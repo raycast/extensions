@@ -49,4 +49,8 @@ export interface XcodeSimulatorApplication {
    * The SandBox Caches directory path
    */
   sandBoxCachesPath: string;
+  /**
+   * The UserDefaults plist path
+   */
+  userDefaultsPlistPath?: string;
 }

@@ -92,5 +92,5 @@ function keywords(xcodeRelease: XcodeRelease): string[] {
   keywords.push(xcodeRelease.versionNumber);
   keywords.push(xcodeRelease.buildNumber);
   keywords.push(...xcodeRelease.sdks.map((sdk) => sdk.version));
-  return keywords.filter((keyword) => !!keyword);
+  return keywords.filter(Boolean);
 }

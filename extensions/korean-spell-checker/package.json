@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "korean-spell-checker",
+  "title": "Korean Spell Checker",
+  "description": "Provides grammar/spelling suggestions for Korean language",
+  "icon": "speller.png",
+  "author": "jcha0713",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-spelling",
+      "title": "Check Korean Spelling",
+      "description": "Check spelling errors in a given text",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2",
+    "@raycast/utils": "^1.4.14",
+    "axios": "^1.2.1",
+    "form-data": "^4.0.0",
+    "ultrahtml": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.2.4",
+    "@types/node": "^18.11.17",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.3.1",
+    "prettier": "^2.5.1",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "jest --verbose",
+    "test:watch": "jest --watch"
+  }
+}

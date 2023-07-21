@@ -1,5 +1,9 @@
 # Apple Maps Search Changelog
 
+## [Enhancement] - 2023-02-06
+
+- Set default origin value to "home" when using "Directions To" command.
+
 ## [Command Changes] - 2022-08-15
 
 - Update command names and copy to better reflect Apple Maps terminology

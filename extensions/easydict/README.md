@@ -1,8 +1,9 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1664029439.png" height="128">
+  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1671180098.png" height="256">
   <h1 align="center">Easydict</h1>
   <h4 align="center"> Easily look up words or translate text. </p>
 <p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿 🇹🇷 🇱🇹 🇱🇻 🇺🇦 🇧🇬 🇮🇩 🇲🇾 🇸🇮 🇪🇪 🇻🇳 🇮🇷 🇵🇰 🇹🇱 🇹🇦 🇮🇳 🇵🇭 🇫🇮 🇰🇭 🇱🇦 🇧🇳 🇲🇲 🇳🇴 🇷🇸 🇭🇷 🇲🇳 🇮🇱 </p>
+
 </p>
 
 <p align="center">
@@ -13,9 +14,11 @@
 
 ## What is Easydict? [【中文介绍】](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/README_ZH.md)
 
-`Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.com), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Volcano](https://translate.volcengine.com/translate), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
+`Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), support OpenAI ChatGPT, **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.com), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Volcano](https://translate.volcengine.com/translate), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
 
-![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1666538159.png)
+![easydict-1-1671806758](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1671806758.png)
+
+![OpenAI-Translate-1679670891](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/OpenAI-Translate-1679670891.gif)
 
 ## Features
 
@@ -23,23 +26,38 @@
 - [x] Automatically detect the input language and automatically query the preferred language.
 - [x] Provide word-rich query information, including basic translation, pronunciation, the types of exams that include the word, multiple parts of speech and explanations, forms and tenses, web translations, and web phrases.
 - [x] Support automatic query selected text, enabled by default.
+- [x] Support screenshot OCR transalte.
 - [x] Support to open the [Eudic Dictionary](https://apps.apple.com/us/app/eudic-%E6%AC%A7%E8%B7%AF%E8%AF%8D%E5%85%B8/id434350458?l=zh&mt=12) and quickly look up words, if installed on your Mac.
 - [x] Support automatic playback of word pronunciation. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).
 - [x] Support to sort query results manually.
-- [x] Support Arguments.
+- [x] Support [Arguments](https://developers.raycast.com/information/lifecycle/arguments).
+- [x] Support [Fallback Commands](https://manual.raycast.com/fallback-commands).
 - [x] Support system proxy.
 - [x] Support Linguee and Youdao Dictionary.
 - [x] Support macOS system translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
-- [x] Support DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun translation.
+- [x] Support OpenAI ChatGPT, DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun translation.
 - [x] Support 48+ languages.
 
-Next:
-
-- [ ] Desktop Electron App.
-- [ ] Support to view query history.
-
 **_If you like this extension, please give it a [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️, thanks!_**
+
+---
+
+## Recommendation
+
+My other project, [Easydict](https://github.com/tisfeng/Easydict) is a concise and easy-to-use translation dictionary macOS App that allows you to easily and elegantly look up words or translate text, feel free to try it!
+
+**Look up word**
+![iShot_2023-03-17_18.01.22_11zon-1679056100](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679056100.jpg)
+
+**Translate text**
+![iShot_2023-01-28_17.49.53-1674901731](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.49.53-1674901731.png)
+
+**Auto select translate**
+![iShot_2023-01-20_11.01.35-1674183779](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.01.35-1674183779.gif)
+
+**OCR screenshot translate**
+![iShot_2023-01-20_11.26.25-1674185209](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.26.25-1674185209.gif)
 
 ---
 
@@ -186,11 +204,11 @@ Details of the languages supported by each language detection service are as fol
 
 ##### Youdao Dictionary
 
-Support 5 langauges, (Chinese), English, French, Japanese, Korean.
+Support 5 languages, (Chinese), English, French, Japanese, Korean.
 
 ##### Linguee Dictionary
 
-Support 19 langauges, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+Support 19 languages, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 #### Translation
 
@@ -384,14 +402,7 @@ The following application tutorial is from [`Bob`](https://bobtranslate.com/guid
 
 ![A2ECFJ-1664270926](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/A2ECFJ-1664270926.png)
 
-## Friendly Recommendation
+## Acknowledgements
 
-[`Bob`](https://bobtranslate.com/) is a MacOS **translation** and **OCR** application.
-
-![image-20220620150946277](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620150946277.png)
-
-## Thanks
-
-This project is inspired by [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) and [Bob](https://github.com/ripperhe/Bob), and the first version is based on [raycast-Parrot](https://github.com/Haojen/raycast-Parrot). `Easydict` has improved many UI displays, added more practical features, deleted some complex or inappropriate operations, and made a lot of optimization && improvements on the original project.
-
-Finally, all those interested in this project are welcome to contribute to the project, issues and PRs are fine. The project is still in the rapid development stage, any practical suggestions or interesting ideas are OK. There is no guarantee that they will be accepted, but they will be definitely considered. In addition, if submitting a PR, it is recommended to open a issue to briefly describe the content of the PR to avoid conflicts between PR and the features I am currently developing. Thank you.
+- This project is inspired by [raycast-Parrot](https://github.com/Haojen/raycast-Parrot) and [Bob](https://github.com/ripperhe/Bob), and the first version is based on [raycast-Parrot](https://github.com/Haojen/raycast-Parrot). `Easydict` has improved many UI displays, added more practical features, deleted some complex or inappropriate operations, and made a lot of optimization && improvements on the original project.
+- OCR Translate feature refers to [ScreenOCR](https://github.com/raycast/extensions/tree/d0cb79de95d41891d8ca0568a60db67aefa5806b/extensions/screenocr/), thanks to [aidevjoe](https://github.com/aidevjoe)'s PR [feat: add OCR recognition](https://github.com/tisfeng/Raycast-Easydict/pull/41).

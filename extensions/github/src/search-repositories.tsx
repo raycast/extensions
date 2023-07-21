@@ -13,14 +13,17 @@ import { getGitHubClient } from "./helpers/withGithubClient";
 function SearchRepositories() {
   const { github } = getGitHubClient();
 
-  const preferences = getPreferenceValues<{ includeForks: boolean }>();
+  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
-    () => `${searchFilter} ${searchText} fork:${preferences.includeForks}`,
+    () =>
+      `${searchFilter} ${searchText} fork:${preferences.includeForks} ${
+        preferences.includeArchived ? "" : "archived:false"
+      }`,
     [searchText, searchFilter]
   );
 

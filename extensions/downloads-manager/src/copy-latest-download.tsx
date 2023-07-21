@@ -1,26 +1,23 @@
-import { popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { getLatestDownload } from "./utils";
-import { runAppleScript } from "run-applescript";
-
-function buildCopyToClipboardAppleScript(path: string) {
-  return `
-    set the clipboard to POSIX file "${path}"  
-  `;
-}
+import { popToRoot, showHUD } from "@raycast/api";
+import { getLatestDownload, hasAccessToDownloadsFolder as hasAccessToDownloadsFolder } from "./utils";
+import { Clipboard } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 
 export default async function main() {
-  const latestDownload = await getLatestDownload();
-  if (latestDownload === undefined) {
-    await showHUD("No downloads found");
+  if (!hasAccessToDownloadsFolder()) {
+    await showHUD("No permission to access the downloads folder");
+    return;
   }
 
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Copying to clipboard",
-  });
+  const download = getLatestDownload();
+  if (!download) {
+    await showHUD("No downloads found");
+    return;
+  }
 
-  await runAppleScript(buildCopyToClipboardAppleScript(latestDownload!.path));
-  toast.style = Toast.Style.Success;
-  toast.title = "Copied to clipboard";
+  await Clipboard.copy({ file: download.path });
+
+  await closeMainWindow();
+  await showHUD("Copied latest download to clipboard");
   await popToRoot();
 }

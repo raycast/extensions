@@ -37,7 +37,7 @@ function useCachedPromise<T, U>(
 
 With a few options:
 
-- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See [Promise Argument dependent on List search text](#promise-argument-dependent-on-list-search-text) for more information.
 
 Including the [useCachedState](./useCachedState.md)'s options:
 
@@ -66,6 +66,7 @@ import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
+  const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
@@ -100,17 +101,15 @@ This behaviour can cause some flickering (initial data -> fetched data -> argume
 
 ```tsx
 import { useState } from "react";
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-
-type Item = { id: string; title: string };
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
-      const result: Item[] = await response.json();
+      const result = await response.text();
       return result;
     },
     ["https://api.example"],
@@ -122,7 +121,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
-      {data?.map((item) => (
+      {(data || []).map((item) => (
         <List.Item key={item.id} title={item.title} />
       ))}
     </List>
@@ -174,9 +173,7 @@ export default function Command() {
       // the data will automatically be rolled back to its previous value
       toast.style = Toast.Style.Failure;
       toast.title = "Could not append Foo";
-      if (err instanceof Error) {
-        toast.message = err.message;
-      }
+      toast.message = err.message;
     }
   };
 
@@ -203,7 +200,7 @@ An object corresponding to the execution state of the function.
 ```ts
 // Initial State
 {
-  isLoading: true,
+  isLoading: true, // or `false` if `options.execute` is `false`
   data: undefined,
   error: undefined
 }

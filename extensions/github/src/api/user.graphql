@@ -6,6 +6,34 @@ fragment UserFields on User {
   isViewer
 }
 
+fragment AuthorFields on Actor {
+  ... on Bot {
+    id
+    login
+    avatarUrl(size: 64)
+  }
+  ... on User {
+    ...UserFields
+  }
+  ... on Mannequin {
+    id
+    login
+    avatarUrl(size: 64)
+  }
+  ... on Organization {
+    id
+    login
+    name
+    avatarUrl(size: 64)
+  }
+  ... on EnterpriseUserAccount {
+    id
+    login
+    name
+    avatarUrl(size: 64)
+  }
+}
+
 query getViewer {
   viewer {
     ...UserFields

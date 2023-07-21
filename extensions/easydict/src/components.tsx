@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-26 11:09
+ * @lastEditTime: 2023-03-16 23:10
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -31,7 +31,7 @@ import { openInEudic } from "./scripts";
 import { getVolcanoWebTranslateURL } from "./translation/volcano/volcanoAPI";
 import {
   ActionListPanelProps,
-  DicionaryType,
+  DictionaryType,
   ListDisplayItem,
   QueryType,
   TranslationType,
@@ -40,9 +40,9 @@ import {
 import { checkIsLingueeListItem, checkIsTranslationType, checkIsYoudaoDictionaryListItem } from "./utils";
 
 const queryWebItemTypes = [
-  DicionaryType.Youdao,
-  DicionaryType.Linguee,
-  DicionaryType.Eudic,
+  DictionaryType.Youdao,
+  DictionaryType.Linguee,
+  DictionaryType.Eudic,
   TranslationType.DeepL,
   TranslationType.Google,
   TranslationType.Baidu,
@@ -256,7 +256,7 @@ function playSoundIcon(lightTintColor: string) {
  */
 export function getListItemIcon(listItem: ListDisplayItem): Image.ImageLike {
   const { displayType } = listItem;
-  // console.log(`---> get list type: ${displayType}`);
+  // console.warn(`---> get list type: ${displayType}`);
 
   let itemIcon: Image.ImageLike = {
     source: Icon.Dot,
@@ -383,7 +383,7 @@ export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemTy
 function getQueryTypeIcon(queryType: QueryType): Image.ImageLike {
   return {
     source: `${queryType}.png`,
-    mask: Image.Mask.RoundedRectangle,
+    // mask: Image.Mask.RoundedRectangle, // !!!: mask may cause rendering issue, like flickering.
   };
 }
 
@@ -399,12 +399,20 @@ export function getWordAccessories(item: ListDisplayItem): List.Item.Accessory[]
     if (accessoryItem.examTypes) {
       wordExamTypeAccessory = [
         {
-          icon: { source: Icon.Star, tintColor: Color.SecondaryText },
+          icon: { source: Icon.StarCircle, tintColor: Color.Blue },
           tooltip: "Word included in the types of exam",
         },
-        { text: accessoryItem.examTypes?.join("  ") },
       ];
-      wordAccessories = [...wordExamTypeAccessory];
+      const tags = accessoryItem.examTypes.map((examType) => {
+        const tag: List.Item.Accessory = {
+          tag: {
+            value: examType,
+            color: Color.Blue,
+          },
+        };
+        return tag;
+      });
+      wordAccessories = [...wordExamTypeAccessory, ...tags];
     }
     if (accessoryItem.phonetic) {
       pronunciationAccessory = [
@@ -414,7 +422,7 @@ export function getWordAccessories(item: ListDisplayItem): List.Item.Accessory[]
         },
         { text: accessoryItem.phonetic },
       ];
-      wordAccessories = [...wordAccessories, { text: " " }, ...pronunciationAccessory];
+      wordAccessories = [...wordAccessories, ...pronunciationAccessory];
     }
   }
   return wordAccessories;
@@ -445,15 +453,15 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
       webUrl = getVolcanoWebTranslateURL(wordInfo);
       break;
     }
-    case DicionaryType.Linguee: {
+    case DictionaryType.Linguee: {
       webUrl = getLingueeWebDictionaryURL(wordInfo);
       break;
     }
-    case DicionaryType.Youdao: {
+    case DictionaryType.Youdao: {
       webUrl = getYoudaoWebDictionaryURL(wordInfo);
       break;
     }
-    case DicionaryType.Eudic: {
+    case DictionaryType.Eudic: {
       webUrl = getEudicWebDictionaryURL(wordInfo);
       break;
     }

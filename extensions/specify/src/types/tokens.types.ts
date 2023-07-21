@@ -9,6 +9,7 @@ export type Color = {
         b: number;
       }
     | string;
+  description: string;
 };
 
 export type Bitmap = {

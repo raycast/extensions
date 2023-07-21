@@ -1,5 +1,7 @@
 # iHosts Changelog
 
+## [Optimize Experience] - 2022-11-28
+
 ## [Optimization] - 2022-10-12
 
 Make `sys-host-prem.png` to local

@@ -58,7 +58,7 @@ module.exports = async ({ github, context, core, changedFiles }) => {
       issue_number: context.issue.number,
       owner: context.repo.owner,
       repo: context.repo.repo,
-      labels: ["extension fix / improvement", `extension: ${ext}`],
+      labels: ["extension fix / improvement", limitLabelLength(`extension: ${findExtensionName(ext)}`)],
     });
 
     if (owners[0] === sender) {
@@ -105,6 +105,16 @@ function getCodeOwners() {
   }, {});
 }
 
+function findExtensionName(ext) {
+  const map = JSON.parse(fs.readFileSync(path.join(__dirname, "../.github/extensionName2Folder.json"), "utf8"));
+
+  const folder = ext.replace("/extensions/", "");
+
+  const foundExtension = Object.entries(map).find(([name, _folder]) => _folder === folder);
+
+  return foundExtension ? foundExtension[0] : undefined;
+}
+
 // Create a new comment or update the existing one
 async function comment({ github, context, comment }) {
   // Get the existing comments on the PR
@@ -132,4 +142,8 @@ async function comment({ github, context, comment }) {
       body: comment,
     });
   }
+}
+
+function limitLabelLength(label) {
+  return label.length > 50 ? label.substring(0, 49) + "…" : label;
 }

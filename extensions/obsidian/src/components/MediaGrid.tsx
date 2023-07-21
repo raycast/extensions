@@ -1,11 +1,13 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Image } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
-import { Media, MediaSearchArguments, SearchMediaPreferences, Vault } from "../utils/interfaces";
+import { Media, MediaSearchArguments, Vault } from "../utils/interfaces";
 import { OpenPathInObsidianAction, ShowPathInFinderAction } from "../utils/actions";
 import { getListOfExtensions, useMedia } from "../utils/utils";
 import { IMAGE_SIZE_MAPPING } from "../utils/constants";
 import { filterMedia } from "../utils/search";
+import { useNotes } from "../utils/hooks";
+import { SearchMediaPreferences } from "../utils/preferences";
 
 export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArguments }) {
   const { vault, searchArguments } = props;
@@ -13,6 +15,7 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
   const { ready, media } = useMedia(vault);
   const [mediaList, setMediaList] = useState<Media[]>([]);
   const [allMedia, setAllMedia] = useState<Media[]>([]);
+  const [notes] = useNotes(vault);
 
   useEffect(() => {
     if (ready) {
@@ -25,13 +28,14 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
   const { imageSize } = getPreferenceValues<SearchMediaPreferences>();
 
   const [searchText, setSearchText] = useState(searchArguments ? searchArguments.searchArgument : "");
-  const list = useMemo(() => filterMedia(mediaList, searchText, vault), [mediaList, searchText]);
+  const list = useMemo(() => filterMedia(mediaList, searchText, notes), [mediaList, searchText]);
 
   return (
     <Grid
-      inset={Grid.Inset.Small}
-      itemSize={IMAGE_SIZE_MAPPING.get(imageSize)}
+      fit={Grid.Fit.Fill}
+      columns={IMAGE_SIZE_MAPPING.get(imageSize)}
       isLoading={mediaList.length == 0 && !ready}
+      aspectRatio={"4/3"}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={

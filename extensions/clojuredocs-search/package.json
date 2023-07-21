@@ -23,8 +23,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.8",
-    "edn-data": "^1.0.0"
+    "edn-data": "^1.0.0",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

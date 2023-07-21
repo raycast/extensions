@@ -1,11 +1,11 @@
 import { AuthorizationAction } from './components/authorization-action'
 import { CompleteTodoAction } from '@/components/complete-todo-action'
 import { CopyToDoAction } from '@/components/copy-todo-action'
-import { DeleteTodoAction } from '@/components/delete-todo-action'
 import { RemindAction } from '@/components/remind-todo-action'
 import { SetLabelAction } from '@/components/set-todo-label-action'
 import { useOnboarding } from './hooks/use-onboarding'
-import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
+import { Action, ActionPanel, Color, Icon, List, open } from '@raycast/api'
+import { createAccessoriesArray } from '@/utils/create-accessories-array'
 
 export function Onboarding() {
   const {
@@ -17,88 +17,80 @@ export function Onboarding() {
     handleComplete,
     handleSetTag,
     handleSetDate,
-    handleDelete,
-    handleMoveUp,
-    handleMoveDown,
+    handleOnAuthorize,
   } = useOnboarding()
 
   return (
     <List
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Filter or create to-do"
+      searchBarPlaceholder="Search or create task"
     >
-      {searchText ? (
-        <List.Item
-          icon={{ source: Icon.Plus, tintColor: Color.Blue }}
-          title={`Create "${searchText}"`}
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.Plus}
-                title="Create To-do"
-                onAction={handleCreate}
-              />
-            </ActionPanel>
-          }
-        />
-      ) : null}
-      {todos.map((todo, index) => (
-        <List.Item
-          key={todo.id}
-          icon={todo.isCompleted ? Icon.Checkmark : Icon.Circle}
-          title={todo.title}
-          accessories={
-            todo.tag
-              ? [
-                  {
-                    text: todo.tag.name,
-                    icon: {
-                      source: 'dot.png',
-                      tintColor: todo.tag.color,
-                    },
+      <List.Section title="Onboarding">
+        {searchText ? (
+          <List.Item
+            icon={{ source: Icon.Plus, tintColor: Color.Blue }}
+            title={`Create "${searchText}"`}
+            actions={
+              <ActionPanel>
+                <Action
+                  icon={Icon.Plus}
+                  title="Create Task"
+                  onAction={handleCreate}
+                />
+              </ActionPanel>
+            }
+          />
+        ) : null}
+        {todos.map((todo) => (
+          <List.Item
+            key={todo.id}
+            icon={{
+              source: todo.completed ? 'completed.svg' : 'pending.svg',
+              tintColor: todo.completed
+                ? {
+                    light: '#0CA16C',
+                    dark: '#49BC99',
+                  }
+                : {
+                    light: '#93959C',
+                    dark: '#666666',
                   },
-                ]
-              : []
-          }
-          actions={
-            <ActionPanel>
-              <CompleteTodoAction todo={todo} onComplete={handleComplete} />
-              <RemindAction todo={todo} onSetDate={handleSetDate} />
-              <SetLabelAction
-                todo={todo}
-                tags={tags}
-                onSetLabel={handleSetTag}
-              />
-              <Action
-                icon={Icon.ChevronUp}
-                title={'Move Up'}
-                onAction={() => handleMoveUp(index)}
-                shortcut={{ modifiers: ['shift'], key: 'arrowUp' }}
-              />
-              <Action
-                icon={Icon.ChevronDown}
-                title={'Move Down'}
-                onAction={() => handleMoveDown(index)}
-                shortcut={{ modifiers: ['shift'], key: 'arrowDown' }}
-              />
-              <DeleteTodoAction todo={todo} onDelete={handleDelete} />
-              <ActionPanel.Section>
-                {todo.contentUrl ? (
-                  <Action.OpenInBrowser
-                    title="View Link"
-                    icon={Icon.Link}
-                    url={todo.contentUrl}
-                    shortcut={{ modifiers: ['cmd'], key: 'e' }}
+            }}
+            title={todo.title}
+            accessories={createAccessoriesArray({
+              todo,
+              projectsById: {},
+            })}
+            actions={
+              <ActionPanel>
+                <CompleteTodoAction todo={todo} onComplete={handleComplete} />
+                <ActionPanel.Section>
+                  <RemindAction todo={todo} onSetDate={handleSetDate} />
+                  <SetLabelAction
+                    todo={todo}
+                    tags={tags}
+                    onSetLabel={handleSetTag}
                   />
-                ) : null}
-                <CopyToDoAction todo={todo} />
-              </ActionPanel.Section>
-              <AuthorizationAction />
-            </ActionPanel>
-          }
-        />
-      ))}
+                  {todo.contentUrl ? (
+                    <Action
+                      title="Open Content URL"
+                      icon={Icon.Link}
+                      shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                      onAction={async () => {
+                        handleComplete(todo)
+                        await open(todo.contentUrl as string)
+                      }}
+                    />
+                  ) : null}
+                  <CopyToDoAction todo={todo} />
+                </ActionPanel.Section>
+                <AuthorizationAction onAuthorize={handleOnAuthorize} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   )
 }

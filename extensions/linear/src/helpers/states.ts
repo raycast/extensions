@@ -1,3 +1,4 @@
+import { WorkflowState } from "@linear/sdk";
 import { Image } from "@raycast/api";
 import { groupBy } from "lodash";
 import { IssueState } from "../api/getIssues";
@@ -24,6 +25,13 @@ export const statusIcons: Record<string, IconAsset> = {
   [StateType.completed]: { light: "light/completed.svg", dark: "dark/completed.svg" },
   [StateType.canceled]: { light: "light/canceled.svg", dark: "dark/canceled.svg" },
 };
+
+export function getStatusIcon(state: Pick<WorkflowState, "type" | "color">) {
+  return {
+    source: statusIcons[state.type],
+    tintColor: { light: state.color, dark: state.color, adjustContrast: true },
+  };
+}
 
 export function getOrderedStates(
   states: IssueState[],

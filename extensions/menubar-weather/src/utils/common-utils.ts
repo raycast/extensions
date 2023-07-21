@@ -1,6 +1,20 @@
 import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { cityName, latitude, longitude, showForecast, showLocation, showSun } from "./weather-utils";
+import {
+  cityName,
+  latitude,
+  longitude,
+  tempType,
+  menuUVI,
+  menuPressure,
+  menuHumidity,
+  menuWind,
+  showForecast,
+  showLocation,
+  showSun,
+  showUVI,
+  windSpeedUnits,
+} from "./weather-utils";
 
 export enum CacheKey {
   CURRENT_WEATHER = "Open-Meteo Weather",
@@ -9,9 +23,15 @@ export enum CacheKey {
   CITY_NAME = "City Name",
   LONGITUDE = "Longitude",
   LATITUDE = "Latitude",
+  TEMP_TYPE = "Temperature to display",
+  MENU_UVI = "Show UV index in menu",
+  MENU_PRESSURE = "Show pressure in menu",
+  MENU_HUMIDITY = "Show humidity in menu",
+  MENU_WIND = "Show wind in menu",
   SHOW_SUN = "Show Sun",
   SHOW_LOCATION = "Show Location",
   SHOW_FORECAST = "Show Forecast",
+  SHOW_UVI = "Show UV Index",
 }
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -20,12 +40,34 @@ export const isEmpty = (string: string | null | undefined) => {
 
 export function getUnits() {
   let tempUint: string;
-  const windUint = "Km/h";
+  let windUint: string;
   const { tempUnits } = getPreferenceValues<Preferences>();
   if (tempUnits === "celsius") {
     tempUint = "℃";
   } else {
     tempUint = "℉";
+  }
+  switch (windSpeedUnits) {
+    case "kmh": {
+      windUint = "Km/h";
+      break;
+    }
+    case "ms": {
+      windUint = "m/s";
+      break;
+    }
+    case "mph": {
+      windUint = "Mph";
+      break;
+    }
+    case "kn": {
+      windUint = "Knots";
+      break;
+    }
+    default: {
+      windUint = "Km/h";
+      break;
+    }
   }
 
   return { tempUnit: tempUint, windUint: windUint };
@@ -92,9 +134,15 @@ export function preferencesChanged() {
   cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
   cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
   cache.set(CacheKey.LATITUDE, JSON.stringify(newLat));
+  cache.set(CacheKey.TEMP_TYPE, JSON.stringify(tempType));
   cache.set(CacheKey.SHOW_SUN, JSON.stringify(showSun));
   cache.set(CacheKey.SHOW_LOCATION, JSON.stringify(showLocation));
   cache.set(CacheKey.SHOW_FORECAST, JSON.stringify(showForecast));
+  cache.set(CacheKey.SHOW_UVI, JSON.stringify(showUVI));
+  cache.set(CacheKey.MENU_UVI, JSON.stringify(menuUVI));
+  cache.set(CacheKey.MENU_PRESSURE, JSON.stringify(menuPressure));
+  cache.set(CacheKey.MENU_HUMIDITY, JSON.stringify(menuHumidity));
+  cache.set(CacheKey.MENU_WIND, JSON.stringify(menuWind));
 
   return (
     oldCityName !== newCityName ||

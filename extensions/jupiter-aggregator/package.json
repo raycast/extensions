@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jup-agg",
+  "title": "Jupiter Aggregator",
+  "description": "Lets you display the value of a token in the menu bar and lets you calculate the value of tokens",
+  "icon": "jupiter.png",
+  "author": "stevedsimkins",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "TOKEN_LIST",
+      "title": "Token List",
+      "description": "Choose between strict or all tokens",
+      "type": "dropdown",
+      "required": false,
+      "default": "strict",
+      "data": [
+        {
+          "title": "Strict",
+          "value": "strict"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "menu-bar-token-price",
+      "title": "Menu Bar Token Price",
+      "description": "Shows the price of Sol in your menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "compare-token-prices",
+      "title": "Compare Token Prices",
+      "description": "Compare the value between two SPL tokens",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.2",
+    "@raycast/utils": "^1.4.8",
+    "axios": "^1.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

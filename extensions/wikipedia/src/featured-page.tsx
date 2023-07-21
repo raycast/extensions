@@ -1,8 +1,16 @@
-import { encodeTitle, getTodayFeaturedPageTitle } from "./wikipedia";
+import { getTodayFeaturedPageUrl } from "./utils/api";
 import { closeMainWindow, open } from "@raycast/api";
+import { getStoredLanguage } from "./utils/language";
+import { openInBrowser } from "./utils/preferences";
 
-export default async function () {
-  const pageTitle = await getTodayFeaturedPageTitle();
-  await open(`https://wikipedia.org/wiki/${encodeTitle(pageTitle)}`);
-  await closeMainWindow({ clearRootSearch: true });
+export default async function featuredPage() {
+  const language = await getStoredLanguage();
+  const { title, url } = await getTodayFeaturedPageUrl(language);
+
+  if (openInBrowser) {
+    await open(url);
+    await closeMainWindow({ clearRootSearch: true });
+  } else {
+    await open(`raycast://extensions/vimtor/wikipedia/open-page?arguments=${encodeURI(JSON.stringify({ title }))}`);
+  }
 }

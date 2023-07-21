@@ -1,6 +1,6 @@
 # Storage
 
-The storage APIs can be used to store non-sensitive data that is persisted across command launches.
+The storage APIs can be used to store data in Raycast's [local encrypted database](../information/security.md#data-storage).
 
 All commands in an extension have shared access to the stored data. Extensions can _not_ access the storage of other extensions.
 

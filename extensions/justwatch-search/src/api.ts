@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { JustWatchMedia, JustWatchMediaOffers, MediaProvider } from "./types";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
+import { JustWatchMedia, JustWatchMediaOffers, MediaProvider, MediaType } from "./types";
 
 interface Preferences {
   flatrate?: boolean;
@@ -14,7 +13,7 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
   const countryCode = (await LocalStorage.getItem<string>("country_code")) || "en_CA";
 
   const searchParams = new URLSearchParams({
-    language: "en",
+    // language: "en",
     body: JSON.stringify({
       page_size: 8,
       page: 1,
@@ -59,14 +58,35 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
     data.forEach((value: any) => {
       let thumbnail: string = value.poster;
       thumbnail = thumbnail?.replace("{profile}", "s718");
+      const backdrop = thumbnail?.replace("poster", "backdrop").replace("s718", "s1440");
+
+      let imdb_score,
+        imdb_votes = null;
+
+      if (value.scoring !== undefined && value.scoring.length > 0) {
+        for (const score of value.scoring) {
+          if (score.provider_type === "imdb:score") {
+            imdb_score = score.value;
+          }
+
+          if (score.provider_type === "imdb:votes") {
+            imdb_votes = score.value;
+          }
+        }
+      }
+
       const media: JustWatchMedia = {
         id: value.id,
         name: value.title,
         type: value.object_type,
         year: value.original_release_year,
         thumbnail: `https://images.justwatch.com${thumbnail}`,
+        backdrop: `https://images.justwatch.com${backdrop}/name.webp`,
         jw_url: `https://justwatch.com${value.full_path}`,
+        is_movie: value.object_type === "movie",
         offers: [],
+        imdb_votes: imdb_votes,
+        imdb_score: imdb_score,
       };
 
       if (value.offers === undefined || value.offers.length === 0) {
@@ -81,15 +101,23 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
         // if we've found it, then save it...
 
         if (provider) {
+          // if monetization type is "ads", then make it free...
+          if (offer.monetization_type === "ads") {
+            offer.monetization_type = "free";
+          }
+
           const mediaOffer: JustWatchMediaOffers = {
             type: offer.monetization_type,
+            type_parsed: getMediaType(offer.monetization_type),
             service: offer.package_short_name,
             url: offer.package_short_name === "dnp" ? offer.urls.deeplink_web : offer.urls.standard_web,
-            seasons: offer.element_count ? offer.element_count + " seasons" : "",
+            seasons:
+              offer.element_count === 1 ? "1 season" : offer.element_count ? `${offer.element_count} seasons` : "",
             price_amount: offer.retail_price || 0,
-            price: `${offer.retail_price} ${offer.currency}`,
+            currency: offer.currency,
             icon: provider.icon_url,
             name: provider.clear_name,
+            presentation_type: offer.presentation_type?.toUpperCase(),
           };
 
           // check preferences and ensure we show the results...
@@ -99,12 +127,13 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
         }
       });
 
-      // sort by free streaming > rent > buy
-      media.offers.sort((a, b) => a.price_amount - b.price_amount);
-
-      // loop through offers and remove the duplicate ones...
       if (media.offers.length > 0) {
-        media.offers = media.offers.filter((tag, index, array) => array.findIndex((t) => t.url == tag.url) == index);
+        media.offers = sortMedia(media.offers);
+        media.offers = removeDuplicates(media.offers);
+        media.offers = removeLowerQuality(media.offers);
+        aggregateOtherOffersPrices(media.offers); // this function mutates media.offers in-place
+        media.offers = keepFirstRemoveRest(media.offers);
+        media.offers = sortMediaFinal(media.offers);
       }
 
       medias.push(media);
@@ -114,4 +143,84 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
   }
 
   return parsedMedias;
+
+  function sortMedia(offers: JustWatchMediaOffers[]) {
+    return offers.sort((a, b) => {
+      const streamOrder = ["stream", "free", "rent", "buy"];
+      const orderA = streamOrder.indexOf(a.type);
+      const orderB = streamOrder.indexOf(b.type);
+
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      } else {
+        return a.presentation_type.localeCompare(b.presentation_type) || a.price_amount - b.price_amount;
+      }
+    });
+  }
+
+  function removeDuplicates(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) =>
+        index === self.findIndex((t) => t.url === offer.url && t.price_amount === offer.price_amount)
+    );
+  }
+
+  function removeLowerQuality(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) =>
+        index ===
+        self.findIndex(
+          (t) => t.service === offer.service && t.price_amount === offer.price_amount && t.type === offer.type
+        )
+    );
+  }
+
+  function aggregateOtherOffersPrices(offers: JustWatchMediaOffers[]) {
+    const rentOrBuyOffers = offers.filter((offer) => ["rent", "buy"].includes(offer.type));
+
+    for (const offer of rentOrBuyOffers) {
+      const otherOffers = offers.filter(
+        (o) => o.service === offer.service && o.type === offer.type && o.price_amount !== offer.price_amount
+      );
+
+      if (otherOffers.length > 0) {
+        offer.other_prices = otherOffers.map(({ price_amount, currency, seasons, presentation_type }) => ({
+          price_amount,
+          currency,
+          seasons,
+          presentation_type,
+        }));
+      }
+    }
+  }
+
+  function keepFirstRemoveRest(offers: JustWatchMediaOffers[]) {
+    return offers.filter(
+      (offer, index, self) => index === self.findIndex((t) => t.service === offer.service && t.type === offer.type)
+    );
+  }
+
+  function sortMediaFinal(offers: JustWatchMediaOffers[]) {
+    return sortMedia(offers); // reusing the initial sort function
+  }
+
+  function getMediaType(type: string) {
+    if (type === MediaType.buy) {
+      return "Purchase";
+    }
+
+    if (type === MediaType.rent) {
+      return "Rent";
+    }
+
+    if (type == MediaType.stream) {
+      return "Streaming";
+    }
+
+    if (type == MediaType.free) {
+      return "Free";
+    }
+
+    return "";
+  }
 }

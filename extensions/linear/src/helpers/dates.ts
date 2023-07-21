@@ -1,7 +1,7 @@
 import { Icon, Image, Color } from "@raycast/api";
 import { differenceInDays, startOfToday } from "date-fns";
 
-export function getDueDateIcon(dueDate: Date): Image.ImageLike {
+export function getDateIcon(dueDate: Date): Image.ImageLike {
   const daysBetweenDueDateAndToday = differenceInDays(dueDate, startOfToday());
 
   let color = Color.PrimaryText;

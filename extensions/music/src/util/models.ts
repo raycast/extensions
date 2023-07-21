@@ -22,6 +22,9 @@ export enum SFSymbols {
   STAR = "􀋂",
   STAR_FILL = "􀋃",
   TIME = "􀐫",
+  SPEAKER_FILL = "􀊡",
+  SPEAKER_FILL_PLUS = "􁜋",
+  SPEAKER_FILL_MINUS = "􁜍",
 }
 
 export interface Track {
@@ -60,3 +63,7 @@ export interface ScriptError extends Error {
 export const ScriptError = {
   is: (error: Error): error is ScriptError => "shortMessaage" in error,
 };
+
+export interface Preferences {
+  volumeSteps: string;
+}

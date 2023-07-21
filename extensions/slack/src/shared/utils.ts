@@ -1,10 +1,20 @@
-import { closeMainWindow, open } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, open } from "@raycast/api";
 import formatDistance from "date-fns/formatDistance";
+import { runAppleScript } from "run-applescript";
 
 // https://api.slack.com/reference/deep-linking
 const openChat = (workspaceId: string, userId: string) => {
+  const { closeRightSidebar } = getPreferenceValues<{ closeRightSidebar: boolean }>();
+
   open(`slack://user?team=${workspaceId}&id=${userId}`);
   closeMainWindow();
+  if (closeRightSidebar) {
+    runAppleScript(
+      buildScriptEnsuringSlackIsRunning(`
+        tell application "System Events" to tell process "Slack" to key code 47 using {command down}
+      `)
+    );
+  }
 };
 
 const openChannel = (workspaceId: string, channelId: string) => {

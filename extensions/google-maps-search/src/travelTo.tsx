@@ -1,20 +1,28 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchItemInput } from "./utils/input";
-import { orginOption, Preferences, TravelMode } from "./utils/types";
+import { Preferences, TravelMode } from "./utils/types";
 import { makeDirectionsURL } from "./utils/url";
 
+/* The form's origin options. */
+enum OrginOption {
+  CurLoc = "curloc",
+  Home = "home",
+  Custom = "custom",
+}
+
 export default function Command() {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
 
   // Used to handle what the Form displays.
-  const [origin, setOrigin] = useState<string>("");
+  const [origin, setOrigin] = useState<OrginOption>(OrginOption.CurLoc);
   // Used to handle what is submitted to the Google Maps API.
   const [originAddress, setOriginAddress] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
   const [mode, setMode] = useState<string>(preferences.preferredMode);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(preferences.useSelected);
 
+  // Get highlighted or copied text if preferred.
   useEffect(() => {
     async function _fetchItemInput() {
       const inputItem = await fetchItemInput();
@@ -22,19 +30,21 @@ export default function Command() {
       setIsLoading(false);
     }
 
-    _fetchItemInput().then();
+    if (preferences.useSelected) {
+      _fetchItemInput().then();
+    }
   }, []);
 
   const handleOriginChange = (value: string) => {
-    if (value === orginOption.CurLoc) {
+    if (value === OrginOption.CurLoc) {
       setOriginAddress("");
-      setOrigin(orginOption.CurLoc);
-    } else if (value === orginOption.Home) {
+      setOrigin(OrginOption.CurLoc);
+    } else if (value === OrginOption.Home) {
       setOriginAddress(preferences.homeAddress);
-      setOrigin(orginOption.Home);
+      setOrigin(OrginOption.Home);
     } else {
       setOriginAddress("");
-      setOrigin(orginOption.Custom);
+      setOrigin(OrginOption.Custom);
     }
   };
 
@@ -65,11 +75,11 @@ export default function Command() {
       />
       <Form.Separator />
       <Form.Dropdown id="origin" title="Origin" value={origin} onChange={handleOriginChange}>
-        <Form.Dropdown.Item value={orginOption.CurLoc} title="Current Location" icon="📍" />
-        <Form.Dropdown.Item value={orginOption.Home} title="Home" icon="🏠" />
-        <Form.Dropdown.Item value={orginOption.Custom} title="Custom Address" icon="✏️" />
+        <Form.Dropdown.Item value={OrginOption.CurLoc} title="Current Location" icon="📍" />
+        <Form.Dropdown.Item value={OrginOption.Home} title="Home" icon="🏠" />
+        <Form.Dropdown.Item value={OrginOption.Custom} title="Custom Address" icon="✏️" />
       </Form.Dropdown>
-      {origin === orginOption.Custom && (
+      {origin === OrginOption.Custom && (
         <Form.TextField
           id="originAddress"
           title="Origin Address"

@@ -37,6 +37,10 @@ export const generateSentences = (count: number) => {
   return generator.generateSentences(count);
 };
 
+export const generateWords = (count: number) => {
+  return generator.generateWords(count);
+};
+
 export const notify = () => {
   showHUD("Copied to clipboard");
 };

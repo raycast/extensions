@@ -73,10 +73,6 @@ const locales = [
     title: "English (US)",
   },
   {
-    value: "de",
-    title: "Deutsch",
-  },
-  {
     value: "es",
     title: "Español",
   },
@@ -93,10 +89,6 @@ const locales = [
     title: "한국어",
   },
   {
-    value: "pl",
-    title: "Polski",
-  },
-  {
     value: "pt-BR",
     title: "Português (do Brasil)",
   },
@@ -105,8 +97,8 @@ const locales = [
     title: "Русский",
   },
   {
-    value: "zn-CN",
-    title: "中文(简体)",
+    value: "zh-CN",
+    title: "中文 (简体)",
   },
   {
     value: "zh-TW",

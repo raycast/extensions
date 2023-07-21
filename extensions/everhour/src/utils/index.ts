@@ -1,7 +1,7 @@
-import { ToastStyle } from "@raycast/api";
+import { ToastStyle, Toast } from "@raycast/api";
 
 export const createResolvedToast = (
-  toast: any,
+  toast: Toast,
   title: string,
   message?: string
 ): { error: () => void; success: () => void } => {

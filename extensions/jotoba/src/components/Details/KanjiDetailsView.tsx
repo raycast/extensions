@@ -10,20 +10,18 @@ function KanjiDetailsView({ kanjiResult }: { kanjiResult: KanjiResult }) {
   const { kanjiDetailsTitleDisplayType } = getPreferenceValues<Preferences>();
   const { literal, onyomi, kunyomi, stroke_count, jlpt, grade } = kanjiResult;
 
-  const onTitle =
-    kanjiDetailsTitleDisplayType === "jp" ? "音読み" : kanjiDetailsTitleDisplayType === "kana" ? "オン" : "onyomi";
+  const onTitle = { short: "on", long: "on readings", romaji: "onyomi" }[kanjiDetailsTitleDisplayType] ?? "";
   const parsedOnReadings = onyomi && parseReadings(onyomi);
 
-  const kunTitle =
-    kanjiDetailsTitleDisplayType === "jp" ? "訓読み" : kanjiDetailsTitleDisplayType === "kana" ? "くん" : "kunyomi";
+  const kunTitle = { short: "kun", long: "kun readings", romaji: "kunyomi" }[kanjiDetailsTitleDisplayType] ?? "";
   const parsedKunReadings = kunyomi && parseReadings(kunyomi);
 
   return (
     <Detail
       navigationTitle={`Jotoba ・${literal}`}
       markdown={`# ${literal}\n - ${stroke_count} strokes\n - JLPT N${jlpt}\n - Grade ${grade} ${
-        onyomi ? `\n## 【${onTitle}】\n${parsedOnReadings || ""}` : ""
-      }${kunyomi ? `\n## 【${kunTitle}】\n${parsedKunReadings || ""}` : ""}`}
+        onyomi ? `\n## ${onTitle.toUpperCase()}\n${parsedOnReadings || ""}` : ""
+      }${kunyomi ? `\n## ${kunTitle.toUpperCase()}\n${parsedKunReadings || ""}` : ""}`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

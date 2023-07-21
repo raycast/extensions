@@ -1,38 +1,35 @@
-import { loadDoneProperty } from '@/services/storage'
-import { TodoPage } from '@/types/todo-page'
-import { getPreferenceValues } from '@raycast/api'
+import { loadPreferences } from '@/services/storage'
 import { notion } from '../client'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
 
-export async function completeTodo(pageId: string): Promise<any> {
+export async function completeTodo(pageId: string): Promise<boolean> {
   const notionClient = await notion()
-  const preferences = getPreferenceValues()
-  const status = await loadDoneProperty()
+  const preferences = await loadPreferences()
+  const status = preferences.properties.status
 
-  const page = await notionClient.pages.update({
+  await notionClient.pages.update({
     page_id: pageId,
     properties: {
       ...(status.type === 'checkbox'
         ? {
-            [preferences.property_done]: {
+            [status.name]: {
               checkbox: true,
             },
           }
         : {}),
       ...(!!status?.doneName && status.type === 'status'
         ? {
-            [preferences.property_done]: {
+            [status.name]: {
               status: {
                 name: status.doneName,
               },
             },
           }
         : {}),
-      [preferences.property_date]: {
+      [preferences.properties.date]: {
         date: { start: new Date().toISOString().split('T')[0] },
       },
     },
   })
 
-  return mapPageToTodo(page as TodoPage, preferences)
+  return true
 }

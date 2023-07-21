@@ -15,6 +15,7 @@ export function parsedYAMLFrontmatter(str: string) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function yamlHas(yaml: any, property: string) {
   if (Object.prototype.hasOwnProperty.call(yaml, property)) {
     if (yaml[property]) {

@@ -1,14 +1,24 @@
 {
   "root": true,
-  "env": {
-    "es2020": true,
-    "node": true
-  },
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "import"],
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
+  "plugins": [
+    "import"
+  ],
+  "extends": [
+    "@raycast"
+  ],
   "rules": {
-    "import/order": ["error", { "newlines-between": "always", "alphabetize": { "order": "asc" } }]
+    "import/order": [
+      "error",
+      {
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ]
   },
-  "ignorePatterns": ["*.graphql", "**/generated/**"]
+  "ignorePatterns": [
+    "*.graphql",
+    "**/generated/**"
+  ]
 }

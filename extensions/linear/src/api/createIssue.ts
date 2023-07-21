@@ -70,3 +70,36 @@ export async function createIssue(payload: CreateIssuePayload) {
 
   return { success: data?.issueCreate.success, issue: data?.issueCreate.issue };
 }
+
+type CreateSubIssuePayload = {
+  teamId: string;
+  title: string;
+  description?: string;
+  parentId: string;
+  stateId?: string;
+};
+
+export async function createSubIssue(payload: CreateSubIssuePayload) {
+  const { graphQLClient } = getLinearClient();
+
+  const title = payload.title.replace(/"/g, "\\$&");
+  const description = payload.description?.replace(/\n/g, "\\n").replace(/"/g, "\\$&");
+
+  let issueCreateInput = `teamId: "${payload.teamId}", title: "${title}", description: "${description}", parentId: "${payload.parentId}"`;
+
+  if (payload.stateId) {
+    issueCreateInput += `, stateId: "${payload.stateId}"`;
+  }
+
+  const { data } = await graphQLClient.rawRequest<{ issueCreate: { success: boolean } }, Record<string, unknown>>(
+    `
+      mutation {
+        issueCreate(input: {${issueCreateInput}}) {
+          success
+        }
+      }
+    `
+  );
+
+  return { success: data?.issueCreate.success };
+}

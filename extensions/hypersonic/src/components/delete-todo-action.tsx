@@ -10,8 +10,9 @@ export function DeleteTodoAction({
 }) {
   return (
     <Action
-      icon={Icon.Trash}
+      icon={{ source: Icon.Trash }}
       title={'Delete'}
+      style={Action.Style.Destructive}
       onAction={() => onDelete(todo.id)}
       shortcut={{ modifiers: ['cmd'], key: 'delete' }}
     />

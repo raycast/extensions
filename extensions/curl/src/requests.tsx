@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   confirmAlert,
   Icon,
   List,
@@ -14,6 +15,7 @@ import {
 import axios from "axios";
 import ResultView from "./views/Result";
 import RequestDetails from "./views/RequestDetails";
+import { methodColors } from "../utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const curlString = require("curl-string");
@@ -127,20 +129,18 @@ export default function Requests() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      enableFiltering={false}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search URL"
-    >
+    <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText} searchBarPlaceholder="Search URL">
       {requests?.map((req: Values) => {
         const value = JSON.parse(req.value);
+        const methodColor = (methodColors as { [index: string]: Color })[value.method];
         return (
           <List.Item
             key={req.key}
             title={value?.meta?.title ? value?.meta?.title : `${value.url}`}
-            accessories={[{ text: "Copy cURL", icon: Icon.CopyClipboard }]}
-            icon={{ source: `${value.method}.svg` }}
+            accessories={[
+              { text: "Copy cURL", icon: Icon.CopyClipboard },
+              { tag: { color: methodColor, value: value.method } },
+            ]}
             subtitle={value?.meta?.description ? value?.meta?.description : ""}
             actions={
               <ActionPanel>

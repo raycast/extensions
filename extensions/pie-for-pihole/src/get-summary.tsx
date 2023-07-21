@@ -6,10 +6,12 @@ import { cleanPiholeURL, fetchRequestTimeout } from "./utils";
 export default function testFunction() {
   const [data, updateData] = useState<SummaryInfo>();
   const [timeoutInfo, updateTimeoutInfo] = useState<string>();
-  const { PIHOLE_URL } = getPreferenceValues();
+  const { PIHOLE_URL, API_TOKEN } = getPreferenceValues();
   useEffect(() => {
     async function getSummary() {
-      const response = await fetchRequestTimeout(`http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?summary`);
+      const response = await fetchRequestTimeout(
+        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?summary&auth=${API_TOKEN}`
+      );
       if (response == "query-aborted" || response == undefined) {
         updateTimeoutInfo("query-aborted");
       } else {
@@ -20,6 +22,7 @@ export default function testFunction() {
     }
 
     getSummary();
+    console.log(data);
   }, []);
 
   return (

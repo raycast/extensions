@@ -21,7 +21,7 @@ export default async function Command() {
   console.log(`Assets path: ${environment.assetsPath}`);
   console.log(`Support path: ${environment.supportPath}`);
   console.log(`Is development mode: ${environment.isDevelopment}`);
-  console.log(`Theme: ${environment.theme}`);
+  console.log(`Appearance: ${environment.appearance}`);
   console.log(`Text size: ${environment.textSize}`);
   console.log(`LaunchType: ${environment.launchType}`);
 }
@@ -30,6 +30,36 @@ export default async function Command() {
 #### Properties
 
 <InterfaceTableFromJSDoc name="Environment" />
+
+## environment.canAccess
+
+Checks whether the user can access a specific API or not.
+
+#### Signature
+
+```typescript
+function canAccess(api: any): bool;
+```
+
+#### Example
+
+```typescript
+import { AI, showHUD, environment } from "@raycast/api";
+import fs from "fs";
+
+export default async function main() {
+  if (environment.canAccess(AI)) {
+    const answer = await AI.ask("Suggest 5 jazz songs");
+    await Clipboard.copy(answer);
+  } else {
+    await showHUD("You don't have access :(");
+  }
+}
+```
+
+#### Return
+
+A Boolean indicating whether the user running the command has access to the API.
 
 ### getSelectedFinderItems
 
@@ -62,7 +92,7 @@ export default async function Command() {
 
 #### Return
 
-A Promise that resolves with the [selected file system items](#filesystemitem).
+A Promise that resolves with the [selected file system items](#filesystemitem). If Finder is not the frontmost application, the promise will be rejected.
 
 ### getSelectedText
 
@@ -96,7 +126,7 @@ export default async function Command() {
 
 #### Return
 
-A Promise that resolves with the selected text.
+A Promise that resolves with the selected text. If no text is selected in the frontmost application, the promise will be rejected.
 
 ## Types
 
@@ -118,7 +148,3 @@ Indicates the type of command launch. Use this to detect whether the command has
 | :------------ | :--------------------------------------------------------- |
 | UserInitiated | A regular launch through user interaction                  |
 | Background    | Scheduled through an interval and launched from background |
-
-### LaunchContext
-
-Represents the passed context object of programmatic command launches.

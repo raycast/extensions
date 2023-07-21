@@ -1,5 +1,14 @@
 # World Cup Changelog
 
+## [Update] - 2023-01-05
+
+Updated dependencies
+
+## [Enhancements] - 2022-11-24
+
+- Fix live results for simultaneous matches
+- Remove loading indicator for goals
+
 ## [Enhancements] - 2022-11-24
 
 - Show live time and score for current match

@@ -31,13 +31,13 @@ export function AvatarListLayout(props: {
         setAvatarOptions(_avatarOptions);
       }}
       onSelectionChange={(id) => {
-        if (typeof id !== "undefined") {
+        if (typeof id === "string") {
           const _avatarOptions = { ...avatarOptions };
           _avatarOptions.style = id;
           setAvatarOptions(_avatarOptions);
         }
       }}
-      enableFiltering={false}
+      filtering={false}
       throttle={true}
       searchBarAccessory={
         <List.Dropdown

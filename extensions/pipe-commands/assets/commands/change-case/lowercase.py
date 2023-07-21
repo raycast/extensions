@@ -4,6 +4,7 @@
 # @raycast.title Switch to Lowercase
 # @raycast.packageName Text Actions
 # @raycast.mode pipe
+# @raycast.inputType text
 
 import sys
 

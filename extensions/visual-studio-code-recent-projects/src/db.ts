@@ -1,11 +1,11 @@
 import { useSQL } from "@raycast/utils";
 import { homedir } from "os";
-import { preferences } from "./preferences";
+import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
 
 export function useRecentEntries() {
   const { data, isLoading } = useSQL<RecentEntries>(
-    `${homedir()}/Library/Application Support/${preferences.build}/User/globalStorage/state.vscdb`,
+    `${homedir()}/Library/Application Support/${build}/User/globalStorage/state.vscdb`,
     "SELECT json_extract(value, '$.entries') as entries FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'"
   );
 

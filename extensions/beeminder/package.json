@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "beeminder",
+  "title": "Beeminder",
+  "description": "Manage your Beeminder goals from Raycast",
+  "icon": "beelogo.png",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "author": "vivgui",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "beeminder",
+      "title": "Manage Beeminder Goals",
+      "description": "Manage your Beeminder goals from Raycast",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.2",
+    "@raycast/utils": "^1.4.16",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "name": "beeminderApiToken",
+      "title": "Personal Auth Token",
+      "description": "Your Personal Auth Token for the Beeminder API",
+      "type": "password",
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "beeminderUsername",
+      "title": "Beeminder Username",
+      "description": "Your Beeminder Username",
+      "placeholder": "https://www.beeminder.com/settings/account",
+      "type": "textfield",
+      "default": "",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

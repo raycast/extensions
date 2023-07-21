@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getCurWeather } from "../utils/weather-utils";
-import { Cache, environment, LaunchType, showToast, Toast } from "@raycast/api";
+import { Cache, environment, LaunchType } from "@raycast/api";
 import { CacheKey, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
-import { AxiosError } from "axios";
 import { GeoLocation, OpenMeteoWeather } from "../types/types";
 
 export const getCurrentWeather = () => {
@@ -18,13 +17,25 @@ export const getCurrentWeather = () => {
     const cacheTime = cache.get(CacheKey.REFRESH_TIME);
     let oldRefreshTime = 0;
     if (typeof cacheWeather === "string" && !isEmpty(cacheWeather)) {
-      setWeather(JSON.parse(cacheWeather) as OpenMeteoWeather);
+      try {
+        setWeather(JSON.parse(cacheWeather) as OpenMeteoWeather);
+      } catch (e) {
+        console.debug(`Could not parse cached weather: ${cacheWeather}`, e);
+      }
     }
     if (typeof cacheLocation === "string" && !isEmpty(cacheLocation)) {
-      setLocation(JSON.parse(cacheLocation) as GeoLocation);
+      try {
+        setLocation(JSON.parse(cacheLocation) as GeoLocation);
+      } catch (e) {
+        console.debug(`Could not parse cached location: ${cacheLocation}`, e);
+      }
     }
     if (typeof cacheTime === "string" && !isEmpty(cacheTime)) {
-      oldRefreshTime = JSON.parse(cacheTime) as number;
+      try {
+        oldRefreshTime = JSON.parse(cacheTime) as number;
+      } catch (e) {
+        console.debug(`Could not parse cached time: ${cacheTime}`, e);
+      }
     }
     const newRefreshTime = Date.now();
     const isRefresh = shouldRefresh(oldRefreshTime, newRefreshTime) || preferencesChanged();
@@ -48,12 +59,6 @@ export const getCurrentWeather = () => {
       } catch (e) {
         setWeather(undefined);
         console.error(e);
-        const error = e as AxiosError;
-        await showToast({
-          title: `${error.name}`,
-          message: `${error.message}`,
-          style: Toast.Style.Failure,
-        });
       }
     }
     setLoading(false);

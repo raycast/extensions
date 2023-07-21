@@ -1,5 +1,7 @@
 # OSS Browser Changelog
 
+## [Optimize Experience] - 2022-11-28
+
 ## [Update README & No data view] - 2022-10-11
 
 Update README & No data view

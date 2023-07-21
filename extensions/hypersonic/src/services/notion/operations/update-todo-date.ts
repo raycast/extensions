@@ -1,19 +1,17 @@
-import { TodoPage } from '@/types/todo-page'
-import { getPreferenceValues } from '@raycast/api'
+import { loadPreferences } from '@/services/storage'
 import { notion } from '../client'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
 
 export async function updateTodoDate(
   pageId: string,
   date: string | null
-): Promise<any> {
+): Promise<boolean> {
   const notionClient = await notion()
-  const preferences = getPreferenceValues()
+  const preferences = await loadPreferences()
 
-  const page = await notionClient.pages.update({
+  await notionClient.pages.update({
     page_id: pageId,
     properties: {
-      [preferences.property_date]: {
+      [preferences.properties.date]: {
         date: date
           ? {
               start: date,
@@ -23,5 +21,5 @@ export async function updateTodoDate(
     },
   })
 
-  return mapPageToTodo(page as TodoPage, preferences)
+  return true
 }

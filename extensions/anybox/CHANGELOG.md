@@ -1,5 +1,10 @@
 # Anybox Changelog
 
+## [Feature Improvement] - 2022-12-03
+
+- Add “Search Link Descriptions” setting.
+- Display comments in search results.
+
 ## [Bug Fixes] - 2022-11-03
 
 - Fix in some scenarios the extension can’t connect to the app.

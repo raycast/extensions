@@ -34,12 +34,12 @@ export const getIcons = async (search: string, style?: string): Promise<Icon8[]>
   }
 };
 
-export const getStyles = async (): Promise<Style[] | null> => {
+export const getStyles = async (): Promise<Style[] | undefined> => {
   const query = `https://api-icons.icons8.com/publicApi/platforms?token=${api}&limit=588`;
   try {
     const response = await fetch(query);
     if (response.status !== 200) {
-      return null;
+      return undefined;
     }
     const data: any = await response.json();
     const platforms = data.docs
@@ -54,7 +54,7 @@ export const getStyles = async (): Promise<Style[] | null> => {
     return styles;
   } catch (e) {
     console.error(e);
-    return null;
+    return undefined;
   }
 };
 

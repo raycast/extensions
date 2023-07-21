@@ -1,4 +1,4 @@
-import { partition } from "lodash";
+import { chain } from "lodash";
 import { useCachedPromise } from "@raycast/utils";
 import { getNotifications } from "../api/getNotifications";
 
@@ -7,7 +7,11 @@ export default function useNotifications() {
 
   const { notifications, urlKey } = data || {};
 
-  const [readNotifications, unreadNotifications] = partition(notifications, (notification) => !!notification.readAt);
+  const now = new Date();
+  const [readNotifications, unreadNotifications] = chain(notifications)
+    .filter((notification) => !notification.snoozedUntilAt || notification.snoozedUntilAt < now)
+    .partition((notification) => !!notification.readAt)
+    .value();
 
   return {
     urlKey,

@@ -1,13 +1,12 @@
-import { homedir } from "os";
 import { useCallback, useEffect, useState } from "react";
 import { parseFileSync } from "bplist-parser";
 
 import { Bookmark, OrionFavoriteItem, OrionFavoritesPlistResult } from "../types";
-import { unique } from "../utils";
+import { getOrionBasePath, unique } from "../utils";
 import { join } from "path";
 import { showToast, Toast } from "@raycast/api";
 
-const FAVORITES_PATH = join(homedir(), "/Library/Application Support/Orion/Defaults/favourites.plist");
+const FAVORITES_PATH = join(getOrionBasePath(), "Defaults/favourites.plist");
 
 const useBookmarks = () => {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
@@ -59,6 +58,8 @@ function parseBookmarks(items: OrionFavoriteItem[], folders: Map<string, string>
       const bookmark: Bookmark = {
         uuid: oBookmark.id,
         title: oBookmark.title,
+        // We've filtered out bookmarks without url by this point
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         url: oBookmark.url!,
         folders: folder ? [folder] : [],
         dateAdded: oBookmark.dateAdded,

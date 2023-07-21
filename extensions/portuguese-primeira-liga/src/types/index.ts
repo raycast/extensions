@@ -33,10 +33,14 @@ export interface Newspaper {
 
 export interface Player {
   name: string;
+  dateOfBirth: string;
+  nationality: string | undefined;
+  position: string | undefined;
 }
 
 export interface TopScorer {
   player: Player;
   team: Team;
   goals: number;
+  penalties: number | undefined;
 }

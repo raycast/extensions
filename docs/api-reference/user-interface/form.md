@@ -95,9 +95,7 @@ function validatePassword(value: string): boolean {
 
 ## Drafts
 
-Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when an end-user exits the command. To enable this mechanism, set the `enableDrafts` prop on your Form and populate the initial values of the Form with the top-level props `draftValues`.
-
-<InterfaceTableFromJSDoc name="FormLaunchProps" />
+Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when an end-user exits the command. To enable this mechanism, set the `enableDrafts` prop on your Form and populate the initial values of the Form with the [top-level prop `draftValues`](../../information/lifecycle/README.md#launchprops).
 
 ![](../../.gitbook/assets/form-drafts.png)
 
@@ -116,7 +114,7 @@ Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when
 {% tab title="Uncontrolled Form" %}
 
 ```typescript
-import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, popToRoot, LaunchProps } from "@raycast/api";
 
 interface TodoValues {
   title: string;
@@ -124,13 +122,8 @@ interface TodoValues {
   dueDate?: Date;
 }
 
-export default function Command(props: { draftValues?: TodoValues }) {
+export default function Command(props: LaunchProps<{ draftValues: TodoValues }>) {
   const { draftValues } = props;
-
-  function handleSubmit(values: TodoValues) {
-    console.log("onSubmit", values);
-    popToRoot();
-  }
 
   return (
     <Form
@@ -139,7 +132,7 @@ export default function Command(props: { draftValues?: TodoValues }) {
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={(values: TodoValues) => {
-              handleSubmit(values);
+              console.log("onSubmit", values);
               popToRoot();
             }}
           />
@@ -159,7 +152,7 @@ export default function Command(props: { draftValues?: TodoValues }) {
 {% tab title="Controlled Form" %}
 
 ```typescript
-import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, popToRoot, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 
 interface TodoValues {
@@ -168,17 +161,12 @@ interface TodoValues {
   dueDate?: Date;
 }
 
-export default function Command(props: { draftValues?: TodoValues }) {
+export default function Command(props: LaunchProps<{ draftValues: TodoValues }>) {
   const { draftValues } = props;
 
   const [title, setTitle] = useState<string>(draftValues?.title || "");
   const [description, setDescription] = useState<string>(draftValues?.description || "");
   const [dueDate, setDueDate] = useState<Date | null>(draftValues?.dueDate || null);
-
-  function handleSubmit(values: TodoValues) {
-    console.log("onSubmit", values);
-    popToRoot();
-  }
 
   return (
     <Form
@@ -187,7 +175,7 @@ export default function Command(props: { draftValues?: TodoValues }) {
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={(values: TodoValues) => {
-              handleSubmit(values);
+              console.log("onSubmit", values);
               popToRoot();
             }}
           />

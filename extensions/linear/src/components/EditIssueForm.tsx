@@ -14,7 +14,7 @@ import useIssues from "../hooks/useIssues";
 import useProjects from "../hooks/useProjects";
 
 import { getEstimateScale } from "../helpers/estimates";
-import { getOrderedStates, statusIcons } from "../helpers/states";
+import { getOrderedStates, getStatusIcon } from "../helpers/states";
 import { getErrorMessage } from "../helpers/errors";
 import { priorityIcons } from "../helpers/priorities";
 import { getUserIcon } from "../helpers/users";
@@ -174,12 +174,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
         {hasStates
           ? orderedStates.map((state) => {
               return (
-                <Form.Dropdown.Item
-                  title={state.name}
-                  value={state.id}
-                  key={state.id}
-                  icon={{ source: statusIcons[state.type], tintColor: state.color }}
-                />
+                <Form.Dropdown.Item title={state.name} value={state.id} key={state.id} icon={getStatusIcon(state)} />
               );
             })
           : null}
@@ -294,7 +289,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
                 title={`${issue.identifier} - ${issue.title}`}
                 value={issue.id}
                 key={issue.id}
-                icon={{ source: statusIcons[issue.state.type], tintColor: issue.state.color }}
+                icon={getStatusIcon(issue.state)}
               />
             );
           })}

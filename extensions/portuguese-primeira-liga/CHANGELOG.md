@@ -1,5 +1,10 @@
 # Portuguese Primeira Liga Changelog
 
+## [New Additions] - 2023-03-24
+
+- Added Player Detail View in View Top Scorers command
+- Disabled filtering in all commands
+
 ## [New Additions] - 2022-10-14
 
 - Added View Top Scorers command

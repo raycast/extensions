@@ -4,6 +4,7 @@ import {
   List,
   Application,
   open,
+  Icon,
   showHUD,
 } from "@raycast/api";
 import { setProjectApp } from "cheetah-core";
@@ -22,7 +23,6 @@ export default ({ projectPath }: { projectPath: string }) => {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search application name..."
-      throttle
     >
       <List.Section title="Results" subtitle={applicationList?.length + ""}>
         {applicationList?.map((searchResult: Application) => (
@@ -54,6 +54,7 @@ function SearchListItem({
           <ActionPanel.Section>
             <Action
               title="Choose and Complete"
+              icon={Icon.Box}
               onAction={async () => {
                 await setProjectApp(projectPath, searchResult.name);
                 await open(projectPath, searchResult.name);

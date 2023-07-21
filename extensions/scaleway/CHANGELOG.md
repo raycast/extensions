@@ -1,5 +1,19 @@
 # Scaleway Changelog
 
+## [Improvement] - 2023-03-14
+
+- Update scaleway SDK
+
+## [Fix] - 2023-01-04
+
+- fix(config): bug when you don't have configure the cli
+- feat(config): Add the possibility to select your profile
+
+## [Improvement] - 2022-12-26
+
+- Add products: Apple Silicon, Elastic Metal, Transactional Email, LoadBalancer, IOT
+- Change assets
+
 ## [Improvement] - 2022-11-20
 
 - Use the Scaleway JS SDK instead of the REST API

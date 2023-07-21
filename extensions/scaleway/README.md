@@ -1,3 +1,7 @@
+# Scaleway
+
+ <body>
+
 <div align="center">
   <img
     src="./assets/scaleway.png"
@@ -17,20 +21,12 @@ Raycast extension to search containers, database, instances or Redis clusters, t
     </a>
     <img
       src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
-      alt="PRs welcome!"  
+      alt="PRs welcome!"
     />
   </p>
 </div>
+</body>
 
-## Features
-
-- Quick access to your serverless containers
-- Deploy a container
-- Get the last logs of a container
-- Quick access to your instances
-- Start, reboot and shutdown an instance
-- Quick access to your databases
-- Quick access to your Redis clusters
 
 ## Getting started
 
@@ -38,29 +34,78 @@ Raycast extension to search containers, database, instances or Redis clusters, t
 - Click on your organisation at the top right, and go to `Credentials`
 - Generate a new API key with a purpose e.g. `raycast`, and copy your `Access Key` and `Secret Key`
 - Open a Scaleway command in Raycast and enter your `Access Key` and `Secret Key`
+- if you are using [CLI](https://github.com/scaleway/scaleway-cli), you can use `profileName` to set up you your configuration, if you have only one profile, the name of the profile is `default`. This will not use your raycast configuration but instead use your profile settings.
+if you don't used the cli, you can easily install it and run `scw init` will generate your config file
 
 ![configure-extension](./media/configure-extension.png)
 
 That's it! You're ready to use the extension! 🚀
 
+## Products
+
+The list of products availables
+
+Compute:
+
+- Instances
+- AppleSilicon
+- Elastic Metal
+- Dedibox 🤞🏻 ( soon )
+
+Containers:
+
+- Kubernetes
+- Registry
+
+Networks:
+
+- VPC 🤞🏻 ( soon )
+- Private Networks
+- Public Gateways
+- Load Balancers
+- Domains
+
+Serverless:
+
+- Functions
+- Containers
+- Databases 🤞🏻 ( soon )
+- Messaging & Queing
+
+Storage:
+
+- Object Storage ( ❌ not planed )
+
+Databases:
+
+- Redis
+- PostgreSQL and MySQL
+
+Managed Services:
+
+- Transactional Email
+- Web Hosting 🤞🏻 ( soon )
+- IoT
+
+Security & Identity:
+
+- IAM Identity and Access Management
+- Secrets  🤞🏻 ( soon )
+
 ## Showcases
 
-### Containers
+### Apple Silicon
 
-![list-containers](./metadata/1-containers.png)
+![list-instances](./media/apple.png)
 
-### Logs of Container
+### Elastic Metal
 
-![container-logs](./metadata/2-container-logs.png)
-
-### Instances
-
-![list-instances](./metadata/3-instances.png)
-
-### Databases
-
-![list-databases](./metadata/4-databases.png)
+![list-elastic-metal](./media/elasticMetal.png)
 
 ### Redis Clusters
 
-![list-redis-clusters](./metadata/5-redis.png)
+![list-redis-clusters](./media/redis.png)
+
+### Instances
+
+![list-redis-clusters](./media/instances.png)

@@ -3,9 +3,10 @@ import { List, Icon, showToast, ToastStyle } from "@raycast/api";
 import { TaskListItem } from "../components";
 import { getCurrentTimer, getTasks } from "../api";
 import { createResolvedToast } from "../utils";
+import { Task } from "../types";
 
-const filterTasks = (records: Array<any>, projectId: string) => {
-  return records.filter((record: any) => record.projectId === projectId);
+const filterTasks = (records: Array<Task>, projectId: string) => {
+  return records.filter((record: Task) => record.projects[0] === projectId);
 };
 
 export function TaskList({
@@ -14,11 +15,11 @@ export function TaskList({
   refreshRecords,
 }: {
   projectId: string;
-  timeRecords: Array<any>;
-  refreshRecords: () => Promise<any[]>;
+  timeRecords: Array<Task>;
+  refreshRecords: () => Promise<Array<Task>>;
 }) {
   const [activeTimerTaskId, setActiveTimerTaskId] = useState<null | string>(null);
-  const [tasks, setTasks] = useState<Array<any>>([]);
+  const [tasks, setTasks] = useState<Array<Task>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const refreshActiveTimer = async () => {
@@ -58,14 +59,14 @@ export function TaskList({
     refreshActiveTimer();
   }, [activeTimerTaskId]);
 
-  const todaysTimeRecords = filterTasks(timeRecords, projectId);
+  const recentTimeRecords = filterTasks(timeRecords, projectId);
 
   const renderTasks = () => {
     if (tasks[0]) {
       return tasks.map((task) => (
         <TaskListItem
           key={task.id}
-          todaysTimeRecords={todaysTimeRecords}
+          recentTimeRecords={recentTimeRecords}
           refreshRecords={() => {
             fetchTasks();
             return refreshRecords();

@@ -3,7 +3,9 @@
 Converts everything web related:
 
 - rem
+- rem to Tailwind Spacing or to Tailwind Arbitrary Value
 - px
+- px to Tailwind Spacing or to Tailwind Arbitrary Value
 - pt
 - hex
 - hex (with opacity)
@@ -11,3 +13,4 @@ Converts everything web related:
 - rgba
 - hsl
 - hsla
+and the shows closest Tailwind CSS color.

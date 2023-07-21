@@ -1,33 +1,50 @@
-import { List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import React from "react";
 import { Photo } from "pexels";
 import { PexelsPhoto } from "../types/types";
 import { ActionOnPhotos } from "./action-on-photos";
 
-export function PhotosListItem(props: { pexelsPhoto: Photo; index: number }) {
-  const { pexelsPhoto, index } = props;
+export function PhotosListItem(props: { item: Photo; index: number }) {
+  const { item, index } = props;
 
   return (
     <List.Item
-      id={index + "_" + pexelsPhoto.id}
-      key={index + "_" + pexelsPhoto.id}
-      icon={{ source: pexelsPhoto.src.tiny }}
-      title={pexelsPhoto.photographer}
+      id={index + "_" + item.id}
+      key={index + "_" + item.id}
+      icon={{ source: item.src.tiny }}
+      title={item.photographer}
       accessories={[
         {
-          icon: { source: "solid-circle.png", tintColor: (pexelsPhoto as PexelsPhoto).avg_color },
-          tooltip: `${(pexelsPhoto as PexelsPhoto).avg_color}`,
+          icon: { source: Icon.CircleFilled, tintColor: (item as PexelsPhoto).avg_color },
+          tooltip: `${(item as PexelsPhoto).avg_color}`,
         },
       ]}
       detail={
         <List.Item.Detail
           isLoading={false}
-          markdown={`<img src="${pexelsPhoto.src.medium}" alt="${pexelsPhoto.photographer}" height="256" />\n
-
-**${(pexelsPhoto as PexelsPhoto).alt.trim()}**`}
+          markdown={`![${(item as PexelsPhoto).alt.trim()}](${item.src.medium})`}
+          metadata={
+            <List.Item.Detail.Metadata>
+              {(item as PexelsPhoto).alt.trim() && (
+                <List.Item.Detail.Metadata.Label title="Title" text={`${(item as PexelsPhoto).alt.trim()}`} />
+              )}
+              <List.Item.Detail.Metadata.Link
+                title="User"
+                target={`${item.photographer_url}`}
+                text={`${item.photographer}`}
+              />
+              <List.Item.Detail.Metadata.Label title="Size" text={`${item.width}x${item.height}`} />
+              <List.Item.Detail.Metadata.Label
+                title="AvgColor"
+                icon={{ source: Icon.CircleFilled, tintColor: `${item.avg_color}` as Color }}
+                text={`${item.avg_color}`}
+              />
+              <List.Item.Detail.Metadata.Link title="URL" target={`${item.url}`} text={`${item.url}`} />
+            </List.Item.Detail.Metadata>
+          }
         />
       }
-      actions={<ActionOnPhotos pexelsPhoto={pexelsPhoto} />}
+      actions={<ActionOnPhotos item={item} />}
     />
   );
 }

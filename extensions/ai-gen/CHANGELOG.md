@@ -1,5 +1,8 @@
 # OpenAI Generator Changelog
 
+## [Update text completion model] - 2022-11-28
+- Uses new GPT-3 `text-davinci-003` version
+
 ## [Add Create Image Variation & Edit commands] - 2022-11-12
 - Adds new Create Image Variation command to start a variation from an image on your local computer
 - Adds new Create Image Edit command to extend an image from your local computer using a mask

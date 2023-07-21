@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "splitwise",
+  "title": "Splitwise",
+  "description": "View the balances and add expenses to Splitwise",
+  "icon": "command-icon.png",
+  "author": "ilian",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "splitwise",
+      "title": "Splitwise",
+      "subtitle": "View balances and add expenses",
+      "description": "Add new expense to Splitwise",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "title": "Personal Access Token",
+      "placeholder": "Generate at https://secure.splitwise.com/apps",
+      "description": "See the extension's README for instructions about how to create a token",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.2",
+    "@raycast/utils": "^1.4.16",
+    "got": "^12.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

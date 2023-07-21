@@ -1,4 +1,4 @@
-export type Response = {
+export type CastResponse = {
   casts: Cast[];
 };
 
@@ -52,4 +52,31 @@ export type ActionsProps = {
 
 export type CastDetailsProps = {
   cast: Cast;
+};
+
+export type Profile = {
+  body: {
+    id: number;
+    address: string;
+    username: string;
+    displayName: string;
+    bio: string | undefined;
+    followers: number;
+    following: number;
+    avatarUrl: string;
+    isVerifiedAvatar: boolean;
+    registeredAt: number;
+  };
+  connectedAddress: string;
+};
+
+export type ProfileResponse =
+  | Profile[]
+  | {
+      error: string;
+    };
+
+export type ProfileActionsProps = {
+  profile: Profile;
+  farcasterInstalled: boolean;
 };

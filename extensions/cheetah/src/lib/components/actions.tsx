@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Action, ActionPanel, useNavigation, Icon } from "@raycast/api";
+import { Action, ActionPanel, useNavigation, Icon, open } from "@raycast/api";
 import { COMMAND, updateHits } from "cheetah-core";
 import { refreshKeyword } from "../constant";
 import { ResultItem } from "../types";
@@ -46,12 +46,12 @@ export default ({
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.Open
+        <Action
           title={`Open in ${finalAppPath}`}
-          target={searchResult.path!}
-          application={finalAppPath}
-          onOpen={async () => {
+          icon={Icon.Finder}
+          onAction={async () => {
             await updateHits(searchResult.path!);
+            await open(searchResult.path!, finalAppPath);
           }}
         />
       </ActionPanel.Section>

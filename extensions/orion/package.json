@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "orion",
   "title": "Orion",
-  "description": "Manage your Orion bookmarks, History, and Reading List",
+  "description": "Manage your Orion Bookmarks, History, Tabs, and Reading list",
   "icon": "orion-icon.png",
   "author": "plonq",
   "categories": [
@@ -27,12 +27,31 @@
       "title": "Search Orion History",
       "description": "Browse your history",
       "mode": "view"
+    },
+    {
+      "name": "tabs",
+      "title": "Search Tabs",
+      "subtitle": "Orion",
+      "description": "Browse your open tabs",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "orion-rc",
+      "title": "Orion",
+      "label": "Use Release Candidate",
+      "description": "Looks in '~/Library/Application Support/Orion RC' instead of '~/Library/Application Support/Orion'",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
     "@raycast/utils": "^1.4.7",
-    "bplist-parser": "^0.3.2"
+    "bplist-parser": "^0.3.2",
+    "osascript-tag": "^0.1.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

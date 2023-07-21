@@ -5,12 +5,16 @@ on:
   workflow_dispatch:
     inputs:
       paths:
-        description: 'Extensions to update (space-separated relative paths for extensions) or ("extensions/**"" to execute on all possible subdirectories)'
+        description: 'Extensions to update (comma-separated relative paths for extensions) or ("extensions/**"" to execute on all possible subdirectories)'
         required: true
       command:
         description: "Ray CLI command to run (build | publish)"
         default: "build"
         required: true
+        type: choice
+        options:
+          - build
+          - publish
       cli_version:
         description: 'CLI Version (optional, eg. "1.0.0")'
         required: false
@@ -34,6 +38,17 @@ jobs:
       # This makes sure that the problems found while validating the extensions are shown in the PR diff
       - name: Register Problem Matcher for Ray CLI
         run: echo "##[add-matcher].github/ray.matcher.json"
+      - name: Generate 'allow_owners_only_for_extensions'
+        id: allow_owners_only_for_extensions
+        run: |
+          file_path="${{ github.workspace }}/.github/public_raycast_extensions.txt"
+          if [[ -f "$file_path" ]]; then
+            echo "value<<EOF" >> "$GITHUB_OUTPUT"
+            while IFS= read -r line; do
+              echo "$line" >> "$GITHUB_OUTPUT"
+            done < "$file_path"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
       - name: Run Ray CLI
         id: ray_cli
         uses: raycast/github-actions/ray@v1.13.0
@@ -42,6 +57,7 @@ jobs:
           command: "${{ github.event.inputs.command }}"
           paths: "${{ github.event.inputs.paths }}"
           cli_version: "${{ github.event.inputs.cli_version }}"
+          allow_owners_only_for_extensions: "${{ steps.allow_owners_only_for_extensions.outputs.value }}"
       - name: Post Store URLs
         uses: raycast/github-actions/git-post-store-urls-to-pr@v1.13.0
         with:
@@ -51,7 +67,7 @@ jobs:
         if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: raycast/github-actions/slack-send@master
         with:
-          webhook: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+          webhook: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"
           text: |
             :no_entry_sign: ${env.GITHUB_WORKFLOW} has failed

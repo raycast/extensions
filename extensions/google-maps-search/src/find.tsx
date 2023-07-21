@@ -1,20 +1,24 @@
-import { Action, ActionPanel, Form, Icon, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, popToRoot, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchItemInput } from "./utils/input";
 import { makeSearchURL } from "./utils/url";
+import { Preferences } from "./utils/types";
 
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
   const [query, setQuery] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(preferences.useSelected);
 
+  // Get highlighted or copied text if preferred.
   useEffect(() => {
     async function _fetchItemInput() {
       const inputItem = await fetchItemInput();
       setQuery(inputItem);
       setIsLoading(false);
     }
-
-    _fetchItemInput().then();
+    if (preferences.useSelected) {
+      _fetchItemInput().then();
+    }
   }, []);
 
   return (

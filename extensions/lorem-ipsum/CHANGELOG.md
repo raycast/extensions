@@ -1,9 +1,12 @@
 # Lorem Ipsum Changelog
 
+## [New Feature] - 2023-01-02
+
+- Add generate words command
+
 ## [Fix] - 2022-10-20
 
 - Fixed error when triggered by hotkey.
-
 
 ## [New Feature] - 2022-10-04
 

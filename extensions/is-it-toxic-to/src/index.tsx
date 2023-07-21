@@ -4,7 +4,7 @@ import PlantListItem from "./PlantListItem";
 
 export default function Command() {
   const { isLoading, data, revalidate } = useFetch<Plant[]>(
-    "https://fourthclasshonours.github.io/toxic-plant-list-scraper/toxicPlants.json"
+    "https://foldaway.github.io/toxic-plant-list-scraper/toxicPlants.json"
   );
 
   return (

@@ -5,6 +5,9 @@
   "description": "Search Zotero Database from Raycast",
   "icon": "command-icon.png",
   "author": "reckoning-dev",
+  "contributors": [
+    "lazarjov"
+  ],
   "version": "1.0.0",
   "license": "MIT",
   "commands": [

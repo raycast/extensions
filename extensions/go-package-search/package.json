@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "bstncartwright",
   "contributors": [
-    "k8scat"
+    "k8scat",
+    "BalliAsghar"
   ],
   "categories": [
     "Developer Tools",

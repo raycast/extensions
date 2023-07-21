@@ -1,21 +1,30 @@
-import { ActionPanel, Color, Detail, Icon, Image, List, Grid, Action, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Image,
+  List,
+  Grid,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+} from "@raycast/api";
 import React from "react";
 import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
-import { Channel, getChannel, getPrimaryActionPreference, PrimaryAction, useRefresher } from "../lib/youtubeapi";
+import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
-import { addRecentChannel } from "./recent_channels";
-import { getViewLayout } from "./listgrid";
+import { addRecentChannel, PinChannel, PinnedChannelActions, RecentChannelActions } from "./recent_channels";
 import he from "he";
+import { ViewLayout, PrimaryAction, Preferences } from "../lib/types";
 
 export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean | undefined }): JSX.Element {
   const channel = props.channel;
   let statistics;
-  let channelId: string | undefined;
   let mdParts = [];
   if (channel) {
     statistics = channel.statistics;
-    console.log(statistics);
-    channelId = channel.id;
     const desc = channel.description || "No description";
     const title = channel.title;
     const thumbnailUrl = channel.thumbnails?.default?.url || undefined;
@@ -64,78 +73,88 @@ export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean
       actions={
         <ActionPanel>
           <ShowRecentPlaylistVideosAction
-            channel={channel}
+            channelId={channel.id}
             title="Show Recent Channel Videos"
             playlistId={channel?.relatedPlaylists?.uploads}
           />
-          <SearchChannelVideosAction channel={channel} />
-          <OpenChannelInBrowser channelId={channel.id} channel={channel} />
+          <SearchChannelVideosAction channelId={channel.id} />
+          <OpenChannelInBrowser channelId={channel.id} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function ChannelItem(props: { channel: Channel; actions?: JSX.Element | undefined }): JSX.Element {
-  const channel = props.channel;
+interface ChannelItemProps {
+  channel: Channel;
+  refresh?: () => void;
+  pinned?: boolean;
+  recent?: boolean;
+}
+
+export function ChannelItem(props: ChannelItemProps): JSX.Element {
+  const { view, primaryaction } = getPreferenceValues<Preferences>();
+  const { channel, refresh } = props;
   const channelId = channel.id;
   const title = he.decode(channel.title);
   let parts: string[] = [];
   if (channel.statistics) {
     parts = [
       `${compactNumberFormat(parseInt(channel.statistics.subscriberCount))} subs · ${compactNumberFormat(
-        parseInt(channel.statistics.viewCount)
+        parseInt(channel.statistics.viewCount),
       )} views`,
     ];
   }
   const thumbnail = channel.thumbnails?.high?.url || "";
 
-  const mainActions = (): JSX.Element => {
+  const Actions = (): JSX.Element => {
     const showDetail = (
       <Action.Push
         title="Show Details"
-        target={<ChannelItemDetail channel={channel} />}
+        target={<ChannelItemDetail {...props} />}
         icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-        onPush={async () => await addRecentChannel(channel)}
+        onPush={() => {
+          addRecentChannel(channel.id);
+          if (refresh) refresh();
+        }}
       />
     );
-    const openBrowser = <OpenChannelInBrowser channelId={channel.id} channel={channel} />;
-
-    if (getPrimaryActionPreference() === PrimaryAction.Browser) {
-      return (
-        <React.Fragment>
-          {openBrowser}
-          {showDetail}
-        </React.Fragment>
-      );
-    } else {
-      return (
-        <React.Fragment>
-          {showDetail}
-          {openBrowser}
-        </React.Fragment>
-      );
-    }
-  };
-
-  const Actions = (): JSX.Element => {
+    const openBrowser = <OpenChannelInBrowser channelId={channel.id} refresh={refresh} />;
     return (
       <ActionPanel>
-        <ActionPanel.Section>{mainActions()}</ActionPanel.Section>
         <ActionPanel.Section>
-          <SearchChannelVideosAction channel={channel} />
+          {primaryaction === PrimaryAction.OpenInBrowser ? (
+            <React.Fragment>
+              {openBrowser}
+              {showDetail}
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              {showDetail}
+              {openBrowser}
+            </React.Fragment>
+          )}
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <SearchChannelVideosAction channelId={channel.id} refresh={refresh} />
           <ShowRecentPlaylistVideosAction
-            channel={channel}
+            channelId={channel.id}
+            refresh={refresh}
             title="Show Recent Channel Videos"
             playlistId={channel.relatedPlaylists?.uploads}
           />
         </ActionPanel.Section>
-        <ActionPanel.Section>{props.actions}</ActionPanel.Section>
+        {props.recent && <RecentChannelActions channelId={channel.id} refresh={refresh} />}
+        {props.pinned ? (
+          <PinnedChannelActions channelId={channel.id} refresh={refresh} />
+        ) : (
+          <PinChannel channelId={channel.id} refresh={refresh} />
+        )}
       </ActionPanel>
     );
   };
 
-  return getViewLayout() === "list" ? (
+  return view === ViewLayout.List ? (
     <List.Item
       key={channelId}
       title={title}

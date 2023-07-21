@@ -145,15 +145,26 @@ export default function FileListItem({ file, mutate }: FileListItemProps) {
         <ActionPanel title={file.name}>
           <Action.OpenInBrowser title="Open in Browser" url={file.webViewLink} />
 
-          <ActionPanel.Section>
-            {file.webContentLink ? (
-              <Action.OpenInBrowser
-                title="Download in Browser"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                url={file.webContentLink}
-              />
-            ) : null}
-            {/*
+          {file.parents && file.parents.length > 0 ? (
+            <Action.OpenInBrowser
+              title="Open File Location in Browser"
+              icon={Icon.Folder}
+              // As of September 2020, a file can have exactly one parent folder
+              // It's safe to assume the corresponding folder will be the first one
+              // https://developers.google.com/drive/api/guides/ref-single-parent
+              url={`https://drive.google.com/drive/folders/${file.parents[0]}`}
+            />
+          ) : null}
+
+          {file.webContentLink ? (
+            <Action.OpenInBrowser
+              title="Download in Browser"
+              icon={Icon.Download}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              url={file.webContentLink}
+            />
+          ) : null}
+          {/*
             {file.starred ? (
               <Action
                 title="Remove from Favorites"
@@ -179,7 +190,6 @@ export default function FileListItem({ file, mutate }: FileListItemProps) {
                 onAction={moveToTrash}
               />
             ) : null} */}
-          </ActionPanel.Section>
 
           <ActionPanel.Section>
             <Action.CopyToClipboard

@@ -1,14 +1,18 @@
-import { showHUD, showInFinder } from "@raycast/api";
-import { getDownloads } from "./utils";
+import { popToRoot, showHUD, showInFinder } from "@raycast/api";
+import { getLatestDownload, hasAccessToDownloadsFolder } from "./utils";
 
 export default async function main() {
-  const downloads = getDownloads();
+  if (!hasAccessToDownloadsFolder()) {
+    await showHUD("No permission to access the downloads folder");
+    return;
+  }
 
-  if (downloads.length < 1) {
+  const latestDownload = getLatestDownload();
+  if (!latestDownload) {
     await showHUD("No downloads found");
     return;
   }
 
-  const latestDownload = downloads[0];
   await showInFinder(latestDownload.path);
+  await popToRoot();
 }

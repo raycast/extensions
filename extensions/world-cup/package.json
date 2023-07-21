@@ -27,6 +27,7 @@
     "@raycast/api": "^1.44.0",
     "@raycast/utils": "^1.4.11",
     "@types/lodash.groupby": "^4.6.7",
+    "cross-fetch": "^3.1.5",
     "date-fns": "^2.29.3",
     "lodash.groupby": "^4.6.0"
   },

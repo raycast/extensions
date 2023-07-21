@@ -48,14 +48,12 @@ function WordListItem({ wordResult }: { wordResult: WordResult }) {
       detail={<WordListItemDetail wordResult={wordResult} />}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Push title={"See more..."} target={<WordDetailsView wordResult={wordResult} />} />
-          </ActionPanel.Section>
-          {(reading.kanji || reading.kana) && (
-            <ActionPanel.Section>
-              <OpenInJotoba searchTerm={reading.kanji || reading.kana} />
-            </ActionPanel.Section>
-          )}
+          <Action.Push
+            title={"View Details"}
+            icon={Icon.AppWindowList}
+            target={<WordDetailsView wordResult={wordResult} />}
+          />
+          {(reading.kanji || reading.kana) && <OpenInJotoba searchTerm={reading.kanji || reading.kana} />}
         </ActionPanel>
       }
     />

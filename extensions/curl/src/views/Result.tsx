@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, useNavigation } from "@raycast/api";
 import { AxiosRequestConfig } from "axios";
+import { methodColors } from "../../utils";
 
 type AxiosResponse<T = never> = {
   data: T;
@@ -16,7 +17,6 @@ type Result = {
 };
 
 export default function ResultView({ result, curl }: { result: Result; curl: string }) {
-  const { pop } = useNavigation();
   const markdown = "### Response\n\n" + "```json\n" + JSON.stringify(result.response.data, null, 2) + "\n\n";
 
   return (
@@ -25,7 +25,12 @@ export default function ResultView({ result, curl }: { result: Result; curl: str
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Method" text={result.method} />
+          <Detail.Metadata.TagList title="Method">
+            <Detail.Metadata.TagList.Item
+              text={`${result.method}`}
+              color={(methodColors as { [index: string]: Color })[result.method]}
+            />
+          </Detail.Metadata.TagList>
 
           <Detail.Metadata.TagList title="Status code">
             <Detail.Metadata.TagList.Item text={`${result.response.status}`} color={"#00b969"} />

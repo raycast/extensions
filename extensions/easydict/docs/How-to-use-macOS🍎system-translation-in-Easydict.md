@@ -30,7 +30,7 @@ If there is `Easydict-Translate-V1.2.0' in the Shortcuts app, the shortcut will 
 
 ## Turn on the Feature
 
-Next, in the preferences of `Easydict`, just turn on the Apple Translate option. ( Note that Apple translation is only enabled when translating text, not when querying words)
+Next, in the preferences of `Easydict`, just turn on the Apple Translate option.
 
 Similarly, the same is true of Apple's language recognition feature `Apple Language Detect`, which can improve the speed and accuracy of identifying input text languages.
 

@@ -51,7 +51,6 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { useRef } from "react";
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
@@ -154,7 +153,7 @@ An object corresponding to the execution state of the function.
 ```ts
 // Initial State
 {
-  isLoading: true,
+  isLoading: true, // or `false` if `options.execute` is `false`
   data: undefined,
   error: undefined
 }

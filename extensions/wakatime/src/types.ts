@@ -103,10 +103,10 @@ declare global {
           timezone: string;
         };
       }>;
-      cummulative_total: {
-        /** cummulative number of seconds over the date range of summaries */
+      cumulative_total: {
+        /** cumulative number of seconds over the date range of summaries */
         seconds: number;
-        /** cummulative total coding activity in human readable format */
+        /** cumulative total coding activity in human readable format */
         text: string;
       };
     }

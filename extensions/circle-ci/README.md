@@ -1,6 +1,6 @@
-# Circle CI Workflows
+# CircleCI Workflows
 
-Extension for quickly visualize Circle CI Workflows status.
+Extension for quickly visualize CircleCI Workflows status.
 
 ## How to get API Token
 

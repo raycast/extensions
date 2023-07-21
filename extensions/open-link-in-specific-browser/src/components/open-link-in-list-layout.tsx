@@ -45,7 +45,7 @@ export function OpenLinkInListLayout(props: {
           }
         />
       </List.Section>
-      <List.Section title="Preferred">
+      <List.Section title="Favorites">
         {customApps.map((browser, index) => {
           return (
             <SurfBoardsListItem
@@ -73,7 +73,7 @@ export function OpenLinkInListLayout(props: {
           );
         })}
       </List.Section>
-      <List.Section title="Other">
+      <List.Section title="Other" subtitle={"Press ⌘+S to add app to Favorites"}>
         {otherApps.map((browser, index) => {
           return (
             <SurfBoardsListItem

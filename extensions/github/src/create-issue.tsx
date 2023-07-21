@@ -29,7 +29,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
 
-  const { handleSubmit, itemProps, values, setValue } = useForm<IssueFormValues>({
+  const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<IssueFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
@@ -66,6 +66,18 @@ export function IssueForm({ draftValues }: IssueFormProps) {
             onAction: () => Clipboard.copy(issue.url),
           };
         }
+
+        reset({
+          title: "",
+          description: "",
+          reviewers: [],
+          assignees: [],
+          labels: [],
+          projects: [],
+          milestone: "",
+        });
+
+        focus("repository");
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed creating issue";

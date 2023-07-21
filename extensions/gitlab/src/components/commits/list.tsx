@@ -5,7 +5,7 @@ import { useCache } from "../../cache";
 import { gitlab } from "../../common";
 import { Project, User } from "../../gitlabapi";
 import { GitLabIcons } from "../../icons";
-import { showErrorToast } from "../../utils";
+import { capitalizeFirstLetter, showErrorToast } from "../../utils";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
 import { getCIJobStatusIcon, PipelineJobsListByCommit } from "../jobs";
@@ -54,7 +54,9 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     return null;
   };
 
-  const statusIcon: Image.ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
+  const statusIcon: Image.ImageLike | undefined = status?.status
+    ? getCIJobStatusIcon(status.status, status.allow_failure)
+    : undefined;
   const icon: Image.ImageLike | undefined = statusIcon
     ? statusIcon
     : { source: GitLabIcons.commit, tintColor: Color.Green };
@@ -64,7 +66,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
       title={title}
       subtitle={ref || commit}
       accessories={[{ text: project?.name_with_namespace }]}
-      icon={icon}
+      icon={{ value: icon, tooltip: status?.status ? `Status: ${capitalizeFirstLetter(status.status)}` : "" }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -75,6 +77,10 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
       }
     />
   );
+}
+
+function RecentCommitsListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Commits" icon={{ source: GitLabIcons.commit, tintColor: Color.PrimaryText }} />;
 }
 
 export function RecentCommitsList(): JSX.Element {
@@ -107,6 +113,7 @@ export function RecentCommitsList(): JSX.Element {
       {commits?.map((e) => (
         <EventCommitListItem event={e} key={`${e.id}`} />
       ))}
+      <RecentCommitsListEmptyView />
     </List>
   );
 }
@@ -115,6 +122,7 @@ export interface CommitStatus {
   status: string;
   author: User;
   ref?: string;
+  allow_failure: boolean;
 }
 
 export interface Commit {
@@ -143,7 +151,11 @@ async function getProjectCommits(projectID: number, refName?: string): Promise<C
   return commits;
 }
 
-export function ProjectCommitList(props: { projectID: number; refName?: string }): JSX.Element {
+export function ProjectCommitList(props: {
+  projectID: number;
+  refName?: string;
+  navigationTitle?: string;
+}): JSX.Element {
   const projectID = props.projectID;
   const refName = props.refName;
   let cacheKey = `project_commits_${projectID}`;
@@ -164,7 +176,7 @@ export function ProjectCommitList(props: { projectID: number; refName?: string }
     showErrorToast(error, "Could not fetch commits from Project");
   }
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle={props.navigationTitle}>
       {data?.map((e) => (
         <CommitListItem key={e.id} commit={e} projectID={projectID} />
       ))}

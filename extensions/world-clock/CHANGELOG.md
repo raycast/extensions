@@ -1,5 +1,17 @@
 # World Clock Changelog
 
+## [Sort Time Zones] - 2023-05-30
+
+- Starred time zones support sorting
+
+## [Update Date Format] - 2023-01-02
+
+- Add more date formats
+
+## [Update Raycast API] - 2022-12-02
+
+- Update Raycast API version to 1.44.0
+
 ## [Add Menu Bar command] - 2022-09-05
 
 - Add Menu Bar command: Query World Time

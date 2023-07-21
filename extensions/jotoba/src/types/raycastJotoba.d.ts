@@ -142,6 +142,13 @@ interface Preferences {
   detailsPosDisplayType: string;
   kanjiDetailsTitleDisplayType: string;
   showDetailsInList: string;
+  commonWordsFirst: boolean;
+}
+
+interface fetchAsyncConfig {
+  method: "GET" | "POST";
+  signal?: AbortSignal;
+  bodyData?: object;
 }
 
 /**
