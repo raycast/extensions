@@ -55,6 +55,7 @@ const categories = [
     value: "most+recent",
   },
 ];
+
 const HISTORY_KEY = "history";
 const FAVOURITES_KEY = "favourites";
 const LASTRELOAD_KEY = "lastReload";
