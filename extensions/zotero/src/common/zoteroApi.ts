@@ -443,15 +443,15 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     keys: [
       {
         name: "title",
-        weight: 2,
+        weight: 10,
       },
       {
         name: "abstractNote",
-        weight: 1,
+        weight: 5,
       },
       {
         name: "tags",
-        weight: 5,
+        weight: 15,
       },
       {
         name: "date",
@@ -463,7 +463,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
       },
       {
         name: "DOI",
-        weight: 1,
+        weight: 10,
       },
     ],
   };
