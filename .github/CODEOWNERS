@@ -181,6 +181,7 @@
 /extensions/control-d                                @httpjamesm
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/convert                                  @nielsvanrijn
+/extensions/convert-px-to-vw-vh                      @atiipik
 /extensions/convert-typescript-to-javascript         @bengry
 /extensions/converter                                @koinzhang @Saafo
 /extensions/copy-gcp-icons                           @pomdtr
