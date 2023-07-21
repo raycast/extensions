@@ -63,7 +63,7 @@
     },
     {
       "name": "menu-bar",
-      "title": "History Conversion",
+      "title": "Conversion History",
       "description": "History of your last conversions",
       "icon": "logo.png",
       "mode": "menu-bar"
