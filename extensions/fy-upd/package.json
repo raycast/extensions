@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fy-upd",
+  "title": "fy-upd",
+  "description": "It fetches upload data details from our api",
+  "icon": "command-icon.png",
+  "author": "yash_jajoo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Fy - Upload Data Details",
+      "description": "Search upload details using batchcode",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "batchcode",
+          "placeholder": "Enter batchcode",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "token",
+      "title": "Fy - Set token",
+      "description": "Set token to fetch details",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "token",
+          "placeholder": "Enter token",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
