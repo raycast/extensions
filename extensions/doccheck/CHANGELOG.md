@@ -1,6 +1,6 @@
 # DocCheck Changelog
 
-## [Version 2.1] - 2023-07-xx
+## [Version 2.1] - 2023-07-21
 - NEW: Favourites - pin an article to the main screen, you will see a "★" in front of the navigation title at the bottom if the article is a favourite (shortcut to favourite and unfavourite: ⌘ + F; you can also unfavourite an article in Home)
 - NEW: option to force reload Home with ⌘ + R
 - NEW: option to clear all history or favourites (no shortcut, because there is no second prompt)
@@ -12,7 +12,6 @@
 - Fixed: Images with links are now displayed correctly (without returns, see e.g. article [Enterostoma](https://flexikon.doccheck.com/de/Enterostoma))
 - Fixed: display error when article is not loaded and therefore cannot be favoured
 - Fixed: some under the hood improvements (more unique listkeys in Home, check if item is still loading before you can bookmark it)
-TO-DO: new screenshots
 
 ## [Version 2.0] - 2023-06-08
 - NEW: Home - completely redesigned main screen shows the History from the last read articles (see below), "Neu erstellt", "Frisch verbessert", "Schreib über", "Verbessere" in addition to the "Top Artikel" (information from the [main page](https://flexikon.doccheck.com/de/Hauptseite))
