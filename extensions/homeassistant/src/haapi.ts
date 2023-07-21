@@ -45,7 +45,6 @@ export class HomeAssistant {
   public url: string;
   public urlInternal: string | undefined;
   private _nearestURL: string | undefined;
-  private httpsAgent?: Agent;
   private _ignoreCerts = false;
   public wifiSSIDs: string[] | undefined;
   private usePing = true;
@@ -57,9 +56,12 @@ export class HomeAssistant {
     this.wifiSSIDs = options?.wifiSSIDs;
     this.usePing = options?.usePing ?? true;
     this._ignoreCerts = ignoreCerts;
-    if (this.url.startsWith("https://")) {
-      this.httpsAgent = new Agent({
-        rejectUnauthorized: !ignoreCerts,
+  }
+
+  private httpsAgent(url: string): Agent | undefined {
+    if (url.startsWith("https://")) {
+      return new Agent({
+        rejectUnauthorized: !this._ignoreCerts,
       });
     }
   }
@@ -101,7 +103,6 @@ export class HomeAssistant {
         timeout: 2,
         extra: ["-i", "1", "-c", "1"],
       });
-      console.log(res);
       return res.alive;
     } catch (error) {
       return false;
@@ -161,11 +162,11 @@ export class HomeAssistant {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async fetch(url: string, params: { [key: string]: string } = {}): Promise<any> {
     const ps = paramString(params);
-    const fullUrl = urljoin(this.url, "api", url + ps);
+    const fullUrl = urljoin(await this.nearestURL(), "api", url + ps);
     console.log(`send GET request: ${fullUrl}`);
     try {
       const response = await fetch(fullUrl, {
-        agent: this.httpsAgent,
+        agent: this.httpsAgent(fullUrl),
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -182,13 +183,13 @@ export class HomeAssistant {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async post(url: string, params: { [key: string]: any } = {}): Promise<null> {
-    const fullUrl = this.url + "/api/" + url;
+    const fullUrl = urljoin(await this.nearestURL(), "api", url);
     console.log(`send POST request: ${fullUrl}`);
     const body = JSON.stringify(params);
     console.log(body);
     //try {
     const response = await fetch(fullUrl, {
-      agent: this.httpsAgent,
+      agent: this.httpsAgent(fullUrl),
       method: "POST",
       headers: {
         "Content-Type": "application/json",

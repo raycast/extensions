@@ -11,7 +11,7 @@ function allWorkspacesFetch<T>(workSpaceFunction: (workspaceId: number) => Promi
       workspaces.map(async (workspace) => {
         const workspaceData = await workSpaceFunction(workspace.id);
         return workspaceData || [];
-      })
+      }),
     );
     return data.flat();
   };

@@ -11,7 +11,7 @@ import {
   getPreferenceValues,
   useNavigation,
   showToast,
-  Toast,
+  Toast
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
@@ -55,6 +55,9 @@ const categories = [
     value: "most+recent",
   },
 ];
+const LASTRELOAD_KEY = "lastReload";
+
+const TRENDINGARTICLES_KEY = "trendingArticles";
 
 const HISTORY_KEY = "history";
 const FAVOURITES_KEY = "favourites";
@@ -160,30 +163,28 @@ export default function Command() {
                 await LocalStorage.setItem(TRENDINGARTICLES_KEY, JSON.stringify(sortedArticles));
                 setLoading(false);
               } else {
-                throw new Error(`Error fetching summary data: ${summaryResponse.status}`);
+                setEntries([
+                  {
+                    uid: "42",
+                    title: "Nothing found!",
+                    url: "<empty>",
+                    authors: [],
+                    doi: "",
+                    pmid: "",
+                    pmc: "",
+                    pubdate: "",
+                    epubdate: "",
+                    fulljournalname: "Press ⏎ to open the search in the browser",
+                    volume: "",
+                    issue: "",
+                    pages: "",
+                  },
+                ]);
+                setLoading(false);
               }
             } else {
-              setEntries([
-                {
-                  uid: "42",
-                  title: "Nothing found!",
-                  url: "<empty>",
-                  authors: [],
-                  doi: "",
-                  pmid: "",
-                  pmc: "",
-                  pubdate: "",
-                  epubdate: "",
-                  fulljournalname: "Press ⏎ to open the search in the browser",
-                  volume: "",
-                  issue: "",
-                  pages: "",
-                },
-              ]);
-              setLoading(false);
+              throw new Error(`Error fetching search data: ${trendinghResponse.status}`);
             }
-          } else {
-            throw new Error(`Error fetching search data: ${trendinghResponse.status}`);
           }
         }
       } catch (error) {
@@ -579,6 +580,87 @@ export default function Command() {
                 icon={Icon.MagnifyingGlass}
                 title="Open search in Browser"
                 target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
+        {entries.map((entry) => {
+          if (entry.pmc && entry.doi) {
+            return (
+              <List.Item
+                key={entry.uid}
+                title={{ value: entry.title, tooltip: entry.title }}
+                accessories={[
+                  { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
+                  { tag: { value: "PMC", color: Color.Green }, tooltip: entry.pmc },
+                  { tag: { value: "DOI", color: Color.Red }, tooltip: entry.doi },
+                  { tag: { value: "PMID", color: Color.Blue }, tooltip: entry.pmid },
+                  {
+                    tag: new Date(entry.epubdate ? entry.epubdate : entry.pubdate),
+                    tooltip: new Date(entry.epubdate ? entry.epubdate : entry.pubdate).toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }),
+                  },
+                ]}
+                actions={EntryActions(entry, query!, sortBy!)}
+              />
+            );
+          } else if (entry.doi) {
+            return (
+              <List.Item
+                key={entry.uid}
+                title={{ value: entry.title, tooltip: entry.title }}
+                accessories={[
+                  { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
+                  { tag: { value: "DOI", color: Color.Red }, tooltip: entry.doi },
+                  { tag: { value: "PMID", color: Color.Blue }, tooltip: entry.pmid },
+                  {
+                    tag: new Date(entry.epubdate ? entry.epubdate : entry.pubdate),
+                    tooltip: new Date(entry.epubdate ? entry.epubdate : entry.pubdate).toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }),
+                  },
+                ]}
+                actions={EntryActions(entry, query!, sortBy!)}
+              />
+            );
+          } else if (entry.url === "<empty>") {
+            return (
+              <List.Item
+                key={entry.uid}
+                title={entry.title}
+                subtitle={entry.fulljournalname}
+                actions={
+                  <ActionPanel>
+                    <Action.Open
+                      icon={Icon.MagnifyingGlass}
+                      title="Open search in Browser"
+                      target={
+                        "https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)
+                      }
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          } else if (entry.title) {
+            return (
+              <List.Item
+                key={entry.uid}
+                title={{ value: entry.title, tooltip: entry.title }}
+                accessories={[
+                  { icon: Icon.Person, text: entry.authors[0], tooltip: entry.authors.join(", ") },
+                  { tag: { value: "PMID", color: Color.Blue }, tooltip: entry.pmid },
+                  {
+                    tag: new Date(entry.epubdate ? entry.epubdate : entry.pubdate),
+                    tooltip: new Date(entry.epubdate ? entry.epubdate : entry.pubdate).toLocaleDateString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    }),
+                  },
+                ]}
+                actions={EntryActions(entry, query!, sortBy!)}
               />
             </ActionPanel>
           }
@@ -942,6 +1024,62 @@ function EntryActions(
           icon={Icon.Trash}
           title={"Clear All Favourites"}
           onAction={() => clearAllFavourites(fetchData, getHistoryAndFavourites)}
+        />
+      </ActionPanel>
+    );
+  }
+}
+
+function EntryActionsDetail(article: Article, query: string) {
+  const backTitel = query != undefined && query != "" ? `Back to Search  "` + query + `"` : "Back to Trending Articles";
+  const { pop } = useNavigation();
+  if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != "" && article.doi) {
+    return (
+      <ActionPanel>
+        <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
+        <Action.Open
+          icon={Icon.LockUnlocked}
+          title="Open article on Sci-Hub in Browser"
+          target={preferences.scihubinstance.value + encodeURI(article.doi)}
+          shortcut={{ modifiers: ["opt"], key: "enter" }}
+        />
+        <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+        <Action
+          icon={Icon.ArrowLeftCircleFilled}
+          title={backTitel}
+          onAction={pop}
+          shortcut={{ modifiers: [], key: "arrowLeft" }}
+        />
+      </ActionPanel>
+    );
+  } else if (article.doi) {
+    return (
+      <ActionPanel>
+        <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
+        <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+        <Action
+          icon={Icon.ArrowLeftCircleFilled}
+          title={backTitel}
+          onAction={pop}
+          shortcut={{ modifiers: [], key: "arrowLeft" }}
+        />
+      </ActionPanel>
+    );
+  } else {
+    return (
+      <ActionPanel>
+        <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+        <Action
+          icon={Icon.ArrowLeftCircleFilled}
+          title={backTitel}
+          onAction={pop}
+          shortcut={{ modifiers: [], key: "arrowLeft" }}
         />
       </ActionPanel>
     );

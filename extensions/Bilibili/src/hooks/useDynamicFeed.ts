@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 
 export function useDynamicFeed() {
-  const [dynamicItems, setDynamicItems] = useState<Bilibili.dynamicItems>([]);
+  const [dynamicItems, setDynamicItems] = useState<Bilibili.DynamicItems>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

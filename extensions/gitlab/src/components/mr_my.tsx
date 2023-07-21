@@ -5,7 +5,7 @@ import { useCache } from "../cache";
 import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest, Project } from "../gitlabapi";
 import { daysInSeconds, showErrorToast } from "../utils";
-import { MRListItem, MRScope, MRState } from "./mr";
+import { MRListEmptyView, MRListItem, MRScope, MRState } from "./mr";
 import { MyProjectsDropdown } from "./project";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -32,7 +32,7 @@ function MyMRList(props: {
 
   return (
     <List
-      searchBarPlaceholder="Filter Merge Requests by name..."
+      searchBarPlaceholder="Filter Merge Requests by Name..."
       isLoading={props.isLoading}
       searchText={props.searchText}
       onSearchTextChange={props.onSearchTextChange}
@@ -52,6 +52,7 @@ function MyMRList(props: {
           />
         ))}
       </List.Section>
+      <MRListEmptyView />
     </List>
   );
 }

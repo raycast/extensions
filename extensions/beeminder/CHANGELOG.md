@@ -1,5 +1,9 @@
 # Beeminder Changelog
 
+## [Update] - 2023-07-16
+
+Adds support for caching goals information.
+
 ## [Update] - 2023-06-03
 
 Adds support for opening the goal in the browser.

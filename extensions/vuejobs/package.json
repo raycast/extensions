@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vuejobs",
   "title": "VueJobs",
-  "description": "Browse through our list of Vue.js jobs, find your perfect match and apply. Use the sidebar filters for more accurate results!",
+  "description": "Browse through our list of Vue.js jobs, find your perfect match and apply.Use the filter or search for more accurate results!",
   "icon": "vuejobs.png",
   "author": "abusiraj84",
   "categories": [
@@ -14,7 +14,7 @@
       "name": "index",
       "title": "Find the Best Vue.js Jobs",
       "subtitle": "vuejobs",
-      "description": "Browse through our list of Vue.js jobs, find your perfect match and apply. Use the sidebar filters for more accurate results!",
+      "description": "Browse through our list of Vue.js jobs, find your perfect match and apply.Use the filter or search for more accurate results!",
       "mode": "view"
     },
     {

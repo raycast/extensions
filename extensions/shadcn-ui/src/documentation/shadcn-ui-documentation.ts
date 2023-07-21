@@ -3,7 +3,7 @@ Documentation pulled manually from https://github.com/shadcn/ui/tree/main/apps/w
 For now we upload this file manually and update the date here
  */
 
-const lastUpdated = "2023-06-06T20:16:30.458Z";
+const lastUpdated = "2023-06-22T20:24:22.844Z";
 
 const documentationBase = "https://ui.shadcn.com/docs";
 
@@ -27,6 +27,11 @@ export default [
         path: `${documentationBase}/theming`,
       },
       {
+        doc: "dark-mode",
+        name: "Dark Mode",
+        path: `${documentationBase}/dark-mode`,
+      },
+      {
         doc: "cli",
         name: "CLI",
         path: `${documentationBase}/cli`,
@@ -35,6 +40,11 @@ export default [
         doc: "typography",
         name: "Typography",
         path: `${documentationBase}/components/typography`,
+      },
+      {
+        doc: "changelog",
+        name: "Changelog",
+        path: `${documentationBase}/changelog`,
       },
     ],
   },
@@ -45,16 +55,6 @@ export default [
         doc: "figma",
         name: "Figma",
         path: `${documentationBase}/figma`,
-      },
-    ],
-  },
-  {
-    name: "Forms",
-    pages: [
-      {
-        doc: "react-hook-form",
-        name: "React Hook Form",
-        path: `${documentationBase}/forms/react-hook-form`,
       },
     ],
   },
