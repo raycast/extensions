@@ -6,10 +6,28 @@
   "icon": "command-icon.png",
   "author": "dimagrossman",
   "contributors": [
-    "LenoxFro"
+    "LenoxFro",
+    "otatoPotato"
   ],
   "license": "MIT",
   "preferences": [
+    {
+      "name": "sshConfig",
+      "type": "dropdown",
+      "required": true,
+      "title": "Select Config Source",
+      "description": "Where should it look for the hosts config",
+      "data": [{
+        "title": "localStorage",
+        "value": "localStorage"
+      },
+      {
+        "title": "~/.ssh/config",
+        "value": "~/.ssh/config"
+      }
+    ],
+    "default": "localStorage"
+    },
     {
     "name": "terminal",
     "type": "dropdown",
