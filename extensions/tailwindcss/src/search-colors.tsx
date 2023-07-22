@@ -37,7 +37,7 @@ export default function SearchColors() {
                     adjustContrast: false,
                   },
                 }}
-                keywords={[name, name + shade, `${name} ${shade}`, `${name}-${shade}`]}
+                keywords={[name, name + shade, `${name} ${shade}`, `${name}-${shade}`, value as string]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
