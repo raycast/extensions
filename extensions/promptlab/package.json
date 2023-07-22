@@ -2,13 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "promptlab",
   "title": "PromptLab",
+  "version": "1.1.0",
   "description": "Create custom AI commands using powerful placeholders",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "categories": [
     "Productivity",
     "Data",
-    "Developer Tools"
+    "Developer Tools",
+    "Fun"
   ],
   "license": "MIT",
   "preferences": [
@@ -19,6 +21,22 @@
       "type": "checkbox",
       "default": true,
       "description": "If checked, PromptLab will use OCR to extract text from PDFs. This takes longer but enables analysis of more PDF content types.",
+      "required": false
+    },
+    {
+      "title": "Export Location",
+      "name": "exportLocation",
+      "type": "directory",
+      "default": "~/Downloads",
+      "description": "The folder where exported commands and chats will be saved.",
+      "required": false
+    },
+    {
+      "title": "Custom Placeholder Files",
+      "name": "customPlaceholderFiles",
+      "type": "textfield",
+      "default": "",
+      "description": "A comma-separated list of JSON files containing custom placeholders. These files must follow the format of the original custom_placeholders.json file. See the documentation for more information.",
       "required": false
     },
     {
@@ -137,7 +155,7 @@
       "type": "textfield",
       "required": false,
       "default": "N/A",
-      "description": "The JSON schema of the endpoint used to generate PromptLab command output. This is only used if the model source is set to something other than Raycast AI. Use {input} to represent PromptLab's input to the command.",
+      "description": "The JSON schema of the endpoint used to generate PromptLab command output. This is only used if the model source is set to something other than Raycast AI. Use {prompt} to represent PromptLab's entire input to the model.",
       "placeholder": "{ \"prompt\": \"{input}\" }"
     },
     {
@@ -185,12 +203,6 @@
   ],
   "commands": [
     {
-      "name": "summarize-files",
-      "title": "Summarize Selected Files",
-      "description": "Summarize the contents of the selected files",
-      "mode": "view"
-    },
-    {
       "name": "create-command",
       "title": "New PromptLab Command",
       "description": "Create a custom PromptLab command accessible via 'Search PromptLab Commands'",
@@ -212,18 +224,11 @@
       "preferences": [
         {
           "name": "groupByCategory",
+          "title": "Search Settings",
           "label": "Group Commands By Category",
           "type": "checkbox",
           "default": false,
           "description": "If checked, each command category will have its own section in the search results.",
-          "required": false
-        },
-        {
-          "title": "Export Location",
-          "name": "exportLocation",
-          "type": "directory",
-          "default": "~/Downloads",
-          "description": "The folder where exported commands will be saved.",
           "required": false
         }
       ]
@@ -273,7 +278,7 @@
           "type": "textfield",
           "required": false,
           "default": "I want you to act as an interactive information engine. When I supply a question, you will respond with an answer based on any information I've provided and your own inferences.",
-          "description": "The base prompt that provides the initial context for the conversation."
+          "description": "The base prompt that provides the initial context for conversations."
         }
       ]
     },
@@ -288,6 +293,86 @@
       "title": "PromptLab Command Store",
       "description": "Discover commands from the PromptLab community",
       "mode": "view"
+    },
+    {
+      "name": "manage-models",
+      "title": "Manage Models",
+      "description": "Manage the models used to generate PromptLab command output",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-item",
+      "title": "PromptLab Menu Item",
+      "description": "Show PromptLab shortcut in the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "title": "Shortcuts To Show",
+          "name": "showNewChatShortcut",
+          "label": "New Chat",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to show the 'New Chat' shortcut in the menu.",
+          "required": false
+        },
+        {
+          "name": "showAllCommandsShortcut",
+          "label": "All Commands",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to show the 'All Commands' shortcut in the menu.",
+          "required": false
+        },
+        {
+          "name": "showPromptLabStoreShortcut",
+          "label": "PromptLab Store",
+          "type": "checkbox",
+          "default": false,
+          "description": "Whether to show the 'PromptLab Store' shortcut in the menu.",
+          "required": false
+        },
+        {
+          "name": "showNewCommandShortcut",
+          "label": "New Command",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to show the 'New Command' shortcut in the menu.",
+          "required": false
+        },
+        {
+          "title": "Display Settings",
+          "name": "displayIcons",
+          "label": "Display Icons",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to display icons next to the menu items.",
+          "required": false
+        },
+        {
+          "name": "displayColors",
+          "label": "Display Icon Colors",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to display colors in the menu item icons.",
+          "required": false
+        },
+        {
+          "name": "displayFavorites",
+          "label": "Display Favorites",
+          "type": "checkbox",
+          "default": true,
+          "description": "Whether to separate favorite commands from the rest of the menu items.",
+          "required": false
+        },
+        {
+          "name": "displayCategories",
+          "label": "Display Categories",
+          "type": "checkbox",
+          "default": false,
+          "description": "Whether to separate commands by category.",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
