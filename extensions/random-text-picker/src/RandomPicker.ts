@@ -1,4 +1,4 @@
-import { Alert, Toast, confirmAlert, environment, open, showToast } from "@raycast/api";
+import { Alert, Toast, confirmAlert, environment, showToast } from "@raycast/api";
 import { exec } from "child_process";
 
 export default async function RandomPicker(
