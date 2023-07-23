@@ -78,7 +78,7 @@ export default function Command() {
   async function fetchData() {
     const apikeyArgument = preferences.apikey.value === "0" ? "" : `&api_key=${preferences.apikey.value}`;
     if (!query) {
-      controllToast("Fetching trending articles", true);
+      controllToast("Loading Trending Articles", true);
       getHistoryAndFavourites();
       try {
         if (
@@ -193,7 +193,7 @@ export default function Command() {
         });
       } finally {
         setEntries(JSON.parse((await LocalStorage.getItem(TRENDINGARTICLES_KEY)) ?? "[]"));
-        controllToast("Fetching trending articles", false);
+        controllToast("Loading Trending Articles", false);
         setLoading(false);
       }
     } else {
