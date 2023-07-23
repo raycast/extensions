@@ -352,7 +352,7 @@ export default function Command() {
         }}
         throttle={true}
         isLoading={loading}
-        searchBarPlaceholder="Search entry..."
+        searchBarPlaceholder="Search..."
         searchBarAccessory={
           <List.Dropdown
             tooltip="Sort by"
@@ -403,7 +403,7 @@ export default function Command() {
         }}
         throttle={true}
         isLoading={loading}
-        searchBarPlaceholder="Search entry..."
+        searchBarPlaceholder="Search..."
         searchBarAccessory={
           <List.Dropdown
             tooltip="Sort by"
