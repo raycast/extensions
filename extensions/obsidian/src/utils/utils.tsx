@@ -95,43 +95,44 @@ export function getUserIgnoreFilters(vault: Vault) {
   }
 }
 
-export function getStarredJSON(vault: Vault) {
-  const starredNotesPath = vault.path + "/.obsidian/starred.json";
-  if (!fs.existsSync(starredNotesPath)) {
+export function getBookmarkedJSON(vault: Vault) {
+  const bookmarkedNotesPath = vault.path + "/.obsidian/bookmarks.json";
+  if (!fs.existsSync(bookmarkedNotesPath)) {
     return [];
   } else {
-    return JSON.parse(fs.readFileSync(starredNotesPath, "utf-8"))["items"] || [];
+    return JSON.parse(fs.readFileSync(bookmarkedNotesPath, "utf-8"))["items"] || [];
   }
 }
 
-export function writeToStarredJSON(vault: Vault, starredNotes: Note[]) {
-  const starredNotesPath = vault.path + "/.obsidian/starred.json";
-  fs.writeFileSync(starredNotesPath, JSON.stringify({ items: starredNotes }));
+export function writeToBookmarkedJSON(vault: Vault, bookmarkedNotes: Note[]) {
+  const bookmarkedNotesPath = vault.path + "/.obsidian/bookmarks.json";
+  fs.writeFileSync(bookmarkedNotesPath, JSON.stringify({ items: bookmarkedNotes }));
 }
 
-export function getStarredNotePaths(vault: Vault) {
-  const starredNotes = getStarredJSON(vault);
-  return starredNotes.map((note: { type: string; title: string; path: string }) => note.path);
+export function getBookmarkedNotePaths(vault: Vault) {
+  const bookmarkedNotes = getBookmarkedJSON(vault);
+  return bookmarkedNotes.map((note: { type: string; title: string; path: string }) => note.path);
 }
 
-export function starNote(vault: Vault, note: Note) {
-  const starredNotes = getStarredJSON(vault);
-  const starredNote = {
+export function bookmarkNote(vault: Vault, note: Note) {
+  const bookmarkedNotes = getBookmarkedJSON(vault);
+  const bookmarkedNote = {
     type: "file",
     title: note.title,
     path: note.path.split(vault.path)[1].slice(1),
   };
-  starredNotes.push(starredNote);
-  writeToStarredJSON(vault, starredNotes);
+  bookmarkedNotes.push(bookmarkedNote);
+  writeToBookmarkedJSON(vault, bookmarkedNotes);
 }
 
-export function unstarNote(vault: Vault, note: Note) {
-  const starredNotes = getStarredJSON(vault);
-  const index = starredNotes.findIndex(
-    (starred: { type: string; title: string; path: string }) => starred.path === note.path.split(vault.path)[1].slice(1)
+export function unbookmarkNote(vault: Vault, note: Note) {
+  const bookmarkedNotes = getBookmarkedJSON(vault);
+  const index = bookmarkedNotes.findIndex(
+    (bookmarked: { type: string; title: string; path: string }) =>
+      bookmarked.path === note.path.split(vault.path)[1].slice(1)
   );
-  starredNotes.splice(index, 1);
-  writeToStarredJSON(vault, starredNotes);
+  bookmarkedNotes.splice(index, 1);
+  writeToBookmarkedJSON(vault, bookmarkedNotes);
 }
 
 function getVaultNameFromPath(vaultPath: string): string {
@@ -250,8 +251,21 @@ export async function getClipboardContent() {
   return clipboardText ? clipboardText : "";
 }
 
+async function ISO8601_week_no(dt: Date) {
+  const tdt = new Date(dt.getTime());
+  const dayn = (dt.getDay() + 6) % 7;
+  tdt.setDate(tdt.getDate() - dayn + 3);
+  const firstThursday = tdt.getTime();
+  tdt.setMonth(0, 1);
+  if (tdt.getDay() !== 4) {
+    tdt.setMonth(0, 1 + ((4 - tdt.getDay() + 7) % 7));
+  }
+  return 1 + Math.ceil((firstThursday - tdt.getTime()) / 604800000);
+}
+
 export async function applyTemplates(content: string) {
   const date = new Date();
+  const week = await ISO8601_week_no(date);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const seconds = date.getSeconds().toString().padStart(2, "0");
@@ -260,6 +274,8 @@ export async function applyTemplates(content: string) {
 
   content = content.replaceAll("{time}", date.toLocaleTimeString());
   content = content.replaceAll("{date}", date.toLocaleDateString());
+
+  content = content.replaceAll("{week}", week.toString().padStart(2, "0"));
 
   content = content.replaceAll("{year}", date.getFullYear().toString());
   content = content.replaceAll("{month}", MONTH_NUMBER_TO_STRING[date.getMonth()]);
@@ -315,6 +331,7 @@ export enum ObsidianTargetType {
   DailyNote = "obsidian://advanced-uri?daily=true&vault=",
   DailyNoteAppend = "obsidian://advanced-uri?daily=true&mode=append",
   NewNote = "obsidian://new?vault=",
+  AppendTask = "obsidian://advanced-uri?mode=append&filepath=",
 }
 
 export type ObsidianTarget =
@@ -322,7 +339,15 @@ export type ObsidianTarget =
   | { type: ObsidianTargetType.OpenPath; path: string }
   | { type: ObsidianTargetType.DailyNote; vault: Vault }
   | { type: ObsidianTargetType.DailyNoteAppend; vault: Vault; text: string; heading?: string; silent?: boolean }
-  | { type: ObsidianTargetType.NewNote; vault: Vault; name: string; content?: string };
+  | { type: ObsidianTargetType.NewNote; vault: Vault; name: string; content?: string }
+  | {
+      type: ObsidianTargetType.AppendTask;
+      vault: Vault;
+      text: string;
+      path: string;
+      heading?: string;
+      silent?: boolean;
+    };
 
 export function getObsidianTarget(target: ObsidianTarget) {
   switch (target.type) {
@@ -355,6 +380,19 @@ export function getObsidianTarget(target: ObsidianTarget) {
         encodeURIComponent(target.name) +
         "&content=" +
         encodeURIComponent(target.content || "")
+      );
+    }
+    case ObsidianTargetType.AppendTask: {
+      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      return (
+        ObsidianTargetType.AppendTask +
+        encodeURIComponent(target.path) +
+        "&data=" +
+        encodeURIComponent(target.text) +
+        "&vault=" +
+        encodeURIComponent(target.vault.name) +
+        headingParam +
+        (target.silent ? "&openmode=silent" : "")
       );
     }
     default: {

@@ -3,17 +3,28 @@ import { useCallback, useEffect, useState } from "react";
 import { getBibleData, getLanguages } from "youversion-suggest";
 import {
   getPreferredLanguage,
+  getPreferredLineBreaksSetting,
   getPreferredReferenceFormat,
+  getPreferredVerseNumbersSetting,
   getPreferredVersion,
   setPreferredLanguage,
+  setPreferredLineBreaksSetting,
   setPreferredReferenceFormat,
+  setPreferredVerseNumbersSetting,
   setPreferredVersion,
 } from "./preferences";
 import { BibleLanguage, BibleLanguageId, BibleVersion, BibleVersionId } from "./types";
 import { isReferenceFormatValid } from "./utilities";
 
 export default function Command() {
-  const { state, onChangeLanguage, onChangeVersion, onChangeReferenceFormat } = usePreferences();
+  const {
+    state,
+    onChangeLanguage,
+    onChangeVersion,
+    onChangeReferenceFormat,
+    onChangeVerseNumbersSetting,
+    onChangeLineBreaksSetting,
+  } = usePreferences();
 
   const [referenceFormatError, setReferenceFormatError] = useState<string | undefined>();
 
@@ -27,7 +38,7 @@ export default function Command() {
 
   return (
     <Form isLoading={state.isLoading}>
-      {state.currentLanguage ? (
+      {state.currentLanguage !== undefined ? (
         <Form.Dropdown
           id="language"
           title="Language"
@@ -40,7 +51,7 @@ export default function Command() {
           })}
         </Form.Dropdown>
       ) : null}
-      {state.currentVersion ? (
+      {state.currentVersion !== undefined ? (
         <Form.Dropdown
           id="version"
           title="Version"
@@ -71,6 +82,24 @@ export default function Command() {
           }}
         />
       ) : null}
+      {state.currentVerseNumbersSetting !== undefined ? (
+        <Form.Checkbox
+          id="versenumbers"
+          label="Include Verse Numbers in Content?"
+          info="Whether or not to include verse numbers in copied Bible content"
+          value={state.currentVerseNumbersSetting}
+          onChange={onChangeVerseNumbersSetting}
+        />
+      ) : null}
+      {state.currentLineBreaksSetting !== undefined ? (
+        <Form.Checkbox
+          id="linebreaks"
+          label="Preserve Line Breaks in Content?"
+          info="Whether or not to preserve line breaks in copied Bible content"
+          value={state.currentLineBreaksSetting}
+          onChange={onChangeLineBreaksSetting}
+        />
+      ) : null}
     </Form>
   );
 }
@@ -83,6 +112,8 @@ function usePreferences() {
     versionOptions: [],
     currentVersion: undefined,
     currentReferenceFormat: undefined,
+    currentVerseNumbersSetting: undefined,
+    currentLineBreaksSetting: undefined,
   });
 
   useEffect(() => {
@@ -109,7 +140,26 @@ function usePreferences() {
     setState({ isLoading: false, ...newState });
   }, []);
 
-  return { state, onChangeLanguage, onChangeVersion, onChangeReferenceFormat };
+  const onChangeVerseNumbersSetting = useCallback(async (newValue: boolean) => {
+    await setPreferredVerseNumbersSetting(newValue);
+    const newState = await getPreferenceFormData();
+    setState({ isLoading: false, ...newState });
+  }, []);
+
+  const onChangeLineBreaksSetting = useCallback(async (newValue: boolean) => {
+    await setPreferredLineBreaksSetting(newValue);
+    const newState = await getPreferenceFormData();
+    setState({ isLoading: false, ...newState });
+  }, []);
+
+  return {
+    state,
+    onChangeLanguage,
+    onChangeVersion,
+    onChangeReferenceFormat,
+    onChangeVerseNumbersSetting,
+    onChangeLineBreaksSetting,
+  };
 }
 
 async function getPreferenceFormData() {
@@ -118,6 +168,8 @@ async function getPreferenceFormData() {
   const preferredVersionId = await getPreferredVersion();
   const bible = await getBibleData(preferredLanguageId);
   const preferredReferenceFormat = await getPreferredReferenceFormat();
+  const preferredVerseNumbersSetting = await getPreferredVerseNumbersSetting();
+  const preferredLineBreaksSetting = await getPreferredLineBreaksSetting();
 
   return {
     languageOptions: languages,
@@ -125,6 +177,8 @@ async function getPreferenceFormData() {
     versionOptions: bible.versions,
     currentVersion: preferredVersionId,
     currentReferenceFormat: preferredReferenceFormat,
+    currentVerseNumbersSetting: preferredVerseNumbersSetting,
+    currentLineBreaksSetting: preferredLineBreaksSetting,
   };
 }
 
@@ -135,4 +189,6 @@ interface FormState {
   versionOptions: BibleVersion[];
   currentVersion: BibleVersionId | undefined;
   currentReferenceFormat: string | undefined;
+  currentVerseNumbersSetting?: boolean;
+  currentLineBreaksSetting?: boolean;
 }

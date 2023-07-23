@@ -1,12 +1,12 @@
 import React from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import debounce from "debounce";
-import { useSelectedLanguagesSet } from "./hooks";
+import { usePromise } from "@raycast/utils";
+import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
 import { LanguageCode, supportedLanguagesByCode, languages } from "./languages";
-import { AUTO_DETECT, simpleTranslate, SimpleTranslateResult } from "./simple-translate";
+import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
 
-const TranslateForm = () => {
+export default function TranslateForm() {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
   const langFrom = selectedLanguageSet.langFrom;
   const langTo = selectedLanguageSet.langTo;
@@ -15,9 +15,21 @@ const TranslateForm = () => {
   const fromLangObj = supportedLanguagesByCode[langFrom];
   const toLangObj = supportedLanguagesByCode[langTo];
 
-  const [text, setText] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [translated, setTranslated] = React.useState<SimpleTranslateResult | null>(null);
+  const [text, setText] = useTextState();
+  const debouncedValue = useDebouncedValue(text, 500);
+  const { data: translated, isLoading } = usePromise(
+    simpleTranslate,
+    [debouncedValue, { langFrom: fromLangObj.code, langTo: toLangObj.code }],
+    {
+      onError(error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: error.name,
+          message: error.message,
+        });
+      },
+    }
+  );
 
   const handleChange = (value: string) => {
     if (value.length > 5000) {
@@ -31,31 +43,6 @@ const TranslateForm = () => {
       setText(value);
     }
   };
-
-  const doTranslate = React.useMemo(() => {
-    const debouncedTranslate = debounce(async (text: string, langFrom: LanguageCode, langTo: LanguageCode) => {
-      const result = await simpleTranslate(text, {
-        langFrom,
-        langTo,
-      });
-
-      setTranslated(result);
-      setIsLoading(false);
-    }, 500);
-
-    return (text: string | undefined, langFrom: LanguageCode, langTo: LanguageCode) => {
-      if (text) {
-        setIsLoading(true);
-        debouncedTranslate(text, langFrom, langTo);
-      } else {
-        setTranslated(null);
-      }
-    };
-  }, []);
-
-  React.useEffect(() => {
-    doTranslate(text, langFrom, langTo);
-  }, [text, langFrom, langTo]);
 
   const autoDetectedLanguage = React.useMemo(() => {
     if (langFrom === AUTO_DETECT && translated) {
@@ -144,7 +131,7 @@ const TranslateForm = () => {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="text" title="Text" onChange={handleChange} />
+      <Form.TextArea id="text" title="Text" value={text} onChange={handleChange} />
       <Form.Dropdown
         id="language_from"
         title="From"
@@ -184,6 +171,4 @@ const TranslateForm = () => {
       />
     </Form>
   );
-};
-
-export default TranslateForm;
+}

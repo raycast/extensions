@@ -82,7 +82,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
             ) : status === QRCodeStatus.Scanned ? (
               <Detail.Metadata.Label title="Status" icon={Icon.Checkmark} text="Scanned" />
             ) : status === QRCodeStatus.Canceled ? (
-              <Detail.Metadata.Label title="Status" icon={Icon.XmarkCircle} text="Cancelled" />
+              <Detail.Metadata.Label title="Status" icon={Icon.XMarkCircle} text="Cancelled" />
             ) : (
               <Detail.Metadata.Label title="Status" text={QRCodeStatus[status]} />
             )}
@@ -115,7 +115,7 @@ async function getQRCodeMarkdownContent(token: string): Promise<string> {
       margin: 2,
       width: 300,
       color:
-        environment.theme === 'light'
+        environment.appearance === 'light'
           ? {
               light: '#0000',
               dark: '#262426',

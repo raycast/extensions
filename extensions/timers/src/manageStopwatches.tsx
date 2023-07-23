@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Color, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect } from "react";
 import useStopwatches from "./hooks/useStopwatches";
 import RenameView from "./RenameView";
@@ -6,8 +6,16 @@ import { formatTime, formatDateTime } from "./formatUtils";
 import { Stopwatch } from "./types";
 
 export default function Command() {
-  const { stopwatches, isLoading, refreshSWes, handleStartSW, handleStopSW, handlePauseSW, handleUnpauseSW } =
-    useStopwatches();
+  const {
+    stopwatches,
+    isLoading,
+    refreshSWes,
+    handleRestartSW,
+    handleStartSW,
+    handleStopSW,
+    handlePauseSW,
+    handleUnpauseSW,
+  } = useStopwatches();
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -48,10 +56,15 @@ export default function Command() {
                   title="Rename Stopwatch"
                   onAction={() => push(<RenameView currentName={sw.name} originalFile={"stopwatch"} ctID={sw.swID} />)}
                 />
-                <Action
+                <Action.CopyToClipboard
                   title="Copy Current Time"
-                  shortcut={{ modifiers: ["opt"], key: "c" }}
-                  onAction={() => Clipboard.copy(formatTime(sw.timeElapsed))}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  content={formatTime(sw.timeElapsed)}
+                />
+                <Action
+                  title="Restart Stopwatch"
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={() => handleRestartSW(sw)}
                 />
                 <Action
                   title="Stop Stopwatch"

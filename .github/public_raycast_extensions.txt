@@ -1,6 +1,8 @@
 linear
 github
+browser-bookmarks
 google-workspace
+jira
 zoom
 hypersonic
 asana
@@ -18,3 +20,10 @@ netlify
 pinata
 grafbase
 tailscale
+todoist
+screen-studio
+openverse
+putio
+warp
+getsound
+reclaim-ai

@@ -24,7 +24,7 @@ export default function BookmarkCommand() {
         cache.set("latest_bookmarks", JSON.stringify(newBookmarks));
       } catch (error) {
         const requestErr = error as AkkomaError;
-        showToast(Toast.Style.Failure, "Error", requestErr.message);
+        showToast(Toast.Style.Failure, "Error", requestErr.error);
       } finally {
         setIsLoading(false);
       }

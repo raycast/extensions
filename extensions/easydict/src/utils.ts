@@ -12,15 +12,15 @@ import { Clipboard, getApplications, LocalStorage, showToast, Toast } from "@ray
 import { AxiosError } from "axios";
 import CryptoJS from "crypto-js";
 import { clipboardQueryTextKey } from "./consts";
-import { LanguageDetectType } from "./detectLanauge/types";
+import { LanguageDetectType } from "./detectLanguage/types";
 import { LingueeListItemType } from "./dictionary/linguee/types";
 import { QueryWordInfo, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
 import { myPreferences } from "./preferences";
 import { Easydict } from "./releaseVersion/versionInfo";
 import {
-  DicionaryType,
+  DictionaryType,
   ListDisplayItem,
-  QueryRecoredItem,
+  QueryRecordedItem as QueryRecordedItem,
   QueryType,
   RequestErrorInfo,
   RequestType,
@@ -57,9 +57,9 @@ export async function tryQueryClipboardText(queryClipboardText: (text: string) =
     }
 
     if (jsonString) {
-      const queryRecoredItem: QueryRecoredItem = JSON.parse(jsonString);
-      const timestamp = queryRecoredItem.timestamp;
-      const queryText = queryRecoredItem.queryText;
+      const queryRecordedItem: QueryRecordedItem = JSON.parse(jsonString);
+      const timestamp = queryRecordedItem.timestamp;
+      const queryText = queryRecordedItem.queryText;
       if (queryText === text) {
         const now = new Date().getTime();
         console.log(`before: ${new Date(timestamp).toUTCString()}`);
@@ -127,13 +127,13 @@ export function trimTextLength(text: string, length = 1830) {
 /**
  * Get enabled dictionary services.
  */
-export function getEnabledDictionaryServices(): DicionaryType[] {
-  const enabledDictionaryServices: DicionaryType[] = [];
+export function getEnabledDictionaryServices(): DictionaryType[] {
+  const enabledDictionaryServices: DictionaryType[] = [];
   if (myPreferences.enableLingueeDictionary) {
-    enabledDictionaryServices.push(DicionaryType.Linguee);
+    enabledDictionaryServices.push(DictionaryType.Linguee);
   }
   if (myPreferences.enableYoudaoDictionary) {
-    enabledDictionaryServices.push(DicionaryType.Youdao);
+    enabledDictionaryServices.push(DictionaryType.Youdao);
   }
   return enabledDictionaryServices;
 }
@@ -200,7 +200,7 @@ export function copyToClipboard(text: string) {
  * Check type is Dictionary type.
  */
 export function checkIsDictionaryType(type: QueryType): boolean {
-  if (Object.values(DicionaryType).includes(type as DicionaryType)) {
+  if (Object.values(DictionaryType).includes(type as DictionaryType)) {
     return true;
   }
   return false;
@@ -232,7 +232,7 @@ export function checkIsLanguageDetectType(type: RequestType): boolean {
 export function checkIsYoudaoDictionaryListItem(listItem: ListDisplayItem): boolean {
   const { queryType, displayType } = listItem;
   if (
-    queryType === DicionaryType.Youdao &&
+    queryType === DictionaryType.Youdao &&
     Object.values(YoudaoDictionaryListItemType).includes(displayType as YoudaoDictionaryListItemType)
   ) {
     return true;
@@ -246,7 +246,7 @@ export function checkIsYoudaoDictionaryListItem(listItem: ListDisplayItem): bool
 export function checkIsLingueeListItem(listItem: ListDisplayItem): boolean {
   const { queryType, displayType } = listItem;
   if (
-    queryType === DicionaryType.Linguee &&
+    queryType === DictionaryType.Linguee &&
     Object.values(LingueeListItemType).includes(displayType as LingueeListItemType)
   ) {
     return true;

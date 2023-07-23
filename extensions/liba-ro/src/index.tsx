@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Clipboard, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, Toast, closeMainWindow } from "@raycast/api";
 import axios from "axios";
 import { useState, useRef } from "react";
 
@@ -56,6 +56,8 @@ export default function Command() {
 
         toast.style = Toast.Style.Success;
         toast.title = "Short URL copied to clipboard!";
+
+        closeMainWindow({ clearRootSearch: true });
       })
       .catch((err) => {
         setUrlError(err.response?.data?.errors?.url?.[0]);

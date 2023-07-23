@@ -7,4 +7,4 @@ import { handleTaskEitherError } from "./util/utils";
 export default pipe(
   music.player.pause,
   handleTaskEitherError(SFSymbols.WARNING + " Failed to pause playback", SFSymbols.PAUSE + " Playback paused")
-)();
+);

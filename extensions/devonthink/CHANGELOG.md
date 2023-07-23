@@ -1,5 +1,10 @@
 # DEVONthink Changelog
 
+## [Update] - 2023-05-10
+
+- Add two more actions — copy item link and copy link as markdown
+
+
 ## [Fix] - 2023-03-17
 
 - Removed geolocation since it caused crash for some users

@@ -14,6 +14,7 @@ export interface Task {
   parent_group_name: string;
   percent_complete: number;
   is_starred: boolean;
+  end_date: string;
   resources: { name: string }[];
 }
 

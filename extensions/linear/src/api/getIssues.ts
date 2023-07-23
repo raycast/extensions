@@ -4,15 +4,11 @@ import { LabelResult } from "./getLabels";
 import { getLinearClient } from "../helpers/withLinearClient";
 import { getPaginated, PageInfo } from "./pagination";
 
-type Preferences = {
-  limit?: string;
-};
-
 const DEFAULT_PAGE_SIZE = 50;
 const DEFAULT_LIMIT = 50;
 
 function getPageLimits() {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const limit = preferences.limit ? +preferences.limit : DEFAULT_LIMIT;
   const pageSize = Math.min(DEFAULT_PAGE_SIZE, limit);
   const pageLimit = Math.floor(limit / pageSize);

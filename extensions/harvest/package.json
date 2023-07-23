@@ -4,6 +4,9 @@
   "description": "Access Harvest Time Entries",
   "icon": "harvest-logo-icon.png",
   "author": "eluce2",
+  "contributors": [
+    "bchopson"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -65,6 +68,31 @@
       "subtitle": "Harvest",
       "description": "Stop your running timer",
       "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Running Timer",
+      "subtitle": "Harvest",
+      "description": "See your active Harvest timer at a glance",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "callbackURLStart",
+          "title": "Callback URL - Timer Started",
+          "description": "URL to open when a running timer starts. See README for more info.",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "callbackURLStop",
+          "title": "Callback URL - Timer Stopped",
+          "description": "URL to open when a running timer stops. See README for more info.",
+          "type": "textfield",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -90,6 +118,28 @@
       "required": false,
       "label": "Show Client Name above selected project",
       "type": "checkbox"
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "required": false,
+      "description": "Time Format",
+      "type": "dropdown",
+      "default": "company",
+      "data": [
+        {
+          "title": "Company Default",
+          "value": "company"
+        },
+        {
+          "title": "Hours/Minutes",
+          "value": "hours_minutes"
+        },
+        {
+          "title": "Decimal",
+          "value": "decimal"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -104,10 +154,12 @@
     "@types/lodash": "^4.14.175",
     "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
+    "prettier": "^2.8.7",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

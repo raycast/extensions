@@ -3,9 +3,12 @@ import { useCachedPromise } from "@raycast/utils";
 
 export const BROWSERS_BUNDLE_ID = {
   brave: "com.brave.browser",
+  braveBeta: "com.brave.browser.beta",
   chrome: "com.google.chrome",
+  chromeDev: "com.google.chrome.dev",
   firefox: "org.mozilla.firefox",
   safari: "com.apple.safari",
+  edge: "com.microsoft.edgemac",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

@@ -77,6 +77,7 @@ export interface ChatHook {
   setSelectedChatId: Set<string | null>;
   ask: PromiseFunctionWithTwoArg<string, Model>;
   clear: PromiseFunctionNoArg;
+  streamData: Chat | undefined;
 }
 
 export interface ChangeModelProp {
@@ -114,4 +115,13 @@ export interface CreateChatCompletionDeltaResponse {
       finish_reason: string | null;
     }
   ];
+}
+
+export interface ConfigurationPreferences {
+  apiKey: string;
+  useAzure: boolean;
+  azureEndpoint: string;
+  azureDeployment: string;
+  useApiEndpoint: boolean;
+  apiEndpoint: string;
 }

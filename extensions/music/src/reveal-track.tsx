@@ -10,4 +10,4 @@ export default pipe(
   music.currentTrack.reveal,
   TE.apFirst(music.general.activate),
   handleTaskEitherError(SFSymbols.WARNING + " Could not display current track")
-)();
+);

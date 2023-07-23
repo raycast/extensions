@@ -1,12 +1,10 @@
 import { Envelope, Flag } from "./models";
 import * as Exec from "./exec";
 
-export async function list(): Promise<Envelope[]> {
-  const { stdout, stderr } = await Exec.run('"himalaya" -o json list -s 100', {
-    env: {
-      PATH: Exec.PATH,
-    },
-  });
+export async function list(folder: string, account: string): Promise<Envelope[]> {
+  const cmd = `himalaya --account "${account}" --folder "${folder}" -o json list -s 100`;
+  console.debug(`cmd: ${cmd}`);
+  const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 
   if (stdout) {
     const results: any = JSON.parse(stdout);

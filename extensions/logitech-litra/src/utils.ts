@@ -14,8 +14,8 @@ interface Device {
 
 const MINIMUM_SUPPORTED_LITRA_VERSION = "4.4.0";
 
-export const checkLitraVersion = async (cliDirectory: string): Promise<void> => {
-  const version = await getLitraVersion(cliDirectory);
+export const checkLitraVersion = async (cliDirectory: string, nodeBinaryPath?: string): Promise<void> => {
+  const version = await getLitraVersion(cliDirectory, nodeBinaryPath);
 
   if (gte(version, MINIMUM_SUPPORTED_LITRA_VERSION)) {
     if (parse(version)?.major != parse(MINIMUM_SUPPORTED_LITRA_VERSION)?.major) {
@@ -26,11 +26,9 @@ export const checkLitraVersion = async (cliDirectory: string): Promise<void> => 
   }
 };
 
-const getLitraVersion = async (cliDirectory: string): Promise<string> => {
-  const binPath = path.join(cliDirectory, "litra-devices");
-
+const getLitraVersion = async (cliDirectory: string, nodeBinaryPath?: string): Promise<string> => {
   try {
-    const { stdout: version } = await runLitraCommand(cliDirectory, "litra-devices", "--version");
+    const { stdout: version } = await runLitraCommand(cliDirectory, "litra-devices", "--version", nodeBinaryPath);
     return version.trim();
   } catch (error: any) {
     if (error.stderr.includes("unknown option")) {
@@ -44,7 +42,8 @@ const getLitraVersion = async (cliDirectory: string): Promise<string> => {
 const runLitraCommand = (
   directory: string,
   filename: string,
-  args?: string
+  args?: string,
+  nodeBinaryPath?: string
 ): Promise<{
   stdout: string;
   stderr: string;
@@ -52,39 +51,52 @@ const runLitraCommand = (
   const binPath = path.join(directory, filename);
 
   if (fs.existsSync(binPath)) {
-    return exec(`${binPath} ${args}`);
+    const command = [nodeBinaryPath, binPath, args].filter((argument) => argument).join(" ");
+    return exec(command);
   } else {
     throw `The CLI utility \`${filename}\` is not available in \`${directory}\`. Please check the extension's preferences.`;
   }
 };
 
-export const getDevices = async (cliDirectory: string): Promise<Device[]> => {
-  const { stdout } = await runLitraCommand(cliDirectory, "litra-devices", "--json");
+export const getDevices = async (cliDirectory: string, nodeBinaryPath?: string): Promise<Device[]> => {
+  const { stdout } = await runLitraCommand(cliDirectory, "litra-devices", "--json", nodeBinaryPath);
   return JSON.parse(stdout) as Device[];
 };
 
-export const isOn = async (cliDirectory: string, serialNumber: string): Promise<boolean> => {
-  const devices = await getDevices(cliDirectory);
+export const isOn = async (cliDirectory: string, serialNumber: string, nodeBinaryPath?: string): Promise<boolean> => {
+  const devices = await getDevices(cliDirectory, nodeBinaryPath);
   const device = devices.find((device) => device.serial_number === serialNumber) as Device;
   return device.is_on;
 };
 
-export const toggle = async (cliDirectory: string, serialNumber: string): Promise<void> => {
-  await runLitraCommand(cliDirectory, "litra-toggle", `--serial-number ${serialNumber}`);
+export const toggle = async (cliDirectory: string, serialNumber: string, nodeBinaryPath?: string): Promise<void> => {
+  await runLitraCommand(cliDirectory, "litra-toggle", `--serial-number ${serialNumber}`, nodeBinaryPath);
 };
 
 export const setTemperatureInKelvin = async (
   cliDirectory: string,
   serialNumber: string,
-  temperatureInKelvin: number
+  temperatureInKelvin: number,
+  nodeBinaryPath?: string
 ): Promise<void> => {
-  await runLitraCommand(cliDirectory, "litra-temperature-k", `${temperatureInKelvin} --serial-number ${serialNumber}`);
+  await runLitraCommand(
+    cliDirectory,
+    "litra-temperature-k",
+    `${temperatureInKelvin} --serial-number ${serialNumber}`,
+    nodeBinaryPath
+  );
 };
 
 export const setBrightnessPercentage = async (
   cliDirectory: string,
   serialNumber: string,
-  brightnessPercentage: number
+  brightnessPercentage: number,
+  nodeBinaryPath?: string
 ): Promise<void> => {
-  await runLitraCommand(cliDirectory, "litra-brightness", `${brightnessPercentage} --serial-number ${serialNumber}`);
+  await runLitraCommand(
+    cliDirectory,
+    "litra-brightness",
+    `${brightnessPercentage} --serial-number ${serialNumber}`,
+    nodeBinaryPath
+  );
 };

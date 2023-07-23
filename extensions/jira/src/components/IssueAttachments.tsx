@@ -8,6 +8,7 @@ import { filesize } from "filesize";
 import fetch from "node-fetch";
 
 import { Attachment } from "../api/issues";
+import { getUserAvatar } from "../helpers/avatars";
 import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
 type IssueAttachmentsProps = {
@@ -150,7 +151,7 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
               },
               { date, tooltip: format(date, "EEEE d MMMM yyyy 'at' HH:mm") },
               {
-                icon: attachment.author.avatarUrls["32x32"],
+                icon: getUserAvatar(attachment.author),
                 tooltip: `Author: ${attachment.author.displayName}`,
               },
             ]}

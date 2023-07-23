@@ -86,12 +86,14 @@
     "@raycast/api": "^1.28.0",
     "dayjs": "^1.10.7",
     "lodash": "^4.17.21",
-    "osascript-tag": "^0.1.2"
+    "osascript-tag": "^0.1.2",
+    "qs": "^6.11.1"
   },
   "devDependencies": {
     "@types/lodash.groupby": "^4.6.6",
     "@types/lodash.map": "^4.6.13",
     "@types/node": "~16.10.0",
+    "@types/qs": "^6.9.7",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

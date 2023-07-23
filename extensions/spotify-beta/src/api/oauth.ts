@@ -85,6 +85,11 @@ export async function refreshTokens(refreshToken: string): Promise<OAuth.TokenRe
   });
 
   if (!response.ok) {
+    const error: any = await response.json();
+    if (error.error === "invalid_grant") {
+      oauthClient.removeTokens();
+      authorize();
+    }
     throw new Error(response.statusText);
   }
 

@@ -52,7 +52,9 @@
 
 ## API Reference
 
+- [AI](api-reference/ai.md)
 - [Cache](api-reference/cache.md)
+- [Command](api-reference/command.md)
 - [Clipboard](api-reference/clipboard.md)
 - [Environment](api-reference/environment.md)
 - [Feedback](api-reference/feedback/README.md)
@@ -85,4 +87,5 @@
   - [v1.31.0](migration/v1.31.0.md)
   - [v1.37.0](migration/v1.37.0.md)
   - [v1.48.8](migration/v1.48.8.md)
+  - [v1.50.0](migration/v1.50.0.md)
 - [FAQ](faq.md)
