@@ -6,17 +6,11 @@ import {
   isEmptyLonLat,
   latitude,
   longitude,
-  tempType,
-  menuUVI,
-  menuPressure,
-  menuHumidity,
-  menuWind,
   showForecast,
   showLocation,
   showSun,
   showUVI,
   windDirection,
-  windAngle2Direction,
   windDirectionSimple,
 } from "./utils/weather-utils";
 import { OPEN_METEO } from "./utils/axios-utils";

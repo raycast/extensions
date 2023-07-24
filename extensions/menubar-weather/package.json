@@ -202,7 +202,7 @@
     "@typescript-eslint/parser": "^6.1.0",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
-    "prettier": "^3.0.0",
+    "prettier": "^2.8.8",
     "typescript": "^5.1.6"
   },
   "scripts": {
