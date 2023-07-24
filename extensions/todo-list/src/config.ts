@@ -1,4 +1,4 @@
-import { Color, Icon, environment, Image } from "@raycast/api";
+import { Color, Icon, environment, Image, getPreferenceValues } from "@raycast/api";
 import { TodoSections } from "./atoms";
 export const TODO_FILE = `${environment.supportPath}/todo.json`;
 export const DEFAULT_SECTIONS = { pinned: [], todo: [], completed: [] };
@@ -15,3 +15,5 @@ export const SECTIONS_DATA: Data = {
   todo: { name: "Todo" },
   completed: { name: "Completed" },
 };
+
+export const preferences = getPreferenceValues<Preferences>();

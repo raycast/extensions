@@ -35,6 +35,7 @@
       "required": false,
       "title": "Completed tasks in Menu Bar",
       "description": "Show only 3 latest completed tasks, or show/hide all.",
+      "default": "hide_all",
       "data": [
         {
           "title": "Show Latest",
