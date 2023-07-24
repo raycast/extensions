@@ -6,15 +6,17 @@ import SingleTodoItem from "./todo_item";
 const TodoSection = ({ sectionKey }: { sectionKey: keyof TodoSections }) => {
   const [todoSections] = useAtom(todoAtom);
 
-  function sort(items: TodoItem[]) {
+  function sort(a: TodoItem, b: TodoItem) {
     const { sortOrder } = preferences;
-    if (sortOrder == "creation_date_accending") return items;
-    else return items.sort((a, b) => b.timeAdded - a.timeAdded);
+    if ((a.priority || b.priority) && a.priority != b.priority) {
+      return (b.priority ?? 0) - (a.priority ?? 0);
+    }
+    return sortOrder == "creation_date_accending" ? a.timeAdded - b.timeAdded : b.timeAdded - a.timeAdded;
   }
 
   return (
     <List.Section title={SECTIONS_DATA[sectionKey].name}>
-      {sort(todoSections[sectionKey]).map((item, i) => (
+      {todoSections[sectionKey].sort(sort).map((item, i) => (
         <SingleTodoItem item={item} key={i} idx={i} sectionKey={sectionKey} />
       ))}
     </List.Section>

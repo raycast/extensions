@@ -1,5 +1,5 @@
 import { Color, Icon, environment, Image, getPreferenceValues } from "@raycast/api";
-import { TodoSections } from "./atoms";
+import { TodoSections, TodoItem } from "./atoms";
 export const TODO_FILE = `${environment.supportPath}/todo.json`;
 export const DEFAULT_SECTIONS = { pinned: [], todo: [], completed: [] };
 type Data = Record<
@@ -17,3 +17,9 @@ export const SECTIONS_DATA: Data = {
 };
 
 export const preferences = getPreferenceValues<Preferences>();
+
+export const priorityIcons: Record<Required<TodoItem>["priority"], Image.ImageLike> = {
+  1: { source: Icon.Exclamationmark, tintColor: Color.Purple },
+  2: { source: Icon.Exclamationmark2, tintColor: Color.Purple },
+  3: { source: Icon.Exclamationmark3, tintColor: Color.Purple },
+};
