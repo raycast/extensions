@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionPanel, Action, Grid, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Grid, getPreferenceValues, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import type { Result } from "../src/types";
 
@@ -41,6 +41,12 @@ export default function SearchAnimeGrid() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={anime?.url} />
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard content={anime?.url} title="Copy Link" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} icon={Icon.Link}
+                  />
+                  <Action.CopyToClipboard content={anime?.title} title="Copy Original Title" shortcut={{ modifiers: ["cmd"], key: "t" }} />
+                  <Action.CopyToClipboard content={anime?.title_english} title="Copy English Title" shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
