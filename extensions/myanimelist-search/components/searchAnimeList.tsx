@@ -40,38 +40,37 @@ export default function SearchAnimeList() {
       {(data?.data?.filter((anime: Result["data"][0]) => anime.approved) || []).map((anime: Result["data"][0]) => {
         const props: Partial<List.Item.Props> = showingDetail
           ? {
-              detail: (
-                <List.Item.Detail
-                  markdown={`## ${anime.title}\n​<img src="${anime.images.webp.image_url}" height="200"/>\n\n${
-                    anime.synopsis || ""
+            detail: (
+              <List.Item.Detail
+                markdown={`## ${anime.title}\n​<img src="${anime.images.webp.image_url}" height="200"/>\n\n${anime.synopsis || ""
                   }`}
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label title="Type" text={anime.type || "-"} />
-                      <List.Item.Detail.Metadata.Label title="Episodes" text={anime.episodes?.toString() || "-"} />
-                      <List.Item.Detail.Metadata.Label title="Score" text={anime.score?.toString() || "-"} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Ranked"
-                        text={anime.rank ? `#${anime.rank?.toString()}` : "-"}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Year"
-                        text={anime.aired.prop.from.year?.toString() || "-"}
-                      />
-                      <List.Item.Detail.Metadata.TagList title="Genres">
-                        {(anime?.genres || []).map((genre) => (
-                          <List.Item.Detail.Metadata.TagList.Item
-                            text={genre.name}
-                            color={"#E2E7F4"}
-                            key={genre.name}
-                          />
-                        ))}
-                      </List.Item.Detail.Metadata.TagList>
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              ),
-            }
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Type" text={anime.type || "-"} />
+                    <List.Item.Detail.Metadata.Label title="Episodes" text={anime.episodes?.toString() || "-"} />
+                    <List.Item.Detail.Metadata.Label title="Score" text={anime.score?.toString() || "-"} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Ranked"
+                      text={anime.rank ? `#${anime.rank?.toString()}` : "-"}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Year"
+                      text={anime.aired.prop.from.year?.toString() || "-"}
+                    />
+                    <List.Item.Detail.Metadata.TagList title="Genres">
+                      {(anime?.genres || []).map((genre) => (
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={genre.name}
+                          color={"#E2E7F4"}
+                          key={genre.name}
+                        />
+                      ))}
+                    </List.Item.Detail.Metadata.TagList>
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            ),
+          }
           : { accessories: [{ text: anime.score?.toString() || "-" }] };
         const takenSpace = anime.title?.length + anime.aired.prop.from.year?.toString().length + 4;
 
@@ -85,9 +84,8 @@ export default function SearchAnimeList() {
             }}
             subtitle={
               !showingDetail
-                ? `(${anime.aired.prop.from.year || "-"})  ${anime.synopsis?.slice(0, 92 - takenSpace) || ""}${
-                    anime.synopsis?.length > 92 ? "..." : ""
-                  }`
+                ? `(${anime.aired.prop.from.year || "-"})  ${anime.synopsis?.slice(0, 92 - takenSpace) || ""}${anime.synopsis?.length > 92 ? "..." : ""
+                }`
                 : ""
             }
             {...props}
@@ -99,6 +97,12 @@ export default function SearchAnimeList() {
                   onAction={() => setShowingDetail(!showingDetail)}
                   icon={Icon.AppWindowSidebarLeft}
                 />
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard content={anime?.url} title="Copy Link" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} icon={Icon.Link}
+                  />
+                  <Action.CopyToClipboard content={anime?.title} title="Copy Original Title" shortcut={{ modifiers: ["cmd"], key: "t" }} />
+                  <Action.CopyToClipboard content={anime?.title_english} title="Copy English Title" shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
