@@ -1,5 +1,26 @@
 # GitHub Changelog
 
+## [Menu Commands] - 2023-07-18
+
+- Add repo name to `Unread Notifications` Menu
+
+## [Menu Commands] - 2023-07-10
+
+- Add Issues Menu Command
+- Add Pull Requests Menu Command
+
+## [Support rerun failed workflow jobs] - 2023-06-27
+
+- Support rerun failed workflow jobs in `Workflow Runs` command
+
+## [Show Issue/PR number in Notification] - 2023-06-19
+
+- Add Issue/PR number in `Notification` command
+
+## [Add more branches to the into field] - 2023-06-16
+
+- Add more branches to the into field in Create Pull Request command (#4642)
+
 ## [Menu bar mark all as read] - 2023-05-20
 
 - Add `Mark All as Read` command to menu bar action

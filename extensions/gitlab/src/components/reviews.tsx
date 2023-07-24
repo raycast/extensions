@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 import { MergeRequest, Project } from "../gitlabapi";
 import { getListDetailsPreference, gitlab } from "../common";
 import { daysInSeconds, showErrorToast } from "../utils";
@@ -7,6 +7,11 @@ import { useEffect, useState } from "react";
 import { MyProjectsDropdown } from "./project";
 import { MRListItem } from "./mr";
 import { useCachedState } from "@raycast/utils";
+import { GitLabIcons } from "../icons";
+
+function ReviewListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Reviews" icon={{ source: GitLabIcons.review, tintColor: Color.PrimaryText }} />;
+}
 
 export function ReviewList(): JSX.Element {
   const [project, setProject] = useState<Project>();
@@ -38,13 +43,14 @@ export function ReviewList(): JSX.Element {
           onToggleDetails={() => setExpandDetails(!expandDetails)}
         />
       ))}
+      <ReviewListEmptyView />
     </List>
   );
 }
 
-function useMyReviews(project?: Project | undefined): {
+export function useMyReviews(project?: Project | undefined): {
   mrs: MergeRequest[] | undefined;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
 } {

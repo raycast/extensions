@@ -11,7 +11,10 @@
     "tholanda",
     "tonka3000",
     "khasbilegt",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "loxygenk",
+    "oilbeater",
+    "LunaticMuch"
   ],
   "categories": [
     "Developer Tools",
@@ -134,6 +137,58 @@
       "title": "My Discussions",
       "description": "Show your Discussions",
       "mode": "view"
+    },
+    {
+      "name": "open-issues-menu",
+      "title": "Open Issues Menu Bar",
+      "description": "Display Open Issues in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Issues shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Issues",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Issues Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Count",
+          "title": "Appearance",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "open-pull-request-menu",
+      "title": "My Pull Requests Menu Bar",
+      "description": "Display My Pull Request in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Pull Requests shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Pull Requests",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Pull Requests Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Count",
+          "title": "Appearance",
+          "default": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -148,8 +203,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.55.0",
+    "@raycast/utils": "^1.9.0",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
@@ -161,7 +216,7 @@
     "@graphql-codegen/typescript": "^3.0.2",
     "@graphql-codegen/typescript-graphql-request": "^4.5.9",
     "@graphql-codegen/typescript-operations": "^3.0.2",
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.15.11",
     "concurrently": "^8.0.1",
@@ -169,7 +224,7 @@
     "eslint": "^8.37.0",
     "eslint-plugin-import": "^2.27.5",
     "graphql": "^16.6.0",
-    "prettier": "^2.8.7",
+    "prettier": "^3.0.0",
     "typescript": "^5.0.3"
   },
   "scripts": {

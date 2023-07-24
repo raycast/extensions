@@ -7,4 +7,4 @@ import { handleTaskEitherError } from "./util/utils";
 export default pipe(
   music.currentTrack.addToLibrary,
   handleTaskEitherError(SFSymbols.WARNING + " Failed to Add to Library", SFSymbols.ADD_TO_LIBRARY + " Added to library")
-)();
+);

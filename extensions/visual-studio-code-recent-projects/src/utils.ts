@@ -1,7 +1,18 @@
 import { existsSync } from "fs";
 import { URL } from "url";
 import { isDeepStrictEqual } from "util";
-import { EntryType, EntryLike, FileEntry, FolderEntry, RemoteEntry, WorkspaceEntry } from "./types";
+import {
+  EntryType,
+  EntryLike,
+  FileEntry,
+  FolderEntry,
+  RemoteEntry,
+  WorkspaceEntry,
+  RemoteWorkspaceEntry,
+} from "./types";
+import { open } from "@raycast/api";
+import * as fs from "fs";
+import { getBuildScheme } from "./lib/vscode";
 
 // Type Guards
 
@@ -30,6 +41,11 @@ export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
   return folderUri !== undefined && remoteAuthority !== undefined;
 }
 
+export function isRemoteWorkspaceEntry(entry: EntryLike): entry is RemoteWorkspaceEntry {
+  const { workspace, remoteAuthority } = entry as RemoteWorkspaceEntry;
+  return workspace !== undefined && remoteAuthority !== undefined;
+}
+
 // Filters
 
 export function filterEntriesByType(filter: EntryType | null) {
@@ -43,6 +59,8 @@ export function filterEntriesByType(filter: EntryType | null) {
       return isFolderEntry;
     case "Remote Folders":
       return isRemoteEntry;
+    case "Remote Workspace":
+      return isRemoteWorkspaceEntry;
     case "Files":
       return isFileEntry;
     default:
@@ -53,4 +71,49 @@ export function filterEntriesByType(filter: EntryType | null) {
 
 export function filterUnpinnedEntries(pinnedEntries: EntryLike[]) {
   return (entry: EntryLike) => pinnedEntries.find((pinnedEntry) => isDeepStrictEqual(pinnedEntry, entry)) === undefined;
+}
+
+export function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "unknown error";
+}
+
+export async function fileExists(filename: string): Promise<boolean> {
+  return fs.promises
+    .access(filename, fs.constants.F_OK)
+    .then(() => true)
+    .catch(() => false);
+}
+
+const fmt = new Intl.NumberFormat("en", { notation: "compact" });
+
+export function compactNumberFormat(num: number): string {
+  return fmt.format(num);
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function waitForFileExists(filename: string, timeoutMs = 2000) {
+  const start = new Date();
+  while (start.getTime() > 0) {
+    await sleep(10);
+    if (await fileExists(filename)) {
+      return true;
+    }
+    const end = new Date();
+    const delta = end.getTime() - start.getTime();
+    if (delta > timeoutMs) {
+      return false;
+    }
+  }
+  return false;
+}
+
+export function raycastForVSCodeURI(uri: string) {
+  return `${getBuildScheme()}://tonka3000.raycast/${uri}`;
+}
+
+export async function openURIinVSCode(uri: string) {
+  await open(raycastForVSCodeURI(uri));
 }

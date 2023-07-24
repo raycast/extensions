@@ -41,8 +41,16 @@
               "value": "gpt-3.5-turbo"
             },
             {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
               "title": "GPT-4",
               "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
             }
           ]
         }
@@ -79,8 +87,16 @@
               "value": "gpt-3.5-turbo"
             },
             {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
               "title": "GPT-4",
               "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
             }
           ]
         }
@@ -117,8 +133,16 @@
               "value": "gpt-3.5-turbo"
             },
             {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
               "title": "GPT-4",
               "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
             }
           ]
         }
@@ -155,8 +179,16 @@
               "value": "gpt-3.5-turbo"
             },
             {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
               "title": "GPT-4",
               "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
             }
           ]
         }
@@ -185,8 +217,16 @@
               "value": "gpt-3.5-turbo"
             },
             {
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
               "title": "GPT-4",
               "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
             }
           ]
         }
@@ -215,8 +255,17 @@
               "value": "gpt-3.5-turbo"
             },
             {
+
+              "title": "GPT-3.5 Turbo (16K)",
+              "value": "gpt-3.5-turbo-16k"
+            },
+            {
               "title": "GPT-4",
               "value": "gpt-4"
+            },
+            {
+              "title": "GPT-4 (32K, 0613)",
+              "value": "gpt-4-32k-0613"
             }
           ]
         }
@@ -247,8 +296,16 @@
           "value": "gpt-3.5-turbo"
         },
         {
+          "title": "GPT-3.5 Turbo (16K)",
+          "value": "gpt-3.5-turbo-16k"
+        },
+        {
           "title": "GPT-4",
           "value": "gpt-4"
+        },
+        {
+          "title": "GPT-4 (32K, 0613)",
+          "value": "gpt-4-32k-0613"
         }
       ],
       "required": true,

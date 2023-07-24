@@ -6,7 +6,7 @@ const clientId = "7235fe8d42157f1f38c0";
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "GitHub",
-  providerIcon: environment.theme === "light" ? "icon.png" : "icon@dark.png",
+  providerIcon: environment.appearance === "light" ? "icon.png" : "icon@dark.png",
   providerId: "github",
   description: "Connect your GitHub account",
 });
@@ -33,7 +33,7 @@ export async function authorize() {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const response = await fetch("https://github.oauth-proxy.raycast.com/token", {
     method: "POST",

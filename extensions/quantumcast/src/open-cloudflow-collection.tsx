@@ -9,7 +9,7 @@ interface Session {
 
 export default function Command() {
   const { cloudflowBaseUrl, cloudflowUserName, cloudflowUserPassword } = getPreferenceValues();
-  const [cloudflowCollections, setCloudflowCollections] = useState<string[]>(['']);
+  const [cloudflowCollections, setCloudflowCollections] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchCloudflowCollections = async () => {
@@ -25,17 +25,20 @@ export default function Command() {
   }, []);
 
   return (
-    <List searchBarPlaceholder="Select a Cloudflow collection to open in your default browser">
-      {cloudflowCollections.map((installation: string) => (
+    <List
+      isLoading={cloudflowCollections.length === 0}
+      searchBarPlaceholder="Select a Cloudflow collection to open in your default browser"
+    >
+      {cloudflowCollections.map((collection: string) => (
         <List.Item
-          id={installation}
-          key={installation}
-          title={installation}
+          id={collection}
+          key={collection}
+          title={collection}
           icon="../assets/quantumcast.png"
           accessories={[
             {
-              icon: installation.includes('customobjects.') ? Icon.Person : Icon.Gear,
-              tooltip: installation.includes('customobjects.') ? 'Custom Collection' : 'System Collection',
+              icon: collection.includes('customobjects.') ? Icon.Person : Icon.Gear,
+              tooltip: collection.includes('customobjects.') ? 'Custom Collection' : 'System Collection',
             },
           ]}
           actions={
@@ -43,12 +46,12 @@ export default function Command() {
               <Action
                 title="Open in Browser"
                 icon={Icon.Globe}
-                onAction={() => open(cloudflow.getCollectionURL(cloudflowBaseUrl, installation) ?? '')}
+                onAction={() => open(cloudflow.getCollectionURL(cloudflowBaseUrl, collection) ?? '')}
               />
               <Action.CopyToClipboard
                 title="Copy URL to Clipboard"
                 icon={Icon.Clipboard}
-                content={cloudflow.getCollectionURL(cloudflowBaseUrl, installation) ?? ''}
+                content={cloudflow.getCollectionURL(cloudflowBaseUrl, collection) ?? ''}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
               />
             </ActionPanel>

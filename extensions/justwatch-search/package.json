@@ -13,17 +13,19 @@
     {
       "name": "search-justwatch",
       "title": "Search JustWatch",
+      "subtitle": "Search where a movie or show is available to watch",
       "description": "Search where a movie or show is streaming using JustWatch",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.49.3",
+    "@raycast/utils": "^1.5.2",
     "node-fetch": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -39,13 +41,13 @@
   },
   "preferences": [
     {
-      "title": "Show Results",
+      "title": "Show Available Media For:",
       "name": "flatrate",
       "description": "Show streaming services when you use JustWatch Search",
       "required": true,
       "default": true,
       "type": "checkbox",
-      "label": "Available for Streaming (like Netflix)"
+      "label": "Streaming (like Netflix, Disney+, etc.)"
     },
     {
       "name": "free",
@@ -53,21 +55,21 @@
       "required": true,
       "default": true,
       "type": "checkbox",
-      "label": "Available for Free"
+      "label": "Free"
     },
     {
       "name": "buy",
       "description": "Show available buying options when you use JustWatch Search",
       "required": true,
       "type": "checkbox",
-      "label": "Available for Purchase"
+      "label": "Purchase"
     },
     {
       "name": "rent",
       "description": "Show available rental options when you use JustWatch Search",
       "required": true,
       "type": "checkbox",
-      "label": "Available for Rental"
+      "label": "Rent"
     }
   ]
 }

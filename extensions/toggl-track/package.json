@@ -34,6 +34,14 @@
       "required": true,
       "title": "Toggl API Token",
       "type": "password"
+    },
+    {
+      "name": "hideArchivedProjects",
+      "label": "Hide Archived Projects",
+      "description": "When checked, archived projects are hidden.",
+      "type": "checkbox",
+      "required": true,
+      "default": true
     }
   ],
   "dependencies": {
