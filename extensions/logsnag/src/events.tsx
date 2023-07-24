@@ -210,10 +210,24 @@ export function PublishLog({ onLogPublished }: PublishLogProps) {
         message: "Can not have more than 5 tags",
         style: Toast.Style.Failure,
       });
-    else setFormTags([...formTags, { name: "", value: "", nameError: "", valueError: "" }]);
+    else {
+      setFormTags([...formTags, { name: "", value: "", nameError: "", valueError: "" }]);
+      await showToast({
+        title: `Tag # ${formTags.length + 1} added`,
+        message: `Total Tags: ${formTags.length + 1}`,
+        style: Toast.Style.Success,
+      });
+    }
   }
   async function removeTag() {
-    if (formTags.length !== 0) setFormTags(formTags.slice(0, -1));
+    if (formTags.length !== 0) {
+      setFormTags(formTags.slice(0, -1));
+      await showToast({
+        title: `Tag # ${formTags.length} removed`,
+        message: `New Total Tags: ${formTags.length - 1}`,
+        style: Toast.Style.Success,
+      });
+    }
   }
   return (
     <Form
@@ -288,7 +302,7 @@ Code Block = \`\`\`code\`\`\`
 
       <Form.TextField
         title="Icon"
-        placeholder="🔥 | :fire:"
+        placeholder="🔔 | :bell:"
         {...itemProps.icon}
         info="Icon must be a single valid emoji"
       />

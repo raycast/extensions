@@ -47,7 +47,7 @@ export default function Insight() {
       newInsights[insightIndex].value = insight.value;
       setInsights([...newInsights]);
     } else {
-      setInsights([insight, ...newInsights]);
+      setInsights([...newInsights, insight]);
     }
   }
 
@@ -126,7 +126,6 @@ export function PublishInsight({ onInsightPublished }: PublishInsightProps) {
         showToast(Toast.Style.Success, "Published Successfully");
         onInsightPublished(response);
         pop();
-        // console.log(response);
       } else {
         push(<ErrorComponent errorResponse={response} />);
       }
@@ -158,7 +157,7 @@ export function PublishInsight({ onInsightPublished }: PublishInsightProps) {
       <Form.TextField {...itemProps.value} title="Value" placeholder="$200" />
       <Form.TextField
         title="Icon"
-        placeholder="🔥 | :fire:"
+        placeholder="🔔 | :bell:"
         {...itemProps.icon}
         info="Icon must be a single valid emoji"
       />
