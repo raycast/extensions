@@ -1,6 +1,11 @@
 # Menubar Weather Changelog
 
-## [Ass menubar info configutation] - 2023-07-11
+## [Add command subtitle] - {PR_MERGE_DATE}
+
+- Now you can view the weather directly from the subtitle of the command.
+- Fix the problem that the weather information is not updated properly after changing the settings
+
+## [Add menubar info configutation] - 2023-07-11
 
 - You can choose temperature type, UVI, pressure, humidity and rain to display in the menubar.
 
