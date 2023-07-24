@@ -52,6 +52,11 @@ export default [
         name: "Changelog",
         path: `${documentationBase}/changelog`,
       },
+      {
+        doc: "about",
+        name: "About",
+        path: `${documentationBase}/about`,
+      },
     ],
   },
   {
