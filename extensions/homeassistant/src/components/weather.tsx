@@ -211,9 +211,7 @@ function WeatherList(props: { state: State }): ReactElement {
         <WeatherWindSpeed state={s} />
       </List.Section>
       <List.Section title="Forecast">
-        {forecast?.map((f) => (
-          <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />
-        ))}
+        {forecast?.map((f) => <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />)}
       </List.Section>
     </List>
   );
