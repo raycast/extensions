@@ -25,7 +25,7 @@
       "subtitle": "Control timers from menu-bar",
       "description": "Start, pause, stop or continue pomodoro intervals",
       "mode": "menu-bar",
-      "interval": "10s"
+      "interval": "1s"
     },
     {
       "name": "pomodoro-control-timer",
