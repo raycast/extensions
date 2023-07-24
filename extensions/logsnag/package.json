@@ -22,14 +22,14 @@
   "commands": [
     {
       "name": "events",
-      "title": "Events",
       "subtitle": "LogSnag",
+      "title": "List Events",
       "description": "View and Publish events to LogSnag",
       "mode": "view"
     },
     {
       "name": "insights",
-      "title": "Insights",
+      "title": "List Insights",
       "subtitle": "LogSnag",
       "description": "View and Publish insights to LogSnag",
       "mode": "view"
