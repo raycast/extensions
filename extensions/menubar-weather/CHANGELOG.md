@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Add command subtitle] - {PR_MERGE_DATE}
+## [Add command subtitle] - 2023-07-24
 
 - Now you can view the weather directly from the subtitle of the command.
 - Fix the problem that the weather information is not updated properly after changing the settings
