@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Menu Bar Fixes] - 2023-07-04
+## [Menu Bar Fixes] - 2023-07-24
 
 - Fix: Menu bar widget snows the running timer in the format based on the user's preference
 - New option added to hide the timer from the menu bar widget
