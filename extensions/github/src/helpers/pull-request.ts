@@ -77,7 +77,7 @@ export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFra
     pullRequest.reviews?.nodes?.map((review) => {
       return { id: review?.author?.id, ...getGitHubUser(review?.author) };
     }),
-    "id"
+    "id",
   );
 
   return [...(requests ?? []), ...(reviews ?? [])];

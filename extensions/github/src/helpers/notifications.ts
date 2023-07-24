@@ -40,7 +40,7 @@ export function getGitHubURL(notification: Notification, userId?: string) {
       notification.subject.url,
       notification.id,
       userId,
-      latestCommentId ? "#issuecomment-" + latestCommentId : undefined
+      latestCommentId ? "#issuecomment-" + latestCommentId : undefined,
     );
   } else if (notification.subject.type === "CheckSuite") {
     return generateGitHubUrl(`${notification.repository.html_url}/actions`, notification.id, userId);
