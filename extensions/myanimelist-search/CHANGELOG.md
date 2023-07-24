@@ -6,3 +6,7 @@
 - In the list view, you can toggle between simple and detailed views with the action "Cmd+Enter".
 - Pagination for all views.
 - Toggle visibility of NSFW animes.
+
+## [Added extra Actions] - 2023-07-23
+
+- Added 3 actions: Copy Link, Copy Original Title, Copy English Title
