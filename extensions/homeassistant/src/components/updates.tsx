@@ -148,13 +148,7 @@ function HACSUpdateItems(props: { state: State | undefined }): JSX.Element | nul
     return null;
   }
   const repos: HACSRepo[] | undefined = s.attributes.repositories;
-  return (
-    <>
-      {repos?.map((r, i) => (
-        <HACSUpdateItem key={i} repo={r} state={s} />
-      ))}
-    </>
-  );
+  return <>{repos?.map((r, i) => <HACSUpdateItem key={i} repo={r} state={s} />)}</>;
 }
 
 export function UpdatesList(): JSX.Element {
@@ -182,15 +176,11 @@ export function UpdatesList(): JSX.Element {
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       <List.Section title="Updates available" subtitle={`${updateRequiredStates?.length}`}>
-        {updateRequiredStates?.map((state) => (
-          <StateListItem key={state.entity_id} state={state} />
-        ))}
+        {updateRequiredStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
         <HACSUpdateItems state={hacsState} />
       </List.Section>
       <List.Section title="No Updates required" subtitle={`${otherStates?.length}`}>
-        {otherStates?.map((state) => (
-          <StateListItem key={state.entity_id} state={state} />
-        ))}
+        {otherStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
       </List.Section>
     </List>
   );

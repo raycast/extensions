@@ -59,7 +59,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
 
           // It's not possible to add a PR to a project from the initPullRequest call
           await Promise.all(
-            values.projects.map((projectId) => github.addPullRequestToProject({ pullRequestId, projectId }))
+            values.projects.map((projectId) => github.addPullRequestToProject({ pullRequestId, projectId })),
           );
 
           const pullRequest = updateResult?.updatePullRequest?.pullRequest;
@@ -134,7 +134,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       return github.dataForRepository({ owner: selectedRepository.owner.login, name: selectedRepository.name });
     },
     [values.repository],
-    { execute: !!values.repository }
+    { execute: !!values.repository },
   );
 
   const defaultBranch = data?.repository?.defaultBranchRef;

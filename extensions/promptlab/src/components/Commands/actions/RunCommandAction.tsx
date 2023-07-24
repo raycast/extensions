@@ -2,7 +2,7 @@ import { Action, Icon } from "@raycast/api";
 import { Command, StoreCommand, isCommand, isTrueStr } from "../../../utils/types";
 import CommandResponse from "../CommandResponse";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 
 /**
  * Action to run a command.
@@ -60,7 +60,7 @@ export default function RunCommandAction(props: {
         />
       }
       icon={Icon.ArrowRight}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={getActionShortcut("RunCommandAction", settings)}
     />
   );
 }

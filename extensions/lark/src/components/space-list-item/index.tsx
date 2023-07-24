@@ -49,7 +49,7 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actio
     <List.Item
       id={id}
       icon={icon}
-      title={title}
+      title={title || 'Untitled'}
       subtitle={subtitle}
       accessories={[
         { text: time.short, tooltip: time.full },

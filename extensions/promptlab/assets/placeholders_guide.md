@@ -3,8 +3,8 @@
 ------------------------
 
 Author: Stephen Kaplan _(HelloImSteven)_ <br />
-Last Updated: 2023-06-25 <br />
-PromptLab Version: 1.1.0
+Last Updated: 2023-07-23 <br />
+PromptLab Version: 1.1.1
 
 ------------------------
 
@@ -14,13 +14,14 @@ PromptLab uses a comprehensive placeholder system to enable commands with dynami
 
 Numerous placeholders are provided out of the box, and you can create your own using [custom placeholders](#custom-placeholders).
 
-Placeholders in PromptLab fall into three high-level categories:
+Placeholders in PromptLab fall into four high-level categories:
 
 | Category | Description |
 | ----- | ----- |
 | **Information Placeholders** | Information about the current context, e.g. `{{currentTabText}}`, `{{date}}`, and `{{selectedText}}`. These are generally instantaneous and will remain the same when use multiple times in a single pin. Generally evaluated before others kinds of placeholders. |
 | **Script Placeholders** | Placeholders containing content to be evaluated as a function or script, e.g. `{{js:...}}` and `{{shell:...}}`. These are generally dynamic and have different return values for each use. Evaluated after all information placeholders. |
 | **Directives** | Commands to be executed and (generally) replaced with an empty string (with some exceptions), e.g. `{{paste:...}}`, `{{ignore:...}}`, `{{images:...}}`, and `{{pdf:...}}`. Generally evaluated last. |
+| **Configuration Placeholders** | Placeholders that hold the value of a custom command configuration variable, e.g. `{{config:fieldName}}`. Evaluated before all other placeholders. |
 
 These categories are helpful for discussion purposes, but they do not define steadfast rules, nor do they signify any key differences in formatting. For example, `{{date}}` is an information placeholder that accepts a `format` parameter, therefore requiring additional processing, while `{{url:...}}` does not fit squarely into any of these categories, as it both returns information and accepts content to be evaluated. Still, these categories are helpful for understanding the general purpose of each placeholder.
 
@@ -206,7 +207,7 @@ Placeholders are evaluated in order of precedence, rather than in the order they
 - Placeholders more likely to be used are given higher precedence than those less likely to be used.
 - Placeholders that are likely to be used in combination with other placeholders as their contents are given lower precedence than those that are not.
 - The `{{js:...}}` placeholder is given the lowest precedence of all script placeholders.
-- The order of precedence for extension placeholders such as `{{csv:...:...}}` is determined first by their category (e.g. text files, images, videos, audio, pdfs, in that order), then alphabetically.
+- The order of precedence for extension placeholders such as `{{csv:...:...}}` is determined first by their category (e.g. text files, images, videos, audio, PDFs, in that order), then alphabetically.
 - Custom placeholders are given the highest precedence of all placeholders.
 
 > **Note**
@@ -226,7 +227,7 @@ The precedence order of individual placeholders can be difficult to conceptualiz
 - `{{ignore:...}}` has lower precedence than `{{js:...}}` because it is more likely that you will want to use the output of a JavaScript placeholder as input to `{{ignore:...}}` than the other way around, and you can call the `ignore(content)` function in JavaScript to achieve the same result.
 
 > **Note**
-> Precedence is **not** guaranteed to remain the same in future versions of PromptLab. The guidelines above are *likely* to remain true, but even that is not guaranteed. Any changes to precedence will be documented in the release notes.
+> Precedence is **not** guaranteed to remain the same in future versions of PromptLab. The guidelines above are _likely_ to remain true, but even that is not guaranteed. Any changes to precedence will be documented in the release notes.
 
 ## Technical Details
 
@@ -242,11 +243,15 @@ You can use the name of any PromptLab command you have installed as a placeholde
 
 You can run commands of other Raycast extensions by specifying their name and optionally providing the extension name to disambiguate between commands with the same name, along with fallback text, using this format: `{{command:commandName:extensionName:fallbackText}}`. For example, `{{command:PromptLab Chat:PromptLab:Hello!}}` would run the "PromptLab Chat" command from the PromptLab extension and input "Hello!" into the query field.
 
-PromptLab parses the file tree in Raycast's extension directory to map user-facing command and extension names to the names defined in each extension's *package.json*.
+PromptLab parses the file tree in Raycast's extension directory to map user-facing command and extension names to the names defined in each extension's _package.json_.
+
+### Configuration Placeholders
+
+Configuration placeholders are placeholders that hold the user-specified value of a custom command configuration variable. The value is set by the user when they try to run the command for the first time. To add a custom configuration field to a command, use the `Unlock Setup Fields` action when creating/editing a command. This wil enable some additional actions to create different types of configuration fields, e.g. text-only fields, number fields, or true/false (checkbox) fields. Each field type has a slightly different format; instructions for each type are provided within the form's info panels. Once you've setup each field as desired, use the `Lock Setup Fields` action to lock the form and save your changes. When you upload the command to the PromptLab Store, the configuration fields will be included in the command's listing.
 
 ### Custom Placeholders
 
-Custom placeholders are placeholders defined by the user in the `custom_placeholders.json` file in the extension's support directory. To open the file for editing, use the `Edit Custom Placeholders` action from within `My PromptLab Commands`. 
+Custom placeholders are placeholders defined by the user in the `custom_placeholders.json` file in the extension's support directory. To open the file for editing, use the `Edit Custom Placeholders` action from within `My PromptLab Commands`.
 
 The key for each custom command defines the regex used to detect the placeholder. The value is a JSON object with the following properties:
 
@@ -262,8 +267,8 @@ You can use regex capture groups in the key to capture content that you can then
 
 ```json
 "showDialog:([\\s\\S]*?)": {
-  	"name": "showDialog",
-  	"description": "Displays a dialog window with the given text as its message.",
+   "name": "showDialog",
+   "description": "Displays a dialog window with the given text as its message.",
     "value": "{{as:display dialog \"$1\"}}",
     "example": "{{showDialog:Hello world!}}",
     "demoRepresentation": "{{showDialog:..}}"
@@ -356,7 +361,7 @@ jxa(`(() => {
     })()`)
 
     // Play the song and get the artist.
-	.then((favSong) => 
+ .then((favSong) => 
         as(`tell application "Music"
                 play track "${favSong.trim()}"
                 delay 1
@@ -365,13 +370,13 @@ jxa(`(() => {
                 return theArtist
             end tell`)
     // Search Google for songs by the artist.
-	.then((theArtist) => url(`https://google.com/search?q=Journey%20dont%20stop%believin%22`)
+ .then((theArtist) => url(`https://google.com/search?q=Journey%20dont%20stop%believin%22`)
 
     // Create a new note in Notes with the search results as the body, show note, then reactivate Raycast.
-	.then((text) => {
+ .then((text) => {
         const visibleText = text.replaceAll("'", "'\\''").replaceAll('"', '\\"').replaceAll("\n", "<br /><br />")
-	    shell(`osascript -e 'use scripting additions' -e 'tell application "Notes"' -e 'set newNote to make new note with properties {body: "${dateStr}<br /><br />${visibleText}"}' -e 'show newNote' -e 'end tell' -e 'delay 0.5' -e 'tell application "System Events" to open location "raycast://"'`);
-	    return visibleText;
+     shell(`osascript -e 'use scripting additions' -e 'tell application "Notes"' -e 'set newNote to make new note with properties {body: "${dateStr}<br /><br />${visibleText}"}' -e 'show newNote' -e 'end tell' -e 'delay 0.5' -e 'tell application "System Events" to open location "raycast://"'`);
+     return visibleText;
     })));
 }}
 ###
@@ -382,8 +387,6 @@ This code, which can be set as , interweaves several placeholders to look up the
 ### URL Placeholders
 
 You can instruct PromptLab to extract text from any webpage by using the `{{url:...}}` placeholder. For example, `{{url:http://68k.news}}` would be replaced with the visible text of the 68k News homepage. You can use this to interface between files, data, webpages, and APIs.
-
-URL placeholders 
 
 ------------------------
 

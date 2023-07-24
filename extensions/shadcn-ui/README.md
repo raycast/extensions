@@ -14,7 +14,7 @@ Beautifully designed components that you can copy and paste into your apps. Acce
 
 ## Support
 
-If somethings wrong or just want to reach out you can find me [here](https://luis-oliveira.vercel.app/) 😎
+If somethings wrong or just want to reach out you can find me [here](https://www.luisfilipept.com/) 😎
 
 ## FAQ
 

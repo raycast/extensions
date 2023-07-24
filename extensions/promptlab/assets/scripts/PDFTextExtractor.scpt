@@ -54,7 +54,7 @@ on run (argv)
 " & (thePDF's documentAttributes()'s description() as text)
 	end if
 
-	pdfData's setValue:pdfText forKey:"imageText"
+	pdfData's setValue:pdfText forKey:"stringValue"
 
 	set pageCount to thePDF's pageCount()
 	pdfData's setValue:pageCount forKey:"pageCount"

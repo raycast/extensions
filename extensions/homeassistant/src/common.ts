@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 import { Connection, createConnection, createLongLivedTokenAuth } from "home-assistant-js-websocket";
 import { HomeAssistant } from "./haapi";
 import { createSocket } from "./socket";
@@ -35,7 +35,7 @@ export async function getHAWSConnection(): Promise<Connection> {
     console.log("return existing ws con");
     return con;
   } else {
-    console.log("create new home assistant ws con");
+    console.log(`Create new home assistant ws con from command '${environment.commandName}'`);
     const instance = await ha.nearestURL();
     console.log(`Nearest Instance URL ${instance}`);
     const auth = createLongLivedTokenAuth(instance, ha.token);
