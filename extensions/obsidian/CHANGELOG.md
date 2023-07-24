@@ -1,5 +1,12 @@
 # Obsidian Changelog
 
+## [Bug fixes] - 2023-07-20
+- Fixes and issue where tags as objects woudl crash the plugin
+
+## [Add week placeholder] - 2023-07-14
+
+- Adds a {week} template placeholder (thanks @adamadamsmusic)
+
 ## [Fix] - 2023-06-19
 
 - Fixed menubar icon for light backgrounds

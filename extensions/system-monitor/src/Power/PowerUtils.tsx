@@ -4,14 +4,6 @@ import { ExecError } from "../Interfaces";
 
 const execp = promisify(exec);
 
-const isValidTime = (value: string): boolean => {
-  const regexp = /^([0-9]?[0-9]):([0-5]?[0-9])$/;
-  if (regexp.test(value)) {
-    return true;
-  }
-  return false;
-};
-
 const getCycleCount = async (): Promise<string> => {
   try {
     const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Cycle Count' | awk '{print $3}'");
@@ -117,7 +109,6 @@ export {
   getBatteryLevel,
   getBatteryCondition,
   getMaxBatteryCapacity,
-  isValidTime,
   getBatteryTime,
   getTimeOnBattery,
 };

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { showToast, Toast } from "@raycast/api";
 
 export function usePopularVideos(pn: number) {
-  const [popularVideos, setPopularVideos] = useState<Bilibili.video[]>([]);
+  const [popularVideos, setPopularVideos] = useState<Bilibili.Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

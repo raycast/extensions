@@ -24,7 +24,7 @@ function WorkflowRuns() {
       return octokit.rest.actions.listWorkflowRunsForRepo({ owner, repo });
     },
     [selectedRepository],
-    { execute: !!selectedRepository }
+    { execute: !!selectedRepository },
   );
 
   const workflowRuns = data?.data.workflow_runs;
