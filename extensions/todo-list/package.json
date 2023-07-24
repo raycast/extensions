@@ -50,6 +50,24 @@
           "value": "hide_all"
         }
       ]
+    },
+    {
+      "name": "sortOrder",
+      "type": "dropdown",
+      "required": false,
+      "title": "Task sorting",
+      "description": "The order in which task are sorted.",
+      "default": "creation_date_accending",
+      "data": [
+        {
+          "title": "Creation Date (ascending)",
+          "value": "creation_date_accending"
+        },
+        {
+          "title": "Creation Date (descending)",
+          "value": "creation_date_descending"
+        }
+      ]
     }
   ],
   "dependencies": {
