@@ -18,21 +18,21 @@
     {
       "name": "index",
       "title": "Search Matches",
-      "subtitle": "Search your Espanso matches",
+      "subtitle": "Espanso",
       "description": "The Raycast version of Espanso Search Bar",
       "mode": "view"
     },
     {
       "name": "addMatch",
       "title": "Add Match",
-      "subtitle": "Add a new match to Espanso",
+      "subtitle": "Espanso",
       "description": "Add a match to your Espanso config",
       "mode": "view"
     },
     {
       "name": "toggle",
       "title": "Toggle Espanso",
-      "subtitle": "Toggle Espanso",
+      "subtitle": "Espanso",
       "description": "Enable or disable Espanso",
       "mode": "no-view"
     }
