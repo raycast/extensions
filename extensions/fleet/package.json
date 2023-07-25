@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fleet",
+  "title": "Fleet",
+  "description": "'Fleet' is a useful Raycast extension that allows you to quickly open any file using Fleet, the cloud-based IDE, on your Mac. With this extension, you can easily launch Fleet by clicking the menubar shortcut or using your chosen custom shortcut, and it will open the files currently selected in Finder. Fleet is a powerful IDE that offers a wide range of features, making it perfect for efficiently editing and viewing text-based files such as code files, markdown documents, and others. With 'Open with Fleet', you can avoid the annoyance of manually opening files in their default application and streamline your workflow.",
+  "icon": "command_icon.png",
+  "author": "Ek217",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Selected File With Fleet",
+      "description": "Open The Selected File With Fleet Code Editor",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu",
+      "title": "Quick Access",
+      "subtitle": "Quickly and easily access Open With Fleet",
+      "description": "Quickly and easily access Open With Fleet",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.1",
+    "open": "^9.1.0",
+    "opn": "^6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/opn": "^5.5.0",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,3 @@
+# Open With Text Edit
+
+'Fleet' is a useful Raycast extension that allows you to quickly open any file using Fleet, the cloud-based IDE, on your Mac. With this extension, you can easily launch Fleet by clicking the menubar shortcut or using your chosen custom shortcut, and it will open the files currently selected in Finder. Fleet is a powerful IDE that offers a wide range of features, making it perfect for efficiently editing and viewing text-based files such as code files, markdown documents, and others. With 'Open with Fleet', you can avoid the annoyance of manually opening files in their default application and streamline your workflow.
