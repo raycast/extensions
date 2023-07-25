@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Form, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { Fragment, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { ApiInvoice } from "../../api/invoice";
 import useBankAccounts from "../../hooks/useBankAccounts";
 import useClients from "../../hooks/useClients";
 import useProducts from "../../hooks/useProducts";
 import { CreateInvoiceFormValues, CreateInvoicePayload, Service } from "../../types/invoice";
 import { CreateProductFormValues } from "../../types/product";
-import { paymentMethods } from "../../utils";
+import { FormItemRef, paymentMethods } from "../../utils";
 import { formatPrice } from "../../utils/formatters";
 
 type Props = {
@@ -26,6 +26,8 @@ export default function CreateInvoice({ draftValues }: Props) {
       unit: "",
     },
   ]);
+
+  const productInputRefs = useRef<(FormItemRef | null)[]>([]);
 
   const { clientsData, clientsIsLoading } = useClients();
   const { productsData, productsIsLoading } = useProducts();
@@ -122,6 +124,13 @@ export default function CreateInvoice({ draftValues }: Props) {
                 setProducts((prev) => {
                   return [...prev, { name: "", quantity: "", tax_symbol: "", net_price: "", unit: "" }];
                 });
+
+                setTimeout(() => {
+                  const inputRef = productInputRefs.current[products.length];
+                  if (inputRef) {
+                    inputRef.focus();
+                  }
+                });
               }}
             />
             <Action
@@ -133,6 +142,13 @@ export default function CreateInvoice({ draftValues }: Props) {
                 setProducts((prev) => {
                   if (prev.length === 1) return prev;
                   return prev.filter((_, index) => index !== prev.length - 1);
+                });
+
+                setTimeout(() => {
+                  const inputRef = productInputRefs.current[products.length - 2];
+                  if (inputRef) {
+                    inputRef.focus();
+                  }
                 });
               }}
             />
@@ -177,12 +193,16 @@ export default function CreateInvoice({ draftValues }: Props) {
           <Form.Dropdown
             autoFocus={index === 0}
             id={`services-${index}`}
-            title="Product"
+            title={`Product ${index + 1}`}
             error={product.name ? undefined : "Product is required"}
-            info="To add product press ⌘ + ⇧ + A"
+            info={product.name}
+            ref={(ref) => {
+              productInputRefs.current[index] = ref;
+            }}
+            value={product.name}
             onChange={(value) => {
               const newProducts = [...products];
-              const product = productsData?.find((product) => product.id === Number(value));
+              const product = productsData?.find((product) => product.name.toLowerCase() === value.toLowerCase());
 
               const newProduct: CreateProductFormValues = {
                 name: product?.name ?? "",
@@ -197,8 +217,9 @@ export default function CreateInvoice({ draftValues }: Props) {
               setProducts(newProducts);
             }}
           >
+            <Form.Dropdown.Item value="" title="" />
             {productsData?.map((product) => (
-              <Form.Dropdown.Item key={product.id} value={String(product.id)} title={product.name} />
+              <Form.Dropdown.Item key={product.id} value={product.name} title={product.name} />
             ))}
           </Form.Dropdown>
 
@@ -216,18 +237,27 @@ export default function CreateInvoice({ draftValues }: Props) {
             />
           ) : null}
 
-          {product.name ? <Form.Description title="Name" text={product.name} /> : null}
-
-          {product.quantity ? <Form.Description title="Quantity" text={`${product.quantity} ${product.unit}`} /> : null}
-
-          {product.net_price ? (
-            <Form.Description title="Net Price" text={formatPrice(Number(product.net_price))} />
+          {product.name ? (
+            <Form.TextField
+              id={`quantity-${index}`}
+              title="Quantity"
+              value={product.quantity}
+              error={Number(product.quantity) > 0 ? undefined : "Quantity is required"}
+              onChange={(value) => {
+                const newProducts = [...products];
+                const newProduct = { ...newProducts[index], quantity: value };
+                newProducts[index] = newProduct;
+                setProducts(newProducts);
+              }}
+            />
           ) : null}
 
           {product.net_price ? (
             <Form.Description
-              title="Gross Price"
-              text={formatPrice(Number(product.net_price) * ((Number(product.tax_symbol) + 100) / 100))}
+              title="Price"
+              text={`Net - ${formatPrice(Number(product.net_price))}\nGross - ${formatPrice(
+                Number(product.net_price) * ((Number(product.tax_symbol) + 100) / 100)
+              )}\nUnit Net - ${formatPrice(Number(product.net_price) / Number(product.quantity))}`}
             />
           ) : null}
         </Fragment>
