@@ -97,7 +97,7 @@ export default function Command() {
                           });
                           appearance = await AI.ask(
                             `Based on this palette: [${hex.join(",")}], decide whether this is a *LIGHT* or *DARK THEMED* *PALETTE*. *RETURN* "light" for *LIGHT* and "dark" for *DARK*. Return *NOTHING ELSE*.`,
-                            { creativity: 0 }
+                            { creativity: 2 }
                           ).then(response => (response.match(/\b(light|dark)\b/i) || ["light"])[0].toLowerCase());
                         }
                         showToast({
@@ -109,7 +109,7 @@ export default function Command() {
                         if (appearance === "light") {
                           [bgLight, bgDark] = await AI.ask(
                             `For a *LIGHT COLORED COLOR PALETTE*, choose a *VISUALLY LIGHTER* \`backgroundLight\` and a *VISUALLY DARKER* \`backgroundDark\` for the background colors, based on this palette: [${hex.join(",")}]. Make them *VERY CLOSE TO EACH OTHER*, *MOSTLY WHITE AND DULL*, but still with a *HINT OF COLOR*. You may *MODIFY the COLORS* to make them lighter. *ENSURE* the colors are *VISUALLY APPEALING*. ${values.descriptionBg ? "Here are some extra instructions: " + values.descriptionBg : ""}Return your answer as *TWO HEX STRINGS*, separated with *a SPACE*. Return \`backgroundLight\` first, and \`backgroundDark\` second.`,
-                            { creativity: 0 }
+                            { creativity: 1 }
                           ).then(response => {
                             if (extractHexFromString(response).length) {
                               return orderHexColors(...extractHexFromString(response)).map(x => encode(x))
@@ -120,7 +120,7 @@ export default function Command() {
                         } else {
                           [bgLight, bgDark] = await AI.ask(
                             `For a *DARK THEMED COLOR PALETTE*, choose a *VISUALLY LIGHTER* \`backgroundLight\` and a *VISUALLY DARKER* \`backgroundDark\` for the background colors, based on this palette: [${hex.join(", ")}]. Make them *CLOSE TO EACH OTHER*, *MOSTLY DARK AND DULL*, but still with a *HINT OF COLOR*. You may *MODIFY the COLORS* to make them *MORE FITTING*. *ENSURE* the colors are *VISUALLY APPEALING*. Return your answer as *TWO HEX STRINGS*, separated with *a SPACE*. Return \`backgroundLight\` first, and \`backgroundDark\` second.`,
-                            { creativity: 0 }
+                            { creativity: 1 }
                           ).then(response => {
                             if (extractHexFromString(response).length) {
                               return orderHexColors(...extractHexFromString(response)).map(x => encode(x))
@@ -137,8 +137,8 @@ export default function Command() {
                           message: "Using Raycast AI to generate your Theme",
                         });
                         let text = await AI.ask(
-                          `Generate the *MOST CONTRASTING COLOR* to *BOTH* of these colors: ${bgLight} and ${bgDark} for *TEXT ON THE BACKGROUND*. If possible, base it off this palette: [${hex.join(",")}]. Return your answer as a *SINGLE HEX STRING*. Do *NOT* return anything else.`,
-                          { creativity: 0 }
+                          `MODIFY ONE OF THESE COLORS [${hex.join(",")}] to get it to MAX CONTRAST on these two colors: ${bgLight} and ${bgDark}. It should be EASILY VISIBLE. Return your answer as a *SINGLE HEX STRING*. Do *NOT* return anything else.`,
+                          { creativity: 1 }
                         ).then(response => encode((extractHexFromString(response) || (appearance === "light" ? ["#0D0D0D"] : ["#F2F2F2"]))[0]));
                         console.log("TEXT COLOR", text);
                         showToast({
@@ -148,7 +148,7 @@ export default function Command() {
                         });
                         let highlight = await AI.ask(
                           `Generate a *HIGHLIGHT COLOR* that *LOOKS GOOD* on *BOTH* of these colors: ${bgLight} and ${bgDark}. Make it *BASED ON* this *PALETTE*: [${hex.join(",")}], but still *AS BRIGHT* and *POPPING AS POSSIBLE*. Return your answer as a *SINGLE HEX STRING*. Do *NOT* return anything else.`,
-                          { creativity: 0 }
+                          { creativity: 1 }
                         ).then(response => encode((extractHexFromString(response) || (appearance === "light" ? ["#030303"] : ["#FFFFFF"]))[0]));
                         console.log("HIGHLIGHT COLOR", highlight);
                         showToast({
@@ -165,7 +165,7 @@ export default function Command() {
                           if (values.genSupport) {
                             [red, orange, yellow, green, blue, purple, magenta] = await AI.ask(
                               `MODIFY these COLORS IF NECESSARY so that they LOOK GOOD and HAVE GOOD CONTRAST on BOTH of these colors: ${bgLight} and ${bgDark}. Red (#F50A0A), orange (#F5600A), yellow (#E0A200), green (#07BA65), blue (#0A7FF5), purple (#470AF5), and magenta (#F50AA3). Give your new colors in a comma separated list, in this order: red, orange, yellow, green, blue, purple, magenta. Do not provide anything BEFORE, or AFTER.`,
-                              { creativity: 0 }
+                              { creativity: 1 }
                             ).then(response => extractHexFromString(response).map(x => encode(x.trim())));
                           }
                         } else {
@@ -174,7 +174,7 @@ export default function Command() {
                           if (values.genSupport) {
                             [red, orange, yellow, green, blue, purple, magenta] = await AI.ask(
                               `MODIFY these COLORS IF NECESSARY so that they LOOK GOOD and HAVE GOOD CONTRAST on BOTH of these colors: ${bgLight} and ${bgDark}. Red (#F84E4E), orange (#F88D4E), yellow (#FFCC47), green (#4EF8A7), blue (#228CF6), purple (#7B4EF8), and magenta (#F84EBD). Give your new colors in a comma separated list, in this order: red, orange, yellow, green, blue, purple, magenta. Do not provide anything BEFORE, or AFTER.`,
-                              { creativity: 0 }
+                              { creativity: 1 }
                             ).then(response => extractHexFromString(response).map(x => encode(x.trim())));
                           }
                         }
@@ -187,7 +187,7 @@ export default function Command() {
                             message: "Using Raycast AI to generate a Title for your Theme",
                           });
                           name = await AI.ask(
-                            `Given the following colors: [${bgDark}, ${bgLight}, ${text}, ${highlight}], name a Theme. Use 1-2 words, and more only if necessary. Some example names are "White Flames", "Bright Lights", "Burning Candle". Keep in mind this is a ${appearance} theme, so adapt the title to it. ${values.descriptionTitle ? "Here are extra instructions to consider ON TOP OF all previous instructions: " + values.descriptionTitle : ""} DO NOT include ANYTHING BEFORE OR AFTER THE TITLE, including QUOTATION MAKRS, PERIODS, or ANY OTHER PUNCTUATION`,
+                            `Given the following colors: [${bgDark}, ${bgLight}, ${text}, ${highlight}], name this palette. Use 1-2 words, and more only if necessary. Some example names are "White Flames", "Bright Lights", "Burning Candle". Keep in mind this is a ${appearance} theme, so adapt the title to it. ${values.descriptionTitle ? "Here are extra instructions to consider ON TOP OF all previous instructions: " + values.descriptionTitle : ""} DO NOT include ANYTHING BEFORE OR AFTER THE TITLE, including QUOTATION MAKRS, PERIODS, or ANY OTHER PUNCTUATION`,
                             { creativity: values.themeCreativity }
                           ).then(response => encode(response.replace(".", "").trim()));
                         }
