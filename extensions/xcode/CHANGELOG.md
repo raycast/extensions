@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [List Apple Devices] - {PR_MERGE_DATE}
+## [List Apple Devices] - 2023-07-25
 
 - Added "List Apple Devices" command to have a list of Apple devices and their matching product name/code name.
 
