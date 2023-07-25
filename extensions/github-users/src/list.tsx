@@ -3,7 +3,7 @@ import { ActionPanel, Action, Grid } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { useDebounce } from "./hooks/useDebounce";
-import { UserDetail } from "./Detail";
+import { UserDetail } from "./detail";
 import { octokit, onRequestError } from "./utils";
 
 export default function UsersGrid() {
