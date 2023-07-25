@@ -1,7 +1,9 @@
 import { List } from "@raycast/api";
 
 import { SectionWithTasks } from "../helpers/groupBy";
-import { QuickLinkView, ViewMode } from "../home";
+import { ViewMode } from "../helpers/tasks";
+import { QuickLinkView } from "../home";
+import useCachedData from "../hooks/useCachedData";
 import { ViewProps } from "../hooks/useViewTasks";
 
 import TaskListItem from "./TaskListItem";
@@ -20,6 +22,8 @@ export default function TaskListSections({
   viewProps,
   quickLinkView,
 }: TaskListProps): JSX.Element {
+  const [data, setData] = useCachedData();
+
   return (
     <>
       {sections.map((section, index) => {
@@ -34,6 +38,8 @@ export default function TaskListSections({
                   task={task}
                   mode={mode}
                   viewProps={viewProps}
+                  data={data}
+                  setData={setData}
                   quickLinkView={quickLinkView}
                 />
               );

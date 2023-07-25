@@ -4,6 +4,7 @@ import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace, getMemoryUsage }
 import { useInterval } from "usehooks-ts";
 import { MemoryMonitorState } from "../Interfaces";
 import { ExecError } from "../Interfaces";
+import { Actions } from "../components/Actions";
 
 export default function MemoryMonitor() {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,36 +19,66 @@ export default function MemoryMonitor() {
   });
 
   useInterval(() => {
-    getTopRamProcess()
-      .then((newTopProcess) => {
-        getFreeDiskSpace()
-          .then((newFreeDisk) => {
-            getMemoryUsage().then((memoryUsage) => {
-              const memTotal: number = memoryUsage.memTotal;
-              const memUsed: number = memoryUsage.memUsed;
-              const freeMem: number = memTotal - memUsed;
+    getFreeDiskSpace()
+      .then(async (newFreeDisk) => {
+        return getMemoryUsage()
+          .then((memoryUsage) => {
+            const memTotal: number = memoryUsage.memTotal;
+            const memUsed: number = memoryUsage.memUsed;
+            const freeMem: number = memTotal - memUsed;
 
+            setState((prevState) => {
+              return {
+                ...prevState,
+                freeDisk: newFreeDisk,
+                totalMem: Math.round(memTotal / 1024).toString(),
+                freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
+                freeMem: Math.round(freeMem / 1024).toString(),
+              };
+            });
+          })
+          .catch((err: ExecError) => {
+            setError(err);
+          });
+      })
+      .then(async () => {
+        if (!state.topProcess.length) {
+          return getTopRamProcess()
+            .then((newTopProcess) => {
               setState((prevState) => {
                 return {
                   ...prevState,
-                  freeDisk: newFreeDisk,
-                  totalMem: Math.round(memTotal / 1024).toString(),
-                  freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-                  freeMem: Math.round(freeMem / 1024).toString(),
                   topProcess: newTopProcess,
                 };
               });
-              setIsLoading(false);
+            })
+            .catch((err: ExecError) => {
+              setError(err);
             });
-          })
-          .catch((error: ExecError) => {
-            setError(error);
-          });
+        }
+      })
+      .then(() => {
+        setIsLoading(false);
+      })
+      .catch((error: ExecError) => {
+        setError(error);
+      });
+  }, 1000);
+
+  useInterval(() => {
+    getTopRamProcess()
+      .then((newTopProcess) => {
+        setState((prevState) => {
+          return {
+            ...prevState,
+            topProcess: newTopProcess,
+          };
+        });
       })
       .catch((err: ExecError) => {
         setError(err);
       });
-  }, 1000);
+  }, 5000);
 
   useEffect(() => {
     const permData = () => {
@@ -94,7 +125,7 @@ export default function MemoryMonitor() {
                 <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${state.freeMemPercentage} %`} />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
-                {state.topProcess !== [] &&
+                {state.topProcess.length > 0 &&
                   state.topProcess.map((element, index) => {
                     return (
                       <List.Item.Detail.Metadata.Label
@@ -108,6 +139,7 @@ export default function MemoryMonitor() {
             }
           />
         }
+        actions={<Actions />}
       />
     </>
   );

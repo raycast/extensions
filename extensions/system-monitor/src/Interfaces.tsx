@@ -34,6 +34,7 @@ export interface PowerMonitorState {
   batteryCondition: string;
   maxBatteryCapacity: string;
   batteryTime: string;
+  timeOnBattery: string;
 }
 
 export interface MemoryInterface {

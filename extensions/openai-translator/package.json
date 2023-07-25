@@ -209,19 +209,45 @@
   ],
   "preferences": [
     {
+      "name": "provider",
+      "type": "dropdown",
+      "required": true,
+      "title": "Provider",
+      "default": "openai",
+      "description": "Choice API Provider",
+      "data": [
+        {
+          "value": "openai",
+          "title": "OpenAI"
+        },
+        {
+          "value": "raycast",
+          "title": "Raycast AI"
+        },
+        {
+          "value": "azure",
+          "title": "Azure"
+        },
+        {
+          "value": "palm2",
+          "title": "PaLM 2"
+        }
+      ]
+    },
+    {
       "name": "apikey",
-      "label": "OpenAI API Key",
-      "description": "Enter your personal OpenAI API Key,  Type 'none' if your entrypoint do not require an API key.",
+      "label": "API Key",
+      "description": "Enter your API Key for your provider,  Type 'none' if your entrypoint do not require an API key",
       "type": "password",
-      "title": "OpenAI API Key",
+      "title": "API Key",
       "required": true
     },
     {
       "name": "entrypoint",
-      "label": "OpenAI API Entrypoint",
-      "description": "Enter your custom OpenAI entrypoint.",
+      "label": "API Entrypoint",
+      "description": "Enter your provider entrypoint, If your provider does not require an entrypoint, it will be ignored.",
       "type": "textfield",
-      "title": "OpenAI API Entrypoint",
+      "title": "API Entrypoint",
       "default": "https://api.openai.com/v1/chat/completions",
       "required": true
     },
@@ -230,9 +256,13 @@
       "type": "dropdown",
       "required": false,
       "title": "API Model",
-      "default": "gpt-3.5-turbo",
-      "description": "Choice API Model",
+      "default": "gpt-3.5-turbo-0613",
+      "description": "Choose an OpenAI API model, which is only available when using the OpenAI provider",
       "data": [
+        {
+          "value": "gpt-3.5-turbo-0613",
+          "title": "gpt-3.5-turbo-0613"
+        },
         {
           "value": "gpt-3.5-turbo",
           "title": "gpt-3.5-turbo"
@@ -283,8 +313,16 @@
           "title": "粤语"
         },
         {
-          "value": "wyw",
+          "value": "lzh",
           "title": "古文"
+        },
+        {
+          "value": "jdbhw",
+          "title": "近代白话文"
+        },
+        {
+          "value": "xdbhw",
+          "title": "现代白话文"
         },
         {
           "value": "ja",
@@ -565,15 +603,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.4",
+    "@google-ai/generativelanguage": "^0.2.0",
+    "@raycast/api": "^1.51.1",
     "capitalize": "^2.0.4",
     "eventsource-parser": "^0.1.0",
-    "guesslanguage-ng": "^0.0.2",
-    "languagedetect": "^2.0.0",
+    "google-auth-library": "^8.8.0",
+    "iso-639-1": "^2.1.15",
+    "iso-639-3-to-1": "^1.0.0",
     "node-fetch": "^3.3.0",
     "socks-proxy-agent": "^7.0.0",
-    "uuid": "^9.0.0",
-    "xregexp": "^5.1.1"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/capitalize": "^2.0.0",
@@ -589,7 +628,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/ocr assets",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/{ocr,lang} assets",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

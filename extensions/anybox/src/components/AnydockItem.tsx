@@ -45,12 +45,12 @@ export default function Profiles(props: ProfileProps) {
               <ActionPanel>
                 <Action
                   title="Open Command"
-                  onAction={() => {
+                  onAction={async () => {
                     pop();
                     if (props.type == ActionType.Switch) {
-                      postAndCloseMainWindow(`switch-profile/${item.id}`);
+                      await postAndCloseMainWindow(`switch-profile/${item.id}`);
                     } else {
-                      postAndCloseMainWindow(`open-all-in-profile/${item.id}`);
+                      await postAndCloseMainWindow(`open-all-in-profile/${item.id}`);
                     }
                   }}
                 />

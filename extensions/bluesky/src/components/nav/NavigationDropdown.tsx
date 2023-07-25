@@ -1,22 +1,23 @@
 import { List, useNavigation } from "@raycast/api";
 
 import About from "../about/About";
+import AccountsView from "../accounts/AccountsView";
 import AuthorFeed from "../feed/AuthorFeed";
 import Home from "../../home";
 import LikeFeed from "../feed/LikeFeed";
 import { NavigationViewTooltip } from "../../utils/constants";
 import NewPost from "../../new-post";
 import Notifications from "../../notifications";
-import PeopleView from "../people/PeopleView";
+import Privacy from "../privacy/Privacy";
 import Timeline from "../../timeline";
 import { ViewTypes } from "../../config/viewTypeMap";
-import { getSignedInUserHandle } from "../../libs/atp";
+import { getSignedInAccountHandle } from "../../libs/atp";
 
 const NavigationDropdown = ({ currentViewId }: { currentViewId: number }) => {
   const { push } = useNavigation();
 
   const onViewChanged = async (viewId: string) => {
-    const handle = await getSignedInUserHandle();
+    const handle = await getSignedInAccountHandle();
     switch (parseInt(viewId)) {
       case 0:
         push(<Home />);
@@ -28,7 +29,7 @@ const NavigationDropdown = ({ currentViewId }: { currentViewId: number }) => {
         push(<Notifications />);
         break;
       case 3:
-        push(<PeopleView />);
+        push(<AccountsView />);
         break;
       case 4:
         push(<NewPost />);
@@ -44,6 +45,9 @@ const NavigationDropdown = ({ currentViewId }: { currentViewId: number }) => {
         }
         break;
       case 7:
+        push(<Privacy />);
+        break;
+      case 8:
         push(<About />);
         break;
       default:

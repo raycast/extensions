@@ -11,6 +11,7 @@ import {
   XcodeSimulatorOpenUrlError,
   XcodeSimulatorOpenUrlErrorReason,
 } from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
+import { XcodeSimulatorStateFilter } from "../models/xcode-simulator/xcode-simulator-state-filter.model";
 
 /**
  * XcodeSimulatorService
@@ -25,10 +26,18 @@ export class XcodeSimulatorService {
 
   /**
    * Retrieve all XcodeSimulatorGroups
+   *
+   * @param filter The XcodeSimulatorStateFilter to filter the XcodeSimulatorGroups
    */
-  static async xcodeSimulatorGroups(): Promise<XcodeSimulatorGroup[]> {
+  static async xcodeSimulatorGroups(filter: XcodeSimulatorStateFilter): Promise<XcodeSimulatorGroup[]> {
     const simulators = await XcodeSimulatorService.xcodeSimulators();
-    return groupBy(simulators, (simulator) => simulator.runtime)
+    return groupBy(
+      simulators.filter(
+        (value) =>
+          filter === XcodeSimulatorStateFilter.all || value.state === (filter as unknown as XcodeSimulatorState)
+      ),
+      (simulator) => simulator.runtime
+    )
       .map((group) => {
         return { runtime: group.key, simulators: group.values };
       })

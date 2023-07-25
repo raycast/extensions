@@ -1,5 +1,12 @@
 # Figma Files Changelog
 
+## [Support for opening file branches and improvements] - 2023-06-07
+
+- Added support for opening a specific branch of a file through the CMD+K menu.
+- Added icons to differentiate between Projects and Teams.
+- When a single team is added, the search dropdown shows projects instead of teams.
+- Handled edge cases like when a project or team is empty.
+
 ## [Multi-team support and better caching] - 2023-05-12
 
 - Added support for multiple teams. You can now search across multiple teams by providing a comma separated list of teamIDs in preferences.

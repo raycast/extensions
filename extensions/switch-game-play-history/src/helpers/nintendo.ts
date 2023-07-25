@@ -1,5 +1,5 @@
 import { getPreferenceValues, showToast, Toast, Cache } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise, useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import base64url from "base64url";
 import crypto from "crypto";
@@ -7,6 +7,8 @@ import { IPlayHistories, ISessionToken, IToken } from "../types/nintendo";
 import { syncDataToNotionDatabase } from "./notion";
 import { parseUrlParams } from "./utils";
 import getCache from "./cache";
+import * as cheerio from "cheerio";
+import fetch from "node-fetch";
 
 const NINTENDO_CLIENT_ID = "5c38e31cd085304b";
 
@@ -93,7 +95,6 @@ export const usePlayHistories = () => {
   const token = useToken();
   const cache = getCache<IPlayHistories>("HISTORY");
   const cachedHistories = cache.get();
-
   const histories = useFetch<IPlayHistories, IPlayHistories>(
     "https://mypage-api.entry.nintendo.co.jp/api/v1/users/me/play_histories",
     {
@@ -182,4 +183,36 @@ export const useSessionToken = () => {
   });
 
   return { sessionToken, url, getCode };
+};
+
+export const getGameTitle = async (id: string, langCode: string) => {
+  const url = `https://ec.nintendo.com/apps/${id}/${langCode}`;
+  const response = await fetch(url);
+  if (!response.ok) return null;
+  const html = await response.text();
+  const $ = cheerio.load(html);
+  const script = $('script[type="application/ld+json"]');
+  try {
+    const data = JSON.parse(script.html() || "");
+    const titleName = (data.name as string) || null;
+    return titleName;
+  } catch (e) {
+    //
+  }
+};
+export const useGameTitleName = (id: string) => {
+  const { GAME_TITLE_LANGUAGE_CODE } = getPreferenceValues<{
+    GAME_TITLE_LANGUAGE_CODE: string;
+  }>();
+  const title = useCachedPromise(getGameTitle, [id, GAME_TITLE_LANGUAGE_CODE], {
+    keepPreviousData: true,
+    execute: false,
+    initialData: null,
+  });
+  useEffect(() => {
+    if (GAME_TITLE_LANGUAGE_CODE !== "ORIG" && title.data === null) {
+      title.revalidate();
+    }
+  }, [GAME_TITLE_LANGUAGE_CODE]);
+  return title;
 };

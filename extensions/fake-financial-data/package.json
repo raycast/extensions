@@ -5,13 +5,41 @@
   "description": "Generate fake financial data",
   "icon": "command-icon.png",
   "author": "andre-rd-rodrigues",
+  "contributors": [
+    "farisaziz12"
+  ],
   "categories": [
-    "Finance"
+    "Finance",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "ffd-commands",
+      "name": "copy-account-number",
+      "title": "Copy Account Number",
+      "description": "Copy a fake account number",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-iban",
+      "title": "Copy IBAN",
+      "description": "Copy a fake International Bank Account Number (IBAN)",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-sort-code",
+      "title": "Copy Sort Code",
+      "description": "Copy a fake sort code",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-swift",
+      "title": "Copy SWIFT Code",
+      "description": "Copy a fake SWIFT code",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-commands",
       "title": "Generate Financial Data",
       "description": "Generate fake financial data",
       "mode": "menu-bar"

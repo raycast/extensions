@@ -338,9 +338,7 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => (
-        <StateListItem key={state.entity_id} state={state} />
-      ))}
+      {states?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
     </List>
   );
 }
@@ -1053,7 +1051,7 @@ export function useStateSearch(
   query: string | undefined,
   domain: string,
   device_class?: string,
-  allStates?: State[]
+  allStates?: State[],
 ): {
   states?: State[] | undefined;
 } {
@@ -1072,7 +1070,7 @@ export function useStateSearch(
         haStates = haStates.filter(
           (e) =>
             e.entity_id.toLowerCase().includes(query.toLowerCase()) ||
-            (e.attributes.friendly_name || "").toLowerCase().includes(query.toLowerCase())
+            (e.attributes.friendly_name || "").toLowerCase().includes(query.toLowerCase()),
         );
       }
       haStates = haStates.slice(0, 1000);

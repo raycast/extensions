@@ -4,9 +4,9 @@
   "title": "Google Bard",
   "description": "Perform Actions with Google Bard",
   "icon": "bard.png",
-  "author": "EZDev",
+  "author": "EvanZhouDev",
   "contributors": [
-    "VaibhavSatishkumar"
+    "Vaibhav-Satishkumar"
   ],
   "categories": [
     "Productivity"
@@ -17,6 +17,13 @@
   },
   "license": "MIT",
   "commands": [
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "subtitle": "Google Bard",
+      "description": "Chat with Google Bard",
+      "mode": "view"
+    },
     {
       "name": "summarize",
       "title": "Summarize",
@@ -79,6 +86,12 @@
       "subtitle": "Google Bard",
       "description": "Make selected text shorter",
       "mode": "view"
+    },
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "description": "Ask AI about anything",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -92,7 +105,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.48.5",
-    "bard-ai": "^1.0.4"
+    "bard-ai": "^1.5.2",
+    "node-fetch": "^3.3.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",

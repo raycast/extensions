@@ -1,12 +1,15 @@
 # Packages and Crates
 
 ## What is a crate?
+
 A crate is the smallest amount of code that the Cairo compiler considers at a time. Even if you run `cairo-compile` rather than `scarb build` and pass a single source code file, the compiler considers that file to be a crate. Crates can contain modules, and the modules may be defined in other files that get compiled with the crate, as will be discussed in the subsequent sections.
 
 ## What is the crate root?
+
 The crate root is the `lib.cairo` source file that the Cairo compiler starts from and makes up the root module of your crate (we’ll explain modules in depth in the [“Defining Modules to Control Scope”](./ch06-02-defining-modules-to-control-scope.md) section).
 
 ## What is a package?
+
 A cairo package is a bundle of one or more crates with a Scarb.toml file that describes how to build those crates. This enables the splitting of code into smaller, reusable parts and facilitates more structured dependency management.
 
 ## Creating a Package with Scarb

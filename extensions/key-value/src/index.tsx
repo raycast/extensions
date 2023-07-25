@@ -1,49 +1,37 @@
-import { Clipboard, Toast, showToast, showHUD } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
-
+import { ActionPanel, List, Action, getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import * as fs from "fs";
-import * as path from "path";
 
-interface Preferences {
-  jsonFilePath: string;
-}
+export default function Command() {
+  const prefs = getPreferenceValues<ExtensionPreferences>();
 
-export default async function Command() {
-  const preferences = await getPreferenceValues<Preferences>();
+  const { isLoading, data } = useCachedPromise(
+    async () => {
+      return JSON.parse(fs.readFileSync(prefs.jsonFilePath, "utf8"));
+    },
+    [],
+    { initialData: [] }
+  );
 
-  if (!preferences.jsonFilePath) {
-    showToast(Toast.Style.Failure, "No JSON file set");
-    return;
-  }
+  const createListItem = (key: string, value: string) => {
+    return (
+      <List.Item
+        key={key}
+        title={key}
+        subtitle={value}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard content={value} />
+          </ActionPanel>
+        }
+      />
+    );
+  };
 
-  const jsonData = JSON.parse(fs.readFileSync(preferences.jsonFilePath, "utf8"));
-  if (!jsonData) {
-    showToast(Toast.Style.Failure, "Failed to read JSON file");
-    return;
-  }
-
-  const key = await Clipboard.readText();
-  if (!key) {
-    showToast(Toast.Style.Failure, "No key in clipboard");
-    return;
-  }
-
-  key.trim();
-  const value = jsonData[key];
-  if (!value) {
-    showToast(Toast.Style.Failure, "Key not found");
-    return;
-  }
-
-  Clipboard.copy(value);
-  showHUD("Copied value to clipboard");
-}
-
-async function readJson(filePath: string): Promise<{ [key: string]: any } | null> {
-  try {
-    const data = fs.readFileSync(path.resolve(__dirname, filePath), "utf8");
-    return JSON.parse(data);
-  } catch (err) {
-    return null;
-  }
+  return (
+    <List isLoading={isLoading}>
+      <List.Section title="Key -> Value">{Object.keys(data).map((key) => createListItem(key, data[key]))}</List.Section>
+      <List.Section title="Value -> Key">{Object.keys(data).map((key) => createListItem(data[key], key))}</List.Section>
+    </List>
+  );
 }
