@@ -247,9 +247,19 @@
     {
       "name": "mediaplayermenu",
       "title": "Mediaplayer Menu Bar",
-      "description": "Display Mediaplayers in the Menu Bar",
+      "description": "Display Media Players in the Menu Bar",
       "mode": "menu-bar",
-      "interval": "15m"
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "hiddenEntities",
+          "description": "Given entities will be hidden in the menu",
+          "type": "textfield",
+          "required": false,
+          "title": "Hidden Entities",
+          "placeholder": "media_player.player1,media_player.player2"
+        }
+      ]
     }
   ],
   "preferences": [

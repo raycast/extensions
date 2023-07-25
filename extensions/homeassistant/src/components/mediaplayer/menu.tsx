@@ -1,11 +1,26 @@
-import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { Icon, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
 import { getErrorMessage, getFriendlyName, range } from "../../utils";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 import { ha } from "../../common";
 import { State } from "../../haapi";
+import { CopyToClipboardMenubarItem } from "../menu";
 
 function volumeRange() {
   return range(0.0, 1.0, 0.1);
+}
+
+export function MediaPlayerAllMenubarItem() {
+  const launch = async () => {
+    return launchCommand({ name: "mediaplayers", type: LaunchType.UserInitiated });
+  };
+  return (
+    <MenuBarExtra.Item
+      title="Open All Media Players"
+      icon={Icon.Terminal}
+      shortcut={{ modifiers: ["cmd"], key: "o" }}
+      onAction={launch}
+    />
+  );
 }
 
 function MediaPlayerVolumeItem(props: { state: State; volume: number }) {
@@ -84,6 +99,8 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
       <MediaPlayerNextMenubarItem state={s} />
       <MediaPlayerPreviousMenubarItem state={s} />
       <MediaPlayerVolumeSubmenu state={s} />
+      {mediaTitle && <CopyToClipboardMenubarItem title="Copy Track" content={mediaTitle} />}
+      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} />
     </MenuBarExtra.Submenu>
   );
 }

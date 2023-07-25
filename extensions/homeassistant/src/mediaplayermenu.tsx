@@ -1,15 +1,27 @@
-import { Color, MenuBarExtra } from "@raycast/api";
+import { Color, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { getErrorMessage, getFriendlyName } from "./utils";
 import { useHAStates } from "./hooks";
 import { MenuBarItemConfigureCommand } from "./components/menu";
-import { MediaPlayerMenubarItem } from "./components/mediaplayer/menu";
+import { MediaPlayerAllMenubarItem, MediaPlayerMenubarItem } from "./components/mediaplayer/menu";
+
+function hiddenEntitiesPreferences(): string[] {
+  const prefs = getPreferenceValues();
+  const hidden: string | undefined = prefs.hiddenEntities;
+  if (!hidden) {
+    return [];
+  }
+  return (hidden.split(",").map((h) => h.trim()) || []).filter((h) => h.length > 0);
+}
 
 export default function MediaPlayerMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
+  const hidden = hiddenEntitiesPreferences();
   const mediaPlayers = states
     ?.filter((s) => s.entity_id.startsWith("media_player"))
+    .filter((s) => !hidden.includes(s.entity_id))
     .sort((a, b) => getFriendlyName(a).localeCompare(getFriendlyName(b)));
   const header = error ? getErrorMessage(error) : undefined;
+
   return (
     <MenuBarExtra
       icon={{ source: "mediaplayer.png", tintColor: Color.PrimaryText }}
@@ -17,6 +29,7 @@ export default function MediaPlayerMenuCommand(): JSX.Element {
       tooltip={"Home Assistant Media Players"}
     >
       {header && <MenuBarExtra.Item title={header} />}
+      <MediaPlayerAllMenubarItem />
       <MenuBarExtra.Section title="Media Players">
         {mediaPlayers?.map((m) => <MediaPlayerMenubarItem key={m.entity_id} state={m} />)}
       </MenuBarExtra.Section>
