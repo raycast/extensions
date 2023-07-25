@@ -24,8 +24,7 @@
     "file-type": "^18.5.0",
     "get-pixels": "^3.3.3",
     "image-size": "^1.0.2",
-    "jimp": "^0.22.8",
-    "svg2img": "^1.0.0-beta.2"
+    "jimp": "^0.22.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
