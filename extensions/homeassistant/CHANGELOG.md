@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Menu] - 2023-07-25
+
+- Add Mediaplayer Menu Bar command
+
 ## [Modernize] - 2023-07-16
 
 - Add support for switching assist pipelines

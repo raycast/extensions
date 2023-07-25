@@ -243,6 +243,13 @@
       "mode": "view",
       "subtitle": "Home Assistant",
       "disabledByDefault": true
+    },
+    {
+      "name": "mediaplayermenu",
+      "title": "Mediaplayer Menu Bar",
+      "description": "Display Mediaplayers in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m"
     }
   ],
   "preferences": [
