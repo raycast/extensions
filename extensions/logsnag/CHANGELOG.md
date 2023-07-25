@@ -1,3 +1,3 @@
 # LogSnag Changelog
 
-## [Initial Version] - 2023-07-24
+## [Initial Version] - {PR_MERGE_DATE}
