@@ -176,7 +176,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due date" type={Form.DatePicker.Type.Date} />
+      <Form.DatePicker {...itemProps.dueDate} title="Due date" type={Form.DatePicker.Type.DateTime} />
 
       <Form.Dropdown {...itemProps.priority} title="Priority">
         {priorities.map(({ value, name, color, icon }) => (

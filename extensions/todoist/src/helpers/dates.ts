@@ -69,7 +69,7 @@ export function displayDueDateTime(dateString: string) {
 }
 
 export function getAPIDate(date: Date): string {
-  return formatISO(date, { representation: "date" });
+  return formatISO(date, { representation: "complete" });
 }
 
 export function parseDay(date: string | undefined): Date {
