@@ -1,10 +1,10 @@
 # Xcode Changelog
 
-## [List Apple Devices]
+## [List Apple Devices] - {PR_MERGE_DATE}
 
 - Added "List Apple Devices" command to have a list of Apple devices and their matching product name/code name.
 
-## [Filtering Simulators on State with Dropdown]
+## [Filtering Simulators on State with Dropdown] - 2023-07-02
 
 - Added a dropdown in simulators list to filter simulators on the boot state.
 
