@@ -13,14 +13,12 @@
     {
       "name": "sort-primary",
       "title": "Sort Usernames",
-      "subtitle": "Sort usernames alphabetically",
       "description": "Sort usernames alphabetically",
       "mode": "no-view"
     },
     {
       "name": "sort-secondary",
-      "title": "Sort Custom",
-      "subtitle": "Custom sort alphabetically",
+      "title": "Sort Channels",
       "description": "Custom sort alphabetically",
       "mode": "no-view"
     }

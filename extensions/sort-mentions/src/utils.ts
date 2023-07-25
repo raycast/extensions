@@ -2,11 +2,19 @@ import { Clipboard, Toast, getPreferenceValues, getSelectedText, showToast } fro
 import { exec } from "child_process";
 
 export const handleInput = async (handle_type: Preferences["primary_handle"] | Preferences["secondary_handle"]) => {
-  const selectedText = await getSelectedText();
-  const isValidInput = await validateInput(selectedText, handle_type);
-  if (isValidInput) {
-    const processedNames = await handleSort(selectedText, handle_type);
-    await handleOutput(processedNames);
+  try {
+    const selectedText = await getSelectedText();
+    const isValidInput = await validateInput(selectedText, handle_type);
+    if (isValidInput) {
+      const processedNames = await handleSort(selectedText, handle_type);
+      await handleOutput(processedNames);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      await showToast(Toast.Style.Failure, error.message);
+      return;
+    }
+    await showToast(Toast.Style.Failure, "Something went wrong");
   }
 };
 const handleSort = async (text: string, handle: string): Promise<string> => {
@@ -38,11 +46,11 @@ const handleOutput = async (processedNames: string) => {
 
 const validateInput = async (selectedText: string, handle: string): Promise<boolean> => {
   if (!selectedText.trim()) {
-    await showToast(Toast.Style.Failure, `No content`);
+    await showToast(Toast.Style.Failure, `No text selected`);
     return false;
   }
   if (!selectedText.includes(handle)) {
-    await showToast(Toast.Style.Failure, `Invalid input: "${handle}" not found`);
+    await showToast(Toast.Style.Failure, `Invalid input: prefix "${handle}" not found`);
     return false;
   }
   return true;
