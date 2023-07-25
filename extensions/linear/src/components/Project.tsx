@@ -14,6 +14,7 @@ import { getErrorMessage } from "../helpers/errors";
 import ProjectIssues from "./ProjectIssues";
 import EditProjectForm from "./EditProjectForm";
 import { getDateIcon } from "../helpers/dates";
+import CreateMilestoneForm from "./CreateMilestoneForm";
 
 type ProjectProps = {
   project: ProjectResult;
@@ -107,6 +108,13 @@ export default function Project({ project, priorities, users, me, mutateProjects
             target={<ProjectIssues projectId={project.id} priorities={priorities} users={users} me={me} />}
             title="Show Issues"
             icon={Icon.List}
+          />
+
+          <Action.Push
+            target={<CreateMilestoneForm projectId={project.id} />}
+            title="Create Milestone"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+            icon={Icon.ExclamationMark}
           />
 
           {isLinearInstalled ? (
