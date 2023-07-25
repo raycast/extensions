@@ -1,15 +1,7 @@
 import { ActionPanel, Icon, Color, Action } from "@raycast/api";
-import { ha } from "../common";
-import { State } from "../haapi";
-
-export function getMediaPlayerTitleAndArtist(state: State): string | undefined {
-  const title = state.attributes.media_title;
-  const artist = state.attributes.media_artist;
-  if (title && artist) {
-    return `${artist} - ${title}`;
-  }
-  return undefined;
-}
+import { ha } from "../../common";
+import { State } from "../../haapi";
+import { getMediaPlayerTitleAndArtist } from "./utils";
 
 export function SelectSourceAction(props: { state: State }): JSX.Element | null {
   const state = props.state;

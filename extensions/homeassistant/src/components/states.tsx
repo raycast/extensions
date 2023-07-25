@@ -8,10 +8,9 @@ import { EntityStandardActionSections } from "./entity";
 import {
   SelectVolumeAction,
   SelectSourceAction,
-  getMediaPlayerTitleAndArtist,
   MediaPlayerTurnOnAction,
   MediaPlayerTurnOffAction,
-} from "./mediaplayer";
+} from "./mediaplayer/actions";
 import { FanSpeedControlAction, FanSpeedUpAction, FanSpeedDownAction } from "./fan";
 import {
   BrightnessControlAction,
@@ -63,6 +62,7 @@ import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
 import { ZoneShowDetailAction } from "./zones";
 import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons";
 import { getStateTooltip } from "../utils";
+import { getMediaPlayerTitleAndArtist } from "./mediaplayer/utils";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
