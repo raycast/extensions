@@ -84,7 +84,7 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
             <ActionPanel.Section title={page.title ? page.title : "Untitled"}>
               <Action
                 title="Open in Notion"
-                icon={"notion-logo.png"}
+                icon="notion-logo.png"
                 onAction={() => {
                   handleOnOpenPage(page, setRecentPage);
                 }}

@@ -6,7 +6,7 @@ import { parseHTML } from "linkedom";
 import { useState, useEffect } from "react";
 
 import { useSearchPages } from "./hooks";
-import { appendToPage, createDatabasePage, pageIcon } from "./utils/notion";
+import { appendToPage, createDatabasePage, getPageIcon } from "./utils/notion";
 
 const getPageDetail = async (url: string) => {
   try {
@@ -128,7 +128,12 @@ export default function QuickCapture() {
       >
         {searchPages?.map((page) => {
           return (
-            <Form.Dropdown.Item key={page.id} title={page.title || "Untitled"} value={page.id} icon={pageIcon(page)} />
+            <Form.Dropdown.Item
+              key={page.id}
+              title={page.title || "Untitled"}
+              value={page.id}
+              icon={getPageIcon(page)}
+            />
           );
         })}
       </Form.Dropdown>

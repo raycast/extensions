@@ -15,6 +15,7 @@ import {
   supportedPropTypes,
   UnwrapRecord,
   NotionObject,
+  PagePropertyType,
 } from "./types";
 
 const clientId = "c843219a-d93c-403c-8e4d-e8aa9a987494";
@@ -551,7 +552,7 @@ export function notionColorToTintColor(notionColor: string | undefined): Color {
   return notionColor ? colorMapper[notionColor] : colorMapper["default"];
 }
 
-export function pageIcon(page: Page): Image.ImageLike {
+export function getPageIcon(page: Page): Image.ImageLike {
   return page.icon_emoji
     ? page.icon_emoji
     : page.icon_file
@@ -565,4 +566,42 @@ export function pageIcon(page: Page): Image.ImageLike {
 
 export function getPageName(page: Page): string {
   return (page.icon_emoji ? page.icon_emoji + " " : "") + (page.title ? page.title : "Untitled");
+}
+
+export function getPropertyIcon(property: DatabaseProperty | PagePropertyType) {
+  switch (property.type) {
+    case "checkbox":
+      return Icon.Circle;
+    case "date":
+      return Icon.Calendar;
+    case "email":
+      return Icon.Envelope;
+    case "files":
+      return Icon.Paperclip;
+    case "formula":
+      return "./icon/formula.png";
+    case "select":
+    case "multi_select":
+      return Icon.BulletPoints;
+    case "number":
+      return Icon.Hashtag;
+    case "people":
+      return Icon.Person;
+    case "phone_number":
+      return Icon.Phone;
+    case "relation":
+      return Icon.ArrowNe;
+    case "rich_text":
+      return Icon.Paragraph;
+    case "rollup":
+      return Icon.MagnifyingGlass;
+    case "title":
+      return Icon.Text;
+    case "url":
+      return Icon.Link;
+    case "status":
+      return "./icon/kanban_status_backlog.png";
+    default:
+      return Icon.QuestionMark;
+  }
 }

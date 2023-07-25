@@ -9,7 +9,7 @@ import {
   useRelations,
   useUsers,
 } from "../../hooks";
-import { createDatabasePage, notionColorToTintColor, pageIcon } from "../../utils/notion";
+import { createDatabasePage, notionColorToTintColor, getPageIcon } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
 import { DatabasePropertyOption, Page } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
@@ -228,7 +228,7 @@ export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: Cr
                         key={"relation::" + rp.id}
                         value={rp.id}
                         title={rp.title ? rp.title : "Untitled"}
-                        icon={pageIcon(rp)}
+                        icon={getPageIcon(rp)}
                       />
                     );
                   })}

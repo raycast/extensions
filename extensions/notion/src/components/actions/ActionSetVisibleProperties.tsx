@@ -1,5 +1,6 @@
-import { ActionPanel, Color, Action } from "@raycast/api";
+import { ActionPanel, Color, Action, Icon } from "@raycast/api";
 
+import { getPropertyIcon } from "../../utils/notion";
 import { DatabaseProperty } from "../../utils/types";
 
 export function ActionSetVisibleProperties(props: {
@@ -16,7 +17,7 @@ export function ActionSetVisibleProperties(props: {
   return (
     <ActionPanel.Submenu
       title="Show/Hide Properties"
-      icon="./icon/shown.png"
+      icon={Icon.Eye}
       shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "p" }}
     >
       <ActionPanel.Section>
@@ -25,7 +26,7 @@ export function ActionSetVisibleProperties(props: {
             property && (
               <Action
                 key={`selected-property-${property.id}`}
-                icon={{ source: `./icon/${property.type}.png`, tintColor: Color.PrimaryText }}
+                icon={getPropertyIcon(property)}
                 title={`${property.name}  ✓`}
                 onAction={() => onUnselect(property.id)}
               />
@@ -33,14 +34,16 @@ export function ActionSetVisibleProperties(props: {
         )}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {unselectedProperties.map((dp) => (
-          <Action
-            key={`unselected-property-${dp.id}`}
-            icon={{ source: `./icon/${dp.type}_secondary.png`, tintColor: Color.SecondaryText }}
-            title={dp.name}
-            onAction={() => onSelect(dp.id)}
-          />
-        ))}
+        {unselectedProperties.map((dp) => {
+          return (
+            <Action
+              key={`unselected-property-${dp.id}`}
+              icon={{ source: getPropertyIcon(dp), tintColor: Color.SecondaryText }}
+              title={dp.name}
+              onAction={() => onSelect(dp.id)}
+            />
+          );
+        })}
       </ActionPanel.Section>
     </ActionPanel.Submenu>
   );

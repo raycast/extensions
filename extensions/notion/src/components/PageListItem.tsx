@@ -1,8 +1,8 @@
 import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { ActionPanel, Icon, List, Action, Image, Color, confirmAlert } from "@raycast/api";
+import { ActionPanel, Icon, List, Action, Image, confirmAlert } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
-import { deletePage, notionColorToTintColor, pageIcon } from "../utils/notion";
+import { deletePage, notionColorToTintColor, getPageIcon } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
 import { DatabaseView, Page, DatabaseProperty, User, PagePropertyType } from "../utils/types";
 
@@ -31,7 +31,7 @@ export function PageListItem({
   databaseView,
   setRecentPage,
   setDatabaseView,
-  icon = pageIcon(page),
+  icon = getPageIcon(page),
   users,
   mutate,
 }: PageListItemProps) {
@@ -100,14 +100,14 @@ export function PageListItem({
             )}
             <Action
               title="Open in Notion"
-              icon={"notion-logo.png"}
+              icon="notion-logo.png"
               onAction={() => handleOnOpenPage(page, setRecentPage)}
             />
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
                 title="Edit Property"
-                icon={{ source: "icon/edit_page_property.png", tintColor: Color.PrimaryText }}
+                icon={Icon.BulletPoints}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               >
                 {quickEditProperties?.map((dp: DatabaseProperty) => (

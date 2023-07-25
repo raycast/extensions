@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notion",
   "title": "Notion",
-  "description": "Fastest way to search and create Notion page.",
+  "description": "The fastest way to search and create Notion pages.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
   "license": "MIT",

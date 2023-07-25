@@ -1,4 +1,4 @@
-import { List, Image, Color } from "@raycast/api";
+import { List, Image } from "@raycast/api";
 
 import { notionColorToTintColor } from "../utils/notion";
 import { Page, DatabasePropertyOption, DatabaseProperty, DatabaseView, User } from "../utils/types";
@@ -172,7 +172,7 @@ export function DatabaseView(props: DatabaseViewProps) {
                 customOptions={customOptions}
                 pageId={p.id}
                 pageProperty={p.properties[propertyId]}
-                icon={{ source: "./icon/kanban_status_started.png", tintColor: Color.PrimaryText }}
+                icon="./icon/kanban_status_started.png"
                 shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                 mutate={mutate}
               />,

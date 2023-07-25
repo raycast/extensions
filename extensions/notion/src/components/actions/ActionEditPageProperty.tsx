@@ -1,8 +1,8 @@
-import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast, Color } from "@raycast/api";
+import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast } from "@raycast/api";
 import { formatDistanceToNow } from "date-fns";
 
 import { useUsers } from "../../hooks";
-import { notionColorToTintColor, patchPage } from "../../utils/notion";
+import { getPropertyIcon, notionColorToTintColor, patchPage } from "../../utils/notion";
 import { DatabaseProperty, DatabasePropertyOption, PagePropertyType } from "../../utils/types";
 
 export function ActionEditPageProperty(props: {
@@ -20,7 +20,7 @@ export function ActionEditPageProperty(props: {
     pageProperty,
     shortcut,
     mutate,
-    icon = { source: "icon/" + databaseProperty.type + ".png", tintColor: Color.PrimaryText },
+    icon = getPropertyIcon(databaseProperty),
     customOptions: options = databaseProperty.options || [],
   } = props;
 
@@ -48,7 +48,7 @@ export function ActionEditPageProperty(props: {
       return (
         <Action
           title={(value ? "Uncheck " : "Check ") + databaseProperty.name}
-          icon={{ source: "icon/" + databaseProperty.type + "_" + value + ".png", tintColor: Color.PrimaryText }}
+          icon={value ? Icon.Checkmark : Icon.Circle}
           shortcut={shortcut}
           onAction={() => setPageProperty({ [databaseProperty.id]: { checkbox: !value } })}
         />
@@ -90,7 +90,7 @@ export function ActionEditPageProperty(props: {
         <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
           <ActionPanel.Submenu
             title={value?.start ? formatDistanceToNow(new Date(value.start)) : "No Date"}
-            icon={{ source: "icon/date_start.png", tintColor: Color.PrimaryText }}
+            icon="icon/date_start.png"
           >
             <Action
               title="Now"
@@ -103,7 +103,7 @@ export function ActionEditPageProperty(props: {
           </ActionPanel.Submenu>
           <ActionPanel.Submenu
             title={value?.end ? formatDistanceToNow(new Date(value.end)) : "No Date"}
-            icon={{ source: "icon/date_end.png", tintColor: Color.PrimaryText }}
+            icon="icon/date_end.png"
           >
             <Action
               title="Now"

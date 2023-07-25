@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast, Color } from "@raycast/api";
+import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabases } from "../../hooks";
@@ -202,7 +202,7 @@ function KanbanViewFormItem(props: {
           key={`kanban-status-property-${dp.id}`}
           value={dp.id}
           title={dp.name ? dp.name : "Untitled"}
-          icon={{ source: "./icon/select.png", tintColor: Color.PrimaryText }}
+          icon={Icon.ArrowDownCircle}
         />
       ))}
     </Form.Dropdown>,
