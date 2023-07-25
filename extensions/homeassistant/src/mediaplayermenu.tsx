@@ -9,18 +9,14 @@ export default function MediaPlayerMenuCommand(): JSX.Element {
   const mediaPlayers = states
     ?.filter((s) => s.entity_id.startsWith("media_player"))
     .sort((a, b) => getFriendlyName(a).localeCompare(getFriendlyName(b)));
-  let header = "Mediaplayers";
-  if (error) {
-    header = getErrorMessage(error);
-  }
-  console.log(`${isLoading} ${mediaPlayers?.length}`);
+  const header = error ? getErrorMessage(error) : undefined;
   return (
     <MenuBarExtra
       icon={{ source: "mediaplayer.png", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
-      tooltip={"Home Assistant Mediaplayers"}
+      tooltip={"Home Assistant Media Players"}
     >
-      <MenuBarExtra.Item key="_header" title={header} />
+      {header && <MenuBarExtra.Item title={header} />}
       <MenuBarExtra.Section title="Media Players">
         {mediaPlayers?.map((m) => <MediaPlayerMenubarItem key={m.entity_id} state={m} />)}
       </MenuBarExtra.Section>

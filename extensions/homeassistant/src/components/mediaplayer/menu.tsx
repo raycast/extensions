@@ -1,8 +1,39 @@
-import { Icon, MenuBarExtra } from "@raycast/api";
-import { getFriendlyName } from "../../utils";
+import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { getErrorMessage, getFriendlyName, range } from "../../utils";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 import { ha } from "../../common";
 import { State } from "../../haapi";
+
+function volumeRange() {
+  return range(0.0, 1.0, 0.1);
+}
+
+function MediaPlayerVolumeItem(props: { state: State; volume: number }) {
+  const v = props.volume;
+  const setVolume = async () => {
+    try {
+      await ha.setVolumeLevelMedia(props.state.entity_id, v);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+    }
+  };
+  return <MenuBarExtra.Item key={v} title={`${Math.round(v * 100)}%`} onAction={setVolume} />;
+}
+
+function MediaPlayerVolumeSubmenu(props: { state: State }): JSX.Element | null {
+  const s = props.state;
+  const vl: number | undefined = s.attributes.volume_level;
+  if (vl === undefined) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Submenu title={`Volume ${Math.round(vl * 100.0)}%`} icon={Icon.SpeakerOn}>
+      {volumeRange().map((v) => (
+        <MediaPlayerVolumeItem key={v} state={s} volume={v} />
+      ))}
+    </MenuBarExtra.Submenu>
+  );
+}
 
 function MediaPlayerPlayPauseMenubarItem(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -38,7 +69,7 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
   }
   const mediaTitle = getMediaPlayerTitleAndArtist(s);
   const friendlyName = getFriendlyName(s);
-  const title = mediaTitle ? `${friendlyName} - ${mediaTitle}` : friendlyName;
+  const title = mediaTitle ? `${friendlyName} | ${mediaTitle}` : friendlyName;
   const icon = () => {
     let icon = s.state === "playing" ? Icon.SpeakerOn : "mediaplayer.png";
     const ep = s.attributes.entity_picture;
@@ -52,6 +83,7 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
       <MediaPlayerPlayPauseMenubarItem state={s} />
       <MediaPlayerNextMenubarItem state={s} />
       <MediaPlayerPreviousMenubarItem state={s} />
+      <MediaPlayerVolumeSubmenu state={s} />
     </MenuBarExtra.Submenu>
   );
 }
