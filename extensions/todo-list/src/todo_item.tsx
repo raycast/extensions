@@ -107,7 +107,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
               icon={Icon.Exclamationmark}
             >
               <Action title="none" onAction={() => setPriority(undefined)} />
-              <Action title="low" icon={priorityIcons[1]} onAction={() => setPriority(1)} />
+              <Action title="low" icon={priorityIcons[1]} onAction={() => setPriority(1)} autoFocus />
               <Action title="meduim" icon={priorityIcons[2]} onAction={() => setPriority(2)} />
               <Action title="high" icon={priorityIcons[3]} onAction={() => setPriority(3)} />
             </ActionPanel.Submenu>
