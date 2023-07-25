@@ -4,8 +4,15 @@ import { getFavicon } from "@raycast/utils";
 
 export interface Preferences {
   readonly useDev: boolean;
-  readonly useOriginalFavicon: boolean;
+  readonly buildChoice: SettingsBuildChoice;
   readonly openTabInProfile: SettingsProfileOpenBehaviour;
+}
+
+export enum SettingsBuildChoice {
+  Stable = "stable",
+  Dev = "dev",
+  Beta = "beta",
+  Canary = "canary",
 }
 
 export enum SettingsProfileOpenBehaviour {
