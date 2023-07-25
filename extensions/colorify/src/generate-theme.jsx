@@ -285,7 +285,7 @@ Only bitmap images less than 4k are accepted."
               text="Whether or not to modify the red, orange, green, blue, purple, and magenta color of the theme. Uses default light or dark values otherwise."
             />
 
-            <Form.Checkbox id="genSupport" label="Generate" value={true} />
+            <Form.Checkbox id="genSupport" label="Generate" defaultValue={true} />
             <Form.Description
               title="Title Creativity"
               text="Choose the creativity used in the Theme Title generation."
