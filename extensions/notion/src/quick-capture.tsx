@@ -1,8 +1,8 @@
 import { Readability } from "@mozilla/readability";
 import { ActionPanel, Action, Form, getSelectedText, showToast, Toast, closeMainWindow, AI } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import axios from "axios";
 import { parseHTML } from "linkedom";
+import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
 import { useSearchPages } from "./hooks";
@@ -10,8 +10,9 @@ import { appendToPage, createDatabasePage, getPageIcon } from "./utils/notion";
 
 const getPageDetail = async (url: string) => {
   try {
-    const response = await axios.get(url);
-    const { document } = parseHTML(response.data);
+    const response = await fetch(url);
+    const data = await response.text();
+    const { document } = parseHTML(data);
     const reader = new Readability(document);
     const parsedDocument = reader.parse();
     const content = parsedDocument?.textContent;
