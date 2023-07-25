@@ -4,7 +4,7 @@ import { Command, ExtensionPreferences, StoreCommand, isCommand } from "../../..
 import path from "path";
 import * as fs from "fs";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 
 /**
  * Action panel section for actions related to copying command data to the clipboard.
@@ -33,21 +33,21 @@ export const CopyCommandActionsSection = (props: {
         <Action.CopyToClipboard
           title="Copy Prompt"
           content={command.prompt}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          shortcut={getActionShortcut("CopyCommandPromptAction", settings)}
         />
       ) : null}
       {isActionEnabled("CopyCommandJSONAction", settings) ? (
         <Action.CopyToClipboard
           title="Copy Command JSON"
           content={getCommandJSON(command)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+          shortcut={getActionShortcut("CopyCommandJSONAction", settings)}
         />
       ) : null}
       {isCommand(command) && isActionEnabled("CopyCommandIDAction", settings) ? (
         <Action.CopyToClipboard
           title="Copy Command ID"
           content={command.id}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+          shortcut={getActionShortcut("CopyCommandIDAction", settings)}
         />
       ) : null}
       {isCommand(command) && isActionEnabled("ExportAllCommandsAction", settings) ? <ExportAllCommandsAction /> : null}
@@ -65,7 +65,7 @@ export const ExportAllCommandsAction = (): JSX.Element => {
     <Action
       title="Export All Commands"
       icon={Icon.CopyClipboard}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      shortcut={getActionShortcut("ExportAllCommandsAction", defaultAdvancedSettings)}
       onAction={async () => {
         const toast = await showToast({ title: "Exporting Commands", style: Toast.Style.Animated });
 

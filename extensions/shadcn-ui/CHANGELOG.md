@@ -1,5 +1,10 @@
 # shadcn/ui Changelog
 
+## [Update to shadcn/ui July 2023 version] - 2023-07-24
+
+- Update README.md - new author personal site link
+- Update documentation - New Installation section
+
 ## [Update to shadcn/ui June 2023 version] - 2023-06-22
 
 - Update Icon

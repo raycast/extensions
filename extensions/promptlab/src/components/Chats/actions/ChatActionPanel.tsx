@@ -5,7 +5,7 @@ import { DeleteAllChatsAction, DeleteChatAction } from "./DeleteChatActions";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import ChatSettingsForm from "../ChatSettingsForm";
 import { CopyChatActionsSection } from "./CopyChatActions";
-import { anyActionsEnabled, isActionEnabled } from "../../../utils/action-utils";
+import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 import { AdvancedActionSubmenu } from "../../actions/AdvancedActionSubmenu";
 import ContextSettingsActionSection from "./ContextSettingsActionSection";
 import { Chat, ChatManager } from "../../../utils/types";
@@ -55,6 +55,7 @@ export const ChatActionPanel = (props: {
     onCancel,
     revalidate,
   } = props;
+
   return (
     <ActionPanel>
       {isLoading ? (
@@ -92,23 +93,23 @@ export const ChatActionPanel = (props: {
               target={
                 <ChatSettingsForm oldData={chat} chats={chats} setCurrentChat={setCurrentChat} settings={settings} />
               }
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={getActionShortcut("ChatSettingsAction", settings)}
             />
           ) : null}
 
           {isActionEnabled("ToggleChatFavoriteAction", settings) ? (
-            <ToggleChatFavoriteAction chat={chat} chats={chats} setCurrentChat={setCurrentChat} />
+            <ToggleChatFavoriteAction chat={chat} chats={chats} setCurrentChat={setCurrentChat} settings={settings} />
           ) : null}
 
           {chat && isActionEnabled("ExportChatAction", settings) ? (
-            <ExportChatAction chat={chat} chats={chats} />
+            <ExportChatAction chat={chat} chats={chats} settings={settings} />
           ) : null}
 
           {chat && isActionEnabled("DeleteChatAction", settings) ? (
-            <DeleteChatAction chat={chat} chats={chats} setCurrentChat={setCurrentChat} />
+            <DeleteChatAction chat={chat} chats={chats} setCurrentChat={setCurrentChat} settings={settings} />
           ) : null}
           {chats.chats.length > 0 && isActionEnabled("DeleteAllChatsAction", settings) ? (
-            <DeleteAllChatsAction chats={chats} setCurrentChat={setCurrentChat} />
+            <DeleteAllChatsAction chats={chats} setCurrentChat={setCurrentChat} settings={settings} />
           ) : null}
         </ActionPanel.Section>
       ) : null}
@@ -118,7 +119,7 @@ export const ChatActionPanel = (props: {
           title="Regenerate"
           icon={Icon.ArrowClockwise}
           onAction={previousResponse?.length ? () => setSentQuery(query + " ") : revalidate}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={getActionShortcut("RegenerateChatAction", settings)}
         />
       ) : null}
 

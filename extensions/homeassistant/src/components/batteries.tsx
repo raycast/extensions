@@ -30,9 +30,7 @@ export function BatteryList(): JSX.Element {
   });
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {sortedStates?.map((state) => (
-        <StateListItem key={state.entity_id} state={state} />
-      ))}
+      {sortedStates?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
     </List>
   );
 }
