@@ -52,11 +52,12 @@ function MediaPlayerVolumeSubmenu(props: { state: State }): JSX.Element | null {
 
 function MediaPlayerPlayPauseMenubarItem(props: { state: State }): JSX.Element | null {
   const s = props.state;
+  const onAction = s.state === "off" || s.state === "unavailable" ? undefined : () => ha.playPauseMedia(s.entity_id);
   return (
     <MenuBarExtra.Item
       title={s.state === "playing" ? "Pause" : "Play"}
       icon={s.state === "playing" ? Icon.Pause : Icon.Play}
-      onAction={() => ha.playPauseMedia(s.entity_id)}
+      onAction={onAction}
       tooltip={`State: ${s.state}`}
     />
   );
@@ -85,7 +86,11 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
   }
   const mediaTitle = getMediaPlayerTitleAndArtist(s);
   const friendlyName = getFriendlyName(s);
-  const title = mediaTitle ? `${friendlyName} | ${mediaTitle}` : friendlyName;
+  const title = () => {
+    let t = mediaTitle ? `${friendlyName} | ${mediaTitle}` : friendlyName;
+    t = `${s.state === "playing" ? "▶︎ " : ""}${t}`;
+    return t;
+  };
   const icon = () => {
     let icon = s.state === "playing" ? Icon.SpeakerOn : "mediaplayer.png";
     const ep = s.attributes.entity_picture;
@@ -95,7 +100,7 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
     return icon;
   };
   return (
-    <MenuBarExtra.Submenu key={s.entity_id} title={title} icon={icon()}>
+    <MenuBarExtra.Submenu key={s.entity_id} title={title()} icon={icon()}>
       <MediaPlayerPlayPauseMenubarItem state={s} />
       <MediaPlayerNextMenubarItem state={s} />
       <MediaPlayerPreviousMenubarItem state={s} />
