@@ -13,7 +13,7 @@ export function ActionEditPageProperty(props: {
   shortcut?: Keyboard.Shortcut;
   icon?: Image.ImageLike;
   customOptions?: DatabasePropertyOption[];
-}): JSX.Element | null {
+}) {
   const {
     databaseProperty,
     pageId,

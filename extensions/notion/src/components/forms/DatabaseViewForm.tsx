@@ -91,7 +91,7 @@ export function DatabaseViewForm(props: {
                 );
               })}
             </Form.Dropdown>,
-            <Form.Separator />,
+            <Form.Separator key="separator" />,
           ]
         : null}
       <Form.Dropdown
@@ -123,10 +123,7 @@ const statusTypes: { [key: string]: string } = {
   canceled: "Canceled",
 };
 
-function KanbanViewFormItem(props: {
-  selectProperties: DatabaseProperty[];
-  databaseView?: DatabaseView;
-}): JSX.Element | null {
+function KanbanViewFormItem(props: { selectProperties: DatabaseProperty[]; databaseView?: DatabaseView }) {
   const { selectProperties, databaseView } = props;
 
   const [statusPropertyId, setStatusPropertyId] = useState<string | undefined>(
@@ -228,7 +225,7 @@ function StatusTagPicker(props: {
   value: string[];
   onChange: (newValue: string[]) => void;
   statusProperty: DatabaseProperty;
-}): JSX.Element {
+}) {
   const { id, title, statusProperty, value, onChange } = props;
 
   return (

@@ -138,7 +138,7 @@ export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: Cr
               );
             })}
           </Form.Dropdown>
-          <Form.Separator />
+          <Form.Separator key="separator" />
         </>
       )}
 

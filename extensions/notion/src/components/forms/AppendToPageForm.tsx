@@ -4,7 +4,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { appendToPage, getPageName } from "../../utils/notion";
 import { Page } from "../../utils/types";
 
-export function AppendToPageForm(props: { page: Page; onContentUpdate?: () => void }): JSX.Element {
+export function AppendToPageForm(props: { page: Page; onContentUpdate?: () => void }) {
   const { page, onContentUpdate } = props;
   const { pop } = useNavigation();
 

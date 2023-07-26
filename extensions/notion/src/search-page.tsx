@@ -1,10 +1,10 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
 
-import { PageListItem } from "./components";
+import { PageListItem, View } from "./components";
 import { useRecentPages, useSearchPages, useUsers } from "./hooks";
 
-export default function SearchList(): JSX.Element {
+function Search() {
   const { data: recentPages, setRecentPage } = useRecentPages();
   const [searchText, setSearchText] = useState<string>("");
   const { data: searchPages, isLoading, mutate } = useSearchPages(searchText);
@@ -43,5 +43,13 @@ export default function SearchList(): JSX.Element {
 
       <List.EmptyView title="No pages found" />
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Search />
+    </View>
   );
 }

@@ -8,7 +8,7 @@ export function ActionSetVisibleProperties(props: {
   selectedPropertiesIds?: string[];
   onSelect: (propertyId: string) => void;
   onUnselect: (propertyId: string) => void;
-}): JSX.Element {
+}) {
   const { databaseProperties, onSelect, onUnselect, selectedPropertiesIds = [] } = props;
 
   const selectedProperties = selectedPropertiesIds.map((id) => databaseProperties.find((dp) => dp.id === id));
