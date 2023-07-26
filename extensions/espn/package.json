@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "List News",
+      "title": "ESPN News",
       "subtitle": "ESPN",
       "description": "Read the best news from ESPN directly from Raycast",
       "mode": "view"
