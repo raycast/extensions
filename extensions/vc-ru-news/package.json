@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vc-ru-news",
-  "title": "VC.ru popular news",
-  "description": "Popular news from VC.ru",
+  "title": "VC.ru Popular News",
+  "description": "List popular news from VC.ru",
   "icon": "extension-icon.png",
   "author": "khlebobul",
   "categories": [
@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "VC.ru",
+      "title": "List News",
+      "subtitle": "VC.ru",
       "description": "Popular news from VC.ru",
       "mode": "view"
     }
