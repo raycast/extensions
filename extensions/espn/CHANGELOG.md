@@ -1,5 +1,5 @@
 # Habr Changelog
 
-## [Initial Version] - 2023-07-18
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added most popular news sections
