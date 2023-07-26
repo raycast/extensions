@@ -34,8 +34,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading}
-    >
+      isLoading={isLoading}>
       {data && data.items?.map((item, index) => <StoryListItem key={item.id} item={item} index={index} />)}
     </List>
   );
