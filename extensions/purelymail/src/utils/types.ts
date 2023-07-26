@@ -1,0 +1,90 @@
+export type Preferences = {
+  api_token: string;
+};
+
+export type Domain = {
+  name: string;
+  allowAccountReset: boolean;
+  symbolicSubaddressing: boolean;
+  isShared: boolean;
+  dnsSummary: {
+    passesMx: boolean;
+    passesSpf: boolean;
+    passesDkim: boolean;
+    passesDmarc: boolean;
+  };
+};
+export type Rule = {
+  id: number;
+  domainName: string;
+  prefix: boolean;
+  matchUser: string;
+  targetAddresses: string[];
+  catchall: boolean;
+};
+
+// Request Body
+export type CreateUserRequest = {
+  userName: string;
+  domainName: string;
+  password: string;
+  enablePasswordReset?: boolean;
+  recoveryEmail?: string;
+  recoveryEmailDescription?: string;
+  recoveryPhone?: string;
+  recoveryPhoneDescription?: string;
+  enableSearchIndexing?: boolean;
+  sendWelcomeEmail?: boolean;
+};
+export type DeleteUserRequest = {
+  userName: string;
+};
+export type CreateRoutingRequest = {
+  domainName: string;
+  prefix: boolean;
+  matchUser: string;
+  targetAddresses: string[];
+};
+type DeleteRoutingRequest = {
+  routingRuleId: number;
+};
+type AddDomainRequest = {
+  domainName: string;
+};
+type ListDomainsRequest = {
+  includeShared: boolean;
+};
+export type UpdateDomainSettingsRequest = {
+  name: string;
+  allowAccountReset: boolean;
+  symbolicSubaddressing: boolean;
+  recheckDns: boolean;
+};
+type DeleteDomainRequest = {
+  name: string;
+};
+export type RequestBody =
+  | CreateUserRequest
+  | DeleteUserRequest
+  | CreateRoutingRequest
+  | DeleteRoutingRequest
+  | AddDomainRequest
+  | ListDomainsRequest
+  | UpdateDomainSettingsRequest
+  | DeleteDomainRequest
+  | Record<string, never>;
+
+type SuccessResponse = {
+  type: "success";
+  result: {
+    domains?: Domain[];
+    rules?: Rule[];
+    code?: string;
+  };
+};
+export type ErrorResponse = {
+  type: "error";
+  code: string;
+  message: string;
+};
+export type Response = SuccessResponse | ErrorResponse;

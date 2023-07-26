@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-26 22:59
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 00:15
+ * @lastEditTime: 2023-03-17 23:19
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -12,8 +12,8 @@
  * Volcano Translate.
  */
 export interface VolcanoTranslateResult {
-  TranslationList: VolcanoTranslationList[];
-  ResponseMetaData: VolcanoResponseMetaData;
+  TranslationList?: VolcanoTranslationList[];
+  ResponseMetadata: VolcanoResponseMetaData;
 }
 
 export interface VolcanoResponseMetaData {

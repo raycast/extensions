@@ -38,7 +38,7 @@ body:
         3. Run '...'
         4. See error...
     validations:
-      required: false
+      required: true
   - type: textarea
     id: current-behaviour
     attributes:

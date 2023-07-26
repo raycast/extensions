@@ -59,7 +59,13 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
   useEffect(() => {
     getBookmarks(profile)
       .then((bookmarks) => {
-        setData(bookmarks.filter((bookmark) => bookmark.title.toLowerCase().includes(query?.toLowerCase() || "")));
+        setData(
+          bookmarks.filter(
+            (bookmark) =>
+              bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
+              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
+          )
+        );
         setIsLoading(false);
       })
       .catch((e) => {

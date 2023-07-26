@@ -11,8 +11,8 @@ import DeploymentsList from "./deployments-list";
 import EnvironmentVariables from "./environment-variables-list";
 
 const ProjectListSection = () => {
-  const { selectedTeam, user } = useVercel();
-  const url = getFetchProjectsURL(selectedTeam?.id);
+  const { selectedTeam, teams, user } = useVercel();
+  const url = getFetchProjectsURL(selectedTeam);
 
   const { isLoading, data, revalidate } = useFetch<{
     projects: Project[];
@@ -64,7 +64,7 @@ const ProjectListSection = () => {
                           username={user?.username}
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           deployment={project.latestDeployments[0] as any}
-                          selectedTeam={selectedTeam}
+                          selectedTeam={teams?.find((team) => team.id === selectedTeam)}
                         />
                       );
                     } else {

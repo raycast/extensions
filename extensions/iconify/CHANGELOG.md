@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix] - 2023-03-30
+
+- Fix searching when viewing large icon sets that are paginated.
+
 ## [Improvements] - 2023-03-06
 
 - Display icons using a `Grid` instead of `List`

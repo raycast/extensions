@@ -2,6 +2,7 @@ import { Detail } from "@raycast/api";
 import { Fragment } from "react";
 
 import { User } from "../api/users";
+import { getUserAvatar } from "../helpers/avatars";
 import {
   CustomFieldSchema,
   getCustomFieldsForDetail,
@@ -19,6 +20,8 @@ export default function IssueDetailCustomFields({ fields }: IssueDetailCustomFie
   return (
     <>
       {fields.map(({ key, name, value, fieldSchema }) => {
+        if (!name) return null;
+
         let component;
         switch (fieldSchema) {
           case CustomFieldSchema.datePicker: {
@@ -42,6 +45,11 @@ export default function IssueDetailCustomFields({ fields }: IssueDetailCustomFie
           case CustomFieldSchema.float: {
             const typedValue = value as number;
             component = <Detail.Metadata.Label title={name} text={String(typedValue)} />;
+            break;
+          }
+          case CustomFieldSchema.team: {
+            const typedValue = value as { name: string };
+            component = <Detail.Metadata.Label title={name} text={typedValue.name} />;
             break;
           }
           case CustomFieldSchema.labels: {
@@ -86,7 +94,7 @@ export default function IssueDetailCustomFields({ fields }: IssueDetailCustomFie
           case CustomFieldSchema.userPicker: {
             const typedValue = value as User;
             component = (
-              <Detail.Metadata.Label title={name} text={typedValue.displayName} icon={typedValue.avatarUrls["32x32"]} />
+              <Detail.Metadata.Label title={name} text={typedValue.displayName} icon={getUserAvatar(typedValue)} />
             );
             break;
           }

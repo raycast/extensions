@@ -10,6 +10,10 @@
 
 Use the extension's search fields as you would use the ones on Google Maps. They can take regular addresses, as well as building names.
 
+## Autofill
+
+This extension provides the option to autofill the destination field of the `Find Place` and `Travel To` commands. The field will be filled using highlighted text or the last copied text if enabled. Enable it in the extension's settings.
+
 ## Privacy
 
 This extension only stores your address locally to pass it to the Google Maps API. This extension does nothing else with your info.

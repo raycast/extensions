@@ -36,6 +36,9 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
 
   const cycle = issue?.cycle ? formatCycle(issue.cycle) : null;
 
+  const relatedIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "related") : null;
+  const duplicateIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "duplicate") : null;
+
   return (
     <Detail
       markdown={markdown}
@@ -110,6 +113,22 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                       : { source: { light: "light/backlog.svg", dark: "dark/backlog.svg" } }
                   }
                 />
+
+                {!!relatedIssues && relatedIssues.length > 0 ? (
+                  <Detail.Metadata.TagList title="Related">
+                    {relatedIssues.map(({ id, relatedIssue }) => (
+                      <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
+                    ))}
+                  </Detail.Metadata.TagList>
+                ) : null}
+
+                {!!duplicateIssues && duplicateIssues.length > 0 ? (
+                  <Detail.Metadata.TagList title="Duplicates">
+                    {duplicateIssues.map(({ id, relatedIssue }) => (
+                      <Detail.Metadata.TagList.Item key={id} text={relatedIssue.identifier} />
+                    ))}
+                  </Detail.Metadata.TagList>
+                ) : null}
               </Detail.Metadata>
             ),
             actions: (

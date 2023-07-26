@@ -1,4 +1,4 @@
-import { Collection, createClient, ErrorResponse, Photo, Photos, Video } from "pexels";
+import { Collection, createClient, ErrorResponse, Photo, Photos, Video, Videos } from "pexels";
 import React, { useCallback, useEffect, useState } from "react";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { CollectionMediasResponse, CollectionsResponse, SearchRequest } from "../types/types";
@@ -201,4 +201,76 @@ export const getCollectionMedias = (id: string, page: number) => {
   }, [fetchData]);
 
   return { collectionMedias: collectionMedias, loading: loading };
+};
+
+export const searchVideos = (searchRequest: SearchRequest) => {
+  const { searchContent, page } = searchRequest;
+  const [pexelsVideos, setPexelsVideos] = useState<Videos>({
+    total_results: 0,
+    page: 0,
+    next_page: 1,
+    per_page: 15,
+    videos: [],
+  });
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    if (isEmpty(searchContent)) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const videosResponse = await pexelsClient.videos.search({
+        query: searchContent,
+        per_page: 15,
+        page: page,
+      });
+      if (page === 1) {
+        //search new content
+        if ((videosResponse as ErrorResponse).error) {
+          console.error((videosResponse as ErrorResponse).error);
+          await showToast(Style.Failure, String((videosResponse as ErrorResponse).error));
+        } else {
+          setPexelsVideos(videosResponse as Videos);
+        }
+      } else {
+        //load more content
+        await updatePexelsVideo(videosResponse, pexelsVideos, setPexelsVideos, page);
+      }
+    } catch (e) {
+      console.error(String(e));
+      await showToast(Style.Failure, String(e));
+    }
+    setLoading(false);
+  }, [searchContent, page]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { pexelsVideos: pexelsVideos, loading: loading };
+};
+
+const updatePexelsVideo = async (
+  photosResponse: Videos | ErrorResponse,
+  pexelsVideos: Videos,
+  setPexelsVideos: React.Dispatch<React.SetStateAction<Videos>>,
+  page: number
+) => {
+  if ((photosResponse as ErrorResponse).error) {
+    console.error((photosResponse as ErrorResponse).error);
+    await showToast(Style.Failure, String((photosResponse as ErrorResponse).error));
+  } else {
+    const newVideos = photosResponse as Videos;
+    const allVideos = pexelsVideos.videos.concat(newVideos.videos);
+    setPexelsVideos({
+      url: newVideos.url,
+      total_results: newVideos.videos.length,
+      page: newVideos.page,
+      per_page: newVideos.per_page,
+      next_page: page + 1,
+      videos: allVideos,
+    });
+  }
 };

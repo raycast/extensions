@@ -1,0 +1,11 @@
+# dependencies
+/node_modules
+
+# misc
+.DS_Store
+
+# other
+raycast-env.d.ts
+/.idea
+
+

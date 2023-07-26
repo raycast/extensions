@@ -3,7 +3,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function CloudWatch() {
   const [search, setSearch] = useState<string>("");
@@ -52,7 +52,7 @@ function LogGroupEntry({ logGroup }: { logGroup: LogGroup }) {
 
 async function fetchLogGroups(search: string, token?: string, accLogGroups?: LogGroup[]): Promise<LogGroup[]> {
   if (search.length < 4) return [];
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
 
   const { nextToken, logGroups } = await new CloudWatchLogsClient({}).send(
     new DescribeLogGroupsCommand({ nextToken: token, logGroupNamePattern: search || undefined })

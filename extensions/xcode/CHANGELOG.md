@@ -1,5 +1,17 @@
 # Xcode Changelog
 
+## [List Apple Devices] - 2023-07-25
+
+- Added "List Apple Devices" command to have a list of Apple devices and their matching product name/code name.
+
+## [Filtering Simulators on State with Dropdown] - 2023-07-02
+
+- Added a dropdown in simulators list to filter simulators on the boot state.
+
+## [Bug Fix] - 2023-06-21
+
+- Fixed a bug where creating a Swift playground failed due to an incorrect date format.
+
 ## [Bug Fix] - 2023-02-26
 
 - Fixed a bug where the URL to an Apple's developer documentation entry wasn't constructed correctly.
@@ -14,7 +26,7 @@
 
 ## [Bug Fix] - 2023-02-01
 
-- Fixed a bug where the URL of a Swift package wasn't created correctly. 
+- Fixed a bug where the URL of a Swift package wasn't created correctly.
 
 ## [Recent Builds Performance Improvements] - 2023-01-24
 
@@ -44,7 +56,7 @@
 
 ## [Menu Bar Project Favorites] - 2022-10-14
 
-- Added an option to show Xcode Project favorites in the menu bar. 
+- Added an option to show Xcode Project favorites in the menu bar.
 
 ## [Confirmation Alerts] - 2022-10-05
 

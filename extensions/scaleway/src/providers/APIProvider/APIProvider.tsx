@@ -1,3 +1,8 @@
+// @scaleway/sdk extends Request
+// https://github.com/scaleway/scaleway-sdk-js/blob/397fc3edf40583f31a89ecb5db401f36ddd5844b/packages/clients/src/scw/fetch/http-interceptors.ts#L21
+// it's only available on browser or node 18 without remove experimental feature.
+// it's was remove inside raycast https://developers.raycast.com/changelog#1.46.0-2023-01-18
+import 'cross-fetch/polyfill'
 import {
   Account,
   AppleSilicon,
@@ -14,9 +19,11 @@ import {
   RDB,
   Redis,
   Registry,
+  Secret,
   TransactionalEmail,
   VPC,
   VPCGW,
+  Webhosting,
   createClient,
   enableConsoleLogger,
 } from '@scaleway/sdk'
@@ -46,6 +53,8 @@ type APIContextValue = {
   registryV1: Registry.v1.API
   relationalDatabaseV1: RDB.v1.API
   transactionalEmailV1alpha1: TransactionalEmail.v1alpha1.API
+  webhostingV1alpha1: Webhosting.v1alpha1.API
+  secretManager: Secret.v1alpha1.API
 }
 
 const APIContext = createContext<APIContextValue | undefined>(undefined)
@@ -87,6 +96,8 @@ export const APIProvider = ({ children }: APIProviderProps) => {
       registryV1: new Registry.v1.API(client),
       relationalDatabaseV1: new RDB.v1.API(client),
       transactionalEmailV1alpha1: new TransactionalEmail.v1alpha1.API(client),
+      webhostingV1alpha1: new Webhosting.v1alpha1.API(client),
+      secretManager: new Secret.v1alpha1.API(client),
     }
   }, [])
 

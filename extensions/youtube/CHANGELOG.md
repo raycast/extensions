@@ -1,5 +1,27 @@
 # YouTube Changelog
 
+## [Enhancements] - 2023-06-20
+
+- Added video duration info on details view
+
+## [Update] - 2023-06-15
+
+- Add support for fallback commands
+
+## [Enhancements] - 2023-04-18
+
+- Bug fixes for recent and pinned items not updating correctly
+- Recent items were not being added until relaunching the command
+- Pinned items were not being added to the front
+- Now all actions for videos and channels will add them to the recent list
+- Added new empty view
+
+## [Enhancements] - 2023-04-13
+
+- Optimized the experience
+- Using cache instead of local storage
+- Using a 4/3 aspect ratio for videos
+
 ## [Search From Root] - 2023-02-08
 - Add query parameter to Search Videos and Search Channels commands
 

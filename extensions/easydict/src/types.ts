@@ -2,17 +2,17 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-11 21:15
+ * @lastEditTime: 2023-03-16 18:32
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { Image } from "@raycast/api";
-import googleTranslateApi from "@vitalets/google-translate-api";
+import { RawResponse } from "@vitalets/google-translate-api/dist/cjs/types";
 import { ChildProcess } from "child_process";
 import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
-import { LanguageDetectType } from "./detectLanauge/types";
+import { LanguageDetectType } from "./detectLanguage/types";
 import { IcibaDictionaryResult } from "./dictionary/iciba/interface";
 import { LingueeDictionaryResult, LingueeListItemType } from "./dictionary/linguee/types";
 import {
@@ -42,17 +42,18 @@ export enum TranslationType {
   Google = "Google Translate",
   Bing = "Bing Translate",
   Volcano = "Volcano Translate",
+  OpenAI = "OpenAI Translate",
 }
 
-export enum DicionaryType {
+export enum DictionaryType {
   Youdao = "Youdao Dictionary",
   Iciba = "Iciba Dictionary",
   Eudic = "Eudic Dictionary",
   Linguee = "Linguee Dictionary",
 }
 
-export type QueryType = TranslationType | DicionaryType;
-export type RequestType = TranslationType | DicionaryType | LanguageDetectType;
+export type QueryType = TranslationType | DictionaryType;
+export type RequestType = TranslationType | DictionaryType | LanguageDetectType;
 
 export interface QueryTypeResult {
   type: QueryType;
@@ -61,6 +62,10 @@ export interface QueryTypeResult {
   translations: string[]; // each translation is a paragraph.
   oneLineTranslation?: string; // one line translation. will automatically give value when updating if type is TranslationType.
   errorInfo?: RequestErrorInfo;
+
+  onMessage?: (message: { content: string; role: string }) => void;
+  onError?: (error: string) => void;
+  onFinish?: (reason: string) => void;
 }
 
 export type QueryResponse =
@@ -77,7 +82,8 @@ export type QueryResponse =
   | AppleTranslateResult
   | VolcanoTranslateResult
   | VolcanoDetectResult
-  | GoogleTranslateResult;
+  | GoogleTranslateResult
+  | OpenAITranslateResult;
 
 export interface RequestErrorInfo {
   type: RequestType;
@@ -127,9 +133,16 @@ export interface DeepLTranslationItem {
   text: string;
 }
 
-export type GoogleTranslateResult = googleTranslateApi.ITranslateResponse;
+export type GoogleTranslateResult = {
+  text: string;
+  raw: RawResponse;
+};
 
 export interface AppleTranslateResult {
+  translatedText: string;
+}
+
+export interface OpenAITranslateResult {
   translatedText: string;
 }
 
@@ -176,12 +189,12 @@ export interface ListAccessoryItem {
 
 export type ListItemDisplayType = LingueeListItemType | YoudaoDictionaryListItemType | QueryType;
 
-export interface ClipboardRecoredItem {
+export interface ClipboardRecordedItem {
   key: string;
   value: string;
 }
 
-export interface QueryRecoredItem {
+export interface QueryRecordedItem {
   timestamp: number;
   queryText: string;
   result?: string;

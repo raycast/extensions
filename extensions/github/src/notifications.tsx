@@ -60,7 +60,12 @@ function Notifications() {
       {readNotifications.length > 0 ? (
         <List.Section title="Read">
           {readNotifications.map((notification) => (
-            <NotificationListItem key={notification.id} notification={notification} mutateList={mutateList} />
+            <NotificationListItem
+              key={notification.id}
+              notification={notification}
+              userId={viewer?.id}
+              mutateList={mutateList}
+            />
           ))}
         </List.Section>
       ) : null}

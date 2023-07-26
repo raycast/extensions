@@ -6,7 +6,7 @@ export function Video(props: {
   title: string;
   cover: string;
   url: string;
-  uploader: Bilibili.uploader;
+  uploader: Bilibili.Uploader;
   duration: string;
   pubdate: number;
   stat: {

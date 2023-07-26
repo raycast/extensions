@@ -126,7 +126,7 @@ interface LikesResult {
 // Options
 interface UnsplashPreferences {
   accessKey: string;
-  username: string;
+  secretKey: string;
   orientation: "all" | "landscape" | "portrait" | "squarish";
   downloadSize: "raw" | "full" | "regular" | "small" | "thumb";
   collections: string;
@@ -134,4 +134,6 @@ interface UnsplashPreferences {
   applyTo: "current" | "every";
   includeDefaults: "yes" | "no";
   updateTime: string;
+  gridItemSize: "small" | "medium" | "large";
+  showImageTitle: boolean;
 }

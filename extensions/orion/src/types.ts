@@ -43,3 +43,11 @@ export interface HistoryItem {
   lastVisitTime: string;
   lastVisitDate: string;
 }
+
+// Tabs
+
+export interface Tab {
+  title: string;
+  url: string;
+  window_id: number;
+}

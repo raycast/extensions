@@ -1,3 +1,3 @@
-import { AppleSilicon } from './appleSilicon/AppleSilicon'
+import { AppleSilicon } from './products/appleSilicon/AppleSilicon'
 
 export default () => <AppleSilicon />

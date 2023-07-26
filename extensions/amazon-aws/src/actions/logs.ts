@@ -7,6 +7,7 @@ import {
 } from "@aws-sdk/client-cloudwatch-logs";
 import { AWS_URL_BASE } from "../constants";
 import { LogStartTimes } from "../interfaces";
+import { isReadyToFetch } from "../util";
 
 const cloudWatchLogsClient = new CloudWatchLogsClient({});
 export async function fetchLogs(
@@ -15,7 +16,7 @@ export async function fetchLogs(
   logStreamNamePrefix?: string,
   logStreamNames?: string[]
 ): Promise<FilteredLogEvent[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   return await fetchAllLogs(logGroupName, startTime, logStreamNamePrefix, logStreamNames);
 }
 
@@ -24,7 +25,7 @@ export async function fetchLogStreams(
   token?: string,
   accEvents?: LogStream[]
 ): Promise<LogStream[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { logStreams, nextToken } = await cloudWatchLogsClient.send(
     new DescribeLogStreamsCommand({ logGroupName, nextToken: token })
   );

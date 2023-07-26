@@ -1,16 +1,7 @@
 /* Put types that you feel like they still don't deserve a file of their own here */
 
-import { ERRORS } from "~/constants/general";
-
-export type Preferences = {
-  cliPath: string;
-  clientId: string;
-  clientSecret: string;
-  fetchFavicons: boolean;
-  serverUrl: string;
-  serverCertsPath: string;
-  repromptIgnoreDuration: string;
-};
+// This should be updated with the command "name" values in the package.json file
+export type CommandName = "search" | "generate-password" | "generate-password-quick";
 
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";
 export type VaultState = {
@@ -18,5 +9,3 @@ export type VaultState = {
   status: VaultStatus;
   serverUrl: string | null;
 };
-
-export type ErrorType = (typeof ERRORS)[keyof typeof ERRORS];

@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { getIssue, Issue } from "../api/issues";
+import { getProjectAvatar, getUserAvatar } from "../helpers/avatars";
 import { formatDate, getCustomFieldsForDetail, getIssueDescription, getStatusColor } from "../helpers/issues";
 
 import IssueActions from "./IssueActions";
@@ -27,8 +28,12 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
   const { customMarkdownFields, customMetadataFields } = useMemo(() => getCustomFieldsForDetail(issue), [issue]);
 
   const markdown = useMemo(() => {
-    let markdown = `# ${issue?.fields.summary}`;
-    const description = issue?.renderedFields?.description;
+    if (!issue) {
+      return "";
+    }
+
+    let markdown = `# ${issue.fields.summary}`;
+    const description = issue.renderedFields?.description;
 
     if (description) {
       markdown += `\n\n${getIssueDescription(description)}`;
@@ -40,12 +45,6 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
 
     return markdown;
   }, [issue]);
-
-  // If coming from Create Issue's toast action, there's no initial issue
-  // so don't display anything until the data is fully loaded
-  if (!issue) {
-    return null;
-  }
 
   return (
     <Detail
@@ -64,37 +63,41 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
 
           <Detail.Metadata.Label title="Issue Key" text={issue?.key} icon={issue?.fields.issuetype.iconUrl} />
 
-          <Detail.Metadata.Label
-            title="Project"
-            text={issue?.fields.project.name}
-            icon={issue?.fields.project.avatarUrls["32x32"]}
-          />
+          {issue?.fields.project ? (
+            <Detail.Metadata.Label
+              title="Project"
+              text={issue.fields.project.name ?? "None"}
+              icon={getProjectAvatar(issue.fields.project)}
+            />
+          ) : null}
 
           <Detail.Metadata.Label
             title="Status"
             text={{
               value: issue?.fields.status.name || "",
-              color: getStatusColor(issue?.fields.status.statusCategory.colorName),
+              color: issue?.fields.status.statusCategory
+                ? getStatusColor(issue?.fields.status.statusCategory.colorName)
+                : undefined,
             }}
           />
 
           <Detail.Metadata.Label
             title="Priority"
-            text={issue?.fields.priority.name}
-            icon={issue?.fields.priority.iconUrl}
+            text={issue?.fields.priority?.name ?? "None"}
+            icon={issue?.fields.priority?.iconUrl}
           />
 
           <Detail.Metadata.Label
             title="Assignee"
             text={issue?.fields.assignee ? issue?.fields.assignee.displayName : "Unassigned"}
-            icon={issue?.fields.assignee ? issue?.fields.assignee.avatarUrls["32x32"] : Icon.Person}
+            icon={getUserAvatar(issue?.fields.assignee)}
           />
 
           {issue ? (
             <Detail.Metadata.Label
               title="Reporter"
               text={issue.fields.reporter ? issue.fields.reporter.displayName : "Unassigned"}
-              icon={issue.fields.reporter ? issue.fields.reporter.avatarUrls["32x32"] : Icon.Person}
+              icon={getUserAvatar(issue.fields.reporter)}
             />
           ) : null}
 

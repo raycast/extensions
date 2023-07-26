@@ -14,12 +14,15 @@ If you enjoy using Timers for Raycast and/or want to support further development
 
 ## Commands
 
+_Note: if you do not receive notifications from the timer completion, you may need to allow Script Editor notifications in your Focus settings._
+
 - [x] Start Timer (2, 5, 10, 15, 25, 30, 45, 60, and 90 minute variations)
 - [x] Start Custom Timer (allows you to set a custom countdown and optionally save it for future use)
 - [x] Manage Timers (view/rename/start/stop running or preset countdown timers)
 - [x] Start Stopwatch
 - [x] Manage Stopwatches (view/start/stop running stopwatches)
 - [x] Dismiss Timer (stop a ringing alert for a finished timer, if you've checked the Ring Continously setting)
+- [x] Preview Alert Sounds (test out the bundled timer alert sounds before selecting one in settings)
 
 ### Not Yet Implemented
 

@@ -101,6 +101,5 @@ async function refreshTokens(
   }
 
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;
-  tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
   return tokenResponse;
 }

@@ -17,10 +17,12 @@ import {
   OpenProjectPipelinesPushAction,
   OpenProjectSecurityComplianceInBrowserAction,
   OpenProjectSettingsInBrowserAction,
+  OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
 import { CacheActionPanelSection } from "./cache_actions";
+import { ProjectListEmptyView } from "./project";
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
@@ -30,7 +32,10 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
   }
   accessories.push({
     text: project.star_count.toString(),
-    icon: { source: Icon.Star, tintColor: Color.Yellow },
+    icon: {
+      source: Icon.Star,
+      tintColor: project.star_count > 0 ? Color.Yellow : null,
+    },
     tooltip: `Number of stars: ${project.star_count}`,
   });
   return (
@@ -54,6 +59,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <OpenProjectBranchesPushAction project={project} />
             <OpenProjectPipelinesPushAction project={project} />
             <OpenProjectMilestonesPushAction project={project} />
+            <OpenProjectWikiInBrowserAction project={project} />
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
@@ -83,14 +89,17 @@ export function ProjectSearchList(): JSX.Element {
 
   return (
     <List
-      searchBarPlaceholder="Filter Projects by name..."
+      searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
     >
-      {projects?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+      <List.Section title="Projects" subtitle={`${projects?.length}`}>
+        {projects?.map((project) => (
+          <ProjectListItem key={project.id} project={project} />
+        ))}
+      </List.Section>
+      <ProjectListEmptyView />
     </List>
   );
 }

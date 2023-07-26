@@ -6,6 +6,7 @@ import fetch from "node-fetch";
 import { dirname, basename, join } from "path";
 import { compressImageResponseScheme } from "./zodSchema";
 import { Preference } from "./types";
+import { resolveOutputPath } from "./lib/utils";
 
 const preferences = getPreferenceValues<Preference>();
 
@@ -136,7 +137,7 @@ const _compressAndResizeImage = async (
 
   let outputDir = dirname(filePath);
   if (!preferences.overwrite) {
-    outputDir = join(dirname(filePath), "compressed-images");
+    outputDir = resolveOutputPath(filePath, preferences.destinationFolderPath);
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir);
     }

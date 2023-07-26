@@ -1,17 +1,23 @@
 import { useFetch } from "@raycast/utils";
+import { URL } from "node:url";
 import { useMemo } from "react";
 import { authHeaders, BASE_URL } from "../api";
 import { usePreviousTable } from "./usePreviousTable";
+import { useTeams } from "./useTeams";
 
-export function useTable() {
-  const { data, isLoading } = useFetch<Standings>(`${BASE_URL}/standings`, {
+const standingsURL = new URL(`${BASE_URL}/standings`);
+
+export function useTable(season: string) {
+  standingsURL.searchParams.set("season", season);
+  const { data, isLoading, error } = useFetch<Standings>(standingsURL.toString(), {
     headers: authHeaders,
   });
 
-  const previousTable = usePreviousTable();
+  const previousTable = usePreviousTable(season);
+  const [teams] = useTeams();
 
   const table = useMemo(() => {
-    if (!data) {
+    if (!data || error) {
       return [];
     }
 
@@ -22,13 +28,15 @@ export function useTable() {
 
     return standings.table.map((table) => {
       const previous = previousTable.find((p) => p.team.id === table.team.id);
+      const team = teams.find((t) => t.id === table.team.id) ?? table.team;
 
       return {
         ...table,
+        team,
         previousPosition: previous?.position,
       };
     });
-  }, [data, previousTable]);
+  }, [data, previousTable, teams]);
 
   return [table, isLoading] as const;
 }

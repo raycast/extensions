@@ -5,7 +5,7 @@ import {
   ActionPanel,
   Action,
   Icon,
-  openCommandPreferences,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TransAPIErrCode } from "./common/const";
@@ -58,17 +58,20 @@ export default function Command() {
       .then((selectedText) => {
         const text = selectedText.trim();
         if (text.length > 0) {
-          updateInputState(text);
-          updateInputTempState(text);
+          onInputChange(text, true);
         }
       })
       .catch((e) => e);
   }
 
-  function onInputChange(queryText: string) {
+  function onInputChange(queryText: string, immediately?: boolean) {
     updateLoadingState(false);
     updateInputState(queryText);
     clearTimeout(delayFetchTranslateAPITimer);
+    if (immediately) {
+      updateInputTempState(queryText);
+      return;
+    }
     delayFetchTranslateAPITimer = setTimeout(() => {
       updateInputTempState(queryText);
     }, preferences.delayTransInterval || 800);
@@ -120,7 +123,7 @@ export default function Command() {
         });
         if (!hasLoading) {
           updateLoadingState(false);
-          if (preferences.enableHistory) {
+          if (preferences.enableHistory && transResultsNew.length) {
             const history: ITransHistory = {
               time: new Date().getTime(),
               from: transResultsNew[0].from.langId,
@@ -158,7 +161,7 @@ export default function Command() {
             icon={Icon.ComputerChip}
             title="Open iTranslate Preferences"
             shortcut={{ modifiers: ["cmd"], key: "p" }}
-            onAction={openCommandPreferences}
+            onAction={openExtensionPreferences}
           />
         </ActionPanel>
       );
@@ -177,7 +180,7 @@ export default function Command() {
           icon={Icon.ComputerChip}
           title="Open iTranslate Preferences"
           shortcut={{ modifiers: ["cmd"], key: "p" }}
-          onAction={openCommandPreferences}
+          onAction={openExtensionPreferences}
         />
       </ActionPanel>
     );

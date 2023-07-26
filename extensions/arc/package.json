@@ -7,9 +7,20 @@
   "author": "thomas",
   "owner": "the-browser-company",
   "access": "public",
-  "categories": ["Web", "Applications", "Productivity"],
+  "categories": [
+    "Web",
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
-  "contributors": ["pomdtr", "zach", "ankitchouhan1020", "pernielsentikaer"],
+  "contributors": [
+    "pomdtr",
+    "zach",
+    "ankitchouhan1020",
+    "pernielsentikaer",
+    "danpalmer",
+    "hugivar"
+  ],
   "commands": [
     {
       "name": "search-history",
@@ -83,8 +94,15 @@
           "title": "URL",
           "description": "The URL to open in the new tab",
           "type": "textfield",
-          "required": false,
-          "default": "https://google.com"
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
         }
       ]
     },
@@ -101,6 +119,36 @@
       "description": "Search tabs, history and search suggestions",
       "mode": "view",
       "preferences": [
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used for suggestions",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            }
+          ]
+        },
         {
           "name": "sorting",
           "title": "Sorting",
@@ -164,8 +212,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.0",
+    "@raycast/api": "^1.53.0",
     "@raycast/utils": "^1.4.16",
+    "cross-fetch": "^3.1.6",
     "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",
@@ -174,16 +223,14 @@
     "semver": "^7.3.8"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/is-url": "^1.2.30",
     "@types/lodash": "^4.14.191",
     "@types/nanoid": "^3.0.0",
     "@types/node": "^18.8.3",
     "@types/react": "^18.0.17",
     "@types/semver": "^7.3.13",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.8.4",
     "typescript": "^4.4.3"
   },

@@ -89,7 +89,7 @@ export default function DatabaseList() {
           return (
             <List.Section key={item.id} title={item.name} subtitle={subtitle}>
               {item.connections.map((connection) => (
-                <ConnectionListItem key={connection.id} connection={connection} />
+                <ConnectionListItem key={connection.id} connection={connection} groupName={item.name} />
               ))}
             </List.Section>
           );
@@ -128,8 +128,9 @@ export default function DatabaseList() {
     return `item${itemsLength > 1 ? "s" : ""}`;
   }
 
-  function ConnectionListItem(props: { connection: Connection }) {
+  function ConnectionListItem(props: { connection: Connection; groupName: string }) {
     const connection = props.connection;
+    const groupName = props.groupName;
 
     let subtitle = connection.isOverSSH ? "SSH" : connection.isSocket ? "SOCKET" : connection.DatabaseHost;
     if (connection.database && connection.Driver !== "SQLite") {
@@ -158,6 +159,7 @@ export default function DatabaseList() {
             <Action.OpenInBrowser title="Open Database" icon={Icon.Coin} url={`tableplus://?id=${connection.id}`} />
           </ActionPanel>
         }
+        keywords={preferences.searchByGroupName ? [groupName] : []}
       />
     );
   }

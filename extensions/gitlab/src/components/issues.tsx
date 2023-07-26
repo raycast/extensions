@@ -42,6 +42,10 @@ const GET_ISSUE_DETAIL = gql`
   }
 `;
 
+export function IssueListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Issues" icon={{ source: "issues.svg", tintColor: Color.PrimaryText }} />;
+}
+
 export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
@@ -204,7 +208,7 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
       }}
       accessories={[
         {
-          text: issue.milestone ? issue.milestone.title : undefined,
+          tag: issue.milestone ? issue.milestone.title : "",
           tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,
         },
         { date: new Date(issue.updated_at), tooltip: `Updated: ${toLongDateString(issue.updated_at)}` },
@@ -272,7 +276,7 @@ export function IssueList({
 
   return (
     <List
-      searchBarPlaceholder="Search issues by name..."
+      searchBarPlaceholder="Search Issues by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
@@ -284,15 +288,28 @@ export function IssueList({
           <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
+      <IssueListEmptyView />
     </List>
   );
 }
 
-function getIssueQuery(query: string | undefined) {
-  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee"]);
+export function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee", "state"]);
 }
 
-function injectQueryNamedParameters(
+function isValidIssueState(texts: string[] | undefined) {
+  if (!texts) {
+    return false;
+  }
+  for (const v of texts) {
+    if (![IssueState.closed.valueOf(), IssueState.opened.valueOf(), IssueState.all.valueOf()].includes(v)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function injectQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: IssueScope,
@@ -330,6 +347,12 @@ function injectQueryNamedParameters(
             }
           }
           break;
+        case "state": {
+          console.log(extraParamVal);
+          if (isValidIssueState(extraParamVal)) {
+            requestParams[prefixed("state")] = extraParamVal.join(",");
+          }
+        }
       }
     }
   }

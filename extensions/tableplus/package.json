@@ -6,6 +6,9 @@
   "version": "1.2.1",
   "icon": "icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "nagauta"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -33,6 +36,15 @@
       "title": "Show Connection Driver",
       "description": "Show Connection Driver",
       "label": "Show Connection Driver in List"
+    },
+    {
+      "name": "searchByGroupName",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Search by Group Name",
+      "description": "Toggle the Ability to Search by Group Name.",
+      "label": "Search by Group Name"
     }
   ],
   "dependencies": {

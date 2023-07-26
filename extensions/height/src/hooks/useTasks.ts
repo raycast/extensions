@@ -1,39 +1,54 @@
-import { useFetch } from "@raycast/utils";
+import { getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { orderBy } from "lodash-es";
 import { useMemo } from "react";
-import { ApiHeaders, ApiUrls } from "../api/helpers";
-import { TaskObject } from "../types/task";
-import { ApiResponse } from "../types/utils";
+import { ApiUrls } from "../api/helpers";
+import { ApiTask } from "../api/task";
+import { Preferences, UseCachedPromiseOptions } from "../types/utils";
 
 type Props = {
   listId?: string;
   assigneeId?: string;
-  options?: Parameters<typeof useFetch<ApiResponse<TaskObject[]>>>[1];
+  options?: UseCachedPromiseOptions<typeof ApiTask.get>;
 };
 
-export default function useTasks({ listId, assigneeId, options }: Props = {}) {
+type EndpointProps = Pick<Props, "listId" | "assigneeId"> & {
+  apiResultsLimit?: Preferences["apiResultsLimit"];
+};
+
+const endpoint = ({ listId, assigneeId, apiResultsLimit }: EndpointProps) => {
   const filters = {};
 
   if (listId) {
     Object.assign(filters, { listIds: { values: [listId] } });
   }
 
-  if (assigneeId !== undefined && assigneeId !== "all") {
+  if (assigneeId && assigneeId !== "all") {
     Object.assign(filters, { assigneesIds: { values: [assigneeId] } });
   }
 
   const stringifiedFilters = JSON.stringify(filters);
 
-  const order = JSON.stringify([{ column: "createdAt", direction: "DESC" }]);
+  const order = JSON.stringify([
+    { column: "lastActivityAt", direction: "DESC" },
+    { column: "createdAt", direction: "DESC" },
+  ]);
 
   const include = JSON.stringify(["Lists", "ParentTasks"]);
 
-  const endpoint = `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}`;
+  return `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}&limit=${apiResultsLimit}`;
+};
 
-  const { data, error, isLoading, mutate } = useFetch<ApiResponse<TaskObject[]>>(endpoint, {
-    headers: ApiHeaders,
-    ...options,
-  });
+export default function useTasks({ listId, assigneeId, options }: Props = {}) {
+  const { apiResultsLimit } = getPreferenceValues<Preferences>();
+
+  const { data, error, isLoading, mutate } = useCachedPromise(
+    (listId, assigneeId, apiResultsLimit) => ApiTask.get(endpoint({ listId, assigneeId, apiResultsLimit })),
+    [listId, assigneeId, apiResultsLimit],
+    {
+      ...options,
+    }
+  );
 
   const { unorderedTasks, orderedTasks } = useMemo(() => {
     const unorderedTasks = data?.list?.filter(
