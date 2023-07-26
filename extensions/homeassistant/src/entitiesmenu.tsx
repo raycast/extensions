@@ -31,9 +31,7 @@ function StatesAllMenubarItem() {
 export default function MediaPlayerMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
   const entityIDs = entitiesPreferences();
-  const entities = states
-    ?.filter((s) => entityIDs.includes(s.entity_id))
-    .sort((a, b) => getFriendlyName(a).localeCompare(getFriendlyName(b)));
+  const entities = states?.filter((s) => entityIDs.includes(s.entity_id));
   const header = error ? getErrorMessage(error) : undefined;
 
   return (
