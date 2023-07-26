@@ -3,6 +3,7 @@
 ## [Menu] - 2023-07-25
 
 - Add Mediaplayer Menu Bar command
+- Add Entities Menu Bar command to allow to add specific entities in the Menu Bar
 
 ## [Modernize] - 2023-07-16
 

@@ -176,7 +176,7 @@ function getLightTintColor(state: State): Color.ColorLike {
   return lightColor[sl] || PrimaryIconColor;
 }
 
-function getIcon(state: State): Image.ImageLike | undefined {
+export function getIcon(state: State): Image.ImageLike | undefined {
   const e = state.entity_id;
   if (e.startsWith("light")) {
     const color = getLightTintColor(state);
