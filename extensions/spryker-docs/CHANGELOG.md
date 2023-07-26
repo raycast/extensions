@@ -1,5 +1,5 @@
 # Spryker Docs Changelog
 
-## [Added Spryker Docs] - 2023-07-20
+## [Added Spryker Docs] - {PR_MERGE_DATE}
 
 Initial version code
