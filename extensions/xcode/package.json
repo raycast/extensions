@@ -153,6 +153,13 @@
       "mode": "view"
     },
     {
+      "name": "list-apple-devices.command",
+      "title": "List Apple Devices",
+      "subtitle": "Xcode",
+      "description": "List Apple devices with their product name and device code name.",
+      "mode": "view"
+    },
+    {
       "name": "manage-simulators.command",
       "title": "Manage Simulators",
       "subtitle": "Xcode",

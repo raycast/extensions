@@ -18,11 +18,7 @@ function PasteAction(props: { content: string; commandSummary: string }) {
   /**
    * Gets the active application and sets the current app state. The timeout will repeat until the component is unmounted by Raycast.
    */
-  const getActiveApp = async (iter = 0) => {
-    if (iter > 10) {
-      return;
-    }
-
+  const getActiveApp = async () => {
     Promise.resolve(getMenubarOwningApplication(true) as Promise<{ name: string; path: string }>)
       .then((app) => {
         setCurrentApp(app);
@@ -30,7 +26,7 @@ function PasteAction(props: { content: string; commandSummary: string }) {
       .then(() => {
         setTimeout(() => {
           logDebug("Getting active app...");
-          getActiveApp(iter + 1);
+          getActiveApp();
         }, 1000);
       });
   };

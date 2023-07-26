@@ -31,7 +31,7 @@ import {
 import { updateCommand } from "../../utils/command-utils";
 import * as fs from "fs";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME, commandCategories } from "../../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../utils/constants";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
 import { isActionEnabled } from "../../utils/action-utils";
 
@@ -709,7 +709,8 @@ export default function CommandForm(props: {
           icon={{
             source: Icon.Circle,
             tintColor:
-              commandCategories.find((category) => category.name == values.categories?.[0])?.color || Color.PrimaryText,
+              COMMAND_CATEGORIES.find((category) => category.name == values.categories?.[0])?.color ||
+              Color.PrimaryText,
           }}
         />
         <Form.Dropdown.Item
@@ -826,6 +827,7 @@ export default function CommandForm(props: {
           <Form.Dropdown.Item title="List" value="list" icon={Icon.List} />
           <Form.Dropdown.Item title="Grid" value="grid" icon={Icon.Message} />
           <Form.Dropdown.Item title="Chat" value="chat" icon={Icon.Message} />
+          <Form.Dropdown.Item title="Dialog Window" value="dialogWindow" icon={Icon.List} />
         </Form.Dropdown>
       ) : null}
 
@@ -990,7 +992,7 @@ export default function CommandForm(props: {
         info="A comma-separated list of categories for the command. This will be used to help users find your command in the store and in their prompt library."
         {...itemProps.categories}
       >
-        {commandCategories.map((category) => (
+        {COMMAND_CATEGORIES.map((category) => (
           <Form.TagPicker.Item
             key={category.name}
             title={category.name}

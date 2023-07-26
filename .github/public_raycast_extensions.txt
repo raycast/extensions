@@ -1,6 +1,8 @@
 linear
 github
+browser-bookmarks
 google-workspace
+jira
 zoom
 hypersonic
 asana
