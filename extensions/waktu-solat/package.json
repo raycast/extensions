@@ -15,7 +15,6 @@
       "name": "index",
       "title": "Waktu Solat",
       "description": "Malaysia Prayer Time (JAKIM)",
-      "interval": "2s",
       "mode": "view"
     }
   ],

@@ -1,30 +1,30 @@
-import { loadZones, Zone } from './lib/zones'
-import React, { useEffect, useState } from 'react'
-import { useCachedState } from '@raycast/utils'
-import { loadTodaySolat, PrayerTime, PrayerTimeItem } from './lib/prayer-times'
-import { Action, ActionPanel, Color, List } from '@raycast/api'
-import Accessory = List.Item.Accessory
+import { loadZones, Zone } from "./lib/zones";
+import React, { useEffect, useState } from "react";
+import { useCachedState } from "@raycast/utils";
+import { loadTodaySolat, PrayerTime, PrayerTimeItem } from "./lib/prayer-times";
+import { Action, ActionPanel, Color, List } from "@raycast/api";
+import Accessory = List.Item.Accessory;
 
 function Zones(props: { onChange: (z: Zone) => void }) {
-  const [isLoading, setLoading] = useState(true)
-  const [zones, setZones] = useCachedState<Zone[]>('zones')
+  const [isLoading, setLoading] = useState(true);
+  const [zones, setZones] = useCachedState<Zone[]>("zones");
 
   useEffect(() => {
     async function load() {
-      setZones(await loadZones())
-      setLoading(false)
+      setZones(await loadZones());
+      setLoading(false);
     }
 
     // noinspection JSIgnoredPromiseFromCall
-    load()
-  })
+    load();
+  });
   return (
     <List.Dropdown
       isLoading={isLoading}
       tooltip="Select Zone"
       storeValue={true}
       onChange={(newId) => {
-        props.onChange(zones?.find((z) => z.id == newId) || { id: newId, name: '', state: '' })
+        props.onChange(zones?.find((z) => z.id == newId) || { id: newId, name: "", state: "" });
       }}
     >
       <List.Dropdown.Section title="Zones">
@@ -33,28 +33,28 @@ function Zones(props: { onChange: (z: Zone) => void }) {
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
-  )
+  );
 }
 
 function PrayerItem(props: { item: PrayerTimeItem; items: PrayerTimeItem[] }) {
   const {
     item: { isCurrent, label, value, different, isNext },
-  } = props
-  const [tag, setTag] = useState<Accessory>()
+  } = props;
+  const [tag, setTag] = useState<Accessory>();
 
   function setupTag(): Accessory | undefined {
     return isCurrent
       ? {
-          tag: { value: 'Current', color: Color.Green },
+          tag: { value: "Current", color: Color.Green },
         }
       : isNext
       ? { tag: { value: different } }
-      : undefined
+      : undefined;
   }
 
   useEffect(() => {
-    setTag(setupTag)
-  }, [])
+    setTag(setupTag);
+  }, []);
 
   return (
     <List.Item
@@ -69,18 +69,18 @@ function PrayerItem(props: { item: PrayerTimeItem; items: PrayerTimeItem[] }) {
         </ActionPanel>
       }
     />
-  )
+  );
 }
 
 function prayerTimes() {
-  const [isLoading, setLoading] = useState(true)
-  const [prayerTime, setPrayerTime] = useState<PrayerTime>()
+  const [isLoading, setLoading] = useState(true);
+  const [prayerTime, setPrayerTime] = useState<PrayerTime>();
 
   async function onZoneChange(z: Zone) {
-    setLoading(true)
+    setLoading(true);
     // console.log('change to', z)
-    setPrayerTime(await loadTodaySolat(z.id))
-    setLoading(false)
+    setPrayerTime(await loadTodaySolat(z.id));
+    setLoading(false);
   }
 
   return (
@@ -91,10 +91,10 @@ function prayerTimes() {
         ))}
       </List.Section>
     </List>
-  )
+  );
 }
 
 // noinspection JSUnusedGlobalSymbols
 export default function Command() {
-  return prayerTimes()
+  return prayerTimes();
 }
