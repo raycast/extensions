@@ -6,7 +6,7 @@ import { State } from "../../haapi";
 import { CopyToClipboardMenubarItem } from "../menu";
 
 function volumeRange() {
-  return range(0.0, 1.0, 0.1);
+  return range(0.0, 1.0, 0.05);
 }
 
 export function MediaPlayerAllMenubarItem() {
