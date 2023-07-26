@@ -2,7 +2,7 @@
 
 ## [Big update] - 2023-07-25
 
-This update adds a new command to the Notion extension called `Quick Capture`. It allows you to quickly capture websites by selecting their URL. You can then choose to save only the URL, the full page content, or an AI-generated summary, either on a Notion page or in a database.
+This update introduces a new `Quick Capture` command. This lets you quickly save websites in Notion by using their URL or copying it onto your clipboard, then launching the command. You can choose to just save the URL, the entire webpage, or an AI-generated summary.
 
 The page preview now includes a secondary action allowing you to see a metadata panel with page properties. Many properties are supported, including title, emails, numbers, checkboxes, statuses, and more! Speaking of properties, page properties in the list view now make use of Raycast components, improving their visual appearance. Tooltips have also been added to make it easier to identify the property you are viewing. Additionally, when searching Notion pages, you can now see the last author who edited the page.
 
@@ -11,6 +11,8 @@ Page list items have also gained some actions to enhance the extension's power. 
 - Delete pages
 - Copy a page's formatted URL (useful in chat apps such as Slack)
 - Copy a page's title
+
+This update modifies a key default setting. Initially, the main action for Notion pages was to preview them in Raycast. Now, the default is to open them in Notion. If you'd like to revert back to previewing pages in Raycast, you can do so via the ﻿Search Pages preference.
 
 The extension has also been revamped under the hood to improve maintainability and ensure it stays up-to-date with the Raycast ecosystem.
 

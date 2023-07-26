@@ -1,5 +1,15 @@
 import { Readability } from "@mozilla/readability";
-import { ActionPanel, Action, Form, getSelectedText, showToast, Toast, closeMainWindow, AI } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  Clipboard,
+  getSelectedText,
+  showToast,
+  Toast,
+  closeMainWindow,
+  AI,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { parseHTML } from "linkedom";
 import fetch from "node-fetch";
@@ -87,21 +97,14 @@ export default function QuickCapture() {
   });
 
   useEffect(() => {
-    async function select() {
-      try {
-        const selection = await getSelectedText();
-        if (validateUrl(selection)) {
-          setValue("url", selection);
-        }
-      } catch {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Could not select text",
-        });
+    async function getText() {
+      const text = (await getSelectedText()) || (await Clipboard.readText());
+      if (text && validateUrl(text)) {
+        setValue("url", text);
       }
     }
 
-    select();
+    getText();
   }, []);
 
   return (
@@ -112,7 +115,11 @@ export default function QuickCapture() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="URL" {...itemProps.url} />
+      <Form.TextField
+        title="URL"
+        {...itemProps.url}
+        info="Quick tip for future usage: You can either select a URL or copy one to your clipboard to fill this field when launching the command."
+      />
 
       <Form.Dropdown {...itemProps.captureAs} title="Capture As" storeValue>
         <Form.Dropdown.Item title="Bookmark" value="url" />

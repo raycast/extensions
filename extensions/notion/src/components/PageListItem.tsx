@@ -1,5 +1,5 @@
 import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { ActionPanel, Icon, List, Action, Image, confirmAlert } from "@raycast/api";
+import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
 import { deletePage, notionColorToTintColor, getPageIcon } from "../utils/notion";
@@ -77,6 +77,34 @@ export function PageListItem({
 
   const title = page.title ? page.title : "Untitled";
 
+  const { primaryAction } = getPreferenceValues<Preferences.SearchPage>();
+
+  const openInRaycastAction = {
+    page: (
+      <Action.Push
+        title="Preview Page"
+        icon={Icon.BlankDocument}
+        target={<PageDetail page={page} setRecentPage={setRecentPage} users={users} />}
+      />
+    ),
+    database: (
+      <Action.Push
+        title="Navigate to Database"
+        icon={Icon.List}
+        target={<DatabaseList databasePage={page} setRecentPage={setRecentPage} users={users} />}
+      />
+    ),
+  };
+
+  const openInNotionAction = (
+    <Action title="Open in Notion" icon="notion-logo.png" onAction={() => handleOnOpenPage(page, setRecentPage)} />
+  );
+
+  const actions = {
+    raycast: openInRaycastAction[page.object],
+    notion: openInNotionAction,
+  };
+
   return (
     <List.Item
       title={title}
@@ -85,24 +113,8 @@ export function PageListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
-            {page.object === "database" ? (
-              <Action.Push
-                title="Navigate to Database"
-                icon={Icon.List}
-                target={<DatabaseList databasePage={page} setRecentPage={setRecentPage} users={users} />}
-              />
-            ) : (
-              <Action.Push
-                title="Preview Page"
-                icon={Icon.BlankDocument}
-                target={<PageDetail page={page} setRecentPage={setRecentPage} users={users} />}
-              />
-            )}
-            <Action
-              title="Open in Notion"
-              icon="notion-logo.png"
-              onAction={() => handleOnOpenPage(page, setRecentPage)}
-            />
+            {actions[primaryAction]}
+            {actions[primaryAction === "notion" ? "raycast" : "notion"]}
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu

@@ -27,7 +27,27 @@
       "name": "search-page",
       "title": "Search Notion",
       "description": "Search for Notion databases and pages.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "title": "Primary Action",
+          "required": false,
+          "default": "notion",
+          "data": [
+            {
+              "title": "Open in Notion",
+              "value": "notion"
+            },
+            {
+              "title": "Preview in Raycast",
+              "value": "raycast"
+            }
+          ],
+          "description": "Choose the primary action for the Notion Pages list."
+        }
+      ]
     },
     {
       "name": "quick-capture",
@@ -49,7 +69,7 @@
     {
       "name": "open_in",
       "type": "dropdown",
-      "title": "Open in...",
+      "title": "Open Page in",
       "required": false,
       "default": "app",
       "data": [
