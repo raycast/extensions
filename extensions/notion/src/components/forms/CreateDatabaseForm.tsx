@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Detail, Form, showToast, useNavigation, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, Icon, Form, showToast, useNavigation, Action, Image, Toast } from "@raycast/api";
 import { useState } from "react";
 
 import {
@@ -67,7 +67,11 @@ export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: Cr
   }
 
   if (!isLoadingDatabases && !databases.length) {
-    return <Detail markdown="No databases" />;
+    showToast({
+      style: Toast.Style.Failure,
+      title: "No databases found",
+      message: "Please make sure you have access to at least one database",
+    });
   }
 
   const titleProperty = databaseProperties?.find((dp) => dp.id === "title");
