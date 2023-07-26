@@ -963,7 +963,7 @@ export type CustomPlaceholder = {
 /**
  * A user-defined variable created via the {{set:...}} placeholder. These variables are stored in the extension's persistent local storage.
  */
-export interface PersistentVariable {
+export type PersistentVariable = {
   /**
    * The name of the variable.
    */
@@ -978,4 +978,84 @@ export interface PersistentVariable {
    * The original value of the variable.
    */
   initialValue: string;
+};
+
+/**
+ * The output of a data provider such as a script or fetch request.
+ */
+export interface DataProviderOutput {
+  /**
+   * The full text of the data provider's output.
+   */
+  stringValue: string;
+}
+
+/**
+ * The output of an image data provider.
+ */
+export interface ImageData extends DataProviderOutput {
+  /**
+   * Text extracted from the image.
+   */
+  imageText: string;
+
+  /**
+   * Coordinates of the image's points of interest.
+   */
+  imagePOI: string;
+
+  /**
+   * Payload values of barcodes and QR codes in the image.
+   */
+  imageBarcodes: string;
+
+  /**
+   * Labels for animals identified in the image.
+   */
+  imageAnimals: string;
+
+  /**
+   * Center coordinates and dimensions of rectangles identified in the image.
+   */
+  imageRectangles: string;
+
+  /**
+   * Labels for objects identified in the image.
+   */
+  imageSubjects: string;
+
+  /**
+   * The number of faces identified in the image.
+   */
+  imageFaces: string;
+
+  /**
+   * The EXIF data of the image in JSON string format.
+   */
+  imageEXIFData?: string;
+}
+
+/**
+ * The output of a PDF data provider.
+ */
+export interface PDFData extends DataProviderOutput {
+  /**
+   * Text extracted from the PDF without using OCR.
+   */
+  pdfRawText: string;
+
+  /**
+   * Text extracted from the PDF using OCR.
+   */
+  pdfOCRText: string;
+}
+
+/**
+ * The output of an audio data provider.
+ */
+export interface AudioData extends DataProviderOutput {
+  /**
+   * Labels for sounds identified in the audio.
+   */
+  soundClassifications: string;
 }

@@ -104,7 +104,6 @@ export type CreateInvoiceFormValues = {
   payment_method: string;
   bank_account: string;
   client_id: string;
-  services: string[];
 };
 
 export type CreateInvoicePayload = {

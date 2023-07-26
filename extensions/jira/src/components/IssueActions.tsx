@@ -8,8 +8,8 @@ import {
   getIssuePriorities,
   getIssueTransitions,
   Issue,
-  IssueDetail as TIssueDetail,
   Priority,
+  IssueDetail as TIssueDetail,
   Transition,
   updateIssue,
   updateIssueAssignee,
@@ -20,6 +20,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { slugify } from "../helpers/string";
 import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
+import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
 import IssueDetail from "./IssueDetail";
 
@@ -140,6 +141,15 @@ export default function IssueActions({
         />
 
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.Push
+          title="Create Issue"
+          icon={Icon.NewDocument}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          target={<CreateIssueForm />}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

@@ -68,7 +68,7 @@ export function StatesAttributesList(): JSX.Element {
 
 function useSearch(
   query: string | undefined,
-  allStates?: State[]
+  allStates?: State[],
 ): {
   states?: State[] | undefined;
 } {
