@@ -6,7 +6,8 @@
   "icon": "youtube.png",
   "author": "vimtor",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "d2a"
   ],
   "categories": [
     "Applications",
@@ -47,6 +48,15 @@
       "type": "textfield",
       "default": "/opt/homebrew/bin/ffprobe",
       "required": true
+    },
+    {
+      "name": "enableWebm",
+      "title": "Enable WebM Downloads",
+      "description": "Display WebM downloads. These usually have a higher quality, but are less compatible.",
+      "type": "checkbox",
+      "default": true,
+      "label": "Display WebM downloads.",
+      "required": false
     }
   ],
   "dependencies": {
@@ -57,7 +67,7 @@
     "pretty-bytes": "^6.1.0",
     "tempfile": "^4.0.0",
     "unused-filename": "^4.0.1",
-    "ytdl-core": "^4.11.4"
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

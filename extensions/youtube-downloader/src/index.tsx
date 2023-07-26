@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Clipboard, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
 import ytdl, { videoFormat } from "ytdl-core";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
 import prettyBytes from "pretty-bytes";
-import { downloadAudio, downloadVideo, preferences } from "./utils";
+import { downloadAudio, downloadVideo, preferences, FormatOptions } from "./utils";
 import { execSync } from "child_process";
 import fs from "fs";
 
@@ -77,12 +77,17 @@ export default function DownloadVideo() {
     return <NotInstalled executable={missingExecutable} onRefresh={() => setError(error + 1)} />;
   }
 
+  const currentFormat = JSON.parse(values.format || "{}");
   const audioFormats = ytdl.filterFormats(formats, "audioonly").filter((format) => format.container === "mp4");
-  const isSelectedAudio = values.format === audioFormats[0]?.itag.toString();
+  const isSelectedAudio = currentFormat.itag === audioFormats[0]?.itag.toString();
   const audioContentLength = audioFormats[0]?.contentLength ?? "0";
+
   const videoFormats = ytdl
     .filterFormats(formats, "videoonly")
-    .filter((format) => format.container === "mp4" && !format.colorInfo);
+    .filter(
+      (format) =>
+        (format.container === "mp4" && !format.colorInfo) || (preferences.enableWebm && format.container === "webm")
+    );
 
   return (
     <Form
@@ -114,23 +119,30 @@ export default function DownloadVideo() {
         {...itemProps.url}
       />
       <Form.Dropdown title="Format" {...itemProps.format}>
-        <Form.Dropdown.Section title="Video">
-          {videoFormats.map((format) => (
-            <Form.Dropdown.Item
-              key={format.itag}
-              value={format.itag.toString()}
-              title={`${format.qualityLabel} (${
-                format.contentLength ? prettyBytes(parseInt(format.contentLength) + parseInt(audioContentLength)) : ""
-              })`}
-              icon={Icon.Video}
-            />
-          ))}
-        </Form.Dropdown.Section>
+        {["mp4", "webm"].map((container) => (
+          <Form.Dropdown.Section key={container} title={`Video (${container})`}>
+            {videoFormats
+              .filter((format) => format.container == container)
+              .map((format) => (
+                <Form.Dropdown.Item
+                  key={format.itag}
+                  value={JSON.stringify({ itag: format.itag.toString(), container: container } as FormatOptions)}
+                  title={`${format.qualityLabel} (${
+                    format.contentLength
+                      ? prettyBytes(parseInt(format.contentLength) + parseInt(audioContentLength))
+                      : ""
+                  }) [${container}]`}
+                  icon={Icon.Video}
+                />
+              ))}
+          </Form.Dropdown.Section>
+        ))}
+
         <Form.Dropdown.Section title="Audio">
           {audioFormats.map((format) => (
             <Form.Dropdown.Item
               key={format.itag}
-              value={format.itag.toString()}
+              value={JSON.stringify({ itag: format.itag.toString() } as FormatOptions)}
               title={`${format.audioBitrate}kps (${prettyBytes(parseInt(format.contentLength))})`}
               icon={Icon.Music}
             />

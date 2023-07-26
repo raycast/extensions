@@ -10,12 +10,23 @@ import stream from "stream";
 
 const pipeline = promisify(stream.pipeline);
 
-export const preferences = getPreferenceValues<{ downloadPath: string; ffmpegPath: string; ffprobePath: string }>();
+export const preferences = getPreferenceValues<{
+  downloadPath: string;
+  ffmpegPath: string;
+  ffprobePath: string;
+  enableWebm: boolean;
+}>();
+
+export type FormatOptions = {
+  itag: string;
+  container: string;
+};
 
 setFfmpegPath(preferences.ffmpegPath);
 setFfprobePath(preferences.ffprobePath);
 
 export async function downloadVideo(url: string, options: { format: string; copyToClipboard: boolean }) {
+  const formatObject: FormatOptions = JSON.parse(options.format);
   const info = await ytdl.getInfo(url);
 
   const toast = new Toast({
@@ -26,18 +37,20 @@ export async function downloadVideo(url: string, options: { format: string; copy
 
   toast.show();
 
+  const container = formatObject.container || "mp4";
   const title = info.videoDetails.title;
   const filePath = options.copyToClipboard
-    ? tempfile(".mp4")
-    : unusedFilenameSync(path.join(preferences.downloadPath, `${title}.mp4`));
+    ? tempfile(`.${container}`)
+    : unusedFilenameSync(path.join(preferences.downloadPath, `${title}.${container}`));
 
   const videoFormat = ytdl.chooseFormat(info.formats, {
     quality: "highestvideo",
-    filter: (format) => format.container === "mp4" && format.hasVideo && format.itag.toString() === options.format,
+    filter: (format) =>
+      format.container === container && format.hasVideo && format.itag.toString() === formatObject.itag,
   });
   const audioFormat = ytdl.chooseFormat(info.formats, {
     quality: "highestaudio",
-    filter: (format) => format.container === "mp4" && !format.hasVideo && format.hasAudio,
+    filter: (format) => format.container === container && !format.hasVideo && format.hasAudio,
   });
 
   if (!videoFormat || !audioFormat) {
@@ -45,8 +58,8 @@ export async function downloadVideo(url: string, options: { format: string; copy
     return;
   }
 
-  const videoTempFile = tempfile(".mp4");
-  const audioTempFile = tempfile(".mp4");
+  const videoTempFile = tempfile(`.${container}`);
+  const audioTempFile = tempfile(`.${container}`);
 
   let videoDownloaded = 0;
   let audioDownloaded = 0;
@@ -76,7 +89,7 @@ export async function downloadVideo(url: string, options: { format: string; copy
       .input(audioTempFile)
       .videoCodec("copy")
       .audioCodec("copy")
-      .format("mp4")
+      .format(container)
       .outputOptions("-strict", "-2")
       .save(filePath)
       .on("error", (err) => {
@@ -120,6 +133,7 @@ export async function downloadVideo(url: string, options: { format: string; copy
 }
 
 export async function downloadAudio(url: string, options: { format: string; copyToClipboard: boolean }) {
+  const formatObject: FormatOptions = JSON.parse(options.format);
   const info = await ytdl.getInfo(url);
 
   const toast = new Toast({
@@ -136,7 +150,7 @@ export async function downloadAudio(url: string, options: { format: string; copy
 
   await pipeline(
     ytdl
-      .downloadFromInfo(info, { filter: (format) => format.itag.toString() === options.format })
+      .downloadFromInfo(info, { filter: (format) => format.itag.toString() === formatObject.itag })
       .on("progress", (chunk, downloaded, total) => {
         const progress = downloaded / total;
         toast.message = `${Math.round(progress * 100)}%`;
