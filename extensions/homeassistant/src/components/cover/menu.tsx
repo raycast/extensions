@@ -1,5 +1,5 @@
 import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
-import { CopyToClipboardMenubarItem } from "../menu";
+import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
 import { getErrorMessage, getFriendlyName } from "../../utils";
 import { State } from "../../haapi";
 import { getIcon } from "../states";
@@ -47,12 +47,14 @@ export function CoverMenubarItem(props: { state: State }): JSX.Element | null {
   const title = () => {
     return friendlyName;
   };
+  const pos = s.attributes.current_position;
+  const subtitle = pos !== undefined ? `${pos}%` : undefined;
   return (
-    <MenuBarExtra.Submenu key={s.entity_id} title={title()} icon={getIcon(s)}>
+    <MenuBarSubmenu key={s.entity_id} title={title()} subtitle={subtitle} icon={getIcon(s)}>
       <CoverOpenMenubarItem state={s} />
       <CoverCloseMenubarItem state={s} />
       <CoverStopMenubarItem state={s} />
       <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
-    </MenuBarExtra.Submenu>
+    </MenuBarSubmenu>
   );
 }

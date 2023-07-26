@@ -60,3 +60,10 @@ export function getMacOSVersion(): string {
 export function range(from: number, to: number, step: number) {
   return [...Array(Math.floor((to - from) / step) + 1)].map((_, i) => from + i * step);
 }
+
+export function capitalizeFirstLetter(name: string): string {
+  if (!name || name.length <= 0) {
+    return name;
+  }
+  return name.replace(/^./, name[0].toUpperCase());
+}

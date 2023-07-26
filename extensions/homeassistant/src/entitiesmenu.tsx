@@ -1,9 +1,9 @@
 import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand } from "@raycast/api";
-import { getErrorMessage, getFriendlyName } from "./utils";
+import { getErrorMessage } from "./utils";
 import { useHAStates } from "./hooks";
 import { MenuBarItemConfigureCommand } from "./components/menu";
-import { MediaPlayerAllMenubarItem, MediaPlayerMenubarItem } from "./components/mediaplayer/menu";
 import { StateMenubarItem } from "./components/states/menu";
+import { State } from "./haapi";
 
 function entitiesPreferences(): string[] {
   const prefs = getPreferenceValues();
@@ -28,10 +28,24 @@ function StatesAllMenubarItem() {
   );
 }
 
-export default function MediaPlayerMenuCommand(): JSX.Element {
+function sortByPreferenceOrder(entities: State[] | undefined, entityIDs: string[]): State[] | undefined {
+  const result: State[] = [];
+  if (entities && entities.length > 0) {
+    for (const id of entityIDs) {
+      const r = entities.find((e) => e.entity_id === id);
+      if (r) {
+        result.push(r);
+      }
+    }
+  }
+  return result;
+}
+
+export default function EntitiesMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
   const entityIDs = entitiesPreferences();
-  const entities = states?.filter((s) => entityIDs.includes(s.entity_id));
+  const entitiesRaws = states?.filter((s) => s && s.entity_id && entityIDs.includes(s.entity_id));
+  const entities = sortByPreferenceOrder(entitiesRaws, entityIDs);
   const header = error ? getErrorMessage(error) : undefined;
 
   return (
@@ -41,7 +55,7 @@ export default function MediaPlayerMenuCommand(): JSX.Element {
       tooltip={"Home Assistant Entities"}
     >
       {header && <MenuBarExtra.Item title={header} />}
-      <StatesAllMenubarItem />
+      {<StatesAllMenubarItem />}
       <MenuBarExtra.Section title="Entities">
         {entities?.map((m) => <StateMenubarItem key={m.entity_id} state={m} />)}
       </MenuBarExtra.Section>

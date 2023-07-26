@@ -60,7 +60,7 @@ import { InputDateTimeSetValueAction } from "./input_datetime";
 import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
 import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
 import { ZoneShowDetailAction } from "./zones";
-import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons";
+import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons/actions";
 import { getStateTooltip } from "../utils";
 import { getMediaPlayerTitleAndArtist } from "./mediaplayer/utils";
 

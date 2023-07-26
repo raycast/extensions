@@ -1,6 +1,5 @@
 import { Action } from "@raycast/api";
-import React from "react";
-import { State } from "../haapi";
+import { State } from "../../haapi";
 
 export function PersonOpenInGoogleMapsAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
