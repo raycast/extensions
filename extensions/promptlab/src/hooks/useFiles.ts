@@ -237,7 +237,7 @@ const addPDFDetails = async (
 ) => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const pdfText = await ScriptRunner.PDFTextExtractor(filepath, preferences.pdfOCR, 3, options.useMetadata || false);
-  currentData.contents += filterString(pdfText.imageText);
+  currentData.contents += filterString(pdfText.stringValue);
   currentData["pdfRawText"] = filterString(pdfText.pdfRawText);
   currentData["pdfOCRText"] = filterString(pdfText.pdfOCRText);
 };
@@ -276,7 +276,7 @@ const addAudioDetails = async (
     currentData["audioTranscription"] = audioDetails;
   } else if (options.useSubjectClassification) {
     const audioClassifications = await getAudioDetails(filepath);
-    currentData.contents += audioClassifications.contents;
+    currentData.contents += audioClassifications.stringValue;
     currentData["soundClassifications"] = audioClassifications.soundClassifications;
   }
 };
@@ -287,7 +287,7 @@ const addImageDetails = async (
   options: CommandOptions
 ) => {
   const imageDetails = await getImageDetails(filepath, options);
-  const imageVisionInstructions = filterString(imageDetails.output);
+  const imageVisionInstructions = filterString(imageDetails.stringValue);
   currentData.contents += imageVisionInstructions;
   Object.assign(currentData, imageDetails);
 };

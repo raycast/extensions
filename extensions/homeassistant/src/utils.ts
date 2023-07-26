@@ -1,4 +1,6 @@
 import { State } from "./haapi";
+import plist from "plist";
+import * as fs from "fs";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 
@@ -48,4 +50,9 @@ export function getStateTooltip(state: State): string {
   const lastChanged = formatToHumanDateTime(state.last_changed) || "?";
   const lastUpdated = formatToHumanDateTime(state.last_updated) || "?";
   return `Last Changed: ${lastChanged}\nLast Updated: ${lastUpdated}`;
+}
+
+export function getMacOSVersion(): string {
+  const versionInfo = plist.parse(fs.readFileSync("/System/Library/CoreServices/SystemVersion.plist", "utf8"));
+  return JSON.parse(JSON.stringify(versionInfo)).ProductUserVisibleVersion;
 }

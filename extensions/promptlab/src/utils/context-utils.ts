@@ -17,19 +17,19 @@ export const filterString = (str: string, cutoff?: number): string => {
   if (preferences.condenseAmount == "high") {
     // Remove some useful characters for the sake of brevity
     return str
-      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@: \n\r<>]/g, "")
+      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@: ~\n\r<>]/g, "")
       .replaceAll('"', "'")
       .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
   } else if (preferences.condenseAmount == "medium") {
     // Remove uncommon characters
     return str
-      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@: \n\r<>+*&|]/g, "")
+      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@: ~\n\r<>+*&|]/g, "")
       .replaceAll('"', "'")
       .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
   } else if (preferences.condenseAmount == "low") {
     // Remove all characters except for letters, numbers, and punctuation
     return str
-      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@:; \n\r\t<>%^$~+*_&|]/g, "")
+      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@:; ~\n\r\t<>%^$~+*_&|]/g, "")
       .replaceAll('"', "'")
       .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
   } else {
@@ -53,6 +53,7 @@ const getCurrentSafariURL = async (): Promise<string> => {
 
 /**
  * Gets the visible text of the active tab in Safari (avoiding paywalls and other issues with the URL).
+ *
  * @returns A promise which resolves to the visible text of the active tab as a string.
  */
 export const getSafariTabText = async (): Promise<string> => {

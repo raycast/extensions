@@ -85,10 +85,10 @@ export default function useModel(
     targetModel.endpoint == "" ||
     (models.isLoading && !modelOverride && preferenceModel.endpoint == "");
 
-  const temp = modelOverride
-    ? parseFloat(targetModel.temperature)
-    : preferences.includeTemperature
-    ? parseFloat(temperature) || 1.0
+  const temp = preferences.includeTemperature
+    ? parseFloat(temperature) == undefined
+      ? 1.0
+      : parseFloat(temperature)
     : 1.0;
 
   // Get the value at the specified key path
@@ -153,7 +153,7 @@ export default function useModel(
               : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix
           )
       );
-  if (preferences.includeTemperature || modelOverride) {
+  if (preferences.includeTemperature) {
     modelSchema["temperature"] = temp;
   }
 

@@ -21,7 +21,7 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
       const commits = await github.pullRequestCommits({ nodeId: pullRequest.id });
       return commits.node as PullRequestCommitFieldsFragment;
     },
-    [pullRequest]
+    [pullRequest],
   );
 
   const sortedCommits = useMemo(() => {

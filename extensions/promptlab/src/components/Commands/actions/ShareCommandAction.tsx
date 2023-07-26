@@ -3,7 +3,7 @@ import { Command, StoreCommand } from "../../../utils/types";
 import { STORE_ENDPOINT, STORE_KEY } from "../../../utils/constants";
 import fetch from "node-fetch";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 
 /**
  * Action to share a command to the PromptLab store.
@@ -24,7 +24,7 @@ export default function ShareCommandAction(props: {
     <Action
       title="Share To PromptLab Store"
       icon={Icon.Upload}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+      shortcut={getActionShortcut("ShareCommandAction", settings)}
       onAction={async () => {
         const toast = await showToast({
           style: Toast.Style.Animated,
