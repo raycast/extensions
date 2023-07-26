@@ -46,8 +46,9 @@ const copyBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "
 const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "5" };
 const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
 
-const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
-const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "." };
+const copyURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
+const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "." };
+const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
 
@@ -251,6 +252,7 @@ export const View = ({
                       {preferences.use_bibtex && <BibPasteAction selected={item.citekey} />}
 
                       <ActionPanel.Section>
+                        {getURL(item) !== "" && <URLCopyToClipboardAction itemURL={getURL(item)} />}
                         {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
                         {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
                         {getItemZotUrl(item) && <ZoteroUrlCopyToClipboard zotUrl={getItemZotUrl(item)} />}
@@ -266,6 +268,18 @@ export const View = ({
     </List>
   );
 };
+
+function URLCopyToClipboardAction({ itemURL }: { itemURL: string }) {
+  return (
+    <CopyToClipboard
+      content={itemURL}
+      icon={Icon.Clipboard}
+      title="Copy Original Link"
+      shortcut={copyURLShortcut}
+      message="Copied original URL to clipboard"
+    />
+  );
+}
 
 function TitleCopyToClipboardAction({ itemTitle }: { itemTitle: string }) {
   return (
