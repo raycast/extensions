@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { editingAtom, newTodoTextAtom, searchModeAtom, TodoItem, TodoSections } from "./atoms";
 import { useAtom } from "jotai";
-import { SECTIONS_DATA, priorityIcons } from "./config";
+import { SECTIONS_DATA, priorityDescriptions, priorityIcons } from "./config";
 import _ from "lodash";
 import DeleteAllAction from "./delete_all";
 import SearchModeAction from "./search_mode_action";
@@ -34,7 +34,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
     const list: List.Item.Props["accessories"] = [];
     if (item.priority !== undefined) {
       list.push({
-        tooltip: "priority " + item.priority,
+        tooltip: "priority: " + priorityDescriptions[item.priority],
         icon: priorityIcons[item.priority],
       });
     }
@@ -107,9 +107,24 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
               icon={Icon.Exclamationmark}
             >
               <Action title="none" onAction={() => setPriority(undefined)} />
-              <Action title="low" icon={priorityIcons[1]} onAction={() => setPriority(1)} autoFocus />
-              <Action title="meduim" icon={priorityIcons[2]} onAction={() => setPriority(2)} />
-              <Action title="high" icon={priorityIcons[3]} onAction={() => setPriority(3)} />
+              <Action
+                title="low"
+                icon={priorityIcons[1]}
+                onAction={() => setPriority(1)}
+                autoFocus={item.priority === 1 ? true : false}
+              />
+              <Action
+                title="meduim"
+                icon={priorityIcons[2]}
+                onAction={() => setPriority(2)}
+                autoFocus={item.priority === 2 ? true : false}
+              />
+              <Action
+                title="high"
+                icon={priorityIcons[3]}
+                onAction={() => setPriority(3)}
+                autoFocus={item.priority === 3 ? true : false}
+              />
             </ActionPanel.Submenu>
             {urls &&
               urls.length > 0 &&

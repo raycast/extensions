@@ -23,3 +23,9 @@ export const priorityIcons: Record<Required<TodoItem>["priority"], Image.ImageLi
   2: { source: Icon.Exclamationmark2, tintColor: Color.Purple },
   3: { source: Icon.Exclamationmark3, tintColor: Color.Purple },
 };
+
+export const priorityDescriptions = {
+  1: "low",
+  2: "mid",
+  3: "high",
+};
