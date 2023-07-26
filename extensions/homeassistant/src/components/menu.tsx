@@ -12,7 +12,7 @@ export function MenuBarItemConfigureCommand(): JSX.Element {
   );
 }
 
-export function CopyToClipboardMenubarItem(props: { title: string; content: string }) {
+export function CopyToClipboardMenubarItem(props: { title: string; content: string; tooltip?: string }) {
   const copyToClipboard = async () => {
     try {
       console.log(props.content);
@@ -22,5 +22,12 @@ export function CopyToClipboardMenubarItem(props: { title: string; content: stri
       showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
     }
   };
-  return <MenuBarExtra.Item title={props.title} icon={Icon.CopyClipboard} onAction={copyToClipboard} />;
+  return (
+    <MenuBarExtra.Item
+      title={props.title}
+      icon={Icon.CopyClipboard}
+      onAction={copyToClipboard}
+      tooltip={props.tooltip}
+    />
+  );
 }

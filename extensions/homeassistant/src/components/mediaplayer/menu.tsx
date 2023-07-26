@@ -57,6 +57,7 @@ function MediaPlayerPlayPauseMenubarItem(props: { state: State }): JSX.Element |
       title={s.state === "playing" ? "Pause" : "Play"}
       icon={s.state === "playing" ? Icon.Pause : Icon.Play}
       onAction={() => ha.playPauseMedia(s.entity_id)}
+      tooltip={`State: ${s.state}`}
     />
   );
 }
@@ -100,7 +101,7 @@ export function MediaPlayerMenubarItem(props: { state: State }): JSX.Element | n
       <MediaPlayerPreviousMenubarItem state={s} />
       <MediaPlayerVolumeSubmenu state={s} />
       {mediaTitle && <CopyToClipboardMenubarItem title="Copy Track" content={mediaTitle} />}
-      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} />
+      <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarExtra.Submenu>
   );
 }
