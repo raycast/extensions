@@ -98,9 +98,13 @@ export default function QuickCapture() {
 
   useEffect(() => {
     async function getText() {
-      const text = (await getSelectedText()) || (await Clipboard.readText());
-      if (text && validateUrl(text)) {
-        setValue("url", text);
+      try {
+        const text = (await getSelectedText()) || (await Clipboard.readText());
+        if (text && validateUrl(text)) {
+          setValue("url", text);
+        }
+      } catch (error) {
+        console.error(error);
       }
     }
 
