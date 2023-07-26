@@ -214,7 +214,7 @@
     },
     {
       "name": "weathermenu",
-      "title": "Weather Menu Bar",
+      "title": "Weather Menu",
       "description": "Display Weather entity in the Menu Bar",
       "mode": "menu-bar",
       "interval": "15m",
@@ -246,7 +246,7 @@
     },
     {
       "name": "mediaplayermenu",
-      "title": "Mediaplayer Menu Bar",
+      "title": "Mediaplayer Menu",
       "description": "Display Media Players in the Menu Bar",
       "mode": "menu-bar",
       "interval": "15m",
