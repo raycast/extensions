@@ -35,16 +35,6 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select a category"
-          defaultValue={"Популярное"}
-          storeValue
-          onChange={(newValue) => setRssLink(newValue as string)}
-        >
-          <List.Dropdown.Item title={"Популярное"} value={"https://vc.ru/rss?ref=vc.ru"} />
-        </List.Dropdown>
-      }
     >
       {data && data.items?.map((item, index) => <StoryListItem key={item.id} item={item} index={index} />)}
     </List>
