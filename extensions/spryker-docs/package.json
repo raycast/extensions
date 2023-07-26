@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spryker-docs",
   "title": "Spryker Docs",
-  "description": "Spryker Documentation",
+  "description": "Search Spryker Documentation directly from Raycast",
   "icon": "spryker.png",
   "author": "DinisEsteves",
   "categories": ["Documentation", "Developer Tools"],
