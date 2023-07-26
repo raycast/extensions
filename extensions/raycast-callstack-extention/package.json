@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-callstack-extention",
+  "title": "Callstack Assistant",
+  "description": "",
+  "icon": "command-icon.png",
+  "author": "souhe",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "candidates",
+      "title": "Find candidate",
+      "description": "Find CK candidate details",
+      "mode": "view"
+    },
+    {
+      "name": "employees",
+      "title": "Employees",
+      "description": "Find CK employee details",
+      "mode": "view"
+    },
+    {
+      "name": "note",
+      "title": "New Note",
+      "description": "Create new Note",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "NotionKey",
+      "type": "password",
+      "required": true,
+      "title": "Notion Key",
+      "description": "Your Notion Key",
+      "placeholder": "Enter your Notion Key"
+    },
+    {
+      "name": "RecruiteeToken",
+      "type": "password",
+      "required": true,
+      "title": "Recruitee token",
+      "description": "Your Recruitee Token",
+      "placeholder": "Enter your Recruitee Token"
+    },
+    {
+      "name": "EmployeesDbId",
+      "type": "textfield",
+      "required": true,
+      "title": "Employees Database Id",
+      "description": "Database of employees from Notion",
+      "default": "2d93d0f805eb4868ac143d6a0126e343"
+    },
+    {
+      "name": "OkrsDbId",
+      "type": "textfield",
+      "required": true,
+      "title": "OKRs Database Id",
+      "description": "Database of OKRs from Notion",
+      "default": "8a1969746d7b47ca955fe5df269decb0"
+    },
+    {
+      "name": "InterviewNotesDbId",
+      "type": "textfield",
+      "required": true,
+      "title": "Interview notes Database Id",
+      "description": "Database of Interview notes from Notion",
+      "default": "ce4ace7dba094bb2936b9ea8871e5ca4"
+    },
+    {
+      "name": "NotesDbId",
+      "type": "textfield",
+      "required": true,
+      "title": "Notes Database Id",
+      "description": "Database of notes from Notion",
+      "default": "6d92436a4bfe434ab2dbe6f037ae950d"
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^2.2.9",
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.8.0",
+    "date-fns": "^2.30.0",
+    "lodash": "^4.17.21",
+    "notion-to-md": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.184",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
