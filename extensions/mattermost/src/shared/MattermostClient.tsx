@@ -65,7 +65,7 @@ export class MattermostClient {
       case "token":
         this.token = preference.credentials;
         return Promise.resolve();
-      case "logpass":
+      case "logpass": {
         const [username, password] = preference.credentials.split(":");
         return axios
           .post<UserProfile>(
@@ -83,6 +83,7 @@ export class MattermostClient {
             console.log("successfull login");
             return LocalStorage.setItem("mattermost-token", token);
           });
+      }
     }
   }
 

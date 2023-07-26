@@ -182,7 +182,11 @@ function ChannelList(props: { profile: UserProfile; team: TeamUI }) {
 
     const directChatProfiles = await MattermostClient.getProfilesByIds(Array.from(directChatsMap.keys()));
     directChatProfiles.forEach((profile) => {
-      const chat = directChatsMap.get(profile.id)!;
+      const chat = directChatsMap.get(profile.id);
+      if (chat == undefined) {
+        return;
+      }
+
       if (!chat.name.includes(profile.id)) {
         console.error("mismatch between " + profile.id + " and " + chat.name);
       }
