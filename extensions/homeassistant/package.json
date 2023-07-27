@@ -253,11 +253,11 @@
       "preferences": [
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
-          "placeholder": "media_player.player1,media_player.player2"
+          "placeholder": "media_player.player1,media_player.player2,media_player.bath*"
         }
       ]
     },
@@ -266,15 +266,15 @@
       "title": "Lights Menu",
       "description": "Display Lights in the Menu Bar",
       "mode": "menu-bar",
-      "interval": "15m",
+      "interval": "1m",
       "preferences": [
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
-          "placeholder": "light.mylight1,light.mylight2"
+          "placeholder": "light.mylight1,light.mylight2,light.bath*"
         }
       ]
     },
@@ -287,11 +287,11 @@
       "preferences": [
         {
           "name": "excludedEntities",
-          "description": "Given entities will be hidden in the menu",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
           "type": "textfield",
           "required": false,
           "title": "Excluded Entities",
-          "placeholder": "cover.mycover1,light.mycover2"
+          "placeholder": "cover.mycover1,cover.bath*"
         }
       ]
     },
@@ -308,7 +308,7 @@
           "type": "textfield",
           "required": true,
           "title": "Entities",
-          "placeholder": "media_player.player1,light.light3"
+          "placeholder": "media_player.player1,light.light3,cover.*"
         }
       ]
     }
