@@ -80,14 +80,14 @@ export default function MediaGridItem({
     ApiKey: preferences.jellyfinApiKey,
   });
 
-  const accessory: Grid.Item.Accessory = {}
+  const accessory: Grid.Item.Accessory = {};
   if (isWatched) {
-    accessory.icon = Icon.Check
-    accessory.tooltip = "Watched"
+    accessory.icon = Icon.Check;
+    accessory.tooltip = "Watched";
   }
   if (isFavorite) {
-    accessory.icon = Icon.Heart
-    accessory.tooltip = "Favorite"
+    accessory.icon = Icon.Heart;
+    accessory.tooltip = "Favorite";
   }
 
   const subtitle: string[] = [];

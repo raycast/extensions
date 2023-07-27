@@ -13,11 +13,7 @@ export default function ErrorDetailView({
         markdown={errorMessage}
         actions={
           <ActionPanel title="Actions">
-            <Action
-              title="Open Preferences"
-              icon={Icon.Gear}
-              onAction={() => openExtensionPreferences()}
-            />
+            <Action title="Open Preferences" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
           </ActionPanel>
         }
       />
