@@ -270,11 +270,21 @@ function CameraGridItem(props: { state: State }): JSX.Element {
   if (s.state === "unavailable") {
     titleParts.push("❌");
   }
+  const motionIcon = (): Image.ImageLike | undefined => {
+    const motion = s.attributes.motion_detection;
+    if (motion === undefined) {
+      return;
+    }
+    return motion === true
+      ? { source: "run.png", tintColor: Color.Yellow }
+      : { source: "walk.png", tintColor: Color.PrimaryText };
+  };
   return (
     <Grid.Item
       content={content}
       title={titleParts.join(" ")}
       quickLook={imageFilepath ? { name: getFriendlyName(s), path: imageFilepath } : undefined}
+      accessory={{ icon: motionIcon() }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Controls">
