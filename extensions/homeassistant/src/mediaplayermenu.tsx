@@ -1,4 +1,4 @@
-import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { getErrorMessage, getFriendlyName } from "./utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";

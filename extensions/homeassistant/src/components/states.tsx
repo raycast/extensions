@@ -58,11 +58,12 @@ import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
 import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
-import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
+import { ShowWeatherAction } from "./weather/list";
 import { ZoneShowDetailAction } from "./zones";
 import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons/actions";
 import { getStateTooltip } from "../utils";
 import { getMediaPlayerTitleAndArtist } from "./mediaplayer/utils";
+import { weatherConditionToIcon } from "./weather/utils";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
