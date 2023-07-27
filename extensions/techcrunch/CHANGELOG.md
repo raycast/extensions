@@ -1,4 +1,4 @@
-# Habr Changelog
+# TechCrunch Changelog
 
 ## [Initial Version] - 2023-07-18
 
