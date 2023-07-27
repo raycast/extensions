@@ -1,9 +1,10 @@
-import { CopyToClipboardMenubarItem, MenuBarSubmenu, relaunchCurrentCommand } from "../menu";
+import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
 import { getErrorMessage, getFriendlyName } from "../../utils";
 import { State } from "../../haapi";
 import { getIcon } from "../states";
 import { ha } from "../../common";
 import { MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { stateChangeSleep } from "../states/menu";
 
 function LightTurnOnMenubarItem(props: { state: State }) {
   if (props.state.state !== "off") {
@@ -12,6 +13,7 @@ function LightTurnOnMenubarItem(props: { state: State }) {
   const handle = async () => {
     try {
       await ha.turnOnLight(props.state.entity_id);
+      await stateChangeSleep();
     } catch (error) {
       console.log(error);
       showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
@@ -27,6 +29,7 @@ function LightTurnOffMenubarItem(props: { state: State }) {
   const handle = async () => {
     try {
       await ha.turnOffLight(props.state.entity_id);
+      await stateChangeSleep();
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
     }

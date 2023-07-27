@@ -9,14 +9,9 @@ import {
   Image,
   launchCommand,
   LaunchType,
-  environment,
 } from "@raycast/api";
 import { getErrorMessage } from "../utils";
 import { ReactNode } from "react";
-
-export async function relaunchCurrentCommand() {
-  await launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
-}
 
 export function MenuBarItemConfigureCommand(): JSX.Element {
   return (

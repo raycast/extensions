@@ -39,7 +39,7 @@ export default function LightsMenuCommand(): JSX.Element {
         type={LaunchType.UserInitiated}
         icon={Icon.Terminal}
       />
-      <MenuBarExtra.Section title="Media Players">
+      <MenuBarExtra.Section title="Lights">
         {entities?.map((e) => <LightMenubarItem key={e.entity_id} state={e} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>

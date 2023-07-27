@@ -3,6 +3,7 @@ import plist from "plist";
 import * as fs from "fs";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
+import { setTimeout } from "timers/promises";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -66,4 +67,8 @@ export function capitalizeFirstLetter(name: string): string {
     return name;
   }
   return name.replace(/^./, name[0].toUpperCase());
+}
+
+export async function sleep(delay: number) {
+  await setTimeout(delay);
 }

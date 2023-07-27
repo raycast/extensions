@@ -249,7 +249,7 @@
       "title": "Mediaplayer Menu",
       "description": "Display Media Players in the Menu Bar",
       "mode": "menu-bar",
-      "interval": "15m",
+      "interval": "1m",
       "preferences": [
         {
           "name": "hiddenEntities",
