@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import { usePostHogClient } from "../helpers/usePostHogClient";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
+import ErrorHandler from "./error-handler";
 
 type SearchResult = {
   count: number;
@@ -27,7 +28,7 @@ type ProjectDetail = {
 };
 
 export default function Command() {
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects");
+  const { data, isLoading, error } = usePostHogClient<SearchResult>("projects");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [projectDetail, setProjectDetail] = useCachedState<{ [id: number]: ProjectDetail }>("project-details", {});
 
@@ -36,27 +37,29 @@ export default function Command() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search projects..."
-      onSelectionChange={setSelectedId}
-      isShowingDetail={true}
-      throttle
-    >
-      {data ? (
-        <List.Section>
-          {data.results.map((project) => (
-            <Project
-              key={project.id}
-              project={project}
-              detail={projectDetail[project.id]}
-              isSelected={selectedId === project.id.toString()}
-              onDetailUpdated={handleOnDetailUpdated}
-            />
-          ))}
-        </List.Section>
-      ) : null}
-    </List>
+    <ErrorHandler error={error}>
+      <List
+        isLoading={isLoading}
+        searchBarPlaceholder="Search projects..."
+        onSelectionChange={setSelectedId}
+        isShowingDetail={true}
+        throttle
+      >
+        {data ? (
+          <List.Section>
+            {data.results.map((project) => (
+              <Project
+                key={project.id}
+                project={project}
+                detail={projectDetail[project.id]}
+                isSelected={selectedId === project.id.toString()}
+                onDetailUpdated={handleOnDetailUpdated}
+              />
+            ))}
+          </List.Section>
+        ) : null}
+      </List>
+    </ErrorHandler>
   );
 }
 
