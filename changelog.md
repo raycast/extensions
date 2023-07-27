@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.56.0 - 2023-07-26
+
+### ✨ New
+
+- **Clipboard**: `Clipboard.read()` now supports an `offset` option to access the Clipboard History (limited to the last 5)
+- **Grid:** Grid items can now have an icon accessory
+- **Shortcuts:** Providing a consistent user experience should now be easier thanks to the new  `Keyboard.Shortcut.Common` export.
+
+### 💎 Improvements
+
+- `getSelectedText` is now more reliable
+- **Trash**: Improved behaviour of `trash` and `Action.Trash` to better handle missing files.
+- **HUD**: `showHUD` now supports the same options as `closeMainWindow`
+- **Command Launching:** Improved logic for deciding which version of a command gets launched when a user has both a production and a development version of an extension installed.
+- **Tags:** Icon-only tags should now center the icon.
+
+### 🐞 Fixes
+
+- **Form**: When working on a draft, updating a `Form.Checkbox` will update the draft.
+- **Error Reports:** Improved error messages when an extension crashes during a background launch.
+- **Shortcuts:** Previously, the API permitted the creation of shortcuts using keys reserved by Raycast (⌘+K, ⌘+W, ⌘+Esc, etc.), resulting in unexpected behavior. Raycast now ignores these and, during development mode, they will trigger a runtime warning.
+
+## 1.55.0 - 2023-07-06
+
+### 💎 Improvements
+
+- **Fallback Commands**: Local commands will now have an indicator so that it’s possible to differentiate them from the commands installed from the Store
+- The NodeJS process used for Raycast extensions will now be named `Raycast Helper (Extensions)`
+- Active menu bar commands will now be displayed in `Extension Diagnostics`.
+
+### 🐞 Fixes
+
+- Fix an issue where Metadata’s Tag items would sometimes not be updated
+- Fix a bug where renamed commands appear in the root search with both the original and the updated name after an extension update.
+
 ## 1.54.0 - 2023-06-21
 
 ### 💎 Improvements

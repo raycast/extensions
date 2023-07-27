@@ -116,7 +116,7 @@ Reads the clipboard content as plain text, file name, or HTML.
 #### Signature
 
 ```typescript
-async function read(): Promise<ReadContent>;
+async function read(options?: { offset?: number }): Promise<ReadContent>;
 ```
 
 #### Example
@@ -132,6 +132,13 @@ export default async () => {
 };
 ```
 
+#### Parameters
+
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| options | Options for the read operation. | <code>Object</code> |
+| options.offset | Specify an offset to access the Clipboard History. Minimum value is 0, maximum value is 5. | <code>number</code> |
+
 #### Return
 
 A promise that resolves when the clipboard content was read as plain text, file name, or HTML.
@@ -143,7 +150,7 @@ Reads the clipboard as plain text.
 #### Signature
 
 ```typescript
-async function readText(): Promise<string | undefined>;
+async function readText(options?: { offset?: number }): Promise<string | undefined>;
 ```
 
 #### Example
@@ -156,6 +163,13 @@ export default async function Command() {
   console.log(text);
 }
 ```
+
+#### Parameters
+
+| Name | Description | Type |
+| :--- | :--- | :--- |
+| options | Options for the readText operation. | <code>Object</code> |
+| options.offset | Specify an offset to access the Clipboard History. Minimum value is 0, maximum value is 5. | <code>number</code> |
 
 #### Return
 

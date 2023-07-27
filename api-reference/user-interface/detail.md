@@ -239,9 +239,9 @@ A Tag in a `Detail.Metadata.TagList`.
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| text<mark style="color:red;">*</mark> | The text of the tag. | <code>string</code> | - |
 | color | Changes the text color to the provided color and sets a transparent background with the same color. | <code>[Color.ColorLike](colors.md#color.colorlike)</code> | - |
-| icon | An optional icon in front of the text of the tag. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| icon | The optional icon tag icon. Required if the tag has no text. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| text | The optional tag text. Required if the tag has no icon. | <code>string</code> | - |
 | onAction | Callback that is triggered when the item is clicked. | <code>() => void</code> | - |
 
 ### Detail.Metadata.Separator

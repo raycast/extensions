@@ -78,7 +78,7 @@ export default function Command() {
 | icon | A optional icon displayed for the Action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Clipboard](icons-and-images.md#icon) |
 | shortcut | The keyboard shortcut for the Action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the Action. | <code>string</code> | `"Copy to Clipboard"` |
-| transient | Indicates whether the content should be copied to the clipboard temporarily or not. | <code>boolean</code> | false |
+| transient | Indicates whether the content should be copied to the clipboard temporarily or not. | <code>boolean</code> | `false` |
 | onCopy | Callback when the content was copied to clipboard. | <code>(content: string \| number \| [Clipboard.Content](../clipboard.md#clipboard.content)) => void</code> | - |
 
 ### Action.Open
