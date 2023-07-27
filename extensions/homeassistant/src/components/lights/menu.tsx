@@ -4,7 +4,7 @@ import { State } from "../../haapi";
 import { getIcon } from "../states";
 import { ha } from "../../common";
 import { MenuBarExtra, Toast, showToast } from "@raycast/api";
-import { stateChangeSleep } from "../states/menu";
+import { stateChangeSleep } from "../states/utils";
 
 function LightTurnOnMenubarItem(props: { state: State }) {
   if (props.state.state !== "off") {

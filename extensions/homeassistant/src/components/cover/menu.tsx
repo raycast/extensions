@@ -1,11 +1,14 @@
 import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
-import { getErrorMessage, getFriendlyName } from "../../utils";
+import { capitalizeFirstLetter, getErrorMessage, getFriendlyName } from "../../utils";
 import { State } from "../../haapi";
 import { getIcon } from "../states";
 import { ha } from "../../common";
 
 function CoverOpenMenubarItem(props: { state: State }) {
+  if (props.state.attributes.current_position >= 100) {
+    return null;
+  }
   const handle = async () => {
     try {
       await ha.openCover(props.state.entity_id);
@@ -17,6 +20,9 @@ function CoverOpenMenubarItem(props: { state: State }) {
 }
 
 function CoverCloseMenubarItem(props: { state: State }) {
+  if (props.state.attributes.current_position <= 0) {
+    return null;
+  }
   const handle = async () => {
     try {
       await ha.closeCover(props.state.entity_id);
@@ -47,10 +53,17 @@ export function CoverMenubarItem(props: { state: State }): JSX.Element | null {
   const title = () => {
     return friendlyName;
   };
-  const pos = s.attributes.current_position;
-  const subtitle = pos !== undefined ? `${pos}%` : undefined;
+  const subtitle = () => {
+    const pos = s.attributes.current_position;
+    const cs = capitalizeFirstLetter(s.state);
+    if (pos === 100 || pos === 0) {
+      return cs;
+    }
+    const subtitle = pos !== undefined ? `${pos}% ${cs}` : undefined;
+    return subtitle;
+  };
   return (
-    <MenuBarSubmenu key={s.entity_id} title={title()} subtitle={subtitle} icon={getIcon(s)}>
+    <MenuBarSubmenu key={s.entity_id} title={title()} subtitle={subtitle()} icon={getIcon(s)}>
       <CoverOpenMenubarItem state={s} />
       <CoverCloseMenubarItem state={s} />
       <CoverStopMenubarItem state={s} />

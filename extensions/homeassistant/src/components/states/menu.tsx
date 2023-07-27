@@ -1,6 +1,6 @@
 import { State } from "../../haapi";
 import { getIcon } from "../states";
-import { getFriendlyName, sleep } from "../../utils";
+import { getFriendlyName } from "../../utils";
 import { MediaPlayerMenubarItem } from "../mediaplayer/menu";
 import { CoverMenubarItem } from "../cover/menu";
 import { PersonMenubarItem } from "../persons/menu";
@@ -39,11 +39,4 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
   );
-}
-
-/**
- * Sleep to get state changes
- */
-export async function stateChangeSleep() {
-  await sleep(1000);
 }

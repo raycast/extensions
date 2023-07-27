@@ -2,14 +2,14 @@ import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues } from "@ray
 import { getErrorMessage, getFriendlyName } from "./utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
-import { LightMenubarItem } from "./components/lights/menu";
+import { CoverMenubarItem } from "./components/cover/menu";
 import { hiddenEntitiesPreferences } from "./components/states/utils";
 
-export default function LightsMenuCommand(): JSX.Element {
+export default function CoversMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
   const hidden = hiddenEntitiesPreferences();
   const entities = states
-    ?.filter((s) => s.entity_id.startsWith("light"))
+    ?.filter((s) => s.entity_id.startsWith("cover"))
     .filter((s) => !hidden.includes(s.entity_id))
     .sort((a, b) => getFriendlyName(a).localeCompare(getFriendlyName(b)));
   const header = error ? getErrorMessage(error) : undefined;
@@ -19,19 +19,19 @@ export default function LightsMenuCommand(): JSX.Element {
 
   return (
     <MenuBarExtra
-      icon={{ source: "lightbulb.png", tintColor: rootColor }}
+      icon={{ source: "cover-close.png", tintColor: rootColor }}
       isLoading={isLoading}
       tooltip={"Home Assistant Media Players"}
     >
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
-        title="Open All Lights"
-        name="lights"
+        title="Open All Covers"
+        name="covers"
         type={LaunchType.UserInitiated}
         icon={Icon.Terminal}
       />
-      <MenuBarExtra.Section title="Lights">
-        {entities?.map((e) => <LightMenubarItem key={e.entity_id} state={e} />)}
+      <MenuBarExtra.Section title="Covers">
+        {entities?.map((e) => <CoverMenubarItem key={e.entity_id} state={e} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />

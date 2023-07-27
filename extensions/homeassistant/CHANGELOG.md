@@ -5,6 +5,7 @@
 - Add Mediaplayer Menu Bar command
 - Add Entities Menu Bar command to allow to add specific entities in the Menu Bar
 - Add Lights Menu Bar command
+- Add Covers Menu Bar command
 
 ## [Modernize] - 2023-07-16
 
