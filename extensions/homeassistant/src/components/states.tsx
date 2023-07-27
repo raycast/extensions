@@ -105,6 +105,72 @@ const batterLevelIcons: string[] = [
   "battery-100.png",
 ];
 
+/**
+ * @param state
+ * @returns Nice format of state of the given object. If no device class found state will be given back
+ */
+export function getDeviceClassState(state: State): string {
+  const dc = state.attributes.device_class;
+  if (dc) {
+    if (dc === "problem") {
+      switch (state.state) {
+        case "on": {
+          return "Detected";
+        }
+        case "off": {
+          return "OK";
+        }
+      }
+    } else if (dc === "motion") {
+      switch (state.state) {
+        case "on": {
+          return "Detected";
+        }
+        case "off": {
+          return "Normal";
+        }
+      }
+    } else if (dc === "plug") {
+      switch (state.state) {
+        case "on": {
+          return "Plugged";
+        }
+        case "off": {
+          return "Unplugged";
+        }
+      }
+    } else if (dc === "update") {
+      switch (state.state) {
+        case "on": {
+          return "Update Available";
+        }
+        case "off": {
+          return "Up To Date";
+        }
+      }
+    } else if (dc === "door") {
+      switch (state.state) {
+        case "on": {
+          return "Open";
+        }
+        case "off": {
+          return "Closed";
+        }
+      }
+    } else if (dc === "window") {
+      switch (state.state) {
+        case "on": {
+          return "Open";
+        }
+        case "off": {
+          return "Closed";
+        }
+      }
+    }
+  }
+  return state.state;
+}
+
 function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
   if (state.attributes.device_class) {
     const dc = state.attributes.device_class;
@@ -158,6 +224,57 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
   } else {
     return undefined;
   }
+}
+
+export function getStateValue(state: State): string | undefined {
+  if (state.entity_id.startsWith("light") && state.state === "on") {
+    const b = state.attributes.brightness || undefined;
+    if (b !== undefined) {
+      const bv = parseInt(b);
+      if (!isNaN(bv)) {
+        const percent = (bv / 255) * 100;
+        return `${Math.round(percent)}%`;
+      }
+    }
+  } else if (state.entity_id.startsWith("fan")) {
+    // Speed as a percentage
+    const p = state.attributes.percentage || undefined;
+    if (!isNaN(p)) {
+      return `${p}%`;
+    }
+  } else if (state.entity_id.startsWith("sensor")) {
+    const unit = (state.attributes.unit_of_measurement as string) || undefined;
+    const sl = state.state?.toLocaleLowerCase();
+    if (unit && sl && sl !== "unknown" && sl !== "unavailable") {
+      return `${state.state} ${unit}`;
+    }
+  } else if (state.entity_id.startsWith("media_player")) {
+    const v = state.attributes.volume_level as number;
+    if (v && typeof v === "number" && !Number.isNaN(v)) {
+      const vr = Math.round(v * 100);
+      return `🔉 ${vr}% | ${state.state}`;
+    }
+  } else if (state.entity_id.startsWith("binary_sensor")) {
+    return getDeviceClassState(state);
+  } else if (state.entity_id.startsWith("input_button")) {
+    return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
+  } else if (state.entity_id.startsWith("update")) {
+    if (state.attributes.in_progress === true) {
+      return "in progress 🔄";
+    }
+    const iv = state.attributes.installed_version;
+    const lv = state.attributes.latest_version;
+    if (state.state === "on" && lv) {
+      if (iv) {
+        return `${iv} => ${lv}`;
+      }
+      return lv;
+    } else if (state.state === "off") {
+      return "✅";
+    }
+    return state.state;
+  }
+  return state.state;
 }
 
 function getLightIconSource(state: State): string {
@@ -362,114 +479,6 @@ export function StateListItem(props: { state: State }): JSX.Element {
     }
     return "";
   };
-  const stateValue = (state: State): string | undefined => {
-    if (state.entity_id.startsWith("light") && state.state === "on") {
-      const b = state.attributes.brightness || undefined;
-      if (b !== undefined) {
-        const bv = parseInt(b);
-        if (!isNaN(bv)) {
-          const percent = (bv / 255) * 100;
-          return `${Math.round(percent)}%`;
-        }
-      }
-    } else if (state.entity_id.startsWith("fan")) {
-      // Speed as a percentage
-      const p = state.attributes.percentage || undefined;
-      if (!isNaN(p)) {
-        return `${p}%`;
-      }
-    } else if (state.entity_id.startsWith("sensor")) {
-      const unit = (state.attributes.unit_of_measurement as string) || undefined;
-      const sl = state.state?.toLocaleLowerCase();
-      if (unit && sl && sl !== "unknown" && sl !== "unavailable") {
-        return `${state.state} ${unit}`;
-      }
-    } else if (state.entity_id.startsWith("media_player")) {
-      const v = state.attributes.volume_level as number;
-      if (v && typeof v === "number" && !Number.isNaN(v)) {
-        const vr = Math.round(v * 100);
-        return `🔉 ${vr}% | ${state.state}`;
-      }
-    } else if (state.entity_id.startsWith("binary_sensor")) {
-      const dc = state.attributes.device_class;
-      if (dc) {
-        if (dc === "problem") {
-          switch (state.state) {
-            case "on": {
-              return "Detected";
-            }
-            case "off": {
-              return "OK";
-            }
-          }
-        } else if (dc === "motion") {
-          switch (state.state) {
-            case "on": {
-              return "Detected";
-            }
-            case "off": {
-              return "Normal";
-            }
-          }
-        } else if (dc === "plug") {
-          switch (state.state) {
-            case "on": {
-              return "Plugged";
-            }
-            case "off": {
-              return "Unplugged";
-            }
-          }
-        } else if (dc === "update") {
-          switch (state.state) {
-            case "on": {
-              return "Update Available";
-            }
-            case "off": {
-              return "Up To Date";
-            }
-          }
-        } else if (dc === "door") {
-          switch (state.state) {
-            case "on": {
-              return "Open";
-            }
-            case "off": {
-              return "Closed";
-            }
-          }
-        } else if (dc === "window") {
-          switch (state.state) {
-            case "on": {
-              return "open";
-            }
-            case "off": {
-              return "closed";
-            }
-          }
-        }
-      }
-      return state.state;
-    } else if (state.entity_id.startsWith("input_button")) {
-      return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
-    } else if (state.entity_id.startsWith("update")) {
-      if (state.attributes.in_progress === true) {
-        return "in progress 🔄";
-      }
-      const iv = state.attributes.installed_version;
-      const lv = state.attributes.latest_version;
-      if (state.state === "on" && lv) {
-        if (iv) {
-          return `${iv} => ${lv}`;
-        }
-        return lv;
-      } else if (state.state === "off") {
-        return "✅";
-      }
-      return state.state;
-    }
-    return state.state;
-  };
 
   let icon: Image.ImageLike | undefined;
   const subtitle = (state: State): string | undefined => {
@@ -509,7 +518,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
       icon={icon || getIcon(state)}
       accessories={[
         {
-          text: extraTitle(state) + stateValue(state),
+          text: extraTitle(state) + getStateValue(state),
           tooltip: getStateTooltip(state),
         },
       ]}
