@@ -4,6 +4,7 @@ import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
 import { StateMenubarItem } from "./components/states/menu";
 import { State } from "./haapi";
+import { filterStates } from "./components/states/utils";
 
 function entitiesPreferences(): string[] {
   const prefs = getPreferenceValues();
@@ -14,14 +15,16 @@ function entitiesPreferences(): string[] {
   return (hidden.split(",").map((h) => h.trim()) || []).filter((h) => h.length > 0);
 }
 
-function sortByPreferenceOrder(entities: State[] | undefined, entityIDs: string[]): State[] | undefined {
-  const result: State[] = [];
-  if (entities && entities.length > 0) {
-    for (const id of entityIDs) {
-      const r = entities.find((e) => e.entity_id === id);
-      if (r) {
-        result.push(r);
-      }
+function filterEntities(states: State[] | undefined): State[] | undefined {
+  if (!states) {
+    return states;
+  }
+  const entityFilters = entitiesPreferences();
+  let result: State[] = [];
+  for (const f of entityFilters) {
+    const filtered = filterStates(states, { include: [f] });
+    if (filtered && filtered.length > 0) {
+      result = result.concat(filtered);
     }
   }
   return result;
@@ -29,9 +32,7 @@ function sortByPreferenceOrder(entities: State[] | undefined, entityIDs: string[
 
 export default function EntitiesMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
-  const entityIDs = entitiesPreferences();
-  const entitiesRaws = states?.filter((s) => s && s.entity_id && entityIDs.includes(s.entity_id));
-  const entities = sortByPreferenceOrder(entitiesRaws, entityIDs);
+  const entities = filterEntities(states);
   const header = error ? getErrorMessage(error) : undefined;
 
   return (

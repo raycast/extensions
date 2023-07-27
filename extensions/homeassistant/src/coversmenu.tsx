@@ -1,17 +1,16 @@
-import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { getErrorMessage, getFriendlyName } from "./utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
 import { CoverMenubarItem } from "./components/cover/menu";
-import { hiddenEntitiesPreferences } from "./components/states/utils";
+import { filterStates, hiddenEntitiesPreferences } from "./components/states/utils";
 
 export default function CoversMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
   const hidden = hiddenEntitiesPreferences();
-  const entities = states
-    ?.filter((s) => s.entity_id.startsWith("cover"))
-    .filter((s) => !hidden.includes(s.entity_id))
-    .sort((a, b) => getFriendlyName(a).localeCompare(getFriendlyName(b)));
+  const entities = filterStates(states, { include: ["cover.*"], exclude: hidden })?.sort((a, b) =>
+    getFriendlyName(a).localeCompare(getFriendlyName(b)),
+  );
   const header = error ? getErrorMessage(error) : undefined;
 
   const lightOnCount = entities?.filter((e) => e.state === "on").length;
