@@ -39,8 +39,8 @@ on run
 				set dialogMsg to dialogMsg & return & "Clipboard starts with: " & clipboardStartsWith
 			end try
 		end try
-		display dialog dialogMsg
-		return false
+		-- display dialog dialogMsg
+		return dialogMsg
 	end if
 	
 	clipboardConvertToFMObjects({}) of objTrans
