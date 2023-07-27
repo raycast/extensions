@@ -12,19 +12,19 @@
   "commands": [
     {
       "name": "index",
-      "title": "Sections",
+      "title": "List Sections",
       "description": "Sections News from Rusbase",
       "mode": "view"
     },
     {
       "name": "markets",
-      "title": "Markets",
+      "title": "List Markets",
       "description": "Markets News from Rusbase",
       "mode": "view"
     },
     {
       "name": "companies",
-      "title": "Companies",
+      "title": "List Companies",
       "description": "Companies News from Rusbase",
       "mode": "view"
     }
