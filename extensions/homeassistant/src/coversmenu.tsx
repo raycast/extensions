@@ -13,14 +13,15 @@ export default function CoversMenuCommand(): JSX.Element {
   );
   const header = error ? getErrorMessage(error) : undefined;
 
-  const lightOnCount = entities?.filter((e) => e.state === "on").length;
-  const rootColor = lightOnCount !== undefined && lightOnCount > 0 ? Color.Yellow : Color.PrimaryText;
+  const coversOpenCount = entities?.filter((e) => e.state === "open").length || 0;
+  const coversClosedCount = entities?.filter((e) => e.state === "closed").length || 0;
+  const icon = coversOpenCount && coversOpenCount > 0 ? "cover-open.png" : "cover-close.png";
 
   return (
     <MenuBarExtra
-      icon={{ source: "cover-close.png", tintColor: rootColor }}
+      icon={{ source: icon, tintColor: Color.PrimaryText }}
       isLoading={isLoading}
-      tooltip={"Home Assistant Media Players"}
+      tooltip={`Home Assistant Covers: Open ${coversOpenCount}, Closed ${coversClosedCount}`}
     >
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem

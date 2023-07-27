@@ -14,13 +14,14 @@ export default function LightsMenuCommand(): JSX.Element {
   const header = error ? getErrorMessage(error) : undefined;
 
   const lightOnCount = entities?.filter((e) => e.state === "on").length;
+  const lightOffCount = entities?.filter((e) => e.state === "off").length;
   const rootColor = lightOnCount !== undefined && lightOnCount > 0 ? Color.Yellow : Color.PrimaryText;
 
   return (
     <MenuBarExtra
       icon={{ source: "lightbulb.png", tintColor: rootColor }}
       isLoading={isLoading}
-      tooltip={"Home Assistant Media Players"}
+      tooltip={`Home Assistant Lights: On ${lightOnCount}, Off ${lightOffCount}`}
     >
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
