@@ -3,7 +3,7 @@
   "name": "curto-io-url-shortener",
   "title": "curto.io URL Shortener",
   "description": "Quickly shorten the current clipboard URL with curto.io",
-  "icon": "command-icon.svg",
+  "icon": "command-icon.png",
   "author": "birobirobiro",
   "license": "MIT",
   "commands": [
