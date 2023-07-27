@@ -1,4 +1,15 @@
-import { MenuBarExtra, Icon, openCommandPreferences, Clipboard, showHUD, showToast, Toast, Image } from "@raycast/api";
+import {
+  MenuBarExtra,
+  Icon,
+  openCommandPreferences,
+  Clipboard,
+  showHUD,
+  showToast,
+  Toast,
+  Image,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { getErrorMessage } from "../utils";
 import { ReactNode } from "react";
 
@@ -57,5 +68,24 @@ export function MenuBarSubmenu(props: {
     <MenuBarExtra.Submenu title={title} icon={props.icon}>
       {props.children}
     </MenuBarExtra.Submenu>
+  );
+}
+
+export function LaunchCommandMenubarItem(props: {
+  title: string;
+  icon?: Image.ImageLike;
+  name: string;
+  type: LaunchType;
+}) {
+  const launch = async () => {
+    return launchCommand({ name: props.name, type: props.type });
+  };
+  return (
+    <MenuBarExtra.Item
+      title={props.title}
+      icon={props.icon}
+      shortcut={{ modifiers: ["cmd"], key: "o" }}
+      onAction={launch}
+    />
   );
 }

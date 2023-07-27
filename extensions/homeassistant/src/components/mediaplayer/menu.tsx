@@ -9,20 +9,6 @@ function volumeRange() {
   return range(0.0, 1.0, 0.05);
 }
 
-export function MediaPlayerAllMenubarItem() {
-  const launch = async () => {
-    return launchCommand({ name: "mediaplayers", type: LaunchType.UserInitiated });
-  };
-  return (
-    <MenuBarExtra.Item
-      title="Open All Media Players"
-      icon={Icon.Terminal}
-      shortcut={{ modifiers: ["cmd"], key: "o" }}
-      onAction={launch}
-    />
-  );
-}
-
 function MediaPlayerVolumeItem(props: { state: State; volume: number }) {
   const v = props.volume;
   const setVolume = async () => {
