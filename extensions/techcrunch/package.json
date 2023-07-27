@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "TechCrunch",
+      "title": "List News",
+      "subtitle": "TechCrunch",
       "description": "Best News from TechCrunch",
       "mode": "view"
     }
