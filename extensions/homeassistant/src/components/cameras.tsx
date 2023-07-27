@@ -322,7 +322,7 @@ export function CameraGrid(): JSX.Element {
   return (
     <Grid
       searchBarPlaceholder="Filter by Name"
-      inset={Grid.Inset.Small}
+      inset={Grid.Inset.Zero}
       isLoading={isLoading}
       columns={3}
       fit={Grid.Fit.Fill}
