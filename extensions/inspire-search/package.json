@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inspire-search",
   "title": "Inspire HEP Search",
-  "description": "Search papers on inspirehep.net and browse results inside Raycast. Includes an action to copy the bibtex code.",
+  "description": "Search papers on inspirehep.net and browse results inside Raycast. Includes actions to copy one or more bibtex entries, look up references or citations, and (when available) download pdf version.",
   "icon": "command-icon.png",
   "author": "rpenco",
   "categories": [
