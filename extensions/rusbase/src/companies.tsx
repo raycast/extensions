@@ -38,14 +38,14 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select a category"
-          defaultValue={"ВКонтакте"}
+          defaultValue={"VK"}
           storeValue
           onChange={(newValue) => setRssLink(newValue as string)}
         >
-          <List.Dropdown.Item title={"«ВКонтакте»"} value={"https://rb.ru/feeds/tag/vk/"} />
-          <List.Dropdown.Item title={"РВК"} value={"https://rb.ru/feeds/tag/rvc"} />
-          <List.Dropdown.Item title={"Фонд «Сколково»"} value={"https://rb.ru/feeds/tag/skolkovo/"} />
-          <List.Dropdown.Item title={"«Яндекс»"} value={"https://rb.ru/feeds/tag/yandex/"} />
+          <List.Dropdown.Item title={"«VK»"} value={"https://rb.ru/feeds/tag/vk/"} />
+          <List.Dropdown.Item title={"RVK"} value={"https://rb.ru/feeds/tag/rvc"} />
+          <List.Dropdown.Item title={"Skolkovo Foundation"} value={"https://rb.ru/feeds/tag/skolkovo/"} />
+          <List.Dropdown.Item title={"Yandex"} value={"https://rb.ru/feeds/tag/yandex/"} />
           <List.Dropdown.Item title={"Airbnb"} value={"https://rb.ru/feeds/tag/airbnb/"} />
           <List.Dropdown.Item title={"Apple"} value={"https://rb.ru/feeds/tag/apple/"} />
           <List.Dropdown.Item title={"Facebook"} value={"https://rb.ru/feeds/tag/facebook/"} />

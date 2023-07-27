@@ -42,36 +42,36 @@ export default function Command() {
           storeValue
           onChange={(newValue) => setRssLink(newValue as string)}
         >
-          <List.Dropdown.Item title={"Беспилотные аппараты"} value={"https://rb.ru/feeds/tag/drone/"} />
-          <List.Dropdown.Item title={"Биотехнологии"} value={"https://rb.ru/feeds/tag/biotech/"} />
-          <List.Dropdown.Item title={"Биткоины"} value={"https://rb.ru/feeds/tag/bitcoin/"} />
-          <List.Dropdown.Item title={"Большие данные"} value={"https://rb.ru/feeds/tag/bigdata/"} />
-          <List.Dropdown.Item title={"Виртуальная реальность"} value={"https://rb.ru/feeds/tag/vr/"} />
-          <List.Dropdown.Item title={"Интернет вещей"} value={"https://rb.ru/feeds/tag/iot/"} />
-          <List.Dropdown.Item title={"Информационные технологии, IT"} value={"https://rb.ru/feeds/tag/it/"} />
-          <List.Dropdown.Item title={"Искусственный интеллект"} value={"https://rb.ru/feeds/tag/ai/"} />
-          <List.Dropdown.Item title={"Кибербезопасность"} value={"https://rb.ru/feeds/tag/cybersecurity/"} />
-          <List.Dropdown.Item title={"Киберспорт"} value={"https://rb.ru/feeds/tag/cybersport/"} />
-          <List.Dropdown.Item title={"Криптовалюты и ICO"} value={"https://rb.ru/feeds/tag/crypto/"} />
-          <List.Dropdown.Item title={"Космос"} value={"https://rb.ru/feeds/tag/space"} />
-          <List.Dropdown.Item title={"Логистика и доставка"} value={"https://rb.ru/feeds/tag/delivery/"} />
-          <List.Dropdown.Item title={"Маркетинг"} value={"https://rb.ru/feeds/tag/marketing/"} />
-          <List.Dropdown.Item title={"Носимые гаджеты"} value={"https://rb.ru/feeds/tag/wearable/"} />
-          <List.Dropdown.Item title={"Облачные технологии"} value={"https://rb.ru/feeds/tag/cloud/"} />
-          <List.Dropdown.Item title={"Пиар (PR)"} value={"https://rb.ru/feeds/tag/pr/"} />
-          <List.Dropdown.Item title={"Работа с персоналом (HR)"} value={"https://rb.ru/feeds/tag/hr/"} />
-          <List.Dropdown.Item title={"Реклама"} value={"https://rb.ru/feeds/tag/advertising/"} />
-          <List.Dropdown.Item title={"Роботы"} value={"https://rb.ru/feeds/tag/robotics/"} />
-          <List.Dropdown.Item title={"Технологии в медицине"} value={"https://rb.ru/feeds/tag/medtech/"} />
-          <List.Dropdown.Item title={"Технологии в секс-индустрии"} value={"https://rb.ru/feeds/tag/sextech/"} />
-          <List.Dropdown.Item title={"Финансовые технологии"} value={"https://rb.ru/feeds/tag/fintech/"} />
-          <List.Dropdown.Item title={"Фуд-стартапы"} value={"https://rb.ru/feeds/tag/foodtech/"} />
-          <List.Dropdown.Item title={"Хардвер"} value={"https://rb.ru/feeds/tag/hardware/"} />
+          <List.Dropdown.Item title={"Drones"} value={"https://rb.ru/feeds/tag/drone/"} />
+          <List.Dropdown.Item title={"Biotech"} value={"https://rb.ru/feeds/tag/biotech/"} />
+          <List.Dropdown.Item title={"Bitcoins"} value={"https://rb.ru/feeds/tag/bitcoin/"} />
+          <List.Dropdown.Item title={"Big Data"} value={"https://rb.ru/feeds/tag/bigdata/"} />
+          <List.Dropdown.Item title={"VR"} value={"https://rb.ru/feeds/tag/vr/"} />
+          <List.Dropdown.Item title={"IOT"} value={"https://rb.ru/feeds/tag/iot/"} />
+          <List.Dropdown.Item title={"Information technologies, IT"} value={"https://rb.ru/feeds/tag/it/"} />
+          <List.Dropdown.Item title={"AI"} value={"https://rb.ru/feeds/tag/ai/"} />
+          <List.Dropdown.Item title={"Cyberse"} value={"https://rb.ru/feeds/tag/cybersecurity/"} />
+          <List.Dropdown.Item title={"Cybersport"} value={"https://rb.ru/feeds/tag/cybersport/"} />
+          <List.Dropdown.Item title={"Cryptocurrencies and ICOs"} value={"https://rb.ru/feeds/tag/crypto/"} />
+          <List.Dropdown.Item title={"Space"} value={"https://rb.ru/feeds/tag/space"} />
+          <List.Dropdown.Item title={"Logistics and delivery"} value={"https://rb.ru/feeds/tag/delivery/"} />
+          <List.Dropdown.Item title={"Marketing"} value={"https://rb.ru/feeds/tag/marketing/"} />
+          <List.Dropdown.Item title={"Wearable gadgets"} value={"https://rb.ru/feeds/tag/wearable/"} />
+          <List.Dropdown.Item title={"Cloud technologies"} value={"https://rb.ru/feeds/tag/cloud/"} />
+          <List.Dropdown.Item title={"PR"} value={"https://rb.ru/feeds/tag/pr/"} />
+          <List.Dropdown.Item title={"HR"} value={"https://rb.ru/feeds/tag/hr/"} />
+          <List.Dropdown.Item title={"Advertisement"} value={"https://rb.ru/feeds/tag/advertising/"} />
+          <List.Dropdown.Item title={"Robots"} value={"https://rb.ru/feeds/tag/robotics/"} />
+          <List.Dropdown.Item title={"Technology in medicine"} value={"https://rb.ru/feeds/tag/medtech/"} />
+          <List.Dropdown.Item title={"Technology in the sex industry"} value={"https://rb.ru/feeds/tag/sextech/"} />
+          <List.Dropdown.Item title={"FinTech"} value={"https://rb.ru/feeds/tag/fintech/"} />
+          <List.Dropdown.Item title={"FoodTech"} value={"https://rb.ru/feeds/tag/foodtech/"} />
+          <List.Dropdown.Item title={"Hardware"} value={"https://rb.ru/feeds/tag/hardware/"} />
           <List.Dropdown.Item
-            title={"Экономика совместного потребления (sharing economy)"}
+            title={"Sharing economy)"}
             value={"https://rb.ru/feeds/tag/sharing/"}
           />
-          <List.Dropdown.Item title={"Электронная коммерция"} value={"https://rb.ru/feeds/tag/ecommerce/"} />
+          <List.Dropdown.Item title={"E-commerce"} value={"https://rb.ru/feeds/tag/ecommerce/"} />
           <List.Dropdown.Item title={"SEO"} value={"https://rb.ru/feeds/tag/seo/"} />
           <List.Dropdown.Item title={"SMM"} value={"https://rb.ru/feeds/tag/smm/"} />
         </List.Dropdown>

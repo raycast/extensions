@@ -38,18 +38,18 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select a category"
-          defaultValue={"Новости"}
+          defaultValue={"News"}
           storeValue
           onChange={(newValue) => setRssLink(newValue as string)}
         >
-          <List.Dropdown.Item title={"Новости"} value={"https://rb.ru/feeds/news/"} />
-          <List.Dropdown.Item title={"Возможности"} value={"https://rb.ru/feeds/tag/chance/"} />
-          <List.Dropdown.Item title={"Бизнес в Китае"} value={"https://rb.ru/feeds/tag/china/"} />
-          <List.Dropdown.Item title={"Герои Rusbase"} value={"https://rb.ru/feeds/tag/interview/"} />
-          <List.Dropdown.Item title={"Материалы для новичков"} value={"https://rb.ru/feeds/tag/academy/"} />
-          <List.Dropdown.Item title={"Стартап дня"} value={"https://rb.ru/feeds/tag/startupoftheday/"} />
-          <List.Dropdown.Item title={"Фандрайзинг"} value={"https://rb.ru/feeds/tag/fundraising/"} />
-          <List.Dropdown.Item title={"Юридические вопросы для фаундеров"} value={"https://rb.ru/feeds/tag/legal"} />
+          <List.Dropdown.Item title={"News"} value={"https://rb.ru/feeds/news/"} />
+          <List.Dropdown.Item title={"Opportunities"} value={"https://rb.ru/feeds/tag/chance/"} />
+          <List.Dropdown.Item title={"Business in China"} value={"https://rb.ru/feeds/tag/china/"} />
+          <List.Dropdown.Item title={"Rusbase Heroes"} value={"https://rb.ru/feeds/tag/interview/"} />
+          <List.Dropdown.Item title={"Materials for beginners"} value={"https://rb.ru/feeds/tag/academy/"} />
+          <List.Dropdown.Item title={"Startup of the day"} value={"https://rb.ru/feeds/tag/startupoftheday/"} />
+          <List.Dropdown.Item title={"Fundraising"} value={"https://rb.ru/feeds/tag/fundraising/"} />
+          <List.Dropdown.Item title={"Legal issues for funders"} value={"https://rb.ru/feeds/tag/legal"} />
         </List.Dropdown>
       }
     >
