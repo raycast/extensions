@@ -11,7 +11,7 @@ export async function stateChangeSleep() {
 
 export function hiddenEntitiesPreferences(): string[] {
   const prefs = getPreferenceValues();
-  const hidden: string | undefined = prefs.hiddenEntities;
+  const hidden: string | undefined = prefs.excludedEntities;
   if (!hidden) {
     return [];
   }

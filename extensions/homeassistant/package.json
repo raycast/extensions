@@ -252,11 +252,11 @@
       "interval": "1m",
       "preferences": [
         {
-          "name": "hiddenEntities",
+          "name": "excludedEntities",
           "description": "Given entities will be hidden in the menu",
           "type": "textfield",
           "required": false,
-          "title": "Hidden Entities",
+          "title": "Excluded Entities",
           "placeholder": "media_player.player1,media_player.player2"
         }
       ]
@@ -269,11 +269,11 @@
       "interval": "15m",
       "preferences": [
         {
-          "name": "hiddenEntities",
+          "name": "excludedEntities",
           "description": "Given entities will be hidden in the menu",
           "type": "textfield",
           "required": false,
-          "title": "Hidden Entities",
+          "title": "Excluded Entities",
           "placeholder": "light.mylight1,light.mylight2"
         }
       ]
@@ -286,11 +286,11 @@
       "interval": "15m",
       "preferences": [
         {
-          "name": "hiddenEntities",
+          "name": "excludedEntities",
           "description": "Given entities will be hidden in the menu",
           "type": "textfield",
           "required": false,
-          "title": "Hidden Entities",
+          "title": "Excluded Entities",
           "placeholder": "cover.mycover1,light.mycover2"
         }
       ]
@@ -308,7 +308,7 @@
           "type": "textfield",
           "required": true,
           "title": "Entities",
-          "placeholder": "media_player.player1,media_player.player2"
+          "placeholder": "media_player.player1,light.light3"
         }
       ]
     }
