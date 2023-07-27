@@ -80,12 +80,14 @@ export default function MediaGridItem({
     ApiKey: preferences.jellyfinApiKey,
   });
 
-  let prefix = "";
-  if (preferences.showWatchedStatus && isWatched) {
-    prefix += "✅";
+  const accessory: Grid.Item.Accessory = {}
+  if (isWatched) {
+    accessory.icon = Icon.Check
+    accessory.tooltip = "Watched"
   }
-  if (preferences.showFavoriteStatus && isFavorite) {
-    prefix += "❤️";
+  if (isFavorite) {
+    accessory.icon = Icon.Heart
+    accessory.tooltip = "Favorite"
   }
 
   const subtitle: string[] = [];
@@ -97,21 +99,21 @@ export default function MediaGridItem({
   }
 
   const actions = [
-    <Action.OpenInBrowser title="Open in Browser" url={mediaUrl} shortcut={{ key: "enter", modifiers: ["cmd"] }} />,
+    <Action.OpenInBrowser title="Open in Browser" url={mediaUrl} />,
     isWatched ? (
       <Action
         title="Unmark Watched"
         icon={Icon.EyeDisabled}
         style={Action.Style.Destructive}
         onAction={createWatchedHandler(item, false, setIsWatched)}
-        shortcut={{ key: "w", modifiers: ["cmd"] }}
+        shortcut={{ key: "w", modifiers: ["cmd", "shift"] }}
       />
     ) : (
       <Action
         title="Mark Watched"
         icon={Icon.Eye}
         onAction={createWatchedHandler(item, true, setIsWatched)}
-        shortcut={{ key: "w", modifiers: ["cmd"] }}
+        shortcut={{ key: "w", modifiers: ["cmd", "shift"] }}
       />
     ),
     isFavorite ? (
@@ -159,9 +161,10 @@ export default function MediaGridItem({
   return (
     <Grid.Item
       content={coverUrl}
-      title={`${prefix ? prefix + " " : ""}${item.Name}`}
+      title={item.Name}
       subtitle={subtitle.join(" · ")}
       actions={<ActionPanel title="Media Actions">{...actions}</ActionPanel>}
+      accessory={accessory}
     />
   );
 }

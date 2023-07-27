@@ -62,7 +62,7 @@ function TaskListItem({ task, refresh }: { task: ScheduledTask; refresh: () => v
       <Action
         title="Start Task"
         icon={Icon.Play}
-        shortcut={{ key: "enter", modifiers: ["cmd"] }}
+        shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
         onAction={async () => {
           const toast = await showToast({
             title: "Task",

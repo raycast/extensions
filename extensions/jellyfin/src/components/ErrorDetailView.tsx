@@ -16,7 +16,6 @@ export default function ErrorDetailView({
             <Action
               title="Open Preferences"
               icon={Icon.Gear}
-              shortcut={{ key: "enter", modifiers: ["cmd"] }}
               onAction={() => openExtensionPreferences()}
             />
           </ActionPanel>
