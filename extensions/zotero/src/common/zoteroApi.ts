@@ -376,7 +376,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
-    if (diffTime < 60 * Number(preferences.cache_period)) {
+    if (diffTime < 60000 * Number(preferences.cache_period)) {
       const latest = await getLatestModifyDate();
       if (latest < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
