@@ -2,6 +2,10 @@
 
 This is a simple extension that allows you to read [ESPN](https://www.espn.com) news. It works directly in Raycast, no external applications or dependencies are required 
 
+### Our launch on Product Hunt
+
+<a href="https://www.producthunt.com/posts/espn-for-raycast?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-espn&#0045;for&#0045;raycast" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=406852&theme=light" alt="ESPN for Raycast - Best sports news in Spotlight | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
 #### If you enjoy using ESPN for Raycast and/or want to support further development, feel free to donate below!
 
 <a href="https://bmc.link/khlebobul" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
