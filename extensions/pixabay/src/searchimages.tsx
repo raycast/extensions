@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { getClipboardDownloadFolder, getDownloadFolder, Hit, Pixabay, showInFolderAfterDownload } from "./lib/api";
+import { getDownloadFolder, Hit, Pixabay, showInFolderAfterDownload } from "./lib/api";
 import fs from "fs";
 import { useImage } from "./lib/hooks";
 import path from "path";
@@ -85,7 +85,7 @@ function ImageCopyToClipboardAction(props: { localFilepath: string | undefined; 
     try {
       const [firsttag] = hit.tags.split(",");
       const filename = `${firsttag} - ${hit.id}.${getLargeFileExtension(hit)}`;
-      const downloadFolder = getClipboardDownloadFolder();
+      const downloadFolder = getDownloadFolder();
       fs.mkdirSync(downloadFolder, { recursive: true });
       const localFilename = path.join(downloadFolder, filename);
       fs.copyFileSync(lfp, localFilename);
