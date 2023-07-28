@@ -51,10 +51,10 @@ const getOpenId = () => {
 
 // Adapt to the new API
 const getApiVersion = () => {
-  if(getOpenApi().includes('v1')) return '/v1';
+  if (getOpenApi().includes("v1")) return "/v1";
 
-  return ''
-}
+  return "";
+};
 
 const getUseFetch = <T>(url: string, options: Record<string, any>) => {
   return useFetch<T, T>(url, {
@@ -140,8 +140,6 @@ export const getAllMemos = (rowStatus: ROW_STATUS_KEY = ROW_STATUS.NORMAL) => {
       data: [],
     },
   });
-
-  console.log('data',data)
 
   return { isLoading, data, revalidate };
 };
