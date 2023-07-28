@@ -37,7 +37,7 @@
       "type": "textfield",
       "title": "Cache Period (in minutes)",
       "required": false,
-      "default": "5",
+      "default": "10",
       "label": "Number of Minutes to Cache",
       "description": "Minutes after which cache must be updated"
     },

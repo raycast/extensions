@@ -27,6 +27,7 @@ Preferences related to these features are:
 - **Cache Period**: Number of minutes for which data will be used from cache. During this
   period, if last updated time of cache is still later than change in zotero database, Cache will be
   used for queries. Otherwise, a new cache will be created and results read directly from zotero database.
+  A default of 10 minutes is Used.
 
 - **Whether to use Better BibTex Citation**: If you use the [Better BibTex zotero extension](https://retorque.re/zotero-better-bibtex/), you can enable this flag to copy Better BibTex citation keys for any reference.
 - **Better Bibtex CSL JSON File**: Path where you save your auto-updating CSL JSON file. **PLEASE
@@ -73,9 +74,9 @@ Preferences related to these features are:
 ## Features
 
 On launching the application, you will get and empty view. The results will only show up when you
-type any search query. To speedup queries, sqlite query results are cached locally for 1 hour.
-Additionally, This cache is valid even after 1 hour, if your database has not changed since. Please
-note that the cache will become invalid if you update preferences.
+type any search query. To speedup queries, sqlite query results are cached locally for 10 minutes.
+Additionally, This cache is valid in those 10 minutes, only if your database has not changed since.
+Please note that the cache will become invalid if you update preferences.
 
 ![Empty View](media/empty_view.png)
 
