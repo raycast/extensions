@@ -67,10 +67,7 @@ export default function Command() {
           <List.Dropdown.Item title={"FinTech"} value={"https://rb.ru/feeds/tag/fintech/"} />
           <List.Dropdown.Item title={"FoodTech"} value={"https://rb.ru/feeds/tag/foodtech/"} />
           <List.Dropdown.Item title={"Hardware"} value={"https://rb.ru/feeds/tag/hardware/"} />
-          <List.Dropdown.Item
-            title={"Sharing economy)"}
-            value={"https://rb.ru/feeds/tag/sharing/"}
-          />
+          <List.Dropdown.Item title={"Sharing economy)"} value={"https://rb.ru/feeds/tag/sharing/"} />
           <List.Dropdown.Item title={"E-commerce"} value={"https://rb.ru/feeds/tag/ecommerce/"} />
           <List.Dropdown.Item title={"SEO"} value={"https://rb.ru/feeds/tag/seo/"} />
           <List.Dropdown.Item title={"SMM"} value={"https://rb.ru/feeds/tag/smm/"} />
