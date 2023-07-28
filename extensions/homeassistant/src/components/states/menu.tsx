@@ -8,6 +8,7 @@ import { SwitchMenubarItem } from "../switches/menu";
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
 import { LightMenubarItem } from "../lights/menu";
 import { WeatherMenubarItem } from "../weather/menu";
+import { CameraMenubarItem } from "../camera/menu";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
@@ -36,6 +37,9 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
     }
     case "weather": {
       return <WeatherMenubarItem state={s} />;
+    }
+    case "camera": {
+      return <CameraMenubarItem state={s} />;
     }
   }
   return (

@@ -9,6 +9,8 @@ import {
   Image,
   launchCommand,
   LaunchType,
+  Keyboard,
+  open,
 } from "@raycast/api";
 import { getErrorMessage } from "../utils";
 import { ReactNode } from "react";
@@ -86,6 +88,22 @@ export function LaunchCommandMenubarItem(props: {
       icon={props.icon}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       onAction={launch}
+    />
+  );
+}
+
+export function OpenInBrowserMenubarItem(props: {
+  url: string;
+  shortcut?: Keyboard.Shortcut;
+  title?: string;
+  icon?: Image.ImageLike;
+}) {
+  return (
+    <MenuBarExtra.Item
+      title={props.title ? props.title : "Open in Browser"}
+      shortcut={props.shortcut}
+      onAction={() => open(props.url)}
+      icon={props.icon ? props.icon : Icon.Globe}
     />
   );
 }

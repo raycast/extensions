@@ -39,14 +39,6 @@ import {
   VacuumTurnOffAction,
   VacuumTurnOnAction,
 } from "./vacuum";
-import {
-  CameraOpenStreamInBrowserAction,
-  CameraOpenStreamInIINAAction,
-  CameraOpenStreamInVLCAction,
-  CameraShowImage,
-  CameraTurnOffAction,
-  CameraTurnOnAction,
-} from "./cameras";
 import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./buttons";
 import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
@@ -64,6 +56,14 @@ import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsActio
 import { getStateTooltip } from "../utils";
 import { getMediaPlayerTitleAndArtist } from "./mediaplayer/utils";
 import { weatherConditionToIcon } from "./weather/utils";
+import {
+  CameraOpenStreamInBrowserAction,
+  CameraOpenStreamInIINAAction,
+  CameraOpenStreamInVLCAction,
+  CameraShowImageAction,
+  CameraTurnOffAction,
+  CameraTurnOnAction,
+} from "./camera/actions";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -843,7 +843,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       return (
         <ActionPanel>
           <ActionPanel.Section title="Image">
-            <CameraShowImage state={state} />
+            <CameraShowImageAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Video Stream">
             <CameraOpenStreamInBrowserAction state={state} />
