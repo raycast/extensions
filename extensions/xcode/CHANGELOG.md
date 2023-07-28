@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Change Data Source for List Apple Devices] - 2023-07-28
+
+- Changed the data source for the "List Apple Devices" command so it doesn't rely on a text file anymore.
+
 ## [List Apple Devices] - 2023-07-25
 
 - Added "List Apple Devices" command to have a list of Apple devices and their matching product name/code name.
