@@ -42,18 +42,18 @@ export default function Command() {
           storeValue
           onChange={(newValue) => setRssLink(newValue as string)}
         >
-          <List.Dropdown.Item title={"«VK»"} value={"https://rb.ru/feeds/tag/vk/"} />
+          <List.Dropdown.Item title={"VK"} value={"https://rb.ru/feeds/tag/vk/"} />
           <List.Dropdown.Item title={"RVK"} value={"https://rb.ru/feeds/tag/rvc"} />
           <List.Dropdown.Item title={"Skolkovo Foundation"} value={"https://rb.ru/feeds/tag/skolkovo/"} />
           <List.Dropdown.Item title={"Yandex"} value={"https://rb.ru/feeds/tag/yandex/"} />
           <List.Dropdown.Item title={"Airbnb"} value={"https://rb.ru/feeds/tag/airbnb/"} />
           <List.Dropdown.Item title={"Apple"} value={"https://rb.ru/feeds/tag/apple/"} />
           <List.Dropdown.Item title={"Facebook"} value={"https://rb.ru/feeds/tag/facebook/"} />
-          <List.Dropdown.Item title={"Google (Aplphabet)"} value={"https://rb.ru/feeds/tag/google/"} />
+          <List.Dropdown.Item title={"Google (Alphabet)"} value={"https://rb.ru/feeds/tag/google/"} />
           <List.Dropdown.Item title={"Mail.ru Group"} value={"https://rb.ru/feeds/tag/mailru/"} />
           <List.Dropdown.Item title={"Microsoft"} value={"https://rb.ru/feeds/tag/microsoft/"} />
           <List.Dropdown.Item title={"Tesla"} value={" https://rb.ru/feeds/tag/tesla/"} />
-          <List.Dropdown.Item title={"Twitter "} value={"https://rb.ru/feeds/tag/twitter/"} />
+          <List.Dropdown.Item title={"Twitter"} value={"https://rb.ru/feeds/tag/twitter/"} />
           <List.Dropdown.Item title={"Uber"} value={"https://rb.ru/feeds/tag/uber/"} />
         </List.Dropdown>
       }
