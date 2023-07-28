@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Detail, ActionPanel, Action, List } from "@raycast/api";
 
 const ROWS = 15;
-const COLS = 15;
+const COLS = 26;
 
 const initialGrid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => "  "));
 
@@ -18,6 +18,8 @@ const Status = {
   PLAYING: "PLAYING",
   GAME_OVER: "GAME_OVER",
 };
+
+let speed = 250;
 
 export default function Command() {
   const [grid, setGrid] = useState(initialGrid);
@@ -97,9 +99,9 @@ export default function Command() {
       const rows = grid.map((row) => "│" + row.join("") + "│");
       setMarkdown(`
   \`\`\`
-  ╭────────RAYCAST ARCADE────────╮
+  ╭───────────────────RAYCAST ARCADE───────────────────╮
   ${rows.join("\n")}
-  ╰───────┤SCORE: ${(score + "").padStart(6, "0")}├────────╯
+  ╰──────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────╯
   \`\`\`
         `);
     }
@@ -148,44 +150,44 @@ export default function Command() {
 
   let gameOver = `
   \`\`\`
-╭────────RAYCAST ARCADE────────╮
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-│          GAME OVER!          │
-│   PRESS ENTER TO TRY AGAIN   │
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-╰───────┤SCORE: ${(score + "").padStart(6, "0")}├────────╯
+╭───────────────────RAYCAST ARCADE───────────────────╮
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                     GAME OVER!                     │
+│              PRESS ENTER TO TRY AGAIN              │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+╰──────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────╯
 \`\`\`
   `;
   let gameStart = `
   \`\`\`
-╭────────RAYCAST ARCADE────────╮
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-│        RAYCAST SNAKE.        │
-│     PRESS ENTER TO PLAY.     │
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-│                              │
-╰───────┤SCORE: ${(score + "").padStart(6, "0")}├────────╯
+╭───────────────────RAYCAST ARCADE───────────────────╮
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                   RAYCAST SNAKE.                   │
+│                PRESS ENTER TO PLAY.                │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+│                                                    │
+╰──────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────╯
 \`\`\`
   `;
 
@@ -218,7 +220,7 @@ export default function Command() {
         }
         if (e === "game" && intervalRef.current == null && !(status == Status.START || status == Status.GAME_OVER)) {
           // Check intervalRef.current instead of snakeInterval
-          intervalRef.current = setInterval(moveSnake, 250); // Store the new identifier in the ref
+          intervalRef.current = setInterval(moveSnake, speed); // Store the new identifier in the ref
         }
       }}
     >
@@ -251,11 +253,11 @@ export default function Command() {
 
                   direction.current = Direction.RIGHT;
 
-                  intervalRef.current = setInterval(moveSnake, 250);
+                  intervalRef.current = setInterval(moveSnake, speed);
                 }
                 if (status === Status.START) {
                   setStatus(Status.PLAYING);
-                  intervalRef.current = setInterval(moveSnake, 250);
+                  intervalRef.current = setInterval(moveSnake, speed);
                 }
               }}
             />
@@ -302,7 +304,7 @@ export default function Command() {
                 }
                 if (status === Status.PLAYING) {
                   setSelectedTab("game");
-                  intervalRef.current = setInterval(moveSnake, 250);
+                  intervalRef.current = setInterval(moveSnake, speed);
                 }
                 if (status === Status.GAME_OVER) {
                   setSelectedTab("game");
