@@ -11,6 +11,7 @@ export interface Preferences {
   use_bibtex?: boolean;
   bibtex_path?: string;
   csl_style?: string;
+  cache_period?: string;
 }
 
 export interface RefData {
@@ -152,6 +153,7 @@ async function openDb() {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
   const new_fPath = f_path + ".raycast";
+  await copyFile(f_path, new_fPath);
 
   const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
   const SQL = await initSqlJs({ wasmBinary });
@@ -349,9 +351,6 @@ const parseQuery = (q: string) => {
 
 export const searchResources = async (q: string): Promise<RefData[]> => {
   const preferences: Preferences = getPreferenceValues();
-  const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path + ".raycast";
-  await copyFile(f_path, new_fPath);
 
   async function updateCache(): Promise<RefData[]> {
     const data = await getData();
@@ -377,11 +376,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
-    if (diffTime < 3600000) {
-      const cacheBuffer = await readFile(cachePath);
-      const fData = JSON.parse(cacheBuffer.toString());
-      return fData.data;
-    } else {
+    if (diffTime < 60 * Number(preferences.cache_period)) {
       const latest = await getLatestModifyDate();
       if (latest < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
@@ -394,6 +389,8 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
       } else {
         throw "Invalid cache";
       }
+    } else {
+      throw "Invalid cache";
     }
   }
 

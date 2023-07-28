@@ -24,6 +24,10 @@ on the most current Application.
 
 Preferences related to these features are:
 
+- **Cache Period**: Number of minutes for which data will be used from cache. During this
+  period, if last updated time of cache is still later than change in zotero database, Cache will be
+  used for queries. Otherwise, a new cache will be created and results read directly from zotero database.
+
 - **Whether to use Better BibTex Citation**: If you use the [Better BibTex zotero extension](https://retorque.re/zotero-better-bibtex/), you can enable this flag to copy Better BibTex citation keys for any reference.
 - **Better Bibtex CSL JSON File**: Path where you save your auto-updating CSL JSON file. **PLEASE
   NOTE THAT THIS IS MUST IF YOU WANT TO USE THESE FEATURES**. Please see the following screencast
