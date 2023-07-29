@@ -25,7 +25,7 @@ export default function Command() {
     [],
     {
       abortable,
-    },
+    }
   );
 
   return (
