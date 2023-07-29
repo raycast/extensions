@@ -40,7 +40,7 @@ import {
 } from "./vacuum";
 import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./script/actions";
 import { ButtonPressAction } from "./button/actions";
-import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
+import { SceneActivateAction, SceneEditInBrowserAction } from "./scene/actions";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean/actions";
 import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number/actions";
 import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";

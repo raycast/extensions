@@ -1,16 +1,20 @@
 import { Icon, Color, Action } from "@raycast/api";
-import { ha } from "../common";
-import { State } from "../haapi";
+import { ha } from "../../common";
+import { State } from "../../haapi";
+import { callSceneActivateService } from "./utils";
 
 export function SceneActivateAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
   if (!s.entity_id.startsWith("scene")) {
     return null;
   }
-  const handle = async () => {
-    await ha.callService("scene", "turn_on", { entity_id: s.entity_id });
-  };
-  return <Action title="Activate" onAction={handle} icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }} />;
+  return (
+    <Action
+      title="Activate"
+      onAction={() => callSceneActivateService(s)}
+      icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+    />
+  );
 }
 
 export function SceneEditInBrowserAction(props: { state: State }): JSX.Element | null {
