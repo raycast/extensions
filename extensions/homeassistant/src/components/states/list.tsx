@@ -1,37 +1,38 @@
 import { ActionPanel, Color, List, showToast, Image, Toast } from "@raycast/api";
-import { State } from "../haapi";
-import { useState, useEffect } from "react";
-import { ha, shouldDisplayEntityID } from "../common";
-import { useHAStates } from "../hooks";
-import { EntityStandardActionSections } from "./entity";
-import { MediaPlayerActionPanel } from "./mediaplayer/actions";
-import { FanActionPanel } from "./fan/actions";
-import { LightActionPanel } from "./light/actions";
-import { changeRGBBrightness, RGBtoString } from "../color";
-import { AutomationActionPanel } from "./automation/actions";
-import { VacuumActionPanel } from "./vacuum/actions";
-import { ScriptActionPanel } from "./script/actions";
-import { ButtonActionPanel } from "./button/actions";
-import { SceneActionPanel } from "./scene/actions";
-import { InputBooleanActionPanel } from "./input_boolean/actions";
-import { InputNumberActionPanel } from "./input_number/actions";
-import { TimerActionPanel } from "./timer/actions";
-import { InputSelectActionPanel } from "./input_select/actions";
-import { InputButtonActionPanel } from "./input_button/actions";
-import { InputTextActionPanel } from "./input_text/actions";
-import { InputDateTimeActionPanel } from "./input_datetime/actions";
-import { PersonActionPanel } from "./persons/actions";
-import { getStateTooltip } from "../utils";
-import { getMediaPlayerTitleAndArtist } from "./mediaplayer/utils";
-import { weatherConditionToIcon } from "./weather/utils";
-import { CameraActionPanel } from "./camera/actions";
-import { UpdateActionPanel } from "./update/actions";
-import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "./light/utils";
-import { ZoneActionPanel } from "./zone/actions";
-import { SwitchActionPanel } from "./switches/actions";
-import { WeatherActionPanel } from "./weather/actions";
-import { ClimateActionPanel } from "./climate/actions";
-import { CoverActionPanel } from "./cover/actions";
+import { State } from "../../haapi";
+import { useState } from "react";
+import { ha, shouldDisplayEntityID } from "../../common";
+import { useHAStates } from "../../hooks";
+import { EntityStandardActionSections } from "../entity";
+import { MediaPlayerActionPanel } from "../mediaplayer/actions";
+import { FanActionPanel } from "../fan/actions";
+import { LightActionPanel } from "../light/actions";
+import { changeRGBBrightness, RGBtoString } from "../../color";
+import { AutomationActionPanel } from "../automation/actions";
+import { VacuumActionPanel } from "../vacuum/actions";
+import { ScriptActionPanel } from "../script/actions";
+import { ButtonActionPanel } from "../button/actions";
+import { SceneActionPanel } from "../scene/actions";
+import { InputBooleanActionPanel } from "../input_boolean/actions";
+import { InputNumberActionPanel } from "../input_number/actions";
+import { TimerActionPanel } from "../timer/actions";
+import { InputSelectActionPanel } from "../input_select/actions";
+import { InputButtonActionPanel } from "../input_button/actions";
+import { InputTextActionPanel } from "../input_text/actions";
+import { InputDateTimeActionPanel } from "../input_datetime/actions";
+import { PersonActionPanel } from "../persons/actions";
+import { getStateTooltip } from "../../utils";
+import { getMediaPlayerTitleAndArtist } from "../mediaplayer/utils";
+import { weatherConditionToIcon } from "../weather/utils";
+import { CameraActionPanel } from "../camera/actions";
+import { UpdateActionPanel } from "../update/actions";
+import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "../light/utils";
+import { ZoneActionPanel } from "../zone/actions";
+import { SwitchActionPanel } from "../switches/actions";
+import { WeatherActionPanel } from "../weather/actions";
+import { ClimateActionPanel } from "../climate/actions";
+import { CoverActionPanel } from "../cover/actions";
+import { useStateSearch } from "./hooks";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -572,39 +573,4 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       );
     }
   }
-}
-
-export function useStateSearch(
-  query: string | undefined,
-  domain: string,
-  device_class?: string,
-  allStates?: State[],
-): {
-  states?: State[] | undefined;
-} {
-  const [states, setStates] = useState<State[]>();
-
-  useEffect(() => {
-    if (allStates) {
-      let haStates: State[] = allStates;
-      if (domain) {
-        haStates = haStates.filter((s) => s.entity_id.startsWith(domain));
-      }
-      if (device_class) {
-        haStates = haStates.filter((s) => s.attributes.device_class === device_class);
-      }
-      if (query) {
-        haStates = haStates.filter(
-          (e) =>
-            e.entity_id.toLowerCase().includes(query.toLowerCase()) ||
-            (e.attributes.friendly_name || "").toLowerCase().includes(query.toLowerCase()),
-        );
-      }
-      haStates = haStates.slice(0, 1000);
-      setStates(haStates);
-    } else {
-      return undefined;
-    }
-  }, [query, allStates]);
-  return { states };
 }

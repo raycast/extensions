@@ -2,7 +2,7 @@ import { MenuBarExtra } from "@raycast/api";
 import { State } from "../../haapi";
 import { getFriendlyName } from "../../utils";
 import { MenuBarSubmenu } from "../menu";
-import { getIcon } from "../states";
+import { getIcon } from "../states/list";
 import { CopyEntityIDToClipboard } from "../states/menu";
 import { callInputButtonPressService, isEditableInputButton } from "./utils";
 

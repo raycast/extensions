@@ -4,7 +4,7 @@ import { State } from "../../haapi";
 import { ReactElement } from "react";
 import { MenuBarSubmenu } from "../menu";
 import { getFriendlyName } from "../../utils";
-import { getIcon } from "../states";
+import { getIcon } from "../states/list";
 import {
   Forecast,
   getHumidityFromState,

@@ -2,7 +2,6 @@ import { Color, getPreferenceValues, showToast, Action, Toast, List, Grid, Actio
 import { State } from "../../haapi";
 import { getFriendlyName } from "../../utils";
 import { useHAStates } from "../../hooks";
-import { useStateSearch } from "../states";
 import { EntityStandardActionSections } from "../entity";
 import { useImage } from "./hooks";
 import {
@@ -11,6 +10,7 @@ import {
   CameraOpenStreamInVLCAction,
   CameraShowImageAction,
 } from "./actions";
+import { useStateSearch } from "../states/hooks";
 
 const defaultRefreshInterval = 3000;
 

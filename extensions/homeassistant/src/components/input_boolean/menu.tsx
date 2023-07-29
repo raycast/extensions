@@ -2,7 +2,7 @@ import { State } from "../../haapi";
 import { MenuBarSubmenu } from "../menu";
 import { getFriendlyName } from "../../utils";
 import { CopyEntityIDToClipboard } from "../states/menu";
-import { getIcon } from "../states";
+import { getIcon } from "../states/list";
 import { MenuBarExtra } from "@raycast/api";
 import {
   callInputBooleanToggleService,

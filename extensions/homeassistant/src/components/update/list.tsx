@@ -5,8 +5,9 @@ import { State } from "../../haapi";
 import { useHAStates } from "../../hooks";
 import { getStateTooltip } from "../../utils";
 import { ShowAttributesAction } from "../entity";
-import { PrimaryIconColor, StateListItem, useStateSearch } from "../states";
+import { PrimaryIconColor, StateListItem } from "../states/list";
 import { HACSRepo } from "./utils";
+import { useStateSearch } from "../states/hooks";
 
 function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JSX.Element | null {
   const r = props.repo;

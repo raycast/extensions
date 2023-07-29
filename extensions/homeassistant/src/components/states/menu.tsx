@@ -1,5 +1,5 @@
 import { State } from "../../haapi";
-import { getIcon, getStateValue } from "../states";
+import { getIcon, getStateValue } from "./list";
 import { ensureShort, getFriendlyName } from "../../utils";
 import { MediaPlayerMenubarItem } from "../mediaplayer/menu";
 import { CoverMenubarItem } from "../cover/menu";

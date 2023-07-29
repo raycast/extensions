@@ -1,7 +1,7 @@
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
 import { getErrorMessage, getFriendlyName } from "../../utils";
 import { State } from "../../haapi";
-import { getIcon } from "../states";
+import { getIcon } from "../states/list";
 import { capitalize } from "lodash-es";
 import { showToast, Toast, MenuBarExtra } from "@raycast/api";
 import { ha } from "../../common";

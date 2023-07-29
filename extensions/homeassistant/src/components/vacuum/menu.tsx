@@ -2,7 +2,7 @@ import { Icon, Image, MenuBarExtra } from "@raycast/api";
 import { State } from "../../haapi";
 import { capitalizeFirstLetter, getFriendlyName } from "../../utils";
 import { MenuBarSubmenu } from "../menu";
-import { getIcon, getStateValue } from "../states";
+import { getIcon, getStateValue } from "../states/list";
 import { CopyEntityIDToClipboard } from "../states/menu";
 import {
   callVacuumLocateService,
