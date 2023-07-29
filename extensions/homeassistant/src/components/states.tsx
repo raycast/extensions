@@ -48,7 +48,7 @@ import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
 import { InputSelectOptionSelectAction } from "./input_select";
 import { InputButtonPressAction } from "./input_button/actions";
 import { InputTextSetValueAction } from "./input_text";
-import { InputDateTimeSetValueAction } from "./input_datetime";
+import { InputDateTimeSetValueAction } from "./input_datetime/actions";
 import { ShowWeatherAction } from "./weather/list";
 import { ZoneShowDetailAction } from "./zones";
 import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons/actions";

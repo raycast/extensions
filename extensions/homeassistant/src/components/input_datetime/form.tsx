@@ -1,17 +1,10 @@
-import { Icon, Color, Action, Form, ActionPanel, showToast, Toast, useNavigation } from "@raycast/api";
-import { ha } from "../common";
-import { State } from "../haapi";
-import { getErrorMessage } from "../utils";
+import { useNavigation, Form, showToast, Toast, ActionPanel, Action } from "@raycast/api";
+import { ha } from "../../common";
+import { State } from "../../haapi";
+import { getErrorMessage } from "../../utils";
+import { dateToUnixTimestamp, unixTimestampToDate } from "./utils";
 
-function unixTimestampToDate(timestamp: number): Date {
-  return new Date(timestamp * 1000);
-}
-
-function dateToUnixTimestamp(date: Date): number {
-  return Math.floor(date.getTime() / 1000);
-}
-
-function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTime: boolean }): JSX.Element {
+export function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTime: boolean }): JSX.Element {
   const s = props.state;
   const hasDate = props.hasDate;
   const hasTime = props.hasTime;
@@ -66,34 +59,5 @@ function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTime: boo
     >
       <Form.DatePicker id="datetime" type={mode} title={title} />
     </Form>
-  );
-}
-
-export function InputDateTimeSetValueAction(props: { state: State }): JSX.Element | null {
-  const s = props.state;
-  if (!s.entity_id.startsWith("input_datetime")) {
-    return null;
-  }
-  if (s.state === "unavailable") {
-    return null;
-  }
-  const hasDate: boolean = s.attributes.has_date || false;
-  const hasTime: boolean = s.attributes.has_time || false;
-  let title = "";
-  if (hasDate && hasTime) {
-    title = "Set Date and Time";
-  } else if (hasDate) {
-    title = "Set Date";
-  } else if (hasTime) {
-    title = "Set Time";
-  } else {
-    return null;
-  }
-  return (
-    <Action.Push
-      title={title}
-      icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
-      target={<InputDateTimeForm state={s} hasDate={hasDate} hasTime={hasTime} />}
-    />
   );
 }
