@@ -2,9 +2,9 @@ import { Icon, MenuBarExtra } from "@raycast/api";
 import { State } from "../../haapi";
 import { getFriendlyName } from "../../utils";
 import { MenuBarSubmenu } from "../menu";
-import { getIcon } from "../states/list";
 import { CopyEntityIDToClipboard } from "../states/menu";
 import { callSceneActivateService } from "./utils";
+import { getIcon } from "../states/utils";
 
 function SceneActiveMenubarItem(props: { state: State }) {
   return (

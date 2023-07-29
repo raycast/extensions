@@ -1,5 +1,4 @@
 import { State } from "../../haapi";
-import { getIcon, getStateValue } from "./list";
 import { ensureShort, getFriendlyName } from "../../utils";
 import { MediaPlayerMenubarItem } from "../mediaplayer/menu";
 import { CoverMenubarItem } from "../cover/menu";
@@ -16,6 +15,7 @@ import { ScriptMenubarItem } from "../script/menu";
 import { SceneMenubarItem } from "../scene/menu";
 import { TimerMenubarItem } from "../timer/menu";
 import { VacuumMenubarItem } from "../vacuum/menu";
+import { getStateValue, getIcon } from "./utils";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;

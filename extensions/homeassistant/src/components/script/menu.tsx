@@ -2,9 +2,9 @@ import { Icon, MenuBarExtra } from "@raycast/api";
 import { State } from "../../haapi";
 import { getFriendlyName } from "../../utils";
 import { MenuBarSubmenu } from "../menu";
-import { getIcon } from "../states/list";
 import { CopyEntityIDToClipboard } from "../states/menu";
 import { callScriptRunService } from "./utils";
+import { getIcon } from "../states/utils";
 
 function ScriptRunMenubarItem(props: { state: State }) {
   return <MenuBarExtra.Item title="Run" icon={Icon.Terminal} onAction={() => callScriptRunService(props.state)} />;

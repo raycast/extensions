@@ -1,7 +1,7 @@
 import { MenuBarExtra } from "@raycast/api";
 import { State } from "../../haapi";
 import { getFriendlyName } from "../../utils";
-import { getIcon } from "../states/list";
+import { getIcon } from "../states/utils";
 
 export function UpdateMenubarItem(props: { state: State }) {
   const s = props.state;

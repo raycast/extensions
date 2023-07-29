@@ -2,7 +2,6 @@ import { State } from "../../haapi";
 import { MenuBarSubmenu } from "../menu";
 import { getFriendlyName } from "../../utils";
 import { CopyEntityIDToClipboard } from "../states/menu";
-import { getIcon } from "../states/list";
 import { MenuBarExtra } from "@raycast/api";
 import {
   callInputBooleanToggleService,
@@ -10,6 +9,7 @@ import {
   callInputBooleanTurnOnService,
   isEditableInputBoolean,
 } from "./utils";
+import { getIcon } from "../states/utils";
 
 function InputBooleanToggleMenubarItem(props: { state: State }) {
   return (
