@@ -1,6 +1,6 @@
 import { Icon, Color, Action } from "@raycast/api";
-import { ha } from "../common";
-import { State } from "../haapi";
+import { ha } from "../../common";
+import { State } from "../../haapi";
 
 export function InputNumberIncrementAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
