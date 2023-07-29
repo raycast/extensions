@@ -1,7 +1,7 @@
 import { showToast, Toast, List } from "@raycast/api";
 import { useState } from "react";
-import { useHAStates } from "../hooks";
-import { useStateSearch, StateListItem } from "./states";
+import { useHAStates } from "../../hooks";
+import { useStateSearch, StateListItem } from "../states";
 
 export function MotionsList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
