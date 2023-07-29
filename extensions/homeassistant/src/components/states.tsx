@@ -42,7 +42,7 @@ import {
 import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./button/actions";
 import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
-import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
+import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean/actions";
 import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number";
 import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
 import { InputSelectOptionSelectAction } from "./input_select";
