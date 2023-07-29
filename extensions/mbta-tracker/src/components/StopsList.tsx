@@ -3,6 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { PredictionsList } from "./PredictionsList";
 import type { Route, StopsResponse } from "../types";
 import { appendApiKey } from "../utils";
+import { addFavoriteStop } from "../lib/stops";
 
 interface Props {
   route: Route;

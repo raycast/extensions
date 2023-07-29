@@ -15,13 +15,22 @@ export async function addFavoriteStop(route: Route, directionId: String, stop: S
   }
 
   try {
-    await LocalStorage.setItem("favorite-stops", JSON.stringify([...favorites, { route: { attributes: JSON.stringify(route.attributes), id: route.id} , directionId, stop: { attributes: JSON.stringify(stop.attributes), id: stop.id}}]));
+    await LocalStorage.setItem(
+      "favorite-stops",
+      JSON.stringify([
+        ...favorites,
+        {
+          route: { attributes: JSON.stringify(route.attributes), id: route.id },
+          directionId,
+          stop: { attributes: JSON.stringify(stop.attributes), id: stop.id },
+        },
+      ])
+    );
 
     showToast({
       title: `Added ${stop.attributes.name} to favorite stops`,
       style: Toast.Style.Success,
     });
-
   } catch {
     showToast({
       title: "Failed to add to favorite stops",
