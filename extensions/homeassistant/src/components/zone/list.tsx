@@ -1,8 +1,8 @@
 import { showToast, Toast, List, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { State } from "../haapi";
-import { useHAStates } from "../hooks";
-import { useStateSearch, StateListItem } from "./states";
+import { State } from "../../haapi";
+import { useHAStates } from "../../hooks";
+import { useStateSearch, StateListItem } from "../states";
 
 export function ZoneList(props: { state: State }): JSX.Element {
   const s = props.state;
@@ -30,14 +30,6 @@ export function ZoneList(props: { state: State }): JSX.Element {
       </List.Section>
     </List>
   );
-}
-
-export function ZoneShowDetailAction(props: { state: State }): JSX.Element | null {
-  const s = props.state;
-  if (!s.entity_id.startsWith("zone")) {
-    return null;
-  }
-  return <Action.Push title="Show Zone" target={<ZoneList state={s} />} />;
 }
 
 export function ZonesList(): JSX.Element {

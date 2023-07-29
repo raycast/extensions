@@ -49,7 +49,6 @@ import { InputButtonPressAction } from "./input_button/actions";
 import { InputTextSetValueAction } from "./input_text/actions";
 import { InputDateTimeSetValueAction } from "./input_datetime/actions";
 import { ShowWeatherAction } from "./weather/list";
-import { ZoneShowDetailAction } from "./zones";
 import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons/actions";
 import { getStateTooltip } from "../utils";
 import { getMediaPlayerTitleAndArtist } from "./mediaplayer/utils";
@@ -69,6 +68,7 @@ import {
   UpdateSkipVersionAction,
 } from "./update/actions";
 import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "./light/utils";
+import { ZoneShowDetailAction } from "./zone/actions";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
