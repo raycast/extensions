@@ -11,6 +11,7 @@ import { WeatherMenubarItem } from "../weather/menu";
 import { CameraMenubarItem } from "../camera/menu";
 import { ButtonMenubarItem } from "../button/menu";
 import { InputBooleanMenubarItem } from "../input_boolean/menu";
+import { InputSelectMenubarItem } from "../input_select/menu";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
@@ -48,6 +49,9 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
     }
     case "input_boolean": {
       return <InputBooleanMenubarItem state={s} />;
+    }
+    case "input_select": {
+      return <InputSelectMenubarItem state={s} />;
     }
   }
   return (

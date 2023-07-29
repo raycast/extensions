@@ -45,7 +45,7 @@ import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean/actions";
 import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number/actions";
 import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
-import { InputSelectOptionSelectAction } from "./input_select";
+import { InputSelectOptionSelectAction } from "./input_select/actions";
 import { InputButtonPressAction } from "./input_button/actions";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime/actions";
