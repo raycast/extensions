@@ -1,6 +1,6 @@
 import { Action, Color, List } from "@raycast/api";
 import { ReactElement } from "react";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import {
   Forecast,
   getHumidityFromState,

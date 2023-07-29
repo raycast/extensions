@@ -1,6 +1,6 @@
 import { ActionPanel, Color, Icon, Action, Keyboard } from "@raycast/api";
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 import { getFanSpeedValues } from "./utils";
 import { EntityStandardActionSections } from "../entity";
 

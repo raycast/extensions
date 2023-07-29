@@ -1,9 +1,9 @@
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 import { useHAStates } from "../../hooks";
-import { getStateTooltip } from "../../utils";
+import { getStateTooltip } from "../../lib/utils";
 import { ShowAttributesAction } from "../entity";
 import { StateListItem } from "../state/list";
 import { HACSRepo } from "./utils";

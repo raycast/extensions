@@ -1,7 +1,7 @@
 import { Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ha } from "./common";
-import { getErrorMessage } from "./utils";
+import { ha } from "./lib/common";
+import { getErrorMessage } from "./lib/utils";
 import { getWifiSSIDSync } from "./lib/wifi";
 
 export default function ConnectionCommand(): JSX.Element {

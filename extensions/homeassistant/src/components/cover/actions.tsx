@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Color, Icon } from "@raycast/api";
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 import { EntityStandardActionSections } from "../entity";
 
 export function CoverActionPanel(props: { state: State }) {

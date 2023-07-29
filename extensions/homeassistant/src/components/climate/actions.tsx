@@ -1,7 +1,7 @@
 import { ActionPanel, Color, Action, Icon, popToRoot } from "@raycast/api";
 import { range } from "lodash-es";
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 import { EntityStandardActionSections } from "../entity";
 import { useState } from "react";
 

@@ -6,15 +6,15 @@ import fs from "fs";
 import { pipeline } from "stream";
 import util from "util";
 import { Agent } from "https";
-import { getWifiSSIDSync } from "./lib/wifi";
+import { getWifiSSIDSync } from "./wifi";
 import * as ping from "ping";
 import { URL } from "url";
-import { queryMdns } from "./lib/mdns";
+import { queryMdns } from "./mdns";
 import {
   generateMobileDeviceRegistration,
   HADeviceRegistration,
   HAMobileDeviceRegistrationResponse,
-} from "./lib/mobiledevice";
+} from "./mobiledevice";
 import { getHAWSConnection } from "./common";
 import { Connection } from "home-assistant-js-websocket";
 const streamPipeline = util.promisify(pipeline);

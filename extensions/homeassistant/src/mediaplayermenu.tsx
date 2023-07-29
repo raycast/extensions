@@ -1,5 +1,5 @@
 import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
-import { getErrorMessage, getFriendlyName } from "./utils";
+import { getErrorMessage, getFriendlyName } from "./lib/utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
 import { MediaPlayerMenubarItem } from "./components/mediaplayer/menu";

@@ -1,8 +1,8 @@
 import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
-import { getErrorMessage } from "./utils";
+import { getErrorMessage } from "./lib/utils";
 import { MenuBarItemConfigureCommand } from "./components/menu";
 import { useHAStates } from "./hooks";
-import { State } from "./haapi";
+import { State } from "./lib/haapi";
 import { filterBatteries } from "./components/battery/utils";
 import { BatteriesMenubarSection } from "./components/battery/menu";
 import { HAPersistentNotification } from "./components/persistentnotification/utils";

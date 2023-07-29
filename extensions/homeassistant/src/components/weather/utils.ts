@@ -1,4 +1,4 @@
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 
 export interface Forecast {
   condition: string;

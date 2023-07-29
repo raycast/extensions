@@ -1,5 +1,5 @@
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 
 export async function callInputBooleanToggleService(state: State) {
   await ha.callService("input_boolean", "toggle", { entity_id: state.entity_id });

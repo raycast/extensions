@@ -1,9 +1,9 @@
 import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
-import { getErrorMessage } from "./utils";
+import { getErrorMessage } from "./lib/utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
 import { StateMenubarItem } from "./components/state/menu";
-import { State } from "./haapi";
+import { State } from "./lib/haapi";
 import { filterStates } from "./components/state/utils";
 
 function entitiesPreferences(): string[] {

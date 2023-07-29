@@ -1,4 +1,4 @@
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 
 export function getMediaPlayerTitleAndArtist(state: State): string | undefined {
   const title = state.attributes.media_title;

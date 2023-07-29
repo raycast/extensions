@@ -1,6 +1,6 @@
 import { Action, Icon, Color, showHUD, confirmAlert, ActionPanel } from "@raycast/api";
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 import { ChangelogDetail } from "./detail";
 import { EntityStandardActionSections } from "../entity";
 

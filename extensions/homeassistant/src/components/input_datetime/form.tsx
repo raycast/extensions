@@ -1,7 +1,7 @@
 import { useNavigation, Form, showToast, Toast, ActionPanel, Action } from "@raycast/api";
-import { ha } from "../../common";
-import { State } from "../../haapi";
-import { getErrorMessage } from "../../utils";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
+import { getErrorMessage } from "../../lib/utils";
 import { dateToUnixTimestamp, unixTimestampToDate } from "./utils";
 
 export function InputDateTimeForm(props: { state: State; hasDate: boolean; hasTime: boolean }): JSX.Element {

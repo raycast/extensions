@@ -1,5 +1,5 @@
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 
 export function isVacuumEditable(state: State) {
   return state.entity_id.startsWith("vacuum");

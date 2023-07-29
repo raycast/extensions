@@ -1,5 +1,5 @@
 import { Color, Action, ActionPanel } from "@raycast/api";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import {
   callInputBooleanToggleService,
   callInputBooleanTurnOffService,

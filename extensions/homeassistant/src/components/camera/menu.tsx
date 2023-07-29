@@ -1,6 +1,6 @@
 import { CopyToClipboardMenubarItem, MenuBarSubmenu, OpenInBrowserMenubarItem } from "../menu";
-import { capitalizeFirstLetter, getFriendlyName } from "../../utils";
-import { State } from "../../haapi";
+import { capitalizeFirstLetter, getFriendlyName } from "../../lib/utils";
+import { State } from "../../lib/haapi";
 import { getVideoStreamUrlFromCamera } from "./utils";
 import { getIcon } from "../state/utils";
 

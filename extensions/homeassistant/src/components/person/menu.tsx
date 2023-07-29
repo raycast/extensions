@@ -1,6 +1,6 @@
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
-import { getFriendlyName } from "../../utils";
-import { State } from "../../haapi";
+import { getFriendlyName } from "../../lib/utils";
+import { State } from "../../lib/haapi";
 import { capitalize } from "lodash-es";
 import { getIcon } from "../state/utils";
 

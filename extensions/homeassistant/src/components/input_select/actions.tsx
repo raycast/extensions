@@ -1,5 +1,5 @@
 import { Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import { callInputSelectSelectOptionService, getInputSelectSelectableOptions } from "./utils";
 import { EntityStandardActionSections } from "../entity";
 

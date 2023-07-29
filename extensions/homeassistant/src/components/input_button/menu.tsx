@@ -1,6 +1,6 @@
 import { MenuBarExtra } from "@raycast/api";
-import { State } from "../../haapi";
-import { getFriendlyName } from "../../utils";
+import { State } from "../../lib/haapi";
+import { getFriendlyName } from "../../lib/utils";
 import { MenuBarSubmenu } from "../menu";
 import { getIcon } from "../state/list";
 import { CopyEntityIDToClipboard } from "../state/menu";

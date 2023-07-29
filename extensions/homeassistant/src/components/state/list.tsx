@@ -1,7 +1,7 @@
 import { ActionPanel, List, showToast, Image, Toast } from "@raycast/api";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import { useState } from "react";
-import { ha, shouldDisplayEntityID } from "../../common";
+import { ha, shouldDisplayEntityID } from "../../lib/common";
 import { useHAStates } from "../../hooks";
 import { EntityStandardActionSections } from "../entity";
 import { MediaPlayerActionPanel } from "../mediaplayer/actions";
@@ -20,7 +20,7 @@ import { InputButtonActionPanel } from "../input_button/actions";
 import { InputTextActionPanel } from "../input_text/actions";
 import { InputDateTimeActionPanel } from "../input_datetime/actions";
 import { PersonActionPanel } from "../person/actions";
-import { getStateTooltip } from "../../utils";
+import { getStateTooltip } from "../../lib/utils";
 import { getMediaPlayerTitleAndArtist } from "../mediaplayer/utils";
 import { CameraActionPanel } from "../camera/actions";
 import { UpdateActionPanel } from "../update/actions";

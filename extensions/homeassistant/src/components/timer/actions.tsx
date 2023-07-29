@@ -1,5 +1,5 @@
 import { Color, Action, Icon, ActionPanel } from "@raycast/api";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
 import { EntityStandardActionSections } from "../entity";
 

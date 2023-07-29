@@ -1,7 +1,7 @@
 import { ActionPanel, Color, Icon, Action, Keyboard } from "@raycast/api";
-import { KtoColorLike, miredToK, RGB, RGBtoColorLike } from "../../color";
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { KtoColorLike, miredToK, RGB, RGBtoColorLike } from "../../lib/color";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 import { lightRGBColors } from "../../constants";
 import {
   ceilRound50,

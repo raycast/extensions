@@ -1,5 +1,5 @@
 import { ActionPanel } from "@raycast/api";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import { EntityStandardActionSections } from "../entity";
 import { UpdateInstallAction, UpdateSkipVersionAction } from "../update/actions";
 import { ShowWeatherAction } from "./list";

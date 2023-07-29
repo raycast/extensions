@@ -1,5 +1,5 @@
-import { State } from "../../haapi";
-import { ensureShort, getFriendlyName } from "../../utils";
+import { State } from "../../lib/haapi";
+import { ensureShort, getFriendlyName } from "../../lib/utils";
 import { MediaPlayerMenubarItem } from "../mediaplayer/menu";
 import { CoverMenubarItem } from "../cover/menu";
 import { PersonMenubarItem } from "../person/menu";

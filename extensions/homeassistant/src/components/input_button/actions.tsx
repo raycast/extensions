@@ -1,5 +1,5 @@
 import { Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import { callInputButtonPressService, isEditableInputButton } from "./utils";
 import { EntityStandardActionSections } from "../entity";
 

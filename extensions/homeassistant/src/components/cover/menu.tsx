@@ -1,8 +1,8 @@
 import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
-import { capitalizeFirstLetter, getErrorMessage, getFriendlyName } from "../../utils";
-import { State } from "../../haapi";
-import { ha } from "../../common";
+import { capitalizeFirstLetter, getErrorMessage, getFriendlyName } from "../../lib/utils";
+import { State } from "../../lib/haapi";
+import { ha } from "../../lib/common";
 import { getIcon } from "../state/utils";
 
 function CoverOpenMenubarItem(props: { state: State }) {

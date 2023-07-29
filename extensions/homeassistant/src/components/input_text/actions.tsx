@@ -1,5 +1,5 @@
 import { Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import { InputTextForm } from "./form";
 import { EntityStandardActionSections } from "../entity";
 

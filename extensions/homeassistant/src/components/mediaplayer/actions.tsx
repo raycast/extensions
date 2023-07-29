@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, Color, Action } from "@raycast/api";
-import { ha } from "../../common";
-import { State } from "../../haapi";
+import { ha } from "../../lib/common";
+import { State } from "../../lib/haapi";
 import { getMediaPlayerTitleAndArtist } from "./utils";
 import { EntityStandardActionSections } from "../entity";
 

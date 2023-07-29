@@ -1,6 +1,6 @@
 import { showToast, Toast, List, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { State } from "../../haapi";
+import { State } from "../../lib/haapi";
 import { useHAStates } from "../../hooks";
 import { StateListItem } from "../state/list";
 import { useStateSearch } from "../state/hooks";

@@ -1,6 +1,6 @@
 import { Color, getPreferenceValues, showToast, Action, Toast, List, Grid, ActionPanel, Image } from "@raycast/api";
-import { State } from "../../haapi";
-import { getFriendlyName } from "../../utils";
+import { State } from "../../lib/haapi";
+import { getFriendlyName } from "../../lib/utils";
 import { useHAStates } from "../../hooks";
 import { EntityStandardActionSections } from "../entity";
 import { useImage } from "./hooks";
