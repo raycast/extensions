@@ -26,12 +26,15 @@ export function MenuBarItemConfigureCommand(): JSX.Element {
   );
 }
 
+export async function copyToClipboardWithHUD(content: string | number | Clipboard.Content) {
+  await Clipboard.copy(content);
+  showHUD("Copied to Clipboard");
+}
+
 export function CopyToClipboardMenubarItem(props: { title: string; content: string; tooltip?: string }) {
   const copyToClipboard = async () => {
     try {
-      console.log(props.content);
-      await Clipboard.copy(props.content);
-      showHUD("Copied to Clipboard");
+      await copyToClipboardWithHUD(props.content);
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
     }

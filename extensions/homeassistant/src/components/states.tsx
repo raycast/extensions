@@ -49,7 +49,6 @@ import { InputSelectOptionSelectAction } from "./input_select";
 import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
-import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
 import { ShowWeatherAction } from "./weather/list";
 import { ZoneShowDetailAction } from "./zones";
 import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons/actions";
@@ -64,6 +63,12 @@ import {
   CameraTurnOffAction,
   CameraTurnOnAction,
 } from "./camera/actions";
+import {
+  UpdateShowChangelogAction,
+  UpdateOpenInBrowserAction,
+  UpdateInstallAction,
+  UpdateSkipVersionAction,
+} from "./update/actions";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -998,8 +1003,8 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       return (
         <ActionPanel>
           <ActionPanel.Section title="Controls">
-            <UpdateShowChangelog state={state} />
-            <UpdateOpenInBrowser state={state} />
+            <UpdateShowChangelogAction state={state} />
+            <UpdateOpenInBrowserAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Install">
             <UpdateInstallAction state={state} />

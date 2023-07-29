@@ -1,38 +1,14 @@
-import { getPreferenceValues, Icon, MenuBarExtra, open, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getHAWSConnection, ha } from "./common";
+import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
 import { getErrorMessage } from "./utils";
-import { callService } from "home-assistant-js-websocket";
 import { MenuBarItemConfigureCommand } from "./components/menu";
-
-const ensureShort = (text: string): string => {
-  const max = 80;
-  if (text.length > max) {
-    return text.slice(0, max) + " ...";
-  }
-  return text;
-};
-
-function PersistentNotificationMenuItem(props: { notification: HANotification }): JSX.Element {
-  const s = props.notification;
-  const dismiss = async () => {
-    try {
-      const con = await getHAWSConnection();
-      await callService(con, "persistent_notification", "dismiss", { notification_id: s.notification_id });
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) });
-    }
-  };
-  const title = s.title;
-  const msg = s.message ?? "?";
-  const tt = title ? `${title}: ${msg}` : msg;
-  return (
-    <MenuBarExtra.Submenu icon={Icon.SpeechBubbleActive} title={ensureShort(title ? title : msg)}>
-      <MenuBarExtra.Item title="Open" icon={Icon.Globe} onAction={() => open(ha.url)} tooltip={tt} />
-      <MenuBarExtra.Item title="Dismiss" icon={Icon.XMarkCircle} onAction={dismiss} />
-    </MenuBarExtra.Submenu>
-  );
-}
+import { useHAStates } from "./hooks";
+import { State } from "./haapi";
+import { filterBatteries } from "./components/battery/utils";
+import { BatteriesMenubarSection } from "./components/battery/menu";
+import { HAPersistentNotification } from "./components/persistentnotification/utils";
+import { useHAPersistentNotifications } from "./components/persistentnotification/hooks";
+import { PersistentNotificationsMenubarSection } from "./components/persistentnotification/list";
+import { UpdatesMenubarSection } from "./components/update/menu";
 
 function showCountInMenu(): boolean {
   const prefs = getPreferenceValues();
@@ -40,27 +16,30 @@ function showCountInMenu(): boolean {
 }
 
 export default function MenuCommand(): JSX.Element {
-  const { notifications, error, isLoading } = useHANotifications();
-  const valid = notifications && notifications.length > 0 ? true : false;
-  const title = showCountInMenu() && valid ? notifications?.length.toString() : undefined;
+  const { notifications, states, error, isLoading } = useNotifications();
+  const updates = states?.filter((s) => s.entity_id.startsWith("update.") && s.state === "on");
+  const batteries = filterBatteries(states, { onFilterState: (value) => value < 30 });
+
+  const messageCount = (notifications?.length || 0) + (updates?.length || 0) + (batteries?.length || 0);
+  const valid = messageCount > 0;
+  const title = showCountInMenu() && valid ? messageCount.toString() : undefined;
   const tooltip = () => {
     if (!valid) {
       return "No Notifications";
     }
-    if (notifications?.length === 1) {
-      return `${notifications?.length} Notification`;
+    if (messageCount === 1) {
+      return `${messageCount} Notification`;
     }
-    return `${notifications?.length} Notifications`;
+    return `${messageCount} Notifications`;
   };
   const icon = valid ? "home-assistant-orange.png" : "home-assistant.png";
-  let header = valid ? "Notifications" : "No Notifications";
-  if (error) {
-    header = getErrorMessage(error);
-  }
+  const header = error ? getErrorMessage(error) : undefined;
   return (
     <MenuBarExtra icon={icon} isLoading={isLoading} title={title} tooltip={tooltip()}>
-      <MenuBarExtra.Item key="_header" title={header} />
-      {notifications?.map((n) => <PersistentNotificationMenuItem key={n.notification_id} notification={n} />)}
+      {header && <MenuBarExtra.Item title={header} />}
+      <PersistentNotificationsMenubarSection notifications={notifications} />
+      <UpdatesMenubarSection updates={updates} />
+      <BatteriesMenubarSection batteries={batteries} />
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />
       </MenuBarExtra.Section>
@@ -68,58 +47,20 @@ export default function MenuCommand(): JSX.Element {
   );
 }
 
-interface HANotification {
-  message: string;
-  notification_id: string;
-  title?: string;
-  created_at: string;
-}
-
-function useHANotifications(): {
+function useNotifications(): {
   error?: string;
   isLoading: boolean;
-  notifications?: HANotification[];
+  notifications?: HAPersistentNotification[];
+  states?: State[];
 } {
-  const [notifications, setNotifications] = useState<HANotification[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const {
+    notifications,
+    isLoading: isLoadingNotifications,
+    error: errorNotifications,
+  } = useHAPersistentNotifications();
+  const { states, isLoading: isLoadingStates, error: errorStates } = useHAStates();
 
-  useEffect(() => {
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const con = await getHAWSConnection();
-        const data: HANotification[] | undefined = await con.sendMessagePromise({
-          type: "persistent_notification/get",
-        });
-        if (!didUnmount) {
-          setNotifications(data);
-        }
-      } catch (error) {
-        if (!didUnmount) {
-          setError(getErrorMessage(error));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, []);
-
-  return { error, isLoading, notifications };
+  const isLoading = isLoadingNotifications || isLoadingStates;
+  const error = errorNotifications || (errorStates ? getErrorMessage(errorStates) : undefined);
+  return { notifications, states, isLoading, error };
 }

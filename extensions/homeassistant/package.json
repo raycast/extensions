@@ -190,7 +190,7 @@
     {
       "name": "notificationmenu",
       "title": "Notifications Menu",
-      "description": "Display Persistent Notifications in the MenuBar",
+      "description": "Display Persistent Notifications, Low Batteries and Update in the Menu Bar",
       "mode": "menu-bar",
       "subtitle": "Home Assistant",
       "interval": "1m",
