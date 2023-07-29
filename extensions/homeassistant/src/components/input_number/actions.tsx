@@ -1,6 +1,7 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { ha } from "../../common";
 import { State } from "../../haapi";
+import { EntityStandardActionSections } from "../entity";
 
 export function InputNumberIncrementAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -61,5 +62,18 @@ export function InputNumberDecrementAction(props: { state: State }): JSX.Element
       onAction={handle}
       icon={{ source: Icon.ChevronDown, tintColor: Color.PrimaryText }}
     />
+  );
+}
+
+export function InputNumberActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <InputNumberIncrementAction state={state} />
+        <InputNumberDecrementAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }

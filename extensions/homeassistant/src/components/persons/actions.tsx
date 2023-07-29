@@ -1,5 +1,6 @@
-import { Action } from "@raycast/api";
+import { Action, ActionPanel } from "@raycast/api";
 import { State } from "../../haapi";
+import { EntityStandardActionSections } from "../entity";
 
 export function PersonOpenInGoogleMapsAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -50,4 +51,20 @@ export function PersonCopyIDAction(props: { state: State }): JSX.Element | null 
     return null;
   }
   return <Action.CopyToClipboard title="Copy ID" shortcut={{ modifiers: ["cmd", "shift"], key: "i" }} content={id} />;
+}
+
+export function PersonActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <PersonOpenInGoogleMapsAction state={state} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Properties">
+        <PersonCopyIDAction state={state} />
+        <PersonCopyUserIDAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
+  );
 }

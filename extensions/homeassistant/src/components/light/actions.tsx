@@ -9,6 +9,7 @@ import {
   getLightMinMaxK,
   hasLightBrightnessSupport as hasLightBrightnessSupport,
 } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function BrightnessControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
@@ -218,4 +219,43 @@ export function ColorRgbControlAction(props: { state: State }): JSX.Element | nu
     );
   }
   return null;
+}
+
+export function LightActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <Action
+          title="Toggle"
+          onAction={async () => await ha.toggleLight(props.state.entity_id)}
+          icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+        />
+        <Action
+          title="Turn On"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={async () => await ha.turnOnLight(props.state.entity_id)}
+          icon={{ source: "power-btn.png", tintColor: Color.Green }}
+        />
+        <Action
+          title="Turn Off"
+          shortcut={{ modifiers: ["cmd"], key: "f" }}
+          onAction={async () => await ha.turnOffLight(props.state.entity_id)}
+          icon={{ source: "power-btn.png", tintColor: Color.Red }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Brightness">
+        <BrightnessControlAction state={state} />
+        <BrightnessUpAction state={state} />
+        <BrightnessDownAction state={state} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Color">
+        <ColorTempControlAction state={state} />
+        <ColorTempControlUpAction state={state} />
+        <ColorTempControlDownAction state={state} />
+        <ColorRgbControlAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
+  );
 }

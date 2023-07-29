@@ -1,7 +1,8 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { ha } from "../../common";
 import { State } from "../../haapi";
 import { callSceneActivateService } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function SceneActivateAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -29,4 +30,17 @@ export function SceneEditInBrowserAction(props: { state: State }): JSX.Element |
     }
   }
   return null;
+}
+
+export function SceneActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <SceneActivateAction state={state} />
+        <SceneEditInBrowserAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
+  );
 }

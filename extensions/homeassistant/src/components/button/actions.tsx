@@ -1,6 +1,7 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { ha } from "../../common";
 import { State } from "../../haapi";
+import { EntityStandardActionSections } from "../entity";
 
 export function ButtonPressAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -11,4 +12,16 @@ export function ButtonPressAction(props: { state: State }): JSX.Element | null {
     await ha.callService("button", "press", { entity_id: s.entity_id });
   };
   return <Action title="Press" onAction={handle} icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }} />;
+}
+
+export function ButtonActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <ButtonPressAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
+  );
 }

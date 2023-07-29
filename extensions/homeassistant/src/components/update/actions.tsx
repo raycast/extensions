@@ -1,7 +1,8 @@
-import { Action, Icon, Color, showHUD, confirmAlert } from "@raycast/api";
+import { Action, Icon, Color, showHUD, confirmAlert, ActionPanel } from "@raycast/api";
 import { ha } from "../../common";
 import { State } from "../../haapi";
 import { ChangelogDetail } from "./detail";
+import { EntityStandardActionSections } from "../entity";
 
 export function UpdateShowChangelogAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -87,5 +88,22 @@ export function UpdateSkipVersionAction(props: { state: State }): JSX.Element | 
       shortcut={{ modifiers: ["cmd"], key: "s" }}
       icon={{ source: Icon.ArrowRight, tintColor: Color.PrimaryText }}
     />
+  );
+}
+
+export function UpdateActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <UpdateShowChangelogAction state={state} />
+        <UpdateOpenInBrowserAction state={state} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Install">
+        <UpdateInstallAction state={state} />
+        <UpdateSkipVersionAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }

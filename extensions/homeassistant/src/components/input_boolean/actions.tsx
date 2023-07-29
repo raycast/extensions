@@ -1,4 +1,4 @@
-import { Color, Action } from "@raycast/api";
+import { Color, Action, ActionPanel } from "@raycast/api";
 import { State } from "../../haapi";
 import {
   callInputBooleanToggleService,
@@ -6,6 +6,7 @@ import {
   callInputBooleanTurnOnService,
   isEditableInputBoolean,
 } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function InputBooleanToggleAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -48,5 +49,21 @@ export function InputBooleanOffAction(props: { state: State }): JSX.Element | nu
       onAction={() => callInputBooleanTurnOffService(s)}
       icon={{ source: "power-btn.png", tintColor: Color.Red }}
     />
+  );
+}
+
+export function InputBooleanActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <InputBooleanToggleAction state={state} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Controls">
+        <InputBooleanOnAction state={state} />
+        <InputBooleanOffAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }

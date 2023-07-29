@@ -1,9 +1,10 @@
-import { Action, Icon, Color } from "@raycast/api";
+import { Action, Icon, Color, ActionPanel } from "@raycast/api";
 import { State } from "../../haapi";
 import { CameraImageDetail } from "./detail";
 import fs from "fs";
 import { ha } from "../../common";
 import { getVideoStreamUrlFromCamera } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function CameraShowImageAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -116,5 +117,26 @@ export function CameraOpenStreamInIINAAction(props: { state: State }): JSX.Eleme
       shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
       icon={{ fileIcon: appPath }}
     />
+  );
+}
+
+export function CameraActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Image">
+        <CameraShowImageAction state={state} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Video Stream">
+        <CameraOpenStreamInBrowserAction state={state} />
+        <CameraOpenStreamInVLCAction state={state} />
+        <CameraOpenStreamInIINAAction state={state} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Controls">
+        <CameraTurnOnAction state={state} />
+        <CameraTurnOffAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }

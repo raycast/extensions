@@ -1,6 +1,7 @@
-import { Color, Icon, Action } from "@raycast/api";
+import { Color, Icon, Action, ActionPanel } from "@raycast/api";
 import { ha } from "../../common";
 import { State } from "../../haapi";
+import { EntityStandardActionSections } from "../entity";
 
 export function AutomationTriggerAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -61,4 +62,20 @@ export function AutomationDebugInBrowserAction(props: { state: State }): JSX.Ele
     }
   }
   return null;
+}
+
+export function AutomationActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <AutomationTurnOnAction state={state} />
+        <AutomationTurnOffAction state={state} />
+        <AutomationTriggerAction state={state} />
+        <AutomationEditInBrowserAction state={state} />
+        <AutomationDebugInBrowserAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
+  );
 }

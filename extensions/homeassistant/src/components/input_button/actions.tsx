@@ -1,6 +1,7 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { State } from "../../haapi";
 import { callInputButtonPressService, isEditableInputButton } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function InputButtonPressAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -13,5 +14,17 @@ export function InputButtonPressAction(props: { state: State }): JSX.Element | n
       onAction={() => callInputButtonPressService(s)}
       icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
     />
+  );
+}
+
+export function InputButtonActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <InputButtonPressAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }

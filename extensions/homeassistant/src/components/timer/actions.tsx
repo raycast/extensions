@@ -1,6 +1,7 @@
-import { Color, Action, Icon } from "@raycast/api";
+import { Color, Action, Icon, ActionPanel } from "@raycast/api";
 import { State } from "../../haapi";
 import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function TimerStartAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -46,5 +47,19 @@ export function TimerCancelAction(props: { state: State }): JSX.Element | null {
       onAction={() => callTimerCancelService(s)}
       icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
     />
+  );
+}
+
+export function TimerActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <TimerStartAction state={state} />
+        <TimerPauseAction state={state} />
+        <TimerCancelAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }

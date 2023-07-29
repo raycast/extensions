@@ -1,7 +1,8 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { ha } from "../../common";
 import { State } from "../../haapi";
 import { callScriptRunService } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function ScriptRunAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -36,4 +37,18 @@ export function ScriptDebugInBrowserAction(props: { state: State }): JSX.Element
     return <Action.OpenInBrowser url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["cmd"], key: "d" }} />;
   }
   return null;
+}
+
+export function ScriptActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <ScriptRunAction state={state} />
+        <ScriptEditInBrowserAction state={state} />
+        <ScriptDebugInBrowserAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
+  );
 }

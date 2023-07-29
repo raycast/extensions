@@ -1,6 +1,7 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { State } from "../../haapi";
 import { InputDateTimeForm } from "./form";
+import { EntityStandardActionSections } from "../entity";
 
 export function InputDateTimeSetValueAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -28,5 +29,17 @@ export function InputDateTimeSetValueAction(props: { state: State }): JSX.Elemen
       icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
       target={<InputDateTimeForm state={s} hasDate={hasDate} hasTime={hasTime} />}
     />
+  );
+}
+
+export function InputDateTimeActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <InputDateTimeSetValueAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }

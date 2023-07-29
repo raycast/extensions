@@ -2,6 +2,7 @@ import { ActionPanel, Icon, Color, Action } from "@raycast/api";
 import { ha } from "../../common";
 import { State } from "../../haapi";
 import { getMediaPlayerTitleAndArtist } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function SelectSourceAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
@@ -110,5 +111,77 @@ export function MediaPlayerTurnOffAction(props: { state: State }): JSX.Element |
       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
       icon={{ source: "power-btn.png", tintColor: Color.Red }}
     />
+  );
+}
+
+export function MediaPlayerActionPanel(props: { state: State }) {
+  const state = props.state;
+  const entityID = state.entity_id;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <Action
+          title="Play/Pause"
+          onAction={async () => await ha.playPauseMedia(entityID)}
+          icon={{ source: "play-pause.jpg", tintColor: Color.PrimaryText }}
+        />
+        <Action
+          title="Play"
+          onAction={async () => await ha.playMedia(entityID)}
+          icon={{ source: "play.png", tintColor: Color.PrimaryText }}
+        />
+        <Action
+          title="Pause"
+          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          onAction={async () => await ha.pauseMedia(entityID)}
+          icon={{ source: "pause.png", tintColor: Color.PrimaryText }}
+        />
+        <Action
+          title="Stop"
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          onAction={async () => await ha.stopMedia(entityID)}
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+        />
+        <Action
+          title="Next"
+          shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+          onAction={async () => await ha.nextMedia(entityID)}
+          icon={{ source: "next.png", tintColor: Color.PrimaryText }}
+        />
+        <Action
+          title="Previous"
+          shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+          onAction={async () => await ha.previousMedia(entityID)}
+          icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Volume">
+        <Action
+          title="Volume Up"
+          shortcut={{ modifiers: ["cmd"], key: "+" }}
+          onAction={async () => await ha.volumeUpMedia(entityID)}
+          icon={{ source: Icon.SpeakerUp, tintColor: Color.PrimaryText }}
+        />
+        <Action
+          title="Volume Down"
+          shortcut={{ modifiers: ["cmd"], key: "-" }}
+          onAction={async () => await ha.volumeDownMedia(entityID)}
+          icon={{ source: Icon.SpeakerDown, tintColor: Color.PrimaryText }}
+        />
+        <SelectVolumeAction state={state} />
+        <Action
+          title="Mute"
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
+          onAction={async () => await ha.muteMedia(entityID)}
+          icon={{ source: Icon.SpeakerOff, tintColor: Color.PrimaryText }}
+        />
+        <SelectSourceAction state={state} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Power">
+        <MediaPlayerTurnOnAction state={state} />
+        <MediaPlayerTurnOffAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }

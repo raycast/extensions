@@ -2,6 +2,7 @@ import { ActionPanel, Color, Icon, Action, Keyboard } from "@raycast/api";
 import { ha } from "../../common";
 import { State } from "../../haapi";
 import { getFanSpeedValues } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function FanSpeedControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
@@ -60,4 +61,37 @@ export function FanSpeedUpAction(props: { state: State }): JSX.Element | null {
 
 export function FanSpeedDownAction(props: { state: State }): JSX.Element | null {
   return <FanSpeedAddAction state={props.state} add={-1} shortcut={{ modifiers: ["cmd"], key: "-" }} />;
+}
+
+export function FanActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <Action
+          title="Toggle"
+          onAction={async () => await ha.toggleFan(props.state.entity_id)}
+          icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+        />
+        <Action
+          title="Turn On"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={async () => await ha.turnOnFan(props.state.entity_id)}
+          icon={{ source: "power-btn.png", tintColor: Color.Green }}
+        />
+        <Action
+          title="Turn Off"
+          shortcut={{ modifiers: ["cmd"], key: "f" }}
+          onAction={async () => await ha.turnOffFan(props.state.entity_id)}
+          icon={{ source: "power-btn.png", tintColor: Color.Red }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Speed">
+        <FanSpeedControlAction state={state} />
+        <FanSpeedUpAction state={state} />
+        <FanSpeedDownAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
+  );
 }

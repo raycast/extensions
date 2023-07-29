@@ -1,4 +1,4 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { State } from "../../haapi";
 import {
   callVacuumLocateService,
@@ -10,6 +10,7 @@ import {
   callVacuumTurnOnService,
   isVacuumEditable,
 } from "./utils";
+import { EntityStandardActionSections } from "../entity";
 
 export function VacuumLocateAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -112,5 +113,23 @@ export function VacuumReturnToBaseAction(props: { state: State }): JSX.Element |
       shortcut={{ modifiers: ["cmd"], key: "b" }}
       icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
     />
+  );
+}
+
+export function VacuumActionPanel(props: { state: State }) {
+  const state = props.state;
+  return (
+    <ActionPanel>
+      <ActionPanel.Section title="Controls">
+        <VacuumLocateAction state={state} />
+        <VacuumStartAction state={state} />
+        <VacuumPauseAction state={state} />
+        <VacuumStopAction state={state} />
+        <VacuumTurnOnAction state={state} />
+        <VacuumTurnOffAction state={state} />
+        <VacuumReturnToBaseAction state={state} />
+      </ActionPanel.Section>
+      <EntityStandardActionSections state={state} />
+    </ActionPanel>
   );
 }
