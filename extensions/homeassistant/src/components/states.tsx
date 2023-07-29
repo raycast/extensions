@@ -29,7 +29,7 @@ import {
   AutomationTriggerAction,
   AutomationTurnOffAction,
   AutomationTurnOnAction,
-} from "./automation";
+} from "./automation/actions";
 import {
   VacuumLocateAction,
   VacuumPauseAction,
