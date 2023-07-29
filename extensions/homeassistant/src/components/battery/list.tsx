@@ -1,9 +1,9 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { useHAStates } from "../../hooks";
-import { StateListItem } from "../state/list";
+import { useHAStates } from "@components/hooks";
+import { StateListItem } from "@components/state/list";
 import { sortBatteries } from "./utils";
-import { useStateSearch } from "../state/hooks";
+import { useStateSearch } from "@components/state/hooks";
 
 export function BatteryList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();

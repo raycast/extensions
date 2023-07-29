@@ -1,7 +1,7 @@
 import { showToast, Toast, MenuBarExtra, Icon } from "@raycast/api";
 import { callService } from "home-assistant-js-websocket";
-import { getHAWSConnection, ha } from "../../lib/common";
-import { ensureShort, getErrorMessage } from "../../lib/utils";
+import { getHAWSConnection, ha } from "@lib/common";
+import { ensureShort, getErrorMessage } from "@lib/utils";
 import { HAPersistentNotification } from "./utils";
 
 export function PersistentNotificationMenuItem(props: { notification: HAPersistentNotification }): JSX.Element {

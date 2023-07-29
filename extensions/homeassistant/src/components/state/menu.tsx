@@ -1,20 +1,20 @@
-import { State } from "../../lib/haapi";
-import { ensureShort, getFriendlyName } from "../../lib/utils";
-import { MediaPlayerMenubarItem } from "../mediaplayer/menu";
-import { CoverMenubarItem } from "../cover/menu";
-import { PersonMenubarItem } from "../person/menu";
-import { SwitchMenubarItem } from "../switch/menu";
-import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
-import { LightMenubarItem } from "../light/menu";
-import { WeatherMenubarItem } from "../weather/menu";
-import { CameraMenubarItem } from "../camera/menu";
-import { ButtonMenubarItem } from "../button/menu";
-import { InputBooleanMenubarItem } from "../input_boolean/menu";
-import { InputSelectMenubarItem } from "../input_select/menu";
-import { ScriptMenubarItem } from "../script/menu";
-import { SceneMenubarItem } from "../scene/menu";
-import { TimerMenubarItem } from "../timer/menu";
-import { VacuumMenubarItem } from "../vacuum/menu";
+import { State } from "@lib/haapi";
+import { ensureShort, getFriendlyName } from "@lib/utils";
+import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
+import { CoverMenubarItem } from "@components/cover/menu";
+import { PersonMenubarItem } from "@components/person/menu";
+import { SwitchMenubarItem } from "@components/switch/menu";
+import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { LightMenubarItem } from "@components/light/menu";
+import { WeatherMenubarItem } from "@components/weather/menu";
+import { CameraMenubarItem } from "@components/camera/menu";
+import { ButtonMenubarItem } from "@components/button/menu";
+import { InputBooleanMenubarItem } from "@components/input_boolean/menu";
+import { InputSelectMenubarItem } from "@components/input_select/menu";
+import { ScriptMenubarItem } from "@components/script/menu";
+import { SceneMenubarItem } from "@components/scene/menu";
+import { TimerMenubarItem } from "@components/timer/menu";
+import { VacuumMenubarItem } from "@components/vacuum/menu";
 import { getStateValue, getIcon } from "./utils";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {

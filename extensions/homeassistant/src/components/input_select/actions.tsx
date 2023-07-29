@@ -1,7 +1,7 @@
 import { Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { State } from "../../lib/haapi";
+import { State } from "@lib/haapi";
 import { callInputSelectSelectOptionService, getInputSelectSelectableOptions } from "./utils";
-import { EntityStandardActionSections } from "../entity";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function InputSelectOptionSelectAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

@@ -1,9 +1,9 @@
-import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
-import { getErrorMessage, getFriendlyName } from "../../lib/utils";
-import { State } from "../../lib/haapi";
-import { ha } from "../../lib/common";
+import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { State } from "@lib/haapi";
+import { ha } from "@lib/common";
 import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
-import { getIcon, stateChangeSleep } from "../state/utils";
+import { getIcon, stateChangeSleep } from "@components/state/utils";
 import {
   callLightBrightnessService,
   getLightBrightnessValues,

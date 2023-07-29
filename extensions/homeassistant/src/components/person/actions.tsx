@@ -1,6 +1,6 @@
 import { Action, ActionPanel } from "@raycast/api";
-import { State } from "../../lib/haapi";
-import { EntityStandardActionSections } from "../entity";
+import { State } from "@lib/haapi";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function PersonOpenInGoogleMapsAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

@@ -1,4 +1,4 @@
-import { State } from "../../lib/haapi";
+import { State } from "@lib/haapi";
 
 export function sortBatteries(states: State[] | undefined) {
   if (!states) {

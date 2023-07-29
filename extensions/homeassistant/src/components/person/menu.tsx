@@ -1,8 +1,8 @@
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
-import { getFriendlyName } from "../../lib/utils";
-import { State } from "../../lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { State } from "@lib/haapi";
 import { capitalize } from "lodash-es";
-import { getIcon } from "../state/utils";
+import { getIcon } from "@components/state/utils";
 
 export function PersonMenubarItem(props: { state: State }): JSX.Element | null {
   const s = props.state;

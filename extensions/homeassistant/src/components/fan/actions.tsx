@@ -1,8 +1,8 @@
 import { ActionPanel, Color, Icon, Action, Keyboard } from "@raycast/api";
-import { ha } from "../../lib/common";
-import { State } from "../../lib/haapi";
+import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
 import { getFanSpeedValues } from "./utils";
-import { EntityStandardActionSections } from "../entity";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function FanSpeedControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;

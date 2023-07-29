@@ -1,10 +1,10 @@
 import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
-import { getErrorMessage } from "./lib/utils";
-import { useHAStates } from "./hooks";
-import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
-import { StateMenubarItem } from "./components/state/menu";
-import { State } from "./lib/haapi";
-import { filterStates } from "./components/state/utils";
+import { getErrorMessage } from "@lib/utils";
+import { useHAStates } from "@components/hooks";
+import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
+import { StateMenubarItem } from "@components/state/menu";
+import { State } from "@lib/haapi";
+import { filterStates } from "@components/state/utils";
 
 function entitiesPreferences(): string[] {
   const prefs = getPreferenceValues();

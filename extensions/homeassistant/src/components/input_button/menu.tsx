@@ -1,9 +1,9 @@
 import { MenuBarExtra } from "@raycast/api";
-import { State } from "../../lib/haapi";
-import { getFriendlyName } from "../../lib/utils";
-import { MenuBarSubmenu } from "../menu";
-import { getIcon } from "../state/list";
-import { CopyEntityIDToClipboard } from "../state/menu";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { MenuBarSubmenu } from "@components/menu";
+import { getIcon } from "@components/state/utils";
+import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { callInputButtonPressService, isEditableInputButton } from "./utils";
 
 function InputButtonPressMenubarItem(props: { state: State }) {

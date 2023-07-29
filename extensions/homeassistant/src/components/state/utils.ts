@@ -1,10 +1,10 @@
 import { Color, Image, getPreferenceValues } from "@raycast/api";
-import { sleep } from "../../lib/utils";
-import { State } from "../../lib/haapi";
-import { RGBtoString, changeRGBBrightness } from "../../lib/color";
-import { ha } from "../../lib/common";
-import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "../light/utils";
-import { weatherConditionToIcon } from "../weather/utils";
+import { sleep } from "@lib/utils";
+import { State } from "@lib/haapi";
+import { RGBtoString, changeRGBBrightness } from "@lib/color";
+import { ha } from "@lib/common";
+import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "@components/light/utils";
+import { weatherConditionToIcon } from "@components/weather/utils";
 
 /**
  * Sleep to get state changes

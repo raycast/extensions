@@ -1,8 +1,8 @@
-import { CopyToClipboardMenubarItem, MenuBarSubmenu, OpenInBrowserMenubarItem } from "../menu";
-import { capitalizeFirstLetter, getFriendlyName } from "../../lib/utils";
-import { State } from "../../lib/haapi";
+import { CopyToClipboardMenubarItem, MenuBarSubmenu, OpenInBrowserMenubarItem } from "@components/menu";
+import { capitalizeFirstLetter, getFriendlyName } from "@lib/utils";
+import { State } from "@lib/haapi";
 import { getVideoStreamUrlFromCamera } from "./utils";
-import { getIcon } from "../state/utils";
+import { getIcon } from "@components/state/utils";
 
 function CameraOpenStreamInBrowserMenubarItem(props: { state: State }): JSX.Element | null {
   const s = props.state;

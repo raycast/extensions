@@ -1,9 +1,9 @@
-import { Icon, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
-import { getErrorMessage, getFriendlyName, range } from "../../lib/utils";
+import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { getErrorMessage, getFriendlyName, range } from "@lib/utils";
 import { getMediaPlayerTitleAndArtist } from "./utils";
-import { ha } from "../../lib/common";
-import { State } from "../../lib/haapi";
-import { CopyToClipboardMenubarItem } from "../menu";
+import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
+import { CopyToClipboardMenubarItem } from "@components/menu";
 
 function volumeRange() {
   return range(0.0, 1.0, 0.05);

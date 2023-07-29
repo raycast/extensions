@@ -1,10 +1,10 @@
 import { Action, Icon, Color, ActionPanel } from "@raycast/api";
-import { State } from "../../lib/haapi";
+import { State } from "@lib/haapi";
 import { CameraImageDetail } from "./detail";
 import fs from "fs";
-import { ha } from "../../lib/common";
+import { ha } from "@lib/common";
 import { getVideoStreamUrlFromCamera } from "./utils";
-import { EntityStandardActionSections } from "../entity";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function CameraShowImageAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

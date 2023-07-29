@@ -1,5 +1,5 @@
 import { Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { State } from "../../lib/haapi";
+import { State } from "@lib/haapi";
 import {
   callVacuumLocateService,
   callVacuumPauseService,
@@ -10,7 +10,7 @@ import {
   callVacuumTurnOnService,
   isVacuumEditable,
 } from "./utils";
-import { EntityStandardActionSections } from "../entity";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function VacuumLocateAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

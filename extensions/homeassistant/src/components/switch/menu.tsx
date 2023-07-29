@@ -1,10 +1,10 @@
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
-import { getErrorMessage, getFriendlyName } from "../../lib/utils";
-import { State } from "../../lib/haapi";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { State } from "@lib/haapi";
 import { capitalize } from "lodash-es";
 import { showToast, Toast, MenuBarExtra } from "@raycast/api";
-import { ha } from "../../lib/common";
-import { getIcon } from "../state/utils";
+import { ha } from "@lib/common";
+import { getIcon } from "@components/state/utils";
 
 function SwitchToggleItem(props: { state: State }) {
   const handle = async () => {

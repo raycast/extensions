@@ -1,7 +1,7 @@
 import { Color, Icon, Action, ActionPanel } from "@raycast/api";
-import { ha } from "../../lib/common";
-import { State } from "../../lib/haapi";
-import { EntityStandardActionSections } from "../entity";
+import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function AutomationTriggerAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

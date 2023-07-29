@@ -1,8 +1,8 @@
 import { Color, getPreferenceValues, showToast, Action, Toast, List, Grid, ActionPanel, Image } from "@raycast/api";
-import { State } from "../../lib/haapi";
-import { getFriendlyName } from "../../lib/utils";
-import { useHAStates } from "../../hooks";
-import { EntityStandardActionSections } from "../entity";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { useHAStates } from "@components/hooks";
+import { EntityStandardActionSections } from "@components/entity";
 import { useImage } from "./hooks";
 import {
   CameraOpenStreamInBrowserAction,
@@ -10,7 +10,7 @@ import {
   CameraOpenStreamInVLCAction,
   CameraShowImageAction,
 } from "./actions";
-import { useStateSearch } from "../state/hooks";
+import { useStateSearch } from "@components/state/hooks";
 
 const defaultRefreshInterval = 3000;
 

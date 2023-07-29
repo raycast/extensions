@@ -1,9 +1,9 @@
 import { Color, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
-import { State } from "../../lib/haapi";
+import { State } from "@lib/haapi";
 
 import { ReactElement } from "react";
-import { MenuBarSubmenu } from "../menu";
-import { getFriendlyName } from "../../lib/utils";
+import { MenuBarSubmenu } from "@components/menu";
+import { getFriendlyName } from "@lib/utils";
 import {
   Forecast,
   getHumidityFromState,

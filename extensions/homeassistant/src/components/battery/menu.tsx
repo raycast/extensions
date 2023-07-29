@@ -1,9 +1,9 @@
 import { MenuBarExtra } from "@raycast/api";
-import { State } from "../../lib/haapi";
-import { getFriendlyName } from "../../lib/utils";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
 import { batteryStateValue, sortBatteries } from "./utils";
 import { copyToClipboardWithHUD } from "../menu";
-import { getIcon } from "../state/utils";
+import { getIcon } from "@components/state/utils";
 
 export function BatteryMenubarItem(props: { state: State }) {
   const s = props.state;

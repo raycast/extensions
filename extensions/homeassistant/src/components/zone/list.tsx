@@ -1,9 +1,9 @@
 import { showToast, Toast, List, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { State } from "../../lib/haapi";
-import { useHAStates } from "../../hooks";
-import { StateListItem } from "../state/list";
-import { useStateSearch } from "../state/hooks";
+import { State } from "@lib/haapi";
+import { useHAStates } from "@components/hooks";
+import { StateListItem } from "@components/state/list";
+import { useStateSearch } from "@components/state/hooks";
 
 export function ZoneList(props: { state: State }): JSX.Element {
   const s = props.state;

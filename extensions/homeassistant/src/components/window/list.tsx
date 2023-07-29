@@ -1,8 +1,8 @@
 import { showToast, Toast, List } from "@raycast/api";
 import { useState } from "react";
-import { useHAStates } from "../../hooks";
-import { StateListItem } from "../state/list";
-import { useStateSearch } from "../state/hooks";
+import { useHAStates } from "@components/hooks";
+import { StateListItem } from "@components/state/list";
+import { useStateSearch } from "@components/state/hooks";
 
 export function WindowsList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();

@@ -1,8 +1,8 @@
 import { Action, Icon, Color, showHUD, confirmAlert, ActionPanel } from "@raycast/api";
-import { ha } from "../../lib/common";
-import { State } from "../../lib/haapi";
+import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
 import { ChangelogDetail } from "./detail";
-import { EntityStandardActionSections } from "../entity";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function UpdateShowChangelogAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

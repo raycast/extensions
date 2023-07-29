@@ -1,5 +1,5 @@
-import { getHAWSConnection } from "../../lib/common";
-import { getErrorMessage } from "../../lib/utils";
+import { getHAWSConnection } from "@lib/common";
+import { getErrorMessage } from "@lib/utils";
 import { HAPersistentNotification } from "./utils";
 import { useEffect, useState } from "react";
 

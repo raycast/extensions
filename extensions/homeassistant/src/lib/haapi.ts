@@ -10,12 +10,7 @@ import { getWifiSSIDSync } from "./wifi";
 import * as ping from "ping";
 import { URL } from "url";
 import { queryMdns } from "./mdns";
-import {
-  generateMobileDeviceRegistration,
-  HADeviceRegistration,
-  HAMobileDeviceRegistrationResponse,
-} from "./mobiledevice";
-import { getHAWSConnection } from "./common";
+import { generateMobileDeviceRegistration, HAMobileDeviceRegistrationResponse } from "./mobiledevice";
 import { Connection } from "home-assistant-js-websocket";
 const streamPipeline = util.promisify(pipeline);
 

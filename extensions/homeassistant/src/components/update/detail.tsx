@@ -1,5 +1,5 @@
 import { Detail, ActionPanel } from "@raycast/api";
-import { State } from "../../lib/haapi";
+import { State } from "@lib/haapi";
 import { UpdateOpenInBrowserAction } from "./actions";
 
 export function ChangelogDetail(props: { state: State }): JSX.Element {

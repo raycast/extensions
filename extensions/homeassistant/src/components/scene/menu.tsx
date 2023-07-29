@@ -1,10 +1,10 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
-import { State } from "../../lib/haapi";
-import { getFriendlyName } from "../../lib/utils";
-import { MenuBarSubmenu } from "../menu";
-import { CopyEntityIDToClipboard } from "../state/menu";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { MenuBarSubmenu } from "@components/menu";
+import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { callSceneActivateService } from "./utils";
-import { getIcon } from "../state/utils";
+import { getIcon } from "@components/state/utils";
 
 function SceneActiveMenubarItem(props: { state: State }) {
   return (

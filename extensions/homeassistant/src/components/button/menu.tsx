@@ -1,10 +1,10 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
-import { State } from "../../lib/haapi";
-import { getFriendlyName } from "../../lib/utils";
-import { MenuBarSubmenu } from "../menu";
-import { CopyEntityIDToClipboard } from "../state/menu";
-import { ha } from "../../lib/common";
-import { getIcon } from "../state/utils";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { MenuBarSubmenu } from "@components/menu";
+import { CopyEntityIDToClipboard } from "@components/state/menu";
+import { ha } from "@lib/common";
+import { getIcon } from "@components/state/utils";
 
 function ButtonPressMenubarItem(props: { state: State }) {
   const handle = async () => {

@@ -12,7 +12,7 @@ import {
   Keyboard,
   open,
 } from "@raycast/api";
-import { getErrorMessage } from "../lib/utils";
+import { getErrorMessage } from "@lib/utils";
 import { ReactNode } from "react";
 
 export function MenuBarItemConfigureCommand(): JSX.Element {

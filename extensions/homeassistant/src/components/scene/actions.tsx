@@ -1,8 +1,8 @@
 import { Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { ha } from "../../lib/common";
-import { State } from "../../lib/haapi";
+import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
 import { callSceneActivateService } from "./utils";
-import { EntityStandardActionSections } from "../entity";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function SceneActivateAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

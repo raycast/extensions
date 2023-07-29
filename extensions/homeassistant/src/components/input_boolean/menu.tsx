@@ -1,7 +1,7 @@
-import { State } from "../../lib/haapi";
-import { MenuBarSubmenu } from "../menu";
-import { getFriendlyName } from "../../lib/utils";
-import { CopyEntityIDToClipboard } from "../state/menu";
+import { State } from "@lib/haapi";
+import { MenuBarSubmenu } from "@components/menu";
+import { getFriendlyName } from "@lib/utils";
+import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { MenuBarExtra } from "@raycast/api";
 import {
   callInputBooleanToggleService,

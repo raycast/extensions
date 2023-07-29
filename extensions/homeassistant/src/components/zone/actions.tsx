@@ -1,7 +1,7 @@
 import { Action, ActionPanel } from "@raycast/api";
-import { State } from "../../lib/haapi";
+import { State } from "@lib/haapi";
 import { ZoneList } from "./list";
-import { EntityStandardActionSections } from "../entity";
+import { EntityStandardActionSections } from "@components/entity";
 
 export function ZoneShowDetailAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

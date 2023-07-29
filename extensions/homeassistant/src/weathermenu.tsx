@@ -1,10 +1,10 @@
 import { Color, getPreferenceValues, Icon, Image, MenuBarExtra, openCommandPreferences } from "@raycast/api";
-import { State } from "./lib/haapi";
-import { useHAStates } from "./hooks";
-import { getErrorMessage, getFriendlyName } from "./lib/utils";
-import { MenuBarItemConfigureCommand } from "./components/menu";
-import { WeatherCurrentMenubarSection, WeatherForecastMenubarSection } from "./components/weather/menu";
-import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText } from "./components/weather/utils";
+import { State } from "@lib/haapi";
+import { useHAStates } from "@components/hooks";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { MenuBarItemConfigureCommand } from "@components/menu";
+import { WeatherCurrentMenubarSection, WeatherForecastMenubarSection } from "@components/weather/menu";
+import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText } from "@components/weather/utils";
 
 function WeatherMenuBarExtra(props: {
   children: React.ReactNode;

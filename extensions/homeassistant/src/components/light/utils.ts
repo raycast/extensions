@@ -1,7 +1,7 @@
-import { RGB, miredToK } from "../../lib/color";
-import { ha } from "../../lib/common";
-import { State } from "../../lib/haapi";
-import { ensureMinMax } from "../../lib/utils";
+import { RGB, miredToK } from "@lib/color";
+import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
+import { ensureMinMax } from "@lib/utils";
 
 export function getLightRGBFromState(state: State): RGB | undefined {
   const rgb = state.attributes.rgb_color;

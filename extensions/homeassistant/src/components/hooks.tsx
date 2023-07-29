@@ -1,7 +1,7 @@
 import { Connection, entitiesColl, subscribeEntities } from "home-assistant-js-websocket";
 import { useEffect, useRef, useState } from "react";
-import { getHAWSConnection } from "./lib/common";
-import { State } from "./lib/haapi";
+import { getHAWSConnection } from "../lib/common";
+import { State } from "@lib/haapi";
 
 interface EntityRegistryEntry {
   device_id?: string | null;

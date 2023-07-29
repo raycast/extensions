@@ -1,6 +1,6 @@
 import { showToast, Toast, Detail, ActionPanel } from "@raycast/api";
-import { State } from "../../lib/haapi";
-import { EntityStandardActionSections } from "../entity";
+import { State } from "@lib/haapi";
+import { EntityStandardActionSections } from "@components/entity";
 import { useImage } from "./hooks";
 import { CameraOpenStreamInBrowserAction, CameraOpenStreamInIINAAction, CameraOpenStreamInVLCAction } from "./actions";
 
