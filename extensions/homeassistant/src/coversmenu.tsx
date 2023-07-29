@@ -3,12 +3,11 @@ import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { useHAStates } from "@components/hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
 import { CoverMenubarItem } from "@components/cover/menu";
-import { filterStates, hiddenEntitiesPreferences } from "@components/state/utils";
+import { filterViaPreferencePatterns } from "@components/state/utils";
 
 export default function CoversMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
-  const hidden = hiddenEntitiesPreferences();
-  const entities = filterStates(states, { include: ["cover.*"], exclude: hidden })?.sort((a, b) =>
+  const entities = filterViaPreferencePatterns(states, ["cover.*"])?.sort((a, b) =>
     getFriendlyName(a).localeCompare(getFriendlyName(b)),
   );
   const header = error ? getErrorMessage(error) : undefined;

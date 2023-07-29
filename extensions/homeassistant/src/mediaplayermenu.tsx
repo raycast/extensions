@@ -3,12 +3,11 @@ import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { useHAStates } from "@components/hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
 import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
-import { filterStates, hiddenEntitiesPreferences } from "@components/state/utils";
+import { filterViaPreferencePatterns } from "@components/state/utils";
 
 export default function MediaPlayerMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
-  const hidden = hiddenEntitiesPreferences();
-  const mediaPlayers = filterStates(states, { include: ["media_player.*"], exclude: hidden })?.sort((a, b) =>
+  const mediaPlayers = filterViaPreferencePatterns(states, ["media_player.*"])?.sort((a, b) =>
     getFriendlyName(a).localeCompare(getFriendlyName(b)),
   );
   const header = error ? getErrorMessage(error) : undefined;

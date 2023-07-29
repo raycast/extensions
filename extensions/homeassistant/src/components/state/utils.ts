@@ -13,7 +13,34 @@ export async function stateChangeSleep() {
   await sleep(1000);
 }
 
-export function hiddenEntitiesPreferences(): string[] {
+/**
+ * Filter via preferences "includedEntities" and "excludedEntities" if they exist for the active command
+ * @param states States which should be filtered
+ * @param mainPattern The main pattern for the filter e.g. ["light.*"]
+ * @returns
+ */
+export function filterViaPreferencePatterns(states: State[] | undefined, mainPattern: string[]) {
+  const includedPatterns = includedEntitiesPreferences({ fallback: mainPattern });
+  const excludedPatterns = excludedEntitiesPreferences();
+  const entitiesFiltered = filterStates(states, {
+    include: includedPatterns && includedPatterns.length > 0 ? includedPatterns : mainPattern,
+    exclude: excludedPatterns,
+  });
+  const entities = filterStates(entitiesFiltered, { include: mainPattern });
+  return entities;
+}
+
+export function includedEntitiesPreferences(options?: { fallback?: string[] }): string[] {
+  const prefs = getPreferenceValues();
+  const hidden: string | undefined = prefs.includedEntities;
+  console.log(hidden);
+  if (!hidden) {
+    return options?.fallback ? options.fallback : [];
+  }
+  return (hidden.split(",").map((h) => h.trim()) || []).filter((h) => h.length > 0);
+}
+
+export function excludedEntitiesPreferences(): string[] {
   const prefs = getPreferenceValues();
   const hidden: string | undefined = prefs.excludedEntities;
   if (!hidden) {

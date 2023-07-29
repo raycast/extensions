@@ -1,38 +1,13 @@
-import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { getErrorMessage } from "@lib/utils";
 import { useHAStates } from "@components/hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
 import { StateMenubarItem } from "@components/state/menu";
-import { State } from "@lib/haapi";
-import { filterStates } from "@components/state/utils";
-
-function entitiesPreferences(): string[] {
-  const prefs = getPreferenceValues();
-  const hidden: string | undefined = prefs.entities;
-  if (!hidden) {
-    return [];
-  }
-  return (hidden.split(",").map((h) => h.trim()) || []).filter((h) => h.length > 0);
-}
-
-function filterEntities(states: State[] | undefined): State[] | undefined {
-  if (!states) {
-    return states;
-  }
-  const entityFilters = entitiesPreferences();
-  let result: State[] = [];
-  for (const f of entityFilters) {
-    const filtered = filterStates(states, { include: [f] });
-    if (filtered && filtered.length > 0) {
-      result = result.concat(filtered);
-    }
-  }
-  return result;
-}
+import { filterViaPreferencePatterns } from "@components/state/utils";
 
 export default function EntitiesMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();
-  const entities = filterEntities(states);
+  const entities = filterViaPreferencePatterns(states, []);
   const header = error ? getErrorMessage(error) : undefined;
 
   return (

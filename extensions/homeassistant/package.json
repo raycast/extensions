@@ -252,6 +252,14 @@
       "interval": "1m",
       "preferences": [
         {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "media_player.*"
+        },
+        {
           "name": "excludedEntities",
           "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
           "type": "textfield",
@@ -268,6 +276,14 @@
       "mode": "menu-bar",
       "interval": "1m",
       "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "light.*"
+        },
         {
           "name": "excludedEntities",
           "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
@@ -286,6 +302,14 @@
       "interval": "15m",
       "preferences": [
         {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "cover.*"
+        },
+        {
           "name": "excludedEntities",
           "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
           "type": "textfield",
@@ -303,12 +327,20 @@
       "interval": "15m",
       "preferences": [
         {
-          "name": "entities",
-          "description": "Entities which will be displayed in the Menu",
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
           "type": "textfield",
           "required": true,
-          "title": "Entities",
-          "placeholder": "media_player.player1,light.light3,cover.*"
+          "title": "Included Entities",
+          "placeholder": "cover.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "cover.mycover1,cover.bath*"
         }
       ]
     }
