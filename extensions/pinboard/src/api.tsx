@@ -148,3 +148,39 @@ export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
 
   return result;
 }
+
+// 获得所有的tags
+export async function getAllTags(): Promise<string[]> {
+  const params = new URLSearchParams();
+  params.append("format", "json");
+  params.append("auth_token", apiToken);
+
+  const response = await fetch(apiBasePath + "/tags/get?" + params.toString(), {
+    method: "get",
+  });
+
+  if (!response.ok) {
+    return Promise.reject(response.statusText);
+  }
+  const result = (await response.json()) as Record<string, unknown>;
+  // 返回的就是 {"tag1": "count1", "tag2": "count2"}
+  return Object.keys(result);
+}
+
+// 判断是否保存过
+export async function isSaved(url: string): Promise<boolean> {
+  const params = new URLSearchParams();
+  params.append("url", url);
+  params.append("format", "json");
+  params.append("auth_token", apiToken);
+
+  const response = await fetch(apiBasePath + "/posts/get?" + params.toString(), {
+    method: "get",
+  });
+
+  if (!response.ok) {
+    return Promise.reject(response.statusText);
+  }
+  const result = (await response.json()) as Record<string, unknown>;
+  return Object.keys(result).length > 0;
+}
