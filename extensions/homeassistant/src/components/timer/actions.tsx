@@ -1,22 +1,19 @@
 import { Color, Action, Icon } from "@raycast/api";
-import { ha } from "../common";
-import { State } from "../haapi";
+import { State } from "../../haapi";
+import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
 
 export function TimerStartAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
-  if (!s.entity_id.startsWith("timer") || s.attributes.editable !== true) {
+  if (!isTimerEditable(s)) {
     return null;
   }
-  const handle = async () => {
-    await ha.callService("timer", "start", { entity_id: s.entity_id });
-  };
   const title = s.state === "active" ? "Restart" : "Start";
   const iconSource = s.state === "active" ? Icon.ArrowClockwise : "play.png";
   return (
     <Action
       title={title}
       shortcut={{ modifiers: ["cmd"], key: "s" }}
-      onAction={handle}
+      onAction={() => callTimerStartService(s)}
       icon={{ source: iconSource, tintColor: Color.PrimaryText }}
     />
   );
@@ -27,14 +24,11 @@ export function TimerPauseAction(props: { state: State }): JSX.Element | null {
   if (!s.entity_id.startsWith("timer") || s.attributes.editable !== true) {
     return null;
   }
-  const handle = async () => {
-    await ha.callService("timer", "pause", { entity_id: s.entity_id });
-  };
   return (
     <Action
       title="Pause"
       shortcut={{ modifiers: ["cmd"], key: "p" }}
-      onAction={handle}
+      onAction={() => callTimerPauseService(s)}
       icon={{ source: "pause.png", tintColor: Color.Green }}
     />
   );
@@ -42,17 +36,14 @@ export function TimerPauseAction(props: { state: State }): JSX.Element | null {
 
 export function TimerCancelAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
-  if (!s.entity_id.startsWith("timer") || s.attributes.editable !== true) {
+  if (!isTimerEditable(s) && s.state === "active") {
     return null;
   }
-  const handle = async () => {
-    await ha.callService("timer", "cancel", { entity_id: s.entity_id });
-  };
   return (
     <Action
       title="Cancel"
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      onAction={handle}
+      onAction={() => callTimerCancelService(s)}
       icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
     />
   );

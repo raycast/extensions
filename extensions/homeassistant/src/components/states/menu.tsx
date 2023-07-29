@@ -14,6 +14,7 @@ import { InputBooleanMenubarItem } from "../input_boolean/menu";
 import { InputSelectMenubarItem } from "../input_select/menu";
 import { ScriptMenubarItem } from "../script/menu";
 import { SceneMenubarItem } from "../scene/menu";
+import { TimerMenubarItem } from "../timer/menu";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
@@ -65,6 +66,9 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
     }
     case "scene": {
       return <SceneMenubarItem state={s} />;
+    }
+    case "timer": {
+      return <TimerMenubarItem state={s} />;
     }
   }
   return (
