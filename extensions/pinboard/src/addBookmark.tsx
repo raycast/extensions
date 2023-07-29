@@ -32,7 +32,7 @@ export default function Command() {
           }));
         } catch (error) {
           console.error("Could not load document title", error);
-          setState((oldState) => ({ ...oldState, url: selectedText}));
+          setState((oldState) => ({ ...oldState, url: selectedText }));
         }
       } catch (error) {
         console.error("Could not get selected text", error);
@@ -125,7 +125,7 @@ async function loadDocument(url: string): Promise<string> {
   if (!response.ok) {
     return Promise.reject(response.statusText);
   }
-  return await response.text()
+  return await response.text();
 }
 
 function extractDocumentTitle(document: string): string {
