@@ -1,16 +1,7 @@
 import { ActionPanel, Color, Icon, Action, Keyboard } from "@raycast/api";
-import { ha } from "../common";
-import { State } from "../haapi";
-import { ensureMinMax } from "../utils";
-
-function getSpeedValues(step: number): number[] {
-  const result: number[] = [];
-  for (let i = 100; i >= 0; i = i - step) {
-    result.push(i);
-  }
-
-  return result;
-}
+import { ha } from "../../common";
+import { State } from "../../haapi";
+import { getFanSpeedValues } from "./utils";
 
 export function FanSpeedControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
@@ -20,7 +11,7 @@ export function FanSpeedControlAction(props: { state: State }): JSX.Element | nu
     await ha.callService("fan", "turn_on", { entity_id: state.entity_id, percentage: `${pvalue}` });
   };
 
-  const speedValues = getSpeedValues(step);
+  const speedValues = getFanSpeedValues(step);
   return (
     <ActionPanel.Submenu title="Speed" icon="" shortcut={{ modifiers: ["cmd"], key: "p" }}>
       {speedValues.map((value) => (

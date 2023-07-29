@@ -11,7 +11,7 @@ import {
   MediaPlayerTurnOnAction,
   MediaPlayerTurnOffAction,
 } from "./mediaplayer/actions";
-import { FanSpeedControlAction, FanSpeedUpAction, FanSpeedDownAction } from "./fan";
+import { FanSpeedControlAction, FanSpeedUpAction, FanSpeedDownAction } from "./fan/actions";
 import {
   BrightnessControlAction,
   BrightnessDownAction,
