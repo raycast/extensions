@@ -1,7 +1,7 @@
-import { Form, ActionPanel, Action, showToast, Icon, Clipboard, Toast, showHUD, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Icon, getSelectedText, Toast, showHUD, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
-import { Bookmark, addBookmark, getAllTags } from "./api";
+import { Bookmark, addBookmark } from "./api";
 import he from "he";
 
 export default function Command() {
@@ -14,44 +14,28 @@ export default function Command() {
   useEffect(() => {
     (async () => {
       try {
-        const selectedText = await Clipboard.readText();
+        const selectedText = await getSelectedText();
         console.log("selectedText", selectedText);
-        if (!isValidURL(selectedText ?? "")) {
+        if (!isValidURL(selectedText)) {
           console.log(selectedText, "is not a valid URL");
           return;
         }
         try {
-          const document = await loadDocument(selectedText ?? "");
+          const document = await loadDocument(selectedText);
           const documentTitle = await extractDocumentTitle(document);
           const documentDescription = await extractPageDescription(document);
-          console.log("titile: "+ documentTitle)
-          console.log("description: "+ documentDescription)
           setState((oldState) => ({
             ...oldState,
-            url: selectedText ?? "",
+            url: selectedText,
             title: documentTitle,
             description: documentDescription,
           }));
         } catch (error) {
           console.error("Could not load document title", error);
-          setState((oldState) => ({ ...oldState, url: selectedText ?? ""}));
+          setState((oldState) => ({ ...oldState, url: selectedText}));
         }
       } catch (error) {
         console.error("Could not get selected text", error);
-      }
-    })();
-  }, []);
-
-
-  const [tags, setTags] = useState<string[]>([]);
-  // 执行获取tags的操作
-  useEffect(() => {
-    (async () => {
-      try {
-        const tags = await getAllTags(); // 返回的是一个数组
-        setTags(tags);
-      } catch (error) {
-        console.error("Could not get tags", error);
       }
     })();
   }, []);
@@ -130,11 +114,6 @@ export default function Command() {
         onChange={handleDescriptionChange}
       />
       <Form.TextField id="tags" title="Tags" placeholder="Enter tags (comma-separated)" />
-      {/* <Form.TagPicker id="tags" title="Tags">
-        {tags.map((tag) => (
-          <Form.TagPicker.Item key={tag} value={tag} title={tag} />
-        ))}
-      </Form.TagPicker> */}
       <Form.Checkbox id="private" title="" label="Private" storeValue />
       <Form.Checkbox id="readLater" title="" label="Read Later" storeValue />
     </Form>
