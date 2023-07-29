@@ -3,7 +3,7 @@ import { State } from "../../haapi";
 import { getFriendlyName } from "../../utils";
 import { batteryStateValue, sortBatteries } from "./utils";
 import { copyToClipboardWithHUD } from "../menu";
-import { getIcon } from "../states/utils";
+import { getIcon } from "../state/utils";
 
 export function BatteryMenubarItem(props: { state: State }) {
   const s = props.state;

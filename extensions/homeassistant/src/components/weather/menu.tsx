@@ -14,7 +14,7 @@ import {
   weatherConditionToIcon,
   weatherConditionToText,
 } from "./utils";
-import { getIcon } from "../states/utils";
+import { getIcon } from "../state/utils";
 
 function launchWeatherCommand() {
   launchCommand({ name: "weather", type: LaunchType.UserInitiated });

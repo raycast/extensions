@@ -1,8 +1,8 @@
 import { showToast, Toast, List } from "@raycast/api";
 import { useState } from "react";
 import { useHAStates } from "../../hooks";
-import { StateListItem } from "../states/list";
-import { useStateSearch } from "../states/hooks";
+import { StateListItem } from "../state/list";
+import { useStateSearch } from "../state/hooks";
 
 export function DoorsList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();

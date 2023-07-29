@@ -4,7 +4,7 @@ import { State } from "../../haapi";
 import { capitalize } from "lodash-es";
 import { showToast, Toast, MenuBarExtra } from "@raycast/api";
 import { ha } from "../../common";
-import { getIcon } from "../states/utils";
+import { getIcon } from "../state/utils";
 
 function SwitchToggleItem(props: { state: State }) {
   const handle = async () => {

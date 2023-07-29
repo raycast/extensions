@@ -2,7 +2,7 @@ import { Icon, Image, MenuBarExtra } from "@raycast/api";
 import { State } from "../../haapi";
 import { capitalizeFirstLetter, getFriendlyName } from "../../utils";
 import { MenuBarSubmenu } from "../menu";
-import { CopyEntityIDToClipboard } from "../states/menu";
+import { CopyEntityIDToClipboard } from "../state/menu";
 import {
   callVacuumLocateService,
   callVacuumPauseService,
@@ -13,7 +13,7 @@ import {
   callVacuumTurnOnService,
   isVacuumEditable,
 } from "./utils";
-import { getStateValue, getIcon } from "../states/utils";
+import { getStateValue, getIcon } from "../state/utils";
 
 function VacuumMenubarItemBase(props: {
   state: State;

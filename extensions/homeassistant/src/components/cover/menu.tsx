@@ -3,7 +3,7 @@ import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
 import { capitalizeFirstLetter, getErrorMessage, getFriendlyName } from "../../utils";
 import { State } from "../../haapi";
 import { ha } from "../../common";
-import { getIcon } from "../states/utils";
+import { getIcon } from "../state/utils";
 
 function CoverOpenMenubarItem(props: { state: State }) {
   if (props.state.attributes.current_position >= 100) {

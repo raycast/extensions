@@ -3,7 +3,7 @@ import { getErrorMessage, getFriendlyName } from "../../utils";
 import { State } from "../../haapi";
 import { ha } from "../../common";
 import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
-import { getIcon, stateChangeSleep } from "../states/utils";
+import { getIcon, stateChangeSleep } from "../state/utils";
 import {
   callLightBrightnessService,
   getLightBrightnessValues,

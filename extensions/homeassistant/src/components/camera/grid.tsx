@@ -10,7 +10,7 @@ import {
   CameraOpenStreamInVLCAction,
   CameraShowImageAction,
 } from "./actions";
-import { useStateSearch } from "../states/hooks";
+import { useStateSearch } from "../state/hooks";
 
 const defaultRefreshInterval = 3000;
 

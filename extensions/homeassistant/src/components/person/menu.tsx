@@ -2,7 +2,7 @@ import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
 import { getFriendlyName } from "../../utils";
 import { State } from "../../haapi";
 import { capitalize } from "lodash-es";
-import { getIcon } from "../states/utils";
+import { getIcon } from "../state/utils";
 
 export function PersonMenubarItem(props: { state: State }): JSX.Element | null {
   const s = props.state;

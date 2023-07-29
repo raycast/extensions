@@ -2,9 +2,9 @@ import { Icon, MenuBarExtra } from "@raycast/api";
 import { State } from "../../haapi";
 import { getFriendlyName } from "../../utils";
 import { MenuBarSubmenu } from "../menu";
-import { CopyEntityIDToClipboard } from "../states/menu";
+import { CopyEntityIDToClipboard } from "../state/menu";
 import { callInputSelectSelectOptionService, getInputSelectSelectableOptions } from "./utils";
-import { getIcon } from "../states/utils";
+import { getIcon } from "../state/utils";
 
 function InputSelectSetStateMenubarItem(props: { state: State }) {
   const options = getInputSelectSelectableOptions(props.state);

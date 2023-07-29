@@ -3,7 +3,7 @@ import { getErrorMessage, getFriendlyName } from "./utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
 import { MediaPlayerMenubarItem } from "./components/mediaplayer/menu";
-import { filterStates, hiddenEntitiesPreferences } from "./components/states/utils";
+import { filterStates, hiddenEntitiesPreferences } from "./components/state/utils";
 
 export default function MediaPlayerMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();

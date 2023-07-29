@@ -5,10 +5,10 @@ import { State } from "../../haapi";
 import { useHAStates } from "../../hooks";
 import { getStateTooltip } from "../../utils";
 import { ShowAttributesAction } from "../entity";
-import { StateListItem } from "../states/list";
+import { StateListItem } from "../state/list";
 import { HACSRepo } from "./utils";
-import { useStateSearch } from "../states/hooks";
-import { PrimaryIconColor } from "../states/utils";
+import { useStateSearch } from "../state/hooks";
+import { PrimaryIconColor } from "../state/utils";
 
 function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JSX.Element | null {
   const r = props.repo;

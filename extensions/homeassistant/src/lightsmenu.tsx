@@ -3,7 +3,7 @@ import { getErrorMessage, getFriendlyName } from "./utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
 import { LightMenubarItem } from "./components/light/menu";
-import { filterStates, hiddenEntitiesPreferences } from "./components/states/utils";
+import { filterStates, hiddenEntitiesPreferences } from "./components/state/utils";
 
 export default function LightsMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();

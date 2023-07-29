@@ -2,9 +2,9 @@ import { Color, Icon, LaunchType, MenuBarExtra, getPreferenceValues } from "@ray
 import { getErrorMessage } from "./utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
-import { StateMenubarItem } from "./components/states/menu";
+import { StateMenubarItem } from "./components/state/menu";
 import { State } from "./haapi";
-import { filterStates } from "./components/states/utils";
+import { filterStates } from "./components/state/utils";
 
 function entitiesPreferences(): string[] {
   const prefs = getPreferenceValues();
