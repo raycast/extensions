@@ -62,7 +62,10 @@ export function range(from: number, to: number, step: number) {
   return [...Array(Math.floor((to - from) / step) + 1)].map((_, i) => from + i * step);
 }
 
-export function capitalizeFirstLetter(name: string): string {
+export function capitalizeFirstLetter(name: string | undefined): string | undefined {
+  if (name === undefined) {
+    return;
+  }
   if (!name || name.length <= 0) {
     return name;
   }

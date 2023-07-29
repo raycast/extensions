@@ -37,7 +37,7 @@ import {
   VacuumStopAction,
   VacuumTurnOffAction,
   VacuumTurnOnAction,
-} from "./vacuum";
+} from "./vacuum/actions";
 import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./script/actions";
 import { ButtonPressAction } from "./button/actions";
 import { SceneActivateAction, SceneEditInBrowserAction } from "./scene/actions";
