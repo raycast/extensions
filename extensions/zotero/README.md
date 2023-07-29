@@ -69,7 +69,7 @@ Preferences related to these features are:
   - Radiology
   - Vancouver
 
-![A screenshot of searching Zotero via Raycast](./media/preferences.png)
+![A screenshot of searching Zotero via Raycast](./metadata/zotero-5.png)
 
 ## Features
 
