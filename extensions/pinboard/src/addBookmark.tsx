@@ -5,7 +5,7 @@ import { Bookmark, addBookmark } from "./api";
 import he from "he";
 
 export default function Command() {
-  const [state, setState] = useState<{ url: string; title: string; description: string}>({
+  const [state, setState] = useState<{ url: string; title: string; description: string }>({
     url: "",
     title: "",
     description: "",
@@ -106,10 +106,10 @@ export default function Command() {
         onChange={handleTitleChange}
       />
       <Form.Separator />
-      <Form.TextArea 
-        id="description" 
-        title="Description" 
-        placeholder="Enter bookmark description" 
+      <Form.TextArea
+        id="description"
+        title="Description"
+        placeholder="Enter bookmark description"
         value={state.description}
         onChange={handleDescriptionChange}
       />
