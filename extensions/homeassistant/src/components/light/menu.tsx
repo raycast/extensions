@@ -3,8 +3,29 @@ import { getErrorMessage, getFriendlyName } from "../../utils";
 import { State } from "../../haapi";
 import { getIcon } from "../states";
 import { ha } from "../../common";
-import { MenuBarExtra, Toast, showToast } from "@raycast/api";
+import { Icon, MenuBarExtra, Toast, showToast } from "@raycast/api";
 import { stateChangeSleep } from "../states/utils";
+import {
+  callLightBrightnessService,
+  getLightBrightnessValues,
+  getLightCurrentBrightnessPercentage,
+  hasLightBrightnessSupport,
+} from "./utils";
+
+function LightBrightnessControl(props: { state: State }) {
+  if (!hasLightBrightnessSupport(props.state)) {
+    return null;
+  }
+  const values = getLightBrightnessValues();
+  const cb = getLightCurrentBrightnessPercentage(props.state);
+  return (
+    <MenuBarSubmenu title="Set Brightness" subtitle={cb === undefined ? undefined : `${cb}%`} icon={Icon.Pencil}>
+      {values?.map((v) => (
+        <MenuBarExtra.Item key={v} title={`${v}%`} onAction={() => callLightBrightnessService(props.state, v)} />
+      ))}
+    </MenuBarSubmenu>
+  );
+}
 
 function LightTurnOnMenubarItem(props: { state: State }) {
   if (props.state.state !== "off") {
@@ -43,10 +64,17 @@ export function LightMenubarItem(props: { state: State }): JSX.Element | null {
   const title = () => {
     return friendlyName;
   };
+  const currentBrightness = getLightCurrentBrightnessPercentage(s);
   return (
-    <MenuBarSubmenu key={s.entity_id} title={title()} icon={getIcon(s)}>
+    <MenuBarSubmenu
+      key={s.entity_id}
+      title={title()}
+      subtitle={currentBrightness === undefined ? undefined : `${currentBrightness}%`}
+      icon={getIcon(s)}
+    >
       <LightTurnOnMenubarItem state={s} />
       <LightTurnOffMenubarItem state={s} />
+      <LightBrightnessControl state={s} />
       <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />
     </MenuBarSubmenu>
   );

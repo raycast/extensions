@@ -20,8 +20,7 @@ import {
   ColorTempControlDownAction,
   ColorTempControlUpAction,
   ColorRgbControlAction,
-  getLightRGBFromState,
-} from "./light";
+} from "./light/actions";
 import { changeRGBBrightness, RGBtoString } from "../color";
 import {
   AutomationDebugInBrowserAction,
@@ -69,6 +68,7 @@ import {
   UpdateInstallAction,
   UpdateSkipVersionAction,
 } from "./update/actions";
+import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "./light/utils";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -233,13 +233,9 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
 
 export function getStateValue(state: State): string | undefined {
   if (state.entity_id.startsWith("light") && state.state === "on") {
-    const b = state.attributes.brightness || undefined;
-    if (b !== undefined) {
-      const bv = parseInt(b);
-      if (!isNaN(bv)) {
-        const percent = (bv / 255) * 100;
-        return `${Math.round(percent)}%`;
-      }
+    const brightnessPercentage = getLightCurrentBrightnessPercentage(state);
+    if (brightnessPercentage !== undefined) {
+      return `${Math.round(brightnessPercentage)}%`;
     }
   } else if (state.entity_id.startsWith("fan")) {
     // Speed as a percentage

@@ -2,7 +2,7 @@ import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { getErrorMessage, getFriendlyName } from "./utils";
 import { useHAStates } from "./hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
-import { LightMenubarItem } from "./components/lights/menu";
+import { LightMenubarItem } from "./components/light/menu";
 import { filterStates, hiddenEntitiesPreferences } from "./components/states/utils";
 
 export default function LightsMenuCommand(): JSX.Element {

@@ -6,7 +6,7 @@ import { CoverMenubarItem } from "../cover/menu";
 import { PersonMenubarItem } from "../persons/menu";
 import { SwitchMenubarItem } from "../switches/menu";
 import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
-import { LightMenubarItem } from "../lights/menu";
+import { LightMenubarItem } from "../light/menu";
 import { WeatherMenubarItem } from "../weather/menu";
 import { CameraMenubarItem } from "../camera/menu";
 import { ButtonMenubarItem } from "../button/menu";
