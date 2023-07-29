@@ -47,7 +47,7 @@ import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_
 import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
 import { InputSelectOptionSelectAction } from "./input_select/actions";
 import { InputButtonPressAction } from "./input_button/actions";
-import { InputTextSetValueAction } from "./input_text";
+import { InputTextSetValueAction } from "./input_text/actions";
 import { InputDateTimeSetValueAction } from "./input_datetime/actions";
 import { ShowWeatherAction } from "./weather/list";
 import { ZoneShowDetailAction } from "./zones";

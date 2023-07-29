@@ -1,8 +1,8 @@
 import { showToast, Toast, MenuBarExtra, Icon } from "@raycast/api";
 import { callService } from "home-assistant-js-websocket";
 import { getHAWSConnection, ha } from "../../common";
-import { getErrorMessage } from "../../utils";
-import { HAPersistentNotification, ensureShort } from "./utils";
+import { ensureShort, getErrorMessage } from "../../utils";
+import { HAPersistentNotification } from "./utils";
 
 export function PersistentNotificationMenuItem(props: { notification: HAPersistentNotification }): JSX.Element {
   const s = props.notification;
@@ -18,7 +18,7 @@ export function PersistentNotificationMenuItem(props: { notification: HAPersiste
   const msg = s.message ?? "?";
   const tt = title ? `${title}: ${msg}` : msg;
   return (
-    <MenuBarExtra.Submenu icon={Icon.SpeechBubbleActive} title={ensureShort(title ? title : msg)}>
+    <MenuBarExtra.Submenu icon={Icon.SpeechBubbleActive} title={ensureShort(title ? title : msg) || ""}>
       <MenuBarExtra.Item title="Open" icon={Icon.Globe} onAction={() => open(ha.url)} tooltip={tt} />
       <MenuBarExtra.Item title="Dismiss" icon={Icon.XMarkCircle} onAction={dismiss} />
     </MenuBarExtra.Submenu>

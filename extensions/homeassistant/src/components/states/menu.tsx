@@ -1,6 +1,6 @@
 import { State } from "../../haapi";
 import { getIcon, getStateValue } from "../states";
-import { getFriendlyName } from "../../utils";
+import { ensureShort, getFriendlyName } from "../../utils";
 import { MediaPlayerMenubarItem } from "../mediaplayer/menu";
 import { CoverMenubarItem } from "../cover/menu";
 import { PersonMenubarItem } from "../persons/menu";
@@ -16,6 +16,11 @@ import { InputSelectMenubarItem } from "../input_select/menu";
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
   return <CopyToClipboardMenubarItem title="Copy Entity ID" content={s.entity_id} tooltip={s.entity_id} />;
+}
+
+export function CopyEntityStateToClipboardMenubarItem(props: { state: State }) {
+  const s = props.state;
+  return <CopyToClipboardMenubarItem title="Copy Entity State" content={s.state} tooltip={s.state} />;
 }
 
 export function StateMenubarItem(props: { state: State }): JSX.Element | null {
@@ -55,8 +60,14 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
     }
   }
   return (
-    <MenuBarSubmenu key={s.entity_id} title={getFriendlyName(s)} subtitle={getStateValue(s)} icon={getIcon(s)}>
+    <MenuBarSubmenu
+      key={s.entity_id}
+      title={getFriendlyName(s)}
+      subtitle={ensureShort(getStateValue(s))}
+      icon={getIcon(s)}
+    >
       <CopyEntityIDToClipboard state={s} />
+      <CopyEntityStateToClipboardMenubarItem state={s} />
     </MenuBarSubmenu>
   );
 }

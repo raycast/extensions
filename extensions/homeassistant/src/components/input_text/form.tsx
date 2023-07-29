@@ -1,9 +1,9 @@
-import { Icon, Color, Action, Form, ActionPanel, showToast, Toast, useNavigation } from "@raycast/api";
-import { ha } from "../common";
-import { State } from "../haapi";
-import { getErrorMessage } from "../utils";
+import { useNavigation, Form, showToast, Toast, ActionPanel, Action } from "@raycast/api";
+import { ha } from "../../common";
+import { State } from "../../haapi";
+import { getErrorMessage } from "../../utils";
 
-function InputTextForm(props: { state: State }): JSX.Element {
+export function InputTextForm(props: { state: State }): JSX.Element {
   const s = props.state;
   const { pop } = useNavigation();
   const handle = async (input: Form.Values) => {
@@ -43,22 +43,5 @@ function InputTextForm(props: { state: State }): JSX.Element {
       {mode !== "password" && <Form.TextField id="text" title="Text" />}
       {mode === "password" && <Form.PasswordField id="text" title="Text" />}
     </Form>
-  );
-}
-
-export function InputTextSetValueAction(props: { state: State }): JSX.Element | null {
-  const s = props.state;
-  if (!s.entity_id.startsWith("input_text")) {
-    return null;
-  }
-  if (s.state === "unavailable") {
-    return null;
-  }
-  return (
-    <Action.Push
-      title="Set Text"
-      icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
-      target={<InputTextForm state={s} />}
-    />
   );
 }
