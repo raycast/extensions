@@ -1,95 +1,33 @@
-import { ActionPanel, Color, Icon, List, popToRoot, showToast, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, Color, List, showToast, Image, Toast } from "@raycast/api";
 import { State } from "../haapi";
 import { useState, useEffect } from "react";
-import { range } from "lodash-es";
 import { ha, shouldDisplayEntityID } from "../common";
 import { useHAStates } from "../hooks";
 import { EntityStandardActionSections } from "./entity";
-import {
-  SelectVolumeAction,
-  SelectSourceAction,
-  MediaPlayerTurnOnAction,
-  MediaPlayerTurnOffAction,
-  MediaPlayerActionPanel,
-} from "./mediaplayer/actions";
-import { FanSpeedControlAction, FanSpeedUpAction, FanSpeedDownAction, FanActionPanel } from "./fan/actions";
-import {
-  BrightnessControlAction,
-  BrightnessDownAction,
-  BrightnessUpAction,
-  ColorTempControlAction,
-  ColorTempControlDownAction,
-  ColorTempControlUpAction,
-  ColorRgbControlAction,
-  LightActionPanel,
-} from "./light/actions";
+import { MediaPlayerActionPanel } from "./mediaplayer/actions";
+import { FanActionPanel } from "./fan/actions";
+import { LightActionPanel } from "./light/actions";
 import { changeRGBBrightness, RGBtoString } from "../color";
-import {
-  AutomationActionPanel,
-  AutomationDebugInBrowserAction,
-  AutomationEditInBrowserAction,
-  AutomationTriggerAction,
-  AutomationTurnOffAction,
-  AutomationTurnOnAction,
-} from "./automation/actions";
-import {
-  VacuumActionPanel,
-  VacuumLocateAction,
-  VacuumPauseAction,
-  VacuumReturnToBaseAction,
-  VacuumStartAction,
-  VacuumStopAction,
-  VacuumTurnOffAction,
-  VacuumTurnOnAction,
-} from "./vacuum/actions";
-import {
-  ScriptActionPanel,
-  ScriptDebugInBrowserAction,
-  ScriptEditInBrowserAction,
-  ScriptRunAction,
-} from "./script/actions";
-import { ButtonActionPanel, ButtonPressAction } from "./button/actions";
-import { SceneActionPanel, SceneActivateAction, SceneEditInBrowserAction } from "./scene/actions";
-import {
-  InputBooleanActionPanel,
-  InputBooleanOffAction,
-  InputBooleanOnAction,
-  InputBooleanToggleAction,
-} from "./input_boolean/actions";
-import { InputNumberActionPanel, InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number/actions";
-import { TimerActionPanel, TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer/actions";
-import { InputSelectActionPanel, InputSelectOptionSelectAction } from "./input_select/actions";
-import { InputButtonActionPanel, InputButtonPressAction } from "./input_button/actions";
-import { InputTextActionPanel, InputTextSetValueAction } from "./input_text/actions";
-import { InputDateTimeActionPanel, InputDateTimeSetValueAction } from "./input_datetime/actions";
-import { ShowWeatherAction } from "./weather/list";
-import {
-  PersonActionPanel,
-  PersonCopyIDAction,
-  PersonCopyUserIDAction,
-  PersonOpenInGoogleMapsAction,
-} from "./persons/actions";
+import { AutomationActionPanel } from "./automation/actions";
+import { VacuumActionPanel } from "./vacuum/actions";
+import { ScriptActionPanel } from "./script/actions";
+import { ButtonActionPanel } from "./button/actions";
+import { SceneActionPanel } from "./scene/actions";
+import { InputBooleanActionPanel } from "./input_boolean/actions";
+import { InputNumberActionPanel } from "./input_number/actions";
+import { TimerActionPanel } from "./timer/actions";
+import { InputSelectActionPanel } from "./input_select/actions";
+import { InputButtonActionPanel } from "./input_button/actions";
+import { InputTextActionPanel } from "./input_text/actions";
+import { InputDateTimeActionPanel } from "./input_datetime/actions";
+import { PersonActionPanel } from "./persons/actions";
 import { getStateTooltip } from "../utils";
 import { getMediaPlayerTitleAndArtist } from "./mediaplayer/utils";
 import { weatherConditionToIcon } from "./weather/utils";
-import {
-  CameraActionPanel,
-  CameraOpenStreamInBrowserAction,
-  CameraOpenStreamInIINAAction,
-  CameraOpenStreamInVLCAction,
-  CameraShowImageAction,
-  CameraTurnOffAction,
-  CameraTurnOnAction,
-} from "./camera/actions";
-import {
-  UpdateShowChangelogAction,
-  UpdateOpenInBrowserAction,
-  UpdateInstallAction,
-  UpdateSkipVersionAction,
-  UpdateActionPanel,
-} from "./update/actions";
+import { CameraActionPanel } from "./camera/actions";
+import { UpdateActionPanel } from "./update/actions";
 import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "./light/utils";
-import { ZoneActionPanel, ZoneShowDetailAction } from "./zone/actions";
+import { ZoneActionPanel } from "./zone/actions";
 import { SwitchActionPanel } from "./switches/actions";
 import { WeatherActionPanel } from "./weather/actions";
 import { ClimateActionPanel } from "./climate/actions";
