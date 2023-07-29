@@ -9,6 +9,7 @@ import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "../menu";
 import { LightMenubarItem } from "../lights/menu";
 import { WeatherMenubarItem } from "../weather/menu";
 import { CameraMenubarItem } from "../camera/menu";
+import { ButtonMenubarItem } from "../button/menu";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
@@ -40,6 +41,9 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
     }
     case "camera": {
       return <CameraMenubarItem state={s} />;
+    }
+    case "button": {
+      return <ButtonMenubarItem state={s} />;
     }
   }
   return (

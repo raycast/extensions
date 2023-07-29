@@ -40,7 +40,7 @@ import {
   VacuumTurnOnAction,
 } from "./vacuum";
 import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./scripts";
-import { ButtonPressAction } from "./buttons";
+import { ButtonPressAction } from "./button/actions";
 import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
 import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number";
