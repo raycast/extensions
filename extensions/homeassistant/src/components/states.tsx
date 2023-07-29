@@ -38,7 +38,7 @@ import {
   VacuumTurnOffAction,
   VacuumTurnOnAction,
 } from "./vacuum";
-import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./scripts";
+import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./script/actions";
 import { ButtonPressAction } from "./button/actions";
 import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean/actions";

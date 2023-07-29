@@ -1,18 +1,20 @@
 import { Icon, Color, Action } from "@raycast/api";
-import { ha } from "../common";
-import { State } from "../haapi";
+import { ha } from "../../common";
+import { State } from "../../haapi";
+import { callScriptRunService } from "./utils";
 
 export function ScriptRunAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
   if (!s.entity_id.startsWith("script")) {
     return null;
   }
-  const name = s.entity_id.substring(7);
-  console.log(name);
-  const handle = async () => {
-    await ha.callService("script", "turn_on", { entity_id: s.entity_id });
-  };
-  return <Action title="Run" onAction={handle} icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }} />;
+  return (
+    <Action
+      title="Run"
+      onAction={() => callScriptRunService(s)}
+      icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }}
+    />
+  );
 }
 
 export function ScriptEditInBrowserAction(props: { state: State }): JSX.Element | null {
