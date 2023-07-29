@@ -26,9 +26,7 @@ export function ZoneList(props: { state: State }): JSX.Element {
   return (
     <List isLoading={isLoading}>
       <List.Section title="Persons in Zone" subtitle={`${persons?.length}`}>
-        {resolvedPersons?.map((ps) => (
-          <StateListItem key={ps.entity_id} state={ps} />
-        ))}
+        {resolvedPersons?.map((ps) => <StateListItem key={ps.entity_id} state={ps} />)}
       </List.Section>
     </List>
   );
@@ -61,9 +59,7 @@ export function ZonesList(): JSX.Element {
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => (
-        <StateListItem key={state.entity_id} state={state} />
-      ))}
+      {states?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
     </List>
   );
 }

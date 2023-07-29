@@ -185,7 +185,7 @@ async function fileToBase64Image(filename: string): Promise<string> {
 
 export function useImage(
   entityID: string,
-  defaultIcon?: string
+  defaultIcon?: string,
 ): {
   localFilepath?: string;
   error?: string;
@@ -317,9 +317,7 @@ export function CameraGrid(): JSX.Element {
       columns={3}
       fit={Grid.Fit.Fill}
     >
-      {states?.map((s) => (
-        <CameraGridItem key={s.entity_id} state={s} />
-      ))}
+      {states?.map((s) => <CameraGridItem key={s.entity_id} state={s} />)}
     </Grid>
   );
 }

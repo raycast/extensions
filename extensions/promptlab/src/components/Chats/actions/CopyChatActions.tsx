@@ -1,6 +1,6 @@
 import { Action, ActionPanel } from "@raycast/api";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { anyActionsEnabled } from "../../../utils/action-utils";
+import { anyActionsEnabled, getActionShortcut } from "../../../utils/action-utils";
 
 export const CopyChatActionsSection = (props: {
   response: string;
@@ -16,16 +16,20 @@ export const CopyChatActionsSection = (props: {
 
   return (
     <ActionPanel.Section title="Clipboard Actions">
-      <Action.CopyToClipboard title="Copy Response" content={response} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      <Action.CopyToClipboard
+        title="Copy Response"
+        content={response}
+        shortcut={getActionShortcut("CopyChatResponseAction", settings)}
+      />
       <Action.CopyToClipboard
         title="Copy Sent Query"
         content={query}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        shortcut={getActionShortcut("CopyChatQueryAction", settings)}
       />
       <Action.CopyToClipboard
         title="Copy Base Prompt"
         content={basePrompt}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        shortcut={getActionShortcut("CopyChatBasePromptAction", settings)}
       />
     </ActionPanel.Section>
   );

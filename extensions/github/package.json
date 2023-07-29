@@ -13,7 +13,8 @@
     "khasbilegt",
     "pernielsentikaer",
     "loxygenk",
-    "oilbeater"
+    "oilbeater",
+    "LunaticMuch"
   ],
   "categories": [
     "Developer Tools",
@@ -202,8 +203,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.3",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.55.0",
+    "@raycast/utils": "^1.9.0",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
@@ -215,7 +216,7 @@
     "@graphql-codegen/typescript": "^3.0.2",
     "@graphql-codegen/typescript-graphql-request": "^4.5.9",
     "@graphql-codegen/typescript-operations": "^3.0.2",
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.15.11",
     "concurrently": "^8.0.1",
@@ -223,7 +224,7 @@
     "eslint": "^8.37.0",
     "eslint-plugin-import": "^2.27.5",
     "graphql": "^16.6.0",
-    "prettier": "^2.8.7",
+    "prettier": "^3.0.0",
     "typescript": "^5.0.3"
   },
   "scripts": {

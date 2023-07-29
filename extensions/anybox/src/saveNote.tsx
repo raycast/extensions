@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, Clipboard, Icon, useNavigation, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Form, Clipboard, Icon, useNavigation, getPreferenceValues, open } from "@raycast/api";
 import { postAndCloseMainWindow, fetchCollections } from "./utilities/fetch";
 import { useState, useEffect } from "react";
 
@@ -10,6 +10,12 @@ interface CollectionProp {
 
 interface Preferences {
   autoFill: boolean;
+}
+
+interface SaveNoteResponse {
+  code: number;
+  message: string;
+  url: string;
 }
 
 function NoteForm() {
@@ -47,7 +53,7 @@ function NoteForm() {
           <Action.SubmitForm
             title="Save to Anybox"
             icon={Icon.SaveDocument}
-            onSubmit={(values) => {
+            onSubmit={async (values) => {
               const note = values.note;
               if (note.length > 0) {
                 const data = {
@@ -56,7 +62,26 @@ function NoteForm() {
                   starred: !!values.starred,
                 };
                 pop();
-                postAndCloseMainWindow("save", data);
+                await postAndCloseMainWindow("save", data);
+              }
+            }}
+          />
+          <Action.SubmitForm
+            title="Save and Open in Anybox"
+            icon={Icon.ArrowNe}
+            onSubmit={async (values) => {
+              const note = values.note;
+              if (note.length > 0) {
+                const data = {
+                  note,
+                  collections: values.collections,
+                  starred: !!values.starred,
+                };
+                pop();
+                const result = (await postAndCloseMainWindow("save", data)) as SaveNoteResponse;
+                if (result.url) {
+                  open(result.url);
+                }
               }
             }}
           />

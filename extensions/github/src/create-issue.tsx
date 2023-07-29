@@ -48,7 +48,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
         if (issue) {
           // It's not possible to add an issue to a project from the createIssue call
           await Promise.all(
-            values.projects.map((projectId) => github.addIssueToProject({ issueId: issue.id, projectId }))
+            values.projects.map((projectId) => github.addIssueToProject({ issueId: issue.id, projectId })),
           );
 
           toast.style = Toast.Style.Success;
@@ -111,7 +111,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
       return github.dataForRepository({ owner: selectedRepository.owner.login, name: selectedRepository.name });
     },
     [values.repository],
-    { execute: !!values.repository }
+    { execute: !!values.repository },
   );
 
   const collaborators = data?.repository?.collaborators?.nodes;

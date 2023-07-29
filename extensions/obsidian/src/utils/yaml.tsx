@@ -103,13 +103,13 @@ export function yamlTagsForString(str: string) {
     if (yamlHas(parsedYAML, "tag")) {
       if (Array.isArray(parsedYAML.tag)) {
         foundTags = [...parsedYAML.tag];
-      } else {
+      } else if (typeof parsedYAML.tag === "string") {
         foundTags = [...parsedYAML.tag.split(",").map((tag: string) => tag.trim())];
       }
     } else if (yamlHas(parsedYAML, "tags")) {
       if (Array.isArray(parsedYAML.tags)) {
         foundTags = [...parsedYAML.tags];
-      } else {
+      } else if (typeof parsedYAML.tags === "string") {
         foundTags = [...parsedYAML.tags.split(",").map((tag: string) => tag.trim())];
       }
     }

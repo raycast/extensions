@@ -1,5 +1,10 @@
 # Anybox Changelog
 
+## [Feature Improvement and Bug Fixed] - 2023-07-18
+
+- Add "Save and Open in Anybox" action for Save Note.
+- Fix Raycast window not closing after actions.
+
 ## [Feature Improvement] - 2022-12-03
 
 - Add “Search Link Descriptions” setting.

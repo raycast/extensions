@@ -22,6 +22,7 @@ import {
 import { State } from "./haapi";
 import { useHAStates } from "./hooks";
 import { getErrorMessage, getFriendlyName } from "./utils";
+import { MenuBarItemConfigureCommand } from "./components/menu";
 
 function launchWeatherCommand() {
   launchCommand({ name: "weather", type: LaunchType.UserInitiated });
@@ -50,7 +51,7 @@ function WeatherMenuBarExtra(props: {
             <MenuBarExtra.Item title={`Error: ${error}`} />
           </MenuBarExtra.Section>
           <MenuBarExtra.Section>
-            <WeatherConfigure />
+            <MenuBarItemConfigureCommand />
           </MenuBarExtra.Section>
         </>
       ) : (
@@ -143,17 +144,6 @@ function WeatherCondition(props: { condition: string | undefined }): ReactElemen
   );
 }
 
-function WeatherConfigure(): ReactElement {
-  return (
-    <MenuBarExtra.Item
-      title="Configure"
-      icon={Icon.Gear}
-      shortcut={{ modifiers: ["cmd"], key: "," }}
-      onAction={openCommandPreferences}
-    />
-  );
-}
-
 function WeatherForecastItem(props: {
   forecast: Forecast;
   isDaily: boolean;
@@ -238,7 +228,7 @@ export default function WeatherMenuBarCommand(): JSX.Element {
         ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <WeatherConfigure />
+        <MenuBarItemConfigureCommand />
       </MenuBarExtra.Section>
     </WeatherMenuBarExtra>
   );
