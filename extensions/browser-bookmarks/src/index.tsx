@@ -11,8 +11,11 @@ import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
+import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
+import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
+import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
@@ -83,16 +86,22 @@ export default function Command() {
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
+  const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
+  const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
-
+  const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
+  
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const chrome = useChromeBookmarks(hasChrome);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const edge = useEdgeBookmarks(hasEdge);
+  const edgeCanary = useEdgeBookmarks(hasEdgeCanary);
+  const edgeDev = useEdgeBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
+  const vivaldi = useVivaldiBookmarks(hasVivaldi);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
@@ -104,8 +113,11 @@ export default function Command() {
       ...chrome.bookmarks,
       ...chromeDev.bookmarks,
       ...edge.bookmarks,
+      ...edgeCanary.bookmarks,
+      ...edgeDev.bookmarks,
       ...firefox.bookmarks,
       ...safari.bookmarks,
+      ...vivaldi.bookmarks,
     ]
       .map((item) => {
         let domain;
@@ -145,8 +157,11 @@ export default function Command() {
     chrome.bookmarks,
     chromeDev.bookmarks,
     edge.bookmarks,
+    edgeCanary.bookmarks,
+    edgeDev.bookmarks,
     firefox.bookmarks,
     safari.bookmarks,
+    vivaldi.bookmarks,
     frecencies,
     setBookmarks,
   ]);
@@ -158,8 +173,11 @@ export default function Command() {
       ...chrome.folders,
       ...chromeDev.folders,
       ...edge.folders,
+      ...edgeCanary.folders,
+      ...edgeDev.folders,
       ...firefox.folders,
       ...safari.folders,
+      ...vivaldi.folders,
     ];
 
     setFolders(folders);
@@ -169,8 +187,11 @@ export default function Command() {
     chrome.folders,
     chromeDev.folders,
     edge.folders,
+    edgeCanary.folders,
+    edgeDev.folders,
     firefox.folders,
     safari.folders,
+    vivaldi.folders,
     setFolders,
   ]);
 
@@ -234,13 +255,20 @@ export default function Command() {
     if (hasEdge) {
       edge.mutate();
     }
-
+    if (hasEdgeCanary) {
+      edge.mutate();
+    }
+    if (hasEdgeDev) {
+      edge.mutate();
+    }
     if (hasFirefox) {
       firefox.mutate();
     }
-
     if (hasSafari) {
       safari.mutate();
+    }
+    if (hasVivaldi) {
+      vivaldi.mutate();
     }
   }
 
@@ -283,8 +311,11 @@ export default function Command() {
         chrome.isLoading ||
         chromeDev.isLoading ||
         edge.isLoading ||
+        edgeCanary.isLoading ||
+        edgeDev.isLoading ||
         firefox.isLoading ||
-        safari.isLoading
+        safari.isLoading ||
+        vivaldi.isLoading
       }
       searchBarPlaceholder="Search by title, domain name or tag in selected folder"
       onSearchTextChange={setQuery}
@@ -363,6 +394,7 @@ export default function Command() {
                     currentProfile={chromeDev.currentProfile}
                     setCurrentProfile={chromeDev.setCurrentProfile}
                   />
+
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edge}
                     name="Edge"
@@ -371,7 +403,27 @@ export default function Command() {
                     profiles={edge.profiles}
                     currentProfile={edge.currentProfile}
                     setCurrentProfile={edge.setCurrentProfile}
+                  />  
+
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
+                    name="Edge Canary"
+                    icon="edge.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    profiles={edgeCanary.profiles}
+                    currentProfile={edgeCanary.currentProfile}
+                    setCurrentProfile={edgeCanary.setCurrentProfile}
                   />
+                  
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.edgeDev}
+                    name="Edge Dev"
+                    icon="edge.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    profiles={edgeDev.profiles}
+                    currentProfile={edgeDev.currentProfile}
+                    setCurrentProfile={edgeDev.setCurrentProfile}
+                  />   
 
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.firefox}
@@ -382,6 +434,16 @@ export default function Command() {
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
                   />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.vivaldi}
+                    name="Vivaldi"
+                    icon="vivaldi.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                    profiles={vivaldi.profiles}
+                    currentProfile={vivaldi.currentProfile}
+                    setCurrentProfile={vivaldi.setCurrentProfile}
+                  />
+
                 </ActionPanel.Section>
 
                 <ActionPanel.Section>

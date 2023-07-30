@@ -1,5 +1,10 @@
 # Browser Bookmarks Changelog
-## [Support for Brave Beta and Chrome Dev] - 2023-0709
+
+## [Support for Vivaldi and Edge Dev Browsers] - 2023-07-30
+
+- Add support for `Vivaldi`, `Edge Dev` and `Edge Canary` browsers
+
+## [Support for Brave Beta and Chrome Dev Browser] - 2023-07-09
 
 - Add support for `Brave Beta` and `Chrome Dev` browsers
 
