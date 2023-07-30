@@ -16,6 +16,7 @@ import { SceneMenubarItem } from "@components/scene/menu";
 import { TimerMenubarItem } from "@components/timer/menu";
 import { VacuumMenubarItem } from "@components/vacuum/menu";
 import { getStateValue, getIcon } from "./utils";
+import { InputButtonMenubarItem } from "@components/input_button/menu";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
@@ -58,6 +59,9 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
     }
     case "input_boolean": {
       return <InputBooleanMenubarItem state={s} />;
+    }
+    case "input_button": {
+      return <InputButtonMenubarItem state={s} />;
     }
     case "input_select": {
       return <InputSelectMenubarItem state={s} />;
