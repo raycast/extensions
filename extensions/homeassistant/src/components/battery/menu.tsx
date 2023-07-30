@@ -2,38 +2,35 @@ import { MenuBarExtra } from "@raycast/api";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
 import { batteryStateValue, sortBatteries } from "./utils";
-import { copyToClipboardWithHUD } from "../menu";
+import { MenuBarSubmenu } from "../menu";
 import { getIcon } from "@components/state/utils";
+import { CopyEntityIDToClipboard, CopyEntityStateToClipboardMenubarItem } from "@components/state/menu";
 
 export function BatteryMenubarItem(props: { state: State }) {
   const s = props.state;
   return (
-    <MenuBarExtra.Item
-      key={s.entity_id}
-      title={getFriendlyName(s)}
-      tooltip={s.entity_id}
-      subtitle={batteryStateValue(s)}
-      icon={getIcon(s)}
-      onAction={async () => {
-        await copyToClipboardWithHUD(s.entity_id);
-      }}
-    />
+    <MenuBarSubmenu key={s.entity_id} title={getFriendlyName(s)} subtitle={batteryStateValue(s)} icon={getIcon(s)}>
+      <CopyEntityIDToClipboard state={s} />
+      <CopyEntityStateToClipboardMenubarItem state={s} />
+    </MenuBarSubmenu>
   );
 }
 
-export function BatteriesMenubarSection(props: { batteries: State[] | undefined }) {
-  const batteries = props.batteries;
-  if (!batteries || batteries.length <= 0) {
-    return (
-      <MenuBarExtra.Section title="Low Batteries">
-        <MenuBarExtra.Item title="No Battery Notifications" />
-      </MenuBarExtra.Section>
-    );
+export function BatteryMenubarSection(props: {
+  states: State[] | undefined;
+  title?: string;
+  emptyElement?: React.ReactNode;
+}) {
+  const states = props.states;
+  if (!states || states.length <= 0) {
+    if (props.emptyElement) {
+      return <MenuBarExtra.Section title={props.title}>{props.emptyElement}</MenuBarExtra.Section>;
+    }
+    return null;
   }
-  const sortedStates = sortBatteries(batteries);
   return (
-    <MenuBarExtra.Section title="Low Batteries">
-      {sortedStates?.map((b) => <BatteryMenubarItem key={b.entity_id} state={b} />)}
+    <MenuBarExtra.Section title={props.title}>
+      {states?.map((b) => <BatteryMenubarItem key={b.entity_id} state={b} />)}
     </MenuBarExtra.Section>
   );
 }

@@ -5,6 +5,7 @@ import { RGBtoString, changeRGBBrightness } from "@lib/color";
 import { ha } from "@lib/common";
 import { getLightCurrentBrightnessPercentage, getLightRGBFromState } from "@components/light/utils";
 import { weatherConditionToIcon } from "@components/weather/utils";
+import { getBatteryIconFromState } from "@components/battery/utils";
 
 /**
  * Sleep to get state changes
@@ -41,7 +42,6 @@ export function filterViaPreferencePatterns(states: State[] | undefined, mainPat
 export function includedEntitiesPreferences(options?: { fallback?: string[] }): string[] {
   const prefs = getPreferenceValues();
   const hidden: string | undefined = prefs.includedEntities;
-  console.log(hidden);
   if (!hidden) {
     return options?.fallback ? options.fallback : [];
   }
@@ -114,20 +114,6 @@ const deviceClassIconSource: Record<string, string> = {
   humidity: "humidity.png",
 };
 
-const batterLevelIcons: string[] = [
-  "battery-00.png",
-  "battery-10.png",
-  "battery-20.png",
-  "battery-30.png",
-  "battery-40.png",
-  "battery-50.png",
-  "battery-60.png",
-  "battery-70.png",
-  "battery-80.png",
-  "battery-90.png",
-  "battery-100.png",
-];
-
 /**
  * @param state
  * @returns Nice format of state of the given object. If no device class found state will be given back
@@ -198,22 +184,7 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
   if (state.attributes.device_class) {
     const dc = state.attributes.device_class;
     if (dc === "battery") {
-      const v = parseFloat(state.state);
-      let src = "battery-100.png";
-      if (!isNaN(v)) {
-        const level = Math.floor(v / 10);
-        const levelIcon = batterLevelIcons[level];
-        if (levelIcon) {
-          src = levelIcon;
-        }
-      }
-      let tintColor = PrimaryIconColor;
-      if (v <= 20) {
-        tintColor = Color.Red;
-      } else if (v <= 30) {
-        tintColor = Color.Yellow;
-      }
-      return { source: src, tintColor: tintColor };
+      return getBatteryIconFromState(state);
     } else if (dc === "motion") {
       const source = state.state === "on" ? "run.png" : "walk.png";
       const color =

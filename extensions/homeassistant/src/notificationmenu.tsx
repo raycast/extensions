@@ -3,8 +3,6 @@ import { getErrorMessage } from "@lib/utils";
 import { MenuBarItemConfigureCommand } from "@components/menu";
 import { useHAStates } from "@components/hooks";
 import { State } from "@lib/haapi";
-import { filterBatteries } from "@components/battery/utils";
-import { BatteriesMenubarSection } from "@components/battery/menu";
 import { HAPersistentNotification } from "@components/persistentnotification/utils";
 import { useHAPersistentNotifications } from "@components/persistentnotification/hooks";
 import { PersistentNotificationsMenubarSection } from "@components/persistentnotification/list";
@@ -18,9 +16,8 @@ function showCountInMenu(): boolean {
 export default function MenuCommand(): JSX.Element {
   const { notifications, states, error, isLoading } = useNotifications();
   const updates = states?.filter((s) => s.entity_id.startsWith("update.") && s.state === "on");
-  const batteries = filterBatteries(states, { onFilterState: (value) => value < 30 });
 
-  const messageCount = (notifications?.length || 0) + (updates?.length || 0) + (batteries?.length || 0);
+  const messageCount = (notifications?.length || 0) + (updates?.length || 0);
   const valid = messageCount > 0;
   const title = showCountInMenu() && valid ? messageCount.toString() : undefined;
   const tooltip = () => {
@@ -39,7 +36,6 @@ export default function MenuCommand(): JSX.Element {
       {header && <MenuBarExtra.Item title={header} />}
       <PersistentNotificationsMenubarSection notifications={notifications} />
       <UpdatesMenubarSection updates={updates} />
-      <BatteriesMenubarSection batteries={batteries} />
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />
       </MenuBarExtra.Section>
