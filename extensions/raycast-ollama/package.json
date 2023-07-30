@@ -307,7 +307,15 @@
       "title": "Ask Ollama",
       "subtitle": "Ollama",
       "description": "Ask ollama any question",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "ollama-casual",

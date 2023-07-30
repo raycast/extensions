@@ -51,3 +51,12 @@ export interface OllamaApiGenerateResponseMetadata {
   eval_count: number;
   eval_duration: number;
 }
+
+export interface RaycastArgumentsOllamaAsk {
+  fallbackText?: string;
+  arguments: {
+    query: string;
+  };
+  launchType: string;
+  launchContext?: string;
+}

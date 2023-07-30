@@ -8,3 +8,7 @@
 - [Code Improvement] Better error handling.
 - [Code Improvement] Added JSDoc documentation.
 - [Code Improvement] Errors, Types and Ollama functions moved out from main.tsx file.
+
+## [Improvement] - 2023-07-30
+
+- Command 'Ask Ollama' no longer use fallback for text, replaced with query.
