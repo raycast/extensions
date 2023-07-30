@@ -73,3 +73,9 @@ export interface Alert {
 export interface Preferences {
   apiKey?: string;
 }
+
+export interface Favorite {
+  route: Route;
+  directionId: string;
+  stop: Stop;
+}

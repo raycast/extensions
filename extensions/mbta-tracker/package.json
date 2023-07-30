@@ -15,6 +15,12 @@
       "title": "Browse departures",
       "description": "View predicted departure times for a given transit route and stop",
       "mode": "view"
+    },
+    {
+      "name": "view-favorites",
+      "title": "View Favorites",
+      "description": "Display stops that have been marked as a favorite",
+      "mode": "view"
     }
   ],
   "preferences": [
