@@ -1,5 +1,14 @@
 # GitHub Changelog
 
+## [Menu Commands] - 2023-07-18
+
+- Add repo name to `Unread Notifications` Menu
+
+## [Menu Commands] - 2023-07-10
+
+- Add Issues Menu Command
+- Add Pull Requests Menu Command
+
 ## [Support rerun failed workflow jobs] - 2023-06-27
 
 - Support rerun failed workflow jobs in `Workflow Runs` command

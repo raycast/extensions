@@ -65,7 +65,7 @@ interface SignUpFormValues {
   hobbies: string[];
 }
 
-export default function Main() {
+export default function Command() {
   const { handleSubmit, itemProps } = useForm<SignUpFormValues>({
     onSubmit(values) {
       showToast({

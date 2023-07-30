@@ -1,7 +1,15 @@
 import { existsSync } from "fs";
 import { URL } from "url";
 import { isDeepStrictEqual } from "util";
-import { EntryType, EntryLike, FileEntry, FolderEntry, RemoteEntry, WorkspaceEntry } from "./types";
+import {
+  EntryType,
+  EntryLike,
+  FileEntry,
+  FolderEntry,
+  RemoteEntry,
+  WorkspaceEntry,
+  RemoteWorkspaceEntry,
+} from "./types";
 import { open } from "@raycast/api";
 import * as fs from "fs";
 import { getBuildScheme } from "./lib/vscode";
@@ -33,6 +41,11 @@ export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
   return folderUri !== undefined && remoteAuthority !== undefined;
 }
 
+export function isRemoteWorkspaceEntry(entry: EntryLike): entry is RemoteWorkspaceEntry {
+  const { workspace, remoteAuthority } = entry as RemoteWorkspaceEntry;
+  return workspace !== undefined && remoteAuthority !== undefined;
+}
+
 // Filters
 
 export function filterEntriesByType(filter: EntryType | null) {
@@ -46,6 +59,8 @@ export function filterEntriesByType(filter: EntryType | null) {
       return isFolderEntry;
     case "Remote Folders":
       return isRemoteEntry;
+    case "Remote Workspace":
+      return isRemoteWorkspaceEntry;
     case "Files":
       return isFileEntry;
     default:

@@ -1,6 +1,6 @@
 import { Clipboard, Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { getCurrentWeather } from "./hooks/hooks";
-import { getDateIcon, getUnits, isoToDateTime, isoToTime, timeHour } from "./utils/common-utils";
+import { getDateIcon, getMenuItem, getUnits, isoToDateTime, isoToTime, timeHour } from "./utils/common-utils";
 import {
   getWeatherDescription,
   isEmptyLonLat,
@@ -17,16 +17,13 @@ import { OPEN_METEO } from "./utils/axios-utils";
 
 export default function MenubarWeather() {
   const { weather, location, loading } = getCurrentWeather();
-  const { tempUnit, windUint } = getUnits();
+  const { tempUnit, windUnit } = getUnits();
   const { description, icon } = getWeatherDescription(weather?.current_weather?.weathercode);
 
+  const menuItems: string[] = getMenuItem(weather);
+
   return (
-    <MenuBarExtra
-      isLoading={loading}
-      tooltip={`${description}`}
-      title={typeof weather === "undefined" ? "" : ` ${Math.round(weather?.current_weather?.temperature)}${tempUnit}`}
-      icon={icon}
-    >
+    <MenuBarExtra isLoading={loading} tooltip={`${description}`} title={menuItems.join(" | ")} icon={icon}>
       {!loading && (
         <>
           {typeof weather === "undefined" && (
@@ -142,9 +139,9 @@ export default function MenubarWeather() {
                   <MenuBarExtra.Item
                     title={"Speed"}
                     icon={Icon.Gauge}
-                    subtitle={` ${weather?.current_weather.windspeed}${windUint}`}
+                    subtitle={` ${weather?.current_weather.windspeed}${windUnit}`}
                     onAction={async () => {
-                      await Clipboard.copy(`${weather?.current_weather.windspeed}${windUint}`);
+                      await Clipboard.copy(`${weather?.current_weather.windspeed}${windUnit}`);
                     }}
                   />
                   <MenuBarExtra.Item
@@ -295,11 +292,11 @@ export default function MenubarWeather() {
                     <MenuBarExtra.Item
                       key={index + weather?.daily?.time[index] + weather?.daily?.windspeed_10m_max[index]}
                       icon={getDateIcon(weather?.daily?.time[index].substring(8))}
-                      title={` ${value}${windUint}${windDirectionSimple(weather?.daily, index)}`}
+                      title={` ${value}${windUnit}${windDirectionSimple(weather?.daily, index)}`}
                       onAction={async () => {
                         await Clipboard.copy(
                           weather?.daily?.time[index] +
-                            ` ${value}${windUint}${windDirectionSimple(weather?.daily, index)}`
+                            ` ${value}${windUnit}${windDirectionSimple(weather?.daily, index)}`
                         );
                       }}
                     />

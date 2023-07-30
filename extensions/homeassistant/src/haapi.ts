@@ -1,5 +1,5 @@
-import { showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import fetch, { Response } from "node-fetch";
 import urljoin from "url-join";
 import { getErrorMessage } from "./utils";
 import fs from "fs";
@@ -10,6 +10,13 @@ import { getWifiSSIDSync } from "./lib/wifi";
 import * as ping from "ping";
 import { URL } from "url";
 import { queryMdns } from "./lib/mdns";
+import {
+  generateMobileDeviceRegistration,
+  HADeviceRegistration,
+  HAMobileDeviceRegistrationResponse,
+} from "./lib/mobiledevice";
+import { getHAWSConnection } from "./common";
+import { Connection } from "home-assistant-js-websocket";
 const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
@@ -45,10 +52,10 @@ export class HomeAssistant {
   public url: string;
   public urlInternal: string | undefined;
   private _nearestURL: string | undefined;
-  private httpsAgent?: Agent;
   private _ignoreCerts = false;
   public wifiSSIDs: string[] | undefined;
   private usePing = true;
+  private messageSubscription?: object | null;
 
   constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
     this.token = token;
@@ -57,9 +64,12 @@ export class HomeAssistant {
     this.wifiSSIDs = options?.wifiSSIDs;
     this.usePing = options?.usePing ?? true;
     this._ignoreCerts = ignoreCerts;
-    if (this.url.startsWith("https://")) {
-      this.httpsAgent = new Agent({
-        rejectUnauthorized: !ignoreCerts,
+  }
+
+  private httpsAgent(url: string): Agent | undefined {
+    if (url.startsWith("https://")) {
+      return new Agent({
+        rejectUnauthorized: !this._ignoreCerts,
       });
     }
   }
@@ -86,7 +96,7 @@ export class HomeAssistant {
         console.log(
           `Current SSID (${ssid}) is not in home network list (${
             this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
-          })`
+          })`,
         );
       }
     }
@@ -101,7 +111,6 @@ export class HomeAssistant {
         timeout: 2,
         extra: ["-i", "1", "-c", "1"],
       });
-      console.log(res);
       return res.alive;
     } catch (error) {
       return false;
@@ -165,7 +174,7 @@ export class HomeAssistant {
     console.log(`send GET request: ${fullUrl}`);
     try {
       const response = await fetch(fullUrl, {
-        agent: this.httpsAgent,
+        agent: this.httpsAgent(fullUrl),
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -181,14 +190,14 @@ export class HomeAssistant {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async post(url: string, params: { [key: string]: any } = {}): Promise<null> {
+  public async post(url: string, params: { [key: string]: any } = {}): Promise<Response> {
     const fullUrl = urljoin(await this.nearestURL(), "api", url);
     console.log(`send POST request: ${fullUrl}`);
     const body = JSON.stringify(params);
     console.log(body);
     //try {
     const response = await fetch(fullUrl, {
-      agent: this.httpsAgent,
+      agent: this.httpsAgent(fullUrl),
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -203,7 +212,7 @@ export class HomeAssistant {
     //} catch (e) {
     //    console.log(e);
     //}
-    return null;
+    return response;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -343,7 +352,7 @@ export class HomeAssistant {
         result = result.filter(
           (e) =>
             e.entity_id.toLowerCase().includes(params.query.toLowerCase()) ||
-            (e.attributes.friendly_name.toLowerCase() || "").includes(params.query.toLowerCase())
+            (e.attributes.friendly_name.toLowerCase() || "").includes(params.query.toLowerCase()),
         );
       }
       return result;
@@ -371,5 +380,40 @@ export class HomeAssistant {
 
   async getCameraProxyURL(entityID: string, localFilepath: string): Promise<void> {
     await this.downloadFile(`camera_proxy/${entityID}`, { localFilepath: localFilepath });
+  }
+
+  async registerMobileDevice(con: Connection) {
+    const registrationData = await generateMobileDeviceRegistration();
+    let webhook_id = await LocalStorage.getItem<string>("webhook_id");
+    if (webhook_id && webhook_id.length > 0) {
+      console.log(`Use existing webhook id ${webhook_id}`);
+    } else {
+      console.log("Register Device in Home Assistant");
+      const response = await this.post("mobile_app/registrations", registrationData);
+      const data: HAMobileDeviceRegistrationResponse = await response.json();
+      webhook_id = data.webhook_id;
+      await LocalStorage.setItem("webhook_id", webhook_id);
+    }
+
+    if (this.messageSubscription) {
+      console.log("Use existing message subscription");
+    } else {
+      console.log("Create message subscription");
+      try {
+        this.messageSubscription = await con.subscribeMessage(
+          (result) => {
+            console.log(result);
+          },
+          {
+            type: "mobile_app/push_notification_channel",
+            webhook_id: webhook_id,
+            support_confirm: false,
+          },
+          { resubscribe: true },
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
 }

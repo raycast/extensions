@@ -18,6 +18,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "subtitle": "Google Bard",
+      "description": "Chat with Google Bard",
+      "mode": "view"
+    },
+    {
       "name": "summarize",
       "title": "Summarize",
       "subtitle": "Google Bard",
@@ -98,7 +105,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.48.5",
-    "bard-ai": "^1.4.2",
+    "bard-ai": "^1.5.2",
     "node-fetch": "^3.3.1",
     "uuid": "^9.0.0"
   },

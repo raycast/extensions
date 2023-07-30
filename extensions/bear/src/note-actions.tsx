@@ -23,6 +23,12 @@ function renderMarkdown(noteText: string): string {
   }
 }
 
+export function createBasicNote(title: string) {
+  return open(`bear://x-callback-url/create?title=${encodeURIComponent(title)}&show_window=yes&edit=yes`, {
+    background: false,
+  });
+}
+
 function NotePreviewAction({ note }: { note: Note }) {
   return (
     <Action.Push

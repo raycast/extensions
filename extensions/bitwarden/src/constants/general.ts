@@ -15,6 +15,7 @@ export const LOCAL_STORAGE_KEY = {
   SERVER_URL: "cliServer",
   LAST_ACTIVITY_TIME: "lastActivityTime",
   VAULT_LOCK_REASON: "vaultLockReason",
+  VAULT_FAVORITE_ORDER: "vaultFavoriteOrder",
 } as const;
 
 export const VAULT_LOCK_MESSAGES = {

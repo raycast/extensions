@@ -1,5 +1,9 @@
 # Claris Snippets Changelog
 
+## [Fixes] - 2023-07-27
+
+- Fixed a bug where Claris database couldn't be located
+
 ## [Fixes] - 2023-03-14
 
 - Improve performance when loading snippets from a large folder

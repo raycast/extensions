@@ -1,5 +1,11 @@
 # Zotero Changelog
 
+## [Enhancements] - 2023-07-20
+
+- Make open PDF as default action
+- Add dropdown filter for collections
+- Update logo and icons
+
 ## [Enhancements] - 2023-03-07
 
 - Updated logo

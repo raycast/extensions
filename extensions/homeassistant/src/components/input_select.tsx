@@ -20,9 +20,7 @@ export function InputSelectOptionSelectAction(props: { state: State }): JSX.Elem
   };
   return (
     <ActionPanel.Submenu title="Select" icon={{ source: Icon.ChevronUp, tintColor: Color.PrimaryText }}>
-      {selectableOptions?.map((o) => (
-        <Action key={o} title={o} onAction={() => handle(o)} />
-      ))}
+      {selectableOptions?.map((o) => <Action key={o} title={o} onAction={() => handle(o)} />)}
     </ActionPanel.Submenu>
   );
 }

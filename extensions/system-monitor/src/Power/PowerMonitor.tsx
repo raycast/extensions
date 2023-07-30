@@ -7,7 +7,6 @@ import {
   getCycleCount,
   getIsCharging,
   getMaxBatteryCapacity,
-  isValidTime,
   getTimeOnBattery,
 } from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
@@ -29,27 +28,37 @@ const PowerMonitor = () => {
 
   useInterval(async () => {
     getBatteryLevel()
-      .then((newBatteryLevel) => {
+      .then((batteryLevel) => {
         getIsCharging()
-          .then((newIsCharging) => {
+          .then((isCharging) => {
             getBatteryTime()
-              .then((newBatteryTime) => {
-                getTimeOnBattery()
-                  .then((timeOnBattery) => {
-                    setState((prevState) => {
-                      return {
-                        ...prevState,
-                        batteryLevel: newBatteryLevel,
-                        isCharging: newIsCharging,
-                        batteryTime: newBatteryTime,
-                        timeOnBattery: timeOnBattery,
-                      };
+              .then((batteryTime) => {
+                setState((prevState) => {
+                  return {
+                    ...prevState,
+                    batteryLevel,
+                    isCharging,
+                    batteryTime,
+                  };
+                });
+                setIsLoading(false);
+              })
+              .then(() => {
+                if (state.timeOnBattery === "Calculating...") {
+                  getTimeOnBattery()
+                    .then((timeOnBattery) => {
+                      setState((prevState) => {
+                        return {
+                          ...prevState,
+                          timeOnBattery,
+                        };
+                      });
+                      setIsLoading(false);
+                    })
+                    .catch((error: ExecError) => {
+                      setError(error);
                     });
-                    setIsLoading(false);
-                  })
-                  .catch((error: ExecError) => {
-                    setError(error);
-                  });
+                }
               })
               .catch((error: ExecError) => {
                 setError(error);
@@ -64,19 +73,41 @@ const PowerMonitor = () => {
       });
   }, 1000);
 
+  useInterval(async () => {
+    getIsCharging()
+      .then(() => {
+        getTimeOnBattery()
+          .then((timeOnBattery) => {
+            setState((prevState) => {
+              return {
+                ...prevState,
+                timeOnBattery,
+              };
+            });
+            setIsLoading(false);
+          })
+          .catch((error: ExecError) => {
+            setError(error);
+          });
+      })
+      .catch((error: ExecError) => {
+        setError(error);
+      });
+  }, 1000 * 60);
+
   useEffect(() => {
     getCycleCount()
-      .then((newCycleCount) => {
+      .then((cycleCount) => {
         getBatteryCondition()
-          .then((newBatteryCondition) => {
+          .then((batteryCondition) => {
             getMaxBatteryCapacity()
-              .then((newMaxBatteryCapacity) => {
+              .then((maxBatteryCapacity) => {
                 setState((prevState) => {
                   return {
                     ...prevState,
-                    cycleCount: newCycleCount,
-                    batteryCondition: newBatteryCondition,
-                    maxBatteryCapacity: newMaxBatteryCapacity,
+                    cycleCount,
+                    batteryCondition,
+                    maxBatteryCapacity,
                   };
                 });
               })
@@ -119,10 +150,10 @@ const PowerMonitor = () => {
               <List.Item.Detail.Metadata.Label title="Maximum Battery Capacity" text={state.maxBatteryCapacity} />
               <List.Item.Detail.Metadata.Label
                 title={state.isCharging ? "Time to charge" : "Time to discharge"}
-                text={isValidTime(state.batteryTime) ? state.batteryTime : "Calculating..."}
+                text={state.batteryTime}
               />
               <List.Item.Detail.Metadata.Label
-                title={state.isCharging ? "Time on AC" : "Time on battery"}
+                title={state.isCharging && state.batteryLevel === "100" ? "Time on AC" : "Time on battery"}
                 text={state.timeOnBattery}
               />
             </List.Item.Detail.Metadata>

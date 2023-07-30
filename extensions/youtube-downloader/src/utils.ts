@@ -10,10 +10,10 @@ import stream from "stream";
 
 const pipeline = promisify(stream.pipeline);
 
-const preferences = getPreferenceValues();
+export const preferences = getPreferenceValues<{ downloadPath: string; ffmpegPath: string; ffprobePath: string }>();
 
-setFfprobePath("/opt/homebrew/bin/ffprobe");
-setFfmpegPath("/opt/homebrew/bin/ffmpeg");
+setFfmpegPath(preferences.ffmpegPath);
+setFfprobePath(preferences.ffprobePath);
 
 export async function downloadVideo(url: string, options: { format: string; copyToClipboard: boolean }) {
   const info = await ytdl.getInfo(url);
@@ -131,23 +131,36 @@ export async function downloadAudio(url: string, options: { format: string; copy
   toast.show();
 
   const title = info.videoDetails.title;
-  const filePath = options.copyToClipboard
-    ? tempfile(".mp4")
-    : unusedFilenameSync(path.join(preferences.downloadPath, `${title}.mp4`));
 
-  return new Promise((resolve) => {
+  const videoTempFile = tempfile(".mp4");
+
+  await pipeline(
     ytdl
       .downloadFromInfo(info, { filter: (format) => format.itag.toString() === options.format })
       .on("progress", (chunk, downloaded, total) => {
         const progress = downloaded / total;
         toast.message = `${Math.round(progress * 100)}%`;
-      })
+      }),
+    fs.createWriteStream(videoTempFile)
+  );
+
+  const filePath = options.copyToClipboard
+    ? tempfile(".mp3")
+    : unusedFilenameSync(path.join(preferences.downloadPath, `${title}.mp3`));
+
+  return new Promise((resolve) => {
+    ffmpeg()
+      .input(videoTempFile)
+      .format("mp3")
+      .save(filePath)
       .on("error", (err) => {
         toast.title = "Download Failed";
         toast.message = err.message;
         toast.style = Toast.Style.Failure;
       })
       .on("end", () => {
+        fs.unlinkSync(videoTempFile);
+
         resolve(null);
 
         if (options.copyToClipboard) {
@@ -175,7 +188,6 @@ export async function downloadAudio(url: string, options: { format: string; copy
             },
           };
         }
-      })
-      .pipe(fs.createWriteStream(filePath));
+      });
   });
 }

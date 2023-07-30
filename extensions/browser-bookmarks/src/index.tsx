@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage, Toast, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  List,
+  LocalStorage,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
 import Fuse from "fuse.js";
 import { useState, useMemo, useEffect } from "react";
@@ -38,6 +48,8 @@ type Folder = {
 
 export default function Command() {
   const { data: availableBrowsers } = useAvailableBrowsers();
+
+  const { showDomain } = getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -213,7 +225,12 @@ export default function Command() {
 
   const fuse = useMemo(() => {
     return new Fuse(folderBookmarks, {
-      keys: ["title", "domain", "folder"],
+      keys: [
+        { name: "title", weight: 3 },
+        { name: "domain", weight: 1 },
+        { name: "folder", weight: 0.5 },
+      ],
+      threshold: 0.4,
     });
   }, [folderBookmarks]);
 
@@ -317,7 +334,7 @@ export default function Command() {
         safari.isLoading ||
         vivaldi.isLoading
       }
-      searchBarPlaceholder="Search by title, domain name or tag in selected folder"
+      searchBarPlaceholder="Search by title, domain name, or folder name"
       onSearchTextChange={setQuery}
       searchBarAccessory={
         <List.Dropdown tooltip="Folder" onChange={setSelectedFolderId}>
@@ -344,6 +361,7 @@ export default function Command() {
             key={item.id}
             icon={getFavicon(item.url)}
             title={item.title}
+            subtitle={showDomain ? item.domain : ""}
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>

@@ -1,5 +1,8 @@
 # Tailwind CSS Changelog
 
+## [Allow for HEX value search] - 2023-07-22
+- Add HEX values as possible keyword for the `Search Colors` command
+
 ## [Add actions to copy color class names] - 2023-03-12
 - Add actions to copy colors as background, text and border class names for the `Search Colors` command
 

@@ -1,5 +1,14 @@
 # Menubar Weather Changelog
 
+## [Add command subtitle] - 2023-07-24
+
+- Now you can view the weather directly from the subtitle of the command.
+- Fix the problem that the weather information is not updated properly after changing the settings
+
+## [Add menubar info configutation] - 2023-07-11
+
+- You can choose temperature type, UVI, pressure, humidity and rain to display in the menubar.
+
 ## [Add UV Index] - 2023-07-03
 
 - UV Index (UVI) is now included in the current weather and forecast

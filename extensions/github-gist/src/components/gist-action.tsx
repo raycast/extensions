@@ -113,7 +113,7 @@ export function GistAction(props: {
                           } else {
                             await showToast(Toast.Style.Failure, "Delete gist failure.");
                           }
-                        }
+                        },
                       );
                     }}
                   />
