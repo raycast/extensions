@@ -22,10 +22,18 @@ export async function stateChangeSleep() {
 export function filterViaPreferencePatterns(states: State[] | undefined, mainPattern: string[]) {
   const includedPatterns = includedEntitiesPreferences({ fallback: mainPattern });
   const excludedPatterns = excludedEntitiesPreferences();
-  const entitiesFiltered = filterStates(states, {
-    include: includedPatterns && includedPatterns.length > 0 ? includedPatterns : mainPattern,
-    exclude: excludedPatterns,
-  });
+  const filterKeepOrder = () => {
+    let res: State[] = [];
+    for (const includePattern of includedPatterns) {
+      const f = filterStates(states, { include: [includePattern], exclude: excludedPatterns });
+      if (f && f.length > 0) {
+        res = res.concat(f);
+      }
+    }
+    return res;
+  };
+  const entitiesFiltered = filterKeepOrder();
+
   const entities = filterStates(entitiesFiltered, { include: mainPattern });
   return entities;
 }
