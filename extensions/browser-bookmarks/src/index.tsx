@@ -412,7 +412,6 @@ export default function Command() {
                     currentProfile={chromeDev.currentProfile}
                     setCurrentProfile={chromeDev.setCurrentProfile}
                   />
-
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edge}
                     name="Edge"
@@ -422,7 +421,6 @@ export default function Command() {
                     currentProfile={edge.currentProfile}
                     setCurrentProfile={edge.setCurrentProfile}
                   />
-
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
                     name="Edge Canary"
@@ -432,7 +430,6 @@ export default function Command() {
                     currentProfile={edgeCanary.currentProfile}
                     setCurrentProfile={edgeCanary.setCurrentProfile}
                   />
-
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edgeDev}
                     name="Edge Dev"
@@ -442,7 +439,6 @@ export default function Command() {
                     currentProfile={edgeDev.currentProfile}
                     setCurrentProfile={edgeDev.setCurrentProfile}
                   />
-
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.firefox}
                     name="Firefox"
@@ -461,7 +457,6 @@ export default function Command() {
                     currentProfile={vivaldi.currentProfile}
                     setCurrentProfile={vivaldi.setCurrentProfile}
                   />
-
                 </ActionPanel.Section>
 
                 <ActionPanel.Section>
