@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Color, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 
 import { ChannelSchedule } from "../modules/tv/domain/tvSchedule";
 import { getTime } from "../utils/dateUtils";
