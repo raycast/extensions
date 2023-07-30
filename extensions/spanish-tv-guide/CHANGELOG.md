@@ -1,6 +1,6 @@
 # spanish-tv-guide Changelog
 
-## [Initial Version] - 2023-05-21
+## [Initial Version] - 2023-06-02
 - Initial version of the extension
 
 ## [Resize icons] - 2023-07-30

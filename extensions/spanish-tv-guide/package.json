@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spanish-tv-guide",
-  "title": "Browse the Spanish TV Guide",
+  "title": "Spanish TV Guide",
   "description": "Browse the Spanish TV Guide",
   "icon": "app-icon.png",
   "author": "david.molinero",
