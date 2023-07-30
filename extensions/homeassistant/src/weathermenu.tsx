@@ -5,6 +5,7 @@ import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MenuBarItemConfigureCommand } from "@components/menu";
 import { WeatherCurrentMenubarSection, WeatherForecastMenubarSection } from "@components/weather/menu";
 import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText } from "@components/weather/utils";
+import { PrimaryIconColor } from "@components/state/utils";
 
 function WeatherMenuBarExtra(props: {
   children: React.ReactNode;
@@ -70,7 +71,7 @@ export default function WeatherMenuBarCommand(): JSX.Element {
     >
       <MenuBarExtra.Section title="Entity">
         <MenuBarExtra.Item
-          icon={{ source: "entity.png", tintColor: Color.SecondaryText }}
+          icon={{ source: "entity.png", tintColor: PrimaryIconColor }}
           title={weather ? getFriendlyName(weather) : ""}
           onAction={openCommandPreferences}
         />

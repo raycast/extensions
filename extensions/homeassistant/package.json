@@ -324,7 +324,7 @@
       "title": "Batteries Menu",
       "description": "Display Batteries in the Menu Bar",
       "mode": "menu-bar",
-      "interval": "15m",
+      "interval": "30m",
       "preferences": [
         {
           "name": "includedEntities",

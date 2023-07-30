@@ -24,7 +24,7 @@ export default function CoversMenuCommand(): JSX.Element {
     >
       {header && <MenuBarExtra.Item title={header} />}
       <LaunchCommandMenubarItem
-        title="Open All Covers"
+        title="Open All Covers Command"
         name="covers"
         type={LaunchType.UserInitiated}
         icon={Icon.Terminal}
