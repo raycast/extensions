@@ -109,8 +109,8 @@ export default function Command() {
   const chrome = useChromeBookmarks(hasChrome);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const edge = useEdgeBookmarks(hasEdge);
-  const edgeCanary = useEdgeBookmarks(hasEdgeCanary);
-  const edgeDev = useEdgeBookmarks(hasEdgeDev);
+  const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
+  const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
