@@ -103,7 +103,7 @@ export default function Command() {
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
-  
+
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const chrome = useChromeBookmarks(hasChrome);
@@ -421,7 +421,7 @@ export default function Command() {
                     profiles={edge.profiles}
                     currentProfile={edge.currentProfile}
                     setCurrentProfile={edge.setCurrentProfile}
-                  />  
+                  />
 
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
@@ -432,7 +432,7 @@ export default function Command() {
                     currentProfile={edgeCanary.currentProfile}
                     setCurrentProfile={edgeCanary.setCurrentProfile}
                   />
-                  
+
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edgeDev}
                     name="Edge Dev"
@@ -441,7 +441,7 @@ export default function Command() {
                     profiles={edgeDev.profiles}
                     currentProfile={edgeDev.currentProfile}
                     setCurrentProfile={edgeDev.setCurrentProfile}
-                  />   
+                  />
 
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.firefox}
