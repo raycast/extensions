@@ -1,6 +1,6 @@
 # Google Calender
 
-Search and Create sharable link to registrate!
+Search and Create a event-link for anyone to subscribe!
 
 ## Create Event Link Feature
 Create a event-link for anyone to subscribe to their Google Calender.
