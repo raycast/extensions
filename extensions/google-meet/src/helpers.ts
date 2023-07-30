@@ -1,11 +1,32 @@
 import { open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { getOpenedBrowserScript, getOpenedUrlsScript } from "./utils/scripts";
+import {
+  getOpenedBrowserScript,
+  getOpenedUrlForArc,
+  getOpenedUrlForFirefox,
+  getOpenedUrlsScript,
+} from "./utils/scripts";
+
+import type { SupportedBrowsers } from "./utils/scripts";
 
 const openMeetTabUrl = "https://meet.google.com/new";
 
+async function getOpenTabs(): Promise<string> {
+  const browserName = await getDefaultOpenBrowser();
+
+  if (browserName === "Arc") {
+    return await runAppleScript(getOpenedUrlForArc());
+  }
+
+  if (browserName === "Firefox" || browserName === "Firefox Developer Edition") {
+    return await runAppleScript(getOpenedUrlForFirefox(browserName));
+  }
+
+  return await runAppleScript(getOpenedUrlsScript(browserName));
+}
+
 export async function getDefaultOpenBrowser() {
-  return await runAppleScript(getOpenedBrowserScript);
+  return (await runAppleScript(getOpenedBrowserScript)) as SupportedBrowsers;
 }
 
 /**
@@ -24,11 +45,6 @@ export async function getMeetTab(): Promise<string> {
   }
 
   return meetTab as string;
-}
-
-async function getOpenTabs(): Promise<string> {
-  const browserName = await getDefaultOpenBrowser();
-  return await runAppleScript(getOpenedUrlsScript(browserName));
 }
 
 export async function openMeetTabDefaultProfile(): Promise<void> {
