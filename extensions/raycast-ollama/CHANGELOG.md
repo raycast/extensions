@@ -12,3 +12,5 @@
 ## [Improvement] - 2023-07-30
 
 - Command 'Ask Ollama' no longer use fallback for text, replaced with query.
+- Inference statistics disabled by default and can be enable from extension preferences.
+- Text is displayed realtime.

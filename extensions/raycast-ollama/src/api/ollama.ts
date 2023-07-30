@@ -4,8 +4,6 @@ import {
   OllamaApiGenerateResponseDone,
   OllamaApiCreateRequestBody,
   OllamaApiGenerateRequestBody,
-  OllamaApiGenerateResponse,
-  OllamaApiGenerateResponseMetadata,
 } from "./types";
 import {
   ErrorOllamaCustomModel,
@@ -16,6 +14,7 @@ import {
 } from "./errors";
 import { environment } from "@raycast/api";
 import fetch from "node-fetch";
+import { EventEmitter } from "stream";
 
 /**
  * Verify if a specific model is installed.
@@ -93,22 +92,22 @@ function OllamaApiCreateModel(model: string): Promise<boolean> {
  * @param {string} model - Model name. Need to be installed or one of the following: raycast_orca:3b, raycast_llama2:7b, raycast_llama2:13b.
  * @returns {Promise<OllamaApiGenerateResponse>} Response from the Ollama API with generated text and metadata.
  */
-export async function OllamaApiGenerate(prompt: string, model: string): Promise<OllamaApiGenerateResponse> {
+export async function OllamaApiGenerate(prompt: string, model: string): Promise<EventEmitter> {
   const url = "http://localhost:11434/api/generate";
   const body: OllamaApiGenerateRequestBody = {
     model: model,
     prompt: prompt,
   };
-  let answerProp: OllamaApiGenerateResponse | undefined;
+  let emitter: EventEmitter | undefined;
 
-  while (answerProp === undefined) {
-    answerProp = await fetch(url, {
+  while (emitter === undefined) {
+    emitter = await fetch(url, {
       method: "POST",
       body: JSON.stringify(body),
     })
       .then(async (response) => {
         if (response.ok) {
-          return response.text();
+          return response.body;
         }
 
         if (response.status === 400) {
@@ -127,47 +126,26 @@ export async function OllamaApiGenerate(prompt: string, model: string): Promise<
           });
         }
       })
-      .then((output) => {
-        if (output === undefined) {
+      .then((body) => {
+        if (body === undefined) {
           return undefined;
         }
-        const answerProp: OllamaApiGenerateResponse = {
-          answer: "",
-          metadata: {} as OllamaApiGenerateResponseMetadata,
-          error: false,
-        };
-        // split entire response on Array for eatch line
-        const ollamaApiResponseArray = output.split("\n");
 
-        // array of all undone response
-        const ollamaApiResponseUndone = ollamaApiResponseArray.slice(0, -2);
-        ollamaApiResponseUndone.forEach((row) => {
-          try {
-            const data: OllamaApiGenerateResponseUndone = JSON.parse(row);
-            if (data.response) {
-              answerProp.answer += data.response;
+        const e = new EventEmitter();
+
+        body?.on("data", (chunk) => {
+          if (chunk !== undefined) {
+            const buffer = Buffer.from(chunk);
+            const json: OllamaApiGenerateResponseUndone = JSON.parse(buffer.toString());
+            if (json.done) {
+              const lastJSON: OllamaApiGenerateResponseDone = JSON.parse(buffer.toString());
+              e.emit("done", lastJSON);
             }
-          } catch (err) {
-            console.warn(err);
+            if (json.response !== undefined) e.emit("data", json.response);
           }
         });
 
-        // array of last response
-        const ollamaApiResponseDone = ollamaApiResponseArray.slice(-2, -1);
-        ollamaApiResponseDone.forEach((row) => {
-          try {
-            const data: OllamaApiGenerateResponseDone = JSON.parse(row);
-            answerProp.metadata.model = data.model;
-            answerProp.metadata.total_duration = data.total_duration;
-            answerProp.metadata.prompt_eval_count = data.prompt_eval_count;
-            answerProp.metadata.prompt_eval_duration = data.prompt_eval_duration;
-            answerProp.metadata.eval_count = data.eval_count;
-            answerProp.metadata.eval_duration = data.eval_duration;
-          } catch (err) {
-            console.warn(err);
-          }
-        });
-        return answerProp;
+        return e;
       })
       .catch((err) => {
         if (err instanceof ErrorOllamaModelNotInstalled) {
@@ -179,5 +157,5 @@ export async function OllamaApiGenerate(prompt: string, model: string): Promise<
         throw ErrorOllamaNotInstalledOrRunning;
       });
   }
-  return answerProp;
+  return emitter;
 }

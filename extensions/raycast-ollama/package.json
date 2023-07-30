@@ -15,6 +15,24 @@
   },
   "preferences": [
     {
+      "name": "ollamaShowMetadata",
+      "description": "Show inference statistics",
+      "type": "dropdown",
+      "required": false,
+      "title": "Show Inference Statistics",
+      "default": "false",
+      "data": [
+        {
+          "title": "False",
+          "value": "false"
+        },
+        {
+          "title": "True",
+          "value": "true"
+        }
+      ]
+    },
+    {
       "name": "ollamaAskModel",
       "description": "Select model used for perform longer task",
       "type": "dropdown",

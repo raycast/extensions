@@ -3,7 +3,9 @@ import { ErrorOllamaCustomModel, ErrorOllamaModelNotInstalled, ErrorRaycastApiNo
 import { OllamaApiGenerate } from "./ollama";
 import * as React from "react";
 import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/api";
-import { getSelectedText } from "@raycast/api";
+import { getSelectedText, getPreferenceValues } from "@raycast/api";
+
+const preferences = getPreferenceValues();
 
 /**
  * Return JSX element with generated text and relative metadata.
@@ -31,11 +33,16 @@ export default function ResultView(
     await showToast({ style: Toast.Style.Animated, title: "🧠 Performing Inference." });
     setLoading(true);
     OllamaApiGenerate(initialPrompt + text + endPrompt, model)
-      .then(async (data) => {
-        await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
-        setAnswer(data.answer);
-        setAnswerMetadata(data.metadata);
-        setLoading(false);
+      .then(async (emiter) => {
+        emiter.on("data", (data) => {
+          setAnswer((prevState) => prevState + data);
+        });
+
+        emiter.on("done", async (data) => {
+          await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
+          setAnswerMetadata(data);
+          setLoading(false);
+        });
       })
       .catch(async (err) => {
         if (err instanceof ErrorOllamaModelNotInstalled) {
@@ -86,7 +93,8 @@ export default function ResultView(
         )
       }
       metadata={
-        !loading && (
+        !loading &&
+        !(preferences.ollamaShowMetadata as boolean) && (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Model" text={answerMetadata.model} />
             <Detail.Metadata.Separator />
