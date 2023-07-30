@@ -7,7 +7,7 @@ import { ChannelSchedule, TVSchedule } from "./modules/tv/domain/tvSchedule";
 import ChannelDetails from "./components/ChannelDetails";
 import { tvScheduleRepository } from "./modules/tv/repositories/tvScheduleRepository";
 
-const ICONS_DIRECTORY = "/tmp/raycast/spanish-tv-guide/icons"
+const ICONS_DIRECTORY = "/tmp/raycast/spanish-tv-guide/icons";
 
 const Command = () => {
   const [tvSchedule, setTvSchedule] = useState<TVSchedule>([]);
