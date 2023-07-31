@@ -34,7 +34,7 @@
     },
     {
       "name": "ollamaAskModel",
-      "description": "Select model used for perform longer task",
+      "description": "Select model used for perform 'Ask Ollama'",
       "type": "dropdown",
       "required": true,
       "title": "Model - Ask Ollama",
@@ -51,6 +51,50 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "llama2:13b"
+        }
+      ]
+    },
+    {
+      "name": "ollamaAskCustomPromptModel",
+      "description": "Select model used for perform 'Ask Ollama With Custom Prompt'",
+      "type": "dropdown",
+      "required": true,
+      "title": "Model - Ask Ollama With Custom Prompt",
+      "default": "raycast_llama2:7b",
+      "data": [
+        {
+          "title": "orca 3b (at least 8GB of RAM)",
+          "value": "raycast_orca:3b"
+        },
+        {
+          "title": "llama2 7b (at least 16GB of RAM)",
+          "value": "raycast_llama2:7b"
+        },
+        {
+          "title": "llama2 13b (at least 32GB of RAM)",
+          "value": "raycast_llama2:13b"
+        }
+      ]
+    },
+    {
+      "name": "ollamaAskCustomCommandModel",
+      "description": "Select model used for perform 'Custom Command'",
+      "type": "dropdown",
+      "required": true,
+      "title": "Model - Custom Command",
+      "default": "raycast_orca:3b",
+      "data": [
+        {
+          "title": "orca 3b (at least 8GB of RAM)",
+          "value": "raycast_orca:3b"
+        },
+        {
+          "title": "llama2 7b (at least 16GB of RAM)",
+          "value": "raycast_llama2:7b"
+        },
+        {
+          "title": "llama2 13b (at least 32GB of RAM)",
+          "value": "raycast_llama2:13b"
         }
       ]
     },
@@ -355,6 +399,42 @@
       "subtitle": "Ollama",
       "description": "Make selected text more confident",
       "mode": "view"
+    },
+    {
+      "name": "ollama-custom-ask",
+      "title": "Ask Ollama With Custom Prompt",
+      "subtitle": "Ollama",
+      "description": "Ask ollama any question with a custom prompt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ollama-custom-command",
+      "title": "Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "ollama-explain",

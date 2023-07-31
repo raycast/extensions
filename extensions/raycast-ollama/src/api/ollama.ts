@@ -90,7 +90,7 @@ function OllamaApiCreateModel(model: string): Promise<boolean> {
  * Perform text generation with the selected model.
  * @param {string} prompt - Prompt to be used in the generation.
  * @param {string} model - Model name. Need to be installed or one of the following: raycast_orca:3b, raycast_llama2:7b, raycast_llama2:13b.
- * @returns {Promise<OllamaApiGenerateResponse>} Response from the Ollama API with generated text and metadata.
+ * @returns {Promise<EventEmitter>} Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponseDone` object contains all metadata of inference.
  */
 export async function OllamaApiGenerate(prompt: string, model: string): Promise<EventEmitter> {
   const url = "http://localhost:11434/api/generate";

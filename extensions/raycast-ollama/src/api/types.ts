@@ -52,9 +52,40 @@ export interface OllamaApiGenerateResponseMetadata {
   eval_duration: number;
 }
 
+export interface OllamaPromptFormat {
+  promptStart: string;
+  promptEnd: string;
+  tagEnd: string;
+}
+
+export interface OllamaPrompt {
+  prompt: string;
+  tagEnd: string;
+}
+
 export interface RaycastArgumentsOllamaAsk {
   fallbackText?: string;
   arguments: {
+    query: string;
+  };
+  launchType: string;
+  launchContext?: string;
+}
+
+export interface RaycastArgumentsOllamaAskCustom {
+  fallbackText?: string;
+  arguments: {
+    prompt: string;
+    query: string;
+  };
+  launchType: string;
+  launchContext?: string;
+}
+
+export interface RaycastArgumentsOllamaCommandCustom {
+  fallbackText?: string;
+  arguments: {
+    prompt: string;
     query: string;
   };
   launchType: string;
