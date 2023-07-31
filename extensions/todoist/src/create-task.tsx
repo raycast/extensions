@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
+import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color, Keyboard } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 
 import { addComment, addTask, AddTaskArgs, handleError, uploadFile } from "./api";
@@ -14,6 +14,8 @@ import { getPriorityIcon } from "./helpers/priorities";
 import { getProjectIcon } from "./helpers/projects";
 import { getTaskAppUrl, getTaskUrl } from "./helpers/tasks";
 import useSyncData from "./hooks/useSyncData";
+
+const t = Keyboard.Shortcut.Common.Copy;
 
 type CreateTaskValues = {
   content: string;
