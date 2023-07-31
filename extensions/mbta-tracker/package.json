@@ -5,9 +5,7 @@
   "description": "Provides a way to quickly check arrival times for saved stops along MBTA routes",
   "icon": "MBTA-icon.png",
   "author": "djpowers",
-  "categories": [
-    "Productivity"
-  ],
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
