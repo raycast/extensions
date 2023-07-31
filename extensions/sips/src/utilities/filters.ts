@@ -1,20 +1,59 @@
-import { showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { getSelectedImages } from "./utils";
+/**
+ * @file utilities/filters.ts
+ *
+ * @summary Helper functions and resources for applying filters to images and PDFs using Core Image and ASObjC.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-07-dd 00:44:28
+ * Last modified  : 2023-07-dd 00:44:28
+ */
 
+import { runAppleScript } from "run-applescript";
+
+import { Filter } from "./types";
+
+/**
+ * First part of the ASObjC script that applies a filter to an image. Initializes the filter and sets its default values. Initializes the image or PDF document to apply the filter to.
+ *
+ * @param source The path to the image or PDF document to apply the filter to.
+ * @param destination The path to output the filtered image or PDF document.
+ * @param CIFilterName The name of the CIFilter to apply.
+ * @returns The beginning of an ASObjC script with filled-in parameters.
+ */
 const initializeFilterScript = (source: string, destination: string, CIFilterName: string) => {
   return `use framework "Foundation"
     use framework "Quartz"
+    use framework "PDFKit"
+
+    set thePDF to missing value
     applyFilter("${source}", "${destination}")
     on applyFilter(sourcePath, destinationPath)
-        set theImage to current application's NSImage's alloc()'s initWithContentsOfFile:sourcePath
-        
-        -- Set up the Filter
-        set filterName to "${CIFilterName}"
-        set theFilter to current application's CIFilter's filterWithName:filterName
-        theFilter's setDefaults()`;
+        global thePDF
+        set repeatCount to 1
+        if "${source}" ends with ".pdf" then
+            set thePDF to current application's PDFDocument's alloc()'s initWithURL:(current application's |NSURL|'s fileURLWithPath:sourcePath)
+            set pageCount to thePDF's pageCount()
+            set repeatCount to pageCount
+        end if
+
+        repeat with i from 1 to repeatCount
+          if repeatCount > 1 then
+            set thePage to thePDF's pageAtIndex:(i - 1)
+            set theData to thePage's dataRepresentation()
+            set theImage to current application's NSImage's alloc()'s initWithData:theData
+          else
+            set theImage to current application's NSImage's alloc()'s initWithContentsOfFile:sourcePath
+          end if
+          
+          -- Set up the Filter
+          set filterName to "${CIFilterName}"
+          set theFilter to current application's CIFilter's filterWithName:filterName
+          theFilter's setDefaults()`;
 };
 
+/**
+ * Second part of the ASObjC script that applies a filter to an image. Applies the filter to the image, crops the result to the original image size, and calls the saveImage() handler.
+ */
 const baseFilterResultScript = `-- Get result & crop to original image size
     set theBounds to current application's NSMakeRect(0, 0, theImage's |size|()'s width, theImage's |size|()'s height)
     set uncroppedOutput to theFilter's valueForKey:(current application's kCIOutputImageKey)
@@ -24,33 +63,55 @@ const baseFilterResultScript = `-- Get result & crop to original image size
     set theRep to current application's NSCIImageRep's imageRepWithCIImage:croppedOutput
     set theResult to current application's NSImage's alloc()'s initWithSize:(theRep's |size|())
     theResult's addRepresentation:theRep
-    saveImage(theResult, destinationPath)`;
+    saveImage(theResult, sourcePath, destinationPath, i)`;
 
-const saveImageScript = `on saveImage(imageToSave, destinationPath)
-    -- Saves an NSImage to the supplied file path
-    set theTIFFData to imageToSave's TIFFRepresentation()
-    set theBitmapImageRep to current application's NSBitmapImageRep's imageRepWithData:theTIFFData
-    set theImageProperties to current application's NSDictionary's dictionaryWithObject:1 forKey:(current application's NSImageCompressionFactor)
-    set theResultData to theBitmapImageRep's representationUsingType:(current application's NSPNGFileType) |properties|:(missing value)
-    theResultData's writeToFile:destinationPath atomically:false
+/**
+ * Third part of the ASObjC script that applies a filter to an image. Saves the filtered image to the destination path. Iteratively converts a PDF document to filtered images.
+ */
+const saveImageScript = `on saveImage(imageToSave, sourcePath, destinationPath, iter)
+    global thePDF
+    if destinationPath ends with ".pdf" then
+      -- Replaces the contents of a PDF page with the supplied NSImage
+      set newPage to current application's PDFPage's alloc()'s initWithImage:imageToSave
+      thePDF's removePageAtIndex:(iter - 1)
+      thePDF's insertPage:newPage atIndex:(iter - 1)
+    else
+      -- Saves an NSImage to the supplied file path
+      set theTIFFData to imageToSave's TIFFRepresentation()
+      set theBitmapImageRep to current application's NSBitmapImageRep's imageRepWithData:theTIFFData
+      set theImageProperties to current application's NSDictionary's dictionaryWithObject:1 forKey:(current application's NSImageCompressionFactor)
+      set theResultData to theBitmapImageRep's representationUsingType:(current application's NSPNGFileType) |properties|:(missing value)
+      theResultData's writeToFile:destinationPath atomically:false
+    end if
 end saveImage`;
 
+/**
+ * The concluding part of the ASObjC script that applies a filter to an image. Joins all the parts of the script together and runs it.
+ *
+ * @param source The path to the image or PDF document to apply the filter to.
+ * @param destination The path to output the filtered image or PDF document.
+ * @param CIFilterName The name of the CIFilter to apply.
+ * @returns A promise that resolves when the script has finished running.
+ */
 export const applyBasicFilter = async (source: string, destination: string, CIFilterName: string) => {
   return runAppleScript(`${initializeFilterScript(source, destination, CIFilterName)}
-        set theCIImage to current application's CIImage's imageWithData:(theImage's TIFFRepresentation())
-        theFilter's setValue:theCIImage forKey:"inputImage"
-        ${baseFilterResultScript}
+          set theCIImage to current application's CIImage's imageWithData:(theImage's TIFFRepresentation())
+          theFilter's setValue:theCIImage forKey:"inputImage"
+          ${baseFilterResultScript}
+        end repeat
+
+        -- Save PDFs
+        if "${source}" ends with ".pdf" then
+          thePDF's writeToFile:"${destination}"
+        end if
     end applyFilter
     ${saveImageScript}`);
 };
 
-export const filters: {
-  name: string;
-  description: string;
-  applyMethod: (source: string, destination: string, CIFilterName: string) => Promise<string>;
-  CIFilterName: string;
-  thumbnail: string;
-}[] = [
+/**
+ * All supported filters.
+ */
+export const filters: Filter[] = [
   {
     name: "Bloom",
     description: "Softens edges and adds a glow",
@@ -367,34 +428,3 @@ export const filters: {
     thumbnail: "thumbnails/zoom_blur.webp",
   },
 ];
-
-export const applyFilter = async (filter: {
-  name: string;
-  description: string;
-  applyMethod: (source: string, destination: string, CIFilterName: string) => Promise<string>;
-  CIFilterName: string;
-}) => {
-  const selectedImages = await getSelectedImages();
-
-  if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
-    await showToast({ title: "No images selected", style: Toast.Style.Failure });
-    return;
-  }
-
-  const toast = await showToast({ title: "Filtering in progress...", style: Toast.Style.Animated });
-
-  const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-  try {
-    selectedImages.forEach(async (imageFilePath) => {
-      const pathComponents = imageFilePath.split(".");
-      const newPath = pathComponents.slice(0, -1).join(".") + ".png";
-      await filter.applyMethod(imageFilePath, newPath, filter.CIFilterName);
-    });
-    toast.title = `Applied ${filter.name} Filter To ${selectedImages.length.toString()} ${pluralized}`;
-    toast.style = Toast.Style.Success;
-  } catch (error) {
-    console.log(error);
-    toast.title = `Failed To Apply Filter`;
-    toast.style = Toast.Style.Failure;
-  }
-};
