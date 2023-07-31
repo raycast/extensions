@@ -1,3 +1,3 @@
 # Pluggy Changelog
 
-## [Initial Version] - 2023-07-25
+## [Initial Version] - {PR_MERGE_DATE}
