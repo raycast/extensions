@@ -42,7 +42,7 @@ export default function SearchAnimeList() {
           ? {
               detail: (
                 <List.Item.Detail
-                  markdown={`## ${anime.title}\n​<img src="${anime.images.webp.image_url}" height="200"/>\n\n${
+                  markdown={`## ${anime.title}\n<img src="${anime.images.webp.image_url}" height="200"/>\n\n${
                     anime.synopsis || ""
                   }`}
                   metadata={
