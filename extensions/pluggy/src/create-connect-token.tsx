@@ -2,10 +2,12 @@ import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useConnectToken } from "./hooks";
 
 export default function Command() {
-  const { connectToken } = useConnectToken();
+  const { isLoading, connectToken } = useConnectToken();
+  const token = isLoading ? "Loading..." : connectToken;
   const content = `## Connect Token
-  ${connectToken}
+  ${token}
   `;
+
   return (
     connectToken && (
       <Detail
