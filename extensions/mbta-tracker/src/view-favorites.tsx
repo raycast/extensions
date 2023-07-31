@@ -1,4 +1,5 @@
-import { Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { PredictionsList } from "./components/PredictionsList";
 import type { Favorite } from "./types";
 import { useEffect, useState } from "react";
 
@@ -30,6 +31,23 @@ export default function Command() {
                 }`,
               },
             ]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="View Departures"
+                  icon={Icon.Clock}
+                  target={
+                    <PredictionsList
+                      key={favorite.stop.id}
+                      stop={favorite.stop}
+                      directionId={favorite.directionId}
+                      route={favorite.route}
+                      destination={favorite.route.attributes.direction_destinations[favorite.directionId]}
+                    />
+                  }
+                />
+              </ActionPanel>
+            }
           />
         ))}
       </List.Section>

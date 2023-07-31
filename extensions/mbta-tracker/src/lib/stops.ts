@@ -1,7 +1,7 @@
 import { Favorite, Route, Stop } from "../types";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 
-export async function addFavoriteStop(route: Route, directionId: String, stop: Stop) {
+export async function addFavoriteStop(route: Route, directionId: 0 | 1, stop: Stop) {
   let favorites: Favorite[] = [];
 
   try {

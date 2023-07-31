@@ -7,7 +7,7 @@ import { addFavoriteStop } from "../lib/stops";
 
 interface Props {
   route: Route;
-  directionId: string;
+  directionId: 0 | 1;
 }
 
 export const StopsList = ({ route, directionId }: Props): JSX.Element => {
@@ -34,7 +34,7 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
                     stop={stop}
                     directionId={directionId}
                     route={route}
-                    destination={route.attributes.direction_destinations[parseInt(directionId)]}
+                    destination={route.attributes.direction_destinations[directionId]}
                   />
                 }
               />

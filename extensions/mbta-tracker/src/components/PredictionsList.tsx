@@ -9,7 +9,7 @@ import { appendApiKey } from "../utils";
 dayjs.extend(relativeTime);
 
 interface Props {
-  directionId: string;
+  directionId: number;
   route: Route;
   stop: Stop;
   destination: string;
