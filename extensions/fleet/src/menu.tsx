@@ -1,5 +1,4 @@
-import { Icon, MenuBarExtra, launchCommand, LaunchType } from "@raycast/api";
-import { opn } from "opn";
+import { Icon, MenuBarExtra, launchCommand, LaunchType, open, showHUD } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -9,8 +8,13 @@ export default function Command() {
           key={"1"}
           icon={Icon.Document}
           title={"Open File / Directory With Fleet"}
-          onAction={() => {
-            launchCommand({ name: "index", type: LaunchType.Background });
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "index", type: LaunchType.Background });
+            } catch (error) {
+              console.error(error);
+              await showHUD("❌ Failed to launch command");
+            }
           }}
         />
       </MenuBarExtra.Section>
@@ -21,7 +25,7 @@ export default function Command() {
           icon={Icon.Heart}
           title={"Made with ❤️ by EliasK"}
           onAction={() => {
-            opn("https://raycast.com/Ek217");
+            open("https://raycast.com/Ek217");
           }}
         />
       </MenuBarExtra.Section>
