@@ -2,19 +2,19 @@ import { Language, kbdKeys } from "../data";
 
 type Props = {
   input: string;
-  switchFrom: Language;
-  switchTo: Language;
+  langFrom: Language;
+  langTo: Language;
 };
 
-export function transformText({ input, switchFrom, switchTo }: Props) {
+export function transformText({ input, langFrom, langTo }: Props) {
   return input
     .trim()
     .split("")
     .map((char) => {
-      const idx = kbdKeys[switchFrom].indexOf(char);
+      const idx = kbdKeys[langFrom].indexOf(char);
 
       if (idx !== -1) {
-        return kbdKeys[switchTo][idx];
+        return kbdKeys[langTo][idx];
       }
 
       return char;

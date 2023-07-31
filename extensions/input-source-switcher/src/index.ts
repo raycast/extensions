@@ -3,18 +3,18 @@ import { Language } from "./data";
 import { transformText } from "./utils/transformText";
 
 interface Preferences {
-  switchFrom: Language;
-  switchTo: Language;
+  langFrom: Language;
+  langTo: Language;
   defaultAction: "copy" | "paste";
 }
 
 export default async function main() {
   const preferences = getPreferenceValues<Preferences>();
-  const { defaultAction, switchFrom, switchTo } = preferences;
+  const { defaultAction, langFrom, langTo } = preferences;
 
   try {
     const selectedText = await getSelectedText();
-    const transformedText = transformText({ input: selectedText, switchFrom, switchTo });
+    const transformedText = transformText({ input: selectedText, langFrom, langTo });
 
     if (defaultAction === "paste") {
       await Clipboard.paste(transformedText);

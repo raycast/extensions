@@ -5,8 +5,8 @@ import { Language } from "./data";
 
 export default function main() {
   const [text, setText] = useState<string>("");
-  const [switchFrom, setSwitchFrom] = useState<Language>("eng");
-  const [switchTo, setSwitchTo] = useState<Language>("ukr");
+  const [langFrom, setLangFrom] = useState<Language>("eng");
+  const [langTo, setLangTo] = useState<Language>("ukr");
 
   const [textError, setTextError] = useState<string | undefined>("");
   const [langError, setLangError] = useState<string | undefined>("");
@@ -17,7 +17,7 @@ export default function main() {
       return;
     }
 
-    const transformedText = transformText({ input: text, switchFrom, switchTo });
+    const transformedText = transformText({ input: text, langFrom, langTo });
     await Clipboard.paste(transformedText);
     await showHUD("Transformed text pasted to active app");
   }
@@ -28,7 +28,7 @@ export default function main() {
       return;
     }
 
-    const transformedText = transformText({ input: text, switchFrom, switchTo });
+    const transformedText = transformText({ input: text, langFrom, langTo });
     await Clipboard.copy(transformedText);
     await showHUD("Transformed text copied to clipboard");
   }
@@ -38,13 +38,13 @@ export default function main() {
     dropTextErrorIfNeeded();
   }
 
-  function onChangeSwitchFrom(lang: Language) {
-    setSwitchFrom(lang);
+  function onChangeLangFrom(lang: Language) {
+    setLangFrom(lang);
     dropLangErrorIfNeeded();
   }
 
-  function onChangeSwitchTo(lang: Language) {
-    setSwitchTo(lang);
+  function onChangeLangTo(lang: Language) {
+    setLangTo(lang);
     dropLangErrorIfNeeded();
   }
 
@@ -91,12 +91,12 @@ export default function main() {
 
       <Form.Dropdown
         id="langFrom"
-        title="Switch from"
-        value={switchFrom}
+        title="Language from"
+        value={langFrom}
         error={langError}
-        onChange={(lang: string) => onChangeSwitchFrom(lang as Language)}
+        onChange={(lang: string) => onChangeLangFrom(lang as Language)}
         onBlur={(event) => {
-          if (event.target.value === switchTo) {
+          if (event.target.value === langTo) {
             setLangError("Languages should be different");
           } else {
             dropLangErrorIfNeeded();
@@ -109,12 +109,12 @@ export default function main() {
 
       <Form.Dropdown
         id="langTo"
-        title="Switch to"
-        value={switchTo}
+        title="Language to"
+        value={langTo}
         error={langError}
-        onChange={(lang: string) => onChangeSwitchTo(lang as Language)}
+        onChange={(lang: string) => onChangeLangTo(lang as Language)}
         onBlur={(event) => {
-          if (event.target.value === switchFrom) {
+          if (event.target.value === langFrom) {
             setLangError("Languages should be different");
           } else {
             dropLangErrorIfNeeded();
