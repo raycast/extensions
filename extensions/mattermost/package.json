@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mattermost",
-  "title": "Mattremost",
-  "description": "Search for chats, see unread messages and set your presence status.",
+  "title": "Mattermost",
+  "description": "Search for chats, see unread messages, and set your presence status.",
   "icon": "mattermost-icon-rounded.png",
   "author": "ernest0n",
   "categories": [
@@ -18,7 +18,7 @@
       "name": "channels",
       "title": "Search Channel",
       "subtitle": "Mattremost",
-      "description": "Search for all teams directs, channels and open them directly in your Mattremost app.",
+      "description": "Search for all team directs, and channels and open them directly in your Mattremost app.",
       "mode": "view",
       "keywords": [
         "chat"
