@@ -24,9 +24,9 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {inputs.map((item) => (
+      {inputs.map((item, index) => (
         <List.Item
-          key={item}
+          key={item + index}
           title={item}
           actions={
             <ListItems

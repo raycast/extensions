@@ -1,4 +1,4 @@
-import { Alert, Toast, confirmAlert, environment, showToast } from "@raycast/api";
+import { Alert, Icon, Toast, confirmAlert, environment, showToast } from "@raycast/api";
 import { exec } from "child_process";
 
 export default async function RandomPicker(
@@ -38,6 +38,7 @@ export default async function RandomPicker(
   const output = inputs[randomIndex];
   await confirmAlert({
     title: `The winner is: ${output}!`,
+    icon: Icon.Trophy,
     message: "Remove this from the list?",
     primaryAction: {
       title: "Remove",

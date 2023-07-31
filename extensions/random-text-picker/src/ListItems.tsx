@@ -47,12 +47,14 @@ export default function ListItems({ item, inputText, inputs, setInputs, isLoadin
         onAction={() => !isLoading && DeleteItem(item, inputs, setInputs)}
         shortcut={{ modifiers: ["cmd"], key: "backspace" }}
         icon={{ source: Icon.Trash, tintColor: Color.Red }}
+        style={Action.Style.Destructive}
       />
       <Action
         title="Delete All Items"
         onAction={() => !isLoading && DeleteAllItems(setInputs)}
         shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
         icon={{ source: Icon.Trash, tintColor: Color.Red }}
+        style={Action.Style.Destructive}
       />
     </ActionPanel>
   );

@@ -5,6 +5,9 @@
   "description": "Pick a random item from a list by entering multiple text inputs, ala Wheel of Names",
   "icon": "random-picker-icon.png",
   "author": "ezzylan",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Fun",
     "Productivity"
