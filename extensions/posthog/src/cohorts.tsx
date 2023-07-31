@@ -3,7 +3,6 @@ import { usePostHogClient } from "../helpers/usePostHogClient";
 import { useUrl } from "../helpers/useUrl";
 import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
 import { useContext } from "react";
-import ErrorHandler from "./error-handler";
 
 type SearchResult = {
   count: number;
@@ -27,26 +26,24 @@ type Cohort = {
 
 function Cohorts() {
   const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading, error } = usePostHogClient<SearchResult>("projects/" + selectedId + "/cohorts");
+  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/cohorts");
 
   return (
-    <ErrorHandler error={error}>
-      <List
-        isLoading={isLoading}
-        searchBarPlaceholder="Search cohorts..."
-        searchBarAccessory={<ProjectSelector />}
-        isShowingDetail={true}
-        throttle
-      >
-        {data ? (
-          <List.Section title="Results">
-            {data.results.map((cohort) => (
-              <ResultsListSection key={cohort.id} cohort={cohort} />
-            ))}
-          </List.Section>
-        ) : null}
-      </List>
-    </ErrorHandler>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search cohorts..."
+      searchBarAccessory={<ProjectSelector />}
+      isShowingDetail={true}
+      throttle
+    >
+      {data ? (
+        <List.Section title="Results">
+          {data.results.map((cohort) => (
+            <ResultsListSection key={cohort.id} cohort={cohort} />
+          ))}
+        </List.Section>
+      ) : null}
+    </List>
   );
 }
 

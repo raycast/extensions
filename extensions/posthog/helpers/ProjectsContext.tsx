@@ -1,6 +1,7 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 import { usePostHogClient } from "./usePostHogClient";
 import { List } from "@raycast/api";
+import ErrorHandler from "../src/error-handler";
 
 type SearchResult = {
   count: number;
@@ -23,13 +24,21 @@ export const ProjectsContext = createContext<ProjectContextType>({
 });
 
 export function WithProjects({ children }: { children: ReactNode }) {
-  const { data } = usePostHogClient<SearchResult>("projects");
+  const { data, isLoading, error } = usePostHogClient<SearchResult>("projects");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  return !data ? null : (
-    <ProjectsContext.Provider value={{ projects: data?.results, selectedId, setSelectedId: (id) => setSelectedId(id) }}>
-      {children}
-    </ProjectsContext.Provider>
+  if (!data && isLoading) {
+    return <List isLoading={true}></List>;
+  }
+
+  return (
+    <ErrorHandler error={error}>
+      <ProjectsContext.Provider
+        value={{ projects: data?.results || [], selectedId, setSelectedId: (id) => setSelectedId(id) }}
+      >
+        {children}
+      </ProjectsContext.Provider>
+    </ErrorHandler>
   );
 }
 

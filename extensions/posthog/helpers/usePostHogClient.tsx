@@ -3,7 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 export function usePostHogClient<T>(
   path: string,
-  { execute, onData }: { execute?: boolean; onData: (data: T) => void } = {
+  { execute, onData }: { execute: boolean; onData: (data: T) => void } = {
     execute: true,
     onData: (() => null) as (data: T) => void,
   }

@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Grid,
-  Icon,
-  List,
-  Toast,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useEffect } from "react";
 
 const ErrorHandler = ({ error, children }: { error?: Error; children: JSX.Element }): JSX.Element => {
@@ -25,7 +15,7 @@ const ErrorHandler = ({ error, children }: { error?: Error; children: JSX.Elemen
   return error ? (
     <List>
       <List.EmptyView
-        title={"Make sure your API key and data region is correct"}
+        title={"Make sure your API key and data region are correct"}
         icon={Icon.Warning}
         actions={
           <ActionPanel>
