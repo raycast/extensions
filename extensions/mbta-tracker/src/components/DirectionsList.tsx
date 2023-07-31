@@ -42,7 +42,7 @@ export const DirectionsList = ({ route }: Props): JSX.Element => {
             <Action.Push
               title="Choose Travel Direction"
               icon={Icon.Map}
-              target={<StopsList key={route.id} route={route} directionId="0" />}
+              target={<StopsList key={route.id} route={route} directionId={0} />}
             />
           </ActionPanel>
         }
@@ -62,7 +62,7 @@ export const DirectionsList = ({ route }: Props): JSX.Element => {
             <Action.Push
               title="Choose Travel Direction"
               icon={Icon.Map}
-              target={<StopsList key={route.id} route={route} directionId="1" />}
+              target={<StopsList key={route.id} route={route} directionId={1} />}
             />
           </ActionPanel>
         }
