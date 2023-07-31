@@ -7,7 +7,6 @@ interface Props {
 }
 
 export const renderDirectionIcon = (direction: string): Icon => {
-  console.log(direction);
   switch (direction) {
     case "Outbound":
       return Icon.ArrowsExpand;
