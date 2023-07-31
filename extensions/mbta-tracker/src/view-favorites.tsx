@@ -1,4 +1,4 @@
-import { List, LocalStorage } from "@raycast/api";
+import { Icon, List, LocalStorage } from "@raycast/api";
 import type { Favorite } from "./types";
 import { useEffect, useState } from "react";
 
@@ -19,7 +19,18 @@ export default function Command() {
     <List>
       <List.Section title="Favorites">
         {favorites.map((favorite: Favorite) => (
-          <List.Item key={favorite?.stop?.id} title={favorite?.stop?.attributes?.name} />
+          <List.Item
+            key={favorite?.stop?.id}
+            title={favorite?.stop?.attributes?.name}
+            icon={Icon.Star}
+            accessories={[
+              {
+                text: `toward ${favorite?.route?.attributes?.direction_destinations[favorite?.directionId]} via ${
+                  favorite?.route?.attributes?.short_name || favorite?.route?.attributes?.long_name
+                }`,
+              },
+            ]}
+          />
         ))}
       </List.Section>
     </List>

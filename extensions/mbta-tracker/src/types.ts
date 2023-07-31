@@ -76,6 +76,6 @@ export interface Preferences {
 
 export interface Favorite {
   route: Route;
-  directionId: string;
+  directionId: number;
   stop: Stop;
 }
