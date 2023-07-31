@@ -1,16 +1,16 @@
-import { useFetch } from "@raycast/utils";
+import { useCachedState, useFetch } from "@raycast/utils";
 import { Connector, PluggyClient } from "pluggy-sdk";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { PLUGGY_CONNECT_TOKEN_URL } from "./constants";
 
 export function useConnectToken(): { isLoading: boolean; connectToken?: string } {
-  const { isLoading, data } = useFetch<{ accessToken?: string }>(`${PLUGGY_CONNECT_TOKEN_URL}`);
+  const { isLoading, data } = useFetch<{ accessToken?: string }>(PLUGGY_CONNECT_TOKEN_URL);
   return { isLoading, connectToken: data?.accessToken };
 }
 
 export function useConnectors(): Connector[] {
   const { connectToken } = useConnectToken();
-  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [connectors, setConnectors] = useCachedState<Connector[]>("connectors", []);
 
   useEffect(() => {
     if (!connectToken) {
