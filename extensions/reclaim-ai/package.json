@@ -5,6 +5,7 @@
   "description": "AI scheduling for Google Calendar – quickly create Tasks, join meetings, share Scheduling Links, & manage your calendar",
   "icon": "command-icon.png",
   "author": "webergnr",
+  "contributors": ["ilian"],
   "owner": "reclaim-ai",
   "access": "public",
   "categories": [
