@@ -1,3 +1,5 @@
+import { gmail_v1 } from "@googleapis/gmail";
+
 export function getAddressParts(text: string | undefined | null) {
   if (!text) {
     return undefined;
@@ -13,4 +15,8 @@ export function getAddressParts(text: string | undefined | null) {
   } else {
     return undefined;
   }
+}
+
+export function isMailUnread(message: gmail_v1.Schema$Message) {
+  return message?.labelIds ? message.labelIds.includes("UNREAD") : false;
 }

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { GMailMessage, currentGMailAddress, getGMailMessageHeaderValue } from "../../lib/gmail";
 import { useMessage } from "./hooks";
-import { getAddressParts } from "./utils";
+import { getAddressParts, isMailUnread } from "./utils";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAvatarIcon } from "@raycast/utils";
 
@@ -45,7 +45,7 @@ export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message }
     return "<No Subject>";
   };
 
-  const unread = data?.labelIds ? data.labelIds.includes("UNREAD") : false;
+  const unread = isMailUnread(data);
   const unreadIcon = (): Image.ImageLike | undefined => {
     if (!data) {
       return;
