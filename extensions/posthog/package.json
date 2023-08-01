@@ -4,7 +4,7 @@
   "title": "PostHog",
   "description": "Open the web app, search for projects, persons, feature flags, and cohorts.",
   "icon": "posthog-logo.png",
-  "author": "david_newell",
+  "author": "posthog",
   "categories": [
     "Applications",
     "Developer Tools"
