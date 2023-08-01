@@ -3,9 +3,9 @@ import { GMailMessageListItem } from "./components/message/list";
 import { useMessages } from "./components/messages/hooks";
 import { useState } from "react";
 
-export default function MessageRootCommand() {
+export default function UnreadMailsRootCommand() {
   const [searchText, setSearchText] = useState<string>();
-  const queryParts = ["-is:draft"];
+  const queryParts = ["is:draft"];
   if (searchText) {
     queryParts.push(searchText);
   }
@@ -16,7 +16,7 @@ export default function MessageRootCommand() {
   }
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} throttle>
-      <List.Section title="Mails" subtitle={data?.length ? data.length.toString() : undefined}>
+      <List.Section title="Draft Mails" subtitle={data?.length ? data.length.toString() : undefined}>
         {data?.map((l) => (
           <GMailMessageListItem key={l.id} message={l} />
         ))}

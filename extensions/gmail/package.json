@@ -17,6 +17,18 @@
       "mode": "view"
     },
     {
+      "name": "unread",
+      "title": "Unread",
+      "description": "Get unread Mails",
+      "mode": "view"
+    },
+    {
+      "name": "drafts",
+      "title": "Drafts",
+      "description": "Get unread Mails",
+      "mode": "view"
+    },
+    {
       "name": "newwebmail",
       "title": "New Web Mail",
       "description": "Open a new EMail in the Browser",
