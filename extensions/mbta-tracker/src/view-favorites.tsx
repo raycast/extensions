@@ -21,7 +21,7 @@ export default function Command() {
       <List.Section title="Favorites">
         {favorites.map((favorite: Favorite) => (
           <List.Item
-            key={favorite?.stop?.id}
+            key={`${favorite.route.id}-${favorite.directionId}-${favorite.stop.id}`}
             title={favorite?.stop?.attributes?.name}
             icon={Icon.Star}
             accessories={[
