@@ -70,7 +70,11 @@ export function GMailMessageListItem(props: {
             <MessageMarkAsReadAction message={data} onRevalidate={props.onRevalidate} />
             <MessageMarkAllAsReadAction messages={props.allUnreadMessages} onRevalidate={props.onRevalidate} />
             <MessageMarkAsUnreadAction message={data} onRevalidate={props.onRevalidate} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <MessagesRefreshAction onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
           <ActionPanel.Section>
