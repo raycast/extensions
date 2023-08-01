@@ -1,9 +1,7 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { GMailMessage, currentGMailAddress, getGMailMessageHeaderValue } from "../../lib/gmail";
 import { useMessage } from "./hooks";
-import { getTextIcon } from "../../lib/icons";
 import { getAddressParts } from "./utils";
-import { GaxiosResponse } from "googleapis-common";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAvatarIcon } from "@raycast/utils";
 

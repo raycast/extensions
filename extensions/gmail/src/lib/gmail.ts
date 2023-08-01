@@ -49,12 +49,12 @@ export async function getGMailLabels() {
   return res.data.labels;
 }
 
-export async function getGMailMessages(query?: string): Promise<GMailMessage[] | undefined> {
+export async function getGMailMessages(
+  query?: string
+): Promise<GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> | undefined> {
   const gmail = await getGmailClient();
-  const messages = await gmail.users.messages.list({ userId: "me", q: query, maxResults: 20 });
-  return messages.data.messages?.map((m) => {
-    return { id: m.id, threadId: m.threadId };
-  });
+  const messages = await gmail.users.messages.list({ userId: "me", q: query, maxResults: 50 });
+  return messages;
 }
 
 export function getGMailMessageHeaderValue(msg: gmail_v1.Schema$Message | undefined, name: string) {

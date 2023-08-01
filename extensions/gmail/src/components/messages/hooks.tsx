@@ -27,7 +27,7 @@ export function useMessageIds(query?: string): {
       try {
         const messages = await getGMailMessages(query);
         if (!didUnmount) {
-          setData(messages);
+          setData(messages?.data.messages);
         }
       } catch (error) {
         if (!didUnmount) {
@@ -54,10 +54,12 @@ export function useMessageDetails(query?: string): {
   error?: string;
   isLoading: boolean;
   data?: GaxiosResponse<gmail_v1.Schema$Message>[];
+  resultSizeEstimate?: number | null;
 } {
   const [data, setData] = useState<GaxiosResponse<gmail_v1.Schema$Message>[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [resultSizeEstimate, setResultSizeEstimate] = useState<number | null>();
 
   useEffect(() => {
     let didUnmount = false;
@@ -72,10 +74,16 @@ export function useMessageDetails(query?: string): {
 
       try {
         const messages = await getGMailMessages(query);
-        const ids = messages?.map((m) => m.id as string).filter((m) => m);
+        const ids = messages?.data?.messages?.map((m) => m.id as string).filter((m) => m);
         const details = await getMailDetails(ids);
+        const resultPageSize = messages?.config.params.maxResults;
+        const resultPageEstimatedSize = messages?.data.resultSizeEstimate;
+
         if (!didUnmount) {
           setData(details);
+          /*if(resultPageSize && resultPageEstimatedSize){
+            setResultSizeEstimate(resultPageSize * resultPageEstimatedSize); // result is wrong
+          }*/
         }
       } catch (error) {
         if (!didUnmount) {
@@ -95,5 +103,5 @@ export function useMessageDetails(query?: string): {
     };
   }, [query]);
 
-  return { error, isLoading, data };
+  return { error, isLoading, data, resultSizeEstimate };
 }
