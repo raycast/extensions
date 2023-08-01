@@ -1,10 +1,10 @@
-import { showToast, Toast, Action, Icon } from "@raycast/api";
+import { showToast, Toast, Action, Icon, environment } from "@raycast/api";
 import { gmail_v1 } from "googleapis";
-import { markMessageAsRead, markMessageAsUnread } from "../../lib/gmail";
-import { getErrorMessage } from "../../lib/utils";
+import { markMessageAsRead, markMessageAsUnread, messageDraftEditUrl, messageThreadUrl } from "../../lib/gmail";
+import { getErrorMessage, sleep } from "../../lib/utils";
 import { isMailDraft, isMailUnread } from "./utils";
 
-export function GMailMessageMarkAsReadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
+export function MessageMarkAsReadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
   if (!isMailUnread(props.message) || isMailDraft(props.message)) {
     return null;
   }
@@ -29,7 +29,7 @@ export function GMailMessageMarkAsReadAction(props: { message: gmail_v1.Schema$M
   );
 }
 
-export function GMailMessageMarkAsUnreadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
+export function MessageMarkAsUnreadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
   if (isMailUnread(props.message) || isMailDraft(props.message)) {
     return null;
   }
@@ -47,7 +47,7 @@ export function GMailMessageMarkAsUnreadAction(props: { message: gmail_v1.Schema
   return <Action title="Mark as Unread" icon={Icon.CircleFilled} onAction={handle} />;
 }
 
-export function GMailRefreshAction(props: { onRevalidate?: () => void }) {
+export function MessagesRefreshAction(props: { onRevalidate?: () => void }) {
   if (!props.onRevalidate) {
     return null;
   }
@@ -59,4 +59,30 @@ export function GMailRefreshAction(props: { onRevalidate?: () => void }) {
       onAction={props.onRevalidate}
     />
   );
+}
+
+export function MessageCopyIdAction(props: { message: gmail_v1.Schema$Message }) {
+  const m = props.message;
+  if (m.id === undefined || !environment.isDevelopment) {
+    return null;
+  }
+  return <Action.CopyToClipboard title="Copy ID" content={m.id || ""} />;
+}
+
+export function MessageOpenInBrowserAction(props: { message: gmail_v1.Schema$Message; onOpen?: () => void }) {
+  const m = props.message;
+  if (m.id === undefined) {
+    return null;
+  }
+  const url = isMailDraft(m) ? messageDraftEditUrl(m) : messageThreadUrl(m);
+  if (!url) {
+    return null;
+  }
+  const handle = async () => {
+    if (props.onOpen) {
+      await sleep(4000);
+      props.onOpen();
+    }
+  };
+  return <Action.OpenInBrowser url={url} onOpen={handle} />;
 }

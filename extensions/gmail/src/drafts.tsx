@@ -1,6 +1,5 @@
 import { List, Toast, showToast } from "@raycast/api";
 import { GMailMessageListItem } from "./components/message/list";
-import { useMessageDetails } from "./components/messages/hooks";
 import { useState } from "react";
 import { generateQuery, getGMailMessages } from "./lib/gmail";
 import { useCachedPromise } from "@raycast/utils";

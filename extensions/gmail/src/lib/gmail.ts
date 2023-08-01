@@ -115,6 +115,16 @@ export function fullscreenNewMailWebUrl(options?: {
   return prefix ? `${prefix}/?${encodedParams}` : undefined;
 }
 
+export function messageDraftEditUrl(message: gmail_v1.Schema$Message) {
+  const prefix = gmailWebUrlBase();
+  return prefix ? `${prefix}/#drafts?compose=${message.id}` : undefined;
+}
+
+export function messageThreadUrl(message: gmail_v1.Schema$Message) {
+  const prefix = gmailWebUrlBase();
+  return prefix ? `${prefix}/#inbox/${message.threadId}` : undefined;
+}
+
 export async function getMailDetail(id: string) {
   const gmail = await getGmailClient();
   const detail = await gmail.users.messages.get({ userId: "me", id: id, format: "full" });

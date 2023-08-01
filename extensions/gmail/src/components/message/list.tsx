@@ -1,10 +1,16 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { GMailMessage, currentGMailAddress, getGMailMessageHeaderValue } from "../../lib/gmail";
+import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { GMailMessage, getGMailMessageHeaderValue } from "../../lib/gmail";
 import { useMessage } from "./hooks";
 import { getAddressParts, isMailUnread } from "./utils";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAvatarIcon } from "@raycast/utils";
-import { GMailMessageMarkAsReadAction, GMailMessageMarkAsUnreadAction, GMailRefreshAction } from "./actions";
+import {
+  MessageMarkAsReadAction,
+  MessageMarkAsUnreadAction,
+  MessagesRefreshAction,
+  MessageCopyIdAction,
+  MessageOpenInBrowserAction,
+} from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 
 export function GMailMessageListItemLazy(props: { message: GMailMessage }) {
@@ -57,9 +63,6 @@ export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message; 
   };
 
   const internalDate = data?.internalDate ? new Date(parseInt(data.internalDate)) : undefined;
-  const emailAddress = currentGMailAddress();
-  const url =
-    data && emailAddress ? `https://mail.google.com/mail/u/${emailAddress}/#inbox/${data.threadId}` : undefined;
   return (
     <List.Item
       title={title()}
@@ -72,14 +75,15 @@ export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message; 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {url && (
-              <Action.OpenInBrowser url={url} onOpen={() => (props.onRevalidate ? props.onRevalidate() : undefined)} />
-            )}
+            <MessageOpenInBrowserAction message={data} onOpen={props.onRevalidate} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <GMailMessageMarkAsReadAction message={data} onRevalidate={props.onRevalidate} />
-            <GMailMessageMarkAsUnreadAction message={data} onRevalidate={props.onRevalidate} />
-            <GMailRefreshAction onRevalidate={props.onRevalidate} />
+            <MessageMarkAsReadAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageMarkAsUnreadAction message={data} onRevalidate={props.onRevalidate} />
+            <MessagesRefreshAction onRevalidate={props.onRevalidate} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <MessageCopyIdAction message={data} />
           </ActionPanel.Section>
         </ActionPanel>
       }
