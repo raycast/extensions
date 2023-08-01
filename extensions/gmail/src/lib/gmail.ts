@@ -159,6 +159,15 @@ export async function markMessageAsRead(message: gmail_v1.Schema$Message) {
   });
 }
 
+export async function markMessagesAsRead(messages: gmail_v1.Schema$Message[]) {
+  const gmail = await getGmailClient();
+  const ids = messages.map((m) => m.id as string).filter((m) => m);
+  await gmail.users.messages.batchModify({
+    userId: "me",
+    requestBody: { ids, removeLabelIds: ["UNREAD"] },
+  });
+}
+
 export async function markMessageAsUnread(message: gmail_v1.Schema$Message) {
   const gmail = await getGmailClient();
   await gmail.users.messages.modify({
@@ -166,4 +175,12 @@ export async function markMessageAsUnread(message: gmail_v1.Schema$Message) {
     id: message.id || "",
     requestBody: { addLabelIds: ["UNREAD"] },
   });
+}
+
+export async function moveMessageToTrash(message: gmail_v1.Schema$Message) {
+  if (message.id === undefined) {
+    return;
+  }
+  const gmail = await getGmailClient();
+  await gmail.users.messages.trash({ userId: "me", id: message.id || "" });
 }

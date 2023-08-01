@@ -35,7 +35,12 @@ export default function MessageRootCommand() {
         subtitle={unread !== undefined && unread.length > 0 ? unread?.length.toString() : undefined}
       >
         {unread?.map((l) => (
-          <GMailMessageListItem key={l.data.id} message={l.data} onRevalidate={revalidate} />
+          <GMailMessageListItem
+            key={`${l.data.id}_unread`}
+            message={l.data}
+            onRevalidate={revalidate}
+            allUnreadMessages={unread.map((u) => u.data)}
+          />
         ))}
       </List.Section>
       <List.Section title="Mails" subtitle={subtitle()}>

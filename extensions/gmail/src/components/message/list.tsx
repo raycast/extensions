@@ -1,6 +1,5 @@
 import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { GMailMessage, getGMailMessageHeaderValue } from "../../lib/gmail";
-import { useMessage } from "./hooks";
+import { getGMailMessageHeaderValue } from "../../lib/gmail";
 import { getAddressParts, isMailUnread } from "./utils";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAvatarIcon } from "@raycast/utils";
@@ -10,27 +9,16 @@ import {
   MessagesRefreshAction,
   MessageCopyIdAction,
   MessageOpenInBrowserAction,
+  MessageDeleteAction,
+  MessageMarkAllAsReadAction,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 
-export function GMailMessageListItemLazy(props: { message: GMailMessage }) {
-  const { data, isLoading, error } = useMessage(props.message);
-  const title = () => {
-    if (error) {
-      return `Error: ${error}`;
-    }
-    if (isLoading) {
-      return "...";
-    }
-    return "?";
-  };
-  if (!data) {
-    return <List.Item title={title()} />;
-  }
-  return <GMailMessageListItemLazy message={data} />;
-}
-
-export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
+export function GMailMessageListItem(props: {
+  message: gmail_v1.Schema$Message;
+  onRevalidate?: () => void;
+  allUnreadMessages?: gmail_v1.Schema$Message[];
+}) {
   const data = props.message;
   const title = () => {
     const subject = getGMailMessageHeaderValue(data, "Subject");
@@ -79,7 +67,9 @@ export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message; 
           </ActionPanel.Section>
           <ActionPanel.Section>
             <MessageMarkAsReadAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageMarkAllAsReadAction messages={props.allUnreadMessages} onRevalidate={props.onRevalidate} />
             <MessageMarkAsUnreadAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
             <MessagesRefreshAction onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
           <ActionPanel.Section>
