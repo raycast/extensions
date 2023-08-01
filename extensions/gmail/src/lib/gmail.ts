@@ -65,13 +65,13 @@ export function getGMailMessageHeaderValue(msg: gmail_v1.Schema$Message | undefi
   return d?.value;
 }
 
-function webUrlPrefix() {
+export function gmailWebUrlBase() {
   const address = currentGMailAddress();
   return address ? `https://mail.google.com/mail/u/${address}` : undefined;
 }
 
 export function inlineNewMailWebUrl() {
-  const prefix = webUrlPrefix();
+  const prefix = gmailWebUrlBase();
   return prefix ? `${prefix}/#compose` : undefined;
 }
 
@@ -82,7 +82,7 @@ export function fullscreenNewMailWebUrl(options?: {
   subject?: string;
   body?: string;
 }) {
-  const prefix = webUrlPrefix();
+  const prefix = gmailWebUrlBase();
   const params: Record<string, string> = {
     view: "cm",
     fs: "1",

@@ -32,8 +32,13 @@
       "name": "newwebmail",
       "title": "New Web Mail",
       "description": "Open a new EMail in the Browser",
-      "mode": "no-view",
-      "icon": "gmail.svg"
+      "mode": "no-view"
+    },
+    {
+      "name": "openinbrowser",
+      "title": "Open in Browser",
+      "description": "Open your account in the Browser",
+      "mode": "no-view"
     }
   ],
   "preferences": [
