@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Detail,
   Form,
+  Icon,
   PreferenceValues,
   Toast,
   getPreferenceValues,
@@ -14,9 +15,7 @@ import { useState } from "react";
 
 export default function Command() {
   const { push } = useNavigation();
-
   const preferences = getPreferenceValues<PreferenceValues>();
-
   const [loading, setLoading] = useState(false);
 
   return (
@@ -25,6 +24,8 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            title="Explain Command"
+            icon={Icon.Wand}
             onSubmit={async ({ command }: { command: string }) => {
               setLoading(true);
 
@@ -72,22 +73,11 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="command" title="Command" placeholder="Command" />
+      <Form.TextArea id="command" title="Explain Command" placeholder="Command" />
     </Form>
   );
 }
 
 function Result({ content }: { content: string }) {
-  const { pop } = useNavigation();
-
-  return (
-    <Detail
-      markdown={content}
-      actions={
-        <ActionPanel>
-          <Action title="Pop" onAction={pop} />
-        </ActionPanel>
-      }
-    />
-  );
+  return <Detail markdown={content} />;
 }
