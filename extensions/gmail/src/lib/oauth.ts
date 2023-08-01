@@ -32,7 +32,7 @@ export async function authorize(): Promise<void> {
     endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
     clientId: OAuthClientId(),
     scope:
-      "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.labels",
+      "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.labels https://www.googleapis.com/auth/gmail.modify",
   });
   const { authorizationCode } = await client.authorize(authRequest);
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));

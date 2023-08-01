@@ -20,3 +20,7 @@ export function getAddressParts(text: string | undefined | null) {
 export function isMailUnread(message: gmail_v1.Schema$Message) {
   return message?.labelIds ? message.labelIds.includes("UNREAD") : false;
 }
+
+export function isMailDraft(message: gmail_v1.Schema$Message) {
+  return message?.labelIds ? message.labelIds.includes("DRAFT") : false;
+}

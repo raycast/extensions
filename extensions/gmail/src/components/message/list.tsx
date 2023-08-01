@@ -4,18 +4,8 @@ import { useMessage } from "./hooks";
 import { getAddressParts, isMailUnread } from "./utils";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAvatarIcon } from "@raycast/utils";
-
-function firstValidLetter(text: string | null | undefined, fallback?: string) {
-  if (!text) {
-    return;
-  }
-  for (const c of text) {
-    if (c.match(/[a-zA-Z0-9]/)) {
-      return c;
-    }
-  }
-  return fallback;
-}
+import { GMailMessageMarkAsReadAction, GMailMessageMarkAsUnreadAction, GMailRefreshAction } from "./actions";
+import { getFirstValidLetter } from "../../lib/utils";
 
 export function GMailMessageListItemLazy(props: { message: GMailMessage }) {
   const { data, isLoading, error } = useMessage(props.message);
@@ -30,12 +20,11 @@ export function GMailMessageListItemLazy(props: { message: GMailMessage }) {
   };
   if (!data) {
     return <List.Item title={title()} />;
-    return null;
   }
   return <GMailMessageListItemLazy message={data} />;
 }
 
-export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message }) {
+export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
   const data = props.message;
   const title = () => {
     const subject = getGMailMessageHeaderValue(data, "Subject");
@@ -60,7 +49,7 @@ export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message }
   const from = getGMailMessageHeaderValue(data, "From");
   const fromParts = getAddressParts(from);
   const icon = () => {
-    const textIcon = getAvatarIcon(firstValidLetter(from, "?") || "");
+    const textIcon = getAvatarIcon(getFirstValidLetter(from, "?") || "");
     if (textIcon) {
       return textIcon;
     }
@@ -80,7 +69,20 @@ export function GMailMessageListItem(props: { message: gmail_v1.Schema$Message }
         { icon: unreadIcon(), tooltip: unreadIcon() ? "Unread" : undefined },
         { date: internalDate, tooltip: internalDate?.toISOString() },
       ]}
-      actions={<ActionPanel>{url && <Action.OpenInBrowser url={url} />}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser url={url} onOpen={() => (props.onRevalidate ? props.onRevalidate() : undefined)} />
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <GMailMessageMarkAsReadAction message={data} onRevalidate={props.onRevalidate} />
+            <GMailMessageMarkAsUnreadAction message={data} onRevalidate={props.onRevalidate} />
+            <GMailRefreshAction onRevalidate={props.onRevalidate} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
     />
   );
 }

@@ -49,12 +49,19 @@ export async function getGMailLabels() {
   return res.data.labels;
 }
 
-export async function getGMailMessages(
+export async function getGMailMessageIds(
   query?: string
 ): Promise<GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> | undefined> {
   const gmail = await getGmailClient();
   const messages = await gmail.users.messages.list({ userId: "me", q: query, maxResults: 50 });
   return messages;
+}
+
+export async function getGMailMessages(query?: string) {
+  const messages = await getGMailMessageIds(query);
+  const ids = messages?.data?.messages?.map((m) => m.id as string).filter((m) => m);
+  const details = await getMailDetails(ids);
+  return details;
 }
 
 export function getGMailMessageHeaderValue(msg: gmail_v1.Schema$Message | undefined, name: string) {
@@ -131,4 +138,22 @@ export function generateQuery(options?: { baseQuery?: string[]; userQuery?: stri
     parts.push(options.userQuery.trim());
   }
   return parts.join(" ");
+}
+
+export async function markMessageAsRead(message: gmail_v1.Schema$Message) {
+  const gmail = await getGmailClient();
+  await gmail.users.messages.modify({
+    userId: "me",
+    id: message.id || "",
+    requestBody: { removeLabelIds: ["UNREAD"] },
+  });
+}
+
+export async function markMessageAsUnread(message: gmail_v1.Schema$Message) {
+  const gmail = await getGmailClient();
+  await gmail.users.messages.modify({
+    userId: "me",
+    id: message.id || "",
+    requestBody: { addLabelIds: ["UNREAD"] },
+  });
 }

@@ -1,16 +1,22 @@
 import { List, Toast, showToast } from "@raycast/api";
 import { GMailMessageListItem } from "./components/message/list";
-import { useMessageDetails } from "./components/messages/hooks";
 import { useState } from "react";
-import { generateQuery } from "./lib/gmail";
+import { generateQuery, getGMailMessages } from "./lib/gmail";
 import { isMailUnread } from "./components/message/utils";
+import { useCachedPromise } from "@raycast/utils";
+import { getErrorMessage } from "./lib/utils";
 
 export default function MessageRootCommand() {
   const [searchText, setSearchText] = useState<string>();
   const query = generateQuery({ baseQuery: ["-is:draft"], userQuery: searchText });
-  const { data, isLoading, error } = useMessageDetails(query);
+  const { isLoading, data, error, revalidate } = useCachedPromise(
+    async (q: string) => {
+      return await getGMailMessages(q);
+    },
+    [query]
+  );
   if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
+    showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
   const subtitle = () => {
     if (!data) {
@@ -29,12 +35,12 @@ export default function MessageRootCommand() {
         subtitle={unread !== undefined && unread.length > 0 ? unread?.length.toString() : undefined}
       >
         {unread?.map((l) => (
-          <GMailMessageListItem key={l.data.id} message={l.data} />
+          <GMailMessageListItem key={l.data.id} message={l.data} onRevalidate={revalidate} />
         ))}
       </List.Section>
       <List.Section title="Mails" subtitle={subtitle()}>
         {rest?.map((l) => (
-          <GMailMessageListItem key={l.data.id} message={l.data} />
+          <GMailMessageListItem key={l.data.id} message={l.data} onRevalidate={revalidate} />
         ))}
       </List.Section>
     </List>
