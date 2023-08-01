@@ -835,6 +835,7 @@
 /extensions/rsync-commands                           @maxfahl
 /extensions/ruby-evaluate                            @obahareth
 /extensions/ruler                                    @anwarulislam
+/extensions/rusbase                                  @khlebobul
 /extensions/sabnzbd                                  @jesse-c
 /extensions/safari                                   @loris @thomaspaulmann @SKaplanOfficial
 /extensions/salesforce-search                        @svenwiegand
