@@ -15,7 +15,7 @@ export default function MessageRootCommand() {
     <List isLoading={isLoading} onSearchTextChange={setSearchText} throttle>
       <List.Section title="Mails" subtitle={data?.length ? data.length.toString() : undefined}>
         {data?.map((l) => (
-          <GMailMessageListItem key={l.data.id} message={l} />
+          <GMailMessageListItem key={l.data.id} message={l.data} />
         ))}
       </List.Section>
     </List>

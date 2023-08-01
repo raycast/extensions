@@ -15,7 +15,7 @@ export default function UnreadMailsRootCommand() {
     <List isLoading={isLoading} onSearchTextChange={setSearchText} throttle>
       <List.Section title="Unread Mails" subtitle={data?.length ? data.length.toString() : undefined}>
         {data?.map((l) => (
-          <GMailMessageListItem key={l.data.id} message={l} />
+          <GMailMessageListItem key={l.data.id} message={l.data} />
         ))}
       </List.Section>
     </List>
