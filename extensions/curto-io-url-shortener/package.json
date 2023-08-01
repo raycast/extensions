@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Shorten curto.io URL",
+      "title": "Shorten URL",
       "subtitle": "curto.io",
       "description": "Overwrite the clipboard contents with a shortened URL",
       "mode": "no-view"
