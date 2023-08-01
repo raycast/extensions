@@ -40,6 +40,7 @@ export default function MessageRootCommand() {
             message={l.data}
             onRevalidate={revalidate}
             allUnreadMessages={unread.map((u) => u.data)}
+            showUnreadAccessory={false}
           />
         ))}
       </List.Section>

@@ -17,6 +17,7 @@ import { getFirstValidLetter } from "../../lib/utils";
 export function GMailMessageListItem(props: {
   message: gmail_v1.Schema$Message;
   onRevalidate?: () => void;
+  showUnreadAccessory?: boolean;
   allUnreadMessages?: gmail_v1.Schema$Message[];
 }) {
   const data = props.message;
@@ -30,7 +31,7 @@ export function GMailMessageListItem(props: {
 
   const unread = isMailUnread(data);
   const unreadIcon = (): Image.ImageLike | undefined => {
-    if (!data) {
+    if (!data || props.showUnreadAccessory === false) {
       return;
     }
     const src = unread === true ? "envelope-closed.svg" : undefined;
