@@ -17,11 +17,13 @@ export default function MemosListCommand(): JSX.Element {
   };
 
   useEffect(() => {
-    setFilterList(data?.data?.filter((item) => item.content.includes(searchText)) || []);
+    const dataList = data?.data || data || [];
+    setFilterList(dataList.filter((item) => item.content.includes(searchText)) || []);
   }, [searchText]);
 
   useEffect(() => {
-    setFilterList(data?.data || []);
+    const dataList = data?.data || data || [];
+    setFilterList(dataList);
   }, [data]);
 
   function getItemUrl(item: MemoInfoResponse) {
