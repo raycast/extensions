@@ -15,6 +15,13 @@
       "title": "Mails",
       "description": "Get the inbox",
       "mode": "view"
+    },
+    {
+      "name": "newwebmail",
+      "title": "New Web Mail",
+      "description": "Open a new EMail in the Browser",
+      "mode": "no-view",
+      "icon": "gmail.svg"
     }
   ],
   "preferences": [

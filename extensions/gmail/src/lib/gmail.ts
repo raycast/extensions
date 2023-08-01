@@ -4,7 +4,7 @@ import { GaxiosResponse } from "googleapis-common";
 
 let profile: GaxiosResponse<gmail_v1.Schema$Profile>;
 
-export async function getGmailClient() {
+export async function getGmailClient(options?: { ensureProfile?: boolean }) {
   await authorize();
   const t = await client.getTokens();
 
@@ -17,7 +17,11 @@ export async function getGmailClient() {
     expiry_date: t?.expiresIn,
   });
   const gm = gmailclient({ version: "v1", auth: oAuth2Client });
-  getGMailAddress(gm); // prefetch profile
+  if (options?.ensureProfile === true) {
+    await getGMailAddress(gm);
+  } else {
+    getGMailAddress(gm); // prefetch profile
+  }
   return gm;
 }
 
@@ -59,4 +63,47 @@ export function getGMailMessageHeaderValue(msg: gmail_v1.Schema$Message | undefi
   }
   const d = msg.payload?.headers?.find((h) => h.name === name);
   return d?.value;
+}
+
+function webUrlPrefix() {
+  const address = currentGMailAddress();
+  return address ? `https://mail.google.com/mail/u/${address}` : undefined;
+}
+
+export function inlineNewMailWebUrl() {
+  const prefix = webUrlPrefix();
+  return prefix ? `${prefix}/#compose` : undefined;
+}
+
+export function fullscreenNewMailWebUrl(options?: {
+  to?: string;
+  cc?: string;
+  bcc?: string;
+  subject?: string;
+  body?: string;
+}) {
+  const prefix = webUrlPrefix();
+  const params: Record<string, string> = {
+    view: "cm",
+    fs: "1",
+  };
+  if (options?.to) {
+    params.to = options.to;
+  }
+  if (options?.cc) {
+    params.cc = options.cc;
+  }
+  if (options?.bcc) {
+    params.bcc = options.bcc;
+  }
+  if (options?.subject) {
+    params.su = options.subject;
+  }
+  if (options?.body) {
+    params.body = options.body;
+  }
+  const encodedParams = Object.entries(params)
+    .map(([k, v]) => encodeURI(`${k}=${v}`))
+    .join("&");
+  return prefix ? `${prefix}/?${encodedParams}` : undefined;
 }
