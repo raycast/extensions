@@ -17,7 +17,10 @@ export function MessageMarkAsReadAction(props: { message: gmail_v1.Schema$Messag
   }
   const handle = async () => {
     try {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Marking Mail as Read" });
       await markMessageAsRead(props.message);
+      toast.style = Toast.Style.Success;
+      toast.title = "Marked Mail as Read";
 
       if (props.onRevalidate) {
         props.onRevalidate();
@@ -54,7 +57,14 @@ export function MessageMarkAllAsReadAction(props: {
       };
       if (await confirmAlert(options)) {
         if (props.messages) {
+          const toast = await showToast({
+            style: Toast.Style.Animated,
+            title: `Marking ${props.messages.length} Mails as Read`,
+          });
           await markMessagesAsRead(props.messages);
+          toast.style = Toast.Style.Success;
+          toast.title = `Marked ${props.messages.length} Mails as Read`;
+
           if (props.onRevalidate) {
             props.onRevalidate();
           }
@@ -80,7 +90,10 @@ export function MessageMarkAsUnreadAction(props: { message: gmail_v1.Schema$Mess
   }
   const handle = async () => {
     try {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Marking Mail as Unread" });
       await markMessageAsUnread(props.message);
+      toast.style = Toast.Style.Success;
+      toast.title = "Marked Mail as Unread";
 
       if (props.onRevalidate) {
         props.onRevalidate();
@@ -100,14 +113,17 @@ export function MessageDeleteAction(props: { message: gmail_v1.Schema$Message; o
     try {
       const options: Alert.Options = {
         title: "Move to Trash",
-        message: "he Mail can be restored in the next couple of weeks.",
+        message: "The Mail can be restored in the next couple of weeks.",
         primaryAction: {
           title: "Move to Trash",
           style: Alert.ActionStyle.Destructive,
         },
       };
       if (await confirmAlert(options)) {
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Moving Mail to Trash" });
         await moveMessageToTrash(props.message);
+        toast.style = Toast.Style.Success;
+        toast.title = "Moved Mail to Trash";
       }
 
       if (props.onRevalidate) {
