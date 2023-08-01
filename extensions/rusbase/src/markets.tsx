@@ -38,7 +38,7 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select a category"
-          defaultValue={"Беспилотные аппараты"}
+          defaultValue={"Drones"}
           storeValue
           onChange={(newValue) => setRssLink(newValue as string)}
         >
