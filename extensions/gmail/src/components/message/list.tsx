@@ -11,6 +11,7 @@ import {
   MessageOpenInBrowserAction,
   MessageDeleteAction,
   MessageMarkAllAsReadAction,
+  MessageShowDetailsAction,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 
@@ -18,10 +19,12 @@ export function GMailMessageListItem(props: {
   message: gmail_v1.Schema$Message;
   onRevalidate?: () => void;
   showUnreadAccessory?: boolean;
+  detailsShown?: boolean;
+  onDetailsShownChanged?: (newValue: boolean) => void;
   allUnreadMessages?: gmail_v1.Schema$Message[];
 }) {
   const data = props.message;
-  const title = () => {
+  const subject = () => {
     const subject = getGMailMessageHeaderValue(data, "Subject");
     if (subject) {
       return subject;
@@ -52,19 +55,50 @@ export function GMailMessageListItem(props: {
   };
 
   const internalDate = data?.internalDate ? new Date(parseInt(data.internalDate)) : undefined;
+  const detail = [`# ${subject()}`, internalDate?.toLocaleString(), data.snippet]
+    .filter((e) => e && e.length > 0)
+    .join("\n\n");
   return (
     <List.Item
-      title={title()}
-      subtitle={{ value: fromParts ? fromParts.name : undefined, tooltip: fromParts ? fromParts.email : undefined }}
+      title={{ value: subject() || "", tooltip: props.detailsShown ? undefined : data.snippet }}
+      subtitle={{
+        value: fromParts && !props.detailsShown ? fromParts.name : undefined,
+        tooltip: fromParts && !props.detailsShown ? fromParts.email : undefined,
+      }}
       icon={data ? icon() : undefined}
+      detail={
+        <List.Item.Detail
+          markdown={detail}
+          metadata={
+            <List.Item.Detail.Metadata>
+              {internalDate && (
+                <List.Item.Detail.Metadata.Label title="Received" text={internalDate?.toLocaleString()} />
+              )}
+              {fromParts?.name && (
+                <List.Item.Detail.Metadata.Label title="From" text={fromParts.name} icon={Icon.Person} />
+              )}
+              {fromParts?.email && (
+                <List.Item.Detail.Metadata.Label title="Address" text={fromParts.email} icon={Icon.Envelope} />
+              )}
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       accessories={[
         { icon: unreadIcon(), tooltip: unreadIcon() ? "Unread" : undefined },
-        { date: internalDate, tooltip: internalDate?.toISOString() },
+        {
+          date: !props.detailsShown ? internalDate : undefined,
+          tooltip: !props.detailsShown ? internalDate?.toLocaleString() : undefined,
+        },
       ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <MessageOpenInBrowserAction message={data} onOpen={props.onRevalidate} />
+            <MessageShowDetailsAction
+              detailsShown={props.detailsShown === true ? true : false}
+              onAction={props.onDetailsShownChanged}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <MessageMarkAsReadAction message={data} onRevalidate={props.onRevalidate} />

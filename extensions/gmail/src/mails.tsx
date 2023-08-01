@@ -3,7 +3,7 @@ import { GMailMessageListItem } from "./components/message/list";
 import { useState } from "react";
 import { generateQuery, getGMailMessages } from "./lib/gmail";
 import { isMailUnread } from "./components/message/utils";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getErrorMessage } from "./lib/utils";
 
 export default function MessageRootCommand() {
@@ -15,6 +15,7 @@ export default function MessageRootCommand() {
     },
     [query]
   );
+  const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
@@ -29,7 +30,7 @@ export default function MessageRootCommand() {
   const unread = data?.filter((m) => isMailUnread(m.data));
   const rest = data?.filter((m) => !isMailUnread(m.data));
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} throttle>
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} isShowingDetail={showDetails} throttle>
       <List.Section
         title="Unread"
         subtitle={unread !== undefined && unread.length > 0 ? unread?.length.toString() : undefined}
@@ -39,6 +40,8 @@ export default function MessageRootCommand() {
             key={`${l.data.id}_unread`}
             message={l.data}
             onRevalidate={revalidate}
+            detailsShown={showDetails}
+            onDetailsShownChanged={setShowDetails}
             allUnreadMessages={unread.map((u) => u.data)}
             showUnreadAccessory={false}
           />
@@ -46,7 +49,13 @@ export default function MessageRootCommand() {
       </List.Section>
       <List.Section title="Mails" subtitle={subtitle()}>
         {rest?.map((l) => (
-          <GMailMessageListItem key={l.data.id} message={l.data} onRevalidate={revalidate} />
+          <GMailMessageListItem
+            key={l.data.id}
+            message={l.data}
+            onRevalidate={revalidate}
+            detailsShown={showDetails}
+            onDetailsShownChanged={setShowDetails}
+          />
         ))}
       </List.Section>
     </List>

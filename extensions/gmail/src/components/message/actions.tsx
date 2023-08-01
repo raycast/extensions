@@ -183,3 +183,19 @@ export function MessageOpenInBrowserAction(props: { message: gmail_v1.Schema$Mes
   };
   return <Action.OpenInBrowser url={url} onOpen={handle} />;
 }
+
+export function MessageShowDetailsAction(props: { detailsShown: boolean; onAction?: (newValue: boolean) => void }) {
+  const handle = () => {
+    if (props.onAction) {
+      props.onAction(!props.detailsShown);
+    }
+  };
+  return (
+    <Action
+      title={props.detailsShown ? "Hide Details" : "Show Details"}
+      icon={props.detailsShown ? Icon.EyeDisabled : Icon.Eye}
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      onAction={handle}
+    />
+  );
+}

@@ -2,7 +2,7 @@ import { List, Toast, showToast } from "@raycast/api";
 import { GMailMessageListItem } from "./components/message/list";
 import { useState } from "react";
 import { generateQuery, getGMailMessages } from "./lib/gmail";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getErrorMessage } from "./lib/utils";
 
 export default function UnreadMailsRootCommand() {
@@ -14,14 +14,21 @@ export default function UnreadMailsRootCommand() {
     },
     [query]
   );
+  const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} throttle>
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} isShowingDetail={showDetails} throttle>
       <List.Section title="Draft Mails" subtitle={data?.length ? data.length.toString() : undefined}>
         {data?.map((l) => (
-          <GMailMessageListItem key={l.data.id} message={l.data} onRevalidate={revalidate} />
+          <GMailMessageListItem
+            key={l.data.id}
+            message={l.data}
+            onRevalidate={revalidate}
+            detailsShown={showDetails}
+            onDetailsShownChanged={setShowDetails}
+          />
         ))}
       </List.Section>
     </List>
