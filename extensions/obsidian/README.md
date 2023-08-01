@@ -111,6 +111,7 @@ Both the note name and note content support these templates:
 - `{time}`
 - `{year}`
 - `{month}`
+- `{week}`
 - `{day}`
 - `{hour}`
 - `{minute}`
