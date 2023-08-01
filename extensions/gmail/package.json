@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "gmail",
+      "name": "mails",
       "title": "Mails",
       "description": "Get the inbox",
       "mode": "view"

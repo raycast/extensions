@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getErrorMessage } from "../../lib/utils";
-import { GMailMessage, getGmailClient } from "../../lib/gmail";
+import { GMailMessage, getMailDetail } from "../../lib/gmail";
 import { gmail_v1 } from "@googleapis/gmail";
 
 export function useMessage(message: GMailMessage): {
@@ -24,8 +24,7 @@ export function useMessage(message: GMailMessage): {
       setError(undefined);
 
       try {
-        const gm = await getGmailClient();
-        const detail = await gm.users.messages.get({ userId: "me", id: message.id || "", format: "full" });
+        const detail = await getMailDetail(message.id || "");
         if (!didUnmount) {
           setData(detail.data);
         }

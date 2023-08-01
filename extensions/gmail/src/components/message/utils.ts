@@ -7,8 +7,8 @@ export function getAddressParts(text: string | undefined | null) {
   const match = text.match(regex);
 
   if (match) {
-    const name = match[1].trim();
-    const email = match[2].trim();
+    const name = match[1].trim().replaceAll('"', "");
+    const email = match[2].trim().replaceAll('"', "");
     return { name, email };
   } else {
     return undefined;

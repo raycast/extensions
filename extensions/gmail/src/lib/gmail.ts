@@ -107,3 +107,28 @@ export function fullscreenNewMailWebUrl(options?: {
     .join("&");
   return prefix ? `${prefix}/?${encodedParams}` : undefined;
 }
+
+export async function getMailDetail(id: string) {
+  const gmail = await getGmailClient();
+  const detail = await gmail.users.messages.get({ userId: "me", id: id, format: "full" });
+  return detail;
+}
+
+export async function getMailDetails(ids: string[] | undefined | null) {
+  if (!ids) {
+    return;
+  }
+  const result = await Promise.all(ids.map((id) => getMailDetail(id)));
+  return result;
+}
+
+export function generateQuery(options?: { baseQuery?: string[]; userQuery?: string }) {
+  const parts: string[] = [];
+  if (options?.baseQuery && options.baseQuery.length > 0) {
+    parts.push(options.baseQuery.join(" "));
+  }
+  if (options?.userQuery && options.userQuery.length > 0) {
+    parts.push(options.userQuery.trim());
+  }
+  return parts.join(" ");
+}

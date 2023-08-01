@@ -3,8 +3,10 @@ import { GMailMessage, currentGMailAddress, getGMailMessageHeaderValue } from ".
 import { useMessage } from "./hooks";
 import { getTextIcon } from "../../lib/icons";
 import { getAddressParts } from "./utils";
+import { GaxiosResponse } from "googleapis-common";
+import { gmail_v1 } from "@googleapis/gmail";
 
-function firstValidLetter(text: string | undefined) {
+function firstValidLetter(text: string | undefined, fallback?: string) {
   if (!text) {
     return;
   }
@@ -13,9 +15,10 @@ function firstValidLetter(text: string | undefined) {
       return c;
     }
   }
+  return fallback;
 }
 
-export function GMailMessageListItem(props: { message: GMailMessage }) {
+export function GMailMessageListItemLazy(props: { message: GMailMessage }) {
   const { data, isLoading, error } = useMessage(props.message);
   const title = () => {
     if (error) {
@@ -45,7 +48,57 @@ export function GMailMessageListItem(props: { message: GMailMessage }) {
 
   const from = getGMailMessageHeaderValue(data, "From");
   const fromParts = getAddressParts(from);
-  const textIcon = from ? getTextIcon(firstValidLetter(from) || "?") : undefined;
+  const textIcon = from ? getTextIcon(firstValidLetter(from, "?") || "") : undefined;
+  const icon = () => {
+    if (textIcon) {
+      return textIcon;
+    }
+    return Icon.Envelope;
+  };
+
+  const internalDate = data?.internalDate ? new Date(parseInt(data.internalDate)) : undefined;
+  const emailAddress = currentGMailAddress();
+  const url =
+    data && emailAddress ? `https://mail.google.com/mail/u/${emailAddress}/#inbox/${data.threadId}` : undefined;
+  return (
+    <List.Item
+      title={title()}
+      subtitle={{ value: fromParts ? fromParts.name : undefined, tooltip: fromParts ? fromParts.email : undefined }}
+      icon={data ? icon() : undefined}
+      accessories={[
+        { icon: unreadIcon(), tooltip: unreadIcon() ? "Unread" : undefined },
+        { date: internalDate, tooltip: internalDate?.toISOString() },
+      ]}
+      actions={<ActionPanel>{url && <Action.OpenInBrowser url={url} />}</ActionPanel>}
+    />
+  );
+}
+
+export function GMailMessageListItem(props: { message: GaxiosResponse<gmail_v1.Schema$Message> }) {
+  const data = props.message.data;
+  const title = () => {
+    const subject = getGMailMessageHeaderValue(data, "Subject");
+    if (subject) {
+      return subject;
+    }
+    return "<No Subject>";
+  };
+
+  const unread = data?.labelIds ? data.labelIds.includes("UNREAD") : false;
+  const unreadIcon = (): Image.ImageLike | undefined => {
+    if (!data) {
+      return;
+    }
+    const src = unread === true ? "envelope-closed.svg" : undefined;
+    if (!src) {
+      return;
+    }
+    return { source: Icon.Stars, tintColor: Color.Yellow };
+  };
+
+  const from = getGMailMessageHeaderValue(data, "From");
+  const fromParts = getAddressParts(from);
+  const textIcon = from ? getTextIcon(firstValidLetter(from, "?") || "?") : undefined;
   const icon = () => {
     if (textIcon) {
       return textIcon;
