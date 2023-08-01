@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ActionPanel, Action, Grid, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Grid, getPreferenceValues, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import type { Result } from "../src/types";
+import type { Result } from "../types";
 
 export default function SearchAnimeGrid() {
   const [page, setPage] = useState("1");
@@ -35,12 +35,34 @@ export default function SearchAnimeGrid() {
         (data?.data?.filter((anime: Result["data"][0]) => anime.approved) || []).map((anime: Result["data"][0]) => (
           <Grid.Item
             key={anime?.mal_id}
-            content={anime?.images?.jpg?.image_url}
+            content={anime.images?.jpg?.image_url}
             title={anime?.title}
-            subtitle={`${anime?.score || "-"}/10`}
+            subtitle={`${anime.score || "-"}/10`}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={anime?.url} />
+                <Action.OpenInBrowser url={anime.url} />
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard
+                    content={anime.url}
+                    title="Copy Link"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    icon={Icon.Link}
+                  />
+                  {anime.title && (
+                    <Action.CopyToClipboard
+                      content={anime.title}
+                      title="Copy Original Title"
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    />
+                  )}
+                  {anime.title_english && (
+                    <Action.CopyToClipboard
+                      content={anime.title_english}
+                      title="Copy English Title"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                    />
+                  )}
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

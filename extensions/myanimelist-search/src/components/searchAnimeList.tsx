@@ -1,7 +1,7 @@
 import { ActionPanel, List, Action, Image, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { useFetch } from "@raycast/utils";
-import type { Result } from "../src/types";
+import type { Result } from "../types";
 
 export default function SearchAnimeList() {
   const [page, setPage] = useState("1");
@@ -42,11 +42,12 @@ export default function SearchAnimeList() {
           ? {
               detail: (
                 <List.Item.Detail
-                  markdown={`## ${anime.title}\n​<img src="${anime.images.webp.image_url}" height="200"/>\n\n${
+                  markdown={`## ${anime.title}\n<img src="${anime.images.webp.image_url}" height="200"/>\n\n${
                     anime.synopsis || ""
                   }`}
                   metadata={
                     <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="English Title" text={anime.title_english || "-"} />
                       <List.Item.Detail.Metadata.Label title="Type" text={anime.type || "-"} />
                       <List.Item.Detail.Metadata.Label title="Episodes" text={anime.episodes?.toString() || "-"} />
                       <List.Item.Detail.Metadata.Label title="Score" text={anime.score?.toString() || "-"} />
@@ -75,6 +76,8 @@ export default function SearchAnimeList() {
           : { accessories: [{ text: anime.score?.toString() || "-" }] };
         const takenSpace = anime.title?.length + anime.aired.prop.from.year?.toString().length + 4;
 
+        console.log(anime.title_english);
+
         return (
           <List.Item
             key={anime.mal_id}
@@ -95,10 +98,32 @@ export default function SearchAnimeList() {
               <ActionPanel>
                 <Action.OpenInBrowser url={anime.url} />
                 <Action
-                  title="Toggle Detailed view"
+                  title="Toggle Detailed View"
                   onAction={() => setShowingDetail(!showingDetail)}
                   icon={Icon.AppWindowSidebarLeft}
                 />
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard
+                    content={anime.url}
+                    title="Copy Link"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    icon={Icon.Link}
+                  />
+                  {anime.title && (
+                    <Action.CopyToClipboard
+                      content={anime.title}
+                      title="Copy Original Title"
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    />
+                  )}
+                  {anime.title_english && (
+                    <Action.CopyToClipboard
+                      content={anime.title_english}
+                      title="Copy English Title"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                    />
+                  )}
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
