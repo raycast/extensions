@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fixes] - 2023-08-02
+
+- Fix some issues with invalid URLs that cause crashes.
+
 ## [Update] - 2023-07-12
 
 - Make it possible to open remote workspaces.
