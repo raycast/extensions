@@ -19,7 +19,7 @@ const SESSIONS = Array.from(Array(3).keys()).map((key) => {
       time: 30,
       break_time: 5,
       accessory: "Start",
-    }
+    };
   }
 
   if (key == 1) {
@@ -30,7 +30,7 @@ const SESSIONS = Array.from(Array(3).keys()).map((key) => {
       time: 60,
       break_time: 10,
       accessory: "Start",
-    }
+    };
   }
 
   return {
@@ -40,7 +40,7 @@ const SESSIONS = Array.from(Array(3).keys()).map((key) => {
     time: 90,
     break_time: 15,
     accessory: "Start",
-  }
+  };
 });
 
 export default function Command() {
@@ -55,7 +55,7 @@ export default function Command() {
           accessories={[{ text: item.accessory, icon: Icon.Play }]}
           actions={
             <ActionPanel>
-              <Action title="" onAction={() => action(item.time, item.break_time)}/>
+              <Action title="" onAction={() => action(item.time, item.break_time)} />
             </ActionPanel>
           }
         />

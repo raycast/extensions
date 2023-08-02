@@ -8,7 +8,7 @@ import { runAppleScript } from "run-applescript";
  * @returns Generated AppleScript.
  */
 export function buildScriptEnsuringMusicTimerIsRunning(duration: number, breakDuration: number): string {
-    return `
+  return `
       tell application "Music Timer"
         if not application "Music Timer" is running then
           activate
@@ -36,6 +36,6 @@ export function buildScriptEnsuringMusicTimerIsRunning(duration: number, breakDu
  * @returns A promise that is resolved when the AppleScript finished running
  */
 export async function runAppleScriptSilently(duration: number, breakDuration: number) {
-    await closeMainWindow();
-    await runAppleScript(buildScriptEnsuringMusicTimerIsRunning(duration, breakDuration));
+  await closeMainWindow();
+  await runAppleScript(buildScriptEnsuringMusicTimerIsRunning(duration, breakDuration));
 }
