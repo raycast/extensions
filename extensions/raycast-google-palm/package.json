@@ -29,6 +29,7 @@
     {
       "name": "summarize",
       "title": "Summarize",
+      "subtitle": "Google PaLM",
       "description": "Summarize selected text",
       "mode": "view",
       "arguments": [
@@ -43,6 +44,7 @@
     {
       "name": "explain",
       "title": "Explain",
+      "subtitle": "Google PaLM",
       "description": "Explain selected text",
       "mode": "view",
       "arguments": [
@@ -57,6 +59,7 @@
     {
       "name": "comment",
       "title": "Add Comments to Code",
+      "subtitle": "Google PaLM",
       "description": "Add comments to code",
       "mode": "view",
       "arguments": [
@@ -71,6 +74,7 @@
     {
       "name": "friendly",
       "title": "Change Tone to Friendly",
+      "subtitle": "Google PaLM",
       "description": "Change tone of selected text to friendly",
       "mode": "view",
       "arguments": [
@@ -85,6 +89,7 @@
     {
       "name": "professional",
       "title": "Change Tone to Professional",
+      "subtitle": "Google PaLM",
       "description": "Change tone of selected text to professional",
       "mode": "view",
       "arguments": [
@@ -99,6 +104,7 @@
     {
       "name": "synonym",
       "title": "Find Synonym",
+      "subtitle": "Google PaLM",
       "description": "Find synonym of selected word",
       "mode": "view",
       "arguments": [
@@ -113,6 +119,7 @@
     {
       "name": "grammar",
       "title": "Fix Spelling and Grammar",
+      "subtitle": "Google PaLM",
       "description": "Fix spelling and grammar of selected text",
       "mode": "view",
       "arguments": [
@@ -127,6 +134,7 @@
     {
       "name": "longer",
       "title": "Make Longer",
+      "subtitle": "Google PaLM",
       "description": "Make selected text longer",
       "mode": "view",
       "arguments": [
@@ -141,6 +149,7 @@
     {
       "name": "shorter",
       "title": "Make Shorter",
+      "subtitle": "Google PaLM",
       "description": "Make selected text shorter",
       "mode": "view",
       "arguments": [
