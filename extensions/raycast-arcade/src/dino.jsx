@@ -110,12 +110,25 @@ export default function ChromeDino() {
     if (time.current % 10 === 0) score.current += 1
     if (status.current === Status.PLAYING) {
       dinoStatus.current.y = Math.round(Math.max(dinoStatus.current.y + dinoStatus.current.gravity, 0));
-      if (time.current > 60 && time.current % 50 === 0) {
+      if (time.current === 60) {
         activeCacti.current.push({
           x: 90,
-          shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)]
+          shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
+          time: time.current, // ! IMPLMENT TIME
         })
       }
+      console.log(activeCacti.current)
+      if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 20) {
+        if (Math.random() < 0.02) {
+          activeCacti.current.push({
+            x: 90,
+            shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
+            time: time.current, // ! IMPLMENT TIME
+          })
+        }
+      }
+
+
       if (time.current % 70 === 0) {
         activeClouds.current.push({
           x: 90,
@@ -151,7 +164,7 @@ export default function ChromeDino() {
             }
           }
         }
-        if (cactus.x < -10) {
+        if (cactus.x < -200) {
           activeCacti.current.splice(i, 1)
         }
       }
