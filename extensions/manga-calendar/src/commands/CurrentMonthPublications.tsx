@@ -54,15 +54,18 @@ export default function CurrentMonthPublications() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      navigationTitle={`Latest releases ${currentMonth.toUpperCase()}-${currentYear}`}
       searchBarAccessory={<DateDropdown dateList={publicationDates} onDropdownChange={setSelectedDate} />}
     >
       {Object.entries(filteredMangaList).map(([date, mangasByDate], idx) => {
         return (
           mangasByDate && (
-            <List.Section key={idx} title={date}>
-              {mangasByDate.map((manga) => (
-                <MangaListItem key={manga.name + manga.volume} manga={manga} />
+            <List.Section
+              key={idx}
+              title={date}
+              subtitle={`Latest releases ${currentMonth.toUpperCase()}-${currentYear}`}
+            >
+              {mangasByDate.map((manga, idx) => (
+                <MangaListItem key={(manga.name + manga.volume, idx)} manga={manga} />
               ))}
             </List.Section>
           )

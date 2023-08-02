@@ -18,7 +18,6 @@ export default function CurrentMonthPublications() {
 
   return (
     <Grid
-      navigationTitle={`${collectionList.length} Manga collections were found`}
       isLoading={isLoading}
       columns={5}
       inset={Grid.Inset.Small}
@@ -26,9 +25,11 @@ export default function CurrentMonthPublications() {
       onSearchTextChange={setSearchText}
       filtering={true}
     >
-      {collectionList.map((collection, idx) => (
-        <CollectionGridItem key={idx + collection.name} collection={collection} />
-      ))}
+      <Grid.Section title={`${collectionList.length} Manga collections were found`}>
+        {collectionList.map((collection, idx) => (
+          <CollectionGridItem key={idx + collection.name} collection={collection} />
+        ))}
+      </Grid.Section>
     </Grid>
   );
 }
