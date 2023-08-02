@@ -1,8 +1,8 @@
-import { Action, Icon, Color, showHUD, confirmAlert, ActionPanel } from "@raycast/api";
-import { ha } from "@lib/common";
+import { Action, Icon, Color, showHUD, ActionPanel } from "@raycast/api";
 import { State } from "@lib/haapi";
 import { ChangelogDetail } from "./detail";
 import { EntityStandardActionSections } from "@components/entity";
+import { callUpdateInstallService, callUpdateSkipService } from "./utils";
 
 export function UpdateShowChangelogAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -45,20 +45,10 @@ export function UpdateInstallAction(props: { state: State }): JSX.Element | null
   if (s.attributes.in_progress !== false) {
     return null;
   }
-  const handle = async () => {
-    if (
-      await confirmAlert({
-        title: `Installing Update ${s.attributes.title || ""}?
-        `,
-        message: "Backup will be generated before if the integration supports it",
-      })
-    )
-      await ha.callService("update", "install", { entity_id: s.entity_id, backup: true });
-  };
   return (
     <Action
       title="Update with Backup"
-      onAction={handle}
+      onAction={() => callUpdateInstallService(s)}
       shortcut={{ modifiers: ["cmd"], key: "i" }}
       icon={{ source: Icon.Download, tintColor: Color.PrimaryText }}
     />
@@ -73,18 +63,10 @@ export function UpdateSkipVersionAction(props: { state: State }): JSX.Element | 
   if (s.state !== "on") {
     return null;
   }
-  const handle = async () => {
-    if (
-      await confirmAlert({
-        title: `Skip version ${s.attributes.title || ""}?`,
-      })
-    )
-      await ha.callService("update", "skip", { entity_id: s.entity_id });
-  };
   return (
     <Action
       title="Skip Update"
-      onAction={handle}
+      onAction={() => callUpdateSkipService(s)}
       shortcut={{ modifiers: ["cmd"], key: "s" }}
       icon={{ source: Icon.ArrowRight, tintColor: Color.PrimaryText }}
     />
