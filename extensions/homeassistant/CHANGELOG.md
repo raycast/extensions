@@ -1,5 +1,14 @@
 # Home Assistant Changelog
 
+## [Menu] - 2023-07-25
+
+- Add Media Player Menu Bar command
+- Add Entities Menu Bar command to allow to add specific entities in the Menu Bar
+- Add Lights Menu Bar command
+- Add Covers Menu Bar command
+- Add Batteries Menu Bar command
+- Notifications menu now contains battery low battery states as well as updates
+
 ## [Modernize] - 2023-07-16
 
 - Add support for switching assist pipelines
