@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "one-tomato",
+  "title": "One Tomato - A Pomodoro Timer",
+  "description": "A menubar Pomodoro timer can be configured through command. The aim of this extension is to help you focus on any task you are working on, such as study, writing, or coding.",
+  "icon": "extension_icon.png",
+  "author": "Sven97",
+  "keywords": [
+    "pomodoro",
+    "timer",
+    "focus",
+    "productivity"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-focus",
+      "title": "Start Focus",
+      "subtitle": "25 minutes",
+      "description": "Start a focus session",
+      "mode": "view"
+    },
+    {
+      "name": "start-short-break",
+      "title": "Start Short Break",
+      "subtitle": "5 minutes",
+      "description": "Start a short break",
+      "mode": "view"
+    },
+    {
+      "name": "start-long-break",
+      "title": "Start Long Break",
+      "subtitle": "15 minutes",
+      "description": "Start a long break",
+      "mode": "view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "description": "Pause current session",
+      "mode": "view"
+    },
+    {
+      "name": "resume",
+      "title": "Resume",
+      "description": "Resume current session",
+      "mode": "view"
+    },
+    {
+      "name": "finish",
+      "title": "Finish",
+      "description": "Finish current session",
+      "mode": "view"
+    },
+    {
+      "name": "one-tomato-menu-bar",
+      "title": "Update Pomodoro in Menu Bar",
+      "description": "Update Pomodoro with interval in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
