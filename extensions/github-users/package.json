@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-users",
   "title": "GitHub Users Search",
-  "description": "Search github users",
+  "description": "Search GitHub users",
   "icon": "icon.png",
   "author": "luisFilipePT",
   "categories": [
