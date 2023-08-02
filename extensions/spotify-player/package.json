@@ -13,7 +13,8 @@
     "stuart",
     "tonka3000",
     "dancannon",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "efmmoncada"
   ],
   "license": "MIT",
   "preferences": [
@@ -224,6 +225,22 @@
       "title": "Just Play",
       "subtitle": "Spotify",
       "description": "Use this to quickly start playing a song based on your query.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Song / Artist",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "addToQueue",
+      "title": "Add to Queue",
+      "subtitle": "Spotify",
+      "description": "Use this to add a song to the queue.",
       "mode": "no-view",
       "disabledByDefault": true,
       "arguments": [
