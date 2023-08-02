@@ -7,7 +7,7 @@ import { runAppleScript } from "run-applescript";
  * @param commandsToRunAfterMusicTimerIsRunning - The AppleScript command(s) to run after ensuring Music Timer is running.
  * @returns Generated AppleScript.
  */
-export function buildScriptEnsuringMusicTimerIsRunning(duration: Number, breakDuration: Number): string {
+export function buildScriptEnsuringMusicTimerIsRunning(duration: number, breakDuration: number): string {
     return `
       tell application "Music Timer"
         if not application "Music Timer" is running then
@@ -35,7 +35,7 @@ export function buildScriptEnsuringMusicTimerIsRunning(duration: Number, breakDu
  * @throws An error when the AppleScript fails to run
  * @returns A promise that is resolved when the AppleScript finished running
  */
-export async function runAppleScriptSilently(duration: Number, breakDuration: Number) {
+export async function runAppleScriptSilently(duration: number, breakDuration: number) {
     await closeMainWindow();
     await runAppleScript(buildScriptEnsuringMusicTimerIsRunning(duration, breakDuration));
 }
