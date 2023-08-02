@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "uptime",
   "title": "Uptime",
-  "description": "Show how long ago your pc was turned on",
+  "description": "Show how long ago your mac was turned on",
   "icon": "command-icon.png",
   "author": "iaroslav_naiden",
   "categories": [
@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Uptime",
-      "description": "Show how long ago your pc was turned on",
+      "title": "View Uptime",
+      "description": "Show how long ago your mac was turned on",
       "mode": "view"
     }
   ],
