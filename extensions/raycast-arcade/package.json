@@ -11,15 +11,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "snake",
-      "title": "Snake",
-      "description": "Play classic Snake!",
-      "mode": "view"
-    },
-    {
       "name": "tetris",
       "title": "Tetris",
       "description": "Play classic Tetris!",
+      "mode": "view"
+    },
+    {
+      "name": "dino",
+      "title": "Chrome Dino",
+      "description": "Play the Chrome Dino game!",
       "mode": "view"
     }
   ],
