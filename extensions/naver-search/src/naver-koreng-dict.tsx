@@ -3,7 +3,7 @@ import { getIcon } from "./naver/resultUtils";
 import { useSearch } from "./naver/useSearch";
 
 export default function Command() {
-  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch("GENERAL");
+  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch("KOEN");
 
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Naver or enter a URL...">
@@ -17,6 +17,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Result">
+                  <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
                   <Action
                     title="Open in Browser"
                     onAction={async () => {
@@ -28,7 +29,6 @@ export default function Command() {
                   />
 
                   <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
-                  <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">
