@@ -10,11 +10,12 @@ Please report any issues to support@roamresearch.com
 3. View a random block from your roam graph.
 4. Easily create Raycast quicklinks to open Roam graphs or specific pages in the graph
 
-FIXME: quick demo GIF or Loom?
+**DEMO VIDEO**: https://www.loom.com/share/3fa11c532cb44822a047caecc638e47f
 
-## Setting up a graph
 
-To set up a Roam Research graph in this Raycast Extension, you need to use the "Add Graph" Raycast command. 
+## Getting Started / Setting up a graph
+
+To get started with this extension, you need to set up a Roam Research graph via the "Add Graph" Raycast command. 
 
 You can follow the steps listed below or follow along with the following video: https://www.loom.com/share/31ada35f7c8b4f44a2ba537b15237854
 
