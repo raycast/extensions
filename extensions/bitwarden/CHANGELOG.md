@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2023-08-01
+
+- Removed visible line break in card, identity and note details
+
 ## [Improvements] - 2023-07-06
 
 - Display favorites at the top of the list on a separate section

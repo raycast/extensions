@@ -4,7 +4,7 @@ import { Identity } from "~/types/vault";
 
 export function getIdentityDetailsMarkdown(itemName: string, identity: Identity) {
   return `# 🪪 ${itemName}
-<br></br>
+&nbsp;
 | ⌘\t**Field** | **Value** |
 | --- | --- |
 ${Object.entries(identity)
