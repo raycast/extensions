@@ -29,7 +29,7 @@ export default function Command() {
       let page = 1;
 
       try {
-        while (true) {
+        while (page <= 100) {
           const url = `https://manage.runcloud.io/api/v2/servers?page=${page}`;
           const options: RequestInit = {
             headers: {
@@ -39,7 +39,7 @@ export default function Command() {
             },
           };
           const response = await fetch(url, options);
-          const data = await response.json();
+          const data = (await response.json()) as ServerResponse;
           const servers = parseServers(data);
           allServers = allServers.concat(servers);
 
@@ -61,7 +61,7 @@ export default function Command() {
       let page = 1;
 
       try {
-        while (true) {
+        while (page <= 100) {
           const url = `https://manage.runcloud.io/api/v2/servers/${serverId}/webapps?page=${page}`;
           const options: RequestInit = {
             headers: {
@@ -71,7 +71,7 @@ export default function Command() {
             },
           };
           const response = await fetch(url, options);
-          const data = await response.json();
+          const data = (await response.json()) as WebAppResponse;
           const webapps = parseWebapps(data, server);
           allWebapps = allWebapps.concat(webapps);
 
@@ -143,9 +143,7 @@ function WebAppListItem({ webapp }: { webapp: WebApp }) {
     <List.Item
       title={webapp.name}
       subtitle={`${webapp.server.name}`}
-      accessories={[
-        { text: `${webapp.server.ipAddress}`}
-      ]}
+      accessories={[{ text: `${webapp.server.ipAddress}` }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -158,6 +156,10 @@ function WebAppListItem({ webapp }: { webapp: WebApp }) {
       }
     />
   );
+}
+
+interface WebAppResponse {
+  data: WebApp[];
 }
 
 interface WebApp {
@@ -178,6 +180,10 @@ interface WebApp {
   created_at: string;
 }
 
+interface ServerResponse {
+  data: Server[];
+}
+
 interface Server {
   id: number;
   name: string;
@@ -196,44 +202,48 @@ interface Server {
   created_at: string;
 }
 
-function parseServers(data: any): Server[] {
-  return data?.data?.map((server: any) => ({
-    id: server.id,
-    name: server.name,
-    provider: server.provider,
-    ipAddress: server.ipAddress,
-    country_iso_code: server.country_iso_code,
-    os: server.os,
-    osVersion: server.osVersion,
-    connected: server.connected,
-    online: server.online,
-    agentVersion: server.agentVersion,
-    phpCLIVersion: server.phpCLIVersion,
-    softwareUpdate: server.softwareUpdate,
-    securityUpdate: server.securityUpdate,
-    transferStatus: server.transferStatus,
-    created_at: server.created_at,
-  })) || [];
+function parseServers(data: ServerResponse): Server[] {
+  return (
+    data?.data?.map((server: Server) => ({
+      id: server.id,
+      name: server.name,
+      provider: server.provider,
+      ipAddress: server.ipAddress,
+      country_iso_code: server.country_iso_code,
+      os: server.os,
+      osVersion: server.osVersion,
+      connected: server.connected,
+      online: server.online,
+      agentVersion: server.agentVersion,
+      phpCLIVersion: server.phpCLIVersion,
+      softwareUpdate: server.softwareUpdate,
+      securityUpdate: server.securityUpdate,
+      transferStatus: server.transferStatus,
+      created_at: server.created_at,
+    })) || []
+  );
 }
 
-function parseWebapps(data: any, serverData: Server): WebApp[] {
-  return data?.data?.map((webapp: any) => ({
-    id: webapp.id,
-    server_user_id: webapp.server_user_id,
-    server: serverData,
-    name: webapp.name,
-    rootPath: webapp.rootPath,
-    publicPath: webapp.publicPath,
-    phpVersion: webapp.phpVersion,
-    stack: webapp.stack,
-    stackMode: webapp.stackMode,
-    type: webapp.type,
-    defaultApp: webapp.defaultApp,
-    alias: webapp.alias,
-    pullKey1: webapp.pullKey1,
-    pullKey2: webapp.pullKey2,
-    created_at: webapp.created_at,
-  })) || [];
+function parseWebapps(data: WebAppResponse, serverData: Server): WebApp[] {
+  return (
+    data?.data?.map((webapp: WebApp) => ({
+      id: webapp.id,
+      server_user_id: webapp.server_user_id,
+      server: serverData,
+      name: webapp.name,
+      rootPath: webapp.rootPath,
+      publicPath: webapp.publicPath,
+      phpVersion: webapp.phpVersion,
+      stack: webapp.stack,
+      stackMode: webapp.stackMode,
+      type: webapp.type,
+      defaultApp: webapp.defaultApp,
+      alias: webapp.alias,
+      pullKey1: webapp.pullKey1,
+      pullKey2: webapp.pullKey2,
+      created_at: webapp.created_at,
+    })) || []
+  );
 }
 
 function sleep(ms: number) {

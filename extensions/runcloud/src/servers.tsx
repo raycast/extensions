@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Action, List, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { RequestInit } from "node-fetch";
 
@@ -23,9 +23,7 @@ export default function Command() {
 
   const fetchServers = async (page: number): Promise<Server[]> => {
     try {
-      const url = `https://manage.runcloud.io/api/v2/servers?page=${page}&search=${encodeURIComponent(
-        searchText
-      )}`;
+      const url = `https://manage.runcloud.io/api/v2/servers?page=${page}&search=${encodeURIComponent(searchText)}`;
       const options: RequestInit = {
         headers: {
           Authorization: `Basic ${encodedCredentials}`,
@@ -34,7 +32,7 @@ export default function Command() {
         },
       };
       const response = await fetch(url, options);
-      const data = await response.json();
+      const data = (await response.json()) as ServerResponse;
       return parseFetchResponse(data);
     } catch (error) {
       console.error("Error fetching servers:", error);
@@ -61,12 +59,7 @@ export default function Command() {
   }, [searchText, apiKey, apiSecret]);
 
   return (
-    <List
-      isLoading={loading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search servers.."
-      throttle
-    >
+    <List isLoading={loading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search servers.." throttle>
       <List.Section title="Servers" subtitle={servers.length + ""}>
         {servers.map((server) => (
           <SearchListItem key={server.id} server={server} />
@@ -82,9 +75,7 @@ function SearchListItem({ server }: { server: Server }) {
     <List.Item
       title={server.name}
       subtitle={server.ipAddress}
-      accessories={[
-        { text: `PHP CLI: ${server.phpCLIVersion}` }
-      ]}
+      accessories={[{ text: `PHP CLI: ${server.phpCLIVersion}` }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -97,6 +88,10 @@ function SearchListItem({ server }: { server: Server }) {
       }
     />
   );
+}
+
+interface ServerResponse {
+  data: Server[];
 }
 
 interface Server {
@@ -117,22 +112,24 @@ interface Server {
   created_at: string;
 }
 
-function parseFetchResponse(data: any): Server[] {
-  return data?.data?.map((server: any) => ({
-    id: server.id,
-    name: server.name,
-    provider: server.provider,
-    ipAddress: server.ipAddress,
-    country_iso_code: server.country_iso_code,
-    os: server.os,
-    osVersion: server.osVersion,
-    connected: server.connected,
-    online: server.online,
-    agentVersion: server.agentVersion,
-    phpCLIVersion: server.phpCLIVersion,
-    softwareUpdate: server.softwareUpdate,
-    securityUpdate: server.securityUpdate,
-    transferStatus: server.transferStatus,
-    created_at: server.created_at,
-  })) || [];
+function parseFetchResponse(data: ServerResponse): Server[] {
+  return (
+    data?.data?.map((server: Server) => ({
+      id: server.id,
+      name: server.name,
+      provider: server.provider,
+      ipAddress: server.ipAddress,
+      country_iso_code: server.country_iso_code,
+      os: server.os,
+      osVersion: server.osVersion,
+      connected: server.connected,
+      online: server.online,
+      agentVersion: server.agentVersion,
+      phpCLIVersion: server.phpCLIVersion,
+      softwareUpdate: server.softwareUpdate,
+      securityUpdate: server.securityUpdate,
+      transferStatus: server.transferStatus,
+      created_at: server.created_at,
+    })) || []
+  );
 }
