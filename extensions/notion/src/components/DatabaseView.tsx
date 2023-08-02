@@ -13,14 +13,24 @@ type DatabaseViewProps = {
   databaseView?: DatabaseView;
   setDatabaseView?: (view: DatabaseView) => Promise<void>;
   setRecentPage: (page: Page) => Promise<void>;
+  removeRecentPage: (id: string) => Promise<void>;
   mutate: () => Promise<void>;
   users?: User[];
   sort?: "last_edited_time" | "created_time";
 };
 
 export function DatabaseView(props: DatabaseViewProps) {
-  const { databaseId, databasePages, databaseProperties, databaseView, setDatabaseView, mutate, setRecentPage, users } =
-    props;
+  const {
+    databaseId,
+    databasePages,
+    databaseProperties,
+    databaseView,
+    setDatabaseView,
+    mutate,
+    setRecentPage,
+    removeRecentPage,
+    users,
+  } = props;
 
   const viewType = databaseView?.type ?? "list";
   const propertyId = databaseView?.kanban?.property_id;
@@ -38,6 +48,7 @@ export function DatabaseView(props: DatabaseViewProps) {
             databaseView={databaseView}
             setDatabaseView={setDatabaseView}
             setRecentPage={setRecentPage}
+            removeRecentPage={removeRecentPage}
             users={users}
           />
         ))}
@@ -164,6 +175,7 @@ export function DatabaseView(props: DatabaseViewProps) {
             page={p}
             icon={ds.icon}
             setRecentPage={setRecentPage}
+            removeRecentPage={removeRecentPage}
             users={users}
             customActions={[
               <ActionEditPageProperty

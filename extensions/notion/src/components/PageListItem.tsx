@@ -1,5 +1,5 @@
 import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues, Color } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
 import { deletePage, notionColorToTintColor, getPageIcon } from "../utils/notion";
@@ -18,6 +18,7 @@ type PageListItemProps = {
   databaseProperties?: DatabaseProperty[];
   setDatabaseView?: (databaseView: DatabaseView) => Promise<void>;
   setRecentPage: (page: Page) => Promise<void>;
+  removeRecentPage: (id: string) => Promise<void>;
   mutate: () => Promise<void>;
   users?: User[];
   icon?: Image.ImageLike;
@@ -30,6 +31,7 @@ export function PageListItem({
   databaseProperties,
   databaseView,
   setRecentPage,
+  removeRecentPage,
   setDatabaseView,
   icon = getPageIcon(page),
   users,
@@ -91,7 +93,14 @@ export function PageListItem({
       <Action.Push
         title="Navigate to Database"
         icon={Icon.List}
-        target={<DatabaseList databasePage={page} setRecentPage={setRecentPage} users={users} />}
+        target={
+          <DatabaseList
+            databasePage={page}
+            setRecentPage={setRecentPage}
+            removeRecentPage={removeRecentPage}
+            users={users}
+          />
+        }
       />
     ),
   };
@@ -108,8 +117,7 @@ export function PageListItem({
   return (
     <List.Item
       title={title}
-      icon={icon}
-      subtitle={page.object === "database" ? "Database" : undefined}
+      icon={{ value: icon, tooltip: page.object === "database" ? "Database" : "Page" }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
@@ -163,12 +171,13 @@ export function PageListItem({
                 if (
                   await confirmAlert({
                     title: "Delete Page",
-                    icon: Icon.Trash,
+                    icon: { source: Icon.Trash, tintColor: Color.Red },
                     message:
                       "Do you want to delete this page? Don't worry, you'll be able to restore it from Notion's trash.",
                   })
                 ) {
                   await deletePage(page.id);
+                  await removeRecentPage(page.id);
                   await mutate();
                 }
               }}

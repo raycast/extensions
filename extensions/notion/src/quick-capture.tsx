@@ -116,7 +116,7 @@ function QuickCapture() {
       }
 
       if (text && validateUrl(text)) {
-        setValue("url", text);
+        setValue("url", text.trim());
       }
     }
 

@@ -5,7 +5,7 @@ import { PageListItem, View } from "./components";
 import { useRecentPages, useSearchPages, useUsers } from "./hooks";
 
 function Search() {
-  const { data: recentPages, setRecentPage } = useRecentPages();
+  const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
   const [searchText, setSearchText] = useState<string>("");
   const { data: searchPages, isLoading, mutate } = useSearchPages(searchText);
   const { data: users } = useUsers();
@@ -34,6 +34,7 @@ function Search() {
                   users={users}
                   mutate={mutate}
                   setRecentPage={setRecentPage}
+                  removeRecentPage={removeRecentPage}
                 />
               );
             })}

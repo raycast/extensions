@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Form, showToast, useNavigation, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Image, Toast } from "@raycast/api";
 import { useState } from "react";
 
 import {
@@ -29,7 +29,7 @@ export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: Cr
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
 
   const { pop } = useNavigation();
-  async function handleSubmit(values: Form.Values, openPage: boolean) {
+  async function handleSubmit(values: Form.Values) {
     const titleKey = Object.keys(values).find((key) => key.includes("property::title"));
     if (!titleKey || !values[titleKey]) {
       showToast({
@@ -50,11 +50,24 @@ export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: Cr
       const page = await createDatabasePage(values);
 
       if (page) {
-        await showToast({ style: Toast.Style.Success, title: "Created page" });
-
-        if (openPage) {
-          handleOnOpenPage(page, setRecentPage);
-        }
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Created page",
+          primaryAction: {
+            title: "Open Page",
+            shortcut: { modifiers: ["cmd"], key: "o" },
+            onAction: () => handleOnOpenPage(page, setRecentPage),
+          },
+          secondaryAction: page.url
+            ? {
+                title: "Copy URL",
+                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                onAction: () => {
+                  Clipboard.copy(page.url as string);
+                },
+              }
+            : undefined,
+        });
 
         if (mutate) {
           mutate();
@@ -84,16 +97,7 @@ export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: Cr
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.SubmitForm
-              title="Create Page"
-              icon={Icon.Plus}
-              onSubmit={(values) => handleSubmit(values, false)}
-            />
-            <Action.SubmitForm
-              title="Create and Open Page"
-              icon={Icon.Plus}
-              onSubmit={(values) => handleSubmit(values, true)}
-            />
+            <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={(values) => handleSubmit(values)} />
           </ActionPanel.Section>
           {databaseView && setDatabaseView ? (
             <ActionPanel.Section title="View options">
@@ -258,19 +262,19 @@ export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: Cr
           }
         })}
       <Form.Separator />
-      <Form.TextArea id="content" title="Page Content" enableMarkdown />
-      <Form.Description
-        text={`Parses Markdown content into Notion Blocks.
-- Supports all heading types (heading depths 4, 5, 6 are treated as 3 for Notion)
-- Supports numbered lists, bulleted lists, to-do lists
-- Supports italics, bold, strikethrough, inline code, hyperlinks, equations
-- Code blocks
-- Block quotes
-- Tables
+      <Form.TextArea
+        id="content"
+        title="Page Content"
+        enableMarkdown
+        info="Parses Markdown to Notion Blocks. 
+        
+It supports:
+- Headings (levels 4 to 6 are treated as 3 on Notion)
+- Numbered, bulleted, and to-do lists
+- Code blocks, block quotes, and tables
+- Text formatting; italics, bold, strikethrough, inline code, hyperlinks
 
-Per Notion limitations, these markdown attributes are not supported:
-- HTML tags (removed)
-- Thematic breaks (removed)`}
+Please note that HTML tags and thematic breaks are not supported in Notion due to its limitations."
       />
     </Form>
   );

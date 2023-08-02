@@ -12,10 +12,11 @@ import { CreateDatabaseForm } from "./forms";
 type DatabaseListProps = {
   databasePage: Page;
   setRecentPage: (page: Page) => Promise<void>;
+  removeRecentPage: (id: string) => Promise<void>;
   users?: User[];
 };
 
-export function DatabaseList({ databasePage, setRecentPage, users }: DatabaseListProps) {
+export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, users }: DatabaseListProps) {
   const databaseId = databasePage.id;
   const databaseName = getPageName(databasePage);
   const [searchText, setSearchText] = useState<string>();
@@ -70,6 +71,7 @@ export function DatabaseList({ databasePage, setRecentPage, users }: DatabaseLis
         sort={sort}
         mutate={mutate}
         setRecentPage={setRecentPage}
+        removeRecentPage={removeRecentPage}
         users={users}
       />
 

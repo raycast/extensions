@@ -104,11 +104,22 @@ export function useRecentPages() {
     mutate();
   }
 
+  async function removeRecentPage(id: string) {
+    if (!data) return;
+
+    const updatedPages = data.filter((page) => page.id !== id);
+
+    console.log(updatedPages);
+    await LocalStorage.setItem("RECENTLY_OPENED_PAGES", JSON.stringify(updatedPages));
+    mutate();
+  }
+
   return {
     data,
     isLoading,
     mutate,
     setRecentPage,
+    removeRecentPage,
   };
 }
 
