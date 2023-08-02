@@ -46,14 +46,26 @@ export default function PersonDetails(props: PersonDetailsProps) {
 }
 
 const getMarkdown = (data: PersonDetails): string => {
+  if (data.isProfilePrivate) {
+    return "Users's profile data is set to private. \n\n You can view profiles for users who have made their profile public";
+  }
+
   return `
 # ${data.name}
  ${data.avatar ? `<img src="${data.avatar}" alt="Image" height="225">` : ""}
 
-${data.description ? `${convertHtmlToCommonMark(data.description)} [...more](${data.url})` : ""}
+${getProfileDescription(data)}
 
 ${data.rating ? getBibliographyMarkdown(data) : ""}
   `;
+};
+
+const getProfileDescription = (data: PersonDetails): string => {
+  if (data.description) {
+    return `${convertHtmlToCommonMark(data.description)} [...more](${data.url})`;
+  } else {
+    return `View full profile on [Goodreads](${data.url})`;
+  }
 };
 
 const getBibliographyMarkdown = (data: PersonDetails): string => {

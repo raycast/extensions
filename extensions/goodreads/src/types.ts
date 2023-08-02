@@ -43,6 +43,7 @@ export interface Person {
 
 export interface PersonDetails extends Pick<Person, "id" | "name" | "avatar"> {
   url: string;
+  isProfilePrivate?: boolean;
   website?: string;
   books?: Array<Book>;
   description?: string;

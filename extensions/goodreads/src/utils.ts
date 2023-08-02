@@ -107,6 +107,13 @@ const PERSON_DETAILS_PAGE_EXTRACTION_MAP = {
     selector: "div.authorLeftContainer a img",
     value: "src",
   },
+  avatarFallback: {
+    selector: "div.leftAlignedProfilePicture a img",
+    value: "src",
+  },
+  privateProfile: {
+    selector: 'div[id="privateProfile"]',
+  },
   bioDataTitle: [
     {
       selector: "div.rightContainer div.dataTitle",
@@ -222,6 +229,7 @@ export const extractEntitiesFromPersonDetailsPage = (html: string, url: string):
     name,
     userProfileName,
     avatar,
+    avatarFallback,
     bioDataText,
     bioDataLink,
     description,
@@ -229,6 +237,7 @@ export const extractEntitiesFromPersonDetailsPage = (html: string, url: string):
     ratingCount,
     reviewCount,
     bioDataTitle,
+    privateProfile,
   } = parse(PERSON_DETAILS_PAGE_EXTRACTION_MAP, html);
 
   const personName = (name || userProfileName)?.trim();
@@ -236,7 +245,8 @@ export const extractEntitiesFromPersonDetailsPage = (html: string, url: string):
   const result: PersonDetails = {
     id: personName,
     name: personName,
-    avatar,
+    isProfilePrivate: !!privateProfile,
+    avatar: avatar || avatarFallback,
     url,
     description: description[0],
     rating,
