@@ -142,6 +142,8 @@ function getItemIcon(item: RefData): string {
       return "conferencePaper.png";
     case "document":
       return "document.png";
+    case "preprint":
+      return "preprint.png";
     default:
       return "default.png";
   }
