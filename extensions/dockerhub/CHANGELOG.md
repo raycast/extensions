@@ -2,7 +2,7 @@
 
 ## [Fix] - 2023-07-28
 
-- Fixed Pull Image Shortcut
+- Fixed Pull Image Shortcut ⌘+⇧+p instead of ⌘+p
 
 ## [Feature] - 2023-06-12
 
