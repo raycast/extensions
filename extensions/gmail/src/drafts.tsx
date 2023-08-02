@@ -12,7 +12,8 @@ export default function UnreadMailsRootCommand() {
     async (q: string) => {
       return await getGMailMessages(q);
     },
-    [query]
+    [query],
+    { keepPreviousData: true }
   );
   const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });
   if (error) {

@@ -13,7 +13,8 @@ export default function MessageRootCommand() {
     async (q: string) => {
       return await getGMailMessages(q);
     },
-    [query]
+    [query],
+    { keepPreviousData: true }
   );
   const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });
   if (error) {
