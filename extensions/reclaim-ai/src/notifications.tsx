@@ -4,11 +4,12 @@ import { addDays, differenceInHours, endOfDay, format, formatDistance, isWithinI
 import { useMemo } from "react";
 import { useEvent } from "./hooks/useEvent";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
+import { useUser } from "./hooks/useUser";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
+import { miniDuration } from "./utils/dates";
 import { eventColors, truncateEventSize } from "./utils/events";
 import { parseEmojiField } from "./utils/string";
-import { miniDuration } from "./utils/dates";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
@@ -56,6 +57,8 @@ const EventsSection = ({ events, sectionTitle }: { events: Event[]; sectionTitle
 export default function Command() {
   const { apiToken, apiUrl, upcomingEventsCount } = getPreferenceValues<NativePreferences>();
 
+  const { currentUser } = useUser();
+
   const NUMBER_OF_EVENTS = Number(upcomingEventsCount) || 5;
 
   const fetchHeaders = {
@@ -82,6 +85,10 @@ export default function Command() {
     keepPreviousData: true,
   });
 
+  const showDeclinedEvents = useMemo(() => {
+    return !!currentUser?.settings.showDeclinedEvents;
+  }, [currentUser]);
+
   const events = useMemo<EventSection[]>(() => {
     if (!eventData) return [];
 
@@ -93,6 +100,9 @@ export default function Command() {
         section: "NOW",
         sectionTitle: "Now",
         events: eventData
+          .filter((event) => {
+            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+          })
           .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
@@ -110,6 +120,9 @@ export default function Command() {
         sectionTitle: "Upcoming events",
         events: eventData
           .filter((event) => {
+            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+          })
+          .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
           .filter((event) => {
@@ -124,7 +137,7 @@ export default function Command() {
     ];
 
     return events.filter((event) => event.events.length > 0);
-  }, [eventData]);
+  }, [eventData, showDeclinedEvents]);
 
   const handleOpenReclaim = () => {
     open("https://app.reclaim.ai");

@@ -1,5 +1,9 @@
 # reclaim Changelog
 
+## [Update] - 2023-08-02
+
+- Add filter to remove declined events in MenuBar.
+
 ## [Update] - 2023-07-25
 
 - Updated keywords and README
