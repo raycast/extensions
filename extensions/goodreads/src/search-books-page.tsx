@@ -14,7 +14,7 @@ interface SearchBooksPageProps {
 
 export default function SearchBooksPage(props: SearchBooksPageProps) {
   const [searchQuery, setSearch] = useState(props.arguments.title);
-  const { data, isLoading } = useCachedPromise(fetchBooksByTitle, [searchQuery]);
+  const { data, isLoading } = useCachedPromise(fetchBooksByTitle, [searchQuery], { execute: searchQuery.length > 0 });
 
   return (
     <List
@@ -38,13 +38,13 @@ interface BookItemProps {
 function BookItem(props: BookItemProps) {
   const { book } = props;
   const { author, title, thumbnail, contentUrl, rating } = book;
-  const subtitle = `${author} · ${rating} ⭐️`;
   const detailsPageUrl = getDetailsPageUrl(contentUrl.detailsPage);
 
   return (
     <List.Item
       title={title}
-      subtitle={subtitle}
+      subtitle={author}
+      accessories={[{ text: `${rating} ⭐️` }]}
       icon={thumbnail ? { source: thumbnail } : Icon.Book}
       actions={
         <ActionPanel>
