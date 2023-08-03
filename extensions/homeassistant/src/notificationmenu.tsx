@@ -14,13 +14,22 @@ function showCountInMenu(): boolean {
   return (prefs.showcount as boolean) === true;
 }
 
+function updatesIndicatorPreference(): boolean {
+  const prefs = getPreferenceValues();
+  const val = prefs.indicatorUpdates as boolean | undefined;
+  return val === false ? false : true;
+}
+
 export default function MenuCommand(): JSX.Element {
   const { notifications, states, error, isLoading } = useNotifications();
   const updates = states?.filter((s) => s.entity_id.startsWith("update.") && s.state === "on");
 
+  const updatesIndicator = updatesIndicatorPreference();
+
   const hacs = states?.find((s) => s.entity_id === "sensor.hacs");
   const hacsPendingUpdates = getHACSRepositories(hacs)?.length || 0;
-  const messageCount = (notifications?.length || 0) + (updates?.length || 0) + hacsPendingUpdates;
+  const messageCount =
+    (notifications?.length || 0) + (updatesIndicator ? (updates?.length || 0) + hacsPendingUpdates : 0);
   const valid = messageCount > 0;
   const title = showCountInMenu() && valid ? messageCount.toString() : undefined;
   const tooltip = () => {
