@@ -5,8 +5,6 @@
   "description": "Music Timer is the ultimate productivity app that fuses the Pomodoro Technique with your favorite tracks from Spotify and Apple Music!",
   "icon": "music_timer_command.png",
   "author": "JulienLacr0ix",
-  "owner": "MusicTimer",
-  "access": "public",
   "categories": [
     "Productivity"
   ],
