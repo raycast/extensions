@@ -63,7 +63,7 @@ export function QuestionDetail(props: { quid: string; url: string; title: string
 
 export function getDetails(
   query: string,
-  site: string
+  site: string,
 ): {
   markdown: string;
   metadata: Metadata;

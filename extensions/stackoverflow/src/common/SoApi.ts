@@ -144,7 +144,7 @@ export const searchResources = async (q: string, site: string = "stackoverflow")
   };
   const { qss, tss } = parseQuery(q);
   const query = `https://api.stackexchange.com/2.3/search/advanced?key=U4DMV*8nvpm3EOpvf69Rxw((&site=${site}&page=1&pagesize=20&order=desc&sort=relevance&q=${encodeURIComponent(
-    qss
+    qss,
   )}&tagged=${tss}&filter=default`;
   const response = await fetch(query, requestOptions);
   if (response.status !== 200) {
