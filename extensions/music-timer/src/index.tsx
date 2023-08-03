@@ -90,7 +90,7 @@ export default function Command() {
   }
 }
 
-async function action(time: number, break_time: number): Promise<Boolean> {
+async function action(time: number, break_time: number): Promise<boolean> {
   try {
     await runAppleScriptSilently(time, break_time);
     await closeMainWindow();
