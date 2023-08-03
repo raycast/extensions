@@ -72,7 +72,7 @@ const Feed = ({ id, title }: { id: IFeed['id']; title: IFeed['title'] }) => {
             <List.Item
               key={item.id}
               id={item.id}
-              title={item.title}
+              title={item?.title || "Title not found."}
               accessories={[
                 {
                   date: new Date(item.published),
