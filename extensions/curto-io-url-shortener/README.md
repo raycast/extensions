@@ -1,6 +1,6 @@
 # curto.io URL Shortener
 
-<img src=".github/preview.gif" />
+<img src="https://i.ibb.co/ZmMfWds/preview.gif" />
 
 Extension to shorten your url’s with [curto.io](https://curto.io/). Copy the url to shorten and then run the command which will put the shortened url in the clipboard.
 
