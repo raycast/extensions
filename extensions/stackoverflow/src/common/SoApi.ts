@@ -32,42 +32,6 @@ export type QueryResultItem = {
   answer_count: number;
 };
 
-export type AnswersResult = {
-  has_more: boolean;
-  quota_max: Number;
-  quota_remaining: Number;
-  items: AnswerData[];
-};
-
-export type AnswerData = {
-  owner: Owner;
-  is_accepted: boolean;
-  score?: number;
-  last_activity_date?: Date;
-  creation_date?: Date;
-  answer_id: number;
-  question_id?: number;
-  content_license?: string;
-  body_markdown: string;
-  link: string;
-};
-
-export type Owner = {
-  account_id: number;
-  reputation?: number;
-  user_id: number;
-  profile_image?: string;
-  display_name?: string;
-  link?: string;
-};
-
-export type SitesResult = {
-  has_more: boolean;
-  quota_max: Number;
-  quota_remaining: Number;
-  items: SiteData[];
-};
-
 export type SiteData = {
   aliases?: string[];
   styling?: StylingType;
