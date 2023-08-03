@@ -62,7 +62,11 @@ function HACSMenubarItem(props: { repo: HACSRepo | undefined; state: State }) {
     return null;
   }
   return (
-    <MenuBarSubmenu title={r.display_name || r.name} icon="hacs.svg">
+    <MenuBarSubmenu
+      title={r.display_name || r.name}
+      subtitle={`${r.installed_version} => ${r.available_version}`}
+      icon="hacs.svg"
+    >
       <OpenInBrowserMenubarItem title="Open HACS in Browser" url={ha.urlJoin("hacs/entry")} />
       <CopyEntityIDToClipboard state={props.state} />
     </MenuBarSubmenu>
