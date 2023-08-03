@@ -37,3 +37,14 @@ export async function callUpdateSkipService(state: State) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
 }
+
+export function getHACSRepositories(state?: State) {
+  if (!state || state.entity_id !== "sensor.hacs") {
+    return;
+  }
+  const repos: HACSRepo[] | undefined = state.attributes.repositories;
+  if (!repos || repos.length <= 0) {
+    return;
+  }
+  return repos;
+}

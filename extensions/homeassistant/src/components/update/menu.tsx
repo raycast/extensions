@@ -4,7 +4,8 @@ import { getFriendlyName } from "@lib/utils";
 import { getIcon, getStateValue } from "@components/state/utils";
 import { MenuBarSubmenu, OpenInBrowserMenubarItem } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
-import { callUpdateInstallService, callUpdateSkipService } from "./utils";
+import { HACSRepo, callUpdateInstallService, callUpdateSkipService, getHACSRepositories } from "./utils";
+import { ha } from "@lib/common";
 
 function UpdateOpenReleaseUrlMenubarItem(props: { state: State }) {
   const url = props.state.attributes.release_url;
@@ -50,7 +51,35 @@ export function UpdateMenubarItem(props: { state: State }) {
   );
 }
 
-export function UpdatesMenubarSection(props: { updates: State[] | undefined }) {
+function HACSMenubarItem(props: { repo: HACSRepo | undefined; state: State }) {
+  const r = props.repo;
+  if (!r || !r.display_name || !r.available_version || !r.name) {
+    return null;
+  }
+  return (
+    <MenuBarSubmenu title={r.name || r.display_name} icon="hacs.svg">
+      <OpenInBrowserMenubarItem title="Open HACS in Browser" url={ha.urlJoin("hacs/entry")} />
+      <CopyEntityIDToClipboard state={props.state} />
+    </MenuBarSubmenu>
+  );
+}
+
+export function HACSMenubarItems(props: { state: State | undefined }) {
+  const s = props.state;
+  if (!s) {
+    return null;
+  }
+  if (s.entity_id !== "sensor.hacs") {
+    return null;
+  }
+  const repos = getHACSRepositories(s);
+  if (!repos || repos.length <= 0) {
+    return null;
+  }
+  return <>{repos?.map((r, i) => <HACSMenubarItem key={i} repo={r} state={s} />)}</>;
+}
+
+export function UpdatesMenubarSection(props: { updates: State[] | undefined; hacs?: State }) {
   const updates = props.updates;
   if (!updates || updates.length <= 0) {
     return (
@@ -62,6 +91,7 @@ export function UpdatesMenubarSection(props: { updates: State[] | undefined }) {
   return (
     <MenuBarExtra.Section title="Updates">
       {updates?.map((b) => <UpdateMenubarItem key={b.entity_id} state={b} />)}
+      <HACSMenubarItems state={props.hacs} />
     </MenuBarExtra.Section>
   );
 }
