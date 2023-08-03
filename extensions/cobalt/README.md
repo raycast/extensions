@@ -19,7 +19,7 @@
 - Platform-specific customization settings
 
 <div align="center">
-    <img src="./media/example.png"/>
+    <img src="./metadata/cobalt-1.png"/>
 </div>
 
 ## Run Locally (development mode)

@@ -37,7 +37,7 @@
       "placeholder": "https://co.wuk.sh",
       "default": "https://co.wuk.sh",
       "type": "textfield",
-      "required": true
+      "required": false
     },
     {
       "name": "vimeoDownloadType",
