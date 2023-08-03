@@ -1,5 +1,6 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Detail, closeMainWindow } from "@raycast/api";
 import { runAppleScriptSilently } from "./utils";
+import { useState } from "react";
 
 const SESSIONS = [
   {
@@ -29,27 +30,72 @@ const SESSIONS = [
   },
 ];
 
+const markdown = `
+# Music Timer
+<img src="../assets/music_timer_icon.png" width="200" height="200"/>
+Apologies for the inconvenience, but it appears that Music Timer is not currently installed on your Mac. Please consider installing it to access all of its features.
+`;
+
 export default function Command() {
-  return (
-    <List>
-      {SESSIONS.map((item) => (
-        <List.Item
-          key={item.id}
-          icon="list-icon.png"
-          title={item.title}
-          subtitle={item.subtitle}
-          accessories={[{ text: item.accessory, icon: Icon.Play }]}
-          actions={
-            <ActionPanel>
-              <Action title="" onAction={() => action(item.time, item.break_time)} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
+  const [error, setError] = useState<Error>();
+
+  if (error) {
+    return (
+      <Detail
+        markdown={markdown}
+        navigationTitle="Download Music Timer"
+        metadata={
+          <Detail.Metadata>
+            <Detail.Metadata.TagList title="Category">
+              <Detail.Metadata.TagList.Item text="Productivity" color={"#1cd760"} />
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Link
+              title="Mac App Store"
+              target="https://apps.apple.com/app/id6446814612"
+              text="Download on the Mac App Store"
+            />
+          </Detail.Metadata>
+        }
+      />
+    );
+  } else {
+    return (
+      <List>
+        {SESSIONS.map((item) => (
+          <List.Item
+            key={item.id}
+            icon="list-icon.png"
+            title={item.title}
+            subtitle={item.subtitle}
+            accessories={[{ text: item.accessory, icon: Icon.Play }]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title=""
+                  onAction={() =>
+                    action(item.time, item.break_time).then((result) => {
+                      if (!result) {
+                        setError(new Error("Music Timer is not installed!"));
+                      }
+                    })
+                  }
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List>
+    );
+  }
 }
 
-async function action(time: number, break_time: number) {
-  await runAppleScriptSilently(time, break_time);
+async function action(time: number, break_time: number): Promise<Boolean> {
+  try {
+    await runAppleScriptSilently(time, break_time);
+    await closeMainWindow();
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

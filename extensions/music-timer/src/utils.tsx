@@ -1,4 +1,3 @@
-import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 /**
@@ -36,6 +35,5 @@ export function buildScriptEnsuringMusicTimerIsRunning(duration: number, breakDu
  * @returns A promise that is resolved when the AppleScript finished running
  */
 export async function runAppleScriptSilently(duration: number, breakDuration: number) {
-  await closeMainWindow();
   await runAppleScript(buildScriptEnsuringMusicTimerIsRunning(duration, breakDuration));
 }

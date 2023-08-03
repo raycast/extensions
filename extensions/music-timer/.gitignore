@@ -7,4 +7,5 @@
 raycast-env.d.ts
 
 # misc
+.vscode/*
 .DS_Store
