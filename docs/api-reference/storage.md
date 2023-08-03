@@ -1,4 +1,3 @@
-
 # Storage
 
 The storage APIs can be used to store data in Raycast's [local encrypted database](../information/security.md#data-storage).
