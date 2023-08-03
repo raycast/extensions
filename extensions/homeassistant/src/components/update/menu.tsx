@@ -15,7 +15,7 @@ function UpdateOpenReleaseUrlMenubarItem(props: { state: State }) {
   return <OpenInBrowserMenubarItem title="Open Release Notes" url={url} />;
 }
 
-function UpdateWithBackupMenubarItem(props: { state: State }) {
+function UpdateInstallMenubarItem(props: { state: State; backup?: boolean }) {
   const s = props.state;
   if (s.state !== "on") {
     return null;
@@ -24,7 +24,11 @@ function UpdateWithBackupMenubarItem(props: { state: State }) {
     return null;
   }
   return (
-    <MenuBarExtra.Item title="Update with Backup" icon={Icon.Download} onAction={() => callUpdateInstallService(s)} />
+    <MenuBarExtra.Item
+      title={props.backup === false ? "Update without Backup" : "Update with Backup"}
+      icon={Icon.Download}
+      onAction={() => callUpdateInstallService(s, { backup: props.backup })}
+    />
   );
 }
 
@@ -44,7 +48,8 @@ export function UpdateMenubarItem(props: { state: State }) {
   return (
     <MenuBarSubmenu title={getFriendlyName(s)} subtitle={getStateValue(s)} icon={getIcon(s)}>
       <UpdateOpenReleaseUrlMenubarItem state={s} />
-      <UpdateWithBackupMenubarItem state={s} />
+      <UpdateInstallMenubarItem state={s} />
+      <UpdateInstallMenubarItem state={s} backup={false} />
       <UpdateSkipMenubarItem state={s} />
       <CopyEntityIDToClipboard state={s} />
     </MenuBarSubmenu>
