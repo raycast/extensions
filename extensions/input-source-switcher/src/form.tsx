@@ -64,9 +64,9 @@ export default function main() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Paste To Active App" onSubmit={() => handlePaste(text)} />
+          <Action.SubmitForm title="Paste to Active App" onSubmit={() => handlePaste(text)} />
           <Action.SubmitForm
-            title="Copy To Clipboard"
+            title="Copy to Clipboard"
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             onSubmit={() => handleCopy(text)}
           />
