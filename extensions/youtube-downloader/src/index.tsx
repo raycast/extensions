@@ -84,10 +84,7 @@ export default function DownloadVideo() {
 
   const videoFormats = ytdl
     .filterFormats(formats, "videoonly")
-    .filter(
-      (format) =>
-        (format.container === "mp4" && !format.colorInfo) || (preferences.enableWebm && format.container === "webm")
-    );
+    .filter((format) => (format.container === "mp4" && !format.colorInfo) || format.container === "webm");
 
   return (
     <Form

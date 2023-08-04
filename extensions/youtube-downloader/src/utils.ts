@@ -14,7 +14,6 @@ export const preferences = getPreferenceValues<{
   downloadPath: string;
   ffmpegPath: string;
   ffprobePath: string;
-  enableWebm: boolean;
 }>();
 
 export type FormatOptions = {
