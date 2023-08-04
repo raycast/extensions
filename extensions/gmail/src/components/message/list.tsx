@@ -67,7 +67,7 @@ export function GMailMessageListItem(props: {
         value: fromParts && !props.detailsShown ? fromParts.name || fromParts.email : undefined,
         tooltip: fromParts && !props.detailsShown ? fromParts.email : undefined,
       }}
-      icon={data ? icon() : undefined}
+      icon={{ value: data ? icon() : undefined, tooltip: fromParts?.name || fromParts?.email || "" }}
       detail={
         <List.Item.Detail
           markdown={detail}
