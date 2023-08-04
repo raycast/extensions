@@ -1,6 +1,6 @@
 import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { getGMailMessageHeaderValue } from "../../lib/gmail";
-import { getAddressParts, getMessageInternalDate, isMailUnread } from "./utils";
+import { getAddressParts, getMessageFileAttachmentNames, getMessageInternalDate, isMailUnread } from "./utils";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAvatarIcon } from "@raycast/utils";
 import {
@@ -60,6 +60,7 @@ export function GMailMessageListItem(props: {
   const detail = [`# ${subject()}`, internalDate?.toLocaleString(), data.snippet]
     .filter((e) => e && e.length > 0)
     .join("\n\n");
+  const fileAttachments = getMessageFileAttachmentNames(data);
   return (
     <List.Item
       title={{ value: subject() || "", tooltip: props.detailsShown ? undefined : data.snippet }}
@@ -91,12 +92,24 @@ export function GMailMessageListItem(props: {
                   <List.Item.Detail.Metadata.TagList.Item text={r} icon={getAvatarIcon(getFirstValidLetter(r) || "")} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
+              {fileAttachments && fileAttachments.length > 0 && (
+                <List.Item.Detail.Metadata.TagList title="Attachments">
+                  {fileAttachments?.map((a) => (
+                    <List.Item.Detail.Metadata.TagList.Item text={a} icon={Icon.Paperclip} />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+              )}
             </List.Item.Detail.Metadata>
           }
         />
       }
       accessories={[
         { icon: unreadIcon(), tooltip: unreadIcon() ? "Unread" : undefined },
+        {
+          icon: fileAttachments && fileAttachments.length > 0 ? Icon.Paperclip : undefined,
+          text: fileAttachments && fileAttachments.length > 0 ? fileAttachments.length.toString() : undefined,
+          tooltip: fileAttachments && fileAttachments.length > 0 ? `Attachments: ${fileAttachments.length}` : undefined,
+        },
         {
           date: !props.detailsShown ? internalDate : undefined,
           tooltip: !props.detailsShown ? internalDate?.toLocaleString() : undefined,

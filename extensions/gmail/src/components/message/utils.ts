@@ -44,3 +44,8 @@ export function isMailDraft(message: gmail_v1.Schema$Message) {
 export function getMessageInternalDate(message: gmail_v1.Schema$Message) {
   return message.internalDate ? new Date(parseInt(message.internalDate)) : undefined;
 }
+
+export function getMessageFileAttachmentNames(message: gmail_v1.Schema$Message) {
+  const fileParts = message.payload?.parts?.filter((p) => p.filename && p.filename.length > 0);
+  return fileParts?.map((p) => p.filename as string);
+}
