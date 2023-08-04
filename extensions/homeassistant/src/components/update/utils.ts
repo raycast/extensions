@@ -10,16 +10,19 @@ export interface HACSRepo {
   available_version: string | undefined;
 }
 
-export async function callUpdateInstallService(state: State) {
+export async function callUpdateInstallService(state: State, options?: { backup?: boolean }) {
   try {
+    const backup = options?.backup === false ? false : true;
     if (
       await confirmAlert({
         title: `Installing Update ${state.attributes.title || ""}?
         `,
-        message: "Backup will be generated before if the integration supports it",
+        message: backup
+          ? "A Backup will be generated before. If the integration don't support backups an error will be thrown."
+          : "No Backup will be generated before! It is recommended to do this manually before starting the update.",
       })
     )
-      await ha.callService("update", "install", { entity_id: state.entity_id, backup: true });
+      await ha.callService("update", "install", { entity_id: state.entity_id, backup: backup });
   } catch (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
@@ -36,4 +39,15 @@ export async function callUpdateSkipService(state: State) {
   } catch (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
+}
+
+export function getHACSRepositories(state?: State) {
+  if (!state || state.entity_id !== "sensor.hacs") {
+    return;
+  }
+  const repos: HACSRepo[] | undefined = state.attributes.repositories;
+  if (!repos || repos.length <= 0) {
+    return;
+  }
+  return repos;
 }
