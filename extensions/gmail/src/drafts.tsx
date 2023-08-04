@@ -32,6 +32,10 @@ export default function UnreadMailsRootCommand() {
           />
         ))}
       </List.Section>
+      <List.EmptyView
+        title={!searchText || searchText.length <= 0 ? "No Drafts" : "No Draft-Mails found matching your Criteria"}
+        icon="gmail.svg"
+      />
     </List>
   );
 }

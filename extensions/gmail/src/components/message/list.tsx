@@ -72,7 +72,11 @@ export function GMailMessageListItem(props: {
           metadata={
             <List.Item.Detail.Metadata>
               {internalDate && (
-                <List.Item.Detail.Metadata.Label title="Received" text={internalDate?.toLocaleString()} />
+                <List.Item.Detail.Metadata.Label
+                  title="Received"
+                  text={internalDate?.toLocaleString()}
+                  icon={Icon.Clock}
+                />
               )}
               {fromParts?.name && (
                 <List.Item.Detail.Metadata.Label title="From" text={fromParts.name} icon={Icon.Person} />
