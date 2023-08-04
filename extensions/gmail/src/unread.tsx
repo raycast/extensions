@@ -30,6 +30,7 @@ export default function UnreadMailsRootCommand() {
             onDetailsShownChanged={setShowDetails}
             onRevalidate={revalidate}
             showUnreadAccessory={false}
+            allUnreadMessages={data?.map((m) => m.data)}
           />
         ))}
       </List.Section>
