@@ -42,7 +42,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.2",
+    "@raycast/api": "^1.56.3",
     "@raycast/utils": "^1.9.0",
     "bplist-parser": "^0.3.2",
     "node-git-current-branch": "^2.0.1",
