@@ -26,7 +26,7 @@ export function getAddressParts(text: string | undefined | null):
     return { name, email };
   } else {
     if (text.includes("@")) {
-      return { name: text.trim(), email: text.trim() };
+      return { name: undefined, email: text.trim() };
     } else {
       return { name: text.trim(), email: undefined };
     }

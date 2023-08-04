@@ -46,6 +46,8 @@ export function GMailMessageListItem(props: {
 
   const from = getGMailMessageHeaderValue(data, "From");
   const fromParts = getAddressParts(from);
+  const to = getGMailMessageHeaderValue(data, "To");
+  const toRecipients = to?.split(",");
   const icon = () => {
     const textIcon = getAvatarIcon(getFirstValidLetter(from, "?") || "");
     if (textIcon) {
@@ -62,7 +64,7 @@ export function GMailMessageListItem(props: {
     <List.Item
       title={{ value: subject() || "", tooltip: props.detailsShown ? undefined : data.snippet }}
       subtitle={{
-        value: fromParts && !props.detailsShown ? fromParts.name : undefined,
+        value: fromParts && !props.detailsShown ? fromParts.name || fromParts.email : undefined,
         tooltip: fromParts && !props.detailsShown ? fromParts.email : undefined,
       }}
       icon={data ? icon() : undefined}
@@ -79,11 +81,16 @@ export function GMailMessageListItem(props: {
                 />
               )}
               {fromParts?.name && (
-                <List.Item.Detail.Metadata.Label title="From" text={fromParts.name} icon={Icon.Person} />
+                <List.Item.Detail.Metadata.Label title="From Name" text={fromParts.name} icon={Icon.Person} />
               )}
               {fromParts?.email && (
-                <List.Item.Detail.Metadata.Label title="Address" text={fromParts.email} icon={Icon.Envelope} />
+                <List.Item.Detail.Metadata.Label title="From Address" text={fromParts.email} icon={Icon.Envelope} />
               )}
+              <List.Item.Detail.Metadata.TagList title="To">
+                {toRecipients?.map((r) => (
+                  <List.Item.Detail.Metadata.TagList.Item text={r} icon={getAvatarIcon(r)} />
+                ))}
+              </List.Item.Detail.Metadata.TagList>
             </List.Item.Detail.Metadata>
           }
         />
