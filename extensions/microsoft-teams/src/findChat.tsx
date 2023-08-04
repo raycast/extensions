@@ -13,8 +13,8 @@ const chatIcon = {
 
 function chatMemberNames(chat: Chat) {
   const meId = currentUserId();
-  const membersButMe = chat.members.filter((m) => m.userId !== meId);
-  return membersButMe.map((m) => m.displayName);
+  const membersButMe = chat.members?.filter((m) => m.userId !== meId);
+  return membersButMe?.map((m) => m.displayName) ?? [];
 }
 
 function chatTitle(chat: Chat) {
@@ -25,8 +25,8 @@ function chatTitle(chat: Chat) {
     if (memberNames.length) {
       return memberNames.join(", ");
     } else {
-      const msgFrom = chat.lastMessagePreview.from;
-      return msgFrom.application?.displayName ?? msgFrom.user?.displayName ?? "Unknown";
+      const msgFrom = chat.lastMessagePreview?.from;
+      return msgFrom?.application?.displayName ?? msgFrom?.user?.displayName ?? "Unknown";
     }
   }
 }
@@ -36,7 +36,7 @@ function ChatItem({ chat }: { chat: Chat }) {
     <List.Item
       icon={{ source: chatIcon[chat.chatType], tintColor: Color.Purple }}
       title={chatTitle(chat)}
-      accessories={[{ tag: new Date(chat.lastMessagePreview.createdDateTime) }]}
+      accessories={[{ tag: new Date(chat.lastMessagePreview?.createdDateTime ?? chat.createdDateTime) }]}
       actions={
         <ActionPanel>
           <OpenUrlAction url={chat.webUrl} />

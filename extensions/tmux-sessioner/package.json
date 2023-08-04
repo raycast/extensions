@@ -4,7 +4,7 @@
   "title": "Tmux Sessioner",
   "description": "Quick Tmux Session Switcher",
   "icon": "command-icon.png",
-  "author": "loishy",
+  "author": "louishuyng",
   "categories": [
     "Developer Tools"
   ],
@@ -26,6 +26,12 @@
       "name": "create_new_session",
       "title": "Create New Session",
       "description": "Create New Tmux Session",
+      "mode": "view"
+    },
+    {
+      "name": "manage_tmux_windows",
+      "title": "Manage Tmux Windows",
+      "description": "Manage Tmux Windows that user can switch or delete any tmux window from here",
       "mode": "view"
     }
   ],

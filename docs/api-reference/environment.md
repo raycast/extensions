@@ -44,12 +44,12 @@ function canAccess(api: any): bool;
 #### Example
 
 ```typescript
-import { unstable_AI, showHUD, environment } from "@raycast/api";
+import { AI, showHUD, environment } from "@raycast/api";
 import fs from "fs";
 
 export default async function main() {
   if (environment.canAccess(AI)) {
-    const answer = await unstable_AI.ask("Suggest 5 jazz songs");
+    const answer = await AI.ask("Suggest 5 jazz songs");
     await Clipboard.copy(answer);
   } else {
     await showHUD("You don't have access :(");

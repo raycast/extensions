@@ -63,6 +63,10 @@ export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) =
                   title={`Open SSH Connection (${site.username})`}
                   url={`ssh://${site.username}@${server.ip_address}`}
                 />
+                <Action.CopyToClipboard
+                  title="Copy SSH Connection String"
+                  content={`ssh://${site.username}@${server.ip_address}`}
+                />
               </ActionPanel>
             }
           />

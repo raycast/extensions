@@ -1,4 +1,4 @@
-import got from 'got';
+import got, { HTTPError } from 'got';
 import { URL } from 'url';
 import { Comment, MyPreferences, Task, TimeBlock, User } from './types';
 
@@ -27,7 +27,19 @@ export const getCurrentUser = (idToken?: string): Promise<User> => {
 };
 
 export const findTasks = async (
-  { q, today, showCompleted, userId }: { q?: string; today?: boolean; showCompleted?: boolean; userId?: string } = {},
+  {
+    q,
+    today,
+    showCompleted,
+    userId,
+    status,
+  }: {
+    q?: string;
+    today?: boolean;
+    showCompleted?: boolean;
+    userId?: string;
+    status?: 'inprogress' | 'starttwoweeks';
+  } = {},
   idToken?: string
 ) => {
   if (!idToken) {
@@ -52,6 +64,10 @@ export const findTasks = async (
     url.searchParams.set('user_resource_ids', userId);
   }
 
+  if (status) {
+    url.searchParams.set('status', status);
+  }
+
   return got(url.toString(), { headers: { Authorization: `Bearer ${idToken}` } }).json();
 };
 
@@ -68,20 +84,27 @@ export const punchIn = async (taskId: number, idToken?: string): Promise<void> =
     .json();
 };
 
-export const punchOut = async (timeblockId: number, message?: string, idToken?: string): Promise<void> => {
+export const punchOut = async (timeblockId: number, idToken: string, message?: string): Promise<void> => {
   if (!idToken) {
     throw new Error('not authenticated');
   }
 
-  return got
-    .post(`https://api.teamgantt.com/v1/times?punch_out`, {
-      headers: { Authorization: `Bearer ${idToken}` },
-      json: { id: timeblockId, message },
-    })
-    .json();
+  try {
+    return await got
+      .post(`https://api.teamgantt.com/v1/times?punch_out=true`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+        json: { id: timeblockId, message },
+      })
+      .json();
+  } catch (e) {
+    if (e instanceof HTTPError) {
+      console.log(e.response.body);
+    }
+    throw e;
+  }
 };
 
-export const getCurrentTimeBlock = (idToken?: string): Promise<TimeBlock> => {
+export const getCurrentTimeBlock = (idToken: string): Promise<TimeBlock> => {
   if (!idToken) {
     throw new Error('not authenticated');
   }

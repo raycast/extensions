@@ -1,6 +1,7 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import { SourceLanguage, TargetLanguage, sendTranslateRequest, source_languages, target_languages } from "./utils";
+import TranslationView from "./components/TranslationView";
 
 interface Values {
   key?: string;
@@ -21,7 +22,12 @@ function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   );
 }
 
-const Command = () => {
+const Command = (props: LaunchProps) => {
+  // Check whether component is called with an existing value for translation
+  if (props?.launchContext?.translation) {
+    return <TranslationView {...props} />;
+  }
+
   const [loading, setLoading] = useState(false);
   const [sourceText, setSourceText] = useState("");
   const [translation, setTranslation] = useState("");

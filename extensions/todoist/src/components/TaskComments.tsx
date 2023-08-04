@@ -66,7 +66,7 @@ export default function TaskComments({ task }: TaskCommentsProps) {
             title={title}
             subtitle={formatDistanceToNow(new Date(comment.posted_at), { addSuffix: true })}
             detail={<List.Item.Detail markdown={markdown} />}
-            {...(comment.file_attachment ? { accessoryIcon: Icon.Link } : {})}
+            {...(comment.file_attachment ? { accessories: [{ icon: Icon.Link }] } : {})}
             actions={
               <ActionPanel>
                 {data?.user.id === comment.posted_uid ? (

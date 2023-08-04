@@ -12,6 +12,7 @@ import ListActions from "./list_actions";
 import { useMemo } from "react";
 import urlRegexSafe from "url-regex-safe";
 import { useTodo } from "./hooks/useTodo";
+import MarkAllIncompleteAction from "./mark_all_incomplete";
 
 const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number; sectionKey: keyof TodoSections }) => {
   const { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin } = useTodo({ item, idx, sectionKey });
@@ -110,6 +111,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
                 </ActionPanel.Submenu>
               ))}
             <DeleteAllAction />
+            <MarkAllIncompleteAction />
             <SearchModeAction />
           </ActionPanel>
         ) : (

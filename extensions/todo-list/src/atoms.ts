@@ -32,12 +32,12 @@ const getInitialValue = () => {
           storedTodo.push(todo);
         }
       }
-      const convertedStoredItems = {
+
+      return {
         pinned: storedPinned,
         todo: storedTodo,
         completed: storedCompleted,
       };
-      return convertedStoredItems;
     } else {
       return storedItems;
     }

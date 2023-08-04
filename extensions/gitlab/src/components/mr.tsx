@@ -351,6 +351,10 @@ export function MRList({
   );
 }
 
+export function MRListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Merge Requests" icon={{ source: "mropen.png", tintColor: Color.PrimaryText }} />;
+}
+
 export function MRListItem(props: {
   mr: MergeRequest;
   refreshData: () => void;

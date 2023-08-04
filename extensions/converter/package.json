@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "converter",
   "title": "Converter",
-  "description": "Arbitrary input, direct output. Includes Base converter, Code converter, etc.",
+  "description": "Arbitrary input, direct output. Includes Base converter, Byte converter, Code converter, etc.",
   "icon": "converter-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "Saafo"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools",
@@ -53,6 +56,13 @@
       "icon": "code-converter-icon.png",
       "description": "Convert between different character encodings: Unicode, Base64, UTF-8, ASCII, &#xXXXX, URL.",
       "mode": "view"
+    },
+    {
+      "name": "byte-converter",
+      "title": "Byte Converter",
+      "description": "Convert among different byte unit: b, B, KB, MB, GB, etc.",
+      "icon": "byte-converter-icon.png",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -84,7 +94,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0"
+    "@raycast/api": "^1.51.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

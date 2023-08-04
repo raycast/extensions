@@ -3,7 +3,8 @@ import {
   prepareItemsForCache as _prepareItemsForCache,
   prepareFoldersForCache as _prepareFoldersForCache,
 } from "~/components/searchVault/utils/caching";
-import useVaultCaching, { CACHE_KEYS } from "~/components/searchVault/utils/useVaultCaching";
+import useVaultCaching from "~/components/searchVault/utils/useVaultCaching";
+import { CACHE_KEYS } from "~/constants/general";
 import { Cache as _Cache } from "~/utils/cache";
 import { getMockFolders, getMockItems } from "~/utils/testing/mocks";
 

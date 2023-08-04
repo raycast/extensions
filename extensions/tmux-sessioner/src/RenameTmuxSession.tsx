@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 
 import { useState } from "react";
-import { getAllSession, renameSession } from "./sessionUtils";
+import { getAllSession, renameSession } from "./utils/sessionUtils";
 
 export const RenameTmuxSession = ({ session, callback }: { session: string; callback?: () => void }) => {
   const [loading, setLoading] = useState(false);

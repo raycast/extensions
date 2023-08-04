@@ -495,6 +495,12 @@ export default function Command() {
 
 ## Types
 
+### Grid.Item.Accessory
+
+An interface describing an accessory view in a `Grid.Item`.
+
+![Grid.Item accessories illustration](../../.gitbook/assets/grid-item-accessories.png)
+
 ### Grid.Inset
 
 An enum representing the amount of space there should be between a Grid Item's content and its borders. The absolute value depends on the value of [Grid](#grid)'s or [Grid.Section](#grid.section)'s `columns` prop.

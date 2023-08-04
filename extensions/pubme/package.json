@@ -16,6 +16,94 @@
   ],
   "preferences": [
     {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "Specify how often you want to reload the home page.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "always",
+          "value": "0"
+        },
+        {
+          "title": "every 1 minute",
+          "value": "60000"
+        },
+        {
+          "title": "every 5 minutes",
+          "value": "300000"
+        },
+        {
+          "title": "every 10 minutes",
+          "value": "600000"
+        },
+        {
+          "title": "every 15 minutes",
+          "value": "900000"
+        },
+        {
+          "title": "every 30 minutes",
+          "value": "1800000"
+        },
+        {
+          "title": "hourly",
+          "value": "3600000"
+        },
+        {
+          "title": "every 3 hours",
+          "value": "10800000"
+        },
+        {
+          "title": "every 12 hours",
+          "value": "43200000"
+        },
+        {
+          "title": "daily",
+          "value": "86400000"
+        }
+      ],
+      "default": "86400000",
+      "required": false
+    },
+    {
+      "name": "historyItemsNumber",
+      "title": "Number of history items on the home page",
+      "description": "Choose how many history items you want to see.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "history turned off",
+          "value": "0"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "15",
+          "value": "15"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "25",
+          "value": "25"
+        }
+      ],
+      "default": "3",
+      "required": false
+    },
+    {
       "name": "retmax",
       "type": "textfield",
       "default": "20",

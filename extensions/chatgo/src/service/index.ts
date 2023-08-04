@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ChatParams, GetImagesOps } from "../type";
+import { ChatParams, GetImagesOps, TemplateBase, TemplateBaseOps } from "../type";
 
 export const HOST = "http://www.chatgo.pro";
 
@@ -11,16 +11,8 @@ export const loginAccount = (ops: { email: string; password: string }) => {
   });
 };
 
-export const getAccountBalance = (token: string) => {
+export const getAccountBalanceService = (token: string) => {
   return axios.get(`/api/account/balance`, {
-    headers: {
-      Authorization: token,
-    },
-  });
-};
-
-export const getMyTemplateListService = (token: string) => {
-  return axios.get(`/api/prompt/myTemplate/list`, {
     headers: {
       Authorization: token,
     },
@@ -60,6 +52,7 @@ export const chat = (ops: ChatParams) => {
             const jsonData: any = JSON.parse(message);
             onMessage(jsonData);
           } catch (error) {
+            // TODO
             // toast.title = "Error";
             // toast.message = `Couldn't stream message`;
             // toast.style = Toast.Style.Failure;
@@ -93,19 +86,6 @@ export const getImagesService = (ops: GetImagesOps, token: string) => {
   });
 };
 
-export const getPromptTemplatesService = async (ops: { name?: string; tag?: string }, token: string) => {
-  const { tag = "", name = "" } = ops;
-
-  return axios({
-    method: "get",
-    url: `/api/prompt/templates`,
-    headers: {
-      Authorization: token,
-    },
-    params: ops,
-  });
-};
-
 export const getFavoriteListService = async (ops: { name?: string }, token: string) => {
   return axios({
     method: "get",
@@ -114,6 +94,15 @@ export const getFavoriteListService = async (ops: { name?: string }, token: stri
       Authorization: token,
     },
     params: ops,
+  });
+};
+
+// myTemplate
+export const getMyTemplateListService = (token: string) => {
+  return axios.get(`/api/prompt/myTemplate/list`, {
+    headers: {
+      Authorization: token,
+    },
   });
 };
 
@@ -139,6 +128,114 @@ export const removeMyTemplateService = async (id: number, token: string) => {
     },
     data: {
       id,
+    },
+  });
+};
+
+export const pinTemplateService = async (id: number | string, token: string) => {
+  return axios({
+    method: "post",
+    url: "/api/prompt/myTemplate/pin",
+    headers: {
+      Authorization: token,
+    },
+    data: {
+      id,
+    },
+  });
+};
+
+export const getMyTemplateTagsService = async (token: string) => {
+  return axios({
+    method: "get",
+    url: "/api/prompt/tags",
+    headers: {
+      Authorization: token,
+    },
+  });
+};
+
+export const getPromptTemplatesService = async (
+  ops: { name?: string; tag?: string; type?: 1 | 2 | 3 },
+  token: string
+) => {
+  return axios({
+    method: "get",
+    url: `/api/prompt/templates`,
+    headers: {
+      Authorization: token,
+    },
+    params: {
+      type: 1,
+      ...ops,
+    },
+  });
+};
+
+export const createTemplateService = async (
+  ops: {
+    avatar?: string;
+    name: string;
+    content: string;
+    description: string;
+    sample?: string;
+    tags: string[];
+    isPub?: boolean;
+  },
+  token: string
+) => {
+  return axios({
+    method: "post",
+    url: "/api/prompt/template/create",
+    headers: {
+      Authorization: token,
+    },
+    data: ops,
+  });
+};
+
+export const deleteMyTemplateService = async (id: number | string, token: string) => {
+  return axios({
+    method: "post",
+    url: "/api/prompt/template/delete",
+    headers: {
+      Authorization: token,
+    },
+    data: {
+      id,
+    },
+  });
+};
+export const clone2MyTemplateService = async (id: number | string, token: string) => {
+  return axios({
+    method: "post",
+    url: "/api/prompt/template/clone",
+    headers: {
+      Authorization: token,
+    },
+    data: {
+      id,
+    },
+  });
+};
+
+export const updateMyTemplateService = async (ops: TemplateBaseOps, token: string) => {
+  return axios({
+    method: "post",
+    url: "/api/prompt/template/update",
+    headers: {
+      Authorization: token,
+    },
+    data: ops,
+  });
+};
+
+export const getMemberInfoService = async (token: string) => {
+  return axios({
+    method: "get",
+    url: "/api/member",
+    headers: {
+      Authorization: token,
     },
   });
 };

@@ -44,15 +44,32 @@ export async function fetchList(tasklist: string, showCompleted = false): Promis
   const json = (await response.json()) as {
     items: Task[];
   };
-  return json.items.map((item) => ({
-    id: item.id,
-    title: item.title,
-    status: item.status,
-    due: item.due,
-    completed: item.completed,
-    parent: item.parent,
-    notes: item.notes,
-  }));
+  const sortedTasks = json.items
+    .map((item) => ({
+      id: item.id,
+      title: item.title,
+      status: item.status,
+      due: item.due,
+      completed: item.completed,
+      parent: item.parent,
+      notes: item.notes,
+    }))
+    .sort((a, b) => {
+      const dueDateA = a.due !== undefined ? new Date(a.due) : null;
+      const dueDateB = b.due !== undefined ? new Date(b.due) : null;
+
+      if (dueDateA && dueDateB) {
+        return dueDateA.getTime() - dueDateB.getTime();
+      } else if (dueDateA) {
+        return -1; // A has a due date, B does not. A comes before B.
+      } else if (dueDateB) {
+        return 1; // B has a due date, A does not. B comes before A.
+      } else {
+        return 0; // Both A and B do not have due dates. Order remains unchanged.
+      }
+    });
+
+  return sortedTasks;
 }
 
 export async function deleteTask(tasklist: string, id: string): Promise<void> {

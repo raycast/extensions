@@ -27,7 +27,7 @@ export interface Fetcher {
 
 export function useRefresher<T>(
   fn: (updateInline: boolean) => Promise<T>,
-  deps?: React.DependencyList | undefined
+  deps?: React.DependencyList | undefined,
 ): {
   data: T | undefined;
   error?: string;
@@ -186,7 +186,7 @@ async function fetchAndInjectVideoStats(videos: Video[]) {
 async function search(
   query: string,
   type: SearchType,
-  channedId?: string | undefined
+  channedId?: string | undefined,
 ): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
   const data = await youtubeClient.search.list({
     q: query,
@@ -255,7 +255,7 @@ export async function getVideos(videoIds: string[]): Promise<Video[]> {
                 url: r.snippet?.thumbnails?.high?.url || undefined,
               },
             },
-          } as Video)
+          }) as Video,
       ) || [];
     await fetchAndInjectVideoStats(result);
     return result;

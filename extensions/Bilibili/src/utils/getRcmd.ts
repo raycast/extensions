@@ -12,7 +12,7 @@ export async function getRcmd(idx: number) {
   const fresh_idx = idx;
   const brush = idx;
 
-  const response: Bilibili.rcmdVideosResponse = await got(API.rcmdVideos(fresh_idx_1h, fetch_row, fresh_idx, brush), {
+  const response: Bilibili.RcmdVideosResponse = await got(API.rcmdVideos(fresh_idx_1h, fetch_row, fresh_idx, brush), {
     headers: {
       cookie,
     },
