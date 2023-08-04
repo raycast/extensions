@@ -1,6 +1,6 @@
 import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { getGMailMessageHeaderValue } from "../../lib/gmail";
-import { getAddressParts, isMailUnread } from "./utils";
+import { getAddressParts, getMessageInternalDate, isMailUnread } from "./utils";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAvatarIcon } from "@raycast/utils";
 import {
@@ -56,7 +56,7 @@ export function GMailMessageListItem(props: {
     return Icon.Envelope;
   };
 
-  const internalDate = data?.internalDate ? new Date(parseInt(data.internalDate)) : undefined;
+  const internalDate = getMessageInternalDate(data);
   const detail = [`# ${subject()}`, internalDate?.toLocaleString(), data.snippet]
     .filter((e) => e && e.length > 0)
     .join("\n\n");

@@ -19,3 +19,11 @@ export function getFirstValidLetter(text: string | null | undefined, fallback?: 
 export async function sleep(delayMs: number) {
   await setTimeout(delayMs);
 }
+
+export function ensureShortText(text: string, options?: { maxLength?: number }) {
+  const maxLength = options?.maxLength || 80;
+  if (text.length > maxLength) {
+    return text.slice(0, maxLength - 4) + " ...";
+  }
+  return text;
+}

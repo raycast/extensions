@@ -40,3 +40,7 @@ export function isMailUnread(message: gmail_v1.Schema$Message) {
 export function isMailDraft(message: gmail_v1.Schema$Message) {
   return message?.labelIds ? message.labelIds.includes("DRAFT") : false;
 }
+
+export function getMessageInternalDate(message: gmail_v1.Schema$Message) {
+  return message.internalDate ? new Date(parseInt(message.internalDate)) : undefined;
+}

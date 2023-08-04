@@ -39,6 +39,13 @@
       "title": "Open in Browser",
       "description": "Open your account in the Browser",
       "mode": "no-view"
+    },
+    {
+      "name": "unreadmailsmenu",
+      "title": "Unread Menu",
+      "description": "Show unread Mails in the Menubar",
+      "mode": "menu-bar",
+      "interval": "10m"
     }
   ],
   "preferences": [
