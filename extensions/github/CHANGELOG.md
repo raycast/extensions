@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Added missing value] - 2023-08-04
+
+- Fix missing repo name for non numberTag cases 
+
 ## [Menu Commands] - 2023-07-18
 
 - Add repo name to `Unread Notifications` Menu
