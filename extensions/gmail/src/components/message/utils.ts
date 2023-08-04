@@ -1,19 +1,35 @@
 import { gmail_v1 } from "@googleapis/gmail";
 
-export function getAddressParts(text: string | undefined | null) {
+export function getAddressParts(text: string | undefined | null):
+  | {
+      name: string | undefined;
+      email: string | undefined;
+    }
+  | undefined {
   if (!text) {
     return undefined;
   }
-  const regex = /([^<]+)<([^>]+)>/;
-
-  const match = text.match(regex);
-
-  if (match) {
-    const name = match[1].trim().replaceAll('"', "");
-    const email = match[2].trim().replaceAll('"', "");
+  const mailStart = text.indexOf("<");
+  const mailEnd = text.lastIndexOf(">");
+  if (mailStart >= 0 && mailEnd >= 0 && mailEnd > mailStart) {
+    let name = text
+      .substring(0, mailStart - 1)
+      .trim()
+      .replaceAll('"', "");
+    const email = text
+      .substring(mailStart + 1, mailEnd)
+      .trim()
+      .replaceAll('"', "");
+    if (!name || name.length <= 0) {
+      name = email;
+    }
     return { name, email };
   } else {
-    return undefined;
+    if (text.includes("@")) {
+      return { name: text.trim(), email: text.trim() };
+    } else {
+      return { name: text.trim(), email: undefined };
+    }
   }
 }
 
