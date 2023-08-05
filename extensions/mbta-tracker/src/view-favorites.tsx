@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { PredictionsList } from "./components/PredictionsList";
+import { removeFavoriteStop } from "./lib/stops";
 import type { Favorite } from "./types";
 import { useEffect, useState } from "react";
 
@@ -45,6 +46,14 @@ export default function Command() {
                       destination={favorite.route.attributes.direction_destinations[favorite.directionId]}
                     />
                   }
+                />
+                <Action
+                  title="Remove Favorite"
+                  icon={Icon.StarDisabled}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={() => {
+                    removeFavoriteStop(favorite);
+                  }}
                 />
               </ActionPanel>
             }
