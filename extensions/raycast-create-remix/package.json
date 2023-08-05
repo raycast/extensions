@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "create-remix",
-  "title": "create-remix",
+  "title": "Create Remix",
   "description": "Create Remix Run Web App using create-remix",
   "icon": "command-icon-remix.png",
   "author": "nuno_costa",
