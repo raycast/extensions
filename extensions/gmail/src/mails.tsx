@@ -8,7 +8,7 @@ import { getErrorMessage } from "./lib/utils";
 
 export default function MessageRootCommand() {
   const [searchText, setSearchText] = useState<string>();
-  const query = generateQuery({ baseQuery: ["-is:draft"], userQuery: searchText });
+  const query = generateQuery({ baseQuery: ["-is:draft", "label=INBOX"], userQuery: searchText });
   const { isLoading, data, error, revalidate } = useCachedPromise(
     async (q: string) => {
       return await getGMailMessages(q);

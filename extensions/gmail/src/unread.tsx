@@ -7,7 +7,7 @@ import { getErrorMessage } from "./lib/utils";
 
 export default function UnreadMailsRootCommand() {
   const [searchText, setSearchText] = useState<string>();
-  const query = generateQuery({ baseQuery: ["is:unread"], userQuery: searchText });
+  const query = generateQuery({ baseQuery: ["is:unread", "label=INBOX"], userQuery: searchText });
   const { isLoading, data, error, revalidate } = useCachedPromise(
     async (q: string) => {
       return await getGMailMessages(q);

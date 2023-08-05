@@ -1,4 +1,4 @@
-import { showToast, Toast, Action, Icon, environment, Alert, confirmAlert, Keyboard } from "@raycast/api";
+import { showToast, Toast, Action, Icon, environment, Alert, confirmAlert, Keyboard, ActionPanel } from "@raycast/api";
 import { gmail_v1 } from "googleapis";
 import {
   markMessageAsRead,
@@ -10,6 +10,8 @@ import {
 } from "../../lib/gmail";
 import { getErrorMessage, sleep } from "../../lib/utils";
 import { isMailDraft, isMailUnread } from "./utils";
+import path from "path";
+import * as fs from "fs";
 
 export function MessageMarkAsReadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
   if (!isMailUnread(props.message) || isMailDraft(props.message)) {
@@ -197,5 +199,39 @@ export function MessageShowDetailsAction(props: { detailsShown: boolean; onActio
       shortcut={{ modifiers: ["opt"], key: "d" }}
       onAction={handle}
     />
+  );
+}
+
+export function MessageDebugDump(props: { message: gmail_v1.Schema$Message; toFile?: boolean }) {
+  const handle = () => {
+    try {
+      const data = JSON.stringify(props.message, null, 4);
+      if (props.toFile === true) {
+        const folder = path.join(environment.supportPath, "debug");
+        fs.mkdirSync(folder, { recursive: true });
+        const filename = path.join(folder, `msg_${props.message.id}.json`);
+        console.log(`Dump message to ${filename}`);
+        fs.writeFileSync(filename, data, "utf-8");
+      } else {
+        console.log(data);
+      }
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+    }
+  };
+  if (!environment.isDevelopment) {
+    return null;
+  }
+  return (
+    <Action title={props.toFile === true ? "Dump to File" : "Dump To Console"} icon={Icon.Bug} onAction={handle} />
+  );
+}
+
+export function MessageDebugActionPanelSection(props: { message: gmail_v1.Schema$Message }) {
+  return (
+    <ActionPanel.Section title="Debug">
+      <MessageDebugDump message={props.message} />
+      <MessageDebugDump message={props.message} toFile={true} />
+    </ActionPanel.Section>
   );
 }

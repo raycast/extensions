@@ -12,6 +12,7 @@ import {
   MessageDeleteAction,
   MessageMarkAllAsReadAction,
   MessageShowDetailsAction,
+  MessageDebugActionPanelSection,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 
@@ -138,6 +139,7 @@ export function GMailMessageListItem(props: {
           <ActionPanel.Section>
             <MessageCopyIdAction message={data} />
           </ActionPanel.Section>
+          <MessageDebugActionPanelSection message={data} />
         </ActionPanel>
       }
     />
