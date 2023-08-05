@@ -1,10 +1,10 @@
 import { Icon, List, ActionPanel, Action } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, useFrecencySorting } from "@raycast/utils";
 import { DirectionsList } from "./components/DirectionsList";
 import type { RoutesResponse, Route } from "./types";
 import { appendApiKey } from "./utils";
 
-function outputRouteListItem(route: Route) {
+function outputRouteListItem(route: Route, visitItem: Function, resetRanking: Function) {
   return (
     <List.Item
       key={route.id}
@@ -17,7 +17,9 @@ function outputRouteListItem(route: Route) {
             title="Choose Route"
             icon={Icon.Compass}
             target={<DirectionsList key={route.id} route={route} />}
+            onPush={() => visitItem(route)}
           />
+          <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(route)} />
         </ActionPanel>
       }
     />
@@ -28,23 +30,24 @@ export default function Command() {
   const { isLoading, data } = useFetch<RoutesResponse>(appendApiKey("https://api-v3.mbta.com/routes"), {
     keepPreviousData: true,
   });
+  const { data: sortedData, visitItem, resetRanking } = useFrecencySorting(data?.data);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select MBTA route...">
       <List.Section title="Subway">
-        {(data?.data || [])
+        {(sortedData || [])
           .filter((route: Route) => parseInt(route.attributes.type) == 0 || parseInt(route.attributes.type) == 1)
-          .map((route) => outputRouteListItem(route))}
+          .map((route) => outputRouteListItem(route, visitItem, resetRanking))}
       </List.Section>
       <List.Section title="Bus">
-        {(data?.data || [])
+        {(sortedData || [])
           .filter((route) => parseInt(route.attributes.type) == 3)
-          .map((route) => outputRouteListItem(route))}
+          .map((route) => outputRouteListItem(route, visitItem, resetRanking))}
       </List.Section>
       <List.Section title="Commuter Rail">
-        {(data?.data || [])
+        {(sortedData || [])
           .filter((route) => parseInt(route.attributes.type) == 2)
-          .map((route) => outputRouteListItem(route))}
+          .map((route) => outputRouteListItem(route, visitItem, resetRanking))}
       </List.Section>
     </List>
   );
