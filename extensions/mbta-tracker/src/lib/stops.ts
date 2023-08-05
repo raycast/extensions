@@ -46,23 +46,6 @@ export async function removeFavoriteStop(favoriteToDelete: Favorite) {
     if (_favorites) {
       const favorites: Favorite[] = JSON.parse(_favorites);
 
-      favorites.forEach((favorite) => {
-        console.log("---Fav---");
-        console.log(favorite.route.id);
-        console.log(favorite.directionId);
-        console.log(favorite.stop.id);
-        console.log("---individual comparisons---");
-        console.log(favorite.route.id !== favoriteToDelete.route.id);
-        console.log(favorite.directionId !== favoriteToDelete.directionId);
-        console.log(favorite.stop.id !== favoriteToDelete.stop.id);
-        console.log("---full comparison---");
-        console.log(
-          favorite.route.id !== favoriteToDelete.route.id ||
-            favorite.directionId !== favoriteToDelete.directionId ||
-            favorite.stop.id !== favoriteToDelete.stop.id
-        );
-      });
-
       await LocalStorage.setItem(
         "favorite-stops",
         JSON.stringify(
@@ -75,12 +58,6 @@ export async function removeFavoriteStop(favoriteToDelete: Favorite) {
         )
       );
 
-      console.log("---Fav to delete---");
-      console.log(favoriteToDelete.route.id);
-      console.log(favoriteToDelete.directionId);
-      console.log(favoriteToDelete.stop.id);
-      console.log("---Storage---");
-      console.log(await LocalStorage.getItem<string>("favorite-stops"));
       showToast({
         title: `Removed ${favoriteToDelete.stop.attributes.name} from favorite stops`,
         style: Toast.Style.Success,
