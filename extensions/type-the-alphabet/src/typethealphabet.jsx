@@ -1,24 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { Icon, ActionPanel, Action, List } from "@raycast/api";
+
 export default function TypeAlphabet() {
   const [currentProgress, setCurrentProgress] = useState("");
   const [nextLetter, setNextLetter] = useState("A");
   const [timer, setTimer] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+
   useEffect(() => {
     let interval;
+
     if (isTimerRunning) {
       interval = setInterval(() => {
         setTimer((prevTimer) => prevTimer + 1);
       }, 10);
     }
+
     return () => {
       clearInterval(interval);
     };
   }, [isTimerRunning]);
+
   const handleKeyDown = (key) => {
     if (key.toUpperCase() === nextLetter) {
       setCurrentProgress((prevProgress) => prevProgress + key.toUpperCase());
+
       if (nextLetter === "Z") {
         setIsTimerRunning(false);
         setNextLetter("Success!");
@@ -30,16 +36,19 @@ export default function TypeAlphabet() {
       }
     }
   };
+
   const handleReset = () => {
     setCurrentProgress("");
     setNextLetter("A");
     setTimer(0);
     setIsTimerRunning(false);
   };
+
   const formatTime = (milliseconds) => {
     const seconds = (milliseconds / 100).toFixed(3);
     return `${seconds}s`;
   };
+
   return (
     <List
       searchText=""
