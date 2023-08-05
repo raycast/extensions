@@ -1,6 +1,12 @@
 import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { getGMailMessageHeaderValue } from "../../lib/gmail";
-import { getAddressParts, getMessageFileAttachmentNames, getMessageInternalDate, isMailUnread } from "./utils";
+import {
+  getAddressParts,
+  getLabelDetailsFromIds,
+  getMessageFileAttachmentNames,
+  getMessageInternalDate,
+  isMailUnread,
+} from "./utils";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAvatarIcon } from "@raycast/utils";
 import {
@@ -15,6 +21,8 @@ import {
   MessageDebugActionPanelSection,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
+import { useContext } from "react";
+import { GMailContext } from "../context";
 
 export function GMailMessageListItem(props: {
   message: gmail_v1.Schema$Message;
@@ -32,7 +40,7 @@ export function GMailMessageListItem(props: {
     }
     return "<No Subject>";
   };
-
+  const labelsAll = useContext(GMailContext);
   const unread = isMailUnread(data);
   const unreadIcon = (): Image.ImageLike | undefined => {
     if (!data || props.showUnreadAccessory === false) {
@@ -56,6 +64,7 @@ export function GMailMessageListItem(props: {
     }
     return Icon.Envelope;
   };
+  const labels = getLabelDetailsFromIds(data.labelIds, labelsAll);
 
   const internalDate = getMessageInternalDate(data);
   const detail = [`# ${subject()}`, internalDate?.toLocaleString(), data.snippet]
@@ -93,10 +102,22 @@ export function GMailMessageListItem(props: {
                   <List.Item.Detail.Metadata.TagList.Item text={r} icon={getAvatarIcon(getFirstValidLetter(r) || "")} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
+              {labels && labels.length > 0 && (
+                <List.Item.Detail.Metadata.TagList title="Labels">
+                  {labels?.map((l) => (
+                    <List.Item.Detail.Metadata.TagList.Item
+                      key={l.id}
+                      text={l.name || "?"}
+                      color={l.color?.backgroundColor}
+                      icon={Icon.Paperclip}
+                    />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+              )}
               {fileAttachments && fileAttachments.length > 0 && (
                 <List.Item.Detail.Metadata.TagList title="Attachments">
                   {fileAttachments?.map((a) => (
-                    <List.Item.Detail.Metadata.TagList.Item text={a} icon={Icon.Paperclip} />
+                    <List.Item.Detail.Metadata.TagList.Item key={a} text={a} icon={Icon.Paperclip} />
                   ))}
                 </List.Item.Detail.Metadata.TagList>
               )}

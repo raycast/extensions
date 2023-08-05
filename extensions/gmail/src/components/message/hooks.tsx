@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getErrorMessage } from "../../lib/utils";
-import { GMailMessage, getMailDetail } from "../../lib/gmail";
+import { GMailMessage, getGMailLabels, getMailDetail } from "../../lib/gmail";
 import { gmail_v1 } from "@googleapis/gmail";
+import { useCachedPromise } from "@raycast/utils";
 
 export function useMessage(message: GMailMessage): {
   error?: string;
@@ -47,4 +48,23 @@ export function useMessage(message: GMailMessage): {
   }, []);
 
   return { error, isLoading, data };
+}
+
+export function useLabels(): {
+  labels: gmail_v1.Schema$Label[] | undefined;
+  isLoading: boolean;
+  error: Error | undefined;
+} {
+  const {
+    data: labels,
+    isLoading,
+    error,
+  } = useCachedPromise(
+    async () => {
+      return await getGMailLabels();
+    },
+    [],
+    { keepPreviousData: true }
+  );
+  return { labels, isLoading, error };
 }

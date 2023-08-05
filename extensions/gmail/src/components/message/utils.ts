@@ -49,3 +49,14 @@ export function getMessageFileAttachmentNames(message: gmail_v1.Schema$Message) 
   const fileParts = message.payload?.parts?.filter((p) => p.filename && p.filename.length > 0);
   return fileParts?.map((p) => p.filename as string);
 }
+
+export function getLabelDetailsFromIds(
+  labelIds: string[] | null | undefined,
+  labelsAll: gmail_v1.Schema$Label[] | undefined
+) {
+  const labels =
+    labelsAll && labelIds
+      ? (labelIds.map((lid) => labelsAll.find((l) => l.id === lid)).filter((l) => l) as gmail_v1.Schema$Label[])
+      : undefined;
+  return labels;
+}
