@@ -2,7 +2,7 @@
 
 ## [Fix] - 2023-08-05
 
-- Removed SFSymbols
+- Fixed HUD confirmations from showing an unknown character
 - Swapped deprecated 'accessoryTitle' to 'accessories' in lists
 
 ## [Fix] - 2023-06-12
