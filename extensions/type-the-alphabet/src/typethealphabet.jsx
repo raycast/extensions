@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Icon, ActionPanel, Action, List } from "@raycast/api";
 
 export default function TypeAlphabet() {
-  const [currentProgress, setCurrentProgress] = useState<string>("");
-  const [nextLetter, setNextLetter] = useState<string>("A");
-  const [timer, setTimer] = useState<number>(0);
-  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+  const [currentProgress, setCurrentProgress] = useState("");
+  const [nextLetter, setNextLetter] = useState("A");
+  const [timer, setTimer] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval;
 
     if (isTimerRunning) {
       interval = setInterval(() => {
@@ -21,7 +21,7 @@ export default function TypeAlphabet() {
     };
   }, [isTimerRunning]);
 
-  const handleKeyDown = (key: string) => {
+  const handleKeyDown = (key) => {
     if (key.toUpperCase() === nextLetter) {
       setCurrentProgress((prevProgress) => prevProgress + key.toUpperCase());
 
@@ -32,9 +32,7 @@ export default function TypeAlphabet() {
         if (!isTimerRunning && nextLetter === "A") {
           setIsTimerRunning(true);
         }
-        setNextLetter(
-          String.fromCharCode(nextLetter.charCodeAt(0) + 1)
-        );
+        setNextLetter(String.fromCharCode(nextLetter.charCodeAt() + 1));
       }
     }
   };
@@ -46,7 +44,7 @@ export default function TypeAlphabet() {
     setIsTimerRunning(false);
   };
 
-  const formatTime = (milliseconds: number) => {
+  const formatTime = (milliseconds) => {
     const seconds = (milliseconds / 100).toFixed(3);
     return `${seconds}s`;
   };
