@@ -51,6 +51,16 @@ export async function removeFavoriteStop(favoriteToDelete: Favorite) {
         console.log(favorite.route.id);
         console.log(favorite.directionId);
         console.log(favorite.stop.id);
+        console.log("---individual comparisons---");
+        console.log(favorite.route.id !== favoriteToDelete.route.id);
+        console.log(favorite.directionId !== favoriteToDelete.directionId);
+        console.log(favorite.stop.id !== favoriteToDelete.stop.id);
+        console.log("---full comparison---");
+        console.log(
+          favorite.route.id !== favoriteToDelete.route.id ||
+            favorite.directionId !== favoriteToDelete.directionId ||
+            favorite.stop.id !== favoriteToDelete.stop.id
+        );
       });
 
       await LocalStorage.setItem(
@@ -58,8 +68,8 @@ export async function removeFavoriteStop(favoriteToDelete: Favorite) {
         JSON.stringify(
           favorites.filter(
             (favorite) =>
-              favorite.route.id !== favoriteToDelete.route.id &&
-              favorite.directionId !== favoriteToDelete.directionId &&
+              favorite.route.id !== favoriteToDelete.route.id ||
+              favorite.directionId !== favoriteToDelete.directionId ||
               favorite.stop.id !== favoriteToDelete.stop.id
           )
         )
