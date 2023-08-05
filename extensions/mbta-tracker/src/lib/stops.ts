@@ -14,6 +14,19 @@ export async function addFavoriteStop(route: Route, directionId: 0 | 1, stop: St
     console.info("No favorite stops");
   }
 
+  if (
+    favorites.some(
+      (favorite) =>
+        favorite.route.id === route.id && favorite.directionId === directionId && favorite.stop.id === stop.id
+    )
+  ) {
+    showToast({
+      title: "Stop has already been added to favorites",
+      style: Toast.Style.Failure,
+    });
+    return;
+  }
+
   try {
     await LocalStorage.setItem(
       "favorite-stops",
