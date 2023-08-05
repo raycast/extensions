@@ -65,8 +65,7 @@ export default function TypeAlphabet() {
         icon={Icon.Keyboard}
         title={nextLetter}
         description={`${
-          currentProgress ||
-          "Typing game to see how fast you type the alphabet. Timer starts when you do :)"
+          currentProgress || "Typing game to see how fast you type the alphabet. Timer starts when you do :)"
         }\nTime: ${formatTime(timer)}`}
       />
     </List>
