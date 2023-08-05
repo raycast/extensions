@@ -57,7 +57,7 @@ export default function TypeAlphabet() {
         title={nextLetter}
         description={`${
           currentProgress ||
-          "Typing game to see how fast you type. Timer starts when you press A and stops when you press Z :)"
+          "Typing game to see how fast you type the alphabet. Timer starts when you do :)"
         }\nTime: ${formatTime(timer)}`}
       />
     </List>
