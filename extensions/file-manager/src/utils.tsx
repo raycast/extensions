@@ -421,7 +421,7 @@ export function RenameItem(props: { filePath: string; refresh: () => void; isDir
       showToast(
         Toast.Style.Success,
         `${props.isDirectory ? "Directory" : "File"} Renamed`,
-        `${basename(props.filePath)} -> ${itemName}`
+        `${basename(props.filePath)} -> ${itemName}`,
       );
       props.refresh();
       pop();
