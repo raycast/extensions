@@ -9,15 +9,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "browse-departures",
-      "title": "Browse Departures",
-      "description": "View predicted departure times for a given transit route and stop",
+      "name": "browse-stops",
+      "title": "Browse Stops",
+      "description": "Find a stop on a given route and view predicted departure times or add a favorite",
       "mode": "view"
     },
     {
       "name": "view-favorites",
       "title": "View Favorites",
-      "description": "Display stops that have been marked as a favorite",
+      "description": "Display stops that have been added as favorites",
       "mode": "view"
     }
   ],
