@@ -9,7 +9,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "browse-departures",
       "title": "Browse departures",
       "description": "View predicted departure times for a given transit route and stop",
       "mode": "view"
