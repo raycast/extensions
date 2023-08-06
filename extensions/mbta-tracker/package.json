@@ -31,6 +31,18 @@
       "title": "MBTA API Key"
     }
   ],
+  "keywords": [
+    "the T",
+    "Boston",
+    "Massachusetts",
+    "transportation",
+    "transit",
+    "subway",
+    "bus",
+    "commuter",
+    "rail",
+    "train"
+  ],
   "dependencies": {
     "@raycast/api": "^1.49.3",
     "@raycast/utils": "^1.4.8",
