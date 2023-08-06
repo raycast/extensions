@@ -76,7 +76,7 @@ const useTask = () => {
   // Get all tasks from the API
   const getAllTasks = async () => {
     try {
-      const [GetTasks, error] = await axiosPromiseData<Task[]>(fetcher("/tasks"));
+      const [GetTasks, error] = await axiosPromiseData<ApiResponseTasks>(fetcher("/tasks", {method: "GET"}));//<Task[]>(fetcher("/tasks"));
       if (!GetTasks && error) throw error;
       return GetTasks;
     } catch (error) {
