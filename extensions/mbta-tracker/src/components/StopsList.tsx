@@ -12,7 +12,9 @@ interface Props {
 
 export const StopsList = ({ route, directionId }: Props): JSX.Element => {
   const { isLoading, data } = useFetch<StopsResponse>(
-    appendApiKey(`https://api-v3.mbta.com/stops?filter%5Broute%5D=${route.id}&direction_id=${directionId}`)
+    appendApiKey(
+      `https://api-v3.mbta.com/stops?filter%5Broute%5D=${route.id}&direction_id=${directionId}&fields%5Bstop%5D=address,municipality,name`
+    )
   );
 
   return (

@@ -9,7 +9,9 @@ interface Props {
 
 export const AlertsList = ({ alertIds }: Props): JSX.Element => {
   const { data } = useFetch<AlertsResponse>(
-    appendApiKey(`https://api-v3.mbta.com/alerts?filter%5Bid%5D=${alertIds?.toString()}`)
+    appendApiKey(
+      `https://api-v3.mbta.com/alerts?filter%5Bid%5D=${alertIds?.toString()}&fields%5Balert%5D=description,header,lifecycle,timeframe`
+    )
   );
 
   return (

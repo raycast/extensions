@@ -22,10 +22,8 @@ export interface StopsResponse {
 export interface Stop {
   attributes: {
     address?: string;
-    at_street?: string;
     municipality: string;
     name: string;
-    one_street?: string;
   };
   id: string;
 }
@@ -60,11 +58,8 @@ export interface AlertsResponse {
 export interface Alert {
   attributes: {
     description: string;
-    effect: string;
     header: string;
     lifecycle: string;
-    service_effect: string;
-    severity: number;
     timeframe: string;
   };
   id: string;
