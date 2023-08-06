@@ -12,6 +12,7 @@ import {
   Color,
   Form,
   useNavigation,
+  popToRoot,
 } from "@raycast/api";
 import { promisify } from "node:util";
 import { exec as _exec } from "node:child_process";
@@ -118,6 +119,11 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
       actions={
         <ActionPanel>
           <Action.Push title="Open Directory" icon={Icon.ArrowRight} target={<Directory path={filePath} />} />
+          <Action.OpenWith
+            path={filePath}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            onOpen={() => popToRoot({ clearSearchBar: true })}
+          />
           <Action.ShowInFinder path={filePath} />
           <Action.CopyToClipboard
             title="Copy Directory Path"
