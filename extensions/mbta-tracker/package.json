@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "browse-departures",
-      "title": "Browse departures",
+      "title": "Browse Departures",
       "description": "View predicted departure times for a given transit route and stop",
       "mode": "view"
     },
