@@ -3,7 +3,7 @@
   "name": "mbta-tracker",
   "title": "MBTA Tracker",
   "description": "Provides a way to quickly check arrival times for saved stops along MBTA routes",
-  "icon": "MBTA-icon.png",
+  "icon": "mbta-secondary-logo-circle.png",
   "author": "djpowers",
   "categories": ["Productivity"],
   "license": "MIT",
