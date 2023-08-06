@@ -31,6 +31,14 @@ export default function Command() {
                   favorite?.route?.attributes?.direction_destinations[favorite?.directionId]
                 } via ${favorite?.route?.attributes?.short_name || favorite?.route?.attributes?.long_name}`,
               },
+              {
+                icon: {
+                  source: ["Rapid Transit", "Commuter Rail"].includes(favorite?.route?.attributes?.description)
+                    ? Icon.Train
+                    : Icon.Car,
+                  tintColor: favorite.route.attributes.color,
+                },
+              },
             ]}
             actions={
               <ActionPanel>
