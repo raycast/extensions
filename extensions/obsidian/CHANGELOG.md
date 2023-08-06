@@ -1,7 +1,10 @@
 # Obsidian Changelog
 
+## [Apply templates on task file name] - 2023-08-5
+- The Append Task command will now apply template placeholders to file name for dynamic file names
+
 ## [Bug fixes] - 2023-07-20
-- Fixes and issue where tags as objects woudl crash the plugin
+- Fixes and issue where tags as objects would crash the plugin
 
 ## [Add week placeholder] - 2023-07-14
 

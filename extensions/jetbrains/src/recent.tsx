@@ -66,7 +66,7 @@ export default function ProjectList(): JSX.Element {
   const defaultActions = (
     <>
       {appHistory.map((tool) => (
-        <OpenInJetBrainsApp key={tool.title} tool={tool} recent={null} />
+        <OpenInJetBrainsApp key={tool.title} tool={tool} recent={null} toolboxApp={toolboxApp} />
       ))}
       <OpenJetBrainsToolbox app={toolboxApp} />
     </>

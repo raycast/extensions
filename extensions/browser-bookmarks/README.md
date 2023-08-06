@@ -1,6 +1,6 @@
 # Browser Bookmarks
 
-Integrate bookmarks from Chrome, Brave, Edge, Firefox or Safari.
+Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari or Vivaldi.
 
 ## Configuration
 
@@ -11,3 +11,4 @@ If you have multiple profiles, you can select the one you want from the enabled 
 -  Chrome: `⌘` + `⇧` + `C`
 -  Edge: `⌘` + `⇧` + `E`
 -  Firefox: `⌘` + `⇧` + `F`
+-  Vivaldi: `⌘` + `⇧` + `V`

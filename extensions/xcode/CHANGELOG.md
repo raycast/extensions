@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Xcode 15 Beta Icon] - 2023-07-28
+
+- Added Xcode 15 Beta icon when searching for Xcode releases.
+
 ## [Change Data Source for List Apple Devices] - 2023-07-28
 
 - Changed the data source for the "List Apple Devices" command so it doesn't rely on a text file anymore.

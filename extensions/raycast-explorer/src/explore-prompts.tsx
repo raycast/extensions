@@ -279,7 +279,7 @@ export default function ExplorePrompts(props: Props) {
                         title="Contribute"
                         icon={Icon.PlusSquare}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        url={`${CONTRIBUTE_URL}/data/prompts.ts`}
+                        url={`${CONTRIBUTE_URL}/src/data/prompts.ts`}
                       />
                     </ActionPanel.Section>
 

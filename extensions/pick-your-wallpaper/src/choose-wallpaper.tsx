@@ -12,7 +12,7 @@ const wallpaperDir = preferences.wallpaperFolder;
 
 const wallpaperFilenames = fs.readdirSync(wallpaperDir).filter((filename) => {
   const extname = path.extname(filename);
-  return extname === ".jpg" || extname === ".jpeg" || extname === ".png" || extname === ".gif";
+  return extname === ".jpg" || extname === ".jpeg" || extname === ".png" || extname === ".gif" || extname === ".heic";
 });
 
 export function applyWallpaperUpdate(filename: string) {

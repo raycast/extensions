@@ -216,7 +216,7 @@ export const View = ({
                   detail={<List.Item.Detail markdown={getItemDetail(item)} />}
                   actions={
                     <ActionPanel>
-                      {item.attachment && item.attachment.key !== `` && (
+                      {item.attachment && item.attachment.key && item.attachment.key !== `` && (
                         <Action.OpenInBrowser
                           icon={Icon.ArrowRightCircleFilled}
                           title="Open PDF"

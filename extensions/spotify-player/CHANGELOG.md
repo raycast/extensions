@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2023-07-31
+
+- New Menu Bar Player preference to hide the icon when Spotify is not running, or when there is nothing playing.
+
 ## [Typo] - 2023-07-27
 
 - Fixed a bug that showed 25% when setting the volume to 75%
