@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mbta-tracker",
   "title": "MBTA Tracker",
-  "description": "Provides a way to quickly check arrival times for saved stops along MBTA routes",
+  "description": "View departure times for saved stops along MBTA routes",
   "icon": "mbta-secondary-logo-circle.png",
   "author": "djpowers",
   "categories": ["Productivity"],
