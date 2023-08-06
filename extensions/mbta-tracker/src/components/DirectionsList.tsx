@@ -32,11 +32,15 @@ export const DirectionsList = ({ route }: Props): JSX.Element => {
       {directionIds.map((directionId) => (
         <List.Item
           key={route.attributes.direction_destinations[directionId]}
-          title={route.attributes.direction_names[directionId]}
+          title={
+            route.attributes.direction_names[directionId].endsWith("bound")
+              ? route.attributes.direction_names[directionId]
+              : `${route.attributes.direction_names[directionId]}bound`
+          }
           icon={renderDirectionIcon(route.attributes.direction_names[directionId])}
           accessories={[
             {
-              text: route.attributes.direction_destinations[directionId],
+              text: `Toward ${route.attributes.direction_destinations[directionId]}`,
               icon: Icon.Pin,
             },
           ]}
