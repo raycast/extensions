@@ -27,9 +27,9 @@ export default function Command() {
             icon={Icon.Star}
             accessories={[
               {
-                text: `toward ${favorite?.route?.attributes?.direction_destinations[favorite?.directionId]} via ${
-                  favorite?.route?.attributes?.short_name || favorite?.route?.attributes?.long_name
-                }`,
+                text: `${favorite?.route?.attributes?.direction_names[favorite?.directionId]} toward ${
+                  favorite?.route?.attributes?.direction_destinations[favorite?.directionId]
+                } via ${favorite?.route?.attributes?.short_name || favorite?.route?.attributes?.long_name}`,
               },
             ]}
             actions={
