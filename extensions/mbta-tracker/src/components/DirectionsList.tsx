@@ -6,6 +6,8 @@ interface Props {
   route: Route;
 }
 
+const directionIds = [0, 1];
+
 export const renderDirectionIcon = (direction: string): Icon => {
   switch (direction) {
     case "Outbound":
@@ -27,46 +29,28 @@ export const renderDirectionIcon = (direction: string): Icon => {
 export const DirectionsList = ({ route }: Props): JSX.Element => {
   return (
     <List searchBarPlaceholder="Select travel direction...">
-      <List.Item
-        key={route.attributes.direction_destinations[0]}
-        title={route.attributes.direction_names[0]}
-        icon={renderDirectionIcon(route.attributes.direction_names[0])}
-        accessories={[
-          {
-            text: route.attributes.direction_destinations[0],
-            icon: Icon.Pin,
-          },
-        ]}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Choose Travel Direction"
-              icon={Icon.Map}
-              target={<StopsList key={route.id} route={route} directionId={0} />}
-            />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        key={route.attributes.direction_destinations[1]}
-        title={route.attributes.direction_names[1]}
-        icon={renderDirectionIcon(route.attributes.direction_names[1])}
-        accessories={[
-          {
-            text: route.attributes.direction_destinations[1],
-            icon: Icon.Pin,
-          },
-        ]}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Choose Travel Direction"
-              icon={Icon.Map}
-              target={<StopsList key={route.id} route={route} directionId={1} />}
-            />
-          </ActionPanel>
-        }
-      />
+      {directionIds.map((directionId) => (
+        <List.Item
+          key={route.attributes.direction_destinations[directionId]}
+          title={route.attributes.direction_names[directionId]}
+          icon={renderDirectionIcon(route.attributes.direction_names[directionId])}
+          accessories={[
+            {
+              text: route.attributes.direction_destinations[directionId],
+              icon: Icon.Pin,
+            },
+          ]}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Choose Travel Direction"
+                icon={Icon.Map}
+                target={<StopsList key={route.id} route={route} directionId={directionId} />}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 };
