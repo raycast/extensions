@@ -34,7 +34,6 @@ export interface PredictionsResponse {
 
 export interface Prediction {
   attributes: {
-    arrival_time?: string;
     departure_time?: string;
     direction_id: number;
   };

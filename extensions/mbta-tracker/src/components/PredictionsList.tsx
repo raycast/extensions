@@ -18,7 +18,7 @@ interface Props {
 export const PredictionsList = ({ stop, directionId, route, destination }: Props): JSX.Element => {
   const { isLoading, data } = useFetch<PredictionsResponse>(
     appendApiKey(
-      `https://api-v3.mbta.com/predictions?filter%5Broute%5D=${route.id}&filter%5Bdirection_id%5D=${directionId}&filter%5Bstop%5D=${stop.id}&sort=departure_time&include=alerts&fields%5Bprediction%5D=arrival_time,departure_time,direction_id`
+      `https://api-v3.mbta.com/predictions?filter%5Broute%5D=${route.id}&filter%5Bdirection_id%5D=${directionId}&filter%5Bstop%5D=${stop.id}&sort=departure_time&include=alerts&fields%5Bprediction%5D=departure_time,direction_id`
     )
   );
 
