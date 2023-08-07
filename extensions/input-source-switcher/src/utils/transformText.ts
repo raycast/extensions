@@ -1,4 +1,4 @@
-import { Language, kbdKeys } from "../data";
+import { Language, languages } from "../data";
 
 type Props = {
   input: string;
@@ -11,10 +11,10 @@ export function transformText({ input, langFrom, langTo }: Props) {
     .trim()
     .split("")
     .map((char) => {
-      const idx = kbdKeys[langFrom].indexOf(char);
+      const idx = languages[langFrom].kbdKeys.indexOf(char);
 
       if (idx !== -1) {
-        return kbdKeys[langTo][idx];
+        return languages[langTo].kbdKeys[idx];
       }
 
       return char;

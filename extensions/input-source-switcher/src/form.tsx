@@ -1,128 +1,161 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD } from "@raycast/api";
-import { useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  Image,
+  showHUD,
+} from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
+import { useRef } from "react";
 import { transformText } from "./utils/transformText";
-import { Language } from "./data";
+import { Language, languages } from "./data";
+import { useFrontmostApp } from "./hooks/useFrontmostApp";
+
+interface FormValues {
+  text: string;
+  langFrom: string;
+  langTo: string;
+}
 
 export default function main() {
-  const [text, setText] = useState<string>("");
-  const [langFrom, setLangFrom] = useState<Language>("eng");
-  const [langTo, setLangTo] = useState<Language>("ukr");
+  const { handleSubmit, itemProps, setValue, setValidationError } = useForm<FormValues>({
+    initialValues: {
+      text: "",
+      langFrom: "eng",
+      langTo: "ukr",
+    },
+    async onSubmit(values) {
+      const transformedText = transformText({
+        input: values.text,
+        langFrom: values.langFrom as Language,
+        langTo: values.langTo as Language,
+      });
 
-  const [textError, setTextError] = useState<string | undefined>("");
-  const [langError, setLangError] = useState<string | undefined>("");
+      if (action.current === "paste") {
+        await Clipboard.paste(transformedText);
+        await showHUD("Transformed text pasted to active app");
+      } else if (action.current === "copy") {
+        await Clipboard.copy(transformedText);
+        await showHUD("Transformed text copied to clipboard");
+      }
+    },
+    validation: {
+      text: FormValidation.Required,
+      langFrom: (value) => {
+        if (value === itemProps.langTo.value) {
+          return "Languages should be different";
+        }
+      },
+      langTo: (value) => {
+        if (value === itemProps.langFrom.value) {
+          return "Languages should be different";
+        }
+      },
+    },
+  });
 
-  async function handlePaste(text: string) {
-    if (text.length === 0) {
-      setTextError("Text is required");
-      return;
+  function handleSwitchLanguages() {
+    if (itemProps.langTo.value) {
+      setValue("langFrom", itemProps.langTo.value);
     }
 
-    const transformedText = transformText({ input: text, langFrom, langTo });
-    await Clipboard.paste(transformedText);
-    await showHUD("Transformed text pasted to active app");
-  }
-
-  async function handleCopy(text: string) {
-    if (text.length === 0) {
-      setTextError("Text is required");
-      return;
-    }
-
-    const transformedText = transformText({ input: text, langFrom, langTo });
-    await Clipboard.copy(transformedText);
-    await showHUD("Transformed text copied to clipboard");
-  }
-
-  function onChangeText(text: string) {
-    setText(text);
-    dropTextErrorIfNeeded();
-  }
-
-  function onChangeLangFrom(lang: Language) {
-    setLangFrom(lang);
-    dropLangErrorIfNeeded();
-  }
-
-  function onChangeLangTo(lang: Language) {
-    setLangTo(lang);
-    dropLangErrorIfNeeded();
-  }
-
-  function dropTextErrorIfNeeded() {
-    if (textError && textError.length > 0) {
-      setTextError(undefined);
+    if (itemProps.langFrom.value) {
+      setValue("langTo", itemProps.langFrom.value);
     }
   }
 
-  function dropLangErrorIfNeeded() {
-    if (langError && langError.length > 0) {
-      setLangError(undefined);
+  function handleLangChange(type: 'from' | 'to', newValue: string) {
+    if (type === 'from' && itemProps.langTo.value === newValue) {
+      setValidationError("langFrom", "Languages should be different");
+      setValidationError("langTo", "Languages should be different");
+    } else if (type === 'to' && itemProps.langFrom.value === newValue) {
+      setValidationError("langFrom", "Languages should be different");
+      setValidationError("langTo", "Languages should be different");
+    } else {
+      setValidationError("langFrom", null);
+      setValidationError("langTo", null);
     }
   }
 
+  const frontmostApp = useFrontmostApp();
+  const action = useRef("");
+
+  const pasteToAppTitle = `Paste to ${frontmostApp ? frontmostApp.name : "Active App"}`;
+  const pasteToAppIcon: Image.ImageLike = frontmostApp ? { fileIcon: frontmostApp.path } : Icon.ArrowUp;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { onChange: onChangeFrom, ...langFromProps } = itemProps.langFrom;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { onChange: onChangeTo, ...langToProps } = itemProps.langTo;
+  
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Paste to Active App" onSubmit={() => handlePaste(text)} />
-          <Action.SubmitForm
-            title="Copy to Clipboard"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            onSubmit={() => handleCopy(text)}
-          />
+          <ActionPanel.Section>
+            <Action.SubmitForm
+              title={pasteToAppTitle}
+              icon={pasteToAppIcon}
+              onSubmit={(values: FormValues) => {
+                action.current = "paste";
+                handleSubmit(values);
+              }}
+            />
+            {itemProps.text && (
+              <Action.SubmitForm
+                title="Copy to Clipboard"
+                icon={Icon.CopyClipboard}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                onSubmit={(values: FormValues) => {
+                  action.current = "copy";
+                  handleSubmit(values);
+                }}
+              />
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Switch Languages"
+              icon={Icon.Switch}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              onAction={handleSwitchLanguages}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="text"
-        title="Text"
-        placeholder="Enter text here"
-        value={text}
-        error={textError}
-        onChange={onChangeText}
-        onBlur={(event) => {
-          if (event.target.value?.length === 0) {
-            setTextError("Text is required");
-          } else {
-            dropTextErrorIfNeeded();
-          }
-        }}
-      />
+      <Form.TextArea title="Text" placeholder="Enter text here" {...itemProps.text} />
 
       <Form.Dropdown
-        id="langFrom"
         title="Language from"
-        value={langFrom}
-        error={langError}
-        onChange={(lang: string) => onChangeLangFrom(lang as Language)}
-        onBlur={(event) => {
-          if (event.target.value === langTo) {
-            setLangError("Languages should be different");
-          } else {
-            dropLangErrorIfNeeded();
-          }
+        onChange={(newValue) => {
+          handleLangChange('from', newValue);
+          itemProps.langFrom.onChange?.(newValue);
         }}
+        {...langFromProps}
       >
-        <Form.Dropdown.Item value="eng" title="🇬🇧 English" />
-        <Form.Dropdown.Item value="ukr" title="🇺🇦 Ukrainian" />
+        {
+          Object.entries(languages).map(([key, value]) => (
+            <Form.Dropdown.Item key={key} value={value.id} title={value.label} />
+          ))
+        }
       </Form.Dropdown>
 
       <Form.Dropdown
-        id="langTo"
         title="Language to"
-        value={langTo}
-        error={langError}
-        onChange={(lang: string) => onChangeLangTo(lang as Language)}
-        onBlur={(event) => {
-          if (event.target.value === langFrom) {
-            setLangError("Languages should be different");
-          } else {
-            dropLangErrorIfNeeded();
-          }
+        onChange={(newValue) => {
+          handleLangChange('to', newValue);
+          itemProps.langTo.onChange?.(newValue);
         }}
+        {...langToProps}
       >
-        <Form.Dropdown.Item value="eng" title="🇬🇧 English" />
-        <Form.Dropdown.Item value="ukr" title="🇺🇦 Ukrainian" />
+        {
+          Object.entries(languages).map(([key, value]) => (
+            <Form.Dropdown.Item key={key} value={value.id} title={value.label} />
+          ))
+        }
       </Form.Dropdown>
     </Form>
   );

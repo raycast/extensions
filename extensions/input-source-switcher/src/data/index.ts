@@ -1,6 +1,8 @@
-export type Language = "ukr" | "eng";
+import { eng, ukr } from "./lang";
 
-export const kbdKeys: Record<Language, string> = {
-  eng: `qwertyuiop[]\\asdfghjkl;'zxcvbnm,./\`QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?~!@#$%^&*()_+`,
-  ukr: `йцукенгшщзхїʼфівапролджєячсмитьбю.ґЙЦУКЕНГШЩЗХЇ₴ФІВАПРОЛДЖЄЯЧСМИТЬБЮ,Ґ!"№;%:?*()_+`,
+export type Language = keyof typeof languages;
+
+export const languages = {
+  eng,
+  ukr,
 };
