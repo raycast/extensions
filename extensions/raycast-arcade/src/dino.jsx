@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, open } from "@raycast/api";
+import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 
 export default function ChromeDino() {
@@ -95,7 +95,7 @@ export default function ChromeDino() {
   let [markdown, setMarkdown] = useState(
     Array(17)
       .fill()
-      .map((_) => Array(92).fill(" "))
+      .map(() => Array(92).fill(" "))
   );
   let status = useRef(Status.PLAYING);
   let time = useRef(0);
@@ -121,18 +121,24 @@ export default function ChromeDino() {
         activeCacti.current.push({
           x: 90,
           shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
-          time: time.current, // ! IMPLMENT TIME
+          time: time.current,
         });
       }
-      console.log(activeCacti.current);
-      if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 20) {
+      if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 40) {
         if (Math.random() < 0.02) {
           activeCacti.current.push({
             x: 90,
             shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
-            time: time.current, // ! IMPLMENT TIME
+            time: time.current,
           });
         }
+      }
+      if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 100) {
+        activeCacti.current.push({
+          x: 90,
+          shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
+          time: time.current,
+        });
       }
 
       if (time.current % 70 === 0) {
@@ -154,7 +160,7 @@ export default function ChromeDino() {
 
       let newMarkdown = Array(17)
         .fill()
-        .map((_) => Array(92).fill(" "));
+        .map(() => Array(92).fill(" "));
       newMarkdown[16] = Array(92).fill("_");
 
       for (let i = 0; i < activeCacti.current.length; i++) {

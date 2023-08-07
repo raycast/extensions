@@ -6,7 +6,7 @@ export default function Tetris() {
   let generateNewGrid = () =>
     Array(22)
       .fill()
-      .map((_) => Array(10).fill(0));
+      .map(() => Array(10).fill(0));
   let rotate = {
     cw: (matrix) => matrix[0].map((_, index) => matrix.map((row) => row[index]).reverse()),
     ccw: (matrix) => matrix[0].map((val, index) => matrix.map((row) => row[row.length - 1 - index])),

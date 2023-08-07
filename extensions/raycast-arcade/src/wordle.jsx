@@ -40,10 +40,10 @@ export default function Wordle() {
   let [board, setBoard] = useState(
     Array(6)
       .fill()
-      .map((_) =>
+      .map(() =>
         Array(5)
           .fill()
-          .map((_) => ({
+          .map(() => ({
             letter: "",
             color: Color.GRAY,
           }))
@@ -121,10 +121,10 @@ export default function Wordle() {
             JSON.stringify(
               Array(6)
                 .fill()
-                .map((_) =>
+                .map(() =>
                   Array(5)
                     .fill()
-                    .map((_) => ({
+                    .map(() => ({
                       letter: "",
                       color: Color.GRAY,
                     }))
@@ -215,6 +215,7 @@ export default function Wordle() {
 
           if (correct === 5) {
             hasGuessed.current = true;
+            let message;
             updateDailyWordleTitle();
 
             switch (guessCount.current) {
@@ -281,10 +282,10 @@ export default function Wordle() {
     if (loading)
       board = Array(6)
         .fill()
-        .map((_) =>
+        .map(() =>
           Array(5)
             .fill()
-            .map((_) => ({
+            .map(() => ({
               letter: "",
               color: Color.GRAY,
             }))

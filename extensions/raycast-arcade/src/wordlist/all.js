@@ -1,4 +1,4 @@
-export default list = [
+export default [
   "noles",
   "melas",
   "waist",

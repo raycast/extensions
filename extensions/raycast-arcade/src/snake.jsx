@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Detail, ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 
 const ROWS = 15;
 const COLS = 26;
