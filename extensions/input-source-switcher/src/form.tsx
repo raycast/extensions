@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  Image,
-  showHUD,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Image, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useRef } from "react";
 import { transformText } from "./utils/transformText";
@@ -66,11 +58,11 @@ export default function main() {
     }
   }
 
-  function handleLangChange(type: 'from' | 'to', newValue: string) {
-    if (type === 'from' && itemProps.langTo.value === newValue) {
+  function handleLangChange(type: "from" | "to", newValue: string) {
+    if (type === "from" && itemProps.langTo.value === newValue) {
       setValidationError("langFrom", "Languages should be different");
       setValidationError("langTo", "Languages should be different");
-    } else if (type === 'to' && itemProps.langFrom.value === newValue) {
+    } else if (type === "to" && itemProps.langFrom.value === newValue) {
       setValidationError("langFrom", "Languages should be different");
       setValidationError("langTo", "Languages should be different");
     } else {
@@ -89,7 +81,7 @@ export default function main() {
   const { onChange: onChangeFrom, ...langFromProps } = itemProps.langFrom;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { onChange: onChangeTo, ...langToProps } = itemProps.langTo;
-  
+
   return (
     <Form
       actions={
@@ -131,31 +123,27 @@ export default function main() {
       <Form.Dropdown
         title="Language from"
         onChange={(newValue) => {
-          handleLangChange('from', newValue);
+          handleLangChange("from", newValue);
           itemProps.langFrom.onChange?.(newValue);
         }}
         {...langFromProps}
       >
-        {
-          Object.entries(languages).map(([key, value]) => (
-            <Form.Dropdown.Item key={key} value={value.id} title={value.label} />
-          ))
-        }
+        {Object.entries(languages).map(([key, value]) => (
+          <Form.Dropdown.Item key={key} value={value.id} title={value.label} />
+        ))}
       </Form.Dropdown>
 
       <Form.Dropdown
         title="Language to"
         onChange={(newValue) => {
-          handleLangChange('to', newValue);
+          handleLangChange("to", newValue);
           itemProps.langTo.onChange?.(newValue);
         }}
         {...langToProps}
       >
-        {
-          Object.entries(languages).map(([key, value]) => (
-            <Form.Dropdown.Item key={key} value={value.id} title={value.label} />
-          ))
-        }
+        {Object.entries(languages).map(([key, value]) => (
+          <Form.Dropdown.Item key={key} value={value.id} title={value.label} />
+        ))}
       </Form.Dropdown>
     </Form>
   );

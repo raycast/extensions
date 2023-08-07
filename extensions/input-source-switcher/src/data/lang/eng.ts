@@ -1,35 +1,35 @@
 import { InputSourceSettings } from "../types";
 
 const settings: InputSourceSettings = {
-  id: 'eng',
-  label: '🇬🇧 English',
+  id: "eng",
+  label: "🇬🇧 English",
 
   kbdKeys: {
     firstRow: {
-      original: '`1234567890-=',
-      shift: '~!@#$%^&*()_+',
-      opt: '`¡™£¢∞§¶•ªº–≠',
-      shiftOpt: '`⁄€‹›ﬁﬂ‡°·‚—±'
+      original: "`1234567890-=",
+      shift: "~!@#$%^&*()_+",
+      opt: "`¡™£¢∞§¶•ªº–≠",
+      shiftOpt: "`⁄€‹›ﬁﬂ‡°·‚—±",
     },
     secondRow: {
-      original: 'qwertyuiop[]\\',
-      shift: 'QWERTYUIOP{}|',
-      opt: 'œ∑´®†¥¨ˆøπ“‘«',
-      shiftOpt: 'Œ„´‰ˇÁ¨∏”’»'
+      original: "qwertyuiop[]\\",
+      shift: "QWERTYUIOP{}|",
+      opt: "œ∑´®†¥¨ˆøπ“‘«",
+      shiftOpt: "Œ„´‰ˇÁ¨∏”’»",
     },
     thirdRow: {
       original: `asdfghjkl;'`,
       shift: 'ASDFGHJKL:"',
-      opt: 'åß∂ƒ©˙∆˚¬…æ',
-      shiftOpt: 'ÅÍÎÏ˝ÓÔÒÚÆ'
+      opt: "åß∂ƒ©˙∆˚¬…æ",
+      shiftOpt: "ÅÍÎÏ˝ÓÔÒÚÆ",
     },
     fourthRow: {
-      original: 'zxcvbnm,./',
-      shift: 'ZXCVBNM<>?',
+      original: "zxcvbnm,./",
+      shift: "ZXCVBNM<>?",
       opt: `Ω≈ç√∫˜µ≤≥÷`,
-      shiftOpt: '¸˛Ç◊ı˜Â¯˘¿'
-    }
-  }
+      shiftOpt: "¸˛Ç◊ı˜Â¯˘¿",
+    },
+  },
 };
 
 export const eng = {
@@ -56,5 +56,5 @@ export const eng = {
     ...settings.kbdKeys.secondRow.shiftOpt,
     ...settings.kbdKeys.thirdRow.shiftOpt,
     ...settings.kbdKeys.fourthRow.shiftOpt,
-  ].join(''),
-}
+  ].join(""),
+};

@@ -7,7 +7,7 @@ export interface InputSourceSettings {
     secondRow: KeyboardRow;
     thirdRow: KeyboardRow;
     fourthRow: KeyboardRow;
-  }
+  };
 }
 
 export interface KeyboardRow {
