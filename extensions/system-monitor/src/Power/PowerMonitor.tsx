@@ -136,6 +136,7 @@ const PowerMonitor = () => {
 
   return (
     <List.Item
+      id="power"
       title={`Power`}
       icon={{ source: "lightning.png", tintColor: Color.Yellow }}
       accessories={[{ text: isLoading ? "Loading..." : `${state.batteryLevel}%` }]}

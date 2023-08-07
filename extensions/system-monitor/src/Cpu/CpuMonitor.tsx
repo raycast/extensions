@@ -63,6 +63,7 @@ export default function CpuMonitor() {
   return (
     <>
       <List.Item
+        id="power"
         title={`🖥️  CPU`}
         accessories={[{ text: isLoading ? "Loading..." : `${state.cpu}%` }]}
         detail={
