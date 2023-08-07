@@ -43,7 +43,11 @@ export default function Command() {
     return (
       <Detail
         markdown={markdown}
-        navigationTitle="Download Music Timer"
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Download" url="https://apps.apple.com/app/id6446814612" />
+          </ActionPanel>
+        }
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.TagList title="Category">
