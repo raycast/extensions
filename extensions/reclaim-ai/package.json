@@ -94,7 +94,7 @@
     },
     {
       "name": "list-tasks",
-      "title": "List Tasks",
+      "title": "Search Tasks",
       "description": "View & manage your Tasks",
       "mode": "view"
     }
