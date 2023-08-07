@@ -1,6 +1,14 @@
 # Anybox Changelog
 
-## [Feature Improvement and Bug Fixed] - 2023-07-18
+## [Feature Improvement and Bug Fixes] - 2023-08-07
+
+- Show search engines if no links were found.
+- Support adding comment with Save Note action.
+- Update search result to 50.
+- Fix main window not being close after actions.
+- Fix incorrect date formating.
+
+## [Feature Improvement and Bug Fixes] - 2023-07-18
 
 - Add "Save and Open in Anybox" action for Save Note.
 - Fix Raycast window not closing after actions.
