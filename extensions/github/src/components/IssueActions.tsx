@@ -354,7 +354,7 @@ function AddAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
       });
     },
     [issue],
-    { execute: load }
+    { execute: load },
   );
 
   async function addAssignee({ id, text }: { id: string; text: string }) {
@@ -430,7 +430,7 @@ function AddProjectSubmenu({ issue, mutate }: SubmenuProps) {
       });
     },
     [issue],
-    { execute: load }
+    { execute: load },
   );
 
   async function addProject({ id, text }: { id: string; text: string }) {
@@ -498,7 +498,7 @@ function SetMilestoneSubmenu({ issue, mutate }: SubmenuProps) {
       });
     },
     [issue],
-    { execute: load }
+    { execute: load },
   );
 
   async function unsetMilestone() {
