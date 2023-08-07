@@ -4,9 +4,10 @@ import { useEffect, useState, useRef } from "react";
 export default function ChromeDino() {
   const Status = {
     PLAYING: "playing",
-    GAMEOVER: "gameover"
-  }
-  const cactiShapes = [`
+    GAMEOVER: "gameover",
+  };
+  const cactiShapes = [
+    `
   ▄█▄
 █ ███
 ▀▀███
@@ -25,9 +26,10 @@ export default function ChromeDino() {
   ██   
 █ ███
 ▀▀███
-   ██`
-  ]
-  const cloudShapes = [`
+   ██`,
+  ];
+  const cloudShapes = [
+    `
       ░░░░░░░░░░
    ░░░░░░░░░░░░░░░
   ░░░░░░░░░░░░`,
@@ -43,9 +45,10 @@ export default function ChromeDino() {
     ░░░░░░░░░░░
    ░░░░░░░░░░░░░░░
 ░░░░░░░░░░░░`,
-  ]
+  ];
 
-  const dinoRunFrames = [`
+  const dinoRunFrames = [
+    `
         ▄█▀████▄
         ████▀▀▀▀
   █▄   ▄██▀▀▀▀▀ 
@@ -58,8 +61,8 @@ export default function ChromeDino() {
   █▄   ▄██▀▀▀▀▀ 
    ▀█▄████▄     
     ▀████▀      
-     ▀▀ █▄      `
-  ]
+     ▀▀ █▄      `,
+  ];
 
   const dinoJumpFrame = `
         ▄█▀████▄
@@ -67,7 +70,7 @@ export default function ChromeDino() {
   █▄   ▄██▀▀▀▀▀ 
    ▀█▄████▄     
     ▀████▀      
-     █▄ █▄      `
+     █▄ █▄      `;
 
   const dinoHitFrame = `
         ▄██████▄
@@ -75,7 +78,7 @@ export default function ChromeDino() {
   █▄   ▄██▀▀▀▀▀ 
    ▀█▄████▄     
     ▀████▀      
-     █▄ █▄      `
+     █▄ █▄      `;
 
   const gameOver = `
                   
@@ -87,27 +90,31 @@ export default function ChromeDino() {
    ███▄ ▄▄▄▄███   
    ▀██████████▀   
                   
-     `
+     `;
 
-  let [markdown, setMarkdown] = useState(Array(17).fill().map(_ => Array(92).fill(" ")));
+  let [markdown, setMarkdown] = useState(
+    Array(17)
+      .fill()
+      .map((_) => Array(92).fill(" "))
+  );
   let status = useRef(Status.PLAYING);
   let time = useRef(0);
   let dinoStatus = useRef({
     y: 0,
-    gravity: 0
-  })
-  let activeCacti = useRef([])
-  let activeClouds = useRef([])
-  let score = useRef(0)
+    gravity: 0,
+  });
+  let activeCacti = useRef([]);
+  let activeClouds = useRef([]);
+  let score = useRef(0);
   function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
   useEffect(() => {
     tick();
-  }, [])
+  }, []);
 
   let tick = () => {
-    if (time.current % 10 === 0) score.current += 1
+    if (time.current % 10 === 0) score.current += 1;
     if (status.current === Status.PLAYING) {
       dinoStatus.current.y = Math.round(Math.max(dinoStatus.current.y + dinoStatus.current.gravity, 0));
       if (time.current === 60) {
@@ -115,39 +122,40 @@ export default function ChromeDino() {
           x: 90,
           shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
           time: time.current, // ! IMPLMENT TIME
-        })
+        });
       }
-      console.log(activeCacti.current)
+      console.log(activeCacti.current);
       if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 20) {
         if (Math.random() < 0.02) {
           activeCacti.current.push({
             x: 90,
             shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
             time: time.current, // ! IMPLMENT TIME
-          })
+          });
         }
       }
-
 
       if (time.current % 70 === 0) {
         activeClouds.current.push({
           x: 90,
           y: getRandomNumber(0, 5),
-          shape: cloudShapes[Math.floor(Math.random() * cloudShapes.length)]
-        })
+          shape: cloudShapes[Math.floor(Math.random() * cloudShapes.length)],
+        });
       }
       if (dinoStatus.current.y !== 0) {
         dinoStatus.current.gravity -= 1 / 5;
       }
       let frame;
       if (dinoStatus.current.y !== 0) {
-        frame = dinoJumpFrame.split("\n").map(x => x.split(""));
+        frame = dinoJumpFrame.split("\n").map((x) => x.split(""));
       } else {
-        frame = dinoRunFrames[Math.floor(time.current / 5) % 2].split("\n").map(x => x.split(""));
+        frame = dinoRunFrames[Math.floor(time.current / 5) % 2].split("\n").map((x) => x.split(""));
       }
 
-      let newMarkdown = Array(17).fill().map(_ => Array(92).fill(" "));
-      newMarkdown[16] = Array(92).fill("_")
+      let newMarkdown = Array(17)
+        .fill()
+        .map((_) => Array(92).fill(" "));
+      newMarkdown[16] = Array(92).fill("_");
 
       for (let i = 0; i < activeCacti.current.length; i++) {
         let cactus = activeCacti.current[i];
@@ -155,39 +163,46 @@ export default function ChromeDino() {
         // ! SPEED CURVE
         cactus.x -= 1 + ((score.current - 10) * 0.02) / 10;
 
-
-        let cactusFrame = cactus.shape.split("\n").map(x => x.split(""));
+        let cactusFrame = cactus.shape.split("\n").map((x) => x.split(""));
         for (let i = 0; i < cactusFrame.length; i++) {
           for (let j = 0; j < cactusFrame[i].length; j++) {
-            if (cactusFrame[i][j + Math.floor(cactus.x)] !== " " && j + Math.floor(cactus.x) > 0 && j + Math.floor(cactus.x) < 91) {
+            if (
+              cactusFrame[i][j + Math.floor(cactus.x)] !== " " &&
+              j + Math.floor(cactus.x) > 0 &&
+              j + Math.floor(cactus.x) < 91
+            ) {
               newMarkdown[i + 12][j + Math.floor(cactus.x)] = cactusFrame[i][j];
             }
           }
         }
         if (cactus.x < -200) {
-          activeCacti.current.splice(i, 1)
+          activeCacti.current.splice(i, 1);
         }
       }
 
       for (let i = 0; i < activeClouds.current.length; i++) {
         let cloud = activeClouds.current[i];
         cloud.x -= 0.5;
-        let cloudFrame = cloud.shape.split("\n").map(x => x.split(""));
+        let cloudFrame = cloud.shape.split("\n").map((x) => x.split(""));
         for (let i = 0; i < cloudFrame.length; i++) {
           for (let j = 0; j < cloudFrame[i].length; j++) {
-            if (cloudFrame[i][j + Math.floor(cloud.x)] !== " " && (j + Math.floor(cloud.x)) > 0 && (j + Math.floor(cloud.x)) < 91) {
+            if (
+              cloudFrame[i][j + Math.floor(cloud.x)] !== " " &&
+              j + Math.floor(cloud.x) > 0 &&
+              j + Math.floor(cloud.x) < 91
+            ) {
               newMarkdown[i + cloud.y][j + Math.floor(cloud.x)] = cloudFrame[i][j];
             }
           }
         }
         if (cloud.x < -20) {
-          activeClouds.current.splice(i, 1)
+          activeClouds.current.splice(i, 1);
         }
       }
 
       for (let i = 0; i < frame.length; i++) {
         for (let j = 0; j < frame[i].length; j++) {
-          if (frame[i][j] !== " " && (i + -dinoStatus.current.y + 10) > 0) {
+          if (frame[i][j] !== " " && i + -dinoStatus.current.y + 10 > 0) {
             if (["_", " ", "░"].includes(newMarkdown[i + -dinoStatus.current.y + 10][j])) {
               newMarkdown[i + -dinoStatus.current.y + 10][j] = frame[i][j];
             } else {
@@ -200,16 +215,16 @@ export default function ChromeDino() {
       }
       // status.current = Status.GAMEOVER
       if (status.current === Status.GAMEOVER) {
-        let dinoHitFrameProcessed = dinoHitFrame.split("\n").map(x => x.split(""));
+        let dinoHitFrameProcessed = dinoHitFrame.split("\n").map((x) => x.split(""));
         for (let i = 0; i < dinoHitFrameProcessed.length; i++) {
           for (let j = 0; j < dinoHitFrameProcessed[i].length; j++) {
-            if (dinoHitFrameProcessed[i][j] !== " " && (i + -dinoStatus.current.y + 10) > 0) {
+            if (dinoHitFrameProcessed[i][j] !== " " && i + -dinoStatus.current.y + 10 > 0) {
               newMarkdown[i + -dinoStatus.current.y + 10][j] = dinoHitFrameProcessed[i][j];
             }
           }
         }
 
-        let endScreen = gameOver.split("\n").map(x => x.split(""));
+        let endScreen = gameOver.split("\n").map((x) => x.split(""));
         for (let i = 0; i < endScreen.length; i++) {
           for (let j = 0; j < endScreen[i].length; j++) {
             newMarkdown[i + 3][j + 37] = endScreen[i][j];
@@ -217,41 +232,40 @@ export default function ChromeDino() {
         }
       }
 
-      let scoreString = `SCORE: ${score.current}`.split("").reverse().join("")
+      let scoreString = `SCORE: ${score.current}`.split("").reverse().join("");
       for (let i = 0; i < scoreString.length; i++) {
         newMarkdown[1][newMarkdown[0].length - 1 - i] = scoreString[i];
       }
       setMarkdown(newMarkdown);
 
-
       time.current++;
-      setTimeout(tick, 25)
+      setTimeout(tick, 25);
     }
-  }
+  };
 
   let jump = () => {
     if (dinoStatus.current.y === 0) {
       dinoStatus.current.gravity = 2.25;
     }
-  }
+  };
 
   let enter = () => {
     if (status.current === Status.PLAYING) {
-      jump()
+      jump();
     }
     if (status.current === Status.GAMEOVER) {
       time.current = 0;
       dinoStatus.current = {
         y: 0,
-        gravity: 0
-      }
-      activeCacti.current = []
-      activeClouds.current = []
-      score.current = 0
+        gravity: 0,
+      };
+      activeCacti.current = [];
+      activeClouds.current = [];
+      score.current = 0;
       status.current = Status.PLAYING;
       tick();
     }
-  }
+  };
 
   return (
     <Detail
@@ -259,11 +273,13 @@ export default function ChromeDino() {
         <ActionPanel>
           <Action
             title={status.current === Status.PLAYING ? "Jump" : "Restart"}
-            onAction={() => { enter() }}
+            onAction={() => {
+              enter();
+            }}
           />
         </ActionPanel>
       }
-      markdown={`\n\`\`\`${markdown.map(x => x.join("")).join("\n")}\n\`\`\``}
+      markdown={`\n\`\`\`${markdown.map((x) => x.join("")).join("\n")}\n\`\`\``}
     ></Detail>
-  )
+  );
 }
