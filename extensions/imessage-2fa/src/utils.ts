@@ -6,12 +6,17 @@
  * @see https://github.com/squatto/alfred-imessage-2fa/blob/master/find-messages.php
  */
 export function extractCode(original: string) {
-  // remove URLs
-  const regex = new RegExp(
+  // remove URLs and phone numbers
+  const urlRegex = new RegExp(
     "\\b((https?|ftp|file):\\/\\/|www\\.)[-A-Z0-9+&@#\\/%?=~_|$!:,.;]*[A-Z0-9+&@#\\/%=~_|$]",
     "ig"
   );
-  const message = original.replaceAll(regex, "");
+  const phoneRegex = new RegExp(
+    // https://stackoverflow.com/a/123666
+    /(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?/,
+    "ig"
+  );
+  const message = original.replaceAll(urlRegex, "").replaceAll(phoneRegex, "");
 
   if (message.trim() === "") return "";
 
