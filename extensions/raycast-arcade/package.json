@@ -21,10 +21,18 @@
       "title": "Chrome Dino",
       "description": "Play the Chrome Dino game!",
       "mode": "view"
+    },
+    {
+      "name": "wordle",
+      "title": "Wordle",
+      "description": "Play Wordle!",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0"
+    "@raycast/api": "^1.56.0",
+    "@raycast/utils": "^1.9.0",
+    "svg64": "^2.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

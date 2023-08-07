@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action } from "@raycast/api";
+import { Detail, ActionPanel, Action, open } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 
 export default function ChromeDino() {
