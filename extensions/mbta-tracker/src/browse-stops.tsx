@@ -5,7 +5,7 @@ import type { RoutesResponse, Route } from "./types";
 import { appendApiKey } from "./utils";
 import { useState } from "react";
 
-function outputRouteListItem(route: Route, visitItem: Function, resetRanking: Function) {
+function outputRouteListItem(route: Route, visitItem: any, resetRanking: any) {
   return (
     <List.Item
       key={route.id}
