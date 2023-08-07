@@ -224,7 +224,9 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
 
   const isAssignedToMe = issue.assignees.nodes?.some((assignee) => assignee?.isViewer);
 
-  const linkedBranch: { id: string, ref: null | { name: string }} | null = issue.linkedBranches?.nodes?.length ? issue.linkedBranches.nodes[0] : null;
+  const linkedBranch: { id: string; ref: null | { name: string } } | null = issue.linkedBranches?.nodes?.length
+    ? issue.linkedBranches.nodes[0]
+    : null;
 
   return (
     <ActionPanel title={`#${issue.number} in ${issue.repository.nameWithOwner}`}>
@@ -352,7 +354,7 @@ function AddAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
       });
     },
     [issue],
-    { execute: load },
+    { execute: load }
   );
 
   async function addAssignee({ id, text }: { id: string; text: string }) {
@@ -428,7 +430,7 @@ function AddProjectSubmenu({ issue, mutate }: SubmenuProps) {
       });
     },
     [issue],
-    { execute: load },
+    { execute: load }
   );
 
   async function addProject({ id, text }: { id: string; text: string }) {
@@ -496,7 +498,7 @@ function SetMilestoneSubmenu({ issue, mutate }: SubmenuProps) {
       });
     },
     [issue],
-    { execute: load },
+    { execute: load }
   );
 
   async function unsetMilestone() {
