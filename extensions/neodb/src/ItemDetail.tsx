@@ -70,6 +70,7 @@ const ItemDetail: React.FC<{ item: Item }> = ({ item }) => {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`https://neodb.social${item.url}`} title="Open in Browser" />
+          <Action.CopyToClipboard content={`https://neodb.social${item.url}`} title="Copy To Clipboard" shortcut={{ modifiers: ["opt"], key: 'c' }} />
         </ActionPanel>
       }
     />

@@ -32,6 +32,7 @@ const Section: React.FC<SectionProps> = ({ items, category, aspectRatio }) => {
             <ActionPanel>
               <Action.Push title="View Detail" target={<ItemDetail item={item} />} icon={Icon.Glasses} />
               <Action.OpenInBrowser url={`https://neodb.social${item.url}`} title="Open in Browser" />
+              <Action.CopyToClipboard content={`https://neodb.social${item.url}`} title="Copy To Clipboard" shortcut={{ modifiers: ["opt"], key: 'c' }} />
             </ActionPanel>
           }
         />
