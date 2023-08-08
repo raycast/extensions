@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "Melvynx",
   "contributors": [
-    "d2a"
+    "d2a",
+    "chenpx976"
   ],
   "license": "MIT",
   "commands": [
@@ -25,10 +26,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.55.1",
+    "fs-extra": "^11.1.1",
     "qrcode": "^1.5.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@types/fs-extra": "^11.0.1",
     "@types/node": "18.8.3",
     "@types/qrcode": "^1.5.1",
     "@types/react": "18.0.9",
