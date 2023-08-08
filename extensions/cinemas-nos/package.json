@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Browse sessions",
+      "title": "Browse Sessions",
       "description": "Shows all movies and schedules in display by Cinemas NOS.",
       "mode": "view"
     }
