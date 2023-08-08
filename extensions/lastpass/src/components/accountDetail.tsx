@@ -6,10 +6,10 @@ import { isValidUrl } from "../utils";
 
 export const AccountDetail = (args: { showPassword: boolean; getData: () => Promise<Account> }) => {
   const [data, setData] = useState<Account>();
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
-    (async () => args.getData().then(setData, setError))();
+    (async () => args.getData().then(setData, (err) => setError(err.message)))();
   }, []);
 
   return error ? (
