@@ -326,7 +326,12 @@ export default function Wordle() {
   };
 
   return (
-    <List isShowingDetail={true} onSearchTextChange={updateSearchBar} searchText={guess}>
+    <List
+      isShowingDetail={true}
+      onSearchTextChange={updateSearchBar}
+      searchText={guess}
+      searchBarPlaceholder="Enter your guess here..."
+    >
       <List.Item
         title={dailyWordleTitle}
         detail={<List.Item.Detail markdown={generateBoard(board)} />}
