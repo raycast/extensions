@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "runcloud",
-  "title": "Runcloud",
-  "description": "Search Your Runcloud Servers + Webapps",
+  "title": "RunCloud",
+  "description": "Search Your RunCloud Servers + Webapps",
   "icon": "icon.png",
   "author": "itsjustxan",
   "categories": [
@@ -14,19 +14,22 @@
     {
       "name": "servers",
       "title": "Search Servers",
-      "description": "View and search through index of all of your Runcloud Servers",
+      "subtitle": "RunCloud",
+      "description": "View and search through index of all of your RunCloud Servers",
       "mode": "view"
     },
     {
       "name": "webapps",
       "title": "Search Webapps",
+      "subtitle": "RunCloud",
       "description": "View an index of all of your Runcloud Webapps",
       "mode": "view"
     },
     {
       "name": "cacheWebapps",
       "title": "Rebuild Webapps Cache",
-      "description": "Cache the list of webapps to greatly improve performance of the webapps command",
+      "subtitle": "RunCloud",
+      "description": "Cache the list of webapps to greatly improve the performance of the webapps command",
       "mode": "no-view",
       "interval": "60s"
     }
