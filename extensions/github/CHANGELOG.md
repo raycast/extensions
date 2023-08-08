@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Bugfix] - 2023-08-07
+
+- Fixed a bug which caused the extension to crash
+
 ## [Added missing value] - 2023-08-04
 
 - Fix missing repo name for non numberTag cases 
