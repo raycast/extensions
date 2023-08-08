@@ -62,8 +62,15 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
 
   const response = await fetch("https://oauth2.googleapis.com/token", { method: "POST", body: params });
   if (!response.ok) {
-    console.error("refresh tokens error:", await response.text());
-    throw new Error(response.statusText);
+    let ed = "";
+    try {
+      const rt = await response.json();
+      ed = rt.error_description || (await response.text());
+    } catch (error) {
+      ed = await response.text();
+    }
+    console.error("refresh tokens error:", ed);
+    throw new Error(`${response.statusText}: ${ed}`);
   }
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
