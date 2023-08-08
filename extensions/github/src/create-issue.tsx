@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import IssueDetail from "./components/IssueDetail";
 import View from "./components/View";
@@ -26,7 +26,8 @@ type IssueFormProps = {
 
 export function IssueForm({ draftValues }: IssueFormProps) {
   const { push } = useNavigation();
-  const { data: repositories } = useMyRepositories();
+  const [searchText, setSearchText] = useState("");
+  const { data: repositories, isLoading: isLoadingRepositories } = useMyRepositories(searchText);
   const { github } = getGitHubClient();
 
   const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<IssueFormValues>({
@@ -140,7 +141,14 @@ export function IssueForm({ draftValues }: IssueFormProps) {
       }
       enableDrafts
     >
-      <Form.Dropdown {...itemProps.repository} title="Repository" storeValue>
+      <Form.Dropdown
+        {...itemProps.repository}
+        title="Repository"
+        storeValue
+        onSearchTextChange={setSearchText}
+        isLoading={isLoadingRepositories}
+        throttle
+      >
         {repositories?.map((repository) => {
           return (
             <Form.Dropdown.Item

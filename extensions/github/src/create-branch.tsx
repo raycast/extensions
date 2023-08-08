@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Clipboard, Color, Form, Image, showToast, Toast, open } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Clipboard, Form, Image, showToast, Toast, open } from "@raycast/api";
+import { useCachedPromise, useForm } from "@raycast/utils";
+import { useState } from "react";
 
 import View from "./components/View";
 import { getErrorMessage } from "./helpers/errors";
@@ -20,14 +20,67 @@ type BranchFormProps = {
 
 export function BranchForm({ draftValues }: BranchFormProps) {
   const { github } = getGitHubClient();
+  const [searchText, setSearchText] = useState("");
 
-  const [repositoryId, setRepositoryId] = useState<string>(draftValues?.repository ?? "");
-  const [issue, setIssue] = useState<string>(draftValues?.issue ?? "");
-  const [name, setName] = useState<string>(draftValues?.name ?? "");
-  const [nameError, setNameError] = useState<string | undefined>();
+  const { handleSubmit, itemProps, values } = useForm<BranchFormValues>({
+    async onSubmit(values) {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating a branch" });
 
-  const { data: repositories, isLoading: repositoriesIsLoading } = useMyRepositories();
-  const { data, isLoading: repositoryIsLoading } = useCachedPromise(
+      try {
+        let branchName: string | undefined;
+
+        if (values.issue?.length) {
+          const payload = { repositoryId: values.repository, issueId: values.issue, oid };
+
+          const createResult = await github.createLinkedBranch({
+            input: values.name === "" ? payload : { ...payload, name: values.name },
+          });
+
+          branchName = createResult.createLinkedBranch?.linkedBranch?.ref?.name;
+        } else if (values.name) {
+          const createResult = await github.createRef({
+            input: { repositoryId: values.repository, name: values.name, oid },
+          });
+          branchName = createResult.createRef?.ref?.name;
+        }
+
+        toast.style = Toast.Style.Success;
+        toast.title = `${branchName} is created`;
+
+        if (branchName) {
+          toast.primaryAction = {
+            title: "Copy Branch Name",
+            shortcut: { modifiers: ["shift", "cmd"], key: "c" },
+            onAction: () => branchName && Clipboard.copy(branchName),
+          };
+          toast.secondaryAction = {
+            title: "Open in Browser",
+            shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+            onAction: async () => await open(`${repositoryUrl}/tree/${branchName}`),
+          };
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed creating a branch";
+        toast.message = getErrorMessage(error);
+      }
+    },
+    initialValues: {
+      repository: draftValues?.repository ?? "",
+      issue: draftValues?.issue ?? "",
+      name: draftValues?.name ?? "",
+    },
+    validation: {
+      name: (value) => {
+        if (!value && !values.issue) {
+          return "This field can't be empty";
+        }
+      },
+    },
+  });
+
+  const { data: repositories, isLoading: isLoadingRepositories } = useMyRepositories(searchText);
+  const { data, isLoading: isLoadingRepositoryIssues } = useCachedPromise(
     (repository) => {
       const selectedRepository = repositories?.find((r) => r.id === repository);
 
@@ -37,90 +90,31 @@ export function BranchForm({ draftValues }: BranchFormProps) {
 
       return github.repositoryIssues({ owner: selectedRepository.owner.login, name: selectedRepository.name });
     },
-    [repositoryId],
-    { execute: !!repositoryId },
+    [values.repository],
+    { execute: !!values.repository },
   );
 
   const issues = data?.repository?.issues?.nodes?.filter((node) => node?.linkedBranches.totalCount == 0);
-  const oid: string = data?.repository?.defaultBranchRef?.target?.oid;
-  const repositoryUrl: string = data?.repository?.url;
-
-  async function onSubmit(values: BranchFormValues) {
-    if (values.name?.length == 0 && values.issue?.length == 0) {
-      return setNameError("This field can't be empty!");
-    }
-
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Creating a branch" });
-
-    try {
-      let branchName: string | undefined;
-
-      if (values.issue?.length) {
-        const payload = { repositoryId: values.repository, issueId: values.issue, oid };
-
-        const createResult = await github.createLinkedBranch({
-          input: values.name === "" ? payload : { ...payload, name: values.name },
-        });
-
-        branchName = createResult.createLinkedBranch?.linkedBranch?.ref?.name;
-      } else if (values.name) {
-        const createResult = await github.createRef({
-          input: { repositoryId: values.repository, name: values.name, oid },
-        });
-        branchName = createResult.createRef?.ref?.name;
-      }
-
-      toast.style = Toast.Style.Success;
-      toast.title = `${branchName} is created`;
-
-      if (branchName) {
-        toast.primaryAction = {
-          title: "Copy Branch Name",
-          shortcut: { modifiers: ["shift", "cmd"], key: "c" },
-          onAction: () => branchName && Clipboard.copy(branchName),
-        };
-        toast.secondaryAction = {
-          title: "Open in Browser",
-          shortcut: { modifiers: ["shift", "cmd"], key: "o" },
-          onAction: async () => await open(`${repositoryUrl}/tree/${branchName}`),
-        };
-      }
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed creating a branch";
-      toast.message = getErrorMessage(error);
-    }
-  }
-
-  useEffect(() => {
-    if ((!!name.length && !!nameError?.length) || issue?.length) {
-      setNameError(undefined);
-    }
-    setName(name);
-  }, [issue]);
+  const oid = data?.repository?.defaultBranchRef?.target?.oid;
+  const repositoryUrl = data?.repository?.url;
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={onSubmit}
-            title="Create Branch"
-            icon={{ source: "branch.svg", tintColor: Color.PrimaryText }}
-          />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Create Branch" icon="branch.svg" />
         </ActionPanel>
       }
       enableDrafts
-      isLoading={repositoriesIsLoading || repositoryIsLoading}
+      isLoading={isLoadingRepositories || isLoadingRepositoryIssues}
     >
       <Form.Dropdown
-        id="repository"
+        {...itemProps.repository}
         title="Repository"
-        isLoading={repositoriesIsLoading}
-        value={repositoryId}
-        onChange={setRepositoryId}
-        autoFocus
+        isLoading={isLoadingRepositories}
         storeValue
+        onSearchTextChange={setSearchText}
+        throttle
       >
         {repositories?.map((repository) => (
           <Form.Dropdown.Item
@@ -135,11 +129,9 @@ export function BranchForm({ draftValues }: BranchFormProps) {
       <Form.Separator />
 
       <Form.Dropdown
-        id="issue"
+        {...itemProps.issue}
         title="Linked Issue"
-        isLoading={repositoryIsLoading}
-        value={issue}
-        onChange={setIssue}
+        isLoading={isLoadingRepositoryIssues}
         info="If you don't select an issue, a ref pointing to the last commit of the selected repository will be created instead of an issue branch"
       >
         <Form.Dropdown.Item key={"default"} title={"No issue"} value={""} />
@@ -156,24 +148,11 @@ export function BranchForm({ draftValues }: BranchFormProps) {
       </Form.Dropdown>
 
       <Form.TextField
-        id="name"
+        {...itemProps.name}
         title="Name"
-        placeholder={issue ? "Optional branch name (ie: my new branch)" : "Branch name (ie: refs/heads/my_new_branch)"}
-        value={name}
-        error={nameError}
-        onChange={(newName) => {
-          if (!!newName.length && !!nameError?.length) {
-            setNameError(undefined);
-          }
-          setName(newName);
-        }}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0 && issue.length == 0) {
-            setNameError("This field can't be empty!");
-          } else {
-            setNameError(undefined);
-          }
-        }}
+        placeholder={
+          values.issue ? "Optional branch name (ie: my new branch)" : "Branch name (ie: refs/heads/my_new_branch)"
+        }
       />
     </Form>
   );

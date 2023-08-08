@@ -5,18 +5,23 @@ import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { useViewer } from "./useViewer";
 
-export function useMyRepositories() {
+export function useMyRepositories(searchText: string) {
   const { github } = getGitHubClient();
   const viewer = useViewer();
 
-  return useCachedPromise(async () => {
-    const result = await github.searchRepositories({
-      query: `user:@me ${viewer?.organizations?.nodes?.map((org) => `org:${org?.login}`).join(" ")}`,
-      numberOfItems: 100,
-    });
+  return useCachedPromise(
+    async (text) => {
+      const result = await github.searchRepositories({
+        query: `${text ? `${text} ` : ""}user:@me ${viewer?.organizations?.nodes
+          ?.map((org) => `org:${org?.login}`)
+          .join(" ")}`,
+        numberOfItems: 20,
+      });
 
-    return result.search.nodes as ExtendedRepositoryFieldsFragment[];
-  });
+      return result.search.nodes as ExtendedRepositoryFieldsFragment[];
+    },
+    [searchText],
+  );
 }
 
 export function useReleases(repository: ExtendedRepositoryFieldsFragment) {
