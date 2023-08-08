@@ -1,5 +1,9 @@
 # Change Case Changelog
 
+## [Update] - 2023-08-08
+
+- Support change case for multi lines
+
 ## [Added new case] - 2023-05-15
 
 - Added Slug case
