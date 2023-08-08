@@ -7,6 +7,7 @@ import fs from "fs";
 import ffmpeg, { setFfmpegPath, setFfprobePath } from "fluent-ffmpeg";
 import { promisify } from "util";
 import stream from "stream";
+import sanitizeFilename from "sanitize-filename";
 
 const pipeline = promisify(stream.pipeline);
 
@@ -40,7 +41,7 @@ export async function downloadVideo(url: string, options: { format: string; copy
   const title = info.videoDetails.title;
   const filePath = options.copyToClipboard
     ? tempfile(`.${container}`)
-    : unusedFilenameSync(path.join(preferences.downloadPath, `${title}.${container}`));
+    : unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.${container}`));
 
   const videoFormat = ytdl.chooseFormat(info.formats, {
     quality: "highestvideo",
@@ -159,7 +160,7 @@ export async function downloadAudio(url: string, options: { format: string; copy
 
   const filePath = options.copyToClipboard
     ? tempfile(".mp3")
-    : unusedFilenameSync(path.join(preferences.downloadPath, `${title}.mp3`));
+    : unusedFilenameSync(path.join(preferences.downloadPath, `${sanitizeFilename(title)}.mp3`));
 
   return new Promise((resolve) => {
     ffmpeg()
