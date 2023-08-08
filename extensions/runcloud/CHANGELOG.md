@@ -1,4 +1,4 @@
-# Runcloud Changelog
+# RunCloud Changelog
 
 ## [Initial Release] - 2023-07-28
 
