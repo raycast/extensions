@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action } from "@raycast/api";
+import { Detail, ActionPanel, Action, environment } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 
 export default function ChromeDino() {
@@ -30,9 +30,9 @@ export default function ChromeDino() {
   ];
   const cloudShapes = [
     `
-      ░░░░░░░░░░
-   ░░░░░░░░░░░░░░░
-  ░░░░░░░░░░░░`,
+   ░░░░░░░░░░
+  ░░░░░░░░░░░░░░░
+░░░░░░░░░░░░`,
     `
   ░░░░░░░░░░░
 ░░░░░░░░░░░░░░░
@@ -92,10 +92,12 @@ export default function ChromeDino() {
                   
      `;
 
+  let boardWidth = environment.textSize === "medium" ? 106 : 92;
+  let boardHeight = environment.textSize === "medium" ? 21 : 17;
   let [markdown, setMarkdown] = useState(
-    Array(17)
+    Array(boardHeight)
       .fill()
-      .map(() => Array(92).fill(" "))
+      .map(() => Array(boardWidth).fill(" "))
   );
   let status = useRef(Status.PLAYING);
   let time = useRef(0);
@@ -119,7 +121,7 @@ export default function ChromeDino() {
       dinoStatus.current.y = Math.round(Math.max(dinoStatus.current.y + dinoStatus.current.gravity, 0));
       if (time.current === 60) {
         activeCacti.current.push({
-          x: 90,
+          x: boardWidth,
           shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
           time: time.current,
         });
@@ -127,7 +129,7 @@ export default function ChromeDino() {
       if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 40) {
         if (Math.random() < 0.02) {
           activeCacti.current.push({
-            x: 90,
+            x: boardWidth,
             shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
             time: time.current,
           });
@@ -135,7 +137,7 @@ export default function ChromeDino() {
       }
       if (time.current > 60 && time.current - activeCacti.current.at(-1).time > 100) {
         activeCacti.current.push({
-          x: 90,
+          x: boardWidth,
           shape: cactiShapes[Math.floor(Math.random() * cactiShapes.length)],
           time: time.current,
         });
@@ -143,7 +145,7 @@ export default function ChromeDino() {
 
       if (time.current % 70 === 0) {
         activeClouds.current.push({
-          x: 90,
+          x: boardWidth,
           y: getRandomNumber(0, 5),
           shape: cloudShapes[Math.floor(Math.random() * cloudShapes.length)],
         });
@@ -158,10 +160,10 @@ export default function ChromeDino() {
         frame = dinoRunFrames[Math.floor(time.current / 5) % 2].split("\n").map((x) => x.split(""));
       }
 
-      let newMarkdown = Array(17)
+      let newMarkdown = Array(boardHeight)
         .fill()
-        .map(() => Array(92).fill(" "));
-      newMarkdown[16] = Array(92).fill("_");
+        .map(() => Array(boardWidth).fill(" "));
+      newMarkdown[16] = Array(boardWidth).fill("_");
 
       for (let i = 0; i < activeCacti.current.length; i++) {
         let cactus = activeCacti.current[i];
@@ -175,7 +177,7 @@ export default function ChromeDino() {
             if (
               cactusFrame[i][j + Math.floor(cactus.x)] !== " " &&
               j + Math.floor(cactus.x) > 0 &&
-              j + Math.floor(cactus.x) < 91
+              j + Math.floor(cactus.x) < boardWidth - 1
             ) {
               newMarkdown[i + 12][j + Math.floor(cactus.x)] = cactusFrame[i][j];
             }
@@ -195,7 +197,7 @@ export default function ChromeDino() {
             if (
               cloudFrame[i][j + Math.floor(cloud.x)] !== " " &&
               j + Math.floor(cloud.x) > 0 &&
-              j + Math.floor(cloud.x) < 91
+              j + Math.floor(cloud.x) < boardWidth - 1
             ) {
               newMarkdown[i + cloud.y][j + Math.floor(cloud.x)] = cloudFrame[i][j];
             }
@@ -219,7 +221,7 @@ export default function ChromeDino() {
         }
         if (status.current == Status.GAMEOVER) break;
       }
-      // status.current = Status.GAMEOVER
+
       if (status.current === Status.GAMEOVER) {
         let dinoHitFrameProcessed = dinoHitFrame.split("\n").map((x) => x.split(""));
         for (let i = 0; i < dinoHitFrameProcessed.length; i++) {
@@ -233,7 +235,9 @@ export default function ChromeDino() {
         let endScreen = gameOver.split("\n").map((x) => x.split(""));
         for (let i = 0; i < endScreen.length; i++) {
           for (let j = 0; j < endScreen[i].length; j++) {
-            newMarkdown[i + 3][j + 37] = endScreen[i][j];
+            newMarkdown[i + Math.floor(boardHeight / 2 - endScreen.length / 2)][
+              j + Math.floor(boardWidth / 2 - endScreen[i].length / 2)
+            ] = endScreen[i][j];
           }
         }
       }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, environment } from "@raycast/api";
 
 export default function Tetris() {
   // Utility functions
@@ -166,22 +166,51 @@ export default function Tetris() {
           return newPiece;
         } else {
           if (original.y === 0) {
-            setMarkdown(`
-\`\`\`
-
-│          │
-│          │
-│          │
-│          │
-│   GAME   │   PRESS ENTER
-│   OVER   │   TO RESTART
-│          │
-│          │
-│          │
-│          │
-╰──TETRIS──╯
-\`\`\`
-            `);
+            if (environment.textSize === "medium") {
+              setMarkdown(`
+  \`\`\`
+  │                    │        
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │        GAME        │    PRESS ENTER
+  │        OVER        │    TO RESTART
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  │                    │
+  ╰───────TETRIS───────╯  
+  \`\`\`
+              `);
+            } else {
+              setMarkdown(`
+  \`\`\`
+  
+  │          │
+  │          │
+  │          │
+  │          │
+  │   GAME   │   PRESS ENTER
+  │   OVER   │   TO RESTART
+  │          │
+  │          │
+  │          │
+  │          │
+  ╰──TETRIS──╯
+  \`\`\`
+              `);
+            }
             status.current = Status.LOSE;
             return original;
           } else {
@@ -251,36 +280,61 @@ export default function Tetris() {
   }
 
   let generateMarkdown = () => {
-    let result = "\n";
-    for (let i = 0; i < game.length / 2; i += 1) {
-      let matrixSlice = game.slice(i * 2, i * 2 + 2);
-      let current = "";
-      for (let j = 0; j < game[0].length; j++) {
-        let blocks = {
-          "00": " ",
-          "01": "▄",
-          10: "▀",
-          11: "█",
-        };
-        let blockType = [matrixSlice[0][j], matrixSlice[1][j]].join("");
-        current += blocks[blockType];
+    if (environment.textSize === "medium") {
+      let result = "";
+      for (let i = 0; i < game.length; i += 1) {
+        let current = "";
+        for (let j = 0; j < game[i].length; j++) {
+          current += game[i][j] === 0 ? "  " : "██";
+        }
+        if (i === 0) {
+          result += " " + current + " \n";
+        } else if (i === 9) {
+          result += "│" + current + `│ LVL:    ${level} \n`;
+        } else if (i === 10) {
+          result += "│" + current + `│ TIME:   ${convertToMmSs(Date.now() - startTime)}\n`;
+        } else if (i === 11) {
+          result += "│" + current + `│ LINES:  ${String(lines).padStart(6, "0")}\n`;
+        } else if (i === 12) {
+          result += "│" + current + `│ POINTS: ${String(points).padStart(6, "0")} \n`;
+        } else {
+          result += "│" + current + "│\n";
+        }
       }
-      if (i === 0) {
-        result += " " + current + " \n";
-      } else if (i === 7) {
-        result += "│" + current + `│ LVL:    ${level} \n`;
-      } else if (i === 8) {
-        result += "│" + current + `│ TIME:   ${convertToMmSs(Date.now() - startTime)}\n`;
-      } else if (i === 9) {
-        result += "│" + current + `│ LINES:  ${String(lines).padStart(6, "0")}\n`;
-      } else if (i === 10) {
-        result += "│" + current + `│ POINTS: ${String(points).padStart(6, "0")} \n`;
-      } else {
-        result += "│" + current + "│\n";
+      result += "╰───────TETRIS───────╯\n";
+      return result;
+    } else {
+      let result = "\n";
+      for (let i = 0; i < game.length / 2; i += 1) {
+        let matrixSlice = game.slice(i * 2, i * 2 + 2);
+        let current = "";
+        for (let j = 0; j < game[0].length; j++) {
+          let blocks = {
+            "00": " ",
+            "01": "▄",
+            10: "▀",
+            11: "█",
+          };
+          let blockType = [matrixSlice[0][j], matrixSlice[1][j]].join("");
+          current += blocks[blockType];
+        }
+        if (i === 0) {
+          result += " " + current + " \n";
+        } else if (i === 7) {
+          result += "│" + current + `│ LVL:    ${level} \n`;
+        } else if (i === 8) {
+          result += "│" + current + `│ TIME:   ${convertToMmSs(Date.now() - startTime)}\n`;
+        } else if (i === 9) {
+          result += "│" + current + `│ LINES:  ${String(lines).padStart(6, "0")}\n`;
+        } else if (i === 10) {
+          result += "│" + current + `│ POINTS: ${String(points).padStart(6, "0")} \n`;
+        } else {
+          result += "│" + current + "│\n";
+        }
       }
+      result += "╰──TETRIS──╯\n";
+      return result;
     }
-    result += "╰──TETRIS──╯\n";
-    return result;
   };
 
   useEffect(() => {
@@ -399,7 +453,7 @@ export default function Tetris() {
                   setPoints(0);
                   setLines(0);
                   setStartTime(Date.now());
-                  setLevel(0);
+                  setLevel(1);
                 }
               }}
             />
