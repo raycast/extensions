@@ -57,14 +57,6 @@ const useTask = () => {
 
   const fetchTasks = async () => {
     try {
-      // -------
-      // const url = "/tasks";
-      // const options = { method: "GET" };
-      // const response = await fetcher(url, options);
-      // // log the reponse as json()
-      // console.log(response.data); 
-      // return response.data;
-      // -------
       const [tasks, error] = await axiosPromiseData<ApiResponseTasks>(fetcher("/tasks"));
       if (!tasks && error) throw error;
       return tasks;
@@ -82,7 +74,7 @@ const useTask = () => {
     } catch (error) {
       console.error("Error while fetching tasks", error);
     }
-  }
+  };
   
     return {
     createTask,
