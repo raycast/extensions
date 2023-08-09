@@ -53,11 +53,11 @@ export default function TypeAlphabet() {
     <List
       searchText=""
       onSearchTextChange={handleKeyDown}
-      searchBarPlaceholder="Type here. Pro tip: Press enter to restart"
+      searchBarPlaceholder="Type the letter here..."
       actions={
         <ActionPanel>
-          <Action title="Reset" onAction={handleReset} />
-          <Action.CopyToClipboard title="Copy Time" content={formatTime(timer)} />
+          {(isTimerRunning || nextLetter === "Success!") && <Action title="Reset" onAction={handleReset} icon={Icon.RotateClockwise} />}
+          {nextLetter === "Success!" && <Action.CopyToClipboard title="Copy Time" content={formatTime(timer)} />}
         </ActionPanel>
       }
     >
@@ -66,7 +66,7 @@ export default function TypeAlphabet() {
         title={nextLetter}
         description={`${
           currentProgress || "Typing game to see how fast you type the alphabet. Timer starts when you do :)"
-        }\nTime: ${formatTime(timer)}`}
+        }${isTimerRunning ? ` - ${formatTime(timer)}` : ""}`}
       />
     </List>
   );

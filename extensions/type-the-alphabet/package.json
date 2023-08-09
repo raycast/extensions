@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "type-the-alphabet",
   "title": "Type the Alphabet",
-  "description": "Type the Alphabet times how long you take to type the alphabet completely",
+  "description": "Type the Alphabet - how long time does it take you to type the alphabet",
   "icon": "command-icon.png",
   "author": "Vaibhav-Satishkumar",
   "categories": [
@@ -13,7 +13,6 @@
     {
       "name": "typethealphabet",
       "title": "Type the Alphabet",
-      "subtitle": "Time alphabet typing speed.",
       "description": "See how many seconds it will take you to type the entire alphabet using the Type the Alphabet extension!",
       "mode": "view"
     }
