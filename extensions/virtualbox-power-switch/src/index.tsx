@@ -1,24 +1,30 @@
-import { ActionPanel, Detail, List, Action, Icon, Color } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Color, Alert, confirmAlert } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { VM } from "./types";
 import { useState } from "react";
 import { parseFromStdout } from "./utils";
 
 export default function Command() {
-  const { isLoading: loadingAllVMs, data: allVMs } = useExec("VBoxManage", ["list", "vms"], {
+  const {
+    isLoading: loadingAllVMs,
+    data: allVMs,
+    revalidate: revalidateAllVMs,
+  } = useExec("VBoxManage", ["list", "vms"], {
     parseOutput: parseFromStdout,
   });
 
   const {
     isLoading: loadingRunningVMs,
     data: runningVMs,
-    revalidate,
+    revalidate: revalidateRunningVMs,
   } = useExec("VBoxManage", ["list", "runningvms"], {
     parseOutput: parseFromStdout,
   });
 
   const [execArgs, setExecArgs] = useState<string[]>([]);
-  useExec("VBoxManage", execArgs, { onData: revalidate });
+  useExec("VBoxManage", execArgs, {
+    onData: execArgs.includes("unregistervm") ? revalidateAllVMs : revalidateRunningVMs,
+  });
 
   function turnOn(vm: VM) {
     setExecArgs(["startvm", vm.uuid]);
@@ -26,6 +32,20 @@ export default function Command() {
 
   function turnOff(vm: VM) {
     setExecArgs(["controlvm", vm.uuid, "poweroff"]);
+  }
+
+  async function deleteVM(vm: VM) {
+    const alertOptions: Alert.Options = {
+      title: "Delete VM",
+      message:
+        "Are you sure you want to delete this virtual machine?\nNote: All associated files will also be deleted.",
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
+
+    if (await confirmAlert(alertOptions)) setExecArgs(["unregistervm", "--delete", vm.uuid]);
   }
 
   function isRunning(vm: VM) {
@@ -55,7 +75,10 @@ export default function Command() {
                 {vmRunning ? (
                   <Action title="Turn Off" onAction={() => turnOff(vm)} />
                 ) : (
-                  <Action title="Turn On" onAction={() => turnOn(vm)} />
+                  <>
+                    <Action title="Turn On" onAction={() => turnOn(vm)} />
+                    <Action title="Delete VM" style={Action.Style.Destructive} onAction={() => deleteVM(vm)} />
+                  </>
                 )}
               </ActionPanel>
             }
