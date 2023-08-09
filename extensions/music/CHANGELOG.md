@@ -1,5 +1,10 @@
 # Apple Music Changelog
 
+## [Fix] - 2023-08-05
+
+- Fixed HUD confirmations from showing an unknown character
+- Swapped deprecated 'accessoryTitle' to 'accessories' in lists
+
 ## [Fix] - 2023-06-12
 
 - Fixed a few bugs that caused some commands not to open correct

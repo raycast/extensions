@@ -22,7 +22,7 @@ import { EventEmitter } from "stream";
  * @returns {Promise<[boolean, string]>} [true, model] if model is installed, [false, model] if not.
  */
 async function OllamaApiTagsVerify(model: string): Promise<[boolean, string]> {
-  const url = "http://localhost:11434/api/tags";
+  const url = "http://127.0.0.1:11434/api/tags";
   const ModelMap = new Map<string, string>([
     ["raycast_orca:3b", "orca:latest"],
     ["raycast_llama2:7b", "llama2:latest"],
@@ -54,7 +54,7 @@ async function OllamaApiTagsVerify(model: string): Promise<[boolean, string]> {
  * @returns {Promise<boolean>} true if model is created, false if not.
  */
 function OllamaApiCreateModel(model: string): Promise<boolean> {
-  const url = "http://localhost:11434/api/create";
+  const url = "http://127.0.0.1:11434/api/create";
   const ModelFileMap = new Map<string, string>([
     ["raycast_orca:3b", `${environment.assetsPath}/prompt/raycast_orca_3b`],
     ["raycast_llama2:7b", `${environment.assetsPath}/prompt/raycast_llama2_7b`],
@@ -93,7 +93,7 @@ function OllamaApiCreateModel(model: string): Promise<boolean> {
  * @returns {Promise<EventEmitter>} Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponseDone` object contains all metadata of inference.
  */
 export async function OllamaApiGenerate(prompt: string, model: string): Promise<EventEmitter> {
-  const url = "http://localhost:11434/api/generate";
+  const url = "http://127.0.0.1:11434/api/generate";
   const body: OllamaApiGenerateRequestBody = {
     model: model,
     prompt: prompt,

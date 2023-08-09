@@ -53,8 +53,8 @@ export default function CollectionsForm(props: Props) {
                 collections: values.collections,
                 starred: !!values.starred,
               };
-              pop();
               await postAndCloseMainWindow(command, data);
+              pop();
             }}
           />
         </ActionPanel>

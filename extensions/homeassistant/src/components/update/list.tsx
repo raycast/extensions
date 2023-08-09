@@ -17,7 +17,7 @@ function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JS
   }
   return (
     <List.Item
-      title={r.name || r.display_name}
+      title={r.display_name || r.name}
       icon={{ source: "hacs.svg", tintColor: PrimaryIconColor }}
       actions={
         <ActionPanel>

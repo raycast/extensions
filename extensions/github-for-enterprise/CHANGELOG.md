@@ -1,6 +1,10 @@
 # Changelog
 
-## [Dependency Updates] - 2022-02-7
+## [Dependency Updates] - 2023-08-09
+
+- Update graphql-request to v6
+
+## [Dependency Updates] - 2022-02-07
 
 - Updated dependencies for the extension
 
