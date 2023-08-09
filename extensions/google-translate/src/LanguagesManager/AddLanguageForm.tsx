@@ -1,6 +1,6 @@
 import React from "react";
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { getLanguageCode, getLanguageFlag, languages } from "../languages";
+import { getLanguageFlag, languages } from "../languages";
 import { AUTO_DETECT } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
 
