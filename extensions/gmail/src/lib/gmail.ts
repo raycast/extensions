@@ -4,7 +4,7 @@ import { GaxiosResponse } from "googleapis-common";
 
 let profile: GaxiosResponse<gmail_v1.Schema$Profile>;
 
-export async function getGmailClient(options?: { ensureProfile?: boolean }) {
+export async function getAuthorizedGmailClient(options?: { ensureProfile?: boolean }) {
   await authorize();
   const t = await client.getTokens();
 
@@ -41,8 +41,7 @@ export function currentGMailAddress() {
   return profile?.data?.emailAddress ? profile.data.emailAddress : undefined;
 }
 
-export async function getGMailLabels() {
-  const gmail = await getGmailClient();
+export async function getGMailLabels(gmail: gmail_v1.Gmail) {
   const res = await gmail.users.labels.list({
     userId: "me",
   });
@@ -50,17 +49,17 @@ export async function getGMailLabels() {
 }
 
 export async function getGMailMessageIds(
+  gmail: gmail_v1.Gmail,
   query?: string
 ): Promise<GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> | undefined> {
-  const gmail = await getGmailClient();
   const messages = await gmail.users.messages.list({ userId: "me", q: query, maxResults: 50 });
   return messages;
 }
 
-export async function getGMailMessages(query?: string) {
-  const messages = await getGMailMessageIds(query);
+export async function getGMailMessages(gmail: gmail_v1.Gmail, query?: string) {
+  const messages = await getGMailMessageIds(gmail, query);
   const ids = messages?.data?.messages?.map((m) => m.id as string).filter((m) => m);
-  const details = await getMailDetails(ids);
+  const details = await getMailDetails(gmail, ids);
   return details;
 }
 
@@ -125,17 +124,16 @@ export function messageThreadUrl(message: gmail_v1.Schema$Message) {
   return prefix ? `${prefix}/#inbox/${message.threadId}` : undefined;
 }
 
-export async function getMailDetail(id: string) {
-  const gmail = await getGmailClient();
+export async function getMailDetail(gmail: gmail_v1.Gmail, id: string) {
   const detail = await gmail.users.messages.get({ userId: "me", id: id, format: "full" });
   return detail;
 }
 
-export async function getMailDetails(ids: string[] | undefined | null) {
+export async function getMailDetails(gmail: gmail_v1.Gmail, ids: string[] | undefined | null) {
   if (!ids) {
     return;
   }
-  const result = await Promise.all(ids.map((id) => getMailDetail(id)));
+  const result = await Promise.all(ids.map((id) => getMailDetail(gmail, id)));
   return result;
 }
 
@@ -151,7 +149,7 @@ export function generateQuery(options?: { baseQuery?: string[]; userQuery?: stri
 }
 
 export async function markMessageAsRead(message: gmail_v1.Schema$Message) {
-  const gmail = await getGmailClient();
+  const gmail = await getAuthorizedGmailClient();
   await gmail.users.messages.modify({
     userId: "me",
     id: message.id || "",
@@ -160,7 +158,7 @@ export async function markMessageAsRead(message: gmail_v1.Schema$Message) {
 }
 
 export async function markMessagesAsRead(messages: gmail_v1.Schema$Message[]) {
-  const gmail = await getGmailClient();
+  const gmail = await getAuthorizedGmailClient();
   const ids = messages.map((m) => m.id as string).filter((m) => m);
   await gmail.users.messages.batchModify({
     userId: "me",
@@ -169,7 +167,7 @@ export async function markMessagesAsRead(messages: gmail_v1.Schema$Message[]) {
 }
 
 export async function markMessageAsUnread(message: gmail_v1.Schema$Message) {
-  const gmail = await getGmailClient();
+  const gmail = await getAuthorizedGmailClient();
   await gmail.users.messages.modify({
     userId: "me",
     id: message.id || "",
@@ -181,6 +179,6 @@ export async function moveMessageToTrash(message: gmail_v1.Schema$Message) {
   if (message.id === undefined) {
     return;
   }
-  const gmail = await getGmailClient();
+  const gmail = await getAuthorizedGmailClient();
   await gmail.users.messages.trash({ userId: "me", id: message.id || "" });
 }

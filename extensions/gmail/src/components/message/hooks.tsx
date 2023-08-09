@@ -3,6 +3,7 @@ import { getErrorMessage } from "../../lib/utils";
 import { GMailMessage, getGMailLabels, getMailDetail } from "../../lib/gmail";
 import { gmail_v1 } from "@googleapis/gmail";
 import { useCachedPromise } from "@raycast/utils";
+import { getGMailClient } from "../../lib/withGmailClient";
 
 export function useMessage(message: GMailMessage): {
   error?: string;
@@ -12,6 +13,7 @@ export function useMessage(message: GMailMessage): {
   const [data, setData] = useState<gmail_v1.Schema$Message>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { gmail } = getGMailClient();
 
   useEffect(() => {
     let didUnmount = false;
@@ -25,7 +27,7 @@ export function useMessage(message: GMailMessage): {
       setError(undefined);
 
       try {
-        const detail = await getMailDetail(message.id || "");
+        const detail = await getMailDetail(gmail, message.id || "");
         if (!didUnmount) {
           setData(detail.data);
         }
@@ -61,7 +63,8 @@ export function useLabels(): {
     error,
   } = useCachedPromise(
     async () => {
-      return await getGMailLabels();
+      const { gmail } = getGMailClient();
+      return await getGMailLabels(gmail);
     },
     [],
     { keepPreviousData: true }

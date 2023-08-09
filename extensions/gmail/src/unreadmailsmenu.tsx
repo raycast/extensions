@@ -5,6 +5,8 @@ import { gmail_v1 } from "@googleapis/gmail";
 import { getAddressParts, getMessageInternalDate } from "./components/message/utils";
 import { ensureShortText, getErrorMessage, getFirstValidLetter } from "./lib/utils";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./components/menu";
+import View from "./components/view";
+import { getGMailClient } from "./lib/withGmailClient";
 
 function MessageMenubarItem(props: { message: gmail_v1.Schema$Message }) {
   const m = props.message;
@@ -40,15 +42,17 @@ function MessageMenubarItem(props: { message: gmail_v1.Schema$Message }) {
   );
 }
 
-export default function UnreadMenuCommand(): JSX.Element {
+function UnreadMenuCommand(): JSX.Element {
   const query = generateQuery({ baseQuery: ["is:unread"] });
+  const { gmail } = getGMailClient();
   const { isLoading, data, error } = useCachedPromise(
     async (q: string) => {
-      return await getGMailMessages(q);
+      return await getGMailMessages(gmail, q);
     },
     [query],
     { keepPreviousData: true }
   );
+  console.log("isloading", isLoading, data?.length);
   const unreadCount = data?.length || 0;
   return (
     <MenuBarExtra icon={"gmail.svg"} title={unreadCount.toString()} isLoading={isLoading} tooltip="Unread Mails">
@@ -62,7 +66,7 @@ export default function UnreadMenuCommand(): JSX.Element {
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        {isLoading === false && !error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" />}
+        {!error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" />}
         {data?.map((m) => (
           <MessageMenubarItem key={m.data.id} message={m.data} />
         ))}
@@ -71,5 +75,13 @@ export default function UnreadMenuCommand(): JSX.Element {
         <MenuBarItemConfigureCommand />
       </MenuBarExtra.Section>
     </MenuBarExtra>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <UnreadMenuCommand />
+    </View>
   );
 }

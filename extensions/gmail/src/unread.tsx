@@ -6,13 +6,16 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getErrorMessage } from "./lib/utils";
 import { useLabels } from "./components/message/hooks";
 import { GMailContext } from "./components/context";
+import View from "./components/view";
+import { getGMailClient } from "./lib/withGmailClient";
 
-export default function UnreadMailsRootCommand() {
+function UnreadMailsRootCommand() {
   const [searchText, setSearchText] = useState<string>();
   const query = generateQuery({ baseQuery: ["is:unread", "label=INBOX"], userQuery: searchText });
+  const { gmail } = getGMailClient();
   const { isLoading, data, error, revalidate } = useCachedPromise(
     async (q: string) => {
-      return await getGMailMessages(q);
+      return await getGMailMessages(gmail, q);
     },
     [query],
     { keepPreviousData: true }
@@ -44,5 +47,13 @@ export default function UnreadMailsRootCommand() {
         />
       </List>
     </GMailContext.Provider>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <UnreadMailsRootCommand />
+    </View>
   );
 }
