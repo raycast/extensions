@@ -65,7 +65,7 @@ const useTask = () => {
     }
   };
 
-  // Get all tasks from the API
+  // Fetch all tasks
   const getAllTasks = async () => {
     try {
       const [GetTasks, error] = await axiosPromiseData<Task>(fetcher("/tasks", {method: "GET"}));//<Task[]>(fetcher("/tasks"));
@@ -75,6 +75,44 @@ const useTask = () => {
       console.error("Error while fetching tasks", error);
     }
   };
+
+  // Add time
+  const addTime = async (task: Task, time: number) => {
+    try {
+      const [updatedTask, error] = await axiosPromiseData(fetcher(`/planner/add-time/task/${task.id}?minutes=${time}`, {method: "POST", responseType: "json",}));
+      if (!updatedTask || error) throw error;
+      return updatedTask;
+    } catch (error) {
+      console.error("Error while adding time", error);
+    }
+  };
+
+  // Update task
+  // const updateTask = async (task: Task) => {
+  //   console.log(task);
+  //   try {
+  //     const [updatedTask, error] = await axiosPromiseData(
+  //       fetcher(`/tasks/${task.id}`, {
+  //         method: "PUT",
+  //         responseType: "json",
+  //         data: task,
+  //       })
+  //     );
+
+  //     if (error) {
+  //       throw error;
+  //     } else if (!updatedTask) {;
+  //       showToast(Toast.Style.Failure, "Response is empty!");
+  //     } else {
+  //       showToast(Toast.Style.Success, `Task "${updatedTask.title}" updated successfully!`);
+  //     }
+  
+  //     console.log(updatedTask);
+  //     return updatedTask;
+  //   } catch (error) {
+  //     showToast(Toast.Style.Failure, `Error while updating task!`);
+  //   }
+  // };
   
     return {
     createTask,
@@ -82,6 +120,7 @@ const useTask = () => {
     handleStartTask,
     handleStopTask,
     getAllTasks,
+    addTime,
   };
 };
 
