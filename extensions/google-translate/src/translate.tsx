@@ -2,7 +2,7 @@ import React, { ReactElement, useState } from "react";
 import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
-import { supportedLanguagesByCode } from "./languages";
+import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate } from "./simple-translate";
 
@@ -38,8 +38,8 @@ export default function Translate(): ReactElement {
         const langFrom = supportedLanguagesByCode[r.langFrom];
         const langTo = supportedLanguagesByCode[r.langTo];
 
-        const languages = `${langFrom.flag ?? langFrom?.code} -> ${langTo.flag ?? langTo.code}`;
-        const tooltip = `${langFrom.name ?? langFrom?.code} -> ${langTo.name ?? langTo.code}`;
+        const languages = `${getLanguageFlag(langFrom, langFrom?.code)} -> ${getLanguageFlag(langTo, langTo?.code)}`;
+        const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo.name ?? langTo.code}`;
 
         return (
           <List.Item
