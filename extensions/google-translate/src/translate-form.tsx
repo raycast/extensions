@@ -93,7 +93,7 @@ export default function TranslateForm() {
               }}
               title={`${getLanguageFlag(toLangObj, toLangObj?.code)} <-> ${getLanguageFlag(
                 fromLangObj,
-                fromLangObj?.code
+                fromLangObj?.code,
               )} Switch Languages`}
             />
             <ActionPanel.Submenu
