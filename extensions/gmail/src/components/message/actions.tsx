@@ -12,6 +12,8 @@ import { getErrorMessage, sleep } from "../../lib/utils";
 import { isMailDraft, isMailUnread } from "./utils";
 import path from "path";
 import * as fs from "fs";
+import { useCurrentProfile } from "./hooks";
+import { getGMailClient } from "../../lib/withGmailClient";
 
 export function MessageMarkAsReadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
   if (!isMailUnread(props.message) || isMailDraft(props.message)) {
@@ -173,7 +175,9 @@ export function MessageOpenInBrowserAction(props: { message: gmail_v1.Schema$Mes
   if (m.id === undefined) {
     return null;
   }
-  const url = isMailDraft(m) ? messageDraftEditUrl(m) : messageThreadUrl(m);
+  const { gmail } = getGMailClient();
+  const { profile } = useCurrentProfile(gmail);
+  const url = isMailDraft(m) ? messageDraftEditUrl(profile, m) : messageThreadUrl(profile, m);
   if (!url) {
     return null;
   }

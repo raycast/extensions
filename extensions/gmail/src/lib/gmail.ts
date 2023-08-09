@@ -4,7 +4,7 @@ import { GaxiosResponse } from "googleapis-common";
 
 let profile: GaxiosResponse<gmail_v1.Schema$Profile>;
 
-export async function getAuthorizedGmailClient(options?: { ensureProfile?: boolean }) {
+export async function getAuthorizedGmailClient() {
   await authorize();
   const t = await client.getTokens();
 
@@ -17,11 +17,6 @@ export async function getAuthorizedGmailClient(options?: { ensureProfile?: boole
     expiry_date: t?.expiresIn,
   });
   const gm = gmailclient({ version: "v1", auth: oAuth2Client });
-  if (options?.ensureProfile === true) {
-    await getGMailAddress(gm);
-  } else {
-    getGMailAddress(gm); // prefetch profile
-  }
   return gm;
 }
 
@@ -30,15 +25,11 @@ export interface GMailMessage {
   threadId?: string | null;
 }
 
-export async function getGMailAddress(gmail: gmail_v1.Gmail) {
+export async function getGMailCurrentProfile(gmail: gmail_v1.Gmail) {
   if (!profile) {
     profile = await gmail.users.getProfile({ userId: "me" });
   }
-  return profile;
-}
-
-export function currentGMailAddress() {
-  return profile?.data?.emailAddress ? profile.data.emailAddress : undefined;
+  return profile.data;
 }
 
 export async function getGMailLabels(gmail: gmail_v1.Gmail) {
@@ -71,24 +62,27 @@ export function getGMailMessageHeaderValue(msg: gmail_v1.Schema$Message | undefi
   return d?.value;
 }
 
-export function gmailWebUrlBase() {
-  const address = currentGMailAddress();
+export function gmailWebUrlBase(currentProfile: gmail_v1.Schema$Profile | undefined) {
+  const address = currentProfile?.emailAddress;
   return address ? `https://mail.google.com/mail/u/${address}` : undefined;
 }
 
-export function inlineNewMailWebUrl() {
-  const prefix = gmailWebUrlBase();
+export function inlineNewMailWebUrl(currentProfile: gmail_v1.Schema$Profile) {
+  const prefix = gmailWebUrlBase(currentProfile);
   return prefix ? `${prefix}/#compose` : undefined;
 }
 
-export function fullscreenNewMailWebUrl(options?: {
-  to?: string;
-  cc?: string;
-  bcc?: string;
-  subject?: string;
-  body?: string;
-}) {
-  const prefix = gmailWebUrlBase();
+export function fullscreenNewMailWebUrl(
+  currentProfile: gmail_v1.Schema$Profile,
+  options?: {
+    to?: string;
+    cc?: string;
+    bcc?: string;
+    subject?: string;
+    body?: string;
+  }
+) {
+  const prefix = gmailWebUrlBase(currentProfile);
   const params: Record<string, string> = {
     view: "cm",
     fs: "1",
@@ -114,13 +108,19 @@ export function fullscreenNewMailWebUrl(options?: {
   return prefix ? `${prefix}/?${encodedParams}` : undefined;
 }
 
-export function messageDraftEditUrl(message: gmail_v1.Schema$Message) {
-  const prefix = gmailWebUrlBase();
+export function messageDraftEditUrl(
+  currentProfile: gmail_v1.Schema$Profile | undefined,
+  message: gmail_v1.Schema$Message
+) {
+  const prefix = gmailWebUrlBase(currentProfile);
   return prefix ? `${prefix}/#drafts?compose=${message.id}` : undefined;
 }
 
-export function messageThreadUrl(message: gmail_v1.Schema$Message) {
-  const prefix = gmailWebUrlBase();
+export function messageThreadUrl(
+  currentProfile: gmail_v1.Schema$Profile | undefined,
+  message: gmail_v1.Schema$Message
+) {
+  const prefix = gmailWebUrlBase(currentProfile);
   return prefix ? `${prefix}/#inbox/${message.threadId}` : undefined;
 }
 

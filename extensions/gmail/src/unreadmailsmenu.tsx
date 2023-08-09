@@ -52,7 +52,6 @@ function UnreadMenuCommand(): JSX.Element {
     [query],
     { keepPreviousData: true }
   );
-  console.log("isloading", isLoading, data?.length);
   const unreadCount = data?.length || 0;
   return (
     <MenuBarExtra icon={"gmail.svg"} title={unreadCount.toString()} isLoading={isLoading} tooltip="Unread Mails">

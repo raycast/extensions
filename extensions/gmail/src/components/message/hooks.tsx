@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getErrorMessage } from "../../lib/utils";
-import { GMailMessage, getGMailLabels, getMailDetail } from "../../lib/gmail";
+import { GMailMessage, getGMailCurrentProfile, getGMailLabels, getMailDetail } from "../../lib/gmail";
 import { gmail_v1 } from "@googleapis/gmail";
 import { useCachedPromise } from "@raycast/utils";
 import { getGMailClient } from "../../lib/withGmailClient";
@@ -70,4 +70,11 @@ export function useLabels(): {
     { keepPreviousData: true }
   );
   return { labels, isLoading, error };
+}
+
+export function useCurrentProfile(gmail: gmail_v1.Gmail) {
+  const { data: profile } = useCachedPromise(async () => {
+    return await getGMailCurrentProfile(gmail);
+  });
+  return { profile };
 }
