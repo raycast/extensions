@@ -1,3 +1,3 @@
 # Gmail Changelog
 
-## [Initial Version] - 2023-07-31
+## [Initial Version] - 2023-08-09
