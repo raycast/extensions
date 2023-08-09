@@ -5,10 +5,10 @@
   />
 
   <h1>
-    GMail
+    Gmail
   </h1>
 
-Raycast extension to manage your GMail inbox.
+Raycast extension to manage your Gmail inbox.
 
   <p>
     <a href="https://www.raycast.com/tonka3000/gmail">
@@ -50,7 +50,7 @@ Raycast extension to manage your GMail inbox.
 - Manage Drafts
 - Open specific mail on gmail.com
 
-## How to get a GMail OAuth Client ID
+## How to get a Gmail OAuth Client ID
 
 For now you need to create your own OAuth Client ID to be able to use this extension.
 Getting a production enabled OAuth Client ID is complicated but is planned in the future.
@@ -66,7 +66,7 @@ You can search on Google or YouTube to get a better process description like e.g
 
   This step take some seconds until the project is created.
 
-- Enable the `GMail API`
+- Enable the `Gmail API`
 
   1. Click [here](https://console.cloud.google.com/apis/library/gmail.googleapis.com)
   2. Press the `Enable` button
@@ -90,4 +90,4 @@ You can search on Google or YouTube to get a better process description like e.g
   15. Press `Create`
   16. Now copy and paste the shown Client ID into the Preferences of this extension
 
-Now you should be able to manage your GMail account with Raycast.
+Now you should be able to manage your Gmail account with Raycast.
