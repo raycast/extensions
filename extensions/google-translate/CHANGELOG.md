@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - 2023-08-09
+
+- Added latin
+
 ## [Fix] - 2023-06-21
 
 - Supplementary change for zh-TW info to match Google Translate
