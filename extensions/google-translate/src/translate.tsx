@@ -37,13 +37,15 @@ export default function Translate(): ReactElement {
       {results?.map((r, index) => {
         const langFrom = supportedLanguagesByCode[r.langFrom];
         const langTo = supportedLanguagesByCode[r.langTo];
-        const languages = `${langFrom.flag ?? langFrom.code} -> ${langTo.flag ?? langTo.code}`;
+
+        const languages = `${langFrom.flag ?? langFrom?.code} -> ${langTo.flag ?? langTo.code}`;
+        const tooltip = `${langFrom.name ?? langFrom?.code} -> ${langTo.name ?? langTo.code}`;
 
         return (
           <List.Item
             key={index}
             title={r.translatedText}
-            accessories={[{ text: languages }]}
+            accessories={[{ text: languages, tooltip: tooltip }]}
             detail={<List.Item.Detail markdown={r.translatedText} />}
             actions={
               <ActionPanel>
