@@ -2,11 +2,8 @@
 
 ## [Fix] - 2023-08-09
 
-- Fix auto language detect when detected language is not in available list
-
-## [Fix] - 2023-08-09
-
-- Added latin
+- Fix auto language detect when detected language is not in the available list
+- Added Latin
 
 ## [Fix] - 2023-06-21
 
