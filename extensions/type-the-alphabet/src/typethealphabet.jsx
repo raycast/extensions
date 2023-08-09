@@ -56,7 +56,9 @@ export default function TypeAlphabet() {
       searchBarPlaceholder="Type the letter here..."
       actions={
         <ActionPanel>
-          {(isTimerRunning || nextLetter === "Success!") && <Action title="Reset" onAction={handleReset} icon={Icon.RotateClockwise} />}
+          {(isTimerRunning || nextLetter === "Success!") && (
+            <Action title="Reset" onAction={handleReset} icon={Icon.RotateClockwise} />
+          )}
           {nextLetter === "Success!" && <Action.CopyToClipboard title="Copy Time" content={formatTime(timer)} />}
         </ActionPanel>
       }
