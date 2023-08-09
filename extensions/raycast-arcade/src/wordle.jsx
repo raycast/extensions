@@ -1,4 +1,15 @@
-import { List, Action, ActionPanel, Toast, showToast, popToRoot, showHUD, LocalStorage, Clipboard } from "@raycast/api";
+import {
+  List,
+  Action,
+  ActionPanel,
+  Toast,
+  showToast,
+  popToRoot,
+  showHUD,
+  LocalStorage,
+  Clipboard,
+  Icon,
+} from "@raycast/api";
 import svg64 from "svg64";
 import { useState, useRef } from "react";
 import wordlist from "./wordlist/all.js";
@@ -107,9 +118,20 @@ export default function Wordle() {
             target.current = data.solution;
             setLoading(false);
             showToast({
-              style: Toast.Style.SuccessMessage,
+              style: Toast.Style.Success,
               title: "Congratulations!",
               message: "You have already guessed the word.",
+            });
+            return;
+          }
+
+          if (guessCount.current === 6) {
+            target.current = data.solution;
+            setLoading(false);
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Already Completed.",
+              message: "You were not able to guess the word in 6 attempts.",
             });
             return;
           }
@@ -138,11 +160,14 @@ export default function Wordle() {
       await LocalStorage.setItem("wordleDate", currentDate);
 
       target.current = data.solution;
+      console.log(hasGuessed.current);
+      if (!hasGuessed.current) {
+        showToast({
+          style: Toast.Style.SuccessMessage,
+          title: "Loaded daily word",
+        });
+      }
       setLoading(false);
-      showToast({
-        style: Toast.Style.SuccessMessage,
-        title: "Loaded daily word",
-      });
     },
     onWillExecute: () => {
       showToast({
@@ -334,6 +359,7 @@ export default function Wordle() {
     >
       <List.Item
         title={dailyWordleTitle}
+        icon={Icon.Calendar}
         detail={<List.Item.Detail markdown={generateBoard(board)} />}
         actions={
           <ActionPanel>

@@ -1,11 +1,17 @@
 import { Detail, ActionPanel, Action, environment } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
+import sound from "sound-play";
 
 export default function ChromeDino() {
   const Status = {
     PLAYING: "playing",
     GAMEOVER: "gameover",
   };
+
+  let playSound = (name) => {
+    sound.play(environment.assetsPath + "/sfx/" + name);
+  };
+
   const cactiShapes = [
     `
   ▄█▄
@@ -27,6 +33,11 @@ export default function ChromeDino() {
 █ ███
 ▀▀███
    ██`,
+    `
+     █  
+██ ▀██ 
+██▀ ██▀
+██  ██ `,
   ];
   const cloudShapes = [
     `
@@ -116,7 +127,12 @@ export default function ChromeDino() {
   }, []);
 
   let tick = () => {
-    if (time.current % 10 === 0) score.current += 1;
+    if (time.current % 5 === 0) {
+      if (score.current > 0 && score.current % 100 === 0) {
+        playSound("dinoCoinSFX.mov");
+      }
+      score.current += 1;
+    }
     if (status.current === Status.PLAYING) {
       dinoStatus.current.y = Math.round(Math.max(dinoStatus.current.y + dinoStatus.current.gravity, 0));
       if (time.current === 60) {
@@ -214,6 +230,7 @@ export default function ChromeDino() {
             if (["_", " ", "░"].includes(newMarkdown[i + -dinoStatus.current.y + 10][j])) {
               newMarkdown[i + -dinoStatus.current.y + 10][j] = frame[i][j];
             } else {
+              playSound("dinoEndSFX.mov");
               status.current = Status.GAMEOVER;
               break;
             }
@@ -260,6 +277,7 @@ export default function ChromeDino() {
   };
 
   let enter = () => {
+    playSound("dinoJumpSFX.mov");
     if (status.current === Status.PLAYING) {
       jump();
     }

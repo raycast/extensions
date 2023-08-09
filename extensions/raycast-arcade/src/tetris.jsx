@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ActionPanel, Action, List, environment } from "@raycast/api";
+import { ActionPanel, Action, List, environment, Icon } from "@raycast/api";
 
 export default function Tetris() {
   // Utility functions
@@ -65,25 +65,29 @@ export default function Tetris() {
     ],
   ];
 
-  let bag = JSON.parse(JSON.stringify(pieces));
-  for (let i = bag.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [bag[i], bag[j]] = [bag[j], bag[i]];
-  }
+  let bag = useRef(JSON.parse(JSON.stringify(pieces)));
+
+  useEffect(() => {
+    for (let i = bag.current.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [bag.current[i], bag.current[j]] = [bag.current[j], bag.current[i]];
+    }
+  }, []);
 
   // Just the pieces that have already been placed (no current piece)
   // Uses ref to update through setTimeout
   let board = useRef(generateNewGrid());
 
   let generatePiece = () => {
-    let newPiece = bag.shift();
-    if (bag.length === 0) {
+    console.log("GENERATING PIECE");
+    let newPiece = bag.current.shift();
+    if (bag.current.length === 1) {
       let newBag = JSON.parse(JSON.stringify(pieces));
       for (let i = newBag.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [newBag[i], newBag[j]] = [newBag[j], newBag[i]];
       }
-      bag = newBag;
+      bag.current = newBag;
     }
     return {
       x: newPiece.length === 2 ? 4 : 3,
@@ -93,7 +97,7 @@ export default function Tetris() {
   };
 
   // A object that stores data about the current piece
-  let [piece, setPiece] = useState(generatePiece());
+  let [piece, setPiece] = useState(() => generatePiece());
 
   // A completely combined 20x10 matrix of everything in the game
   let [game, setGame] = useState(generateNewGrid());
@@ -168,8 +172,7 @@ export default function Tetris() {
           if (original.y === 0) {
             if (environment.textSize === "medium") {
               setMarkdown(`
-  \`\`\`
-  │                    │        
+  \`\`\`       
   │                    │
   │                    │
   │                    │
@@ -189,8 +192,7 @@ export default function Tetris() {
   │                    │
   │                    │
   │                    │
-  │                    │
-  ╰───────TETRIS───────╯  
+  │                    │ 
   \`\`\`
               `);
             } else {
@@ -224,7 +226,6 @@ export default function Tetris() {
               }
             }
             board.current = newBoard;
-
             let newPiece = generatePiece();
 
             handleLineClear();
@@ -281,30 +282,43 @@ export default function Tetris() {
 
   let generateMarkdown = () => {
     if (environment.textSize === "medium") {
-      let result = "";
-      for (let i = 0; i < game.length; i += 1) {
+      let result = [];
+      for (let i = 1; i < game.length; i += 1) {
         let current = "";
         for (let j = 0; j < game[i].length; j++) {
           current += game[i][j] === 0 ? "  " : "██";
         }
         if (i === 0) {
-          result += " " + current + " \n";
+          result.push([" " + current + " "]);
+        } else if (i === 3) {
+          result.push(["│" + current + `│ NEXT:`]);
         } else if (i === 9) {
-          result += "│" + current + `│ LVL:    ${level} \n`;
+          result.push(["│" + current + `│ LVL:    ${level} `]);
         } else if (i === 10) {
-          result += "│" + current + `│ TIME:   ${convertToMmSs(Date.now() - startTime)}\n`;
+          result.push(["│" + current + `│ TIME:   ${convertToMmSs(Date.now() - startTime)}`]);
         } else if (i === 11) {
-          result += "│" + current + `│ LINES:  ${String(lines).padStart(6, "0")}\n`;
+          result.push(["│" + current + `│ LINES:  ${String(lines).padStart(6, "0")}`]);
         } else if (i === 12) {
-          result += "│" + current + `│ POINTS: ${String(points).padStart(6, "0")} \n`;
+          result.push(["│" + current + `│ POINTS: ${String(points).padStart(6, "0")} `]);
         } else {
-          result += "│" + current + "│\n";
+          result.push(["│" + current + "│"]);
         }
       }
-      result += "╰───────TETRIS───────╯\n";
-      return result;
+      // result += "╰───────TETRIS───────╯\n";
+
+      let nextPiece = structuredClone(bag.current[0]);
+      if (nextPiece.length === 3) nextPiece.push(new Array(nextPiece[0].length).fill(0));
+
+      for (let i = 0; i < nextPiece.length; i++) {
+        result[i + 3] += " ";
+        for (let j = 0; j < nextPiece[i].length; j++) {
+          result[i + 3] += nextPiece[i][j] === 1 ? "██" : "  ";
+        }
+      }
+
+      return result.join("\n") + "\n";
     } else {
-      let result = "\n";
+      let result = [];
       for (let i = 0; i < game.length / 2; i += 1) {
         let matrixSlice = game.slice(i * 2, i * 2 + 2);
         let current = "";
@@ -319,21 +333,43 @@ export default function Tetris() {
           current += blocks[blockType];
         }
         if (i === 0) {
-          result += " " + current + " \n";
+          result.push([" " + current + ""]);
+        } else if (i === 1) {
+          result.push(["│" + current + "│ NEXT:"]);
         } else if (i === 7) {
-          result += "│" + current + `│ LVL:    ${level} \n`;
+          result.push(["│" + current + `│ LVL:    ${level}`]);
         } else if (i === 8) {
-          result += "│" + current + `│ TIME:   ${convertToMmSs(Date.now() - startTime)}\n`;
+          result.push(["│" + current + `│ TIME:   ${convertToMmSs(Date.now() - startTime)}`]);
         } else if (i === 9) {
-          result += "│" + current + `│ LINES:  ${String(lines).padStart(6, "0")}\n`;
+          result.push(["│" + current + `│ LINES:  ${String(lines).padStart(6, "0")}`]);
         } else if (i === 10) {
-          result += "│" + current + `│ POINTS: ${String(points).padStart(6, "0")} \n`;
+          result.push(["│" + current + `│ POINTS: ${String(points).padStart(6, "0")}`]);
         } else {
-          result += "│" + current + "│\n";
+          result.push(["│" + current + "│"]);
         }
       }
-      result += "╰──TETRIS──╯\n";
-      return result;
+
+      let nextPiece = structuredClone(bag.current[0]);
+      if (nextPiece.length === 3) nextPiece.push(new Array(nextPiece[0].length).fill(0));
+
+      for (let i = 0; i < nextPiece.length / 2; i++) {
+        result[i + 2] += " ";
+        let pieceSlice = nextPiece.slice(i * 2, i * 2 + 2);
+        for (let j = 0; j < nextPiece[i].length; j++) {
+          let blocks = {
+            "00": " ",
+            "01": "▄",
+            10: "▀",
+            11: "█",
+          };
+          let blockType = [pieceSlice[0][j], pieceSlice[1][j]].join("");
+
+          result[i + 2] += blocks[blockType];
+        }
+      }
+
+      result.push("╰──TETRIS──╯");
+      return result.join("\n") + "\n";
     }
   };
 
@@ -436,6 +472,7 @@ export default function Tetris() {
       <List.Item
         title="Tetris"
         id="game"
+        icon={Icon.Play}
         detail={<List.Item.Detail markdown={markdown} />}
         actions={
           <ActionPanel>
@@ -481,11 +518,16 @@ export default function Tetris() {
         }
       ></List.Item>
       <List.Item
+        icon={Icon.Pause}
         title="Help / Pause"
         id="help"
         detail={
           <List.Item.Detail
-            markdown={`# ⏸ GAME PAUSED\nPress enter to return to the game.\n# Controls\nAfter focusing your cursor in the top search box, simply use WASD and Space to navigate the piece.\n- Using \`A\`/\`D\` moves the piece left or right\n- Using \`W\` rotates the piece clockwise\n- Using \`S\` moves the piece down\n- Space drops the piece completely.\n> Key repeats are disabled by default on MacOS. You can either turn them on, or hold \`Shift\` with the respective control to enable repeat.\n# Rules\n If you do not know how to play Tetris, read about it on Wikipedia [here](https://en.wikipedia.org/wiki/Tetris).`}
+            markdown={`# Game Paused\nPress enter to return to the game.${
+              environment.textSize === "large"
+                ? "\n > Large text size detected. You may want to use the Small text size for a larger Tetris board."
+                : ""
+            }\n# Controls\nAfter focusing your cursor in the top search box, simply use WASD and Space to navigate the piece.\n- Using \`A\`/\`D\` moves the piece left or right\n- Using \`W\` rotates the piece clockwise\n- Using \`S\` moves the piece down\n- Space drops the piece completely.\n> Key repeats are disabled by default on MacOS. You can either turn them on, or hold \`Shift\` with the respective control to enable repeat.\n# Rules\n If you do not know how to play Tetris, read about it on Wikipedia [here](https://en.wikipedia.org/wiki/Tetris).`}
           />
         }
         actions={
