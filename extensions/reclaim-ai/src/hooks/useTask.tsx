@@ -104,32 +104,6 @@ const useTask = () => {
       console.error("Error while updating task", error);
     }
   };
-
-
-  // const updateTask = async (task: Task) => {
-  //   try {
-  //     const [updatedTask, error] = await axiosPromiseData(
-  //       fetcher(`/tasks/${task.id}`, {
-  //         method: "PUT",
-  //         responseType: "json",
-  //         data: task,
-  //       })
-  //     );
-
-  //     if (error) {
-  //       throw error;
-  //     } else if (!updatedTask) {;
-  //       showToast(Toast.Style.Failure, "Response is empty!");
-  //     } else {
-  //       showToast(Toast.Style.Success, `Task "${updatedTask.title}" updated successfully!`);
-  //     }
-  
-  //     console.log(updatedTask);
-  //     return updatedTask;
-  //   } catch (error) {
-  //     showToast(Toast.Style.Failure, `Error while updating task!`);
-  //   }
-  // };
   
     return {
     createTask,

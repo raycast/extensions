@@ -4,25 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useTask } from "./hooks/useTask";
 import { Task } from "./types/task";
 
-// TODO:
-// -[ ] Add ActionPanel to edit due date
-// -[ ] Clean up code
-
-// define status types
-// const NEW_STATUS = "NEW";
-// const SCHEDULED_STATUS = "SCHEDULED";
-// const IN_PROGRESS_STATUS = "IN_PROGRESS";
+const OPEN_STATUS = "Open";
+const DONE_STATUS = "Marked done";
 const COMPLETE_STATUS = "COMPLETE";
 const ARCHIVED_STATUS = "ARCHIVED";
 
-// Dropdown Menu for Status types -> https://developers.raycast.com/api-reference/user-interface/list#list.dropdown
+// Dropdown Menu for status types
 type StatusDropdownProps = {
   tasks: Task[];
   onStatusChange: (newValue: string) => void;
 };
-
-const OPEN_STATUS = "Open";
-const DONE_STATUS = "Marked done";
 
 const StatusDropdown = (props: StatusDropdownProps) => {
   const { tasks, onStatusChange } = props;
@@ -37,26 +28,21 @@ const StatusDropdown = (props: StatusDropdownProps) => {
       }}
     >
       {statusTypes.map((statusType) => (
-        <List.Dropdown.Item
-          key={statusType}
-          title={statusType}
-          value={statusType}
-        />
+        <List.Dropdown.Item key={statusType} title={statusType} value={statusType} />
       ))}
     </List.Dropdown>
   );
 };
 
-
-// define function to list tasks
+// Main Function
 function TaskList() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
-
   const [tasks, setTasks] = useState<Task[]>([]);
   
-  // Get all tasks via the API
-  const { getAllTasks } = useTask();
+  const { getAllTasks, addTime, updateTask } = useTask();
+  
+  // Get tasks via API
   useEffect(() => {
     const getTasks = async () => {
       try {
@@ -74,7 +60,6 @@ function TaskList() {
   }, []);
 
   // Add time to task function
-  const { addTime } = useTask();
   const handleAddTime = async (task: Task, time: number) => {
     await showToast(Toast.Style.Animated, "Adding time...");
     try {
@@ -90,7 +75,6 @@ function TaskList() {
   };
 
   // Update due date
-  const  { updateTask } = useTask();
   const handleUpdateTask = async (task: Task) => {
     await showToast(Toast.Style.Animated, "Updating due date...");
     try {
@@ -109,16 +93,11 @@ function TaskList() {
   // Filter tasks by status
   const filteredTasks = useMemo(() => {
     if (selectedStatus === DONE_STATUS) {
-      return tasks.filter(
-        (task) => task.status === ARCHIVED_STATUS);
-
+      return tasks.filter((task) => task.status === ARCHIVED_STATUS);
     } else if (selectedStatus === OPEN_STATUS) {
-      return tasks.filter(
-        (task) => task.status !== ARCHIVED_STATUS);
-
+      return tasks.filter((task) => task.status !== ARCHIVED_STATUS);
     } else {
-      return tasks.filter(
-        (task) => task.status === selectedStatus);
+      return tasks.filter((task) => task.status === selectedStatus);
     }
   }, [tasks, selectedStatus]);
 
@@ -130,7 +109,6 @@ function TaskList() {
       if (!groups[task.status]) {
         groups[task.status] = [];
       }
-
       groups[task.status].push(task);
     });
 
@@ -146,20 +124,15 @@ function TaskList() {
         <StatusDropdown tasks={tasks} onStatusChange={setSelectedStatus} />
       }
     >
-      {Object.entries(groupedTasks).sort(([statusA], [statusB]) => {
+      {Object.entries(groupedTasks)
+      .sort(([statusA], [statusB]) => {
         const statusOrder = ["NEW", "IN_PROGRESS", "SCHEDULED", "COMPLETE"];
         return statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB);
       })
       .map(([status, tasks]) => (
-        <List.Section
-          key={status}
-          title={status}
-          subtitle={`${tasks.length} tasks`}
-        >
+        <List.Section key={status} title={status} subtitle={`${tasks.length} tasks`} >
           {tasks.map((task: Task) => (
-            <List.Item
-              key={task.id}
-              keywords={task.notes.split(" ")}
+            <List.Item key={task.id} keywords={task.notes.split(" ")}
               icon={task.status === ARCHIVED_STATUS
                   ? Icon.CheckCircle
                   : task.status === COMPLETE_STATUS
@@ -167,7 +140,6 @@ function TaskList() {
                   : Icon.Circle
                 }
               title={task.title}
-              // accessories
               accessories={[
                 // Snooze until
                 task.status !== ARCHIVED_STATUS && task.snoozeUntil && {
@@ -175,8 +147,7 @@ function TaskList() {
                       value: new Date(task.snoozeUntil),
                       color: Color.Yellow,
                     },
-                    tooltip:
-                      "Snoozed until: " + new Date(task.snoozeUntil).toLocaleString([], {
+                    tooltip: "Snoozed until: " + new Date(task.snoozeUntil).toLocaleString([], {
                         dateStyle: "medium",
                         timeStyle: "short",
                       }),
@@ -208,8 +179,7 @@ function TaskList() {
                     value: new Date(task.due),
                     color: Color.Red,
                   },
-                  tooltip:
-                    "Due date: " + new Date(task.due).toLocaleString([], {
+                  tooltip: "Due date: " + new Date(task.due).toLocaleString([], {
                       dateStyle: "medium",
                       timeStyle: "short",
                     }),
@@ -219,20 +189,14 @@ function TaskList() {
               // actions
               actions={
                 <ActionPanel>
-                  <ActionPanel.Submenu title="Add Time…" icon={{source: Icon.Stopwatch}} shortcut={{ modifiers: ['cmd'], key: 't' }}
-                  >
+                  <ActionPanel.Submenu title="Add Time…" icon={{source: Icon.Stopwatch}} shortcut={{ modifiers: ['cmd'], key: 't' }}>
                     <Action icon={{ source: Icon.CircleProgress25}} title="Add 30min" onAction={() => {const time=30; handleAddTime(task, time)}} />
                     <Action icon={{ source: Icon.CircleProgress50}} title="Add 1h" onAction={() => {const time=60; handleAddTime(task, time)}} />
                     <Action icon={{ source: Icon.CircleProgress75}} title="Add 2h" onAction={() => {const time=120; handleAddTime(task, time)}} autoFocus={true} />
                     <Action icon={{ source: Icon.CircleProgress100}} title="Add 4h" onAction={() => {const time=240; handleAddTime(task, time)}} />
-                    {/* <Action icon={{ source: Icon.CircleProgress100}} title="Add 4h" onAction={() => {task.timeChunksRequired += 16; updateTask(task)} } /> */}
                   </ActionPanel.Submenu>
-
                   <Action.PickDate title="Set Due Date…" shortcut={{ modifiers: ['cmd'], key: 'd' }} onChange={(date: Date) => {task.due=date.toISOString(); handleUpdateTask(task)} } />
-
-                  {/* <RemindAction todo={task} onSetDate={handleSetDate} /> */}
-                  
-                  <Action.OpenInBrowser title="Open task in Reclaim" url={"https://app.reclaim.ai/tasks/" + task.id} shortcut={{ modifiers: ['cmd'], key: 'o' }} />
+                  <Action.OpenInBrowser title="Open task in Reclaim" url={`https://app.reclaim.ai/tasks/${task.id}`} shortcut={{ modifiers: ['cmd'], key: 'o' }} />
                 </ActionPanel>
               }
             />
@@ -247,212 +211,3 @@ export default function Command() {
   return <TaskList />;
 }
 
-
-  // Add time to task function
-  // const { addTime } = useTask();
-  // const handleAddTime = async (task: Task, time: number) => {
-  //   await showToast(Toast.Style.Animated, "Adding time...");
-  //   try {
-  //     const updatedTime = await addTime(task, time);
-  //     if (updatedTime) {
-  //       showToast(Toast.Style.Success, `Added ${time/60}h to "${task.title}" successfully!`);
-  //     } else {
-  //       showToast(Toast.Style.Failure, `Error while adding time!`);
-  //     }
-  //   } catch (error) {
-  //     showToast(Toast.Style.Failure, `Error while adding time!`);
-  //   }
-  // };
-
-  // Update task
-  // const updateTask = async (task: Task) => {
-  //   try {
-  //     const [updatedTask, error] = await axiosPromiseData(
-  //       fetcher(`/tasks/${task.id}`, {
-  //         method: "PUT",
-  //         responseType: "json",
-  //         data: task,
-  //       })
-  //     );
-
-  //     if (error) {
-  //       throw error;
-  //     } else if (!updatedTask) {;
-  //       showToast(Toast.Style.Failure, "Response is empty!");
-  //     } else {
-  //       showToast(Toast.Style.Success, `Task "${updatedTask.title}" updated successfully!`);
-  //     }
-  
-  //     console.log(updatedTask);
-  //     return updatedTask;
-  //   } catch (error) {
-  //     showToast(Toast.Style.Failure, `Error while updating task!`);
-  //   }
-  // };
-  
-
-// // Due format
-// // 'due': '2023-08-12T12:00:00+02:00',
-// function UpdateDueDateAction(task: Task) {
-//   const  { updateTask } = useTask();
-
-//   const handleUpdateDueDate = async (task: Task) => {
-//     await showToast(Toast.Style.Animated, "Updating due date...");
-//     try {
-//       const updatedTask = await updateTask(task);
-//       if (updatedTask) {
-//         showToast(Toast.Style.Success, `Updated due date for "${task.title}" successfully!`);
-//       } else {
-//         showToast(Toast.Style.Failure, `Error while updating due date!`);
-//       }
-//     } catch (error) {
-//       showToast(Toast.Style.Failure, `Error while updating due date!`);
-//     }
-//   };
-// }
-
-
-
-
-// function RemindAction({ task: Task, newDueDate }: SetDateActionProps) {
-//   const handleSubmitCustomDate = (date: Date | null) => {
-//     if (!date) {
-//       onSetDate(todo, null, 'No date')
-//     } else {
-//       const value = toISOStringWithTimezone(date)
-//       const name = format(date, "EEEE d MMMM yyyy 'at' HH:mm")
-//       onSetDate(todo, value, name)
-//     }
-//   }
-
-//   return (
-//     <Action.PickDate
-//       title="Change Due Date…"
-//       shortcut={{ modifiers: ['cmd'], key: 'd' }}
-//       onChange={handleSubmitCustomDate}
-//     />
-//   )
-// }
-
-
-
-
-
-//---------------------------------------------
-
-// // Functions to add time to task 
-// // -> https://github.com/maximilianzuern/extensions/blob/main/extensions/hypersonic/src/features/todo-list/utils/to-iso-string-with-time-zone.ts 
-// // -> https://github.com/maximilianzuern/extensions/blob/main/extensions/hypersonic/src/components/remind-todo-action.tsx
-
-// import { format } from 'date-fns'
-// import { time } from "console";
-// import { get } from "http";
-// function toISOStringWithTimezone(date: Date) {
-//   const tzOffset = -date.getTimezoneOffset()
-//   const diff = tzOffset >= 0 ? '+' : '-'
-//   const pad = (n: any) => `${Math.floor(Math.abs(n))}`.padStart(2, '0')
-//   return (
-//     date.getFullYear() +
-//     '-' +
-//     pad(date.getMonth() + 1) +
-//     '-' +
-//     pad(date.getDate()) +
-//     'T' +
-//     pad(date.getHours()) +
-//     ':' +
-//     pad(date.getMinutes()) +
-//     ':' +
-//     pad(date.getSeconds()) +
-//     diff +
-//     pad(tzOffset / 60) +
-//     ':' +
-//     pad(tzOffset % 60)
-//   )
-// }
-
-// // -> https://github.com/maximilianzuern/extensions/blob/main/extensions/hypersonic/src/components/remind-todo-action.tsx
-// type SetDateActionProps = {
-//   todo: Task[];
-//   onSetDate: (
-//     todo: Task[],
-//     dateValue: string | null,
-//     name: string
-//   ) => Promise<void>
-//   selectTask?: (todo: Task[]) => void
-// }
-// function RemindAction({ todo, onSetDate }: SetDateActionProps) {
-//   const handleSubmitCustomDate = (date: Date | null) => {
-//     if (!date) {
-//       onSetDate(todo, null, 'No date')
-//     } else {
-//       const value = toISOStringWithTimezone(date)
-//       const name = format(date, "EEEE d MMMM yyyy 'at' HH:mm")
-//       onSetDate(todo, value, name)
-//     }
-//   }
-
-//   return (
-//     <Action.PickDate
-//       title="Change Due Date…"
-//       shortcut={{ modifiers: ['cmd'], key: 'd' }}
-//       onChange={handleSubmitCustomDate}
-//     />
-//   )
-// }
-
-// // -> https://github.com/maximilianzuern/extensions/blob/main/extensions/hypersonic/src/services/notion/operations/update-todo-date.ts
-// // import {Toast, showToast} from '@raycast/api'
-// async function updateTodoDate(
-//   pageId: string,
-//   date: string | null
-// ): Promise<boolean> {
-//   const notionClient = await notion()
-//   const preferences = await loadPreferences()
-
-//   await notionClient.pages.update({
-//     page_id: pageId,
-//     properties: {
-//       [preferences.properties.date]: {
-//         date: date
-//           ? {
-//               start: date,
-//             }
-//           : null,
-//       },
-//     },
-//   })
-
-//   return true
-// }
-
-// //-> https://github.com/maximilianzuern/extensions/blob/main/extensions/hypersonic/src/features/todo-list/hooks/use-todo-list.ts#L236
-// const handleSetDate = async (
-//   todo: Task[],
-//   dateValue: string | null,
-//   name: string
-// ) => {
-//   try {
-//     await showToast(Toast.Style.Animated, 'Scheduling...')
-
-//     await mutate(updateTodoDate(todo.id, dateValue), {
-//       optimisticUpdate(data) {
-//         if (!data) return data
-//         const todos = data.map((t) =>
-//           t.id === todo.id
-//             ? {
-//                 ...todo,
-//                 dateValue: dateValue || null,
-//                 date: dateValue ? new Date(dateValue) : null,
-//               }
-//             : t
-//         )
-//         return todos
-//       },
-//       shouldRevalidateAfter: true,
-//     })
-
-//     await showToast(Toast.Style.Success, `Scheduled for ${name}`)
-//   } catch (e: any) {
-//     showToast(Toast.Style.Failure, e?.message)
-//   }
-// }
