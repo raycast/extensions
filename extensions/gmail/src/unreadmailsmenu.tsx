@@ -1,6 +1,12 @@
 import { MenuBarExtra, Toast, showToast, open, showHUD, Icon, LaunchType } from "@raycast/api";
 import { getAvatarIcon, useCachedPromise } from "@raycast/utils";
-import { generateQuery, getGMailMessageHeaderValue, getGMailMessages, messageThreadUrl } from "./lib/gmail";
+import {
+  generateQuery,
+  getGMailCurrentProfile,
+  getGMailMessageHeaderValue,
+  getGMailMessages,
+  messageThreadUrl,
+} from "./lib/gmail";
 import { gmail_v1 } from "@googleapis/gmail";
 import { getAddressParts, getMessageInternalDate } from "./components/message/utils";
 import { ensureShortText, getErrorMessage, getFirstValidLetter } from "./lib/utils";
@@ -18,9 +24,11 @@ function MessageMenubarItem(props: { message: gmail_v1.Schema$Message }) {
     .filter((e) => e && e.length > 0)
     .join(" ");
 
-  const threadUrlWeb = messageThreadUrl(m);
-  const handle = () => {
+  const { gmail } = getGMailClient();
+  const handle = async () => {
     try {
+      const profile = await getGMailCurrentProfile(gmail);
+      const threadUrlWeb = messageThreadUrl(profile, m);
       if (threadUrlWeb && threadUrlWeb.length > 0) {
         open(threadUrlWeb);
         showHUD("Open Mail in Browser");
