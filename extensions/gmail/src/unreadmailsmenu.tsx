@@ -58,7 +58,7 @@ function UnreadMenuCommand(): JSX.Element {
       return await getGMailMessages(gmail, q);
     },
     [query],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
   const unreadCount = data?.length || 0;
   return (
@@ -74,9 +74,7 @@ function UnreadMenuCommand(): JSX.Element {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         {!error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" />}
-        {data?.map((m) => (
-          <MessageMenubarItem key={m.data.id} message={m.data} />
-        ))}
+        {data?.map((m) => <MessageMenubarItem key={m.data.id} message={m.data} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />

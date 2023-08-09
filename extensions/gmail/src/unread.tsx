@@ -18,7 +18,7 @@ function UnreadMailsRootCommand() {
       return await getGMailMessages(gmail, q);
     },
     [query],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
   const { labels } = useLabels();
   const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });

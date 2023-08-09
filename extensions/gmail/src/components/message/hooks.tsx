@@ -67,7 +67,7 @@ export function useLabels(): {
       return await getGMailLabels(gmail);
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
   return { labels, isLoading, error };
 }

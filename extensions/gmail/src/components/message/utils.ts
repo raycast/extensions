@@ -52,7 +52,7 @@ export function getMessageFileAttachmentNames(message: gmail_v1.Schema$Message) 
 
 export function getLabelDetailsFromIds(
   labelIds: string[] | null | undefined,
-  labelsAll: gmail_v1.Schema$Label[] | undefined
+  labelsAll: gmail_v1.Schema$Label[] | undefined,
 ) {
   const labels =
     labelsAll && labelIds

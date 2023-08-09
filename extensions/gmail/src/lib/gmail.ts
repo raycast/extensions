@@ -41,7 +41,7 @@ export async function getGMailLabels(gmail: gmail_v1.Gmail) {
 
 export async function getGMailMessageIds(
   gmail: gmail_v1.Gmail,
-  query?: string
+  query?: string,
 ): Promise<GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> | undefined> {
   const messages = await gmail.users.messages.list({ userId: "me", q: query, maxResults: 50 });
   return messages;
@@ -80,7 +80,7 @@ export function fullscreenNewMailWebUrl(
     bcc?: string;
     subject?: string;
     body?: string;
-  }
+  },
 ) {
   const prefix = gmailWebUrlBase(currentProfile);
   const params: Record<string, string> = {
@@ -110,7 +110,7 @@ export function fullscreenNewMailWebUrl(
 
 export function messageDraftEditUrl(
   currentProfile: gmail_v1.Schema$Profile | undefined,
-  message: gmail_v1.Schema$Message
+  message: gmail_v1.Schema$Message,
 ) {
   const prefix = gmailWebUrlBase(currentProfile);
   return prefix ? `${prefix}/#drafts?compose=${message.id}` : undefined;
@@ -118,7 +118,7 @@ export function messageDraftEditUrl(
 
 export function messageThreadUrl(
   currentProfile: gmail_v1.Schema$Profile | undefined,
-  message: gmail_v1.Schema$Message
+  message: gmail_v1.Schema$Message,
 ) {
   const prefix = gmailWebUrlBase(currentProfile);
   return prefix ? `${prefix}/#inbox/${message.threadId}` : undefined;
