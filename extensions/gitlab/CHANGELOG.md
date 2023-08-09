@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Fixed menubar colors] - 2023-08-08
+
+- Fixes the dynamic color for the GitLab Menu Bar command icons, specifically the Merge Request one.
+
 ## [Optimize Recent Activities] - 2023-07-02
 
 - Add unsupported activity

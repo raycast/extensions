@@ -8,7 +8,7 @@
   "contributors": [
     "BalliAsghar",
     "urwrstkn8mare",
-    "tzfeng"
+    "fengtianze"
   ],
   "license": "MIT",
   "commands": [
@@ -109,6 +109,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix"
   }
 }

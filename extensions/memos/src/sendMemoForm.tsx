@@ -145,7 +145,7 @@ export default function SendMemoFormCommand(): JSX.Element {
       <Form.FilePicker id="files" value={files} onChange={setFiles} />
 
       <Form.TagPicker id="tags" title="Exist Tags">
-        {existTags?.data?.map((tag) => {
+        {(existTags?.data || existTags)?.map((tag) => {
           return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
         })}
       </Form.TagPicker>

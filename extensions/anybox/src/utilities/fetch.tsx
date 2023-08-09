@@ -1,5 +1,6 @@
 import fetch, { FetchError } from "node-fetch";
 import { closeMainWindow, showToast, Toast, open, getApplications } from "@raycast/api";
+import { Link } from "./searchRequest";
 
 interface SidebarItemProp {
   id: string; // UUID
@@ -120,29 +121,29 @@ export function getAndCloseMainWindow(command: string) {
 }
 
 export async function fetchCollections() {
-  return GET("collections") as Promise<CollectionProp[]>;
+  return GET("collections") as Promise<[CollectionProp]>;
 }
 
 export async function fetchProfiles() {
   return GET("anydock-profiles") as Promise<[AnydockProfile]>;
 }
 
-export async function getCollections() {
-  return GET("collections") as Promise<[CollectionProp]>;
+export async function fetchSearchEngines() {
+  return GET("search-engines") as Promise<[Link]>;
 }
 
-export async function getFilters() {
+async function fetchFilters() {
   return GET("filters") as Promise<[FilterProp]>;
 }
 
-export async function getPresetSidebarItems() {
+async function fetchPresetSidebarItems() {
   return GET("presets") as Promise<[PresetProp]>;
 }
 
 export async function fetchSidebar() {
-  const presets = getPresetSidebarItems();
-  const filters = getFilters();
-  const collections = getCollections();
+  const presets = fetchPresetSidebarItems();
+  const filters = fetchFilters();
+  const collections = fetchCollections();
   return Promise.all([presets, filters, collections]).then(([presets, filters, collections]) => {
     const result = [...presets, ...filters, ...collections];
     return result;

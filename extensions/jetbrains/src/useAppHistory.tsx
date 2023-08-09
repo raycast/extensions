@@ -1,5 +1,12 @@
-import { Application } from "@raycast/api";
-import { AppHistory, getHistory, getJetBrainsToolboxApp, loadAppEntries, recentEntry } from "./util";
+import {
+  AppHistory,
+  ToolboxApp,
+  getHistory,
+  getJetBrainsToolboxApp,
+  getV2History,
+  loadAppEntries,
+  recentEntry,
+} from "./util";
 import { FavList } from "raycast-hooks/src/hooks/useFavorites";
 import { useFavorites, usePreferences } from "raycast-hooks";
 import { useEffect, useReducer } from "react";
@@ -66,7 +73,7 @@ export interface State {
   isLoading: boolean;
   sortOrder: string;
   filter: string;
-  toolboxApp?: Application;
+  toolboxApp?: ToolboxApp;
   history?: AppHistory[];
   appHistory: AppHistory[];
   favourites: FavList;
@@ -75,7 +82,7 @@ export interface State {
 }
 
 export type Action =
-  | { type: "setToolboxApp"; results: Application | undefined }
+  | { type: "setToolboxApp"; results: ToolboxApp | undefined }
   | { type: "setHistory"; results: AppHistory[] }
   | { type: "setEntries"; results: AppHistory[] }
   | { type: "setSortOrder"; results: string }
@@ -95,7 +102,7 @@ export function myFavReducer(favourites: FavList, all: recentEntry[]): recentEnt
 
 export interface appHistoryReturn {
   isLoading: boolean;
-  toolboxApp: Application | undefined;
+  toolboxApp: ToolboxApp | undefined;
   appHistory: AppHistory[];
   myFavs: recentEntry[];
   filter: string;
@@ -125,8 +132,18 @@ export function useAppHistory(): appHistoryReturn {
 
   useEffect(() => {
     getJetBrainsToolboxApp().then((toolboxApp) => dispatch({ type: "setToolboxApp", results: toolboxApp }));
-    getHistory().then((history) => dispatch({ type: "setHistory", results: history }));
   }, []);
+
+  useEffect(() => {
+    if (toolboxApp === undefined) {
+      return;
+    }
+    if (toolboxApp.isV2) {
+      getV2History().then((history) => dispatch({ type: "setHistory", results: history }));
+    } else {
+      getHistory().then((history) => dispatch({ type: "setHistory", results: history }));
+    }
+  }, [toolboxApp]);
 
   useEffect(() => {
     if (history === undefined) return;

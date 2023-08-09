@@ -18,22 +18,47 @@ import { getBuildScheme } from "./lib/vscode";
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
   const { fileUri } = entry as FileEntry;
-  return fileUri !== undefined && existsSync(new URL(fileUri)) && fileUri.indexOf(".code-workspace") === -1;
+
+  if (fileUri === undefined) {
+    return false;
+  }
+
+  try {
+    const fileUrl = new URL(fileUri);
+    return existsSync(fileUrl) && fileUri.indexOf(".code-workspace") === -1;
+  } catch (error) {
+    return false;
+  }
 }
 
 export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
   const { folderUri } = entry as FolderEntry;
-  return folderUri !== undefined && existsSync(new URL(folderUri));
+
+  if (folderUri === undefined) {
+    return false;
+  }
+
+  try {
+    const folderUrl = new URL(folderUri);
+    return existsSync(folderUrl);
+  } catch (error) {
+    return false;
+  }
 }
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
   const { workspace } = entry as WorkspaceEntry;
 
-  return (
-    workspace !== undefined &&
-    existsSync(new URL(workspace.configPath)) &&
-    workspace.configPath.indexOf(".code-workspace") !== -1
-  );
+  if (workspace === undefined) {
+    return false;
+  }
+
+  try {
+    const configUrl = new URL(workspace.configPath);
+    return existsSync(configUrl) && workspace.configPath.indexOf(".code-workspace") !== -1;
+  } catch (error) {
+    return false;
+  }
 }
 
 export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {

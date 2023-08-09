@@ -1,5 +1,9 @@
 # LastPass Changelog
 
+## [Enhancement] - 2023-08-8
+
+- Add ability to mask LastPass cli output, with example of masking user password.
+
 ## [Enhancement] - 2023-07-19
 
 - Add `preference` and `action` for show/hide `password` in details view
