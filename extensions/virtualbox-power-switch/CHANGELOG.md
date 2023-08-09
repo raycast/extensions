@@ -1,6 +1,6 @@
 # VirtualBox Changelog
 
-## [Added the Delete VM action] - 2022-01-17
+## [Added the Delete VM action] - 2023-08-09
 
 - Add an action to delete virtual machines.
 
