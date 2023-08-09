@@ -22,7 +22,7 @@ export default function Translate(): ReactElement {
           message: error.toString(),
         });
       },
-    }
+    },
   );
 
   return (

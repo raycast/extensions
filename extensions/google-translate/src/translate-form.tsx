@@ -28,7 +28,7 @@ export default function TranslateForm() {
           message: error.message,
         });
       },
-    }
+    },
   );
 
   const handleChange = (value: string) => {
