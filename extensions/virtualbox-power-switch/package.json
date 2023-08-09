@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Manage VMs",
+      "title": "Manage VMs"
+      "subtitle": "VirtualBox",
       "description": "List your VirtualBox VMs and turn them on or off.",
       "mode": "view"
     }
