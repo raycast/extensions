@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Action, Color, Icon, List, Toast, showToast} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { useTask } from "./hooks/useTask";
@@ -65,12 +65,12 @@ function TaskList() {
     try {
       const updatedTime = await addTime(task, time);
       if (updatedTime) {
-        showToast(Toast.Style.Success, `Added ${time/60}h to "${task.title}" successfully!`);
+        showToast({style: Toast.Style.Success, title: "Yay!", message: `Added ${time/60}h to "${task.title}" successfully!`});
       } else {
-        showToast(Toast.Style.Failure, `Error while adding time!`);
+        showToast({style: Toast.Style.Failure, title: "Error while adding time!", message: String(error)});
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, `Error while adding time!`);
+      showToast({style: Toast.Style.Failure, title: "Error while adding time!", message: String(error)});
     }
   };
 
@@ -80,12 +80,12 @@ function TaskList() {
     try {
       const updatedTask = await updateTask(task);
       if (updatedTask) {
-        showToast(Toast.Style.Success, `Updated due date for "${task.title}" successfully!`);
+        showToast({style: Toast.Style.Success, title: "Yay!", message: `Updated due date for "${task.title}" successfully!`});
       } else {
-        showToast(Toast.Style.Failure, `Error while updating due date!`);
+        showToast({style: Toast.Style.Failure, title: "D'oh", message: `Error while updating due date!`});
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, `Error while updating due date!`);
+      showToast({style: Toast.Style.Failure, title: "D'oh", message: `Error while updating due date!`});
     }
   };
 
@@ -196,7 +196,7 @@ function TaskList() {
                     <Action icon={{ source: Icon.CircleProgress100}} title="Add 4h" onAction={() => {const time=240; handleAddTime(task, time)}} />
                   </ActionPanel.Submenu>
                   <Action.PickDate title="Set Due Date…" shortcut={{ modifiers: ['cmd'], key: 'd' }} onChange={(date: Date) => {task.due=date.toISOString(); handleUpdateTask(task)} } />
-                  <Action.OpenInBrowser title="Open task in Reclaim" url={`https://app.reclaim.ai/tasks/${task.id}`} shortcut={{ modifiers: ['cmd'], key: 'o' }} />
+                  <Action.OpenInBrowser title="Open task in Browser" url={`https://app.reclaim.ai/tasks/${task.id}`} shortcut={{ modifiers: ['cmd'], key: 'o' }} />
                 </ActionPanel>
               }
             />
