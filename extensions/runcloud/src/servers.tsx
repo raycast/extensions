@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Detail, List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { RequestInit } from "node-fetch";
 
@@ -8,6 +8,8 @@ export interface Preferences {
 }
 
 export default function Command() {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [searchText, setSearchText] = useState("");
   const [servers, setServers] = useState<Server[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +35,12 @@ export default function Command() {
       };
       const response = await fetch(url, options);
       const data = (await response.json()) as ServerResponse;
+
+      if (data.message == 'Invalid credentials.') {
+        setErrorMessage('Your API credentials are invalid. Please obtain valid keys from your RunCloud account settings. Once you have your API keys, configure the extension with them.');
+        return [];
+      }
+
       return parseFetchResponse(data);
     } catch (error) {
       console.error("Error fetching servers:", error);
@@ -42,6 +50,7 @@ export default function Command() {
 
   const fetchAndSetServers = async (page: number): Promise<void> => {
     const servers = await fetchServers(page);
+
     if (servers.length > 0) {
       // If servers are found on this page, add them to the list and fetch the next page
       setServers((prevServers) => [...prevServers, ...servers]);
@@ -59,13 +68,17 @@ export default function Command() {
   }, [searchText, apiKey, apiSecret]);
 
   return (
-    <List isLoading={loading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search servers.." throttle>
-      <List.Section title="Servers" subtitle={servers.length + ""}>
-        {servers.map((server) => (
-          <SearchListItem key={server.id} server={server} />
-        ))}
-      </List.Section>
-    </List>
+    errorMessage ? (
+      <Detail markdown={errorMessage} />
+    ) : (
+      <List isLoading={loading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search servers.." throttle>
+        <List.Section title="Servers" subtitle={servers.length + ""}>
+          {servers.map((server) => (
+            <SearchListItem key={server.id} server={server} />
+          ))}
+        </List.Section>
+      </List>
+    )
   );
 }
 
@@ -92,6 +105,7 @@ function SearchListItem({ server }: { server: Server }) {
 
 interface ServerResponse {
   data: Server[];
+  message: string;
 }
 
 interface Server {

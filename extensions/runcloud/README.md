@@ -2,10 +2,10 @@
 
 Browse RunCloud Servers and Webapps
 
-This extension allows you to interact with [Runcloud](https://runcloud.io/) and easily search and browse your servers
+This extension allows you to interact with [RunCloud](https://runcloud.io/) and easily search and browse your servers
 and webapps.
 
-The default webapp search in RunCloud interface has always been highly buggy, and only allows you to type very slowly
+The default webapp search in the RunCloud interface has always been highly buggy, and only allows you to type very slowly
 without making any typos as the typeahead search experiences a tremendous amount of lag. This extension bypasses that by
 caching your webapp list locally, allowing for instant searches.
 
@@ -19,9 +19,9 @@ to acquire the API Key and API Secret.
 ### Search RunCloud Servers
 
 Lists and searches through your RunCloud server list by name using the RunCloud API. It loops throug every page and
-joins them together into one list. RunCloud API has no `per_page` option so this makes 1 query per page.
+joins them together into one list. RunClouds API has no `per_page` option so this makes 1 query per page.
 
-### Search Runcloud Webapps
+### Search RunCloud Webapps
 
 Lists and searches through your RunCloud webapp list by name. The RunCloud API only allows listing your webapps
 per server page and does not currently have a way to query for all of your webapps regardless of server. This command

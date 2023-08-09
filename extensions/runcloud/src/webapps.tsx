@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, getPreferenceValues, Cache } from "@raycast/api";
+import { Action, ActionPanel, Detail, List, getPreferenceValues, Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { RequestInit } from "node-fetch";
 
@@ -10,6 +10,8 @@ export interface Preferences {
 const cache = new Cache();
 
 export default function Command() {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [isLoading, setLoading] = useState(true);
   const [webapps, setWebapps] = useState<WebApp[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -40,6 +42,14 @@ export default function Command() {
           };
           const response = await fetch(url, options);
           const data = (await response.json()) as ServerResponse;
+
+          console.log(data);
+
+          if (data.message == 'Invalid credentials.') {
+            setErrorMessage('Your API credentials are invalid. Please obtain valid keys from your RunCloud account settings. Once you have your API keys, configure the extension with them.');
+            return [];
+          }
+
           const servers = parseServers(data);
           allServers = allServers.concat(servers);
 
@@ -94,7 +104,9 @@ export default function Command() {
 
       // Check if cached data is available
       const cachedDataString = cache.get("webapps");
-      if (cachedDataString) {
+
+      // if cacheDataString and not empty data array
+      if (cachedDataString && cachedDataString !== '{"data":[]}') {
         const cachedData = JSON.parse(cachedDataString);
         setWebapps(cachedData.data);
         setLoading(false);
@@ -128,13 +140,17 @@ export default function Command() {
   const sortedWebapps = filteredWebapps.sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search webapps..." throttle>
-      <List.Section title="WebApps" subtitle={sortedWebapps.length + ""}>
-        {sortedWebapps.map((webapp) => (
-          <WebAppListItem key={webapp.id} webapp={webapp} />
-        ))}
-      </List.Section>
-    </List>
+    errorMessage ? (
+      <Detail markdown={errorMessage} />
+    ) : ( 
+      <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search webapps..." throttle>
+        <List.Section title="WebApps" subtitle={sortedWebapps.length + ""}>
+          {sortedWebapps.map((webapp) => (
+            <WebAppListItem key={webapp.id} webapp={webapp} />
+          ))}
+        </List.Section>
+      </List>
+    )
   );
 }
 
@@ -182,6 +198,7 @@ interface WebApp {
 
 interface ServerResponse {
   data: Server[];
+  message: string;
 }
 
 interface Server {
