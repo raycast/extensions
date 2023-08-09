@@ -36,8 +36,10 @@ export default function Command() {
       const response = await fetch(url, options);
       const data = (await response.json()) as ServerResponse;
 
-      if (data.message == 'Invalid credentials.') {
-        setErrorMessage('Your API credentials are invalid. Please obtain valid keys from your RunCloud account settings. Once you have your API keys, configure the extension with them.');
+      if (data.message == "Invalid credentials.") {
+        setErrorMessage(
+          "Your API credentials are invalid. Please obtain valid keys from your RunCloud account settings. Once you have your API keys, configure the extension with them."
+        );
         return [];
       }
 
@@ -67,18 +69,16 @@ export default function Command() {
     fetchAndSetServers(1);
   }, [searchText, apiKey, apiSecret]);
 
-  return (
-    errorMessage ? (
-      <Detail markdown={errorMessage} />
-    ) : (
-      <List isLoading={loading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search servers.." throttle>
-        <List.Section title="Servers" subtitle={servers.length + ""}>
-          {servers.map((server) => (
-            <SearchListItem key={server.id} server={server} />
-          ))}
-        </List.Section>
-      </List>
-    )
+  return errorMessage ? (
+    <Detail markdown={errorMessage} />
+  ) : (
+    <List isLoading={loading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search servers.." throttle>
+      <List.Section title="Servers" subtitle={servers.length + ""}>
+        {servers.map((server) => (
+          <SearchListItem key={server.id} server={server} />
+        ))}
+      </List.Section>
+    </List>
   );
 }
 

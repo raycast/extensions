@@ -45,8 +45,10 @@ export default function Command() {
 
           console.log(data);
 
-          if (data.message == 'Invalid credentials.') {
-            setErrorMessage('Your API credentials are invalid. Please obtain valid keys from your RunCloud account settings. Once you have your API keys, configure the extension with them.');
+          if (data.message == "Invalid credentials.") {
+            setErrorMessage(
+              "Your API credentials are invalid. Please obtain valid keys from your RunCloud account settings. Once you have your API keys, configure the extension with them."
+            );
             return [];
           }
 
@@ -139,18 +141,16 @@ export default function Command() {
 
   const sortedWebapps = filteredWebapps.sort((a, b) => a.name.localeCompare(b.name));
 
-  return (
-    errorMessage ? (
-      <Detail markdown={errorMessage} />
-    ) : ( 
-      <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search webapps..." throttle>
-        <List.Section title="WebApps" subtitle={sortedWebapps.length + ""}>
-          {sortedWebapps.map((webapp) => (
-            <WebAppListItem key={webapp.id} webapp={webapp} />
-          ))}
-        </List.Section>
-      </List>
-    )
+  return errorMessage ? (
+    <Detail markdown={errorMessage} />
+  ) : (
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search webapps..." throttle>
+      <List.Section title="WebApps" subtitle={sortedWebapps.length + ""}>
+        {sortedWebapps.map((webapp) => (
+          <WebAppListItem key={webapp.id} webapp={webapp} />
+        ))}
+      </List.Section>
+    </List>
   );
 }
 
