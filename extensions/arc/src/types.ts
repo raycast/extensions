@@ -15,6 +15,14 @@ export type Tab = {
 
 export type TabLocation = "topApp" | "pinned" | "unpinned";
 
+export function isTab(tab: Tab): tab is Tab {
+  if (tab && tab.windowId && tab.tabId && tab.url && tab.title && tab.location) {
+    return true;
+  }
+
+  return false;
+}
+
 export type Space = {
   id: string;
   title?: string;

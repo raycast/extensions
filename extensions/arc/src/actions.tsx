@@ -12,23 +12,23 @@ import {
   selectSpace,
   selectTab,
 } from "./arc";
-import { Space, Tab } from "./types";
+import { isTab, Space, Tab } from "./types";
 import { getSpaceTitle, showFailureToast } from "./utils";
 
-function OpenInArcAction(props: { url: string }) {
+function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {
     try {
-      const openTab = await findTab(props.url);
-
-      if (openTab) {
+      if (isTab(props.tabOrUrl as Tab)) {
+        const tab = props.tabOrUrl as Tab;
         await closeMainWindow();
-        await selectTab(openTab);
+        await selectTab(tab);
+        return;
       } else {
-        await open(props.url, "company.thebrowser.Browser");
+        await open(props.tabOrUrl as string, "company.thebrowser.Browser");
       }
     } catch (e) {
       console.error(e);
-      await open(props.url, "company.thebrowser.Browser");
+      await open(props.tabOrUrl as string, "company.thebrowser.Browser");
     }
   }
 
@@ -261,18 +261,24 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
 
 // Sections
 
-export function OpenLinkActionSections(props: { url: string; searchText: string }) {
+export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchText: string }) {
+  let url = props.tabOrUrl as string;
+
+  if (isTab(props.tabOrUrl as Tab)) {
+    url = (props.tabOrUrl as Tab).url;
+  }
+
   return (
     <>
       <ActionPanel.Section>
-        <OpenInArcAction url={props.url} />
-        <OpenInLittleArc url={props.url} />
+        <OpenInArcAction tabOrUrl={props.tabOrUrl} />
+        <OpenInLittleArc url={url} />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <OpenInNewWindowAction url={props.url} />
-        <OpenInNewIncognitoWindowAction url={props.url} />
-        <OpenInSpaceAction url={props.url} />
-        <OpenInOtherBrowserAction url={props.url} />
+        <OpenInNewWindowAction url={url} />
+        <OpenInNewIncognitoWindowAction url={url} />
+        <OpenInSpaceAction url={url} />
+        <OpenInOtherBrowserAction url={url} />
         <SearchWithGoogleAction searchText={props.searchText} />
       </ActionPanel.Section>
     </>
