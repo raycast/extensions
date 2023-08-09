@@ -4,6 +4,7 @@ import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
+import { getBuildScheme } from "./lib/vscode";
 import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows } from "./preferences";
 import { EntryLike, EntryType, RemoteEntry, PinMethods, RemoteWorkspaceEntry } from "./types";
 import {
