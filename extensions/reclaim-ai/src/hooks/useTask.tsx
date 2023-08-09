@@ -79,17 +79,34 @@ const useTask = () => {
   // Add time
   const addTime = async (task: Task, time: number) => {
     try {
-      const [updatedTask, error] = await axiosPromiseData(fetcher(`/planner/add-time/task/${task.id}?minutes=${time}`, {method: "POST", responseType: "json",}));
-      if (!updatedTask || error) throw error;
-      return updatedTask;
+      const [updatedTime, error] = await axiosPromiseData(fetcher(`/planner/add-time/task/${task.id}?minutes=${time}`, {method: "POST", responseType: "json",}));
+      if (!updatedTime || error) throw error;
+      return updatedTime;
     } catch (error) {
       console.error("Error while adding time", error);
     }
   };
 
   // Update task
+  const updateTask = async (task: Task) => {
+    try {
+      const [updatedTask, error] = await axiosPromiseData(
+        fetcher(`/tasks/${task.id}`, {
+          method: "PUT",
+          responseType: "json",
+          data: task,
+        })
+      );
+
+      if (!updatedTask || error) throw error;
+      return updatedTask;
+    } catch (error) {
+      console.error("Error while updating task", error);
+    }
+  };
+
+
   // const updateTask = async (task: Task) => {
-  //   console.log(task);
   //   try {
   //     const [updatedTask, error] = await axiosPromiseData(
   //       fetcher(`/tasks/${task.id}`, {
@@ -121,6 +138,7 @@ const useTask = () => {
     handleStopTask,
     getAllTasks,
     addTime,
+    updateTask,
   };
 };
 
