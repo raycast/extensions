@@ -1,4 +1,14 @@
-import { Comment, Cycle, Issue, IssueRelation, Project, ProjectMilestone, Team, User, WorkflowState } from "@linear/sdk";
+import {
+  Comment,
+  Cycle,
+  Issue,
+  IssueRelation,
+  Project,
+  ProjectMilestone,
+  Team,
+  User,
+  WorkflowState,
+} from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
 import { getLinearClient } from "../helpers/withLinearClient";
@@ -116,7 +126,7 @@ export type IssueResult = Pick<
   parent?: Pick<Issue, "id" | "title" | "number"> & { state: Pick<WorkflowState, "type" | "color"> };
 } & {
   project?: Pick<Project, "id" | "name" | "icon" | "color">;
- } & {
+} & {
   projectMilestone?: Pick<ProjectMilestone, "id" | "name" | "targetDate">;
 };
 

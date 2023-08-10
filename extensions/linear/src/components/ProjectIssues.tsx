@@ -35,7 +35,7 @@ export default function ProjectIssues({ projectId, priorities, me, users }: Proj
     }
 
     const filteredIssues = [];
-    for (let issue of issues) {
+    for (const issue of issues) {
       if (issue.projectMilestone && issue.projectMilestone?.id === milestone) {
         filteredIssues.push(issue);
       }

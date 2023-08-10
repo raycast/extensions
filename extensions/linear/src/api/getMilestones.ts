@@ -47,7 +47,7 @@ export async function getMilestones(projectId?: string) {
       { projectId }
     );
 
-    return data?.project.projectMilestones.nodes
+    return data?.project.projectMilestones.nodes;
   }
   return null;
 }
