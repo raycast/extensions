@@ -1,10 +1,12 @@
+export type TaskStatus = "NEW" | "SCHEDULED" | "INPROGRESS" | "COMPLETE" | "CANCELLED" | "ARCHIVED";
+
 export interface Task {
   id: number;
   title: string;
   notes: string;
   eventCategory: string;
   eventSubType: string;
-  status: string;
+  status: TaskStatus;
   timeChunksRequired: number;
   timeChunksSpent: number;
   timeChunksRemaining: number;
