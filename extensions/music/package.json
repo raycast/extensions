@@ -119,7 +119,7 @@
     },
     {
       "name": "dislike-skip",
-      "title": "Dislike & Skip Track",
+      "title": "Dislike and Skip Track",
       "subtitle": "Apple Music",
       "description": "Dislike and skip currently playing track.",
       "mode": "no-view"
