@@ -19,6 +19,7 @@ import {
   MessageMarkAllAsReadAction,
   MessageShowDetailsAction,
   MessageDebugActionPanelSection,
+  LabelFilterAddAction,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 import { useContext } from "react";
@@ -31,6 +32,8 @@ export function GMailMessageListItem(props: {
   detailsShown?: boolean;
   onDetailsShownChanged?: (newValue: boolean) => void;
   allUnreadMessages?: gmail_v1.Schema$Message[];
+  searchText?: string;
+  setSearchText?: (newValue: string) => void;
 }) {
   const data = props.message;
   const subject = () => {
@@ -153,6 +156,13 @@ export function GMailMessageListItem(props: {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <LabelFilterAddAction
+              labelsAll={labelsAll}
+              searchText={props.searchText}
+              setSearchText={props.setSearchText}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <MessagesRefreshAction onRevalidate={props.onRevalidate} />

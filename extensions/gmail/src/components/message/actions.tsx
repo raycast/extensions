@@ -9,7 +9,7 @@ import {
   moveMessageToTrash,
 } from "../../lib/gmail";
 import { getErrorMessage, sleep } from "../../lib/utils";
-import { isMailDraft, isMailUnread } from "./utils";
+import { getLabelName, isMailDraft, isMailUnread } from "./utils";
 import path from "path";
 import * as fs from "fs";
 import { useCurrentProfile } from "./hooks";
@@ -237,5 +237,37 @@ export function MessageDebugActionPanelSection(props: { message: gmail_v1.Schema
       <MessageDebugDump message={props.message} />
       <MessageDebugDump message={props.message} toFile={true} />
     </ActionPanel.Section>
+  );
+}
+
+export function LabelFilterAddAction(props: {
+  labelsAll: gmail_v1.Schema$Label[] | undefined;
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+}) {
+  if (!props.labelsAll || props.labelsAll.length <= 0 || !props.setSearchText) {
+    return null;
+  }
+  const handle = (selectedLabel: gmail_v1.Schema$Label, prefix: string) => {
+    if (props.setSearchText) {
+      const currentText = props.searchText || "";
+      const labelText = `${prefix}label=${getLabelName(selectedLabel) || ""}`;
+      const nt = currentText && currentText.trim().length > 0 ? `${currentText} ${labelText}` : labelText;
+      props.setSearchText(nt);
+    }
+  };
+  return (
+    <ActionPanel.Submenu title="Add Search Label Filter" icon={Icon.Book}>
+      <ActionPanel.Submenu title="Match">
+        {props.labelsAll.map((l) => (
+          <Action title={getLabelName(l) || "?"} onAction={() => handle(l, "")} />
+        ))}
+      </ActionPanel.Submenu>
+      <ActionPanel.Submenu title="Not Match">
+        {props.labelsAll.map((l) => (
+          <Action title={getLabelName(l) || "?"} onAction={() => handle(l, "-")} />
+        ))}
+      </ActionPanel.Submenu>
+    </ActionPanel.Submenu>
   );
 }

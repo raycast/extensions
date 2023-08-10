@@ -60,3 +60,31 @@ export function getLabelDetailsFromIds(
       : undefined;
   return labels;
 }
+
+const standardLabels: Record<string, string> = {
+  INBOX: "Inbox",
+  SENT: "Sent",
+  CHAT: "Chat",
+  IMPORTANT: "Important",
+  TRASH: "Trash",
+  DRAFT: "Draft",
+  SPAM: "Spam",
+  CATEGORY_FORUMS: "Forums",
+  CATEGORY_UPDATES: "Updates",
+  CATEGORY_PERSONAL: "Personal",
+  CATEGORY_PROMOTIONS: "Promotions",
+  CATEGORY_SOCIAL: "Social",
+  STARRED: "Starred",
+  UNREAD: "Unread",
+};
+
+export function getLabelName(label: gmail_v1.Schema$Label) {
+  if (!label.name || label.id !== label.name) {
+    return label.name;
+  }
+  const sn = standardLabels[label.name];
+  if (!sn || sn.length <= 0) {
+    return label.name;
+  }
+  return sn;
+}

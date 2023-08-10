@@ -38,7 +38,13 @@ function MessageRootCommand() {
   const rest = data?.filter((m) => !isMailUnread(m.data));
   return (
     <GMailContext.Provider value={labels}>
-      <List isLoading={isLoading} onSearchTextChange={setSearchText} isShowingDetail={showDetails} throttle>
+      <List
+        isLoading={isLoading}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        isShowingDetail={showDetails}
+        throttle
+      >
         <List.Section
           title="Unread"
           subtitle={unread !== undefined && unread.length > 0 ? unread?.length.toString() : undefined}
@@ -52,6 +58,8 @@ function MessageRootCommand() {
               onDetailsShownChanged={setShowDetails}
               allUnreadMessages={unread.map((u) => u.data)}
               showUnreadAccessory={false}
+              searchText={searchText}
+              setSearchText={setSearchText}
             />
           ))}
         </List.Section>
@@ -63,6 +71,8 @@ function MessageRootCommand() {
               onRevalidate={revalidate}
               detailsShown={showDetails}
               onDetailsShownChanged={setShowDetails}
+              searchText={searchText}
+              setSearchText={setSearchText}
             />
           ))}
         </List.Section>
