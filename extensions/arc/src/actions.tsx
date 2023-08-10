@@ -12,14 +12,14 @@ import {
   selectSpace,
   selectTab,
 } from "./arc";
-import { isTab, Space, Tab } from "./types";
-import { getSpaceTitle, showFailureToast } from "./utils";
+import { Space, Tab } from "./types";
+import { getSpaceTitle, showFailureToast, isTab } from "./utils";
 
 function OpenInArcAction(props: { tabOrUrl: Tab | string }) {
   async function handleAction() {
     try {
-      if (isTab(props.tabOrUrl as Tab)) {
-        const tab = props.tabOrUrl as Tab;
+      if (isTab(props.tabOrUrl)) {
+        const tab = props.tabOrUrl;
         await closeMainWindow();
         await selectTab(tab);
         return;
@@ -264,8 +264,8 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
 export function OpenLinkActionSections(props: { tabOrUrl: Tab | string; searchText: string }) {
   let url = props.tabOrUrl as string;
 
-  if (isTab(props.tabOrUrl as Tab)) {
-    url = (props.tabOrUrl as Tab).url;
+  if (isTab(props.tabOrUrl)) {
+    url = props.tabOrUrl.url;
   }
 
   return (
