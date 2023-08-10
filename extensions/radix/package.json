@@ -16,6 +16,13 @@
       "subtitle": "Documentation",
       "description": "Search Radix Primitives and open its documentation in the browser",
       "mode": "view"
+    },
+    {
+      "name": "colors",
+      "title": "Radix Colors",
+      "subtitle": "Documentation",
+      "description": "Search Radix Colors and open its documentation in the browser",
+      "mode": "view"
     }
   ],
   "dependencies": {
