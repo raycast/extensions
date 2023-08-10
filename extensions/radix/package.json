@@ -5,6 +5,9 @@
   "description": "Search and open Radix content directly from Raycast.",
   "icon": "icon.png",
   "author": "peduarte",
+  "contributors": [
+    "emlez"
+  ],
   "license": "MIT",
   "commands": [
     {
