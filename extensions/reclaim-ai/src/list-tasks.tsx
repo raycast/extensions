@@ -3,13 +3,23 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useTask } from "./hooks/useTask";
 import { Task, TaskStatus } from "./types/task";
+import { TIME_BLOCK_IN_MINUTES, formatStrDuration } from "./utils/dates";
 
 type DropdownStatus = "OPEN" | "DONE";
 
 const DROPDOWN_STATUS: Record<DropdownStatus, string> = {
   OPEN: "Open",
   DONE: "Done",
-} as const;
+};
+
+const TASK_GROUP_LABEL: Record<TaskStatus, string> = {
+  ARCHIVED: "Archived",
+  COMPLETE: "Complete",
+  IN_PROGRESS: "In Progress",
+  CANCELLED: "Cancelled",
+  NEW: "New",
+  SCHEDULED: "Scheduled",
+};
 
 type StatusDropdownProps = {
   onStatusChange: (newValue: DropdownStatus) => void;
@@ -63,16 +73,12 @@ function TaskList() {
     try {
       const updatedTime = await addTime(task, time);
       if (updatedTime) {
-        showToast({
-          style: Toast.Style.Success,
-          title: "Yay!",
-          message: `Added ${time / 60}h to "${task.title}" successfully!`,
-        });
+        showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
       } else {
-        throw new Error("Update time request failed!");
+        throw new Error("Update time request failed.");
       }
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error while adding time!", message: String(error) });
+      showToast({ style: Toast.Style.Failure, title: "Error while updating time", message: String(error) });
     }
   };
 
@@ -82,22 +88,22 @@ function TaskList() {
     try {
       const updatedTask = await updateTask(task);
       if (updatedTask) {
-        showToast({
-          style: Toast.Style.Success,
-          title: "Yay!",
-          message: `Updated due date for "${task.title}" successfully!`,
-        });
+        showToast(Toast.Style.Success, `Updated due date for "${task.title}" successfully!`);
       } else {
-        throw new Error("Update due date request failed!");
+        throw new Error("Update due date request failed.");
       }
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "D'oh", message: `Error while updating due date!` });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error while updating due date",
+        message: String(error),
+      });
     }
   };
 
   // Filter tasks by status
   const filteredTasks = useMemo(() => {
-    if (selectedStatus === DROPDOWN_STATUS.DONE) {
+    if (selectedStatus === "DONE") {
       return tasks.filter((task) => task.status === "ARCHIVED" || task.status === "COMPLETE");
     }
     return tasks.filter((task) => task.status !== "ARCHIVED" && task.status !== "COMPLETE");
@@ -138,7 +144,7 @@ function TaskList() {
     if (task.status === "ARCHIVED") {
       list.push({
         tag: {
-          value: `${task.timeChunksSpent / 4}h`,
+          value: formatStrDuration(task.timeChunksSpent * TIME_BLOCK_IN_MINUTES + "m"),
           color: Color.PrimaryText,
         },
         tooltip: "Time spent",
@@ -149,10 +155,7 @@ function TaskList() {
     if (task.status !== "ARCHIVED" && task.timeChunksRemaining) {
       list.push({
         tag: {
-          value:
-            task.timeChunksRemaining >= 4
-              ? 0.25 * task.timeChunksRemaining + "h"
-              : 15 * task.timeChunksRemaining + "min",
+          value: formatStrDuration(task.timeChunksRemaining * TIME_BLOCK_IN_MINUTES + "m"),
           color: Color.Green,
         },
         tooltip: "Time left",
@@ -188,11 +191,15 @@ function TaskList() {
     >
       {Object.entries(groupedTasks)
         .sort(([statusA], [statusB]) => {
-          const statusOrder: TaskStatus[] = ["NEW", "INPROGRESS", "SCHEDULED", "COMPLETE", "CANCELLED", "ARCHIVED"];
+          const statusOrder: TaskStatus[] = ["NEW", "IN_PROGRESS", "SCHEDULED", "COMPLETE", "CANCELLED", "ARCHIVED"];
           return statusOrder.indexOf(statusA as TaskStatus) - statusOrder.indexOf(statusB as TaskStatus);
         })
         .map(([status, tasks]) => (
-          <List.Section key={status} title={status} subtitle={`${tasks.length} tasks`}>
+          <List.Section
+            key={status}
+            title={TASK_GROUP_LABEL[status as TaskStatus]}
+            subtitle={`${tasks.length} task${tasks.length > 1 ? "s" : ""}`}
+          >
             {tasks.map((task: Task) => (
               <List.Item
                 key={task.id}
@@ -209,7 +216,7 @@ function TaskList() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Submenu
-                      title="Add Time…"
+                      title="Add Time"
                       icon={{ source: Icon.Stopwatch }}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                     >
@@ -248,7 +255,7 @@ function TaskList() {
                       />
                     </ActionPanel.Submenu>
                     <Action.PickDate
-                      title="Set Due Date…"
+                      title="Set Due Date"
                       shortcut={{ modifiers: ["cmd"], key: "d" }}
                       onChange={(date: Date | null) => {
                         if (date) {
