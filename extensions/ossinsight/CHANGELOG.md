@@ -4,6 +4,7 @@
 
 - Updated the UI
 - Fixed some bugs that caused the extension to crash
+- Added caching to improve performance
 
 ## [Update] - 2022-10-05
 
