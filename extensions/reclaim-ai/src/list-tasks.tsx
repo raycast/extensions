@@ -1,34 +1,32 @@
-import { ActionPanel, Action, Color, Icon, List, Toast, showToast} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { useTask } from "./hooks/useTask";
-import { Task } from "./types/task";
+import { Task, TaskStatus } from "./types/task";
 
-const OPEN_STATUS = "Open";
-const DONE_STATUS = "Marked done";
-const COMPLETE_STATUS = "COMPLETE";
-const ARCHIVED_STATUS = "ARCHIVED";
+type DropdownStatus = "OPEN" | "DONE";
 
-// Dropdown Menu for status types
+const DROPDOWN_STATUS: Record<DropdownStatus, string> = {
+  OPEN: "Open",
+  DONE: "Done",
+} as const;
+
 type StatusDropdownProps = {
-  tasks: Task[];
-  onStatusChange: (newValue: string) => void;
+  onStatusChange: (newValue: DropdownStatus) => void;
 };
 
 const StatusDropdown = (props: StatusDropdownProps) => {
-  const { tasks, onStatusChange } = props;
-  const statusTypes = useMemo(() => [OPEN_STATUS, DONE_STATUS], []); // define status types
+  const { onStatusChange } = props;
+  const statusTypes = useMemo<DropdownStatus[]>(() => ["OPEN", "DONE"], []);
 
   return (
     <List.Dropdown
       tooltip="Select Status"
       storeValue={true}
-      onChange={(newValue) => {
-        onStatusChange(newValue ?? "");
-      }}
+      onChange={(value) => onStatusChange(value as DropdownStatus)}
     >
       {statusTypes.map((statusType) => (
-        <List.Dropdown.Item key={statusType} title={statusType} value={statusType} />
+        <List.Dropdown.Item key={statusType} title={DROPDOWN_STATUS[statusType]} value={statusType} />
       ))}
     </List.Dropdown>
   );
@@ -37,18 +35,18 @@ const StatusDropdown = (props: StatusDropdownProps) => {
 // Main Function
 function TaskList() {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
   const [tasks, setTasks] = useState<Task[]>([]);
-  
+
   const { getAllTasks, addTime, updateTask } = useTask();
-  
+
   // Get tasks via API
   useEffect(() => {
     const getTasks = async () => {
       try {
         setIsLoading(true);
         const tasks = await getAllTasks();
-        setTasks(tasks);
+        setTasks(tasks ? tasks : []);
       } catch (error) {
         console.error("Error while fetching tasks", error);
       } finally {
@@ -65,12 +63,16 @@ function TaskList() {
     try {
       const updatedTime = await addTime(task, time);
       if (updatedTime) {
-        showToast({style: Toast.Style.Success, title: "Yay!", message: `Added ${time/60}h to "${task.title}" successfully!`});
+        showToast({
+          style: Toast.Style.Success,
+          title: "Yay!",
+          message: `Added ${time / 60}h to "${task.title}" successfully!`,
+        });
       } else {
-        showToast({style: Toast.Style.Failure, title: "Error while adding time!", message: String(error)});
+        throw new Error("Update time request failed!");
       }
     } catch (error) {
-      showToast({style: Toast.Style.Failure, title: "Error while adding time!", message: String(error)});
+      showToast({ style: Toast.Style.Failure, title: "Error while adding time!", message: String(error) });
     }
   };
 
@@ -80,25 +82,25 @@ function TaskList() {
     try {
       const updatedTask = await updateTask(task);
       if (updatedTask) {
-        showToast({style: Toast.Style.Success, title: "Yay!", message: `Updated due date for "${task.title}" successfully!`});
+        showToast({
+          style: Toast.Style.Success,
+          title: "Yay!",
+          message: `Updated due date for "${task.title}" successfully!`,
+        });
       } else {
-        showToast({style: Toast.Style.Failure, title: "D'oh", message: `Error while updating due date!`});
+        throw new Error("Update due date request failed!");
       }
     } catch (error) {
-      showToast({style: Toast.Style.Failure, title: "D'oh", message: `Error while updating due date!`});
+      showToast({ style: Toast.Style.Failure, title: "D'oh", message: `Error while updating due date!` });
     }
   };
 
-
   // Filter tasks by status
   const filteredTasks = useMemo(() => {
-    if (selectedStatus === DONE_STATUS) {
-      return tasks.filter((task) => task.status === ARCHIVED_STATUS);
-    } else if (selectedStatus === OPEN_STATUS) {
-      return tasks.filter((task) => task.status !== ARCHIVED_STATUS);
-    } else {
-      return tasks.filter((task) => task.status === selectedStatus);
+    if (selectedStatus === DROPDOWN_STATUS.DONE) {
+      return tasks.filter((task) => task.status === "ARCHIVED" || task.status === "COMPLETE");
     }
+    return tasks.filter((task) => task.status !== "ARCHIVED" && task.status !== "COMPLETE");
   }, [tasks, selectedStatus]);
 
   // Group tasks by status
@@ -115,94 +117,156 @@ function TaskList() {
     return groups;
   }, [filteredTasks]);
 
+  const getListAccessories = (task: Task) => {
+    const list = [];
+
+    if (task.status !== "ARCHIVED" && task.snoozeUntil) {
+      list.push({
+        tag: {
+          value: new Date(task.snoozeUntil),
+          color: Color.Yellow,
+        },
+        tooltip:
+          "Snoozed until: " +
+          new Date(task.snoozeUntil).toLocaleString([], {
+            dateStyle: "medium",
+            timeStyle: "short",
+          }),
+      });
+    }
+
+    if (task.status === "ARCHIVED") {
+      list.push({
+        tag: {
+          value: `${task.timeChunksSpent / 4}h`,
+          color: Color.PrimaryText,
+        },
+        tooltip: "Time spent",
+        icon: Icon.Stopwatch,
+      });
+    }
+
+    if (task.status !== "ARCHIVED" && task.timeChunksRemaining) {
+      list.push({
+        tag: {
+          value:
+            task.timeChunksRemaining >= 4
+              ? 0.25 * task.timeChunksRemaining + "h"
+              : 15 * task.timeChunksRemaining + "min",
+          color: Color.Green,
+        },
+        tooltip: "Time left",
+        icon: Icon.Stopwatch,
+      });
+    }
+
+    if (task.due) {
+      list.push({
+        tag: {
+          value: new Date(task.due),
+          color: Color.Red,
+        },
+        tooltip:
+          "Due date: " +
+          new Date(task.due).toLocaleString([], {
+            dateStyle: "medium",
+            timeStyle: "short",
+          }),
+        icon: Icon.Flag,
+      });
+    }
+
+    return list;
+  };
+
   return (
     <List
       isLoading={isLoading}
       navigationTitle="Search Tasks"
       searchBarPlaceholder="Search tasks"
-      searchBarAccessory={
-        <StatusDropdown tasks={tasks} onStatusChange={setSelectedStatus} />
-      }
+      searchBarAccessory={<StatusDropdown onStatusChange={setSelectedStatus} />}
     >
       {Object.entries(groupedTasks)
-      .sort(([statusA], [statusB]) => {
-        const statusOrder = ["NEW", "IN_PROGRESS", "SCHEDULED", "COMPLETE"];
-        return statusOrder.indexOf(statusA) - statusOrder.indexOf(statusB);
-      })
-      .map(([status, tasks]) => (
-        <List.Section key={status} title={status} subtitle={`${tasks.length} tasks`} >
-          {tasks.map((task: Task) => (
-            <List.Item key={task.id} keywords={task.notes.split(" ")}
-              icon={task.status === ARCHIVED_STATUS
-                  ? Icon.CheckCircle
-                  : task.status === COMPLETE_STATUS
-                  ? Icon.CircleProgress100
-                  : Icon.Circle
+        .sort(([statusA], [statusB]) => {
+          const statusOrder: TaskStatus[] = ["NEW", "INPROGRESS", "SCHEDULED", "COMPLETE", "CANCELLED", "ARCHIVED"];
+          return statusOrder.indexOf(statusA as TaskStatus) - statusOrder.indexOf(statusB as TaskStatus);
+        })
+        .map(([status, tasks]) => (
+          <List.Section key={status} title={status} subtitle={`${tasks.length} tasks`}>
+            {tasks.map((task: Task) => (
+              <List.Item
+                key={task.id}
+                keywords={task.notes.split(" ")}
+                icon={
+                  task.status === "ARCHIVED"
+                    ? Icon.CheckCircle
+                    : task.status === "COMPLETE"
+                    ? Icon.CircleProgress100
+                    : Icon.Circle
                 }
-              title={task.title}
-              accessories={[
-                // Snooze until
-                task.status !== ARCHIVED_STATUS && task.snoozeUntil && {
-                    tag: {
-                      value: new Date(task.snoozeUntil),
-                      color: Color.Yellow,
-                    },
-                    tooltip: "Snoozed until: " + new Date(task.snoozeUntil).toLocaleString([], {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      }),
-                  },
-                // Time spent if task is archived
-                task.status === ARCHIVED_STATUS && {
-                  tag: {
-                    value: `${task.timeChunksSpent / 4}h`,
-                    color: Color.PrimaryText,
-                  },
-                  tooltip: "Time spent",
-                  icon: Icon.Stopwatch,
-                },
-                // Time remaining
-                task.status !== ARCHIVED_STATUS && task.timeChunksRemaining && {
-                    tag: {
-                      value:
-                        task.timeChunksRemaining >= 4
-                          ? 0.25 * task.timeChunksRemaining + "h"
-                          : 15 * task.timeChunksRemaining + "min",
-                      color: Color.Green,
-                    },
-                    tooltip: "Time left",
-                    icon: Icon.Stopwatch,
-                  },
-                // Due date
-                task.due && {
-                  tag: {
-                    value: new Date(task.due),
-                    color: Color.Red,
-                  },
-                  tooltip: "Due date: " + new Date(task.due).toLocaleString([], {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    }),
-                  icon: Icon.Flag,
-                },
-              ].filter(Boolean)}
-              // actions
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Submenu title="Add Time…" icon={{source: Icon.Stopwatch}} shortcut={{ modifiers: ['cmd'], key: 't' }}>
-                    <Action icon={{ source: Icon.CircleProgress25}} title="Add 30min" onAction={() => {const time=30; handleAddTime(task, time)}} />
-                    <Action icon={{ source: Icon.CircleProgress50}} title="Add 1h" onAction={() => {const time=60; handleAddTime(task, time)}} />
-                    <Action icon={{ source: Icon.CircleProgress75}} title="Add 2h" onAction={() => {const time=120; handleAddTime(task, time)}} autoFocus={true} />
-                    <Action icon={{ source: Icon.CircleProgress100}} title="Add 4h" onAction={() => {const time=240; handleAddTime(task, time)}} />
-                  </ActionPanel.Submenu>
-                  <Action.PickDate title="Set Due Date…" shortcut={{ modifiers: ['cmd'], key: 'd' }} onChange={(date: Date) => {task.due=date.toISOString(); handleUpdateTask(task)} } />
-                  <Action.OpenInBrowser title="Open task in Browser" url={`https://app.reclaim.ai/tasks/${task.id}`} shortcut={{ modifiers: ['cmd'], key: 'o' }} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+                title={task.title}
+                accessories={getListAccessories(task)}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Submenu
+                      title="Add Time…"
+                      icon={{ source: Icon.Stopwatch }}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    >
+                      <Action
+                        icon={{ source: Icon.CircleProgress25 }}
+                        title="Add 30min"
+                        onAction={() => {
+                          const time = 30;
+                          handleAddTime(task, time);
+                        }}
+                      />
+                      <Action
+                        icon={{ source: Icon.CircleProgress50 }}
+                        title="Add 1h"
+                        onAction={() => {
+                          const time = 60;
+                          handleAddTime(task, time);
+                        }}
+                      />
+                      <Action
+                        icon={{ source: Icon.CircleProgress75 }}
+                        title="Add 2h"
+                        onAction={() => {
+                          const time = 120;
+                          handleAddTime(task, time);
+                        }}
+                        autoFocus={true}
+                      />
+                      <Action
+                        icon={{ source: Icon.CircleProgress100 }}
+                        title="Add 4h"
+                        onAction={() => {
+                          const time = 240;
+                          handleAddTime(task, time);
+                        }}
+                      />
+                    </ActionPanel.Submenu>
+                    <Action.PickDate
+                      title="Set Due Date…"
+                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      onChange={(date: Date | null) => {
+                        if (date) {
+                          handleUpdateTask({ ...task, due: date.toISOString() });
+                        }
+                      }}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open Task in Browser"
+                      url={`https://app.reclaim.ai/tasks/${task.id}`}
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))}
     </List>
   );
 }
@@ -210,4 +274,3 @@ function TaskList() {
 export default function Command() {
   return <TaskList />;
 }
-
