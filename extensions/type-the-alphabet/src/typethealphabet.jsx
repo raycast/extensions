@@ -53,7 +53,7 @@ export default function TypeAlphabet() {
     <List
       searchText=""
       onSearchTextChange={handleKeyDown}
-      searchBarPlaceholder="Type the letter here..."
+      searchBarPlaceholder="Type here. Pro tip: Press enter to restart"
       actions={
         <ActionPanel>
           {(isTimerRunning || nextLetter === "Success!") && (
@@ -68,7 +68,7 @@ export default function TypeAlphabet() {
         title={nextLetter}
         description={`${
           currentProgress || "Typing game to see how fast you type the alphabet. Timer starts when you do :)"
-        }${isTimerRunning ? `\n${formatTime(timer)}` : ""}`}
+        }${isTimerRunning || nextLetter === "Success!" ? `\n${formatTime(timer)}` : ""}`}
       />
     </List>
   );
