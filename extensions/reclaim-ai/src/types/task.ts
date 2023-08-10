@@ -1,4 +1,4 @@
-export type TaskStatus = "NEW" | "SCHEDULED" | "INPROGRESS" | "COMPLETE" | "CANCELLED" | "ARCHIVED";
+export type TaskStatus = "NEW" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETE" | "CANCELLED" | "ARCHIVED";
 
 export interface Task {
   id: number;
