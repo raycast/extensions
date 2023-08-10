@@ -2,7 +2,7 @@ import { ActionPanel, List, OpenInBrowserAction, CopyToClipboardAction } from "@
 
 const BASE_URL = "https://www.radix-ui.com/";
 
-export default function ColorCommand() {
+export default function ColorsCommand() {
   return (
     <List>
       {colorsRoutes.map(({ label, pages }: RouteProps) => (
