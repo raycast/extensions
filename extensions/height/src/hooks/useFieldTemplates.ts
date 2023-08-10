@@ -15,13 +15,13 @@ export default function useFieldTemplates({ options }: Props = {}) {
   const { statuses, prioritiesObj, priorities, startDate, dueDate } = useMemo(() => {
     const statuses = data?.list
       ?.find((fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "status")
-      ?.metadata?.options?.filter((option) => !option?.deleted && !option?.archived);
+      ?.labels?.filter((label) => !label?.deleted && !label?.archived);
 
     const prioritiesObj = data?.list?.find(
       (fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "priority"
     );
 
-    const priorities = prioritiesObj?.metadata?.options?.filter((option) => !option?.deleted && !option?.archived);
+    const priorities = prioritiesObj?.labels?.filter((label) => !label?.deleted && !label?.archived);
 
     const startDate = data?.list?.find((fieldTemplate) => fieldTemplate?.standardType === "startDate");
 

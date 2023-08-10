@@ -1,5 +1,9 @@
 # System Monitor Changelog
 
+## [Update] - 2023-08-07
+
+- Added preference to select active tab
+
 ## [Update] - 2023-06-14
 
 - Added better wording for the battery charge status

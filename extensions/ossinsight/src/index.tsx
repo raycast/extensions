@@ -2,11 +2,12 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/a
 import { useEffect, useState } from "react";
 import { languages, Repository } from "./types";
 import fetch from "node-fetch";
+import { getIcon } from "./utils";
 
 const pref = getPreferenceValues<{ period: string }>();
 
 export default function Command() {
-  const [language, setLanguage] = useState<string>(languages[0]);
+  const [language, setLanguage] = useState<string>(languages["All"]);
   const [loading, setLoading] = useState<boolean>(true);
   const [results, setResults] = useState<Repository[]>([]);
 
@@ -15,7 +16,6 @@ export default function Command() {
       try {
         setLoading(true);
         const url = `https://api.ossinsight.io/q/trending-repos?language=${language}&period=${pref.period}`;
-        console.log(url);
         const resp = await fetch(url);
         const { data } = (await resp.json()) as { data: Repository[] };
         setResults(data);
@@ -36,8 +36,8 @@ export default function Command() {
             setLanguage(newValue);
           }}
         >
-          {languages.map((lang) => (
-            <List.Dropdown.Item key={lang} title={lang} value={lang} />
+          {Object.entries(languages).map(([key, value], index) => (
+            <List.Dropdown.Item key={index} title={key} value={value} />
           ))}
         </List.Dropdown>
       }
@@ -45,7 +45,8 @@ export default function Command() {
       {results.map((repo, index) => (
         <List.Item
           key={repo.repo_id}
-          title={{ value: `#${index + 1} ${repo.repo_name}`, tooltip: repo.description ?? "" }}
+          icon={getIcon(index + 1)}
+          title={{ value: repo.repo_name, tooltip: repo.description ?? "" }}
           subtitle={repo.language ?? ""}
           accessories={[
             {

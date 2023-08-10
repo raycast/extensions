@@ -1,5 +1,10 @@
 # raycast-ollama Changelog
 
+## [Improvement and BugFix] - 2023-08-7
+
+- Updated README.md with more information.
+- Changed localhost with 127.0.0.1 it seems more reliable.
+
 ## [Improvement] - 2023-07-31
 
 - New Command 'Ask Ollama with Custom Prompt' permits to use ask Ollama using a custom prompt. Use it with Quicklinks to create a custom Command.

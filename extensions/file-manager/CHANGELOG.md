@@ -1,5 +1,9 @@
 # File Manager Changelog
 
+## [Features] - 2023-08-06
+
+- Added Actions OpenWith for directories.
+
 ## [Fixes] - 2023-05-22
 
 - Fix standard shortcuts for deletion.
