@@ -96,6 +96,19 @@ const useTask = () => {
     }
   };
 
+  // Set task to done
+  const doneTask = async (task: Task) => {
+    try {
+      const [updatedTime, error] = await axiosPromiseData(
+        fetcher(`/planner/done/task/${task.id}`, { method: "POST", responseType: "json" })
+      );
+      if (!updatedTime || error) throw error;
+      return updatedTime;
+    } catch (error) {
+      console.error("Error while updating task", error);
+    }
+  };
+
   return {
     createTask,
     handleStartTask,
@@ -103,6 +116,7 @@ const useTask = () => {
     getAllTasks,
     addTime,
     updateTask,
+    doneTask,
   };
 };
 
