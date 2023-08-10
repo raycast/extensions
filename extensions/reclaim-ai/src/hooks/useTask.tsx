@@ -55,22 +55,11 @@ const useTask = () => {
     }
   };
 
-  const fetchTasks = async () => {
+  const getAllTasks = async () => {
     try {
       const [tasks, error] = await axiosPromiseData<ApiResponseTasks>(fetcher("/tasks"));
       if (!tasks && error) throw error;
       return tasks;
-    } catch (error) {
-      console.error("Error while fetching tasks", error);
-    }
-  };
-
-  // Fetch all tasks
-  const getAllTasks = async () => {
-    try {
-      const [GetTasks, error] = await axiosPromiseData<Task>(fetcher("/tasks", { method: "GET" })); //<Task[]>(fetcher("/tasks"));
-      if (!GetTasks && error) throw error;
-      return GetTasks;
     } catch (error) {
       console.error("Error while fetching tasks", error);
     }
@@ -109,7 +98,6 @@ const useTask = () => {
 
   return {
     createTask,
-    fetchTasks,
     handleStartTask,
     handleStopTask,
     getAllTasks,
