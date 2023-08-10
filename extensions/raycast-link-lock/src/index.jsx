@@ -14,18 +14,15 @@ export default function ProtectLink() {
     }
   }
 
-  useEffect(
-    () => {
-      (async () => {
-        try {
-          setURL(await getSelectedText());
-        } catch {
-          setURL("");
-        }
-      })()
-    },
-    []
-  );
+  useEffect(() => {
+    (async () => {
+      try {
+        setURL(await getSelectedText());
+      } catch {
+        setURL("");
+      }
+    })();
+  }, []);
 
   return (
     <Form
