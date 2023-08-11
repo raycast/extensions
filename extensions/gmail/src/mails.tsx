@@ -34,6 +34,8 @@ function MessageRootCommand() {
     return parts.join("/");
   };
 
+  const hideLabelIDs = ["TRASH", "DRAFT", "SPAM", "INBOX"];
+
   const unread = data?.filter((m) => isMailUnread(m.data));
   const rest = data?.filter((m) => !isMailUnread(m.data));
   return (
@@ -43,7 +45,14 @@ function MessageRootCommand() {
         searchText={searchText}
         onSearchTextChange={setSearchText}
         isShowingDetail={showDetails}
-        searchBarAccessory={<QueryListDropdown labels={labels} setSearchText={setSearchText} />}
+        searchBarAccessory={
+          <QueryListDropdown
+            defaultName="Inbox"
+            labels={labels}
+            setSearchText={setSearchText}
+            hideLabelIDs={hideLabelIDs}
+          />
+        }
         throttle
       >
         <List.Section

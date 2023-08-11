@@ -183,6 +183,8 @@ export function GMailMessageListItem(props: {
 export function QueryListDropdown(props: {
   labels: gmail_v1.Schema$Label[] | undefined;
   setSearchText: (newValue: string) => void;
+  hideLabelIDs?: string[];
+  defaultName?: string;
 }) {
   const labels = props.labels;
   if (!labels || labels.length <= 0 || !props.setSearchText) {
@@ -192,11 +194,17 @@ export function QueryListDropdown(props: {
     const text = newValue === "-" ? "" : newValue;
     props.setSearchText(text);
   };
-  const semanticLabels = convertToSemanticLabels(labels);
+  const filterLabels = (labelsAll: gmail_v1.Schema$Label[] | undefined) => {
+    if (!props.hideLabelIDs || props.hideLabelIDs.length <= 0) {
+      return labelsAll;
+    }
+    return labelsAll?.filter((l) => !props.hideLabelIDs?.includes(l.id || ""));
+  };
+  const semanticLabels = convertToSemanticLabels(filterLabels(labels));
   return (
     <List.Dropdown tooltip="Filter" onChange={handle}>
       <List.Dropdown.Section>
-        <List.Dropdown.Item title="Default" value="-" />
+        <List.Dropdown.Item title={props.defaultName ? props.defaultName : "Default"} value="-" />
       </List.Dropdown.Section>
       <List.Dropdown.Section title="System">
         {semanticLabels.systemLabels?.map((l) => (

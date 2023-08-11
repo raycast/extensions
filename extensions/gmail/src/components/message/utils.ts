@@ -86,6 +86,14 @@ const systemLabelOrder: Record<string, number> = {
   DRAFT: 5,
 };
 
+const categoryLabelOrder: Record<string, number> = {
+  CATEGORY_SOCIAL: 1,
+  CATEGORY_UPDATES: 2,
+  CATEGORY_FORUMS: 3,
+  CATEGORY_PERSONAL: 4,
+  CATEGORY_PROMOTIONS: 5,
+};
+
 export function getLabelName(label: gmail_v1.Schema$Label) {
   if (!label.name || label.id !== label.name) {
     return label.name;
@@ -108,7 +116,7 @@ export function isCategoryLabel(label: gmail_v1.Schema$Label) {
   if (!label.id) {
     return false;
   }
-  return label.id.startsWith("CATEGORY_");
+  if (label) return label.id.startsWith("CATEGORY_");
 }
 
 function sortSystemLabels(labels: gmail_v1.Schema$Label[] | undefined) {
@@ -128,6 +136,33 @@ function sortSystemLabels(labels: gmail_v1.Schema$Label[] | undefined) {
   return labels.sort((a, b) => orderValue(a) - orderValue(b));
 }
 
+function sortCategoryLabels(labels: gmail_v1.Schema$Label[] | undefined) {
+  if (!labels || labels.length <= 0) {
+    return labels;
+  }
+  const orderValue = (l: gmail_v1.Schema$Label) => {
+    if (!l.id) {
+      return 100;
+    }
+    const val = categoryLabelOrder[l.id];
+    if (val === undefined) {
+      return 90;
+    }
+    return val;
+  };
+  return labels.sort((a, b) => orderValue(a) - orderValue(b));
+}
+
+function sortLabelsByName(labels: gmail_v1.Schema$Label[] | undefined) {
+  if (!labels || labels.length <= 0) {
+    return labels;
+  }
+  const name = (l: gmail_v1.Schema$Label) => {
+    return l.name || "";
+  };
+  return labels.sort((a, b) => name(a).localeCompare(name(b)));
+}
+
 export interface SemanticLabels {
   categories: gmail_v1.Schema$Label[] | undefined;
   userLabels: gmail_v1.Schema$Label[] | undefined;
@@ -138,6 +173,12 @@ export function generateLabelFilter(label: gmail_v1.Schema$Label) {
   const name = getLabelName(label);
   if (isCategoryLabel(label)) {
     return `category=${name}`;
+  }
+  if (["STARRED", "IMPORTANT"].includes(label.id || "")) {
+    return `is:${name}`;
+  }
+  if (isSystemLabel(label)) {
+    return `in:${name}`;
   }
   return `label=${name}`;
 }
@@ -159,8 +200,8 @@ export function convertToSemanticLabels(labels: gmail_v1.Schema$Label[] | undefi
     }
   }
   return {
-    categories,
-    userLabels,
+    categories: sortCategoryLabels(categories),
+    userLabels: sortLabelsByName(userLabels),
     systemLabels: sortSystemLabels(systemLabels),
   };
 }
