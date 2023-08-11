@@ -203,7 +203,7 @@ export function QueryListDropdown(props: {
   return (
     <List.Dropdown tooltip="Filter" onChange={handle}>
       <List.Dropdown.Section>
-        <List.Dropdown.Item title={props.defaultName ? props.defaultName : "Default"} value="-" />
+        <List.Dropdown.Item title={props.defaultName ? props.defaultName : "Default"} icon={Icon.Box} value="-" />
       </List.Dropdown.Section>
       <List.Dropdown.Section title="System">
         {semanticLabels.systemLabels?.map((l) => (
