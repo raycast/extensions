@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "get-path",
-      "title": "Get path",
+      "title": "Get Path",
       "subtitle": "Get path of current selected item",
       "description": "You need to select a file first",
       "mode": "no-view"

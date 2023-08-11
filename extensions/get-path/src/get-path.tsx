@@ -1,9 +1,8 @@
-import {Clipboard, closeMainWindow, PopToRootType, showHUD} from "@raycast/api";
+import { Clipboard, closeMainWindow, PopToRootType, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export default async function Command() {
-
-    await showHUD("I am finding the path for you", { clearRootSearch: false, popToRootType: PopToRootType.Immediate });
+  await showHUD("I am finding the path for you", { clearRootSearch: false, popToRootType: PopToRootType.Immediate });
 
   const result = await runAppleScript(`
   tell application "Finder"
@@ -25,5 +24,8 @@ export default async function Command() {
   };
   await Clipboard.copy(textContent);
 
-  await showHUD("The path is copied to clipboard: " + result, { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  await showHUD("The path is copied to clipboard: " + result, {
+    clearRootSearch: true,
+    popToRootType: PopToRootType.Immediate,
+  });
 }
