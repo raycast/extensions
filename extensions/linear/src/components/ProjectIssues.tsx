@@ -50,7 +50,7 @@ export default function ProjectIssues({ projectId, priorities, me, users }: Proj
       {...(milestones && milestones.length > 0
         ? {
             searchBarAccessory: (
-              <List.Dropdown tooltip="Change Roadmap" onChange={setMilestone} value={milestone}>
+              <List.Dropdown tooltip="Change Milestone" onChange={setMilestone} value={milestone}>
                 <List.Dropdown.Item value="" title="All Milestones" />
 
                 <List.Dropdown.Section>

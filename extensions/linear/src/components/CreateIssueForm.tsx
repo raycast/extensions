@@ -205,7 +205,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { cycles } = useCycles(values.teamId);
   const { issues } = useIssues(getLastCreatedIssues);
   const { projects } = useProjects(values.teamId);
-  const { milestones } = useMilestones(values.projectId);
+  const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId} );
 
   useEffect(() => {
     if (teams?.length === 1) {

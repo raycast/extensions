@@ -43,7 +43,7 @@ export default function MilestoneSubmenu({
   return (
     <ActionPanel.Submenu
       title="Set Milestone"
-      icon={{ source: "linear-icons/milestone.svg", tintColor: Color.PrimaryText }}
+      icon="linear-icons/milestone.svg"
       shortcut={{ modifiers: ["ctrl", "shift"], key: "m" }}
       onOpen={() => setLoad(true)}
     >
