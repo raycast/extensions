@@ -17,7 +17,6 @@ import { useMemo, useState } from "react";
 
 const WARP_DB = path.resolve(os.homedir(), "Library/Application Support/dev.warp.Warp-Stable/warp.sqlite");
 const WORKFLOW_QUERY = `SELECT id, data FROM workflows`;
-
 const EXTENSION_URI = "raycast://extensions/warpdotdev/warp";
 
 interface Workflow {
@@ -43,6 +42,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { id: numbe
     isLoading,
     error,
   } = useSQL<{ id: number; data: string }>(WARP_DB, WORKFLOW_QUERY);
+
   const allWorkflows = table?.map(({ data, id }) => ({ id, ...JSON.parse(data) } as Workflow)) ?? [];
 
   if (permissionView) {
@@ -64,7 +64,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { id: numbe
   if (props.launchContext?.id) {
     const workflow = allWorkflows.find((w) => w.id === props.launchContext?.id);
     if (workflow) {
-      return <WorkflowForm searchResult={workflow} />;
+      return <WorkflowForm workflow={workflow} />;
     }
   }
 
@@ -77,7 +77,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { id: numbe
     >
       <List.EmptyView
         title="No workflows found"
-        description="Please see here on how to create a workflow https://docs.warp.dev/features/warp-drive/workflows."
+        description="Please see here on how to create a workflow: https://docs.warp.dev/features/warp-drive/workflows."
       />
       <List.Section title="Results" subtitle={allWorkflows.length + ""}>
         {allWorkflows
@@ -98,13 +98,14 @@ function SearchListItem({ searchResult }: { searchResult: Workflow }) {
       id: searchResult.id,
     })
   )}`;
+
   return (
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description || ""}
       actions={
         <ActionPanel>
-          <Action title="Push" onAction={() => push(<WorkflowForm searchResult={searchResult} />)} />
+          <Action title="View" icon={Icon.Eye} onAction={() => push(<WorkflowForm workflow={searchResult} />)} />
           <Action.CreateQuicklink
             title="Create Quicklink"
             icon={Icon.Link}
@@ -128,10 +129,10 @@ const getMarkers = (workflow: Workflow) => {
   return markers.sort((a, b) => a.index - b.index);
 };
 
-function WorkflowForm({ searchResult }: { searchResult: Workflow }) {
+function WorkflowForm({ workflow }: { workflow: Workflow }) {
   const [values, setValues] = useState<{ [key: string]: string }>(() => {
     const vals = {} as Record<string, string>;
-    for (const arg of searchResult.arguments) {
+    for (const arg of workflow.arguments) {
       if (arg.default_value) {
         vals[arg.name] = arg.default_value;
       }
@@ -139,17 +140,17 @@ function WorkflowForm({ searchResult }: { searchResult: Workflow }) {
     return vals;
   });
 
-  const markers = useMemo(() => getMarkers(searchResult), [searchResult]);
+  const markers = useMemo(() => getMarkers(workflow), [workflow]);
 
   const reactiveCommand =
     markers.length > 0
       ? markers.reduce((text, marker, i) => {
           const { index, variable } = marker;
           const value = values[variable] || `{{${variable}}}`;
-          const after = searchResult.command.slice(index + variable.length + 4, markers[i + 1]?.index);
+          const after = workflow.command.slice(index + variable.length + 4, markers[i + 1]?.index);
           return text + value + after;
-        }, searchResult.command.slice(0, markers[0].index))
-      : searchResult.command;
+        }, workflow.command.slice(0, markers[0].index))
+      : workflow.command;
 
   return (
     <>
@@ -168,8 +169,8 @@ function WorkflowForm({ searchResult }: { searchResult: Workflow }) {
           </ActionPanel>
         }
       >
-        <Form.Description title={searchResult.name} text={searchResult.description ?? ""} />
-        {searchResult.arguments.map((arg) => (
+        <Form.Description title={workflow.name} text={workflow.description ?? ""} />
+        {workflow.arguments.map((arg) => (
           <Form.TextField
             id={arg.name}
             title={arg.name}
@@ -179,7 +180,7 @@ function WorkflowForm({ searchResult }: { searchResult: Workflow }) {
             info={arg.description ?? undefined}
           />
         ))}
-        <Form.Description title={"Result"} text={reactiveCommand} />
+        <Form.Description title="Result" text={reactiveCommand} />
       </Form>
     </>
   );
