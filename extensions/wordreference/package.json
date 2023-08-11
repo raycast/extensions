@@ -1,0 +1,229 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wordreference",
+  "title": "WordReference Dictionary Translation",
+  "description": "Quickly find a word translation using WordReference",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "author": "Katatsu",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchTranslations",
+      "title": "Translate Word",
+      "subtitle": "WordReference",
+      "description": "Translate a word and find its definitions using WordReference",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "translationKey",
+      "description": "Language dictionnary to use",
+      "type": "dropdown",
+      "required": true,
+      "title": "Translation Language",
+      "placeholder": "Select a dictionnary language",
+      "default": "enfr",
+      "data": [
+        {
+          "title": "English - Spanish",
+          "value": "enes"
+        },
+        {
+          "title": "Spanish - English",
+          "value": "esen"
+        },
+        {
+          "title": "Spanish - French",
+          "value": "esfr"
+        },
+        {
+          "title": "Spanish - Portuguese",
+          "value": "espt"
+        },
+        {
+          "title": "Spanish - Italian",
+          "value": "esit"
+        },
+        {
+          "title": "Spanish - German",
+          "value": "esde"
+        },
+        {
+          "title": "English - French",
+          "value": "enfr"
+        },
+        {
+          "title": "French - English",
+          "value": "fren"
+        },
+        {
+          "title": "French - Spanish",
+          "value": "fres"
+        },
+        {
+          "title": "English - Italian",
+          "value": "enit"
+        },
+        {
+          "title": "Italian - English",
+          "value": "iten"
+        },
+        {
+          "title": "Italian - Spanish",
+          "value": "ites"
+        },
+        {
+          "title": "English - German",
+          "value": "ende"
+        },
+        {
+          "title": "German - English",
+          "value": "deen"
+        },
+        {
+          "title": "German - Spanish",
+          "value": "dees"
+        },
+        {
+          "title": "English - Dutch",
+          "value": "ennl"
+        },
+        {
+          "title": "Dutch - English",
+          "value": "nlen"
+        },
+        {
+          "title": "English - Swedish",
+          "value": "ensv"
+        },
+        {
+          "title": "Swedish - English",
+          "value": "sven"
+        },
+        {
+          "title": "English - Icelandic",
+          "value": "enis"
+        },
+        {
+          "title": "English - Russian",
+          "value": "enru"
+        },
+        {
+          "title": "Russian - English",
+          "value": "ruen"
+        },
+        {
+          "title": "English - Portuguese",
+          "value": "enpt"
+        },
+        {
+          "title": "Portuguese - English",
+          "value": "pten"
+        },
+        {
+          "title": "Portuguese - Spanish",
+          "value": "ptes"
+        },
+        {
+          "title": "English - Polish",
+          "value": "enpl"
+        },
+        {
+          "title": "Polish - English",
+          "value": "plen"
+        },
+        {
+          "title": "English - Romanian",
+          "value": "enro"
+        },
+        {
+          "title": "Romanian - English",
+          "value": "roen"
+        },
+        {
+          "title": "English - Czech",
+          "value": "encz"
+        },
+        {
+          "title": "Czech - English",
+          "value": "czen"
+        },
+        {
+          "title": "English - Greek",
+          "value": "engr"
+        },
+        {
+          "title": "Greek - English",
+          "value": "gren"
+        },
+        {
+          "title": "English - Turkish",
+          "value": "entr"
+        },
+        {
+          "title": "Turkish - English",
+          "value": "tren"
+        },
+        {
+          "title": "English - Chinese",
+          "value": "enzh"
+        },
+        {
+          "title": "Chinese - English",
+          "value": "zhen"
+        },
+        {
+          "title": "English - Japanese",
+          "value": "enja"
+        },
+        {
+          "title": "Japanese - English",
+          "value": "jaen"
+        },
+        {
+          "title": "English - Korean",
+          "value": "enko"
+        },
+        {
+          "title": "Korean - English",
+          "value": "koen"
+        },
+        {
+          "title": "English - Arabic",
+          "value": "enar"
+        },
+        {
+          "title": "Arabic - English",
+          "value": "aren"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
