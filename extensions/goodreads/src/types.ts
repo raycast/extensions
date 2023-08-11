@@ -11,22 +11,24 @@ export interface Book {
 
 export interface Review {
   reviewerName: string;
-  review: string;
+  reviewBody: string;
   reviewDate: string;
+  reviewUrl: string;
+  rating?: number;
 }
 
 export interface BookDetails extends Pick<Book, "id" | "author" | "title" | "rating"> {
+  authorDetailsPageUrl: string;
+  cover: { source?: string };
   description: string;
   format: string;
   published: string;
+  ratingHistogram: Array<{ count: string; percentage: number }>;
   ratingStatistics: string;
+  communityReviewUrl?: string;
   url: string;
-  authorDetailsPageUrl: string;
-  cover: {
-    source?: string;
-  };
-  language?: string;
   genres?: string[];
+  language?: string;
   reviews?: Array<Review>;
 }
 
