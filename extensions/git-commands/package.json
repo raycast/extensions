@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git-commands",
+  "title": "Git Commands & Alias Docs",
+  "description": "Search commands and alias and read descriptions.",
+  "icon": "git-icon.png",
+  "author": "manumorante",
+  "categories": [
+    "Documentation",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-commands",
+      "title": "Search Commands or Alias",
+      "description": "Quickly search for a command or alias and read its description.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "listItemInfo",
+      "title": "Show information",
+      "description": "Defines the amount of information to be displayed for each command",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Command, description, and alias",
+          "value": "full"
+        },
+        {
+          "title": "Command and alias",
+          "value": "medium"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
