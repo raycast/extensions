@@ -22,7 +22,7 @@ import {
   MessageMarkAllAsReadAction,
   MessageShowDetailsAction,
   MessageDebugActionPanelSection,
-  LabelFilterAddAction,
+  FilterActionPanelSection,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 import { useContext } from "react";
@@ -160,13 +160,11 @@ export function GMailMessageListItem(props: {
           <ActionPanel.Section>
             <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <LabelFilterAddAction
-              labelsAll={labelsAll}
-              searchText={props.searchText}
-              setSearchText={props.setSearchText}
-            />
-          </ActionPanel.Section>
+          <FilterActionPanelSection
+            labelsAll={labelsAll}
+            searchText={props.searchText}
+            setSearchText={props.setSearchText}
+          />
           <ActionPanel.Section>
             <MessagesRefreshAction onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>

@@ -9,7 +9,14 @@ import {
   moveMessageToTrash,
 } from "../../lib/gmail";
 import { getErrorMessage, sleep } from "../../lib/utils";
-import { getLabelName, isMailDraft, isMailUnread } from "./utils";
+import {
+  SemanticLabels,
+  convertToSemanticLabels,
+  generateLabelFilter,
+  getLabelName,
+  isMailDraft,
+  isMailUnread,
+} from "./utils";
 import path from "path";
 import * as fs from "fs";
 import { useCurrentProfile } from "./hooks";
@@ -240,34 +247,117 @@ export function MessageDebugActionPanelSection(props: { message: gmail_v1.Schema
   );
 }
 
-export function LabelFilterAddAction(props: {
+export function UserLabelFilterAddAction(props: {
   labelsAll: gmail_v1.Schema$Label[] | undefined;
   searchText?: string;
   setSearchText: ((newValue: string) => void) | undefined;
 }) {
-  if (!props.labelsAll || props.labelsAll.length <= 0 || !props.setSearchText) {
+  return (
+    <FilterAddAction
+      title="Add Label Filter"
+      labelsAll={props.labelsAll}
+      searchText={props.searchText}
+      setSearchText={props.setSearchText}
+      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      onFilter={(l) => l.userLabels}
+    />
+  );
+}
+
+export function SystemLabelFilterAddAction(props: {
+  labelsAll: gmail_v1.Schema$Label[] | undefined;
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+}) {
+  return (
+    <FilterAddAction
+      title="Add System Filter"
+      labelsAll={props.labelsAll}
+      searchText={props.searchText}
+      setSearchText={props.setSearchText}
+      shortcut={{ modifiers: ["cmd"], key: "s" }}
+      onFilter={(l) => l.systemLabels}
+    />
+  );
+}
+
+export function CategoryLabelFilterAddAction(props: {
+  labelsAll: gmail_v1.Schema$Label[] | undefined;
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+}) {
+  return (
+    <FilterAddAction
+      title="Add Category Filter"
+      labelsAll={props.labelsAll}
+      searchText={props.searchText}
+      setSearchText={props.setSearchText}
+      shortcut={{ modifiers: ["opt", "cmd"], key: "c" }}
+      onFilter={(l) => l.categories}
+    />
+  );
+}
+
+export function FilterAddAction(props: {
+  title: string;
+  labelsAll: gmail_v1.Schema$Label[] | undefined;
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+  shortcut?: Keyboard.Shortcut | undefined;
+  onFilter: (semanticLabels: SemanticLabels) => gmail_v1.Schema$Label[] | undefined;
+}) {
+  const semantic = convertToSemanticLabels(props.labelsAll);
+  const labelsAll = props.onFilter(semantic);
+  if (!labelsAll || labelsAll.length <= 0 || !props.setSearchText) {
     return null;
   }
   const handle = (selectedLabel: gmail_v1.Schema$Label, prefix: string) => {
     if (props.setSearchText) {
       const currentText = props.searchText || "";
-      const labelText = `${prefix}label=${getLabelName(selectedLabel) || ""}`;
+      const labelText = `${prefix}${generateLabelFilter(selectedLabel) || ""}`;
       const nt = currentText && currentText.trim().length > 0 ? `${currentText} ${labelText}` : labelText;
       props.setSearchText(nt);
     }
   };
   return (
-    <ActionPanel.Submenu title="Add Search Label Filter" shortcut={{ modifiers: ["cmd"], key: "l" }} icon={Icon.Book}>
+    <ActionPanel.Submenu title={props.title} shortcut={props.shortcut} icon={Icon.Book}>
       <ActionPanel.Submenu title="Match">
-        {props.labelsAll.map((l) => (
+        {labelsAll.map((l) => (
           <Action title={getLabelName(l) || "?"} onAction={() => handle(l, "")} />
         ))}
       </ActionPanel.Submenu>
       <ActionPanel.Submenu title="Not Match">
-        {props.labelsAll.map((l) => (
+        {labelsAll.map((l) => (
           <Action title={getLabelName(l) || "?"} onAction={() => handle(l, "-")} />
         ))}
       </ActionPanel.Submenu>
     </ActionPanel.Submenu>
+  );
+}
+
+export function FilterActionPanelSection(props: {
+  title?: string;
+  labelsAll: gmail_v1.Schema$Label[] | undefined;
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+}) {
+  return (
+    <ActionPanel.Section title={props.title}>
+      <UserLabelFilterAddAction
+        labelsAll={props.labelsAll}
+        searchText={props.searchText}
+        setSearchText={props.setSearchText}
+      />
+      <SystemLabelFilterAddAction
+        labelsAll={props.labelsAll}
+        searchText={props.searchText}
+        setSearchText={props.setSearchText}
+      />
+      <CategoryLabelFilterAddAction
+        labelsAll={props.labelsAll}
+        searchText={props.searchText}
+        setSearchText={props.setSearchText}
+      />
+    </ActionPanel.Section>
   );
 }
