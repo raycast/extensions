@@ -13,6 +13,7 @@ import {
   SemanticLabels,
   convertToSemanticLabels,
   generateLabelFilter,
+  getLabelIcon,
   getLabelName,
   isMailDraft,
   isMailUnread,
@@ -323,12 +324,12 @@ export function FilterAddAction(props: {
     <ActionPanel.Submenu title={props.title} shortcut={props.shortcut} icon={Icon.Book}>
       <ActionPanel.Submenu title="Match">
         {labelsAll.map((l) => (
-          <Action title={getLabelName(l) || "?"} onAction={() => handle(l, "")} />
+          <Action title={getLabelName(l) || "?"} icon={getLabelIcon(l)} onAction={() => handle(l, "")} />
         ))}
       </ActionPanel.Submenu>
       <ActionPanel.Submenu title="Not Match">
         {labelsAll.map((l) => (
-          <Action title={getLabelName(l) || "?"} onAction={() => handle(l, "-")} />
+          <Action title={getLabelName(l) || "?"} icon={getLabelIcon(l)} onAction={() => handle(l, "-")} />
         ))}
       </ActionPanel.Submenu>
     </ActionPanel.Submenu>

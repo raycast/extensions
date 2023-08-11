@@ -5,6 +5,7 @@ import {
   generateLabelFilter,
   getAddressParts,
   getLabelDetailsFromIds,
+  getLabelIcon,
   getLabelName,
   getMessageFileAttachmentNames,
   getMessageInternalDate,
@@ -206,17 +207,32 @@ export function QueryListDropdown(props: {
       </List.Dropdown.Section>
       <List.Dropdown.Section title="System">
         {semanticLabels.systemLabels?.map((l) => (
-          <List.Dropdown.Item key={l.id} title={getLabelName(l) || "?"} value={generateLabelFilter(l)} />
+          <List.Dropdown.Item
+            key={l.id}
+            title={getLabelName(l) || "?"}
+            icon={getLabelIcon(l)}
+            value={generateLabelFilter(l)}
+          />
         ))}
       </List.Dropdown.Section>
       <List.Dropdown.Section title="Categories">
         {semanticLabels.categories?.map((l) => (
-          <List.Dropdown.Item key={l.id} title={getLabelName(l) || "?"} value={generateLabelFilter(l)} />
+          <List.Dropdown.Item
+            key={l.id}
+            title={getLabelName(l) || "?"}
+            icon={getLabelIcon(l)}
+            value={generateLabelFilter(l)}
+          />
         ))}
       </List.Dropdown.Section>
       <List.Dropdown.Section title="Labels">
         {semanticLabels.userLabels?.map((l) => (
-          <List.Dropdown.Item key={l.id} title={getLabelName(l) || "?"} value={generateLabelFilter(l)} />
+          <List.Dropdown.Item
+            key={l.id}
+            title={getLabelName(l) || "?"}
+            icon={getLabelIcon(l)}
+            value={generateLabelFilter(l)}
+          />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>

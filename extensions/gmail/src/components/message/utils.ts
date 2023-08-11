@@ -1,4 +1,5 @@
 import { gmail_v1 } from "@googleapis/gmail";
+import { Icon, Image } from "@raycast/api";
 
 export function getAddressParts(text: string | undefined | null):
   | {
@@ -204,4 +205,42 @@ export function convertToSemanticLabels(labels: gmail_v1.Schema$Label[] | undefi
     userLabels: sortLabelsByName(userLabels),
     systemLabels: sortSystemLabels(systemLabels),
   };
+}
+
+export function getLabelIcon(label: gmail_v1.Schema$Label): Image.ImageLike | undefined {
+  const id = label.id;
+  if (!id) {
+    return;
+  }
+  switch (id) {
+    case "STARRED":
+      return Icon.Star;
+    case "IMPORTANT":
+      return Icon.Exclamationmark;
+    case "DRAFT":
+      return Icon.Pencil;
+    case "SENT":
+      return Icon.ArrowRightCircleFilled;
+    case "CHAT":
+      return Icon.SpeechBubbleActive;
+    case "UNREAD":
+      return Icon.Envelope;
+    case "CATEGORY_SOCIAL":
+      return Icon.TwoPeople;
+    case "CATEGORY_UPDATES":
+      return Icon.Info;
+    case "CATEGORY_FORUMS":
+      return Icon.SpeechBubble;
+    case "CATEGORY_PROMOTIONS":
+      return Icon.Tag;
+    case "CATEGORY_PERSONAL":
+      return Icon.Person;
+  }
+  if (isSystemLabel(label)) {
+    return { source: Icon.Coin, tintColor: label.color?.backgroundColor };
+  }
+  if (isCategoryLabel(label)) {
+    return { source: Icon.Book, tintColor: label.color?.backgroundColor };
+  }
+  return { source: Icon.Tag, tintColor: label.color?.backgroundColor };
 }
