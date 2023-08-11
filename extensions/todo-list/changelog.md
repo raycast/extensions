@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [Impliment Sorting] - 2023-07-25
+## [Impliment Sorting] - 2023-08-11
 
 - New preference option for choose how tasks are sorted.
 - Adds priority to tasks, allowing the user to take more control of the order of tasks.
