@@ -13,6 +13,10 @@ const promptTemplateFormats = new Map<string, OllamaPromptFormat>([
     "raycast_llama2:13b",
     { promptStart: "<s>[INST] <<SYS>>\n", promptEnd: "\n<</SYS>>\n", tagEnd: " [/INST]" } as OllamaPromptFormat,
   ],
+  [
+    "raycast_llama2:70b",
+    { promptStart: "<s>[INST] <<SYS>>\n", promptEnd: "\n<</SYS>>\n", tagEnd: " [/INST]" } as OllamaPromptFormat,
+  ],
 ]);
 
 const promptTemplate = new Map<string, string>([

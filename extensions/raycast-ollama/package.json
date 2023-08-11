@@ -51,6 +51,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "llama2:70b"
         }
       ]
     },
@@ -73,6 +77,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -95,6 +103,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -117,6 +129,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -139,6 +155,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -161,6 +181,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -183,6 +207,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -205,6 +233,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -227,6 +259,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -249,6 +285,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -271,6 +311,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -293,6 +337,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -315,6 +363,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -337,6 +389,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     },
@@ -359,6 +415,10 @@
         {
           "title": "llama2 13b (at least 32GB of RAM)",
           "value": "raycast_llama2:13b"
+        },
+        {
+          "title": "llama2 70b (at least 64GB of RAM)",
+          "value": "raycast_llama2:70b"
         }
       ]
     }

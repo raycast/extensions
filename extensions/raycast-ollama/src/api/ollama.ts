@@ -27,6 +27,7 @@ async function OllamaApiTagsVerify(model: string): Promise<[boolean, string]> {
     ["raycast_orca:3b", "orca:latest"],
     ["raycast_llama2:7b", "llama2:latest"],
     ["raycast_llama2:13b", "llama2:13b"],
+    ["raycast_llama2:70b", "llama2:70b"],
   ]);
 
   const models = await fetch(url)
@@ -50,7 +51,7 @@ async function OllamaApiTagsVerify(model: string): Promise<[boolean, string]> {
 
 /**
  * Create a custom model from a file template.
- * @param {string} model - Model name. Can be one of the following: raycast_orca:3b, raycast_llama2:7b, raycast_llama2:13b.
+ * @param {string} model - Model name. Can be one of the following: raycast_orca:3b, raycast_llama2:7b, raycast_llama2:13b, raycast_llama2:70b.
  * @returns {Promise<boolean>} true if model is created, false if not.
  */
 function OllamaApiCreateModel(model: string): Promise<boolean> {
@@ -59,6 +60,7 @@ function OllamaApiCreateModel(model: string): Promise<boolean> {
     ["raycast_orca:3b", `${environment.assetsPath}/prompt/raycast_orca_3b`],
     ["raycast_llama2:7b", `${environment.assetsPath}/prompt/raycast_llama2_7b`],
     ["raycast_llama2:13b", `${environment.assetsPath}/prompt/raycast_llama2_13b`],
+    ["raycast_llama2:70b", `${environment.assetsPath}/prompt/raycast_llama2_70b`],
   ]);
   const body: OllamaApiCreateRequestBody = {
     name: model,
@@ -89,7 +91,7 @@ function OllamaApiCreateModel(model: string): Promise<boolean> {
 /**
  * Perform text generation with the selected model.
  * @param {string} prompt - Prompt to be used in the generation.
- * @param {string} model - Model name. Need to be installed or one of the following: raycast_orca:3b, raycast_llama2:7b, raycast_llama2:13b.
+ * @param {string} model - Model name. Need to be installed or one of the following: raycast_orca:3b, raycast_llama2:7b, raycast_llama2:13b, raycast_llama2:70b.
  * @returns {Promise<EventEmitter>} Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponseDone` object contains all metadata of inference.
  */
 export async function OllamaApiGenerate(prompt: string, model: string): Promise<EventEmitter> {

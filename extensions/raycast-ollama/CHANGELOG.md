@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2023-08-11
+
+- Added llama2:70b model. Thanks to [suhaildawood](https://github.com/suhaildawood).
+
 ## [Improvement and BugFix] - 2023-08-7
 
 - Updated README.md with more information.
