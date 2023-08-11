@@ -1,8 +1,8 @@
-import { Action, ActionPanel, List } from "@raycast/api"
-import { getData, typeColor, showDescription } from "./utils"
+import { Action, ActionPanel, List } from "@raycast/api";
+import { getData, typeColor, showDescription } from "./utils";
 
 export default function Command() {
-  const aliases = getData()
+  const aliases = getData();
 
   return (
     <List searchBarPlaceholder="Search for commands or aliases ...">
@@ -21,8 +21,8 @@ export default function Command() {
               </ActionPanel>
             }
           />
-        )
+        );
       })}
     </List>
-  )
+  );
 }
