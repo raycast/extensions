@@ -257,7 +257,7 @@ export function LabelFilterAddAction(props: {
     }
   };
   return (
-    <ActionPanel.Submenu title="Add Search Label Filter" icon={Icon.Book}>
+    <ActionPanel.Submenu title="Add Search Label Filter" shortcut={{ modifiers: ["cmd"], key: "l" }} icon={Icon.Book}>
       <ActionPanel.Submenu title="Match">
         {props.labelsAll.map((l) => (
           <Action title={getLabelName(l) || "?"} onAction={() => handle(l, "")} />

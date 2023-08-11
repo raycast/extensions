@@ -38,6 +38,8 @@ function UnreadMailsRootCommand() {
               onRevalidate={revalidate}
               showUnreadAccessory={false}
               allUnreadMessages={data?.map((m) => m.data)}
+              searchText={searchText}
+              setSearchText={setSearchText}
             />
           ))}
         </List.Section>
