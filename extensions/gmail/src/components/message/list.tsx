@@ -3,6 +3,7 @@ import { getGMailMessageHeaderValue } from "../../lib/gmail";
 import {
   getAddressParts,
   getLabelDetailsFromIds,
+  getLabelName,
   getMessageFileAttachmentNames,
   getMessageInternalDate,
   isMailUnread,
@@ -174,5 +175,31 @@ export function GMailMessageListItem(props: {
         </ActionPanel>
       }
     />
+  );
+}
+
+export function QueryListDropdown(props: {
+  labels: gmail_v1.Schema$Label[] | undefined;
+  setSearchText: (newValue: string) => void;
+}) {
+  const labels = props.labels;
+  if (!labels || labels.length <= 0 || !props.setSearchText) {
+    return null;
+  }
+  const handle = (newValue: string) => {
+    const text = newValue === "-" ? "" : `label=${newValue}`;
+    props.setSearchText(text);
+  };
+  return (
+    <List.Dropdown tooltip="Filter" onChange={handle}>
+      <List.Dropdown.Section>
+        <List.Dropdown.Item title="Default" value="-" />
+      </List.Dropdown.Section>
+      <List.Dropdown.Section title="Labels">
+        {labels.map((l) => (
+          <List.Dropdown.Item key={l.id} title={getLabelName(l) || "?"} value={getLabelName(l) || "?"} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
   );
 }
