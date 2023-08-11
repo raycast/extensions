@@ -24,6 +24,7 @@ import {
   MessageShowDetailsAction,
   MessageDebugActionPanelSection,
   FilterActionPanelSection,
+  CreateQueryQuickLinkAction,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 import { useContext } from "react";
@@ -158,18 +159,19 @@ export function GMailMessageListItem(props: {
             <MessageMarkAllAsReadAction messages={props.allUnreadMessages} onRevalidate={props.onRevalidate} />
             <MessageMarkAsUnreadAction message={data} onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
-          </ActionPanel.Section>
           <FilterActionPanelSection
             labelsAll={labelsAll}
             searchText={props.searchText}
             setSearchText={props.setSearchText}
           />
           <ActionPanel.Section>
+            <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <MessagesRefreshAction onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <CreateQueryQuickLinkAction searchText={props.searchText} />
             <MessageCopyIdAction message={data} />
           </ActionPanel.Section>
           <MessageDebugActionPanelSection message={data} />
@@ -184,14 +186,14 @@ export function QueryListDropdown(props: {
   setSearchText: (newValue: string) => void;
   hideLabelIDs?: string[];
   defaultName?: string;
+  defaultValue?: string;
 }) {
   const labels = props.labels;
   if (!labels || labels.length <= 0 || !props.setSearchText) {
     return null;
   }
   const handle = (newValue: string) => {
-    const text = newValue === "-" ? "" : newValue;
-    props.setSearchText(text);
+    props.setSearchText(newValue);
   };
   const filterLabels = (labelsAll: gmail_v1.Schema$Label[] | undefined) => {
     if (!props.hideLabelIDs || props.hideLabelIDs.length <= 0) {
@@ -203,7 +205,11 @@ export function QueryListDropdown(props: {
   return (
     <List.Dropdown tooltip="Filter" onChange={handle}>
       <List.Dropdown.Section>
-        <List.Dropdown.Item title={props.defaultName ? props.defaultName : "Default"} icon={Icon.Box} value="-" />
+        <List.Dropdown.Item
+          title={props.defaultName ? props.defaultName : "Default"}
+          icon={Icon.Box}
+          value={props.defaultValue || ""}
+        />
       </List.Dropdown.Section>
       <List.Dropdown.Section title="System">
         {semanticLabels.systemLabels?.map((l) => (

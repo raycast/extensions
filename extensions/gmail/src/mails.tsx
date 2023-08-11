@@ -1,4 +1,4 @@
-import { List, Toast, showToast } from "@raycast/api";
+import { LaunchProps, List, Toast, showToast } from "@raycast/api";
 import { GMailMessageListItem, QueryListDropdown } from "./components/message/list";
 import { useState } from "react";
 import { generateQuery, getGMailMessages } from "./lib/gmail";
@@ -10,8 +10,9 @@ import { GMailContext } from "./components/context";
 import View from "./components/view";
 import { getGMailClient } from "./lib/withGmailClient";
 
-function MessageRootCommand() {
-  const [searchText, setSearchText] = useState<string>();
+function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) {
+  const defaultQuery = props.arguments.query && props.arguments.query.length > 0 ? props.arguments.query : undefined;
+  const [searchText, setSearchText] = useState<string | undefined>(defaultQuery);
   const query = generateQuery({ baseQuery: ["-is:draft", "label=INBOX"], userQuery: searchText });
   const { gmail } = getGMailClient();
   const { isLoading, data, error, revalidate } = useCachedPromise(
@@ -48,6 +49,7 @@ function MessageRootCommand() {
         searchBarAccessory={
           <QueryListDropdown
             defaultName="Inbox"
+            defaultValue={defaultQuery}
             labels={labels}
             setSearchText={setSearchText}
             hideLabelIDs={hideLabelIDs}
@@ -97,10 +99,10 @@ function MessageRootCommand() {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Mails }>) {
   return (
     <View>
-      <MessageRootCommand />
+      <MessageRootCommand {...props} />
     </View>
   );
 }

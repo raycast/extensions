@@ -336,6 +336,25 @@ export function FilterAddAction(props: {
   );
 }
 
+export function CreateQueryQuickLinkAction(props: { searchText: string | undefined }) {
+  const s = props.searchText;
+  if (environment.commandName !== "mails") {
+    return null;
+  }
+  if (!s || s.trim().length <= 0) {
+    return null;
+  }
+  const args: Record<string, string> = {
+    query: s,
+  };
+  return (
+    <Action.CreateQuicklink
+      title="Save Query as Quicklink"
+      quicklink={{ link: `raycast://extensions/tonka3000/gmail/mails?arguments=${encodeURI(JSON.stringify(args))}` }}
+    />
+  );
+}
+
 export function FilterActionPanelSection(props: {
   title?: string;
   labelsAll: gmail_v1.Schema$Label[] | undefined;
