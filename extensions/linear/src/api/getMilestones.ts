@@ -14,10 +14,7 @@ export type MilestoneResult = Pick<
 const milestoneFragment = `
   id
   name
-  description
   targetDate
-  archivedAt
-  createdAt
   project {
       id
   }
