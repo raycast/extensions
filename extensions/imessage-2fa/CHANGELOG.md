@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - 2023-08-11
+
+- Resolves an issue where phone numbers get extracted instead of the actual two-factor code.
+
 ## [Update] - 2023-04-13
 
 - Resolves [iMessage 2FA] support code format 123-456 #5523 by making the check case-insensitive
