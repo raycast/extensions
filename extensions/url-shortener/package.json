@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "url-shortener",
-  "title": "ShrtCO.de - Free URL Shortener With No API Key Required",
-  "description": "Experience the joy of shortening URLs to your heart's desire with Raycast's ShrtCO.de URL Shortener extension! Enjoy the convenience of free URL shortening, without the need for an API key or any rate limits.",
+  "title": "URL-Shortener",
+  "description": "Experience the joy of shortening URLs to your heart's desire with Raycast's URL Shortener! Enjoy the convenience of free URL shortening, without the need for an API key or any rate limits. The domains you can use are: tinyurl.com, shrtco.de, 9qr.de, and shiny.link",
   "icon": "command-icon.png",
   "author": "Vaibhav-Satishkumar",
   "license": "MIT",
@@ -25,6 +25,10 @@
       "required" : true
       ,
       "data": [
+        {
+          "title": "tinyurl.com",
+          "value": "4"
+        },
         {
           "title": "shrtco.de",
           "value": "1"

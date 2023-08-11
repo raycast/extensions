@@ -17,16 +17,20 @@ export default async function Command() {
         title: "Shortening URL",
       });
       const request = await fetch(`https://api.shrtco.de/v2/shorten?url=${encodeURIComponent(url)}`);
-      //response has type unknown fix this
       const response = await request.json();
-      console.log(url);
-      console.log(preferences.domain);
       if (preferences.domain == "1") {
         await Clipboard.paste(response.result.full_short_link);
       } else if (preferences.domain == "2") {
         await Clipboard.paste(response.result.full_short_link2);
-      } else {
+      } else if (preferences.domain == "3") {
         await Clipboard.paste(response.result.full_short_link3);
+      } else {
+        const getTinyURL = async (url) => {
+          const response = await fetch(`https://tinyurl.com/api-create.php?url=${url}`);
+          return response.text();
+        };
+
+        await Clipboard.paste(await getTinyURL(url));
       }
     }
   } catch (error) {
