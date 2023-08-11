@@ -144,6 +144,8 @@ function getItemIcon(item: RefData): string {
       return "document.png";
     case "preprint":
       return "preprint.png";
+    case "patent":
+      return "patent.png";
     default:
       return "default.png";
   }
