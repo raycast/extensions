@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "larajobs-search",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "Search LaraJobs",
   "description": "Search jobs on Larajobs",
   "icon": "extension_icon.png",
