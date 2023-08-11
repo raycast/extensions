@@ -2,7 +2,7 @@ import { List, Toast, showToast } from "@raycast/api";
 import { GMailMessageListItem, QueryListDropdown } from "./components/message/list";
 import { useState } from "react";
 import { generateQuery, getGMailMessages } from "./lib/gmail";
-import { getLabelName, isMailUnread } from "./components/message/utils";
+import { isMailUnread } from "./components/message/utils";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getErrorMessage } from "./lib/utils";
 import { useLabels } from "./components/message/hooks";

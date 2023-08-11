@@ -1,6 +1,8 @@
 import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { getGMailMessageHeaderValue } from "../../lib/gmail";
 import {
+  convertToSemanticLabels,
+  generateLabelFilter,
   getAddressParts,
   getLabelDetailsFromIds,
   getLabelName,
@@ -187,17 +189,28 @@ export function QueryListDropdown(props: {
     return null;
   }
   const handle = (newValue: string) => {
-    const text = newValue === "-" ? "" : `label=${newValue}`;
+    const text = newValue === "-" ? "" : newValue;
     props.setSearchText(text);
   };
+  const semanticLabels = convertToSemanticLabels(labels);
   return (
     <List.Dropdown tooltip="Filter" onChange={handle}>
       <List.Dropdown.Section>
         <List.Dropdown.Item title="Default" value="-" />
       </List.Dropdown.Section>
+      <List.Dropdown.Section title="System">
+        {semanticLabels.systemLabels?.map((l) => (
+          <List.Dropdown.Item key={l.id} title={getLabelName(l) || "?"} value={generateLabelFilter(l)} />
+        ))}
+      </List.Dropdown.Section>
+      <List.Dropdown.Section title="Categories">
+        {semanticLabels.categories?.map((l) => (
+          <List.Dropdown.Item key={l.id} title={getLabelName(l) || "?"} value={generateLabelFilter(l)} />
+        ))}
+      </List.Dropdown.Section>
       <List.Dropdown.Section title="Labels">
-        {labels.map((l) => (
-          <List.Dropdown.Item key={l.id} title={getLabelName(l) || "?"} value={getLabelName(l) || "?"} />
+        {semanticLabels.userLabels?.map((l) => (
+          <List.Dropdown.Item key={l.id} title={getLabelName(l) || "?"} value={generateLabelFilter(l)} />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>

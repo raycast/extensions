@@ -78,6 +78,14 @@ const standardLabels: Record<string, string> = {
   UNREAD: "Unread",
 };
 
+const systemLabelOrder: Record<string, number> = {
+  INBOX: 0,
+  STARRED: 1,
+  IMPORTANT: 3,
+  SENT: 4,
+  DRAFT: 5,
+};
+
 export function getLabelName(label: gmail_v1.Schema$Label) {
   if (!label.name || label.id !== label.name) {
     return label.name;
@@ -87,4 +95,72 @@ export function getLabelName(label: gmail_v1.Schema$Label) {
     return label.name;
   }
   return sn;
+}
+
+export function isSystemLabel(label: gmail_v1.Schema$Label) {
+  if (!label.id) {
+    return false;
+  }
+  return ["INBOX", "SENT", "CHAT", "IMPORTANT", "TRASH", "DRAFT", "SPAM", "STARRED", "UNREAD"].includes(label.id);
+}
+
+export function isCategoryLabel(label: gmail_v1.Schema$Label) {
+  if (!label.id) {
+    return false;
+  }
+  return label.id.startsWith("CATEGORY_");
+}
+
+function sortSystemLabels(labels: gmail_v1.Schema$Label[] | undefined) {
+  if (!labels || labels.length <= 0) {
+    return labels;
+  }
+  const orderValue = (l: gmail_v1.Schema$Label) => {
+    if (!l.id) {
+      return 100;
+    }
+    const val = systemLabelOrder[l.id];
+    if (val === undefined) {
+      return 90;
+    }
+    return val;
+  };
+  return labels.sort((a, b) => orderValue(a) - orderValue(b));
+}
+
+export interface SemanticLabels {
+  categories: gmail_v1.Schema$Label[] | undefined;
+  userLabels: gmail_v1.Schema$Label[] | undefined;
+  systemLabels: gmail_v1.Schema$Label[] | undefined;
+}
+
+export function generateLabelFilter(label: gmail_v1.Schema$Label) {
+  const name = getLabelName(label);
+  if (isCategoryLabel(label)) {
+    return `category=${name}`;
+  }
+  return `label=${name}`;
+}
+
+export function convertToSemanticLabels(labels: gmail_v1.Schema$Label[] | undefined): SemanticLabels {
+  const categories: gmail_v1.Schema$Label[] | undefined = [];
+  const userLabels: gmail_v1.Schema$Label[] | undefined = [];
+  const systemLabels: gmail_v1.Schema$Label[] | undefined = [];
+  for (const l of labels || []) {
+    if (!l.id) {
+      continue;
+    }
+    if (isCategoryLabel(l)) {
+      categories.push(l);
+    } else if (isSystemLabel(l)) {
+      systemLabels.push(l);
+    } else {
+      userLabels?.push(l);
+    }
+  }
+  return {
+    categories,
+    userLabels,
+    systemLabels: sortSystemLabels(systemLabels),
+  };
 }
