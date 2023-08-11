@@ -6,7 +6,11 @@ import { ListQueryCommand } from "./components/command";
 export default function Command() {
   return (
     <View>
-      <ListQueryCommand baseQuery={["-in:inbox", "-is:draft"]} emptyMessage="No Mails in the Archive" />
+      <ListQueryCommand
+        baseQuery={["-in:inbox", "-is:draft"]}
+        sectionTitle="Archived Mails"
+        emptyMessage="No Mails in the Archive"
+      />
     </View>
   );
 }
