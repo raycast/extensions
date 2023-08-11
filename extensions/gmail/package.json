@@ -32,6 +32,20 @@
       "mode": "view"
     },
     {
+      "name": "trash",
+      "title": "List Trash",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Trash",
+      "mode": "view"
+    },
+    {
+      "name": "archive",
+      "title": "List Archive",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Archive",
+      "mode": "view"
+    },
+    {
       "name": "newwebmail",
       "title": "New Web Mail",
       "subtitle": "Gmail",
