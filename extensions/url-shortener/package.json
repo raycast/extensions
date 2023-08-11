@@ -44,7 +44,8 @@
     "@raycast/api": "^1.57.0",
     "shortid": "^2.2.16",
     "express": "^4.18.2",
-    "tinyurl-api": "^1.0.1"
+    "tinyurl-api": "^1.0.1",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
