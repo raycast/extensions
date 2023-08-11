@@ -1,8 +1,6 @@
 import { getSelectedText, Clipboard, showToast, Toast, showHUD, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
-
-
 export default async function Command() {
   const preferences = getPreferenceValues();
   try {
