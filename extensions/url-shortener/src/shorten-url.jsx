@@ -1,12 +1,10 @@
 import { getSelectedText, Clipboard, showToast, Toast, showHUD, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
-interface Preferences {
-  domain: string;
-}
+
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   try {
     const url = await getSelectedText();
     const regexURL = /^((ftp|smtp|file|data):\/\/)?[^\s$.?#].[^\s]*$/;
@@ -21,6 +19,7 @@ export default async function Command() {
         title: "Shortening URL",
       });
       const request = await fetch(`https://api.shrtco.de/v2/shorten?url=${encodeURIComponent(url)}`);
+      //response has type unknown fix this
       const response = await request.json();
       console.log(url);
       console.log(preferences.domain);
