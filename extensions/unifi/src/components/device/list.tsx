@@ -2,13 +2,14 @@ import { ActionPanel, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Site, tDevice } from "unifi-client";
 import { showErrorToast } from "../../utils";
-import { ToggleDetailsAction } from "../actions";
+import { RevalidateAction, ToggleDetailsAction } from "../actions";
 import { deviceStateToString } from "./utils";
 
 function DeviceListItem(props: {
   device: tDevice;
   showDetails?: boolean;
   setShowDetails?: (newValue: boolean) => void;
+  revalidate: () => void;
 }) {
   const d = props.device;
   return (
@@ -37,7 +38,12 @@ function DeviceListItem(props: {
       accessories={[{ tag: !props.showDetails ? deviceStateToString(d.state) : undefined }]}
       actions={
         <ActionPanel>
-          <ToggleDetailsAction showDetails={props.showDetails} setShowDetails={props.setShowDetails} />
+          <ActionPanel.Section>
+            <ToggleDetailsAction showDetails={props.showDetails} setShowDetails={props.setShowDetails} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <RevalidateAction revalidate={props.revalidate} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -50,6 +56,7 @@ export function SiteDevicesList(props: { site: Site }) {
     data: clients,
     error,
     isLoading,
+    revalidate,
   } = useCachedPromise(
     async (site: Site) => {
       const clients = await site.devices.list();
@@ -63,7 +70,13 @@ export function SiteDevicesList(props: { site: Site }) {
     <List isLoading={isLoading} isShowingDetail={showDetails}>
       <List.Section title="Devices" subtitle={`${clients?.length}`}>
         {clients?.map((d) => (
-          <DeviceListItem key={d._id} device={d} showDetails={showDetails} setShowDetails={setShowDetails} />
+          <DeviceListItem
+            key={d._id}
+            device={d}
+            showDetails={showDetails}
+            setShowDetails={setShowDetails}
+            revalidate={revalidate}
+          />
         ))}
       </List.Section>
     </List>

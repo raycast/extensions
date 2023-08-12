@@ -21,6 +21,12 @@
       "title": "Clients",
       "description": "Get all Clients",
       "mode": "view"
+    },
+    {
+      "name": "openInBrowser",
+      "title": "Open In Browser",
+      "description": "Open the Dashboard in the Browser",
+      "mode": "no-view"
     }
   ],
   "preferences": [

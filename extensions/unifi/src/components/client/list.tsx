@@ -3,7 +3,7 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Client, Site } from "unifi-client";
 import { showErrorToast } from "../../utils";
 import { isClientConnected } from "../../lib/unifi";
-import { ToggleDetailsAction } from "../actions";
+import { RevalidateAction, ToggleDetailsAction } from "../actions";
 
 function SingleDetailTag(props: { title: string; text: string; color?: Color.ColorLike | null | undefined }) {
   return (
@@ -17,6 +17,7 @@ function ClientListItem(props: {
   client: Client;
   showDetails?: boolean;
   setShowDetails?: (newValue: boolean) => void;
+  revalidate: () => void;
 }) {
   const c = props.client;
   return (
@@ -59,7 +60,12 @@ function ClientListItem(props: {
       }
       actions={
         <ActionPanel>
-          <ToggleDetailsAction showDetails={props.showDetails} setShowDetails={props.setShowDetails} />
+          <ActionPanel.Section>
+            <ToggleDetailsAction showDetails={props.showDetails} setShowDetails={props.setShowDetails} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <RevalidateAction revalidate={props.revalidate} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
@@ -84,6 +90,7 @@ export function SiteClientsList(props: { site: Site }) {
     data: clients,
     error,
     isLoading,
+    revalidate,
   } = useCachedPromise(
     async (site: Site) => {
       const clients = await site.clients.list3();
@@ -99,12 +106,24 @@ export function SiteClientsList(props: { site: Site }) {
     <List isLoading={isLoading} isShowingDetail={showDetails}>
       <List.Section title="Connected" subtitle={`${connected?.length}`}>
         {connected?.map((c) => (
-          <ClientListItem key={c._id} client={c} showDetails={showDetails} setShowDetails={setShowDetails} />
+          <ClientListItem
+            key={c._id}
+            client={c}
+            showDetails={showDetails}
+            setShowDetails={setShowDetails}
+            revalidate={revalidate}
+          />
         ))}
       </List.Section>
       <List.Section title="Disconnected" subtitle={`${disconnected?.length}`}>
         {disconnected?.map((c) => (
-          <ClientListItem key={c._id} client={c} showDetails={showDetails} setShowDetails={setShowDetails} />
+          <ClientListItem
+            key={c._id}
+            client={c}
+            showDetails={showDetails}
+            setShowDetails={setShowDetails}
+            revalidate={revalidate}
+          />
         ))}
       </List.Section>
     </List>
