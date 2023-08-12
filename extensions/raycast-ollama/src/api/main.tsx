@@ -1,6 +1,6 @@
-import { OllamaApiGenerateResponseMetadata } from "./types";
+import { OllamaApiEmbeddingsResponse, OllamaApiGenerateRequestBody, OllamaApiGenerateResponseMetadata } from "./types";
 import { ErrorOllamaCustomModel, ErrorOllamaModelNotInstalled, ErrorRaycastApiNoTextSelected } from "./errors";
-import { OllamaApiGenerate } from "./ollama";
+import { OllamaApiEmbeddings, OllamaApiGenerate } from "./ollama";
 import * as React from "react";
 import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/api";
 import { getSelectedText, getPreferenceValues } from "@raycast/api";
@@ -9,30 +9,52 @@ const preferences = getPreferenceValues();
 
 /**
  * Return JSX element with generated text and relative metadata.
- * @param {string} model - Model used for inference.
- * @param {string} initialPrompt - Initial prompt for inference.
- * @param {string} endPrompt - End tag prompt.
+ * @param {OllamaApiGenerateRequestBody} body - Ollama Generate Body Request.
  * @param {boolean} selectText - If true, get text from selected text.
+ * @param {boolean} embeddings - If true, use embeddings.
+ * @param {string} embeddingsModel - Model used for embeddings. By default use same model for inference.
  * @returns {JSX.Element} Raycast Detail View.
  */
 export default function ResultView(
-  model: string,
-  initialPrompt: string,
-  endPrompt: string,
-  selectText: boolean
+  body: OllamaApiGenerateRequestBody,
+  selectText: boolean,
+  embeddings = false,
+  embeddingsModel = body.model
 ): JSX.Element {
+  const [embeddingsResponse, setEmbeddingsResponse]: [
+    OllamaApiEmbeddingsResponse,
+    React.Dispatch<React.SetStateAction<OllamaApiEmbeddingsResponse>>
+  ] = React.useState({} as OllamaApiEmbeddingsResponse);
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answerMetadata, setAnswerMetadata]: [
     OllamaApiGenerateResponseMetadata,
     React.Dispatch<React.SetStateAction<OllamaApiGenerateResponseMetadata>>
   ] = React.useState({} as OllamaApiGenerateResponseMetadata);
-  let text = "";
+
+  async function HandleError(err: Error) {
+    if (err instanceof ErrorOllamaModelNotInstalled) {
+      await showToast({ style: Toast.Style.Failure, title: err.message, message: err.suggest });
+      setLoading(false);
+      return;
+    } else if (err instanceof ErrorOllamaCustomModel) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+        message: `Model: ${err.model}, File: ${err.file}`,
+      });
+      setLoading(false);
+      return;
+    } else {
+      await showToast({ style: Toast.Style.Failure, title: err.message });
+      setLoading(false);
+    }
+  }
 
   async function Inference(): Promise<void> {
     await showToast({ style: Toast.Style.Animated, title: "🧠 Performing Inference." });
     setLoading(true);
-    OllamaApiGenerate(initialPrompt + text + endPrompt, model)
+    OllamaApiGenerate(body)
       .then(async (emiter) => {
         emiter.on("data", (data) => {
           setAnswer((prevState) => prevState + data);
@@ -45,40 +67,57 @@ export default function ResultView(
         });
       })
       .catch(async (err) => {
-        if (err instanceof ErrorOllamaModelNotInstalled) {
-          await showToast({ style: Toast.Style.Failure, title: err.message, message: err.suggest });
-          setLoading(false);
-          return;
-        } else if (err instanceof ErrorOllamaCustomModel) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: err.message,
-            message: `Model: ${err.model}, File: ${err.file}`,
-          });
-          setLoading(false);
-          return;
-        } else {
-          await showToast({ style: Toast.Style.Failure, title: err.message });
-          setLoading(false);
-        }
+        await HandleError(err);
+      });
+  }
+
+  async function Embeddings(text: string): Promise<void> {
+    await showToast({ style: Toast.Style.Animated, title: "🧠 Performing Embeddings." });
+    setLoading(true);
+    await OllamaApiEmbeddings(text, embeddingsModel)
+      .then((response) => {
+        setLoading(false);
+        setEmbeddingsResponse(response);
+      })
+      .catch(async (err) => {
+        await HandleError(err);
       });
   }
 
   React.useEffect(() => {
-    if (selectText) {
+    if (selectText && !embeddings) {
       getSelectedText()
         .then((selectedText) => {
-          text = selectedText;
+          body.prompt = selectedText;
           Inference();
         })
         .catch(async (err) => {
           await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextSelected.message });
           console.error(err);
         });
-    } else {
+    } else if (!selectText) {
       Inference();
     }
   }, []);
+
+  React.useEffect(() => {
+    if (selectText && embeddings) {
+      getSelectedText()
+        .then((selectedText) => {
+          Embeddings(selectedText);
+        })
+        .catch(async (err) => {
+          await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextSelected.message });
+          console.error(err);
+        });
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (embeddingsResponse.embedding) {
+      //Inference();
+    }
+  }, [embeddingsResponse]);
 
   return (
     <Detail
@@ -94,7 +133,7 @@ export default function ResultView(
       }
       metadata={
         !loading &&
-        !(preferences.ollamaShowMetadata as boolean) && (
+        preferences.ollamaShowMetadata && (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Model" text={answerMetadata.model} />
             <Detail.Metadata.Separator />
