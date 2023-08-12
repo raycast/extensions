@@ -97,7 +97,7 @@ export function SiteClientsList(props: { site: Site }) {
       return clients;
     },
     [props.site],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
   showErrorToast(error);
   const connected = clients?.filter((c) => isClientConnected(c));

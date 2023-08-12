@@ -63,7 +63,7 @@ export function SiteDevicesList(props: { site: Site }) {
       return clients;
     },
     [props.site],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
   showErrorToast(error);
   return (
