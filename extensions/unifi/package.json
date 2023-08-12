@@ -3,7 +3,7 @@
   "name": "unifi",
   "title": "Unifi",
   "description": "Manage Unifi Controllers",
-  "icon": "command-icon.png",
+  "icon": "unifi.png",
   "author": "tonka3000",
   "categories": [
     "Other"

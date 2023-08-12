@@ -1,26 +1,9 @@
-import { Action, ActionPanel, Color, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Client, Site } from "unifi-client";
 import { showErrorToast } from "../../utils";
 import { isClientConnected } from "../../lib/unifi";
-
-function ToggleDetailsAction(props: { showDetails?: boolean; setShowDetails?: (newValue: boolean) => void }) {
-  if (props.showDetails === undefined || props.setShowDetails === undefined) {
-    return null;
-  }
-  const handle = () => {
-    if (props.setShowDetails) {
-      props.setShowDetails(!props.showDetails);
-    }
-  };
-  return (
-    <Action
-      title={props.showDetails ? "Hide Details" : "Show Details"}
-      shortcut={{ modifiers: ["opt"], key: "d" }}
-      onAction={handle}
-    />
-  );
-}
+import { ToggleDetailsAction } from "../actions";
 
 function SingleDetailTag(props: { title: string; text: string; color?: Color.ColorLike | null | undefined }) {
   return (
@@ -36,10 +19,10 @@ function ClientListItem(props: {
   setShowDetails?: (newValue: boolean) => void;
 }) {
   const c = props.client;
-  console.log(c);
   return (
     <List.Item
       title={c.name || "<No Name>"}
+      icon={Icon.Monitor}
       detail={
         props.showDetails === true && (
           <List.Item.Detail
@@ -96,7 +79,7 @@ function ClientListItem(props: {
 }
 
 export function SiteClientsList(props: { site: Site }) {
-  const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "clients" });
+  const [showDetails, setShowDetails] = useCachedState("show-details", true, { cacheNamespace: "clients" });
   const {
     data: clients,
     error,

@@ -1,9 +1,51 @@
-import { List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { Site } from "unifi-client";
+import { ActionPanel, List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Site, tDevice } from "unifi-client";
 import { showErrorToast } from "../../utils";
+import { ToggleDetailsAction } from "../actions";
+import { deviceStateToString } from "./utils";
+
+function DeviceListItem(props: {
+  device: tDevice;
+  showDetails?: boolean;
+  setShowDetails?: (newValue: boolean) => void;
+}) {
+  const d = props.device;
+  return (
+    <List.Item
+      key={d._id}
+      title={d.name || "?"}
+      icon="unifi.png"
+      detail={
+        props.showDetails === true && (
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Name" text={d.name || "-"} />
+                <List.Item.Detail.Metadata.Label title="IP Address" text={d.ip} />
+                <List.Item.Detail.Metadata.Label title="MAC Address" text={d.mac} />
+                <List.Item.Detail.Metadata.Label title="Status" text={deviceStateToString(d.state)} />
+                <List.Item.Detail.Metadata.Label title="Device Version" text={d.version} />
+                <List.Item.Detail.Metadata.Label title="Device ID" text={d.deviceId} />
+                <List.Item.Detail.Metadata.Label title="Model" text={d.model} />
+                <List.Item.Detail.Metadata.Label title="Network" text={d.connectionNetworkName} />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        )
+      }
+      accessories={[{ tag: !props.showDetails ? deviceStateToString(d.state) : undefined }]}
+      actions={
+        <ActionPanel>
+          <ToggleDetailsAction showDetails={props.showDetails} setShowDetails={props.setShowDetails} />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export function SiteDevicesList(props: { site: Site }) {
+  const [showDetails, setShowDetails] = useCachedState("show-details", true, { cacheNamespace: "devices" });
   const {
     data: clients,
     error,
@@ -18,10 +60,12 @@ export function SiteDevicesList(props: { site: Site }) {
   );
   showErrorToast(error);
   return (
-    <List isLoading={isLoading}>
-      {clients?.map((c) => (
-        <List.Item key={c._id} title={c.name || "?"} />
-      ))}
+    <List isLoading={isLoading} isShowingDetail={showDetails}>
+      <List.Section title="Devices" subtitle={`${clients?.length}`}>
+        {clients?.map((d) => (
+          <DeviceListItem key={d._id} device={d} showDetails={showDetails} setShowDetails={setShowDetails} />
+        ))}
+      </List.Section>
     </List>
   );
 }
