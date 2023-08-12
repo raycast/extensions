@@ -15,6 +15,12 @@
       "title": "Devices",
       "description": "Get all Devices",
       "mode": "view"
+    },
+    {
+      "name": "clients",
+      "title": "Clients",
+      "description": "Get all Clients",
+      "mode": "view"
     }
   ],
   "preferences": [

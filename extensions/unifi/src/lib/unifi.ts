@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import Controller from "unifi-client";
+import Controller, { Client } from "unifi-client";
 
 let controller: Controller | null = null;
 
@@ -35,4 +35,17 @@ export async function getAuthenticatedUnifiClient() {
     await controller.login();
   }
   return controller;
+}
+
+export function isClientConnected(client: Client) {
+  return client.networkId;
+  /*if (!client.lastSeen) {
+    return false;
+  }
+  if (!client.lastDisconnect) {
+    return true;
+  }
+  const lastSeen = new Date(client.lastSeen);
+  const lastDisconnect = new Date(client.lastDisconnect);
+  return lastDisconnect <= lastSeen;*/
 }
