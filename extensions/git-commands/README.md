@@ -1,3 +1,3 @@
-# Git commands
+# Git Commands
 
-Search commands and alias and read descriptions
+Quickly use and learn Git commands and Oh My Zsh alias.

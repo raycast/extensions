@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git-commands",
-  "title": "Git Commands & Alias Docs",
-  "description": "Search commands and alias and read descriptions.",
-  "icon": "git-icon.png",
+  "title": "Git Commands",
+  "description": "Quickly use and learn Git commands and Oh My Zsh alias.",
+  "icon": "icon.png",
   "author": "manumorante",
   "categories": [
     "Documentation",
@@ -14,28 +14,27 @@
   "commands": [
     {
       "name": "search-commands",
-      "title": "Search Commands or Alias",
-      "description": "Quickly search for a command or alias and read its description.",
+      "title": "Search Commands",
+      "description": "Search command, description or alias.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "listItemInfo",
-      "title": "Show information",
-      "description": "Defines the amount of information to be displayed for each command",
-      "required": true,
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Command, description, and alias",
-          "value": "full"
-        },
-        {
-          "title": "Command and alias",
-          "value": "medium"
-        }
-      ]
+      "name": "ItemAliasShowDescription",
+      "label": "Show command description",
+      "description": "Displays the command description.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "ItemAliasTypeColor",
+      "label": "Show command type color",
+      "description": "Displays colors according to the impact the command produces.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
     }
   ],
   "dependencies": {
