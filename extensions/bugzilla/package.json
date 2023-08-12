@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bugzilla",
+  "title": "Bugzilla",
+  "description": "Interact with Bugzilla instances to view bugs",
+  "icon": "Bugzilla.png",
+  "author": "vkhitrin",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "bugzilla",
+    "bug",
+    "bugs"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "bugs_limit",
+      "title": "Bugs Limit",
+      "description": "Amount of bugs returned by the API.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "100",
+      "default": "100"
+    }
+  ],
+  "commands": [
+    {
+      "name": "quicksearch",
+      "title": "Quick Search",
+      "description": "Quicksearch bugs",
+      "mode": "view"
+    },
+    {
+      "name": "assigned-to-me",
+      "title": "Open Bugs Assigned To Me",
+      "description": "Show open bugs assigned to the logged-in user",
+      "mode": "view"
+    },
+    {
+      "name": "reported-by-me",
+      "title": "Open Bugs Reported By Me",
+      "description": "Show open bugs reported by the logged-in user",
+      "mode": "view"
+    },
+    {
+      "name": "cc",
+      "title": "My CC Bugs",
+      "description": "Show CCed bugs by the logged-in user",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.0",
+    "@raycast/utils": "^1.9.0",
+    "date-fns": "^2.30.0",
+    "node-fetch": "^3.3.2",
+    "uuidv4": "^6.2.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
