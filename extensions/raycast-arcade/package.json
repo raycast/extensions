@@ -27,6 +27,24 @@
       "title": "Wordle",
       "description": "Play Wordle!",
       "mode": "view"
+    },
+    {
+      "name": "snake",
+      "title": "Snake",
+      "description": "Play classic Snake!",
+      "mode": "view"
+    },
+    {
+      "name": "game2048",
+      "title": "2048",
+      "description": "Play classic 2048!",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Games",
+      "description": "Search for the Raycast Arcade games, all in one place.",
+      "mode": "view"
     }
   ],
   "dependencies": {

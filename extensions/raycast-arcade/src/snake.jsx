@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, environment, Icon } from "@raycast/api";
 
-const ROWS = 15;
-const COLS = 26;
+let smallText = environment.textSize === "medium"
+
+const ROWS = smallText ? 18 : 15;
+const COLS = smallText ? 30 : 26;
 
 const initialGrid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => "  "));
 
@@ -28,7 +30,11 @@ export default function Command() {
     { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 1 },
     { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 2 },
   ]);
-  const food = useRef(randomFood());
+  const food = useRef(randomFood([
+    { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) },
+    { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 1 },
+    { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 2 },
+  ]));
   const [score, setScore] = useState(0);
   const queuedDirection = useRef(Direction.RIGHT);
   const direction = useRef(Direction.RIGHT);
@@ -43,7 +49,7 @@ export default function Command() {
       if (i % 2 === 0) {
         newGrid[row][col] = "░░";
       } else {
-        newGrid[row][col] = "░░";
+        newGrid[row][col] = "▒▒";
       }
     });
     const { row: foodRow, col: foodCol } = food.current;
@@ -83,7 +89,7 @@ export default function Command() {
       }
       const newSnake = [head, ...oldSnake.slice(0, oldSnake.length - 1)];
       if (head.row === food.current.row && head.col === food.current.col) {
-        food.current = randomFood();
+        food.current = randomFood(newSnake);
         newSnake.push(head);
         setScore((score) => score + 100);
       }
@@ -97,13 +103,23 @@ export default function Command() {
     }
     if (status === Status.PLAYING) {
       const rows = grid.map((row) => "│" + row.join("") + "│");
-      setMarkdown(`
-  \`\`\`
-  ╭───────────────────RAYCAST ARCADE───────────────────╮
-  ${rows.join("\n")}
-  ╰──────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────╯
-  \`\`\`
-        `);
+      if (smallText) {
+        setMarkdown(`
+\`\`\`
+╭──────────────────────RAYCAST ARCADE────────────────────────╮
+${rows.join("\n")}
+╰──────────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────────╯
+\`\`\`
+          `);
+      } else {
+        setMarkdown(`
+\`\`\`
+╭───────────────────RAYCAST ARCADE───────────────────╮
+${rows.join("\n")}
+╰──────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────╯
+\`\`\`
+          `);
+      }
     }
     if (status === Status.GAME_OVER) {
       setMarkdown(gameOver);
@@ -136,7 +152,7 @@ export default function Command() {
     queuedDirection.current = newDirection;
   }
 
-  function randomFood() {
+  function randomFood(snake) {
     const emptyCells = [];
     grid.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
@@ -148,7 +164,31 @@ export default function Command() {
     return emptyCells[Math.floor(Math.random() * emptyCells.length)];
   }
 
-  let gameOver = `
+
+  let gameOver = smallText ? `
+  \`\`\`
+  ╭──────────────────────RAYCAST ARCADE────────────────────────╮
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                         GAME OVER!                         │
+  │                  PRESS ENTER TO TRY AGAIN                  │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  ╰──────────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────────╯
+  \`\`\`
+  ` : `
   \`\`\`
 ╭───────────────────RAYCAST ARCADE───────────────────╮
 │                                                    │
@@ -169,7 +209,31 @@ export default function Command() {
 ╰──────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────╯
 \`\`\`
   `;
-  let gameStart = `
+  let gameStart = smallText ? `
+  \`\`\`
+  ╭──────────────────────RAYCAST ARCADE────────────────────────╮
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                       RAYCAST SNAKE.                       │
+  │                    PRESS ENTER TO PLAY.                    │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  │                                                            │
+  ╰──────────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────────╯
+  \`\`\`
+  `
+    : `
   \`\`\`
 ╭───────────────────RAYCAST ARCADE───────────────────╮
 │                                                    │
@@ -227,10 +291,12 @@ export default function Command() {
       <List.Item
         id="game"
         title={"Snake"}
+        icon={Icon.Play}
         detail={<List.Item.Detail markdown={markdown} />}
         actions={
           <ActionPanel title="Game controls">
             <Action
+              icon={status === Status.PLAYING ? Icon.Pause : Status.START ? Icon.Play : Icon.RotateClockwise}
               title={status === Status.PLAYING ? "Pause" : Status.START ? "Play" : "Replay"}
               onAction={() => {
                 if (status === Status.PLAYING) {
@@ -241,8 +307,8 @@ export default function Command() {
                 if (status === Status.GAME_OVER) {
                   setGrid(Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => "  ")));
                   setStatus(Status.PLAYING);
-
-                  food.current = randomFood();
+                  setScore(0);
+                  food.current = randomFood(snake);
                   setSnake([
                     { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) },
                     { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 1 },
@@ -263,21 +329,25 @@ export default function Command() {
             />
             <Action
               title="Up"
+              icon={Icon.ArrowUp}
               shortcut={{ modifiers: ["shift"], key: "arrowUp" }}
               onAction={() => handleKeyDown("ArrowUp")}
             />
             <Action
               title="Down"
+              icon={Icon.ArrowDown}
               shortcut={{ modifiers: ["shift"], key: "arrowDown" }}
               onAction={() => handleKeyDown("ArrowDown")}
             />
             <Action
               title="Left"
+              icon={Icon.ArrowLeft}
               shortcut={{ modifiers: ["shift"], key: "arrowLeft" }}
               onAction={() => handleKeyDown("ArrowLeft")}
             />
             <Action
               title="Right"
+              icon={Icon.ArrowRight}
               shortcut={{ modifiers: ["shift"], key: "arrowRight" }}
               onAction={() => handleKeyDown("ArrowRight")}
             />
@@ -286,6 +356,7 @@ export default function Command() {
       />
       <List.Item
         id="help"
+        icon={Icon.Pause}
         title={"Help / Pause"}
         detail={
           <List.Item.Detail
@@ -297,6 +368,7 @@ export default function Command() {
         actions={
           <ActionPanel title="Game Controls">
             <Action
+              icon={Icon.Play}
               title={status === Status.PLAYING ? "Unpause" : "Return to Game"}
               onAction={() => {
                 if (status === Status.START) {
