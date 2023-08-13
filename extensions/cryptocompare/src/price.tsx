@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel } from "@raycast/api";
+import { List, Action, ActionPanel, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchData, cryptoList, addFavoriteCrypto, removeFavoriteCrypto } from "./api";
 import { delay } from "./utils";
@@ -34,7 +34,7 @@ export default function Command() {
         // 实现延迟搜索
         changeNumber += 1;
         const currentChangeNumber = changeNumber;
-        await delay(1000);
+        await delay(1200);
 
         // 过滤非正常搜索 + 延迟搜索
         if (
