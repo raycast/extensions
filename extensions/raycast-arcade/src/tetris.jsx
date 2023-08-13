@@ -79,7 +79,6 @@ export default function Tetris() {
   let board = useRef(generateNewGrid());
 
   let generatePiece = () => {
-    console.log("GENERATING PIECE");
     let newPiece = bag.current.shift();
     if (bag.current.length === 1) {
       let newBag = JSON.parse(JSON.stringify(pieces));

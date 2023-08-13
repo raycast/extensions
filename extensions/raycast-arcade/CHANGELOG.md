@@ -18,11 +18,12 @@ Games are still available as commands, so you can pick and choose by disabiling 
 
 ### New Features
 
+- 🎨 **Game Icons**: Each game now has its unique icon... huge thank-you to Krishna AR on Slack for designing the original icons!
 - 🟩 **Wordle**: Grab your dictionary, because Wordle just got better. By an Unlimited amount! Play Wordle infinitely in the new mode, and check statistics on both modes with the new Statistics tab!
 
 ### Improvements and Fixes
 
-- **Icons, Icons Everywhere!**: Now, every Action has an icon!
+- **Actions Icons, Action Icons Everywhere!**: Now, every Action has an Icon too!
 - **Dino Crash**: Holding down enter in the Chrome Dinosaur game causes it to crash... and even freeze your Mac. Now its fixed! Thanks to Danylo Zalizchuk on Slack for reporting this issue!
 
 We hope you enjoy this new update, and have fun in the Arcade!

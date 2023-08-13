@@ -15,6 +15,7 @@ The classic block-stacking game, remade in Raycast!
 Control the falling block with WASD, and clear as many lines as you can.
             `,
       commandName: "tetris",
+      icon:"tetris.png",
     },
     {
       name: "Wordle",
@@ -33,6 +34,7 @@ Modes:
 2. *Wordle Unlimited*: Finished the daily puzzle? Keep on playing! From the official list of possible words, Wordle Unlimited is an amazing experience.
             `,
       commandName: "wordle",
+      icon:"wordle.png",
     },
     {
       name: "Chrome Dino",
@@ -49,6 +51,7 @@ Jump over cacti with enter, and try to survive as long as you can, while you mov
 How many points can you get?
             `,
       commandName: "dino",
+      icon:"dinosaur.png",
     },
     {
       name: "2048",
@@ -63,6 +66,7 @@ A classic number game, beautifully replicated in Raycast.
 Merge numbers with ⇪ + ←↑→↓ and try to get the 2048 tile!
             `,
       commandName: "game2048",
+      icon:"2048.png",
     },
     {
       name: "Snake",
@@ -77,14 +81,16 @@ Move a snake around with WASD to eat apples!
 Make sure not to bump into walls or your tail, or it's Game Over!
             `,
       commandName: "snake",
+      icon:"snake.png",
     },
   ];
   return (
     <List isShowingDetail={true} searchBarPlaceholder="Search for your favorite game...">
-      {games.map(({ name, highlights, author, wikipedia, markdown, commandName }) => (
+      {games.map(({ name, highlights, author, wikipedia, markdown, commandName, icon }) => (
         <List.Item
           key={name}
           title={name}
+          icon={icon}
           detail={
             <List.Item.Detail
               metadata={
