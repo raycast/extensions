@@ -1,11 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spoiler-converter",
-  "title": "Spoiler Converter",
-  "description": "Converts normal text into spoiler text",
+  "title": "Discord Spoiler Spammer",
+  "description": "Discord Spoiler Spammer converts every character of the selected text into it's own spoiler. Laugh at your friends on Discord as they continue clicking to reveal the never ending spoilers!",
   "icon": "command-icon.png",
-  "author": "varun-satishkumar",
-  "contributors": ["Vaibhav-Satishkumar"],
+  "author": "Vaibhav-Satishkumar",
+  "contributors": ["varun-satishkumar"],
   "categories": [
     "Fun"
   ],
@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Spam Spoiler",
-      "description": "Convert Selected Text to Spoiler",
+      "description": "Convert Selected Text to Spam Spoiler. The format is as follows: word => ||w||||o||||r||||d||.",
       "mode": "no-view"
     }
   ],
