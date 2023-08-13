@@ -1,5 +1,5 @@
 import { parse } from "./parser";
-import type { Person, Book, BookDetails, PersonDetails } from "./types";
+import type { Person, Book, BookDetails, PersonDetails, Review } from "./types";
 
 const BOOK_LIST_EXTRACTION_MAP = {
   thumbnail: {
@@ -60,6 +60,11 @@ const DETAILS_PAGE_EXTRACTION_MAP = {
   rating: {
     selector: "div.ReviewsSectionStatistics div.RatingStatistics__rating",
   },
+  ratingHistogramRows: [
+    {
+      selector: "div.RatingsHistogram__bar div.RatingsHistogram__labelTotal",
+    },
+  ],
   genres: [
     {
       selector: "div.BookPageMetadataSection__genres a",
@@ -72,12 +77,24 @@ const DETAILS_PAGE_EXTRACTION_MAP = {
         reviewerName: {
           selector: "div.ReviewerProfile__name a",
         },
-        review: {
+        reviewBody: {
           selector: "section.ReviewText__content span",
         },
         reviewDate: {
           selector: "section.ReviewCard__row span a",
         },
+        reviewUrl: {
+          selector: "section.ReviewCard__row span a",
+          value: "href",
+        },
+        ratingStars: {
+          selector: "section.ReviewCard__row div.ShelfStatus span.RatingStars",
+        },
+        ratingDeduction: [
+          {
+            selector: "section.ReviewCard__row div.ShelfStatus use.RatingStar__backgroundFill",
+          },
+        ],
       },
     },
   ],
@@ -147,6 +164,10 @@ const PERSON_DETAILS_PAGE_EXTRACTION_MAP = {
   },
 };
 
+const GOODREADS_URL_BASE = "https://www.goodreads.com";
+
+const COMMUNITY_REVIEWS_HASH = "#CommunityReviews";
+
 const PERSON_BIO_SECTION = {
   twitter: "Twitter",
   website: "Website",
@@ -178,6 +199,7 @@ export const extractEntitiesFromBookDetailsPage = (html: string, url: string): B
     rating,
     genres,
     reviews,
+    ratingHistogramRows,
   } = parse(DETAILS_PAGE_EXTRACTION_MAP, html);
 
   const format = featuredDetails[0];
@@ -185,11 +207,43 @@ export const extractEntitiesFromBookDetailsPage = (html: string, url: string): B
   const ratingStats = extractStatsNumbers(ratingStatistics);
   const formattedRatingStatistics = `${ratingStats[0]} ratings · ${ratingStats[1]} reviews`;
 
+  // process reviews
+  const processedReviews = reviews.map((reviewItem) => {
+    const { reviewBody, reviewDate, reviewerName, reviewUrl, ratingDeduction, ratingStars } = reviewItem;
+
+    const processedReview: Review = { reviewBody, reviewDate, reviewerName, reviewUrl };
+    if (ratingStars != undefined && ratingDeduction != undefined) {
+      processedReview.rating = 5 - ratingDeduction.length;
+    }
+
+    return processedReview;
+  });
+
+  // process ratings histogram
+  const ratingHistogramProcessed = ratingHistogramRows.map((row) => {
+    // histogram row value is in the format: "number (percentage)"
+    // Regular expression pattern to match numbers inside and outside parentheses
+    const pattern = /([\d,]+)\s*\((?:<*)?([\d.]+)%\)/;
+
+    const matches = row.match(pattern);
+    if (matches) {
+      const count = matches[1];
+      const percentage = parseFloat(matches[2]);
+      return { count, percentage };
+    }
+
+    return { count: "0", percentage: 0 };
+  });
+
+  const communityReviewUrl = `${url}${COMMUNITY_REVIEWS_HASH}`;
+
   return {
     id: title, // find an alternative
     author,
     authorDetailsPageUrl,
     rating,
+    ratingHistogram: ratingHistogramProcessed,
+    communityReviewUrl,
     ratingStatistics: formattedRatingStatistics,
     title,
     format,
@@ -198,7 +252,7 @@ export const extractEntitiesFromBookDetailsPage = (html: string, url: string): B
     cover: { source: coverImageSrc },
     url,
     genres,
-    reviews,
+    reviews: processedReviews,
   };
 };
 
@@ -285,6 +339,8 @@ interface BookResponse {
   ratingAndReview: string;
   detailsPageUrl: string;
 }
+
+export const getCompleteUrl = (path: string): string => `${GOODREADS_URL_BASE}${path}`;
 
 function createBookFromResponse(data: BookResponse, index: number): Book {
   const { thumbnail, title, author, ratingAndReview, detailsPageUrl } = data;

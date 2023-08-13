@@ -1,6 +1,6 @@
 import React from "react";
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { languages } from "../languages";
+import { getLanguageFlag, languages } from "../languages";
 import { AUTO_DETECT } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
 
@@ -22,14 +22,14 @@ export const AddLanguageForm: React.VFC<{
     >
       <Form.Dropdown id="langFrom">
         {languages.map((lang) => (
-          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
+          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="langTo">
         {languages
           .filter((lang) => lang.code !== AUTO_DETECT)
           .map((lang) => (
-            <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
+            <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
           ))}
       </Form.Dropdown>
     </Form>
