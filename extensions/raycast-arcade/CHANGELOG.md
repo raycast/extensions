@@ -1,6 +1,6 @@
 # Raycast Arcade Changelog
 
-## [Raycast Arcade Grand Opening] - 2023-08-12
+## [Raycast Arcade Grand Opening] - 2023-08-13
 
 ✨ It's update time! Get ready for new features, new games, fixes, and more!
 
