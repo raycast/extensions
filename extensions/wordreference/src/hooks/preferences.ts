@@ -8,11 +8,11 @@ interface Preferences {
 export default function usePreferences() {
   const preferences = getPreferenceValues<Preferences>();
 
-  const translationKey = preferences?.translationKey as keyof typeof translationKeyMap || "enfr";
+  const translationKey = (preferences?.translationKey as keyof typeof translationKeyMap) || "enfr";
   const translation = translationKeyMap[translationKey];
 
   return {
     preferences,
-    translation
-  }
+    translation,
+  };
 }
