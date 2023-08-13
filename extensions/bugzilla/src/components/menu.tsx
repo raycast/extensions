@@ -398,7 +398,7 @@ function AddBugzilla(props: {
         id="customHeader"
         defaultValue={props.bugzilla?.customHeader}
         placeholder="Bugzilla_api_key: ${apiKey}"
-        info="Some instances allow/require sending a custom header for authentication. `${apiKey}` template will be translated to aprovided API key."
+        info="Some instances allow/require sending a custom header for authentication. `${apiKey}` template will be translated to the provided API key."
       />
       <Form.Checkbox
         title="Unsafe HTTPS"

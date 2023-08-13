@@ -1,5 +1,3 @@
-Spelling
-
 # Bugzilla
 
 ## Caveats
