@@ -307,6 +307,89 @@ export function CategoryLabelFilterAddAction(props: {
   );
 }
 
+export function OlderThanFilterAddAction(props: {
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+}) {
+  return (
+    <TimeThanFilterAddAction
+      title="Older Than"
+      shortcut={{ modifiers: ["cmd", "opt"], key: "o" }}
+      searchText={props.searchText}
+      setSearchText={props.setSearchText}
+      prefix="older_than"
+    />
+  );
+}
+
+export function NewerThanFilterAddAction(props: {
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+}) {
+  return (
+    <TimeThanFilterAddAction
+      title="Newer Than"
+      shortcut={{ modifiers: ["cmd", "opt"], key: "n" }}
+      searchText={props.searchText}
+      setSearchText={props.setSearchText}
+      prefix="newer_than"
+    />
+  );
+}
+
+export function TimeThanFilterAddAction(props: {
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+  prefix: string;
+  title: string;
+  shortcut?: Keyboard.Shortcut;
+}) {
+  if (!props.setSearchText) {
+    return null;
+  }
+  if (props.searchText && props.searchText.includes(`${props.prefix}:`)) {
+    return null;
+  }
+  const handle = (val: string) => {
+    const s = props.searchText ? props.searchText.trim() : "";
+    if (props.setSearchText) {
+      props.setSearchText(`${s}${s.length > 0 ? " " : ""}${props.prefix}:${val}`);
+    }
+  };
+  const Days = ({ days }: { days: number }) => (
+    <Action title={`${days} ${days <= 1 ? "Day" : "Days"}`} onAction={() => handle(`${days}d`)} />
+  );
+  const Months = ({ months }: { months: number }) => (
+    <Action title={`${months} ${months <= 1 ? "Month" : "Months"}`} onAction={() => handle(`${months}m`)} />
+  );
+  const Weeks = ({ weeks }: { weeks: number }) => (
+    <Action title={`${weeks} ${weeks <= 1 ? "Week" : "Weeks"}`} onAction={() => handle(`${weeks * 7}d`)} />
+  );
+  const Years = ({ years }: { years: number }) => (
+    <Action title={`${years} ${years <= 1 ? "Year" : "Years"}`} onAction={() => handle(`${years}y`)} />
+  );
+  const days = [1, 2, 3, 4, 6];
+  const weeks = [1, 2, 3];
+  const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11];
+  const years = [1, 2, 3, 4, 5, 6];
+  return (
+    <ActionPanel.Submenu title={props.title} icon={Icon.Clock} shortcut={props.shortcut}>
+      {days.map((d) => (
+        <Days days={d} />
+      ))}
+      {weeks.map((w) => (
+        <Weeks weeks={w} />
+      ))}
+      {months.map((m) => (
+        <Months months={m} />
+      ))}
+      {years.map((y) => (
+        <Years years={y} />
+      ))}
+    </ActionPanel.Submenu>
+  );
+}
+
 export function FilterAddAction(props: {
   title: string;
   labelsAll: gmail_v1.Schema$Label[] | undefined;
@@ -386,6 +469,8 @@ export function FilterActionPanelSection(props: {
         searchText={props.searchText}
         setSearchText={props.setSearchText}
       />
+      <OlderThanFilterAddAction searchText={props.searchText} setSearchText={props.setSearchText} />
+      <NewerThanFilterAddAction searchText={props.searchText} setSearchText={props.setSearchText} />
     </ActionPanel.Section>
   );
 }
