@@ -239,11 +239,19 @@ export function MessageDebugDump(props: { message: gmail_v1.Schema$Message; toFi
   );
 }
 
-export function MessageDebugActionPanelSection(props: { message: gmail_v1.Schema$Message }) {
+export function CopyQueryAction(props: { query: string | undefined }) {
+  if (!environment.isDevelopment) {
+    return null;
+  }
+  return <Action.CopyToClipboard title="Copy Query to Clipboard" content={props.query || ""} />;
+}
+
+export function MessageDebugActionPanelSection(props: { message: gmail_v1.Schema$Message; query?: string }) {
   return (
     <ActionPanel.Section title="Debug">
       <MessageDebugDump message={props.message} />
       <MessageDebugDump message={props.message} toFile={true} />
+      <CopyQueryAction query={props.query} />
     </ActionPanel.Section>
   );
 }

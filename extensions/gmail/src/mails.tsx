@@ -72,6 +72,7 @@ function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) 
               showUnreadAccessory={false}
               searchText={searchText}
               setSearchText={setSearchText}
+              query={query}
             />
           ))}
         </List.Section>
@@ -85,6 +86,7 @@ function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) 
               onDetailsShownChanged={setShowDetails}
               searchText={searchText}
               setSearchText={setSearchText}
+              query={query}
             />
           ))}
         </List.Section>

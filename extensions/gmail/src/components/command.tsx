@@ -49,6 +49,7 @@ export function ListQueryCommand(props: {
               allUnreadMessages={data?.map((m) => m.data)}
               searchText={searchText}
               setSearchText={setSearchText}
+              query={query}
             />
           ))}
         </List.Section>

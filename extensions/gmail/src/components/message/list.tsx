@@ -39,6 +39,7 @@ export function GMailMessageListItem(props: {
   allUnreadMessages?: gmail_v1.Schema$Message[];
   searchText?: string;
   setSearchText?: (newValue: string) => void;
+  query?: string;
 }) {
   const data = props.message;
   const subject = () => {
@@ -174,7 +175,7 @@ export function GMailMessageListItem(props: {
             <CreateQueryQuickLinkAction searchText={props.searchText} />
             <MessageCopyIdAction message={data} />
           </ActionPanel.Section>
-          <MessageDebugActionPanelSection message={data} />
+          <MessageDebugActionPanelSection message={data} query={props.query} />
         </ActionPanel>
       }
     />
