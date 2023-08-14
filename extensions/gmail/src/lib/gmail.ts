@@ -148,6 +148,15 @@ export function generateQuery(options?: { baseQuery?: string[]; userQuery?: stri
   return parts.join(" ");
 }
 
+export async function markMessageAsArchived(message: gmail_v1.Schema$Message) {
+  const gmail = await getAuthorizedGmailClient();
+  await gmail.users.messages.modify({
+    userId: "me",
+    id: message.id || "",
+    requestBody: { removeLabelIds: ["INBOX"] },
+  });
+}
+
 export async function markMessageAsRead(message: gmail_v1.Schema$Message) {
   const gmail = await getAuthorizedGmailClient();
   await gmail.users.messages.modify({

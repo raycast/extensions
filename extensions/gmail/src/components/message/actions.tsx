@@ -1,6 +1,7 @@
 import { showToast, Toast, Action, Icon, environment, Alert, confirmAlert, Keyboard, ActionPanel } from "@raycast/api";
 import { gmail_v1 } from "googleapis";
 import {
+  markMessageAsArchived,
   markMessageAsRead,
   markMessageAsUnread,
   markMessagesAsRead,
@@ -8,9 +9,10 @@ import {
   messageThreadUrl,
   moveMessageToTrash,
 } from "../../lib/gmail";
-import { getErrorMessage, sleep } from "../../lib/utils";
+import { getErrorMessage, sleep, toastifiedPromiseCall } from "../../lib/utils";
 import {
   SemanticLabels,
+  canMessageBeArchived,
   convertToSemanticLabels,
   generateLabelFilter,
   getLabelIcon,
@@ -23,30 +25,52 @@ import * as fs from "fs";
 import { useCurrentProfile } from "./hooks";
 import { getGMailClient } from "../../lib/withGmailClient";
 
+export function MessageMarkAsArchived(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
+  if (!canMessageBeArchived(props.message)) {
+    return null;
+  }
+  return (
+    <Action
+      title="Archive"
+      icon={Icon.Box}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "a" }}
+      onAction={() =>
+        toastifiedPromiseCall({
+          onCall: async () => {
+            await markMessageAsArchived(props.message);
+            if (props.onRevalidate) {
+              props.onRevalidate();
+            }
+          },
+          title: "Marking Mail as Archived",
+          finishTitle: "Mail Archived",
+        })
+      }
+    />
+  );
+}
+
 export function MessageMarkAsReadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
   if (!isMailUnread(props.message) || isMailDraft(props.message)) {
     return null;
   }
-  const handle = async () => {
-    try {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Marking Mail as Read" });
-      await markMessageAsRead(props.message);
-      toast.style = Toast.Style.Success;
-      toast.title = "Marked Mail as Read";
-
-      if (props.onRevalidate) {
-        props.onRevalidate();
-      }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
-    }
-  };
   return (
     <Action
       title="Mark as Read"
       icon={Icon.Circle}
       shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
-      onAction={handle}
+      onAction={() =>
+        toastifiedPromiseCall({
+          onCall: async () => {
+            await markMessageAsRead(props.message);
+            if (props.onRevalidate) {
+              props.onRevalidate();
+            }
+          },
+          title: "Marking Mail as Read",
+          finishTitle: "Marked Mail as Read",
+        })
+      }
     />
   );
 }
@@ -100,21 +124,24 @@ export function MessageMarkAsUnreadAction(props: { message: gmail_v1.Schema$Mess
   if (isMailUnread(props.message) || isMailDraft(props.message)) {
     return null;
   }
-  const handle = async () => {
-    try {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Marking Mail as Unread" });
-      await markMessageAsUnread(props.message);
-      toast.style = Toast.Style.Success;
-      toast.title = "Marked Mail as Unread";
-
-      if (props.onRevalidate) {
-        props.onRevalidate();
+  return (
+    <Action
+      title="Mark as Unread"
+      icon={Icon.CircleFilled}
+      onAction={() =>
+        toastifiedPromiseCall({
+          onCall: async () => {
+            await markMessageAsUnread(props.message);
+            if (props.onRevalidate) {
+              props.onRevalidate();
+            }
+          },
+          title: "Marking Mail as Unread",
+          finishTitle: "Marked Mail as Unread",
+        })
       }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
-    }
-  };
-  return <Action title="Mark as Unread" icon={Icon.CircleFilled} onAction={handle} />;
+    />
+  );
 }
 
 export function MessageDeleteAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {

@@ -120,6 +120,13 @@ export function isCategoryLabel(label: gmail_v1.Schema$Label) {
   if (label) return label.id.startsWith("CATEGORY_");
 }
 
+export function canMessageBeArchived(message: gmail_v1.Schema$Message) {
+  if (!message.id) {
+    return false;
+  }
+  return message?.labelIds ? message.labelIds.includes("INBOX") : false;
+}
+
 function sortSystemLabels(labels: gmail_v1.Schema$Label[] | undefined) {
   if (!labels || labels.length <= 0) {
     return labels;
