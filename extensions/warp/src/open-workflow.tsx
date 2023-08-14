@@ -111,9 +111,9 @@ function WorkflowForm({ workflow, formValues }: { workflow: Workflow; formValues
     }
     return { ...vals, ...formValues };
   });
-  const markers = useMemo(() => getWorkflowMarkers(workflow), [workflow]);
 
-  const reactiveCommand = fillWorkflowCommand(workflow.command, markers, values);
+  const variableRegex = /{{([a-zA-z_-]+)}}/g;
+  const reactiveCommand = workflow.command.replaceAll(variableRegex, (_, key) => values[key] || `{{${key}}}`);
 
   return (
     <>
