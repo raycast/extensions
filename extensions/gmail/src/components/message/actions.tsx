@@ -386,6 +386,31 @@ export function NewerThanFilterAddAction(props: {
   );
 }
 
+export function HasAttachmentsFilterAddAction(props: {
+  searchText?: string;
+  setSearchText: ((newValue: string) => void) | undefined;
+}) {
+  const keyword = "has:attachment";
+  const alreadySet = props.searchText ? props.searchText.includes(keyword) : false;
+  if (alreadySet) {
+    return null;
+  }
+  const handle = () => {
+    const s = props.searchText || "";
+    if (props.setSearchText) {
+      props.setSearchText(`${s}${s ? " " : ""}${keyword}`);
+    }
+  };
+  return (
+    <Action
+      title="Has Attachment Filter"
+      icon={Icon.Paperclip}
+      shortcut={{ modifiers: ["ctrl"], key: "a" }}
+      onAction={handle}
+    />
+  );
+}
+
 export function TimeThanFilterAddAction(props: {
   searchText?: string;
   setSearchText: ((newValue: string) => void) | undefined;
@@ -518,6 +543,7 @@ export function FilterActionPanelSection(props: {
         searchText={props.searchText}
         setSearchText={props.setSearchText}
       />
+      <HasAttachmentsFilterAddAction searchText={props.searchText} setSearchText={props.setSearchText} />
       <OlderThanFilterAddAction searchText={props.searchText} setSearchText={props.setSearchText} />
       <NewerThanFilterAddAction searchText={props.searchText} setSearchText={props.setSearchText} />
     </ActionPanel.Section>
