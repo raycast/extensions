@@ -1,5 +1,16 @@
 # raycast-ollama Changelog
 
+## [Improvement and BugFix] - 2023-08-12
+
+- No longer needed custom MODFILEs.
+- Model no longer restricted to orca and llama. Now can be selected all available Ollama model.
+- Initial implementation of embeddings on code.
+- Resolved bug causing Metadata not showing up.
+
+## [Improvement] - 2023-08-11
+
+- Added llama2:70b model. Thanks to [suhaildawood](https://github.com/suhaildawood).
+
 ## [Improvement and BugFix] - 2023-08-7
 
 - Updated README.md with more information.

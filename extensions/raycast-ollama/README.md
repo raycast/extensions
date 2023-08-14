@@ -33,6 +33,12 @@ Install llama2 13b
 ollama pull llama2:13b
 ```
 
+Install llama2 70b
+
+```bash
+ollama pull llama2:70b
+```
+
 ## Create your own custom commands
 
 With '***Create Quicklink***' and '***Custom Command***' you can create your own custom command with a specific prompt.
