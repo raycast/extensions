@@ -1,6 +1,6 @@
 # IP Geolocation Changelog
 
-## [Command metadata] - {PR_MERGE_DATE}
+## [Command metadata] - 2023-08-14
 
 - Command metadata: show IP address in the command palette
 
