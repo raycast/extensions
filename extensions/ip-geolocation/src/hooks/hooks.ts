@@ -1,4 +1,4 @@
-import { Cache, showToast, Toast } from "@raycast/api";
+import { Cache, showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import axios from "axios";
 import { publicIpv4, publicIpv6 } from "public-ip";
 import { useCallback, useEffect, useState } from "react";
@@ -43,7 +43,7 @@ export const searchIpGeolocation = (
             ISP: ipGeolocation.isp,
             Organization: ipGeolocation.org,
           };
-
+          updateCommandMetadata({ subtitle: `Last Query ${ipGeolocation.query}` });
           axios({
             method: "GET",
             url: WORLD_TIME_API + ipGeolocationReadable.Timezone,
@@ -170,6 +170,8 @@ export const searchMyIpGeolocation = (language: string, showIPv6: boolean, coord
           setLoading(false);
           showToast(Style.Failure, String(error));
         });
+
+      await updateCommandMetadata({ subtitle: `Public IP ${myPublicIpv4}` });
     } catch (e) {
       console.error(String(e));
       setLoading(false);
