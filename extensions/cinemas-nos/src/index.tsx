@@ -14,7 +14,7 @@ export default function Command() {
           title={region.name}
           actions={
             <ActionPanel>
-              <Action.Push title="Show locations" target={<Region region={region} />} />
+              <Action.Push title="Show Locations" target={<Region region={region} />} />
             </ActionPanel>
           }
         />
@@ -35,7 +35,7 @@ function Region({ region }: { region: Region }) {
           title={theater.name}
           actions={
             <ActionPanel>
-              <Action.Push title="Show movies" target={<Theater theater={theater} />} />
+              <Action.Push title="Show Movies" target={<Theater theater={theater} />} />
             </ActionPanel>
           }
         />
@@ -56,7 +56,7 @@ function Theater({ theater }: { theater: Theater }) {
           title={movie.title}
           actions={
             <ActionPanel>
-              <Action.Push title="Show sessions" target={<Sessions movie={movie} theater={theater} />} />
+              <Action.Push title="Show Sessions" target={<Sessions movie={movie} theater={theater} />} />
             </ActionPanel>
           }
         />
@@ -82,7 +82,7 @@ function Sessions({ movie, theater }: { movie: Movie; theater: Theater }) {
                   title={session.time}
                   actions={
                     <ActionPanel>
-                      <Action.Open title="Open in browser" target={`https://www.cinemas.nos.pt${movie.detailurl}`} />
+                      <Action.OpenInBrowser url={`https://www.cinemas.nos.pt${movie.detailurl}`} />
                     </ActionPanel>
                   }
                 />
