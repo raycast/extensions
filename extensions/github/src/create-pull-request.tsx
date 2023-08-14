@@ -154,10 +154,10 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const milestones = data?.repository?.milestones?.nodes;
 
   useEffect(() => {
-    const template = data?.repository?.pullRequestTemplateLowercase ?? data?.repository?.pullRequestTemplateUppercase;
+    const template = data?.repository?.pullRequestTemplates?.[0];
 
-    if (template && "text" in template && template.text && !values.description) {
-      setValue("description", template.text);
+    if (template && template.body && !values.description) {
+      setValue("description", template.body);
     }
 
     if (defaultBranch) {

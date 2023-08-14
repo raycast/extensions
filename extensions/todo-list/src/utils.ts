@@ -1,4 +1,6 @@
 import { TodoItem } from "./atoms";
+import { preferences } from "./config";
+
 export const compare = (a: TodoItem, b: TodoItem) => {
   if (a.completed && !b.completed) return 1;
   if (b.completed && !a.completed) return -1;
@@ -24,3 +26,11 @@ export const insertIntoSection = (
   currentSection.splice(low + 1, 0, newItem);
   return currentSection;
 };
+
+export function sortTodoItem(a: TodoItem, b: TodoItem) {
+  const { sortOrder } = preferences;
+  if ((a.priority || b.priority) && a.priority != b.priority) {
+    return (b.priority ?? 0) - (a.priority ?? 0);
+  }
+  return sortOrder == "creation_date_accending" ? a.timeAdded - b.timeAdded : b.timeAdded - a.timeAdded;
+}

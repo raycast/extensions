@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Dislike & Skip] - 2023-08-10
+
+- Add command to dislike and then skip a track
+
 ## [Fix] - 2023-08-05
 
 - Fixed HUD confirmations from showing an unknown character
