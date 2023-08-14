@@ -3,7 +3,7 @@ import { Action, ActionPanel, List } from "@raycast/api";
 interface Props {
   variable: string;
   items?: JSX.Element[];
-  provider: "WhatsApp" | "Telegram" | "WeChat" | "Mail";
+  provider: "Mail";
 }
 
 const Wrapper = (props: Props) => {
@@ -12,9 +12,6 @@ const Wrapper = (props: Props) => {
   const resolveProvider = (provider: string) => {
     const tree = {
       Mail: "mailto:" + variable,
-      Telegram: "https://t.me/" + variable,
-      WeChat: "https://web.wechat.com/" + variable,
-      WhatsApp: "https://api.whatsapp.com/send?phone=" + variable,
     };
 
     return tree[provider as keyof typeof tree];
@@ -24,7 +21,7 @@ const Wrapper = (props: Props) => {
     <List>
       <List.Item
         subtitle={variable}
-        title="Send message to:"
+        title="Send message to"
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open in Browser" url={resolveProvider(provider)} />

@@ -1,3 +1,4 @@
 # text Changelog
 
-## [Initial Version] - 2023-08-06
+## [Initial Version] - {PR_MERGE_DATE}
+

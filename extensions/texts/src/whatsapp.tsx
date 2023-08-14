@@ -1,14 +1,6 @@
-import { LaunchProps } from "@raycast/api";
-import Wrapper from "./wrapper";
+import { LaunchProps, open } from "@raycast/api";
 
-interface Props {
-  phone: string;
-}
-
-const WhatsApp = (props: LaunchProps<{ arguments: Props }>) => {
+export default async function Main(props: LaunchProps<{ arguments: Arguments.Whatsapp }>) {
   const { phone } = props.arguments;
-
-  return <Wrapper provider="WhatsApp" variable={phone} />;
-};
-
-export default WhatsApp;
+  await open(`https://api.whatsapp.com/send?phone=${phone}`);
+}

@@ -1,14 +1,6 @@
-import { LaunchProps } from "@raycast/api";
-import Wrapper from "./wrapper";
+import { LaunchProps, open } from "@raycast/api";
 
-interface Props {
-  username: string;
-}
-
-const Telegram = (props: LaunchProps<{ arguments: Props }>) => {
+export default async function Main(props: LaunchProps<{ arguments: Arguments.Telegram }>) {
   const { username } = props.arguments;
-
-  return <Wrapper provider="Telegram" variable={username} />;
-};
-
-export default Telegram;
+  await open(`https://t.me/${username}`);
+}

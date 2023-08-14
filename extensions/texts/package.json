@@ -16,7 +16,7 @@
       "name": "whatsapp",
       "title": "Whatsapp",
       "description": "send message to WhatsApp user",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "phone",
@@ -31,7 +31,7 @@
       "name": "telegram",
       "title": "Telegram",
       "description": "send message to Telegram user",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "username",
