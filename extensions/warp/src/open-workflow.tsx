@@ -11,31 +11,21 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { runAppleScript, useSQL } from "@raycast/utils";
-import os from "os";
-import path from "path";
 import { useMemo, useState } from "react";
+import {
+  EXTENSION_URI,
+  WARP_DB,
+  WORKFLOW_QUERY,
+  Workflow,
+  WorkflowLaunchContext,
+  executeShellCommand,
+  fillWorkflowCommand,
+  getWorkflowMarkers,
+  showError,
+} from "./workflow-util";
 
-const WARP_DB = path.resolve(os.homedir(), "Library/Application Support/dev.warp.Warp-Stable/warp.sqlite");
-const WORKFLOW_QUERY = `SELECT id, data FROM workflows`;
-const EXTENSION_URI = "raycast://extensions/warpdotdev/warp";
-
-interface Workflow {
-  id: number;
-  name: string;
-  description: string | null;
-  command: string;
-  arguments: WorkflowArgument[];
-}
-
-interface WorkflowArgument {
-  name: string;
-  description: string | null;
-  default_value: string | null;
-}
-
-export default function Command(props: LaunchProps<{ launchContext?: { id: number } }>) {
+export default function Command(props: LaunchProps<{ launchContext?: WorkflowLaunchContext }>) {
   const [searchText, setSearchText] = useState("");
-
   const {
     data: table,
     permissionView,
@@ -49,14 +39,6 @@ export default function Command(props: LaunchProps<{ launchContext?: { id: numbe
     return permissionView;
   }
 
-  const showError = async (title: string, message: string) => {
-    await showToast({
-      style: Toast.Style.Failure,
-      title,
-      message,
-    });
-  };
-
   if (error) {
     showError("Unknown Error: ", error.message);
   }
@@ -64,7 +46,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { id: numbe
   if (props.launchContext?.id) {
     const workflow = allWorkflows.find((w) => w.id === props.launchContext?.id);
     if (workflow) {
-      return <WorkflowForm workflow={workflow} />;
+      return <WorkflowForm workflow={workflow} formValues={props.launchContext.values} />;
     }
   }
 
@@ -93,7 +75,7 @@ export default function Command(props: LaunchProps<{ launchContext?: { id: numbe
 
 function SearchListItem({ searchResult }: { searchResult: Workflow }) {
   const { push } = useNavigation();
-  const link = `${EXTENSION_URI}/run-workflow?launchContext=${encodeURIComponent(
+  const link = `${EXTENSION_URI}/open-workflow?launchContext=${encodeURIComponent(
     JSON.stringify({
       id: searchResult.id,
     })
@@ -119,17 +101,7 @@ function SearchListItem({ searchResult }: { searchResult: Workflow }) {
   );
 }
 
-const getMarkers = (workflow: Workflow) => {
-  const command = workflow.command;
-  const markers = workflow.arguments.flatMap((arg) => {
-    const matches = [...command.matchAll(new RegExp(`{{${arg.name}}}`, "g"))];
-    return matches.map((m) => ({ index: m.index!, variable: arg.name }));
-  });
-
-  return markers.sort((a, b) => a.index - b.index);
-};
-
-function WorkflowForm({ workflow }: { workflow: Workflow }) {
+function WorkflowForm({ workflow, formValues }: { workflow: Workflow; formValues?: Record<string, string> }) {
   const [values, setValues] = useState<{ [key: string]: string }>(() => {
     const vals = {} as Record<string, string>;
     for (const arg of workflow.arguments) {
@@ -137,20 +109,11 @@ function WorkflowForm({ workflow }: { workflow: Workflow }) {
         vals[arg.name] = arg.default_value;
       }
     }
-    return vals;
+    return { ...vals, ...formValues };
   });
+  const markers = useMemo(() => getWorkflowMarkers(workflow), [workflow]);
 
-  const markers = useMemo(() => getMarkers(workflow), [workflow]);
-
-  const reactiveCommand =
-    markers.length > 0
-      ? markers.reduce((text, marker, i) => {
-          const { index, variable } = marker;
-          const value = values[variable] || `{{${variable}}}`;
-          const after = workflow.command.slice(index + variable.length + 4, markers[i + 1]?.index);
-          return text + value + after;
-        }, workflow.command.slice(0, markers[0].index))
-      : workflow.command;
+  const reactiveCommand = fillWorkflowCommand(workflow.command, markers, values);
 
   return (
     <>
@@ -164,6 +127,24 @@ function WorkflowForm({ workflow }: { workflow: Workflow }) {
               onSubmit={async () => {
                 await runAppleScript(`tell application "Warp" to activate`);
                 await Clipboard.paste(reactiveCommand);
+              }}
+            />
+            <Action.SubmitForm
+              icon={Icon.Bolt}
+              title="Run Workflow"
+              onSubmit={async () => {
+                const { stdout, stderr } = await executeShellCommand(reactiveCommand);
+                if (stderr) {
+                  showError("Error", stderr);
+                }
+                if (stdout) {
+                  await Clipboard.copy(stdout);
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Result Copied to Clipboard ✅",
+                    message: stdout,
+                  });
+                }
               }}
             />
           </ActionPanel>
