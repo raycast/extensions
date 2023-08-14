@@ -26,6 +26,7 @@ import {
   FilterActionPanelSection,
   CreateQueryQuickLinkAction,
   MessageMarkAsArchived,
+  FilterMessagesLikeGivenAction,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 import { useContext } from "react";
@@ -171,6 +172,7 @@ export function GMailMessageListItem(props: {
             <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <FilterMessagesLikeGivenAction email={fromParts?.email} setSearchText={props.setSearchText} />
             <MessagesRefreshAction onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
           <ActionPanel.Section>

@@ -197,6 +197,28 @@ export function MessagesRefreshAction(props: { onRevalidate?: () => void }) {
   );
 }
 
+export function FilterMessagesLikeGivenAction(props: {
+  email: string | undefined;
+  setSearchText: ((newValue: string) => void) | undefined;
+}) {
+  if (!props.email || props.email.trim().length <= 0) {
+    return null;
+  }
+  const handle = () => {
+    if (props.setSearchText) {
+      props.setSearchText(`from:${props.email}`);
+    }
+  };
+  return (
+    <Action
+      title="Filter Mails From Sender"
+      icon={Icon.Person}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
+      onAction={handle}
+    />
+  );
+}
+
 export function MessageCopyIdAction(props: { message: gmail_v1.Schema$Message }) {
   const m = props.message;
   if (m.id === undefined || !environment.isDevelopment) {
