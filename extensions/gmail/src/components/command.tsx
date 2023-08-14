@@ -30,7 +30,13 @@ export function ListQueryCommand(props: {
   }
   return (
     <GMailContext.Provider value={labels}>
-      <List isLoading={isLoading} onSearchTextChange={setSearchText} isShowingDetail={showDetails} throttle>
+      <List
+        isLoading={isLoading}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        isShowingDetail={showDetails}
+        throttle
+      >
         <List.Section title={props.sectionTitle} subtitle={data?.length ? data.length.toString() : undefined}>
           {data?.map((l) => (
             <GMailMessageListItem
