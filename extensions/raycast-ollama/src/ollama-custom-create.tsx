@@ -42,7 +42,6 @@ export default function Command(): JSX.Element {
 
   return (
     <Form
-      navigationTitle="Create a Custom Ollama Command"
       actions={
         <ActionPanel>
           {CreateQuicklinkEnabled && (
