@@ -11,7 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { runAppleScript, useSQL } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   EXTENSION_URI,
   WARP_DB,
@@ -19,8 +19,6 @@ import {
   Workflow,
   WorkflowLaunchContext,
   executeShellCommand,
-  fillWorkflowCommand,
-  getWorkflowMarkers,
   showError,
 } from "./workflow-util";
 
