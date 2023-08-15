@@ -48,13 +48,13 @@ export default function CollectionsForm(props: Props) {
           <Action.SubmitForm
             title={title}
             icon={Icon.SaveDocument}
-            onSubmit={(values) => {
+            onSubmit={async (values) => {
               const data = {
                 collections: values.collections,
                 starred: !!values.starred,
               };
+              await postAndCloseMainWindow(command, data);
               pop();
-              postAndCloseMainWindow(command, data);
             }}
           />
         </ActionPanel>

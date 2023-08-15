@@ -1,7 +1,9 @@
 linear
 github
 browser-bookmarks
+raycast-explorer
 google-workspace
+jira
 zoom
 hypersonic
 asana

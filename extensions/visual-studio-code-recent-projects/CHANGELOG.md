@@ -1,5 +1,13 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2023-08-09
+
+- Fixed a bug that caused the extension to crash if wrong build was selected
+
+## [Fixes] - 2023-08-02
+
+- Fix some issues with invalid URLs that cause crashes.
+
 ## [Update] - 2023-07-12
 
 - Make it possible to open remote workspaces.

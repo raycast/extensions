@@ -31,7 +31,7 @@ function SearchPullRequests() {
       return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
     },
     [searchText],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   return (

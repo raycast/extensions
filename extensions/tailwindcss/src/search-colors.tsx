@@ -37,7 +37,14 @@ export default function SearchColors() {
                     adjustContrast: false,
                   },
                 }}
-                keywords={[name, name + shade, `${name} ${shade}`, `${name}-${shade}`]}
+                keywords={[
+                  name,
+                  name + shade,
+                  `${name} ${shade}`,
+                  `${name}-${shade}`,
+                  value as string,
+                  (value as string).replace("#", ""),
+                ]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>

@@ -1,5 +1,17 @@
 # GitHub Changelog
 
+## [Pull request templates] - 2023-08-08
+
+- Support all pull request templates when creating pull requests.
+
+## [Bug fix] - 2023-08-07
+
+- Fixed a bug (`Cannot read properties of null (reading 'name')`) which caused the extension to crash.
+
+## [Added missing value] - 2023-08-04
+
+- Fix missing repo name for non numberTag cases 
+
 ## [Menu Commands] - 2023-07-18
 
 - Add repo name to `Unread Notifications` Menu

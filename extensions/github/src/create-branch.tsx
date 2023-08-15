@@ -38,7 +38,7 @@ export function BranchForm({ draftValues }: BranchFormProps) {
       return github.repositoryIssues({ owner: selectedRepository.owner.login, name: selectedRepository.name });
     },
     [repositoryId],
-    { execute: !!repositoryId }
+    { execute: !!repositoryId },
   );
 
   const issues = data?.repository?.issues?.nodes?.filter((node) => node?.linkedBranches.totalCount == 0);
@@ -151,7 +151,7 @@ export function BranchForm({ draftValues }: BranchFormProps) {
               value={issue.id}
               {...getIssueStatus(issue)}
             />
-          ) : null
+          ) : null,
         )}
       </Form.Dropdown>
 

@@ -187,7 +187,7 @@ on run (argv)
 		end if
 	end try
 
-	imageData's setValue:promptText forKey:"output"
+	imageData's setValue:promptText forKey:"stringValue"
 
 	set jsonObj to current application's NSJSONSerialization's dataWithJSONObject:imageData options:(current application's NSJSONWritingFragmentsAllowed) |error|:(missing value)
 	set jsonString to current application's NSString's alloc()'s initWithData:jsonObj encoding:(current application's NSUTF8StringEncoding)

@@ -142,7 +142,6 @@ export const textFileExtensions = [
   "hsc",
   "htm",
   "html",
-  "http",
   "hxx",
   "hy",
   "icl",

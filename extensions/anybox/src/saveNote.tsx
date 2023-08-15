@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, Clipboard, Icon, useNavigation, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Form, Clipboard, Icon, useNavigation, getPreferenceValues, open } from "@raycast/api";
 import { postAndCloseMainWindow, fetchCollections } from "./utilities/fetch";
 import { useState, useEffect } from "react";
 
@@ -12,9 +12,16 @@ interface Preferences {
   autoFill: boolean;
 }
 
+interface SaveNoteResponse {
+  code: number;
+  message: string;
+  url: string;
+}
+
 function NoteForm() {
   const preferences = getPreferenceValues<Preferences>();
   const [note, setNote] = useState<string>();
+  const [comment, setComment] = useState<string>();
   const [collections, setCollections] = useState<CollectionProp[]>([]);
   const { pop } = useNavigation();
 
@@ -47,7 +54,24 @@ function NoteForm() {
           <Action.SubmitForm
             title="Save to Anybox"
             icon={Icon.SaveDocument}
-            onSubmit={(values) => {
+            onSubmit={async (values) => {
+              const note = values.note;
+              if (note.length > 0) {
+                const data = {
+                  note,
+                  comment: values.comment,
+                  collections: values.collections,
+                  starred: !!values.starred,
+                };
+                await postAndCloseMainWindow("save", data);
+                pop();
+              }
+            }}
+          />
+          <Action.SubmitForm
+            title="Save and Open in Anybox"
+            icon={Icon.ArrowNe}
+            onSubmit={async (values) => {
               const note = values.note;
               if (note.length > 0) {
                 const data = {
@@ -55,8 +79,11 @@ function NoteForm() {
                   collections: values.collections,
                   starred: !!values.starred,
                 };
+                const result = (await postAndCloseMainWindow("save", data)) as SaveNoteResponse;
+                if (result.url) {
+                  open(result.url);
+                }
                 pop();
-                postAndCloseMainWindow("save", data);
               }
             }}
           />
@@ -64,6 +91,7 @@ function NoteForm() {
       }
     >
       <Form.TextArea title="Note" id="note" value={note} onChange={setNote} />
+      <Form.TextArea title="Comment" id="comment" value={comment} onChange={setComment} />
       <Form.TagPicker id="collections" title="Collections" defaultValue={[]}>
         {collections.map((val) => {
           return <Form.TagPicker.Item value={val.id} title={collectionTitle(val)} key={val.id} />;

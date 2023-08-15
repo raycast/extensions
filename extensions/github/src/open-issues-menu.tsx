@@ -39,7 +39,7 @@ function OpenIssuesMenu() {
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   return (
