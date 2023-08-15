@@ -1,14 +1,10 @@
 import { OllamaApiGenerateRequestBody, RaycastArgumentsOllamaAskCustom } from "./api/types";
-import ResultView from "./api/main";
-import { getPreferenceValues } from "@raycast/api";
-
-const preferences = getPreferenceValues();
+import { ResultView } from "./api/main";
 
 export default function Command(props: RaycastArgumentsOllamaAskCustom): JSX.Element {
   const body = {
-    model: preferences.ollamaAskCustomPromptModel,
+    model: props.arguments.model,
     prompt: props.arguments.query,
-    system: props.arguments.prompt,
   } as OllamaApiGenerateRequestBody;
 
   return ResultView(body, false);

@@ -20,6 +20,6 @@ export class ErrorOllamaModelNotInstalled extends Error {
   constructor(message: string, model?: string) {
     super(message);
     this.model = model;
-    this.suggest = `Run 'ollama pull ${model}' for install it.`;
+    this.suggest = `Install ${model} with 'Manage Models' command`;
   }
 }
