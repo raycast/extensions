@@ -108,7 +108,7 @@ export default function ChromeDino() {
   let [markdown, setMarkdown] = useState(
     Array(boardHeight)
       .fill()
-      .map(() => Array(boardWidth).fill(" "))
+      .map(() => Array(boardWidth).fill(" ")),
   );
   let status = useRef(Status.PLAYING);
   let time = useRef(0);

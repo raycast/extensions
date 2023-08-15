@@ -38,8 +38,8 @@ function generateRow(rows) {
       svgString += `
             <rect x="${width * i + spacing * i}" width="${width}" height="${width}" fill="${color}"/>
             <text x="${width * i + spacing * i + width / 2}" y="${
-        width - width / 6
-      }" text-anchor="middle" alignment-baseline="middle" class="large" font-size="300" font-weight="bold" fill="white" font-family="Helvetica Neue">${letter}</text>
+              width - width / 6
+            }" text-anchor="middle" alignment-baseline="middle" class="large" font-size="300" font-weight="bold" fill="white" font-family="Helvetica Neue">${letter}</text>
             `;
     }
   }
@@ -90,8 +90,8 @@ export default function Wordle() {
           .map(() => ({
             letter: "",
             color: Color.GRAY,
-          }))
-      )
+          })),
+      ),
   );
   let guessCount = useRef(0);
   let target = useRef("     ");
@@ -106,8 +106,8 @@ export default function Wordle() {
           .map(() => ({
             letter: "",
             color: Color.GRAY,
-          }))
-      )
+          })),
+      ),
   );
   let unlimitedGuessCount = useRef(0);
   let unlimitedTarget = useRef(allowedList[Math.floor(Math.random() * allowedList.length)]);
@@ -216,9 +216,9 @@ export default function Wordle() {
                     .map(() => ({
                       letter: "",
                       color: Color.GRAY,
-                    }))
-                )
-            )
+                    })),
+                ),
+            ),
           );
           await LocalStorage.setItem("wordleGuessCount", JSON.stringify(0));
           await LocalStorage.setItem("wordleHasGuessed", JSON.stringify(false));
@@ -482,7 +482,7 @@ export default function Wordle() {
             .map(() => ({
               letter: "",
               color: Color.GRAY,
-            }))
+            })),
         );
 
     let markdown = "";
@@ -548,8 +548,8 @@ export default function Wordle() {
             .map(() => ({
               letter: "",
               color: Color.GRAY,
-            }))
-        )
+            })),
+        ),
     );
     unlimitedGuessCount.current = 0;
     unlimitedTarget.current = allowedList[Math.floor(Math.random() * allowedList.length)];
@@ -566,9 +566,9 @@ export default function Wordle() {
                 .map(() => ({
                   letter: "",
                   color: Color.GRAY,
-                }))
-            )
-        )
+                })),
+            ),
+        ),
       );
       await LocalStorage.setItem("wordleUnlimitedGuessCount", JSON.stringify(unlimitedGuessCount.current));
       await LocalStorage.setItem("wordleUnlimitedHasGuessed", JSON.stringify(unlimitedHasGuessed.current));
@@ -661,7 +661,7 @@ ${
 | Played  | Games Won | Games Lost | Win % |
 |---------|-----------|------------|-------|
 | ${stats.daily.played} |  ${stats.daily.won}  | ${stats.daily.played - stats.daily.won}      | ${Math.round(
-        (stats.daily.won / stats.daily.played) * 100
+        (stats.daily.won / stats.daily.played) * 100,
       )}% |
 
 ### Guess Distribution

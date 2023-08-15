@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ActionPanel, Action, List, environment, Icon } from "@raycast/api";
 
-let smallText = environment.textSize === "medium"
+let smallText = environment.textSize === "medium";
 
 const ROWS = smallText ? 18 : 15;
 const COLS = smallText ? 30 : 26;
@@ -30,11 +30,13 @@ export default function Command() {
     { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 1 },
     { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 2 },
   ]);
-  const food = useRef(randomFood([
-    { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) },
-    { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 1 },
-    { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 2 },
-  ]));
+  const food = useRef(
+    randomFood([
+      { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) },
+      { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 1 },
+      { row: Math.floor(ROWS / 2), col: Math.floor(COLS / 2) - 2 },
+    ]),
+  );
   const [score, setScore] = useState(0);
   const queuedDirection = useRef(Direction.RIGHT);
   const direction = useRef(Direction.RIGHT);
@@ -78,7 +80,7 @@ export default function Command() {
 
       const hitWall = head.row < 0 || head.row >= ROWS || head.col < 0 || head.col >= COLS;
       const hitSelf = oldSnake.some(
-        (segment, index) => index !== 0 && segment.row === head.row && segment.col === head.col
+        (segment, index) => index !== 0 && segment.row === head.row && segment.col === head.col,
       );
       if (hitWall || hitSelf) {
         clearInterval(intervalRef.current); // Clear interval using the ref's current value
@@ -164,8 +166,8 @@ ${rows.join("\n")}
     return emptyCells[Math.floor(Math.random() * emptyCells.length)];
   }
 
-
-  let gameOver = smallText ? `
+  let gameOver = smallText
+    ? `
   \`\`\`
   ╭──────────────────────RAYCAST ARCADE────────────────────────╮
   │                                                            │
@@ -188,7 +190,8 @@ ${rows.join("\n")}
   │                                                            │
   ╰──────────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────────╯
   \`\`\`
-  ` : `
+  `
+    : `
   \`\`\`
 ╭───────────────────RAYCAST ARCADE───────────────────╮
 │                                                    │
@@ -209,7 +212,8 @@ ${rows.join("\n")}
 ╰──────────────────┤SCORE: ${(score + "").padStart(6, "0")}├───────────────────╯
 \`\`\`
   `;
-  let gameStart = smallText ? `
+  let gameStart = smallText
+    ? `
   \`\`\`
   ╭──────────────────────RAYCAST ARCADE────────────────────────╮
   │                                                            │
