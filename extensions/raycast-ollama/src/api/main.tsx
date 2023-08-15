@@ -396,7 +396,6 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
   return (
     <List
       isLoading={loading}
-      navigationTitle="Ask..."
       searchBarPlaceholder="Ask..."
       searchText={query}
       onSearchTextChange={setQuery}
