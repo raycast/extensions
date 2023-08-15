@@ -1,0 +1,112 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bing-chat-ai",
+  "title": "Bing Chat GPT",
+  "description": "Utilize the Bing Chat GPT feature on Raycast.",
+  "icon": "bing-icon.png",
+  "author": "toanbku",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "promptSummarize",
+          "title": "Summarize Prompt",
+          "description": "The prompt for the summarize command",
+          "type": "textfield",
+          "default": "Summarize the following text using native language of input text: \n",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "rephrase",
+      "title": "Rephrase",
+      "description": "Rephrase selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "promptRephrase",
+          "title": "Rephrase Prompt",
+          "description": "The prompt for the rephrase command",
+          "type": "textfield",
+          "default": "Rephrase this using an academic tone: \n",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "refine",
+      "title": "Refine",
+      "description": "Refine the writing of selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "promptRefine",
+          "title": "Refine Prompt",
+          "description": "The prompt for the refine command",
+          "type": "textfield",
+          "default": "Refine the writing and correct grammar mistakes: \n",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1",
+    "bing-chat": "^0.2.3",
+    "isomorphic-fetch": "^3.0.0"
+  },
+  "preferences": [
+    {
+      "name": "bingCookies",
+      "description": "Your BingChat cookies",
+      "type": "password",
+      "required": true,
+      "title": "Bing Chat Cookie"
+    },
+    {
+      "name": "conversationStyle",
+      "description": "Choose a conversation style",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Balanced",
+          "value": "Balanced"
+        },
+        {
+          "title": "Creative",
+          "value": "Creative"
+        },
+        {
+          "title": "Precise",
+          "value": "Precise"
+        }
+      ],
+      "required": true,
+      "title": "Conversation style"
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
