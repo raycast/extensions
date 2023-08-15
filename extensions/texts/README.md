@@ -1,3 +1,3 @@
-# text
+# Texts
 
-use your messaging applications from raycast.
+Use your messaging applications from Raycast.
