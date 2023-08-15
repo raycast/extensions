@@ -79,7 +79,6 @@ export default function Tetris() {
   let board = useRef(generateNewGrid());
 
   let generatePiece = () => {
-    console.log("GENERATING PIECE");
     let newPiece = bag.current.shift();
     if (bag.current.length === 1) {
       let newBag = JSON.parse(JSON.stringify(pieces));
@@ -478,6 +477,7 @@ export default function Tetris() {
           <ActionPanel>
             <Action
               title={status.current === Status.PLAYING ? "Pause" : "Restart"}
+              icon={status.current === Status.PLAYING ? Icon.Pause : Icon.RotateClockwise}
               onAction={() => {
                 if (status.current === Status.PLAYING) {
                   setSelectedTab("help");
@@ -495,21 +495,25 @@ export default function Tetris() {
               }}
             />
             <Action
+              icon={Icon.ArrowLeft}
               title="Move Piece Left"
               shortcut={{ modifiers: ["shift"], key: "a" }}
               onAction={() => handleKeyDown("a")}
             />
             <Action
+              icon={Icon.ArrowRight}
               title="Move Piece Right"
               shortcut={{ modifiers: ["shift"], key: "d" }}
               onAction={() => handleKeyDown("d")}
             />
             <Action
+              icon={Icon.ArrowDown}
               title="Move Piece Down"
               shortcut={{ modifiers: ["shift"], key: "s" }}
               onAction={() => handleKeyDown("s")}
             />
             <Action
+              icon={Icon.RotateClockwise}
               title="Rotate Piece"
               shortcut={{ modifiers: ["shift"], key: "w" }}
               onAction={() => handleKeyDown("w")}
@@ -533,6 +537,7 @@ export default function Tetris() {
         actions={
           <ActionPanel>
             <Action
+              icon={Icon.Play}
               title="Unpause"
               onAction={() => {
                 setSelectedTab("game");
