@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Toast, showToast } from "@raycast/api";
+import { List, Action, ActionPanel } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchData, cryptoList, addFavoriteCrypto, removeFavoriteCrypto } from "./api";
 import { delay } from "./utils";
@@ -25,6 +25,55 @@ export default function Command() {
 
     fetchDataAsync();
   }, []);
+
+  function getAction(item: Data) {
+    const actionList = [];
+
+    actionList.push(
+      // add or remove favorite
+      <Action
+        title={item.favorite ? "Remove From Favorite" : "Add To Favorite"}
+        icon={item.favorite ? "remove.png" : "favorite.png"}
+        onAction={async () => {
+          setPriceData((priceData) =>
+            priceData.map((i) => {
+              if (i.name === item.name) {
+                return { ...i, favorite: !item.favorite };
+              }
+              return i;
+            })
+          );
+          if (item.favorite) {
+            await removeFavoriteCrypto(item.name);
+          } else {
+            addFavoriteCrypto(item.name);
+          }
+        }}
+      />
+    );
+
+    // refresh
+    actionList.push(
+      <Action
+        title="Refresh"
+        icon="refresh.png"
+        onAction={async () => {
+          setIsLoading(true);
+          setPriceData(await fetchData(""));
+          setIsLoading(false);
+        }}
+      />
+    );
+
+    // copy price
+    if (item.favorite) {
+      actionList.unshift(<Action.CopyToClipboard title="Copy Price" content={item.price} onCopy={() => item.price} />);
+    } else {
+      actionList.push(<Action.CopyToClipboard title="Copy Price" content={item.price} onCopy={() => item.price} />);
+    }
+
+    return <ActionPanel>{...actionList}</ActionPanel>;
+  }
 
   return (
     <List
@@ -59,39 +108,7 @@ export default function Command() {
           icon={{ source: item.icon }}
           accessories={item.favorite ? [{ icon: "favorited.png", tooltip: "Favorited" }] : []}
           subtitle={{ value: item.price, tooltip: item.markets }}
-          actions={
-            <ActionPanel>
-              <Action
-                title={item.favorite ? "Remove From Favorite" : "Add To Favorite"}
-                icon={item.favorite ? "remove.png" : "favorite.png"}
-                onAction={async () => {
-                  setPriceData((priceData) =>
-                    priceData.map((i) => {
-                      if (i.name === item.name) {
-                        return { ...i, favorite: !item.favorite };
-                      }
-                      return i;
-                    })
-                  );
-                  if (item.favorite) {
-                    await removeFavoriteCrypto(item.name);
-                  } else {
-                    addFavoriteCrypto(item.name);
-                  }
-                }}
-              />
-              <Action.CopyToClipboard title="Copy Price" content={item.price} onCopy={() => item.price} />
-              <Action
-                title="Refresh"
-                icon="refresh.png"
-                onAction={async () => {
-                  setIsLoading(true);
-                  setPriceData(await fetchData(""));
-                  setIsLoading(false);
-                }}
-              />
-            </ActionPanel>
-          }
+          actions={getAction(item)}
         />
       ))}
     </List>
