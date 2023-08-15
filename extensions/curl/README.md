@@ -1,5 +1,10 @@
 # cURL Changelog
 
+## [Allow custom headers] - 2023-08-15
+
+- Allows custom values for a header key. Just type a value into the dropdown search box, and it will show up as an option.
+- Implement filtering header keys by search value.
+
 ## [Add PATCH method and change methods icons] - 2023-01-18
 
 - Add PATCH method to methods' list
