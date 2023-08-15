@@ -39,8 +39,6 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
         }),
     };
 
-    console.log(payload.headers);
-
     axios({ ...payload })
       .then(async (res) => {
         response = res;
