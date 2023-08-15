@@ -38,7 +38,7 @@ export default function ProtectLink() {
     };
   }
 
-  const isValidHttpUrl = (string) => {
+  const isValidHttpUrl = (string: string) => {
     let url;
 
     try {
