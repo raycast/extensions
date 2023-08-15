@@ -24,16 +24,17 @@ function PasteTotpAction() {
     } catch (error) {
       toast.message = "Failed to get TOTP";
       toast.style = Toast.Style.Failure;
-      captureException("Failed to copy TOTP", error);
+      captureException("Failed to paste TOTP", error);
     }
   };
 
   return (
     <ActionWithReprompt
-      title={`Paste TOTP into ${currentApplicationName}`}
+      title={currentApplicationName ? `Paste TOTP into ${currentApplicationName}` : "Paste TOTP"}
       icon={Icon.Window}
       onAction={pasteTotp}
-      shortcut={{ modifiers: ["ctrl"], key: "t" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      repromptDescription={`Pasting the TOTP of <${selectedItem.name}>`}
     />
   );
 }
