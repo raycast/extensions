@@ -1,4 +1,4 @@
-import ResultView from "./api/main";
+import { ResultView } from "./api/main";
 import { getPreferenceValues } from "@raycast/api";
 import { OllamaApiGenerateRequestBody } from "./api/types";
 

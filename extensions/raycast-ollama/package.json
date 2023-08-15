@@ -23,28 +23,20 @@
       "label": "Check for showing inference statistics"
     },
     {
+      "name": "ollamaChatModel",
+      "description": "Select model used for perform 'Chat With Ollama'",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Chat whit Ollama",
+      "default": "llama2:latest"
+    },
+    {
       "name": "ollamaAskModel",
       "description": "Select model used for perform 'Ask Ollama'",
       "type": "textfield",
       "required": true,
       "title": "Model - Ask Ollama",
       "default": "llama2:latest"
-    },
-    {
-      "name": "ollamaAskCustomPromptModel",
-      "description": "Select model used for perform 'Ask Ollama With Custom Prompt'",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Ask Ollama With Custom Prompt",
-      "default": "llama2:latest"
-    },
-    {
-      "name": "ollamaAskCustomCommandModel",
-      "description": "Select model used for perform 'Custom Command'",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Custom Command",
-      "default": "orca:latest"
     },
     {
       "name": "ollamaCasualModel",
@@ -145,6 +137,13 @@
   ],
   "commands": [
     {
+      "name": "ollama-chat",
+      "title": "Chat With Ollama",
+      "subtitle": "Ollama",
+      "description": "Chat with Ollama",
+      "mode": "view"
+    },
+    {
       "name": "ollama-ask",
       "title": "Ask Ollama",
       "subtitle": "Ollama",
@@ -179,42 +178,6 @@
       "subtitle": "Ollama",
       "description": "Make selected text more confident",
       "mode": "view"
-    },
-    {
-      "name": "ollama-custom-ask",
-      "title": "Ask Ollama With Custom Prompt",
-      "subtitle": "Ollama",
-      "description": "Ask ollama any question with a custom prompt",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "prompt",
-          "placeholder": "Prompt",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "ollama-custom-command",
-      "title": "Custom Command",
-      "subtitle": "Ollama",
-      "description": "Create a custom command using a quicklinks",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "prompt",
-          "placeholder": "Prompt",
-          "type": "text",
-          "required": true
-        }
-      ]
     },
     {
       "name": "ollama-explain",
@@ -278,6 +241,71 @@
       "subtitle": "Ollama",
       "description": "Rephrase selected text as Tweet",
       "mode": "view"
+    },
+    {
+      "name": "ollama-models",
+      "title": "Manage Models",
+      "subtitle": "Ollama",
+      "description": "Manage installed models",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-custom-create",
+      "title": "Create Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-custom-chat",
+      "title": "Custom Chat",
+      "subtitle": "Ollama",
+      "description": "Create a custom chatbot using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "model",
+          "placeholder": "Model",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ollama-custom-command",
+      "title": "Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "model",
+          "placeholder": "Model",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ollama-custom-ask",
+      "title": "Custom Ask Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom ask command using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "model",
+          "placeholder": "Model",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
