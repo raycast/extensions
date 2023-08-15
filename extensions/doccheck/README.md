@@ -1,6 +1,7 @@
 # DocCheck Extension
 
-## About DocChec
+
+## About DocCheck
 Search "DocCheck® Flexikon[, an open] encyclopaedia exclusively for the education and training of members and students of the medical profession (e.g. doctors, pharmacists, veterinarians, dentists) [with Raycast](https://www.raycast.com/). Please note that] this is not a guide to self-therapy and is not a substitute for medical advice or treatment." [Source: [https://flexikon.doccheck.com/de/Flexikon:Wichtiger_Hinweis](https://flexikon.doccheck.com/de/Flexikon:Wichtiger_Hinweis), last accessed 06.04.2023]
 
 ## Using the Extension

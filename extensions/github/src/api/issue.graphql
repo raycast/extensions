@@ -141,6 +141,7 @@ fragment IssueDetailFields on Issue {
     totalCount
     nodes {
       ... on LinkedBranch {
+        id
         ref {
           name
         }

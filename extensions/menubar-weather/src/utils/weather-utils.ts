@@ -60,7 +60,6 @@ export async function getCurWeather() {
     weatherData = await getOpenMeteoWeather(geoLocation.longitude.toString(), geoLocation.latitude.toString());
   }
 
-  console.debug(weatherData);
   return { weather: weatherData, geoLocation: geoLocation };
 }
 

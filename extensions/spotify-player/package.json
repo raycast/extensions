@@ -12,7 +12,8 @@
     "andreaselia",
     "stuart",
     "tonka3000",
-    "dancannon"
+    "dancannon",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "preferences": [
@@ -80,6 +81,15 @@
               "value": "cover-image"
             }
           ],
+          "required": false
+        },
+        {
+          "name": "hideIconWhenIdle",
+          "title": "Hide icon when idle",
+          "description": "Hide the icon in the Menu Bar when Spotify is not running or when nothing is playing",
+          "type": "checkbox",
+          "label": "Enabled",
+          "default": false,
           "required": false
         }
       ]
@@ -227,8 +237,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.4",
-    "@raycast/utils": "^1.8.0",
+    "@raycast/api": "^1.56.1",
+    "@raycast/utils": "^1.9.0",
     "node-fetch": "^3.3.1",
     "oazapfts": "^4.6.0"
   },

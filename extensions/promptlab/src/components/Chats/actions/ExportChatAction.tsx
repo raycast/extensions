@@ -2,6 +2,8 @@ import { Action, Icon, Toast, confirmAlert, getPreferenceValues, showInFinder, s
 import { Chat, ChatManager, ExtensionPreferences } from "../../../utils/types";
 import path from "path";
 import * as fs from "fs";
+import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
+import { getActionShortcut } from "../../../utils/action-utils";
 
 /**
  * Action to export a chat to a JSON file.
@@ -9,14 +11,19 @@ import * as fs from "fs";
  * @param props.chats The chat manager object.
  * @returns An action component.
  */
-export const ExportChatAction = (props: { chat: Chat; chats: ChatManager }) => {
-  const { chat, chats } = props;
+export const ExportChatAction = (props: {
+  chat: Chat;
+  chats: ChatManager;
+  settings: typeof defaultAdvancedSettings;
+}) => {
+  const { chat, chats, settings } = props;
   const preferences = getPreferenceValues<ExtensionPreferences>();
+
   return (
     <Action
       title="Export Chat"
       icon={Icon.Download}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+      shortcut={getActionShortcut("ExportChatAction", settings)}
       onAction={async () => {
         const toast = await showToast({ title: "Exporting Chat", style: Toast.Style.Animated });
 

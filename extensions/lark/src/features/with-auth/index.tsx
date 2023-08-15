@@ -1,11 +1,14 @@
 import { Action, ActionPanel, Detail, openExtensionPreferences } from '@raycast/api';
 import { useEffect, useState } from 'react';
+import { useAtomValue } from 'jotai';
 import { parse } from 'tough-cookie';
-import { checkAuthState, isAuthenticated, setAuthData } from '../../services/shared';
-import { QRLogin } from './qr-login';
+import { isAuthenticatedAtom } from '../../hooks/atoms';
+import { checkAuthState, setAuthData } from '../../services/shared';
 import { DOMAIN } from '../../utils/config';
+import { QRLogin } from './qr-login';
 
 const AuthGuard = ({ children }: { children: React.ReactElement }) => {
+  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
   const [checked, setChecked] = useState(isAuthenticated);
   const [, refresh] = useState(0);
 
@@ -13,12 +16,12 @@ const AuthGuard = ({ children }: { children: React.ReactElement }) => {
     checkAuthState().finally(() => setChecked(true));
   }, []);
 
-  const handleLogin = async (tenantDomain: string, cookies: string[]) => {
+  const handleLogin = async (cookies: string[]) => {
     for (const item of cookies) {
       const cookie = parse(item);
       if (!cookie) return;
       if (cookie.key === 'session') {
-        await setAuthData(tenantDomain, cookie.value);
+        await setAuthData(cookie.value);
         refresh(Math.random());
         break;
       }
@@ -51,9 +54,8 @@ const MissingDomain = () => {
 
 export const withAuth =
   <T extends Record<string, unknown>>(Component: React.ComponentType<T>): React.FC<T> =>
-  (props: T) =>
-    (
-      <AuthGuard>
-        <Component {...props} />
-      </AuthGuard>
-    );
+  (props: T) => (
+    <AuthGuard>
+      <Component {...props} />
+    </AuthGuard>
+  );

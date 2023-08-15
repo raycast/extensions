@@ -1,10 +1,23 @@
-import { showToast, Toast } from "@raycast/api";
-import { execSync } from "child_process";
-import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages } from "./utils";
+/**
+ * @file pad.ts
+ *
+ * @summary Raycast command to add padding to selected images.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-07-06 14:55:36
+ * Last modified  : 2023-07-06 15:48:02
+ */
+
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+
+import pad from "./operations/padOperation";
+import { cleanup, getSelectedImages, showErrorToast } from "./utilities/utils";
+import { PadPreferences } from "./utilities/preferences";
 
 export default async function Command(props: { arguments: { amount: string; hexcolor: string } }) {
   const { amount, hexcolor } = props.arguments;
   const selectedImages = await getSelectedImages();
+  const preferences = getPreferenceValues<PadPreferences>();
 
   const padAmount = parseInt(amount);
   if (isNaN(padAmount) || padAmount < 0) {
@@ -12,11 +25,11 @@ export default async function Command(props: { arguments: { amount: string; hexc
     return;
   }
 
-  let hexString = hexcolor || "FFFFFF";
+  let hexString = hexcolor || preferences.defaultPadColor;
   if (hexString.startsWith("#")) {
     hexString = hexString.substring(1);
   }
-  if (!hexString.match(/#?[0-9A-Fa-f]{6}/)) {
+  if (!hexString.match(/[0-9A-Fa-f]{6}/)) {
     await showToast({ title: "Invalid HEX Color", style: Toast.Style.Failure });
     return;
   }
@@ -31,41 +44,13 @@ export default async function Command(props: { arguments: { amount: string; hexc
   if (selectedImages) {
     const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
     try {
-      for (const imagePath of selectedImages) {
-        const resultArr = execSync(`sips -g pixelWidth -g pixelHeight "${imagePath}"`)
-          .toString()
-          .split(/(: |\n)/g);
-        const oldWidth = parseInt(resultArr[4]);
-        const oldHeight = parseInt(resultArr[8]);
-
-        if (imagePath.toLowerCase().endsWith(".webp")) {
-          // Convert to PNG, apply padding, then restore to WebP
-          execSIPSCommandOnWebP(
-            `sips --padToHeightWidth ${oldHeight + padAmount} ${oldWidth + padAmount} --padColor ${hexString}`,
-            imagePath
-          );
-        }
-        if (imagePath.toLowerCase().endsWith(".svg")) {
-          // Convert to PNG, apply padding, then restore to SVG
-          execSIPSCommandOnSVG(
-            `sips --padToHeightWidth ${oldHeight + padAmount} ${oldWidth + padAmount} --padColor ${hexString}`,
-            imagePath
-          );
-        } else {
-          // Run command normally
-          execSync(
-            `sips --padToHeightWidth ${oldHeight + padAmount} ${
-              oldWidth + padAmount
-            } --padColor ${hexString} "${imagePath}"`
-          );
-        }
-      }
-
+      await pad(selectedImages, padAmount, hexString);
       toast.title = `Added padding to ${selectedImages.length.toString()} ${pluralized}`;
       toast.style = Toast.Style.Success;
-    } catch {
-      toast.title = `Failed to pad ${selectedImages.length.toString()} ${pluralized}`;
-      toast.style = Toast.Style.Failure;
+    } catch (error) {
+      await showErrorToast(`Failed to pad ${selectedImages.length.toString()} ${pluralized}`, error as Error, toast);
+    } finally {
+      await cleanup();
     }
   }
 }

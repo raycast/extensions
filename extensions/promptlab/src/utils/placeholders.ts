@@ -37,7 +37,7 @@ import * as os from "os";
 import * as crypto from "crypto";
 import * as vm from "vm";
 import { execSync } from "child_process";
-import { CUSTOM_PLACEHOLDERS_FILENAME, StorageKeys } from "./constants";
+import { CUSTOM_PLACEHOLDERS_FILENAME, STORAGE_KEYS } from "./constants";
 import { getStorage, loadAdvancedSettingsSync, setStorage } from "./storage-utils";
 import { ScriptRunner, addFileToSelection, getRunningApplications, searchNearbyLocations } from "./scripts";
 import { getExtensions } from "./file-utils";
@@ -137,7 +137,7 @@ const placeholders: PlaceholderList = {
     name: "vars",
     rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
-      const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+      const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
       if (Array.isArray(vars)) {
         const varNames = vars.map((v) => v.name);
         return { result: varNames.join(", "), vars: varNames.join(", ") };
@@ -1144,15 +1144,15 @@ const placeholders: PlaceholderList = {
     rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       let newUUID = crypto.randomUUID();
-      const usedUUIDs = await getStorage(StorageKeys.USED_UUIDS);
+      const usedUUIDs = await getStorage(STORAGE_KEYS.USED_UUIDS);
       if (Array.isArray(usedUUIDs)) {
         while (usedUUIDs.includes(newUUID)) {
           newUUID = crypto.randomUUID();
         }
         usedUUIDs.push(newUUID);
-        await setStorage(StorageKeys.USED_UUIDS, usedUUIDs);
+        await setStorage(STORAGE_KEYS.USED_UUIDS, usedUUIDs);
       } else {
-        await setStorage(StorageKeys.USED_UUIDS, [newUUID]);
+        await setStorage(STORAGE_KEYS.USED_UUIDS, [newUUID]);
       }
       return { result: newUUID, uuid: newUUID };
     },
@@ -1171,7 +1171,7 @@ const placeholders: PlaceholderList = {
     name: "usedUUIDs",
     rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
-      const usedUUIDs = await getStorage(StorageKeys.USED_UUIDS);
+      const usedUUIDs = await getStorage(STORAGE_KEYS.USED_UUIDS);
       if (Array.isArray(usedUUIDs)) {
         return { result: usedUUIDs.join(", "), usedUUIDs: usedUUIDs.join(", ") };
       }
@@ -2663,7 +2663,7 @@ const bulkApply = async (str: string, context?: { [key: string]: string }): Prom
  * @returns The value of the variable, or an empty string if the variable does not exist.
  */
 export const getPersistentVariable = async (name: string): Promise<string> => {
-  const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+  const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
   const variable = vars.find((variable) => variable.name == name);
   if (variable) {
     return variable.value;
@@ -2677,7 +2677,7 @@ export const getPersistentVariable = async (name: string): Promise<string> => {
  * @param value The initial value of the variable.
  */
 export const setPersistentVariable = async (name: string, value: string) => {
-  const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+  const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
   const variable = vars.find((variable) => variable.name == name);
   if (variable) {
     vars.splice(vars.indexOf(variable), 1);
@@ -2686,7 +2686,7 @@ export const setPersistentVariable = async (name: string, value: string) => {
   } else {
     vars.push({ name: name, value: value, initialValue: value });
   }
-  await setStorage(StorageKeys.PERSISTENT_VARIABLES, vars);
+  await setStorage(STORAGE_KEYS.PERSISTENT_VARIABLES, vars);
 };
 
 /**
@@ -2694,13 +2694,13 @@ export const setPersistentVariable = async (name: string, value: string) => {
  * @param name The name of the variable to reset.
  */
 export const resetPersistentVariable = async (name: string): Promise<string> => {
-  const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+  const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
   const variable = vars.find((variable) => variable.name == name);
   if (variable) {
     vars.splice(vars.indexOf(variable), 1);
     variable.value = variable.initialValue;
     vars.push(variable);
-    await setStorage(StorageKeys.PERSISTENT_VARIABLES, vars);
+    await setStorage(STORAGE_KEYS.PERSISTENT_VARIABLES, vars);
     return variable.value;
   }
   return "";
@@ -2711,11 +2711,11 @@ export const resetPersistentVariable = async (name: string): Promise<string> => 
  * @param name The name of the variable to delete.
  */
 export const deletePersistentVariable = async (name: string) => {
-  const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+  const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
   const variable = vars.find((variable) => variable.name == name);
   if (variable) {
     vars.splice(vars.indexOf(variable), 1);
-    await setStorage(StorageKeys.PERSISTENT_VARIABLES, vars);
+    await setStorage(STORAGE_KEYS.PERSISTENT_VARIABLES, vars);
   }
 };
 

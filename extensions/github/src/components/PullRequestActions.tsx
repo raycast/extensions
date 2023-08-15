@@ -326,7 +326,7 @@ function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
       });
     },
     [pullRequest],
-    { execute: load }
+    { execute: load },
   );
 
   async function requestReview({ id, text }: { id: string; text: string }) {
@@ -400,7 +400,7 @@ function AddAssigneeSubmenu({ pullRequest, mutate }: SubmenuProps) {
       });
     },
     [pullRequest],
-    { execute: load }
+    { execute: load },
   );
 
   async function addAssignee({ id, text }: { id: string; text: string }) {
@@ -477,7 +477,7 @@ function AddProjectSubmenu({ pullRequest, mutate }: SubmenuProps) {
       });
     },
     [pullRequest],
-    { execute: load }
+    { execute: load },
   );
 
   async function addProject({ id, text }: { id: string; text: string }) {
@@ -545,7 +545,7 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
       });
     },
     [pullRequest],
-    { execute: load }
+    { execute: load },
   );
 
   async function unsetMilestone() {
