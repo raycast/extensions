@@ -113,7 +113,6 @@ export default function Command(): JSX.Element {
   if (showForm)
     return (
       <Form
-        navigationTitle="Pull Model"
         actions={
           <ActionPanel>
             <Action.SubmitForm
