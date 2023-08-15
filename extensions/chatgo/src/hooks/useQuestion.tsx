@@ -29,11 +29,6 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
             });
           }
         } catch (error) {
-          // await showToast({
-          //   style: Toast.Style.Failure,
-          //   title: "Selected text couldn't load",
-          //   message: String(error),
-          // });
         }
         setLoading(false);
       }
