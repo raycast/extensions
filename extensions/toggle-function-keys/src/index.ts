@@ -45,6 +45,6 @@ export default async function main() {
       end if
     end tell
   end tell
-  `)
+  `);
   await showHUD("Successfully toggled function keys");
 }
