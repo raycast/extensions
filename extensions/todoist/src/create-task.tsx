@@ -1,5 +1,6 @@
 import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
+import { useState } from "react";
 
 import { addComment, addTask, AddTaskArgs, handleError, uploadFile } from "./api";
 import RefreshAction from "./components/RefreshAction";
@@ -36,6 +37,7 @@ type CreateTaskProps = {
 };
 
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
+  const [dueDateWithTime, setDueDateWithTime] = useState(false);
   const { push, pop } = useNavigation();
 
   const { data, setData, isLoading } = useSyncData();
@@ -51,7 +53,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       const body: AddTaskArgs = { content: values.content, description: values.description };
 
       if (values.dueDate) {
-        body.due = { date: getAPIDate(values.dueDate) };
+        body.due = { date: getAPIDate(values.dueDate, dueDateWithTime) };
       }
 
       if (values.priority) {
@@ -176,7 +178,20 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due date" type={Form.DatePicker.Type.DateTime} />
+      <Form.Checkbox
+        id="Add time"
+        title="Add time"
+        value={dueDateWithTime}
+        label="Add time to the Due date"
+        onChange={setDueDateWithTime}
+      />
+
+      {/* @Mathieu - the bug is here */}
+      {dueDateWithTime ? (
+        <Form.DatePicker {...itemProps.dueDate} title="Due date" type={Form.DatePicker.Type.DateTime} />
+      ) : (
+        <Form.DatePicker {...itemProps.dueDate} title="Due date" type={Form.DatePicker.Type.Date} />
+      )}
 
       <Form.Dropdown {...itemProps.priority} title="Priority">
         {priorities.map(({ value, name, color, icon }) => (

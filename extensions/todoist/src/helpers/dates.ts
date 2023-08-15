@@ -68,8 +68,8 @@ export function displayDueDateTime(dateString: string) {
   return `${date} ${format(new Date(dateString), "HH:mm")}`;
 }
 
-export function getAPIDate(date: Date): string {
-  return formatISO(date, { representation: "complete" });
+export function getAPIDate(date: Date, dateWithTime?: boolean): string {
+  return formatISO(date, { representation: dateWithTime ? "complete" : "date" });
 }
 
 export function parseDay(date: string | undefined): Date {
