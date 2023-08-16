@@ -18,19 +18,28 @@ export default async function Command() {
       });
       const request = await fetch(`https://api.shrtco.de/v2/shorten?url=${encodeURIComponent(url)}`);
       const response = await request.json();
-      if (preferences.domain == "1") {
-        await Clipboard.paste(response.result.full_short_link);
-      } else if (preferences.domain == "2") {
-        await Clipboard.paste(response.result.full_short_link2);
-      } else if (preferences.domain == "3") {
-        await Clipboard.paste(response.result.full_short_link3);
-      } else {
-        const getTinyURL = async (url) => {
-          const response = await fetch(`https://tinyurl.com/api-create.php?url=${url}`);
-          return response.text();
-        };
+      let urlString = "";
 
-        await Clipboard.paste(await getTinyURL(url));
+      switch (preferences.domain) {
+        case "1":
+        case "2":
+        case "3":
+          if (preferences.domain == "1") {
+            await Clipboard.paste(response.result.full_short_link);
+          } else if (preferences.domain == "2") {
+            await Clipboard.paste(response.result.full_short_link2);
+          } else if (preferences.domain == "3") {
+            await Clipboard.paste(response.result.full_short_link3);
+          }
+          break;
+        default:
+          urlString = async (url) => {
+            const response = await fetch(`https://tinyurl.com/api-create.php?url=${url}`);
+            return response.text();
+          };
+
+          await Clipboard.paste(await urlString(url));
+          break;
       }
     }
   } catch (error) {
