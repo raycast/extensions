@@ -1,5 +1,11 @@
 # Notion Changelog
 
+## [Small fixes] - 2023-08-16
+
+- Hide formula fields when creating database pages
+- Fixes can't read property `plain_text` error
+- Update screenshots
+
 ## [Big update] - 2023-07-25
 
 This update introduces a new `Quick Capture` command. This lets you quickly save websites in Notion by using their URL or copying it onto your clipboard, then launching the command. You can choose to just save the URL, the entire webpage, or an AI-generated summary.
