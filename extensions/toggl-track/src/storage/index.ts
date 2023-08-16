@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import api from "../toggl";
-import { Client, Me, Project, Tag, TimeEntry, Workspace } from "../toggl/types";
+import { Me, Workspace, Project, Client, Tag, TimeEntry } from "../toggl/types";
 import persistedStorage from "./persistedStorage";
 import { TogglStorage } from "./types";
 
@@ -23,25 +23,20 @@ export const storage: TogglStorage = {
     fetch: api.getMe,
     expirySeconds: 3600,
   }),
-  projects: persistedStorage({
-    key: "projects",
-    fetch: allWorkspacesFetch(api.getWorkspaceProjects),
-    expirySeconds: 60,
-  }),
   workspaces: persistedStorage({
     key: "workspaces",
     fetch: api.getWorkspaces,
     expirySeconds: 3600,
   }),
+  projects: persistedStorage({
+    key: "projects",
+    fetch: allWorkspacesFetch(api.getWorkspaceProjects),
+    expirySeconds: 60,
+  }),
   clients: persistedStorage({
     key: "clients",
     fetch: allWorkspacesFetch(api.getWorkspaceClients),
     expirySeconds: 60,
-  }),
-  runningTimeEntry: persistedStorage({
-    key: "runningTimeEntry",
-    fetch: api.getRunningTimeEntry,
-    expirySeconds: 10,
   }),
   tags: persistedStorage({
     key: "tags",
@@ -57,38 +52,43 @@ export const storage: TogglStorage = {
       }),
     expirySeconds: 60 * 5,
   }),
+  runningTimeEntry: persistedStorage({
+    key: "runningTimeEntry",
+    fetch: api.getRunningTimeEntry,
+    expirySeconds: 10,
+  }),
 };
 
 export type StorageValues = {
   me: Me | null;
-  projects: Project[];
   workspaces: Workspace[];
+  projects: Project[];
   clients: Client[];
   tags: Tag[];
-  runningTimeEntry: TimeEntry | null;
   timeEntries: TimeEntry[];
+  runningTimeEntry: TimeEntry | null;
 };
 
 export async function getStorage(): Promise<StorageValues> {
   return {
     me: await storage.me.get(),
-    projects: await storage.projects.get(),
     workspaces: await storage.workspaces.get(),
+    projects: await storage.projects.get(),
     clients: await storage.clients.get(),
     tags: await storage.tags.get(),
-    runningTimeEntry: await storage.runningTimeEntry.get(),
     timeEntries: await storage.timeEntries.get(),
+    runningTimeEntry: await storage.runningTimeEntry.get(),
   };
 }
 
 export async function refreshStorage(): Promise<void> {
   await Promise.all([
     storage.me.refresh(),
-    storage.projects.refresh(),
     storage.workspaces.refresh(),
+    storage.projects.refresh(),
     storage.clients.refresh(),
     storage.tags.refresh(),
-    storage.runningTimeEntry.refresh(),
     storage.timeEntries.refresh(),
+    storage.runningTimeEntry.refresh(),
   ]);
 }

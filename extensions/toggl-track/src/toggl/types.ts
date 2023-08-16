@@ -20,19 +20,6 @@ export interface Project {
   workspace_id: number;
 }
 
-// https://developers.track.toggl.com/docs/api/time_entries#response
-export interface TimeEntry {
-  at: string;
-  billable: boolean;
-  description: string;
-  id: number;
-  project_id: number;
-  start: string;
-  duration: number;
-  tags: string[];
-  workspace_id: number;
-}
-
 // https://developers.track.toggl.com/docs/api/clients#response
 export interface Client {
   id: number;
@@ -43,5 +30,18 @@ export interface Client {
 export interface Tag {
   id: number;
   name: string;
+  workspace_id: number;
+}
+
+// https://developers.track.toggl.com/docs/api/time_entries#response
+export interface TimeEntry {
+  at: string;
+  billable: boolean;
+  description: string;
+  id: number;
+  project_id: number;
+  start: string;
+  duration: number;
+  tags: string[];
   workspace_id: number;
 }

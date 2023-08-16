@@ -1,4 +1,4 @@
-import { Client, Me, Project, Tag, TimeEntry, Workspace } from "./types";
+import { Me, Workspace, Project, Client, Tag, TimeEntry } from "./types";
 import { getPreferenceValues } from "@raycast/api";
 import { authenticatedFetch } from "./auth";
 
@@ -25,6 +25,20 @@ const TogglAPI = function ({ togglApiToken, hideArchivedProjects }: Preferences)
         active: true,
       });
       return hideArchivedProjects ? projects.filter((p) => p.active) : projects;
+    },
+    getWorkspaceClients: (workspaceId: number): Promise<Client[] | null> => {
+      return api.get<Client[] | null>(`/workspaces/${workspaceId}/clients`);
+    },
+    getWorkspaceTags: (workspaceId: number): Promise<Tag[] | null> => {
+      return api.get<Tag[] | null>(`/workspaces/${workspaceId}/tags`);
+    },
+    getTimeEntries: ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
+      return api.get<TimeEntry[]>(
+        `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`,
+      );
+    },
+    getRunningTimeEntry: async (): Promise<TimeEntry | null> => {
+      return api.get<TimeEntry | null>("/me/time_entries/current");
     },
     createTimeEntry: ({
       projectId,
@@ -53,22 +67,8 @@ const TogglAPI = function ({ togglApiToken, hideArchivedProjects }: Preferences)
         workspace_id: workspaceId,
       });
     },
-    getRunningTimeEntry: async (): Promise<TimeEntry | null> => {
-      return api.get<TimeEntry | null>("/me/time_entries/current");
-    },
-    getWorkspaceClients: (workspaceId: number): Promise<Client[] | null> => {
-      return api.get<Client[] | null>(`/workspaces/${workspaceId}/clients`);
-    },
-    getWorkspaceTags: (workspaceId: number): Promise<Tag[] | null> => {
-      return api.get<Tag[] | null>(`/workspaces/${workspaceId}/tags`);
-    },
     stopTimeEntry: ({ id, workspaceId }: { id: number; workspaceId: number }) => {
       return api.patch<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries/${id}/stop`, {});
-    },
-    getTimeEntries: ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
-      return api.get<TimeEntry[]>(
-        `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`,
-      );
     },
   };
 };
