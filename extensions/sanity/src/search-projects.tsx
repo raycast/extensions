@@ -1,16 +1,30 @@
-import { ActionPanel, open, Icon, List, Action, getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { Project } from "./types/Project";
+import { ActionPanel, Cache, open, Icon, List, Action } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { client } from "./util/client";
+import { SanityProject } from "@sanity/client";
+
+const cache = new Cache();
 
 export default function SearchProjects() {
-  const { isLoading, data } = useFetch<Project[]>("https://api.sanity.io/v2021-06-07/projects", {
-    headers: {
-      Authorization: `Bearer ${getPreferenceValues().accessToken}`,
-    },
-  });
+  const [projects, setProjects] = useState<SanityProject[] | null>(null);
 
-  const projects = data;
-
+  useEffect(() => {
+    async function fetchProjects() {
+      const cachedProjects = cache.get("projects");
+      /*
+       * If we have a cached version of the projects, use that
+       * while we fetch the fresh version in the background
+       * */
+      if (cachedProjects) {
+        setProjects(JSON.parse(cachedProjects));
+      }
+      const freshProjects: SanityProject[] = await client.projects.list();
+      cache.set("projects", JSON.stringify(freshProjects));
+      setProjects(freshProjects);
+    }
+    fetchProjects();
+  }, []);
+  const isLoading = !projects;
   return (
     <List searchBarPlaceholder="Search Projects..." isLoading={isLoading}>
       {projects &&
