@@ -28,7 +28,7 @@ async function updateBonds() {
     );
     const json = (await response.json()) as any;
     const result = json.result.data.filter(({ VALUE_DATE }: { VALUE_DATE: string }) =>
-      VALUE_DATE.includes(currentDate)
+      VALUE_DATE?.includes(currentDate)
     );
     if (!result.length) {
       setBonds([
@@ -53,7 +53,7 @@ async function updateBonds() {
 function main() {
   const currentDate = dayjs().tz("asia/shanghai").format("YYYY-MM-DD");
   const bonds = getBonds();
-  if (bonds[0]?.VALUE_DATE.includes(currentDate)) {
+  if (bonds[0]?.VALUE_DATE?.includes(currentDate)) {
     return;
   }
   updateBonds();
