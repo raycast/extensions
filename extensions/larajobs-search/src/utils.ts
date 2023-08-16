@@ -10,3 +10,20 @@ export function getShortcut(index: number) {
 
   return shortcut;
 }
+
+export function formatString(str: string): string {
+  const newString = str.split("_").join(" ").toLowerCase();
+
+  return newString.charAt(0).toUpperCase() + newString.slice(1);
+}
+
+export function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const datePart = date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  return datePart;
+}
