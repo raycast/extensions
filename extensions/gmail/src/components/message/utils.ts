@@ -188,7 +188,8 @@ export function generateLabelFilter(label: gmail_v1.Schema$Label) {
   if (isSystemLabel(label)) {
     return `in:${name}`;
   }
-  return `label=${name}`;
+  const safeName = name?.replaceAll(/\s*-\s*/g, (substring) => "-".repeat(substring.length));
+  return `label=${safeName}`;
 }
 
 export function convertToSemanticLabels(labels: gmail_v1.Schema$Label[] | undefined): SemanticLabels {
