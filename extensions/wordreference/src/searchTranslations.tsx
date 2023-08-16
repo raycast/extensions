@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   Icon,
   List,
   LocalStorage,
@@ -18,7 +19,7 @@ import usePreferences from "./hooks/preferences";
 
 export default function Command() {
   const { preferences, translation } = usePreferences();
-  const { searchText, setSearchText, translations } = useSearchTranslations();
+  const { searchText, setSearchText, translations, isLoading } = useSearchTranslations();
 
   const { clearRecentSearches, recentSearches, removeRecentSearch } = useRecentSearches();
 
@@ -31,6 +32,7 @@ export default function Command() {
         </ActionPanel>
       }
       filtering={false}
+      isLoading={isLoading}
       searchBarPlaceholder={`Search ${translation.from} to ${translation.to} translations...`}
     >
       {searchText ? (
@@ -68,6 +70,8 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section title={word}>
                     <DetailActions word={word} lang={lang} translationKey={preferences.translationKey} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
                     <Action
                       title="Delete"
                       onAction={() => {
@@ -77,9 +81,6 @@ export default function Command() {
                       shortcut={{ modifiers: ["ctrl"], key: "x" }}
                       style={Action.Style.Destructive}
                     />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
-                    <SettingsAction />
                     <Action
                       title="Clear Recent Searches"
                       onAction={() => {
@@ -89,6 +90,9 @@ export default function Command() {
                       shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                       style={Action.Style.Destructive}
                     />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <SettingsAction />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
@@ -138,7 +142,7 @@ function useSearchTranslations() {
   const [searchText, setSearchText] = useState("");
   const { preferences } = usePreferences();
 
-  const { data } = useFetch<string>(
+  const { data, isLoading } = useFetch<string>(
     `https://www.wordreference.com/autocomplete?dict=${preferences.translationKey}&query=${searchText}`,
     {
       method: "GET",
@@ -162,7 +166,7 @@ function useSearchTranslations() {
     return result;
   }, [data]);
 
-  return { searchText, setSearchText, translations };
+  return { searchText, setSearchText, translations, isLoading };
 }
 
 interface RecentSearch {
@@ -209,7 +213,7 @@ function useRecentSearches() {
     await confirmAlert({
       title: "Clear Recent Searches",
       message: "Are you sure you want to clear all recent searches?",
-      icon: Icon.Trash,
+      icon: { source: Icon.Trash, tintColor: Color.Red },
       primaryAction: {
         title: "Clear",
         onAction: () => {
