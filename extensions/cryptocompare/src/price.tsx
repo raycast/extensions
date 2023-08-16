@@ -81,7 +81,7 @@ export default function Command() {
                   }
                 }}
               />
-              
+
               <Action
                 title="Refresh"
                 icon="refresh.png"
