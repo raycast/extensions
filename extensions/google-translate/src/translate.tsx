@@ -39,7 +39,7 @@ export default function Translate(): ReactElement {
         const langTo = supportedLanguagesByCode[r.langTo];
 
         const languages = `${getLanguageFlag(langFrom, langFrom?.code)} -> ${getLanguageFlag(langTo, langTo?.code)}`;
-        const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo.name ?? langTo.code}`;
+        const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
 
         return (
           <List.Item
