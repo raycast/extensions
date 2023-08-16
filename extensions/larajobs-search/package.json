@@ -6,8 +6,12 @@
   "description": "Search jobs on Larajobs",
   "icon": "extension_icon.png",
   "author": "Treblle",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
-    "Other", "Web"
+    "Other",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
@@ -27,16 +31,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.3"
+    "@raycast/api": "^1.56.3",
+    "@raycast/utils": "^1.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@raycast/utils": "^1.9.0",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
-    "axios": "^1.4.0",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
