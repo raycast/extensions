@@ -5,12 +5,13 @@ A URL shortener unlike anything you've seen before on the Raycast extension stor
 - **No API keys required**
     - No prior setup necessary
 - **Completely FREE**. 
-- choose from multiple URL shortening domains, including **TinyURL** and **Shrtcode.** 
-- the *fastest way* to shorten any URL,
-    - no need to fill out any forms. 
-        - a no-view extension
-        - extension only uses selected text
-        - perfect for using a hotkey! (I personally use `^L`)
-- choose how you handle the shortened URL
+    - The power is *limitless*
+- Choose from multiple URL shortening domains, including **TinyURL** and **Shrtcode** 
+- The *fastest way* to shorten any URL
+    - No need to fill out any forms. 
+        - A no-view extension
+        - Extension only uses selected text
+        - Perfect for using a hotkey! (I personally use `^L`)
+- Choose how Raycast handles the shortened URL
     - Paste to Active Window
     - Or Copy to Clipboard

@@ -48,10 +48,10 @@ export default async function Command() {
 
       if (preferences.clipboard == "1") {
         await Clipboard.paste(URLString);
-        await showHUD("Pasted url to active window");
+        await showHUD("Pasted URL to Active Window");
       } else {
         await Clipboard.copy(URLString);
-        await showHUD("Copied url to clipboard");
+        await showHUD("Copied URL to Clipboard");
       }
     }
   } catch (error) {
