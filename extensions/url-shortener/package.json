@@ -10,7 +10,6 @@
     {
       "name": "shorten-url",
       "title": "Shorten URL",
-      "subtitle": "Replace selected text (a valid link) with shortened link",
       "description": "Using your selected text (a valid link), URL Shortener will replace it with a shortened link which redirects to your desired selected URL.",
       "mode": "no-view"
     }
@@ -19,10 +18,10 @@
     {
       "name": "domain",
       "title": "Domain",
-      "description" : "This is what will be used in your shortened links.",
+      "description": "This is what will be used in your shortened links.",
       "type": "dropdown",
       
-      "required" : true
+      "required": true
       ,
       "data": [
         {
