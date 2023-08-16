@@ -25,7 +25,7 @@
       "description": "You can get your own access token from https://gyazo.com/oauth/applications",
       "name": "accessToken",
       "required": true,
-      "title": "access token",
+      "title": "Access Token",
       "type": "textfield"
     }
   ],
