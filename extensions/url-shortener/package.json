@@ -20,9 +20,7 @@
       "title": "Domain",
       "description": "This is what will be used in your shortened links.",
       "type": "dropdown",
-      
-      "required": true
-      ,
+      "required": true,
       "data": [
         {
           "title": "tinyurl.com",
@@ -47,7 +45,6 @@
       "title": "Clipboard",
       "description": "Choose between copying the shortened link to the clipboard or pasting it to the active window.",
       "type": "dropdown",
-      
       "required": true,
       "data": [
         {
@@ -63,9 +60,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.57.0",
-    "shortid": "^2.2.16",
-    "express": "^4.18.2",
-    "tinyurl-api": "^1.0.1",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
@@ -73,7 +67,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
