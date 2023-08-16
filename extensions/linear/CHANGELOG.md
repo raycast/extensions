@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Add milestone functionality] - 2023-08-10
+## [Add milestone functionality] - 2023-08-16
 
 Linear now allows users to create milestones within projects. This feature is now available on this extension.
 

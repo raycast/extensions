@@ -114,7 +114,7 @@ export default function Project({ project, priorities, users, me, mutateProjects
             target={<CreateMilestoneForm projectId={project.id} />}
             title="Create Milestone"
             shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-            icon={Icon.ExclamationMark}
+            icon={{ source: "linear-icons/milestone.svg", tintColor: Color.PrimaryText }}
           />
 
           {isLinearInstalled ? (
