@@ -19,23 +19,16 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "accessToken",
-      "type": "password",
-      "required": true,
-      "title": "Access Token",
-      "description": "Your Sanity access token. You can retrieve it using the Sanity CLI.",
-      "placeholder": "Enter your Sanity Token",
-      "link": "https://www.sanity.io/docs/http-auth"
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.56.3",
-    "@raycast/utils": "^1.9.0"
+    "@raycast/utils": "^1.9.0",
+    "@sanity/cli": "^3.15.1",
+    "@sanity/client": "^6.4.6",
+    "configstore": "^6.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@types/configstore": "^6.0.0",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",

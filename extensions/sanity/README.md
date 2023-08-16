@@ -6,14 +6,11 @@ Not affiliated with Sanity.
 
 ## Setup:
 
-A Sanity API token is required to use this extension. You can retrieve it using the Sanity CLI:
+This extension leverages the same authentication as your Sanity CLI. To log in on your computer, run the following in your command line interface (requires you to have [Node.js installed](https://nodejs.org/en)):
 
+```sh
+npx sanity login
 ```
-sanity debug --secrets
-```
-
-Copy paste the `Auth token` from the output of the above command into the extension settings.
-To set up the CLI, refer to Sanity's documentation: https://www.sanity.io/docs/cli
 
 ## Features:
 
