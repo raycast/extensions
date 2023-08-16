@@ -12,7 +12,7 @@ export default function SearchProjects() {
   const projects = data;
 
   return (
-    <List searchBarPlaceholder="Search Projects..." navigationTitle="Results" isLoading={isLoading}>
+    <List searchBarPlaceholder="Search Projects..." isLoading={isLoading}>
       {projects &&
         projects
           .filter((project) => !project.isDisabled && !project.isDisabledByUser)
