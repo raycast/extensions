@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 export default async function Command() {
   const preferences = getPreferenceValues();
   try {
-    let url = await getSelectedText();
+    const url = await getSelectedText();
     const regexURL = /^((ftp|smtp|file|data):\/\/)?[^\s$.?#].[^\s]*$/;
 
     if (url === "") {
