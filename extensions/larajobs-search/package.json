@@ -18,16 +18,15 @@
     {
       "name": "index",
       "title": "Search Larajobs",
-      "subtitle": "Search latest LaraJobs",
       "description": "Search and open jobs from Larajobs right from Raycast.",
       "mode": "view"
     },
     {
       "name": "menu",
-      "title": "See Larajobs",
-      "subtitle": "See latest LaraJobs",
+      "title": "Menubar Larajobs",
       "description": "See and open jobs from Larajobs right from your menubar.",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "dependencies": {
