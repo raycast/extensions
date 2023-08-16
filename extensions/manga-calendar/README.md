@@ -5,7 +5,7 @@
 
 ### Browsing through the latest manga publications by Mexican editors
 
-A [Raycast](https://raycast.com/) to see all collections published in Mexico: mangas, comics and other collectibles in one place [Mis Comics MX](https://miscomics.com.mx/).
+A [Raycast](https://raycast.com/) extension to see all collections published in Mexico: mangas, comics and other collectibles in one place [Mis Comics MX](https://miscomics.com.mx/).
 
 Choose between 2 commands:
   - Latest Publication: See the current month's releases.
