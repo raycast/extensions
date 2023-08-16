@@ -26,10 +26,9 @@ export default async () => {
   if (typeof file === "undefined") {
     await showToast({
       style: Toast.Style.Failure,
-      title: "",
-      message: "Clipboard is not image",
+      title: "Clipboard is not an image",
       primaryAction: {
-        title: "Open Clipboard history",
+        title: "Open Clipboard History",
         onAction: async (toast) => {
           await open("raycast://extensions/raycast/clipboard-history/clipboard-history");
           toast.hide();
