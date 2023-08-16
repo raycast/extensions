@@ -37,8 +37,12 @@ export default async function Command() {
             const response = await fetch(`https://tinyurl.com/api-create.php?url=${url}`);
             return response.text();
           };
-
-          await Clipboard.paste(await urlString(url));
+          if (preferences.clipboard == "1") {
+            await Clipboard.paste(await urlString(url));
+          } else {
+            await Clipboard.copy(await urlString(url));
+            await showHUD("Copied url to clipboard");
+          }
           break;
       }
     }

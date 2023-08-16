@@ -41,6 +41,24 @@
           "value": "3"
         }
       ]
+    },
+    {
+      "name": "clipboard",
+      "title": "Clipboard",
+      "description": "Choose between copying the shortened link to the clipboard or pasting it to the active window.",
+      "type": "dropdown",
+      
+      "required": true,
+      "data": [
+        {
+          "title": "Paste to Active Window",
+          "value": "1"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "2"
+        }
+      ]
     }
   ],
   "dependencies": {
