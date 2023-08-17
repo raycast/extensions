@@ -10,7 +10,6 @@ import {
   showToast,
 } from "@raycast/api";
 import { Clipboard } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import {
   filterString,
   getComputerName,
@@ -59,6 +58,7 @@ import {
   Placeholder,
   PlaceholderList,
 } from "./types";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Placeholder specification.

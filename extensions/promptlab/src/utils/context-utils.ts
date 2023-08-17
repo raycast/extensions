@@ -1,8 +1,8 @@
-import { runAppleScript } from "run-applescript";
 import * as os from "os";
 import { getPreferenceValues } from "@raycast/api";
 import { ExtensionPreferences, JSONObject } from "./types";
 import fetch from "node-fetch";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Removes extraneous symbols from a string and limits it to (by default) 3000 characters.

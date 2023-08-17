@@ -1,5 +1,4 @@
 import { spawn } from "child_process";
-import { runAppleScript } from "run-applescript";
 import * as util from "util";
 import { DebugStyle, logDebug } from "./dev-utils";
 import { CalendarDuration, EventType, ImageData, PDFData, ReturnType } from "./types";
@@ -8,6 +7,7 @@ import path from "path";
 import { filterString } from "./context-utils";
 import * as fs from "fs";
 import * as os from "os";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Executes an OSA script using the `osascript` command.
@@ -329,6 +329,7 @@ export const ScriptRunner = {
    */
   ScreenCapture: async (windowOnly = false) => {
     const tempPath = path.join(os.tmpdir(), "screenshot.png");
+    console.log("fuck");
     await (runScript("ScreenCapture", ReturnType.STRING, "JavaScript", tempPath, windowOnly) as Promise<string>);
     const data = await ScriptRunner.ImageFeatureExtractor(tempPath, true, true, true, true, false, false, 0.7);
     await fs.promises.rm(tempPath);

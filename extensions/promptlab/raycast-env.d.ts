@@ -9,35 +9,35 @@
 
 type ExtensionPreferences = {
   /** General Settings - If checked, PromptLab will use OCR to extract text from PDFs. This takes longer but enables analysis of more PDF content types. */
-  "pdfOCR"?: boolean,
+  "pdfOCR": boolean,
   /** Export Location - The folder where exported commands and chats will be saved. */
-  "exportLocation"?: string,
+  "exportLocation": string,
   /** Custom Placeholder Files - A comma-separated list of JSON files containing custom placeholders. These files must follow the format of the original custom_placeholders.json file. See the documentation for more information. */
-  "customPlaceholderFiles"?: string,
+  "customPlaceholderFiles": string,
   /** Primary Command Action - The top action of the actions menu in command response views. */
-  "primaryAction"?: "copy-response-to-clipboard" | "paste-to-active-app" | "copy-prompt-to-clipboard" | "open-chat" | "regenerate",
+  "primaryAction": "copy-response-to-clipboard" | "paste-to-active-app" | "copy-prompt-to-clipboard" | "open-chat" | "regenerate",
   /** Level of Automatic Input Condensing - The amount of automatic input condensing to apply to the input text. Higher levels will remove more characters and cut out excess verbiage, resulting in far fewer tokens. However, this may result in less accurate results. Adjust this value according to the model's token limit. For Raycast AI, use 'Medium' or 'High'. */
-  "condenseAmount"?: "high" | "medium" | "low" | "none",
+  "condenseAmount": "high" | "medium" | "low" | "none",
   /** Prompt Prefix - Text to prepend at the start of every prompt. This can be used to set context for all commands. */
-  "promptPrefix"?: string,
+  "promptPrefix": string,
   /** Prompt Suffix - Text to append and the end of every prompt. This can be used to set context for all commands. */
-  "promptSuffix"?: string,
+  "promptSuffix": string,
   /** Model Endpoint - The API endpoint of the model used to generate PromptLab command output. Set to 'Raycast AI' to use the Raycast AI API. */
-  "modelEndpoint"?: string,
+  "modelEndpoint": string,
   /** API Authorization Type - The authorization type for the model endpoint, e.g. API Key or Bearer. This is only used if the model source is set to something other than Raycast AI. */
-  "authType"?: "apiKey" | "bearerToken" | "x-api-key",
+  "authType": "apiKey" | "bearerToken" | "x-api-key",
   /** API Key - The API key for the model source. This is only used if the model source is set to something other than Raycast AI. */
-  "apiKey"?: string,
+  "apiKey": string,
   /** Input Schema - The JSON schema of the endpoint used to generate PromptLab command output. This is only used if the model source is set to something other than Raycast AI. Use {prompt} to represent PromptLab's entire input to the model. */
-  "inputSchema"?: string,
+  "inputSchema": string,
   /**  - If checked, PromptLab will include a temperature (creativity) parameter in the model input, using the value specified during command creation. You may need to disable this if the model does not support temperature. Disabling this will also disable the 'Creativity' textfield in the command creation view. */
-  "includeTemperature"?: boolean,
+  "includeTemperature": boolean,
   /** Output Key Path - The key path to the text output in the JSON response from the model endpoint. For example, choices[0].message.content, for the OpenAI API. This is only used if the model source is set to something other than Raycast AI. */
-  "outputKeyPath"?: string,
+  "outputKeyPath": string,
   /** Output Timing - Whether output from the model endpoint should be processed synchronously or asynchronously. Often, this is also an option on the model API. This is only used if the model source is set to something other than Raycast AI. */
-  "outputTiming"?: "sync" | "async",
+  "outputTiming": "sync" | "async",
   /** Prompt Length Limit - The maximum length of the prompt that will be sent to the model endpoint, beyond which it will be truncated. Larger values will support more content, but may result in token count errors. Adjust this value according to the model's token limit (but leave some space, e.g. 1000 characters, for additional input and placeholders). */
-  "lengthLimit"?: string
+  "lengthLimit": string
 }
 
 /** Preferences accessible in all the extension's commands */
@@ -49,18 +49,18 @@ declare namespace Preferences {
   /** Preferences accessible in the `search-commands` command */
   export type SearchCommands = ExtensionPreferences & {
   /** Search Settings - If checked, each command category will have its own section in the search results. */
-  "groupByCategory"?: boolean
+  "groupByCategory": boolean
 }
   /** Preferences accessible in the `chat` command */
   export type Chat = ExtensionPreferences & {
   /** Default Chat Settings - If checked, the selected files will be used as context for conversations by default. */
-  "useSelectedFiles"?: boolean,
+  "useSelectedFiles": boolean,
   /**  - If checked, the conversation history will be used as context for conversations by default. */
-  "useConversationHistory"?: boolean,
+  "useConversationHistory": boolean,
   /**  - If checked, autonomous agent features such as 'Allow AI To Run Commands' will be enabled by default. */
-  "autonomousFeatures"?: boolean,
+  "autonomousFeatures": boolean,
   /** Base Prompt - The base prompt that provides the initial context for conversations. */
-  "basePrompt"?: string
+  "basePrompt": string
 }
   /** Preferences accessible in the `import-commands` command */
   export type ImportCommands = ExtensionPreferences & {}
@@ -71,21 +71,21 @@ declare namespace Preferences {
   /** Preferences accessible in the `menubar-item` command */
   export type MenubarItem = ExtensionPreferences & {
   /** Shortcuts To Show - Whether to show the 'New Chat' shortcut in the menu. */
-  "showNewChatShortcut"?: boolean,
+  "showNewChatShortcut": boolean,
   /**  - Whether to show the 'All Commands' shortcut in the menu. */
-  "showAllCommandsShortcut"?: boolean,
+  "showAllCommandsShortcut": boolean,
   /**  - Whether to show the 'PromptLab Store' shortcut in the menu. */
-  "showPromptLabStoreShortcut"?: boolean,
+  "showPromptLabStoreShortcut": boolean,
   /**  - Whether to show the 'New Command' shortcut in the menu. */
-  "showNewCommandShortcut"?: boolean,
+  "showNewCommandShortcut": boolean,
   /** Display Settings - Whether to display icons next to the menu items. */
-  "displayIcons"?: boolean,
+  "displayIcons": boolean,
   /**  - Whether to display colors in the menu item icons. */
-  "displayColors"?: boolean,
+  "displayColors": boolean,
   /**  - Whether to separate favorite commands from the rest of the menu items. */
-  "displayFavorites"?: boolean,
+  "displayFavorites": boolean,
   /**  - Whether to separate commands by category. */
-  "displayCategories"?: boolean
+  "displayCategories": boolean
 }
 }
 
@@ -110,4 +110,14 @@ declare namespace Arguments {
   export type ManageModels = {}
   /** Arguments passed to the `menubar-item` command */
   export type MenubarItem = {}
+}
+
+
+declare module "swift:*" {
+  function run<T = unknown, U = any>(command: string, input?: U): Promise<T>;
+  export default run;
+	export class SwiftError extends Error {
+    stderr: string;
+    stdout: string;
+  }
 }
