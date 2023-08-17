@@ -329,7 +329,6 @@ export const ScriptRunner = {
    */
   ScreenCapture: async (windowOnly = false) => {
     const tempPath = path.join(os.tmpdir(), "screenshot.png");
-    console.log("fuck");
     await (runScript("ScreenCapture", ReturnType.STRING, "JavaScript", tempPath, windowOnly) as Promise<string>);
     const data = await ScriptRunner.ImageFeatureExtractor(tempPath, true, true, true, true, false, false, 0.7);
     await fs.promises.rm(tempPath);
