@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "shorten-url",
-      "title": "Shorten URL",
+      "title": "Shorten URL Using Selected Text",
       "description": "Using your selected text (a valid link), URL Shortener will replace it with a shortened link which redirects to your desired selected URL.",
       "mode": "no-view"
     },
