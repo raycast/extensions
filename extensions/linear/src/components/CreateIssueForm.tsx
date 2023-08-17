@@ -376,7 +376,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
       {hasMilestones ? (
         <Form.Dropdown title="Milestone" storeValue {...itemProps.milestoneId}>
-          <Form.Dropdown.Item title="No Milestone" value="" icon={{ source: "linear-icons/milestone.svg" }} />
+          <Form.Dropdown.Item title="No Milestone" value="" icon={{ source: "linear-icons/no-milestone.svg" }} />
 
           {milestones.map((milestone) => {
             return (

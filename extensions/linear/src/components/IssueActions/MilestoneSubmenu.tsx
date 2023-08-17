@@ -49,7 +49,7 @@ export default function MilestoneSubmenu({
     >
       <Action
         title="No Milestone"
-        icon={{ source: "linear-icons/milestone.svg" }}
+        icon={{ source: "linear-icons/no-milestone.svg" }}
         onAction={() => setMilestone(null)}
       />
 
