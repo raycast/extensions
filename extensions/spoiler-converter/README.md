@@ -1,3 +1,3 @@
 # Spoiler Converter
 
-Converts normal text into spoiler text
+Converts every letter into spoiler text
