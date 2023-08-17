@@ -12,6 +12,20 @@
       "title": "Shorten URL",
       "description": "Using your selected text (a valid link), URL Shortener will replace it with a shortened link which redirects to your desired selected URL.",
       "mode": "no-view"
+    },
+    {
+      "name": "shorten-url-withargs",
+      "title": "Shorten URL Using Arguments",
+      "description": "Using the inputted argument (a valid link), URL Shortener will copy a shortened version of the link to the clipboard which redirects to your desired selected URL.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -43,7 +57,7 @@
     {
       "name": "clipboard",
       "title": "Clipboard",
-      "description": "Choose between copying the shortened link to the clipboard or pasting it to the active window.",
+      "description": "For the command that converts selected text into a shortened link, choose between copying the shortened link to the clipboard or pasting it to the active window.",
       "type": "dropdown",
       "required": true,
       "data": [
