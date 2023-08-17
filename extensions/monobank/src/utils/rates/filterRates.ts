@@ -1,5 +1,5 @@
 import cc from "currency-codes";
-import { RateResponse } from "../types";
+import { RateResponse } from "../../types";
 
 export function filterRates(rates: RateResponse[]) {
   const currencySet = new Set<number>();

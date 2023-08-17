@@ -1,4 +1,4 @@
-import { Account, Jar } from "../types";
+import { Account, Jar } from "../../types";
 
 export function isAccount(accountOrJar: Account | Jar): accountOrJar is Account {
   return (accountOrJar as Account).iban !== undefined;

@@ -1,6 +1,6 @@
 import cc from "currency-codes";
-import { Account, AccountResponse, Currency } from "../types";
-import { getEmojiByCurrencyCode } from "./getEmojiByCurrencyCode";
+import { Account, AccountResponse, Currency } from "../../types";
+import { getEmojiByCurrencyCode } from "../common/getEmojiByCurrencyCode";
 
 export function transformAccount(account: AccountResponse): Account {
   const { currencyCode, balance, creditLimit, ...other } = account;

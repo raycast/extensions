@@ -1,6 +1,6 @@
 import cc from "currency-codes";
-import { Currency, Jar, JarResponse } from "../types";
-import { getEmojiByCurrencyCode } from "./getEmojiByCurrencyCode";
+import { Currency, Jar, JarResponse } from "../../types";
+import { getEmojiByCurrencyCode } from "../common/getEmojiByCurrencyCode";
 
 export function transformJar(jar: JarResponse): Jar {
   const { currencyCode, balance, goal, ...other } = jar;

@@ -1,14 +1,22 @@
-import { Action, ActionPanel, Clipboard, Color, Icon, List, Toast, showHUD, showToast } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
-import { useAccounts } from "./hooks/useAccounts";
-import { Account, Jar } from "./types";
-import { isAccount } from "./utils/typeGuards";
-import { accountTypeColors } from "./data/constants";
-import { useCurrencyRates } from "./hooks/useCurrencyRates";
+import { Clipboard, List, Toast, showHUD, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { calculateTotal, satisfiesTexts, filterPinnedItems, formatCurrency } from "./utils";
-import { useLocalStorage } from "./hooks/useLocalStorage";
-import EditForm from "./views/EditForm";
+import { Account, Jar } from "./types";
+import { useLocalStorage, useCurrencyRates, useAccounts } from "./hooks";
+
+import AccountDetail from "./components/accounts/AccountDetail";
+import AccountActions from "./components/accounts/AccountActions";
+import JarDetail from "./components/accounts/JarDetail";
+import JarActions from "./components/accounts/JarActions";
+
+import {
+  formatCurrency,
+  filterOutPinnedItems,
+  isAccount,
+  satisfiesTexts,
+  calculateTotal,
+  getAccountAccessories,
+  getJarAccessories,
+} from "./utils";
 
 type Category = "all" | "pinned" | "card" | "fop" | "jar";
 
@@ -16,7 +24,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState<Category>("all");
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const { data: clientInfo, isLoading: isClientInfoLoading, isError: isAccountsError } = useAccounts();
+  const { data: clientInfo, updateAccount, isLoading: isClientInfoLoading, isError: isAccountsError } = useAccounts();
   const { data: rates, isLoading: isRatesLoading, isError: isRatesError } = useCurrencyRates();
   const {
     data: pinned,
@@ -102,15 +110,15 @@ export default function Command() {
       return satisfiesTexts(searchText, account.currency.code, account.title);
     });
 
-  const filteredCards = filterPinnedItems({ category, items: cards, pinned }).filter((card) =>
+  const filteredCards = filterOutPinnedItems({ category, items: cards, pinned }).filter((card) =>
     satisfiesTexts(searchText, card.title, card.currency.code, card.type, card.maskedPan[0])
   );
 
-  const filteredFops = filterPinnedItems({ category, items: fops, pinned }).filter((fop) =>
+  const filteredFops = filterOutPinnedItems({ category, items: fops, pinned }).filter((fop) =>
     satisfiesTexts(searchText, fop.title, fop.currency.code, fop.type, fop.iban)
   );
 
-  const filteredJars = filterPinnedItems({ category, items: jars, pinned }).filter((jar) =>
+  const filteredJars = filterOutPinnedItems({ category, items: jars, pinned }).filter((jar) =>
     satisfiesTexts(searchText, jar.title, jar.currency.code)
   );
 
@@ -126,9 +134,9 @@ export default function Command() {
       searchBarAccessory={<CategoryDropdown onCategoryChange={onCategoryChange} />}
       onSearchTextChange={setSearchText}
     >
-      {(category === "all" || category === "pinned") && (
-        <List.Section title="Pinned">
-          {pinnedAccounts.map((account) => (
+      <List.Section title="Pinned">
+        {(category === "all" || category === "pinned") &&
+          pinnedAccounts.map((account) => (
             <List.Item
               key={account.id}
               id={account.id}
@@ -160,6 +168,7 @@ export default function Command() {
                     onRearrange={onRearrange}
                     onToggleDetails={toggleDetails}
                     onCopyTotal={onCopyTotal}
+                    onEdit={updateAccount}
                   />
                 ) : (
                   <JarActions
@@ -175,12 +184,11 @@ export default function Command() {
               }
             />
           ))}
-        </List.Section>
-      )}
+      </List.Section>
 
-      {(category === "all" || category === "card") && (
-        <List.Section title="Cards">
-          {filteredCards.map((card) => (
+      <List.Section title="Cards">
+        {(category === "all" || category === "card") &&
+          filteredCards.map((card) => (
             <List.Item
               key={card.id}
               id={card.id}
@@ -195,16 +203,16 @@ export default function Command() {
                   onPin={onPin}
                   onToggleDetails={toggleDetails}
                   onCopyTotal={onCopyTotal}
+                  onEdit={updateAccount}
                 />
               }
             />
           ))}
-        </List.Section>
-      )}
+      </List.Section>
 
-      {(category === "all" || category === "fop") && (
-        <List.Section title="PEs">
-          {filteredFops.map((fop) => (
+      <List.Section title="PEs">
+        {(category === "all" || category === "fop") &&
+          filteredFops.map((fop) => (
             <List.Item
               key={fop.id}
               id={fop.id}
@@ -219,16 +227,16 @@ export default function Command() {
                   onPin={onPin}
                   onToggleDetails={toggleDetails}
                   onCopyTotal={onCopyTotal}
+                  onEdit={updateAccount}
                 />
               }
             />
           ))}
-        </List.Section>
-      )}
+      </List.Section>
 
-      {(category === "all" || category === "jar") && (
-        <List.Section title="Jars">
-          {filteredJars.map((jar) => (
+      <List.Section title="Jars">
+        {(category === "all" || category === "jar") &&
+          filteredJars.map((jar) => (
             <List.Item
               key={jar.id}
               id={jar.id}
@@ -247,8 +255,7 @@ export default function Command() {
               }
             />
           ))}
-        </List.Section>
-      )}
+      </List.Section>
     </List>
   );
 }
@@ -274,309 +281,12 @@ function CategoryDropdown(props: { onCategoryChange: (newValue: Category) => voi
 function getTitle(item: Account | Jar) {
   if (isAccount(item)) {
     const panOrIban = item.maskedPan.length ? item.maskedPan[0] : item.iban;
-    return `${item.currency.flag} ${item.title ? item.title : panOrIban}`;
+    return `${item.currency.flag} ${item.title || panOrIban}`;
   }
 
-  return item.currency.flag + " " + item.title;
+  return `${item.currency.flag} ${item.title}`;
 }
 
 function getSubtitle(item: Account | Jar) {
   return formatCurrency(item.balance, item.currency.code);
-}
-
-function getAccountAccessories(account: Account): List.Item.Accessory[] {
-  const color = accountTypeColors[account.type];
-
-  const panOrIban = account.type === "fop" ? account.iban : account.maskedPan[0];
-
-  return account.title
-    ? [{ text: panOrIban }, { tag: { value: account.type, color } }]
-    : [{ tag: { value: account.type, color } }];
-}
-
-function AccountDetail(props: { account: Account }) {
-  const { account } = props;
-
-  const hasTopUpPage = account.sendId && account.currency.code === "UAH";
-
-  return (
-    <List.Item.Detail
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="ID" text={account.id} />
-          <List.Item.Detail.Metadata.Separator />
-
-          {account.maskedPan.length ? (
-            <>
-              <List.Item.Detail.Metadata.Label title="Masked Pan" text={account.maskedPan[0]} />
-              <List.Item.Detail.Metadata.Separator />
-            </>
-          ) : undefined}
-
-          <List.Item.Detail.Metadata.Label title="IBAN" text={account.iban} />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.TagList title="Type">
-            <List.Item.Detail.Metadata.TagList.Item text={account.type} color={accountTypeColors[account.type]} />
-          </List.Item.Detail.Metadata.TagList>
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Currency"
-            text={account.currency.flag + " " + account.currency.code + ", " + account.currency.name}
-          />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Balance"
-            text={formatCurrency(account.balance, account.currency.code)}
-          />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Credit Limit"
-            text={formatCurrency(account.creditLimit, account.currency.code)}
-          />
-          <List.Item.Detail.Metadata.Separator />
-
-          {account.cashbackType ? (
-            <>
-              <List.Item.Detail.Metadata.Label title="Cashback Type" text={account.cashbackType} />
-              <List.Item.Detail.Metadata.Separator />
-            </>
-          ) : undefined}
-
-          {hasTopUpPage ? (
-            <List.Item.Detail.Metadata.Link
-              title="Top Up Page URL"
-              text={`https://send.monobank.ua/${account.sendId}`}
-              target={`https://send.monobank.ua/${account.sendId}`}
-            />
-          ) : undefined}
-        </List.Item.Detail.Metadata>
-      }
-    />
-  );
-}
-
-function AccountActions(props: {
-  account: Account;
-  isPinned: boolean;
-  validRearrangeDirections?: { up: boolean; down: boolean };
-  onPin: (account: Account) => void;
-  onRearrange?: (account: Account, direction: "up" | "down") => void;
-  onToggleDetails: () => void;
-  onCopyTotal: () => void;
-}) {
-  const { account, isPinned, validRearrangeDirections, onPin, onRearrange, onToggleDetails, onCopyTotal } = props;
-
-  const sendUrl = `https://send.monobank.ua/${account.sendId}`;
-
-  return (
-    <ActionPanel>
-      <ActionPanel.Section>
-        {account.sendId && account.currency.code === "UAH" && (
-          <>
-            <Action.OpenInBrowser title="Open Top Up Page" url={sendUrl} />
-            <Action.CopyToClipboard title="Copy Top Up Page URL" icon={Icon.Link} content={sendUrl} />
-          </>
-        )}
-        <Action.CopyToClipboard
-          title="Copy IBAN"
-          content={account.iban}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-        />
-        <Action.CopyToClipboard
-          title="Copy Balance"
-          content={account.balance}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-        />
-        <Action
-          title="Copy Total"
-          icon={Icon.CopyClipboard}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-          onAction={onCopyTotal}
-        />
-        <Action.Push
-          title="Edit Account"
-          icon={Icon.Pencil}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
-          target={<EditForm account={account} />}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action
-          title="Toggle Details"
-          icon={Icon.Sidebar}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          onAction={onToggleDetails}
-        />
-        <Action
-          title={!isPinned ? "Pin" : "Unpin"}
-          icon={!isPinned ? Icon.Pin : Icon.PinDisabled}
-          shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
-          onAction={() => onPin(account)}
-        />
-        {isPinned && onRearrange && (
-          <>
-            {validRearrangeDirections?.up && (
-              <Action
-                title="Move Up in Pinned"
-                icon={Icon.ArrowUp}
-                shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
-                onAction={() => onRearrange(account, "up")}
-              />
-            )}
-
-            {validRearrangeDirections?.down && (
-              <Action
-                title="Move Down in Pinned"
-                icon={Icon.ArrowDown}
-                shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
-                onAction={() => onRearrange(account, "down")}
-              />
-            )}
-          </>
-        )}
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
-}
-
-function getJarAccessories(jar: Jar): List.Item.Accessory[] {
-  const progress = jar.balance / jar.goal;
-  const percentage = (progress * 100).toFixed(2);
-
-  if (!jar.goal) return [{ text: "No goal" }];
-
-  return [
-    {
-      text: formatCurrency(jar.goal, jar.currency.code),
-    },
-    {
-      icon:
-        progress < 1 ? getProgressIcon(progress, Color.Green) : { source: Icon.CheckCircle, tintColor: Color.Green },
-      tooltip: `${percentage}%`,
-    },
-  ];
-}
-
-function JarDetail(props: { jar: Jar }) {
-  const { jar } = props;
-
-  return (
-    <List.Item.Detail
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="ID" text={jar.id} />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label title="Title" text={jar.title} />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label title="Description" text={jar.description} />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Currency"
-            text={jar.currency.flag + " " + jar.currency.code + ", " + jar.currency.name}
-          />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label title="Balance" text={formatCurrency(jar.balance, jar.currency.code)} />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Goal"
-            text={jar.goal ? formatCurrency(jar.goal, jar.currency.code) : "No goal"}
-          />
-          <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Link
-            title="Top Up Page URL"
-            text={`https://send.monobank.ua/${jar.sendId}`}
-            target={`https://send.monobank.ua/${jar.sendId}`}
-          />
-        </List.Item.Detail.Metadata>
-      }
-    />
-  );
-}
-
-function JarActions(props: {
-  jar: Jar;
-  isPinned: boolean;
-  validRearrangeDirections?: { up: boolean; down: boolean };
-  onPin: (account: Jar) => void;
-  onRearrange?: (account: Jar, direction: "up" | "down") => void;
-  onToggleDetails: () => void;
-  onCopyTotal: () => void;
-}) {
-  const { jar, isPinned, validRearrangeDirections, onPin, onRearrange, onToggleDetails, onCopyTotal } = props;
-
-  const sendUrl = `https://send.monobank.ua/${jar.sendId}`;
-
-  return (
-    <ActionPanel>
-      <ActionPanel.Section>
-        <Action.OpenInBrowser title="Open Top Up Page" url={sendUrl} />
-        <Action.CopyToClipboard title="Copy Top Up Page URL" icon={Icon.Link} content={sendUrl} />
-        <Action.CopyToClipboard
-          title="Copy Balance"
-          content={jar.balance}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-        />
-        {jar.goal ? (
-          <Action.CopyToClipboard
-            title="Copy Goal"
-            content={jar.goal}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
-          />
-        ) : undefined}
-        <Action
-          title="Copy Total"
-          icon={Icon.CopyClipboard}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-          onAction={onCopyTotal}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action
-          title="Toggle Details"
-          icon={Icon.Sidebar}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          onAction={onToggleDetails}
-        />
-        <Action
-          title={!isPinned ? "Pin" : "Unpin"}
-          icon={!isPinned ? Icon.Pin : Icon.PinDisabled}
-          shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
-          onAction={() => onPin(jar)}
-        />
-        {isPinned && onRearrange && (
-          <>
-            {validRearrangeDirections?.up && (
-              <Action
-                title="Move Up in Pinned"
-                icon={Icon.ArrowUp}
-                shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
-                onAction={() => onRearrange(jar, "up")}
-              />
-            )}
-
-            {validRearrangeDirections?.down && (
-              <Action
-                title="Move Down in Pinned"
-                icon={Icon.ArrowDown}
-                shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
-                onAction={() => onRearrange(jar, "down")}
-              />
-            )}
-          </>
-        )}
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
 }

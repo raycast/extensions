@@ -1,6 +1,6 @@
 import cc from "currency-codes";
-import { CurrencyRate, RateResponse } from "../types";
-import { getEmojiByCurrencyCode } from "./getEmojiByCurrencyCode";
+import { CurrencyRate, RateResponse } from "../../types";
+import { getEmojiByCurrencyCode } from "../common/getEmojiByCurrencyCode";
 
 export function transformRate(rate: RateResponse): CurrencyRate {
   const currencyA = cc.number(rate.currencyCodeA.toString())!;

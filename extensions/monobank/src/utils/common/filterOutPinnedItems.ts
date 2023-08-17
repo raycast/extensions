@@ -1,4 +1,4 @@
-export function filterPinnedItems<T extends { id: string }>(props: {
+export function filterOutPinnedItems<T extends { id: string }>(props: {
   category: string;
   items: T[];
   pinned: string[];

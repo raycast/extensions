@@ -1,4 +1,4 @@
-import { Account, Jar, RateResponse } from "../types";
+import { Account, Jar, RateResponse } from "../../types";
 
 export function calculateTotal(accounts: (Account | Jar)[], rates: RateResponse[]) {
   return accounts.reduce((total, account) => {

@@ -1,9 +1,11 @@
-import { ActionPanel, Action, List, Icon, showToast, Toast } from "@raycast/api";
-import { useCurrencyRates } from "./hooks/useCurrencyRates";
-import { transformRate } from "./utils";
-import { Currency, CurrencyRate } from "./types";
-import { useLocalStorage } from "./hooks/useLocalStorage";
+import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { Currency, CurrencyRate } from "./types";
+import { useLocalStorage, useCurrencyRates } from "./hooks";
+
+import RateActions from "./components/rates/RateActions";
+
+import { filterOutPinnedItems, transformRate } from "./utils";
 
 export default function Command() {
   const [category, setCategory] = useState<Category>("all");
@@ -64,15 +66,15 @@ export default function Command() {
   }
 
   const transformedRates = data.map(transformRate);
-  const filteredRates = category === "all" ? transformedRates.filter((rate) => !pinned.includes(rate.id)) : [];
   const pinnedRates = pinned.map((pinnedRate) => transformedRates.find((rate) => rate.id === pinnedRate)!);
+  const filteredRates = filterOutPinnedItems({ category, items: transformedRates, pinned });
   const isLoading = isRatesLoading || isPinnedLoadingFromLS;
 
   return (
     <List isLoading={isLoading} searchBarAccessory={<CategoryDropdown onCategoryChange={onCategoryChange} />}>
-      {pinnedRates.length ? (
-        <List.Section title="Pinned">
-          {pinnedRates.map((item) => (
+      <List.Section title="Pinned">
+        {(category === "all" || category === "pinned") &&
+          pinnedRates.map((item) => (
             <List.Item
               key={item.id}
               id={item.id}
@@ -90,22 +92,20 @@ export default function Command() {
               }
             />
           ))}
-        </List.Section>
-      ) : (
-        <List.EmptyView />
-      )}
+      </List.Section>
 
       <List.Section title="All">
-        {filteredRates.map((item) => (
-          <List.Item
-            key={item.id}
-            id={item.id}
-            title={getTitle(item.currencyA, item.currencyB)}
-            subtitle={getSubtitle(item)}
-            accessories={getAccessories(item)}
-            actions={<RateActions item={item} isPinned={false} onPin={onPin} />}
-          />
-        ))}
+        {category === "all" &&
+          filteredRates.map((item) => (
+            <List.Item
+              key={item.id}
+              id={item.id}
+              title={getTitle(item.currencyA, item.currencyB)}
+              subtitle={getSubtitle(item)}
+              accessories={getAccessories(item)}
+              actions={<RateActions item={item} isPinned={false} onPin={onPin} />}
+            />
+          ))}
       </List.Section>
     </List>
   );
@@ -121,61 +121,6 @@ function CategoryDropdown(props: { onCategoryChange: (newValue: string) => void 
       <List.Dropdown.Item title="All" value="all" />
       <List.Dropdown.Item title="Pinned" value="pinned" />
     </List.Dropdown>
-  );
-}
-
-function RateActions(props: {
-  item: CurrencyRate;
-  isPinned: boolean;
-  onPin: (rate: CurrencyRate) => void;
-  onRearrange?: (rate: CurrencyRate, direction: "up" | "down") => void;
-  validRearrangeDirections?: { up: boolean; down: boolean };
-}) {
-  const { item, isPinned, onPin, onRearrange, validRearrangeDirections } = props;
-
-  return (
-    <ActionPanel>
-      <ActionPanel.Section>
-        {!item.rateCross ? (
-          <>
-            <Action.CopyToClipboard title="Copy Sell Rate" content={item.rateSell} />
-            <Action.CopyToClipboard title="Copy Buy Rate" content={item.rateBuy} />
-          </>
-        ) : (
-          <Action.CopyToClipboard title="Copy Cross Rate" content={item.rateCross} />
-        )}
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action
-          title={!isPinned ? "Pin" : "Unpin"}
-          icon={!isPinned ? Icon.Pin : Icon.PinDisabled}
-          shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
-          onAction={() => onPin(item)}
-        />
-        {isPinned && onRearrange && (
-          <>
-            {validRearrangeDirections?.up && (
-              <Action
-                title="Move Up in Pinned"
-                icon={Icon.ArrowUp}
-                shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
-                onAction={() => onRearrange(item, "up")}
-              />
-            )}
-
-            {validRearrangeDirections?.down && (
-              <Action
-                title="Move Down in Pinned"
-                icon={Icon.ArrowDown}
-                shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
-                onAction={() => onRearrange(item, "down")}
-              />
-            )}
-          </>
-        )}
-      </ActionPanel.Section>
-    </ActionPanel>
   );
 }
 
