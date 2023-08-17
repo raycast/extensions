@@ -6,7 +6,6 @@ import View from "./components/View";
 function FeedbackForm() {
   return (
     <Form
-      navigationTitle={`Feedback Form for Gitpod Extension`}
       actions={
         <ActionPanel>
           <Action.SubmitForm
