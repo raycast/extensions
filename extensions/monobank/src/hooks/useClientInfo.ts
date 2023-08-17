@@ -62,10 +62,9 @@ export function useClientInfo() {
           const savedAccount = data.clientInfo.accounts.find((savedAccount) => savedAccount.id === account.id);
           if (!savedAccount) return account;
 
-          const { title, ...other } = account;
           return {
+            ...account,
             title: savedAccount.title,
-            ...other,
           };
         });
 
