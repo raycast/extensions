@@ -34,7 +34,7 @@ export default function Capture() {
 
   LocalStorage.getItem("path").then((savedPath) => {
     if (savedPath) setDefaultPath(savedPath.toString());
-    else setDefaultPath("/inbox");
+    else setDefaultPath("inbox");
   });
   const formatData = (content?: string, link?: string, highlight?: string) => {
     const data = [];
@@ -52,13 +52,12 @@ export default function Capture() {
 
   async function createNewNote({ fileName, content, link, vault, path, highlight }: Form.Values) {
     try {
-      await LocalStorage.setItem("vault", vault);
-      await LocalStorage.setItem("path", path);
+      if (vault) await LocalStorage.setItem("vault", vault);
+      if (path) await LocalStorage.setItem("path", path);
 
       const target = `obsidian://advanced-uri?vault=${encodeURIComponent(vault)}&filepath=${encodeURIComponent(
         path
       )}/${encodeURIComponent(fileName)}&data=${encodeURIComponent(formatData(content, link, highlight))}`;
-      console.log(target);
       open(target);
       popToRoot();
       closeMainWindow();
@@ -158,7 +157,7 @@ export default function Capture() {
           </ActionPanel>
         }
       >
-        {ready && vaultsWithPlugin.length > 1 && (
+        {ready && vaultsWithPlugin.length >= 1 && (
           <Form.Dropdown id="vault" title="Vault" defaultValue={defaultVault}>
             {vaultsWithPlugin.map((vault) => (
               <Form.Dropdown.Item key={vault.key} value={vault.name} title={vault.name} icon="🧳" />
