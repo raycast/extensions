@@ -1,3 +1,0 @@
-[submodule "extensions/lazy-obsidian"]
-	path = extensions/lazy-obsidian
-	url = git@github.com:trillhause/lazy-obsidian.git
