@@ -1,11 +1,4 @@
-import {
-  getPreferenceValues,
-  LocalStorage,
-  Clipboard,
-  Toast,
-  showToast,
-  getSelectedText,
-} from "@raycast/api";
+import { getPreferenceValues, LocalStorage, Clipboard, Toast, showToast, getSelectedText } from "@raycast/api";
 
 import fs from "fs";
 import fsPath from "path";
@@ -14,15 +7,7 @@ import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { createContext, useEffect, useMemo, useState } from "react";
 
-import {
-  Note,
-  ObsidianJSON,
-  ObsidianVaultsState,
-  Vault,
-  MediaState,
-  Media,
-  CodeBlock,
-} from "../utils/interfaces";
+import { Note, ObsidianJSON, ObsidianVaultsState, Vault, MediaState, Media, CodeBlock } from "../utils/interfaces";
 
 import {
   BYTES_PER_KILOBYTE,
@@ -84,14 +69,11 @@ export function getNoteFileContent(path: string, filter = false) {
 export function vaultPluginCheck(vaults: Vault[], plugin: string) {
   const vaultsWithoutPlugin: Vault[] = [];
   vaults = vaults.filter((vault: Vault) => {
-    const communityPluginsPath =
-      vault.path + "/.obsidian/community-plugins.json";
+    const communityPluginsPath = vault.path + "/.obsidian/community-plugins.json";
     if (!fs.existsSync(communityPluginsPath)) {
       vaultsWithoutPlugin.push(vault);
     } else {
-      const plugins: string[] = JSON.parse(
-        fs.readFileSync(communityPluginsPath, "utf-8")
-      );
+      const plugins: string[] = JSON.parse(fs.readFileSync(communityPluginsPath, "utf-8"));
 
       if (plugins.includes(plugin)) {
         return vault;
@@ -118,25 +100,18 @@ export function getBookmarkedJSON(vault: Vault) {
   if (!fs.existsSync(bookmarkedNotesPath)) {
     return [];
   } else {
-    return (
-      JSON.parse(fs.readFileSync(bookmarkedNotesPath, "utf-8"))["items"] || []
-    );
+    return JSON.parse(fs.readFileSync(bookmarkedNotesPath, "utf-8"))["items"] || [];
   }
 }
 
 export function writeToBookmarkedJSON(vault: Vault, bookmarkedNotes: Note[]) {
   const bookmarkedNotesPath = vault.path + "/.obsidian/bookmarks.json";
-  fs.writeFileSync(
-    bookmarkedNotesPath,
-    JSON.stringify({ items: bookmarkedNotes })
-  );
+  fs.writeFileSync(bookmarkedNotesPath, JSON.stringify({ items: bookmarkedNotes }));
 }
 
 export function getBookmarkedNotePaths(vault: Vault) {
   const bookmarkedNotes = getBookmarkedJSON(vault);
-  return bookmarkedNotes.map(
-    (note: { type: string; title: string; path: string }) => note.path
-  );
+  return bookmarkedNotes.map((note: { type: string; title: string; path: string }) => note.path);
 }
 
 export function bookmarkNote(vault: Vault, note: Note) {
@@ -190,13 +165,9 @@ export function parseVaults(): Vault[] {
 }
 
 async function loadObsidianJson(): Promise<Vault[]> {
-  const obsidianJsonPath = fsPath.resolve(
-    `${homedir()}/Library/Application Support/obsidian/obsidian.json`
-  );
+  const obsidianJsonPath = fsPath.resolve(`${homedir()}/Library/Application Support/obsidian/obsidian.json`);
   try {
-    const obsidianJson = JSON.parse(
-      await readFile(obsidianJsonPath, "utf8")
-    ) as ObsidianJSON;
+    const obsidianJson = JSON.parse(await readFile(obsidianJsonPath, "utf8")) as ObsidianJSON;
     return Object.values(obsidianJson.vaults).map(({ path }) => ({
       name: getVaultNameFromPath(path),
       key: path,
@@ -311,19 +282,13 @@ export async function applyTemplates(content: string) {
   content = content.replaceAll("{week}", week.toString().padStart(2, "0"));
 
   content = content.replaceAll("{year}", date.getFullYear().toString());
-  content = content.replaceAll(
-    "{month}",
-    MONTH_NUMBER_TO_STRING[date.getMonth()]
-  );
+  content = content.replaceAll("{month}", MONTH_NUMBER_TO_STRING[date.getMonth()]);
   content = content.replaceAll("{day}", DAY_NUMBER_TO_STRING[date.getDay()]);
 
   content = content.replaceAll("{hour}", hours);
   content = content.replaceAll("{minute}", minutes);
   content = content.replaceAll("{second}", seconds);
-  content = content.replaceAll(
-    "{millisecond}",
-    date.getMilliseconds().toString()
-  );
+  content = content.replaceAll("{millisecond}", date.getMilliseconds().toString());
 
   content = content.replaceAll("{timestamp}", timestamp);
   content = content.replaceAll("{zettelkastenID}", timestamp);
@@ -342,9 +307,7 @@ export async function applyTemplates(content: string) {
 export async function appendSelectedTextTo(note: Note) {
   let { appendSelectedTemplate } = getPreferenceValues<SearchNotePreferences>();
 
-  appendSelectedTemplate = appendSelectedTemplate
-    ? appendSelectedTemplate
-    : "{content}";
+  appendSelectedTemplate = appendSelectedTemplate ? appendSelectedTemplate : "{content}";
 
   try {
     const selectedText = await getSelectedText();
@@ -355,10 +318,7 @@ export async function appendSelectedTextTo(note: Note) {
         style: Toast.Style.Failure,
       });
     } else {
-      let content = appendSelectedTemplate.replaceAll(
-        "{content}",
-        selectedText
-      );
+      let content = appendSelectedTemplate.replaceAll("{content}", selectedText);
       content = await applyTemplates(content);
       fs.appendFileSync(note.path, "\n" + content);
       showToast({
@@ -414,22 +374,16 @@ export type ObsidianTarget =
 export function getObsidianTarget(target: ObsidianTarget) {
   switch (target.type) {
     case ObsidianTargetType.OpenVault: {
-      return (
-        ObsidianTargetType.OpenVault + encodeURIComponent(target.vault.name)
-      );
+      return ObsidianTargetType.OpenVault + encodeURIComponent(target.vault.name);
     }
     case ObsidianTargetType.OpenPath: {
       return ObsidianTargetType.OpenPath + encodeURIComponent(target.path);
     }
     case ObsidianTargetType.DailyNote: {
-      return (
-        ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name)
-      );
+      return ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name);
     }
     case ObsidianTargetType.DailyNoteAppend: {
-      const headingParam = target.heading
-        ? "&heading=" + encodeURIComponent(target.heading)
-        : "";
+      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
       return (
         ObsidianTargetType.DailyNoteAppend +
         "&data=" +
@@ -451,9 +405,7 @@ export function getObsidianTarget(target: ObsidianTarget) {
       );
     }
     case ObsidianTargetType.AppendTask: {
-      const headingParam = target.heading
-        ? "&heading=" + encodeURIComponent(target.heading)
-        : "";
+      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
       return (
         ObsidianTargetType.AppendTask +
         encodeURIComponent(target.path) +
@@ -495,28 +447,15 @@ function validFile(file: string, includes: string[]) {
   return true;
 }
 
-export function walkFilesHelper(
-  dirPath: string,
-  exFolders: string[],
-  fileEndings: string[],
-  arrayOfFiles: string[]
-) {
+export function walkFilesHelper(dirPath: string, exFolders: string[], fileEndings: string[], arrayOfFiles: string[]) {
   const files = fs.readdirSync(dirPath);
 
   arrayOfFiles = arrayOfFiles || [];
 
   for (const file of files) {
     const next = fs.statSync(dirPath + "/" + file);
-    if (
-      next.isDirectory() &&
-      validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"])
-    ) {
-      arrayOfFiles = walkFilesHelper(
-        dirPath + "/" + file,
-        exFolders,
-        fileEndings,
-        arrayOfFiles
-      );
+    if (next.isDirectory() && validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"])) {
+      arrayOfFiles = walkFilesHelper(dirPath + "/" + file, exFolders, fileEndings, arrayOfFiles);
     } else {
       if (
         validFileEnding(file, fileEndings) &&
@@ -581,9 +520,7 @@ export function useMedia(vault: Vault) {
           await fs.promises.access(vault.path + "/.");
 
           const ml = new MediaLoader(vault);
-          const media = ml
-            .loadMedia()
-            .sort((m1, m2) => sortByAlphabet(m1.title, m2.title));
+          const media = ml.loadMedia().sort((m1, m2) => sortByAlphabet(m1.title, m2.title));
 
           setMedia({ ready: true, media });
         } catch (error) {
@@ -603,6 +540,4 @@ export function useMedia(vault: Vault) {
 
 export const NotesContext = createContext([] as Note[]);
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export const NotesDispatchContext = createContext((() => {}) as (
-  action: NoteReducerAction
-) => void);
+export const NotesDispatchContext = createContext((() => {}) as (action: NoteReducerAction) => void);

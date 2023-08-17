@@ -23,7 +23,7 @@ import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedUR
 
 export default function Capture() {
   const { ready, vaults: allVaults } = useObsidianVaults();
-  const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(allVaults, "obsidian-advanced-uri");
+  const [vaultsWithPlugin] = vaultPluginCheck(allVaults, "obsidian-advanced-uri");
 
   const [defaultVault, setDefaultVault] = useState<string | undefined>(undefined);
   const [defaultPath, setDefaultPath] = useState<string | undefined>(undefined);
@@ -96,14 +96,18 @@ export default function Capture() {
           setSelectedResource(url);
           setResourceInfo(title);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
 
       try {
         const data = await getSelectedText();
         if (data) {
           setSelectedText(data);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     setText();

@@ -187,7 +187,7 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Vaul
 
   return (
     <Action.Open
-      title="Open in new Pane"
+      title="Open in New Pane"
       target={
         "obsidian://advanced-uri?vault=" +
         encodeURIComponent(vault.name) +
@@ -325,7 +325,7 @@ export function AppendTaskAction(props: { note: Note; vault: Vault }) {
 
   return (
     <Action.Push
-      title="Append task"
+      title="Append Task"
       target={<AppendNoteForm note={note} vault={vault} dispatch={dispatch} />}
       shortcut={{ modifiers: ["opt"], key: "a" }}
       icon={Icon.Pencil}
