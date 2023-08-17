@@ -11,13 +11,15 @@ export default function command() {
   const [markdown, setMarkdown] = useState("");
   const [formattedTotal, setFormattedTotal] = useState("0.00");
 
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+
   const handleError = (error: Error, message: string): void => {
     if (environment.isDevelopment) {
       console.log(error);
     }
 
     if (message) {
-      showHUD(message);
+      showHUD(message).then();
     }
 
     setLoading(false);
@@ -25,7 +27,7 @@ export default function command() {
   };
 
   const formatNumber = (n: number): string => {
-    const formatter = new Intl.NumberFormat("en-US", {
+    const formatter = new Intl.NumberFormat(locale, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -34,7 +36,7 @@ export default function command() {
   };
 
   const formatCurrency = (n: number): string => {
-    const formatter = new Intl.NumberFormat("en-US", {
+    const formatter = new Intl.NumberFormat(locale, {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 2,
@@ -78,7 +80,7 @@ ${numbers.map((n) => `| ${isCurrency ? formatCurrency(n) : formatNumber(n)} |`).
   useEffect(() => {
     setLoading(true);
 
-    showHUD("Select an area with numbers to sum them up.");
+    showHUD("Select an area with numbers to sum them up.").then();
 
     const filename = `${environment.assetsPath}/sum-numbers-${Date.now()}.png`;
 
@@ -92,7 +94,7 @@ ${numbers.map((n) => `| ${isCurrency ? formatCurrency(n) : formatNumber(n)} |`).
       const command = join(environment.assetsPath, "screen-math");
       await chmod(command, "755");
 
-      exec(`${command} ${filename}`, async (error, stdout) => {
+      exec(`${command} ${filename}`, (error, stdout) => {
         if (error) {
           handleError(error, "❌ There was an error while processing the screenshot.");
 
@@ -109,7 +111,7 @@ ${numbers.map((n) => `| ${isCurrency ? formatCurrency(n) : formatNumber(n)} |`).
 
         setFormattedTotal(formattedTotal);
 
-        await showHUD(`✅ Total is ${formattedTotal}`);
+        showHUD(`✅ Total is ${formattedTotal}`);
 
         if (fs.existsSync(filename)) {
           fs.unlinkSync(filename);
