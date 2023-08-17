@@ -1,7 +1,20 @@
 import { Currency } from "./index";
 
-export type AccountType = "black" | "white" | "platinum" | "iron" | "fop" | "yellow" | "eAid";
-export type CashbackType = "None" | "UAH" | "Miles";
+export enum AccountType {
+  BLACK = "black",
+  WHITE = "white",
+  PLATINUM = "platinum",
+  IRON = "iron",
+  FOP = "fop",
+  YELLOW = "yellow",
+  EAID = "eAid",
+}
+
+export enum CashbackType {
+  NONE = "None",
+  UAH = "UAH",
+  MILES = "Miles",
+}
 
 export interface Account {
   id: string;

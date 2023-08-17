@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { useLocalStorage } from "./useLocalStorage";
-import { Account, UserInfoResponse, Jar, Preferences } from "../types";
-import api from "../api";
 import { getPreferenceValues } from "@raycast/api";
+import { useEffect, useState } from "react";
+import api from "../api";
+import { Account, UserInfoResponse, Jar, Preferences } from "../types";
+import { useLocalStorage } from "./useLocalStorage";
+
 import { transformAccount, transformJar } from "../utils";
 
 interface LocalStorageUserInfoData {
@@ -29,7 +30,7 @@ const lsInitialValue: LocalStorageUserInfoData = {
   lastUpdated: 0,
 };
 
-export function useAccounts() {
+export function useClientInfo() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 

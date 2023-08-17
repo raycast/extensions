@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useLocalStorage } from "./useLocalStorage";
-import { RateResponse } from "../types";
-import { filterRates } from "../utils";
 import api from "../api";
+import { RateResponse } from "../types";
+import { useLocalStorage } from "./useLocalStorage";
+
+import { filterRates } from "../utils";
 
 interface LocalStorageRatesData {
   rates: RateResponse[];

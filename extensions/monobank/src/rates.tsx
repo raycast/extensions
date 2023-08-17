@@ -7,8 +7,18 @@ import RateActions from "./components/rates/RateActions";
 
 import { filterOutPinnedItems, transformRate } from "./utils";
 
+enum Category {
+  ALL = "all",
+  PINNED = "pinned",
+}
+
+const categoryLabel: Record<Category, string> = {
+  [Category.ALL]: "All",
+  [Category.PINNED]: "Pinned",
+};
+
 export default function Command() {
-  const [category, setCategory] = useState<Category>("all");
+  const [category, setCategory] = useState<Category>(Category.ALL);
   const { data, isLoading: isRatesLoading, isError } = useCurrencyRates();
   const {
     data: pinned,
@@ -66,14 +76,16 @@ export default function Command() {
   }
 
   const transformedRates = data.map(transformRate);
-  const pinnedRates = pinned.map((pinnedRate) => transformedRates.find((rate) => rate.id === pinnedRate)!);
+  const pinnedRates = pinned
+    .map((pinnedRate) => transformedRates.find((rate) => rate.id === pinnedRate))
+    .filter(Boolean) as CurrencyRate[];
   const filteredRates = filterOutPinnedItems({ category, items: transformedRates, pinned });
   const isLoading = isRatesLoading || isPinnedLoadingFromLS;
 
   return (
     <List isLoading={isLoading} searchBarAccessory={<CategoryDropdown onCategoryChange={onCategoryChange} />}>
-      <List.Section title="Pinned">
-        {(category === "all" || category === "pinned") &&
+      <List.Section title={categoryLabel[Category.PINNED]}>
+        {[Category.ALL, Category.PINNED].includes(category) &&
           pinnedRates.map((item) => (
             <List.Item
               key={item.id}
@@ -94,8 +106,8 @@ export default function Command() {
           ))}
       </List.Section>
 
-      <List.Section title="All">
-        {category === "all" &&
+      <List.Section title={categoryLabel[Category.ALL]}>
+        {category === Category.ALL &&
           filteredRates.map((item) => (
             <List.Item
               key={item.id}
@@ -111,15 +123,15 @@ export default function Command() {
   );
 }
 
-type Category = "all" | "pinned";
-
 function CategoryDropdown(props: { onCategoryChange: (newValue: string) => void }) {
   const { onCategoryChange } = props;
+  const categories = Object.values(Category);
 
   return (
     <List.Dropdown tooltip="Select Category" storeValue onChange={(newValue) => onCategoryChange(newValue)}>
-      <List.Dropdown.Item title="All" value="all" />
-      <List.Dropdown.Item title="Pinned" value="pinned" />
+      {categories.map((category) => (
+        <List.Dropdown.Item key={category} title={categoryLabel[category]} value={category} />
+      ))}
     </List.Dropdown>
   );
 }
@@ -129,7 +141,7 @@ function getTitle(currencyA: Currency, currencyB: Currency) {
 }
 
 function getSubtitle(rate: CurrencyRate) {
-  return rate.rateCross ? rate.rateCross.toString() : rate.rateBuy + " / " + rate.rateSell;
+  return `${rate.rateCross || `${rate.rateBuy} / ${rate.rateSell}`}`;
 }
 
 function getAccessories(rate: CurrencyRate): List.Item.Accessory[] {

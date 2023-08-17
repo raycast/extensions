@@ -1,7 +1,7 @@
 import { Clipboard, List, Toast, showHUD, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Account, Jar } from "./types";
-import { useLocalStorage, useCurrencyRates, useAccounts } from "./hooks";
+import { Account, AccountType, Jar } from "./types";
+import { useLocalStorage, useCurrencyRates, useClientInfo } from "./hooks";
 
 import AccountDetail from "./components/accounts/AccountDetail";
 import AccountActions from "./components/accounts/AccountActions";
@@ -18,13 +18,27 @@ import {
   getJarAccessories,
 } from "./utils";
 
-type Category = "all" | "pinned" | "card" | "fop" | "jar";
+enum Category {
+  ALL = "all",
+  PINNED = "pinned",
+  CARD = "card",
+  FOP = "fop",
+  JAR = "jar",
+}
+
+const categoryLabel: Record<Category, string> = {
+  [Category.ALL]: "All",
+  [Category.PINNED]: "Pinned",
+  [Category.CARD]: "Cards",
+  [Category.FOP]: "PEs",
+  [Category.JAR]: "Jars",
+};
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [category, setCategory] = useState<Category>("all");
+  const [category, setCategory] = useState<Category>(Category.ALL);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const { data: clientInfo, updateAccount, isLoading: isClientInfoLoading, isError: isAccountsError } = useAccounts();
+  const { data: clientInfo, updateAccount, isLoading: isClientInfoLoading, isError: isAccountsError } = useClientInfo();
   const { data: rates, isLoading: isRatesLoading, isError: isRatesError } = useCurrencyRates();
   const {
     data: pinned,
@@ -91,12 +105,14 @@ export default function Command() {
     };
   }
 
-  const cards = accounts.filter((account) => account.type !== "fop");
-  const fops = accounts.filter((account) => account.type === "fop");
+  const cards = accounts.filter((account) => account.type !== AccountType.FOP);
+  const fops = accounts.filter((account) => account.type === AccountType.FOP);
 
   const pinnedAccounts = pinned
-    .map((pinnedAccountId) => [...accounts, ...jars].find((account) => account.id === pinnedAccountId)!)
+    .map((pinnedAccountId) => [...accounts, ...jars].find((account) => account.id === pinnedAccountId))
     .filter((account) => {
+      if (!account) return false;
+
       if (isAccount(account)) {
         return satisfiesTexts(
           searchText,
@@ -108,7 +124,7 @@ export default function Command() {
       }
 
       return satisfiesTexts(searchText, account.currency.code, account.title);
-    });
+    }) as (Account | Jar)[];
 
   const filteredCards = filterOutPinnedItems({ category, items: cards, pinned }).filter((card) =>
     satisfiesTexts(searchText, card.title, card.currency.code, card.type, card.maskedPan[0])
@@ -134,8 +150,8 @@ export default function Command() {
       searchBarAccessory={<CategoryDropdown onCategoryChange={onCategoryChange} />}
       onSearchTextChange={setSearchText}
     >
-      <List.Section title="Pinned">
-        {(category === "all" || category === "pinned") &&
+      <List.Section title={categoryLabel[Category.PINNED]}>
+        {[Category.ALL, Category.PINNED].includes(category) &&
           pinnedAccounts.map((account) => (
             <List.Item
               key={account.id}
@@ -186,8 +202,8 @@ export default function Command() {
           ))}
       </List.Section>
 
-      <List.Section title="Cards">
-        {(category === "all" || category === "card") &&
+      <List.Section title={categoryLabel[Category.CARD]}>
+        {[Category.ALL, Category.CARD].includes(category) &&
           filteredCards.map((card) => (
             <List.Item
               key={card.id}
@@ -210,8 +226,8 @@ export default function Command() {
           ))}
       </List.Section>
 
-      <List.Section title="PEs">
-        {(category === "all" || category === "fop") &&
+      <List.Section title={categoryLabel[Category.FOP]}>
+        {[Category.ALL, Category.FOP].includes(category) &&
           filteredFops.map((fop) => (
             <List.Item
               key={fop.id}
@@ -234,8 +250,8 @@ export default function Command() {
           ))}
       </List.Section>
 
-      <List.Section title="Jars">
-        {(category === "all" || category === "jar") &&
+      <List.Section title={categoryLabel[Category.JAR]}>
+        {[Category.ALL, Category.JAR].includes(category) &&
           filteredJars.map((jar) => (
             <List.Item
               key={jar.id}
@@ -263,19 +279,23 @@ export default function Command() {
 function CategoryDropdown(props: { onCategoryChange: (newValue: Category) => void }) {
   const { onCategoryChange } = props;
 
+  const commonCategories = Object.values(Category).filter((category) =>
+    [Category.ALL, Category.PINNED].includes(category)
+  );
+  const otherCategories = Object.values(Category).filter((category) => !commonCategories.includes(category));
+
   return (
     <List.Dropdown tooltip="Select Category" storeValue onChange={(newValue) => onCategoryChange(newValue as Category)}>
-      <List.Dropdown.Section>
-        <List.Dropdown.Item title="All" value="all" />
-        <List.Dropdown.Item title="Pinned" value="pinned" />
-      </List.Dropdown.Section>
-      <List.Dropdown.Section>
-        <List.Dropdown.Item title="Cards" value="card" />
-        <List.Dropdown.Item title="PEs" value="fop" />
-        <List.Dropdown.Item title="Jars" value="jar" />
-      </List.Dropdown.Section>
+      <List.Dropdown.Section>{renderCategoryDropdownItems(commonCategories)}</List.Dropdown.Section>
+      <List.Dropdown.Section>{renderCategoryDropdownItems(otherCategories)}</List.Dropdown.Section>
     </List.Dropdown>
   );
+}
+
+function renderCategoryDropdownItems(categories: Category[]) {
+  return categories.map((category) => (
+    <List.Dropdown.Item key={category} title={categoryLabel[category]} value={category} />
+  ));
 }
 
 function getTitle(item: Account | Jar) {

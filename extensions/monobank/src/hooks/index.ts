@@ -1,5 +1,5 @@
 import { useLocalStorage } from "./useLocalStorage";
 import { useCurrencyRates } from "./useCurrencyRates";
-import { useAccounts } from "./useAccounts";
+import { useClientInfo } from "./useClientInfo";
 
-export { useLocalStorage, useCurrencyRates, useAccounts };
+export { useLocalStorage, useCurrencyRates, useClientInfo };
