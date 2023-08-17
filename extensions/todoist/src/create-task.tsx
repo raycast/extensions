@@ -8,6 +8,7 @@ import TaskDetail from "./components/TaskDetail";
 import View from "./components/View";
 import { getCollaboratorIcon, getProjectCollaborators } from "./helpers/collaborators";
 import { getColorByKey } from "./helpers/colors";
+import { getAPIDate } from "./helpers/dates";
 import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
 import { priorities } from "./helpers/priorities";
 import { getPriorityIcon } from "./helpers/priorities";
@@ -52,7 +53,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       const body: AddTaskArgs = { content: values.content, description: values.description };
 
       if (values.dueDate) {
-        body.due = { date: values.dueDate.toISOString() };
+        body.due = { date: dueDateWithTime ? values.dueDate.toISOString() : getAPIDate(values.dueDate) };
       }
 
       if (values.priority) {
