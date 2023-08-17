@@ -35,26 +35,11 @@ export default function command() {
     return formatter.format(n);
   };
 
-  const formatCurrency = (n: number): string => {
-    const formatter = new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-
-    return formatter.format(n);
-  };
-
-  const processNumbers = (strings: string[]): { numbersFound: number[]; isCurrency: boolean } => {
+  const processNumbers = (strings: string[]): number[] => {
     const numbersFound = [];
-    let isCurrency = false;
 
     for (let i = 0; i < strings.length; i++) {
       let s = strings[i];
-      if (s.includes("$")) {
-        isCurrency = true;
-      }
 
       // Remove anything that is not a number except for the decimal point
       s = s.replace(/[^0-9.]/g, "");
@@ -65,14 +50,14 @@ export default function command() {
       }
     }
 
-    return { numbersFound, isCurrency };
+    return numbersFound;
   };
 
-  const displayNumbers = (numbers: number[], isCurrency: boolean): void => {
+  const displayNumbers = (numbers: number[]): void => {
     const markdown = `
 | **Numbers Found** |
 | ------ |
-${numbers.map((n) => `| ${isCurrency ? formatCurrency(n) : formatNumber(n)} |`).join("\n")}`;
+${numbers.map((n) => `| ${formatNumber(n)} |`).join("\n")}`;
 
     setMarkdown(markdown);
   };
@@ -102,12 +87,12 @@ ${numbers.map((n) => `| ${isCurrency ? formatCurrency(n) : formatNumber(n)} |`).
         }
 
         const numbers = JSON.parse(stdout);
-        const { numbersFound, isCurrency } = processNumbers(numbers);
+        const numbersFound = processNumbers(numbers);
 
-        displayNumbers(numbersFound, isCurrency);
+        displayNumbers(numbersFound);
 
         const total = numbersFound.reduce((a, b) => a + b, 0);
-        const formattedTotal = isCurrency ? formatCurrency(total) : formatNumber(total);
+        const formattedTotal = formatNumber(total);
 
         setFormattedTotal(formattedTotal);
 
