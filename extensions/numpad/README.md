@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![extension-icon](./assets/extension-icon.png)
+![extension-icon](./assets/extension_icon.png)
 
 </div>
 
