@@ -5,13 +5,11 @@ import { useRef } from "react";
 import View from "./components/View";
 
 function FeedbackForm() {
-
   const commandDropdownRef = useRef<Form.Dropdown>(null);
   const issueTitleRef = useRef<Form.TextField>(null);
   const descriptionRef = useRef<Form.TextField>(null);
   const issueTypeRef = useRef<Form.Dropdown>(null);
   const tagsRef = useRef<Form.TagPicker>(null);
-
 
   return (
     <Form
@@ -23,8 +21,8 @@ function FeedbackForm() {
               try {
                 const toast = await showToast({
                   title: "Submitting Form...",
-                  style: ToastStyle.Animated
-                })
+                  style: ToastStyle.Animated,
+                });
                 const response = await fetch(`https://raycast-extension-feedback.vercel.app/api-v1`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -32,19 +30,19 @@ function FeedbackForm() {
                 });
 
                 if (response.status === 200) {
-                  toast.title = "Feedback submitted successfully."
-                  toast.style = ToastStyle.Success
+                  toast.title = "Feedback submitted successfully.";
+                  toast.style = ToastStyle.Success;
                   issueTitleRef.current?.reset();
                   commandDropdownRef.current?.reset();
-                  issueTypeRef.current?.reset()
-                  descriptionRef.current?.reset()
+                  issueTypeRef.current?.reset();
+                  descriptionRef.current?.reset();
                   tagsRef.current?.reset();
                 } else {
-                  toast.title = "Unable to Submit the Feedback."
-                  toast.style = ToastStyle.Failure
+                  toast.title = "Unable to Submit the Feedback.";
+                  toast.style = ToastStyle.Failure;
                 }
                 setTimeout(() => {
-                  toast.hide()
+                  toast.hide();
                 }, 2000);
               } catch (e) {
                 showHUD("Failed to submit form data. Please try again.");
@@ -60,7 +58,12 @@ function FeedbackForm() {
         <Form.Dropdown.Item value="Menubar Workspaces" title="Menubar Workspaces" />
         <Form.Dropdown.Item value="New Feature Request" title="New Feature" />
       </Form.Dropdown>
-      <Form.TextField title="Title of Issue" id="title" placeholder="Any issue you've been facing..." ref={issueTitleRef} />
+      <Form.TextField
+        title="Title of Issue"
+        id="title"
+        placeholder="Any issue you've been facing..."
+        ref={issueTitleRef}
+      />
       <Form.TextArea
         enableMarkdown={true}
         ref={descriptionRef}
