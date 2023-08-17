@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "numpad",
-  "title": "Numpad",
-  "description": "Numpad",
+  "title": "NumPad",
+  "description": "NumPad Keyboard Extension for Raycast",
   "icon": "extension_icon.png",
   "author": "paulovictor237",
   "categories": [
@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Numpad",
-      "subtitle": "numpad keyboard",
-      "description": "numpad keyboard",
+      "title": "NumPad",
+      "subtitle": "NumPad Keyboard",
+      "description": "NumPad Keyboard Extension for Raycast",
       "mode": "view"
     }
   ],
