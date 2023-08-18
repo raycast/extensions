@@ -54,6 +54,13 @@
       "mode": "view"
     },
     {
+      "name": "spam",
+      "title": "List Spam",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Spam Folder",
+      "mode": "view"
+    },
+    {
       "name": "newwebmail",
       "title": "New Web Mail",
       "subtitle": "Gmail",
