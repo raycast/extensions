@@ -74,7 +74,7 @@
           "type": "checkbox",
           "label": "Show Lists Shortcuts",
           "description": "When enabled, lists shortcuts (e.g today, upcoming, projects, areas, etc.) will be included in the menu bar.",
-          "default": false,
+          "default": true,
           "required": false
         }
       ]
