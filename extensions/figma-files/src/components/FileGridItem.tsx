@@ -16,6 +16,7 @@ export default function FileGridItem(props: {
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
   const accessory: Grid.Item.Accessory = {};
   accessory.icon = "branch.svg";
+  accessory.tooltip = "File has branches";
   return (
     <Grid.Item
       id={fileIdentifier}
