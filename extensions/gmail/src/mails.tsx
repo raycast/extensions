@@ -26,7 +26,6 @@ function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) 
   const { labels } = useLabels();
   const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });
   const { selectionController } = useMessageListSelection(data?.map((m) => m.data));
-  console.log("sel: ", selectionController.getSelected().length);
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
