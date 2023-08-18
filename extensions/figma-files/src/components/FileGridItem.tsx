@@ -14,12 +14,14 @@ export default function FileGridItem(props: {
 }) {
   const { file, extraKey, desktopApp, onVisit } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
-
+  const accessory: Grid.Item.Accessory = {};
+  accessory.icon = "branch.svg";
   return (
     <Grid.Item
       id={fileIdentifier}
       title={file.name}
       content={file.thumbnail_url ?? "Missing thumbnail"}
+      accessory={file.branches && accessory}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
