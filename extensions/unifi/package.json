@@ -24,7 +24,7 @@
     },
     {
       "name": "openInBrowser",
-      "title": "Open In Browser",
+      "title": "Dashboard",
       "description": "Open the Dashboard in the Browser",
       "mode": "no-view"
     }
