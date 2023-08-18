@@ -73,6 +73,18 @@ export function extractCode(original: string) {
     }
     return "";
   }
+  if ((m = /\b(?=[A-Z]*[0-9])(?=[0-9]*[A-Z])[0-9A-Z]{3,8}\b/.exec(message)) !== null) {
+    // 3-8 character upper-case alpha numeric string, containing at least one letter and one number
+    // examples:
+    //   "5WGU8G"
+    //   "Your code is: 5WGU8G"
+    //   "CWGUG8"
+    //   "CWGUG8 is your code"
+    //   "7645W453"
+    return m[0];
+  }
+
+  console.debug(message);
 
   return code;
 }
