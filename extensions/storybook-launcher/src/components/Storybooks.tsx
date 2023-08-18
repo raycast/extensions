@@ -30,7 +30,7 @@ export function Storybooks({
                 onAction={() => push(<Components title={storybook.name} url={storybook.url} />)}
               />
               <AddStorybookAction onCreate={onCreate} />
-              <DeleteStorybookAction id={storybook.id} onDelete={onDelete} />
+              <DeleteStorybookAction name={storybook.name} id={storybook.id} onDelete={onDelete} />
             </ActionPanel>
           }
         />
