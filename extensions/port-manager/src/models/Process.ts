@@ -1,13 +1,13 @@
-import { promisify } from "util";
-import { LsofPrefix, readmeURL } from "./constants";
+import { Alert, closeMainWindow, confirmAlert, getPreferenceValues, open } from "@raycast/api";
 import { exec as cExec } from "child_process";
-import { IProcessInfo, PortInfo } from "./interfaces";
+import { promisify } from "util";
 import isDigit from "../utilities/isDigit";
-import { closeMainWindow, confirmAlert, getPreferenceValues, open, Alert } from "@raycast/api";
+import { LsofPrefix, readmeURL } from "./constants";
+import { PortInfo, ProcessInfo } from "./interfaces";
 
 const exec = promisify(cExec);
 
-export default class ProcessInfo implements IProcessInfo {
+export default class Process implements ProcessInfo {
   private static useSudo: boolean = getPreferenceValues().sudo ?? false;
 
   public path?: string;
@@ -31,25 +31,26 @@ export default class ProcessInfo implements IProcessInfo {
   }
 
   public async loadPath() {
-    this.path = await this.getProcessPath(this.pid, ProcessInfo.useSudo);
+    this.path = await this.getProcessPath(this.pid, Process.useSudo);
   }
 
   public async loadParentPath() {
     if (this.parentPid === undefined) return;
-    this.parentPath = await this.getProcessPath(this.parentPid, ProcessInfo.useSudo);
+    this.parentPath = await this.getProcessPath(this.parentPid, Process.useSudo);
   }
 
   public static async getCurrent() {
-    const cmd = `${ProcessInfo.useSudo ? "/usr/bin/sudo " : ""}/usr/sbin/lsof +c0 -iTCP -sTCP:LISTEN -P -FpcRuLPn`;
+    const cmd = `${Process.useSudo ? "/usr/bin/sudo " : ""}/usr/sbin/lsof +c0 -iTCP -w -sTCP:LISTEN -P -FpcRuLPn`;
+
     try {
       const { stdout, stderr } = await exec(cmd);
       if (stderr) throw new Error(stderr);
       const processes = stdout.split("\np");
-      const instances: ProcessInfo[] = [];
+      const instances: Process[] = [];
       for (const process of processes) {
         if (process.length === 0) continue;
         const lines = process.split("\n");
-        const values: IProcessInfo = { pid: 0 };
+        const values: ProcessInfo = { pid: 0 };
         for (const line of lines) {
           if (line.length === 0) continue;
           const prefix = line[0];
@@ -95,7 +96,7 @@ export default class ProcessInfo implements IProcessInfo {
               break;
           }
         }
-        const p = new ProcessInfo(
+        const p = new Process(
           values.pid,
           values.name,
           values.parentPid,
