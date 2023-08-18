@@ -39,7 +39,7 @@ export default function DatabaseList() {
       <List.EmptyView icon={{ source: "no-view.png" }} title="No databases found in Sequel Ace, go add one!" />
       {state &&
         state.grps?.map((item) => {
-          const subtitle = `${item.connections.length}` + ` item${item.connections.length > 1 ? "s" : ""}`;
+          const subtitle = `${item.connections.length}` + ` item${item.connections.length !== 1 ? "s" : ""}`;
           return (
             <List.Section key={item.id} title={item.name} subtitle={subtitle}>
               {item.connections.map((connection) => (
