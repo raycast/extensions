@@ -31,6 +31,8 @@ import {
 import { getFirstValidLetter } from "../../lib/utils";
 import { useContext } from "react";
 import { GMailContext } from "../context";
+import { ListSelectionController } from "../selection/utils";
+import { SelectionActionSection } from "../selection/actions";
 
 export function GMailMessageListItem(props: {
   message: gmail_v1.Schema$Message;
@@ -41,6 +43,7 @@ export function GMailMessageListItem(props: {
   allUnreadMessages?: gmail_v1.Schema$Message[];
   searchText?: string;
   setSearchText?: (newValue: string) => void;
+  selectionController?: ListSelectionController<gmail_v1.Schema$Message>;
   query?: string;
 }) {
   const data = props.message;
@@ -69,6 +72,9 @@ export function GMailMessageListItem(props: {
   const to = getGMailMessageHeaderValue(data, "To");
   const toRecipients = to?.split(",");
   const icon = () => {
+    if (props.selectionController && props.selectionController.isSelected(props.message)) {
+      return Icon.CheckCircle;
+    }
     const textIcon = getAvatarIcon(getFirstValidLetter(from, "?") || "");
     if (textIcon) {
       return textIcon;
@@ -158,9 +164,17 @@ export function GMailMessageListItem(props: {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <MessageMarkAsReadAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageMarkAsReadAction
+              message={data}
+              onRevalidate={props.onRevalidate}
+              selectionController={props.selectionController}
+            />
             <MessageMarkAllAsReadAction messages={props.allUnreadMessages} onRevalidate={props.onRevalidate} />
-            <MessageMarkAsUnreadAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageMarkAsUnreadAction
+              message={data}
+              onRevalidate={props.onRevalidate}
+              selectionController={props.selectionController}
+            />
             <MessageMarkAsArchived message={data} onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
           <FilterActionPanelSection
@@ -171,6 +185,7 @@ export function GMailMessageListItem(props: {
           <ActionPanel.Section>
             <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
+          <SelectionActionSection message={props.message} selectionController={props.selectionController} />
           <ActionPanel.Section>
             <FilterMessagesLikeGivenAction email={fromParts?.email} setSearchText={props.setSearchText} />
             <MessagesRefreshAction onRevalidate={props.onRevalidate} />

@@ -24,6 +24,8 @@ import path from "path";
 import * as fs from "fs";
 import { useCurrentProfile } from "./hooks";
 import { getGMailClient } from "../../lib/withGmailClient";
+import { ListSelectionController } from "../selection/utils";
+import { MessageMarkSelectedAsReadAction, MessageMarkSelectedAsUnreadAction } from "../selection/actions";
 
 export function MessageMarkAsArchived(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
   if (!canMessageBeArchived(props.message)) {
@@ -50,7 +52,21 @@ export function MessageMarkAsArchived(props: { message: gmail_v1.Schema$Message;
   );
 }
 
-export function MessageMarkAsReadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
+export function MessageMarkAsReadAction(props: {
+  message: gmail_v1.Schema$Message;
+  onRevalidate?: () => void;
+  selectionController?: ListSelectionController<gmail_v1.Schema$Message>;
+}) {
+  const shortcut: Keyboard.Shortcut = { modifiers: ["cmd", "opt"], key: "enter" };
+  if (props.selectionController && props.selectionController.getSelectedKeys().length > 0) {
+    return (
+      <MessageMarkSelectedAsReadAction
+        selectionController={props.selectionController}
+        shortcut={shortcut}
+        onRevalidate={props.onRevalidate}
+      />
+    );
+  }
   if (!isMailUnread(props.message) || isMailDraft(props.message)) {
     return null;
   }
@@ -58,7 +74,7 @@ export function MessageMarkAsReadAction(props: { message: gmail_v1.Schema$Messag
     <Action
       title="Mark as Read"
       icon={Icon.Circle}
-      shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+      shortcut={shortcut}
       onAction={() =>
         toastifiedPromiseCall({
           onCall: async () => {
@@ -120,7 +136,19 @@ export function MessageMarkAllAsReadAction(props: {
   );
 }
 
-export function MessageMarkAsUnreadAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
+export function MessageMarkAsUnreadAction(props: {
+  message: gmail_v1.Schema$Message;
+  onRevalidate?: () => void;
+  selectionController?: ListSelectionController<gmail_v1.Schema$Message>;
+}) {
+  if (props.selectionController && props.selectionController.getSelectedKeys().length > 0) {
+    return (
+      <MessageMarkSelectedAsUnreadAction
+        selectionController={props.selectionController}
+        onRevalidate={props.onRevalidate}
+      />
+    );
+  }
   if (isMailUnread(props.message) || isMailDraft(props.message)) {
     return null;
   }

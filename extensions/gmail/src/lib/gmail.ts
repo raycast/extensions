@@ -184,6 +184,15 @@ export async function markMessageAsUnread(message: gmail_v1.Schema$Message) {
   });
 }
 
+export async function markMessagesAsUnread(messages: gmail_v1.Schema$Message[]) {
+  const gmail = await getAuthorizedGmailClient();
+  const ids = messages.map((m) => m.id as string).filter((m) => m);
+  await gmail.users.messages.batchModify({
+    userId: "me",
+    requestBody: { ids, addLabelIds: ["UNREAD"] },
+  });
+}
+
 export async function moveMessageToTrash(message: gmail_v1.Schema$Message) {
   if (message.id === undefined) {
     return;

@@ -7,6 +7,7 @@ import { getErrorMessage } from "../lib/utils";
 import { useLabels } from "../components/message/hooks";
 import { GMailContext } from "../components/context";
 import { getGMailClient } from "../lib/withGmailClient";
+import { useMessageListSelection } from "./selection/hooks";
 
 export function ListQueryCommand(props: {
   baseQuery?: string[] | undefined;
@@ -24,6 +25,7 @@ export function ListQueryCommand(props: {
     { keepPreviousData: true },
   );
   const { labels } = useLabels();
+  const { selectionController } = useMessageListSelection(data?.map((m) => m.data));
   const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
@@ -50,6 +52,7 @@ export function ListQueryCommand(props: {
               searchText={searchText}
               setSearchText={setSearchText}
               query={query}
+              selectionController={selectionController}
             />
           ))}
         </List.Section>

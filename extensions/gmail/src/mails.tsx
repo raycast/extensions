@@ -9,6 +9,7 @@ import { useLabels } from "./components/message/hooks";
 import { GMailContext } from "./components/context";
 import View from "./components/view";
 import { getGMailClient } from "./lib/withGmailClient";
+import { useMessageListSelection } from "./components/selection/hooks";
 
 function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) {
   const defaultQuery = props.arguments.query && props.arguments.query.length > 0 ? props.arguments.query : undefined;
@@ -24,6 +25,8 @@ function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) 
   );
   const { labels } = useLabels();
   const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });
+  const { selectionController } = useMessageListSelection(data?.map((m) => m.data));
+  console.log("sel: ", selectionController.getSelected().length);
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
@@ -73,6 +76,7 @@ function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) 
               searchText={searchText}
               setSearchText={setSearchText}
               query={query}
+              selectionController={selectionController}
             />
           ))}
         </List.Section>
@@ -87,6 +91,7 @@ function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) 
               searchText={searchText}
               setSearchText={setSearchText}
               query={query}
+              selectionController={selectionController}
             />
           ))}
         </List.Section>
