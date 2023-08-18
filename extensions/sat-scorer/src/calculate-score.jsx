@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, Detail } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import { useState } from "react";
 
 export default function CalculateScore() {
