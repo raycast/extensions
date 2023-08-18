@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Randomize List",
-      "description": "Add items to a list and randomize it\n",
+      "description": "Add items to a list and randomize it",
       "mode": "view"
     }
   ],
