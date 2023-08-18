@@ -69,7 +69,11 @@ export default function Command() {
     <MenuBarExtra icon="../assets/menu_icon.png" tooltip={bonds ? `${bonds.length} bonds` : "No bonds"}>
       <MenuBarExtra.Item title={currentDate} />
       {bonds.map(({ SECUCODE, RATING }: { SECUCODE: string; RATING?: string }) => (
-        <MenuBarExtra.Item title={`${SECUCODE}${RATING ? ` (${RATING})` : ''}`} key={SECUCODE} onAction={console.warn} />
+        <MenuBarExtra.Item
+          title={`${SECUCODE}${RATING ? ` (${RATING})` : ""}`}
+          key={SECUCODE}
+          onAction={console.warn}
+        />
       ))}
       <MenuBarExtra.Item title={`Latest Refresh time：${cache.get("lastRefreshTime")}`} />
       <MenuBarExtra.Item title="Refresh" onAction={updateBonds} />
