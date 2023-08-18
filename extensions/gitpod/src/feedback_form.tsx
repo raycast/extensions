@@ -1,87 +1,90 @@
-import { ActionPanel, Form, Action, showHUD, showToast, Toast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Form, Action, showHUD, showToast, Toast, Icon } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import fetch from "node-fetch";
-import { useRef } from "react";
 
 import View from "./components/View";
 
+interface FeedbackFormValues {
+  command: string;
+  title: string;
+  comment: string;
+  type: string;
+  tags: string[];
+}
+
 function FeedbackForm() {
-  const commandDropdownRef = useRef<Form.Dropdown>(null);
-  const issueTitleRef = useRef<Form.TextField>(null);
-  const descriptionRef = useRef<Form.TextField>(null);
-  const issueTypeRef = useRef<Form.Dropdown>(null);
-  const tagsRef = useRef<Form.TagPicker>(null);
+  const { handleSubmit, itemProps, setValue } = useForm<FeedbackFormValues>({
+    async onSubmit(values) {
+      try {
+        const toast = await showToast({
+          title: "Submitting Form...",
+          style: Toast.Style.Animated,
+        });
+        const response = await fetch(`https://raycast-extension-feedback.vercel.app/api-v1`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...values, tags: values.tags.join(",") }),
+        });
+
+        if (response.status === 200) {
+          toast.title = "Feedback submitted successfully.";
+          toast.style = Toast.Style.Success;
+
+          setValue("command", "Open Context in Gitpod");
+          setValue("title", "");
+          setValue("comment", "");
+          setValue("tags", ["bug", "github"]);
+          setValue("type", "Issue");
+        } else {
+          toast.title = "Unable to Submit the Feedback.";
+          toast.style = Toast.Style.Failure;
+        }
+      } catch (e) {
+        showHUD("Failed to submit form data. Please try again.");
+      }
+    },
+    validation: {
+      title: FormValidation.Required,
+      comment: FormValidation.Required,
+    },
+    initialValues: {
+      type: "Issue",
+      tags: ["bug", "github"],
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Feedback"
-            onSubmit={async (values) => {
-              try {
-                const toast = await showToast({
-                  title: "Submitting Form...",
-                  style: ToastStyle.Animated,
-                });
-                const response = await fetch(`https://raycast-extension-feedback.vercel.app/api-v1`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ ...values, tags: values.tags.join(",") }),
-                });
-
-                if (response.status === 200) {
-                  toast.title = "Feedback submitted successfully.";
-                  toast.style = ToastStyle.Success;
-                  issueTitleRef.current?.reset();
-                  commandDropdownRef.current?.reset();
-                  issueTypeRef.current?.reset();
-                  descriptionRef.current?.reset();
-                  tagsRef.current?.reset();
-                } else {
-                  toast.title = "Unable to Submit the Feedback.";
-                  toast.style = ToastStyle.Failure;
-                }
-                setTimeout(() => {
-                  toast.hide();
-                }, 2000);
-              } catch (e) {
-                showHUD("Failed to submit form data. Please try again.");
-              }
-            }}
-          />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Submit Feedback" icon={Icon.Envelope} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown ref={commandDropdownRef} id="command" title="Command" defaultValue="Open Context in Gitpod">
+      <Form.Dropdown title="Command" {...itemProps.command}>
         <Form.Dropdown.Item value="Open Context in Gitpod" title="Open Context in Gitpod" />
         <Form.Dropdown.Item value="Manage Workspaces" title="Manage Workspaces" />
         <Form.Dropdown.Item value="Menubar Workspaces" title="Menubar Workspaces" />
         <Form.Dropdown.Item value="New Feature Request" title="New Feature" />
       </Form.Dropdown>
-      <Form.TextField
-        title="Title of Issue"
-        id="title"
-        placeholder="Any issue you've been facing..."
-        ref={issueTitleRef}
-      />
+      <Form.TextField title="Title of Issue" placeholder="Any issue you've been facing..." {...itemProps.title} />
       <Form.TextArea
         enableMarkdown={true}
-        ref={descriptionRef}
-        title="Description"
-        id="comment"
-        placeholder={"Issue/Feature in brief (markdown supported)"}
+        title="comment"
+        placeholder="Issue/Feature in brief (markdown supported)"
+        {...itemProps.comment}
       />
-      <Form.Dropdown ref={issueTypeRef} id="type" title="Type" defaultValue="Issue">
+      <Form.Dropdown title="Type" {...itemProps.type}>
         <Form.Dropdown.Item value="Issue" title="Issue" />
         <Form.Dropdown.Item value="Feature Request" title="Feature Request" />
       </Form.Dropdown>
-      <Form.TagPicker ref={tagsRef} id="tags" title="Tags" defaultValue={["bug", "github"]}>
-        <Form.TagPicker.Item value="bug" title="bug" icon="🐞" />
-        <Form.TagPicker.Item value="convenience" title="convenience" icon={"🏪"} />
-        <Form.TagPicker.Item value="question" title="question" icon="❓" />
-        <Form.TagPicker.Item value="documentation" title="documentation" icon="📚" />
-        <Form.TagPicker.Item value="enhancement" title="enhancement" icon="📈" />
-        <Form.TagPicker.Item value="github" title="github" icon="🎓" />
+      <Form.TagPicker title="Tags" {...itemProps.tags}>
+        <Form.TagPicker.Item value="bug" title="Bug" icon="🐞" />
+        <Form.TagPicker.Item value="convenience" title="Convenience" icon={"🏪"} />
+        <Form.TagPicker.Item value="question" title="Question" icon="❓" />
+        <Form.TagPicker.Item value="documentation" title="Documentation" icon="📚" />
+        <Form.TagPicker.Item value="enhancement" title="Enhancement" icon="📈" />
+        <Form.TagPicker.Item value="github" title="GitHub" icon="🎓" />
       </Form.TagPicker>
     </Form>
   );
