@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
 import { gmail_v1 } from "googleapis";
 import { ListSelectionController } from "./utils";
 import { markMessagesAsRead, markMessagesAsUnread } from "../../lib/gmail";
@@ -24,7 +24,12 @@ export function ToggleSelectedStateAction(props: {
     }
   };
   return (
-    <Action title={isSelected ? "Deselect" : "Select"} shortcut={{ modifiers: ["ctrl"], key: "s" }} onAction={handle} />
+    <Action
+      title={isSelected ? "Deselect" : "Select"}
+      icon={{ source: Icon.CheckCircle, tintColor: isSelected ? Color.Magenta : undefined }}
+      shortcut={{ modifiers: ["ctrl"], key: "s" }}
+      onAction={handle}
+    />
   );
 }
 
@@ -40,7 +45,14 @@ export function UnselectAllAction(props: {
       sc.deselectAll();
     }
   };
-  return <Action title="Deselect All" shortcut={{ modifiers: ["shift", "ctrl"], key: "s" }} onAction={handle} />;
+  return (
+    <Action
+      title="Deselect All"
+      icon={{ source: Icon.CheckCircle, tintColor: Color.Magenta }}
+      shortcut={{ modifiers: ["shift", "ctrl"], key: "s" }}
+      onAction={handle}
+    />
+  );
 }
 
 export function SelectionActionSection(props: {
