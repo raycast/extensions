@@ -13,7 +13,7 @@ interface FeedbackFormValues {
 }
 
 function FeedbackForm() {
-  const { handleSubmit, itemProps, setValue } = useForm<FeedbackFormValues>({
+  const { handleSubmit, itemProps, reset, setValue } = useForm<FeedbackFormValues>({
     async onSubmit(values) {
       try {
         const toast = await showToast({
@@ -30,11 +30,8 @@ function FeedbackForm() {
           toast.title = "Feedback submitted successfully.";
           toast.style = Toast.Style.Success;
 
-          setValue("command", "Open Context in Gitpod");
-          setValue("title", "");
-          setValue("comment", "");
+          reset();
           setValue("tags", ["bug", "github"]);
-          setValue("type", "Issue");
         } else {
           toast.title = "Unable to Submit the Feedback.";
           toast.style = Toast.Style.Failure;
@@ -48,7 +45,6 @@ function FeedbackForm() {
       comment: FormValidation.Required,
     },
     initialValues: {
-      type: "Issue",
       tags: ["bug", "github"],
     },
   });

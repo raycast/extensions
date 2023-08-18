@@ -8,8 +8,7 @@
   "contributors": [
     "Palanikannan1437",
     "henitchobisa",
-    "pernielsentikaer",
-    "mads"
+    "pernielsentikaer"
   ],
   "categories": [
     "Developer Tools",
@@ -135,8 +134,8 @@
     "@graphql-codegen/cli": "^2.16.2",
     "@graphql-codegen/typescript-graphql-request": "^4.5.8",
     "@graphql-codegen/typescript-operations": "^2.5.11",
-    "@raycast/api": "^1.45.2",
-    "@raycast/utils": "^1.9.0",
+    "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.1",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
