@@ -84,7 +84,5 @@ export function extractCode(original: string) {
     return m[0];
   }
 
-  console.debug(message);
-
   return code;
 }
