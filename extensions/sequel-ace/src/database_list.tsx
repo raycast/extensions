@@ -93,7 +93,7 @@ function ConnectionListItem(props: { connection: Connection; groupName: string }
   const connection = props.connection;
   const groupName = props.groupName;
   const accessories = [];
-  if (connection.colorIndex in tintColorsIndex) {
+  if (connection.colorIndex in tintColorsIndex && connection.colorIndex in enviromentIndex) {
     accessories.push({
       tag: {
         color: tintColorsIndex[connection.colorIndex],
