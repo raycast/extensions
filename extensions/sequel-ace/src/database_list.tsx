@@ -76,7 +76,8 @@ function getfavorites(favorites: ReadonlyArray<plist.PlistObject>, grpName: stri
       grps.concat(getfavorites(favorite.Children as ReadonlyArray<plist.PlistObject>, favorite.Name as string, grps));
     } else {
       const conn: Connection = {
-        id: favorite.id.toString(),
+        id:
+          favorite.id?.toString() ?? favorite.name.toString() + favorite.host.toString() + favorite.database.toString(),
         colorIndex: favorite.colorIndex as number,
         name: favorite.name.toString(),
         database: favorite.database.toString(),
