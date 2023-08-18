@@ -183,7 +183,11 @@ export function GMailMessageListItem(props: {
             setSearchText={props.setSearchText}
           />
           <ActionPanel.Section>
-            <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageDeleteAction
+              message={data}
+              onRevalidate={props.onRevalidate}
+              selectionController={props.selectionController}
+            />
           </ActionPanel.Section>
           <SelectionActionSection message={props.message} selectionController={props.selectionController} />
           <ActionPanel.Section>

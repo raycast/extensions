@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Alert, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
 import { gmail_v1 } from "googleapis";
 import { ListSelectionController } from "./utils";
-import { markMessagesAsRead, markMessagesAsUnread } from "../../lib/gmail";
+import { markMessagesAsRead, markMessagesAsUnread, moveMessagesToTrash } from "../../lib/gmail";
 import { getErrorMessage } from "../../lib/utils";
 import { isMailUnread } from "../message/utils";
 
@@ -149,4 +149,45 @@ export function MessageMarkSelectedAsUnreadAction(props: {
   return (
     <Action title="Mark Selected as Unread" icon={Icon.CircleFilled} shortcut={props.shortcut} onAction={handle} />
   );
+}
+
+export function MessageDeleteSelectedAction(props: {
+  selectionController: ListSelectionController<gmail_v1.Schema$Message>;
+  onRevalidate?: () => void;
+  shortcut?: Keyboard.Shortcut | null | undefined;
+}) {
+  const messages = props.selectionController.getSelected().filter((m) => !isMailUnread(m));
+  if (!messages || messages.length <= 0) {
+    return null;
+  }
+  const handle = async () => {
+    try {
+      const options: Alert.Options = {
+        title: `Move all ${messages?.length} selected Mails to Trash?`,
+        primaryAction: {
+          title: "Move to Trash",
+          style: Alert.ActionStyle.Default,
+        },
+      };
+      if (await confirmAlert(options)) {
+        if (messages) {
+          const toast = await showToast({
+            style: Toast.Style.Animated,
+            title: `Moving ${messages.length} selected Mails to Trash`,
+          });
+          await moveMessagesToTrash(messages);
+          toast.style = Toast.Style.Success;
+          toast.title = `Moved ${messages.length} selected Mails to Trash`;
+
+          props.selectionController.deselectAll();
+          if (props.onRevalidate) {
+            props.onRevalidate();
+          }
+        }
+      }
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+    }
+  };
+  return <Action title="Delete Selected" icon={Icon.XMarkCircle} shortcut={props.shortcut} onAction={handle} />;
 }

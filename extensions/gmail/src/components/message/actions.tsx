@@ -25,7 +25,11 @@ import * as fs from "fs";
 import { useCurrentProfile } from "./hooks";
 import { getGMailClient } from "../../lib/withGmailClient";
 import { ListSelectionController } from "../selection/utils";
-import { MessageMarkSelectedAsReadAction, MessageMarkSelectedAsUnreadAction } from "../selection/actions";
+import {
+  MessageDeleteSelectedAction,
+  MessageMarkSelectedAsReadAction,
+  MessageMarkSelectedAsUnreadAction,
+} from "../selection/actions";
 
 export function MessageMarkAsArchived(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
   if (!canMessageBeArchived(props.message)) {
@@ -172,7 +176,21 @@ export function MessageMarkAsUnreadAction(props: {
   );
 }
 
-export function MessageDeleteAction(props: { message: gmail_v1.Schema$Message; onRevalidate?: () => void }) {
+export function MessageDeleteAction(props: {
+  message: gmail_v1.Schema$Message;
+  onRevalidate?: () => void;
+  selectionController?: ListSelectionController<gmail_v1.Schema$Message>;
+}) {
+  const shortcut = Keyboard.Shortcut.Common.Remove;
+  if (props.selectionController && props.selectionController.getSelectedKeys().length > 0) {
+    return (
+      <MessageDeleteSelectedAction
+        selectionController={props.selectionController}
+        onRevalidate={props.onRevalidate}
+        shortcut={shortcut}
+      />
+    );
+  }
   if (props.message.id === undefined) {
     return null;
   }

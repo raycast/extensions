@@ -200,3 +200,12 @@ export async function moveMessageToTrash(message: gmail_v1.Schema$Message) {
   const gmail = await getAuthorizedGmailClient();
   await gmail.users.messages.trash({ userId: "me", id: message.id || "" });
 }
+
+export async function moveMessagesToTrash(messages: gmail_v1.Schema$Message[]) {
+  const gmail = await getAuthorizedGmailClient();
+  const ids = messages.map((m) => m.id as string).filter((m) => m);
+  await gmail.users.messages.batchModify({
+    userId: "me",
+    requestBody: { ids, removeLabelIds: ["INBOX"], addLabelIds: ["TRASH"] },
+  });
+}
