@@ -56,16 +56,15 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
   });
 
   async function generateToDos() {
-    async () => {
-      try {
-        if (!values.title) {
-          await showToast({ style: Toast.Style.Failure, title: 'The project should have a title' });
-          return;
-        }
+    try {
+      if (!values.title) {
+        await showToast({ style: Toast.Style.Failure, title: 'The project should have a title' });
+        return;
+      }
 
-        const toast = await showToast({ style: Toast.Style.Animated, title: 'Generating to-dos' });
-        const items =
-          await AI.ask(`Break down a project into tasks. The tasks should be actionable. Each item should be separated by a new line. Return the tasks in the same language than the projects's title (e.g if the project title is written in French, the tasks should be written in French as well).
+      const toast = await showToast({ style: Toast.Style.Animated, title: 'Generating to-dos' });
+      const items =
+        await AI.ask(`Break down a project into tasks. The tasks should be actionable. Each item should be separated by a new line. Return the tasks in the same language than the projects's title (e.g if the project title is written in French, the tasks should be written in French as well).
 
 For example, for a project named "Vacation in Rome", you could write:
 Research hotels in Rome and book one
@@ -78,13 +77,12 @@ Here's the project you need to break-down: "${values.title}"
 ${values.notes.length > 0 ? `For additional context, here are the task's notes: "${values.notes}"` : ''}
 
 Tasks:`);
-        toast.hide();
-        setValue('toDos', items.trim());
-        focus('toDos');
-      } catch (error) {
-        await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos' });
-      }
-    };
+      toast.hide();
+      setValue('toDos', items.trim());
+      focus('toDos');
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate to-dos' });
+    }
   }
 
   const isLoading = isLoadingTags || isLoadingAreas;
