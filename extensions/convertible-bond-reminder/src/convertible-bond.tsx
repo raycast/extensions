@@ -33,7 +33,7 @@ async function updateBonds() {
     if (!result.length) {
       setBonds([
         {
-          SECURITY_NAME_ABBR: "今日无可转债信息更新",
+          SECUCODE: "No convertible bond today",
         },
       ]);
       return;
@@ -41,10 +41,9 @@ async function updateBonds() {
     setBonds(result);
     cache.set("lastRefreshTime", dayjs().tz("asia/shanghai").format());
   } catch (error) {
-    console.error(error);
     setBonds([
       {
-        SECURITY_NAME_ABBR: "可转债信息更新失败",
+        SECUCODE: "Update failure",
       },
     ]);
   }
@@ -53,7 +52,7 @@ async function updateBonds() {
 function main() {
   const currentDate = dayjs().tz("asia/shanghai").format("YYYY-MM-DD");
   const bonds = getBonds();
-  if (bonds[0]?.VALUE_DATE?.includes(currentDate)) {
+  if (bonds?.[0]?.VALUE_DATE?.includes(currentDate)) {
     return;
   }
   updateBonds();
@@ -67,14 +66,14 @@ export default function Command() {
   const bonds = getBonds();
   const currentDate = dayjs().tz("asia/shanghai").format("YYYY-MM-DD");
   return (
-    <MenuBarExtra icon="../assets/menu_icon.png" tooltip={bonds ? `有${bonds.length}个可转债` : "无可转债"}>
+    <MenuBarExtra icon="../assets/menu_icon.png" tooltip={bonds ? `${bonds.length} bonds` : "No bonds"}>
       <MenuBarExtra.Item title={currentDate} />
-      {bonds.map(({ SECURITY_NAME_ABBR }: { SECURITY_NAME_ABBR: string }) => (
-        <MenuBarExtra.Item title={SECURITY_NAME_ABBR} key={SECURITY_NAME_ABBR} onAction={console.warn} />
+      {bonds.map(({ SECUCODE, RATING }: { SECUCODE: string; RATING?: string }) => (
+        <MenuBarExtra.Item title={`${SECUCODE}${RATING ? ` (${RATING})` : ''}`} key={SECUCODE} onAction={console.warn} />
       ))}
-      <MenuBarExtra.Item title={`最近更新时间：${cache.get("lastRefreshTime")}`} />
-      <MenuBarExtra.Item title="点击更新" onAction={updateBonds} />
-      <MenuBarExtra.Item title={`上次后台刷新时间：${cache.get("backgroundLaunchTime")}`} />
+      <MenuBarExtra.Item title={`Latest Refresh time：${cache.get("lastRefreshTime")}`} />
+      <MenuBarExtra.Item title="Refresh" onAction={updateBonds} />
+      <MenuBarExtra.Item title={`Last Background Sync Time：${cache.get("backgroundLaunchTime")}`} />
     </MenuBarExtra>
   );
 }
