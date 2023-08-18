@@ -60,7 +60,7 @@ function readfavorites(sequelAceLocation: string): any[] {
   const connectionsList = plist.parse(fs.readFileSync(sequelAceLocation, "utf8")) as ReadonlyArray<plist.PlistObject>;
 
   const root = connectionsList["Favorites Root" as any];
-  const cnns = getfavorites(root["Children"] as ReadonlyArray<plist.PlistObject>, "undefined");
+  const cnns = getfavorites(root["Children"] as ReadonlyArray<plist.PlistObject>, "No Group");
   return cnns;
 }
 
