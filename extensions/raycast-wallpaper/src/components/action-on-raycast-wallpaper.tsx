@@ -1,27 +1,32 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
-import { deleteCache, downloadPicture, setWallpaper } from "../utils/common-utils";
+import { cache, deleteCache, downloadPicture, setWallpaper } from "../utils/common-utils";
 import PreviewRaycastWallpaper from "../preview-raycast-wallpaper";
-import { RAYCAST_WALLPAPER } from "../utils/constants";
+import { LocalStorageKey, RAYCAST_WALLPAPER } from "../utils/constants";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import React from "react";
-import { RaycastWallpaper } from "../types/types";
+import { RaycastWallpaperWithInfo } from "../types/types";
 
-export function ActionOnRaycastWallpaper(props: { index: number; raycastWallpapers: RaycastWallpaper[] }) {
-  const { index, raycastWallpapers } = props;
+export function ActionOnRaycastWallpaper(props: {
+  index: number;
+  raycastWallpapers: RaycastWallpaperWithInfo[];
+  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+}) {
+  const { index, raycastWallpapers, setRefresh } = props;
+  const raycastWallpaper = raycastWallpapers[index];
   return (
     <ActionPanel>
       <Action
         icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
-          setWallpaper(raycastWallpapers[index]).then(() => "");
+          setWallpaper(raycastWallpaper).then(() => "");
         }}
       />
       <Action
         icon={Icon.Download}
         title={"Download Wallpaper"}
         onAction={async () => {
-          await downloadPicture(raycastWallpapers[index]);
+          await downloadPicture(raycastWallpaper);
         }}
       />
       <Action.Push
@@ -41,11 +46,41 @@ export function ActionOnRaycastWallpaper(props: { index: number; raycastWallpape
             setWallpaper(randomImage).then(() => "");
           }}
         />
+        {!raycastWallpaper.exclude && (
+          <Action
+            icon={Icon.XMarkTopRightSquare}
+            title={"Exclude From Auto Switch"}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+            onAction={() => {
+              const _excludeCache = cache.get(LocalStorageKey.EXCLUDE_LIST_CACHE);
+              const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
+              _excludeList.push(raycastWallpaper.url);
+              cache.set(LocalStorageKey.EXCLUDE_LIST_CACHE, JSON.stringify(_excludeList));
+              setRefresh(Date.now());
+            }}
+          />
+        )}
+        {raycastWallpaper.exclude && (
+          <Action
+            icon={Icon.PlusTopRightSquare}
+            title={"Include in Auto Switch"}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+            onAction={() => {
+              const _excludeCache = cache.get(LocalStorageKey.EXCLUDE_LIST_CACHE);
+              const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
+              _excludeList.splice(_excludeList.indexOf(raycastWallpaper.url), 1);
+              cache.set(LocalStorageKey.EXCLUDE_LIST_CACHE, JSON.stringify(_excludeList));
+              setRefresh(Date.now());
+            }}
+          />
+        )}
         <Action.OpenInBrowser
           title={"Go to Raycast Wallpaper"}
           shortcut={{ modifiers: ["shift", "cmd"], key: "g" }}
           url={RAYCAST_WALLPAPER}
         />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
         <Action
           icon={Icon.Trash}
           title={"Clear Picture Cache"}
