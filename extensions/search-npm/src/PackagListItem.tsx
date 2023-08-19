@@ -106,7 +106,7 @@ export const PackageListItem = ({
           source: 'command-icon.png',
         }}
         onOpen={handleAddToHistory}
-        shortcut={Keyboard.Shortcut.Common.OpenWith}
+        shortcut={Keyboard.Shortcut.Common.Open}
       />
     ),
     skypackPackagePage: (
