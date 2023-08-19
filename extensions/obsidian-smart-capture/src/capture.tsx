@@ -15,7 +15,7 @@ import {
   List,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { GET_LINK_INFO_SCRIPT } from "./scripts/get-link";
 import { useObsidianVaults, vaultPluginCheck } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
