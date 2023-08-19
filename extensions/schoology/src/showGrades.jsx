@@ -170,7 +170,7 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
+                <Action.Paste
                   title="Paste Grade"
                   content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[coursesText.indexOf(course)]}%`}
                 />
