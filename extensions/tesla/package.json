@@ -22,35 +22,35 @@
       "name": "turnClimateOn",
       "title": "Turn Climate On",
       "subtitle": "Tesla",
-      "description": "View information about your Tesla",
+      "description": "Turn your AC on",
       "mode": "view"
     },
     {
       "name": "turnClimateOff",
       "title": "Turn Climate Off",
       "subtitle": "Tesla",
-      "description": "View information about your Tesla",
+      "description": "Turn your AC off",
       "mode": "view"
     },
     {
       "name": "turnSentryOn",
       "title": "Turn Sentry On",
       "subtitle": "Tesla",
-      "description": "View information about your Tesla",
+      "description": "Turn sentry mode on",
       "mode": "view"
     },
     {
       "name": "turnSentryOff",
       "title": "Turn Sentry Off",
       "subtitle": "Tesla",
-      "description": "View information about your Tesla",
+      "description": "Turn sentry mode off",
       "mode": "view"
     },
     {
       "name": "honk",
       "title": "Honk",
       "subtitle": "Tesla",
-      "description": "View information about your Tesla",
+      "description": "Honk the horn",
       "mode": "view"
     }
   ],

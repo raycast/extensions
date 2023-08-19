@@ -12,18 +12,18 @@ const BASE_URL = "https://teslascope.com/api";
 
 interface ViewCarProps {
   command?:
-  | "honkHorn"
-  | "flashLights"
-  | "enableSentryMode"
-  | "disableSentryMode"
-  | "startAC"
-  | "stopAC"
-  | "ventWindows"
-  | "closeWindows"
-  | "openTrunk"
-  | "openFrunk"
-  | "openChargeDoor"
-  | "closeChargeDoor";
+    | "honkHorn"
+    | "flashLights"
+    | "enableSentryMode"
+    | "disableSentryMode"
+    | "startAC"
+    | "stopAC"
+    | "ventWindows"
+    | "closeWindows"
+    | "openTrunk"
+    | "openFrunk"
+    | "openChargeDoor"
+    | "closeChargeDoor";
   loadingMessage?: string;
 }
 
