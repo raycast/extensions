@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.57.0 - 2023-08-09
+
+### 🐞 Fixes
+
+- **Metadata**: Fixed various rendering issues with `TagList`.
+- **Menu Bar Extra**: Fixed a bug that caused section titles to be unreadable on macOS Sonoma.
+- **Menu Bar Extra**: Fixed a bug that could cause a menu bar command to be unloaded while its menu is open.
+- **Form**: Fixed stale suggestions in the DatePicker when changing its type.
+- **Icon**: Fixed the `AppWindowGrid2x2` icon only showing a square.
+
+## 1.56.0 - 2023-07-26
+
+### ✨ New
+
+- **Clipboard**: `Clipboard.read()` now supports an `offset` option to access the Clipboard History (limited to the last 5)
+- **Grid:** Grid items can now have an icon accessory
+- **Shortcuts:** Providing a consistent user experience should now be easier thanks to the new `Keyboard.Shortcut.Common` export.
+
+### 💎 Improvements
+
+- `getSelectedText` is now more reliable
+- **Trash**: Improved behaviour of `trash` and `Action.Trash` to better handle missing files.
+- **HUD**: `showHUD` now supports the same options as `closeMainWindow`
+- **Command Launching:** Improved logic for deciding which version of a command gets launched when a user has both a production and a development version of an extension installed.
+- **Tags:** Icon-only tags should now center the icon.
+
+### 🐞 Fixes
+
+- **Form**: When working on a draft, updating a `Form.Checkbox` will update the draft.
+- **Error Reports:** Improved error messages when an extension crashes during a background launch.
+- **Shortcuts:** Previously, the API permitted the creation of shortcuts using keys reserved by Raycast (⌘+K, ⌘+W, ⌘+Esc, etc.), resulting in unexpected behavior. Raycast now ignores these and, during development mode, they will trigger a runtime warning.
+
 ## 1.55.0 - 2023-07-06
 
 ### 💎 Improvements

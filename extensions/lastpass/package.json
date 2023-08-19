@@ -16,33 +16,54 @@
       "title": "Search Vault",
       "subtitle": "LastPass",
       "description": "Search LastPass credentials",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "email",
-      "type": "textfield",
-      "description": "Email address from LastPass account",
-      "required": true,
-      "title": "Email",
-      "placeholder": "biggest@cheburek.com"
-    },
-    {
-      "name": "password",
-      "type": "password",
-      "description": "Password from LastPass account",
-      "title": "Password",
-      "required": true
-    },
-    {
-      "name": "syncRate",
-      "type": "dropdown",
-      "description": "How often do you want to refresh LastPass vault",
-      "title": "Refresh Rate",
-      "required": true,
-      "data": [{"title": "Always", "value": "0"}, {"title": "Every day", "value": "86400000"}, {"title": "Every Week", "value": "604800000"}],
-      "default": "0"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "email",
+          "type": "textfield",
+          "description": "Email address from LastPass account",
+          "required": true,
+          "title": "Email",
+          "placeholder": "biggest@cheburek.com"
+        },
+        {
+          "name": "password",
+          "type": "password",
+          "description": "Password from LastPass account",
+          "title": "Password",
+          "required": true
+        },
+        {
+          "name": "hidePassword",
+          "type": "checkbox",
+          "required": true,
+          "title": "Hide Password",
+          "label": "Hide password while searching",
+          "description": "Indicates whether password should be hidden while searching"
+        },
+        {
+          "name": "syncRate",
+          "type": "dropdown",
+          "description": "How often do you want to refresh LastPass vault",
+          "title": "Refresh Rate",
+          "required": true,
+          "data": [
+            {
+              "title": "Always",
+              "value": "0"
+            },
+            {
+              "title": "Every Day",
+              "value": "86400000"
+            },
+            {
+              "title": "Every Week",
+              "value": "604800000"
+            }
+          ],
+          "default": "0"
+        }
+      ]
     }
   ],
   "dependencies": {

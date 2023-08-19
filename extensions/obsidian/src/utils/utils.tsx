@@ -251,8 +251,21 @@ export async function getClipboardContent() {
   return clipboardText ? clipboardText : "";
 }
 
+async function ISO8601_week_no(dt: Date) {
+  const tdt = new Date(dt.getTime());
+  const dayn = (dt.getDay() + 6) % 7;
+  tdt.setDate(tdt.getDate() - dayn + 3);
+  const firstThursday = tdt.getTime();
+  tdt.setMonth(0, 1);
+  if (tdt.getDay() !== 4) {
+    tdt.setMonth(0, 1 + ((4 - tdt.getDay() + 7) % 7));
+  }
+  return 1 + Math.ceil((firstThursday - tdt.getTime()) / 604800000);
+}
+
 export async function applyTemplates(content: string) {
   const date = new Date();
+  const week = await ISO8601_week_no(date);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const seconds = date.getSeconds().toString().padStart(2, "0");
@@ -261,6 +274,8 @@ export async function applyTemplates(content: string) {
 
   content = content.replaceAll("{time}", date.toLocaleTimeString());
   content = content.replaceAll("{date}", date.toLocaleDateString());
+
+  content = content.replaceAll("{week}", week.toString().padStart(2, "0"));
 
   content = content.replaceAll("{year}", date.getFullYear().toString());
   content = content.replaceAll("{month}", MONTH_NUMBER_TO_STRING[date.getMonth()]);

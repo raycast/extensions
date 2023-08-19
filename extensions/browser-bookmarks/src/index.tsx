@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage, Toast, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  List,
+  LocalStorage,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
 import Fuse from "fuse.js";
 import { useState, useMemo, useEffect } from "react";
@@ -6,11 +16,16 @@ import { useState, useMemo, useEffect } from "react";
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
+import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
+import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
+import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
+import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
+import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
@@ -33,6 +48,8 @@ type Folder = {
 
 export default function Command() {
   const { data: availableBrowsers } = useAvailableBrowsers();
+
+  const { showDomain } = getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -77,16 +94,26 @@ export default function Command() {
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
+  const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
+  const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
+  const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
+  const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
+  const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
 
   const brave = useBraveBookmarks(hasBrave);
+  const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const chrome = useChromeBookmarks(hasChrome);
+  const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const edge = useEdgeBookmarks(hasEdge);
+  const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
+  const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox);
   const safari = useSafariBookmarks(hasSafari);
+  const vivaldi = useVivaldiBookmarks(hasVivaldi);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
@@ -94,10 +121,15 @@ export default function Command() {
   useEffect(() => {
     const bookmarks = [
       ...brave.bookmarks,
+      ...braveBeta.bookmarks,
       ...chrome.bookmarks,
+      ...chromeDev.bookmarks,
       ...edge.bookmarks,
+      ...edgeCanary.bookmarks,
+      ...edgeDev.bookmarks,
       ...firefox.bookmarks,
       ...safari.bookmarks,
+      ...vivaldi.bookmarks,
     ]
       .map((item) => {
         let domain;
@@ -133,19 +165,47 @@ export default function Command() {
     setBookmarks(bookmarks);
   }, [
     brave.bookmarks,
+    braveBeta.bookmarks,
     chrome.bookmarks,
+    chromeDev.bookmarks,
     edge.bookmarks,
+    edgeCanary.bookmarks,
+    edgeDev.bookmarks,
     firefox.bookmarks,
     safari.bookmarks,
+    vivaldi.bookmarks,
     frecencies,
     setBookmarks,
   ]);
 
   useEffect(() => {
-    const folders = [...brave.folders, ...chrome.folders, ...edge.folders, ...firefox.folders, ...safari.folders];
+    const folders = [
+      ...brave.folders,
+      ...braveBeta.folders,
+      ...chrome.folders,
+      ...chromeDev.folders,
+      ...edge.folders,
+      ...edgeCanary.folders,
+      ...edgeDev.folders,
+      ...firefox.folders,
+      ...safari.folders,
+      ...vivaldi.folders,
+    ];
 
     setFolders(folders);
-  }, [brave.folders, chrome.folders, edge.folders, firefox.folders, safari.folders, setFolders]);
+  }, [
+    brave.folders,
+    braveBeta.folders,
+    chrome.folders,
+    chromeDev.folders,
+    edge.folders,
+    edgeCanary.folders,
+    edgeDev.folders,
+    firefox.folders,
+    safari.folders,
+    vivaldi.folders,
+    setFolders,
+  ]);
 
   const folderBookmarks = useMemo(() => {
     return bookmarks.filter((item) => {
@@ -165,7 +225,12 @@ export default function Command() {
 
   const fuse = useMemo(() => {
     return new Fuse(folderBookmarks, {
-      keys: ["title", "domain", "folder"],
+      keys: [
+        { name: "title", weight: 3 },
+        { name: "domain", weight: 1 },
+        { name: "folder", weight: 0.5 },
+      ],
+      threshold: 0.4,
     });
   }, [folderBookmarks]);
 
@@ -195,21 +260,32 @@ export default function Command() {
     if (hasBrave) {
       brave.mutate();
     }
-
+    if (hasBraveBeta) {
+      braveBeta.mutate();
+    }
     if (hasChrome) {
       chrome.mutate();
     }
-
+    if (hasChromeDev) {
+      chromeDev.mutate();
+    }
     if (hasEdge) {
       edge.mutate();
     }
-
+    if (hasEdgeCanary) {
+      edge.mutate();
+    }
+    if (hasEdgeDev) {
+      edge.mutate();
+    }
     if (hasFirefox) {
       firefox.mutate();
     }
-
     if (hasSafari) {
       safari.mutate();
+    }
+    if (hasVivaldi) {
+      vivaldi.mutate();
     }
   }
 
@@ -248,12 +324,17 @@ export default function Command() {
         isLoadingBrowsers ||
         isLoadingFrecencies ||
         brave.isLoading ||
+        braveBeta.isLoading ||
         chrome.isLoading ||
+        chromeDev.isLoading ||
         edge.isLoading ||
+        edgeCanary.isLoading ||
+        edgeDev.isLoading ||
         firefox.isLoading ||
-        safari.isLoading
+        safari.isLoading ||
+        vivaldi.isLoading
       }
-      searchBarPlaceholder="Search by title, domain name or tag in selected folder"
+      searchBarPlaceholder="Search by title, domain name, or folder name"
       onSearchTextChange={setQuery}
       searchBarAccessory={
         <List.Dropdown tooltip="Folder" onChange={setSelectedFolderId}>
@@ -280,6 +361,7 @@ export default function Command() {
             key={item.id}
             icon={getFavicon(item.url)}
             title={item.title}
+            subtitle={showDomain ? item.domain : ""}
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>
@@ -303,7 +385,15 @@ export default function Command() {
                     currentProfile={brave.currentProfile}
                     setCurrentProfile={brave.setCurrentProfile}
                   />
-
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.braveBeta}
+                    name="Brave Beta"
+                    icon="brave.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                    profiles={braveBeta.profiles}
+                    currentProfile={braveBeta.currentProfile}
+                    setCurrentProfile={braveBeta.setCurrentProfile}
+                  />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.chrome}
                     name="Chrome"
@@ -313,7 +403,15 @@ export default function Command() {
                     currentProfile={chrome.currentProfile}
                     setCurrentProfile={chrome.setCurrentProfile}
                   />
-
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.chromeDev}
+                    name="Chrome Dev"
+                    icon="chrome-dev.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    profiles={chromeDev.profiles}
+                    currentProfile={chromeDev.currentProfile}
+                    setCurrentProfile={chromeDev.setCurrentProfile}
+                  />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.edge}
                     name="Edge"
@@ -323,7 +421,24 @@ export default function Command() {
                     currentProfile={edge.currentProfile}
                     setCurrentProfile={edge.setCurrentProfile}
                   />
-
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
+                    name="Edge Canary"
+                    icon="edge.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    profiles={edgeCanary.profiles}
+                    currentProfile={edgeCanary.currentProfile}
+                    setCurrentProfile={edgeCanary.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.edgeDev}
+                    name="Edge Dev"
+                    icon="edge.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    profiles={edgeDev.profiles}
+                    currentProfile={edgeDev.currentProfile}
+                    setCurrentProfile={edgeDev.setCurrentProfile}
+                  />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.firefox}
                     name="Firefox"
@@ -332,6 +447,15 @@ export default function Command() {
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.vivaldi}
+                    name="Vivaldi"
+                    icon="vivaldi.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                    profiles={vivaldi.profiles}
+                    currentProfile={vivaldi.currentProfile}
+                    setCurrentProfile={vivaldi.setCurrentProfile}
                   />
                 </ActionPanel.Section>
 

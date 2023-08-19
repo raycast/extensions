@@ -6,6 +6,9 @@
   "categories": [
     "Applications"
   ],
+  "contributors": [
+    "EvanZhouDev"
+  ],
   "icon": "extension-icon.png",
   "owner": "raycast",
   "access": "public",

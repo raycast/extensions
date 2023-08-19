@@ -6,13 +6,17 @@ import { findPagesByTitle, getPageData } from "./utils/api";
 import { toSentenceCase } from "./utils/formatting";
 import { languages, Locale, useLanguage } from "./utils/language";
 import { openInBrowser, prefersListView } from "./utils/preferences";
+import { useRecentArticles } from "./utils/recents";
 
 const View = prefersListView ? List : Grid;
 
 export default function SearchPage(props: { arguments: { title: string } }) {
   const [language, setLanguage] = useLanguage();
   const [search, setSearch] = useState(props.arguments.title);
-  const { data, isLoading } = useCachedPromise(findPagesByTitle, [search, language]);
+  const { readArticles } = useRecentArticles();
+  const { data, isLoading } = useCachedPromise(findPagesByTitle, [search, language], {
+    keepPreviousData: true,
+  });
 
   return (
     <View
@@ -37,8 +41,19 @@ export default function SearchPage(props: { arguments: { title: string } }) {
         </View.Dropdown>
       }
     >
-      {data?.language === language &&
-        data?.results.map((title: string) => <PageItem key={title} title={title} language={language} />)}
+      {search ? (
+        data?.language === language && (
+          <View.Section title="Results">
+            {data?.results.map((title: string) => <PageItem key={title} title={title} language={language} />)}
+          </View.Section>
+        )
+      ) : (
+        <View.Section title="Recent Articles">
+          {readArticles.map((title) => (
+            <PageItem key={title} title={title} language={language} />
+          ))}
+        </View.Section>
+      )}
     </View>
   );
 }

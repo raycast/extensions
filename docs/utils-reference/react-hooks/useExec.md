@@ -125,7 +125,7 @@ import { useMemo } from "react";
 
 const brewPath = cpus()[0].model.includes("Apple") ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew";
 
-export default function () {
+export default function Command() {
   const { isLoading, data } = useExec(brewPath, ["info", "--json=v2", "--installed"]);
   const results = useMemo<{ id: string; name: string }[]>(() => JSON.parse(data || "{}").formulae || [], [data]);
 
@@ -150,12 +150,12 @@ import { useState } from "react";
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useExec("brew", ["info", searchText]);
 
   return <Detail isLoading={isLoading} markdown={data} />;
-};
+}
 ```
 
 {% hint style="info" %}
@@ -174,7 +174,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
   const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
 
@@ -219,7 +219,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Types

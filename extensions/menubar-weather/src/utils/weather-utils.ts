@@ -11,6 +11,11 @@ export const {
   precipitationUnits,
   longitude,
   latitude,
+  tempType,
+  menuUVI,
+  menuPressure,
+  menuHumidity,
+  menuWind,
   showSun,
   showUVI,
   showLocation,
@@ -55,7 +60,6 @@ export async function getCurWeather() {
     weatherData = await getOpenMeteoWeather(geoLocation.longitude.toString(), geoLocation.latitude.toString());
   }
 
-  console.debug(weatherData);
   return { weather: weatherData, geoLocation: geoLocation };
 }
 
@@ -172,7 +176,7 @@ export function getWeatherDescription(weatherCode: number | undefined) {
   }
 }
 
-const windAngle2Direction = (windAngle: number) => {
+export const windAngle2Direction = (windAngle: number) => {
   if ((windAngle >= 0 && windAngle < 11.25) || (windAngle >= 348.75 && windAngle <= 360)) {
     return { icon: "↓", symbol: "N", direction: "North" };
   }

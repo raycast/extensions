@@ -4,7 +4,7 @@ import { toDataURL } from 'qrcode';
 import { initQRCode, NextStep, QRCodeStatus, User } from '../../../services/auth';
 
 interface QRLoginProps {
-  onConfirm: (tenantDomain: string, cookies: string[]) => void;
+  onConfirm: (cookies: string[]) => void;
 }
 
 export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
@@ -37,7 +37,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
         if (unmountedRef.current || tokenRef.current !== qrCode.token) return;
 
         if (result.next_step === NextStep.EnterApp) {
-          return onConfirm(userRef.current!.tenant.tenant_full_domain, result.cookie || []);
+          return onConfirm(result.cookie || []);
         }
 
         if (result.status === QRCodeStatus.Outdated) {
@@ -121,7 +121,7 @@ async function getQRCodeMarkdownContent(token: string): Promise<string> {
               dark: '#262426',
             }
           : { light: '#0000', dark: '#dedede' },
-    }
+    },
   );
   return `![](${qrCodeData})`;
 }
