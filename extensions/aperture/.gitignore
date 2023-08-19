@@ -9,4 +9,4 @@ raycast-env.d.ts
 # misc
 .DS_Store
 
-/tmp
+.apperture-node

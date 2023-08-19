@@ -13,15 +13,24 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "record",
-      "title": "record",
-      "subtitle": "Record your screen",
+      "name": "start.command",
+      "title": "Record Your Screen",
+      "subtitle": "Start recording your screen",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "stop.command",
+      "title": "Stop Recording",
+      "subtitle": "Stop recording your screen",
+      "description": "",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.1"
+    "@raycast/api": "^1.57.1",
+    "aperture": "^6.1.3",
+    "execa": "^8.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
@@ -37,6 +46,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "update:aperture": "git clone https://github.com/jomifepe/aperture-node.git tmp/aperture-node && cd tmp/aperture-node && npm run build && mv aperture ../../assets/aperture"
+    "update:aperture": "rm -rf .aperture-node && git clone https://github.com/wulkano/aperture-node.git .aperture-node && cd .aperture-node && npm run build && mv aperture ../assets/aperture && cd .. && rm -rf .aperture-node"
   }
 }
