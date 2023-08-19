@@ -18,11 +18,29 @@
       "subtitle": "Google Calender",
       "description": "Easy to generate evet link to register for Google Calender!",
       "mode": "view"
+    },
+    {
+      "name": "search-google-calender",
+      "title": "Search Events",
+      "subtitle": "Google Calender",
+      "description": "search recent events on Google Calender",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "password",
+      "required": true,
+      "title": "OAuth Client ID",
+      "description": "Your OAuth client ID.",
+      "placeholder": "See https://console.developers.google.com/apis/credentials"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.56.1",
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.30.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
