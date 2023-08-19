@@ -32,11 +32,7 @@ export default function ViewCar(props: ViewCarProps) {
 
   const [carId, setCarID] = useState<string | undefined>(undefined);
 
-  const {
-    isLoading,
-    data: carData,
-    revalidate,
-  } = useFetch<Info>(`${BASE_URL}/vehicle/${carId}?api_key=${API_KEY}`, { execute: false });
+  const { isLoading, data: carData, revalidate } = useFetch<Info>(`${BASE_URL}/vehicle/${carId}?api_key=${API_KEY}`);
 
   const { isLoading: isLoadingState, data: state } = useFetch<State>(
     `${BASE_URL}/vehicle/${carId}/state?api_key=${API_KEY}`
