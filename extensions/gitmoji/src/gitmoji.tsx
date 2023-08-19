@@ -60,8 +60,16 @@ const GitmojiListItem = ({ gitmoji }: GitmojiListItemProps) => {
           {copy === "description-code" && <PrimaryAction content={`${code} ${description}`} />}
 
           <ActionPanel.Section>
-            <Action.CopyToClipboard content={emoji} title="Copy Emoji" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
-            <Action.CopyToClipboard content={code} title="Copy Code" shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
+            <Action.CopyToClipboard
+              content={emoji}
+              title="Copy Emoji"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+            <Action.CopyToClipboard
+              content={code}
+              title="Copy Code"
+              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            />
             <Action.CopyToClipboard
               content={`${emoji} ${description}`}
               title="Copy Emoji + Description"
