@@ -36,6 +36,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "update:aperture": "git clone https://github.com/jomifepe/aperture-node.git tmp/aperture-node && cd tmp/aperture-node && npm run build && mv aperture ../../assets/aperture"
   }
 }
