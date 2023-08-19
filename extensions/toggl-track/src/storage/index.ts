@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import api from "../toggl";
-import { Me, Workspace, Project, Client, Tag, TimeEntry } from "../toggl/types";
+import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "../toggl/types";
 import persistedStorage from "./persistedStorage";
 import { TogglStorage } from "./types";
 
@@ -43,6 +43,11 @@ export const storage: TogglStorage = {
     fetch: allWorkspacesFetch(api.getWorkspaceTags),
     expirySeconds: 60 * 5,
   }),
+  tasks: persistedStorage({
+    key: "tasks",
+    fetch: allWorkspacesFetch(api.getTasks),
+    expirySeconds: 60 * 5,
+  }),
   timeEntries: persistedStorage({
     key: "timeEntries",
     fetch: () =>
@@ -65,6 +70,7 @@ export type StorageValues = {
   projects: Project[];
   clients: Client[];
   tags: Tag[];
+  tasks: Task[];
   timeEntries: TimeEntry[];
   runningTimeEntry: TimeEntry | null;
 };
@@ -76,6 +82,7 @@ export async function getStorage(): Promise<StorageValues> {
     projects: await storage.projects.get(),
     clients: await storage.clients.get(),
     tags: await storage.tags.get(),
+    tasks: await storage.tasks.get(),
     timeEntries: await storage.timeEntries.get(),
     runningTimeEntry: await storage.runningTimeEntry.get(),
   };
@@ -88,6 +95,7 @@ export async function refreshStorage(): Promise<void> {
     storage.projects.refresh(),
     storage.clients.refresh(),
     storage.tags.refresh(),
+    storage.tasks.refresh(),
     storage.timeEntries.refresh(),
     storage.runningTimeEntry.refresh(),
   ]);

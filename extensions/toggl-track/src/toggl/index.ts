@@ -1,4 +1,4 @@
-import { Me, Workspace, Project, Client, Tag, TimeEntry } from "./types";
+import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "./types";
 import { getPreferenceValues } from "@raycast/api";
 import { authenticatedFetch } from "./auth";
 
@@ -31,6 +31,9 @@ const TogglAPI = function ({ togglApiToken, hideArchivedProjects }: Preferences)
     },
     getWorkspaceTags: (workspaceId: number): Promise<Tag[] | null> => {
       return api.get<Tag[] | null>(`/workspaces/${workspaceId}/tags`);
+    },
+    getTasks: (workspaceId: number): Promise<Task[]> => {
+      return api.get<Task[]>(`/workspaces/${workspaceId}/tasks`);
     },
     getTimeEntries: ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
       return api.get<TimeEntry[]>(
