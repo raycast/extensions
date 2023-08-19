@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-svg64",
-  "title": "svg64 - Convert SVGs to base64 Strings",
+  "title": "SVG64 - Convert SVGs to Base64 Strings",
   "description": "Convert SVGs to base64 strings, perfect for non-SVG enabled Markdown renderers.",
   "icon": "command-icon.png",
   "author": "EvanZhouDev",
@@ -13,13 +13,13 @@
   "commands": [
     {
       "name": "encode-svg-from-text",
-      "title": "Encode SVG from Text",
+      "title": "Encode SVG From Text",
       "description": "Converts SVG text into Base64.",
       "mode": "view"
     },
     {
       "name": "encode-svg-from-file",
-      "title": "Encode SVG from File",
+      "title": "Encode SVG From File",
       "description": "Converts an SVG file into Base64.",
       "mode": "view"
     }
