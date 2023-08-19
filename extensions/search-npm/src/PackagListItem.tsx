@@ -6,6 +6,7 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
+  Keyboard,
 } from '@raycast/api'
 import tinyRelativeDate from 'tiny-relative-date'
 import { CopyInstallCommandActions } from './CopyInstallCommandActions'
@@ -105,6 +106,7 @@ export const PackageListItem = ({
           source: 'command-icon.png',
         }}
         onOpen={handleAddToHistory}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
     ),
     skypackPackagePage: (
