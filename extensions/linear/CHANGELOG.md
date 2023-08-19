@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Add milestone functionality] - 2023-08-16
+
+Linear now allows users to create milestones within projects. This feature is now available on this extension.
+
 ## [Add "Break Issue Into Sub-Issues" action] - 2023-05-09
 
 Thanks to AI, the Linear extension has a new issue action: `Break Issue Into Sub-Issues`. It takes the issue title and description as context and generates actionable sub-issues that you can choose to create or not.

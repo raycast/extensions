@@ -308,12 +308,12 @@ function getPropertyAccessory(
       if (!property.phone_number) return;
       return { text: property.phone_number, tooltip: `${title}: ${property.phone_number}` };
     case "rich_text": {
-      const text = property.rich_text[0].plain_text;
+      const text = property.rich_text[0]?.plain_text;
       if (!property.rich_text[0]) return;
       return { text, tooltip: `${title}: ${text}` };
     }
     case "title": {
-      const text = property.title[0].plain_text ?? "Untitled";
+      const text = property.title[0]?.plain_text ?? "Untitled";
       return { text, tooltip: `${title}: ${text}` };
     }
     case "url":

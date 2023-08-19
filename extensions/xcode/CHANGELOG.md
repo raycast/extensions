@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Xcode Project List] - 2023-08-15
+
+- The favorites section will always be shown at first in the "Search Recent Projects" command.
+
 ## [Xcode 15 Beta Icon] - 2023-07-28
 
 - Added Xcode 15 Beta icon when searching for Xcode releases.

@@ -55,7 +55,7 @@ async function fetchLogGroups(search: string, token?: string, accLogGroups?: Log
   if (!isReadyToFetch()) return [];
 
   const { nextToken, logGroups } = await new CloudWatchLogsClient({}).send(
-    new DescribeLogGroupsCommand({ nextToken: token, logGroupNamePattern: search || undefined })
+    new DescribeLogGroupsCommand({ nextToken: token, logGroupNamePattern: search || undefined }),
   );
 
   const combinedLogGroups = [...(accLogGroups || []), ...(logGroups || [])];

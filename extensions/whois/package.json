@@ -5,6 +5,9 @@
   "description": "Retrieve whois data.",
   "icon": "extension_icon.png",
   "author": "zavbala",
+  "contributors": [
+    "snilan"
+  ],
   "categories": [
     "Web",
     "Data",
@@ -23,7 +26,7 @@
           "title": "Domain",
           "description": "Domain to lookup",
           "placeholder": "raycast.com",
-          "required": true,
+          "required": false,
           "type": "text"
         }
       ]
@@ -31,6 +34,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.49.0",
+    "@raycast/utils": "^1.9.0",
     "axios": "^1.3.4"
   },
   "devDependencies": {
