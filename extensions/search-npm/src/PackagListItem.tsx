@@ -90,18 +90,11 @@ export const PackageListItem = ({
           onOpen={handleAddToHistory}
         />
       ) : null,
-    changelogPackagePage: changelogUrl ? (
-      <Action.OpenInBrowser
-        key="openChangelog"
-        url={changelogUrl}
-        title="Open Changelog"
-      />
-    ) : null,
     npmPackagePage: (
       <Action.OpenInBrowser
         key="npmPackagePage"
         url={pkg.links.npm}
-        title="npm Package Page"
+        title="Open Npm Package Page"
         icon={{
           source: 'command-icon.png',
         }}
@@ -109,6 +102,13 @@ export const PackageListItem = ({
         shortcut={Keyboard.Shortcut.Common.Open}
       />
     ),
+    changelogPackagePage: changelogUrl ? (
+      <Action.OpenInBrowser
+        key="openChangelog"
+        url={changelogUrl}
+        title="Open Changelog"
+      />
+    ) : null,
     skypackPackagePage: (
       <Action.OpenInBrowser
         url={`https://www.skypack.dev/view/${pkg.name}`}
