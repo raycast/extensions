@@ -17,7 +17,17 @@
       "title": "Record Your Screen",
       "subtitle": "Start recording your screen",
       "description": "",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "savePath",
+          "type": "directory",
+          "title": "Save Location",
+          "description": "Where to save the recordings",
+          "default": "~/Movies",
+          "required": true
+        }
+      ]
     },
     {
       "name": "stop.command",
@@ -25,16 +35,6 @@
       "subtitle": "Stop recording your screen",
       "description": "",
       "mode": "no-view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "savePath",
-      "type": "directory",
-      "title": "Save Location",
-      "description": "Where to save the recordings",
-      "default": "~/Movies",
-      "required": true
     }
   ],
   "dependencies": {
