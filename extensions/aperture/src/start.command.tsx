@@ -1,17 +1,11 @@
-import { Action, ActionPanel, List, Toast, environment, popToRoot, showToast } from "@raycast/api";
-import { chmod } from "fs/promises";
-import { join } from "path";
+import { Action, ActionPanel, List, Toast, popToRoot, showToast } from "@raycast/api";
 import { saveRecordingData } from "~/utils/storage";
 import { useAperture } from "~/utils/useAperture";
-
-const BIN_PATH = join(environment.assetsPath, "aperture");
 
 export default function StartRecordingCommand() {
   const recorder = useAperture();
 
   const handleSelect = async () => {
-    await chmod(BIN_PATH, 755);
-
     const toast = await showToast({ title: "Starting recording...", style: Toast.Style.Animated });
     try {
       const recording = await recorder.startRecording();

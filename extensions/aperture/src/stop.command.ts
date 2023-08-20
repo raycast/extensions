@@ -10,10 +10,10 @@ export default async function StopRecordingCommand() {
     return showToast({ title: "No recording in progress", style: Toast.Style.Failure });
   }
 
-  const confirmed = await getStopConfirmation(startTime);
+  const confirmed = await getStopRecordingConfirmation(startTime);
   if (!confirmed) return;
 
-  await showToast({ title: "Stopping recording...", style: Toast.Style.Animated });
+  await showToast({ title: "Saving recording...", style: Toast.Style.Animated });
 
   kill(pid);
   const endTime = new Date();
@@ -24,7 +24,7 @@ export default async function StopRecordingCommand() {
 }
 
 
-function getStopConfirmation(startTime: Date) {
+function getStopRecordingConfirmation(startTime: Date) {
   const elapsedString = formatDistanceToNow(startTime, { includeSeconds: true, addSuffix: true });
   return confirmAlert({
     title: "Stop Recording",
