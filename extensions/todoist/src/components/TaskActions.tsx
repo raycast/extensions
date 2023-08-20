@@ -386,15 +386,15 @@ export default function TaskActions({
 
                   {sections && sections.length > 0
                     ? sections.map((section) => {
-                      return (
-                        <Action
-                          key={section.id}
-                          title={section.name}
-                          icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
-                          onAction={() => moveTask({ id: task.id, section_id: section.id })}
-                        />
-                      );
-                    })
+                        return (
+                          <Action
+                            key={section.id}
+                            title={section.name}
+                            icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
+                            onAction={() => moveTask({ id: task.id, section_id: section.id })}
+                          />
+                        );
+                      })
                     : null}
                 </Fragment>
               );

@@ -1,5 +1,12 @@
 # Todoist Changelog
 
+## [Add time to Due date via Create Task] - 2023-06-29
+
+This update adds the ability to add time to due date via the `Create Task` command. This is useful when you want to set a specific time for a task to be due.
+
+Happy time setting!
+
+
 ## [View task in Raycast from menu bar] - 2023-06-29
 
 When using menu bar you may want to take a closer a look at your task description without opening the Todoist app. This change adds a way to quickly preview any task from menu bar on Raycast floating window.
@@ -20,7 +27,7 @@ Happy task breaking!
 
 ## [Show task count for projects] - 2023-06-07
 
-This update adds a new feature to display the `task count` besides project name  in the `Show Projects` view. Note it's set to off by default in the command's preferences.  
+This update adds a new feature to display the `task count` besides project name  in the `Show Projects` view. Note it's set to off by default in the command's preferences.
 
 
 ## [Filter view menu bar] - 2023-06-05
@@ -87,7 +94,7 @@ There's also significant improvements to labels with this update: introducing th
 The menu bar command also gets its own set of improvements:
 - Hide the tasks count in the command's preferences if you want to have a cleaner (and maybe more stress-free) menu-bar
 - Add a label or an assignee to a task
-- Quickly access your tasks views (`Inbox`, `Today`, etc.), or other commands such as `Create Task` or `Create Project` 
+- Quickly access your tasks views (`Inbox`, `Today`, etc.), or other commands such as `Create Task` or `Create Project`
 - Also, some bugs have been fixed which should make the menu-bar smoother to use
 
 ### Quality of Life Improvements
