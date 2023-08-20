@@ -37,8 +37,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.57.1",
-    "@raycast/utils": "^1.9.1",
-    "exec-sh": "^0.4.0"
+    "@raycast/utils": "^1.9.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

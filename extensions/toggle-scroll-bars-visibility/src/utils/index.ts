@@ -1,5 +1,5 @@
 import { runAppleScript } from "@raycast/utils";
-import execSh from "exec-sh";
+import { execSync } from "child_process";
 import { scrollBarOutputToValueMap } from "../data/constants";
 
 function setScrollBarsVisibility(value: number) {
@@ -39,10 +39,10 @@ function setScrollBarsVisibility(value: number) {
   `);
 }
 
-async function getCurrentScrollBarsVisibility() {
-  const out = await execSh.promise("defaults read NSGlobalDomain AppleShowScrollBars", true);
-  const stringValue = out.stdout.replace(/[\r\n]/gm, "");
-  return scrollBarOutputToValueMap[stringValue];
+function getCurrentScrollBarsVisibility() {
+  const buffer = execSync("defaults read NSGlobalDomain AppleShowScrollBars");
+  const output = buffer.toString().replace(/[\r\n]/gm, "");
+  return scrollBarOutputToValueMap[output];
 }
 
 export { setScrollBarsVisibility, getCurrentScrollBarsVisibility };

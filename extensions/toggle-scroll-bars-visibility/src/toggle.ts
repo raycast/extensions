@@ -4,7 +4,7 @@ import { scrollBarLabel } from "./data/constants";
 import { setScrollBarsVisibility, getCurrentScrollBarsVisibility } from "./utils";
 
 export default async function main() {
-  const currentValue = await getCurrentScrollBarsVisibility();
+  const currentValue = getCurrentScrollBarsVisibility();
   const newValue = currentValue !== ScrollBarValue.ALWAYS ? ScrollBarValue.ALWAYS : ScrollBarValue.AUTOMATIC;
 
   await setScrollBarsVisibility(newValue);
