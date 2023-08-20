@@ -16,6 +16,7 @@ const initialStorageValues: StorageValues = Object.freeze({
   projects: [],
   clients: [],
   tags: [],
+  tasks: [],
   timeEntries: [],
   runningTimeEntry: null,
 });

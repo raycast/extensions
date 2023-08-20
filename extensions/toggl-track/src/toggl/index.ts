@@ -48,12 +48,14 @@ const TogglAPI = function ({ togglApiToken, hideArchivedProjects }: Preferences)
       workspaceId,
       description,
       tags,
+      taskId,
       billable,
     }: {
       projectId?: number;
       workspaceId: number;
       description: string;
       tags: string[];
+      taskId?: number;
       billable: boolean;
     }) => {
       const now = new Date();
@@ -68,6 +70,7 @@ const TogglAPI = function ({ togglApiToken, hideArchivedProjects }: Preferences)
         start: now.toISOString(),
         tags,
         workspace_id: workspaceId,
+        task_id: taskId,
       });
     },
     stopTimeEntry: ({ id, workspaceId }: { id: number; workspaceId: number }) => {
