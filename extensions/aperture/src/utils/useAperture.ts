@@ -112,25 +112,6 @@ export function useAperture() {
     });
   };
 
-  async function waitForEvent(name: string) {
-    if (!apertureProcessId.current) return;
-    const { stdout } = await execAperture(
-      "events",
-      "listen",
-      "--process-id",
-      apertureProcessId.current,
-      "--exit",
-      name
-    );
-    console.log("waitForEvent", { stdout });
-  }
-
-  async function throwIfNotStarted() {
-    if (process.current === undefined) {
-      throw new Error("Call `.startRecording()` first");
-    }
-  }
-
   async function stopRecording() {
     throwIfNotStarted();
 
@@ -140,6 +121,24 @@ export function useAperture() {
       clearRecording();
     }
     return tmpPath.current;
+  }
+
+  async function waitForEvent(name: string) {
+    if (!apertureProcessId.current) return;
+    await execAperture(
+      "events",
+      "listen",
+      "--process-id",
+      apertureProcessId.current,
+      "--exit",
+      name
+    );
+  }
+
+  async function throwIfNotStarted() {
+    if (process.current == null) {
+      throw new Error("Call `.startRecording()` first");
+    }
   }
 
   return {
@@ -232,5 +231,5 @@ function getRecorderOptions(tmpFilePath: string, options?: Options) {
 }
 
 function getTemporaryRecordingFilePath() {
-  return join(os.tmpdir(), `aperture-tmp-${getRandomId()}.mp4`);
+  return join(os.tmpdir(), `aperture-tmp-${getRandomString()}.mp4`);
 }

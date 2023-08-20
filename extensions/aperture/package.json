@@ -27,6 +27,16 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "savePath",
+      "type": "directory",
+      "title": "Save Location",
+      "description": "Where to save the recordings",
+      "default": "~/Movies",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.57.1",
     "date-fns": "^2.30.0",

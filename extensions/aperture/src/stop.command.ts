@@ -1,8 +1,8 @@
 import { Alert, Toast, confirmAlert, open, showToast } from "@raycast/api";
-import { statSync } from "fs";
 import { kill } from "process";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { clearStoredRecording, getStoredRecording } from "~/utils/storage";
+import { moveFileToSaveLocation, waitUntilFileIsAvailable } from "~/utils/fs";
 
 export default async function StopRecordingCommand() {
   const { pid, filePath, startTime } = await getStoredRecording();
@@ -16,26 +16,13 @@ export default async function StopRecordingCommand() {
   await showToast({ title: "Stopping recording...", style: Toast.Style.Animated });
 
   kill(pid);
+  const endTime = new Date();
   await waitUntilFileIsAvailable(filePath);
-  await open(filePath);
+  const savedFilePath = await moveFileToSaveLocation(filePath, endTime);
+  await open(savedFilePath);
   await clearStoredRecording();
 }
 
-function waitUntilFileIsAvailable(path: string): Promise<void> {
-  return new Promise((resolve) => {
-    const interval = setInterval(() => {
-      try {
-        const stats = statSync(path);
-        if (stats.isFile()) {
-          clearInterval(interval);
-          resolve();
-        }
-      } catch (e) {
-        // ignore
-      }
-    }, 1000);
-  });
-}
 
 function getStopConfirmation(startTime: Date) {
   const elapsedString = formatDistanceToNow(startTime, { includeSeconds: true, addSuffix: true });
