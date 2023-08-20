@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aperture",
   "title": "Aperture",
-  "description": "Record you screen directly from raycast",
+  "description": "Record you screen directly from Raycast",
   "icon": "command-icon.png",
   "author": "jomifepe",
   "categories": [
@@ -15,8 +15,8 @@
     {
       "name": "start.command",
       "title": "Record Your Screen",
-      "subtitle": "Start recording your screen",
-      "description": "",
+      "subtitle": "Aperture",
+      "description": "Start recording your screen",
       "mode": "view",
       "preferences": [
         {
@@ -31,9 +31,9 @@
     },
     {
       "name": "stop.command",
+      "subtitle": "Aperture",
+      "description": "Stop recording your screen",
       "title": "Stop Recording",
-      "subtitle": "Stop recording your screen",
-      "description": "",
       "mode": "no-view"
     }
   ],
