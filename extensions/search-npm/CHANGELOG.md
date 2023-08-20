@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Added a shortcut] - 2023-08-31
+## [Added a shortcut] - 2023-08-20
 
 - Added a shortcut to open the package's npm page
 
