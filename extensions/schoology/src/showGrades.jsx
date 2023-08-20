@@ -145,11 +145,7 @@ export default function Command() {
   }
 
   return (
-    <List
-      navigationTitle="Show Grades"
-      searchBarPlaceholder="Search your courses"
-      isLoading={coursesText.length === 0}
-    >
+    <List navigationTitle="Show Grades" searchBarPlaceholder="Search your courses" isLoading={coursesText.length === 0}>
       {coursesText
         .filter((course) => course.includes(searchText))
         .map((course) => (
