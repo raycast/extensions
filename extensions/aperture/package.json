@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.57.1",
-    "aperture": "^6.1.3",
+    "date-fns": "^2.30.0",
     "execa": "^8.0.1"
   },
   "devDependencies": {

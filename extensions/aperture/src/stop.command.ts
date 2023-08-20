@@ -1,28 +1,24 @@
-import { LocalStorage, Toast, confirmAlert, open, showToast } from "@raycast/api";
+import { Alert, Toast, confirmAlert, open, showToast } from "@raycast/api";
 import { statSync } from "fs";
 import { kill } from "process";
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { clearStoredRecording, getStoredRecording } from "~/utils/storage";
 
 export default async function StopRecordingCommand() {
-  const pid = Number(await LocalStorage.getItem<string>("aperture-processId"));
-  const path = await LocalStorage.getItem<string>("aperture-filePath");
-  if (!pid || Number.isNaN(pid) || !path) {
+  const { pid, filePath, startTime } = await getStoredRecording();
+  if (!pid || Number.isNaN(pid) || !filePath || !startTime) {
     return showToast({ title: "No recording in progress", style: Toast.Style.Failure });
   }
 
-  const isConfirmed = await confirmAlert({
-    title: "Stop Recording",
-    message: "Are you sure you want to stop your current screen recording?",
-  });
-  if (!isConfirmed) return;
+  const confirmed = await getStopConfirmation(startTime);
+  if (!confirmed) return;
 
   await showToast({ title: "Stopping recording...", style: Toast.Style.Animated });
 
   kill(pid);
-  await waitUntilFileIsAvailable(path);
-  await open(path);
-
-  await LocalStorage.removeItem("aperture-processId");
-  await LocalStorage.removeItem("aperture-filePath");
+  await waitUntilFileIsAvailable(filePath);
+  await open(filePath);
+  await clearStoredRecording();
 }
 
 function waitUntilFileIsAvailable(path: string): Promise<void> {
@@ -39,4 +35,16 @@ function waitUntilFileIsAvailable(path: string): Promise<void> {
       }
     }, 1000);
   });
+}
+
+function getStopConfirmation(startTime: Date) {
+  const elapsedString = formatDistanceToNow(startTime, { includeSeconds: true, addSuffix: true });
+  return confirmAlert({
+    title: "Stop Recording",
+    message: `You started recording ${elapsedString}.\nDo you wish to stop it?`,
+    primaryAction: {
+      title: 'Stop Recording',
+      style: Alert.ActionStyle.Destructive
+    }
+  })
 }
