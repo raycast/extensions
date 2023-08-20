@@ -64,7 +64,7 @@ export default function Command() {
 
         setCoursesText(course_grades_ids);
       } catch (error) {
-        console.error(error);
+        //console.error(error);
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid Schoology API key and/or secret",
@@ -146,8 +146,6 @@ export default function Command() {
 
   return (
     <List
-      filtering={true}
-      onSearchTextChange={setSearchText}
       navigationTitle="Show Grades"
       searchBarPlaceholder="Search your courses"
       isLoading={coursesText.length === 0}
@@ -156,7 +154,6 @@ export default function Command() {
         .filter((course) => course.includes(searchText))
         .map((course) => (
           <List.Item
-            key={course}
             title={coursesHashmap2[course] || course}
             icon={getIconBasedOnNumber(coursesIconHashmap2[course]) || Icon.Text}
             accessories={[
