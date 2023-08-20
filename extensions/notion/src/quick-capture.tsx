@@ -9,6 +9,7 @@ import {
   Toast,
   closeMainWindow,
   AI,
+  Icon,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { parseHTML } from "linkedom";
@@ -138,9 +139,9 @@ function QuickCapture() {
       />
 
       <Form.Dropdown {...itemProps.captureAs} title="Capture As" storeValue>
-        <Form.Dropdown.Item title="Bookmark" value="url" />
-        <Form.Dropdown.Item title="Full Page" value="full" />
-        <Form.Dropdown.Item title="Summarize Page with AI" value="ai" />
+        <Form.Dropdown.Item title="Bookmark" value="url" icon={Icon.Link} />
+        <Form.Dropdown.Item title="Full Page" value="full" icon={Icon.Paragraph} />
+        <Form.Dropdown.Item title="Summarize Page with AI" value="ai" icon={Icon.Stars} />
       </Form.Dropdown>
 
       <Form.Dropdown

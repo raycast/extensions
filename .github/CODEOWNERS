@@ -359,6 +359,7 @@
 /extensions/gif-search                               @josephschmitt
 /extensions/git-branch-name-generator                @michaelbonner
 /extensions/git-co-authors                           @nickradford @pernielsentikaer
+/extensions/git-commands                             @manumorante
 /extensions/git-repos                                @moored
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @azlekov
@@ -404,6 +405,7 @@
 /extensions/graphcdn                                 @mathieudutour
 /extensions/greip                                    @gre-dev @pernielsentikaer
 /extensions/guitar-chords                            @GastroGeek
+/extensions/gyazo-uploader                           @udus122
 /extensions/habr-media                               @khlebobul
 /extensions/hacker-news                              @thomaspaulmann @GastroGeek @sxn @itsnwa
 /extensions/hackmd                                   @Yukaii
@@ -518,6 +520,7 @@
 /extensions/lacinka                                  @colorage
 /extensions/laliga                                   @anhthang
 /extensions/laracasts                                @danyelkeddah
+/extensions/larajobs-search                          @JustSteveKing @pernielsentikaer
 /extensions/laravel-artisan                          @KevinBatdorf
 /extensions/laravel-docs                             @indykoning @aglipanci @Erth0
 /extensions/laravel-forge                            @KevinBatdorf @macbookandrew
@@ -548,7 +551,7 @@
 /extensions/lightning-time                           @MatthewStanciu
 /extensions/lightshot-gallery                        @feyli
 /extensions/ligue-1                                  @anhthang
-/extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann @peduarte @pernielsentikaer
+/extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann @peduarte @pernielsentikaer @mil3na
 /extensions/linguee                                  @geekdada
 /extensions/link-cleaner                             @MisakiCoca
 /extensions/linkding                                 @InteractiveNinja
@@ -570,6 +573,7 @@
 /extensions/mailsy                                   @BalliAsghar
 /extensions/mailwip                                  @xmok
 /extensions/man-pages                                @SKaplanOfficial
+/extensions/manga-calendar                           @MrOlivo
 /extensions/mantine                                  @EmilMalanczak
 /extensions/marginnote                               @ourongxing
 /extensions/markdown-blog-manager                    @pyronaur
@@ -854,6 +858,7 @@
 /extensions/sabnzbd                                  @jesse-c
 /extensions/safari                                   @loris @thomaspaulmann @SKaplanOfficial
 /extensions/salesforce-search                        @svenwiegand
+/extensions/sanity                                   @marcusforsberg
 /extensions/savvycal                                 @keturiosakys @pernielsentikaer @derrickreimer @vimtor
 /extensions/scaleway                                 @philibea @flozdra
 /extensions/scrapbox-search                          @zett-8
@@ -925,7 +930,7 @@
 /extensions/specify                                  @AllanMichay
 /extensions/speed-dial                               @osamaaamer95
 /extensions/speedtest                                @tonka3000 @koayon @pernielsentikaer
-/extensions/spotify-beta                             @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
+/extensions/spoiler-converter                        @EvanZhouDev @varunsatish2017
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq
 /extensions/spotify-player                           @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer
 /extensions/spryker-docs                             @DinisEsteves
@@ -983,7 +988,7 @@
 /extensions/the-noble-quran                          @BalliAsghar
 /extensions/the-verge                                @klkvsky @pernielsentikaer
 /extensions/thesaurus                                @ABukSwienty
-/extensions/things                                   @loris @andreaselia
+/extensions/things                                   @loris @andreaselia @thomaslombart
 /extensions/ticktick                                 @viduycheung @viduycheung @Alireza29675
 /extensions/tim                                      @tmwrnr
 /extensions/time-traveling-world-clock               @himarky
