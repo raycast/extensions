@@ -23,6 +23,12 @@
           "placeholder": "BPM",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "group",
+          "placeholder": "Accents",
+          "type": "text",
+          "required": true
         }
       ]
     }
