@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 
 const markdown = `
 ![Image Title](command-icon.png)
@@ -9,7 +9,16 @@ You can download it here: [Download](https://github.com/okwasniewski/MiniSim/rel
 `;
 
 const ErrorScreen = () => {
-  return <Detail markdown={markdown} />;
+  return (
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser title="Download" url="https://www.minisim.app/" />
+        </ActionPanel>
+      }
+    />
+  );
 };
 
 export default ErrorScreen;
