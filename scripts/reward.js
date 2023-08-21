@@ -1,4 +1,4 @@
-module.exports = async ({ github, context }) => {
+module.exports = async ({ github, context, fetch }) => {
   try {
     const pr = (
       await github.rest.repos.listPullRequestsAssociatedWithCommit({
