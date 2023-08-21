@@ -15,7 +15,7 @@ function setBonds(bonds: object[]) {
   cache.set("bonds", JSON.stringify(bonds));
 }
 
-function getBonds(): ({ SECUCODE: string; RATING?: string; VALUE_DATE: string })[] | undefined {
+function getBonds(): { SECUCODE: string; RATING?: string; VALUE_DATE: string }[] | undefined {
   const cached = cache.get("bonds");
   return cached ? JSON.parse(cached) : undefined;
 }
