@@ -95,8 +95,15 @@ ${numbers.map((n) => `| ${formatNumber(n)} |`).join("\n")}`;
 
         reopenRayCast();
 
-        const numbers = JSON.parse(stdout);
-        const numbersFound = processNumbers(numbers);
+        // Remove surrounding brackets and split into an array
+        const stringWithoutBrackets = stdout.slice(1, -1);
+        const stringArray = stringWithoutBrackets.split(", ");
+
+        // Trim whitespace from each element and store in a new array
+        const trimmedArray = stringArray.map((item) => item.trim());
+
+        // const numbers = JSON.parse(stdout);
+        const numbersFound = processNumbers(trimmedArray);
 
         displayNumbers(numbersFound);
 
