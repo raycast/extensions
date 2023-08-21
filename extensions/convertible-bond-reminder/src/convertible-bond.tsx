@@ -30,6 +30,7 @@ async function updateBonds() {
     const result = json.result.data.filter(({ VALUE_DATE }: { VALUE_DATE: string }) =>
       VALUE_DATE?.includes(currentDate)
     );
+    cache.set("lastRefreshTime", dayjs().tz("asia/shanghai").format());
     if (!result.length) {
       setBonds([
         {
@@ -39,7 +40,6 @@ async function updateBonds() {
       return;
     }
     setBonds(result);
-    cache.set("lastRefreshTime", dayjs().tz("asia/shanghai").format());
   } catch (error) {
     setBonds([
       {
