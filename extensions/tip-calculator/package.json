@@ -37,6 +37,16 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "currency",
+      "description": "Enter the symbol of the currency you use.",
+      "type": "textfield",
+      "title": "Currency's Symbol",
+      "placeholder": "Exmples: $, €, ₹, etc...",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.57.1"
   },
