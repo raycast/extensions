@@ -19,7 +19,7 @@
         {
           "name": "bill",
           "type": "text",
-          "placeholder": "Bill",
+          "placeholder": "Bill (Currency)",
           "required": true
         },
         {

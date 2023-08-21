@@ -3,7 +3,7 @@ import { Detail, LaunchProps, showToast, Toast, List, popToRoot, Icon, Color } f
 export default function Command(props: LaunchProps) {
   const { bill, tip, people } = props.arguments;
 
-  if (!Number.isNaN(bill) && bill >= 0 && !Number.isNaN(tip) && tip >= 0 && !Number.isNaN(people) && people >= 0) {
+  if (!Number.isNaN(bill) && bill >= 0 && !Number.isNaN(tip) && tip >= 0 && !Number.isNaN(people) && people > 0) {
     return (
       <List navigationTitle="Search Beers" searchBarPlaceholder="Search Information...">
         <List.Section title="Inputted Values">
@@ -27,6 +27,9 @@ export default function Command(props: LaunchProps) {
         </List.Section>
       </List>
     );
+  } else if (people <= 0) {
+    popToRoot();
+    showToast({ title: "Invalid Input", message: "People can't be lower than 1", style: Toast.Style.Failure });
   } else {
     popToRoot();
     showToast({ title: "Invalid Input", message: "Please use only numbers", style: Toast.Style.Failure });
