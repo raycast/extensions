@@ -62,6 +62,13 @@ ${numbers.map((n) => `| ${formatNumber(n)} |`).join("\n")}`;
     setMarkdown(markdown);
   };
 
+  /**
+   * This is a workaround until Raycast API support openMainWindow()
+   */
+  const reopenRayCast = (): void => {
+    exec("open raycast://reopen");
+  };
+
   useEffect(() => {
     setLoading(true);
 
@@ -85,6 +92,8 @@ ${numbers.map((n) => `| ${formatNumber(n)} |`).join("\n")}`;
 
           return;
         }
+
+        reopenRayCast();
 
         const numbers = JSON.parse(stdout);
         const numbersFound = processNumbers(numbers);
