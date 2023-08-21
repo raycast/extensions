@@ -4,11 +4,13 @@ import { join } from "path";
 import { chmodSync, unlinkSync } from "fs";
 import { ExecaChildProcess, execa } from "execa";
 import { environment } from "@raycast/api";
-import { getTemporaryFilePath } from "~/utils/fs";
+import { getTemporaryFilePath, waitUntilFileIsAvailable } from "~/utils/fs";
 import { ApertureOptions, CropArea, RecorderCodec, VideoCodec } from "~/types/aperture";
 import { getRandomString } from "~/utils/crypto";
+import { Recording } from "~/types/recording";
+import { kill } from "process";
 
-export type Options = {
+export type RecordingOptions = {
   fps?: number;
   cropArea?: CropArea;
   showCursor?: boolean;
@@ -18,28 +20,30 @@ export type Options = {
   screenId: number;
 };
 
-export type RecordingResult = {
-  pid: number;
-  filePath: string;
-  startTime: Date;
-};
-
 export class Aperture {
   private binPath: string;
   private process: ExecaChildProcess<string> | undefined;
+  private processId: number | undefined;
+  private startTime: Date | undefined;
   private recTempPath: string | undefined;
-  private apertureProcessId: string | undefined;
+  private aperturePid: string | undefined;
 
-  constructor() {
+  constructor(ongoingRecording?: Recording) {
     this.binPath = join(environment.assetsPath, "aperture");
     void chmodSync(this.binPath, "755");
+    if (ongoingRecording) {
+      this.processId = ongoingRecording.pid;
+      this.startTime = ongoingRecording.startTime;
+      this.recTempPath = ongoingRecording.filePath;
+      this.aperturePid = ongoingRecording.aperturePid;
+    }
   }
 
   execAperture(...args: string[]) {
     return execa(this.binPath, args);
   }
 
-  startRecording(options?: Options): Promise<RecordingResult> {
+  startRecording(options?: RecordingOptions): Promise<Recording> {
     return new Promise((resolve, reject) => {
       (async () => {
         if (this.process != null) {
@@ -60,19 +64,21 @@ export class Aperture {
           reject(error);
         }, 5000);
 
+        let aperturePid: string;
         let isFileReadyPromise: Promise<boolean>;
 
         (async () => {
           try {
             await this.waitForEvent("onStart");
             const startTime = new Date();
+            this.startTime = startTime;
             clearTimeout(timeout);
             if (!this.process?.pid) return reject(new Error("Recorder did not start"));
             const pid = this.process.pid;
 
             setTimeout(async () => {
               await isFileReadyPromise;
-              resolve({ pid, filePath, startTime });
+              resolve({ pid, aperturePid, filePath, startTime });
             }, 1000);
           } catch (error) {
             this.clearRecording();
@@ -85,11 +91,13 @@ export class Aperture {
           return true;
         })();
 
-        this.apertureProcessId = getRandomString();
+        aperturePid = getRandomString();
+        this.aperturePid = aperturePid;
+
         this.process = this.execAperture(
           "record",
           "--process-id",
-          this.apertureProcessId,
+          aperturePid,
           JSON.stringify(recorderOptions)
         );
 
@@ -109,35 +117,46 @@ export class Aperture {
   }
 
   async stopRecording() {
-    this.throwIfNotStarted();
+    if (!this.recTempPath || !this.startTime || !this.processId || !this.aperturePid) {
+      throw new Error("Call `.startRecording()` first");
+    }
 
     if (this.process) {
       this.process.kill();
       await this.process;
-      this.clearRecording();
-    }
-    return this.recTempPath;
+    } else {
+      kill(this.processId);
+    } 
+
+    const endTime = new Date();
+    await waitUntilFileIsAvailable(this.recTempPath);
+    const filePath = this.recTempPath;
+    this.clearRecording();
+
+    return { endTime, filePath };
   }
 
   clearRecording() {
-    this.apertureProcessId = undefined;
+    this.aperturePid = undefined;
     this.process = undefined;
     this.recTempPath = undefined;
   };
 
-  async waitForEvent(name: string) {
-    if (!this.apertureProcessId) return;
-    await this.execAperture("events", "listen", "--process-id", this.apertureProcessId, "--exit", name);
+  isRecordingStarted() {
+    return this.recTempPath != null && this.startTime != null && this.processId != null;
   }
 
-  async throwIfNotStarted() {
-    if (this.process == null) {
-      throw new Error("Call `.startRecording()` first");
-    }
+  isRecordingRestored() {
+    return this.isRecordingStarted() && this.process == null;
+  }
+
+  async waitForEvent(name: string) {
+    if (!this.aperturePid) return;
+    await this.execAperture("events", "listen", "--process-id", this.aperturePid, "--exit", name);
   }
 }
 
-function getRecorderOptions(tmpFilePath: string, options?: Options) {
+function getRecorderOptions(tmpFilePath: string, options?: RecordingOptions) {
   const {
     fps = 30,
     cropArea,

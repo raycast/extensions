@@ -1,7 +1,10 @@
-import { Action, ActionPanel, Icon, List, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
+import { formatDistanceToNow } from "date-fns";
 import { useRef } from "react";
-import { Aperture } from "~/api/Aperture";
-import { saveRecordingData } from "~/utils/storage";
+import { Aperture } from "~/api/aperture";
+import { Recording } from "~/types/recording";
+import { moveFileToSaveLocation } from "~/utils/fs";
+import { clearStoredRecording, getStoredRecording, saveRecordingData } from "~/utils/storage";
 
 const RecordingMode = {
   EntireScreen: "entire-screen",
@@ -10,12 +13,14 @@ const RecordingMode = {
 type RecordingMode = (typeof RecordingMode)[keyof typeof RecordingMode];
 
 export default function StartRecordingCommand() {
-  const selectedRecordingMode = useRef<RecordingMode | null>();
+  const selectedRecordingMode = useRef<RecordingMode>(RecordingMode.EntireScreen);
 
   const handleStartRecording = async () => {
-    if (selectedRecordingMode.current == null) return;
-    const toast = await showToast({ title: "Starting recording...", style: Toast.Style.Animated });
     try {
+      const ongoingRecording = await getStoredRecording();
+      if (ongoingRecording && !(await confirmStoppingOngoingRecording(ongoingRecording))) return;
+
+      const toast = await showToast({ title: "Starting recording...", style: Toast.Style.Animated });
       if (selectedRecordingMode.current === RecordingMode.EntireScreen) {
         const recorder = new Aperture();
         const recording = await recorder.startRecording();
@@ -26,8 +31,7 @@ export default function StartRecordingCommand() {
         await popToRoot();
       }
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not start recording";
+      await showToast({ title: "Could not start recording", style: Toast.Style.Failure });
       console.error("Could not start recording", error);
     }
   };
@@ -48,4 +52,26 @@ export default function StartRecordingCommand() {
       />
     </List>
   );
+}
+
+async function confirmStoppingOngoingRecording(recording: Recording): Promise<boolean> {
+  const { pid, startTime } = recording;
+  if (!pid || Number.isNaN(pid) || !startTime) return true;
+
+  const elapsedString = formatDistanceToNow(startTime, { includeSeconds: true, addSuffix: true });
+  const confirmed = await confirmAlert({
+    title: "You have a recording in progress",
+    message: `You started a recording ${elapsedString}.\nDo you wish to stop and saving it before starting a new one?`,
+    primaryAction: { title: 'Stop Recording', style: Alert.ActionStyle.Destructive }
+  });
+
+  if (!confirmed) return false;
+
+  await showToast({ title: "Saving recording...", style: Toast.Style.Animated });
+  const recorder = new Aperture(recording);
+  const { filePath, endTime } = await recorder.stopRecording();
+  await moveFileToSaveLocation(filePath, endTime);
+  await clearStoredRecording();
+
+  return true;
 }
