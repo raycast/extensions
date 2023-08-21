@@ -1,19 +1,30 @@
-import { Action, ActionPanel, List, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, popToRoot, showToast } from "@raycast/api";
+import { useRef } from "react";
+import { Aperture } from "~/api/Aperture";
 import { saveRecordingData } from "~/utils/storage";
-import { useAperture } from "~/utils/useAperture";
+
+const RecordingMode = {
+  EntireScreen: "entire-screen",
+} as const;
+
+type RecordingMode = (typeof RecordingMode)[keyof typeof RecordingMode];
 
 export default function StartRecordingCommand() {
-  const recorder = useAperture();
+  const selectedRecordingMode = useRef<RecordingMode | null>();
 
-  const handleSelect = async () => {
+  const handleStartRecording = async () => {
+    if (selectedRecordingMode.current == null) return;
     const toast = await showToast({ title: "Starting recording...", style: Toast.Style.Animated });
     try {
-      const recording = await recorder.startRecording();
-      await saveRecordingData(recording);
-      toast.style = Toast.Style.Success;
-      toast.title = "Recording started";
+      if (selectedRecordingMode.current === RecordingMode.EntireScreen) {
+        const recorder = new Aperture();
+        const recording = await recorder.startRecording();
+        await saveRecordingData(recording);
+        toast.style = Toast.Style.Success;
+        toast.title = "Recording started";
 
-      await popToRoot();
+        await popToRoot();
+      }
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not start recording";
@@ -21,16 +32,19 @@ export default function StartRecordingCommand() {
     }
   };
 
+  const handleSelectionChange = (id: string | null) => {
+    selectedRecordingMode.current = id as RecordingMode;
+  };
+
+  const commonActions = <Action title="Start Recording" onAction={handleStartRecording} icon={Icon.Camera} />;
+
   return (
-    <List>
+    <List onSelectionChange={handleSelectionChange}>
       <List.Item
-        title="Entire Screen"
-        id="entire-screen"
-        actions={
-          <ActionPanel>
-            <Action title="Start Recording" onAction={handleSelect} />
-          </ActionPanel>
-        }
+        id={RecordingMode.EntireScreen}
+        title="Capture Entire Screen"
+        icon={Icon.Maximize}
+        actions={<ActionPanel>{commonActions}</ActionPanel>}
       />
     </List>
   );
