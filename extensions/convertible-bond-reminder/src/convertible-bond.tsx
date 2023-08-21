@@ -15,7 +15,7 @@ function setBonds(bonds: object[]) {
   cache.set("bonds", JSON.stringify(bonds));
 }
 
-function getBonds() {
+function getBonds(): ({ SECUCODE: string; RATING?: string; VALUE_DATE: string })[] | undefined {
   const cached = cache.get("bonds");
   return cached ? JSON.parse(cached) : undefined;
 }
@@ -63,7 +63,7 @@ export default function Command() {
     cache.set("backgroundLaunchTime", dayjs().tz("asia/shanghai").format());
   }
   main();
-  const bonds = getBonds();
+  const bonds = getBonds() ?? [];
   const currentDate = dayjs().tz("asia/shanghai").format("YYYY-MM-DD");
   return (
     <MenuBarExtra icon="../assets/menu_icon.png" tooltip={bonds ? `${bonds.length} bonds` : "No bonds"}>
