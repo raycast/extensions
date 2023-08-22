@@ -5,6 +5,9 @@
   "description": "Calculate the total per person based on the Bill, Tp %, and Number of People.",
   "icon": "command-icon.png",
   "author": "Vaibhav-Satishkumar",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Finance"
   ],
@@ -45,6 +48,24 @@
       "title": "Currency's Symbol",
       "placeholder": "Exmples: $, €, ₹, etc...",
       "required": true
+    },
+    {
+      "name": "currencyPosition",
+      "description": "Should currency be pre- or appended?",
+      "type": "dropdown",
+      "required": false,
+      "title": "Pre- or append the currency",
+      "placeholder": "Should currency be pre- or appended?",
+      "data": [
+        {
+          "title": "Append",
+          "value": "append"
+        },
+        {
+          "title": "Prepend",
+          "value": "prepend"
+        }
+      ]
     }
   ],
   "dependencies": {
