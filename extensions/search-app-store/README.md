@@ -1,3 +1,3 @@
 # Search App Store
 
-Search the App Store right from Raycast!
+Open the App Store and search right from Raycast!
