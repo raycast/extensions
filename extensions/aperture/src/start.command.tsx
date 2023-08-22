@@ -62,7 +62,7 @@ async function confirmStoppingOngoingRecording(recording: Recording): Promise<bo
   const confirmed = await confirmAlert({
     title: "You have a recording in progress",
     message: `You started a recording ${elapsedString}.\nDo you wish to stop and saving it before starting a new one?`,
-    primaryAction: { title: 'Stop Recording', style: Alert.ActionStyle.Destructive }
+    primaryAction: { title: "Stop Recording", style: Alert.ActionStyle.Destructive },
   });
 
   if (!confirmed) return false;

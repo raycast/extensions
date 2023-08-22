@@ -25,7 +25,7 @@ export function waitUntilFileIsAvailable(path: string): Promise<void> {
 export async function moveFileToSaveLocation(filePath: string, endTime = new Date()) {
   const savePath = getPreferenceValues<Preferences>().savePath;
   const savedFilePath = join(savePath, `Aperture ${format(endTime, "yyyy-MM-dd 'at' HH.mm.ss")}.mp4`);
-  await rename(filePath, savedFilePath)
+  await rename(filePath, savedFilePath);
 
   return savedFilePath;
 }

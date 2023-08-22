@@ -45,7 +45,7 @@ export class Aperture {
 
   startRecording(options?: RecordingOptions): Promise<Recording> {
     return new Promise((resolve, reject) => {
-      (async () => {
+      void (async () => {
         if (this.process != null) {
           reject(new Error("Call `.stopRecording()` first"));
           return;
@@ -67,7 +67,7 @@ export class Aperture {
         let aperturePid: string;
         let isFileReadyPromise: Promise<boolean>;
 
-        (async () => {
+        void (async () => {
           try {
             await this.waitForEvent("onStart");
             const startTime = new Date();
@@ -94,12 +94,7 @@ export class Aperture {
         aperturePid = getRandomString();
         this.aperturePid = aperturePid;
 
-        this.process = this.execAperture(
-          "record",
-          "--process-id",
-          aperturePid,
-          JSON.stringify(recorderOptions)
-        );
+        this.process = this.execAperture("record", "--process-id", aperturePid, JSON.stringify(recorderOptions));
 
         this.process.catch((error) => {
           if (this.recTempPath) unlinkSync(this.recTempPath);
@@ -126,7 +121,7 @@ export class Aperture {
       await this.process;
     } else {
       kill(this.processId);
-    } 
+    }
 
     const endTime = new Date();
     await waitUntilFileIsAvailable(this.recTempPath);
@@ -140,7 +135,7 @@ export class Aperture {
     this.aperturePid = undefined;
     this.process = undefined;
     this.recTempPath = undefined;
-  };
+  }
 
   isRecordingStarted() {
     return this.recTempPath != null && this.startTime != null && this.processId != null;

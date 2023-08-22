@@ -1,4 +1,12 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+  "parserOptions": { "project": "./tsconfig.json" },
+  "extends": ["@raycast", "plugin:promise/recommended"],
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": ["error"],
+    "promise/always-return": "off",
+    "@typescript-eslint/no-floating-promises": ["error"]
+  },
+  "ignorePatterns": ["raycast-env.d.ts"]
 }

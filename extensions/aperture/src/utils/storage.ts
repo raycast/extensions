@@ -18,5 +18,5 @@ export async function getStoredRecording(): Promise<Recording | undefined> {
 }
 
 export async function saveRecordingData(recording: Recording) {
-  await LocalStorage.setItem(STORAGE_KEY.RECORDING_DATA, JSON.stringify(recording))
+  await LocalStorage.setItem(STORAGE_KEY.RECORDING_DATA, JSON.stringify(recording));
 }
