@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grammari-x",
+  "title": "GrammariX: Your Writing's Best Friend",
+  "description": "In this extension, you can fix your grammar and rewrite your sentences more effectively.",
+  "icon": "icon.png",
+  "author": "hakob_nersesian",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "grammariX",
+      "title": "GrammariX",
+      "description": "Experience flawless writing with GrammariX,\nyour AI-powered grammar companion.\nFrom intricate sentence structure to nuanced word choice,\nGrammariX ensures your text is polished and precise.\nLet advanced AI technology enhance your writing effortlessly,\nleaving you with confidence in every word.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": "",
+      "description": "Enter the OpenAI access token",
+      "name": "openaiAccessToken",
+      "placeholder": "[Enter Your Access Token]",
+      "required": true,
+      "title": "OpenAI access token",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.1",
+    "dotenv": "^16.3.1",
+    "openai": "^4.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
