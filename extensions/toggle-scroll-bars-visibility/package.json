@@ -33,6 +33,12 @@
       "title": "Set Scroll Bars Visibility To \"Always\"",
       "description": "Sets scroll bars visibility to \"Always\".",
       "mode": "no-view"
+    },
+    {
+      "name": "view-current-value",
+      "title": "View Current Scroll Bars Visibility Value",
+      "description": "Views current scroll bars visibility value.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

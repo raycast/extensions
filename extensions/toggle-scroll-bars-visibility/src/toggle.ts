@@ -7,7 +7,7 @@ export default async function main() {
   const currentValue = getCurrentScrollBarsVisibility();
   const newValue = currentValue !== ScrollBarValue.ALWAYS ? ScrollBarValue.ALWAYS : ScrollBarValue.AUTOMATIC;
 
-  await setScrollBarsVisibility(newValue);
+  setScrollBarsVisibility(newValue);
   const message = `Set scroll bars visibility to "${scrollBarLabel[newValue]}"`;
   await showHUD(message);
 }
