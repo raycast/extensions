@@ -35,6 +35,28 @@
       "description": "Where to save the recordings",
       "default": "~/Movies",
       "required": true
+    },
+    {
+      "name": "postSaveAction",
+      "type": "dropdown",
+      "title": "Post Save Action",
+      "description": "What to do after stopping and saving the recording file",
+      "data": [
+        {
+          "title": "Open file in Finder",
+          "value": "openFinder"
+        },
+        {
+          "title": "Open file with default app",
+          "value": "open"
+        },
+        {
+          "title": "Nothing",
+          "value": "nothing"
+        }
+      ],
+      "default": "openFinder",
+      "required": false
     }
   ],
   "dependencies": {
