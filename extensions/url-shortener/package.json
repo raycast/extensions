@@ -15,7 +15,7 @@
     },
     {
       "name": "shorten-url-withargs",
-      "title": "Shorten URL Using Arguments",
+      "title": "Shorten URL Using Argument",
       "description": "Using the inputted argument (a valid link), URL Shortener will copy a shortened version of the link to the clipboard which redirects to your desired selected URL.",
       "mode": "no-view",
       "arguments": [
