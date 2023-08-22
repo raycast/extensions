@@ -6,6 +6,9 @@
   "icon": "word-count.png",
   "access": "public",
   "author": "itsmingjie",
+  "contributors": [
+    "koayon"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -27,6 +30,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.4.16",
     "react": "^18.2.0"
   },
   "devDependencies": {
