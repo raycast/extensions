@@ -10,6 +10,15 @@
     "Media",
     "Productivity"
   ],
+  "keywords": [
+    "aperture",
+    "record",
+    "screen",
+    "video",
+    "capture",
+    "screencapture",
+    "mp4"
+  ],
   "license": "MIT",
   "commands": [
     {
