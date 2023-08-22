@@ -30,7 +30,7 @@ module.exports = async ({ github, context, fetch }) => {
 
     if (!result.user_id) {
       await github.rest.issues.createComment({
-        issue_number: context.issue.number,
+        issue_number: pr.number,
         owner: context.repo.owner,
         repo: context.repo.repo,
         body: ":tada: :tada: :tada:\n\nSuch a great contribution deserves a reward, but unfortunately we couldn't find your Raycast account based on your GitHub username.\nPlease [link your GitHub account to your Raycast account](https://www.raycast.com/settings/account) to receive your credits and soon be able to exchange them for some swag.",
