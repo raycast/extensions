@@ -44,7 +44,7 @@ const decode = (string: string) => {
  */
 export const count = (text: string, includeWhitespace: boolean): ICountResult => {
   const trimmed = text.trim();
-  const words = trimmed ? (trimmed.replace(/['";:,.?¿\-!¡]+/g, "").match(/\S+/g) || []).length : 0
+  const words = trimmed ? (trimmed.replace(/['";:,.?¿\-!¡]+/g, "").match(/\S+/g) || []).length : 0;
 
   return {
     paragraphs: trimmed ? (trimmed.match(/\n+/g) || []).length + 1 : 0,
