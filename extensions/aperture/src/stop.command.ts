@@ -2,7 +2,7 @@ import { Alert, Toast, confirmAlert, open, showToast } from "@raycast/api";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { clearStoredRecording, getStoredRecording } from "~/utils/storage";
 import { moveFileToSaveLocation } from "~/utils/fs";
-import { Aperture } from "~/api/Aperture";
+import { Aperture } from "~/api/temp";
 
 export default async function StopRecordingCommand() {
   const recording = await getStoredRecording();
