@@ -14,7 +14,7 @@
       "name": "sum-numbers",
       "title": "Sum Numbers On Screen",
       "description": "Sum the numbers in selected area",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "dependencies": {
