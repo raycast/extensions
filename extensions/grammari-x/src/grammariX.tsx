@@ -6,7 +6,6 @@ import CommandList from "./components/CommandList";
 import ResultSection from "./components/ResultSection";
 import { getAccessToken } from "./utils";
 
-console.log(process.env);
 const openAIKey = getAccessToken();
 if (!openAIKey) {
   throw new Error("OPENAI_SECRET_KEY is missing");
