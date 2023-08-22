@@ -234,7 +234,7 @@ const globFromChannel = (channel: Channel) => {
     return [];
   }
   const appPath = defaults.defaultConfigDirectories["idea.config.path"].replace("$HOME", homedir());
-  return [`${appPath}/options/recentProjects.xml`];
+  return [`${appPath}/options/recent(Projects|Solutions).xml`];
 };
 
 const shellFromChannel = (channel: Channel) => {

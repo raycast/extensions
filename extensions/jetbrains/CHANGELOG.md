@@ -1,5 +1,9 @@
 # Jetbrains Changelog
 
+## [Rider tweak] - 2023-07-22
+
+- Small tweak for Rider on Toolbox 2.0
+
 ## [JetBrains Toolbox 2.0 Support] - 2023-07-04
 
 - Update to support new Toolbox 2.0 release
