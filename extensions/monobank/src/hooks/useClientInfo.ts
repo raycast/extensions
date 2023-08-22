@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import api from "../api";
-import { Account, UserInfoResponse, Jar, Preferences } from "../types";
+import { Account, UserInfoResponse, Jar } from "../types";
 import { useLocalStorage } from "./useLocalStorage";
 
 import { transformAccount, transformJar } from "../utils";
@@ -40,7 +40,7 @@ export function useClientInfo() {
     isLoading: isLoadingFromLS,
   } = useLocalStorage<LocalStorageUserInfoData>("clientInfo", lsInitialValue);
 
-  const { token } = getPreferenceValues<Preferences>();
+  const { token } = getPreferenceValues<Preferences.Accounts>();
 
   useEffect(() => {
     if (isLoadingFromLS) return;

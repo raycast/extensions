@@ -139,6 +139,8 @@ export default function Command() {
   );
 
   const totalAmount = calculateTotal([...cards, ...fops, ...jars], rates);
+  const commandTitle = "Show Accounts"; // title for "accounts" in package.json
+  const navigationTitle = `${commandTitle} (Total: ${formatCurrency(totalAmount, "UAH")})`;
 
   const isLoading = isClientInfoLoading || isRatesLoading || isPinnedLoadingFromLS;
 
@@ -146,7 +148,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
-      navigationTitle={!isRatesError ? `Total: ${formatCurrency(totalAmount, "UAH")}` : undefined}
+      navigationTitle={!isRatesError ? navigationTitle : undefined}
       searchBarAccessory={<CategoryDropdown onCategoryChange={onCategoryChange} />}
       onSearchTextChange={setSearchText}
     >
