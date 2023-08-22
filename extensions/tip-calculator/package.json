@@ -51,10 +51,10 @@
     },
     {
       "name": "currencyPosition",
-      "description": "Should currency be pre- or appended?",
+      "description": "Should the currency be placed before or after the values?",
       "type": "dropdown",
-      "required": false,
-      "title": "Pre- or append the currency",
+      "required": true,
+      "title": "Prepend or Append the Currency",
       "placeholder": "Should currency be pre- or appended?",
       "data": [
         {
