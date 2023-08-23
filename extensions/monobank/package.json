@@ -13,12 +13,14 @@
     {
       "name": "rates",
       "title": "Show Currency Rates",
+      "subtitle": "monobank",
       "description": "Currency rates in monobank.",
       "mode": "view"
     },
     {
       "name": "accounts",
       "title": "Show Accounts",
+      "subtitle": "monobank",
       "description": "All your accounts in monobank.",
       "mode": "view",
       "preferences": [
