@@ -54,7 +54,7 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
               />
               <Action
                 title={isFavorite(route, directionId, stop) ? "Remove Favorite" : "Add Favorite"}
-                icon={Icon.Star}
+                icon={isFavorite(route, directionId, stop) ? Icon.StarDisabled : Icon.Star}
                 onAction={() => {
                   isFavorite(route, directionId, stop)
                     ? removeFavoriteStop({ route, directionId, stop })
