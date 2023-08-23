@@ -4,9 +4,9 @@
   "title": "Connect to VPN",
   "description": "Connect to/disconnect from VPN",
   "icon": "command-icon.png",
-  "author": "sato11",
+  "author": "rasmusbe",
   "contributors": [
-    "rasmusbe"
+    "sato11"
   ],
   "license": "MIT",
   "commands": [
