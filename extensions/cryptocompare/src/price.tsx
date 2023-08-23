@@ -26,6 +26,75 @@ export default function Command() {
     fetchDataAsync();
   }, []);
 
+  function getActions(item: Data) {
+    const actions = [
+      <Action.CopyToClipboard title="Copy Price" content={item.price} onCopy={() => item.price} />,
+      <Action
+        title={item.favorite ? "Remove From Favorite" : "Add To Favorite"}
+        icon={item.favorite ? "remove.png" : "favorite.png"}
+        onAction={async () => {
+          setPriceData((priceData) =>
+            priceData.map((i) => {
+              if (i.name === item.name) {
+                return { ...i, favorite: !item.favorite };
+              }
+              return i;
+            })
+          );
+          if (item.favorite) {
+            await removeFavoriteCrypto(item.name);
+          } else {
+            addFavoriteCrypto(item.name);
+          }
+        }}
+      />,
+      <Action
+        title="Refresh"
+        icon="refresh.png"
+        onAction={async () => {
+          setIsLoading(true);
+          setPriceData(await fetchData(""));
+          setIsLoading(false);
+        }}
+      />,
+    ];
+    return <ActionPanel>{...actions}</ActionPanel>;
+  }
+
+  function getList() {
+    const listItemList: Array<any> = [];
+    const listSectionList: Array<any> = [];
+    priceData.map((item: Data) => {
+      if (item.favorite) {
+        listSectionList.push(
+          <List.Item
+            key={item.name}
+            title={item.name}
+            icon={{ source: item.icon }}
+            accessories={item.favorite ? [{ icon: "favorited.png", tooltip: "Favorited" }] : []}
+            subtitle={{ value: item.price, tooltip: item.markets }}
+            actions={getActions(item)}
+          />
+        );
+      } else {
+        listItemList.push(
+          <List.Item
+            key={item.name}
+            title={item.name}
+            icon={{ source: item.icon }}
+            accessories={item.favorite ? [{ icon: "favorited.png", tooltip: "Favorited" }] : []}
+            subtitle={{ value: item.price, tooltip: item.markets }}
+            actions={getActions(item)}
+          />
+        );
+      }
+    });
+    return [
+      <List.Section title="Favorited">{...listSectionList}</List.Section>,
+      <List.Section title="Not Favorited">{...listItemList}</List.Section>,
+    ];
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -52,49 +121,7 @@ export default function Command() {
       throttle={true}
       searchBarPlaceholder="Search for prices of digital coins"
     >
-      {priceData.map((item) => (
-        <List.Item
-          key={item.name}
-          title={item.name}
-          icon={{ source: item.icon }}
-          accessories={item.favorite ? [{ icon: "favorited.png", tooltip: "Favorited" }] : []}
-          subtitle={{ value: item.price, tooltip: item.markets }}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy Price" content={item.price} onCopy={() => item.price} />
-              <Action
-                title={item.favorite ? "Remove From Favorite" : "Add To Favorite"}
-                icon={item.favorite ? "remove.png" : "favorite.png"}
-                onAction={async () => {
-                  setPriceData((priceData) =>
-                    priceData.map((i) => {
-                      if (i.name === item.name) {
-                        return { ...i, favorite: !item.favorite };
-                      }
-                      return i;
-                    })
-                  );
-                  if (item.favorite) {
-                    await removeFavoriteCrypto(item.name);
-                  } else {
-                    addFavoriteCrypto(item.name);
-                  }
-                }}
-              />
-
-              <Action
-                title="Refresh"
-                icon="refresh.png"
-                onAction={async () => {
-                  setIsLoading(true);
-                  setPriceData(await fetchData(""));
-                  setIsLoading(false);
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {...getList()}
     </List>
   );
 }
