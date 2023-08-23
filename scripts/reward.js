@@ -13,7 +13,7 @@ module.exports = async ({ github, context, fetch }) => {
       return;
     }
 
-    const result = (
+    const result = await (
       await fetch("https://www.raycast.com/api/v1/dev_contributions", {
         method: "POST",
         headers: {
@@ -27,8 +27,6 @@ module.exports = async ({ github, context, fetch }) => {
         }),
       })
     ).json();
-
-    console.log(result);
 
     if (!result.user_id) {
       await github.rest.issues.createComment({
