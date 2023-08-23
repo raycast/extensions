@@ -30,17 +30,21 @@ export default function Command() {
 
   async function onExecute(command: CommandType) {
     try {
-      setState((previous) => ({ ...previous, command }));
+      setState((previous) => ({
+        ...previous,
+        command,
+        isLoading: true,
+      }));
+
       let output = "";
-      if (command === CommandType.Fix) {
-        setState((previous) => ({ ...previous, isLoading: true }));
-        output = await openAI.fixGrammer(state.searchText || "");
-        setState((previous) => ({ ...previous, isLoading: false, output }));
-      } else if (command === CommandType.Rewrite) {
-        setState((previous) => ({ ...previous, isLoading: true }));
-        output = await openAI.correctGrammer(state.searchText || "");
-        setState((previous) => ({ ...previous, isLoading: false, output }));
-      }
+
+      output = await executeCommand(command, state.searchText);
+      setState((previous) => ({
+        ...previous,
+        isLoading: false,
+        output,
+      }));
+
       if (output) {
         Clipboard.copy(output);
         await showToast({
@@ -48,13 +52,23 @@ export default function Command() {
           title: "Result has been copied to the clipboard.",
         });
       }
-      return;
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Cannot copy file path",
+        title: "Cannot execute command",
         message: String(error),
       });
+    }
+  }
+
+  async function executeCommand(command: CommandType, text: string): Promise<string> {
+    switch (command) {
+      case CommandType.Fix:
+        return openAI.fixGrammer(text);
+      case CommandType.Rewrite:
+        return openAI.correctGrammer(text);
+      default:
+        throw new Error("Invalid command");
     }
   }
 
@@ -62,6 +76,7 @@ export default function Command() {
     <List
       isShowingDetail={!!state.output}
       searchText={state.searchText}
+      isLoading={state.isLoading}
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, output: "", searchText: newValue }));
       }}
