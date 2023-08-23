@@ -14,11 +14,11 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
   const [query, setQuery] = useState(() => {
     return initialQuery ?? "";
   });
-  
-  let prefix = getPreferenceValues()["search-issues-prefix"]
+
+  let prefix = getPreferenceValues()["search-issues-prefix"];
   //Normalize project key to without dash
   if (prefix.at(-1) === "-") {
-    prefix= prefix.slice(0, -1)
+    prefix = prefix.slice(0, -1);
   }
   const jql = useMemo(() => {
     if (query === "") {
@@ -31,16 +31,16 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
 
     let issueKeyQuery = "";
     const issueKeyRegex = /\w+-\d+/;
-    const onlyNumbers = /^\d+$/
+    const onlyNumbers = /^\d+$/;
     const matches = query.match(issueKeyRegex);
     const escapedQuery = query.replace(/[\\"]/g, "\\$&");
 
     if (matches) {
       issueKeyQuery = `OR issuekey = ${matches[0]}`;
-    } else if(prefix &&  query.match(onlyNumbers)) {
+    } else if (prefix && query.match(onlyNumbers)) {
       issueKeyQuery = `OR issuekey = ${prefix}-${escapedQuery}`;
     }
-    
+
     // "text" by default searches in fields summary, description, environment, comments and all text custom fields.
     // Search "project" so that an issuekey prefix will be found (e.g. "APP").
     return `(text ~ "${escapedQuery}" OR project = "${escapedQuery}" ${issueKeyQuery}) ORDER BY updated DESC`;
