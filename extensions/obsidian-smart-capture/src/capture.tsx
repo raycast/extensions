@@ -141,7 +141,6 @@ export default function Capture() {
   } else if (vaultsWithPlugin.length >= 1) {
     return (
       <Form
-        navigationTitle={"Smart Capture"}
         actions={
           <ActionPanel>
             <Action.SubmitForm title="Capture" onSubmit={createNewNote} />
