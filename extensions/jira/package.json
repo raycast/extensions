@@ -9,7 +9,8 @@
     "FezVrasta",
     "igor9silva",
     "jesperorb",
-    "teziovsky"
+    "teziovsky",
+    "iltimasd"
   ],
   "owner": "raycast",
   "access": "public",
@@ -75,6 +76,13 @@
       "mode": "view"
     }
   ],
+  "preferences": [{
+    "name": "search-issues-prefix",
+    "title": "Search Issues Prefix",
+    "description": "Search by project key [XXX-] by default if none are provided",
+    "type": "textfield",
+    "required": false
+  }],
   "dependencies": {
     "@raycast/api": "^1.53.3",
     "@raycast/utils": "^1.5.2",
