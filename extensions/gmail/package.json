@@ -15,7 +15,15 @@
       "title": "List Mails",
       "description": "Get the inbox",
       "subtitle": "Gmail",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "unread",
@@ -29,6 +37,27 @@
       "title": "List Drafts",
       "subtitle": "Gmail",
       "description": "Get unread Mails",
+      "mode": "view"
+    },
+    {
+      "name": "trash",
+      "title": "List Trash",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Trash",
+      "mode": "view"
+    },
+    {
+      "name": "archive",
+      "title": "List Archive",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Archive",
+      "mode": "view"
+    },
+    {
+      "name": "spam",
+      "title": "List Spam",
+      "subtitle": "Gmail",
+      "description": "Get Mails from Spam Folder",
       "mode": "view"
     },
     {
@@ -65,7 +94,7 @@
   ],
   "dependencies": {
     "@googleapis/gmail": "^5.0.0",
-    "@raycast/api": "^1.56.1",
+    "@raycast/api": "^1.57.0",
     "@raycast/utils": "^1.9.0",
     "cross-fetch": "^4.0.0",
     "googleapis": "^123.0.0"

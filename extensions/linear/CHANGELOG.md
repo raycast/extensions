@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Fix] - 2023-08-23
+
+Fixed "Workflow state not in same team as issue" error for Break Issue into Sub-issues error.
+
 ## [Add milestone functionality] - 2023-08-16
 
 Linear now allows users to create milestones within projects. This feature is now available on this extension.
