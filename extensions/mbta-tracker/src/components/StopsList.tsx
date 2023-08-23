@@ -33,7 +33,10 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
           key={stop.id}
           title={stop.attributes.name}
           icon={{ source: Icon.CircleFilled, tintColor: route.attributes.color }}
-          accessories={[{ text: stop.attributes.address || stop.attributes.municipality, icon: Icon.Pin }]}
+          accessories={[
+            { text: stop.attributes.address || stop.attributes.municipality, icon: Icon.Pin },
+            { icon: isFavorite(route, directionId, stop) ? Icon.Star : null, tooltip: "Saved as Favorite" },
+          ]}
           actions={
             <ActionPanel>
               <Action.Push
