@@ -4,7 +4,7 @@ import { ListQueryCommand } from "./components/command";
 export default function Command() {
   return (
     <View>
-      <ListQueryCommand baseQuery={["is:draft"]} sectionTitle="Draft Mails" emptyMessage="No Drafts" />
+      <ListQueryCommand baseQuery={["in:trash"]} sectionTitle="Mails in Trash" emptyMessage="No Mails in the Trash" />
     </View>
   );
 }
