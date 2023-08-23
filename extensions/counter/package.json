@@ -5,6 +5,9 @@
   "description": "A simple counter, in the comfort of Raycast root!",
   "icon": "command-icon.png",
   "author": "EvanZhouDev",
+  !  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Fun"
