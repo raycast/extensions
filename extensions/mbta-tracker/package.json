@@ -5,7 +5,9 @@
   "description": "View departure times for saved stops along MBTA routes",
   "icon": "mbta-secondary-logo-circle.png",
   "author": "djpowers",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
