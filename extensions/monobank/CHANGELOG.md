@@ -1,5 +1,5 @@
 # monobank Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2023-08-23
 
 Release of monobank extension
