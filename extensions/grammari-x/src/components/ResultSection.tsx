@@ -1,6 +1,14 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 
-export default function ResultSection({ output }: { output: string }) {
+export default function ResultSection({
+  output,
+  isShowingDetail,
+  setIsShowingDetail,
+}: {
+  output: string;
+  isShowingDetail: boolean;
+  setIsShowingDetail: (value: boolean) => void;
+}) {
   return (
     <List.Section title="Result">
       {output ? (
@@ -10,6 +18,7 @@ export default function ResultSection({ output }: { output: string }) {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={output} />
+              <Action title="Toggle Full Text" icon={Icon.Text} onAction={() => setIsShowingDetail(!isShowingDetail)} />
             </ActionPanel>
           }
         />

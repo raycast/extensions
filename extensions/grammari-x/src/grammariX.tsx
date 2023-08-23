@@ -28,6 +28,8 @@ export default function Command() {
     output: "",
   });
 
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+
   async function onExecute(command: CommandType) {
     try {
       setState((previous) => ({
@@ -74,14 +76,14 @@ export default function Command() {
 
   return (
     <List
-      isShowingDetail={!!state.output}
       searchText={state.searchText}
       isLoading={state.isLoading}
+      isShowingDetail={isShowingDetail}
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, output: "", searchText: newValue }));
       }}
     >
-      <ResultSection output={state.output} />
+      <ResultSection output={state.output} isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} />
       <CommandList onExecute={onExecute} searchText={state.searchText} />
     </List>
   );
