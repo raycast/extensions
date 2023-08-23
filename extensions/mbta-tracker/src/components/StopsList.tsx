@@ -1,7 +1,7 @@
 import { Icon, List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 import { PredictionsList } from "./PredictionsList";
-import type { Favorite, Route, StopsResponse } from "../types";
+import type { Favorite, Route, StopsResponse, Stop } from "../types";
 import { appendApiKey, FavoriteService } from "../utils";
 import { addFavoriteStop } from "../lib/stops";
 
@@ -18,6 +18,13 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
   );
 
   const favoriteStops = useCachedPromise(FavoriteService.favorites);
+
+  function isFavorite(route: Route, directionId: number, stop: Stop): boolean | undefined {
+    return favoriteStops.data?.some(
+      (favorite: Favorite) =>
+        favorite.route.id === route.id && favorite.directionId === directionId && favorite.stop.id === stop.id
+    );
+  }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select origin MBTA stop...">
@@ -43,16 +50,7 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
                 }
               />
               <Action
-                title={
-                  favoriteStops.data?.some(
-                    (favorite: Favorite) =>
-                      favorite.route.id === route.id &&
-                      favorite.directionId === directionId &&
-                      favorite.stop.id === stop.id
-                  )
-                    ? "Remove"
-                    : "Add"
-                }
+                title={isFavorite(route, directionId, stop) ? "Remove" : "Add"}
                 icon={Icon.Star}
                 onAction={() => {
                   addFavoriteStop(route, directionId, stop);
