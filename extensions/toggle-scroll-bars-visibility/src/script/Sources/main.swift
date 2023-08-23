@@ -1,5 +1,3 @@
-#!/usr/bin/swift
-
 import Foundation
 
 func getSelectedValue() -> String {

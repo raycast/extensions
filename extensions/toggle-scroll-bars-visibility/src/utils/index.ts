@@ -4,7 +4,7 @@ import { scrollBarOutputToValueMap } from "../data/constants";
 import { ScrollBarValue } from "../types";
 
 export function setScrollBarsVisibility(value: ScrollBarValue) {
-  const scriptPath = `${environment.assetsPath}/scripts/set-scroll-bars-visibility.swift`;
+  const scriptPath = `${environment.assetsPath}/scripts/set-scroll-bars-visibility`;
   execSync(`chmod +x ${scriptPath}`);
   execFileSync(scriptPath, [value]);
 }

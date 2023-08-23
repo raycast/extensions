@@ -56,8 +56,11 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "script:run": "cd src/script && swift run script",
+    "script:build": "cd src/script && swift build",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
   }
 }
