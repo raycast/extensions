@@ -23,7 +23,7 @@ export default function Command() {
   const [accounts, setAccounts] = useState<
     { id: string; name: string; username: string; password: string; url: string }[]
   >([]);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -37,9 +37,7 @@ export default function Command() {
         setAccounts(accounts);
         setIsLoading(false);
       } catch (error) {
-        if (error instanceof Error) {
-          setError(error);
-        }
+        setError((error as Error)?.message || "");
       }
     })();
   }, []);

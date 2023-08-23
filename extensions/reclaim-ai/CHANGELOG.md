@@ -1,5 +1,14 @@
 # reclaim Changelog
 
+## [New Command] - 2023-08-10
+
+- Added new `Search Tasks` command
+
+## [Update] - 2023-08-02
+
+- Added filter to remove declined events in MenuBar.
+- Added new `Joing Meeting` command
+
 ## [Update] - 2023-07-25
 
 - Updated keywords and README

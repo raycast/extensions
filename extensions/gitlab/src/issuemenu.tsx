@@ -8,6 +8,7 @@ import {
 } from "./components/menu";
 import { useMyIssues } from "./components/issues_my";
 import { IssueScope, IssueState } from "./components/issues";
+import { GitLabIcons } from "./icons";
 
 async function launchMyIssues(): Promise<void> {
   return launchCommand({ name: "issue_my", type: LaunchType.UserInitiated });
@@ -50,7 +51,7 @@ export default function MenuCommand(): JSX.Element {
         >
           {issues?.map((m) => (
             <MenuBarItem
-              icon={"mropen.png"}
+              icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
               title={`#${m.iid} ${m.title}`}
               tooltip={m.reference_full}
               onAction={() => open(m.web_url)}

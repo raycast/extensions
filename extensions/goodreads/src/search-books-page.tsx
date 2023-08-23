@@ -54,7 +54,7 @@ function BookItem(props: BookItemProps) {
               title={STRINGS.showDetails}
               target={<BookDetails bookTitle={title} qualifier={contentUrl.detailsPage} />}
             />
-            <Action.OpenInBrowser url={getDetailsPageUrl(detailsPageUrl)} />
+            <Action.OpenInBrowser url={detailsPageUrl} />
           </>
 
           <ActionPanel.Section>

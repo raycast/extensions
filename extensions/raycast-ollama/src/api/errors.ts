@@ -1,7 +1,6 @@
 export const ErrorRaycastApiNoTextSelected = new Error("You Need to Select a Text for This Command.");
 export const ErrorOllamaNotInstalledOrRunning = new Error("Verify Ollama is Installed and Currently Running.");
-export const ErrorOllamaCantCreateCustomModel = new Error("Something Goes Wrong Creating Custom Model");
-export const MessageOllamaModelNotInstalled = new Error("Base Model is not Installed.");
+export const MessageOllamaModelNotInstalled = new Error("Model is not Installed.");
 
 export class ErrorOllamaCustomModel extends Error {
   public readonly model?: string;
@@ -21,6 +20,6 @@ export class ErrorOllamaModelNotInstalled extends Error {
   constructor(message: string, model?: string) {
     super(message);
     this.model = model;
-    this.suggest = `Run 'ollama pull ${model}' for install it.`;
+    this.suggest = `Install ${model} with 'Manage Models' command`;
   }
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix] - 2023-08-23
+
+- Fixed an authentication error when listing models which caused a crash
+
 ## [Fix & Feature] - May, 18 2023
 
 - Feature: Custom API Endpoint

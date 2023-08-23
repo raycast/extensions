@@ -15,6 +15,7 @@ import {
   CopyIdentityFieldsActions,
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
+  PasteTotpAction,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
@@ -33,6 +34,7 @@ const VaultItemActionPanel = () => {
             <CopyPasswordAction />
           </ComponentReverser>
           <CopyTotpAction />
+          <PasteTotpAction />
           <CopyUsernameAction />
           <OpenUrlInBrowserAction />
           <CopyLoginUrisActions />

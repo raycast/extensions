@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, useNavigation, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, List, useNavigation, Icon, Color, Image } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getAndCloseMainWindow, fetchSidebar } from "./utilities/fetch";
 
@@ -14,7 +14,7 @@ interface SidebarItemProps {
 
 function itemTitle(item: SidebarItemProps) {
   if (item.heading) {
-    return `${item.heading} > ${item.name}`;
+    return `${item.heading} › ${item.name}`;
   }
   return item.name;
 }
@@ -42,6 +42,7 @@ function itemSubtitle(item: SidebarItemProps) {
 // Case Heading = "/show/heading/:identifier"
 
 export default function Sidebar() {
+  const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<Array<SidebarItemProps>>(Array<SidebarItemProps>());
   const { pop } = useNavigation();
 
@@ -50,11 +51,12 @@ export default function Sidebar() {
       if (Array.isArray(sidebar)) {
         setItems(sidebar);
       }
+      setIsLoading(false);
     });
-  }, []);
+  }, [setIsLoading]);
 
   return (
-    <List isLoading={false} searchBarPlaceholder="Filter by list name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter by list name...">
       {items.map((item) => {
         return (
           <List.Item
@@ -62,10 +64,11 @@ export default function Sidebar() {
             subtitle={itemSubtitle(item)}
             icon={{
               source: `http://127.0.0.1:6391/sf-symbols/${item.icon}`,
+              mask: Image.Mask.RoundedRectangle,
               fallback: Icon.List,
               tintColor: item.color || Color.Purple,
             }}
-            accessoryTitle={item.count > 0 ? String(item.count) : "0"}
+            accessories={[{ text: item.count > 0 ? String(item.count) : "0" }]}
             key={item.id}
             actions={
               <ActionPanel>
@@ -77,7 +80,6 @@ export default function Sidebar() {
                     tintColor: item.color || Color.Purple,
                   }}
                   onAction={() => {
-                    pop();
                     if (item.type == "filter") {
                       getAndCloseMainWindow(`show/filter/${item.id}`);
                     } else if (item.type == "collection") {
@@ -85,6 +87,7 @@ export default function Sidebar() {
                     } else {
                       getAndCloseMainWindow(`show/${item.id}`);
                     }
+                    pop();
                   }}
                 />
               </ActionPanel>

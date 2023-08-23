@@ -1,6 +1,10 @@
 # Arc Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Fixes] - 2023-08-11
+
+- Fixed an issue where, when searching for tabs with the same URL but different titles, the wrong tab would be opened.
+
+## [Improvements] - 2023-06-30
 
 - Expand Search Arc suggestions to available engines
 

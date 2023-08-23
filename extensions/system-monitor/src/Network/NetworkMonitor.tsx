@@ -91,6 +91,7 @@ export default function NetworkMonitor() {
   return (
     <>
       <List.Item
+        id="network"
         title={`Network`}
         icon={{ source: "connection.png", tintColor: Color.Blue }}
         accessories={[
