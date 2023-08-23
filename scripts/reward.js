@@ -28,6 +28,8 @@ module.exports = async ({ github, context, fetch }) => {
       })
     ).json();
 
+    console.log(result);
+
     if (!result.user_id) {
       await github.rest.issues.createComment({
         issue_number: pr.number,
