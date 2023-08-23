@@ -1,15 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  getPreferenceValues,
-  Detail,
-  Color,
-  OAuth,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, getPreferenceValues, Color, showToast, Toast, popToRoot } from "@raycast/api";
 import SchoologyAPI from "schoologyapi";
 import { useEffect, useState } from "react";
 
@@ -25,24 +14,24 @@ export default function Command() {
 
   useEffect(() => {
     const fetchCoursesText = async () => {
-      const users_response = await client.request("GET", "/app-user-info");
-      const users_data = await users_response;
-      const uid = users_response.api_uid.toString();
-
-      const user_grades = await client.request("GET", `/users/${uid}/grades`);
-      const user_grades_data = await user_grades;
-      const finalGradesSet = new Set();
-
-      user_grades_data.section.forEach((section) => {
-        section.final_grade.forEach((gradeObj) => {
-          finalGradesSet.add(gradeObj.grade);
-        });
-      });
-
-      const finalGrades = Array.from(finalGradesSet);
-      setGradesArr(finalGrades);
-
       try {
+        const users_response = await client.request("GET", "/app-user-info");
+        const users_data = await users_response;
+        const uid = users_response.api_uid.toString();
+
+        const user_grades = await client.request("GET", `/users/${uid}/grades`);
+        const user_grades_data = await user_grades;
+        const finalGradesSet = new Set();
+
+        user_grades_data.section.forEach((section) => {
+          section.final_grade.forEach((gradeObj) => {
+            finalGradesSet.add(gradeObj.grade);
+          });
+        });
+
+        const finalGrades = Array.from(finalGradesSet);
+        setGradesArr(finalGrades);
+
         const course_response = await client.request("GET", `/users/${uid}/sections`);
         const course_data = await course_response;
         const courses_sections = course_data.section.map((course) => course.id);
@@ -64,7 +53,7 @@ export default function Command() {
 
         setCoursesText(course_grades_ids);
       } catch (error) {
-        //console.error(error);
+        popToRoot();
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid Schoology API key and/or secret",
