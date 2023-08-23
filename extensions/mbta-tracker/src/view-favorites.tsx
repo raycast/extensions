@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, LocalStorage } from "@raycast/api";
 import { PredictionsList } from "./components/PredictionsList";
 import { removeFavoriteStop } from "./lib/stops";
 import type { Favorite } from "./types";
@@ -58,7 +58,7 @@ export default function Command() {
                 <Action
                   title="Remove Favorite"
                   icon={Icon.StarDisabled}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => {
                     removeFavoriteStop(favorite);
                   }}

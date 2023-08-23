@@ -1,4 +1,4 @@
-import { Icon, List, ActionPanel, Action } from "@raycast/api";
+import { Icon, Keyboard, List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 import { PredictionsList } from "./PredictionsList";
 import type { Favorite, Route, StopsResponse, Stop } from "../types";
@@ -55,6 +55,7 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
               <Action
                 title={isFavorite(route, directionId, stop) ? "Remove Favorite" : "Add Favorite"}
                 icon={isFavorite(route, directionId, stop) ? Icon.StarDisabled : Icon.Star}
+                shortcut={isFavorite(route, directionId, stop) ? Keyboard.Shortcut.Common.Remove : null}
                 onAction={() => {
                   isFavorite(route, directionId, stop)
                     ? removeFavoriteStop({ route, directionId, stop })
