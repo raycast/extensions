@@ -1,12 +1,15 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { Response, useFetch } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useFetch(`https://bahn.expert/api/stopPlace/v1/search/${searchText}`, {
     parseResponse: parseFetchResponse,
+    execute: searchText.length > 0,
   });
+
+  const title = searchText.length > 0 ? (isLoading ? "Loading..." : "No Results") : "Search for Train Stations";
 
   return (
     <List
@@ -15,7 +18,8 @@ export default function Command() {
       searchBarPlaceholder="Search train stations..."
       throttle
     >
-      <List.Section title="Results" subtitle={data?.length + ""}>
+      <List.EmptyView title={title} />
+      <List.Section title="Results" subtitle={`${data?.length}`}>
         {data?.map((searchResult) => (
           <SearchListItem key={searchResult.evaNumber} searchResult={searchResult} />
         ))}
@@ -32,7 +36,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser
-              title="Open in Browser"
               url={`https://bahn.expert/${encodeURIComponent(searchResult.name)}?lookahead=150&lookbehind=10`}
             />
           </ActionPanel.Section>
