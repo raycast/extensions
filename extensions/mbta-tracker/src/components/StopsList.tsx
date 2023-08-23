@@ -1,8 +1,8 @@
 import { Icon, List, ActionPanel, Action } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise, useFetch } from "@raycast/utils";
 import { PredictionsList } from "./PredictionsList";
-import type { Route, StopsResponse } from "../types";
-import { appendApiKey } from "../utils";
+import type { Favorite, Route, StopsResponse } from "../types";
+import { appendApiKey, FavoriteService } from "../utils";
 import { addFavoriteStop } from "../lib/stops";
 
 interface Props {
@@ -16,6 +16,8 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
       `https://api-v3.mbta.com/stops?filter%5Broute%5D=${route.id}&direction_id=${directionId}&fields%5Bstop%5D=address,municipality,name`
     )
   );
+
+  const favoriteStops = useCachedPromise(FavoriteService.favorites);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select origin MBTA stop...">
@@ -41,7 +43,16 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
                 }
               />
               <Action
-                title="Add Favorite"
+                title={
+                  favoriteStops.data?.some(
+                    (favorite: Favorite) =>
+                      favorite.route.id === route.id &&
+                      favorite.directionId === directionId &&
+                      favorite.stop.id === stop.id
+                  )
+                    ? "Remove"
+                    : "Add"
+                }
                 icon={Icon.Star}
                 onAction={() => {
                   addFavoriteStop(route, directionId, stop);
