@@ -36,6 +36,11 @@ export const ItemField: FC<ItemProps> = (item) => {
             onAction={item.context?.copyAndClose}
           />
           <Action
+            title="Undo"
+            shortcut={{ modifiers: [], key: "backspace" }}
+            onAction={() => item.context?.onAction("undo")}
+          />
+          <Action
             title="Delete All Saves"
             onAction={item.context?.deleteAllSaves}
           />

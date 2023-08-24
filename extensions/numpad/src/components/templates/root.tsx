@@ -15,7 +15,7 @@ export const Root: FC<Props> = ({ children, context }) => {
   const selectedItemId: Symbols = "clean";
 
   useEffect(() => {
-    if (selection) context.onAction(selection);
+    // if (selection) context.onAction(selection);
   }, [selection]);
 
   return (

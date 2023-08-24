@@ -1,4 +1,4 @@
-import { Grid, Icon } from "@raycast/api";
+import { Icon } from "@raycast/api";
 import { ItemField } from "../atoms/item";
 import { NumberItem } from "../molecules/numberItem";
 import { FC } from "react";
@@ -9,7 +9,7 @@ export type Props = {
 };
 
 export const Section1: FC<Props> = ({ context }) => (
-  <Grid.Section>
+  <>
     <NumberItem id="7" context={context} />
     <NumberItem id="8" context={context} />
     <NumberItem id="9" context={context} />
@@ -27,5 +27,5 @@ export const Section1: FC<Props> = ({ context }) => (
     />
     <ItemField id="/" icon={Icon["Italics"]} title="Divide" context={context} />
     <ItemField id="save" icon={Icon["Heart"]} title="Save" context={context} />
-  </Grid.Section>
+  </>
 );

@@ -1,4 +1,4 @@
-import { Color, Grid, Icon } from "@raycast/api";
+import { Color, Icon } from "@raycast/api";
 import { FC } from "react";
 import { ContextProps } from "../../hooks/preview";
 import { ItemField } from "../atoms/item";
@@ -9,7 +9,7 @@ export type Props = {
 };
 
 export const Section3: FC<Props> = ({ context }) => (
-  <Grid.Section>
+  <>
     <NumberItem id="1" context={context} />
     <NumberItem id="2" context={context} />
     <NumberItem id="3" context={context} />
@@ -29,5 +29,5 @@ export const Section3: FC<Props> = ({ context }) => (
       color={Color.Green}
       context={context}
     />
-  </Grid.Section>
+  </>
 );
