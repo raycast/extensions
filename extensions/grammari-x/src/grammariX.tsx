@@ -93,11 +93,7 @@ export default function Command() {
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, output: "", searchText: newValue }));
       }}
-      searchBarAccessory={
-        <>
-          <ToneTypeDropDown onToneTypeChange={onToneTypeChange}></ToneTypeDropDown>
-        </>
-      }
+      searchBarAccessory={<ToneTypeDropDown onToneTypeChange={onToneTypeChange}></ToneTypeDropDown>}
     >
       <ResultSection output={state.output} isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} />
       <CommandList onExecute={onExecute} searchText={state.searchText} />

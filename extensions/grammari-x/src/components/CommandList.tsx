@@ -5,6 +5,7 @@ const fixGrammerCommandIcon = { source: Icon.Check, tintColor: Color.Green };
 const paraphraseCommandIcon = { source: Icon.Pencil, tintColor: Color.Blue };
 const toneChangeCommandIcon = { source: Icon.Raindrop, tintColor: Color.Orange };
 const continueTextCommandIcon = { source: Icon.ShortParagraph, tintColor: Color.Yellow };
+
 export default function CommandList({
   onExecute,
   searchText,
