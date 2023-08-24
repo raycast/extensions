@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grammari-x",
-  "title": "GrammariX: Your Writing's Best Friend",
-  "description": "In this extension, you can fix your grammar and rewrite your sentences more effectively.",
+  "title": "Your Writing's Best Friend",
+  "description": "In this extension, you can fix your grammar and paraphrase your sentences more effectively.",
   "icon": "icon.png",
-  "author": "hakob_nersesian",
+  "author": "hakob_nersesyan",
   "categories": [
     "Communication"
   ],

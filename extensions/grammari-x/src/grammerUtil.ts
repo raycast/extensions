@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { ToneType } from "./types";
 
 class OpenAIModule {
   private openai: OpenAI;
@@ -13,7 +14,18 @@ class OpenAIModule {
   }
 
   async correctGrammer(inputText: string): Promise<string> {
-    const prompt = `Please rewrite this sentence: "${inputText}" and return only rewrited version without any context`;
+    const prompt = `Please paraphrase this sentence: "${inputText}" and return only paraphrased version without any context`;
+    return await this.gptRequest(prompt);
+  }
+
+  async changeTone(inputText: string, toneType: ToneType) {
+    console.log(inputText, toneType);
+    const prompt = `Transform the following sentence to have a "${toneType}" tone: "${inputText}"  and return only transformed version without any context`;
+    return await this.gptRequest(prompt);
+  }
+
+  async continueText(inputText: string) {
+    const prompt = `Based on the following information, continue the text "${inputText}" and return only transformed version without any context`;
     return await this.gptRequest(prompt);
   }
 

@@ -4,7 +4,7 @@
 
 ## Overview
 
-The GrammariX extension seamlessly integrates with Raycaster, enabling you to enhance your writing effortlessly.
+The GrammariX extension seamlessly integrates with Raycaster, enabling you to enhance your writing effortlessly. With the added support for tone changes, it offers even more versatility in refining your text.
 
 ## Installation
 
@@ -29,21 +29,14 @@ The GrammariX extension seamlessly integrates with Raycaster, enabling you to en
 
 1. Launch Raycaster and open your preferred text editor.
 2. As you write, the GrammariX extension will analyze your text for grammar and sentence structure.
-3. Receive grammer fixed clean result
+3. Experience the convenience of receiving grammar-fixed, polished results.
 
 ## Features
 
 - **Grammar Perfection**: Effortlessly correct grammar mistakes.
 - **Sentence Rephrasing**: Discover alternative phrasings for improved clarity.
 - **Style Enhancement**: Craft engaging sentences that captivate readers.
+- **Tone Change**: Adjust the tone of your writing, whether it's happy, friendly, romantic, and more.
 - **Integrated Workflow**: Enhance your writing within your familiar Raycaster environment.
-
-## Roadmap
-
-We're excited to share our upcoming plans for GrammariX:
-
-- **Custom Rewriting Tones**: Choose from a variety of rewriting tones such as formal, informal, funny, and more. Tailor your text to suit different contexts and audiences.
-
-We're committed to making GrammariX an indispensable tool for your writing journey. Stay tuned for these exciting updates!
 
 ## We are using the GPT-3.5 turbo model, so each request will incur a cost. Please refer to the [price list ](https://openai.com/pricing) for details

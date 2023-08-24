@@ -1,6 +1,18 @@
 enum CommandType {
   Fix = "Fix grammer",
-  Rewrite = "Rewrite",
+  Paraphrase = "Paraphrase",
+  ToneChange = "Change Tone",
+  ContinueText = "Continue Text",
 }
 
-export { CommandType };
+enum ToneType {
+  Professional = "Professional",
+  Friendly = "Friendly",
+  Romantic = "Romantic",
+  Happy = "Happy",
+  Sad = "Sad",
+  Sarcastic = "Sarcastic",
+  Angry = "Angry",
+}
+
+export { CommandType, ToneType };

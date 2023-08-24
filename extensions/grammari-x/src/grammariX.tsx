@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { List, Clipboard, showToast, Toast } from "@raycast/api";
-import { OpenAIModule } from "./grammarCorrection";
-import { CommandType } from "./types";
+import { OpenAIModule } from "./grammerUtil";
+import { CommandType, ToneType } from "./types";
 import CommandList from "./components/CommandList";
 import ResultSection from "./components/ResultSection";
+import ToneTypeDropDown from "./components/ToneTypeDropdown";
 import { getAccessToken } from "./utils";
 
 const openAIKey = getAccessToken();
@@ -15,6 +16,7 @@ const openAI = new OpenAIModule(openAIKey);
 
 type State = {
   command: CommandType;
+  toneType: ToneType;
   isLoading: boolean;
   searchText: string;
   output: string;
@@ -23,6 +25,7 @@ type State = {
 export default function Command() {
   const [state, setState] = useState<State>({
     command: CommandType.Fix,
+    toneType: ToneType.Professional,
     isLoading: false,
     searchText: "",
     output: "",
@@ -67,11 +70,19 @@ export default function Command() {
     switch (command) {
       case CommandType.Fix:
         return openAI.fixGrammer(text);
-      case CommandType.Rewrite:
+      case CommandType.Paraphrase:
         return openAI.correctGrammer(text);
+      case CommandType.ToneChange:
+        return openAI.changeTone(text, state.toneType);
+      case CommandType.ContinueText:
+        return openAI.continueText(text);
       default:
         throw new Error("Invalid command");
     }
+  }
+
+  function onToneTypeChange(toneType: ToneType) {
+    setState((previous) => ({ ...previous, toneType }));
   }
 
   return (
@@ -82,6 +93,11 @@ export default function Command() {
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, output: "", searchText: newValue }));
       }}
+      searchBarAccessory={
+        <>
+          <ToneTypeDropDown onToneTypeChange={onToneTypeChange}></ToneTypeDropDown>
+        </>
+      }
     >
       <ResultSection output={state.output} isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} />
       <CommandList onExecute={onExecute} searchText={state.searchText} />

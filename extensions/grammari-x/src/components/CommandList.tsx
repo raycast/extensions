@@ -2,8 +2,9 @@ import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { CommandType } from "../types";
 
 const fixGrammerCommandIcon = { source: Icon.Check, tintColor: Color.Green };
-const rewriteCommandIcon = { source: Icon.Pencil, tintColor: Color.Blue };
-
+const paraphraseCommandIcon = { source: Icon.Pencil, tintColor: Color.Blue };
+const toneChangeCommandIcon = { source: Icon.Raindrop, tintColor: Color.Orange };
+const continueTextCommandIcon = { source: Icon.ShortParagraph, tintColor: Color.Yellow };
 export default function CommandList({
   onExecute,
   searchText,
@@ -25,11 +26,31 @@ export default function CommandList({
             }
           />
           <List.Item
-            title="Rewrite"
-            icon={rewriteCommandIcon}
+            title="Paraphrase"
+            icon={paraphraseCommandIcon}
             actions={
               <ActionPanel>
-                <Action title="Rewrite" onAction={async () => await onExecute(CommandType.Rewrite)} />
+                <Action title="Paraphrase" onAction={async () => await onExecute(CommandType.Paraphrase)} />
+              </ActionPanel>
+            }
+          />
+
+          <List.Item
+            title="Tone Changer"
+            icon={toneChangeCommandIcon}
+            actions={
+              <ActionPanel>
+                <Action title="Tone Changer" onAction={async () => await onExecute(CommandType.ToneChange)} />
+              </ActionPanel>
+            }
+          />
+
+          <List.Item
+            title="Continue Text"
+            icon={continueTextCommandIcon}
+            actions={
+              <ActionPanel>
+                <Action title="Continue Text" onAction={async () => await onExecute(CommandType.ContinueText)} />
               </ActionPanel>
             }
           />
