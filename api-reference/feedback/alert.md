@@ -79,6 +79,7 @@ export default async function Command() {
 | icon | The icon of an alert to illustrate the action. Displayed on the top. | <code>[Image.ImageLike](../user-interface/icons-and-images.md#image.imagelike)</code> |
 | message | An additional message for an Alert. Useful to show more information, e.g. a confirmation message for a destructive action. | <code>string</code> |
 | primaryAction | The primary Action the user can take. | <code>[Alert.ActionOptions](alert.md#alert.actionoptions)</code> |
+| rememberUserChoice | If set to true, the Alert will also display a `Do not show this message again` checkbox. When checked, the answer is persisted and directly returned to the extension the next time the alert should be shown, without the user actually seeing the alert. | <code>boolean</code> |
 
 ### Alert.ActionOptions
 
