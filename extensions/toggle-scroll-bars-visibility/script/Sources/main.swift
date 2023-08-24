@@ -1,6 +1,11 @@
 import Foundation
 
 func getSelectedValue() -> String {
+  if CommandLine.argc < 2 {
+    print("No arguments passed. Please pass one of the following values: \"Always\", \"Automatic\", \"WhenScrolling\".")
+    exit(1)
+  }
+
   let args = CommandLine.arguments
   let value = args[1]
 
