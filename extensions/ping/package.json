@@ -28,7 +28,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.1",
+    "@raycast/api": "^1.57.2",
     "@raycast/utils": "^1.9.1",
     "ping": "^0.4.4"
   },
