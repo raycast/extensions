@@ -1,5 +1,11 @@
 # Figma Files Changelog
 
+## [Support for adding favourite files, Grid UX improvements] - 2023-08-24
+
+- Added support for favouriting your most used figma files.
+- Added accessory icon in grid to identify files with branches.
+- Added tooltip on hover to view entire file names.
+
 ## [Support for opening file branches and improvements] - 2023-06-07
 
 - Added support for opening a specific branch of a file through the CMD+K menu.
