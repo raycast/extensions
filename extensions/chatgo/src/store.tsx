@@ -1,19 +1,20 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
 import { uniqBy } from "lodash";
+import React, { useCallback, useEffect, useState } from "react";
 import { useChatGo } from "./hooks/useChatGo";
 import { TemplateBase, TemplateModel } from "./type";
-import { getAvatarIcon } from "@raycast/utils";
+import { TemplateListItem } from "./views/template-list-item";
 
 export default function Store() {
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [myTPlList, setMyTPlList] = useState<TemplateModel[]>([]);
-  const [list, setList] = useState<TemplateBase[]>([]);
+  const [myFavoriteTPlList, setMyFavoriteTPlList] = useState<TemplateModel[]>([]);
+  const [officialTplList, setOfficialTplList] = useState<TemplateBase[]>([]);
+  const [mineTplList, setMineTplList] = useState<TemplateBase[]>([]);
+  const [communityTplList, setCommunityTplList] = useState<TemplateBase[]>([]);
   const chatGo = useChatGo();
 
-  const uniqMyTplList = uniqBy(myTPlList, "id");
-  const uniqList = uniqBy(list, "id");
-  const uniqListWithoutMyList = uniqList.filter((i) => uniqMyTplList.every((j) => j.template_id !== i.id));
+  const uniqMyFavoriteTplList = uniqBy(myFavoriteTPlList, "id");
 
   useEffect(() => {
     getData();
@@ -21,53 +22,94 @@ export default function Store() {
 
   const getData = useCallback(() => {
     setLoading(true);
-    Promise.all([chatGo.getMyTemplateList(true), chatGo.getPromptTemplates({ name: "", tag: "" })])
-      .then(([myList, response2]) => {
-        setMyTPlList(myList || []);
-        if (response2) {
-          const { data: list } = response2;
-          if (list.code === "000000") {
-            setList(list.data || []);
-          }
+    Promise.all([
+      chatGo.getMyTemplateList(true),
+      chatGo.getPromptTemplates({ name: "", tag: "", type: 1 }),
+      chatGo.getPromptTemplates({ name: "", tag: "", type: 2 }),
+      chatGo.getPromptTemplates({ name: "", tag: "", type: 3 }),
+    ])
+      .then(([myList, response4Official, response4Mine, response4Community]) => {
+        setMyFavoriteTPlList(myList || []);
+        if (response4Official) {
+          const { data: list } = response4Official;
+          const { data: list4Mine } = response4Mine;
+          const { data: list4Community } = response4Community;
+          setOfficialTplList(list?.data ?? []);
+          setCommunityTplList(list4Community?.data ?? []);
+          setMineTplList(list4Mine?.data ?? []);
         }
         setLoading(false);
       })
       .catch();
-  }, [setLoading, setMyTPlList, setList]);
+  }, [setLoading, setMyFavoriteTPlList, setOfficialTplList, setCommunityTplList, setMineTplList]);
 
   return (
     <List
       isLoading={isLoading}
       filtering={false}
       throttle={false}
-      isShowingDetail={myTPlList.length > 0 || list.length > 0}
+      isShowingDetail={myFavoriteTPlList.length > 0 || officialTplList.length > 0}
       // searchBarPlaceholder="Search answer/question..."
     >
-      {myTPlList.length === 0 && list.length === 0 && (
+      {myFavoriteTPlList.length === 0 && officialTplList.length === 0 && (
         <List.EmptyView title="No Data" description="Your recent questions will be showed up here" icon={Icon.Stars} />
       )}
-      <List.Section title="My Template" subtitle={uniqBy(myTPlList, "id").length.toLocaleString()}>
-        {uniqMyTplList.map((item) => {
+      <List.Section title={"Favorite Templates"} subtitle={uniqBy(myFavoriteTPlList, "id").length.toLocaleString()}>
+        {uniqMyFavoriteTplList.map((item, index) => {
           return (
             <List.Item
               title={item.template_name}
               id={item.id.toString() + item.template_name + "F"}
               key={item.id}
               icon={item.avatar || getAvatarIcon(item.template_name)}
-              accessories={[{ text: new Date(item.create_time ?? 0).toLocaleDateString() }]}
-              detail={<List.Item.Detail markdown={`**${item.template_name}**\n\n\n\n ${item.content}`} />}
+              detail={
+                <List.Item.Detail
+                  markdown={`**${item.template_name}**\n\n\n\n **Description:**\n\n${item.description} \n\n\n **Content:** \n\n${item.content}`}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.TagList title="Tags">
+                        {(item.tags.length ? item.tags : ["UNKNOWN"]).map((tag) => (
+                          <List.Item.Detail.Metadata.TagList.Item text={tag} color={Color.Blue} />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                      <List.Item.Detail.Metadata.Label
+                        title="CreateTime"
+                        text={new Date(item.create_time ?? 0).toLocaleDateString()}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="UpdateTime"
+                        text={new Date(item.update_time ?? 0).toLocaleDateString()}
+                      />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
               actions={
                 <ActionPanel>
                   {item.template_name !== "万能助手" && (
-                    <Action
-                      icon={Icon.StarDisabled}
-                      title="Remove Template from My Templates"
-                      onAction={() => {
-                        chatGo.removeMyTemplate(item.id).then(() => {
-                          getData();
-                        });
-                      }}
-                    />
+                    <>
+                      {index > 1 ? (
+                        <Action
+                          title="Move Up"
+                          icon={Icon.ArrowUp}
+                          onAction={() => {
+                            chatGo.moveUpMyFavoriteTPl(item.id).then(() => {
+                              getData();
+                            });
+                          }}
+                        />
+                      ) : null}
+                      <Action
+                        icon={Icon.StarDisabled}
+                        title="Remove the Favorite Template"
+                        shortcut={{ modifiers: ["cmd"], key: "p" }}
+                        onAction={() => {
+                          chatGo.removeMyTemplate(item.id).then(() => {
+                            getData();
+                          });
+                        }}
+                      />
+                    </>
                   )}
                 </ActionPanel>
               }
@@ -75,46 +117,26 @@ export default function Store() {
           );
         })}
       </List.Section>
-      <List.Section title={"Template Store"} subtitle={uniqBy(list, "id").length.toLocaleString()}>
-        {uniqListWithoutMyList.map((item) => {
-          return (
-            <List.Item
-              title={item.name}
-              id={item.id.toString() + item.name}
-              key={item.id}
-              icon={item.avatar || getAvatarIcon(item.name)}
-              accessories={[{ text: new Date(item.create_time ?? 0).toLocaleDateString() }]}
-              detail={
-                <List.Item.Detail markdown={`**${item.name}**\n\n\n\n ${item.description} \n\n ${item.content}`} />
-              }
-              actions={
-                <ActionPanel>
-                  <Action
-                    icon={Icon.Star}
-                    title="Add to My Template List"
-                    onAction={async () => {
-                      const toast = await showToast({
-                        title: "Add template...",
-                        style: Toast.Style.Animated,
-                      });
-                      chatGo
-                        .addTemplateForMine(item.id)
-                        .then(() => {
-                          toast.title = "Add template success";
-                          toast.style = Toast.Style.Success;
-                          getData();
-                        })
-                        .catch(() => {
-                          toast.title = "Add template fail";
-                          toast.style = Toast.Style.Failure;
-                        });
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+      <List.Section title={"My Templates"} subtitle={uniqBy(mineTplList, "id").length.toLocaleString()}>
+        {uniqBy(mineTplList, "id")
+          .filter((i) => uniqMyFavoriteTplList.every((j) => j.template_id !== i.id))
+          .map((item) => {
+            return <TemplateListItem item={item} getData={getData} type={2} prefix={"M"} />;
+          })}
+      </List.Section>
+      <List.Section title={"Official Templates"} subtitle={uniqBy(officialTplList, "id").length.toLocaleString()}>
+        {uniqBy(officialTplList, "id")
+          .filter((i) => uniqMyFavoriteTplList.every((j) => j.template_id !== i.id))
+          .map((item) => {
+            return <TemplateListItem item={item} getData={getData} type={1} prefix="M" />;
+          })}
+      </List.Section>
+      <List.Section title={"Community Templates"} subtitle={uniqBy(communityTplList, "id").length.toLocaleString()}>
+        {uniqBy(communityTplList, "id")
+          .filter((i) => uniqMyFavoriteTplList.every((j) => j.template_id !== i.id))
+          .map((item) => {
+            return <TemplateListItem item={item} getData={getData} type={3} prefix="C" />;
+          })}
       </List.Section>
     </List>
   );

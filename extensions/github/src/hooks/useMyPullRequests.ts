@@ -32,7 +32,7 @@ export function useMyPullRequests(repository: string | null) {
         numberOfClosedItems: 20,
       });
     },
-    [repository]
+    [repository],
   );
 
   const created = data?.createdOpen.pullRequests;
@@ -49,7 +49,7 @@ export function useMyPullRequests(repository: string | null) {
       ...(data?.reviewRequestsClosed.pullRequests || []),
       ...(data?.reviewedByClosed.pullRequests || []),
     ],
-    "pullRequest.id"
+    "pullRequest.id",
   );
 
   const prIds: string[] = [];
@@ -70,7 +70,7 @@ export function useMyPullRequests(repository: string | null) {
     .filter((section) => section.pullRequests && section.pullRequests.length > 0)
     .map((section) => {
       const pullRequests = getPullRequestsWithoutDuplicates(
-        section.pullRequests?.map((pr) => pr?.pullRequest as PullRequestFieldsFragment)
+        section.pullRequests?.map((pr) => pr?.pullRequest as PullRequestFieldsFragment),
       );
       pullRequests?.sort((a, b) => compareDesc(new Date(a.updatedAt), new Date(b.updatedAt)));
 

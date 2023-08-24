@@ -1,6 +1,6 @@
-# Mastodon Search - Search for people or hashtags on Mastodon!
+# Mastodon Search
 
-This extension is not intended to be a full Mastodon client. Instead, it is a quick and easy way to get glanceable information about people and to navigate to pages on the Mastodon website. It intentionally does not include posting, browsing timelines, mentions, or even post search.
+**Search for people or hashtags on Mastodon!** – This extension is not intended to be a full Mastodon client. Instead, it is a quick and easy way to get glanceable information about people and to navigate to pages on the Mastodon website. It intentionally does not include posting, browsing timelines, mentions, or even post search.
 
 ## Authors
 

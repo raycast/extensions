@@ -1,5 +1,6 @@
 export interface IServer {
   api_token_key: string;
+  ssh_user: string;
   id: number;
   credential_id?: string | null;
   name?: string;

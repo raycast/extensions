@@ -6,3 +6,5 @@ node_modules
 
 # macos
 .DS_Store
+
+raycast-env.d.ts

@@ -61,7 +61,7 @@ type NoteItem = {
   title: string;
 };
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, permissionView } = useSQL<NoteItem>(NOTES_DB, notesQuery);
 
   if (permissionView) {
@@ -75,7 +75,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -97,7 +97,7 @@ type NoteItem = {
   title: string;
 };
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate, permissionView } = useFetch("https://api.example");
 
   if (permissionView) {
@@ -145,7 +145,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Types

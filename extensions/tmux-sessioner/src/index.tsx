@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { List, Icon, Action, ActionPanel, Toast, showToast, Detail, useNavigation } from "@raycast/api";
-import { LocalStorage } from "@raycast/api";
+
+import { List, Icon, Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 import { SelectTerminalApp } from "./SelectTermnialApp";
-import { deleteSession, getAllSession, switchToSession } from "./sessionUtils";
 import { RenameTmuxSession } from "./RenameTmuxSession";
+import { deleteSession, getAllSession, switchToSession } from "./utils/sessionUtils";
+import { checkTerminalSetup } from "./utils/terminalUtils";
 
 export default function Command() {
   const [sessions, setSessions] = useState<Array<string>>([]);
@@ -11,27 +12,6 @@ export default function Command() {
   const [isTerminalSetup, setIsTerminalSetup] = useState(false);
 
   const { push } = useNavigation();
-  async function checkTerminalSetup(): Promise<boolean> {
-    const localTerminalAppName = await LocalStorage.getItem<string>("terminalAppName");
-
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Checking terminal App setup",
-    });
-
-    if (!localTerminalAppName) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "No default terminal setup for tmux sessioner";
-      setIsTerminalSetup(false);
-
-      return false;
-    } else {
-      toast.hide();
-      setIsTerminalSetup(true);
-
-      return true;
-    }
-  }
 
   const setupListSesssions = () => {
     getAllSession((error, stdout) => {
@@ -55,7 +35,7 @@ export default function Command() {
     (async () => {
       setIsLoading(true);
 
-      const isSetup = await checkTerminalSetup();
+      const isSetup = await checkTerminalSetup(setIsTerminalSetup);
 
       if (!isSetup) {
         setIsLoading(false);

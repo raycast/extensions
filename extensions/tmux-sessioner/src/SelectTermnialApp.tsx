@@ -2,9 +2,9 @@ import { Action, ActionPanel, Application, Form, Toast, getApplications, showToa
 import { LocalStorage } from "@raycast/api";
 
 import { useEffect, useState } from "react";
-import { applicationIconFromPath } from "./pathUtils";
+import { applicationIconFromPath } from "./utils/pathUtils";
 
-const ALLOWED_APPS = ["kitty", "Alacritty", "iTerm2", "Terminal", "Warp"];
+const ALLOWED_APPS = ["kitty", "Alacritty", "iTerm2", "Terminal", "Warp", "WezTerm"];
 
 export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?: (value: boolean) => void }) => {
   const [apps, setApps] = useState<Application[]>();

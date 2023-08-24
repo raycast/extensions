@@ -44,6 +44,7 @@ export const getWifiList = (refresh: number) => {
     const _wifiListWithPassword: WifiNetworkWithPassword[] = [];
     allWifiList
       .filter((wifiItem) => wifiItem.security !== "NONE")
+      .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
       .forEach((value1) => {
         const includeWifi = passwordCaches.filter((value2) => value1.ssid === value2.ssid);
         if (includeWifi.length > 0) {
@@ -54,7 +55,11 @@ export const getWifiList = (refresh: number) => {
       });
     setWifiWithPasswordList(_wifiListWithPassword);
     setWifiList(_wifiList);
-    setPublicWifi(allWifiList.filter((wifiItem) => wifiItem.security === "NONE"));
+    setPublicWifi(
+      allWifiList
+        .filter((wifiItem) => wifiItem.security === "NONE")
+        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
+    );
 
     const __allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
     const _allWifiList = uniqueWifiNetWork(__allWifiList);
@@ -63,6 +68,7 @@ export const getWifiList = (refresh: number) => {
     const __wifiListWithPassword: WifiNetworkWithPassword[] = [];
     _allWifiList
       .filter((wifiItem) => wifiItem.security !== "NONE")
+      .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
       .forEach((value1) => {
         const includeWifi = passwordCaches.filter((value2) => value1.ssid === value2.ssid);
         if (includeWifi.length > 0) {
@@ -73,7 +79,11 @@ export const getWifiList = (refresh: number) => {
       });
     setWifiWithPasswordList(__wifiListWithPassword);
     setWifiList(__wifiList);
-    setPublicWifi(_allWifiList.filter((wifiItem) => wifiItem.security === "NONE"));
+    setPublicWifi(
+      _allWifiList
+        .filter((wifiItem) => wifiItem.security === "NONE")
+        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
+    );
     setLoading(false);
     if (_allWifiList.length > 0) {
       await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(_allWifiList));

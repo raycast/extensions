@@ -1,8 +1,10 @@
-import { Toast, showToast, LocalStorage } from '@raycast/api';
+import { LocalStorage, Toast, showToast } from '@raycast/api';
 import got from 'got';
-import { preference } from '../utils/config';
+import { getDefaultStore } from 'jotai';
+import { isAuthenticatedAtom } from '../hooks/atoms';
+import { GENERAL_DOMAIN } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
-import { cookieJar, getTenantPrefixUrl } from './shared';
+import { cookieJar, isAbortError } from './shared';
 
 export type UserID = string;
 export type NodeID = string;
@@ -131,7 +133,7 @@ const client = got.extend({
   hooks: {
     beforeRequest: [
       (options) => {
-        options.headers.referer = getTenantPrefixUrl();
+        options.headers.referer = GENERAL_DOMAIN;
         // remove `_csrf_token`
         options.headers.cookie = String(options.headers.cookie)
           .split('; ')
@@ -141,21 +143,20 @@ const client = got.extend({
     ],
     afterResponse: [
       (response) => {
-        try {
-          const data = response.body as Record<string, unknown>;
-          if (data.code !== 0) {
-            if (data.code === 5) {
-              // Login Required
-              LocalStorage.clear();
+        const data = response.body as Record<string, unknown>;
+        if (data.code !== 0) {
+          if (data.code === 5) {
+            // Login Required
+            LocalStorage.clear();
+            getDefaultStore().set(isAuthenticatedAtom, false);
+            setTimeout(() => {
               showToast(Toast.Style.Failure, 'Session expired, please login again');
-            }
-            throw Error();
+            });
           }
-          response.body = data.data;
-          return response;
-        } catch {
-          return response;
+          throw Error();
         }
+        response.body = data.data;
+        return response;
       },
     ],
   },
@@ -166,13 +167,14 @@ export function isNodeEntity(entity: NodeEntity | ObjEntity): entity is NodeEnti
 }
 
 function prependUrl(url: string) {
-  return `${getTenantPrefixUrl()}/space/api/${url}`;
+  return `${GENERAL_DOMAIN}/space/api/${url}`;
 }
 
-export async function fetchRecentList(length = preference.recentListCount): Promise<RecentListResponse> {
+export async function fetchRecentList(length: number, signal?: AbortSignal): Promise<RecentListResponse> {
   try {
     const { body } = await client.get<RecentListResponse>(prependUrl('explorer/recent/list/'), {
       searchParams: { length },
+      signal,
     });
     return body;
   } catch (error) {
@@ -180,8 +182,7 @@ export async function fetchRecentList(length = preference.recentListCount): Prom
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }
-
-    showToast(Toast.Style.Failure, errorMessage);
+    if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
       has_more: false,
       total: 0,
@@ -200,10 +201,11 @@ export interface SearchDocsParams {
   count?: number;
 }
 
-export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsResponse> {
+export async function searchDocs(params: SearchDocsParams, signal?: AbortSignal): Promise<SearchDocsResponse> {
   try {
     const { body } = await client.get<SearchDocsResponse>(prependUrl('search/refine_search/'), {
       searchParams: { offset: 0, count: 15, ...params },
+      signal,
     });
     Object.keys(body.entities.objs).forEach((key) => {
       const objEntity = body.entities.objs[key];
@@ -221,8 +223,7 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }
-
-    showToast(Toast.Style.Failure, errorMessage);
+    if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
       has_more: false,
       total: 0,

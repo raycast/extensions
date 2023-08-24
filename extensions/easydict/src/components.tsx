@@ -31,7 +31,7 @@ import { openInEudic } from "./scripts";
 import { getVolcanoWebTranslateURL } from "./translation/volcano/volcanoAPI";
 import {
   ActionListPanelProps,
-  DicionaryType,
+  DictionaryType,
   ListDisplayItem,
   QueryType,
   TranslationType,
@@ -40,9 +40,9 @@ import {
 import { checkIsLingueeListItem, checkIsTranslationType, checkIsYoudaoDictionaryListItem } from "./utils";
 
 const queryWebItemTypes = [
-  DicionaryType.Youdao,
-  DicionaryType.Linguee,
-  DicionaryType.Eudic,
+  DictionaryType.Youdao,
+  DictionaryType.Linguee,
+  DictionaryType.Eudic,
   TranslationType.DeepL,
   TranslationType.Google,
   TranslationType.Baidu,
@@ -453,15 +453,15 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
       webUrl = getVolcanoWebTranslateURL(wordInfo);
       break;
     }
-    case DicionaryType.Linguee: {
+    case DictionaryType.Linguee: {
       webUrl = getLingueeWebDictionaryURL(wordInfo);
       break;
     }
-    case DicionaryType.Youdao: {
+    case DictionaryType.Youdao: {
       webUrl = getYoudaoWebDictionaryURL(wordInfo);
       break;
     }
-    case DicionaryType.Eudic: {
+    case DictionaryType.Eudic: {
       webUrl = getEudicWebDictionaryURL(wordInfo);
       break;
     }

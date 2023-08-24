@@ -1,13 +1,26 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { uniqBy } from "lodash";
 import { QuestionFormProps } from "../../type";
 import { useState } from "react";
 
-export const QuestionForm = ({ initialQuestion, onSubmit }: QuestionFormProps) => {
+export const QuestionForm = ({
+  initialQuestion,
+  onSubmit,
+  templateModels,
+  selectedTemplateModelId,
+  onTemplateModelChange,
+  disableChange,
+}: QuestionFormProps & { disableChange?: boolean }) => {
   const { pop } = useNavigation();
   const [question, setQuestion] = useState<string>(initialQuestion ?? "");
   const [error, setError] = useState<{ question: string }>({
     question: "",
   });
+  const defaultTemplateModel = templateModels.find((x) => x.template_id.toString() === "0");
+  const separateDefaultModel = templateModels.filter((x) => x.template_id.toString() !== "0");
+  const selectedTemplateModel = templateModels.filter(
+    (x) => x.template_id.toString() === selectedTemplateModelId.toString()
+  );
   return (
     <Form
       actions={
@@ -40,6 +53,48 @@ export const QuestionForm = ({ initialQuestion, onSubmit }: QuestionFormProps) =
           }
         }}
       ></Form.TextArea>
+      <Form.Dropdown
+        id="selectedTemplateModelId"
+        title="Template"
+        storeValue={false}
+        placeholder="Choose Template"
+        defaultValue={selectedTemplateModelId.toString()}
+        onChange={(id) => {
+          onTemplateModelChange(Number(id));
+        }}
+      >
+        {disableChange && (
+          <>
+            {uniqBy(selectedTemplateModel, "template_id").map((model, index) => (
+              <Form.Dropdown.Item
+                key={model.template_id.toString() + index}
+                title={model.template_name}
+                value={model.template_id.toString()}
+              />
+            ))}
+          </>
+        )}
+        {!disableChange && defaultTemplateModel && (
+          <Form.Dropdown.Section title="Common Template Models">
+            <Form.Dropdown.Item
+              key={defaultTemplateModel.template_id.toString() + "-D"}
+              title={defaultTemplateModel.template_name}
+              value={defaultTemplateModel.template_id.toString()}
+            />
+          </Form.Dropdown.Section>
+        )}
+        {!disableChange && (
+          <Form.Dropdown.Section title="My Template Models">
+            {uniqBy(separateDefaultModel, "template_id").map((model, index) => (
+              <Form.Dropdown.Item
+                key={model.template_id.toString() + "-F-" + index}
+                title={model.template_name}
+                value={model.template_id.toString()}
+              />
+            ))}
+          </Form.Dropdown.Section>
+        )}
+      </Form.Dropdown>
     </Form>
   );
 };

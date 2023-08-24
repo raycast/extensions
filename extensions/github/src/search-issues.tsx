@@ -31,7 +31,7 @@ function SearchIssues() {
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },
     [searchText],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   return (

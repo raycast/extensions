@@ -4,7 +4,14 @@ import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Issue } from "../gitlabapi";
 import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
-import { IssueListItem, IssueScope, IssueState, getIssueQuery, injectQueryNamedParameters } from "./issues";
+import {
+  IssueListEmptyView,
+  IssueListItem,
+  IssueScope,
+  IssueState,
+  getIssueQuery,
+  injectQueryNamedParameters,
+} from "./issues";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -55,6 +62,7 @@ export function SearchMyIssues(): JSX.Element {
           <IssueListItem key={i.id} issue={i} refreshData={performRefetch} />
         ))}
       </List.Section>
+      <IssueListEmptyView />
     </List>
   );
 }

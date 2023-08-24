@@ -1,5 +1,13 @@
 # Arc Changelog
 
+## [Fixes] - 2023-08-11
+
+- Fixed an issue where, when searching for tabs with the same URL but different titles, the wrong tab would be opened.
+
+## [Improvements] - 2023-06-30
+
+- Expand Search Arc suggestions to available engines
+
 ## [Improvements] - 2023-03-08
 
 - Add a new command to open little arc.

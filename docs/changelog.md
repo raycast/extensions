@@ -1,5 +1,105 @@
 # Changelog
 
+## 1.57.0 - 2023-08-09
+
+### 🐞 Fixes
+
+- **Metadata**: Fixed various rendering issues with `TagList`.
+- **Menu Bar Extra**: Fixed a bug that caused section titles to be unreadable on macOS Sonoma.
+- **Menu Bar Extra**: Fixed a bug that could cause a menu bar command to be unloaded while its menu is open.
+- **Form**: Fixed stale suggestions in the DatePicker when changing its type.
+- **Icon**: Fixed the `AppWindowGrid2x2` icon only showing a square.
+
+## 1.56.0 - 2023-07-26
+
+### ✨ New
+
+- **Clipboard**: `Clipboard.read()` now supports an `offset` option to access the Clipboard History (limited to the last 5)
+- **Grid:** Grid items can now have an icon accessory
+- **Shortcuts:** Providing a consistent user experience should now be easier thanks to the new `Keyboard.Shortcut.Common` export.
+
+### 💎 Improvements
+
+- `getSelectedText` is now more reliable
+- **Trash**: Improved behaviour of `trash` and `Action.Trash` to better handle missing files.
+- **HUD**: `showHUD` now supports the same options as `closeMainWindow`
+- **Command Launching:** Improved logic for deciding which version of a command gets launched when a user has both a production and a development version of an extension installed.
+- **Tags:** Icon-only tags should now center the icon.
+
+### 🐞 Fixes
+
+- **Form**: When working on a draft, updating a `Form.Checkbox` will update the draft.
+- **Error Reports:** Improved error messages when an extension crashes during a background launch.
+- **Shortcuts:** Previously, the API permitted the creation of shortcuts using keys reserved by Raycast (⌘+K, ⌘+W, ⌘+Esc, etc.), resulting in unexpected behavior. Raycast now ignores these and, during development mode, they will trigger a runtime warning.
+
+## 1.55.0 - 2023-07-06
+
+### 💎 Improvements
+
+- **Fallback Commands**: Local commands will now have an indicator so that it’s possible to differentiate them from the commands installed from the Store
+- The NodeJS process used for Raycast extensions will now be named `Raycast Helper (Extensions)`
+- Active menu bar commands will now be displayed in `Extension Diagnostics`.
+
+### 🐞 Fixes
+
+- Fix an issue where Metadata’s Tag items would sometimes not be updated
+- Fix a bug where renamed commands appear in the root search with both the original and the updated name after an extension update.
+
+## 1.54.0 - 2023-06-21
+
+### 💎 Improvements
+
+- Add an action to clear the local storage when an unexpected error occurs
+- When using `showToast` while the Raycast window is closed (for example if a command is launched with a hotkey), a `HUD` will be shown instead
+- Improve the error messages when a command fails to load
+- The NodeJS inspector will now use a random free port instead of using the default 9229 port (which you can use for other NodeJS scripts)
+
+### 🐞 Fixes
+
+- Fix a performance issue on the first render of Lists and Grids
+- Fix an issue where required arguments wouldn’t be required when launching a command right after installing it
+- Fix a regression where the deprecated `render` method would not work anymore
+- Fix an edge case where some Form items would not be updated if some items would be added at the same time
+
+## 1.53.0 - 2023-06-07
+
+### ✨ New
+
+- **Metadata**: `List.Item.Detail.Metadata.TagList.Item` and `Detail.Metadata.TagList.Item` now accepts an action handler via the `onAction` prop!
+- Added [LaunchContext](https://developers.raycast.com/api-reference/command#launchcontext) support to `Create Quicklink` and `Create Snippet:`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "raycast", name: "create-quicklink", type: LaunchType.UserInitiated, context: { name: "context name", application: "Xcode", }});`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "snippets", name: "create-snippet", type: LaunchType.UserInitiated, context: { name: "context name", text: "context text", keyword: "context keyword" }})`
+- **Date Pickers:** You can now add a minimum and maximum date to `Form.DatePicker` and `Action.PickDate` using the `min` and `max` props to limit the suggestions shown when entering a date.
+
+### 💎 Improvements
+
+- Updated NodeJS to 18.16.0
+- Improve the “Fork Extension” action to avoid modifying the manifest as much as possible.
+
+### 🐞 Fixes
+
+- Fixed a bug that sometimes caused `no-view` commands to not display errors.
+- Fixed a bug that caused OAuth not to work if the `client.authorize(authorizationRequest)` was executed more than once.
+- Fixed a problem where commands with background execution would not display the OAuth sign-in screen.
+- **SVG**: Properly handle `currentColor`
+- **List/Grid**: Fixed `selectedItemId` being sometimes ignored on the first render.
+- **Form**: Fixed triggering `onChange` on the TextArea when using a markdown keyboard shortcut.
+
+## 1.52.0 - 2023-05-24
+
+### ✨ New
+
+- **SVG**: You can now use the Raycast `Color` in an SVG.
+
+### 💎 Improvements
+
+- Improve the error message when a required property is missing on a component
+
+### 🐞 Fixes
+
+- Fixed an edge case where the keyboard events triggered while an extension is loading would not be passed down to the extension once loaded
+- Fixed an issue where the fallback of an image would show while it is being loaded
+
 ## 1.51.0 - 2023-05-10
 
 ### ✨ New

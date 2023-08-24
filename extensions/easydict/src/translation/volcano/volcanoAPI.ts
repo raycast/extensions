@@ -10,8 +10,8 @@
 
 import axios from "axios";
 import { requestCostTime } from "../../axiosConfig";
-import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
-import { checkIfPreferredLanguagesContainChinese } from "../../detectLanauge/utils";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanguage/types";
+import { checkIfPreferredLanguagesContainChinese } from "../../detectLanguage/utils";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
 import { chineseLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getVolcanoLangCode, getYoudaoLangCodeFromVolcanoCode } from "../../language/languages";
@@ -47,8 +47,8 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
     Category: "", // 默认使用通用翻译领域，无需填写
   };
 
-  const signObjet = genVolcanoSign(query, params);
-  if (!signObjet) {
+  const signObject = genVolcanoSign(query, params);
+  if (!signObject) {
     console.warn(`Volcano AccessKey or SecretKey is empty`);
     const errorInfo: RequestErrorInfo = {
       type: type,
@@ -58,8 +58,8 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
     return Promise.reject(errorInfo);
   }
 
-  const url = signObjet.getUrl();
-  const config = signObjet.getConfig();
+  const url = signObject.getUrl();
+  const config = signObject.getConfig();
 
   return new Promise((resolve, reject) => {
     axios
@@ -127,9 +127,9 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
     TextList: [text],
   };
 
-  const signObjet = genVolcanoSign(query, params);
+  const signObject = genVolcanoSign(query, params);
 
-  if (!signObjet) {
+  if (!signObject) {
     console.warn(`Volcano AccessKey or SecretKey is empty`);
     const result: DetectedLangModel = {
       type: type,
@@ -141,8 +141,8 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
     return Promise.resolve(result);
   }
 
-  const url = signObjet.getUrl();
-  const config = signObjet.getConfig();
+  const url = signObject.getUrl();
+  const config = signObject.getConfig();
 
   return new Promise((resolve, reject) => {
     axios

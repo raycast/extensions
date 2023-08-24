@@ -49,6 +49,13 @@ const getOpenId = () => {
   return parseQuery.openId;
 };
 
+// Adapt to the new API
+const getApiVersion = () => {
+  if (getOpenApi().includes("v1")) return "/v1";
+
+  return "";
+};
+
 const getUseFetch = <T>(url: string, options: Record<string, any>) => {
   return useFetch<T, T>(url, {
     headers: {
@@ -84,7 +91,7 @@ export const getMe = () => {
 };
 
 export const sendMemo = (data: PostMemoParams) => {
-  return getFetch<ResponseData<MemoInfoResponse>>({
+  return getFetch<ResponseData<MemoInfoResponse> & MemoInfoResponse>({
     url: getOpenApi(),
     method: "POST",
     data,
@@ -92,9 +99,9 @@ export const sendMemo = (data: PostMemoParams) => {
 };
 
 export const getTags = () => {
-  const url = getRequestUrl(`/api/tag?openId=${getOpenId()}`);
+  const url = getRequestUrl(`/api${getApiVersion()}/tag?openId=${getOpenId()}`);
 
-  return getUseFetch<ResponseData<TagResponse>>(url, {
+  return getUseFetch<ResponseData<TagResponse> & TagResponse>(url, {
     keepPreviousData: true,
     initialData: {
       data: [],
@@ -125,9 +132,9 @@ export const getAllMemos = (rowStatus: ROW_STATUS_KEY = ROW_STATUS.NORMAL) => {
     rowStatus,
   });
 
-  const url = getRequestUrl(`/api/memo?${queryString}`);
+  const url = getRequestUrl(`/api${getApiVersion()}/memo?${queryString}`);
 
-  const { isLoading, data, revalidate } = getUseFetch<ResponseData<MemoInfoResponse[]>>(url, {
+  const { isLoading, data, revalidate } = getUseFetch<ResponseData<MemoInfoResponse[]> & MemoInfoResponse[]>(url, {
     keepPreviousData: true,
     initialData: {
       data: [],
@@ -138,7 +145,7 @@ export const getAllMemos = (rowStatus: ROW_STATUS_KEY = ROW_STATUS.NORMAL) => {
 };
 
 export const patchMemo = (memoId: number, { rowStatus = ROW_STATUS.NORMAL } = {}) => {
-  const url = getRequestUrl(`/api/memo/${memoId}?openId=${getOpenId()}`);
+  const url = getRequestUrl(`/api${getApiVersion()}/memo/${memoId}?openId=${getOpenId()}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
     url,
@@ -163,7 +170,7 @@ export const restoreMemo = (memoId: number) => {
 };
 
 export const deleteMemo = (memoId: number) => {
-  const url = getRequestUrl(`/api/memo/${memoId}?openId=${getOpenId()}`);
+  const url = getRequestUrl(`/api${getApiVersion()}/memo/${memoId}?openId=${getOpenId()}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
     url,

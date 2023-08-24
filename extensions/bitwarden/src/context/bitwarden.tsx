@@ -1,6 +1,6 @@
-import { Detail } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 import { Bitwarden } from "~/api/bitwarden";
+import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 
 const BitwardenContext = createContext<Bitwarden | null>(null);
 
@@ -14,7 +14,7 @@ export const BitwardenProvider = (props: BitwardenProviderProps) => {
     void new Bitwarden().initialize().then(setBitwarden);
   }, []);
 
-  if (!bitwarden) return <Detail isLoading />;
+  if (!bitwarden) return <VaultLoadingFallback />;
 
   return <BitwardenContext.Provider value={bitwarden}>{children}</BitwardenContext.Provider>;
 };

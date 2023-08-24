@@ -1,12 +1,10 @@
-import { Icon, Action, getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/api";
+import { Icon, Action, showToast, LocalStorage, Toast } from "@raycast/api";
 import { Server } from "../../api/Server";
 import { IServer } from "../../types";
 import { clearCache } from "../../lib/cache";
 import { unwrapToken } from "../../lib/auth";
 
 export const ServerCommands = ({ server }: { server: IServer }) => {
-  const preferences = getPreferenceValues();
-  const sshUser = preferences?.laravel_forge_ssh_user ?? "forge";
   const token = unwrapToken(server.api_token_key);
   return (
     <>
@@ -14,8 +12,8 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
       <Action.OpenInBrowser
         icon={Icon.Terminal}
         // eslint-disable-next-line @raycast/prefer-title-case
-        title={`Open SSH Connection (${sshUser})`}
-        url={`ssh://${sshUser}@${server.ip_address}`}
+        title={`Open SSH Connection (${server.ssh_user})`}
+        url={`ssh://${server.ssh_user}@${server.ip_address}`}
       />
       <Action
         icon={Icon.ArrowClockwise}

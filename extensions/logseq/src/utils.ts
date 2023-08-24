@@ -111,7 +111,8 @@ export const formatResult = (result: string) => {
 
 export const formatFilePath = (pageName: string) => {
   const dbName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length - 1];
-  const finalURL = encodeURI(`logseq://graph/${dbName}?file=${pageName}`);
+  const title = pageName.split("/")[pageName.split("/").length - 1];
+  const finalURL = encodeURI(`logseq://graph/${dbName}?page=${title}`);
   return finalURL;
 };
 

@@ -1,15 +1,15 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import searchRequest, { SearchQuery, Link } from "./utilities/searchRequest";
-import { Preferences } from "./utilities/searchRequest";
+import searchRequest, { SearchQuery, Link, Preferences } from "./utilities/searchRequest";
 import LinkItem from "./components/LinkItem";
 import CollectionItem from "./components/CollectionItem";
-import { CollectionProp, getCollections } from "./utilities/fetch";
+import { CollectionProp, fetchCollections, fetchSearchEngines } from "./utilities/fetch";
 
 interface State {
   links: Link[];
   collections: CollectionProp[];
   isLoading: boolean;
+  isSearchEngines: boolean;
 }
 
 function looseMatch(query: string, content: string): boolean {
@@ -28,8 +28,8 @@ function looseMatch(query: string, content: string): boolean {
   return true;
 }
 
-let collectionsResult: [CollectionProp];
-getCollections().then((res) => {
+let collectionsResult: CollectionProp[];
+fetchCollections().then((res) => {
   collectionsResult = res;
 });
 
@@ -38,19 +38,31 @@ export default function SearchResult() {
     links: [],
     collections: [],
     isLoading: true,
+    isSearchEngines: false,
   });
   const [searchText, setSearchText] = useState("");
   const preferences: Preferences = getPreferenceValues();
 
   useEffect(() => {
-    const query: SearchQuery = {
-      q: searchText.trim(),
-      limit: 30,
-      pinyin: preferences.usePinyin ? "yes" : "no",
-    };
-    searchRequest(query).then((linksReuslt) => {
-      if (Array.isArray(linksReuslt)) {
+    const searchLinks = async () => {
+      const query: SearchQuery = {
+        q: searchText.trim(),
+        limit: 50,
+        pinyin: preferences.usePinyin ? "yes" : "no",
+      };
+      let isSearchEngines = false;
+      let linksResult = await searchRequest(query);
+
+      if (Array.isArray(linksResult)) {
         let filteredCollections: CollectionProp[];
+
+        if (!linksResult.length) {
+          const searchEngines = await fetchSearchEngines();
+          if (Array.isArray(searchEngines) && searchEngines.length) {
+            linksResult = searchEngines;
+            isSearchEngines = true;
+          }
+        }
 
         if (preferences.searchCollections) {
           filteredCollections = collectionsResult
@@ -64,18 +76,22 @@ export default function SearchResult() {
         }
 
         setState({
-          links: linksReuslt,
+          links: linksResult,
           collections: filteredCollections,
           isLoading: false,
+          isSearchEngines,
         });
       } else {
         setState({
           links: [],
           collections: [],
           isLoading: false,
+          isSearchEngines: false,
         });
       }
-    });
+    };
+
+    searchLinks();
   }, [searchText]);
 
   let navigationTitle: string;
@@ -102,7 +118,7 @@ export default function SearchResult() {
         return <CollectionItem item={item} key={item.id} />;
       })}
       {state.links.map((item) => {
-        return <LinkItem item={item} key={item.id} />;
+        return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;
       })}
     </List>
   );

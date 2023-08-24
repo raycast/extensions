@@ -4,6 +4,8 @@ This is a extension for raycast to manage tmux sessions.
 
 ## Features
 - Switch between sessions 🔄
+- Switch between windows 🔄
+- Attach to sessions/windows automatically with setup terminal 🖥
 - Attach to sessions automatically with setup terminal 🖥
 - Create new sessions 🆕
 - Delete sessions 🗑
@@ -25,3 +27,4 @@ This is a extension for raycast to manage tmux sessions.
 - [ ] Label sessions 🏷
 - [ ] Prioritize sessions 📈
 - [ ] Allow Creating Session with predefined windows 🖼
+- [ ] Create/Delete/Rename Windows
