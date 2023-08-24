@@ -142,7 +142,6 @@ export default function Command() {
             title={coursesHashmap2[course] || course}
             icon={getIconBasedOnNumber(coursesIconHashmap2[course]) || Icon.Text}
             accessories={[
-
               {
                 tag: {
                   value: getLetterGrade(gradesArr[coursesText.indexOf(course)]),
@@ -151,7 +150,6 @@ export default function Command() {
               },
 
               { text: `${gradesArr[coursesText.indexOf(course)] + "%"}` },
-
             ]}
             actions={
               <ActionPanel>
@@ -164,7 +162,6 @@ export default function Command() {
                   title="Copy Grade"
                   content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[coursesText.indexOf(course)]}%`}
                 />
-
               </ActionPanel>
             }
           />
