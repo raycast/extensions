@@ -4,6 +4,7 @@ export type File = {
   name: string;
   thumbnail_url: string;
   branches: Branch[];
+  favourite?: boolean;
 };
 
 export type Branch = {

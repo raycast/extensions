@@ -5,6 +5,7 @@ import DevelopmentActionSection from "./DevelopmentActionSection";
 import { OpenProjectFileAction } from "./OpenProjectFileAction";
 import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 import { OpenBranchSubmenuAction } from "./OpenBranchSubmenuAction";
+import { FavouriteFileAction } from "./FavouriteFileAction";
 
 export default function FileGridItem(props: {
   file: File;
@@ -21,13 +22,17 @@ export default function FileGridItem(props: {
     <Grid.Item
       id={fileIdentifier}
       title={file.name}
-      content={file.thumbnail_url ?? "Missing thumbnail"}
+      content={{ tooltip: file.name, value: file.thumbnail_url ?? "Missing thumbnail" }}
       accessory={file.branches && accessory}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <OpenProjectFileAction file={props.file} desktopApp={desktopApp} onVisit={onVisit} />
             <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
+            <FavouriteFileAction
+              file={props.file}
+              isStarred={file.favourite == undefined || file.favourite == false ? false : true}
+            />
           </ActionPanel.Section>
 
           <ActionPanel.Section>
