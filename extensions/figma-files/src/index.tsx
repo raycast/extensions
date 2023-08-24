@@ -1,7 +1,7 @@
 import { Application, getApplications, Grid } from "@raycast/api";
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
-import { useVisitedFiles } from "./hooks/useVisitedFiles";
+import { useVisitedFavouriteFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
@@ -19,7 +19,7 @@ export default function Command() {
     }
   );
 
-  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
+  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFavouriteFiles();
   const isLoadingBlock = isLoading || isLoadingVisitedFiles;
   const [filteredFiles, setFilteredFiles] = useState(data);
   const [isFiltered, setIsFiltered] = useState(false);
