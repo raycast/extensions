@@ -1,4 +1,4 @@
-import { Project, Workspace, Client, TimeEntry, Tag, Me } from "../toggl/types";
+import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "../toggl/types";
 
 export type Refreshable<T> = {
   lastRefresh: string | null;
@@ -8,12 +8,13 @@ export type Refreshable<T> = {
 
 export type TogglStorage = {
   me: Refreshable<Me | null>;
-  projects: Refreshable<Project[]>;
   workspaces: Refreshable<Workspace[]>;
+  projects: Refreshable<Project[]>;
   clients: Refreshable<Client[]>;
   tags: Refreshable<Tag[]>;
-  runningTimeEntry: Refreshable<TimeEntry | null>;
+  tasks: Refreshable<Task[]>;
   timeEntries: Refreshable<TimeEntry[]>;
+  runningTimeEntry: Refreshable<TimeEntry | null>;
 };
 
 export type Storable<T> = {

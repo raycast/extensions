@@ -191,6 +191,7 @@
 /extensions/copy-path                                @koinzhang
 /extensions/copy-skeet-link                          @justin
 /extensions/cosmic-bookmarks                         @kemiljk
+/extensions/counter                                  @EvanZhouDev @pernielsentikaer
 /extensions/country-lookup                           @pernielsentikaer
 /extensions/cpf-cnpj-generator                       @gstvds
 /extensions/craftdocs                                @kudrykv @mafredri @0x77dev
@@ -378,8 +379,8 @@
 /extensions/gitignore                                @daniel-stoneuk
 /extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss @metakirby5 @macbookandrew @shaoye @charl3j @emlez
 /extensions/gitlab-docs                              @saschaeggi
-/extensions/gitmoji                                  @ricoberger
-/extensions/gitpod                                   @henit-chobisa @Palanikannan1437
+/extensions/gitmoji                                  @ricoberger @DannySeidel
+/extensions/gitpod                                   @henit-chobisa @Palanikannan1437 @henit-chobisa @pernielsentikaer @henit-chobisa
 /extensions/global-media-key                         @douo
 /extensions/glyph-search                             @gbougakov
 /extensions/gmail                                    @tonka3000
@@ -596,7 +597,8 @@
 /extensions/memorable-generate-password              @gandli @pernielsentikaer
 /extensions/memos                                    @JakeLaoyu
 /extensions/mempool                                  @dillionverma
-/extensions/menubar-weather                          @koinzhang @fuksman
+/extensions/menubar-weather                          @koinzhang @koinzhang @fuksman
+/extensions/metronome                                @EvanZhouDev
 /extensions/microsoft-azure                          @crisboarna
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko @crisboarna
 /extensions/microsoft-teams                          @svenwiegand
@@ -613,6 +615,7 @@
 /extensions/moji                                     @Kasper4649
 /extensions/monday                                   @freak4pc
 /extensions/moneylover                               @lacherogwu
+/extensions/monobank                                 @danulqua
 /extensions/monorepo-manager                         @tung-dang
 /extensions/monse                                    @victor-falcon
 /extensions/monzo                                    @danpalmer
@@ -669,6 +672,7 @@
 /extensions/obs-control                              @Yukaii
 /extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai @KevinBatdorf
 /extensions/obsidian-bookmarks                       @Dru89
+/extensions/obsidian-smart-capture                   @trillhause
 /extensions/odin                                     @aamoussa97
 /extensions/office-quotes                            @braydoncoyer @sandypockets
 /extensions/office2pdf                               @ARui-tw
@@ -806,6 +810,7 @@
 /extensions/raycast-icons                            @PitNikola @peduarte
 /extensions/raycast-link-lock                        @EvanZhouDev @pernielsentikaer
 /extensions/raycast-ollama                           @MassimilianoPasquini97
+/extensions/raycast-svg64                            @EvanZhouDev
 /extensions/raycast-translate-ge                     @giokaxo
 /extensions/raycast-wallpaper                        @koinzhang
 /extensions/raycast-wca                              @EvanZhouDev @EvanZhouDev
@@ -859,8 +864,10 @@
 /extensions/safari                                   @loris @thomaspaulmann @SKaplanOfficial
 /extensions/salesforce-search                        @svenwiegand
 /extensions/sanity                                   @marcusforsberg
+/extensions/sat-scorer                               @EvanZhouDev
 /extensions/savvycal                                 @keturiosakys @pernielsentikaer @derrickreimer @vimtor
 /extensions/scaleway                                 @philibea @flozdra
+/extensions/schoology                                @EvanZhouDev
 /extensions/scrapbox-search                          @zett-8
 /extensions/scrcpy                                   @zcfan @bxb100
 /extensions/screen-saver                             @koinzhang
@@ -884,7 +891,7 @@
 /extensions/semantic-scholar                         @blainerothrock
 /extensions/send-to-flomo                            @ahonn @fankaidev @pernielsentikaer @thishym
 /extensions/sentry                                   @thomaspaulmann @mattisssa @NoorBayari
-/extensions/sequel-ace                               @nagauta
+/extensions/sequel-ace                               @nagauta @macbookandrew
 /extensions/serverless-framework-docs                @yemilgr
 /extensions/session                                  @jamesjlyons @pernielsentikaer
 /extensions/setapp                                   @lardissone
@@ -944,6 +951,7 @@
 /extensions/stock-tracker                            @hmarr
 /extensions/stockholm-public-transport               @albingroen
 /extensions/stoicquotes                              @rrajath
+/extensions/storybook-launcher                       @winkerVSbecks
 /extensions/storybook-sandboxes                      @JReinhold
 /extensions/storybook-search                         @nakaakist
 /extensions/storytime                                @andreaselia @pernielsentikaer
@@ -980,6 +988,7 @@
 /extensions/tennis-standings                         @faisal3389
 /extensions/terminal                                 @ron-myers
 /extensions/terminalfinder                           @yedongze
+/extensions/tesla                                    @WilliamWelsh
 /extensions/text-decorator                           @koinzhang
 /extensions/text-shortcuts                           @koinzhang
 /extensions/textlint-rule-aws-service-name           @bun913
@@ -999,6 +1008,7 @@
 /extensions/tints-and-shades                         @anusandhan
 /extensions/tinyfaces-nft                            @peduarte
 /extensions/tinypng                                  @kawamataryo
+/extensions/tip-calculator                           @EvanZhouDev @pernielsentikaer
 /extensions/tldr                                     @pomdtr
 /extensions/tmdb                                     @Aayush9029 @andreaselia
 /extensions/tmux-sessioner                           @louishuyng
@@ -1007,6 +1017,7 @@
 /extensions/toggl-track                              @franzwilhelm @bkeys818 @rogatty @michaelfaisst
 /extensions/toggle-desktop-visibility                @Haojen
 /extensions/toggle-menu-bar                          @iamyeizi
+/extensions/toggle-scroll-bars-visibility            @danulqua
 /extensions/toolbox                                  @kkange @Saafo @pernielsentikaer
 /extensions/toothpick                                @VladCuciureanu @briankosw
 /extensions/tower                                    @tdwesten
@@ -1049,6 +1060,7 @@
 /extensions/uplabs                                   @gebeto
 /extensions/uptime                                   @yarnaid
 /extensions/urban-dictionary                         @Sheraff @zhenpewu @pernielsentikaer
+/extensions/url-shortener                            @EvanZhouDev
 /extensions/url-tools                                @joshauh46
 /extensions/utm-virtual-machines                     @alaidriel
 /extensions/uuid-generator                           @jmaeso @GastroGeek @pernielsentikaer @LunaticMuch
