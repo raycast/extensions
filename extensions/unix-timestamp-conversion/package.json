@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unix-timestamp-conversion",
+  "title": "Unix Timestamp Conversion",
+  "description": "unix timestamp and date conversion",
+  "icon": "extension_icon.png",
+  "author": "loerise",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "date",
+    "time",
+    "unix",
+    "seconds",
+    "milliseconds",
+    "iso",
+    "timestamp",
+    "convert"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Unix Timestamp Conversion",
+      "description": "Unix timestamp and date conversion",
+      "mode": "view",
+      "keywords": [
+        "date",
+        "time",
+        "unix",
+        "seconds",
+        "milliseconds",
+        "iso",
+        "timestamp",
+        "convert"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@loerise/eslint-config": "^1.0.15",
+    "@raycast/api": "^1.53.3",
+    "dayjs": "^1.11.9",
+    "ramda": "^0.29.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "20.3.1",
+    "@types/ramda": "^0.29.3",
+    "@types/react": "18.2.12",
+    "eslint": "^8.42.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.1.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

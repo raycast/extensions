@@ -1,0 +1,8 @@
+{
+  "root": true,
+  "extends": ["@raycast", "@loerise/eslint-config"],
+  "rules": {
+    "import/no-unresolved": 0,
+    "no-empty": 0
+  }
+}
