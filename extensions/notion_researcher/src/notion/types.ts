@@ -21,7 +21,7 @@ export interface Page {
 }
 
 export interface ParsedPage {
-    id: string;
-    title: string;
-    icon: string;
-  }
+  id: string;
+  title: string;
+  icon: string;
+}
