@@ -22,6 +22,7 @@ import {
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
   getCurrentUVIndex,
+  getCurrentVisibility,
   getCurrentWindConditions,
   Weather,
   WeatherConditions,
@@ -134,6 +135,16 @@ function WindMenubarItem(props: { curcon: WeatherConditions | undefined }) {
   return <MenuBarExtra.Item icon={"💨"} title="Wind" subtitle={wind} onAction={launchWeatherCommand} />;
 }
 
+function VisibilityMenubarItem(props: { curcon: WeatherConditions | undefined }) {
+  const vis = getCurrentVisibility(props.curcon);
+  if (!vis) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Item icon={"💨"} title="Visibility" subtitle={vis.distanceAndUnit} onAction={launchWeatherCommand} />
+  );
+}
+
 export default function MenuCommand(): JSX.Element {
   const { data, error, isLoading } = useWeather(getDefaultQuery());
   const { title, curcon, weatherDesc } = getMetaData(data);
@@ -170,6 +181,7 @@ export default function MenuCommand(): JSX.Element {
         <UVIndexMenuItem curcon={curcon} />
         <WindMenubarItem curcon={curcon} />
         <HumidityMenuItem curcon={curcon} />
+        <VisibilityMenubarItem curcon={curcon} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Forecast">
         {data?.weather?.map((d) => (

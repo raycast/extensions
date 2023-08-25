@@ -11,6 +11,7 @@ import {
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
   getCurrentUVIndex,
+  getCurrentVisibility,
   getCurrentWindConditions,
   wttr,
 } from "../wttr";
@@ -171,6 +172,14 @@ function WindDirectionItem(props: { curcon: WeatherConditions | undefined }) {
   );
 }
 
+function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
+  const vis = getCurrentVisibility(props.curcon);
+  if (!vis) {
+    return null;
+  }
+  return <List.Item title="Visibility" icon={WeatherIcons.Wind} accessories={[{ text: vis.distanceAndUnit }]} />;
+}
+
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
@@ -203,6 +212,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
         <HumidityItem curcon={curcon} />
         <WindSpeedItem curcon={curcon} />
         <WindDirectionItem curcon={curcon} />
+        <VisibilityItem curcon={curcon} />
       </List.Section>
     </React.Fragment>
   );

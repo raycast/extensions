@@ -246,3 +246,16 @@ export function getCurrentWindConditions(
   }
   return { speed, unit, dirDeg, dirIcon, dirText };
 }
+
+export function getCurrentVisibility(
+  curcon: WeatherConditions | undefined,
+): { unit: string; distance: string; distanceAndUnit: string } | undefined {
+  if (!curcon) {
+    return;
+  }
+  const us = getUnitSystem();
+  const distance = us === UnitSystem.Imperial ? curcon.visibilityMiles : curcon.visibility;
+  const unit = us === UnitSystem.Imperial ? "Miles" : "Km";
+  const distanceAndUnit = `${distance} ${unit}`;
+  return { unit, distance, distanceAndUnit };
+}
