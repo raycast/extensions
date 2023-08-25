@@ -10,7 +10,6 @@ import {
 } from "@raycast/api";
 import {
   getCurrentTemperature,
-  getCurrentWind,
   getMetaData,
   useWeather,
   getDefaultQuery,
@@ -18,11 +17,12 @@ import {
   getWeekday,
   getDayTemperature,
 } from "./components/weather";
-import { getWeatherCodeIcon, getWindDirectionIcon, WeatherIcons } from "./icons";
+import { getWeatherCodeIcon, WeatherIcons } from "./icons";
 import {
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
   getCurrentUVIndex,
+  getCurrentWindConditions,
   Weather,
   WeatherConditions,
 } from "./wttr";
@@ -125,13 +125,22 @@ function WeatherMenuBarExtra(props: {
   );
 }
 
+function WindMenubarItem(props: { curcon: WeatherConditions | undefined }) {
+  const windCon = getCurrentWindConditions(props.curcon);
+  if (!windCon) {
+    return null;
+  }
+  const wind = `${windCon.speed} ${windCon.unit} ${windCon.dirIcon} (${windCon.dirText})`;
+  return <MenuBarExtra.Item icon={"💨"} title="Wind" subtitle={wind} onAction={launchWeatherCommand} />;
+}
+
 export default function MenuCommand(): JSX.Element {
   const { data, error, isLoading } = useWeather(getDefaultQuery());
   const { title, curcon, weatherDesc } = getMetaData(data);
-  const { showMenuIcon, showMenuText } = getAppearancePreferences();
+  const { showMenuText } = getAppearancePreferences();
 
   const temp = getCurrentTemperature(curcon);
-  const wind = curcon ? `${getCurrentWind(curcon)} ${getWindDirectionIcon(curcon.winddirDegree)} ` : "?";
+
   return (
     <WeatherMenuBarExtra
       data={data}
@@ -159,14 +168,8 @@ export default function MenuCommand(): JSX.Element {
         />
         <FeelsLikeMenuItem curcon={curcon} />
         <UVIndexMenuItem curcon={curcon} />
+        <WindMenubarItem curcon={curcon} />
         <HumidityMenuItem curcon={curcon} />
-        <MenuBarExtra.Item icon={"💨"} title="Wind" subtitle={wind} onAction={launchWeatherCommand} />
-        <MenuBarExtra.Item
-          icon={"💧"}
-          title="Humidity"
-          subtitle={curcon ? `${curcon.humidity}%` : "?"}
-          onAction={launchWeatherCommand}
-        />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Forecast">
         {data?.weather?.map((d) => (

@@ -1,8 +1,8 @@
 import { ActionPanel, getPreferenceValues, List, Action, Icon } from "@raycast/api";
 import moment from "moment";
 import React, { ReactElement, useEffect, useState } from "react";
-import { WeatherIcons, getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
-import { getTemperatureUnit, getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
+import { WeatherIcons, getWeatherCodeIcon } from "../icons";
+import { getTemperatureUnit, getWttrTemperaturePostfix } from "../unit";
 import { getErrorMessage } from "../utils";
 import {
   Weather,
@@ -11,6 +11,7 @@ import {
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
   getCurrentUVIndex,
+  getCurrentWindConditions,
   wttr,
 } from "../wttr";
 import { DayList } from "./day";
@@ -106,23 +107,6 @@ export function getMetaData(data: Weather | undefined): {
   return { title, curcon, weatherDesc };
 }
 
-export function getCurrentWind(curcon: WeatherConditions | undefined): string | undefined {
-  if (!curcon) {
-    return;
-  }
-
-  const getWind = (): string => {
-    const d = curcon as Record<string, any>;
-    const key = `windspeed${getWttrWindPostfix()}`;
-    let val = "?";
-    if (d[key]) {
-      val = d[key] || "?";
-    }
-    return `${val} ${getWindUnit()}`;
-  };
-  return getWind();
-}
-
 export function getCurrentTemperature(curcon: WeatherConditions | undefined): string | undefined {
   if (!curcon) {
     return;
@@ -163,12 +147,37 @@ function HumidityItem(props: { curcon: WeatherConditions | undefined }) {
   return <List.Item title="Humidity" icon={WeatherIcons.Humidity} accessories={[{ text: hum.valueAndUnit }]} />;
 }
 
+function WindSpeedItem(props: { curcon: WeatherConditions | undefined }) {
+  const wind = getCurrentWindConditions(props.curcon);
+  if (!wind) {
+    return null;
+  }
+  return (
+    <List.Item title="Wind Speed" icon={WeatherIcons.Wind} accessories={[{ text: `${wind.speed} ${wind.unit}` }]} />
+  );
+}
+
+function WindDirectionItem(props: { curcon: WeatherConditions | undefined }) {
+  const wind = getCurrentWindConditions(props.curcon);
+  if (!wind) {
+    return null;
+  }
+  return (
+    <List.Item
+      title="Wind Direction"
+      icon={WeatherIcons.Wind}
+      accessories={[{ text: wind.dirIcon }, { text: wind.dirText }]}
+    />
+  );
+}
+
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
     return null;
   }
   const { title, curcon, weatherDesc } = getMetaData(data);
+  const windCon = getCurrentWindConditions(curcon);
 
   return (
     <React.Fragment>
@@ -185,13 +194,15 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
             },
             {
               icon: "💨",
-              text: curcon ? `${getCurrentWind(curcon) || "?"} ${getWindDirectionIcon(curcon.winddirDegree)}` : "?",
+              text: windCon ? `${windCon.speed} ${windCon.unit} ${windCon.dirIcon}` : "?",
             },
           ]}
         />
         <FeelsLikeItem curcon={curcon} />
         <UVIndexItem curcon={curcon} />
         <HumidityItem curcon={curcon} />
+        <WindSpeedItem curcon={curcon} />
+        <WindDirectionItem curcon={curcon} />
       </List.Section>
     </React.Fragment>
   );

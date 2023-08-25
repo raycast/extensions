@@ -1,5 +1,6 @@
 import fetch, { Response } from "node-fetch";
-import { UnitSystem, getTemperatureUnit, getUnitSystem, getWttrTemperaturePostfix } from "./unit";
+import { UnitSystem, getTemperatureUnit, getUnitSystem, getWindUnit, getWttrWindPostfix } from "./unit";
+import { getWindDirectionIcon } from "./icons";
 
 export interface Hourly {
   DewPointC: string;
@@ -203,7 +204,7 @@ export function getCurrentFeelLikeTemperature(
   return { value, unit, valueAndUnit };
 }
 
-export function getCurrentUVIndex(curcon: WeatherConditions | undefined) {
+export function getCurrentUVIndex(curcon: WeatherConditions | undefined): string | undefined {
   if (!curcon) {
     return;
   }
@@ -221,4 +222,27 @@ export function getCurrentHumidity(
   }
   const unit = "%";
   return { unit, value: curcon.humidity, valueAndUnit: `${curcon.humidity} %` };
+}
+
+export function getCurrentWindConditions(
+  curcon: WeatherConditions | undefined,
+): { speed: string; unit: string; dirDeg: string; dirIcon: string; dirText: string } | undefined {
+  if (!curcon) {
+    return;
+  }
+  const speed: string | undefined = (curcon as any)[`windspeed${getWttrWindPostfix()}`];
+  if (!speed) {
+    return;
+  }
+  const unit = getWindUnit();
+  const dirDeg = curcon.winddirDegree;
+  if (!dirDeg) {
+    return;
+  }
+  const dirIcon = getWindDirectionIcon(dirDeg) || "?";
+  const dirText = curcon.winddir16Point;
+  if (!dirText) {
+    return;
+  }
+  return { speed, unit, dirDeg, dirIcon, dirText };
 }
