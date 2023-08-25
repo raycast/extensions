@@ -209,3 +209,16 @@ export function getCurrentUVIndex(curcon: WeatherConditions | undefined) {
   }
   return curcon.uvIndex;
 }
+
+export function getCurrentHumidity(
+  curcon: WeatherConditions | undefined,
+): { value: string; unit: string; valueAndUnit: string } | undefined {
+  if (!curcon) {
+    return;
+  }
+  if (!curcon.humidity) {
+    return;
+  }
+  const unit = "%";
+  return { unit, value: curcon.humidity, valueAndUnit: `${curcon.humidity} %` };
+}

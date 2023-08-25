@@ -2,8 +2,9 @@
 
 ## [Feels Like] - 2023-08-25
 
-- Add `Temperature Feels Like` to command and menu
-- Add `UV Index` to command and menu
+- Add `Temperature Feels Like`
+- Add `UV Index`
+- Add `Humidity`
 
 ## [Add MenuBar] - 2022-11-26
 

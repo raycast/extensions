@@ -19,7 +19,13 @@ import {
   getDayTemperature,
 } from "./components/weather";
 import { getWeatherCodeIcon, getWindDirectionIcon, WeatherIcons } from "./icons";
-import { getCurrentFeelLikeTemperature, getCurrentUVIndex, Weather, WeatherConditions } from "./wttr";
+import {
+  getCurrentFeelLikeTemperature,
+  getCurrentHumidity,
+  getCurrentUVIndex,
+  Weather,
+  WeatherConditions,
+} from "./wttr";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
@@ -73,6 +79,23 @@ function UVIndexMenuItem(props: { curcon: WeatherConditions | undefined }) {
       title="UV Index"
       subtitle={uvIndex}
       icon={WeatherIcons.UVIndex}
+      onAction={() => {
+        /**/
+      }}
+    />
+  );
+}
+
+function HumidityMenuItem(props: { curcon: WeatherConditions | undefined }) {
+  const hum = getCurrentHumidity(props.curcon);
+  if (!hum) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Item
+      title="Humidity"
+      subtitle={hum.valueAndUnit}
+      icon={WeatherIcons.Humidity}
       onAction={() => {
         /**/
       }}
@@ -136,6 +159,7 @@ export default function MenuCommand(): JSX.Element {
         />
         <FeelsLikeMenuItem curcon={curcon} />
         <UVIndexMenuItem curcon={curcon} />
+        <HumidityMenuItem curcon={curcon} />
         <MenuBarExtra.Item icon={"💨"} title="Wind" subtitle={wind} onAction={launchWeatherCommand} />
         <MenuBarExtra.Item
           icon={"💧"}

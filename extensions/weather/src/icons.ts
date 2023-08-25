@@ -183,4 +183,5 @@ export enum WeatherIcons {
   Temperature = Icon.Temperature,
   FeelsLike = Icon.Temperature,
   UVIndex = Icon.Sun,
+  Humidity = Icon.Raindrop,
 }

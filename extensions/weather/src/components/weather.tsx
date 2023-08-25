@@ -9,6 +9,7 @@ import {
   WeatherConditions,
   WeatherData,
   getCurrentFeelLikeTemperature,
+  getCurrentHumidity,
   getCurrentUVIndex,
   wttr,
 } from "../wttr";
@@ -154,6 +155,14 @@ function UVIndexItem(props: { curcon: WeatherConditions | undefined }) {
   return <List.Item title="UV Index" icon={WeatherIcons.UVIndex} accessories={[{ text: uvIndex }]} />;
 }
 
+function HumidityItem(props: { curcon: WeatherConditions | undefined }) {
+  const hum = getCurrentHumidity(props.curcon);
+  if (!hum) {
+    return null;
+  }
+  return <List.Item title="Humidity" icon={WeatherIcons.Humidity} accessories={[{ text: hum.valueAndUnit }]} />;
+}
+
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
@@ -182,6 +191,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
         />
         <FeelsLikeItem curcon={curcon} />
         <UVIndexItem curcon={curcon} />
+        <HumidityItem curcon={curcon} />
       </List.Section>
     </React.Fragment>
   );
