@@ -18,8 +18,8 @@ import {
   getWeekday,
   getDayTemperature,
 } from "./components/weather";
-import { getWeatherCodeIcon, getWindDirectionIcon } from "./icons";
-import { Weather, WeatherConditions } from "./wttr";
+import { getWeatherCodeIcon, getWindDirectionIcon, WeatherIcons } from "./icons";
+import { getCurrentFeelLikeTemperature, Weather, WeatherConditions } from "./wttr";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
@@ -44,6 +44,23 @@ function getWeatherMenuIcon(curcon: WeatherConditions | undefined): Image.ImageL
     return undefined;
   }
   return curcon ? getWeatherCodeIcon(curcon.weatherCode) : "weather.png";
+}
+
+function FeelsLikeMenuItem(props: { curcon: WeatherConditions | undefined }) {
+  const feelsLike = getCurrentFeelLikeTemperature(props.curcon);
+  if (!feelsLike) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Item
+      title="Feels Like"
+      subtitle={feelsLike.valueAndUnit}
+      icon={WeatherIcons.FeelsLike}
+      onAction={() => {
+        /**/
+      }}
+    />
+  );
 }
 
 function WeatherMenuBarExtra(props: {
@@ -100,6 +117,7 @@ export default function MenuCommand(): JSX.Element {
           subtitle={temp || "?"}
           onAction={launchWeatherCommand}
         />
+        <FeelsLikeMenuItem curcon={curcon} />
         <MenuBarExtra.Item icon={"💨"} title="Wind" subtitle={wind} onAction={launchWeatherCommand} />
         <MenuBarExtra.Item
           icon={"💧"}

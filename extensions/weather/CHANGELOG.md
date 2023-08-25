@@ -1,5 +1,9 @@
 # Weather Changelog
 
+## [Feels Like] - 2023-08-25
+
+- Add `Temperature Feels Like` to command and menu
+
 ## [Add MenuBar] - 2022-11-26
 
 - Add MenuBar command

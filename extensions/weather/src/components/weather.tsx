@@ -1,10 +1,10 @@
 import { ActionPanel, getPreferenceValues, List, Action, Icon } from "@raycast/api";
 import moment from "moment";
 import React, { ReactElement, useEffect, useState } from "react";
-import { getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
+import { WeatherIcons, getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
 import { getTemperatureUnit, getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { getErrorMessage } from "../utils";
-import { Weather, WeatherConditions, WeatherData, wttr } from "../wttr";
+import { Weather, WeatherConditions, WeatherData, getCurrentFeelLikeTemperature, wttr } from "../wttr";
 import { DayList } from "./day";
 
 function getHighestOccurrence(arr: string[]): string | undefined {
@@ -129,6 +129,16 @@ export function getCurrentTemperature(curcon: WeatherConditions | undefined): st
   return `${val} ${getTemperatureUnit()}`;
 }
 
+function FeelsLikeItem(props: { curcon: WeatherConditions | undefined }) {
+  const feelsLike = getCurrentFeelLikeTemperature(props.curcon);
+  if (!feelsLike) {
+    return null;
+  }
+  return (
+    <List.Item title="Feels Like" icon={WeatherIcons.FeelsLike} accessories={[{ text: feelsLike.valueAndUnit }]} />
+  );
+}
+
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
@@ -155,6 +165,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
             },
           ]}
         />
+        <FeelsLikeItem curcon={curcon} />
       </List.Section>
     </React.Fragment>
   );
@@ -168,9 +179,7 @@ function WeatherDailyForecaseFragment(props: { data: Weather | undefined }): Rea
   const { title } = getMetaData(data);
   return (
     <List.Section title="Daily Forecast">
-      {data?.weather?.map((d) => (
-        <DayListItem key={d.date} day={d} title={title} />
-      ))}
+      {data?.weather?.map((d) => <DayListItem key={d.date} day={d} title={title} />)}
     </List.Section>
   );
 }

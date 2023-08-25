@@ -1,4 +1,5 @@
 import fetch, { Response } from "node-fetch";
+import { UnitSystem, getTemperatureUnit, getUnitSystem, getWttrTemperaturePostfix } from "./unit";
 
 export interface Hourly {
   DewPointC: string;
@@ -189,3 +190,15 @@ export class Wttr {
 export const supportedLanguages: string[] = ["en", "de", "fr"];
 
 export const wttr = new Wttr();
+
+export function getCurrentFeelLikeTemperature(
+  curcon: WeatherConditions | undefined,
+): { value: string; unit: string; valueAndUnit: string } | undefined {
+  if (!curcon) {
+    return;
+  }
+  const value = getUnitSystem() === UnitSystem.Imperial ? curcon.FeelsLikeF : curcon.FeelsLikeC;
+  const unit = getTemperatureUnit();
+  const valueAndUnit = `${value} ${unit}`;
+  return { value, unit, valueAndUnit };
+}

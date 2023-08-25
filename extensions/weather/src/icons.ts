@@ -1,5 +1,7 @@
 // codes from https://raw.githubusercontent.com/chubin/wttr.in/master/lib/constants.py
 
+import { Icon } from "@raycast/api";
+
 export function getWeatherCodeIcon(weatherCode: string | undefined): string {
   if (!weatherCode) {
     return "";
@@ -176,3 +178,8 @@ export const LOCALE = {
   zh: "zh_TW",
   zu: "zu_ZA",
 };
+
+export enum WeatherIcons {
+  Temperature = Icon.Temperature,
+  FeelsLike = Icon.Temperature,
+}
