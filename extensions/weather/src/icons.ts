@@ -182,4 +182,5 @@ export const LOCALE = {
 export enum WeatherIcons {
   Temperature = Icon.Temperature,
   FeelsLike = Icon.Temperature,
+  UVIndex = Icon.Sun,
 }

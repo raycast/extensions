@@ -202,3 +202,10 @@ export function getCurrentFeelLikeTemperature(
   const valueAndUnit = `${value} ${unit}`;
   return { value, unit, valueAndUnit };
 }
+
+export function getCurrentUVIndex(curcon: WeatherConditions | undefined) {
+  if (!curcon) {
+    return;
+  }
+  return curcon.uvIndex;
+}

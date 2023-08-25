@@ -4,7 +4,14 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { WeatherIcons, getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
 import { getTemperatureUnit, getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { getErrorMessage } from "../utils";
-import { Weather, WeatherConditions, WeatherData, getCurrentFeelLikeTemperature, wttr } from "../wttr";
+import {
+  Weather,
+  WeatherConditions,
+  WeatherData,
+  getCurrentFeelLikeTemperature,
+  getCurrentUVIndex,
+  wttr,
+} from "../wttr";
 import { DayList } from "./day";
 
 function getHighestOccurrence(arr: string[]): string | undefined {
@@ -139,6 +146,14 @@ function FeelsLikeItem(props: { curcon: WeatherConditions | undefined }) {
   );
 }
 
+function UVIndexItem(props: { curcon: WeatherConditions | undefined }) {
+  const uvIndex = getCurrentUVIndex(props.curcon);
+  if (!uvIndex) {
+    return null;
+  }
+  return <List.Item title="UV Index" icon={WeatherIcons.UVIndex} accessories={[{ text: uvIndex }]} />;
+}
+
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
@@ -166,6 +181,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
           ]}
         />
         <FeelsLikeItem curcon={curcon} />
+        <UVIndexItem curcon={curcon} />
       </List.Section>
     </React.Fragment>
   );
