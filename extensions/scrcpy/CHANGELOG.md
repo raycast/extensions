@@ -2,7 +2,7 @@
 
 ## [Enhancement] - 2023-08-25
 
-- select previous used device automatically
+- Select previous used device automatically
 
 ## [Minor change] - 2023-05-08
 
