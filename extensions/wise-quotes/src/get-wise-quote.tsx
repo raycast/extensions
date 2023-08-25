@@ -44,7 +44,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
 
   const sourceAmount = getSourceAmount();
   const targetCurrency = getTargetCurrency();
-  const { isLoading, data, error, revalidate, mutate } = useWiseQuoteQuery({
+  const { isLoading, data, error, mutate } = useWiseQuoteQuery({
     sourceAmount,
     targetCurrency,
   });
@@ -58,7 +58,33 @@ Please check:
 - If the currency "${targetCurrency}" is correct and supported by Wise
 - If the amount "${sourceAmount}" is correct
 `;
-    return <Detail isLoading={false} navigationTitle="Error" markdown={errorMarkdown} />;
+    return (
+      <Detail
+        isLoading={false}
+        navigationTitle={`Error: ${error.message}`}
+        markdown={errorMarkdown}
+        actions={
+          <ActionPanel title="Actions">
+            <Action
+              title="Set Default Source Amount"
+              icon={{
+                source: Icon.Coins,
+              }}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              onAction={openCommandPreferences}
+            />
+            <Action
+              title="Set Default Target Currency"
+              icon={{
+                source: Icon.Globe,
+              }}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onAction={openExtensionPreferences}
+            />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   const availablePaymentOptions = data?.paymentOptions.filter((option) => !option.disabled);

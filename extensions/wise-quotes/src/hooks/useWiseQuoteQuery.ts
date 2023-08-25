@@ -1,10 +1,20 @@
 import { useFetch } from "@raycast/utils";
 import { Response } from "../types";
-import { Toast, showToast } from "@raycast/api";
+import { Toast, openExtensionPreferences, showToast } from "@raycast/api";
 
 type Params = {
   sourceAmount: number;
   targetCurrency?: string;
+};
+
+export type Error = {
+  code: "CurrencyCode";
+  message: string;
+  path: string;
+};
+
+type ErrorResponse = {
+  errors: Error[];
 };
 
 const defaultParams = {
@@ -25,11 +35,34 @@ function useWiseQuoteQuery({ sourceAmount, targetCurrency = "MXN" }: Params) {
       "Content-Type": "application/json",
     },
     method: "POST",
-    onError() {
+    parseResponse: async (response) => {
+      if (!response.ok) {
+        const error = await response.text();
+        const parsedError = JSON.parse(error) as ErrorResponse;
+        const errorMessage = parsedError.errors?.[0];
+        return Promise.reject(errorMessage);
+      }
+      return await response.json();
+    },
+    onError(error) {
+      const apiError = error as unknown as Error;
+      if (apiError.code === "CurrencyCode") {
+        showToast({
+          style: Toast.Style.Failure,
+          title: apiError.message,
+          message: "Please check your currency code",
+          primaryAction: {
+            title: "Update target currency",
+            onAction: () => {
+              openExtensionPreferences();
+            },
+          },
+        });
+        return;
+      }
       showToast({
         style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: "Please check if the amount and currency are correct.",
+        title: error?.message || "Something went wrong",
       });
     },
   });

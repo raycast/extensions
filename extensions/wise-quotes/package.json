@@ -66,6 +66,7 @@
       "title": "Default target currency",
       "description": "The default target currency to convert to",
       "type": "textfield",
+      "placeholder": "A valid ISO-4217 currency code (like GBP, MXN or EUR)",
       "defaultValue": "MXN",
       "required": true
     }
