@@ -17,8 +17,8 @@ export default function Command() {
   const [devices, handleDeviceChange] = useDevices();
 
   function handleSubmit(values: Values) {
-    const serial = values["device"]
-    handleDeviceChange({ serial })
+    const serial = values["device"];
+    handleDeviceChange({ serial });
     exec(
       `${getScrcpyDir()}/scrcpy \
         ${values["turnScreenOff"] ? "--turn-screen-off" : ""} \
@@ -42,7 +42,7 @@ export default function Command() {
             message: err.message,
           });
         }
-      }
+      },
     );
   }
 
@@ -54,25 +54,16 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="device" title="Device Serial" >
+      <Form.Dropdown id="device" title="Device Serial">
         {devices.map((device) => {
           if (device.default) {
             return (
               <Form.Dropdown.Section key={device.serial} title="Previous Device">
-                <Form.Dropdown.Item
-                  value={device.serial}
-                  title={device.serial}
-                />
+                <Form.Dropdown.Item value={device.serial} title={device.serial} />
               </Form.Dropdown.Section>
-            )
+            );
           }
-          return (
-            <Form.Dropdown.Item
-              key={device.serial}
-              value={device.serial}
-              title={device.serial}
-            />
-          )
+          return <Form.Dropdown.Item key={device.serial} value={device.serial} title={device.serial} />;
         })}
       </Form.Dropdown>
 

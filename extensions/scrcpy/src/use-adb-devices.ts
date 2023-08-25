@@ -21,8 +21,8 @@ export default function useDevices() {
         .slice(1)
         .filter(Boolean)
         .map((device) => ({
-            serial: device.split("\t")[0]
-          }));
+          serial: device.split("\t")[0],
+        }));
       setDevices(devices);
     });
   }, []);
