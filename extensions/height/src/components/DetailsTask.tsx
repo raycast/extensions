@@ -1,19 +1,19 @@
 import { Color, Detail, environment, Icon } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { differenceInCalendarDays, format } from "date-fns";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTask from "../hooks/useTask";
+import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
 import { TaskObject } from "../types/task";
-import { ApiResponse } from "../types/utils";
+import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
 import { getListById, getTintColorFromHue, ListColors } from "../utils/list";
 import { getAssigneeById, getIconByStatusState, getPriorityIcon, getStatusById } from "../utils/task";
 import ActionsTask from "./ActionsTask";
 
 type Props = {
   taskId: string;
-  mutateTask: MutatePromise<ApiResponse<TaskObject[]> | undefined>;
+  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
 };
 
 const markdown = (task: TaskObject | undefined) => `
@@ -24,8 +24,15 @@ ${task?.description}
 
 export default function DetailsTask({ taskId, mutateTask }: Props) {
   const { theme } = environment;
-  const { fieldTemplatesStatuses, fieldTemplatesIsLoading } = useFieldTemplates();
-  const { task, taskIsLoading, taskRevalidate } = useTask(taskId);
+  const {
+    fieldTemplatesStatuses,
+    fieldTemplatesPrioritiesObj,
+    fieldTemplatesPriorities,
+    fieldTemplatesDueDate,
+    fieldTemplatesIsLoading,
+  } = useFieldTemplates();
+  const { tasks, tasksIsLoading } = useTasks();
+  const { task, taskIsLoading, taskRevalidate } = useTask({ taskId });
   const { lists, smartLists, listsIsLoading } = useLists();
   const { users, usersIsLoading } = useUsers();
 
@@ -40,10 +47,24 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
 
   return (
     <Detail
-      isLoading={taskIsLoading || fieldTemplatesIsLoading || listsIsLoading || usersIsLoading}
+      isLoading={taskIsLoading || tasksIsLoading || fieldTemplatesIsLoading || listsIsLoading || usersIsLoading}
       markdown={markdown(task)}
       navigationTitle={task?.name}
-      actions={<ActionsTask mutateTask={mutateTask} task={task} detailsTaskRevalidate={taskRevalidate} detailsPage />}
+      actions={
+        <ActionsTask
+          task={task}
+          mutateTask={mutateTask}
+          fieldTemplatesStatuses={fieldTemplatesStatuses}
+          fieldTemplatesPriorities={fieldTemplatesPriorities}
+          fieldTemplatesPrioritiesObj={fieldTemplatesPrioritiesObj}
+          fieldTemplatesDueDate={fieldTemplatesDueDate}
+          lists={lists}
+          tasks={tasks}
+          users={users}
+          detailsTaskRevalidate={taskRevalidate}
+          detailsPage
+        />
+      }
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
@@ -124,7 +145,7 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
                     text={list.name}
                     color={getTintColorFromHue(list?.appearance?.hue, ListColors)}
                     icon={{
-                      source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+                      source: list.appearance?.iconUrl ?? "list-icons/list.svg",
                       tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
                     }}
                   />
@@ -142,7 +163,7 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
               icon={{
                 source:
                   getListById(task?.parentTasks[0]?.listIds[0], lists, smartLists)?.appearance?.iconUrl ??
-                  "list-icons/list-light.svg",
+                  "list-icons/list.svg",
                 tintColor: getTintColorFromHue(task.lists?.[0]?.appearance?.hue, ListColors),
               }}
             />

@@ -1,18 +1,16 @@
-import { Task } from "@doist/todoist-api-typescript";
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { useState } from "react";
 
-import { todoist, handleError } from "../api";
+import { Task, updateTask, handleError } from "../api";
+import useCachedData from "../hooks/useCachedData";
 
-interface TaskEditProps {
+type TaskEditProps = {
   task: Task;
-  mutateTasks?: MutatePromise<Task[] | undefined>;
-  mutateTaskDetail?: MutatePromise<Task | undefined>;
-}
+};
 
-export default function TaskEdit({ task, mutateTasks, mutateTaskDetail }: TaskEditProps) {
+export default function TaskEdit({ task }: TaskEditProps) {
   const { pop } = useNavigation();
+  const [data, setData] = useCachedData();
 
   const [content, setContent] = useState(task.content);
   const [description, setDescription] = useState(task.description);
@@ -21,16 +19,8 @@ export default function TaskEdit({ task, mutateTasks, mutateTaskDetail }: TaskEd
     await showToast({ style: Toast.Style.Animated, title: "Updating task" });
 
     try {
-      await todoist.updateTask(task.id, { content, description });
+      await updateTask({ id: task.id, content, description }, { data, setData });
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
-
-      if (mutateTasks) {
-        mutateTasks();
-      }
-
-      if (mutateTaskDetail) {
-        mutateTaskDetail();
-      }
 
       pop();
     } catch (error) {

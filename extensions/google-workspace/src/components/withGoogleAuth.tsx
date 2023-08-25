@@ -1,8 +1,9 @@
-import { Detail, environment, MenuBarExtra } from "@raycast/api";
+import { environment, List, MenuBarExtra } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { authorize } from "../api/oauth";
+import { authorize, getEmail } from "../api/oauth";
 
 let token: string | null = null;
+let email: string | undefined;
 
 export function withGoogleAuth(component: JSX.Element) {
   const [x, forceRerender] = useState(0);
@@ -10,16 +11,19 @@ export function withGoogleAuth(component: JSX.Element) {
   // we use a `useMemo` instead of `useEffect` to avoid a render
   useMemo(() => {
     (async function () {
-      token = await authorize();
-
-      forceRerender(x + 1);
+      try {
+        token = await authorize();
+        email = await getEmail();
+        forceRerender(x + 1);
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : "Something went wrong while authorizing");
+      }
     })();
   }, []);
 
   if (!token) {
     if (environment.commandMode === "view") {
-      // Using the <List /> component makes the placeholder buggy
-      return <Detail isLoading />;
+      return <List isLoading />;
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
     } else {
@@ -37,4 +41,12 @@ export function getOAuthToken(): string {
   }
 
   return token;
+}
+
+export function getUserEmail(): string {
+  if (!email) {
+    throw new Error("getUserEmail must be used when authenticated");
+  }
+
+  return email;
 }

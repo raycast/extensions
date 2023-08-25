@@ -105,17 +105,16 @@ export const fetchActivities = async (
     .sort((a, b) => (a.created_at > b.created_at || a.updated_at > b.updated_at ? -1 : 1));
 };
 
-export const startActivity = async (
-  values: any,
-  projectID: number | undefined,
-  taskID: number
-): Promise<boolean | void> => {
+export const startActivity = async (values: any): Promise<boolean | void> => {
   const verb = values.hours === "" ? "start" : "logg";
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `${verb.charAt(0).toUpperCase() + verb.slice(1)}ing activity...`,
   });
-
+  axios.interceptors.request.use((request) => {
+    console.log("Starting Request", JSON.stringify(request, null, 2));
+    return request;
+  });
   const result = await axios
     .post(
       `/activities`,
@@ -123,8 +122,8 @@ export const startActivity = async (
         date: values.date,
         description: values.description,
         hours: values.hours,
-        project_id: projectID,
-        task_id: taskID,
+        project_id: values.projectID,
+        task_id: values.taskID,
       },
       {
         headers: {

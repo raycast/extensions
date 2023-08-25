@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
+import { useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
@@ -40,6 +52,7 @@ export default function Command() {
       onSubmit: async (data) => {
         data.id = location.id ?? uuidv4();
         data.git = Boolean(data.locType === "git");
+        const toast = await showToast(Toast.Style.Animated, "Saving Snippet Location", "Please wait...");
 
         if (data.git) {
           // form is not using FilePicker component here, so can trust the path is `string`
@@ -49,6 +62,7 @@ export default function Command() {
             console.error(e);
             const msg = typeof e === "string" ? e : "Unknown error with git";
             setValidationError("path", msg);
+            toast.hide();
             return;
           }
         } else {
@@ -59,6 +73,8 @@ export default function Command() {
         locations.findIndex((l) => l.id === data.id) === -1
           ? setLocations((locations) => [...locations, data])
           : setLocations((locations) => locations.map((l) => (l.id === data.id ? data : l)));
+
+        toast.hide();
 
         pop();
       },
@@ -80,16 +96,22 @@ export default function Command() {
           <Form.Dropdown.Item value="git" title="Git Repository" />
         </Form.Dropdown>
         {values.locType === "local" && (
-          <Form.FilePicker
-            id={itemProps.path.id}
-            value={itemProps.path.value ? [itemProps.path.value] : []}
-            onChange={(val) => itemProps.path.onChange && itemProps.path.onChange(val[0])}
-            error={itemProps.path.error}
-            allowMultipleSelection={false}
-            canChooseDirectories
-            canChooseFiles={false}
-            title="Folder"
-          />
+          <>
+            <Form.FilePicker
+              id={itemProps.path.id}
+              value={itemProps.path.value ? [itemProps.path.value] : []}
+              onChange={(val) => itemProps.path.onChange && itemProps.path.onChange(val[0])}
+              error={itemProps.path.error}
+              allowMultipleSelection={false}
+              canChooseDirectories
+              canChooseFiles={false}
+              title="Folder"
+            />
+            <Form.Description
+              title="WARNING"
+              text="The enitre contents of this folder will be scanned for snippets. Select a folder that will only contain snippets for better performance."
+            />
+          </>
         )}
         {values.locType === "git" && (
           <>

@@ -1,5 +1,10 @@
 import { CreateDatabaseForm } from "./components";
+import { View } from "./components";
 
-export default function Main(): JSX.Element {
-  return <CreateDatabaseForm />;
+export default function Command() {
+  return (
+    <View>
+      <CreateDatabaseForm />
+    </View>
+  );
 }

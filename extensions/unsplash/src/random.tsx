@@ -1,4 +1,3 @@
-// Functions
 import { useRandom } from "@/hooks/useRandom";
 import { environment, LaunchType, getPreferenceValues, LocalStorage } from "@raycast/api";
 

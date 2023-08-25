@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Bug fix - Quit-Applications crashing] - 2023-04-26
+
+- Fix the case where some of the apps (e.g. MasOS Stocks app) were causing the quit applications to crash
+
 ## [Add icons] - 2023-02-26
 
 - Add icons to each application you are about to quit

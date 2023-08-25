@@ -113,11 +113,17 @@ function Command() {
 
   const isLoading = isSetsLoading || isIconsLoading || icons.length === 0;
 
+  const [filter, setFilter] = useState('');
+
   return (
     <Grid
       columns={8}
       inset={Grid.Inset.Medium}
       isLoading={isLoading}
+      onSearchTextChange={(query) => {
+        setPage(0);
+        setFilter(query);
+      }}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Icon Set"
@@ -134,9 +140,13 @@ function Command() {
       }
     >
       <Grid.Section
-        title={`Page ${page + 1} of ${Math.ceil(icons.length / itemsPerPage)}`}
+        title={`Page ${page + 1} of ${Math.ceil(
+          icons.filter((icon) => icon.id.includes(filter)).length /
+            itemsPerPage,
+        )}`}
       >
         {icons
+          .filter((icon) => icon.id.includes(filter))
           .slice(itemsPerPage * page, itemsPerPage * (page + 1))
           .map((icon) => {
             const { id, body, width, height } = icon;

@@ -17,8 +17,9 @@ export interface Database {
 }
 
 // Currently supported properties
-export const supportedPropTypes = [
+export const supportedPropTypes: PagePropertyType["type"][] = [
   "title",
+  "status",
   "number",
   "rich_text",
   "url",
@@ -69,7 +70,9 @@ export interface Page {
   id: string;
   parent_page_id?: string;
   parent_database_id?: string;
+  created_by?: string;
   last_edited_time?: number;
+  last_edited_user?: string;
   title: string | null;
   icon_emoji: string | null;
   icon_file: string | null;

@@ -1,5 +1,9 @@
 # Pexels Changelog
 
+## [Add New Command] - 2023-03-31
+
+- Add Search Videos command
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0

@@ -57,6 +57,28 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
     }
   }
 
+  async function rerunWorkflowFailedJobs() {
+    await showToast({ style: Toast.Style.Animated, title: "Sending re-run workflow failed jobs request" });
+
+    try {
+      await octokit.rest.actions.reRunWorkflowFailedJobs({ run_id: workflowRun.id, owner, repo });
+
+      await mutateList();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Sent re-run workflow failed jobs request",
+        message: "Refresh in 5-10 seconds.",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed sending re-run workflow failed jobs request",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   async function cancelRun() {
     await showToast({ style: Toast.Style.Animated, title: "Sending cancel request" });
 
@@ -107,10 +129,19 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
       <ActionPanel.Section>
         {workflowRun.status === "completed" ? (
           <Action
-            title="Re-run Workflow"
+            title="Re-Run Workflow"
             icon={Icon.Clock}
             onAction={rerunWorkflow}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
+          />
+        ) : null}
+
+        {workflowRun.status === "completed" && workflowRun.conclusion !== "success" ? (
+          <Action
+            title="Re-Run Workflow Failed Jobs"
+            icon={Icon.Redo}
+            onAction={rerunWorkflowFailedJobs}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
           />
         ) : null}
 

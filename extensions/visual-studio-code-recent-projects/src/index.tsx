@@ -1,17 +1,19 @@
-import { ActionPanel, Action, Grid, Icon, showToast } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
-import { bundleIdentifier, build, keepSectionOrder } from "./preferences";
-import { EntryLike, EntryType, RemoteEntry, PinMethods } from "./types";
+import { getBuildScheme } from "./lib/vscode";
+import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows } from "./preferences";
+import { EntryLike, EntryType, RemoteEntry, PinMethods, RemoteWorkspaceEntry } from "./types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
   isFileEntry,
   isFolderEntry,
   isRemoteEntry,
+  isRemoteWorkspaceEntry,
   isWorkspaceEntry,
 } from "./utils";
 import {
@@ -21,13 +23,33 @@ import {
   ListOrGridDropdownItem,
   ListOrGridSection,
   ListOrGridItem,
+  ListOrGridEmptyView,
 } from "./grid-or-list";
 import { usePinnedEntries } from "./pinned";
+import { runAppleScriptSync } from "run-applescript";
 
 export default function Command() {
-  const { data, isLoading } = useRecentEntries();
+  const { data, isLoading, error } = useRecentEntries();
   const [type, setType] = useState<EntryType | null>(null);
   const { pinnedEntries, ...pinnedMethods } = usePinnedEntries();
+
+  if (error) {
+    showToast(Toast.Style.Failure, "Failed to load recent projects");
+    return (
+      <ListOrGrid
+        actions={
+          <ActionPanel>
+            <Action title="Change Build" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      >
+        <ListOrGridEmptyView
+          title="Failed to load recent projects"
+          description="Press enter to change build"
+        ></ListOrGridEmptyView>
+      </ListOrGrid>
+    );
+  }
 
   return (
     <ListOrGrid
@@ -82,7 +104,25 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods) {
   } else if (isFolderEntry(props.entry)) {
     return <LocalItem {...props} uri={props.entry.folderUri} />;
   } else if (isRemoteEntry(props.entry)) {
-    return <RemoteItem {...props} entry={props.entry} pinned={props.pinned} />;
+    return (
+      <RemoteItem
+        {...props}
+        uri={props.entry.folderUri}
+        subtitle={props.entry.label}
+        entry={props.entry}
+        pinned={props.pinned}
+      />
+    );
+  } else if (isRemoteWorkspaceEntry(props.entry)) {
+    return (
+      <RemoteItem
+        {...props}
+        uri={props.entry.workspace.configPath}
+        subtitle={props.entry.label}
+        entry={props.entry}
+        pinned={props.pinned}
+      />
+    );
   } else if (isFileEntry(props.entry)) {
     return <LocalItem {...props} uri={props.entry.fileUri} />;
   } else {
@@ -108,11 +148,23 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Open
+            <Action
               title={`Open in ${build}`}
               icon="action-icon.png"
-              target={props.uri}
-              application={bundleIdentifier}
+              onAction={() => {
+                if (closeOtherWindows) {
+                  runAppleScriptSync(`
+                    tell application "System Events"
+                      tell process "${build}"
+                        repeat while window 1 exists
+                          click button 1 of window 1
+                        end repeat
+                      end tell
+                    end tell
+                  `);
+                }
+                open(props.uri, bundleIdentifier);
+              }}
             />
             <Action.ShowInFinder path={path} />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
@@ -132,15 +184,16 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
   );
 }
 
-function RemoteItem(props: { entry: RemoteEntry; pinned?: boolean } & PinMethods) {
-  const remotePath = decodeURI(basename(props.entry.folderUri));
-  const uri = props.entry.folderUri.replace("vscode-remote://", "vscode://vscode-remote/");
+function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods) {
+  const remotePath = decodeURI(basename(props.uri));
+  const scheme = getBuildScheme();
+  const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
 
   return (
     <ListOrGridItem
       id={props.pinned ? remotePath : undefined}
       title={remotePath}
-      subtitle={props.entry.label || "/"}
+      subtitle={props.subtitle || "/"}
       icon="remote.svg"
       content="remote.svg"
       actions={

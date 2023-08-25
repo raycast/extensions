@@ -6,7 +6,7 @@ NOTE: if you want to call the app version of this library, use the following:
 Then, you can use all the methods and properties below via your locally-instantiated objTrans script object. 
 
 CHANGES (to this overall script file - handler changes should be documented WITHIN handler's comnmens):
-	-- 2019-03-07 ( dshockley ): Added explicit 'on run'. 
+	-- 2019-03-07 ( danshockley ): Added explicit 'on run'. 
 	-- 2017-12-21 ( eshagdar ): This script needs to return just the object since there are other libraries that depend on it.
 
 *)
@@ -21,23 +21,27 @@ end run
 on fmObjectTranslator_Instantiate(prefs)
 	
 	script fmObjectTranslator
-		-- version 4.0.9, Daniel A. Shockley
+		-- version 4.1.3, Daniel A. Shockley
 		
-		-- 4.0.9 - 2020-08-11 ( dshockley ): Fix to log for addHeaderFooter. 
-		-- 4.0.8 - 2019-07-17 ( dshockley ): Added "ValueList" object support (code "XMVL"), per GitHub Issue #6. 
+		-- 4.1.3 - 2023-03-13 ( danshockley ): Added modern note in the recordFromList function. Renamed dshockley to danshockley in comments. 
+		-- 4.1.2 - 2023-03-10 ( danshockley ): In prettifyXML, no longer try to use tabs instead of tidy's spaces. DO still avoid extra line-breaks around CDATA, which means scanning for leading whitespace for both CR and LF line breaks, since the recently-added HEREDOC method converted CRs to LFs. 
+		-- 4.1.1 - 2023-03-10 ( danshockley ): Renamed function to "isStringValidFMObjectXML" instead of "checkStringForValidXML" to be more specific. Added isStringAnyValidXML. 
+		-- 4.1 - 2023-03-04 ( danshockley ): Update logConsole to 2.0 - prepend ScriptName onto message, since tag option no longer seems to work. Updated prettifyXML to 1.8 - use a HEREDOC when skipping temp file, since the shopt/xpg_echo modification of echo to preserve backslashes no longer seems to work properly. 
+		-- 4.0.9 - 2020-08-11 ( danshockley ): Fix to log for addHeaderFooter. 
+		-- 4.0.8 - 2019-07-17 ( danshockley ): Added "ValueList" object support (code "XMVL"), per GitHub Issue #6. 
 		-- 4.0.7 - 2019-03-12 ( eshagdar ): debugMode should be set to false by default. Users can overwrite it if they need to turn it on.
-		-- 4.0.6 - 2019-03-07 ( dshockley ): Updated checkStringForValidXML to 1.2. 
+		-- 4.0.6 - 2019-03-07 ( danshockley ): Updated isStringValidFMObjectXML to 1.2. 
 		-- 4.0.5 - 2019-02-15 ( jwillinghalpern ): preserve backslashes when prettifying xml with shell script.
 		-- 4.0.4 - 2019-01-18 ( eshagdar ): remove EndOfText character ( ascii 3 ).
 		-- 4.0.3 - 2018-12-04 ( dshockley, eshagdar ): remove unneeded whitespace around CDATA inside Calculation tags. 
-		-- 4.0.2 - 2018-10-29 ( dshockley ): prettify used to fail (and just get raw XML) when 'too large'. Use temp file to avoid fail. Bug-fix in dataObjectToUTF8. 
-		-- 4.0.1 - 2018-10-29 ( dshockley ): BUG-FIX - using wrong variable in prettify resulted in placeholders not be replaced. Neatened up code. 
+		-- 4.0.2 - 2018-10-29 ( danshockley ): prettify used to fail (and just get raw XML) when 'too large'. Use temp file to avoid fail. Bug-fix in dataObjectToUTF8. 
+		-- 4.0.1 - 2018-10-29 ( danshockley ): BUG-FIX - using wrong variable in prettify resulted in placeholders not be replaced. Neatened up code. 
 		-- 4.0 - 2018-10-25 ( dshockley/eshagdar ): Addded indentation to prettify. Tidy CANNOT output tabs, so preserve tabs 1st.
 		-- 3.9.8 - 2018-04-20 ( dshockley/eshagdar ): when doing prettify or simpleFormat, convert all ASCII 13 (Carriage Returns) into ASCII 10 (LineFeed) so that there is not a MIX of line endings. If prettify, do NOT also do SimpleFormat. 
-		-- 3.9.7 - 2018-04-20 ( dshockley ): remove "preserve-entities" from tidy, since that was an attempt to deal with layout objects, which we no longer even attempt to prettify, and using it causes problems with other objects. 
-		-- 3.9.6 - 2018-04-10 ( dshockley ): do NOT prettify layout objects even if specified since they are already quasi-formatted. Stick with tidy after all (not xmllint for now). 
+		-- 3.9.7 - 2018-04-20 ( danshockley ): remove "preserve-entities" from tidy, since that was an attempt to deal with layout objects, which we no longer even attempt to prettify, and using it causes problems with other objects. 
+		-- 3.9.6 - 2018-04-10 ( danshockley ): do NOT prettify layout objects even if specified since they are already quasi-formatted. Stick with tidy after all (not xmllint for now). 
 		-- 3.9.5 - 2018-04-04 ( dshockley/eshagdar ): improved prettifyXML to also 'preserve-entities' because it otherwise munges whitespace within a value wrapped by tags. Specifically, it was changing "<Type>SVG </Type>" to "<Type>SVG</Type>", which resulted in breaking button icons on FileMaker buttons. ALSO, when editing XML, insert LineFeeds, not Carriage Returns. When stripping XML header for layout objects, also remove possible leading blank line. 
-		-- 3.9.4 - 2017-12-18 ( dshockley ): added support for LayoutObjects to addHeaderFooter and removeHeaderFooter. Updated getTextBetween. 
+		-- 3.9.4 - 2017-12-18 ( danshockley ): added support for LayoutObjects to addHeaderFooter and removeHeaderFooter. Updated getTextBetween. 
 		-- 3.9.3 - 2017-11-03 ( eshagdar ): when running this file directly, return the script object ( don't run a sample ).
 		-- 3.9.2 - 2017-04-25 ( dshockley/eshagdar ): added removeHeaderFooter, addHeaderFooter. 
 		-- 3.9.1 - 2016-11-02 ( dshockley/eshagdar ): always reset currentCode before reading clipboard; debugMode now logs the tempDataPosix in dataObjectToUTF8; add more error-trapping and error-handling.
@@ -197,7 +201,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			end if
 			
 			if debugMode then logConsole(ScriptName, "clipboardSetObjectsUsingXML: START")
-			if not checkStringForValidXML(stringFmXML) then
+			if not isStringValidFMObjectXML(stringFmXML) then
 				if debugMode then logConsole(ScriptName, "clipboardSetObjectsUsingXML: Specified XML does not validly represent FileMaker objects.")
 				return false
 			end if
@@ -230,7 +234,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			end if
 			
 			if debugMode then logConsole(ScriptName, "clipboardAddObjectsUsingXML: START")
-			if not checkStringForValidXML(stringFmXML) then
+			if not isStringValidFMObjectXML(stringFmXML) then
 				if debugMode then logConsole(ScriptName, "clipboardAddObjectsUsingXML: Specified XML does not validly represent FileMaker objects.")
 				return false
 			end if
@@ -316,9 +320,9 @@ on fmObjectTranslator_Instantiate(prefs)
 				if debugMode then logConsole(ScriptName, "clipboardConvertToXML : FileMaker 10 BUG ASCII-10 check: Char:" & testChar & return & "currentCode:" & currentCode & return & "ASCII:" & (ASCII number of testChar))
 			end if
 			
-			set newClip to {string:xmlTranslation}
+			set newClip to {string:xmlTranslation} & fmClipboard
 			
-			-- set the clipboard to newClip
+			set the clipboard to newClip
 			
 			if debugMode then logConsole(ScriptName, "clipboardConvertToXML: added XML to clipboard")
 			
@@ -404,7 +408,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			set testClipboard to get the clipboard
 			
-			return checkStringForValidXML(testClipboard)
+			return isStringValidFMObjectXML(testClipboard)
 		end checkClipboardForValidXML
 		
 		
@@ -482,7 +486,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			if debugMode then logConsole(ScriptName, "convertXmlToObjects: START")
 			
-			set stringIsValidXML to checkStringForValidXML(stringFmXML) -- return boolean, also sets currentCode property.			
+			set stringIsValidXML to isStringValidFMObjectXML(stringFmXML) -- return boolean, also sets currentCode property.			
 			if not stringIsValidXML then
 				-- if not valid, give an error.
 				if debugMode then logConsole(ScriptName, "convertXmlToObjects: no valid XML")
@@ -507,24 +511,26 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 		end convertXmlToObjects
 		
-		
-		
-		on checkStringForValidXML(someString)
-			-- version 1.2
-			-- Checks someString for XML that represents FM objects. Returns true if it does, false if not. 
+		on isStringAnyValidXML(someString)
+			-- version 1.0
+			-- Checks someString for XML of ANY type (not just FM objects!). Returns true if it does, false if not. 
 			
-			-- 1.2 - 2019-03-07 ( dshockley ): Added capture of error -1700. 
-			-- 1.1 - 2016-11-02 ( dshockley/eshagdar ): added comment, changed test to length of instead of empty string.
+			-- 1.0 - 2023-03-10 ( danshock ): first created.
 			
-			if debugMode then logConsole(ScriptName, "checkStringForValidXML: START")
-			
+			if debugMode then logConsole(ScriptName, "isStringAnyValidXML: START")
 			try
 				tell application "System Events"
-					set xmlData to make new XML data with data someString
-					set fmObjectName to name of XML element 1 of XML element 1 of xmlData
+					set stringAsXML to make XML data with properties {text:someString}
+					set nameElem1 to name of XML element 1 of stringAsXML
+					if nameElem1 is missing value then
+						return false
+					else
+						return true
+					end if
 				end tell
+				
 			on error errMsg number errNum
-				if debugMode then logConsole(ScriptName, "checkStringForValidXML: ERROR: " & errMsg & "(" & errNum & ")")
+				if debugMode then logConsole(ScriptName, "isStringAnyValidXML: ERROR: " & errMsg & "(" & errNum & ")")
 				if errNum is -1700 then
 					-- is not something that can be treated as text, so does not have XML:
 					return false
@@ -539,7 +545,39 @@ on fmObjectTranslator_Instantiate(prefs)
 				end if
 			end try
 			
-			if debugMode then logConsole(ScriptName, "checkStringForValidXML: fmObjectName: " & fmObjectName)
+		end isStringAnyValidXML
+		
+		on isStringValidFMObjectXML(someString)
+			-- version 1.2
+			-- Checks someString for XML that represents FM objects. Returns true if it does, false if not. 
+			
+			-- 1.2 - 2019-03-07 ( danshockley ): Added capture of error -1700. 
+			-- 1.1 - 2016-11-02 ( dshockley/eshagdar ): added comment, changed test to length of instead of empty string.
+			
+			if debugMode then logConsole(ScriptName, "isStringValidFMObjectXML: START")
+			
+			try
+				tell application "System Events"
+					set xmlData to make new XML data with data someString
+					set fmObjectName to name of XML element 1 of XML element 1 of xmlData
+				end tell
+			on error errMsg number errNum
+				if debugMode then logConsole(ScriptName, "isStringValidFMObjectXML: ERROR: " & errMsg & "(" & errNum & ")")
+				if errNum is -1700 then
+					-- is not something that can be treated as text, so does not have XML:
+					return false
+				else if errNum is -1719 then
+					-- couldn't find an XML element, so NOT valid XML
+					return false
+				else if errNum is -2753 then
+					-- couldn't create XML from someString, so NOT valid XML
+					return false
+				else
+					error errMsg number errNum
+				end if
+			end try
+			
+			if debugMode then logConsole(ScriptName, "isStringValidFMObjectXML: fmObjectName: " & fmObjectName)
 			
 			set currentCode to ""
 			repeat with oneObjectType in fmObjectList
@@ -578,7 +616,7 @@ on fmObjectTranslator_Instantiate(prefs)
 				end if
 			end repeat
 			
-			if debugMode then logConsole(ScriptName, "checkStringForValidXML: currentCode: " & currentCode)
+			if debugMode then logConsole(ScriptName, "isStringValidFMObjectXML: currentCode: " & currentCode)
 			
 			if length of currentCode is 0 then
 				return false
@@ -586,7 +624,7 @@ on fmObjectTranslator_Instantiate(prefs)
 				return true
 			end if
 			
-		end checkStringForValidXML
+		end isStringValidFMObjectXML
 		
 		
 		
@@ -621,7 +659,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			-- version 1.2
 			
 			-- 1.2 - 2018-04-04 ( dshockley/eshagdar ): remove leading blank line after removing header.
-			-- 1.1 - 2017-12-18 ( dshockley ): handles layout objects special header.
+			-- 1.1 - 2017-12-18 ( danshockley ): handles layout objects special header.
 			-- 1.0 - 2017-04-25 ( dshockley/eshagdar ): first created.
 			
 			
@@ -691,8 +729,8 @@ on fmObjectTranslator_Instantiate(prefs)
 		on addHeaderFooter(someXML)
 			-- version 1.2
 			
-			-- 1.2 - 2020-08-11 ( dshockley ): log was using wrong function name. 
-			-- 1.1 - 2017-12-18 ( dshockley ): support layout objects.
+			-- 1.2 - 2020-08-11 ( danshockley ): log was using wrong function name. 
+			-- 1.1 - 2017-12-18 ( danshockley ): support layout objects.
 			-- 1.0 - 2017-04-25 ( dshockley/eshagdar ): first created.
 			
 			if debugMode then logConsole(ScriptName, "addHeaderFooter: START")
@@ -731,12 +769,15 @@ on fmObjectTranslator_Instantiate(prefs)
 		
 		
 		on prettifyXML(someXML)
-			-- version 1.7, Daniel A. Shockley
+			-- version 1.9, Daniel A. Shockley
+			
+			-- 1.9 - ditch the idea of trying to control tidy's handling of tabs/spaces, since that caused problems when attempting to prettify already-pretty XML. 
+			
 			if debugMode then logConsole(ScriptName, "prettifyXML: START")
 			try
 				
 				if currentCode is "XML2" then
-					-- do NOT try to prettify, even if specified, since XML2 is already quasi-formatted.
+					-- do NOT try to prettify, even if specified, since XML2 is already quasi-formatted, and will break.
 					set prettyXML to someXML
 					if debugMode then logConsole(ScriptName, "prettifyXML: Skipped Layout Objects")
 				else
@@ -763,8 +804,6 @@ on fmObjectTranslator_Instantiate(prefs)
 						*)
 					
 					set maxEchoSize to 200000 (* not sure exact point of failure, but was between 224317 and 227811 when tested on 2018-10-29, so playing it safe. *)
-					set spacePlaceholder to "|3784831346446981709931393949506519634432034195210262251535space|"
-					set tabPlaceholder to "|3784831346446981709931393949506519634432034195210262251535tab|"
 					set spaces4String to "    "
 					set otherTidyOptions to " -i --indent-spaces 4 --literal-attributes yes --drop-empty-paras no --fix-backslash no --fix-bad-comments no --fix-uri no --lower-literals no --ncr no --quote-ampersand no --quote-nbsp no "
 					set tidyCommand to "tidy -xml -raw -wrap 999999999999999 " & otherTidyOptions
@@ -773,20 +812,12 @@ on fmObjectTranslator_Instantiate(prefs)
 					
 					set prettyXML to someXML
 					
-					(*
-					Preserve certain whitespace:
-					Try to convert 4-spaces into tabs AFTER tidy modifies data. To do that, must preserve any initial runs of 4-spaces.
-					Also, Tidy refuses to output tabs, so preserve and restore them, too!
-					*)
-					set prettyXML to replaceSimple({prettyXML, spaces4String, spacePlaceholder})
-					set prettyXML to replaceSimple({prettyXML, tab, tabPlaceholder})
-					
 					
 					if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: length of prettyXML: " & length of prettyXML)
 					
 					
 					-- prettify command:
-					if length of prettyXML is greater than maxEchoSize then
+					if true then --length of prettyXML is greater than maxEchoSize then
 						
 						try
 							
@@ -839,29 +870,32 @@ on fmObjectTranslator_Instantiate(prefs)
 						
 						
 					else
-						-- just use echo:
-						-- use "shopt -u xpg_echo; echo " instead of "echo" to handle backslashes properly: https://stackoverflow.com/questions/8138167/how-can-i-escape-shell-arguments-in-applescript/8145515
-						set prettyPrint_ShellCommand to "shopt -u xpg_echo; echo " & quoted form of prettyXML & " | " & tidyCommand
+						-- just redirect into tidy, without needing a temp file:
+						
+						-- use a HEREDOC to redirect the temporarily-modified prettyXML into the tidy command: 
+						--   (instead of echo with modified xpg_echo setting using shopt): 
+						set prettyPrint_ShellCommand to tidyCommand & " << \"EOF84738939393\"" & (ASCII character 10) & prettyXML & (ASCII character 10) & "EOF84738939393"
+						
 						set prettyXML to do shell script prettyPrint_ShellCommand
+						
+						if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: used tidy with redirected text, no temp file")
+						
+						return prettyXML
+						
+						
 					end if
 					
 					
-					-- restore original characters where placeholders exist:
-					set prettyXML to replaceSimple({prettyXML, spaces4String, tab})
-					set prettyXML to replaceSimple({prettyXML, spacePlaceholder, spaces4String})
-					set prettyXML to replaceSimple({prettyXML, tabPlaceholder, tab})
 					
-					
-					
-					-- After restoring whitespace, get rid of line returns and indentation around the CDATA inside a Calculation tag, since tidy adds that:
+					-- Get rid of line returns and indentation around the CDATA inside a Calculation tag, since tidy adds that:
 					-- Cleanup between Calc open tag and CDATA:
 					set maxTabs to 12
 					set stringCalcTagOpen to "<Calculation>"
 					set stringStartCdata to "<![CDATA["
 					
-					
+					-- [CR as line breaks] note: since tidy uses spaces instead of tabs, "tabs" here means 4spaces:
 					repeat with numTabs from 1 to maxTabs
-						set stringBeforeCdata to (stringCalcTagOpen & charCR & repeatString({someString:tab, repeatCount:numTabs}) & stringStartCdata)
+						set stringBeforeCdata to (stringCalcTagOpen & charCR & repeatString({someString:spaces4String, repeatCount:numTabs}) & stringStartCdata)
 						if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: numTabs: " & numTabs)
 						if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: stringBeforeCdata: " & stringBeforeCdata)
 						if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: offset of stringBeforeCdata in prettyXML: " & (offset of stringBeforeCdata in prettyXML))
@@ -874,6 +908,22 @@ on fmObjectTranslator_Instantiate(prefs)
 					set stringEndCData to "]]>"
 					set stringCalcTagClose to "</Calculation>"
 					set prettyXML to replaceSimple({prettyXML, stringEndCData & charCR & stringCalcTagClose, stringEndCData & stringCalcTagClose})
+					
+					-- [LF as line breaks] note: since tidy uses spaces instead of tabs, "tabs" here means 4spaces:
+					repeat with numTabs from 1 to maxTabs
+						set stringBeforeCdata to (stringCalcTagOpen & charLF & repeatString({someString:spaces4String, repeatCount:numTabs}) & stringStartCdata)
+						if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: numTabs: " & numTabs)
+						if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: stringBeforeCdata: " & stringBeforeCdata)
+						if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: offset of stringBeforeCdata in prettyXML: " & (offset of stringBeforeCdata in prettyXML))
+						if prettyXML contains stringBeforeCdata then
+							if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: found stringBeforeCdata with " & numTabs & " tabs.")
+							set prettyXML to replaceSimple({prettyXML, stringBeforeCdata, stringCalcTagOpen & stringStartCdata})
+						end if
+					end repeat
+					-- Cleanup between CDATA and Calc close tag:
+					set stringEndCData to "]]>"
+					set stringCalcTagClose to "</Calculation>"
+					set prettyXML to replaceSimple({prettyXML, stringEndCData & charLF & stringCalcTagClose, stringEndCData & stringCalcTagClose})
 					
 					
 					
@@ -895,7 +945,7 @@ on fmObjectTranslator_Instantiate(prefs)
 		on dataObjectToUTF8(prefs)
 			-- version 2.9
 			
-			-- 2.9 - 2018-10-29 ( dshockley ): BUG-FIX: the error handler closed a non-existent variable. 
+			-- 2.9 - 2018-10-29 ( danshockley ): BUG-FIX: the error handler closed a non-existent variable. 
 			-- 2.8 - 2016-11-02 ( dshockley/eshagdar ): debugMode now logs the tempDataPosix
 			-- 2.7 - by default, look for someObject instead of 'fmObjects' (but allow calling code to specify 'fmObjects' for backwards compatibility).
 			-- 2.6 - can return the UTF8 ITSELF, or instead a path to the temp file this creates.
@@ -1150,15 +1200,16 @@ on fmObjectTranslator_Instantiate(prefs)
 		
 		
 		on logConsole(processName, consoleMsg)
-			-- version 1.9 - Daniel A. Shockley, http://www.danshockley.com
+			-- version 2.0 - Daniel A. Shockley, http://www.danshockley.com
 			
+			-- 2.0 - seems that the "-t" option for logger no longer DOES anything, so just prepend the ScriptName to the message. 
 			-- 1.9 - REQUIRES coerceToString to enable logging of objects not directly coercible to string.
 			-- 1.8 - coerces to string first (since numbers would not directly convert for 'quoted form'
 			-- 1.7 - now works with Leopard by using the "logger" command instead of just appending to log file
 			-- 1.6 - the 'space' constant instead of literal spaces for readability, removed trailing space from the hostname command
 			-- 1.5 - uses standard date-stamp format	
 			
-			set shellCommand to "logger" & space & "-t" & space & quoted form of processName & space & quoted form of coerceToString(consoleMsg)
+			set shellCommand to "logger" & space & quoted form of (processName & ":" & space & coerceToString(consoleMsg))
 			
 			do shell script shellCommand
 			return shellCommand
@@ -1324,6 +1375,7 @@ on fmObjectTranslator_Instantiate(prefs)
 		
 		on recordFromList(assocList)
 			-- version 2003-11-06, Nigel Garvey, AppleScript-Users mailing list
+			-- more recent discussion (2021): https://www.macscripter.net/t/convert-a-list-to-a-record/72860/13
 			try
 				{«class usrf»:assocList}'s x
 			on error msg

@@ -9,3 +9,8 @@ export function secondsParser(seconds: number) {
 
   return `${hours}:${minutes > 9 ? minutes : `0${minutes}`}:${secondsLeft > 9 ? secondsLeft : `0${secondsLeft}`}`;
 }
+
+export function toDecimalTime(time: string) {
+  const [hours, minutes] = time.split(":");
+  return Number(hours) + Number(minutes) / 60;
+}

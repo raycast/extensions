@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LocalStorage, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getNumberCanvas } from "./utils/common-utils";
 import { spawnSync } from "child_process";
@@ -28,7 +28,8 @@ export default function ScorePage(props: { myScore: HistoryScore; historyScore: 
       });
       setBreakRecord(_breakRecord);
       if (_breakRecord) {
-        spawnSync(`open raycast://confetti`, { shell: true });
+        await open(`raycast://extensions/raycast/raycast/confetti`);
+        spawnSync(`open raycast://`, { shell: true });
       }
       await LocalStorage.setItem("HistoryScore", JSON.stringify(_newHistoryScore));
     }

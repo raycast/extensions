@@ -18,6 +18,20 @@
       "mode": "view"
     },
     {
+      "name": "viewLatestTopics",
+      "title": "View Latest Topics",
+      "subtitle": "V2EX",
+      "description": "View the latest topics",
+      "mode": "view"
+    },
+    {
+      "name": "viewHotTopics",
+      "title": "View Hot Topics",
+      "subtitle": "V2EX",
+      "description": "View the hotest topics",
+      "mode": "view"
+    },
+    {
       "name": "viewNotifications",
       "title": "View Notifications",
       "subtitle": "V2EX",
@@ -48,13 +62,14 @@
       "required": true,
       "default": "programmer create share ideas apple jobs all4all qna",
       "title": "Nodes",
-      "placeholder": "Please enter the nodes you want to visit"
+      "placeholder": "Please enter the names of the nodes you want to visit, separated by spaces"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.39.2",
     "@raycast/utils": "^1.3.1",
-    "dayjs": "^1.11.5"
+    "dayjs": "^1.11.5",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

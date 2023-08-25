@@ -1,12 +1,11 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-import { CopyToClipboard } from "./ActionCopyToClipboard";
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
-import { Item, Url, User } from "../types";
-import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp } from "../utils";
+import { Item, User } from "../types";
+import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp, actionsForItem } from "../utils";
 import { Guide } from "./Guide";
-import resetCache from "../../reset-cache";
+import { ItemActionPanel } from "./ItemActionPanel";
 
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
@@ -61,42 +60,7 @@ export function Items() {
                     : {},
                   { text: item.vault?.name },
                 ]}
-                actions={
-                  <ActionPanel>
-                    <Action.Open
-                      title="Open In 1Password"
-                      target={`onepassword://view-item/?a=${account?.account_uuid}&v=${item.vault.id}&i=${item.id}`}
-                      application="com.1password.1password"
-                    />
-                    {item.category === "LOGIN" && (
-                      <>
-                        {item?.urls?.filter((url) => url.primary).length ? (
-                          <Action.OpenInBrowser
-                            title="Open In Browser"
-                            url={(item.urls.find((url) => url.primary) as Url).href}
-                          />
-                        ) : null}
-                        <ActionPanel.Section>
-                          <CopyToClipboard
-                            id={item.id}
-                            vault_id={item.vault.id}
-                            field="username"
-                            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                          />
-                          <CopyToClipboard
-                            id={item.id}
-                            vault_id={item.vault.id}
-                            field="password"
-                            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-                          />
-                        </ActionPanel.Section>
-                      </>
-                    )}
-                    <ActionPanel.Section>
-                      <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
+                actions={<ItemActionPanel account={account!} item={item} actions={actionsForItem(item)} />}
               />
             ))}
       </List.Section>

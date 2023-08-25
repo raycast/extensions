@@ -1,5 +1,11 @@
 # V2EX Viewer Changelog
 
+## [Features] - 2023-03-08
+
+- Re-Support view latest and hot topics
+- Support delete notification
+- Better UX
+
 ## [Features & Refactor] - 2023-03-07
 
 - Temporarily delete the command of view latest and hotest topics

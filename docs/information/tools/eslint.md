@@ -35,3 +35,7 @@ You're free to turn on/off rules or add new plugins as you see fit for your exte
   }
 }
 ```
+
+## Migration
+
+Starting with version 1.48.8, the ESLint configuration is included automatically when creating a new extension using the `Create Extension` command. If your extension was created before this version, you can migrate following the steps outlined on the [v1.48.8](https://developers.raycast.com/migration/v1.48.8) page.

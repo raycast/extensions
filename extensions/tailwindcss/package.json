@@ -28,7 +28,31 @@
         "css"
       ],
       "description": "Search Tailwind CSS utility classes",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultAction",
+          "title": "Default Action",
+          "description": "Action to perform when pressing enter",
+          "type": "dropdown",
+          "required": false,
+          "default": "selector",
+          "data": [
+            {
+              "title": "Copy Selector",
+              "value": "selector"
+            },
+            {
+              "title": "Copy CSS",
+              "value": "css"
+            },
+            {
+              "title": "Copy Class Name",
+              "value": "class"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "search-colors",

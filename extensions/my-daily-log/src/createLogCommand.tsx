@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
-import { createDailyLog } from "./domain/createDailyLog";
 import { useForm } from "@raycast/utils";
+import { NewDailyLog } from "./domain/dailyLog/NewDailyLog";
+import { createNewLogUseCaseFactory } from "./factories/createNewLogUseCaseFactory";
+import { randomPlaceholder } from "./shared/randomPlaceholder";
 
 interface CreateLogArguments {
   title: string;
@@ -8,7 +10,8 @@ interface CreateLogArguments {
 
 export default function Command(props: { arguments: CreateLogArguments }) {
   const createLogAndExit = (title: string): void => {
-    createDailyLog(title);
+    createNewLogUseCaseFactory().execute(new NewDailyLog(title, new Date()));
+
     popToRoot();
     showToast(Toast.Style.Success, "Log added", title);
   };
@@ -40,19 +43,6 @@ export default function Command(props: { arguments: CreateLogArguments }) {
       <Form.TextField id="title" title="What did you do?" placeholder={randomPlaceholder()} />
     </Form>
   );
-}
-
-function randomPlaceholder(): string {
-  const options = [
-    "Completed a TODO",
-    "Wrote a blog post",
-    "Wrote a Raycast extension",
-    "Had a meeting with a client",
-    "Went to the gym",
-    "Ate a peanut butter sandwich",
-  ];
-
-  return options[Math.floor(Math.random() * options.length)];
 }
 
 interface FormData {

@@ -8,23 +8,21 @@ interface Website {
 
 export default function Command(props: LaunchProps<{ arguments: Website }>) {
   const { url } = props.arguments;
+  const [tips, setTips] = useState<boolean>(false);
   const [result, setResult] = useState(null as unknown as Record<string, string>);
   const [sidebar, setSidebar] = useState(null as unknown as Record<string, string>);
   const [favicon, setFavicon] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
   const [website, setWebsite] = useState<string | undefined>();
   const [score, setScore] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const checkHTags = (data: string) => {
     const h1 = data.match(/<h1/g)?.length || 0;
     const h2 = data.match(/<h2/g)?.length || 0;
     const h3 = data.match(/<h3/g)?.length || 0;
-    const h4 = data.match(/<h4/g)?.length || 0;
-    const h5 = data.match(/<h5/g)?.length || 0;
-    const h6 = data.match(/<h6/g)?.length || 0;
 
-    if (h1 < h2 && h2 < h3 && h3 < h4 && h4 < h5 && h5 < h6) {
+    if (h1 <= h2 && h2 <= h3) {
       setScore((score) => score + 1);
       setResult((result) => ({ ...result, hTags: `Headings are in order ![](${Icon.CheckCircle}) ` }));
     } else {
@@ -78,7 +76,6 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
   };
 
   const checkIndexed = (data: string) => {
-    // look for meta robots tag
     const metaRobots = data.match(/<meta name="robots" content="(.*?)"\/>/)?.[1];
     if (metaRobots) {
       if (metaRobots.includes("noindex")) {
@@ -161,7 +158,6 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
   };
 
   const submitForm = async (values: Record<string, string>) => {
-    setLoading(true);
     if (values.url) {
       if (validateUrl(values.url) && (await urlReachable(values.url))) {
         await websiteCheck(String(values.url));
@@ -204,6 +200,7 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
 
   return (
     <>
+      {loading && <Detail isLoading={true} navigationTitle="Analyzing..." />}
       {result && !loading && (
         <Detail
           navigationTitle={`Analyzed ${website}`}
@@ -211,12 +208,42 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
             ((favicon && `# ![${website}](${favicon}) `) || "#") +
             ` SEO Score: ${Math.round((score / 6) * 100)}% \n` +
             `## Results in detail: \n` +
-            `1. ${result.hTags} \n ` +
-            `2. ${result.imageAlt} \n` +
-            `3. ${result.meta} \n` +
-            `4. ${result.pageSpeed} \n` +
-            `5. ${result.robots} \n` +
-            `6. ${result.indexed} \n`
+            `- ${result.hTags} \n ` +
+            `${
+              tips && result.hTags.includes("not")
+                ? "\n The hierarchy of your h-Tags should be reviewed. You can have multiple h1-Tags, however make sure to not overuse them, for example try to have more h2-Tags than h1-Tags and more h3-Tags than h2-Tags and so on. \n \n"
+                : ""
+            }` +
+            `- ${result.imageAlt} \n` +
+            `${
+              tips && result.imageAlt.includes("Not")
+                ? "\n You haven't added alt attributes to all img-Tags. Make sure to add `alt='[YOUR TEXT]'` inside your img-Tags to get a better score.  \n \n"
+                : ""
+            }` +
+            `- ${result.meta} \n` +
+            `${
+              tips && result.meta.includes("not")
+                ? "\n You've forgot to add some meta-Tags to your site (eg. `<meta name='description' content='Free Web tutorials'>`), make sure to add them to rank higher. Find additional ones [here](https://www.w3schools.com/tags/tag_meta.asp).  \n \n"
+                : ""
+            }` +
+            `- ${result.pageSpeed} \n` +
+            `${
+              tips && result.pageSpeed.includes("slow")
+                ? "\n Your page seems a little slow, make sure to compress images and use CDNs for faster loading.  \n \n"
+                : ""
+            }` +
+            `- ${result.robots} \n` +
+            `${
+              tips && result.robots.includes("not")
+                ? "\n No robots.txt file on this site, make sure to add one to advice the Google Crawler as seen [here](https://developers.google.com/search/docs/crawling-indexing/robots/intro).  \n \n"
+                : ""
+            }` +
+            `- ${result.indexed} \n` +
+            `${
+              tips && result.indexed.includes("not")
+                ? "\n Your site has a noindex policy. If that's not intented, make sure to change the meta-Robots tag to not include 'noindex' anymore.  \n \n"
+                : ""
+            }`
           }
           metadata={
             <Detail.Metadata>
@@ -258,6 +285,26 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
                   shortcut={{ modifiers: ["cmd"], key: "a" }}
                   icon={Icon.Repeat}
                 />
+                {score !== 6 && !tips && (
+                  <Action
+                    title="Open Tips"
+                    onAction={() => {
+                      setTips(true);
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    icon={Icon.LightBulb}
+                  />
+                )}
+                {score !== 6 && tips && (
+                  <Action
+                    title="Close Tips"
+                    onAction={() => {
+                      setTips(false);
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "t" }}
+                    icon={Icon.LightBulb}
+                  />
+                )}
               </ActionPanel>
             )
           }

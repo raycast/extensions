@@ -57,6 +57,14 @@
       "required": true
     },
     {
+      "title": "Destination Folder Path",
+      "name": "destinationFolderPath",
+      "description": "Set Destination Folder path. Specify an absolute path or a relative path from the target file.",
+      "type": "textfield",
+      "required": true,
+      "default": "./compressed-images"
+    },
+    {
       "title": "Options",
       "name": "overwrite",
       "description": "Whether to overwrite the original image file.",
@@ -77,13 +85,15 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "vitest": "^0.30.1"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "vitest"
   }
 }

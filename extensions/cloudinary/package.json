@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudinary",
+  "title": "Cloudinary",
+  "description": "Search assets and upload your clipboard to your Cloudinary account",
+  "icon": "cloudinary-512x512-rounded.png",
+  "author": "colbyfayock",
+  "categories": [
+    "Media",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Assets",
+      "subtitle": "Cloudinary",
+      "description": "Search for assets inside Cloudinary",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tag",
+          "placeholder": "Tag",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "upload-clipboard",
+      "title": "Upload Clipboard",
+      "subtitle": "Cloudinary",
+      "description": "Upload image contents from clipboard to Cloudinary.",
+      "mode": "view"
+    },
+    {
+      "name": "upload-url",
+      "title": "Upload URL",
+      "subtitle": "Cloudinary",
+      "description": "Upload a file by URL to Cloudinary.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cloudinaryCloudName",
+      "title": "Cloudinary Cloud Name",
+      "type": "textfield",
+      "description": "Your Cloud Name",
+      "required": true
+    },
+    {
+      "name": "cloudinaryApiKey",
+      "title": "Cloudinary API Key",
+      "type": "textfield",
+      "description": "Your API Key",
+      "required": true
+    },
+    {
+      "name": "cloudinaryApiSecret",
+      "title": "Cloudinary API Secret",
+      "type": "textfield",
+      "description": "Your API Secret",
+      "required": true
+    },
+    {
+      "name": "cloudinaryUploadFolder",
+      "title": "Cloudinary Upload Folder",
+      "type": "textfield",
+      "description": "Your preferred folder in Cloudinary",
+      "required": true,
+      "default": "raycast-uploads"
+    },
+    {
+      "name": "pngpasteFullPath",
+      "title": "Pngpaste Full Path",
+      "type": "textfield",
+      "required": true,
+      "description": "Your local pngpaste path",
+      "default": "/opt/homebrew/bin/pngpaste"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^1.6.1",
+    "cloudinary": "^1.36.4",
+    "execa": "^7.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

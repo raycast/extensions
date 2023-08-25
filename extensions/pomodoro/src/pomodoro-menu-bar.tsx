@@ -1,6 +1,5 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
 import { useState } from "react";
-
 import {
   createInterval,
   getCurrentInterval,
@@ -16,15 +15,26 @@ import {
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
 
+const IconTint: Color.Dynamic = {
+  light: "#000000",
+  dark: "#FFFFFF",
+  adjustContrast: false,
+};
+
 export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
 
   if (currentInterval && progress(currentInterval) >= 100) {
-    launchCommand({
-      name: "pomodoro-control-timer",
-      type: LaunchType.UserInitiated,
-      context: { currentInterval },
-    });
+    try {
+      launchCommand({
+        name: "pomodoro-control-timer",
+        type: LaunchType.UserInitiated,
+        context: { currentInterval },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
     resetInterval();
   }
 
@@ -45,14 +55,18 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
-  let icon;
-  icon = { source: { light: "tomato-light.png", dark: "tomato-dark.png" } };
+  let icon: Image.ImageLike;
+  icon = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
-    const progressInQuarters = Math.floor(progress(currentInterval) / 25) * 25;
-    icon = Icon[(progressInQuarters > 0 ? `CircleProgress${progressInQuarters}` : "Circle") as keyof typeof Icon];
+    const progressInTenth = 100 - Math.floor(progress(currentInterval) / 10) * 10;
+    icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
-  const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : "--:--";
+  const title = preferences.enableTimeOnMenuBar
+    ? currentInterval
+      ? secondsToTime(currentInterval.length - duration(currentInterval))
+      : "--:--"
+    : undefined;
 
   return (
     <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>

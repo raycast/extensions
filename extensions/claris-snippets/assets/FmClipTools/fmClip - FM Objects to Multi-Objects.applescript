@@ -1,24 +1,30 @@
 -- FM-XML Objects to Multi-Objects
--- version 4.0, Daniel A. Shockley, Erik Shagdar
--- Takes objects in the clipboard and adds multiple types of FileMaker objects into clipboard (plus return-delimited text). 
+-- version 4.2, Daniel A. Shockley, Erik Shagdar
+(* 
+	Takes objects in the clipboard and adds multiple types of FileMaker objects into clipboard (plus return-delimited text). 
+	
 
--- 4.1 - 2019-09-11 ( dshockley ): If clipboard was Script Steps (XMSS) and not ALL were 'Set Field' or 'Set Variable', try to get useful info about all the different script steps, rather than ignoring. 
--- 4.0 - 2018-04-04 ( dshockley/eshagdar ): load fmObjectTranslator code by reference instead of embedded. Made fmObjTrans into a global so that sub-script objects can use the already-instantiated library object. 
--- 3.9.3 - 2017-08-09 ( eshagdar ): renamed 'FM-XML Objects to Multi-Objects' to 'fmClip - FM Objects to Multi-Objects' to match other handler name pattern
--- 3.9.2 - if the clipboard is text without double-colons then assume those aren't fields, but rather Variable names; Also, if the clipboard contains Set Variable script steps, extract the variable Name and Value into tab-separated columns. 
--- 3.9.1 - now works if the clipboard contains text (assumes those are fully-qualified field names).
--- 2.2 - extract field objects _wthin_ other layout objects
--- 2.1 - updated flattenList to avoid namespace conflict; 
--- 2.0 - modified to INCLUDE FM12 Layout Objects (as well as FM11, not instead of).
--- 1.8 - asking for table name actually ASKS for table name.
--- 1.7 - trims off extraneous line return at end of original text source, rather than silently failing. 
--- 1.6 - added error-trapping during the conversions to different FM objects. 
--- 1.5 - when original is BaseTables, look at the fields of each BaseTable and then process. BUT, do NOT try to create BaseTable objects from other sources. BaseTable is source-only, and just treated like a bunch of fields. 
--- 1.4 - when original is TEXT, preserve and add back that, rather than only plain. 
--- 1.3 - bug fix: if original format is clipboard, need to SET to others first, then add text last, or only the last 'set' FM object actually sticks. 
--- 1.2 - bug fix: when source is script steps, process ANY script step that has a FIELD, but flatten list.
--- 1.1 - fixed default NumFormat for field to "As Entered"
--- 1.0 - initial version, which generates LayoutObjects, FieldDefs, ScriptSteps(SetField), and plain text.
+HISTORY:
+	4.2 - 2023-02-07 ( danshockley ): Add support for custom functions (XMFN) by adding the function NAMES to the clipboard alongside the objects. 
+	4.1 - 2019-09-11 ( danshockley ): If clipboard was Script Steps (XMSS) and not ALL were 'Set Field' or 'Set Variable', try to get useful info about all the different script steps, rather than ignoring. 
+	4.0 - 2018-04-04 ( danshockley/eshagdar ): load fmObjectTranslator code by reference instead of embedded. Made fmObjTrans into a global so that sub-script objects can use the already-instantiated library object. 
+	3.9.3 - 2017-08-09 ( eshagdar ): renamed 'FM-XML Objects to Multi-Objects' to 'fmClip - FM Objects to Multi-Objects' to match other handler name pattern
+	3.9.2 - if the clipboard is text without double-colons then assume those aren't fields, but rather Variable names; Also, if the clipboard contains Set Variable script steps, extract the variable Name and Value into tab-separated columns. 
+	3.9.1 - now works if the clipboard contains text (assumes those are fully-qualified field names).
+	2.2 - extract field objects _wthin_ other layout objects
+	2.1 - updated flattenList to avoid namespace conflict; 
+	2.0 - modified to INCLUDE FM12 Layout Objects (as well as FM11, not instead of).
+	1.8 - asking for table name actually ASKS for table name.
+	1.7 - trims off extraneous line return at end of original text source, rather than silently failing. 
+	1.6 - added error-trapping during the conversions to different FM objects. 
+	1.5 - when original is BaseTables, look at the fields of each BaseTable and then process. BUT, do NOT try to create BaseTable objects from other sources. BaseTable is source-only, and just treated like a bunch of fields. 
+	1.4 - when original is TEXT, preserve and add back that, rather than only plain. 
+	1.3 - bug fix: if original format is clipboard, need to SET to others first, then add text last, or only the last 'set' FM object actually sticks. 
+	1.2 - bug fix: when source is script steps, process ANY script step that has a FIELD, but flatten list.
+	1.1 - fixed default NumFormat for field to "As Entered"
+	1.0 - initial version, which generates LayoutObjects, FieldDefs, ScriptSteps(SetField), and plain text.
+
+*)
 
 
 property ScriptName : "FMXML Multi"
@@ -36,6 +42,8 @@ on run
 	set otherTextBlock to ""
 	set otherTextItems to {}
 	set fieldNames to {}
+	set functionNames to {}
+	set varNamesOptionalValues to {}
 	set newClip to ""
 	
 	set objTrans to run script alias (((((path to me as text) & "::") as alias) as string) & "fmObjectTranslator.applescript")
@@ -96,6 +104,16 @@ on run
 		
 		-- END:		FM11/12 LAYOUT OBJECTS. 		
 		
+		
+	else if originalClipboardFormat is "XMFN" then
+		-- CUSTOM FUNCTIONS: 
+		
+		tell application "System Events"
+			set functionsXmlData to make new XML data with data someXML
+			
+			set functionNames to value of XML attribute "name" of (every XML element of XML element 1 of functionsXmlData whose name is "CustomFunction")
+		end tell
+		
 	else if originalClipboardFormat is "XMFD" then
 		-- FIELD DEFINITIONS: 
 		
@@ -122,7 +140,7 @@ on run
 	else if originalClipboardFormat is "XMSS" then
 		-- SCRIPT STEPS: 
 		
-		-- 2019-09-11 ( dshockley ): Changed logic so that it only extracts simple-text-list for 'Set Field' or 'Set Variable' if ALL of the copied script steps are for one of those. Otherwise, it tries to turn the script steps into a human-readable block of text.
+		-- 2019-09-11 ( danshockley ): Changed logic so that it only extracts simple-text-list for 'Set Field' or 'Set Variable' if ALL of the copied script steps are for one of those. Otherwise, it tries to turn the script steps into a human-readable block of text.
 		
 		
 		tell application "System Events"
@@ -165,16 +183,11 @@ on run
 					set varNames to my flattenList(varNames)
 					set varValues to my flattenList(varValues)
 					
-					
-					set varNamesOptionalValues to {}
 					repeat with i from 1 to count of varNames
-						
 						set oneVarName to item i of varNames
 						set oneVarValue to item i of varValues
 						
-						
 						copy (oneVarName & targetValueSep & oneVarValue) as string to end of varNamesOptionalValues
-						
 					end repeat
 					
 					-- END OF: ALL are 'Set Variable' steps. 
@@ -371,9 +384,6 @@ on run
 	end if
 	
 	
-	
-	
-	
 	if originalClipboardFormat is not "XMFD" and originalClipboardFormat is not "XMTB" then
 		-- treat Table like Fields (so don't add fields if it was either). 
 		
@@ -402,6 +412,10 @@ on run
 	else if (count of varNamesOptionalValues) is not 0 then
 		set varNamesValuesListAsText to unParseChars(varNamesOptionalValues, return)
 		set newClip to {string:varNamesValuesListAsText} & fmClipboard
+		
+	else if (count of functionNames) is not 0 then
+		set functionNamesListAsText to unParseChars(functionNames, return)
+		set newClip to {string:functionNamesListAsText} & fmClipboard
 		
 	end if
 	
@@ -1537,7 +1551,7 @@ end logConsole
 
 
 on getXMLElementsByName(search_name, search_xml_element)
-	-- version 2014-12-10-dshockley
+	-- version 2014-12-10-danshockley
 	-- based on code by adamh on stackoverflow.com, 2014-01-22, http://stackoverflow.com/a/21282921
 	
 	set foundElems to {}

@@ -2,13 +2,13 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 23:21
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-02-22 10:28
+ * @lastEditTime: 2023-03-17 09:49
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { DetectedLangModel } from "../../detectLanauge/types";
+import { DetectedLangModel } from "../../detectLanguage/types";
 
 export interface YoudaoDictionaryFormatResult {
   queryWordInfo: QueryWordInfo;
@@ -57,6 +57,10 @@ export interface QueryWordInfo {
   phonetic?: string; // [ɡʊd]
   examTypes?: string[];
   speechUrl?: string; // word audio url. some language not have tts url, such as "ຂາດ"
+
+  onMessage?: (message: { content: string; role: string }) => void;
+  onError?: (error: string) => void;
+  onFinish?: (reason: string) => void;
 }
 
 export interface YoudaoTranslateResultBasicItem {

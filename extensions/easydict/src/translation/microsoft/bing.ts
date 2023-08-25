@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-17 10:35
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-01-17 16:22
+ * @lastEditTime: 2023-03-17 10:12
  * @fileName: bing.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -14,7 +14,7 @@ import qs from "qs";
 import { requestCostTime } from "../../axiosConfig";
 import { checkIfIpInChina } from "../../checkIP";
 import { isChineseIPKey, userAgent } from "../../consts";
-import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanguage/types";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
 import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getBingLangCode, getYoudaoLangCodeFromBingCode } from "../../language/languages";
@@ -111,7 +111,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
           checkIfIpInChina().then((isIpInChina) => {
             const tld = getBingTld(isIpInChina);
             bingTld = tld;
-            console.log(`bing tld is changed to: ${bingTld}, try request token and bing transalte again`);
+            console.log(`bing tld is changed to: ${bingTld}, try request token and bing translate again`);
 
             requestBingConfig().then((bingConfig) => {
               if (bingConfig) {

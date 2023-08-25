@@ -8,31 +8,7 @@ fragment IssueFields on Issue {
   stateReason
   updatedAt
   author {
-    ... on Bot {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on User {
-      ...UserFields
-    }
-    ... on Mannequin {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on Organization {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
-    ... on EnterpriseUserAccount {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
+    ...AuthorFields
   }
   linkedBranches(first: 50) {
     totalCount
@@ -150,31 +126,7 @@ fragment IssueDetailFields on Issue {
   stateReason
   updatedAt
   author {
-    ... on Bot {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on User {
-      ...UserFields
-    }
-    ... on Mannequin {
-      id
-      login
-      avatarUrl(size: 64)
-    }
-    ... on Organization {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
-    ... on EnterpriseUserAccount {
-      id
-      login
-      name
-      avatarUrl(size: 64)
-    }
+    ...AuthorFields
   }
   labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
     totalCount
@@ -189,6 +141,7 @@ fragment IssueDetailFields on Issue {
     totalCount
     nodes {
       ... on LinkedBranch {
+        id
         ref {
           name
         }

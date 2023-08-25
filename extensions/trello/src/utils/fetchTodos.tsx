@@ -11,15 +11,17 @@ export const returnTodos = async (searchTerm: string): Promise<TrelloFetchRespon
       const response = await fetch(
         `https://api.trello.com/1/search?filter=visible&key=${apitoken}&token=${token}&modelTypes=cards&query=${searchTerm}`
       );
-
-      return (await response.json()) as TrelloFetchResponse;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const json: any = await response.json();
+      return json.cards as TrelloFetchResponse;
     } else {
       try {
         const response = await fetch(
           `https://api.trello.com/1/members/${username}/cards?filter=visible&key=${apitoken}&token=${token}`
         );
-
-        return (await response.json()) as TrelloFetchResponse;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const json: any = await response.json();
+        return json as TrelloFetchResponse;
       } catch (error) {
         showToast(Toast.Style.Failure, "An error occured", "Could not fetch todos, check your credentials");
         return Promise.resolve([]);

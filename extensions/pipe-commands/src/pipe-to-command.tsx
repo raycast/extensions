@@ -97,10 +97,20 @@ export function getRaycastIcon(script: ScriptCommand): Image.ImageLike {
 async function getInput(inputType: InputType) {
   switch (inputType) {
     case "text": {
-      const selection = await getSelectedText();
-      if (selection) {
-        return selection;
+      try {
+        // there are some applications where text selection cannot be retrieved, fallback to clipboard
+        const selection = await getSelectedText();
+
+        if (selection) {
+          return selection;
+        }
+      } catch (e: any) {
+        // if there was an intermittent error copying text, let's pull from clipboard instead
+        if (e.message != "Cannot copy selected text from frontmost application.") {
+          throw e;
+        }
       }
+
       const clipboard = await Clipboard.readText();
       if (!clipboard) {
         throw new Error("No text in clipboard");

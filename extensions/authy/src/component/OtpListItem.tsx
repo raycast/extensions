@@ -3,6 +3,7 @@ import { icondir } from "../constants";
 import { icon } from "../util/icon";
 import { compareByName } from "../util/compare";
 import { addToCache, checkIfCached, getFromCache, RECENTLY_USED } from "../cache";
+import { CORRUPTED } from "./OtpList";
 
 const { primaryActionIsCopy, recentlyUsedOrder } = getPreferenceValues<{
   primaryActionIsCopy: boolean;
@@ -77,28 +78,39 @@ export default function OtpListItem({ index, item, basis, timeLeft, refresh, set
   return (
     <List.Item
       title={item.name}
-      accessoryTitle={`${otp}`}
       subtitle={subtitleDisplay}
-      accessoryIcon={{
-        source: {
-          light: `${environment.assetsPath}/${icondir}/light/${pie}.png`,
-          dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`,
-        },
-      }}
       icon={icon(item)}
       keywords={[subtitle]}
       actions={
         <ActionPanel>
-          <PrimaryAction pin={otp ?? ""} id={item.id} index={index} setOtpList={setOtpList} />
-          <SecondaryAction pin={otp ?? ""} id={item.id} index={index} setOtpList={setOtpList} />
-          <Action
-            title={"Sync"}
-            icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => refresh()}
-          />
+          {otp == CORRUPTED ? (
+            <Action.OpenInBrowser title="Submit Issue" url="https://github.com/raycast/extensions/issues/new/choose" />
+          ) : (
+            <>
+              <PrimaryAction pin={otp ?? ""} id={item.id} index={index} setOtpList={setOtpList} />
+              <SecondaryAction pin={otp ?? ""} id={item.id} index={index} setOtpList={setOtpList} />
+              <Action
+                title={"Sync"}
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => refresh()}
+              />
+            </>
+          )}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${otp}`,
+
+          icon: {
+            source: {
+              light: `${environment.assetsPath}/${icondir}/light/${pie}.png`,
+              dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`,
+            },
+          },
+        },
+      ]}
     />
   );
 }

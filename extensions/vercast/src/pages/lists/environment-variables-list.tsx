@@ -12,7 +12,7 @@ import NewEnvironmentVariable from "../forms/new-env-var";
 
 type Props = {
   project: Project;
-  team?: Team;
+  team?: string;
 };
 
 const EnvironmentVariables = ({ project, team }: Props) => {
@@ -24,7 +24,7 @@ const EnvironmentVariables = ({ project, team }: Props) => {
   const { push, pop } = useNavigation();
 
   async function fetchAndSetVars() {
-    const vars = await fetchEnvironmentVariables(project.id, team?.id);
+    const vars = await fetchEnvironmentVariables(project.id, team);
     const systemVars: Environment[] = [];
     const plainVars: Environment[] = [];
     const encryptedVars: Environment[] = [];
@@ -70,7 +70,7 @@ const EnvironmentVariables = ({ project, team }: Props) => {
   };
 
   const createEnvVar = async (envVar: CreateEnvironment) => {
-    const addedVar = await createEnvironmentVariable(project.id, envVar, team?.id);
+    const addedVar = await createEnvironmentVariable(project.id, envVar, team);
     if (addedVar.error) {
       showToast({
         style: Toast.Style.Failure,

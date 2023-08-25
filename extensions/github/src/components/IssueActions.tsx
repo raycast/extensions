@@ -224,7 +224,7 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
 
   const isAssignedToMe = issue.assignees.nodes?.some((assignee) => assignee?.isViewer);
 
-  const linkedBranch: any = issue.linkedBranches?.nodes?.length ? issue.linkedBranches.nodes[0] : null;
+  const linkedBranch = issue.linkedBranches?.nodes?.length ? issue.linkedBranches.nodes[0] : null;
 
   return (
     <ActionPanel title={`#${issue.number} in ${issue.repository.nameWithOwner}`}>
@@ -235,7 +235,7 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
       <ActionPanel.Section>
         {viewer ? (
           <Action
-            title={isAssignedToMe ? "Un-assign from Me" : "Assign to Me"}
+            title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
             icon={viewerUser.icon}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => (isAssignedToMe ? unassignFromMe(viewer.id) : assignToMe(viewer.id))}
@@ -286,7 +286,7 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
                 title={"Delete Issue Branch"}
                 style={Action.Style.Destructive}
                 icon={{ source: "branch.svg", tintColor: Color.Red }}
-                onAction={() => deleteLinkedBranch(linkedBranch.id, linkedBranch.ref.name)}
+                onAction={() => deleteLinkedBranch((linkedBranch as any)?.id || "", linkedBranch.ref?.name ?? "")}
               />
             ) : null}
           </>
@@ -312,9 +312,9 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
           shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
         />
 
-        {linkedBranch ? (
+        {linkedBranch?.ref?.name ? (
           <Action.CopyToClipboard
-            content={linkedBranch.ref.name}
+            content={linkedBranch.ref?.name}
             title="Copy Branch Name"
             shortcut={{ modifiers: ["ctrl", "shift"], key: "." }}
           />
@@ -344,7 +344,7 @@ function AddAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
   const [load, setLoad] = useState(false);
 
   const { data, isLoading } = useCachedPromise(
-    async (issue) => {
+    async (issue: Issue) => {
       return github.repositoryCollaboratorsForIssues({
         owner: issue.repository.owner.login,
         name: issue.repository.name,
@@ -352,7 +352,7 @@ function AddAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
       });
     },
     [issue],
-    { execute: load }
+    { execute: load },
   );
 
   async function addAssignee({ id, text }: { id: string; text: string }) {
@@ -420,7 +420,7 @@ function AddProjectSubmenu({ issue, mutate }: SubmenuProps) {
   const [load, setLoad] = useState(false);
 
   const { data, isLoading } = useCachedPromise(
-    async (issue) => {
+    async (issue: Issue) => {
       return github.repositoryProjectsForIssues({
         owner: issue.repository.owner.login,
         name: issue.repository.name,
@@ -428,7 +428,7 @@ function AddProjectSubmenu({ issue, mutate }: SubmenuProps) {
       });
     },
     [issue],
-    { execute: load }
+    { execute: load },
   );
 
   async function addProject({ id, text }: { id: string; text: string }) {
@@ -489,14 +489,14 @@ function SetMilestoneSubmenu({ issue, mutate }: SubmenuProps) {
   const [load, setLoad] = useState(false);
 
   const { data, isLoading } = useCachedPromise(
-    async (issue) => {
+    async (issue: Issue) => {
       return github.milestonesForRepository({
         owner: issue.repository.owner.login,
         name: issue.repository.name,
       });
     },
     [issue],
-    { execute: load }
+    { execute: load },
   );
 
   async function unsetMilestone() {
