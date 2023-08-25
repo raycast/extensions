@@ -1,4 +1,4 @@
-module.exports = async ({ github, context }) => {
+module.exports = async ({ github, context, fetch }) => {
   try {
     const pr = (
       await github.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -13,7 +13,7 @@ module.exports = async ({ github, context }) => {
       return;
     }
 
-    const result = (
+    const result = await (
       await fetch("https://www.raycast.com/api/v1/dev_contributions", {
         method: "POST",
         headers: {
@@ -30,7 +30,7 @@ module.exports = async ({ github, context }) => {
 
     if (!result.user_id) {
       await github.rest.issues.createComment({
-        issue_number: context.issue.number,
+        issue_number: pr.number,
         owner: context.repo.owner,
         repo: context.repo.repo,
         body: ":tada: :tada: :tada:\n\nSuch a great contribution deserves a reward, but unfortunately we couldn't find your Raycast account based on your GitHub username.\nPlease [link your GitHub account to your Raycast account](https://www.raycast.com/settings/account) to receive your credits and soon be able to exchange them for some swag.",

@@ -36,7 +36,9 @@ export default function FileListItem({ file, email }: FileListItemProps) {
         <ActionPanel title={file.name}>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`${file.webViewLink}${email ? `&authuser=${email}` : ""}`}
+            url={`${file.webViewLink}${
+              email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""
+            }`}
           />
 
           {file.parents && file.parents.length > 0 ? (

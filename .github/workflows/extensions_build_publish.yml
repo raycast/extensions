@@ -81,7 +81,8 @@ jobs:
             const script = require('./reward')
             await script({
               github,
-              context
+              context,
+              fetch,
             })
       - name: Notify Failure to Slack
         if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
