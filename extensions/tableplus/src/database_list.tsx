@@ -1,82 +1,16 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues, Color } from "@raycast/api";
-import plist from "plist";
-import fs from "fs";
-import { homedir } from "os";
-import path from "node:path";
-import os from "node:os";
-import expandTidle from "expand-tilde";
+import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { fetchDatabases, renderPluralIfNeeded, tildify } from "./utils";
 import { useEffect, useState } from "react";
-import { Connection, Group, tintColors, Preferences } from "./interfaces";
-
-const homeDirectory = os.homedir();
-const EmptyGroupID = "__EMPTY__";
-const preferences: Preferences = getPreferenceValues();
-const appendPath = fs.existsSync(`${homedir()}/Library/Application Support/com.tinyapp.TablePlus-setapp/Data/`)
-  ? "-setapp"
-  : "";
-const directoryPath = preferences.path
-  ? expandTidle(preferences.path)
-  : `${homedir()}/Library/Application Support/com.tinyapp.TablePlus${appendPath}/Data/`;
+import { Connection, Group, tintColors } from "./interfaces";
+import { preferences } from "./utils";
 
 export default function DatabaseList() {
   const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
 
   useEffect(() => {
-    async function fetch() {
-      const tablePlusLocation = `${directoryPath}/Connections.plist`;
-      const groupLocations = `${directoryPath}/ConnectionGroups.plist`;
-
-      if (!fs.existsSync(tablePlusLocation)) {
-        showToast(
-          Toast.Style.Failure,
-          "Error loading connections",
-          "TablePlus data directory not found, add directory path in preferences"
-        );
-        setState({ isLoading: false });
-      } else {
-        const connectionsList = plist.parse(
-          fs.readFileSync(tablePlusLocation, "utf8")
-        ) as ReadonlyArray<plist.PlistObject>;
-        const groupList = plist.parse(fs.readFileSync(groupLocations, "utf8")) as ReadonlyArray<plist.PlistObject>;
-
-        const groups = new Map<string, Group>(
-          groupList.map((group) => [
-            group.ID.toString(),
-            { id: group.ID.toString(), name: group.Name.toString(), connections: [] },
-          ])
-        );
-
-        groups.set(EmptyGroupID, {
-          id: EmptyGroupID,
-          name: "Ungrouped",
-          connections: [],
-        });
-
-        connectionsList.forEach((connection) => {
-          const groupId = connection.GroupID?.toString() !== "" ? connection.GroupID?.toString() : EmptyGroupID;
-
-          const conn: Connection = {
-            id: connection.ID.toString(),
-            groupId,
-            name: connection.ConnectionName.toString() ?? "",
-            driver: connection.Driver.toString(),
-            isSocket: connection.isUseSocket === 1,
-            isOverSSH: connection.isOverSSH === 1,
-            database: connection.DatabaseName.toString(),
-            ServerAddress: connection.ServerAddress.toString(),
-            DatabaseHost: connection.DatabaseHost.toString(),
-            Driver: connection.Driver.toString(),
-            Environment: connection.Enviroment.toString(),
-          };
-
-          groups.get(groupId)?.connections.push(conn);
-        });
-
-        setState({ isLoading: false, connections: Array.from(groups.values()) });
-      }
-    }
-
-    fetch();
+    (async () => {
+      setState(await fetchDatabases());
+    })();
   }, []);
 
   return (
@@ -97,16 +31,6 @@ export default function DatabaseList() {
     </List>
   );
 
-  function tildify(absolutePath: string) {
-    const normalizedPath = path.normalize(absolutePath) + path.sep;
-
-    return (
-      normalizedPath.startsWith(homeDirectory)
-        ? normalizedPath.replace(homeDirectory + path.sep, `~${path.sep}`)
-        : normalizedPath
-    ).slice(0, -1);
-  }
-
   function getAccessories(connection: Connection) {
     const accessories = [];
 
@@ -124,10 +48,6 @@ export default function DatabaseList() {
     return accessories;
   }
 
-  function renderPluralIfNeeded(itemsLength: number) {
-    return `item${itemsLength > 1 ? "s" : ""}`;
-  }
-
   function ConnectionListItem(props: { connection: Connection; groupName: string }) {
     const connection = props.connection;
     const groupName = props.groupName;
@@ -139,13 +59,6 @@ export default function DatabaseList() {
       subtitle += ` : ${connection.DatabaseHost}`;
     }
 
-    let groupIcon = "icon.png";
-    if (connection.groupId) {
-      if (fs.existsSync(`${directoryPath}/${connection.groupId}`)) {
-        groupIcon = `${directoryPath}/${connection.groupId}`;
-      }
-    }
-
     return (
       <List.Item
         id={connection.id}
@@ -153,7 +66,7 @@ export default function DatabaseList() {
         title={connection.name}
         subtitle={tildify(subtitle)}
         accessories={getAccessories(connection)}
-        icon={groupIcon}
+        icon={connection.icon}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open Database" icon={Icon.Coin} url={`tableplus://?id=${connection.id}`} />

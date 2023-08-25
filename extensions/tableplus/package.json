@@ -3,7 +3,7 @@
   "name": "tableplus",
   "title": "TablePlus",
   "description": "Search and open database connections in TablePlus",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "contributors": [
@@ -17,6 +17,12 @@
       "subtitle": "TablePlus",
       "description": "List all databases",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Menubar",
+      "description": "TablePlus Menubar",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
@@ -48,26 +54,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.0",
+    "@raycast/api": "^1.57.0",
     "plist": "^3.0.4"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/expand-tilde": "^2.0.0",
     "@types/node": "^18.8.3",
     "@types/plist": "^3.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "expand-tilde": "^2.0.2",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.21.0",
+    "prettier": "^3.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
