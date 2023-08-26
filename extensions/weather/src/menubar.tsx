@@ -141,7 +141,12 @@ function VisibilityMenubarItem(props: { curcon: WeatherConditions | undefined })
     return null;
   }
   return (
-    <MenuBarExtra.Item icon={"💨"} title="Visibility" subtitle={vis.distanceAndUnit} onAction={launchWeatherCommand} />
+    <MenuBarExtra.Item
+      icon={WeatherIcons.Visibility}
+      title="Visibility"
+      subtitle={vis.distanceAndUnit}
+      onAction={launchWeatherCommand}
+    />
   );
 }
 

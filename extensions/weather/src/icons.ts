@@ -185,4 +185,5 @@ export enum WeatherIcons {
   UVIndex = Icon.Sun,
   Humidity = Icon.Raindrop,
   Wind = Icon.Cloud,
+  Visibility = Icon.Eye,
 }

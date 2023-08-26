@@ -177,7 +177,7 @@ function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
   if (!vis) {
     return null;
   }
-  return <List.Item title="Visibility" icon={WeatherIcons.Wind} accessories={[{ text: vis.distanceAndUnit }]} />;
+  return <List.Item title="Visibility" icon={WeatherIcons.Visibility} accessories={[{ text: vis.distanceAndUnit }]} />;
 }
 
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
