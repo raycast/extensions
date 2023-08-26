@@ -2,10 +2,14 @@
 
 ## [Feels Like] - 2023-08-25
 
-- Add `Temperature Feels Like`
-- Add `UV Index`
-- Add `Humidity`
 - Upgrade to 1.57
+- Add `Temperature Feels Like`
+- Add `Humidity`
+- Add `Pressure`
+- Add `Sunrise`, `Sunset` `UV Index`
+- Add more details for location
+- Add observation time
+- Add semantic section in menubar command
 
 ## [Add MenuBar] - 2022-11-26
 
