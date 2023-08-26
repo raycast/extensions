@@ -52,6 +52,7 @@ export interface WeatherConditions {
   temp_C: string;
   temp_F: string;
   pressure: string;
+  pressureInches: string;
   cloudcover: string;
   FeelsLikeC: string;
   FeelsLikeF: string;
@@ -300,6 +301,22 @@ export function getAreaValues(
   const population = area.population;
 
   return { areaName, country, region, latitude, longitude, population };
+}
+
+export function getCurrentPressure(
+  curcon: WeatherConditions | undefined,
+): { value: string; unit: string; valueAndUnit: string } | undefined {
+  if (!curcon) {
+    return;
+  }
+  const us = getUnitSystem();
+  const value: string | undefined = us === UnitSystem.Imperial ? curcon.pressureInches : curcon.pressure;
+  if (!value) {
+    return;
+  }
+  const unit = us === UnitSystem.Imperial ? "PSI" : "hPa";
+  const valueAndUnit = `${value} ${unit}`;
+  return { value, unit, valueAndUnit };
 }
 
 export function getCurrentSun(weather: Weather | undefined): { sunrise: string; sunset: string } | undefined {

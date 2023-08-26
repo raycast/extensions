@@ -23,6 +23,7 @@ import {
   getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
+  getCurrentPressure,
   getCurrentSun,
   getCurrentUVIndex,
   getCurrentVisibility,
@@ -153,6 +154,21 @@ function VisibilityMenubarItem(props: { curcon: WeatherConditions | undefined })
   );
 }
 
+function PressureMenubarItem(props: { curcon: WeatherConditions | undefined }) {
+  const p = getCurrentPressure(props.curcon);
+  if (!p) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Item
+      icon={WeatherIcons.Pressure}
+      title="Pressure"
+      subtitle={p.valueAndUnit}
+      onAction={launchWeatherCommand}
+    />
+  );
+}
+
 function LocationMenubarSection(props: { area: Area | undefined }) {
   const a = getAreaValues(props.area);
   if (!a) {
@@ -253,6 +269,7 @@ export default function MenuCommand(): JSX.Element {
         />
         <FeelsLikeMenuItem curcon={curcon} />
         <UVIndexMenuItem curcon={curcon} />
+        <PressureMenubarItem curcon={curcon} />
         <WindMenubarItem curcon={curcon} />
         <HumidityMenuItem curcon={curcon} />
         <VisibilityMenubarItem curcon={curcon} />
