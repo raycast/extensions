@@ -132,7 +132,7 @@ function WindMenubarItem(props: { curcon: WeatherConditions | undefined }) {
     return null;
   }
   const wind = `${windCon.speed} ${windCon.unit} ${windCon.dirIcon} (${windCon.dirText})`;
-  return <MenuBarExtra.Item icon={"💨"} title="Wind" subtitle={wind} onAction={launchWeatherCommand} />;
+  return <MenuBarExtra.Item icon={WeatherIcons.Wind} title="Wind" subtitle={wind} onAction={launchWeatherCommand} />;
 }
 
 function VisibilityMenubarItem(props: { curcon: WeatherConditions | undefined }) {

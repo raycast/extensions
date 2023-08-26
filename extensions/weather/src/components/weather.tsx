@@ -199,11 +199,20 @@ function LocationItem(props: { area: Area | undefined }) {
   if (!a) {
     return null;
   }
+  const coords = a.latitude && a.longitude ? `${a.longitude}, ${a.latitude}` : undefined;
+  if (!coords) {
+    return null;
+  }
   return (
     <List.Item
       title="Location Coordinates"
       icon={WeatherIcons.Coordinate}
-      accessories={[{ text: a.latitude && a.longitude ? `${a.latitude}, ${a.longitude}` : undefined }]}
+      accessories={[
+        {
+          text: coords,
+          tooltip: `Location (Longitude, Latitude): ${coords}`,
+        },
+      ]}
     />
   );
 }
@@ -218,8 +227,8 @@ function SunItem(props: { data: Weather | undefined }) {
       title="Sun"
       icon={WeatherIcons.Sunrise}
       accessories={[
-        { icon: WeatherIcons.Sunrise, text: s.sunrise },
-        { icon: WeatherIcons.Sunset, text: s.sunset },
+        { icon: WeatherIcons.Sunrise, text: s.sunrise, tooltip: `Sunrise ${s.sunrise}` },
+        { icon: WeatherIcons.Sunset, text: s.sunset, tooltip: `Sunset ${s.sunset}` },
       ]}
     />
   );
@@ -238,27 +247,25 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
     <>
       <List.Section title={`Weather report (${title}) ${observation ? " - " + observation : ""}`}>
         <List.Item
-          key="_"
           title={getCurrentTemperature(curcon) || ""}
           subtitle={weatherDesc}
           icon={{ value: getWeatherCodeIcon(curcon?.weatherCode), tooltip: weatherDesc || "" }}
           accessories={[
             {
-              icon: "💧",
+              icon: WeatherIcons.Humidity,
               text: curcon ? `${curcon.humidity}%` : "?",
+              tooltip: curcon ? `Humidity: ${curcon.humidity}%` : "?",
             },
             {
-              icon: "💨",
-              text: windCon ? `${windCon.speed} ${windCon.unit} ${windCon.dirIcon}` : "?",
+              icon: WeatherIcons.Wind,
+              text: windCon ? `${windCon.speed} ${windCon.unit} ${windCon.dirIcon} (${windCon.dirText})` : "?",
+              tooltip: windCon ? `Wind ${windCon.speed}${windCon.unit} ${windCon.dirIcon} (${windCon.dirText})` : "?",
             },
           ]}
         />
         <FeelsLikeItem curcon={curcon} />
         <UVIndexItem curcon={curcon} />
-        <HumidityItem curcon={curcon} />
         <PressureItem curcon={curcon} />
-        <WindSpeedItem curcon={curcon} />
-        <WindDirectionItem curcon={curcon} />
         <VisibilityItem curcon={curcon} />
         <LocationItem area={area} />
         <SunItem data={data} />

@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import { getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
 import { getWindUnit, getTemperatureUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { Hourly, WeatherData } from "../wttr";
+import { getUVIndexIcon } from "../utils";
 
 function getTime(time: string): string {
   const h = parseInt(time) / 100.0;
@@ -15,12 +16,13 @@ export function DayList(props: { day: WeatherData; title: string }): JSX.Element
   const getWeatherDesc = (hour: Hourly): string => {
     try {
       return hour.weatherDesc[0].value;
-    } catch (e: any) {
+    } catch (e: unknown) {
       return "?";
     }
   };
 
   const getWind = (hour: Hourly): string => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = hour as Record<string, any>;
     const key = `windspeed${getWttrWindPostfix()}`;
     let val = "?";
@@ -31,6 +33,7 @@ export function DayList(props: { day: WeatherData; title: string }): JSX.Element
   };
 
   const getTemp = (hour: Hourly): string => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = hour as Record<string, any>;
     const key = `temp${getWttrTemperaturePostfix()}`;
     let val = "?";
@@ -58,6 +61,10 @@ export function DayList(props: { day: WeatherData; title: string }): JSX.Element
             subtitle={`${getTemp(data)}     ${getWeatherDesc(data)}`}
             icon={{ value: getWeatherCodeIcon(data.weatherCode), tooltip: "test" }}
             accessories={[
+              {
+                icon: day.uvIndex ? getUVIndexIcon(day.uvIndex) : undefined,
+                tooltip: day.uvIndex ? `UV Index: ${day.uvIndex}` : undefined,
+              },
               {
                 icon: "💧",
                 text: getHumidityText(data),
