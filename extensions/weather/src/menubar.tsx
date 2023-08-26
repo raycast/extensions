@@ -32,6 +32,7 @@ import {
   WeatherConditions,
 } from "./wttr";
 import { useWeather } from "./components/hooks";
+import { getUVIndexIcon } from "./utils";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
@@ -68,9 +69,7 @@ function FeelsLikeMenuItem(props: { curcon: WeatherConditions | undefined }) {
       title="Feels Like"
       subtitle={feelsLike.valueAndUnit}
       icon={WeatherIcons.FeelsLike}
-      onAction={() => {
-        /**/
-      }}
+      onAction={launchWeatherCommand}
     />
   );
 }
@@ -84,10 +83,8 @@ function UVIndexMenuItem(props: { curcon: WeatherConditions | undefined }) {
     <MenuBarExtra.Item
       title="UV Index"
       subtitle={uvIndex}
-      icon={WeatherIcons.UVIndex}
-      onAction={() => {
-        /**/
-      }}
+      icon={getUVIndexIcon(uvIndex)}
+      onAction={launchWeatherCommand}
     />
   );
 }
@@ -102,9 +99,7 @@ function HumidityMenuItem(props: { curcon: WeatherConditions | undefined }) {
       title="Humidity"
       subtitle={hum.valueAndUnit}
       icon={WeatherIcons.Humidity}
-      onAction={() => {
-        /**/
-      }}
+      onAction={launchWeatherCommand}
     />
   );
 }

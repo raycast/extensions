@@ -20,6 +20,7 @@ import {
 } from "../wttr";
 import { DayList } from "./day";
 import { useWeather } from "./hooks";
+import { getUVIndexIcon } from "../utils";
 
 function getHighestOccurrence(arr: string[]): string | undefined {
   const oc: Record<string, number> = {};
@@ -142,7 +143,7 @@ function UVIndexItem(props: { curcon: WeatherConditions | undefined }) {
   if (!uvIndex) {
     return null;
   }
-  return <List.Item title="UV Index" icon={WeatherIcons.UVIndex} accessories={[{ text: uvIndex }]} />;
+  return <List.Item title="UV Index" icon={getUVIndexIcon(uvIndex)} accessories={[{ text: uvIndex }]} />;
 }
 
 function HumidityItem(props: { curcon: WeatherConditions | undefined }) {
