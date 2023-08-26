@@ -243,7 +243,7 @@ function ObservationTimeMenubarItem(props: { curcon: WeatherConditions | undefin
     <MenuBarExtra.Item
       title="Observation"
       subtitle={relative}
-      tooltip={`Observation: ${obs}`}
+      tooltip={`Observation Time from Weather Provider: ${obs}`}
       icon={Icon.Clock}
       onAction={launchWeatherCommand}
     />
@@ -257,7 +257,7 @@ function LastFetchTimeMenubarItem(props: { fetched: Date | undefined }) {
     <MenuBarExtra.Item
       title="Fetched"
       subtitle={relative}
-      tooltip={`Fetched: ${f ? f.toLocaleString() : "-"}`}
+      tooltip={`Fetched from Weather Provider: ${f ? f.toLocaleString() : "-"}`}
       icon={Icon.Download}
       onAction={launchWeatherCommand}
     />
