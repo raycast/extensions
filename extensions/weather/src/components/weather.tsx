@@ -12,6 +12,7 @@ import {
   getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
+  getCurrentObservationTime,
   getCurrentPressure,
   getCurrentSun,
   getCurrentUVIndex,
@@ -230,11 +231,12 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
     return null;
   }
   const { title, curcon, weatherDesc, area } = getMetaData(data);
+  const observation = getCurrentObservationTime(curcon);
   const windCon = getCurrentWindConditions(curcon);
 
   return (
     <>
-      <List.Section title={`Weather report (${title})`}>
+      <List.Section title={`Weather report (${title}) ${observation ? " - " + observation : ""}`}>
         <List.Item
           key="_"
           title={getCurrentTemperature(curcon) || ""}

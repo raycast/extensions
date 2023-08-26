@@ -65,6 +65,7 @@ export interface WeatherConditions {
   winddirDegree: string;
   windspeedKmph: string;
   windspeedMiles: string;
+  localObsDateTime?: string;
 }
 
 export interface AreaName {
@@ -334,4 +335,11 @@ export function getCurrentSun(weather: Weather | undefined): { sunrise: string; 
     return;
   }
   return { sunrise, sunset };
+}
+
+export function getCurrentObservationTime(curcon: WeatherConditions | undefined): string | undefined {
+  if (!curcon) {
+    return;
+  }
+  return curcon.localObsDateTime;
 }

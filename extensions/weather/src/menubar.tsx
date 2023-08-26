@@ -23,6 +23,7 @@ import {
   getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
+  getCurrentObservationTime,
   getCurrentPressure,
   getCurrentSun,
   getCurrentUVIndex,
@@ -237,9 +238,17 @@ function SunMenubarSection(props: { data: Weather | undefined }) {
   );
 }
 
+function ObservationTimeMenubarItem(props: { curcon: WeatherConditions | undefined }) {
+  const obs = getCurrentObservationTime(props.curcon);
+  if (!obs) {
+    return null;
+  }
+  return <MenuBarExtra.Item title="Observation" subtitle={obs} icon={Icon.Clock} onAction={launchWeatherCommand} />;
+}
+
 export default function MenuCommand(): JSX.Element {
   const { data, error, isLoading } = useWeather(getDefaultQuery());
-  const { title, curcon, weatherDesc, area } = getMetaData(data);
+  const { curcon, weatherDesc, area } = getMetaData(data);
   const { showMenuText } = getAppearancePreferences();
 
   const temp = getCurrentTemperature(curcon);
@@ -296,6 +305,7 @@ export default function MenuCommand(): JSX.Element {
           subtitle="wttr.in"
           onAction={() => open("https://wttr.in")}
         />
+        <ObservationTimeMenubarItem curcon={curcon} />
         <MenuBarExtra.Item
           title="Configure"
           icon={Icon.Gear}
