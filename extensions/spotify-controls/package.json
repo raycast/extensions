@@ -24,6 +24,13 @@
       "mode": "no-view"
     },
     {
+      "name": "playDiscoverWeekly",
+      "title": "Play Discover Weekly",
+      "subtitle": "Spotify",
+      "description": "Plays the playlist Discover Weekly in Spotify.",
+      "mode": "no-view"
+    },
+    {
       "name": "pause",
       "title": "Pause",
       "subtitle": "Spotify",
