@@ -233,7 +233,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
   const windCon = getCurrentWindConditions(curcon);
 
   return (
-    <React.Fragment>
+    <>
       <List.Section title={`Weather report (${title})`}>
         <List.Item
           key="_"
@@ -261,7 +261,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
         <LocationItem area={area} />
         <SunItem data={data} />
       </List.Section>
-    </React.Fragment>
+    </>
   );
 }
 

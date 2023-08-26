@@ -217,8 +217,10 @@ function SunMenubarSection(props: { data: Weather | undefined }) {
   if (!sun) {
     return null;
   }
+  const { curcon } = getMetaData(props.data);
   return (
     <MenuBarExtra.Section title="Sun">
+      <UVIndexMenuItem curcon={curcon} />
       <MenuBarExtra.Item
         title="Sunrise"
         subtitle={sun.sunrise}
@@ -251,16 +253,15 @@ export default function MenuCommand(): JSX.Element {
       isLoading={isLoading}
       tooltip={weatherDesc}
     >
-      <MenuBarExtra.Section title="Location">
-        <MenuBarExtra.Item icon={Icon.Pin} title={title} onAction={launchWeatherCommand} />
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Section title="Current">
+      <MenuBarExtra.Section title="Weather">
         <MenuBarExtra.Item
           icon={curcon ? getWeatherCodeIcon(curcon.weatherCode) : "weather.png"}
           title="Condition"
           subtitle={weatherDesc}
           onAction={launchWeatherCommand}
         />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Temperature">
         <MenuBarExtra.Item
           icon={Icon.Temperature}
           title="Temperature"
@@ -268,14 +269,15 @@ export default function MenuCommand(): JSX.Element {
           onAction={launchWeatherCommand}
         />
         <FeelsLikeMenuItem curcon={curcon} />
-        <UVIndexMenuItem curcon={curcon} />
-        <PressureMenubarItem curcon={curcon} />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Air">
         <WindMenubarItem curcon={curcon} />
+        <PressureMenubarItem curcon={curcon} />
         <HumidityMenuItem curcon={curcon} />
         <VisibilityMenubarItem curcon={curcon} />
       </MenuBarExtra.Section>
-      <LocationMenubarSection area={area} />
       <SunMenubarSection data={data} />
+      <LocationMenubarSection area={area} />
       <MenuBarExtra.Section title="Forecast">
         {data?.weather?.map((d) => (
           <MenuBarExtra.Item
