@@ -32,7 +32,7 @@ import {
   WeatherConditions,
 } from "./wttr";
 import { useWeather } from "./components/hooks";
-import { getUVIndexIcon } from "./utils";
+import { convertToRelativeDate, getUVIndexIcon } from "./utils";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
@@ -238,7 +238,16 @@ function ObservationTimeMenubarItem(props: { curcon: WeatherConditions | undefin
   if (!obs) {
     return null;
   }
-  return <MenuBarExtra.Item title="Observation" subtitle={obs} icon={Icon.Clock} onAction={launchWeatherCommand} />;
+  const relative = convertToRelativeDate(obs) || obs;
+  return (
+    <MenuBarExtra.Item
+      title="Observation"
+      subtitle={relative}
+      tooltip={`Observation: ${obs}`}
+      icon={Icon.Clock}
+      onAction={launchWeatherCommand}
+    />
+  );
 }
 
 export default function MenuCommand(): JSX.Element {

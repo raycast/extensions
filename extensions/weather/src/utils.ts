@@ -1,4 +1,9 @@
 import { getAvatarIcon } from "@raycast/utils";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en.json";
+
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo("en-US");
 
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -39,4 +44,19 @@ export function getUVIndexIcon(uvIndex: string | undefined) {
   const index = Number(uvIndex);
   const color = uvIndexColor(index);
   return getAvatarIcon(uvIndex, { background: color });
+}
+
+export function isDateValid(date: Date) {
+  return !Number.isNaN(date.getTime());
+}
+
+export function convertToRelativeDate(input: Date | string | undefined): string | undefined {
+  if (!input) {
+    return;
+  }
+  const date = typeof input === "string" ? new Date(input) : input;
+  if (!isDateValid(date)) {
+    return;
+  }
+  return timeAgo.format(date) as string;
 }

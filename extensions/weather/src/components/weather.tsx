@@ -20,7 +20,7 @@ import {
 } from "../wttr";
 import { DayList } from "./day";
 import { useWeather } from "./hooks";
-import { getUVIndexIcon } from "../utils";
+import { convertToRelativeDate, getUVIndexIcon } from "../utils";
 
 function getHighestOccurrence(arr: string[]): string | undefined {
   const oc: Record<string, number> = {};
@@ -243,9 +243,11 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
   const observation = getCurrentObservationTime(curcon);
   const windCon = getCurrentWindConditions(curcon);
 
+  const observationRelative = convertToRelativeDate(observation) || observation;
+
   return (
     <>
-      <List.Section title={`Weather report (${title}) ${observation ? " - " + observation : ""}`}>
+      <List.Section title={`Weather Report (${title}) ${observationRelative ? " - " + observationRelative : ""}`}>
         <List.Item
           title={getCurrentTemperature(curcon) || ""}
           subtitle={weatherDesc}

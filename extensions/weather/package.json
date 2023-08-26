@@ -74,6 +74,7 @@
     "@raycast/api": "^1.57.0",
     "@raycast/utils": "^1.9.1",
     "cross-fetch": "^4.0.0",
+    "javascript-time-ago": "^2.5.9",
     "moment": "^2.29.1",
     "prettier": "^3.0.2"
   },

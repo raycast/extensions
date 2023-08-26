@@ -188,6 +188,7 @@ export class Wttr {
           "Content-Type": "application/json",
         },
       });
+      console.log("response date header: ", response.headers.get("Date"));
       const json = await toJsonOrError(response);
       return json;
     } catch (error: unknown) {
