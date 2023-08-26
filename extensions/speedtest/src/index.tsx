@@ -1,9 +1,9 @@
-import { ActionPanel, Color, Icon, List, showToast, Action, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import * as afs from "fs/promises";
+import { useEffect, useState } from "react";
 import { ensureCLI, speedtestCLIDirectory } from "./lib/cli";
 import { Result, ResultProgress, runSpeedTest } from "./lib/speedtest";
 import { pingToString, speedToString } from "./lib/utils";
-import * as afs from "fs/promises";
 
 function percentageToString(val: number | undefined): string | undefined {
   if (val === undefined) {
@@ -239,7 +239,8 @@ function CopySummaryAction(props: { result: Result }): JSX.Element {
 
 export default function SpeedtestList() {
   const { result, error, isLoading, resultProgress } = useSpeedtest();
-  if (error) {
+
+  if (error || result.error) {
     showToast({
       style: Toast.Style.Failure,
       title: "Speedtest failed",
@@ -248,24 +249,31 @@ export default function SpeedtestList() {
   }
   const title = isLoading ? "Speedtest running" : undefined;
   const summaryAction = <CopySummaryAction result={result} />;
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder={title}>
-      <ISPListItem url={result.url} name={result.isp} summary={summaryAction} />
-      <ServerListItem url={result.url} serverName={result.serverName} summary={summaryAction} />
-      <PingListItem url={result.url} ping={result.ping} progress={resultProgress.ping} summary={summaryAction} />
-      <DownloadListItem
-        url={result.url}
-        download={result.download}
-        progress={resultProgress.download}
-        summary={summaryAction}
-      />
-      <UploadListItem
-        url={result.url}
-        upload={result.upload}
-        progress={resultProgress.upload}
-        summary={summaryAction}
-      />
-      <ResultListItem result={result} isLoading={isLoading} summary={summaryAction} />
+      {result.error ? (
+        <List.EmptyView icon={Icon.LevelMeter} title={result.error} />
+      ) : (
+        <>
+          <ISPListItem url={result.url} name={result.isp} summary={summaryAction} />
+          <ServerListItem url={result.url} serverName={result.serverName} summary={summaryAction} />
+          <PingListItem url={result.url} ping={result.ping} progress={resultProgress.ping} summary={summaryAction} />
+          <DownloadListItem
+            url={result.url}
+            download={result.download}
+            progress={resultProgress.download}
+            summary={summaryAction}
+          />
+          <UploadListItem
+            url={result.url}
+            upload={result.upload}
+            progress={resultProgress.upload}
+            summary={summaryAction}
+          />
+          <ResultListItem result={result} isLoading={isLoading} summary={summaryAction} />
+        </>
+      )}
     </List>
   );
 }
@@ -284,6 +292,7 @@ function useSpeedtest(): {
     upload: undefined,
     ping: undefined,
     url: undefined,
+    error: undefined,
   });
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
