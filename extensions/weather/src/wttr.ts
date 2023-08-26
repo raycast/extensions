@@ -1,6 +1,7 @@
 import fetch from "cross-fetch";
 import { UnitSystem, getTemperatureUnit, getUnitSystem, getWindUnit, getWttrWindPostfix } from "./unit";
 import { getWindDirectionIcon } from "./icons";
+import { getErrorMessage } from "./utils";
 
 export interface Hourly {
   DewPointC: string;
@@ -132,12 +133,14 @@ function paramString(params: { [key: string]: string }): string {
   return prefix + p.join("&");
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function toJsonOrError(response: Response): Promise<any> {
   const s = response.status;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getJson = async (): Promise<any> => {
     try {
       return await response.json();
-    } catch (e: any) {
+    } catch (e: unknown) {
       throw Error(`Server-side issue at wttr.in (${s} - invalid json). Please try again later`);
     }
   };
@@ -173,7 +176,8 @@ async function toJsonOrError(response: Response): Promise<any> {
 export class Wttr {
   private url = "https://wttr.in";
 
-  public async fetch(city?: string, params: { [key: string]: string } = {}, all = false): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async fetch(city?: string, params: { [key: string]: string } = {}): Promise<any> {
     try {
       const ps = paramString(params);
       const fullUrl = this.url + "/" + (city ? city : "") + ps;
@@ -186,8 +190,8 @@ export class Wttr {
       });
       const json = await toJsonOrError(response);
       return json;
-    } catch (error: any) {
-      throw Error(error);
+    } catch (error: unknown) {
+      throw Error(getErrorMessage(error));
     }
   }
 
@@ -245,6 +249,7 @@ export function getCurrentWindConditions(
   if (!curcon) {
     return;
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const speed: string | undefined = (curcon as any)[`windspeed${getWttrWindPostfix()}`];
   if (!speed) {
     return;

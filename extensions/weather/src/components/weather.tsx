@@ -33,14 +33,12 @@ function getHighestOccurrence(arr: string[]): string | undefined {
   }
   let highestName: string | undefined = undefined;
   let highestValue = 0;
-  let i = 0;
   for (const e of Object.keys(oc)) {
     const count = oc[e];
     if (count > highestValue) {
       highestName = e;
       highestValue = count;
     }
-    i++;
   }
   return highestName;
 }
@@ -48,6 +46,7 @@ function getHighestOccurrence(arr: string[]): string | undefined {
 export function getDayTemperature(day: WeatherData, prefix: string): string {
   const unit = getWttrTemperaturePostfix();
   const key = `${prefix}temp${unit}`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rec = day as Record<string, any>;
   let val = "?";
   if (rec[key]) {
@@ -120,6 +119,7 @@ export function getCurrentTemperature(curcon: WeatherConditions | undefined): st
   }
 
   const key = `temp_${getWttrTemperaturePostfix()}`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const f = curcon as Record<string, any>;
   let val = "?";
   if (f[key]) {
