@@ -1,9 +1,8 @@
 import { ActionPanel, getPreferenceValues, List, Action, Icon } from "@raycast/api";
 import moment from "moment";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useState } from "react";
 import { WeatherIcons, getWeatherCodeIcon } from "../icons";
 import { getTemperatureUnit, getWttrTemperaturePostfix } from "../unit";
-import { getErrorMessage } from "../utils";
 import {
   Area,
   Weather,
@@ -18,9 +17,9 @@ import {
   getCurrentUVIndex,
   getCurrentVisibility,
   getCurrentWindConditions,
-  wttr,
 } from "../wttr";
 import { DayList } from "./day";
+import { useWeather } from "./hooks";
 
 function getHighestOccurrence(arr: string[]): string | undefined {
   const oc: Record<string, number> = {};
@@ -306,56 +305,4 @@ export function getDefaultQuery(): string | undefined {
   const pref = getPreferenceValues();
   const q = (pref.defaultquery as string) || undefined;
   return q;
-}
-
-export function useWeather(query: string | undefined): {
-  data: Weather | undefined;
-  error?: string;
-  isLoading: boolean;
-} {
-  const [data, setData] = useState<Weather>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      if (!query) {
-        const dq = getDefaultQuery();
-        if (dq && dq.length > 0) {
-          query = dq;
-        }
-      }
-      if (query === null || cancel) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const wdata = await wttr.getWeather(query);
-        if (!cancel) {
-          setData(wdata);
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return { data, error, isLoading };
 }

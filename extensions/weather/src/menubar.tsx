@@ -11,7 +11,6 @@ import {
 import {
   getCurrentTemperature,
   getMetaData,
-  useWeather,
   getDefaultQuery,
   getDayWeatherIcon,
   getWeekday,
@@ -32,6 +31,7 @@ import {
   Weather,
   WeatherConditions,
 } from "./wttr";
+import { useWeather } from "./components/hooks";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
