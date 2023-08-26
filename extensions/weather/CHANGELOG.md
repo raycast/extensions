@@ -5,6 +5,7 @@
 - Add `Temperature Feels Like`
 - Add `UV Index`
 - Add `Humidity`
+- Upgrade to 1.57
 
 ## [Add MenuBar] - 2022-11-26
 
