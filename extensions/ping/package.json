@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ping",
   "title": "Ping",
-  "description": "Pings a domain exactly once.",
+  "description": "Pings a domain to see if it is alive",
   "icon": "command-icon.png",
   "author": "stevensd2m",
   "categories": [
