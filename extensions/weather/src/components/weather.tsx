@@ -5,9 +5,11 @@ import { WeatherIcons, getWeatherCodeIcon } from "../icons";
 import { getTemperatureUnit, getWttrTemperaturePostfix } from "../unit";
 import { getErrorMessage } from "../utils";
 import {
+  Area,
   Weather,
   WeatherConditions,
   WeatherData,
+  getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
   getCurrentUVIndex,
@@ -96,16 +98,17 @@ export function getMetaData(data: Weather | undefined): {
   title: string;
   curcon: WeatherConditions | undefined;
   weatherDesc: string | undefined;
+  area: Area | undefined;
 } {
   if (!data) {
-    return { title: "?", curcon: undefined, weatherDesc: undefined };
+    return { title: "?", curcon: undefined, weatherDesc: undefined, area: undefined };
   }
   const area = data.nearest_area[0];
   const curcon = data.current_condition[0];
 
   const title = `${area.areaName[0].value}, ${area.region[0].value}, ${area.country[0].value}`;
   const weatherDesc = curcon ? curcon.weatherDesc[0].value : undefined;
-  return { title, curcon, weatherDesc };
+  return { title, curcon, weatherDesc, area };
 }
 
 export function getCurrentTemperature(curcon: WeatherConditions | undefined): string | undefined {
@@ -180,12 +183,26 @@ function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
   return <List.Item title="Visibility" icon={WeatherIcons.Visibility} accessories={[{ text: vis.distanceAndUnit }]} />;
 }
 
+function LocationItem(props: { area: Area | undefined }) {
+  const a = getAreaValues(props.area);
+  if (!a) {
+    return null;
+  }
+  return (
+    <List.Item
+      title="Location Coordinates"
+      icon={WeatherIcons.Coordinate}
+      accessories={[{ text: a.latitude && a.longitude ? `${a.latitude}, ${a.longitude}` : undefined }]}
+    />
+  );
+}
+
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
     return null;
   }
-  const { title, curcon, weatherDesc } = getMetaData(data);
+  const { title, curcon, weatherDesc, area } = getMetaData(data);
   const windCon = getCurrentWindConditions(curcon);
 
   return (
@@ -213,6 +230,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
         <WindSpeedItem curcon={curcon} />
         <WindDirectionItem curcon={curcon} />
         <VisibilityItem curcon={curcon} />
+        <LocationItem area={area} />
       </List.Section>
     </React.Fragment>
   );

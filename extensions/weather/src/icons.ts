@@ -186,4 +186,8 @@ export enum WeatherIcons {
   Humidity = Icon.Raindrop,
   Wind = Icon.Cloud,
   Visibility = Icon.Eye,
+  Coordinate = Icon.Pin,
+  Area = Icon.Pin,
+  Region = Icon.Pin,
+  Country = Icon.Pin,
 }

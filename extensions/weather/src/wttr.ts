@@ -82,6 +82,9 @@ export interface Area {
   areaName: Array<AreaName>;
   country: Array<CountryName>;
   region: Array<RegionName>;
+  latitude: string | undefined;
+  longitude: string | undefined;
+  population: string | undefined;
 }
 
 export interface WeatherData {
@@ -258,4 +261,33 @@ export function getCurrentVisibility(
   const unit = us === UnitSystem.Imperial ? "Miles" : "Km";
   const distanceAndUnit = `${distance} ${unit}`;
   return { unit, distance, distanceAndUnit };
+}
+
+export function getAreaValues(
+  area: Area | undefined,
+):
+  | { areaName?: string; country?: string; region?: string; latitude?: string; longitude?: string; population?: string }
+  | undefined {
+  if (!area) {
+    return;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getStringVal = (obj: any[] | undefined): string | undefined => {
+    if (obj === undefined) {
+      return;
+    }
+    if (obj && obj.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (obj[0] as any).value;
+    }
+    return;
+  };
+  const areaName = getStringVal(area?.areaName);
+  const country = getStringVal(area?.country);
+  const region = getStringVal(area?.region);
+  const latitude = area.latitude;
+  const longitude = area.longitude;
+  const population = area.population;
+
+  return { areaName, country, region, latitude, longitude, population };
 }

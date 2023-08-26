@@ -19,6 +19,8 @@ import {
 } from "./components/weather";
 import { getWeatherCodeIcon, WeatherIcons } from "./icons";
 import {
+  Area,
+  getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
   getCurrentUVIndex,
@@ -150,9 +152,52 @@ function VisibilityMenubarItem(props: { curcon: WeatherConditions | undefined })
   );
 }
 
+function LocationMenubarSection(props: { area: Area | undefined }) {
+  const a = getAreaValues(props.area);
+  if (!a) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Section title="Location">
+      {a.areaName && (
+        <MenuBarExtra.Item
+          title="Area"
+          icon={WeatherIcons.Country}
+          subtitle={a.areaName}
+          onAction={launchWeatherCommand}
+        />
+      )}
+      {a.region && (
+        <MenuBarExtra.Item
+          title="Region"
+          subtitle={a.region}
+          icon={WeatherIcons.Region}
+          onAction={launchWeatherCommand}
+        />
+      )}
+      {a.country && (
+        <MenuBarExtra.Item
+          title="Country"
+          subtitle={a.country}
+          icon={WeatherIcons.Country}
+          onAction={launchWeatherCommand}
+        />
+      )}
+      {a.latitude && a.longitude && (
+        <MenuBarExtra.Item
+          title="Lon, Lat"
+          subtitle={`${a.longitude},${a.latitude}`}
+          icon={WeatherIcons.Coordinate}
+          onAction={launchWeatherCommand}
+        />
+      )}
+    </MenuBarExtra.Section>
+  );
+}
+
 export default function MenuCommand(): JSX.Element {
   const { data, error, isLoading } = useWeather(getDefaultQuery());
-  const { title, curcon, weatherDesc } = getMetaData(data);
+  const { title, curcon, weatherDesc, area } = getMetaData(data);
   const { showMenuText } = getAppearancePreferences();
 
   const temp = getCurrentTemperature(curcon);
@@ -188,6 +233,7 @@ export default function MenuCommand(): JSX.Element {
         <HumidityMenuItem curcon={curcon} />
         <VisibilityMenubarItem curcon={curcon} />
       </MenuBarExtra.Section>
+      <LocationMenubarSection area={area} />
       <MenuBarExtra.Section title="Forecast">
         {data?.weather?.map((d) => (
           <MenuBarExtra.Item
