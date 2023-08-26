@@ -12,6 +12,7 @@ import {
   getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
+  getCurrentPressure,
   getCurrentSun,
   getCurrentUVIndex,
   getCurrentVisibility,
@@ -184,6 +185,14 @@ function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
   return <List.Item title="Visibility" icon={WeatherIcons.Visibility} accessories={[{ text: vis.distanceAndUnit }]} />;
 }
 
+function PressureItem(props: { curcon: WeatherConditions | undefined }) {
+  const p = getCurrentPressure(props.curcon);
+  if (!p) {
+    return null;
+  }
+  return <List.Item title="Pressure" icon={WeatherIcons.Pressure} accessories={[{ text: p.valueAndUnit }]} />;
+}
+
 function LocationItem(props: { area: Area | undefined }) {
   const a = getAreaValues(props.area);
   if (!a) {
@@ -245,6 +254,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
         <FeelsLikeItem curcon={curcon} />
         <UVIndexItem curcon={curcon} />
         <HumidityItem curcon={curcon} />
+        <PressureItem curcon={curcon} />
         <WindSpeedItem curcon={curcon} />
         <WindDirectionItem curcon={curcon} />
         <VisibilityItem curcon={curcon} />
