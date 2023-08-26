@@ -327,7 +327,7 @@ function useSpeedtest(): {
             if (!cancel) {
               setResultProgress(prog);
             }
-          }
+          },
         );
       } catch (err) {
         if (!cancel) {

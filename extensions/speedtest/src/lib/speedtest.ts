@@ -27,7 +27,7 @@ export function runSpeedTest(
   callback: (result: Result) => void,
   resultCallback: (result: Result) => void,
   errorCallback: (error: Error) => void,
-  progressCallback: (resultProgress: ResultProgress) => void
+  progressCallback: (resultProgress: ResultProgress) => void,
 ) {
   const exePath = speedtestCLIFilepath();
   const pro = spawn(exePath, ["--format", "json", "--progress", "--accept-license", "--accept-gdpr"]);
