@@ -12,6 +12,7 @@ import {
   getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
+  getCurrentSun,
   getCurrentUVIndex,
   getCurrentVisibility,
   getCurrentWindConditions,
@@ -197,6 +198,23 @@ function LocationItem(props: { area: Area | undefined }) {
   );
 }
 
+function SunItem(props: { data: Weather | undefined }) {
+  const s = getCurrentSun(props.data);
+  if (!s) {
+    return null;
+  }
+  return (
+    <List.Item
+      title="Sun"
+      icon={WeatherIcons.Sunrise}
+      accessories={[
+        { icon: WeatherIcons.Sunrise, text: s.sunrise },
+        { icon: WeatherIcons.Sunset, text: s.sunset },
+      ]}
+    />
+  );
+}
+
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
@@ -231,6 +249,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
         <WindDirectionItem curcon={curcon} />
         <VisibilityItem curcon={curcon} />
         <LocationItem area={area} />
+        <SunItem data={data} />
       </List.Section>
     </React.Fragment>
   );

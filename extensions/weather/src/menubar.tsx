@@ -23,6 +23,7 @@ import {
   getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
+  getCurrentSun,
   getCurrentUVIndex,
   getCurrentVisibility,
   getCurrentWindConditions,
@@ -195,6 +196,29 @@ function LocationMenubarSection(props: { area: Area | undefined }) {
   );
 }
 
+function SunMenubarSection(props: { data: Weather | undefined }) {
+  const sun = getCurrentSun(props.data);
+  if (!sun) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Section title="Sun">
+      <MenuBarExtra.Item
+        title="Sunrise"
+        subtitle={sun.sunrise}
+        icon={WeatherIcons.Sunrise}
+        onAction={launchWeatherCommand}
+      />
+      <MenuBarExtra.Item
+        title="Sunset"
+        subtitle={sun.sunset}
+        icon={WeatherIcons.Sunset}
+        onAction={launchWeatherCommand}
+      />
+    </MenuBarExtra.Section>
+  );
+}
+
 export default function MenuCommand(): JSX.Element {
   const { data, error, isLoading } = useWeather(getDefaultQuery());
   const { title, curcon, weatherDesc, area } = getMetaData(data);
@@ -234,6 +258,7 @@ export default function MenuCommand(): JSX.Element {
         <VisibilityMenubarItem curcon={curcon} />
       </MenuBarExtra.Section>
       <LocationMenubarSection area={area} />
+      <SunMenubarSection data={data} />
       <MenuBarExtra.Section title="Forecast">
         {data?.weather?.map((d) => (
           <MenuBarExtra.Item

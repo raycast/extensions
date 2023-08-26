@@ -87,6 +87,15 @@ export interface Area {
   population: string | undefined;
 }
 
+export interface Astronomy {
+  moon_illumination?: string;
+  moon_phase?: string;
+  moonrise?: string;
+  moonset?: string;
+  sunrise?: string;
+  sunset?: string;
+}
+
 export interface WeatherData {
   avgtempC: string;
   avgtempF: string;
@@ -99,6 +108,7 @@ export interface WeatherData {
   uvIndex: string;
   date: string;
   hourly: Array<Hourly>;
+  astronomy?: Astronomy[];
 }
 
 export interface Weather {
@@ -290,4 +300,21 @@ export function getAreaValues(
   const population = area.population;
 
   return { areaName, country, region, latitude, longitude, population };
+}
+
+export function getCurrentSun(weather: Weather | undefined): { sunrise: string; sunset: string } | undefined {
+  if (!weather || !weather.weather || weather.weather.length <= 0) {
+    return;
+  }
+  const today = weather.weather[0];
+  if (!today.astronomy || today.astronomy.length <= 0) {
+    return;
+  }
+  const a = today.astronomy[0];
+  const sunrise = a.sunrise;
+  const sunset = a.sunset;
+  if (!sunrise || !sunset) {
+    return;
+  }
+  return { sunrise, sunset };
 }

@@ -190,4 +190,6 @@ export enum WeatherIcons {
   Area = Icon.Pin,
   Region = Icon.Pin,
   Country = Icon.Pin,
+  Sunrise = Icon.Sunrise,
+  Sunset = Icon.Sun,
 }
