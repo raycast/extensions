@@ -1,4 +1,4 @@
-import fetch, { Response } from "node-fetch";
+import fetch from "cross-fetch";
 import { UnitSystem, getTemperatureUnit, getUnitSystem, getWindUnit, getWttrWindPostfix } from "./unit";
 import { getWindDirectionIcon } from "./icons";
 
