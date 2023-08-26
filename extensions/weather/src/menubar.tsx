@@ -250,8 +250,23 @@ function ObservationTimeMenubarItem(props: { curcon: WeatherConditions | undefin
   );
 }
 
+function LastFetchTimeMenubarItem(props: { fetched: Date | undefined }) {
+  const f = props.fetched;
+  const relative = f ? convertToRelativeDate(f) || f?.toLocaleString() : "-";
+  return (
+    <MenuBarExtra.Item
+      title="Fetched"
+      subtitle={relative}
+      tooltip={`Fetched: ${f ? f.toLocaleString() : "-"}`}
+      icon={Icon.Download}
+      onAction={launchWeatherCommand}
+    />
+  );
+}
+//{fetchDate && <MenuBarExtra.Item title="Fetched" subtitle={convertToRelativeDate(fetchDate)}/>}
+
 export default function MenuCommand(): JSX.Element {
-  const { data, error, isLoading } = useWeather(getDefaultQuery());
+  const { data, error, isLoading, fetchDate } = useWeather(getDefaultQuery());
   const { curcon, weatherDesc, area } = getMetaData(data);
   const { showMenuText } = getAppearancePreferences();
 
@@ -310,6 +325,7 @@ export default function MenuCommand(): JSX.Element {
           onAction={() => open("https://wttr.in")}
         />
         <ObservationTimeMenubarItem curcon={curcon} />
+        <LastFetchTimeMenubarItem fetched={fetchDate} />
         <MenuBarExtra.Item
           title="Configure"
           icon={Icon.Gear}

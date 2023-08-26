@@ -1,13 +1,18 @@
 import { getErrorMessage } from "../utils";
 import { Weather, wttr } from "../wttr";
 import { getDefaultQuery } from "./weather";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { environment } from "@raycast/api";
 
 export function useWeather(query: string | undefined): {
   data: Weather | undefined;
   error?: string;
   isLoading: boolean;
+  fetchDate: Date | undefined;
 } {
+  const [fetchDate, setFetchDate] = useCachedState<Date | undefined>("last-fetch", undefined, {
+    cacheNamespace: environment.commandName,
+  });
   const { data, error, isLoading } = useCachedPromise(
     async (q) => {
       let query = q;
@@ -18,11 +23,12 @@ export function useWeather(query: string | undefined): {
         }
       }
       const wdata = await wttr.getWeather(query);
+      setFetchDate(new Date());
       return wdata;
     },
     [query],
     { keepPreviousData: true },
   );
 
-  return { data, error: error ? getErrorMessage(error) : undefined, isLoading };
+  return { data, error: error ? getErrorMessage(error) : undefined, isLoading, fetchDate };
 }
