@@ -74,8 +74,7 @@
     "@raycast/api": "^1.57.0",
     "@raycast/utils": "^1.9.1",
     "cross-fetch": "^4.0.0",
-    "moment": "^2.29.1",
-    "raycast": "^1.0.8"
+    "moment": "^2.29.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
