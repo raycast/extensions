@@ -1,4 +1,5 @@
 # Confluence
+
 Atlassian's Confluence extension, allowing you to:
 
  - `Search` allowing you to search all pages/blogs
