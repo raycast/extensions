@@ -67,6 +67,8 @@ export interface WeatherConditions {
   windspeedKmph: string;
   windspeedMiles: string;
   localObsDateTime?: string;
+  precipMM?: string;
+  precipInches?: string;
 }
 
 export interface AreaName {
@@ -380,6 +382,46 @@ export function getCurrentTemperatureMinMax(
     return;
   }
   return { minTemp, maxTemp };
+}
+
+export function getCurrentRain(
+  curcon: WeatherConditions | undefined,
+): { value: number; unit: string; valueAndUnit: string } | undefined {
+  if (!curcon) {
+    return;
+  }
+  const us = getUnitSystem();
+  const valueText: string | undefined = us === UnitSystem.Imperial ? curcon.precipInches : curcon.precipMM;
+
+  if (!valueText) {
+    return;
+  }
+  const value = Number(valueText);
+  if (Number.isNaN(value)) {
+    return;
+  }
+  const unit = us === UnitSystem.Imperial ? "Inches" : "mm";
+  const valueAndUnit = `${value} ${unit}`;
+  return { value, unit, valueAndUnit };
+}
+
+export function getCurrentCloudCover(
+  curcon: WeatherConditions | undefined,
+): { value: number; unit: string; valueAndUnit: string } | undefined {
+  if (!curcon) {
+    return;
+  }
+  const valueText: string | undefined = curcon.cloudcover;
+  if (!valueText) {
+    return;
+  }
+  const value = Number(valueText);
+  if (Number.isNaN(value)) {
+    return;
+  }
+  const unit = "%";
+  const valueAndUnit = `${value} ${unit}`;
+  return { value, unit, valueAndUnit };
 }
 
 export function getCurrentObservationTime(curcon: WeatherConditions | undefined): string | undefined {

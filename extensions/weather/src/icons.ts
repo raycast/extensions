@@ -196,4 +196,6 @@ export enum WeatherIcons {
   Moon = Icon.Moon,
   Moonrise = Icon.Moon,
   Moonset = "moonset.svg",
+  Rain = Icon.Raindrop,
+  Cloud = Icon.Cloud,
 }

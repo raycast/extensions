@@ -1,4 +1,5 @@
 import {
+  Color,
   getPreferenceValues,
   Icon,
   Image,
@@ -20,11 +21,13 @@ import { getWeatherCodeIcon, WeatherIcons } from "./icons";
 import {
   Area,
   getAreaValues,
+  getCurrentCloudCover,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
   getCurrentMoon,
   getCurrentObservationTime,
   getCurrentPressure,
+  getCurrentRain,
   getCurrentSun,
   getCurrentTemperatureMinMax,
   getCurrentUVIndex,
@@ -102,6 +105,36 @@ function TemperatureMax(props: { weather: Weather | undefined }) {
       title="Max"
       icon={Icon.ArrowUp}
       subtitle={`${t.maxTemp} ${getTemperatureUnit()}`}
+      onAction={launchWeatherCommand}
+    />
+  );
+}
+
+function RainMenuItem(props: { curcon: WeatherConditions | undefined }) {
+  const r = getCurrentRain(props.curcon);
+  if (!r) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Item
+      title="Rain"
+      icon={{ source: WeatherIcons.Rain, tintColor: r.value > 0 ? Color.Blue : undefined }}
+      subtitle={r.valueAndUnit}
+      onAction={launchWeatherCommand}
+    />
+  );
+}
+
+function CloudCoverMenuItem(props: { curcon: WeatherConditions | undefined }) {
+  const r = getCurrentCloudCover(props.curcon);
+  if (!r) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Item
+      title="Cloud Cover"
+      icon={WeatherIcons.Cloud}
+      subtitle={r.valueAndUnit}
       onAction={launchWeatherCommand}
     />
   );
@@ -361,8 +394,10 @@ export default function MenuCommand(): JSX.Element {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Air">
         <WindMenubarItem curcon={curcon} />
+        <RainMenuItem curcon={curcon} />
         <PressureMenubarItem curcon={curcon} />
         <HumidityMenuItem curcon={curcon} />
+        <CloudCoverMenuItem curcon={curcon} />
         <VisibilityMenubarItem curcon={curcon} />
       </MenuBarExtra.Section>
       <SunMenubarSection data={data} />

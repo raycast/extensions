@@ -9,11 +9,13 @@ import {
   WeatherConditions,
   WeatherData,
   getAreaValues,
+  getCurrentCloudCover,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
   getCurrentMoon,
   getCurrentObservationTime,
   getCurrentPressure,
+  getCurrentRain,
   getCurrentSun,
   getCurrentUVIndex,
   getCurrentVisibility,
@@ -235,6 +237,8 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
   const windCon = getCurrentWindConditions(curcon);
 
   const observationRelative = convertToRelativeDate(observation) || observation;
+  const rain = getCurrentRain(curcon);
+  const cloud = getCurrentCloudCover(curcon);
 
   return (
     <>
@@ -244,6 +248,15 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
           subtitle={weatherDesc}
           icon={{ value: getWeatherCodeIcon(curcon?.weatherCode), tooltip: weatherDesc || "" }}
           accessories={[
+            {
+              text: cloud ? cloud.valueAndUnit : undefined,
+              icon: cloud ? WeatherIcons.Cloud : undefined,
+              tooltip: cloud ? `Cloud Cover ${cloud.valueAndUnit}` : undefined,
+            },
+            {
+              text: rain && rain.value > 0 ? rain.valueAndUnit : undefined,
+              icon: rain && rain.value > 0 ? WeatherIcons.Rain : undefined,
+            },
             {
               icon: { source: WeatherIcons.Humidity, tintColor: Color.SecondaryText },
               text: curcon ? `${curcon.humidity}%` : "?",
