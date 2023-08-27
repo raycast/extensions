@@ -1,5 +1,5 @@
-import { List } from "@raycast/api";
-import { getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
+import { Color, List } from "@raycast/api";
+import { WeatherIcons, getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
 import { getWindUnit, getTemperatureUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { Hourly, WeatherData } from "../wttr";
 import { getUVIndexIcon } from "../utils";
@@ -66,12 +66,12 @@ export function DayList(props: { day: WeatherData; title: string }): JSX.Element
                 tooltip: day.uvIndex ? `UV Index: ${day.uvIndex}` : undefined,
               },
               {
-                icon: "💧",
+                icon: { source: WeatherIcons.Humidity, tintColor: Color.SecondaryText },
                 text: getHumidityText(data),
                 tooltip: `Humidity: ${getHumidityText(data)}`,
               },
               {
-                icon: "💨",
+                icon: { source: WeatherIcons.Wind, tintColor: Color.SecondaryText },
                 text: getWindText(data),
                 tooltip: `Wind: ${getWindText(data)}`,
               },
