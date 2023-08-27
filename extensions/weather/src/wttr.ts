@@ -460,3 +460,55 @@ export function getDaySnowInfo(day: WeatherData) {
   const valueAndUnit = `${value} ${unit}`;
   return { value, unit, valueAndUnit };
 }
+
+export function getHourlyCloudCover(hour: Hourly | undefined) {
+  if (!hour) {
+    return;
+  }
+  const value = hour.cloudcover;
+  if (!value) {
+    return;
+  }
+  const unit = "%";
+  const valueAndUnit = `${value} ${unit}`;
+  return { value, unit, valueAndUnit };
+}
+
+export function getHourlyRain(hour: Hourly | undefined) {
+  if (!hour) {
+    return;
+  }
+  const us = getUnitSystem();
+  const valueText = us === UnitSystem.Imperial ? hour.precipInches : hour.precipMM;
+  if (!valueText) {
+    return;
+  }
+  const value = Number(valueText);
+  if (Number.isNaN(value)) {
+    return;
+  }
+  const chanceOfRain = hour.chanceofrain;
+  if (!chanceOfRain) {
+    return;
+  }
+  const unit = us === UnitSystem.Imperial ? "Inches" : "mm";
+  const valueAndUnit = `${valueText} ${unit}`;
+  return { value, unit, valueAndUnit, chanceOfRain };
+}
+
+export function getHourlyThunder(hour: Hourly | undefined) {
+  if (!hour) {
+    return;
+  }
+  const valueText = hour.chanceofthunder;
+  if (!valueText) {
+    return;
+  }
+  const value = Number(valueText);
+  if (Number.isNaN(value)) {
+    return;
+  }
+  const unit = "%";
+  const valueAndUnit = `${valueText} ${unit}`;
+  return { value, unit, valueAndUnit };
+}

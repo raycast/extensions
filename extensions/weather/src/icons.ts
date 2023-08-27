@@ -199,4 +199,5 @@ export enum WeatherIcons {
   Rain = Icon.Raindrop,
   Cloud = Icon.Cloud,
   Snow = Icon.Snowflake,
+  Thunder = Icon.Bolt,
 }
