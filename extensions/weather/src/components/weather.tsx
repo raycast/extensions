@@ -147,38 +147,6 @@ function UVIndexItem(props: { curcon: WeatherConditions | undefined }) {
   return <List.Item title="UV Index" icon={getUVIndexIcon(uvIndex)} accessories={[{ text: uvIndex }]} />;
 }
 
-function HumidityItem(props: { curcon: WeatherConditions | undefined }) {
-  const hum = getCurrentHumidity(props.curcon);
-  if (!hum) {
-    return null;
-  }
-  return <List.Item title="Humidity" icon={WeatherIcons.Humidity} accessories={[{ text: hum.valueAndUnit }]} />;
-}
-
-function WindSpeedItem(props: { curcon: WeatherConditions | undefined }) {
-  const wind = getCurrentWindConditions(props.curcon);
-  if (!wind) {
-    return null;
-  }
-  return (
-    <List.Item title="Wind Speed" icon={WeatherIcons.Wind} accessories={[{ text: `${wind.speed} ${wind.unit}` }]} />
-  );
-}
-
-function WindDirectionItem(props: { curcon: WeatherConditions | undefined }) {
-  const wind = getCurrentWindConditions(props.curcon);
-  if (!wind) {
-    return null;
-  }
-  return (
-    <List.Item
-      title="Wind Direction"
-      icon={WeatherIcons.Wind}
-      accessories={[{ text: wind.dirIcon }, { text: wind.dirText }]}
-    />
-  );
-}
-
 function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
   const vis = getCurrentVisibility(props.curcon);
   if (!vis) {
@@ -277,12 +245,12 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
           icon={{ value: getWeatherCodeIcon(curcon?.weatherCode), tooltip: weatherDesc || "" }}
           accessories={[
             {
-              icon: WeatherIcons.Humidity,
+              icon: { source: WeatherIcons.Humidity, tintColor: Color.SecondaryText },
               text: curcon ? `${curcon.humidity}%` : "?",
               tooltip: curcon ? `Humidity: ${curcon.humidity}%` : "?",
             },
             {
-              icon: WeatherIcons.Wind,
+              icon: { source: WeatherIcons.Wind, tintColor: Color.SecondaryText },
               text: windCon ? `${windCon.speed} ${windCon.unit} ${windCon.dirIcon} (${windCon.dirText})` : "?",
               tooltip: windCon ? `Wind ${windCon.speed}${windCon.unit} ${windCon.dirIcon} (${windCon.dirText})` : "?",
             },
