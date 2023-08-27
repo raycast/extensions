@@ -22,6 +22,7 @@ import {
   getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
+  getCurrentMoon,
   getCurrentObservationTime,
   getCurrentPressure,
   getCurrentSun,
@@ -233,6 +234,30 @@ function SunMenubarSection(props: { data: Weather | undefined }) {
   );
 }
 
+function MoonMenubarSection(props: { data: Weather | undefined }) {
+  const moon = getCurrentMoon(props.data);
+  if (!moon) {
+    return null;
+  }
+  const { curcon } = getMetaData(props.data);
+  return (
+    <MenuBarExtra.Section title="Moon">
+      <MenuBarExtra.Item
+        title="Moonrise"
+        subtitle={moon.moonrise}
+        icon={WeatherIcons.Moonrise}
+        onAction={launchWeatherCommand}
+      />
+      <MenuBarExtra.Item
+        title="Moonset"
+        subtitle={moon.moonset}
+        icon={WeatherIcons.Moonset}
+        onAction={launchWeatherCommand}
+      />
+    </MenuBarExtra.Section>
+  );
+}
+
 function ObservationTimeMenubarItem(props: { curcon: WeatherConditions | undefined }) {
   const obs = getCurrentObservationTime(props.curcon);
   if (!obs) {
@@ -305,7 +330,7 @@ export default function MenuCommand(): JSX.Element {
         <VisibilityMenubarItem curcon={curcon} />
       </MenuBarExtra.Section>
       <SunMenubarSection data={data} />
-      <LocationMenubarSection area={area} />
+      <MoonMenubarSection data={data} />
       <MenuBarExtra.Section title="Forecast">
         {data?.weather?.map((d) => (
           <MenuBarExtra.Item
@@ -317,6 +342,7 @@ export default function MenuCommand(): JSX.Element {
           />
         ))}
       </MenuBarExtra.Section>
+      <LocationMenubarSection area={area} />
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           icon={Icon.Link}

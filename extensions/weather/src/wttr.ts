@@ -343,6 +343,23 @@ export function getCurrentSun(weather: Weather | undefined): { sunrise: string; 
   return { sunrise, sunset };
 }
 
+export function getCurrentMoon(weather: Weather | undefined): { moonrise: string; moonset: string } | undefined {
+  if (!weather || !weather.weather || weather.weather.length <= 0) {
+    return;
+  }
+  const today = weather.weather[0];
+  if (!today.astronomy || today.astronomy.length <= 0) {
+    return;
+  }
+  const a = today.astronomy[0];
+  const moonrise = a.moonrise;
+  const moonset = a.moonset;
+  if (!moonrise || !moonset) {
+    return;
+  }
+  return { moonrise, moonset };
+}
+
 export function getCurrentObservationTime(curcon: WeatherConditions | undefined): string | undefined {
   if (!curcon) {
     return;

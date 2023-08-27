@@ -193,4 +193,7 @@ export enum WeatherIcons {
   Sunrise = Icon.Sun,
   Sunset = Icon.Sunrise,
   Pressure = Icon.BarCode,
+  Moon = Icon.Moon,
+  Moonrise = Icon.Moon,
+  Moonset = "moonset.svg",
 }

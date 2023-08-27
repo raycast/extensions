@@ -6,7 +6,8 @@
 - Add `Temperature Feels Like`
 - Add `Humidity`
 - Add `Pressure`
-- Add `Sunrise`, `Sunset` `UV Index`
+- Add `Sunrise`, `Sunset` and `UV Index`
+- Add `Moonrise` and `Moonset`
 - Add more details for location
 - Add observation time
 - Add semantic section in menubar command

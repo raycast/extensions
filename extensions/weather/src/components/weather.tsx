@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, Action, Icon, Color } from "@raycast/api";
 import moment from "moment";
 import React, { ReactElement, useState } from "react";
 import { WeatherIcons, getWeatherCodeIcon } from "../icons";
@@ -11,6 +11,7 @@ import {
   getAreaValues,
   getCurrentFeelLikeTemperature,
   getCurrentHumidity,
+  getCurrentMoon,
   getCurrentObservationTime,
   getCurrentPressure,
   getCurrentSun,
@@ -234,6 +235,27 @@ function SunItem(props: { data: Weather | undefined }) {
   );
 }
 
+function MoonItem(props: { data: Weather | undefined }) {
+  const m = getCurrentMoon(props.data);
+  if (!m) {
+    return null;
+  }
+  return (
+    <List.Item
+      title="Moon"
+      icon={WeatherIcons.Moon}
+      accessories={[
+        { icon: WeatherIcons.Moonrise, text: m.moonrise, tooltip: `Moonrise ${m.moonrise}` },
+        {
+          icon: { source: WeatherIcons.Moonset, tintColor: Color.SecondaryText },
+          text: m.moonset,
+          tooltip: `Moonset ${m.moonset}`,
+        },
+      ]}
+    />
+  );
+}
+
 function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
@@ -271,6 +293,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
         <VisibilityItem curcon={curcon} />
         <LocationItem area={area} />
         <SunItem data={data} />
+        <MoonItem data={data} />
       </List.Section>
     </>
   );
