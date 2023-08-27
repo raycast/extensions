@@ -10,7 +10,7 @@ function getTime(time: string): string {
   return `${h} ${postfix}`;
 }
 
-export function DayList(props: { day: WeatherData; title: string }): JSX.Element {
+export function DayList(props: { day: WeatherData; title: string; isLoading?: boolean }): JSX.Element {
   const day = props.day;
 
   const getWeatherDesc = (hour: Hourly): string => {
@@ -52,7 +52,7 @@ export function DayList(props: { day: WeatherData; title: string }): JSX.Element
   };
 
   return (
-    <List>
+    <List isLoading={props.isLoading}>
       <List.Section title={props.title}>
         {day.hourly.map((data) => (
           <List.Item

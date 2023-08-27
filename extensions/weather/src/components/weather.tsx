@@ -26,6 +26,11 @@ import { DayList } from "./day";
 import { useWeather } from "./hooks";
 import { convertToRelativeDate, getUVIndexIcon } from "../utils";
 
+export interface WttrDay {
+  date: string;
+  title: string;
+}
+
 function getHighestOccurrence(arr: string[]): string | undefined {
   const oc: Record<string, number> = {};
   for (const e of arr) {
@@ -312,26 +317,38 @@ function WeatherDailyForecastFragment(props: { data: Weather | undefined }): Rea
   );
 }
 
-export function WeatherList(): JSX.Element {
+export function WeatherListOrDay(props: { day?: WttrDay }): JSX.Element {
   const [query, setQuery] = useState<string>("");
   const { data, error, isLoading } = useWeather(query);
-  return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search for other location (e.g. London)"
-      onSearchTextChange={setQuery}
-      throttle
-    >
-      {error ? (
-        <List.EmptyView title="Could not fetch data from wttr.in" icon="⛈️" description={error} />
-      ) : (
-        <React.Fragment>
-          <WeatherCurrentListItemFragment data={data} />
-          <WeatherDailyForecastFragment data={data} />
-        </React.Fragment>
-      )}
-    </List>
-  );
+  if (props.day) {
+    const day = data?.weather.find((w) => w.date === props.day?.date);
+    if (day) {
+      return <DayList isLoading={isLoading} title={props.day.title} day={day} />;
+    }
+    return (
+      <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
+        {error && <List.EmptyView title="Could not fetch data from wttr.in" icon="⛈️" description={error} />}
+      </List>
+    );
+  } else {
+    return (
+      <List
+        isLoading={isLoading}
+        searchBarPlaceholder="Search for other location (e.g. London)"
+        onSearchTextChange={setQuery}
+        throttle
+      >
+        {error ? (
+          <List.EmptyView title="Could not fetch data from wttr.in" icon="⛈️" description={error} />
+        ) : (
+          <React.Fragment>
+            <WeatherCurrentListItemFragment data={data} />
+            <WeatherDailyForecastFragment data={data} />
+          </React.Fragment>
+        )}
+      </List>
+    );
+  }
 }
 
 export function getDefaultQuery(): string | undefined {

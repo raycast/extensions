@@ -16,6 +16,7 @@ import {
   getDayWeatherIcon,
   getWeekday,
   getDayTemperature,
+  WttrDay,
 } from "./components/weather";
 import { getWeatherCodeIcon, WeatherIcons } from "./icons";
 import {
@@ -44,6 +45,14 @@ import { getTemperatureUnit } from "./unit";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
+}
+
+export interface LaunchContextDay {
+  day?: WttrDay;
+}
+
+function launchWeatherCommandWithDate(context: LaunchContextDay) {
+  launchCommand({ name: "index", type: LaunchType.UserInitiated, context: context });
 }
 
 function getAppearancePreferences(): { showMenuIcon: boolean; showMenuText: boolean } {
@@ -358,7 +367,7 @@ function LastFetchTimeMenubarItem(props: { fetched: Date | undefined }) {
   );
 }
 
-function WeatherForecastDay(props: { day: WeatherData }) {
+function WeatherForecastDay(props: { day: WeatherData; fullTitle: string }) {
   const d = props.day;
   const valParts = [`⬆${getDayTemperature(d, "max")}`, `⬇${getDayTemperature(d, "min")}`];
   const snow = getDaySnowInfo(d);
@@ -369,19 +378,20 @@ function WeatherForecastDay(props: { day: WeatherData }) {
     valParts.push(`❄️ ${snow.valueAndUnit}`);
   }
   const st = valParts.join(" ");
+  const weekday = getWeekday(d.date);
   return (
     <MenuBarExtra.Item
-      title={getWeekday(d.date)}
+      title={weekday}
       icon={getDayWeatherIcon(d)}
       subtitle={st}
-      onAction={launchWeatherCommand}
+      onAction={() => launchWeatherCommandWithDate({ day: { date: d.date, title: `${props.fullTitle} - ${weekday}` } })}
     />
   );
 }
 
 export default function MenuCommand(): JSX.Element {
   const { data, error, isLoading, fetchDate } = useWeather(getDefaultQuery());
-  const { curcon, weatherDesc, area } = getMetaData(data);
+  const { title, curcon, weatherDesc, area } = getMetaData(data);
   const { showMenuText } = getAppearancePreferences();
 
   const temp = getCurrentTemperature(curcon);
@@ -425,7 +435,7 @@ export default function MenuCommand(): JSX.Element {
       <SunMenubarSection data={data} />
       <MoonMenubarSection data={data} />
       <MenuBarExtra.Section title="Forecast">
-        {data?.weather?.map((d) => <WeatherForecastDay key={d.date} day={d} />)}
+        {data?.weather?.map((d) => <WeatherForecastDay key={d.date} day={d} fullTitle={title} />)}
       </MenuBarExtra.Section>
       <LocationMenubarSection area={area} />
       <MenuBarExtra.Section>

@@ -11,6 +11,7 @@
 - Add more details for location
 - Add observation time
 - Add semantic section in menubar command
+- Click on a Menubar forecast item will forward to the detail list view
 
 ## [Add MenuBar] - 2022-11-26
 
