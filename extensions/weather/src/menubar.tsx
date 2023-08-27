@@ -239,18 +239,20 @@ function MoonMenubarSection(props: { data: Weather | undefined }) {
   if (!moon) {
     return null;
   }
-  const { curcon } = getMetaData(props.data);
+  const phase = `Phase: ${moon.moonPhase}`;
   return (
     <MenuBarExtra.Section title="Moon">
       <MenuBarExtra.Item
         title="Moonrise"
         subtitle={moon.moonrise}
+        tooltip={phase}
         icon={WeatherIcons.Moonrise}
         onAction={launchWeatherCommand}
       />
       <MenuBarExtra.Item
         title="Moonset"
         subtitle={moon.moonset}
+        tooltip={phase}
         icon={WeatherIcons.Moonset}
         onAction={launchWeatherCommand}
       />

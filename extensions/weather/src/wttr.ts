@@ -343,7 +343,9 @@ export function getCurrentSun(weather: Weather | undefined): { sunrise: string; 
   return { sunrise, sunset };
 }
 
-export function getCurrentMoon(weather: Weather | undefined): { moonrise: string; moonset: string } | undefined {
+export function getCurrentMoon(
+  weather: Weather | undefined,
+): { moonrise: string; moonset: string; moonPhase: string } | undefined {
   if (!weather || !weather.weather || weather.weather.length <= 0) {
     return;
   }
@@ -354,10 +356,11 @@ export function getCurrentMoon(weather: Weather | undefined): { moonrise: string
   const a = today.astronomy[0];
   const moonrise = a.moonrise;
   const moonset = a.moonset;
-  if (!moonrise || !moonset) {
+  const moonPhase = a.moon_phase;
+  if (!moonrise || !moonset || !moonPhase) {
     return;
   }
-  return { moonrise, moonset };
+  return { moonrise, moonset, moonPhase };
 }
 
 export function getCurrentObservationTime(curcon: WeatherConditions | undefined): string | undefined {

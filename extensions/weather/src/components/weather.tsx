@@ -243,6 +243,7 @@ function MoonItem(props: { data: Weather | undefined }) {
   return (
     <List.Item
       title="Moon"
+      subtitle={m.moonPhase}
       icon={WeatherIcons.Moon}
       accessories={[
         { icon: WeatherIcons.Moonrise, text: m.moonrise, tooltip: `Moonrise ${m.moonrise}` },
