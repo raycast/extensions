@@ -176,7 +176,7 @@ function LocationMenubarSection(props: { area: Area | undefined }) {
       {a.areaName && (
         <MenuBarExtra.Item
           title="Area"
-          icon={WeatherIcons.Country}
+          icon={WeatherIcons.Area}
           subtitle={a.areaName}
           onAction={launchWeatherCommand}
         />
