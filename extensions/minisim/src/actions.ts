@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { Command, Device, Platform } from "./types";
 
 export async function getDevices(platform: Platform): Promise<Device[]> {
