@@ -33,8 +33,10 @@ import {
   getCurrentUVIndex,
   getCurrentVisibility,
   getCurrentWindConditions,
+  getDaySnowInfo,
   Weather,
   WeatherConditions,
+  WeatherData,
 } from "./wttr";
 import { useWeather } from "./components/hooks";
 import { convertToRelativeDate, getUVIndexIcon } from "./utils";
@@ -355,7 +357,27 @@ function LastFetchTimeMenubarItem(props: { fetched: Date | undefined }) {
     />
   );
 }
-//{fetchDate && <MenuBarExtra.Item title="Fetched" subtitle={convertToRelativeDate(fetchDate)}/>}
+
+function WeatherForecastDay(props: { day: WeatherData }) {
+  const d = props.day;
+  const valParts = [`⬆${getDayTemperature(d, "max")}`, `⬇${getDayTemperature(d, "min")}`];
+  const snow = getDaySnowInfo(d);
+  if (d.sunHour) {
+    valParts.push(`☀️ ${d.sunHour}h`);
+  }
+  if (snow && snow.value > 0) {
+    valParts.push(`❄️ ${snow.valueAndUnit}`);
+  }
+  const st = valParts.join(" ");
+  return (
+    <MenuBarExtra.Item
+      title={getWeekday(d.date)}
+      icon={getDayWeatherIcon(d)}
+      subtitle={st}
+      onAction={launchWeatherCommand}
+    />
+  );
+}
 
 export default function MenuCommand(): JSX.Element {
   const { data, error, isLoading, fetchDate } = useWeather(getDefaultQuery());
@@ -403,15 +425,7 @@ export default function MenuCommand(): JSX.Element {
       <SunMenubarSection data={data} />
       <MoonMenubarSection data={data} />
       <MenuBarExtra.Section title="Forecast">
-        {data?.weather?.map((d) => (
-          <MenuBarExtra.Item
-            key={d.date}
-            title={getWeekday(d.date)}
-            icon={getDayWeatherIcon(d)}
-            subtitle={`⬆${getDayTemperature(d, "max")} ⬇ ${getDayTemperature(d, "min")}`}
-            onAction={launchWeatherCommand}
-          />
-        ))}
+        {data?.weather?.map((d) => <WeatherForecastDay key={d.date} day={d} />)}
       </MenuBarExtra.Section>
       <LocationMenubarSection area={area} />
       <MenuBarExtra.Section>

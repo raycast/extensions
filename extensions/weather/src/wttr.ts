@@ -109,7 +109,7 @@ export interface WeatherData {
   maxtempC: string;
   maxtempF: string;
   sunHour: string;
-  totalSnow_cm: string;
+  totalSnow_cm?: string;
   uvIndex: string;
   date: string;
   hourly: Array<Hourly>;
@@ -384,6 +384,22 @@ export function getCurrentTemperatureMinMax(
   return { minTemp, maxTemp };
 }
 
+export function getCurrentSunHours(
+  weather: Weather | undefined,
+): { value: string; unit: string; valueAndUnit: string } | undefined {
+  if (!weather || !weather.weather || weather.weather.length <= 0) {
+    return;
+  }
+  const today = weather.weather[0];
+  const value = today.sunHour;
+  if (!value) {
+    return;
+  }
+  const unit = "h";
+  const valueAndUnit = `${value} ${unit}`;
+  return { value, unit, valueAndUnit };
+}
+
 export function getCurrentRain(
   curcon: WeatherConditions | undefined,
 ): { value: number; unit: string; valueAndUnit: string } | undefined {
@@ -429,4 +445,18 @@ export function getCurrentObservationTime(curcon: WeatherConditions | undefined)
     return;
   }
   return curcon.localObsDateTime;
+}
+
+export function getDaySnowInfo(day: WeatherData) {
+  if (!day.totalSnow_cm) {
+    return;
+  }
+  const totalSnowCm = day.totalSnow_cm ? Number(day.totalSnow_cm) : undefined;
+  if (totalSnowCm === undefined || Number.isNaN(totalSnowCm)) {
+    return;
+  }
+  const value = totalSnowCm;
+  const unit = "cm";
+  const valueAndUnit = `${value} ${unit}`;
+  return { value, unit, valueAndUnit };
 }

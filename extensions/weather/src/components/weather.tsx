@@ -11,15 +11,16 @@ import {
   getAreaValues,
   getCurrentCloudCover,
   getCurrentFeelLikeTemperature,
-  getCurrentHumidity,
   getCurrentMoon,
   getCurrentObservationTime,
   getCurrentPressure,
   getCurrentRain,
   getCurrentSun,
+  getCurrentSunHours,
   getCurrentUVIndex,
   getCurrentVisibility,
   getCurrentWindConditions,
+  getDaySnowInfo,
 } from "../wttr";
 import { DayList } from "./day";
 import { useWeather } from "./hooks";
@@ -76,12 +77,23 @@ export function DayListItem(props: { day: WeatherData; title: string }): JSX.Ele
   const weatherCode = getHighestOccurrence(weatherCodes);
   const max = getDayTemperature(data, "max");
   const min = getDayTemperature(data, "min");
+  const snow = getDaySnowInfo(data);
   return (
     <List.Item
       key={data.date}
       title={wd}
       icon={getWeatherCodeIcon(weatherCode || "")}
       accessories={[
+        {
+          text: data.sunHour ? `${data.sunHour} h` : undefined,
+          icon: data.sunHour ? WeatherIcons.Sunrise : undefined,
+          tooltip: data.sunHour ? `Sun Hours: ${data.sunHour} h` : undefined,
+        },
+        {
+          text: snow && snow.value > 0 ? snow.valueAndUnit : undefined,
+          icon: snow && snow.value > 0 ? WeatherIcons.Snow : undefined,
+          tooltip: snow && snow.value > 0 ? `Snow: ${snow.valueAndUnit}` : undefined,
+        },
         { text: max, icon: Icon.ArrowUp, tooltip: `Max. Temperature ${max}` },
         { text: min, icon: Icon.ArrowDown, tooltip: `Min. Temperature ${min}` },
       ]}
@@ -239,6 +251,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
   const observationRelative = convertToRelativeDate(observation) || observation;
   const rain = getCurrentRain(curcon);
   const cloud = getCurrentCloudCover(curcon);
+  const sun = getCurrentSunHours(data);
 
   return (
     <>
@@ -248,6 +261,11 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
           subtitle={weatherDesc}
           icon={{ value: getWeatherCodeIcon(curcon?.weatherCode), tooltip: weatherDesc || "" }}
           accessories={[
+            {
+              text: sun ? sun.valueAndUnit : undefined,
+              icon: sun ? WeatherIcons.Sunrise : undefined,
+              tooltip: sun ? `Sun Hours: ${sun.valueAndUnit}` : undefined,
+            },
             {
               text: cloud ? cloud.valueAndUnit : undefined,
               icon: cloud ? WeatherIcons.Cloud : undefined,
@@ -281,7 +299,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
   );
 }
 
-function WeatherDailyForecaseFragment(props: { data: Weather | undefined }): ReactElement | null {
+function WeatherDailyForecastFragment(props: { data: Weather | undefined }): ReactElement | null {
   const data = props.data;
   if (!data) {
     return null;
@@ -309,7 +327,7 @@ export function WeatherList(): JSX.Element {
       ) : (
         <React.Fragment>
           <WeatherCurrentListItemFragment data={data} />
-          <WeatherDailyForecaseFragment data={data} />
+          <WeatherDailyForecastFragment data={data} />
         </React.Fragment>
       )}
     </List>
