@@ -26,6 +26,7 @@ import {
   getCurrentObservationTime,
   getCurrentPressure,
   getCurrentSun,
+  getCurrentTemperatureMinMax,
   getCurrentUVIndex,
   getCurrentVisibility,
   getCurrentWindConditions,
@@ -34,6 +35,7 @@ import {
 } from "./wttr";
 import { useWeather } from "./components/hooks";
 import { convertToRelativeDate, getUVIndexIcon } from "./utils";
+import { getTemperatureUnit } from "./unit";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
@@ -70,6 +72,36 @@ function FeelsLikeMenuItem(props: { curcon: WeatherConditions | undefined }) {
       title="Feels Like"
       subtitle={feelsLike.valueAndUnit}
       icon={WeatherIcons.FeelsLike}
+      onAction={launchWeatherCommand}
+    />
+  );
+}
+
+function TemperatureMin(props: { weather: Weather | undefined }) {
+  const t = getCurrentTemperatureMinMax(props.weather);
+  if (!t) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Item
+      title="Min"
+      icon={Icon.ArrowDown}
+      subtitle={`${t.minTemp} ${getTemperatureUnit()}`}
+      onAction={launchWeatherCommand}
+    />
+  );
+}
+
+function TemperatureMax(props: { weather: Weather | undefined }) {
+  const t = getCurrentTemperatureMinMax(props.weather);
+  if (!t) {
+    return null;
+  }
+  return (
+    <MenuBarExtra.Item
+      title="Max"
+      icon={Icon.ArrowUp}
+      subtitle={`${t.maxTemp} ${getTemperatureUnit()}`}
       onAction={launchWeatherCommand}
     />
   );
@@ -324,6 +356,8 @@ export default function MenuCommand(): JSX.Element {
           onAction={launchWeatherCommand}
         />
         <FeelsLikeMenuItem curcon={curcon} />
+        <TemperatureMin weather={data} />
+        <TemperatureMax weather={data} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Air">
         <WindMenubarItem curcon={curcon} />

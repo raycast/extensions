@@ -363,6 +363,25 @@ export function getCurrentMoon(
   return { moonrise, moonset, moonPhase };
 }
 
+export function getCurrentTemperatureMinMax(
+  weather: Weather | undefined,
+): { minTemp: string; maxTemp: string } | undefined {
+  if (!weather || !weather.weather || weather.weather.length <= 0) {
+    return;
+  }
+  const us = getUnitSystem();
+  const today = weather.weather[0];
+  const minTemp: string | undefined = us === UnitSystem.Imperial ? today.mintempF : today.mintempC;
+  if (!minTemp) {
+    return;
+  }
+  const maxTemp: string | undefined = us === UnitSystem.Imperial ? today.maxtempF : today.maxtempC;
+  if (!maxTemp) {
+    return;
+  }
+  return { minTemp, maxTemp };
+}
+
 export function getCurrentObservationTime(curcon: WeatherConditions | undefined): string | undefined {
   if (!curcon) {
     return;
