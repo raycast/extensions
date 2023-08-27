@@ -19,7 +19,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0"
+    "@notionhq/client": "^2.2.12",
+    "@raycast/api": "^1.56.0",
+    "date-fns": "^2.30.0",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
