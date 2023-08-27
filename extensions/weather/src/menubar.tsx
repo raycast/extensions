@@ -30,6 +30,7 @@ import {
   getCurrentPressure,
   getCurrentRain,
   getCurrentSun,
+  getCurrentSunHours,
   getCurrentTemperatureMinMax,
   getCurrentUVIndex,
   getCurrentVisibility,
@@ -291,9 +292,18 @@ function SunMenubarSection(props: { data: Weather | undefined }) {
     return null;
   }
   const { curcon } = getMetaData(props.data);
+  const sunHours = getCurrentSunHours(props.data);
   return (
     <MenuBarExtra.Section title="Sun">
       <UVIndexMenuItem curcon={curcon} />
+      {sunHours && (
+        <MenuBarExtra.Item
+          title="Sun Hours"
+          subtitle={sunHours.valueAndUnit}
+          icon={WeatherIcons.SunHours}
+          onAction={launchWeatherCommand}
+        />
+      )}
       <MenuBarExtra.Item
         title="Sunrise"
         subtitle={sun.sunrise}

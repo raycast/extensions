@@ -192,6 +192,7 @@ export enum WeatherIcons {
   Country = Icon.Pin,
   Sunrise = Icon.Sun,
   Sunset = Icon.Sunrise,
+  SunHours = Icon.Clock,
   Pressure = Icon.BarCode,
   Moon = Icon.Moon,
   Moonrise = Icon.Moon,
