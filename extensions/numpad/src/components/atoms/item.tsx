@@ -37,7 +37,7 @@ export const ItemField: FC<ItemProps> = (item) => {
           />
           <Action
             title="Undo"
-            shortcut={{ modifiers: [], key: "backspace" }}
+            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
             onAction={() => item.context?.onAction("undo")}
           />
           <Action
