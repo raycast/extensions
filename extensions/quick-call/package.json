@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "phone-call",
-  "title": "Phone Call",
+  "name": "quick-call",
+  "title": "Quick Phone Call",
   "description": "Make a phone call with default telephone app.",
   "icon": "phone-icon.png",
   "author": "karbassi",
@@ -11,9 +11,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "phone-call",
-      "title": "Quick Call",
-      "description": "Phone number",
+      "name": "quick-call",
+      "title": "Phone Call",
+      "description": "Make a quick phone call",
       "mode": "no-view",
       "arguments": [
         {
