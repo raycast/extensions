@@ -90,9 +90,14 @@ export default function Command() {
         return;
       }
 
+      let message = "references";
+      if (OPENAI_API_KEY) {
+        message = "explanations and references";
+      }
+
       await showToast({
         style: Toast.Style.Animated,
-        title: `Generating explanations and references for ${articlesMetadata.length} articles...`,
+        title: `Generating ${message} for ${articlesMetadata.length} articles...`,
       });
 
       await Promise.all(readerRequestBodies.map((body, index) => updatePageData(body, notionPageIds[index])));

@@ -15,20 +15,20 @@
       "description": "Notion token to allow access to the database",
       "type": "password",
       "required": true
+    },    
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI Key",
+      "placeholder": "Your OpenAI API Key...",
+      "description": "[Optional]: Used to generate helpful explanations to understand the paper",
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "readerApiKey",
       "title": "Readwise Reader Key",
       "placeholder": "Your Readwise Reader Key...",
-      "description": "Readwise Reader Api Token",
-      "type": "textfield",
-      "required": false
-    },
-    {
-      "name": "openaiApiKey",
-      "title": "OpenAI Key",
-      "placeholder": "Your OpenAI API Key...",
-      "description": "Used to generate helpful explanations to understand the paper",
+      "description": "[Optional]: Used to add the pdfs to Readwise Reader",
       "type": "textfield",
       "required": false
     }
@@ -66,7 +66,7 @@
     "arxivjs": "^0.0.11",
     "got": "^11.8.2",
     "notion-types": "^6.16.0",
-    "openai": "^4.0.1",
+    "openai": "^4.3.0",
     "use-debounce": "^9.0.4"
   },
   "devDependencies": {
