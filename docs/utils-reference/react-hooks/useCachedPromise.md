@@ -109,10 +109,10 @@ export default function Command() {
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
-      const result = await response.text();
+      const result = await response.json();
       return result;
     },
-    ["https://api.example"],
+    [`https://api.example?q=${searchText}`],
     {
       // to make sure the screen isn't flickering when the searchText changes
       keepPreviousData: true,
