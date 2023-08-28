@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
-import { fetchDatabases, renderPluralIfNeeded, tildify } from "./utils";
+import { fetchDatabases, renderPluralIfNeeded } from "./utils";
 import { useEffect, useState } from "react";
 import { Connection, Group, tintColors } from "./interfaces";
 import { preferences } from "./utils";

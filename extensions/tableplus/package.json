@@ -21,6 +21,7 @@
     {
       "name": "menubar",
       "title": "Menubar",
+      "subtitle": "TablePlus",
       "description": "TablePlus Menubar",
       "mode": "menu-bar"
     }
