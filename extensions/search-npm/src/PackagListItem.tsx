@@ -6,6 +6,7 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
+  Keyboard,
 } from '@raycast/api'
 import tinyRelativeDate from 'tiny-relative-date'
 import { CopyInstallCommandActions } from './CopyInstallCommandActions'
@@ -89,6 +90,18 @@ export const PackageListItem = ({
           onOpen={handleAddToHistory}
         />
       ) : null,
+    npmPackagePage: (
+      <Action.OpenInBrowser
+        key="npmPackagePage"
+        url={pkg.links.npm}
+        title="Open Npm Package Page"
+        icon={{
+          source: 'command-icon.png',
+        }}
+        onOpen={handleAddToHistory}
+        shortcut={Keyboard.Shortcut.Common.Open}
+      />
+    ),
     changelogPackagePage: changelogUrl ? (
       <Action.OpenInBrowser
         key="openChangelog"
@@ -96,17 +109,6 @@ export const PackageListItem = ({
         title="Open Changelog"
       />
     ) : null,
-    npmPackagePage: (
-      <Action.OpenInBrowser
-        key="npmPackagePage"
-        url={pkg.links.npm}
-        title="npm Package Page"
-        icon={{
-          source: 'command-icon.png',
-        }}
-        onOpen={handleAddToHistory}
-      />
-    ),
     skypackPackagePage: (
       <Action.OpenInBrowser
         url={`https://www.skypack.dev/view/${pkg.name}`}
