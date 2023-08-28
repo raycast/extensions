@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grammari-x",
-  "title": "Your Writing's Best Friend",
-  "description": "In this extension, you can fix your grammar and paraphrase your sentences more effectively.",
+  "title": "GrammariX",
+  "description": "Your Writing's Best Friend. In this extension, you can fix your grammar and paraphrase your sentences more effectively.",
   "icon": "icon.png",
   "author": "hakob_nersesian",
   "categories": [
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "grammariX",
-      "title": "GrammariX",
+      "title": "Improve Writing",
       "description": "Experience flawless writing with GrammariX,\nyour AI-powered grammar companion.\nFrom intricate sentence structure to nuanced word choice,\nGrammariX ensures your text is polished and precise.\nLet advanced AI technology enhance your writing effortlessly,\nleaving you with confidence in every word.",
       "mode": "view"
     }
