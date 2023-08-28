@@ -1,3 +1,3 @@
 # MiniSim Changelog
 
-## [Initial Version] - 2023-06-18
+## [Initial Version] - 2023-08-28
