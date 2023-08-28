@@ -3,7 +3,7 @@ import os from "node:os";
 import fs from "fs";
 import expandTidle from "expand-tilde";
 import { Connection, Group } from "./interfaces";
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import plist from "plist";
 import path from "node:path";
 
@@ -55,6 +55,15 @@ export async function fetchDatabases() {
         }
       }
 
+      let subtitle = (
+        connection.isOverSSH ? "SSH" : connection.isSocket ? "SOCKET" : connection.DatabaseHost
+      ) as string;
+      if (connection.database && connection.Driver !== "SQLite") {
+        subtitle += ` : ${connection.database}`;
+      } else if (connection.Driver === "SQLite" && connection.isOverSSH) {
+        subtitle += ` : ${connection.DatabaseHost}`;
+      }
+
       const conn: Connection = {
         id: connection.ID.toString(),
         groupId,
@@ -68,6 +77,7 @@ export async function fetchDatabases() {
         Driver: connection.Driver.toString(),
         Environment: connection.Enviroment.toString(),
         icon: groupIcon,
+        subtitle: tildify(subtitle),
       };
 
       groups.get(groupId)?.connections.push(conn);
@@ -89,4 +99,15 @@ export function tildify(absolutePath: string) {
 
 export function renderPluralIfNeeded(itemsLength: number) {
   return `item${itemsLength > 1 ? "s" : ""}`;
+}
+
+export function getShortcut(index: number) {
+  const key = index + 1;
+
+  let shortcut: Keyboard.Shortcut | undefined;
+  if (key >= 1 && key <= 9) {
+    shortcut = { modifiers: ["cmd"], key: String(key) as Keyboard.KeyEquivalent };
+  }
+
+  return shortcut;
 }

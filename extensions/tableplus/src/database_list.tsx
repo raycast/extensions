@@ -52,19 +52,12 @@ export default function DatabaseList() {
     const connection = props.connection;
     const groupName = props.groupName;
 
-    let subtitle = connection.isOverSSH ? "SSH" : connection.isSocket ? "SOCKET" : connection.DatabaseHost;
-    if (connection.database && connection.Driver !== "SQLite") {
-      subtitle += ` : ${connection.database}`;
-    } else if (connection.Driver === "SQLite" && connection.isOverSSH) {
-      subtitle += ` : ${connection.DatabaseHost}`;
-    }
-
     return (
       <List.Item
         id={connection.id}
         key={connection.id}
         title={connection.name}
-        subtitle={tildify(subtitle)}
+        subtitle={connection.subtitle}
         accessories={getAccessories(connection)}
         icon={connection.icon}
         actions={

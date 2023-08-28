@@ -51,6 +51,15 @@
       "title": "Search by Group Name",
       "description": "Toggle the Ability to Search by Group Name.",
       "label": "Search by Group Name"
+    },
+    {
+      "name": "showPathInMenubar",
+      "description": "Show Path in Menubar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Path in Menubar",
+      "placeholder": "Show Path in Menubar",
+      "label": "Show Path in Menubar"
     }
   ],
   "dependencies": {

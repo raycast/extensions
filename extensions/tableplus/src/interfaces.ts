@@ -13,6 +13,7 @@ export type Connection = {
   Driver: string;
   Environment: string | "local" | "development" | "testing" | "staging" | "production";
   icon: string;
+  subtitle: string;
 };
 
 export type Group = {
