@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minisim",
   "title": "MiniSim",
-  "description": "Extension for MiniSim",
+  "description": "Raycast extension for MiniSim",
   "icon": "command-icon.png",
   "author": "okwasniewski",
   "categories": [
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show Devices",
+      "title": "Show MiniSim Devices",
       "keywords": [
         "Android",
         "iOS",
