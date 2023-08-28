@@ -75,15 +75,15 @@
     "@raycast/utils": "^1.9.1",
     "cross-fetch": "^4.0.0",
     "javascript-time-ago": "^2.5.9",
-    "moment": "^2.29.1",
-    "prettier": "^3.0.2"
+    "moment": "^2.29.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/moment": "^2.13.0",
     "@types/node": "^18.8.3",
     "eslint": "^7.31.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "prettier": "^3.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",
