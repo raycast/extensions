@@ -26,7 +26,7 @@ export async function fetchDatabases() {
     showToast(
       Toast.Style.Failure,
       "Error loading connections",
-      "TablePlus data directory not found, add directory path in preferences"
+      "TablePlus data directory not found, add directory path in preferences",
     );
     return { isLoading: false };
   } else {
@@ -37,7 +37,7 @@ export async function fetchDatabases() {
       groupList.map((group) => [
         group.ID.toString(),
         { id: group.ID.toString(), name: group.Name.toString(), connections: [] },
-      ])
+      ]),
     );
 
     groups.set(EmptyGroupID, {
@@ -48,11 +48,10 @@ export async function fetchDatabases() {
 
     connectionsList.forEach((connection) => {
       const groupId = connection.GroupID?.toString() !== "" ? connection.GroupID?.toString() : EmptyGroupID;
-
       let groupIcon = "icon.png";
-      if (connection.groupId) {
-        if (fs.existsSync(`${directoryPath}/${connection.groupId}`)) {
-          groupIcon = `${directoryPath}/${connection.groupId}`;
+      if (groupId) {
+        if (fs.existsSync(`${directoryPath}/${groupId}`)) {
+          groupIcon = `${directoryPath}/${groupId}`;
         }
       }
 

@@ -20,11 +20,19 @@ export default function MenuCommand() {
           return (
             <MenuBarExtra.Section key={item.id} title={item.name}>
               {item.connections.map((connection) => {
+                let subtitle = connection.isOverSSH ? "SSH" : connection.isSocket ? "SOCKET" : connection.DatabaseHost;
+                if (connection.database && connection.Driver !== "SQLite") {
+                  subtitle += ` : ${connection.database}`;
+                } else if (connection.Driver === "SQLite" && connection.isOverSSH) {
+                  subtitle += ` : ${connection.DatabaseHost}`;
+                }
+
                 return (
                   <MenuBarExtra.Item
                     key={connection.id}
                     icon={connection.icon}
                     title={connection.name}
+                    subtitle={subtitle}
                     onAction={() => {
                       open(`tableplus://?id=${connection.id}`);
                     }}
