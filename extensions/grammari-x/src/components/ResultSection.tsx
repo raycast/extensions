@@ -18,6 +18,7 @@ export default function ResultSection({
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={output} />
+              <Action.Paste content={output} />
               <Action title="Toggle Full Text" icon={Icon.Text} onAction={() => setIsShowingDetail(!isShowingDetail)} />
             </ActionPanel>
           }
