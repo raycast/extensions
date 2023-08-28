@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 
 const markdown = `
-![Image Title](command-icon.png)
+![Image Title](no-view.png)
 
 ## Something went wrong.
 Please make sure you have **MiniSim installed** and running latest version.\n\n
