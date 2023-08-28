@@ -1,5 +1,9 @@
 # TablePlus Changelog
 
+## [Update] - 2023-08-25
+
+- Added menubar
+
 ## [Update] - 2023-04-27
 
 - Added the ability to search by group name
