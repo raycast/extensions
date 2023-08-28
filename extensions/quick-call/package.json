@@ -11,10 +11,18 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "make-a-phone-call",
-      "title": "Make A Phone Call",
-      "description": "Make a phone call with default telephone app.",
-      "mode": "view"
+      "name": "phone-call",
+      "title": "Quick Call",
+      "description": "Phone number",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "number",
+          "placeholder": "phone number",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
