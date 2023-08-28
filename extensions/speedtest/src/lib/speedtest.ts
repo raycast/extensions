@@ -1,5 +1,5 @@
-import fs from "fs";
 import { spawn } from "child_process";
+import fs from "fs";
 import { speedtestCLIFilepath } from "./cli";
 
 export interface Result {
@@ -10,6 +10,7 @@ export interface Result {
   upload: number | undefined;
   ping: number | undefined;
   url: string | undefined;
+  error: string | undefined;
 }
 
 export interface ResultProgress {
@@ -26,7 +27,7 @@ export function runSpeedTest(
   callback: (result: Result) => void,
   resultCallback: (result: Result) => void,
   errorCallback: (error: Error) => void,
-  progressCallback: (resultProgress: ResultProgress) => void
+  progressCallback: (resultProgress: ResultProgress) => void,
 ) {
   const exePath = speedtestCLIFilepath();
   const pro = spawn(exePath, ["--format", "json", "--progress", "--accept-license", "--accept-gdpr"]);
@@ -38,6 +39,7 @@ export function runSpeedTest(
     upload: undefined,
     ping: undefined,
     url: undefined,
+    error: undefined,
   };
   const resultProgress: ResultProgress = { download: undefined, upload: undefined, ping: undefined };
 
@@ -68,6 +70,36 @@ export function runSpeedTest(
 
   pro.on("error", function (err) {
     errorCallback(err);
+  });
+
+  let stderrOutput = "";
+
+  pro.stderr.on("data", (data) => {
+    stderrOutput += data.toString();
+  });
+
+  pro.on("exit", (code) => {
+    if (code === 0) {
+      console.log("Child process completed successfully.");
+    } else {
+      console.log("Stderr output:", stderrOutput);
+
+      const errorMessage = stderrOutput.includes("NoNetworkConnection")
+        ? "The Internet connection appears to be offline."
+        : "Something went wrong. Please try again.";
+
+      resultCallback({
+        error: errorMessage,
+        isp: undefined,
+        location: undefined,
+        serverName: undefined,
+        download: undefined,
+        upload: undefined,
+        ping: undefined,
+        url: undefined,
+      });
+      console.error(`Child process exited with code ${code}`);
+    }
   });
 
   pro.stdout.on("data", (data) => {
