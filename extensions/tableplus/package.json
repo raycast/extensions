@@ -3,7 +3,7 @@
   "name": "tableplus",
   "title": "TablePlus",
   "description": "Search and open database connections in TablePlus",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "contributors": [

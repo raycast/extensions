@@ -2,6 +2,7 @@ import { MenuBarExtra, getPreferenceValues, open, openExtensionPreferences } fro
 import { useEffect, useState } from "react";
 import { fetchDatabases, getShortcut } from "./utils";
 import { Group } from "./interfaces";
+import { preferences } from "./constants";
 
 export default function MenuCommand() {
   const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
@@ -24,7 +25,13 @@ export default function MenuCommand() {
             {item.connections.map((connection) => {
               const subtitle = showPathInMenubar ? connection.subtitle : "";
 
-              console.log(connection.icon);
+              const handleClick = (event: MenuBarExtra.ActionEvent) => {
+                const baseUri = `tableplus://?id=${connection.id}`;
+                const isLeftClick = event.type === "left-click";
+                const isTabbedMode = preferences.defaultAction === "tab" ? isLeftClick : !isLeftClick;
+                const uri = isTabbedMode && connection.version >= 492 ? `${baseUri}&windowMode=tabbed` : baseUri;
+                open(uri);
+              };
 
               return (
                 <MenuBarExtra.Item
@@ -34,11 +41,7 @@ export default function MenuCommand() {
                   shortcut={getShortcut(numberInMenubar++)}
                   subtitle={subtitle}
                   onAction={(event: MenuBarExtra.ActionEvent) => {
-                    if (event.type === "left-click") {
-                      open(`tableplus://?id=${connection.id}`);
-                    } else {
-                      open(`tableplus://?id=${connection.id}&windowMode=tabbed`);
-                    }
+                    handleClick(event);
                   }}
                 />
               );
