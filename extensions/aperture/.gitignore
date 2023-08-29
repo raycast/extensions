@@ -8,5 +8,14 @@ raycast-env.d.ts
 
 # misc
 .DS_Store
-
 .apperture-node
+
+# Swift/Xcode
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/
+DerivedData/
+.swiftpm/config/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc

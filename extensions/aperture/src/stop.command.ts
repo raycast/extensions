@@ -1,3 +1,4 @@
+import { execa } from "execa";
 import { dirname } from "path";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { Alert, Toast, confirmAlert, getPreferenceValues, open, showToast } from "@raycast/api";
@@ -21,6 +22,7 @@ export default async function StopRecordingCommand() {
   await showToast({ title: "Saving recording...", style: Toast.Style.Animated });
   const recorder = new Aperture(recording);
   const { endTime } = await recorder.stopRecording();
+  await killRecordingIndicator();
 
   const savedFilePath = await moveFileToSaveLocation(filePath, endTime);
   if (postSaveAction === "open") await open(savedFilePath);
@@ -38,4 +40,8 @@ function getStopRecordingConfirmation(startTime: Date) {
       style: Alert.ActionStyle.Destructive,
     },
   });
+}
+
+async function killRecordingIndicator() {
+  return execa("killall", ["aperture-indicator"]).catch(() => undefined);
 }
