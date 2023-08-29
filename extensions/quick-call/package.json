@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-call",
   "title": "Quick Phone Call",
-  "description": "Make a phone call with default telephone app.",
+  "description": "Make a phone call with the default telephone app.",
   "icon": "phone-icon.png",
   "author": "karbassi",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Communication"
   ],
