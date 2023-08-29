@@ -1,22 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  environment,
-  popToRoot,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
 import { formatDistanceToNow } from "date-fns";
-import { execa } from "execa";
-import { join } from "path";
 import { useRef } from "react";
 import { Aperture } from "~/api/aperture";
 import { Recording } from "~/types/recording";
 import { moveFileToSaveLocation } from "~/utils/fs";
+import { launchRecordingIndicator } from "~/utils/indicator";
 import { clearStoredRecording, getStoredRecording, saveRecordingData } from "~/utils/storage";
 
 const RecordingMode = {
@@ -38,9 +26,7 @@ export default function StartRecordingCommand() {
         const recorder = new Aperture();
         const recording = await recorder.startRecording();
         await saveRecordingData(recording);
-        const indicatorPath = join(environment.assetsPath, "aperture-indicator.app");
-        const { stderr, stdout } = await execa("/usr/bin/open", [indicatorPath]);
-        console.log({ stderr, stdout });
+        await launchRecordingIndicator();
         toast.style = Toast.Style.Success;
         toast.title = "Recording started";
 

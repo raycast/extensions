@@ -1,10 +1,10 @@
-import { execa } from "execa";
 import { dirname } from "path";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { Alert, Toast, confirmAlert, getPreferenceValues, open, showToast } from "@raycast/api";
 import { clearStoredRecording, getStoredRecording } from "~/utils/storage";
 import { moveFileToSaveLocation } from "~/utils/fs";
 import { Aperture } from "~/api/aperture";
+import { killRecordingIndicator } from "~/utils/indicator";
 
 const { postSaveAction } = getPreferenceValues<Preferences>();
 
@@ -40,8 +40,4 @@ function getStopRecordingConfirmation(startTime: Date) {
       style: Alert.ActionStyle.Destructive,
     },
   });
-}
-
-async function killRecordingIndicator() {
-  return execa("killall", ["aperture-indicator"]).catch(() => undefined);
 }

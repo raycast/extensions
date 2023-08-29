@@ -1,10 +1,11 @@
-import { getPreferenceValues } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 import { format } from "date-fns";
 import { statSync } from "fs";
 import { rename } from "fs/promises";
 import { join } from "path";
 import { getRandomString } from "~/utils/crypto";
 import os from "os";
+import { execa } from "execa";
 
 export function waitUntilFileIsAvailable(path: string): Promise<void> {
   return new Promise((resolve) => {
@@ -32,4 +33,11 @@ export async function moveFileToSaveLocation(filePath: string, endTime = new Dat
 
 export function getTemporaryFilePath({ extension }: { extension: "mp4" | "jpg" }) {
   return join(os.tmpdir(), `aperture-tmp-${getRandomString()}.${extension}`);
+}
+
+export async function openAssetsMacOSApplication(name: string) {
+  const appPath = join(environment.assetsPath, `${name}.app`);
+  // give execution permissions to the binary inside the app
+  await execa("chmod", ["+x", join(appPath, `/Contents/MacOS/${name}`)]);
+  await execa("open", [appPath]);
 }
