@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "aperture 2.svg",
+      "filename" : "aperture-icon.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "aperture 3.svg",
+      "filename" : "aperture-icon 1.svg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "aperture 4.svg",
+      "filename" : "aperture-icon 2.svg",
       "idiom" : "universal",
       "scale" : "3x"
     }
