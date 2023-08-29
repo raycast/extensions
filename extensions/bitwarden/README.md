@@ -1,11 +1,23 @@
-# Bitwarden Extension
+# Bitwarden
+
+Access your Bitwarden vault directly from Raycast 🚀
 
 ## Setup
 
-1. Install the Bitwarden CLI: <https://bitwarden.com/help/cli/#download-and-install> (prefer the Homebrew method!)
-2. Set your API secrets. For more information see <https://bitwarden.com/help/personal-api-key/#get-your-personal-api-key>
+#### 1. Install the Bitwarden CLI
 
-## Self-hosted Bitwarden Instance
+> ##### Option 1 - Using Homebrew
+> ```sh
+> brew install bitwarden-cli
+> ```
+> ##### Option 2 - Downloading it from the [official page](https://bitwarden.com/help/cli/#download-and-install)
+
+#### 2. Set your API secrets in the extension preferences. 
+> For more information check the official [documentation](https://bitwarden.com/help/personal-api-key/#get-your-personal-api-key).
+
+You're all set! 🎉
+
+### Self-hosted Instance
 
 This extension connects to Bitwarden-hosted servers by default, but can be configured to use a self-hosted Bitwarden instance instead. If the self-hosted Bitwarden server requires a self-signed TLS certificate, add the path to the extension preferences.
 
