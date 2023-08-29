@@ -87,24 +87,35 @@ Please check:
     );
   }
 
-  const availablePaymentOptions = data?.paymentOptions.filter((option) => !option.disabled);
-  const preferredPaymentOption = availablePaymentOptions?.[0];
-
   if (!data) {
     return <Detail isLoading={true} />;
   }
+
+  const availablePaymentOptions = data?.paymentOptions.filter((option) => !option.disabled);
+  const preferredPaymentOption = availablePaymentOptions?.[0];
+  const paymentOption = data?.paymentOptions?.[0];
+  const disabledReason = paymentOption?.disabledReason;
+
+  const noPaymentOptionAvailableMarkdown = `
+****
+**⚠️ Warning: No payment option available**
+
+${disabledReason?.message ?? "Try with another parameters"}
+****
+`;
 
   const markdown = `
 # Wise Transfer
 You send exaclty **${formatCurrency(data.sourceAmount, data.sourceCurrency)}**
 
 Recepient gets **${formatCurrency(
-    preferredPaymentOption?.targetAmount ?? 0,
-    preferredPaymentOption?.targetCurrency ?? ""
+    preferredPaymentOption?.targetAmount ?? paymentOption?.targetAmount ?? 0,
+    preferredPaymentOption?.targetCurrency ?? paymentOption?.targetCurrency ?? ""
   )}**
 
 ## Rate  
 ${data.rate}
+${!preferredPaymentOption ? noPaymentOptionAvailableMarkdown : ""}
   `;
 
   async function refetch() {

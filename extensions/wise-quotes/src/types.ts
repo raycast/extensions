@@ -44,6 +44,12 @@ interface Fee {
   partner: number;
 }
 
+interface DisabledReason {
+  code: string;
+  message: string;
+  path: string;
+}
+
 export type PaymentOption = {
   formattedEstimatedDelivery: string;
   estimatedDeliveryDelays: any[];
@@ -51,6 +57,7 @@ export type PaymentOption = {
   feePercentage: number;
   estimatedDelivery: string;
   disabled: boolean;
+  disabledReason: DisabledReason;
   sourceAmount: number;
   targetAmount: number;
   sourceCurrency: string;
