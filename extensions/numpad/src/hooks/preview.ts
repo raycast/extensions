@@ -15,7 +15,7 @@ export const usePreview = () => {
     setCurrentValue("");
     await Clipboard.copy(currentValue);
     await Clipboard.paste(currentValue);
-    await showHUD("Copied date to clipboard");
+    await showHUD("Copied to clipboard");
   };
 
   const copyAndClose = async () => {
@@ -23,7 +23,7 @@ export const usePreview = () => {
     setCurrentValue("");
     await Clipboard.copy(currentValue);
     await closeMainWindow({ clearRootSearch: true });
-    await showHUD("Copied date to clipboard");
+    await showHUD("Copied to clipboard");
   };
 
   const clear = () => setCurrentValue("");
