@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show System Information",
-      "description": "See your system information",
+      "title": "View System Information",
+      "description": "View your system information",
       "mode": "view"
     }
   ],
