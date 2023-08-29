@@ -4,7 +4,7 @@ Access your Bitwarden vault directly from Raycast 🚀
 
 ## Setup
 
-#### 1. Install the Bitwarden CLI
+#### Step 1 - Install the Bitwarden CLI
 
 > ##### Option 1 - Using Homebrew
 > ```sh
@@ -12,10 +12,11 @@ Access your Bitwarden vault directly from Raycast 🚀
 > ```
 > ##### Option 2 - Downloading it from the [official page](https://bitwarden.com/help/cli/#download-and-install)
 
-#### 2. Set your API secrets in the extension preferences. 
-> For more information check the official [documentation](https://bitwarden.com/help/personal-api-key/#get-your-personal-api-key).
+#### Step 2 - Set your API secrets in the extension preferences. 
+> Get them from your account [security settings](https://vault.bitwarden.com/#/settings/security/security-keys).
+For more information check the official [documentation](https://bitwarden.com/help/personal-api-key/#get-your-personal-api-key).
 
-You're all set! 🎉
+#### You're all set! 🎉
 
 ### Self-hosted Instance
 
