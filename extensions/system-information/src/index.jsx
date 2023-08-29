@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Icon, List } from "@raycast/api";
+import { Icon, List, Action, environment, ActionPanel } from "@raycast/api";
 import { macOSVersion } from "macos-version";
 import macosRelease from "macos-release";
 import os from "os";
@@ -43,14 +43,16 @@ export default function Command() {
 
   const releaseImage = () => {
     switch (macosRelease().name) {
+      case "Sonoma":
+        return `${environment.assetsPath}/macos_sonoma.png`;
       case "Ventura":
-        return "https://tinyurl.com/29meyokw";
-      case "Monterey":
-        return "https://tinyurl.com/2cyba7vz";
+        return `${environment.assetsPath}/macos_ventura.png`;
+      case environment.assetsPath + "Monterey":
+        return `${environment.assetsPath}/macos_monterey.png`;
       case "Big Sur":
-        return "https://tinyurl.com/27m5gg8g";
+        return `${environment.assetsPath}/macos_big_sur.png`;
       case "Catalina":
-        return "https://tinyurl.com/2ybemhbe";
+        return `${environment.assetsPath}/macos_catalina.png`;
       case "Mojave":
         return "Mojave";
       case "High Sierra":
@@ -76,14 +78,58 @@ export default function Command() {
           icon={Icon.Person}
           title="Hostname"
           accessories={[{ text: os.hostname().replace(/\.local/g, "") }]}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
+                title="Open in System Settings"
+                icon={Icon.Cog}
+              />
+            </ActionPanel>
+          }
         />
-        <List.Item icon={Icon.ComputerChip} title="Chip" accessories={[{ text: os.cpus()[0].model }]} />
+        <List.Item
+          icon={Icon.ComputerChip}
+          title="Chip"
+          accessories={[{ text: os.cpus()[0].model }]}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
+                title="Open in System Settings"
+                icon={Icon.Cog}
+              />
+            </ActionPanel>
+          }
+        />
         <List.Item
           icon={Icon.MemoryChip}
           title="Memory"
           accessories={[{ text: os.totalmem() / (1024 * 1024 * 1024) + " GB" }]}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
+                title="Open in System Settings"
+                icon={Icon.Cog}
+              />
+            </ActionPanel>
+          }
         />
-        <List.Item icon={Icon.Hashtag} title="Serial Number" accessories={[{ text: serialNumber || "-" }]} />
+        <List.Item
+          icon={Icon.Hashtag}
+          title="Serial Number"
+          accessories={[{ text: serialNumber || "-" }]}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
+                title="Open in System Settings"
+                icon={Icon.Cog}
+              />
+            </ActionPanel>
+          }
+        />
       </List.Section>
 
       <List.Section title="macOS">
@@ -91,14 +137,43 @@ export default function Command() {
           icon={releaseImage()}
           title={`macOS ${macosRelease().name}`}
           accessories={[{ text: `Version ${macOSVersion()}` }]}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.preferences.softwareupdate?client=softwareupdateapp"
+                title="Check for Updates"
+                icon={Icon.RotateClockwise}
+              />
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
+                title="Open in System Settings"
+                icon={Icon.Cog}
+              />
+            </ActionPanel>
+          }
         />
       </List.Section>
 
       <List.Section title="Storage">
         <List.Item
-          icon={Icon.HardDrive}
+          icon={Icon.HardDrive} //com.apple.settings.Storage
           title="Macintosh HD"
-          accessories={[{ text: storageInfo }, { tooltip: "This information may be inaccurate" }]}
+          accessories={[
+            {
+              text: storageInfo,
+              tooltip: "This information may be inaccurate",
+            },
+          ]}
+          actions={
+            <ActionPanel>
+              <Action.Open target="x-apple.systempreferences:com.apple.settings.Storage" title="Storage Settings" />
+              <Action.Open
+                target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
+                title="Open in System Settings"
+                icon={Icon.Cog}
+              />
+            </ActionPanel>
+          }
         />
       </List.Section>
     </List>
