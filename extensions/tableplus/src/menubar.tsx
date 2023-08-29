@@ -24,6 +24,8 @@ export default function MenuCommand() {
             {item.connections.map((connection) => {
               const subtitle = showPathInMenubar ? connection.subtitle : "";
 
+              console.log(connection.icon);
+
               return (
                 <MenuBarExtra.Item
                   key={connection.id}
@@ -31,8 +33,12 @@ export default function MenuCommand() {
                   title={connection.name}
                   shortcut={getShortcut(numberInMenubar++)}
                   subtitle={subtitle}
-                  onAction={() => {
-                    open(`tableplus://?id=${connection.id}`);
+                  onAction={(event: MenuBarExtra.ActionEvent) => {
+                    if (event.type === "left-click") {
+                      open(`tableplus://?id=${connection.id}`);
+                    } else {
+                      open(`tableplus://?id=${connection.id}&windowMode=tabbed`);
+                    }
                   }}
                 />
               );

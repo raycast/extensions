@@ -31,9 +31,17 @@
       "name": "path",
       "type": "textfield",
       "required": false,
-      "title": "TablePlus data directory",
+      "title": "TablePlus Data Directory",
       "placeholder": "Leave blank for default location",
       "description": "If you moved the data directory\r\n(must be full-paths or tidle-prefixed ones)"
+    },
+    {
+      "name": "applicationPath",
+      "type": "textfield",
+      "required": false,
+      "title": "TablePlus Application Path",
+      "placeholder": "Leave blank for default location",
+      "description": "If you moved TablePlus\r\n(must be full-paths or tidle-prefixed ones)"
     },
     {
       "name": "showConnectionDriver",
@@ -58,10 +66,29 @@
       "description": "Show Path in Menubar",
       "type": "checkbox",
       "required": false,
-      "default": true,
+      "default": false,
       "title": "Show Path in Menubar",
       "placeholder": "Show Path in Menubar",
       "label": "Show Path in Menubar"
+    },
+    {
+      "name": "defaultAction",
+      "description": "Select the default action",
+      "type": "dropdown",
+      "required": false,
+      "default": "new",
+      "title": "Default Action",
+      "placeholder": "placeholder",
+      "data": [
+        {
+          "title": "Open new Window",
+          "value": "new"
+        },
+        {
+          "title": "Open in Tab",
+          "value": "tab"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -2,7 +2,7 @@ import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { fetchDatabases, renderPluralIfNeeded } from "./utils";
 import { useEffect, useState } from "react";
 import { Connection, Group, tintColors } from "./interfaces";
-import { preferences } from "./utils";
+import { preferences } from "./constants";
 
 export default function DatabaseList() {
   const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
@@ -52,6 +52,32 @@ export default function DatabaseList() {
     const connection = props.connection;
     const groupName = props.groupName;
 
+    const Actions = () => {
+      return preferences.defaultAction == "tab" ? (
+        <>
+          {connection.version >= 492 && (
+            <Action.OpenInBrowser
+              title="Open Database in New Tab"
+              icon={Icon.Coin}
+              url={`tableplus://?id=${connection.id}&windowMode=tabbed`}
+            />
+          )}
+          <Action.OpenInBrowser title="Open Database" icon={Icon.Coin} url={`tableplus://?id=${connection.id}`} />
+        </>
+      ) : (
+        <>
+          <Action.OpenInBrowser title="Open Database" icon={Icon.Coin} url={`tableplus://?id=${connection.id}`} />
+          {connection.version >= 492 && (
+            <Action.OpenInBrowser
+              title="Open Database in New Tab"
+              icon={Icon.Coin}
+              url={`tableplus://?id=${connection.id}&windowMode=tabbed`}
+            />
+          )}
+        </>
+      );
+    };
+
     return (
       <List.Item
         id={connection.id}
@@ -62,7 +88,7 @@ export default function DatabaseList() {
         icon={connection.icon}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open Database" icon={Icon.Coin} url={`tableplus://?id=${connection.id}`} />
+            <Actions />
           </ActionPanel>
         }
         keywords={preferences.searchByGroupName ? [groupName] : []}
