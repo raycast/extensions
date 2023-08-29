@@ -8,18 +8,17 @@ export function buildFileName(path: string, name: string, extension: string) {
   const directoryExists = fse.existsSync(path + name + "." + extension);
   if (!directoryExists) {
     return name + "." + extension;
-  } else {
-    let index = 2;
-    while (directoryExists) {
-      const newName = name + "-" + index + "." + extension;
-      const directoryExists = fse.existsSync(path + newName);
-      if (!directoryExists) {
-        return newName;
-      }
-      index++;
-    }
-    return name + "-" + index + "." + extension;
   }
+  let index = 2;
+  while (true) {
+    const newName = name + "-" + index + "." + extension;
+    const directoryExists = fse.existsSync(path + newName);
+    if (!directoryExists) {
+      return newName;
+    }
+    index++;
+  }
+  return name + "-" + index + "." + extension;
 }
 
 export default function Command() {
