@@ -1,11 +1,16 @@
-import ResultView from "./api/main";
-import { GetPrompt } from "./api/prompt";
+import { ResultView } from "./api/main";
 import { getPreferenceValues } from "@raycast/api";
+import { OllamaApiGenerateRequestBody } from "./api/types";
 
 const preferences = getPreferenceValues();
 
 export default function Command(): JSX.Element {
-  const prompt = GetPrompt(preferences.ollamaCasualModel, "ollama-casual", "");
+  const body = {
+    model: preferences.ollamaCasualModel,
+    prompt: "",
+    system:
+      "Act as a writer. Make the following text more casual while keeping the core idea.\n\nOutput only with the modified text.\n",
+  } as OllamaApiGenerateRequestBody;
 
-  return ResultView(preferences.ollamaCasualModel, prompt.prompt, prompt.tagEnd, true);
+  return ResultView(body, true);
 }

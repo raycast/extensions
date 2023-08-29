@@ -1,11 +1,16 @@
-import ResultView from "./api/main";
-import { GetPrompt } from "./api/prompt";
+import { ResultView } from "./api/main";
 import { getPreferenceValues } from "@raycast/api";
+import { OllamaApiGenerateRequestBody } from "./api/types";
 
 const preferences = getPreferenceValues();
 
 export default function Command(): JSX.Element {
-  const prompt = GetPrompt(preferences.ollamaFixSpellingGrammar, "ollama-fix-spelling-grammar", "");
+  const body = {
+    model: preferences.ollamaFixSpellingGrammar,
+    prompt: "",
+    system:
+      "Act as a writer. Fix the following text from spelling and grammar error.\n\nOutput only with the fixed text.\n",
+  } as OllamaApiGenerateRequestBody;
 
-  return ResultView(preferences.ollamaFixSpellingGrammar, prompt.prompt, prompt.tagEnd, true);
+  return ResultView(body, true);
 }

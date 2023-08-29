@@ -13,6 +13,10 @@ export type LanguagesItem = {
   flag?: string;
 };
 
+export const getLanguageFlag = (language?: LanguagesItem, fallback = "🏳️") => {
+  return language?.flag ?? fallback;
+};
+
 export const supportedLanguagesByCode = _supportedLanguagesByCode as Record<LanguageCode, LanguagesItem>;
 export const supportedLanguagesByCountry = _supportedLanguagesByCountry as Record<LanguageCountries, LanguagesItem>;
 

@@ -6,12 +6,17 @@
  * @see https://github.com/squatto/alfred-imessage-2fa/blob/master/find-messages.php
  */
 export function extractCode(original: string) {
-  // remove URLs
-  const regex = new RegExp(
+  // remove URLs and phone numbers
+  const urlRegex = new RegExp(
     "\\b((https?|ftp|file):\\/\\/|www\\.)[-A-Z0-9+&@#\\/%?=~_|$!:,.;]*[A-Z0-9+&@#\\/%=~_|$]",
     "ig"
   );
-  const message = original.replaceAll(regex, "");
+  const phoneRegex = new RegExp(
+    // https://stackoverflow.com/a/123666
+    /(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?/,
+    "ig"
+  );
+  const message = original.replaceAll(urlRegex, "").replaceAll(phoneRegex, "");
 
   if (message.trim() === "") return "";
 
@@ -67,6 +72,16 @@ export function extractCode(original: string) {
       return `${first}${second}`;
     }
     return "";
+  }
+  if ((m = /\b(?=[A-Z]*[0-9])(?=[0-9]*[A-Z])[0-9A-Z]{3,8}\b/.exec(message)) !== null) {
+    // 3-8 character uppercase alphanumeric string, containing at least one letter and one number
+    // examples:
+    //   "5WGU8G"
+    //   "Your code is: 5WGU8G"
+    //   "CWGUG8"
+    //   "CWGUG8 is your code"
+    //   "7645W453"
+    return m[0];
   }
 
   return code;
