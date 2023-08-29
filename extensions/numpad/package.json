@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "NumPad",
-      "subtitle": "NumPad Keyboard",
+      "title": "NumPad Keyboard",
       "description": "NumPad Keyboard Extension for Raycast",
       "mode": "view"
     }
