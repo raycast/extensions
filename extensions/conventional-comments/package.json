@@ -2,41 +2,39 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "conventional-comments",
   "title": "Conventional Comments",
-  "description": "Paste conventional comment into your foremost application",
-  "icon": "icon.png",
-  "author": "krzysztofzuraw",
+  "description": "Provides a list of conventional comments prefixes and descriptions that can be inserted into your active window",
+  "icon": "../assets/command-icon.png",
+  "author": "niemtec",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "comment",
-      "title": "Insert Conventional Comment",
-      "description": "Easily insert conventional comments into the frontmost application.",
-      "mode": "view"
-    },
-    {
-      "name": "commit",
-      "title": "Insert Conventional Commit",
-      "description": "Easily insert conventional commit into the frontmost application.",
+      "name": "index",
+      "title": "Insert Conventional Comment Prefix",
+      "subtitle": "Insert a conventional comment prefix into your current window",
+      "description": "Provides a list of conventional comments prefixes and descriptions that can be inserted into your active window",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@jeromefitz/conventional-gitmoji": "^1.0.0",
-    "@raycast/api": "^1.25.0"
+    "@raycast/api": "^1.57.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "tsc": "tsc --project . --noEmit",
-    "lint": "eslint --fix --quiet --ext .ts,.tsx,.es,.jsx src/"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
