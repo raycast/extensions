@@ -1,5 +1,5 @@
 # Numpad Changelog
 
-## [Initial Version] - 2023-08-16
+## [Initial Version] - 2023-08-29
 
 - Initial version code
