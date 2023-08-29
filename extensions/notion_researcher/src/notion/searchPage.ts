@@ -42,6 +42,6 @@ function parsePage(page: any): ParsedPage {
       icon: page.icon?.type === "emoji" ? page.icon.emoji : "",
     };
   } catch (e: any) {
-    throw new Error("Title doesn't exist on page");
+    throw new Error("Page must have a title");
   }
 }
