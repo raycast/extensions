@@ -1,5 +1,9 @@
 # OpenAI Generator Changelog
 
+## [AbortController fix] - 2023-08-10
+
+- Updated the API calls to OpenAI to use AbortController signals
+
 ## [Update text completion model] - 2022-11-28
 - Uses new GPT-3 `text-davinci-003` version
 
@@ -14,7 +18,3 @@
 
 - Implement the Create Image API to generate up to 10 images based on a text prompt
 - Implement the Complete Text API to generate answers based on a text prompt
-
-## [AbortController fix] - 2023-08-10
-
-- Updated the API calls to OpenAI to use AbortController signals 
