@@ -1,16 +1,20 @@
-# Bitwarden
+<div align="center">
+  <img src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/bitwarden/assets/bitwarden-512.png" width="128" height="128" />
 
-Access your Bitwarden vault directly from Raycast 🚀
+  <br/>
 
-🔎 &nbsp;Search your vault items
+  # Bitwarden Vault
 
-📋 &nbsp;Copy and paste any field
+  Access your Bitwarden vault directly from Raycast
 
-🔑 &nbsp;Generate passwords and TOTP codes
+  🔎 &nbsp; Search your vault &nbsp; 📋 &nbsp; Copy and paste any field &nbsp; 🔑 &nbsp; Generate passwords and TOTP codes &nbsp; ⭐ &nbsp; Mark items as favorites
+</div>
 
-⭐ &nbsp;Mark items as favorites
+<br/>
 
 ## Setup
+
+Before you're able to use this extension, you need to follow these steps:
 
 #### Step 1 - Install the Bitwarden CLI
 
