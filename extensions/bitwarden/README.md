@@ -2,6 +2,14 @@
 
 Access your Bitwarden vault directly from Raycast 🚀
 
+🔎 &nbsp;Search your vault items
+
+📋 &nbsp;Copy and paste any field
+
+🔑 &nbsp;Generate passwords and TOTP codes
+
+⭐ &nbsp;Mark items as favorites
+
 ## Setup
 
 #### Step 1 - Install the Bitwarden CLI
