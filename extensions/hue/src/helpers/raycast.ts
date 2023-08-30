@@ -1,15 +1,24 @@
 import { CssColor, HasId, Id } from "../lib/types";
 import React from "react";
 import { getPreferenceValues, Icon, Image } from "@raycast/api";
+import { DEFAULT_TRANSITION_TIME_MS } from "./constants";
 
 export function getIconForColor(color: CssColor): Image {
   return { source: Icon.CircleFilled, tintColor: { light: color.value, dark: color.value, adjustContrast: false } };
 }
 
+// This code can be simplified if/once the default value is read when a Raycast preference field is cleared. As of
+//   writing this, clearing a preference field counts as setting it with an empty string, which results in NaN when
+//   trying to parse as an integer.
 export function getTransitionTimeInMs(): number {
-  const { transitionTime } = getPreferenceValues<Preferences>();
+  const { transitionTime: transitionTimePreference } = getPreferenceValues<Preferences>();
+  const transitionTime = parseInt(transitionTimePreference);
 
-  return Math.round(parseInt(transitionTime));
+  if (isNaN(transitionTime)) {
+    return DEFAULT_TRANSITION_TIME_MS;
+  }
+
+  return Math.round(transitionTime);
 }
 
 export function optimisticUpdate<T extends HasId>(
