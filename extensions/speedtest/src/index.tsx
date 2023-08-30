@@ -16,7 +16,10 @@ function percentageToString(val: number | undefined): string | undefined {
   return `${v}%`;
 }
 
-function ClearCacheAction(): JSX.Element {
+function ClearCacheAction(props: { isLoading: boolean }) {
+  if (props.isLoading) {
+    return null;
+  }
   const handle = async () => {
     try {
       const d = speedtestCLIDirectory();
@@ -25,10 +28,15 @@ function ClearCacheAction(): JSX.Element {
       // ignore
     }
   };
-  return <Action title="Clear CLI Cache" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handle} />;
+  return <Action title="Clear CLI Cache" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handle} />;
 }
 
-function ISPListItem(props: { url: string | undefined; name: string | undefined; summary: JSX.Element }): JSX.Element {
+function ISPListItem(props: {
+  url: string | undefined;
+  name: string | undefined;
+  summary: JSX.Element;
+  isLoading: boolean;
+}): JSX.Element {
   const n = props.name;
   const url = props.url;
   return (
@@ -46,7 +54,7 @@ function ISPListItem(props: { url: string | undefined; name: string | undefined;
               shortcut={{ modifiers: ["opt"], key: "enter" }}
             />
           )}
-          <ClearCacheAction />
+          <ClearCacheAction isLoading={props.isLoading} />
         </ActionPanel>
       }
       accessories={[
@@ -237,8 +245,22 @@ function CopySummaryAction(props: { result: Result }): JSX.Element {
   return <Action.CopyToClipboard title="Copy Summary to Clipboard" content={parts.join("; ")} />;
 }
 
+function RestartAction(props: { isLoading: boolean; revalidate: () => void }) {
+  if (props.isLoading) {
+    return null;
+  }
+  return (
+    <Action
+      title="Restart"
+      icon={Icon.RotateAntiClockwise}
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      onAction={props.revalidate}
+    />
+  );
+}
+
 export default function SpeedtestList() {
-  const { result, error, isLoading, resultProgress } = useSpeedtest();
+  const { result, error, isLoading, resultProgress, revalidate } = useSpeedtest();
 
   if (error || result.error) {
     showToast({
@@ -248,7 +270,12 @@ export default function SpeedtestList() {
     });
   }
   const title = isLoading ? "Speedtest running" : undefined;
-  const summaryAction = <CopySummaryAction result={result} />;
+  const summaryAction = (
+    <>
+      <CopySummaryAction result={result} />
+      <RestartAction isLoading={isLoading} revalidate={revalidate} />{" "}
+    </>
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={title}>
@@ -256,7 +283,7 @@ export default function SpeedtestList() {
         <List.EmptyView icon={Icon.LevelMeter} title={result.error} />
       ) : (
         <>
-          <ISPListItem url={result.url} name={result.isp} summary={summaryAction} />
+          <ISPListItem url={result.url} name={result.isp} summary={summaryAction} isLoading={isLoading} />
           <ServerListItem url={result.url} serverName={result.serverName} summary={summaryAction} />
           <PingListItem url={result.url} ping={result.ping} progress={resultProgress.ping} summary={summaryAction} />
           <DownloadListItem
@@ -283,6 +310,7 @@ function useSpeedtest(): {
   error: string | undefined;
   isLoading: boolean;
   resultProgress: ResultProgress;
+  revalidate: () => void;
 } {
   const [result, setResult] = useState<Result>({
     isp: undefined,
@@ -296,11 +324,16 @@ function useSpeedtest(): {
   });
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [date, setDate] = useState<Date>();
   const [resultProgress, setResultProgress] = useState<ResultProgress>({
     download: undefined,
     upload: undefined,
     ping: undefined,
   });
+  const revalidate = () => {
+    setDate(new Date());
+    setIsLoading(true);
+  };
   let cancel = false;
   useEffect(() => {
     async function runTest() {
@@ -341,6 +374,6 @@ function useSpeedtest(): {
     return () => {
       cancel = true;
     };
-  }, []);
-  return { result, error, isLoading, resultProgress };
+  }, [date]);
+  return { result, error, isLoading, resultProgress, revalidate };
 }
