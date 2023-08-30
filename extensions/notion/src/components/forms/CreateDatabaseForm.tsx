@@ -257,6 +257,9 @@ export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: Cr
                   })}
                 </Form.TagPicker>
               );
+            // Formulas can't be set on creation
+            case "formula":
+              return null;
             default:
               return <Form.TextField key={key} id={id} title={title} placeholder={placeholder} />;
           }
