@@ -37,7 +37,7 @@ class NumberExtractor {
             completionHandler(text)
         })
 
-        request.recognitionLevel = .fast
+        request.recognitionLevel = .accurate
         request.usesLanguageCorrection = false
 
         let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
