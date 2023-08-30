@@ -1,5 +1,10 @@
 # Speedtest Changelog
 
+## [Optimize] - 2023-08-30
+
+- Catch possible crash in speedtest
+- Upgrade to 1.57
+
 ## [Spelling] - 2023-06-13
 
 - Corrected naming convention for an action
