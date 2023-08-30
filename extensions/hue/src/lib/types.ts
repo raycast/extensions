@@ -9,12 +9,6 @@
 ///////////////////////
 // Non-Hue API types //
 ///////////////////////
-export type Preferences = {
-  transitionTime?: string;
-  toggleAllLights: "on" | "off";
-  bridgeIpAddress?: string;
-  bridgeUsername?: string;
-};
 
 export type Id = string | number;
 export type Palette = string[];

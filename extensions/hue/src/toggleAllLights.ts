@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import createHueClient from "./lib/createHueClient";
-import { Light, Preferences } from "./lib/types";
+import { Light } from "./lib/types";
 import HueClient from "./lib/HueClient";
 
 export default async function ToggleAllLights() {
@@ -69,17 +69,14 @@ export default async function ToggleAllLights() {
 }
 
 async function toggleLightsAndNotifyUser(lights: Light[], onLights: Light[], hueClient: HueClient): Promise<void> {
+  const { toggleAllLights } = getPreferenceValues<Preferences>();
   const toast = new Toast({
     style: Toast.Style.Animated,
     title: "",
     message: "Please wait…",
   });
 
-  const preferences = getPreferenceValues<Preferences>();
-  const toggleOn =
-    preferences.toggleAllLights === "on"
-      ? onLights.length === 0 || lights.length !== onLights.length
-      : onLights.length === 0;
+  const toggleOn = onLights.length === 0 || (toggleAllLights === "on" && lights.length !== onLights.length);
   let toastTitle: string;
   let successMessage: string;
   let failureMessage: string;
