@@ -168,28 +168,14 @@ function Group(props: {
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onIncrease={() =>
-                  handleBrightnessChange(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    props.groupedLight,
-                    props.group,
-                    "increase",
-                  )
+                  handleBrightnessChange(props.useHue, props.rateLimiter, props.groupedLight, props.group, "increase")
                 }
               />
               <DecreaseBrightnessAction
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onDecrease={() =>
-                  handleBrightnessChange(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    props.groupedLight,
-                    props.group,
-                    "decrease",
-                  )
+                  handleBrightnessChange(props.useHue, props.rateLimiter, props.groupedLight, props.group, "decrease")
                 }
               />
             </ActionPanel.Section>
@@ -386,7 +372,6 @@ async function handleSetBrightness(
 async function handleBrightnessChange(
   { hueBridgeState, lights, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  groupLights: Light[],
   groupedLight: GroupedLight | undefined,
   group: Group,
   direction: "increase" | "decrease",
