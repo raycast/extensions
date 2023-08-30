@@ -25,7 +25,7 @@ async function runTerminal(item: ISSHConnection) {
   let interactive = "";
   if (item.command) {
     customcommand = `\\"${item.command}\\" `;
-    interactive = '-t';
+    interactive = "-t";
   }
   const command = `ssh ${interactive} ${identity} ${item.user}@${item.address} ${customport} ${customcommand}`;
 
@@ -275,5 +275,5 @@ function Action({
 function getSubtitle(item: ISSHConnection) {
   return `${item.user}@${item.address}${item.port ? " Port: " + item.port : ""}${
     item.sshKey ? " SSH Key: " + item.sshKey : ""
-  } ${item.command ? " Command: \"" + item.command : "\""}`;
+  } ${item.command ? ' Command: "' + item.command : '"'}`;
 }
