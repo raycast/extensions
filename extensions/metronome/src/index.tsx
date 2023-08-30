@@ -60,7 +60,6 @@ export default function Command(props: LaunchProps) {
   if (
     Number.isInteger(Number(bpm)) &&
     Number(bpm) > 0 &&
-
     Number(bpm) < 500 &&
     Number.isInteger(Number(group)) &&
     Number(group) > 0 &&
@@ -91,7 +90,6 @@ export default function Command(props: LaunchProps) {
       style: Toast.Style.Failure,
       title: "Invalid Inputs",
       message: "Inputs must be positive integers below 500",
-
     });
     popToRoot();
     return null;
