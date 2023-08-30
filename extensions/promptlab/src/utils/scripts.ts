@@ -1,11 +1,13 @@
 import { spawn } from "child_process";
-import { runAppleScript } from "run-applescript";
 import * as util from "util";
 import { DebugStyle, logDebug } from "./dev-utils";
 import { CalendarDuration, EventType, ImageData, PDFData, ReturnType } from "./types";
 import { environment } from "@raycast/api";
 import path from "path";
 import { filterString } from "./context-utils";
+import * as fs from "fs";
+import * as os from "os";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Executes an OSA script using the `osascript` command.
@@ -285,6 +287,7 @@ export const ScriptRunner = {
     useFaceDetection: boolean,
     useRectangleDetection: boolean,
     useSaliencyAnalysis: boolean,
+    useHorizonDetection: boolean,
     confidenceThreshold = 0.7
   ) =>
     runScript(
@@ -297,6 +300,7 @@ export const ScriptRunner = {
       useFaceDetection,
       useRectangleDetection,
       useSaliencyAnalysis,
+      useHorizonDetection,
       confidenceThreshold
     ) as Promise<ImageData>,
 
@@ -318,6 +322,19 @@ export const ScriptRunner = {
       pageLimit,
       useMetadata
     ) as Promise<PDFData>,
+
+  /**
+   * Analyzes an instantaneous screenshot of the display, extracting various features. Deletes the screenshot after analysis.
+   * @returns The path of the screenshot file.
+   */
+  ScreenCapture: async (windowOnly = false) => {
+    const tempPath = path.join(os.tmpdir(), "screenshot.png");
+    console.log("fuck");
+    await (runScript("ScreenCapture", ReturnType.STRING, "JavaScript", tempPath, windowOnly) as Promise<string>);
+    const data = await ScriptRunner.ImageFeatureExtractor(tempPath, true, true, true, true, false, false, 0.7);
+    await fs.promises.rm(tempPath);
+    return data.stringValue;
+  },
 
   /**
    * Gets the selected files from Finder, even if Finder is not the active application.
