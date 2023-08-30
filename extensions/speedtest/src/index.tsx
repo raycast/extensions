@@ -36,6 +36,7 @@ function ISPListItem(props: {
   name: string | undefined;
   summary: JSX.Element;
   isLoading: boolean;
+  restart: JSX.Element;
 }): JSX.Element {
   const n = props.name;
   const url = props.url;
@@ -45,16 +46,23 @@ function ISPListItem(props: {
       icon={{ source: Icon.Globe, tintColor: Color.Green }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {n && <Action.CopyToClipboard content={n} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
-          <ClearCacheAction isLoading={props.isLoading} />
+          <ActionPanel.Section>
+            {props.summary}
+            {n && <Action.CopyToClipboard content={n} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
@@ -70,6 +78,8 @@ function ServerListItem(props: {
   url: string | undefined;
   serverName: string | undefined;
   summary: JSX.Element;
+  restart: JSX.Element;
+  isLoading: boolean;
 }): JSX.Element {
   const sn = props.serverName;
   const url = props.url;
@@ -79,15 +89,23 @@ function ServerListItem(props: {
       icon={{ source: Icon.HardDrive, tintColor: Color.Green }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {sn && <Action.CopyToClipboard content={sn} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
+          <ActionPanel.Section>
+            {props.summary}
+            {sn && <Action.CopyToClipboard content={sn} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
@@ -104,6 +122,8 @@ function PingListItem(props: {
   ping: number | undefined;
   progress: number | undefined;
   summary: JSX.Element;
+  restart: JSX.Element;
+  isLoading: boolean;
 }): JSX.Element {
   const p = props.ping;
   const url = props.url;
@@ -114,15 +134,23 @@ function PingListItem(props: {
       icon={{ source: Icon.LevelMeter, tintColor: Color.Blue }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {p && <Action.CopyToClipboard content={pingToString(p)} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
+          <ActionPanel.Section>
+            {props.summary}
+            {p && <Action.CopyToClipboard content={pingToString(p)} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
@@ -139,6 +167,8 @@ function DownloadListItem(props: {
   download: number | undefined;
   progress: number | undefined;
   summary: JSX.Element;
+  restart: JSX.Element;
+  isLoading: boolean;
 }): JSX.Element {
   const d = props.download;
   const url = props.url;
@@ -149,15 +179,23 @@ function DownloadListItem(props: {
       icon={{ source: Icon.ArrowDownCircle, tintColor: Color.Blue }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {d && <Action.CopyToClipboard content={speedToString(d)} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
+          <ActionPanel.Section>
+            {props.summary}
+            {d && <Action.CopyToClipboard content={speedToString(d)} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
@@ -174,6 +212,8 @@ function UploadListItem(props: {
   upload: number | undefined;
   progress: number | undefined;
   summary: JSX.Element;
+  restart: JSX.Element;
+  isLoading: boolean;
 }): JSX.Element {
   const u = props.upload;
   const url = props.url;
@@ -184,15 +224,23 @@ function UploadListItem(props: {
       icon={{ source: Icon.ArrowUpCircle, tintColor: "#bf71ff" }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {u && <Action.CopyToClipboard content={speedToString(u)} />}
-          {url && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
+          <ActionPanel.Section>
+            {props.summary}
+            {u && <Action.CopyToClipboard content={speedToString(u)} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
@@ -204,7 +252,12 @@ function UploadListItem(props: {
   );
 }
 
-function ResultListItem(props: { result: Result; isLoading: boolean; summary: JSX.Element }): JSX.Element {
+function ResultListItem(props: {
+  result: Result;
+  isLoading: boolean;
+  summary: JSX.Element;
+  restart: JSX.Element;
+}): JSX.Element {
   const url = props.result?.url;
   return (
     <List.Item
@@ -212,15 +265,23 @@ function ResultListItem(props: { result: Result; isLoading: boolean; summary: JS
       icon={{ source: Icon.CheckCircle, tintColor: Color.Blue }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {!props.isLoading && <Action.CopyToClipboard content={url ?? ""} />}
-          {!props.isLoading && (
-            <Action.OpenInBrowser
-              title="Open Results in Browser"
-              url={url ?? ""}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-            />
-          )}
+          <ActionPanel.Section>
+            {props.summary}
+            {!props.isLoading && <Action.CopyToClipboard content={url ?? ""} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {!props.isLoading && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
@@ -270,12 +331,8 @@ export default function SpeedtestList() {
     });
   }
   const title = isLoading ? "Speedtest running" : undefined;
-  const summaryAction = (
-    <>
-      <CopySummaryAction result={result} />
-      <RestartAction isLoading={isLoading} revalidate={revalidate} />{" "}
-    </>
-  );
+  const summaryAction = <CopySummaryAction result={result} />;
+  const restartAction = <RestartAction isLoading={isLoading} revalidate={revalidate} />;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={title}>
@@ -283,22 +340,45 @@ export default function SpeedtestList() {
         <List.EmptyView icon={Icon.LevelMeter} title={result.error} />
       ) : (
         <>
-          <ISPListItem url={result.url} name={result.isp} summary={summaryAction} isLoading={isLoading} />
-          <ServerListItem url={result.url} serverName={result.serverName} summary={summaryAction} />
-          <PingListItem url={result.url} ping={result.ping} progress={resultProgress.ping} summary={summaryAction} />
+          <ISPListItem
+            url={result.url}
+            name={result.isp}
+            summary={summaryAction}
+            isLoading={isLoading}
+            restart={restartAction}
+          />
+          <ServerListItem
+            url={result.url}
+            isLoading={isLoading}
+            serverName={result.serverName}
+            summary={summaryAction}
+            restart={restartAction}
+          />
+          <PingListItem
+            url={result.url}
+            isLoading={isLoading}
+            ping={result.ping}
+            progress={resultProgress.ping}
+            summary={summaryAction}
+            restart={restartAction}
+          />
           <DownloadListItem
             url={result.url}
+            isLoading={isLoading}
             download={result.download}
             progress={resultProgress.download}
             summary={summaryAction}
+            restart={restartAction}
           />
           <UploadListItem
             url={result.url}
+            isLoading={isLoading}
             upload={result.upload}
             progress={resultProgress.upload}
             summary={summaryAction}
+            restart={restartAction}
           />
-          <ResultListItem result={result} isLoading={isLoading} summary={summaryAction} />
+          <ResultListItem result={result} isLoading={isLoading} summary={summaryAction} restart={restartAction} />
         </>
       )}
     </List>
