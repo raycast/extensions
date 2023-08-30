@@ -2,16 +2,19 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pipedrive",
   "title": "Pipedrive Search",
-  "description": "Search Pipedrive Deals",
+  "description": "Search Pipedrive Deals, People and Organiations",
   "icon": "command-icon.png",
   "author": "stephendolan",
+  "contributors": [
+    "ahp"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search Deals",
+      "title": "Search Deals, People and Organizations",
       "subtitle": "Pipedrive",
-      "description": "Search Pipedrive deals.",
+      "description": "Search Pipedrive deals, people and organizations",
       "mode": "view"
     }
   ],
@@ -31,6 +34,14 @@
       "title": "API Token",
       "description": "Your Pipedrive API Token",
       "placeholder": "Enter your Pipedrive API Token"
+    },
+    {
+      "name": "limit",
+      "type": "textfield",
+      "required": true,
+      "title": "Result Limit",
+      "description": "Maximum number of results",
+      "placeholder": "20"
     }
   ],
   "dependencies": {
