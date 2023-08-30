@@ -298,9 +298,6 @@ async function handleToggle(
     const changes = {
       on: { on: !groupedLight.on?.on },
       dynamics: { duration: getTransitionTimeInMs() },
-      ...(!groupedLight.on?.on && groupedLight.dimming
-        ? { dimming: { brightness: groupedLight.dimming?.brightness } }
-        : {}),
     };
 
     const changesToGroupedLights = new Map(
