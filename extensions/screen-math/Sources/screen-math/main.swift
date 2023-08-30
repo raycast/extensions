@@ -38,7 +38,9 @@ class NumberExtractor {
         })
 
         request.recognitionLevel = .accurate
-        request.usesLanguageCorrection = false
+        request.recognitionLanguages = ["en-US"]
+        request.usesLanguageCorrection = true
+        request.customWords = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 
         let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
         do {

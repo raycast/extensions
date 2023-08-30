@@ -67,6 +67,10 @@ export default async function command() {
           reject(error);
         }
 
+        if (environment.isDevelopment) {
+          console.log(stdout);
+        }
+
         // Remove surrounding brackets and split into an array
         const stringWithoutBrackets = stdout.slice(1, -1);
         const stringArray = stringWithoutBrackets.split(", ");
