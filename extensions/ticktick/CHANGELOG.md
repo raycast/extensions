@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Added] - 2023-07-25
+
+- Support complete task.
+
 ## [Added] - 2023-06-02
 
 - Add `Inbox` command.

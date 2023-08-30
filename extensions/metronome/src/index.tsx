@@ -60,12 +60,14 @@ export default function Command(props: LaunchProps) {
   if (
     Number.isInteger(Number(bpm)) &&
     Number(bpm) > 0 &&
+
     Number(bpm) < 500 &&
     Number.isInteger(Number(group)) &&
     Number(group) > 0 &&
     Number(group) < 500
   ) {
     const description = isRunning ? "Click ↵ to pause" : "Click ↵ to play";
+
     return (
       <List searchBarPlaceholder="" searchText="">
         <List.EmptyView
@@ -89,6 +91,7 @@ export default function Command(props: LaunchProps) {
       style: Toast.Style.Failure,
       title: "Invalid Inputs",
       message: "Inputs must be positive integers below 500",
+
     });
     popToRoot();
     return null;

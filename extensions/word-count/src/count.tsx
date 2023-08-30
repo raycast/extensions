@@ -24,7 +24,7 @@ export default function Command() {
 
   useEffect(() => {
     const result = count(text, includeWhitespace);
-    const resultStr = `${result.characters} characters · ${result.words} words · ${result.sentences} sentences · ${result.paragraphs} paragraphs`;
+    const resultStr = `${result.characters} characters · ${result.words} words \n${result.sentences} sentences · ${result.paragraphs} paragraphs \n${result.reading_time} minutes to read · ${result.speaking_time} minutes to speak`;
     setResult(resultStr);
   }, [text, includeWhitespace]);
 

@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2023-08-29
+
+- Fixed crash in Logout command
+
 ## [Improvements] - 2023-08-15
 
 - Adds ability to paste TOTP code into active application

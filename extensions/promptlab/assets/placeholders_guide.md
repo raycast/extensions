@@ -3,8 +3,8 @@
 ------------------------
 
 Author: Stephen Kaplan _(HelloImSteven)_ <br />
-Last Updated: 2023-07-23 <br />
-PromptLab Version: 1.1.1
+Last Updated: 2023-08-16 <br />
+PromptLab Version: 1.2.0
 
 ------------------------
 
@@ -44,7 +44,7 @@ All placeholders are evaluated at runtime — when you execute a command — and
 | `{{copy:...}}` | Copies the specified text to the clipboard. |
 | `{{cutoff [number]:...}}` | Cuts content to the specified number of characters. |
 | `{{decrement:identifier}}` | Decrements the specified persistent variable by 1. |
-| `{{END}}` | Ends the current prompt, ignore all subsequent content. |
+| `{{END}}` | Ends the current prompt, ignoring all subsequent content. |
 | `{{ignore:...}}` or <br /> `{{IGNORE:...}}` | Ignores all content contained within. Useful for running placeholders without inserting their return value. |
 | `{{increment:identifier}}` | Increments the specified persistent variable by 1. |
 | `{{paste:...}}` | Pastes the specified text into the frontmost application. |
@@ -89,6 +89,7 @@ In addition to the above, you can use any supported file extension as a directiv
 | `{{computerName}}` | The 'pretty' hostname of the computer. |
 | `{{currentAppName}}` or <br /> `{{currentApp}}` or <br /> `{{currentApplicationName}}` or <br /> `{{currentApplication}}` | The name of the frontmost application. |
 | `{{currentAppPath}}` or <br /> `{{currentApplicationPath}}` | The POSIX path to the bundle of the frontmost application. |
+| `{{currentAppBundleID}}` or <br /> `{{currentApplicationBundleID}}` | The bundle ID of the frontmost application. |
 | `{{currentDirectory}}` | The POSIX path of Finder's current insertion location. This is the desktop if no Finder windows are open. |
 | `{{currentTabText}}` or <br /> `{{tabText}}` | The visible text of the current tab of the frontmost browser window. |
 | `{{currentURL}}` | The URL of the active tab of the frontmost browser window. |
@@ -121,6 +122,7 @@ In addition to the above, you can use any supported file extension as a directiv
 | `{{imageAnimals}}` | A comma-separated list of names for animals detected in currently selected image(s) in Finder. |
 | `{{imageBarcodes}}` | The text contents of barcodes detected in currently selected image(s) in Finder. |
 | `{{imageFaces}}` | The number of faces detected in currently selected image(s) in Finder. |
+| `{{imageHorizon}}` | The angle of the horizon detected in currently selected image(s) in Finder. |
 | `{{imagePOI}}` | A comma-separated list of points of interest detected in currently selected image(s) in Finder. The points are normalized to a 1x1 coordinate space. |
 | `{{imageRectangles}}` | A newline-separated list of rectangles detected in currently selected image(s) in Finder. Each rectangle is represented in the format `Rectangle #1: Midpoint=(x,y) Dimensions=wxh` |
 | `{{imageSubjects}}` | A comma-separated list of names for objects detected in currently selected image(s) in Finder. |
@@ -169,16 +171,26 @@ In addition to the above, you can use any supported file extension as a directiv
 | `{{usedUUIDs}}` | The list of UUIDs previously used by the `{{uuid}}` placeholder since Pins' LocalStorage was last reset. |
 | `{{uuid}}` or <br /> `{{UUID}}` | A unique UUID generated at runtime. |
 
+#### On-Screen Information
+
+| `{{focusedElement}}` or <br /> `{{activeElement}}` or <br /> `{{selectedElement}}` or <br /> `{{focusedElementText}}` or <br /> `{{activeElementText}}` or <br /> `{{selectedElementText}}` | The text content of the currently focused element in the active tab of a supported browser. Specify a browser using `{{focusedElement browser="..."}}`. |
+| `{{screenContent}}` | Image vision analysis for a screen capture of the entire screen, including all windows. Primarily extracts all visible text, but also detects objects. |
+| `{{windowContent}}` | Image vision analysis for a screen capture of the active window. Primarily extracts the visible text of the window, but also detects objects. |
+
 #### External Data
 
 | Placeholder | Replaced With |
 | ----- | ----- |
-| `{{location}}` | The user's current location in the format `city, region, country`. Obtained using [geojs.io](https://get.geojs.io).
+| `{{elementHTML:...}}` or <br /> `{{element:...}}` or <br /> `{{HTMLOfElement:...}}` | The raw HTML source of an HTML element in the active tab of a supported browser. The first matching element will be used. Specify a browser using `{{elementHTML browser="..."}}`. |
+| `{{elementText:...}}` or <br /> `{{textOfElement:...}}` | The text content of the specified HTML element, e.g. `{{elementText:#myElement}}`, `{{elementText:.myClass}}`, or `{{elementText:<body>}}`. The first matching element will be used. Specify a browser using `{{elementText browser="..."}}`. |
+| `{{latitude}}` | The user's current latitude. Obtained using [geojs.io](https://get.geojs.io). |
+| `{{longitude}}` | The user's current longitude. Obtained using [geojs.io](https://get.geojs.io). |
+| `{{location}}` or <br /> `{{currentLocation}}` | The user's current location in the format `city, region, country`. Obtained using [geojs.io](https://get.geojs.io).
 | `{{nearbyLocations:...}}` | A comma-separated list of nearby locations matching the provided query, e.g. `{{nearbyLocations:food}}`. |
 | `{{todayWeather}}` | 24-hour weather forecast data at the user's current location, in JSON format. Obtained using [open-meteo.com](https://open-meteo.com).
+| `{{url:...}}` or <br /> `{{URL:...}}` or <br /> `{{...}}` | The visible text content at the specified URL, e.g. `{{url:https://google.com}}` or `{{https://google.com}}`. Note: Only the HTTP(S) protocol is supported at this time. Use `{{url raw=true:https://google.com}}` to get the raw HTML of the page instead of the visible text. |
 | `{{weekWeather}}` | 7-day weather forecast data at the user's current location, in JSON format. Obtained using [open-meteo.com](https://open-meteo.com).
 | `{{youtube:...}}` | The transcript of the first YouTube video matching the provided query or URL, e.g. `{{youtube:how to make a sandwich}}` or `{{youtube:https://www.youtube.com/watch?v=...}}`. |
-| `{{url:...}}` or <br /> `{{URL:...}}` or <br /> `{{...}}` | The visible text content at the specified URL, e.g. `{{url:https://google.com}}` or `{{https://google.com}}`. Note: Only the HTTP(S) protocol is supported at this time. Use `{{url raw=true:https://google.com}}` to get the raw HTML of the page instead of the visible text. |
 
 ### Script Placeholders
 
@@ -237,7 +249,7 @@ This section contains technical details about how the PromptLab placeholders sys
 
 #### PromptLab Command Placeholders
 
-You can use the name of any PromptLab command you have installed as a placeholder by surrounding it with double curly braces, `{{like this}}`. For example, if you have a command named "Summarize Selected Files", you can use the placeholder `{{Summarize Selected Files}}` to include the output of that command in your prompt for another command. This is useful for chaining commands together, but it also slows down the execution of your command, so use it wisely. You can also use the unique ID of the command in place of its name, e.g. `{{a1b0bb1d-8f75-4afc-9168-9907c5e3bd87}}`. You can obtain a command's ID via the action menu within Raycast.
+You can use the name of any PromptLab command you have installed as a placeholder by surrounding it with double curly braces, `{{like this}}`. For example, if you have a command named "Summarize Selected Files", you can use the placeholder `{{Summarize Selected Files}}` to include the output of that command in your prompt for another command. This is useful for chaining commands together, but it also slows down the execution of your command, so use it wisely. You can also use the unique ID of the command in place of its name, e.g. `{{CMa1b0bb1d-8f75-4afc-9168-9907c5e3bd87}}`. You can obtain a command's ID via the action menu within Raycast.
 
 #### Raycast Command Placeholders
 
