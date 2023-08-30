@@ -166,10 +166,6 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       };
     }
     else if (results.type as string === "person") {
-      const resultsName = results.name as Json;
-      //      const primaryEmail = results.primary_email as string || "" as string;
-      //      const resultsPhone = results.phones as Json[];
-      //      const primaryPhone = resultsPhone[0] || "" as string;    
       const primaryEmail = typeof results.primary_email === 'string' ? results.primary_email : "" as string;
       const resultsPhone = Array.isArray(results.phones) ? results.phones : [];
       const primaryPhone = typeof resultsPhone[0] === 'string' ? resultsPhone[0] : "" as string;
