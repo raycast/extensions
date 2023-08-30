@@ -68,7 +68,7 @@ function ServerListItem(props: {
   return (
     <List.Item
       title="Server"
-      icon={{ source: "server.png" }}
+      icon={{ source: Icon.HardDrive, tintColor: Color.Green }}
       actions={
         <ActionPanel>
           {props.summary}
@@ -138,7 +138,7 @@ function DownloadListItem(props: {
     <List.Item
       title="Download"
       subtitle={percentageToString(props.progress)}
-      icon={{ source: "download.png", tintColor: Color.Blue }}
+      icon={{ source: Icon.ArrowDownCircle, tintColor: Color.Blue }}
       actions={
         <ActionPanel>
           {props.summary}
@@ -173,7 +173,7 @@ function UploadListItem(props: {
     <List.Item
       title="Upload"
       subtitle={percentageToString(props.progress)}
-      icon={{ source: "upload.png", tintColor: "#bf71ff" }}
+      icon={{ source: Icon.ArrowUpCircle, tintColor: "#bf71ff" }}
       actions={
         <ActionPanel>
           {props.summary}
@@ -201,7 +201,7 @@ function ResultListItem(props: { result: Result; isLoading: boolean; summary: JS
   return (
     <List.Item
       title="Result Link"
-      icon={{ source: "results.png", tintColor: Color.Blue }}
+      icon={{ source: Icon.CheckCircle, tintColor: Color.Blue }}
       actions={
         <ActionPanel>
           {props.summary}

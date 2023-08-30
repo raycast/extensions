@@ -4,6 +4,7 @@
 
 - Catch possible crash in speedtest
 - Upgrade to 1.57
+- Use Raycast Icons instead of custom ones
 
 ## [Spelling] - 2023-06-13
 
