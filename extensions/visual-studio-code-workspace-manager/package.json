@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "visual-studio-code-workspace-manager",
+  "title": "Visual Studio Code Workspace Manager",
+  "description": "Quickly open your workspace project!",
+  "icon": "command-icon.png",
+  "author": "jeasonnow",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Visual Studio Code Workspace Manager",
+      "subtitle": "VSCode Workspace Manager",
+      "description": "Quickly open your workspace project!",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspacePath",
+      "type": "textfield",
+      "required": true,
+      "default": "",
+      "title": "Path of your workspce",
+      "description": "The project space folder you use to store all your projects"
+    },
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Code",
+      "description": "Select which build of Visual Studio Code to use",
+      "data": [
+        {
+          "value": "Code",
+          "title": "Visual Studio Code"
+        },
+        {
+          "value": "Code - Insiders",
+          "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
+        },
+        {
+          "value": "VSCodium < 1.71",
+          "title": "VSCodium < 1.71"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.2",
+    "fs-extra": "^11.1.1",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
