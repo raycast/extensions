@@ -1,4 +1,4 @@
-import { Clipboard, environment, showHUD } from "@raycast/api";
+import { Clipboard, environment, popToRoot, showHUD } from "@raycast/api";
 import { exec } from "child_process";
 import fs from "fs";
 import { chmod } from "fs/promises";
@@ -15,6 +15,8 @@ export default async function command() {
     if (message) {
       showHUD(message).then();
     }
+
+    popToRoot({ clearSearchBar: true });
   };
 
   const formatNumber = (n: number): string => {
@@ -48,8 +50,6 @@ export default async function command() {
     return new Promise((resolve, reject) => {
       exec(`/usr/sbin/screencapture -i -x ${filename}`, async (error) => {
         if (error) {
-          handleError(error, "❌ There was an error while taking the screenshot.");
-
           reject(error);
         }
 
@@ -86,10 +86,18 @@ export default async function command() {
 
   const filename = `${environment.assetsPath}/sum-numbers-${Date.now()}.png`;
 
-  await getScreenshot(filename);
+  await getScreenshot(filename).catch((error) => {
+    handleError(error, "❌ There was an error while taking the screenshot.");
+
+    return;
+  });
 
   const command = join(environment.assetsPath, "screen-math");
   await chmod(command, "755");
+
+  if (!fs.existsSync(filename)) {
+    return;
+  }
 
   const numbersFound = await findNumbers(filename);
 
