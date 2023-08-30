@@ -12,7 +12,7 @@ import {
 import { getPreferenceValues, LocalStorage, Toast } from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "../helpers/constants";
 import HueClient from "./HueClient";
-import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
+import { BridgeConfig, GroupedLight, Light, Preferences, Room, Scene, Zone } from "./types";
 import React from "react";
 import createHueClient from "./createHueClient";
 import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "../helpers/hueNetworking";
@@ -67,7 +67,7 @@ export default function hueBridgeMachine(
         invoke: {
           id: "loadingPreferences",
           src: async () => {
-            const preferences = getPreferenceValues();
+            const preferences = getPreferenceValues<Preferences>();
             const bridgeIpAddress = preferences.bridgeIpAddress;
             const bridgeUsername = preferences.bridgeUsername;
 
@@ -342,17 +342,17 @@ export default function hueBridgeMachine(
             {
               target: "linking",
               actions: assign({
-                bridgeUsername: () => getPreferenceValues().bridgeUsername,
+                bridgeUsername: () => getPreferenceValues<Preferences>().bridgeUsername,
                 bridgeId: () => undefined,
                 bridgeConfig: () => undefined,
               }),
-              cond: () => !!getPreferenceValues().bridgeIpAddress,
+              cond: () => !!getPreferenceValues<Preferences>().bridgeIpAddress,
             },
             {
               target: "discoveringUsingPublicApi",
               actions: assign({
                 bridgeIpAddress: () => undefined,
-                bridgeUsername: () => getPreferenceValues().bridgeUsername,
+                bridgeUsername: () => getPreferenceValues<Preferences>().bridgeUsername,
                 bridgeId: () => undefined,
                 bridgeConfig: () => undefined,
               }),
