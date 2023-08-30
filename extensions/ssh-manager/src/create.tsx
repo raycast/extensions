@@ -35,7 +35,7 @@ export default function Main() {
       />
       <Form.TextField
         id="command"
-        title="Command to execute (optional)"
+        title="Command to Execute (optional)"
         placeholder={"An optional command to execute on the remote server after connecting"}
       />
     </Form>
