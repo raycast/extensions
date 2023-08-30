@@ -9,7 +9,13 @@
   * When some, but not all lights are on, the preference will be used (default: Turn all off)
   * When all lights are on, all lights will turn off
 
+### Known issues
+
+* Transition Time preference does not apply to toggling groups, as this causes the group to turn on with minimal
+  brightness due to a bug in the Hue V2 API.
+
 ## [Bug fix] - 2023-06-30
+
 * Fixed a bug where the extension would not store the username/API key after linking the Hue Bridge
 
 ## [Connectivity update] - 2023-06-22
