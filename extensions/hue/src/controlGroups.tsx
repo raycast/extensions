@@ -283,7 +283,8 @@ async function handleToggle(
 
     const changes = {
       on: { on: !groupedLight.on?.on },
-      dynamics: { duration: getTransitionTimeInMs() },
+      // No dynamics when toggling groups, as that causes the brightness to the set to the lowest possible level,
+      //   even when only applied to toggling off.
     };
 
     const changesToGroupedLights = new Map(
