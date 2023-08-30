@@ -87,7 +87,7 @@ async function toggleLightsAndNotifyUser(lights: Light[], onLights: Light[], hue
     lights.map((light) => {
       const on = onLights.includes(light);
       return hueClient.updateLight(light, { on: { on: !on } });
-    })
+    }),
   );
 
   const lightsTurnedOn = settledPromises.filter((p) => p.status === "fulfilled").length;

@@ -44,7 +44,7 @@ export default function hueBridgeMachine(
   setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
   setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
   setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
-  setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
+  setScenes: React.Dispatch<React.SetStateAction<Scene[]>>,
 ) {
   return createMachine<HueContext>({
     id: "manage-hue-bridge",
@@ -164,7 +164,7 @@ export default function hueBridgeMachine(
               setGroupedLights,
               setRooms,
               setZones,
-              setScenes
+              setScenes,
             );
 
             new Toast({ title: "" }).hide().then();
@@ -278,7 +278,7 @@ export default function hueBridgeMachine(
             const bridgeConfig = await linkWithBridge(
               context.bridgeIpAddress,
               context.bridgeId,
-              context.bridgeUsername
+              context.bridgeUsername,
             );
 
             const hueClient = await createHueClient(
@@ -287,7 +287,7 @@ export default function hueBridgeMachine(
               setGroupedLights,
               setRooms,
               setZones,
-              setScenes
+              setScenes,
             );
 
             return { bridgeConfig, hueClient };

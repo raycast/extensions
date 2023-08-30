@@ -13,7 +13,7 @@ export function getTransitionTimeInMs(): number {
 export function optimisticUpdate<T extends HasId>(
   stateItem: T,
   changes: Partial<T>,
-  setState: React.Dispatch<React.SetStateAction<T[]>>
+  setState: React.Dispatch<React.SetStateAction<T[]>>,
 ): () => void {
   let undoState: T[];
 
@@ -29,7 +29,7 @@ export function optimisticUpdate<T extends HasId>(
 
 export function optimisticUpdates<T extends HasId>(
   changes: Map<Id, Partial<T>>,
-  setState: React.Dispatch<React.SetStateAction<T[]>>
+  setState: React.Dispatch<React.SetStateAction<T[]>>,
 ): () => void {
   let undoState: T[];
 
