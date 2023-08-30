@@ -6,11 +6,14 @@ export default function Command(props: LaunchProps) {
   const { bpm, group } = props.arguments;
   const [taps, setTaps] = useState<number>(0);
   const groupPositionRef = useRef<number>(1);
-  const [isRunning, setIsRunning] = useState(true);
+  const [isRunning, setIsRunning] = useState(true); // Added state variable for metronome status
 
   const handleStartStop = () => {
-    if (isRunning) stopMetronome();
-    else startMetronome();
+    if (isRunning) {
+      stopMetronome();
+    } else {
+      startMetronome();
+    }
   };
 
   const stopMetronome = () => {
@@ -28,23 +31,39 @@ export default function Command(props: LaunchProps) {
     const interval = 60000 / Number(bpm);
 
     function handleClick() {
-      const clickSound = groupPositionRef.current === 1 ? "metronome-click.wav" : "metronome-click_lower.wav";
-      sound.play(environment.assetsPath + "/sfx/" + clickSound);
+      if (groupPositionRef.current === 1) {
+        sound.play(environment.assetsPath + "/sfx/" + "metronome-click.wav");
+      } else {
+        sound.play(environment.assetsPath + "/sfx/" + "metronome-click_lower.wav");
+      }
 
-      groupPositionRef.current = groupPositionRef.current === Number(group) ? 1 : groupPositionRef.current + 1;
+      if (groupPositionRef.current === Number(group)) {
+        groupPositionRef.current = 1;
+      } else {
+        groupPositionRef.current += 1;
+      }
+
       setTaps((previousTaps) => previousTaps + 1);
     }
 
-    if (isRunning) timer = setInterval(handleClick, interval);
+    if (isRunning) {
+      timer = setInterval(handleClick, interval);
+    }
 
     return () => {
-      if (timer) clearInterval(timer);
+      if (timer) {
+        clearInterval(timer);
+      }
     };
   }, [bpm, group, isRunning]);
 
   if (
-    Number.isInteger(Number(bpm)) && Number(bpm) > 0 && Number(bpm) < 700 &&
-    Number.isInteger(Number(group)) && Number(group) > 0 && Number(group) < 700
+    Number.isInteger(Number(bpm)) &&
+    Number(bpm) > 0 &&
+    Number(bpm) < 500 &&
+    Number.isInteger(Number(group)) &&
+    Number(group) > 0 &&
+    Number(group) < 500
   ) {
     const description = isRunning ? "Click ↵ to pause" : "Click ↵ to play";
     return (
@@ -69,7 +88,7 @@ export default function Command(props: LaunchProps) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid Inputs",
-      message: "Inputs must be positive integers below 700",
+      message: "Inputs must be positive integers below 500",
     });
     popToRoot();
     return null;
