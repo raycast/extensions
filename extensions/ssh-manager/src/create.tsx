@@ -33,6 +33,11 @@ export default function Main() {
         title="SSH Key Location (optional)"
         placeholder={"An optional key path to authenticate with"}
       />
+      <Form.TextField
+        id="command"
+        title="Command to execute (optional)"
+        placeholder={"An optional command to execute on the remote server after connecting"}
+      />
     </Form>
   );
 }
