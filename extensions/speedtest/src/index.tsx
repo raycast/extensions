@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import * as afs from "fs/promises";
-import { useEffect, useState } from "react";
-import { ensureCLI, speedtestCLIDirectory } from "./lib/cli";
-import { Result, ResultProgress, runSpeedTest } from "./lib/speedtest";
+import { speedtestCLIDirectory } from "./lib/cli";
+import { Result } from "./lib/speedtest";
 import { pingToString, speedToString } from "./lib/utils";
+import { useSpeedtest } from "./lib/hooks";
 
 function percentageToString(val: number | undefined): string | undefined {
   if (val === undefined) {
@@ -383,77 +383,4 @@ export default function SpeedtestList() {
       )}
     </List>
   );
-}
-
-function useSpeedtest(): {
-  result: Result;
-  error: string | undefined;
-  isLoading: boolean;
-  resultProgress: ResultProgress;
-  revalidate: () => void;
-} {
-  const [result, setResult] = useState<Result>({
-    isp: undefined,
-    location: undefined,
-    serverName: undefined,
-    download: undefined,
-    upload: undefined,
-    ping: undefined,
-    url: undefined,
-    error: undefined,
-  });
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [date, setDate] = useState<Date>();
-  const [resultProgress, setResultProgress] = useState<ResultProgress>({
-    download: undefined,
-    upload: undefined,
-    ping: undefined,
-  });
-  const revalidate = () => {
-    setDate(new Date());
-    setIsLoading(true);
-  };
-  let cancel = false;
-  useEffect(() => {
-    async function runTest() {
-      try {
-        await ensureCLI();
-        runSpeedTest(
-          (r: Result) => {
-            if (!cancel) {
-              setResult({ ...r });
-            }
-          },
-          (r: Result) => {
-            if (!cancel) {
-              setResult({ ...r });
-              setIsLoading(false);
-            }
-          },
-          (err: Error) => {
-            if (!cancel) {
-              setError(err.message);
-              setIsLoading(false);
-            }
-          },
-          (prog: ResultProgress) => {
-            if (!cancel) {
-              setResultProgress(prog);
-            }
-          },
-        );
-      } catch (err) {
-        if (!cancel) {
-          setError(err instanceof Error ? err.message : "Unknown Error");
-          setIsLoading(false);
-        }
-      }
-    }
-    runTest();
-    return () => {
-      cancel = true;
-    };
-  }, [date]);
-  return { result, error, isLoading, resultProgress, revalidate };
 }
