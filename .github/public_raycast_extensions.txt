@@ -28,3 +28,4 @@ putio
 warp
 getsound
 reclaim-ai
+posthog
