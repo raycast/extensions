@@ -14,6 +14,7 @@ export type Connection = {
   Environment: string | "local" | "development" | "testing" | "staging" | "production";
   icon: string;
   subtitle: string;
+  version: number;
 };
 
 export type Group = {

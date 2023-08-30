@@ -1,22 +1,9 @@
-import { homedir } from "os";
-import os from "node:os";
 import fs from "fs";
-import expandTidle from "expand-tilde";
 import { Connection, Group } from "./interfaces";
-import { Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Keyboard, Toast, showToast } from "@raycast/api";
 import plist from "plist";
 import path from "node:path";
-
-export const homeDirectory = os.homedir();
-export const EmptyGroupID = "__EMPTY__";
-export const preferences = getPreferenceValues<ExtensionPreferences>();
-export const appendPath = fs.existsSync(`${homedir()}/Library/Application Support/com.tinyapp.TablePlus-setapp/Data/`)
-  ? "-setapp"
-  : "";
-
-export const directoryPath = preferences.path
-  ? expandTidle(preferences.path)
-  : `${homedir()}/Library/Application Support/com.tinyapp.TablePlus${appendPath}/Data/`;
+import { EmptyGroupID, directoryPath, homeDirectory, plistVersionPath } from "./constants";
 
 export async function fetchDatabases() {
   const tablePlusLocation = `${directoryPath}/Connections.plist`;
@@ -32,6 +19,7 @@ export async function fetchDatabases() {
   } else {
     const connectionsList = plist.parse(fs.readFileSync(tablePlusLocation, "utf8")) as ReadonlyArray<plist.PlistObject>;
     const groupList = plist.parse(fs.readFileSync(groupLocations, "utf8")) as ReadonlyArray<plist.PlistObject>;
+    const plistInformation = plist.parse(fs.readFileSync(plistVersionPath, "utf8")) as Readonly<plist.PlistObject>;
 
     const groups = new Map<string, Group>(
       groupList.map((group) => [
@@ -78,6 +66,7 @@ export async function fetchDatabases() {
         Environment: connection.Enviroment.toString(),
         icon: groupIcon,
         subtitle: tildify(subtitle),
+        version: Number(plistInformation.CFBundleVersion),
       };
 
       groups.get(groupId)?.connections.push(conn);
