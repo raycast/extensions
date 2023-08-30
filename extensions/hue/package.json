@@ -61,6 +61,24 @@
       "required": false
     },
     {
+      "name": "toggleAllLights",
+      "title": "“Toggle All Lights” when some lights are on",
+      "description": "When some—but not all—lights are on, the command should",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Turn all lights off",
+          "value": "off"
+        },
+        {
+          "title": "Turn all lights on",
+          "value": "on"
+        }
+      ],
+      "default": "off",
+      "required": false
+    },
+    {
       "name": "bridgeIpAddress",
       "title": "Bridge IP address (manual)",
       "description": "The IP address of your Hue bridge. Use this if automatic discovery doesn't work.",
