@@ -105,18 +105,24 @@ function Light(props: {
               light={props.light}
               onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.light)}
             />
-            <SetBrightnessAction
-              light={props.light}
-              onSet={(percentage: number) => handleSetBrightness(props.useHue, props.light, percentage)}
-            />
-            <IncreaseBrightnessAction
-              light={props.light}
-              onIncrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "increase")}
-            />
-            <DecreaseBrightnessAction
-              light={props.light}
-              onDecrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "decrease")}
-            />
+            {props.light.dimming !== undefined && (
+              <SetBrightnessAction
+                light={props.light}
+                onSet={(percentage: number) => handleSetBrightness(props.useHue, props.light, percentage)}
+              />
+            )}
+            {props.light.dimming !== undefined && (
+              <IncreaseBrightnessAction
+                light={props.light}
+                onIncrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "increase")}
+              />
+            )}
+            {props.light.dimming !== undefined && (
+              <DecreaseBrightnessAction
+                light={props.light}
+                onDecrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "decrease")}
+              />
+            )}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
