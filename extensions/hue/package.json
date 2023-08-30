@@ -54,7 +54,7 @@
     {
       "name": "transitionTime",
       "title": "Transition Time",
-      "description": "The time in milliseconds that the transition will take, rounded to 100ms.",
+      "description": "The time in milliseconds that transitions will take, rounded to the nearest 100ms.",
       "placeholder": "400",
       "type": "textfield",
       "default": "400",
