@@ -217,7 +217,7 @@ function ResultListItem(props: { result: Result; isLoading: boolean; summary: JS
       }
       accessories={[
         {
-          text: props.isLoading ? "?" : `${props.result.url}`,
+          text: props.isLoading ? "?" : `${props.result.url || "?"}`,
         },
       ]}
     />
@@ -321,6 +321,7 @@ function useSpeedtest(): {
           (err: Error) => {
             if (!cancel) {
               setError(err.message);
+              setIsLoading(false);
             }
           },
           (prog: ResultProgress) => {
@@ -331,7 +332,7 @@ function useSpeedtest(): {
         );
       } catch (err) {
         if (!cancel) {
-          setError(err instanceof Error ? err.message : "unknown error");
+          setError(err instanceof Error ? err.message : "Unknown Error");
           setIsLoading(false);
         }
       }

@@ -103,29 +103,34 @@ export function runSpeedTest(
   });
 
   pro.stdout.on("data", (data) => {
-    const obj = JSON.parse(data);
-    const t = (obj.type as string) || undefined;
-    if (t) {
-      if (t === "download" || t === "upload") {
-        const d = obj[t];
-        const bandwidth = (d.bandwidth as number) || undefined;
-        result[t] = bandwidth;
-        callback(result);
-        sendProgress(t, (d.progress as number) || undefined);
-      } else if (t === "testStart") {
-        result.isp = obj.isp as string;
-        result.serverName = obj.server?.name;
-      } else if (t === "ping") {
-        result.ping = obj.ping?.latency;
-        sendProgress(t, (obj.ping?.progress as number) || undefined);
-      } else if (t === "result") {
-        result.download = (obj.download.bandwidth as number) || undefined;
-        result.upload = (obj.upload.bandwidth as number) || undefined;
-        result.ping = obj.ping?.latency;
-        result.url = obj.result?.url;
-        resultCallback(result);
-        progressCallback({ download: undefined, upload: undefined, ping: undefined });
+    try {
+      const obj = JSON.parse(data);
+
+      const t = (obj.type as string) || undefined;
+      if (t) {
+        if (t === "download" || t === "upload") {
+          const d = obj[t];
+          const bandwidth = (d.bandwidth as number) || undefined;
+          result[t] = bandwidth;
+          callback(result);
+          sendProgress(t, (d.progress as number) || undefined);
+        } else if (t === "testStart") {
+          result.isp = obj.isp as string;
+          result.serverName = obj.server?.name;
+        } else if (t === "ping") {
+          result.ping = obj.ping?.latency;
+          sendProgress(t, (obj.ping?.progress as number) || undefined);
+        } else if (t === "result") {
+          result.download = (obj.download.bandwidth as number) || undefined;
+          result.upload = (obj.upload.bandwidth as number) || undefined;
+          result.ping = obj.ping?.latency;
+          result.url = obj.result?.url;
+          resultCallback(result);
+          progressCallback({ download: undefined, upload: undefined, ping: undefined });
+        }
       }
+    } catch (error) {
+      errorCallback(Error("Could not read data from Speedtest"));
     }
   });
 }
