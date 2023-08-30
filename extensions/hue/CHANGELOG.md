@@ -1,7 +1,16 @@
 # Hue Changelog
 
+## [Bug fixes] - 2023-08-30
+
+* Hide dimming actions when a light does not support them
+* Fix bug where toggling a group on will set its brightness to the lowest possible setting
+* Fix “Toggle All Lights” behaviour
+  * When no lights are on, all lights will turn on
+  * When some, but not all lights are on, the preference will be used (default: Turn all off)
+  * When all lights are on, all lights will turn off
+
 ## [Bug fix] - 2023-06-30
-* Fixed a bug where the extension would not store the username/API key after linking the Hue Bridge.
+* Fixed a bug where the extension would not store the username/API key after linking the Hue Bridge
 
 ## [Connectivity update] - 2023-06-22
 
@@ -17,7 +26,7 @@
   * Rate limit group toggle action
 * Rework "Turn Off All Lights" into "Toggle All Lights"
   * Turns off all lights if any are on, turns on all lights if all are off.
-  * Updates state in background every 10 minutes to help "stale while revalidate".
+  * Updates state in background every 10 minutes to help "stale while revalidate"
 
 ## [Hue Extension 2.0] - 2023-04-17
 
