@@ -16,12 +16,11 @@ export default async function StopRecordingCommand() {
     return showToast({ title: "No recording in progress", style: Toast.Style.Failure });
   }
 
-  const confirmed = await getStopRecordingConfirmation(startTime);
-  if (!confirmed) return;
+  const hasConfirmedAction = await getStopRecordingConfirmation(startTime);
+  if (!hasConfirmedAction) return;
 
   await showToast({ title: "Saving recording...", style: Toast.Style.Animated });
-  const recorder = new Aperture(recording);
-  const { endTime } = await recorder.stopRecording();
+  const { endTime } = await new Aperture(recording).stopRecording();
   await killRecordingIndicator();
 
   const savedFilePath = await moveFileToSaveLocation(filePath, endTime);

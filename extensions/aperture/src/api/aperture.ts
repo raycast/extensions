@@ -39,7 +39,7 @@ export class Aperture {
     }
   }
 
-  execAperture(...args: string[]) {
+  private execAperture(...args: string[]) {
     return execa(this.binPath, args);
   }
 
@@ -131,21 +131,21 @@ export class Aperture {
     return { endTime, filePath };
   }
 
-  clearRecording() {
+  private clearRecording() {
     this.aperturePid = undefined;
     this.process = undefined;
     this.recTempPath = undefined;
   }
 
-  isRecordingStarted() {
+  private isRecordingStarted() {
     return this.recTempPath != null && this.startTime != null && this.processId != null;
   }
 
-  isRecordingRestored() {
+  private isRecordingRestored() {
     return this.isRecordingStarted() && this.process == null;
   }
 
-  async waitForEvent(name: string) {
+  private async waitForEvent(name: string) {
     if (!this.aperturePid) return;
     await this.execAperture("events", "listen", "--process-id", this.aperturePid, "--exit", name);
   }

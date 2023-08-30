@@ -29,7 +29,6 @@ export default function StartRecordingCommand() {
         await launchRecordingIndicator();
         toast.style = Toast.Style.Success;
         toast.title = "Recording started";
-
         await popToRoot();
       }
     } catch (error) {
@@ -61,17 +60,16 @@ async function confirmStoppingOngoingRecording(recording: Recording): Promise<bo
   if (!pid || Number.isNaN(pid) || !startTime) return true;
 
   const elapsedString = formatDistanceToNow(startTime, { includeSeconds: true, addSuffix: true });
-  const confirmed = await confirmAlert({
+  const hasConfirmedStopRecording = await confirmAlert({
     title: "You have a recording in progress",
     message: `You started a recording ${elapsedString}.\nDo you wish to stop and saving it before starting a new one?`,
     primaryAction: { title: "Stop Recording", style: Alert.ActionStyle.Destructive },
   });
 
-  if (!confirmed) return false;
+  if (!hasConfirmedStopRecording) return false;
 
   await showToast({ title: "Saving recording...", style: Toast.Style.Animated });
-  const recorder = new Aperture(recording);
-  const { filePath, endTime } = await recorder.stopRecording();
+  const { filePath, endTime } = await new Aperture(recording).stopRecording();
   await moveFileToSaveLocation(filePath, endTime);
   await clearStoredRecording();
 

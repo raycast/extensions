@@ -16,7 +16,6 @@
     "screen",
     "video",
     "capture",
-    "screencapture",
     "mp4"
   ],
   "license": "MIT",
@@ -85,10 +84,11 @@
   },
   "scripts": {
     "build": "ray build -e dist",
+    "build:aperture": "rm -rf .aperture-node && git clone https://github.com/wulkano/aperture-node.git .aperture-node && cd .aperture-node && npm run build && mv aperture ../assets/aperture && cd .. && rm -rf .aperture-node",
+    "build:aperture-indicator": "cd Sources/aperture-indicator && xcodebuild build -scheme aperture-indicator -configuration Release -sdk macosx SYMROOT=${PWD}/Build && rm -rf ../../assets/aperture-indicator.app && mv Build/Release/aperture-indicator.app ../../assets/aperture-indicator.app",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "update:aperture": "rm -rf .aperture-node && git clone https://github.com/wulkano/aperture-node.git .aperture-node && cd .aperture-node && npm run build && mv aperture ../assets/aperture && cd .. && rm -rf .aperture-node"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

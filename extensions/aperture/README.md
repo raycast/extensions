@@ -1,6 +1,13 @@
+<div align="center">
+
+<img src="assets/extension-icon.png" width="128" height="128" />
+
+<br/>
+
 # Aperture
 
 Record you screen directly from Raycast
+</div>
 
 # Acknowledgements
 
