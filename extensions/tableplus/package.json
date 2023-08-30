@@ -72,6 +72,16 @@
       "label": "Show Path in Menubar"
     },
     {
+      "name": "showMonochromeIcon",
+      "description": "Show monochrome icon in Menubar",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Show monochrome icon in Menubar",
+      "placeholder": "Show monochrome icon in Menubar",
+      "label": "Show monochrome icon in Menubar"
+    },
+    {
       "name": "defaultAction",
       "description": "Select the default action",
       "type": "dropdown",

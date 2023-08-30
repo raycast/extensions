@@ -19,7 +19,7 @@ export async function fetchDatabases() {
   } else {
     const connectionsList = plist.parse(fs.readFileSync(tablePlusLocation, "utf8")) as ReadonlyArray<plist.PlistObject>;
     const groupList = plist.parse(fs.readFileSync(groupLocations, "utf8")) as ReadonlyArray<plist.PlistObject>;
-    const plistInformation = plist.parse(fs.readFileSync(plistVersionPath, "utf8")) as ReadonlyArray<plist.PlistObject>;
+    const plistInformation = plist.parse(fs.readFileSync(plistVersionPath, "utf8")) as Readonly<plist.PlistObject>;
 
     const groups = new Map<string, Group>(
       groupList.map((group) => [

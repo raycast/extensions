@@ -1,8 +1,8 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { fetchDatabases, renderPluralIfNeeded } from "./utils";
 import { useEffect, useState } from "react";
-import { Connection, Group, tintColors } from "./interfaces";
-import { preferences } from "./constants";
+import { Group } from "./interfaces";
+import { ConnectionListItem } from "./components/ConnectionListItem";
 
 export default function DatabaseList() {
   const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
@@ -30,69 +30,4 @@ export default function DatabaseList() {
         })}
     </List>
   );
-
-  function getAccessories(connection: Connection) {
-    const accessories = [];
-
-    if (preferences.showConnectionDriver) {
-      accessories.push({ tag: connection.Driver.toString() });
-    }
-
-    accessories.push({
-      tag: {
-        color: tintColors[connection.Environment],
-        value: connection.Environment.charAt(0).toUpperCase() + connection.Environment.slice(1),
-      },
-    });
-
-    return accessories;
-  }
-
-  function ConnectionListItem(props: { connection: Connection; groupName: string }) {
-    const connection = props.connection;
-    const groupName = props.groupName;
-
-    const Actions = () => {
-      return preferences.defaultAction == "tab" ? (
-        <>
-          {connection.version >= 492 && (
-            <Action.OpenInBrowser
-              title="Open Database in New Tab"
-              icon={Icon.Coin}
-              url={`tableplus://?id=${connection.id}&windowMode=tabbed`}
-            />
-          )}
-          <Action.OpenInBrowser title="Open Database" icon={Icon.Coin} url={`tableplus://?id=${connection.id}`} />
-        </>
-      ) : (
-        <>
-          <Action.OpenInBrowser title="Open Database" icon={Icon.Coin} url={`tableplus://?id=${connection.id}`} />
-          {connection.version >= 492 && (
-            <Action.OpenInBrowser
-              title="Open Database in New Tab"
-              icon={Icon.Coin}
-              url={`tableplus://?id=${connection.id}&windowMode=tabbed`}
-            />
-          )}
-        </>
-      );
-    };
-
-    return (
-      <List.Item
-        id={connection.id}
-        key={connection.id}
-        title={connection.name}
-        subtitle={connection.subtitle}
-        accessories={getAccessories(connection)}
-        icon={connection.icon}
-        actions={
-          <ActionPanel>
-            <Actions />
-          </ActionPanel>
-        }
-        keywords={preferences.searchByGroupName ? [groupName] : []}
-      />
-    );
-  }
 }
