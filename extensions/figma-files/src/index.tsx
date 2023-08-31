@@ -6,7 +6,7 @@ import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
-import { loadStarredFiles } from "./components/useStarredFiles";
+import { loadStarredFiles } from "./components/starFiles";
 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(
