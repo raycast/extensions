@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "text-format-improver",
   "title": "Text Format Improver",
-  "description": "Enhance your text quality by improving formatting, correcting spaces, words, and punctuation.",
+  "description": "Enhance your text quality by improving formatting, correcting spaces, words, and punctuation involving mixed writing of Chinese, Japanese, and Korean (CJK) with English.",
   "icon": "command-icon.png",
   "author": "alice.ellis",
   "categories": [
