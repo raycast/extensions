@@ -37,7 +37,7 @@ export default function SendMemoFormCommand(): JSX.Element {
     let markdown = content;
 
     resourceList.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/o/r/${resource.id}/${resource.filename}`);
+      const resourceUrl = getRequestUrl(`/o/r/${resource.id}?thumbnail=1`);
 
       if (index === 0) {
         markdown += "\n\n";
@@ -67,7 +67,7 @@ export default function SendMemoFormCommand(): JSX.Element {
         title: "Upload Files",
       });
 
-      const postFilesPromiseArr: Promise<ResponseData<PostFileResponse>>[] = [];
+      const postFilesPromiseArr: Promise<ResponseData<PostFileResponse> & PostFileResponse>[] = [];
 
       files.forEach((file) => {
         postFilesPromiseArr.push(postFile(file));
@@ -78,7 +78,7 @@ export default function SendMemoFormCommand(): JSX.Element {
       });
 
       if (uploadedFiles) {
-        params.resourceIdList = uploadedFiles.map((file) => file.data.id);
+        params.resourceIdList = uploadedFiles.map((file) => file.id || file.data.id);
       }
     }
 
@@ -93,8 +93,8 @@ export default function SendMemoFormCommand(): JSX.Element {
 
     if (res) {
       showToast(Toast.Style.Success, "Send Memo Success");
-      computedCreatedMarkdown(res.data);
-      computedCreatedUrl(res.data);
+      computedCreatedMarkdown(res.data || res);
+      computedCreatedUrl(res.data || res);
 
       setTimeout(() => {
         popToRoot({ clearSearchBar: true });
