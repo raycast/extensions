@@ -26,6 +26,7 @@ export default function ResultSection({
             <ActionPanel>
               <Action.CopyToClipboard content={chat.answer} />
               <Action title="Toggle Full Text" icon={Icon.Text} onAction={() => setIsShowingDetail(!isShowingDetail)} />
+              <Action.Paste content={chat.answer} />
               <SaveActionSection onSaveAnswerAction={() => savedChat.add(chat)} />
               <PreferencesActionSection />
             </ActionPanel>
