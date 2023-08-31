@@ -14,7 +14,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const {
