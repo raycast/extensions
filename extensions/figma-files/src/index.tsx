@@ -1,11 +1,12 @@
 import { Application, getApplications, Grid } from "@raycast/api";
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
-import { useVisitedFavouriteFiles } from "./hooks/useVisitedFiles";
+import { useVisitedStarredFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
+import { useStarredFiles } from "./hooks/useStarredFiles";
 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(
@@ -19,8 +20,9 @@ export default function Command() {
     }
   );
 
-  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFavouriteFiles();
-  const isLoadingBlock = isLoading || isLoadingVisitedFiles;
+  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedStarredFiles();
+  const { starredFiles, starredFilesCount, isLoading: isLoadingStarredFiles } = useStarredFiles();
+  const isLoadingBlock = isLoading || isLoadingVisitedFiles || isLoadingStarredFiles;
   const [filteredFiles, setFilteredFiles] = useState(data);
   const [isFiltered, setIsFiltered] = useState(false);
   const [desktopApp, setDesktopApp] = useState<Application>();
@@ -80,6 +82,22 @@ export default function Command() {
       searchBarAccessory={filterDropdown()}
     >
       {!isFiltered && (
+        <Grid.Section key="starred-files" title="Starred Files">
+          {starredFiles?.map((file) => (
+            <FileGridItem
+              key={file.key + "-starred-file"}
+              file={file}
+              desktopApp={desktopApp}
+              extraKey={file.key + "-starred-file-item"}
+              onVisit={visitFile}
+              starredFiles={starredFiles || []}
+              starredFilesCount={starredFilesCount || 0}
+            />
+          ))}
+        </Grid.Section>
+      )}
+
+      {!isFiltered && (
         <Grid.Section key="recent-files" title="Recent Files">
           {visitedFiles?.map((file) => (
             <FileGridItem
@@ -88,6 +106,8 @@ export default function Command() {
               desktopApp={desktopApp}
               extraKey={file.key + "-recent-file-item"}
               onVisit={visitFile}
+              starredFiles={starredFiles || []}
+              starredFilesCount={starredFilesCount || 0}
             />
           ))}
         </Grid.Section>
@@ -106,7 +126,14 @@ export default function Command() {
               subtitle={team.name}
             >
               {project.files?.map((file) => (
-                <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
+                <FileGridItem
+                  key={file.key + "-file"}
+                  file={file}
+                  desktopApp={desktopApp}
+                  onVisit={visitFile}
+                  starredFiles={starredFiles || []}
+                  starredFilesCount={starredFilesCount || 0}
+                />
               ))}
             </Grid.Section>
           ) : (

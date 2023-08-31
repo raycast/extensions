@@ -1,23 +1,27 @@
 import { Action, ActionPanel, Application, Grid } from "@raycast/api";
-
 import type { File } from "../types";
 import DevelopmentActionSection from "./DevelopmentActionSection";
 import { OpenProjectFileAction } from "./OpenProjectFileAction";
 import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 import { OpenBranchSubmenuAction } from "./OpenBranchSubmenuAction";
-import { FavouriteFileAction } from "./FavouriteFileAction";
+import { StarFileAction } from "./StarFileAction";
 
 export default function FileGridItem(props: {
   file: File;
   extraKey?: string;
   desktopApp: Application | undefined;
+  starredFiles: File[];
+  starredFilesCount: number;
   onVisit: (file: File) => void;
 }) {
   const { file, extraKey, desktopApp, onVisit } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
+  const isStarred = props.starredFiles.some((item) => item.name === file.name);
+
   const accessory: Grid.Item.Accessory = {};
   accessory.icon = "branch.svg";
   accessory.tooltip = "File has branches";
+
   return (
     <Grid.Item
       id={fileIdentifier}
@@ -29,10 +33,7 @@ export default function FileGridItem(props: {
           <ActionPanel.Section>
             <OpenProjectFileAction file={props.file} desktopApp={desktopApp} onVisit={onVisit} />
             <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
-            <FavouriteFileAction
-              file={props.file}
-              isStarred={file.favourite == undefined || file.favourite == false ? false : true}
-            />
+            <StarFileAction file={props.file} isStarred={isStarred} />
           </ActionPanel.Section>
 
           <ActionPanel.Section>

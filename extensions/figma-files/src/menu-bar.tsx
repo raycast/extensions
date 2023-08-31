@@ -1,6 +1,6 @@
 import { Application, getApplications, MenuBarExtra, open } from "@raycast/api";
 import { resolveAllFiles } from "./components/fetchFigmaData";
-import { useVisitedFavouriteFiles } from "./hooks/useVisitedFiles";
+import { useVisitedStarredFiles } from "./hooks/useVisitedFiles";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 
@@ -16,7 +16,7 @@ export default function Command() {
     }
   );
 
-  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFavouriteFiles();
+  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedStarredFiles();
   const [desktopApp, setDesktopApp] = useState<Application>();
   let url = "figma://file/";
 
