@@ -42,6 +42,7 @@ export default function Translate(): ReactElement {
         const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
 
         return (
+          <>
           <List.Item
             key={index}
             title={r.translatedText}
@@ -73,6 +74,38 @@ export default function Translate(): ReactElement {
               </ActionPanel>
             }
           />
+          {r.pronounceText && <List.Item
+            key={index}
+            title={r.pronounceText}
+            accessories={[{ text: languages, tooltip: tooltip }]}
+            detail={<List.Item.Detail markdown={r.pronounceText} />}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard title="Copy" content={r.pronounceText} />
+                  <Action
+                    title="Toggle Full Text"
+                    icon={Icon.Text}
+                    onAction={() => setIsShowingDetail(!isShowingDetail)}
+                  />
+                  <Action.OpenInBrowser
+                    title="Open in Google Translate"
+                    shortcut={{ modifiers: ["opt"], key: "enter" }}
+                    url={
+                      "https://translate.google.com/?sl=" +
+                      r.langFrom +
+                      "&tl=" +
+                      r.langTo +
+                      "&text=" +
+                      encodeURIComponent(debouncedValue) +
+                      "&op=translate"
+                    }
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />}
+          </>
         );
       })}
     </List>
