@@ -36,8 +36,6 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
       raw: true,
     });
 
-    console.log(" >>> SSS", translated.raw?.[0])
-
     return {
       originalText: text,
       translatedText: translated.text,
