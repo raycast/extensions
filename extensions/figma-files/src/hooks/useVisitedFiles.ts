@@ -26,7 +26,7 @@ export async function clearVisitedFiles() {
   return await LocalStorage.removeItem(VISITED_FIGMA_FILES_KEY);
 }
 
-export function useVisitedStarredFiles() {
+export function useVisitedFiles() {
   const [files, setFiles] = useCachedState<File[]>("visitedFiles");
 
   useEffect(() => {

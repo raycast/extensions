@@ -1,8 +1,9 @@
-import { Application, getApplications, MenuBarExtra, open } from "@raycast/api";
+import { Application, getApplications, MenuBarExtra, open, Icon } from "@raycast/api";
 import { resolveAllFiles } from "./components/fetchFigmaData";
-import { useVisitedStarredFiles } from "./hooks/useVisitedFiles";
+import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
+import { loadStarredFiles } from "./components/starFiles";
 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(
@@ -16,7 +17,17 @@ export default function Command() {
     }
   );
 
-  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedStarredFiles();
+  const {
+    data: starredFiles,
+    isLoading: isLoadingStarredFiles,
+    error: starredFilesError,
+    revalidate: revalidateStarredFiles,
+  } = useCachedPromise(async () => {
+    const results = await loadStarredFiles();
+    return results;
+  }, []);
+
+  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
   const [desktopApp, setDesktopApp] = useState<Application>();
   let url = "figma://file/";
 
@@ -42,9 +53,25 @@ export default function Command() {
       isLoading={isLoadingVisitedFiles || isLoading}
     >
       {error && <MenuBarExtra.Item title="Error" key="ErrorState" />}
+      {starredFiles && (
+        <>
+          <MenuBarExtra.Submenu key="starred-files" title="Starred" icon={Icon.StarCircle}>
+            {starredFiles?.map((file) => (
+              <MenuBarExtra.Item
+                key={file.key + "-starred-file"}
+                title={file.name}
+                onAction={async () => {
+                  open(url + file.key);
+                  await visitFile(file);
+                }}
+              />
+            ))}
+          </MenuBarExtra.Submenu>
+        </>
+      )}
       {visitedFiles && (
         <>
-          <MenuBarExtra.Submenu key="recent-files" title="Recent">
+          <MenuBarExtra.Submenu key="recent-files" title="Recent" icon={Icon.Hourglass}>
             {visitedFiles?.map((file) => (
               <MenuBarExtra.Item
                 key={file.key + "-recent-file"}
