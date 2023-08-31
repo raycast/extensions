@@ -21,7 +21,6 @@ export default function Command() {
     data: starredFiles,
     isLoading: isLoadingStarredFiles,
     error: starredFilesError,
-    revalidate: revalidateStarredFiles,
   } = useCachedPromise(async () => {
     const results = await loadStarredFiles();
     return results;
@@ -50,9 +49,9 @@ export default function Command() {
         },
       }}
       tooltip="Figma files"
-      isLoading={isLoadingVisitedFiles || isLoading}
+      isLoading={isLoadingVisitedFiles || isLoading || isLoadingStarredFiles}
     >
-      {error && <MenuBarExtra.Item title="Error" key="ErrorState" />}
+      {(error || starredFilesError) && <MenuBarExtra.Item title="Error" key="ErrorState" />}
       {starredFiles && (
         <>
           <MenuBarExtra.Submenu key="starred-files" title="Starred" icon={Icon.StarCircle}>
