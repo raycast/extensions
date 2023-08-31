@@ -29,6 +29,7 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
             });
           }
         } catch (error) {
+          console.log(error);
         }
         setLoading(false);
       }

@@ -33,8 +33,7 @@ export default function Ask(props: P) {
   const question = useQuestion({ initialQuestion: initialQuestion ?? "", disableAutoLoad: !!props.conversation });
   const [isLoading, setLoading] = useState<boolean>(true);
   const myTemplateModel = useMyTemplateModel();
-  const [error, setError] = useState<Error>();
-  // const {push, pop} = useNavigation();
+  const [error] = useState<Error>();
 
   const [conversation, setConversation] = useState<Conversation>(
     props.conversation ?? {

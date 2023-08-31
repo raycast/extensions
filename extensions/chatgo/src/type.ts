@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export type Set<T> = React.Dispatch<React.SetStateAction<T>>;
 
 export interface Question {

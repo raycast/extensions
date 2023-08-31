@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { uniqBy } from "lodash";
 import React, { useCallback, useEffect, useState } from "react";
