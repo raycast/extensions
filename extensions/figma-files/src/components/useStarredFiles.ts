@@ -1,11 +1,8 @@
-import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { LocalStorage } from "@raycast/api";
-import { useEffect } from "react";
 import { File } from "../types";
 const STARRED_FILES_KEY = "favourite-files";
 const STARRED_FILES_LIMIT = 10;
 
-//functions for favouriting files
 export async function loadStarredFiles() {
   const item = await LocalStorage.getItem<string>(STARRED_FILES_KEY);
   if (item) {

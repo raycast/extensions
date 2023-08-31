@@ -1,6 +1,6 @@
 import { Action, Icon } from "@raycast/api";
 import { File } from "../types";
-import { saveStarredFile, removeStarredFile } from "../hooks/useStarredFiles";
+import { saveStarredFile, removeStarredFile } from "./useStarredFiles";
 
 export function StarFileAction(props: { file: File; isStarred: boolean; revalidate: () => void }) {
   const { file } = props;
