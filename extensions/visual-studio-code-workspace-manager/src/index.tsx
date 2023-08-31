@@ -13,12 +13,12 @@ function VisualStudioCodeWorkspaceManager() {
   };
 
   const dirs = readdirSync(join(WORKSPACE_DIR)).filter(directoryFilter);
-  const projects = dirs.map((item) => join(WORKSPACE_DIR, item));
+  const projects = dirs.map((item: string) => join(WORKSPACE_DIR, item));
 
   return (
     <List searchBarPlaceholder="Search Project Name...">
       <List.Section title="Result">
-        {projects.map((project) => {
+        {projects.map((project: string) => {
           return <LocalItem key={project} project={project} />;
         })}
       </List.Section>

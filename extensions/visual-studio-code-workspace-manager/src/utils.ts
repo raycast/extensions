@@ -10,7 +10,7 @@ export function getProjectByName(projectName: string) {
   };
 
   const dirs = readdirSync(join(WORKSPACE_DIR)).filter(directoryFilter);
-  const items = dirs.filter((item) => item.includes(projectName)).map((item) => join(WORKSPACE_DIR, item));
+  const items = dirs.filter((item: string) => item.includes(projectName)).map((item: string) => join(WORKSPACE_DIR, item));
 
   return items;
 }
