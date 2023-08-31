@@ -1,25 +1,33 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { PreferencesActionSection } from "../actions/preferences";
+import { SaveActionSection } from "../actions/save";
+import { Chat } from "../types";
+import { AnswerDetailView } from "../views/answer-detail";
+import { useSavedChat } from "../utils/savedChatUtil";
 
 export default function ResultSection({
-  output,
+  chat,
   isShowingDetail,
   setIsShowingDetail,
 }: {
-  output: string;
+  chat: Chat;
   isShowingDetail: boolean;
   setIsShowingDetail: (value: boolean) => void;
 }) {
+  const savedChat = useSavedChat();
+  console.log(chat);
   return (
     <List.Section title="Result">
-      {output ? (
+      {chat.answer ? (
         <List.Item
-          title={output}
-          detail={<List.Item.Detail markdown={output} />}
+          title={chat.answer}
+          detail={<AnswerDetailView chat={chat} />}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard content={output} />
-              <Action.Paste content={output} />
+              <Action.CopyToClipboard content={chat.answer} />
               <Action title="Toggle Full Text" icon={Icon.Text} onAction={() => setIsShowingDetail(!isShowingDetail)} />
+              <SaveActionSection onSaveAnswerAction={() => savedChat.add(chat)} />
+              <PreferencesActionSection />
             </ActionPanel>
           }
         />

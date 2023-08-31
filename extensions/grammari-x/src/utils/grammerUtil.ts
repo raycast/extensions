@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { ToneType } from "./types";
+import { ToneType } from "../types";
 
 class OpenAIModule {
   private openai: OpenAI;
