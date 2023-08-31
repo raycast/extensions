@@ -32,15 +32,15 @@ else if "Arc" is in activeApp then
 	    return URL of active tab of front window & "\\t" & title of active tab of front window
     end tell
 else if "Firefox" is in activeApp then
-    tell application "Arc"
+    tell application "Firefox"
 	    return URL of active tab of front window & "\\t" & title of active tab of front window
     end tell
 else if "Microsoft Edge" is in activeApp then
-    tell application "Arc"
+    tell application "Microsoft Edge"
 	    return URL of active tab of front window & "\\t" & title of active tab of front window
     end tell
 else if "Opera" is in activeApp then
-    tell application "Arc"
+    tell application "Opera"
 	    return URL of active tab of front window & "\\t" & title of active tab of front window
     end tell
 else
