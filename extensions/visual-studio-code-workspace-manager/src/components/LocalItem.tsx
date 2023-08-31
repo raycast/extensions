@@ -1,15 +1,15 @@
-import { Action, ActionPanel, List } from '@raycast/api';
+import { Action, ActionPanel, List } from "@raycast/api";
 
-import tildify from 'tildify';
+import tildify from "tildify";
 import { dirname } from "path";
-import { build, bundleIdentifier } from '../preference';
+import { build, bundleIdentifier } from "../preference";
 
 interface LocalItemProps {
   project: string;
 }
 
-export default function LocalItem({project}: LocalItemProps) {
-  const projectArrs = project.split('/');
+export default function LocalItem({ project }: LocalItemProps) {
+  const projectArrs = project.split("/");
   const name = projectArrs[projectArrs.length - 1];
   const prettyPath = tildify(project);
   const subtitle = dirname(prettyPath);

@@ -2,7 +2,7 @@ export enum VSCodeBuild {
   Code = "Code",
   Insiders = "Code - Insiders",
   VSCodium = "VSCodium",
-  VSCodiumMinor = 'VSCodium < 1.71'
+  VSCodiumMinor = "VSCodium < 1.71",
 }
 
 export type Preferences = {
@@ -12,4 +12,4 @@ export type Preferences = {
 
 export type Arguments = {
   project: string;
-}
+};
