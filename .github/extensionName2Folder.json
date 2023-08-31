@@ -182,6 +182,7 @@
   "contentful": "contentful",
   "control-d": "control-d",
   "conventional-comments": "conventional-comments",
+  "conventional-commits": "conventional-commits",
   "web-converter": "convert",
   "convert-px-to-vw-vh": "convert-px-to-vw-vh",
   "convert-typescript-to-javascript": "convert-typescript-to-javascript",
