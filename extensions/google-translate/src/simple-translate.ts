@@ -16,7 +16,7 @@ export class TranslateError extends Error {}
 
 const extractPronounceTextFromRaw = (raw: string) => {
   return raw?.[0]?.[1]?.[2];
-}
+};
 
 export async function simpleTranslate(text: string, options: LanguageCodeSet): Promise<SimpleTranslateResult> {
   try {
