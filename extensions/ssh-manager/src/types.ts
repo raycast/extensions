@@ -5,4 +5,5 @@ export interface ISSHConnection {
   user: string;
   port?: string;
   sshKey?: string;
+  command?: string;
 }

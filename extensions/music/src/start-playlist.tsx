@@ -74,7 +74,7 @@ export default function PlaySelected() {
             {data.map((playlist) => (
               <List.Item
                 key={playlist.id}
-                title={playlist.name}
+                title={playlist.name ?? "Unknown Playlist"}
                 accessories={[
                   { text: `${playlist.count} songs ·` + ` ${Math.floor(Number(playlist.duration) / 60)} min` },
                 ]}

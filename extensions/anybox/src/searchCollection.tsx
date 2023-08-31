@@ -38,7 +38,7 @@ export default function SearchCollection(props: Props) {
 
       if (Array.isArray(linksResult)) {
         if (!linksResult.length) {
-          const searchEngines = await fetchSearchEngines();
+          const searchEngines = await fetchSearchEngines(preferences.api_key);
           if (Array.isArray(searchEngines) && searchEngines.length) {
             linksResult = searchEngines;
             isSearchEngines = true;

@@ -8,7 +8,7 @@ interface Props {
 
 function itemTitle(item: CollectionProp) {
   if (item.heading) {
-    return `${item.heading} > ${item.name}`;
+    return `${item.heading} › ${item.name}`;
   }
   return item.name;
 }

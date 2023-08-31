@@ -37,7 +37,7 @@ export default function MemosListCommand(): JSX.Element {
     let markdown = content;
 
     resourceList.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/o/r/${resource.id}/${resource.filename}`);
+      const resourceUrl = getRequestUrl(`/o/r/${resource.id}?thumbnail=1`);
 
       if (index === 0) {
         markdown += "\n\n";
