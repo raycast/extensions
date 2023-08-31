@@ -74,15 +74,15 @@ export default function Translate(): ReactElement {
               </ActionPanel>
             }
           />
-          {r.pronounceText && <List.Item
+          {r.pronunciationText && <List.Item
             key={index}
-            title={r.pronounceText}
+            title={r.pronunciationText}
             accessories={[{ text: languages, tooltip: tooltip }]}
-            detail={<List.Item.Detail markdown={r.pronounceText} />}
+            detail={<List.Item.Detail markdown={r.pronunciationText} />}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.CopyToClipboard title="Copy" content={r.pronounceText} />
+                  <Action.CopyToClipboard title="Copy" content={r.pronunciationText} />
                   <Action
                     title="Toggle Full Text"
                     icon={Icon.Text}

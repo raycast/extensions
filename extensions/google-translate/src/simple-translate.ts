@@ -7,7 +7,7 @@ export const AUTO_DETECT = "auto";
 export type SimpleTranslateResult = {
   originalText: string;
   translatedText: string;
-  pronounceText?: string;
+  pronunciationText?: string;
   langFrom: LanguageCode;
   langTo: LanguageCode;
 };
@@ -24,7 +24,7 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
       return {
         originalText: text,
         translatedText: "",
-        pronounceText: "",
+        pronunciationText: "",
         langFrom: options.langFrom,
         langTo: options.langTo,
       };
@@ -39,7 +39,7 @@ export async function simpleTranslate(text: string, options: LanguageCodeSet): P
     return {
       originalText: text,
       translatedText: translated.text,
-      pronounceText: extractPronounceTextFromRaw(translated?.raw),
+      pronunciationText: extractPronounceTextFromRaw(translated?.raw),
       langFrom: translated?.from?.language?.iso as LanguageCode,
       langTo: options.langTo,
     };
