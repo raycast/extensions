@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Application, Grid } from "@raycast/api";
+import { Action, ActionPanel, Application, Grid, Icon } from "@raycast/api";
 import type { File } from "../types";
 import DevelopmentActionSection from "./DevelopmentActionSection";
 import { OpenProjectFileAction } from "./OpenProjectFileAction";
@@ -34,7 +34,11 @@ export default function FileGridItem(props: {
           <ActionPanel.Section>
             <OpenProjectFileAction file={props.file} desktopApp={desktopApp} onVisit={onVisit} />
             <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
-            <StarFileAction file={props.file} isStarred={isStarred} revalidate={revalidate} />
+            {props.starredFilesCount >= 10 && !isStarred ? (
+              <Action icon={Icon.ExclamationMark} title="Reached 10 Starred Files Limit" />
+            ) : (
+              <StarFileAction file={props.file} isStarred={isStarred} revalidate={revalidate} />
+            )}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
