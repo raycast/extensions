@@ -7,6 +7,7 @@ import { OpenBranchSubmenuAction } from "./OpenBranchSubmenuAction";
 import { StarFileAction } from "./StarFileAction";
 
 export default function FileGridItem(props: {
+  revalidate: () => void;
   file: File;
   extraKey?: string;
   desktopApp: Application | undefined;
@@ -14,7 +15,7 @@ export default function FileGridItem(props: {
   starredFilesCount: number;
   onVisit: (file: File) => void;
 }) {
-  const { file, extraKey, desktopApp, onVisit } = props;
+  const { file, extraKey, desktopApp, onVisit, revalidate } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
   const isStarred = props.starredFiles.some((item) => item.name === file.name);
 
@@ -33,7 +34,7 @@ export default function FileGridItem(props: {
           <ActionPanel.Section>
             <OpenProjectFileAction file={props.file} desktopApp={desktopApp} onVisit={onVisit} />
             <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
-            <StarFileAction file={props.file} isStarred={isStarred} />
+            <StarFileAction file={props.file} isStarred={isStarred} revalidate={revalidate} />
           </ActionPanel.Section>
 
           <ActionPanel.Section>

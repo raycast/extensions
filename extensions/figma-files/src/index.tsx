@@ -6,7 +6,7 @@ import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
-import { useStarredFiles } from "./hooks/useStarredFiles";
+import { loadStarredFiles } from "./hooks/useStarredFiles";
 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(
@@ -20,8 +20,17 @@ export default function Command() {
     }
   );
 
+  const {
+    data: starredFiles,
+    isLoading: isLoadingStarredFiles,
+    error: starredFilesError,
+    revalidate: revalidateStarredFiles,
+  } = useCachedPromise(async () => {
+    const results = await loadStarredFiles();
+    return results;
+  }, []);
+
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedStarredFiles();
-  const { starredFiles, starredFilesCount, isLoading: isLoadingStarredFiles } = useStarredFiles();
   const isLoadingBlock = isLoading || isLoadingVisitedFiles || isLoadingStarredFiles;
   const [filteredFiles, setFilteredFiles] = useState(data);
   const [isFiltered, setIsFiltered] = useState(false);
@@ -37,7 +46,7 @@ export default function Command() {
     setFilteredFiles(data);
   }, [data]);
 
-  if (error) {
+  if (error || starredFilesError) {
     return <ErrorView />;
   }
 
@@ -89,9 +98,10 @@ export default function Command() {
               file={file}
               desktopApp={desktopApp}
               extraKey={file.key + "-starred-file-item"}
+              revalidate={revalidateStarredFiles}
               onVisit={visitFile}
               starredFiles={starredFiles || []}
-              starredFilesCount={starredFilesCount || 0}
+              starredFilesCount={starredFiles.length || 0}
             />
           ))}
         </Grid.Section>
@@ -105,9 +115,10 @@ export default function Command() {
               file={file}
               desktopApp={desktopApp}
               extraKey={file.key + "-recent-file-item"}
+              revalidate={revalidateStarredFiles}
               onVisit={visitFile}
               starredFiles={starredFiles || []}
-              starredFilesCount={starredFilesCount || 0}
+              starredFilesCount={starredFiles?.length || 0}
             />
           ))}
         </Grid.Section>
@@ -128,11 +139,12 @@ export default function Command() {
               {project.files?.map((file) => (
                 <FileGridItem
                   key={file.key + "-file"}
+                  revalidate={revalidateStarredFiles}
                   file={file}
                   desktopApp={desktopApp}
                   onVisit={visitFile}
                   starredFiles={starredFiles || []}
-                  starredFilesCount={starredFilesCount || 0}
+                  starredFilesCount={starredFiles?.length || 0}
                 />
               ))}
             </Grid.Section>

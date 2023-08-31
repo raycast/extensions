@@ -1,4 +1,4 @@
-import { useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { LocalStorage } from "@raycast/api";
 import { useEffect } from "react";
 import { File } from "../types";
@@ -31,20 +31,4 @@ export async function removeStarredFile(file: File) {
   const nextFiles = parsedFiles.filter((item) => item.name !== file.name);
   const data = JSON.stringify(nextFiles);
   await LocalStorage.setItem(STARRED_FILES_KEY, data);
-}
-
-export function useStarredFiles() {
-  const [starredFiles, setStarredFiles] = useCachedState<File[]>("StarredFiles");
-  const [starredFilesCount, setStarredFilesCount] = useCachedState<number>("StarredFilesCount");
-
-  useEffect(() => {
-    async function starredFilesSetting() {
-      const files = await loadStarredFiles();
-      setStarredFiles(files);
-      setStarredFilesCount(files.length);
-    }
-    starredFilesSetting();
-  }, []);
-
-  return { starredFiles, starredFilesCount, isLoading: !starredFiles };
 }
