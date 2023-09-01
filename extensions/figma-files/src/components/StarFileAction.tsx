@@ -8,6 +8,7 @@ export function StarFileAction(props: { file: File; isStarred: boolean; revalida
     <Action
       title={props.isStarred == false ? "Star this file" : "Unstar this file"}
       icon={props.isStarred ? Icon.StarDisabled : Icon.Star}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       onAction={async () => {
         if (props.isStarred === true) {
           await removeStarredFile(file);
