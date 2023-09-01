@@ -4,7 +4,7 @@
 
 - Create email aliases
 
-## 2023-09-01
+##  [New Command] 2023-09-01
 
 - List&search all email aliases
 - Activate and deactivate email aliases

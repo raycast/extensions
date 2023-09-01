@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, popToRoot, showHUD } from "@raycast/api";
 
 import { useEffect, useState } from "react";
-import { aliasObject, listAllAliases } from "./utils/list";
+import { emailObject, listAllAliases } from "./utils/list";
 import { toggleAlias } from "./utils/toggle";
 
 const ListEmails = () => {
   const [loading, setLoading] = useState(true);
-  const [filteredList, filterList] = useState<aliasObject[]>([]);
+  const [filteredList, filterList] = useState<emailObject[]>([]);
 
   useEffect(() => {
     init();
