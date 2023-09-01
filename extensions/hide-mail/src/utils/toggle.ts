@@ -3,22 +3,25 @@ import fetch, { Response } from "node-fetch";
 import { showToast, Toast } from "@raycast/api";
 import { API_URL, getHeaders } from "../config";
 
-export const toggleAlias = async (id: string, newState: boolean) => {
+export const toggleAlias = async (email: string, newState: boolean) => {
   const headers = getHeaders(getApiKey());
 
   let res: Response;
 
   if (!newState) {
-    res = await fetch(`${API_URL}/active-aliases/${id}`, {
+    res = await fetch(`${API_URL}/delete-aliases`, {
       method: "DELETE",
       headers,
+      body: JSON.stringify({
+        email,
+      }),
     });
   } else {
     res = await fetch(`${API_URL}/active-aliases`, {
       method: "POST",
       headers,
       body: JSON.stringify({
-        id,
+        email,
       }),
     });
   }

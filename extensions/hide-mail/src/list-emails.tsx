@@ -28,7 +28,7 @@ const ListEmails = () => {
 
         return (
           <List.Item
-            key={alias.id}
+            key={alias.email}
             title={alias.email}
             subtitle={note}
             keywords={keywords}
@@ -52,7 +52,7 @@ const ListEmails = () => {
                   <Action
                     title="Activate"
                     onAction={async () => {
-                      const success = await toggleAlias(alias.id, true);
+                      const success = await toggleAlias(alias.email, true);
 
                       if (success) {
                         showHUD("✅ Email activated");
@@ -66,7 +66,7 @@ const ListEmails = () => {
                   <Action
                     title="Deactivate"
                     onAction={async () => {
-                      const success = await toggleAlias(alias.id, false);
+                      const success = await toggleAlias(alias.email, false);
 
                       if (success) {
                         showHUD("✅ Email deactivated");
