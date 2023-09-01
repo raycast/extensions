@@ -17,6 +17,7 @@ const Generate = async () => {
     await showHUD(
       "❌ HideMail API credentials are invalid. Create new API Token and update it on Raycast extension preferences",
     );
+    await open("https://hidemail.app/user/api-tokens?source=raycast");
     return false;
   }
   const data = (await res.json()) as creationResponse;
@@ -29,7 +30,7 @@ const Generate = async () => {
       await open(newAliasEmail?.messageLink);
     } else {
       await showHUD(newAliasEmail?.message);
-      await open("https://hidemail.app/dashboard");
+      await open("https://hidemail.app/dashboard?source=raycast");
     }
     return;
   }
