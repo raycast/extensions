@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { File } from "../types";
-const STARRED_FILES_KEY = "favourite-files";
+const STARRED_FILES_KEY = "starred-files";
 const STARRED_FILES_LIMIT = 10;
 
 export async function loadStarredFiles() {
