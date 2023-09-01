@@ -7,7 +7,7 @@ import SamsungDevices from "./samsung";
 import SennheiserDevices from "./sennheiser";
 import SonyDevices from "./sony";
 import UgreenDevices from "./ugreen";
-import { DeviceDefinition } from "src/types/device";
+import { DeviceDefinition } from "../../devices.types";
 
 export const DevicesMap: Record<string, Record<string, DeviceDefinition>> = {
   "0x004C": AppleDevices,

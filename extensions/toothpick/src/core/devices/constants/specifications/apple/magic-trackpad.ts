@@ -1,4 +1,4 @@
-import { DeviceDefinition } from "src/types/device";
+import { DeviceDefinition } from "../../../devices.types";
 
 export default {
   "0x030E": {

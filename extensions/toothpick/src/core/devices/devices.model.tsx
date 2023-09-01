@@ -1,10 +1,9 @@
 import { Action, Clipboard, Color, Icon, Image, List } from "@raycast/api";
-import { readFileSync } from "fs";
-import { resolve } from "path";
 import { ReactNode } from "react";
-import { runAppleScriptSync } from "run-applescript";
-import { DevicesMap } from "src/constants/devices";
-import { connectDevice, disconnectDevice } from "src/helpers/devices";
+import { DevicesMap } from "src/core/devices/constants/specifications";
+import { DeviceBatteryLevels } from "./devices.types";
+import { disconnectDevice } from "src/core/devices/handlers/disconnect-device";
+import { connectDevice } from "./handlers/connect-device";
 
 export class Device {
   name: string;
@@ -48,46 +47,6 @@ export class Device {
       const customIconPath = this.tryFetchIconPath("main");
       this.icon = customIconPath ? { source: customIconPath } : this.icon;
     }
-  }
-
-  public openConnection() {
-    const formattedMacAddress = this.macAddress.toUpperCase().replaceAll(":", "-");
-    const script = readFileSync(resolve(__dirname, "assets/scripts/connectDevice.applescript")).toString();
-    const getFirstMatchingDeviceScript = readFileSync(
-      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
-    ).toString();
-    const result = runAppleScriptSync(
-      `
-      use framework "IOBluetooth"\n
-      use scripting additions\n
-      \n
-      ${getFirstMatchingDeviceScript}\n
-      \n
-      ${script}\n
-      \n
-      return connectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`
-    );
-    if (result !== "0") throw "Failed to connect device.";
-  }
-
-  public closeConnection() {
-    const formattedMacAddress = this.macAddress.toUpperCase().replaceAll(":", "-");
-    const script = readFileSync(resolve(__dirname, "assets/scripts/disconnectDevice.applescript")).toString();
-    const getFirstMatchingDeviceScript = readFileSync(
-      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
-    ).toString();
-    const result = runAppleScriptSync(
-      `
-      use framework "IOBluetooth"\n
-      use scripting additions\n
-      \n
-      ${getFirstMatchingDeviceScript}\n
-      \n
-      ${script}\n
-      \n
-      disconnectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`
-    );
-    if (result !== "0") throw "Failed to disconnect device.";
   }
 
   private generateActions(additionalActions: ReactNode[]) {
@@ -169,16 +128,3 @@ export class Device {
     }
   }
 }
-
-export type RawDeviceData = Record<string, Record<string, string>>;
-
-export type DeviceBatteryLevels = {
-  main: string | undefined;
-  case: string | undefined;
-  left: string | undefined;
-  right: string | undefined;
-};
-
-export type DeviceDefinition = {
-  name: string;
-} & Partial<DeviceBatteryLevels>;

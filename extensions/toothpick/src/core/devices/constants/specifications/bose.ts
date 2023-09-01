@@ -1,6 +1,6 @@
-import { DeviceDefinition } from "src/types/device";
+import { DeviceDefinition } from "../../devices.types";
 
-export default {
+const devices: Record<string, DeviceDefinition> = {
   "0x4020": {
     name: "QuietComfort 35 II",
     main: "icons/devices/bose/qc.35.svg",
@@ -9,4 +9,6 @@ export default {
     name: "QuietComfort 35",
     main: "icons/devices/bose/qc.35.svg",
   },
-} as Record<string, DeviceDefinition>;
+};
+
+export default devices;

@@ -1,4 +1,5 @@
-import { Device, DeviceBatteryLevels, RawDeviceData } from "../types/device";
+import { Device } from "./devices.model";
+import { DeviceBatteryLevels, RawDeviceData } from "./devices.types";
 
 export function mapDevice(deviceData: RawDeviceData): Device {
   // Extract useful data
