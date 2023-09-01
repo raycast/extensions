@@ -94,7 +94,7 @@ function DeleteCharacter(props: { onDelete: () => void }) {
     />
   );
 }
-        
+
 function CreateCharacterForm(props: { onCreate: (character: Character) => void }) {
   const { onCreate } = props;
   const { pop } = useNavigation();
