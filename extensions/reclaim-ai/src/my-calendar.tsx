@@ -20,7 +20,7 @@ type EventSection = { section: string; sectionTitle: string; events: Event[] };
 const EventActionsList = ({ event }: { event: Event }) => {
   const [eventActions, setEventActions] = useState<EventActions>([]);
 
-  const { getEventActions } = useEvent();
+  const { getEventActions, handleRescheduleTask } = useEvent();
 
   const loadEventActions = async () => {
     const actions = await getEventActions(event);
@@ -43,6 +43,58 @@ const EventActionsList = ({ event }: { event: Event }) => {
           }}
         />
       ))}
+      {event.reclaimManaged === true && (
+        <ActionPanel.Submenu title="Reschule Event" icon={Icon.ArrowClockwise}>
+          <Action
+            title="15min"
+            onAction={() => {
+              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_15M");
+            }}
+          />
+          <Action
+            title="30min"
+            onAction={() => {
+              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_30M");
+            }}
+          />
+          <Action
+            title="1hr"
+            onAction={() => {
+              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_1H");
+            }}
+          />
+          <Action
+            title="2hrs"
+            onAction={() => {
+              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_2H");
+            }}
+          />
+          <Action
+            title="4hrs"
+            onAction={() => {
+              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_4H");
+            }}
+          />
+          <Action
+            title="1 day"
+            onAction={() => {
+              handleRescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
+            }}
+          />
+          <Action
+            title="2 days"
+            onAction={() => {
+              handleRescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
+            }}
+          />
+          <Action
+            title="1 week"
+            onAction={() => {
+              handleRescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
+            }}
+          />
+        </ActionPanel.Submenu>
+      )}
     </ActionPanel>
   );
 };

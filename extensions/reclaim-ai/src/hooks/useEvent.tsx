@@ -174,10 +174,25 @@ const useEvent = () => {
     return eventActions;
   }, []);
 
+  const handleRescheduleTask = async (calendarID: string, eventID: string, rescheduleCommand: string) => {
+    try {
+      const [task, error] = await axiosPromiseData(
+        fetcher(`/planner/task/${calendarID}/${eventID}/reschedule?snoozeOption=${rescheduleCommand}`, {
+          method: "POST",
+        })
+      );
+      if (!task || error) throw error;
+      return task;
+    } catch (error) {
+      console.error("Error while rescheduling event", error);
+    }
+  };
+
   return {
     fetchEvents,
     getEventActions,
     showFormattedEventTitle,
+    handleRescheduleTask,
   };
 };
 
