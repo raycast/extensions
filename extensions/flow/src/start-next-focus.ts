@@ -1,5 +1,5 @@
 import { Alert, Color, confirmAlert, Icon, showHUD, Toast } from "@raycast/api";
-import {getCurrentPhase, isFlowInstalled, skipSession, startTimer} from "./utils";
+import { getCurrentPhase, isFlowInstalled, skipSession, startTimer } from "./utils";
 
 export default async function () {
   const toast = new Toast({
