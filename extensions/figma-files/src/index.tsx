@@ -17,7 +17,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const {
@@ -79,7 +79,7 @@ export default function Command() {
         : data?.map((team) =>
             team.files.map((project) => (
               <Grid.Dropdown.Item key={project.name} title={project.name} value={project.name} icon="project.svg" />
-            )),
+            ))
           )}
     </Grid.Dropdown>
   );
@@ -157,8 +157,8 @@ export default function Command() {
             >
               <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
             </Grid.Section>
-          ),
-        ),
+          )
+        )
       )}
     </Grid>
   );
