@@ -242,6 +242,14 @@ function TaskList() {
                             shortcut={{ modifiers: ["cmd"], key: "t" }}
                           >
                             <Action
+                              icon={{ source: Icon.Circle }}
+                              title="Add 15min"
+                              onAction={() => {
+                                const time = 15;
+                                handleAddTime(task, time);
+                              }}
+                            />
+                            <Action
                               icon={{ source: Icon.CircleProgress25 }}
                               title="Add 30min"
                               onAction={() => {
