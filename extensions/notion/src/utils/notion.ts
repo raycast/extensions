@@ -183,7 +183,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
           break;
         case "status":
           (databaseProperty.options as DatabasePropertyOption[]).push({
-            id: "_status_null_",
+            id: "_select_null_",
             name: "No Selection",
           });
           databaseProperty.options = (databaseProperty.options as DatabasePropertyOption[]).concat(
@@ -548,9 +548,9 @@ export function notionColorToTintColor(notionColor: string | undefined): Color.C
   // ordered by appearance in option configuration
   // colors obtained by using color picker on notion app
   const colorMapper = {
-    default: {light: "#E3E2E0", dark: "#373737" }, // AKA "light gray in an option"
-    gray: {light: "#E3E2E0", dark: "#5A5A5A" },
-    brown: {light: "#EEE0DB", dark: "#603B2D"},
+    default: { light: "#E3E2E0", dark: "#373737" }, // AKA "light gray in an option"
+    gray: { light: "#E3E2E0", dark: "#5A5A5A" },
+    brown: { light: "#EEE0DB", dark: "#603B2D" },
     orange: { light: "#D6BEAC", dark: "#844C1D" },
     yellow: { light: "#FEECC7", dark: "#89632A" },
     green: { light: "#DBEDDB", dark: "#2B593F" },
