@@ -372,6 +372,30 @@ export async function createDatabasePage(values: Form.Values) {
   }
 }
 
+
+export async function deleteDatabase(databaseId: string) {
+    try {
+      await authorize();
+  
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Deleting database",
+      });
+  
+      await notion.databases.update({
+        database_id: databaseId,
+        archived: true,
+      });
+  
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Database deleted",
+      });
+    } catch (err) {
+      return handleError(err, "Failed to delete database", undefined);
+    }
+  }
+
 export async function deletePage(pageId: string) {
   try {
     await authorize();
