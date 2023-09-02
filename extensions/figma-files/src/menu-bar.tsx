@@ -14,7 +14,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const {
@@ -29,7 +29,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
