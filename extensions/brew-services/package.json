@@ -5,6 +5,10 @@
   "description": "Manage homebrew services",
   "icon": "command-icon.png",
   "author": "es183923",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -40,6 +44,9 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }
