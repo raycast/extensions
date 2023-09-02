@@ -181,6 +181,15 @@ export async function fetchDatabaseProperties(databaseId: string) {
             property.select.options,
           );
           break;
+        case "status":
+          (databaseProperty.options as DatabasePropertyOption[]).push({
+            id: "_status_null_",
+            name: "No Selection",
+          });
+          databaseProperty.options = (databaseProperty.options as DatabasePropertyOption[]).concat(
+            property.status.options,
+          );
+          break;
         case "multi_select":
           databaseProperty.options = property.multi_select.options;
           break;
