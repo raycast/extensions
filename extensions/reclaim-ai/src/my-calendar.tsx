@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import {
   addDays,
   differenceInHours,
@@ -27,6 +27,24 @@ const EventActionsList = ({ event }: { event: Event }) => {
     setEventActions(actions);
   };
 
+  const RescheduleTask = async (calendarId: string, eventId: string, reschedule: string) => {
+    await showToast(Toast.Style.Animated, "Rescheduling event...");
+    try {
+      const executeReschedule = await handleRescheduleTask(calendarId, eventId, reschedule);
+      if (executeReschedule) {
+        showToast(Toast.Style.Success, `Rescheduled"${event.title}" successfully!`);
+      } else {
+        throw new Error("Rescheduling failed.");
+      }
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error while rescheduling",
+        message: String(error),
+      });
+    }
+  };
+
   useEffect(() => {
     void loadEventActions();
   }, []);
@@ -48,49 +66,49 @@ const EventActionsList = ({ event }: { event: Event }) => {
           <Action
             title="15min"
             onAction={() => {
-              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_15M");
+              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_15M");
             }}
           />
           <Action
             title="30min"
             onAction={() => {
-              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_30M");
+              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_30M");
             }}
           />
           <Action
             title="1hr"
             onAction={() => {
-              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_1H");
+              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_1H");
             }}
           />
           <Action
             title="2hrs"
             onAction={() => {
-              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_2H");
+              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_2H");
             }}
           />
           <Action
             title="4hrs"
             onAction={() => {
-              handleRescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_4H");
+              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_4H");
             }}
           />
           <Action
             title="1 day"
             onAction={() => {
-              handleRescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
+              RescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
             }}
           />
           <Action
             title="2 days"
             onAction={() => {
-              handleRescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
+              RescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
             }}
           />
           <Action
             title="1 week"
             onAction={() => {
-              handleRescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
+              RescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
             }}
           />
         </ActionPanel.Submenu>
