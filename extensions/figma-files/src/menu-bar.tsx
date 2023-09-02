@@ -14,17 +14,23 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const {
     data: starredFiles,
     isLoading: isLoadingStarredFiles,
     error: starredFilesError,
-  } = useCachedPromise(async () => {
-    const results = await loadStarredFiles();
-    return results;
-  }, []);
+  } = useCachedPromise(
+    async () => {
+      const results = await loadStarredFiles();
+      return results;
+    },
+    [],
+    {
+      keepPreviousData: true,
+    }
+  );
 
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
   const [desktopApp, setDesktopApp] = useState<Application>();
