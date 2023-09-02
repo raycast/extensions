@@ -4,11 +4,11 @@
 
 **My Calendar**
 
-- Added new action 'Reschedule'.
+- Added new action `Reschedule`.
 
 **Search Tasks**
 
-- Added action 'Mark incomplete' to 'Marked done' tasks.
+- Added action `Mark incomplete` to archived tasks.
 - Added option 'Add 15min' to `Add Time` action.
 
 ## [New Command] - 2023-08-10
