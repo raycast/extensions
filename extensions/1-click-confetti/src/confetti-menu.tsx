@@ -1,5 +1,5 @@
 import { MenuBarExtra, getPreferenceValues } from "@raycast/api";
-import { Shoot } from "./common"
+import { Shoot } from "./common";
 
 export default function Command() {
   const { confettiSound } = getPreferenceValues();

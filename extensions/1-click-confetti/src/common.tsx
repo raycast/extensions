@@ -1,4 +1,4 @@
-import { environment, open} from "@raycast/api";
+import { environment, open } from "@raycast/api";
 import { exec } from "child_process";
 
 const sound = "mixkit-happy-crowd-cheer-975.wav";
