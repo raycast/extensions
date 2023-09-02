@@ -1,14 +1,14 @@
 import {
-  ActionPanel,
   Action,
+  ActionPanel,
   Color,
   getPreferenceValues,
   Icon,
   Image,
+  Keyboard,
   List,
   showToast,
   Toast,
-  Keyboard,
 } from "@raycast/api";
 import { execaCommand } from "execa";
 import { existsSync } from "fs";
@@ -16,7 +16,12 @@ import { cpus, homedir } from "os";
 
 export type ServiceStatus = string;
 
-export type Service = { name: string; status: ServiceStatus; user: string; path: string };
+export type Service = {
+  name: string;
+  status: ServiceStatus;
+  user: string;
+  path: string;
+};
 
 const preferences: { brewPath: string } = getPreferenceValues();
 
@@ -155,7 +160,11 @@ export async function restartService(service: string) {
 }
 
 export async function runService(service: string) {
-  const toast = new Toast({ style: Toast.Style.Animated, title: "Running Service", message: `Running ${service}` });
+  const toast = new Toast({
+    style: Toast.Style.Animated,
+    title: "Running Service",
+    message: `Running ${service}`,
+  });
   toast.show();
 
   await runShellScript(`${brewPath} services run ${service}`);
@@ -175,11 +184,18 @@ export async function runService(service: string) {
 }
 
 export function createIcon(status: string): Image.ImageLike {
-  if (status === "started") return { source: Icon.Play, tintColor: Color.Green };
-  if (status === "running") return { source: Icon.PlayFilled, tintColor: Color.Green };
-  if (status === "none") return { source: Icon.Stop };
-  if (status === "error") return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
-  return { source: Icon.QuestionMark, tintColor: Color.Red };
+  switch (status) {
+    case "started":
+      return { source: Icon.Play, tintColor: Color.Green };
+    case "running":
+      return { source: Icon.PlayFilled, tintColor: Color.Green };
+    case "error":
+      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+    case "none":
+      return { source: Icon.Stop, tintColor: Color.PrimaryText };
+    default:
+      return { source: Icon.QuestionMark, tintColor: Color.Red };
+  }
 }
 
 export function StopService(props: { name: string }) {
