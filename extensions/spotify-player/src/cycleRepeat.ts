@@ -3,7 +3,7 @@ import { getPlaybackState } from "./api/getPlaybackState";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { repeat } from "./api/repeat";
 
-function cycleRepeatState(repeatState?: string ) {
+function cycleRepeatState(repeatState?: string) {
   switch (repeatState) {
     case "off":
       return "context";
@@ -22,7 +22,7 @@ export default async function Command() {
   const playbackStateData = await getPlaybackState();
   const repeatState = playbackStateData?.repeat_state;
 
-  const newState = cycleRepeatState(repeatState)
+  const newState = cycleRepeatState(repeatState);
 
   try {
     await repeat(newState);

@@ -8,13 +8,13 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
   // make sure position is a valid number
   if (isNaN(position)) {
-    await showHUD("Position must be a number.");
+    await showHUD("Position must be a number");
     return;
   }
 
   // make sure volume is greater than 100
   if (position < 0) {
-    await showHUD("Position must be between 0 and 100.");
+    await showHUD("Position must be between 0 and 100");
     return;
   }
 
