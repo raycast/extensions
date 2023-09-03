@@ -226,6 +226,30 @@
       "disabledByDefault": true
     },
     {
+      "name": "replay",
+      "title": "Replay",
+      "subtitle": "Spotify",
+      "description": "Replay the current song/episode form the beginning.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "seek",
+      "title": "Seek",
+      "subtitle": "Spotify",
+      "description": "Seek to a position in the current song/episode.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "position",
+          "placeholder": "Position",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "startRadio",
       "title": "Start Radio",
       "subtitle": "Spotify",
