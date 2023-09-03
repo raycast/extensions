@@ -13,7 +13,7 @@ import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
 import { CreateDatabaseForm, DatabaseViewForm, AppendToPageForm } from "./forms";
 
 function capitalize(string: string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 type PageListItemProps = {
@@ -83,8 +83,8 @@ export function PageListItem({
 
   const title = page.title ? page.title : "Untitled";
 
-    const { primaryAction } = getPreferenceValues<Preferences.SearchPage>();
-    
+  const { primaryAction } = getPreferenceValues<Preferences.SearchPage>();
+
   const openInRaycastAction = {
     page: (
       <Action.Push
@@ -176,15 +176,14 @@ export function PageListItem({
                   await confirmAlert({
                     title: `Delete ${capitalize(page.object)}`,
                     icon: { source: Icon.Trash, tintColor: Color.Red },
-                    message:
-                      `Do you want to delete this ${page.object}? Don't worry, you'll be able to restore it from Notion's trash.`,
+                    message: `Do you want to delete this ${page.object}? Don't worry, you'll be able to restore it from Notion's trash.`,
                   })
                 ) {
-                    if (page.object === "database") {
-                        deleteDatabase(page.id);
-                    } else {
-                        deletePage(page.id);
-                    }
+                  if (page.object === "database") {
+                    deleteDatabase(page.id);
+                  } else {
+                    deletePage(page.id);
+                  }
                   await removeRecentPage(page.id);
                   await mutate();
                 }
