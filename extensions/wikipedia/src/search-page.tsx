@@ -123,4 +123,3 @@ function PageItem({ search, title, language }: { search: string; title: string; 
     />
   );
 }
-
