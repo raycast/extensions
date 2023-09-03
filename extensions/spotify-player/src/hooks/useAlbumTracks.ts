@@ -15,7 +15,7 @@ export function useAlbumTracks({ albumId = "", limit = 50, options }: UseAlbumTr
     [albumId, limit],
     {
       execute: options?.execute !== false && !!albumId && !!limit,
-    }
+    },
   );
 
   return { albumTracksData: data, albumTracksError: error, albumTracksIsLoading: isLoading };

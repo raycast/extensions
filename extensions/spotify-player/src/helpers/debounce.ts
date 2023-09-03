@@ -1,6 +1,6 @@
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): ((...args: Parameters<T>) => Promise<ReturnType<T>>) => {
   let timeout: NodeJS.Timeout | null;
   return (...args: Parameters<T>) => {
