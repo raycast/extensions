@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import classes from "./classes.json";
 
-const preferences = getPreferenceValues<Preferences.SearchClasses>();
+const preferences = getPreferenceValues();
 
 function formatClasses(css: string): string {
   if (preferences.measuringUnit === "px") {
