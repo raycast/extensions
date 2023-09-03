@@ -13,16 +13,13 @@ import {
   Form,
   useNavigation,
   popToRoot,
+  environment,
 } from "@raycast/api";
-import { promisify } from "node:util";
-import { exec as _exec } from "node:child_process";
 import { filesize } from "filesize";
-import { existsSync, lstatSync, readdirSync, readlinkSync } from "node:fs";
+import fs from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { homedir } from "node:os";
 import { useState } from "react";
-
-const exec = promisify(_exec);
 
 export type FileType = "directory" | "file" | "symlink" | "other";
 
@@ -54,7 +51,7 @@ export async function deleteFile(filePath: string, fileName: string, refresh: ()
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        await runShellScript(`rm -rf "${filePath}"`);
+        fs.rmSync(filePath);
         refresh();
         showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
       },
@@ -75,7 +72,7 @@ export async function deleteDirectory(folderPath: string, folderName: string, re
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        await runShellScript(`rm -rf "${folderPath}"`);
+        fs.rmdirSync(folderPath);
         refresh();
         showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
       },
@@ -95,11 +92,6 @@ export function getFileSize(preferences: PreferencesType, fileData: FileDataType
   }
 }
 
-export async function runShellScript(command: string) {
-  const { stdout, stderr } = await exec(command);
-  return { stdout, stderr };
-}
-
 export function getStartDirectory(): string {
   let { startDirectory } = getPreferenceValues();
   startDirectory = startDirectory.replace("~", homedir());
@@ -109,6 +101,9 @@ export function getStartDirectory(): string {
 export function DirectoryItem(props: { fileData: FileDataType; refresh: () => void }) {
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
+
+  const context = encodeURIComponent(`{"path":"${filePath}"}`);
+  const deeplink = `raycast://extensions/es183923/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
   return (
     <List.Item
@@ -124,7 +119,7 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             onOpen={() => popToRoot({ clearSearchBar: true })}
           />
-          <Action.ShowInFinder path={filePath} />
+          <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
           <Action.CopyToClipboard
             title="Copy Directory Path"
             content={`${filePath}/`}
@@ -135,6 +130,10 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
             title="Rename Directory"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             icon={Icon.Pencil}
+          />
+          <Action.CreateQuicklink
+            title="Create Quicklink to this Directory"
+            quicklink={{ name: `Open ${filePath}`, link: deeplink }}
           />
           <ActionPanel.Section>
             <Action.Trash
@@ -187,7 +186,7 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
       actions={
         <ActionPanel>
           <Action.Open title="Open File" target={filePath} />
-          <Action.ShowInFinder path={filePath} />
+          <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
           <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           <Action.CopyToClipboard
             title="Copy File Path"
@@ -236,9 +235,9 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
 export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void }) {
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
-  const a = readlinkSync(filePath);
+  const a = fs.readlinkSync(filePath);
   const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
-  const originalFileData = lstatSync(originalPath, { throwIfNoEntry: false });
+  const originalFileData = fs.lstatSync(originalPath, { throwIfNoEntry: false });
   if (originalFileData?.isDirectory() ?? false) {
     return (
       <List.Item
@@ -346,7 +345,7 @@ export function createItem(fileData: FileDataType, refresh: () => void) {
 
 export function getDirectoryData(path: string): FileDataType[] {
   const preferences: PreferencesType = getPreferenceValues();
-  let files: string[] = readdirSync(path);
+  let files: string[] = fs.readdirSync(path);
   if (!preferences.showDots) {
     files = files.filter((file) => !file.startsWith("."));
   }
@@ -361,11 +360,14 @@ export function getDirectoryData(path: string): FileDataType[] {
   const data: FileDataType[] = [];
 
   for (const file of files) {
-    const fileData = lstatSync(`${path}/${file}`);
+    const fileData = fs.lstatSync(`${path}/${file}`);
     let fileType: FileType = "other";
     if (fileData.isDirectory()) fileType = "directory";
     if (fileData.isFile()) fileType = "file";
     if (fileData.isSymbolicLink()) fileType = "symlink";
+
+    // ignore other files
+    if (fileType === "other") continue;
 
     const permissions: string = (fileData.mode & parseInt("777", 8)).toString(8); // convert from number to octal
     const size: number = fileData.size;
@@ -383,11 +385,13 @@ export function getDirectoryData(path: string): FileDataType[] {
 }
 
 export function Directory(props: { path: string }) {
-  if (!existsSync(props.path)) {
+  // somehow, sometimes props.path is null
+  if (props.path === null || !fs.existsSync(props.path)) {
     return <Detail markdown={`# Error: \n\nThe directory \`${props.path}\` does not exist. `} />;
   }
   const [directoryData, setDirectoryData] = useState<FileDataType[]>(() => getDirectoryData(props.path));
   const preferences: PreferencesType = getPreferenceValues();
+
   if (preferences.directoriesFirst) {
     const directories = directoryData.filter((file) => file.type === "directory");
     const nonDirectories = directoryData.filter((file) => file.type !== "directory");
@@ -414,10 +418,10 @@ export function RenameItem(props: { filePath: string; refresh: () => void; isDir
   const [itemName, setItemName] = useState<string>(basename(props.filePath));
   const { pop } = useNavigation();
 
-  async function renameItem() {
+  function renameItem() {
     const newFilePath = `${dirname(props.filePath)}/${itemName}`;
     if (props.filePath !== newFilePath) {
-      await runShellScript(`mv "${props.filePath}" "${newFilePath}"`);
+      fs.renameSync(props.filePath, newFilePath);
       showToast(
         Toast.Style.Success,
         `${props.isDirectory ? "Directory" : "File"} Renamed`,
