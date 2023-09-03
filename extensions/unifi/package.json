@@ -33,21 +33,21 @@
   "preferences": [
     {
       "name": "controllerUrl",
-      "description": "Url of your Unifi Controller",
+      "description": "Url of your UniFi Controller",
       "type": "textfield",
       "required": true,
       "title": "Controller Url"
     },
     {
       "name": "username",
-      "description": "Username of Local(!) Unifi User. Cloud accounts are not supported.",
+      "description": "Username of Local(!) UniFi User. Cloud accounts are not supported.",
       "type": "textfield",
       "required": true,
       "title": "Username"
     },
     {
       "name": "password",
-      "description": "Password of Local Unifi User",
+      "description": "Password of Local UniFi User",
       "type": "password",
       "required": true,
       "title": "Password"
