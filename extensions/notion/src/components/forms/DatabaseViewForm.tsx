@@ -94,7 +94,13 @@ export function DatabaseViewForm(props: {
             <Form.Separator key="separator" />,
           ]
         : null}
-      <Form.Dropdown id="type" title="View Type" value={viewType} onChange={setViewType}>
+      <Form.Dropdown
+        id="type"
+        title="View Type"
+        value={viewType}
+        // @ts-expect-error string instead of 'list' | 'kanban'
+        onChange={setViewType}
+      >
         <Form.Dropdown.Item value="list" title="List" icon="./icon/view_list.png" />
         <Form.Dropdown.Item value="kanban" title="Kanban" icon="./icon/view_kanban.png" />
       </Form.Dropdown>
