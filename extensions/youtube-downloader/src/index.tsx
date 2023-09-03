@@ -24,9 +24,6 @@ export default function DownloadVideo() {
   const [duration, setDuration] = useState(0);
 
   const { handleSubmit, values, itemProps, setValue } = useForm<DownloadOptions>({
-    initialValues: {
-      url: "https://www.youtube.com/watch?v=zlmzrD8zq0o",
-    },
     onSubmit: async (values) => {
       setLoading(true);
 
