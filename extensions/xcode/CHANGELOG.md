@@ -1,5 +1,17 @@
 # Xcode Changelog
 
+## [Xcode Project List] - 2023-08-15
+
+- The favorites section will always be shown at first in the "Search Recent Projects" command.
+
+## [Xcode 15 Beta Icon] - 2023-07-28
+
+- Added Xcode 15 Beta icon when searching for Xcode releases.
+
+## [Change Data Source for List Apple Devices] - 2023-07-28
+
+- Changed the data source for the "List Apple Devices" command so it doesn't rely on a text file anymore.
+
 ## [List Apple Devices] - 2023-07-25
 
 - Added "List Apple Devices" command to have a list of Apple devices and their matching product name/code name.

@@ -1,6 +1,6 @@
 import { environment } from "@raycast/api";
 import * as os from "os";
-import { getMacOSVersion } from "../utils";
+import { getMacOSVersion } from "./utils";
 
 interface HADeviceRegistrationData {
   push_notification_key: string;

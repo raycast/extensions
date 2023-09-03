@@ -111,7 +111,7 @@ Reads the clipboard content as plain text, file name, or HTML.
 #### Signature
 
 ```typescript
-async function read(): Promise<ReadContent>;
+async function read(options?: { offset?: number }): Promise<ReadContent>;
 ```
 
 #### Example
@@ -127,6 +127,10 @@ export default async () => {
 };
 ```
 
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="Clipboard.read" />
+
 #### Return
 
 A promise that resolves when the clipboard content was read as plain text, file name, or HTML.
@@ -138,7 +142,7 @@ Reads the clipboard as plain text.
 #### Signature
 
 ```typescript
-async function readText(): Promise<string | undefined>;
+async function readText(options?: { offset?: number }): Promise<string | undefined>;
 ```
 
 #### Example
@@ -151,6 +155,10 @@ export default async function Command() {
   console.log(text);
 }
 ```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="Clipboard.readText" />
 
 #### Return
 

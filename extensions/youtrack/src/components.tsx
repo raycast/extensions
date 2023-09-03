@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List, Icon, Color, Image, Detail } from "@raycast/api";
 import { Issue, IssueExtended } from "./interfaces";
-import { issueStates } from "./utils";
+import { isURL, issueStates, removeMarkdownImages } from "./utils";
 
 const resolvedIcon = { source: Icon.Check, tintColor: Color.Green };
 const openIcon = { source: Icon.Dot };
@@ -54,7 +54,8 @@ function IssueDetails(props: {
     return <Detail isLoading />;
   }
 
-  const issueBody = `## ${issue.summary}\n\n${issue.description ?? ""}`;
+  //NOTE: images are being removed from the description because youtrack-rest doesn't support them at the moment
+  const issueBody = `## ${issue.summary}\n\n${removeMarkdownImages(issue.description ?? "")}`;
   return (
     <Detail
       markdown={issueBody}
@@ -65,21 +66,29 @@ function IssueDetails(props: {
           <Detail.Metadata.Label
             title="Author"
             text={issue.reporter?.fullName}
-            icon={`${props.instance}${issue.reporter?.avatarUrl}`}
+            icon={
+              isURL(issue.reporter?.avatarUrl ?? "")
+                ? issue.reporter?.avatarUrl
+                : `${props.instance}${issue.reporter?.avatarUrl}`
+            }
           />
           <Detail.Metadata.Label title="Updated" text={issue.date} />
           <Detail.Metadata.Label
             title="Updater"
             text={issue.updater?.fullName}
-            icon={`${props.instance}${issue.reporter?.avatarUrl}`}
+            icon={
+              isURL(issue.updater?.avatarUrl ?? "")
+                ? issue.updater?.avatarUrl
+                : `${props.instance}${issue.updater?.avatarUrl}`
+            }
           />
-          {issue.tags?.length && (
+          {issue.tags?.length ? (
             <Detail.Metadata.TagList title="Tags">
               {issue.tags.map((tag) => (
                 <Detail.Metadata.TagList.Item key={tag.id} text={tag.name} />
               ))}
             </Detail.Metadata.TagList>
-          )}
+          ) : null}
         </Detail.Metadata>
       }
       actions={

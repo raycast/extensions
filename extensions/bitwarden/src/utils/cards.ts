@@ -27,7 +27,7 @@ const getCardValue = (key: string, value: string) => {
 
 export function getCardDetailsMarkdown(itemName: string, card: Card) {
   return `# 💳 ${itemName}
-<br></br>
+&nbsp;
 | ⌘\t**Field** | **Value** |
 | --- | --- |
 ${Object.entries(card)

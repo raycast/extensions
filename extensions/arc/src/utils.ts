@@ -70,6 +70,14 @@ export function getNumberOfTabs(tabs?: Tab[]) {
   return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
 }
 
+export function isTab(tab: any): tab is Tab {
+  if (tab && tab.windowId && tab.tabId && tab.url && tab.title && tab.location) {
+    return true;
+  }
+
+  return false;
+}
+
 export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
   if (!entries) {
     return undefined;

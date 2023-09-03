@@ -5,6 +5,9 @@
   "description": "The Raycast version of Espanso Search Bar",
   "icon": "espanso-logo.png",
   "author": "kud",
+  "contributors": [
+    "nbbaier"
+  ],
   "categories": [
     "Applications",
     "System",
@@ -18,10 +21,26 @@
       "subtitle": "Espanso",
       "description": "The Raycast version of Espanso Search Bar",
       "mode": "view"
+    },
+    {
+      "name": "addMatch",
+      "title": "Add Match",
+      "subtitle": "Espanso",
+      "description": "Add a match to your Espanso config",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Espanso",
+      "subtitle": "Espanso",
+      "description": "Enable or disable Espanso",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.50.5",
+    "@raycast/utils": "^1.7.0",
+    "fs-extra": "^11.1.1",
     "zx": "7.2.2"
   },
   "devDependencies": {

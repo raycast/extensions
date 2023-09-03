@@ -13,6 +13,9 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
   });
 
   useEffect(() => {
+    if (initialQuestion) {
+      return;
+    }
     (async () => {
       if (isAutoLoadText && !disableAutoLoad) {
         setLoading(true);
@@ -26,11 +29,7 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
             });
           }
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Selected text couldn't load",
-            message: String(error),
-          });
+          console.log(error);
         }
         setLoading(false);
       }

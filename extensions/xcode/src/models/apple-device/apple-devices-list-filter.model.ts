@@ -3,4 +3,5 @@ export enum AppleDevicesListFilter {
   iphone = "iPhone",
   ipad = "iPad",
   watch = "Watch",
+  mac = "Mac",
 }

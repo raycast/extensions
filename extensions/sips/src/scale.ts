@@ -1,6 +1,17 @@
+/**
+ * @file scale.ts
+ *
+ * @summary Raycast command to scale selected images by a given factor.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-07-06 14:56:29
+ * Last modified  : 2023-07-06 15:48:08
+ */
+
 import { showToast, Toast } from "@raycast/api";
-import { execSync } from "child_process";
-import { execSIPSCommandOnSVG, execSIPSCommandOnWebP, getSelectedImages } from "./utils";
+
+import scale from "./operations/scaleOperation";
+import { cleanup, getSelectedImages, showErrorToast } from "./utilities/utils";
 
 export default async function Command(props: { arguments: { scaleFactor: string } }) {
   const { scaleFactor } = props.arguments;
@@ -12,7 +23,6 @@ export default async function Command(props: { arguments: { scaleFactor: string 
   }
 
   const selectedImages = await getSelectedImages();
-
   if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
     await showToast({ title: "No images selected", style: Toast.Style.Failure });
     return;
@@ -20,39 +30,14 @@ export default async function Command(props: { arguments: { scaleFactor: string 
 
   const toast = await showToast({ title: "Scaling in progress...", style: Toast.Style.Animated });
 
-  if (selectedImages) {
-    const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-    try {
-      for (const imagePath of selectedImages) {
-        const resultArr = execSync(`sips -g pixelWidth -g pixelHeight "${imagePath}"`)
-          .toString()
-          .split(/(: |\n)/g);
-        const oldWidth = parseInt(resultArr[4]);
-        const oldHeight = parseInt(resultArr[8]);
-
-        if (imagePath.toLowerCase().endsWith("webp")) {
-          // Convert to PNG, scale, the restore to WebP
-          execSIPSCommandOnWebP(
-            `sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber}`,
-            imagePath
-          );
-        } else if (imagePath.toLowerCase().endsWith("svg")) {
-          // Convert to PNG, scale, and restore to SVG
-          execSIPSCommandOnSVG(
-            `sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber}`,
-            imagePath
-          );
-        } else {
-          execSync(`sips --resampleHeightWidth ${oldHeight * scaleNumber} ${oldWidth * scaleNumber} "${imagePath}"`);
-        }
-      }
-
-      toast.title = `Scaled ${selectedImages.length.toString()} ${pluralized}`;
-      toast.style = Toast.Style.Success;
-    } catch (error) {
-      console.log(error);
-      toast.title = `Failed to scale ${selectedImages.length.toString()} ${pluralized}`;
-      toast.style = Toast.Style.Failure;
-    }
+  const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
+  try {
+    await scale(selectedImages, scaleNumber);
+    toast.title = `Scaled ${selectedImages.length.toString()} ${pluralized}`;
+    toast.style = Toast.Style.Success;
+  } catch (error) {
+    await showErrorToast(`Failed to scale ${selectedImages.length.toString()} ${pluralized}`, error as Error, toast);
+  } finally {
+    await cleanup();
   }
 }

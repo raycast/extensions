@@ -7,7 +7,6 @@ import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
 import { Album, Track } from "./util/models";
-import { SFSymbols } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
@@ -86,8 +85,8 @@ export default function PlayLibraryAlbum() {
           <List.Item
             key={id}
             title={name ?? "--"}
-            subtitle={SFSymbols.ARTIST + ` ${artist}` ?? "--"}
-            accessoryTitle={count ? SFSymbols.PLAYLIST + ` ${count}` : ""}
+            subtitle={`${artist}` ?? "--"}
+            accessories={[{ text: count ? `${count}` : "" }]}
             icon={{ source: "../assets/icon.png" }}
             actions={<Actions name={name} pop={pop} />}
           />
