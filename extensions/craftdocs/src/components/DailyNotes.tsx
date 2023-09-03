@@ -1,16 +1,17 @@
 import Config from "../Config";
 import { Action, ActionPanel, List, openExtensionPreferences } from "@raycast/api";
 import { DailyNoteRef } from "./DailyNoteRef";
-import { Shortcut } from "./Shortcut";
+import { DayReference, Shortcut } from "./Shortcut";
 
 type DailyNotesParams = {
   appExists: boolean;
-  config: Config | null;
+  config: Config | undefined;
   query: string;
   date: Date | undefined;
+  spaceID: string | undefined;
 };
 
-export const DailyNotes = ({ appExists, config, query, date }: DailyNotesParams) => {
+export const DailyNotes = ({ appExists, config, query, date, spaceID }: DailyNotesParams) => {
   if (!appExists || !config) {
     return (
       <List.EmptyView
@@ -38,15 +39,17 @@ export const DailyNotes = ({ appExists, config, query, date }: DailyNotesParams)
     );
   }
 
+  const selectedSpaceID = spaceID || space.spaceID;
+
   if (query.length > 0) {
-    return <DailyNoteRef date={date} text={query} spaceID={space.spaceID} />;
+    return <DailyNoteRef date={date} text={query} spaceID={selectedSpaceID} />;
   }
 
   return (
     <List.Section title="Shortcuts">
-      <Shortcut dayRef="today" spaceID={space.spaceID} />
-      <Shortcut dayRef="yesterday" spaceID={space.spaceID} />
-      <Shortcut dayRef="tomorrow" spaceID={space.spaceID} />
+      {(["today", "yesterday", "tomorrow"] as DayReference[]).map((dayRef, index) => (
+        <Shortcut key={index} dayRef={dayRef} spaceID={selectedSpaceID} config={config} />
+      ))}
     </List.Section>
   );
 };

@@ -8,7 +8,7 @@ type ListDocBlocksParams = {
   setQuery: (query: string) => void;
   results: DocBlock[];
   query: string;
-  config: Config | null;
+  config: Config | undefined;
 };
 
 export default function ListDocBlocks({ resultsLoading, results, setQuery, query, config }: ListDocBlocksParams) {

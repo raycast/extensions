@@ -8,7 +8,7 @@ const [craftDataRoot] = bundleIds
   .filter(existsSync);
 const searchPath = path.join(craftDataRoot, "Search");
 
-type SpaceSQLite = {
+export type SpaceSQLite = {
   path: string;
   spaceID: string;
   primary: boolean;

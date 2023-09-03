@@ -8,7 +8,7 @@ type ListBlocksParams = {
   onSearchTextChange: (text: string) => void;
   blocks: Block[];
   query: string;
-  config: Config | null;
+  config: Config | undefined;
 };
 
 export default function ListBlocks(params: ListBlocksParams) {

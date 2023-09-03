@@ -4,14 +4,16 @@ import { UseAppExists } from "./useAppExists";
 
 export type UseConfig = {
   configLoading: boolean;
-  config: Config | null;
+  config: Config | undefined;
 };
 
 export default function useConfig({ appExistsLoading, appExists }: UseAppExists) {
-  const [state, setState] = useState<UseConfig>({ configLoading: true, config: null as Config | null });
+  const [state, setState] = useState<UseConfig>({ configLoading: true, config: undefined });
 
   useEffect(() => {
     if (appExistsLoading) return;
+
+    console.log("useConfig");
 
     if (!appExists) {
       return setState((prev) => ({ ...prev, configIsLoading: false }));
