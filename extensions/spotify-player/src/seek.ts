@@ -21,7 +21,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   await setSpotifyClient();
 
   try {
-    let res = await seek(position);
+    const res = await seek(position);
     if (res == "next") {
       await showHUD("Skipping to next track");
     } else if (res == "position") {

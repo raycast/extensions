@@ -250,6 +250,13 @@
       ]
     },
     {
+      "name": "current",
+      "title": "Current Track",
+      "description": "Show the current song/episode state.",
+      "mode": "no-view",
+      "interval": "30s"
+    },
+    {
       "name": "startRadio",
       "title": "Start Radio",
       "subtitle": "Spotify",
