@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pass",
+  "title": "Pass",
+  "description": "Search, edit and add passwords using pass",
+  "icon": "command-icon.png",
+  "author": "tafeen",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Pass",
+      "description": "Search, edit and add passwords using pass",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+      {
+        "name": "path_var",
+        "description": "Set path variables used by pass app",
+        "type": "textfield",
+        "default": "/opt/homebrew/bin:/usr/bin:/bin",
+        "required": true,
+        "title": "Path variable"
+      }, 
+      {
+        "name": "passwords_store_path",
+        "description": "Set path to passwords store",
+        "type": "textfield",
+        "default": "~/.password-store",
+        "required": true,
+        "title": "Password store"
+      }
+    ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16",
+    "child_process": "^1.0.2",
+    "recursive-readdir": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/recursive-readdir": "^2.2.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
