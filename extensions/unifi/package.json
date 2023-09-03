@@ -12,13 +12,13 @@
   "commands": [
     {
       "name": "devices",
-      "title": "Devices",
+      "title": "Search Devices",
       "description": "Get all Devices",
       "mode": "view"
     },
     {
       "name": "clients",
-      "title": "Clients",
+      "title": "Search Clients",
       "description": "Get all Clients",
       "mode": "view"
     },
