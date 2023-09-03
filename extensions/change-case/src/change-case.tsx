@@ -16,6 +16,7 @@ import {
   getFrontmostApplication,
 } from "@raycast/api";
 import * as changeCase from "change-case-all";
+import { execa } from "execa";
 import React, { useEffect, useState } from "react";
 
 const cases = [
@@ -46,6 +47,13 @@ const cases = [
 type CaseType = (typeof cases)[number];
 type Cases = { [key: string]: (input: string, options?: object) => string };
 
+async function runShellScript(command: string) {
+  const { stdout } = await execa(command, {
+    env: { LC_CTYPE: "UTF-8" },
+  });
+  return stdout;
+}
+
 class NoTextError extends Error {
   constructor() {
     super("No text");
@@ -62,18 +70,19 @@ async function getSelection() {
 }
 
 async function readContent(preferredSource: string) {
-  const clipboard = await Clipboard.readText();
-  const selected = await getSelection();
-
   if (preferredSource === "clipboard") {
-    if (clipboard) return clipboard;
-    if (selected) return selected;
+    const clipboard = await runShellScript("pbpaste");
+    if (clipboard.length > 0) return clipboard;
+    const selection = await getSelection();
+    if (selection.length > 0) return selection;
+    throw new NoTextError();
   } else {
-    if (selected) return selected;
-    if (clipboard) return clipboard;
+    const selection = await getSelection();
+    if (selection.length > 0) return selection;
+    const clipboard = await runShellScript("pbpaste");
+    if (clipboard.length > 0) return clipboard;
+    throw new NoTextError();
   }
-
-  throw new NoTextError();
 }
 
 const cache = new Cache();
@@ -82,46 +91,43 @@ const getPinnedCases = (): CaseType[] => {
   const pinned = cache.get("pinned");
   return pinned ? JSON.parse(pinned) : [];
 };
-
 const getRecentCases = (): CaseType[] => {
   const recent = cache.get("recent");
   return recent ? JSON.parse(recent) : [];
 };
-
 const setPinnedCases = (pinned: CaseType[]) => {
   cache.set("pinned", JSON.stringify(pinned));
 };
-
 const setRecentCases = (recent: CaseType[]) => {
   cache.set("recent", JSON.stringify(recent));
 };
 
-const functions: Cases = {
-  "Camel Case": changeCase.camelCase,
-  "Capital Case": changeCase.capitalCase,
-  "Constant Case": changeCase.constantCase,
-  "Dot Case": changeCase.dotCase,
-  "Header Case": changeCase.headerCase,
-  "Kebab Case": changeCase.paramCase,
-  "Lower Case": changeCase.lowerCase,
-  "Lower First": changeCase.lowerCaseFirst,
-  "Macro Case": changeCase.constantCase,
-  "No Case": changeCase.noCase,
-  "Param Case": changeCase.paramCase,
-  "Pascal Case": changeCase.pascalCase,
-  "Path Case": changeCase.pathCase,
-  "Random Case": changeCase.spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
-  "Slug Case": changeCase.paramCase,
-  "Snake Case": changeCase.snakeCase,
-  "Swap Case": changeCase.swapCase,
-  "Title Case": changeCase.titleCase,
-  "Upper Case": changeCase.upperCase,
-  "Upper First": changeCase.upperCaseFirst,
-  "Sponge Case": changeCase.spongeCase,
-};
-
 export default function Command() {
+  const functions: Cases = {
+    "Camel Case": changeCase.camelCase,
+    "Capital Case": changeCase.capitalCase,
+    "Constant Case": changeCase.constantCase,
+    "Dot Case": changeCase.dotCase,
+    "Header Case": changeCase.headerCase,
+    "Kebab Case": changeCase.paramCase,
+    "Lower Case": changeCase.lowerCase,
+    "Lower First": changeCase.lowerCaseFirst,
+    "Macro Case": changeCase.constantCase,
+    "No Case": changeCase.noCase,
+    "Param Case": changeCase.paramCase,
+    "Pascal Case": changeCase.pascalCase,
+    "Path Case": changeCase.pathCase,
+    "Random Case": changeCase.spongeCase,
+    "Sentence Case": changeCase.sentenceCase,
+    "Slug Case": changeCase.paramCase,
+    "Snake Case": changeCase.snakeCase,
+    "Swap Case": changeCase.swapCase,
+    "Title Case": changeCase.titleCase,
+    "Upper Case": changeCase.upperCase,
+    "Upper First": changeCase.upperCaseFirst,
+    "Sponge Case": changeCase.spongeCase,
+  };
+
   const [clipboard, setClipboard] = useState<string>("");
   const [frontmostApp, setFrontmostApp] = useState<Application>();
 
@@ -140,7 +146,6 @@ export default function Command() {
   useEffect(() => {
     setPinnedCases(pinned);
   }, [pinned]);
-
   useEffect(() => {
     setRecentCases(recent);
   }, [recent]);
@@ -278,7 +283,7 @@ export default function Command() {
   };
 
   return (
-    <List isShowingDetail={true}>
+    <List isShowingDetail={true} selectedItemId={pinned[0] || recent[0]}>
       <List.Section title="Pinned">
         {pinned?.map((key) => (
           <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} pinned={true} />
@@ -292,7 +297,7 @@ export default function Command() {
       <List.Section title="All Cases">
         {Object.entries(functions)
           .filter(
-            ([key, _]) =>
+            ([key, func]) =>
               preferences[key.replace(/ +/g, "")] &&
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType)
