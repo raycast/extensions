@@ -138,6 +138,22 @@
       "disabledByDefault": true
     },
     {
+      "name": "volume",
+      "title": "Set Volume",
+      "subtitle": "Spotify",
+      "description": "Set the volume to an arbitrary percent.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "volume",
+          "placeholder": "Volume",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "volume0",
       "title": "Set Volume to 0%",
       "subtitle": "Spotify",
