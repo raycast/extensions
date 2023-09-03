@@ -1,3 +1,3 @@
-# unifi Changelog
+# UniFi Changelog
 
-## [Initial Version] - 2023-08-12
+## [Initial Version] - 2023-09-03
