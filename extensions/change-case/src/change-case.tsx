@@ -14,10 +14,12 @@ import {
   Cache,
   Application,
   getFrontmostApplication,
+  environment,
+  LaunchProps,
+  popToRoot
 } from "@raycast/api";
 import * as changeCase from "change-case-all";
-import React, { useEffect, useState } from "react";
-
+import { useEffect, useState } from "react";
 const cases = [
   "Camel Case",
   "Capital Case",
@@ -121,15 +123,30 @@ const functions: Cases = {
   "Sponge Case": changeCase.spongeCase,
 };
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
+  const preferences = getPreferenceValues();
+  const preferredSource = preferences["source"];
+
+  const immediatelyConvertToCase = props.launchContext?.case;
+  if (immediatelyConvertToCase) {
+    (async () => {
+      let content = await readContent(preferredSource);
+      let converted = functions[immediatelyConvertToCase](content);
+
+      Clipboard.copy(converted);
+
+      showHUD(`Converted to ${immediatelyConvertToCase}`);
+      popToRoot();
+    })();
+    return;
+  }
+
   const [clipboard, setClipboard] = useState<string>("");
   const [frontmostApp, setFrontmostApp] = useState<Application>();
 
   const [pinned, setPinned] = useState<CaseType[]>([]);
   const [recent, setRecent] = useState<CaseType[]>([]);
 
-  const preferences = getPreferenceValues();
-  const preferredSource = preferences["source"];
 
   useEffect(() => {
     setPinned(getPinnedCases());
@@ -204,6 +221,9 @@ export default function Command() {
   };
 
   const CaseItem = (props: { case: CaseType; modified: string; pinned?: boolean; recent?: boolean }): JSX.Element => {
+    const context = encodeURIComponent(`{"case":"${props.case}"}`);
+    const deeplink = `raycast://extensions/es183923/${environment.extensionName}/${environment.commandName}?context=${context}`;
+
     return (
       <List.Item
         id={props.case}
@@ -231,7 +251,7 @@ export default function Command() {
                   }}
                 />
               ) : (
-                <React.Fragment>
+                <>
                   <Action
                     title="Remove Pinned Case"
                     icon={Icon.PinDisabled}
@@ -248,10 +268,10 @@ export default function Command() {
                       setPinned([]);
                     }}
                   />
-                </React.Fragment>
+                </>
               )}
               {props.recent && (
-                <React.Fragment>
+                <>
                   <Action
                     title="Remove Recent Case"
                     icon={Icon.XMarkCircle}
@@ -268,8 +288,12 @@ export default function Command() {
                       setRecent([]);
                     }}
                   />
-                </React.Fragment>
+                </>
               )}
+              <Action.CreateQuicklink
+                title={`Create Quicklink to Convert to ${props.case}`}
+                quicklink={{ name: `Convert to ${props.case}`, link: deeplink }}
+              />
             </ActionPanel.Section>
           </ActionPanel>
         }
