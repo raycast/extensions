@@ -2,7 +2,8 @@
 
 ## [Fixes] - {PR_MERGE_DATE}
 
-- Fix issue where the extension may not work on Macs with Intel processors
+- Fix the issue where the extension may not work on Macs with Intel processors
+- Fix the issue of changing scroll bars visibility that causes the reset of the entire global domain settings
 
 ## [Improvements] - 2023-08-28
 
