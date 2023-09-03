@@ -56,33 +56,44 @@ export class MattermostClient {
     console.log("try login");
     const preference = getPreferenceValues<Preference>();
 
-    if (this.token.length != 0) {
-      console.log("already logged with token: " + this.token);
-      return Promise.resolve();
-    }
-
     switch (preference.authorizationType) {
       case "token":
         this.token = preference.credentials;
         return Promise.resolve();
       case "logpass": {
-        const [username, password] = preference.credentials.split(":");
-        return axios
-          .post<UserProfile>(
-            "/users/login",
-            JSON.stringify({
-              login_id: username,
-              password: password,
-            }),
-            this.config()
-          )
-          .then((response) => {
-            const token = response.headers["token"];
-            console.log(response.statusText);
-            this.token = token;
-            console.log("successfull login");
-            return LocalStorage.setItem("mattermost-token", token);
-          });
+        function signIn(): Promise<void> {
+          const [username, password] = preference.credentials.split(":");
+          return axios
+            .post<UserProfile>(
+              "/users/login",
+              JSON.stringify({
+                login_id: username,
+                password: password,
+              }),
+              MattermostClient.config()
+            )
+            .then((response) => {
+              const token = response.headers["token"];
+              console.log(response.statusText);
+              MattermostClient.token = token;
+              console.log("successfull login");
+              return LocalStorage.setItem("mattermost-token", token);
+            });
+        }
+
+        if (this.token.length == 0) {
+          return signIn();
+        }
+
+        console.log("already logged with token: " + this.token);
+        return this.getMe()
+          .catch((error) => {
+            if (error.message.includes("401")) {
+              console.warn("token expired, relogin");
+              return signIn();
+            }
+          })
+          .then();
       }
     }
   }
