@@ -42,6 +42,7 @@ export default function () {
 
 const castSelectedSpaceID = (value: LocalStorage.Value | undefined): string | undefined => {
   if (typeof value !== "string") return undefined;
+  if (value.length === 0) return undefined;
 
   return value;
 };
