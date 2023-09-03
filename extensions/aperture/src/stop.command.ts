@@ -1,12 +1,12 @@
 import { dirname } from "path";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
-import { Alert, Toast, confirmAlert, getPreferenceValues, open, showToast } from "@raycast/api";
+import { Alert, Clipboard, Toast, confirmAlert, getPreferenceValues, open, showToast } from "@raycast/api";
 import { clearStoredRecording, getStoredRecording } from "~/utils/storage";
 import { moveFileToSaveLocation } from "~/utils/fs";
 import { Aperture } from "~/api/aperture";
 import { killRecordingIndicator } from "~/utils/indicator";
 
-const { postSaveAction } = getPreferenceValues<Preferences>();
+const { postSaveAction, copyToClipboard } = getPreferenceValues<Preferences>();
 
 export default async function stopRecordingCommand() {
   const recording = await getStoredRecording();
@@ -26,6 +26,7 @@ export default async function stopRecordingCommand() {
   const savedFilePath = await moveFileToSaveLocation(filePath, endTime);
   if (postSaveAction === "open") await open(savedFilePath);
   if (postSaveAction === "openFinder") await open(dirname(savedFilePath), "com.apple.Finder");
+  if (copyToClipboard) await Clipboard.copy({ file: savedFilePath });
   await clearStoredRecording();
 }
 

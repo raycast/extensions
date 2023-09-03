@@ -62,7 +62,7 @@
     {
       "name": "postSaveAction",
       "type": "dropdown",
-      "title": "Post Save Action",
+      "title": "Post Save Actions",
       "description": "What to do after stopping and saving the recording file",
       "data": [
         {
@@ -79,6 +79,14 @@
         }
       ],
       "default": "openFinder",
+      "required": false
+    },
+    {
+      "name": "copyToClipboard",
+      "type": "checkbox",
+      "label": "Copy To Clipboard",
+      "description": "Whether to copy the file to the clipboard after saving",
+      "default": true,
       "required": false
     }
   ],
