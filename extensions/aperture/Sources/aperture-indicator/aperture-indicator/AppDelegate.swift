@@ -45,7 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func openStopCommand() {
-        if let url = URL(string: "raycast://extensions/jomifepe/aperture/stop.command") {
+        if let url = URL(string: "raycast://extensions/jomifepe/aperture/record.command") {
             NSWorkspace.shared.open(url)
         }
     }

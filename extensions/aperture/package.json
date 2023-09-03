@@ -22,25 +22,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "start.command",
-      "title": "Record Your Screen",
+      "name": "record.command",
+      "title": "Start/Stop Recording Your Screen",
       "subtitle": "Aperture",
-      "description": "Start recording your screen",
+      "description": "Start or stop recording your screen using Aperture",
       "mode": "view",
       "keywords": [
         "start",
-        "screen",
         "record",
-        "recording",
-        "capture"
+        "recording"
       ]
-    },
-    {
-      "name": "stop.command",
-      "subtitle": "Aperture",
-      "description": "Stop recording your screen",
-      "title": "Stop Recording",
-      "mode": "no-view"
     },
     {
       "name": "preferences.command",
