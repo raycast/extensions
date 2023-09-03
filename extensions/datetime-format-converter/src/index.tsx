@@ -43,8 +43,8 @@ export default function main() {
     }
 
     return [
-      dTime.format("YYYY-MM-DD hh:mm:ss").toString(),
-      dTime.format("YYYY-MM-DD hh:mm:ss.SSS").toString(),
+      dTime.format("YYYY-MM-DD HH:mm:ss").toString(),
+      dTime.format("YYYY-MM-DD HH:mm:ss.SSS").toString(),
       dTime.format().toString(),
       dTime.valueOf().toString(),
       dTime.unix().toString(),
