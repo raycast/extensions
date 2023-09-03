@@ -6,6 +6,8 @@
 	<string>22F82</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Aperture</string>
 	<key>CFBundleExecutable</key>
 	<string>aperture-indicator</string>
 	<key>CFBundleIconFile</key>
@@ -44,6 +46,8 @@
 	<string>1431</string>
 	<key>DTXcodeBuild</key>
 	<string>14E300c</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.3</string>
 	<key>NSMainNibFile</key>
