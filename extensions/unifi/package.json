@@ -6,7 +6,7 @@
   "icon": "unifi.png",
   "author": "tonka3000",
   "categories": [
-    "Other"
+    "Other", "System"
   ],
   "keywords": ["Ubiquiti", "UniFi"],
   "license": "MIT",
