@@ -8,7 +8,6 @@ raycast-env.d.ts
 
 # misc
 .DS_Store
-.apperture-node
 
 # Swift/Xcode
 /.build
