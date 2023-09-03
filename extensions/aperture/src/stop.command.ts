@@ -8,7 +8,7 @@ import { killRecordingIndicator } from "~/utils/indicator";
 
 const { postSaveAction } = getPreferenceValues<Preferences>();
 
-export default async function StopRecordingCommand() {
+export default async function stopRecordingCommand() {
   const recording = await getStoredRecording();
   const { pid, filePath, startTime } = recording ?? {};
 

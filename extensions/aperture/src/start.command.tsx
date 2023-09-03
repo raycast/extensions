@@ -5,7 +5,12 @@ import { Aperture } from "~/api/aperture";
 import { Recording } from "~/types/recording";
 import { moveFileToSaveLocation } from "~/utils/fs";
 import { launchRecordingIndicator } from "~/utils/indicator";
-import { clearStoredRecording, getStoredRecording, saveRecordingData } from "~/utils/storage";
+import {
+  clearStoredRecording,
+  getStoredRecording,
+  getStoredRecordingPreferences,
+  saveRecordingData,
+} from "~/utils/storage";
 
 const RecordingMode = {
   EntireScreen: "entire-screen",
@@ -22,9 +27,9 @@ export default function StartRecordingCommand() {
       if (ongoingRecording && !(await confirmStoppingOngoingRecording(ongoingRecording))) return;
 
       const toast = await showToast({ title: "Starting recording...", style: Toast.Style.Animated });
+      const recordingOptions = await getStoredRecordingPreferences();
       if (selectedRecordingMode.current === RecordingMode.EntireScreen) {
-        const recorder = new Aperture();
-        const recording = await recorder.startRecording();
+        const recording = await new Aperture().startRecording(recordingOptions);
         await saveRecordingData(recording);
         await launchRecordingIndicator();
         toast.style = Toast.Style.Success;

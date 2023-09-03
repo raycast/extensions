@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
+import type { RecordingOptions, RecordingPreferences, Recording } from "~/types/recording";
 import { STORAGE_KEY } from "~/constants/storage";
-import { Recording } from "~/types/recording";
+import { DEFAULT_RECORDING_OPTIONS } from "~/constants/recording";
 
 export async function clearStoredRecording() {
   await LocalStorage.removeItem(STORAGE_KEY.RECORDING_DATA);
@@ -19,4 +20,18 @@ export async function getStoredRecording(): Promise<Recording | undefined> {
 
 export async function saveRecordingData(recording: Recording) {
   await LocalStorage.setItem(STORAGE_KEY.RECORDING_DATA, JSON.stringify(recording));
+}
+
+export async function saveRecordingPreferences(value: RecordingOptions) {
+  await LocalStorage.setItem("preferences", JSON.stringify(value));
+}
+
+export async function getStoredRecordingPreferences(): Promise<RecordingPreferences> {
+  try {
+    const serializedPreferences = await LocalStorage.getItem<string>("preferences");
+    if (!serializedPreferences) return DEFAULT_RECORDING_OPTIONS;
+    return { ...DEFAULT_RECORDING_OPTIONS, ...JSON.parse<RecordingOptions>(serializedPreferences) };
+  } catch {
+    return DEFAULT_RECORDING_OPTIONS;
+  }
 }

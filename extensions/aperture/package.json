@@ -14,6 +14,7 @@
     "aperture",
     "record",
     "screen",
+    "recorder",
     "video",
     "capture",
     "mp4"
@@ -25,7 +26,14 @@
       "title": "Record Your Screen",
       "subtitle": "Aperture",
       "description": "Start recording your screen",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "start",
+        "screen",
+        "record",
+        "recording",
+        "capture"
+      ]
     },
     {
       "name": "stop.command",
@@ -33,6 +41,13 @@
       "description": "Stop recording your screen",
       "title": "Stop Recording",
       "mode": "no-view"
+    },
+    {
+      "name": "preferences.command",
+      "subtitle": "Aperture Preferences",
+      "description": "Customize your recording preferences",
+      "title": "Preferences",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -69,6 +84,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.1",
     "date-fns": "^2.30.0",
     "execa": "^8.0.1"
   },

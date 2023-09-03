@@ -5,20 +5,10 @@ import { chmodSync, unlinkSync } from "fs";
 import { ExecaChildProcess, execa } from "execa";
 import { environment } from "@raycast/api";
 import { getTemporaryFilePath, waitUntilFileIsAvailable } from "~/utils/fs";
-import { ApertureOptions, CropArea, RecorderCodec, VideoCodec } from "~/types/aperture";
+import { ApertureOptions, RecorderCodec } from "~/types/aperture";
 import { getRandomString } from "~/utils/crypto";
-import { Recording } from "~/types/recording";
+import { Recording, RecordingOptions } from "~/types/recording";
 import { kill } from "process";
-
-export type RecordingOptions = {
-  fps?: number;
-  cropArea?: CropArea;
-  showCursor?: boolean;
-  highlightClicks?: boolean;
-  audioDeviceId?: string;
-  videoCodec: VideoCodec;
-  screenId: number;
-};
 
 export class Aperture {
   private binPath: string;
@@ -153,7 +143,7 @@ export class Aperture {
 
 function getRecorderOptions(tmpFilePath: string, options?: RecordingOptions) {
   const {
-    fps = 30,
+    framesPerSecond = 30,
     cropArea,
     showCursor = true,
     highlightClicks = false,
@@ -164,7 +154,7 @@ function getRecorderOptions(tmpFilePath: string, options?: RecordingOptions) {
 
   const recorderOptions: ApertureOptions = {
     destination: `file://${tmpFilePath}`,
-    framesPerSecond: fps,
+    framesPerSecond,
     showCursor,
     highlightClicks,
     screenId,
