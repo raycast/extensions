@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { Client, Site } from "unifi-client";
 import { showErrorToast } from "../../utils";
 import { isClientConnected } from "../../lib/unifi";
 import { RevalidateAction, ToggleDetailsAction } from "../actions";
+import { CopyClientIPAction, CopyClientMacAddressAction } from "./actions";
 
 function SingleDetailTag(props: { title: string; text: string; color?: Color.ColorLike | null | undefined }) {
   return (
@@ -20,10 +21,12 @@ function ClientListItem(props: {
   revalidate: () => void;
 }) {
   const c = props.client;
+  const keywords = [c.ip, c.hostname, c.mac, c.oui].filter((e) => e && e.length > 0) as string[];
   return (
     <List.Item
       title={c.name || "<No Name>"}
       icon={Icon.Monitor}
+      keywords={keywords.length > 0 ? keywords : undefined}
       detail={
         props.showDetails === true && (
           <List.Item.Detail
@@ -62,6 +65,10 @@ function ClientListItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <ToggleDetailsAction showDetails={props.showDetails} setShowDetails={props.setShowDetails} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyClientIPAction client={c} />
+            <CopyClientMacAddressAction client={c} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <RevalidateAction revalidate={props.revalidate} />

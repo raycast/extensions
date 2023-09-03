@@ -4,6 +4,7 @@ import { Site, tDevice } from "unifi-client";
 import { showErrorToast } from "../../utils";
 import { RevalidateAction, ToggleDetailsAction } from "../actions";
 import { deviceStateToString } from "./utils";
+import { CopyDeviceIPAction, CopyDeviceMacAddressAction } from "./actions";
 
 function DeviceListItem(props: {
   device: tDevice;
@@ -12,11 +13,13 @@ function DeviceListItem(props: {
   revalidate: () => void;
 }) {
   const d = props.device;
+  const keywords = [d.ip, d.mac, d.model, d.deviceId].filter((e) => e && e.length > 0) as string[];
   return (
     <List.Item
       key={d._id}
       title={d.name || "?"}
       icon="unifi.png"
+      keywords={keywords.length > 0 ? keywords : undefined}
       detail={
         props.showDetails === true && (
           <List.Item.Detail
@@ -40,6 +43,10 @@ function DeviceListItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <ToggleDetailsAction showDetails={props.showDetails} setShowDetails={props.setShowDetails} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyDeviceIPAction device={d} />
+            <CopyDeviceMacAddressAction device={d} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <RevalidateAction revalidate={props.revalidate} />
