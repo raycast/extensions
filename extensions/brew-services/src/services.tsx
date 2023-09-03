@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { execaCommand } from "execa";
-import { existsSync } from "fs";
+import fs from "fs";
 import { cpus, homedir } from "os";
 
 export type ServiceStatus = string;
@@ -38,12 +38,20 @@ export async function runShellScript(command: string) {
 }
 
 export async function getServices(): Promise<Service[]> {
-  if (!existsSync(brewPath)) {
+  // make sure that brewPath exists, is a file, and is executable
+  // after this, we can assume that brewPath is valid (unless the user modifies the executable at brewPath)
+  if (!fs.existsSync(brewPath)) {
     await showToast(Toast.Style.Failure, "Brew Executable Not Found", `Is brew installed at ${brewPath}?`);
     return [];
   }
 
-  const data = await runShellScript(`${brewPath} services list`);
+  let data = "";
+  try {
+    data = await runShellScript(`${brewPath} services list`);
+  } catch (e) {
+    await showToast(Toast.Style.Failure, "Error Fetching Service Data", `Is brew installed at ${brewPath}?`);
+    return [];
+  }
 
   if (data === undefined) {
     showToast(Toast.Style.Failure, "Error Parsing Service Data", "Service data could not be parsed.");
