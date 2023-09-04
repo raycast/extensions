@@ -1,6 +1,6 @@
 # Toggle Scroll Bars Visibility Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2023-09-04
 
 - Fix the issue where the extension may not work on Macs with Intel processors
 - Fix the issue of changing scroll bars visibility that causes the reset of the entire global domain settings
