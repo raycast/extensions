@@ -1,13 +1,8 @@
 # Git Commands Changelog
 
-## [Aliases review and scripts] - 2023-09-01
+## [Aliases review] - 2023-09-04
 
 - The list of commands has been revised and the missing ones have been added.
-- Some command descriptions have been improved.
-
-Useful information for developers:
-
-- Notes and scripts have been added to know how the list of aliases has been created.
 
 ## [Compatible with macOS Big Sur] - 2023-08-22
 
