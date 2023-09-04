@@ -13,7 +13,8 @@
     "stuart",
     "tonka3000",
     "dancannon",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "stevensd2m"
   ],
   "license": "MIT",
   "preferences": [
@@ -259,6 +260,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "generate-spotify-client": "oazapfts --optimistic ./fixed-spotify-open-api.yml ./src/helpers/spotify.api.ts"
+    "generate-spotify-client": "oazapfts --optimistic ./fixed-spotify-open-api.yml ./src/helpers/spotify.api.ts",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

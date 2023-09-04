@@ -1,5 +1,9 @@
 # Prompt Explorer Extension Changelog
 
+## [Adding prompts] - 2023-08-31
+
+**Adding default Raycast prompts.**
+
 ## [Random Theme Button] - 2023-08-01
 
 **Introducing the Random Theme button.**

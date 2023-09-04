@@ -172,6 +172,7 @@ export default function TranslateForm() {
         value={translated?.translatedText ?? ""}
         placeholder="Translation"
       />
+      <Form.Description title="Pronunciation" text={translated?.pronunciationText ?? ""} />
     </Form>
   );
 }

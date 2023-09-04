@@ -57,7 +57,7 @@ export default function SearchResult() {
         let filteredCollections: CollectionProp[];
 
         if (!linksResult.length) {
-          const searchEngines = await fetchSearchEngines();
+          const searchEngines = await fetchSearchEngines(preferences.api_key);
           if (Array.isArray(searchEngines) && searchEngines.length) {
             linksResult = searchEngines;
             isSearchEngines = true;

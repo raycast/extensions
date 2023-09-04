@@ -36,7 +36,7 @@ export default function CollectionsForm(props: Props) {
 
   function collectionTitle(tag: CollectionProp) {
     if (tag.heading) {
-      return `${tag.heading} > ${tag.name}`;
+      return `${tag.heading} › ${tag.name}`;
     }
     return `${tag.name}`;
   }
