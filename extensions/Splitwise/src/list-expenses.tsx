@@ -2,6 +2,9 @@ import {personalAccessToken} from "./preferences"; // Personal Access Token
 import { GetExpenses, Expense } from "./get_expenses"; 
 import { useFetch } from "@raycast/utils";
 
+import { getPreferenceValues } from "@raycast/api";
+const loadingLimit = getPreferenceValues().loadingLimit;
+
 // TODOS
 // - [ ] Add a way to delete expenses -> https://dev.splitwise.com/#tag/expenses/paths/~1delete_expense~1{id}/post
 // - [ ] Add a way to update expenses -> https://dev.splitwise.com/#tag/expenses/paths/~1update_expense~1{id}/post
@@ -62,9 +65,10 @@ function get_expenses(limit: string): [Expense[], boolean, () => void] {
 // ------------ MAIN ------------
 import { Action, ActionPanel, Icon, Image, List, Form, showToast, Toast, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { Console } from "console";
 
 export default function Command() {
-  const [expenses, loadingExpenses, revalidate] = get_expenses("1000");
+  const [expenses, loadingExpenses, revalidate] = get_expenses(loadingLimit);
 
   return (
     <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses}>
