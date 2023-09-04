@@ -98,7 +98,7 @@
     },
     {
       "name": "view-mapped-devices",
-      "title": "View mapped devices",
+      "title": "View Mapped Devices",
       "subtitle": "Toothpick",
       "description": "A list of all mapped devices. Used for development.",
       "mode": "view",
