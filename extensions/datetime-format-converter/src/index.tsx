@@ -1,9 +1,9 @@
 import { Form, List, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import dayjs from "dayjs";
 
-var localizedFormat = require("dayjs/plugin/localizedFormat");
+const localizedFormat = require("dayjs/plugin/localizedFormat");
 dayjs.extend(localizedFormat);
-var utc = require("dayjs/plugin/utc");
+const utc = require("dayjs/plugin/utc");
 dayjs.extend(utc);
 
 export default function main() {
