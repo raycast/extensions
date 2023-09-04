@@ -25,5 +25,5 @@ export async function checkTerminalSetup(callback: (isTerminalSetup: boolean) =>
 
 export async function openTerminal() {
   const localTerminalAppName = await LocalStorage.getItem<string>("terminalAppName");
-  execSync(`open -a ${localTerminalAppName}`);
+  execSync(`open -b ${localTerminalAppName}`);
 }
