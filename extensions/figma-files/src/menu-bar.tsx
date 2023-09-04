@@ -14,7 +14,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const {
@@ -29,7 +29,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
@@ -57,7 +57,7 @@ export default function Command() {
       tooltip="Figma files"
       isLoading={isLoadingVisitedFiles || isLoading || isLoadingStarredFiles}
     >
-      {(error || starredFilesError) && <MenuBarExtra.Item title="Error" key="ErrorState" />}
+      {error && <MenuBarExtra.Item title="Error" key="ErrorState" />}
       {starredFiles && (
         <>
           <MenuBarExtra.Submenu key="starred-files" title="Starred" icon={Icon.StarCircle}>
