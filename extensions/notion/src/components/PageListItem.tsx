@@ -119,7 +119,7 @@ export function PageListItem({
   };
 
   const pageWord = capitalize(page.object);
-  
+
   return (
     <List.Item
       title={title}
