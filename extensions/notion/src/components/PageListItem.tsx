@@ -118,6 +118,8 @@ export function PageListItem({
     notion: openInNotionAction,
   };
 
+  const pageWord = capitalize(page.object);
+  
   return (
     <List.Item
       title={title}
@@ -167,14 +169,14 @@ export function PageListItem({
             <ActionCreateQuicklink page={page} />
 
             <Action
-              title={`Delete ${capitalize(page.object)}`}
+              title={`Delete ${pageWord}`}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={async () => {
                 if (
                   await confirmAlert({
-                    title: `Delete ${capitalize(page.object)}`,
+                    title: `Delete ${pageWord}`,
                     icon: { source: Icon.Trash, tintColor: Color.Red },
                     message: `Do you want to delete this ${page.object}? Don't worry, you'll be able to restore it from Notion's trash.`,
                   })
@@ -231,7 +233,7 @@ export function PageListItem({
           {page.url ? (
             <ActionPanel.Section>
               <Action.CopyToClipboard
-                title={`Copy ${capitalize(page.object)} URL`}
+                title={`Copy ${pageWord} URL`}
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
@@ -244,12 +246,12 @@ export function PageListItem({
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
               />
               <Action.Paste
-                title={`Paste ${capitalize(page.object)} URL`}
+                title={`Paste ${pageWord} URL`}
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
               />
               <Action.CopyToClipboard
-                title={`Copy ${capitalize(page.object)} Title`}
+                title={`Copy ${pageWord} Title`}
                 content={title}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
