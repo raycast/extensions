@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/extension-icon.png" width="128" height="128" />
+<img src="assets/extension-banner.png" />
 
 <br/>
 
