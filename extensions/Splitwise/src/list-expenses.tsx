@@ -1,13 +1,11 @@
-import { Detail, getPreferenceValues } from "@raycast/api";
-import { GetExpenses, Expense } from "./get_expenses";
-// import axios from "axios";
+import {personalAccessToken} from "./preferences"; // Personal Access Token
+import { GetExpenses, Expense } from "./get_expenses"; 
 import { useFetch } from "@raycast/utils";
 
+// TODOS
+// - [ ] Add a way to delete expenses -> https://dev.splitwise.com/#tag/expenses/paths/~1delete_expense~1{id}/post
+// - [ ] Add a way to update expenses -> https://dev.splitwise.com/#tag/expenses/paths/~1update_expense~1{id}/post
 // ------------ API ------------
-const { personalAccessToken } = getPreferenceValues();
-if (!personalAccessToken) {
-  throw new Error("Personal access token is missing");
-}
 
 const OPTIONS = {
   headers: {
@@ -39,9 +37,9 @@ const OPTIONS = {
 //   return [fetchedExpenses, loadingExpenses];
 // }
 
-function get_expenses(): [Expense[], boolean, () => void] {
+function get_expenses(limit: string): [Expense[], boolean, () => void] {
   const { isLoading, data, revalidate, error } = useFetch<GetExpenses>(
-    "https://secure.splitwise.com/api/v3.0/get_expenses?limit=200",
+    `https://secure.splitwise.com/api/v3.0/get_expenses?limit=${limit}`,
     OPTIONS
   );
   const fetchedExpenses = data?.expenses || [];
@@ -64,10 +62,9 @@ function get_expenses(): [Expense[], boolean, () => void] {
 // ------------ MAIN ------------
 import { Action, ActionPanel, Icon, Image, List, Form, showToast, Toast, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import exp from "constants";
 
 export default function Command() {
-  const [expenses, loadingExpenses, revalidate] = get_expenses();
+  const [expenses, loadingExpenses, revalidate] = get_expenses("1000");
 
   return (
     <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses}>
@@ -79,8 +76,8 @@ export default function Command() {
           accessories={[
             // { tag: new Date(expense.date), tooltip: `Date: ${new Date(expense.date).toLocaleString()}` },
             {
-              tag: { value: `${expense.cost} ${expense.currency_code}`, color: Color.Green },
-              tooltip: `Cost: ${expense.cost} ${expense.currency_code}`,
+              tag: { value: `${expense.cost} ${expense.currency_code}`, color: Color.SecondaryText },
+              tooltip: `Amount: ${expense.cost} ${expense.currency_code}`,
             },
           ]}
           detail={
@@ -95,9 +92,10 @@ export default function Command() {
               isLoading={loadingExpenses}
               metadata={
                 <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Description" />
                   <List.Item.Detail.Metadata.TagList title={expense.description}>
                     <List.Item.Detail.Metadata.TagList.Item
-                      text={expense.cost + " " + expense.currency_code}
+                      text={`${expense.currency_code} ${expense.cost} `}
                       color={Color.PrimaryText}
                       key={expense.id}
                       icon={Icon.Coins}
@@ -108,13 +106,13 @@ export default function Command() {
 
                   <List.Item.Detail.Metadata.Label
                     title={`Created by ${expense.created_by["first_name"]}`}
-                    text={new Date(expense.created_at).toLocaleDateString()}
+                    text={new Date(expense.created_at).toDateString()}
                     key={expense.created_by["id"]}
                   />
                   {expense.updated_by && (
                     <List.Item.Detail.Metadata.Label
                       title={`Updated by ${expense.updated_by["first_name"]}`}
-                      text={new Date(expense.updated_at).toLocaleDateString()}
+                      text={new Date(expense.updated_at).toDateString()}
                     />
                   )}
 
@@ -125,7 +123,7 @@ export default function Command() {
                       .filter((user) => Number(user.paid_share) > 0)
                       .map((user) => (
                         <List.Item.Detail.Metadata.TagList.Item
-                          text={`${user.user.first_name} paid ${user.paid_share} ${expense.currency_code}`}
+                          text={`${user.user.first_name} paid ${expense.currency_code} ${user.paid_share}`}
                           icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                           color={Color.Green}
                           key={user.user_id}
@@ -140,9 +138,9 @@ export default function Command() {
                       .filter((user) => Number(user.net_balance) < 0)
                       .map((user) => (
                         <List.Item.Detail.Metadata.TagList.Item
-                          text={`${user.user.first_name} owes ${String(Number(user.net_balance) * -1)} ${
-                            expense.currency_code
-                          }`}
+                          text={`${user.user.first_name} owes ${expense.currency_code} ${String(
+                            Number(user.net_balance) * -1
+                          )}`}
                           icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                           color={Color.Red}
                           key={user.user_id}
@@ -150,49 +148,30 @@ export default function Command() {
                       ))}
                   </List.Item.Detail.Metadata.TagList>
 
-                  <List.Item.Detail.Metadata.Separator />
+                  {expense.repeats === true && ( // REPEATING EXPENSE
+                    <>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label title="Repeating Expense" text={expense.repeat_interval} />
+                    </>
+                  )}
 
-                  {/* {expense.users
-                    .filter((user) => Number(user.owed_share) > 0)
-                    .map((user) => (
-                      <List.Item.Detail.Metadata.Label
-                        title={`${user.user.first_name} owes ${user.owed_share} ${expense.currency_code}`}
-                        text={user.owed_share}
-                        key={user.user_id}
-                      />
-                    ))}
-
-                  <List.Item.Detail.Metadata.Separator /> */}
-
-                  {/* {expense.users
-                    .filter((user) => Number(user.paid_share) > 0)
-                    .map((user) => (
-                      <List.Item.Detail.Metadata.Label
-                      title={`${user.user.first_name} owes ${user.owed_share} ${expense.currency_code}`}
-                      key={user.user_id}
-                      />
-                    ))} */}
-                  {/* <List.Item.Detail.Metadata.Separator /> */}
-
-
-                  {/* <List.Item.Detail.Metadata.Label title={expense.description} />
-                  <List.Item.Detail.Metadata.Label title="Type" icon={Icon.AddPerson} text="Grass" />
-                  <List.Item.Detail.Metadata.Separator /> */}
-
-                  {/* <List.Item.Detail.Metadata.Separator />
-                  
-                  <List.Item.Detail.Metadata.Label title="Chracteristics" />
-                  
-                  <List.Item.Detail.Metadata.Label title="Height" text="70cm" />
-                  
-                  <List.Item.Detail.Metadata.Link title="Link" text="Google" target="https://www.google.com" /> */}
-                  {/* <List.Item.Detail.Metadata.Label title="Link" text="Google" /> */}
+                  {expense.receipt.original !== null && ( // RECEIPT
+                    <>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Link title="Receipt" text="View" target={expense.receipt.original} />
+                    </>
+                  )}
                 </List.Item.Detail.Metadata>
               }
             />
           }
           actions={
             <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open Expense in Splitwise"
+                url={`https://secure.splitwise.com/#/all/expenses/${expense.id}`}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+              />
               <Action title="Reload" onAction={() => revalidate()} />
             </ActionPanel>
           }
