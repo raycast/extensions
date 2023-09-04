@@ -15,6 +15,7 @@ function SearchGoogleDriveFiles() {
   const email = getUserEmail();
 
   const { data, isLoading } = useFetch<{ files: File[] }>(getFilesURL(queryType, scopeType, query), {
+    keepPreviousData: true,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${getOAuthToken()}`,

@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Fix `start-playlist`] - 2023-08-31
+
+- Fixed a bug in `start-playlist` where item title could be empty or undefined.
+
 ## [Dislike & Skip] - 2023-08-10
 
 - Add command to dislike and then skip a track

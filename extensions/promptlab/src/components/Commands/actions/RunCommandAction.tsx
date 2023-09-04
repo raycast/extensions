@@ -39,6 +39,7 @@ export default function RunCommandAction(props: {
             useAudioDetails: isTrueStr(command.useAudioDetails),
             useBarcodeDetection: isTrueStr(command.useBarcodeDetection),
             useFaceDetection: isTrueStr(command.useFaceDetection),
+            useHorizonDetection: isTrueStr(command.useHorizonDetection),
             useRectangleDetection: isTrueStr(command.useRectangleDetection),
             useSubjectClassification: isTrueStr(command.useSubjectClassification),
             outputKind: command.outputKind,
