@@ -118,8 +118,8 @@ export const postFile = (filePath: string) => {
     contentType: mime.getType(filePath) || undefined,
   });
 
-  return getFetch<ResponseData<PostFileResponse>>({
-    url: getRequestUrl(`/api/resource/blob?openId=${getOpenId()}`),
+  return getFetch<ResponseData<PostFileResponse> & PostFileResponse>({
+    url: getRequestUrl(`/api${getApiVersion()}/resource/blob?openId=${getOpenId()}`),
     method: "POST",
     data: formData,
     headers: {},

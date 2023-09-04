@@ -124,12 +124,14 @@ export default function useModel(
   };
 
   // Add the authentication header if necessary
-  if (targetModel.authType == "apiKey") {
-    headers["Authorization"] = `Api-Key ${targetModel.apiKey.trim()}`;
-  } else if (targetModel.authType == "bearerToken") {
-    headers["Authorization"] = `Bearer ${targetModel.apiKey.trim()}`;
-  } else if (targetModel.authType == "x-api-key") {
-    headers["X-API-Key"] = `${targetModel.apiKey.trim()}`;
+  if (targetModel.apiKey.length != 0) {
+    if (targetModel.authType == "apiKey") {
+      headers["Authorization"] = `Api-Key ${targetModel.apiKey.trim()}`;
+    } else if (targetModel.authType == "bearerToken") {
+      headers["Authorization"] = `Bearer ${targetModel.apiKey.trim()}`;
+    } else if (targetModel.authType == "x-api-key") {
+      headers["X-API-Key"] = `${targetModel.apiKey.trim()}`;
+    }
   }
 
   const modelSchema = raycastModel
@@ -221,6 +223,21 @@ export default function useModel(
               } else if (line.startsWith("data: ")) {
                 try {
                   const jsonData = JSON.parse(line.substring(5));
+                  const output = get(jsonData, targetModel.outputKeyPath) || "";
+                  if (output.toString().includes(text)) {
+                    text = output.toString();
+                  } else {
+                    text = text + output;
+                  }
+                  if (me?.tag == basePrompt + prompt + input) {
+                    setData(text);
+                  }
+                } catch (e) {
+                  console.log((e as Error).message, line.substring(line.length - 100));
+                }
+              } else {
+                try {
+                  const jsonData = JSON.parse(line);
                   const output = get(jsonData, targetModel.outputKeyPath) || "";
                   if (output.toString().includes(text)) {
                     text = output.toString();

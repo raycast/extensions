@@ -32,7 +32,7 @@ export async function fetchServices(clusterArn: string): Promise<Service[]> {
   const serviceChunks: string[][] = getChunks(servicesArns, 10);
 
   const services = await Promise.all(
-    serviceChunks.map((chunk) => ecsClient.send(new DescribeServicesCommand({ cluster: clusterArn, services: chunk })))
+    serviceChunks.map((chunk) => ecsClient.send(new DescribeServicesCommand({ cluster: clusterArn, services: chunk }))),
   );
 
   return services.map((entry) => entry.services || []).flat(2);
@@ -45,7 +45,7 @@ export async function fetchTasks(clusterArn: string, serviceName: string): Promi
   const taskChunks: string[][] = getChunks(taskArns, 100);
 
   const tasks = await Promise.all(
-    taskChunks.map((chunk) => ecsClient.send(new DescribeTasksCommand({ cluster: clusterArn, tasks: chunk })))
+    taskChunks.map((chunk) => ecsClient.send(new DescribeTasksCommand({ cluster: clusterArn, tasks: chunk }))),
   );
 
   return tasks.map((entry) => entry.tasks || []).flat(2);
@@ -83,7 +83,7 @@ async function fetchClusterArns(token?: string, accClusters?: string[]): Promise
 
 async function fetchServiceArns(clusterArn: string, token?: string, accServices?: string[]): Promise<string[]> {
   const { serviceArns, nextToken } = await ecsClient.send(
-    new ListServicesCommand({ cluster: clusterArn, nextToken: token })
+    new ListServicesCommand({ cluster: clusterArn, nextToken: token }),
   );
 
   const combinedServices = [...(accServices || []), ...(serviceArns || [])];
@@ -99,10 +99,10 @@ async function fetchTasksArns(
   clusterArn: string,
   serviceName: string,
   token?: string,
-  accTasks?: string[]
+  accTasks?: string[],
 ): Promise<string[]> {
   const { taskArns, nextToken } = await ecsClient.send(
-    new ListTasksCommand({ cluster: clusterArn, serviceName, nextToken: token })
+    new ListTasksCommand({ cluster: clusterArn, serviceName, nextToken: token }),
   );
 
   const combinedTasks = [...(accTasks || []), ...(taskArns || [])];
