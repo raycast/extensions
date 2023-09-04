@@ -4,7 +4,14 @@ import { LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { applicationIconFromPath } from "./utils/pathUtils";
 
-const ALLOWED_APPS = ["kitty", "Alacritty", "iTerm2", "Terminal", "Warp", "WezTerm"];
+const ALLOWED_APPS_BUNDLEID = [
+  "net.kovidgoyal.kitty",
+  "org.alacritty",
+  "com.googlecode.iterm2",
+  "com.apple.Terminal",
+  "dev.warp.Warp-Stable",
+  "com.github.wez.wezterm"
+];
 
 export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?: (value: boolean) => void }) => {
   const [apps, setApps] = useState<Application[]>();
@@ -14,7 +21,7 @@ export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?:
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const apps = (await getApplications()).filter((app) => ALLOWED_APPS.includes(app.name));
+      const apps = (await getApplications()).filter((app) => ALLOWED_APPS_BUNDLEID.includes(app.bundleId || ''));
 
       setApps(apps);
       setLoading(false);
