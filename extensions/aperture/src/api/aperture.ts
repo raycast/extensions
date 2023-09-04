@@ -19,7 +19,7 @@ export class Aperture {
   private aperturePid: string | undefined;
 
   constructor(ongoingRecording?: Recording) {
-    this.binPath = join(environment.assetsPath, "aperture");
+    this.binPath = join(environment.assetsPath, "aperture-cli");
     void chmodSync(this.binPath, "755");
     if (ongoingRecording) {
       this.processId = ongoingRecording.pid;
