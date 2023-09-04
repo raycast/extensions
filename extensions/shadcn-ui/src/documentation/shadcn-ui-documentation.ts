@@ -3,9 +3,10 @@ Documentation pulled manually from https://github.com/shadcn/ui/tree/main/apps/w
 For now we upload this file manually and update the date here
  */
 
-const lastUpdated = "2023-06-22T20:24:22.844Z";
+const lastUpdated = "2023-08-19T15:44:18.731Z";
 
 const documentationBase = "https://ui.shadcn.com/docs";
+const documentationInstallation = `${documentationBase}/installation`;
 
 export default [
   {
@@ -20,6 +21,11 @@ export default [
         doc: "installation",
         name: "Installation",
         path: `${documentationBase}/installation`,
+      },
+      {
+        doc: "components.json",
+        name: "components.json",
+        path: `${documentationBase}/components-json`,
       },
       {
         doc: "theming",
@@ -42,19 +48,69 @@ export default [
         path: `${documentationBase}/components/typography`,
       },
       {
+        doc: "figma",
+        name: "Figma",
+        path: `${documentationBase}/figma`,
+      },
+      {
         doc: "changelog",
         name: "Changelog",
         path: `${documentationBase}/changelog`,
       },
+      {
+        doc: "about",
+        name: "About",
+        path: `${documentationBase}/about`,
+      },
     ],
   },
   {
-    name: "Community",
+    name: "Installation",
     pages: [
       {
-        doc: "figma",
-        name: "Figma",
-        path: `${documentationBase}/figma`,
+        doc: "next",
+        name: "Next.js",
+        path: `${documentationInstallation}/next`,
+      },
+      {
+        doc: "vite",
+        name: "Vite",
+        path: `${documentationInstallation}/vite`,
+      },
+      {
+        doc: "remix",
+        name: "Remix",
+        path: `${documentationInstallation}/remix`,
+      },
+      {
+        doc: "gatsby",
+        name: "Gatsby",
+        path: `${documentationInstallation}/gatsby`,
+      },
+      {
+        doc: "astro",
+        name: "Astro",
+        path: `${documentationInstallation}/astro`,
+      },
+      {
+        doc: "manual",
+        name: "Manual",
+        path: `${documentationInstallation}/manual`,
+      },
+    ],
+  },
+  {
+    name: "Dark Mode",
+    pages: [
+      {
+        doc: "next",
+        name: "Next.js",
+        path: `${documentationBase}/dark-mode/next`,
+      },
+      {
+        doc: "vite",
+        name: "Vite",
+        path: `${documentationBase}/dark-mode/vite`,
       },
     ],
   },

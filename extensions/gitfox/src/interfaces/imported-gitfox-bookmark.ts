@@ -6,7 +6,7 @@ export interface GitfoxRepositoryV3 {
   id: string;
   title: string;
   kind: {
-    folder?: any;
+    folder?: string;
     repository?: {
       url: {
         relative: string;

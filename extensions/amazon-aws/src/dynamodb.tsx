@@ -43,7 +43,7 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
 async function fetchTables(token?: string, accTables?: string[]): Promise<string[]> {
   if (!isReadyToFetch()) return [];
   const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
-    new ListTablesCommand({ ExclusiveStartTableName: token })
+    new ListTablesCommand({ ExclusiveStartTableName: token }),
   );
   const combinedTables = [...(accTables || []), ...(TableNames || [])];
 

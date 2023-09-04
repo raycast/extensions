@@ -1,12 +1,11 @@
 
 ![IMAGE 2023-07-01 15:02:59](https://getsound.ai/getsound/images/RayExtention_Icon_512.png)
 
-
 # GetSound - Raycast Extension
 
 ## Overview
 
-[GetSound.ai](http://getsound.ai/) Raycast Extension is a slimmed-down version of our main GetSound.ai app, crafted especially for Raycast Community. It provides developers and users with a convenient and straightforward way to take a break and refocus during their work. Simply type "Focus" and you can generate short, 5-10 minute, calming ambient music tracks to help you get back on track.
+[GetSound.ai](http://getsound.ai/) Raycast Extension is a slimmed-down version of our main GetSound.ai app, crafted especially for Raycast Community. It provides developers and users with a convenient and straightforward way to take a break and refocus during their work. Simply type "Focus" to generate short, 5-10 minute, calming ambient music tracks. They will help you regain focus, enter your focused zone more easily, and boost your productivity.
 
 **What makes the full version of GetSound different?**
 
@@ -27,10 +26,17 @@ After installation, you can access the extension by typing "Focus" in the Raycas
 
 ## Commands
 
-* **Quick Access**: Just type "Focus" to start your 5-10 minutes relaxing ambient music track.<br>
-* **Stop Track**: Choose "Stop" command to end the playing music track.<br>
-* **Skip Track**: Choose "Skip" to generate a new ambient track.<br>
 
+- [x] **Quick Access**: Just type "Focus" to start your 5-10 minutes relaxing ambient music track.<br>
+- [x] **Stop Track**: Choose "Stop" command to end the playing music track.<br>
+- [x] **Skip Track**: Choose "Skip" to generate a new ambient track.<br>
+
+## Features To Be implanted
+- [ ] _Timer Session_
+- [ ] _Littel Tray Icon_
+- [ ] _Volume Control_
+- [ ] _Infinite Mode Switch Toggle_
+ 
 ## Feedback
 
 We value your feedback! If you have any suggestions, issues, or just want to tell us what you think of the GetSound Raycast Extension, please open a GitHub issue. We're always looking to improve and make the extension better for our users.
@@ -39,10 +45,14 @@ We value your feedback! If you have any suggestions, issues, or just want to tel
 
 If you enjoy using the GetSound.ai Raycast Extension, we invite you to try out our full-featured GetSound.ai app. As a token of our appreciation for Raycast Community, we're offering an exclusive 15% discount for the GetSound.ai app personal plan. Enter the coupon code **`GetRay15OFF`** at checkout to take advantage of this offer.
 
-## Acknowledgments
-* [Terms Of Use](https://bit.ly/3PQmZ1c)
+## More Links
+* [Buy Us a Coffee](https://bmc.link/Getsoundai)              
 * [GetSound Official Website](https://getsound.ai)
+* [GetSound On SetApp](https://bit.ly/GetSound_SetApp)
 * [Wall Of Love](https://testimonial.to/getsound-ai/all)
 * [Discord Community](https://discord.com/invite/4gQVAyjYbs)
 * [Instagram](https://www.instagram.com/getsound.ai/)
-* [More Links](https://linktr.ee/getsound.ai)
+* [Socials](https://linktr.ee/getsound.ai)
+* [Terms Of Use](https://bit.ly/3PQmZ1c)
+
+

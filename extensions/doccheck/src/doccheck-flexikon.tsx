@@ -815,7 +815,6 @@ function EntryActions(
             target={
               <DocCheckPage url={url} navigationItems={""} query={query} onDetailViewPop={getHistoryAndFavourites} />
             }
-            // shortcut={{ modifiers: [], key: "arrowRight" }}
           />
           <Action.Open
             icon={Icon.Globe}

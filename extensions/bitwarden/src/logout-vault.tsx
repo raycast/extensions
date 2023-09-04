@@ -24,7 +24,7 @@ async function logoutVaultCommand() {
     }
   } catch (error) {
     const execaError = error as ExecaError;
-    if (execaError.stderr.toLowerCase().includes("not logged in")) {
+    if (execaError.stderr?.toLowerCase().includes("not logged in")) {
       await showToast(Toast.Style.Failure, "No session found", "You are not logged in");
       return;
     }

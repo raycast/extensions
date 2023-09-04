@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: raycast/github-actions/setup-node@master
 
       - name: Get changed files
         id: changed-files
-        uses: Ana06/get-changed-files@v2.1.0
+        uses: Ana06/get-changed-files@v2.2.0
         with:
           format: "json"
 

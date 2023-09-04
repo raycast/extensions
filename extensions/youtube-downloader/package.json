@@ -6,7 +6,8 @@
   "icon": "youtube.png",
   "author": "vimtor",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "d2a"
   ],
   "categories": [
     "Applications",
@@ -52,12 +53,14 @@
   "dependencies": {
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
+    "date-fns": "^2.30.0",
     "fluent-ffmpeg": "2.1.2",
     "patch-package": "^6.5.1",
     "pretty-bytes": "^6.1.0",
+    "sanitize-filename": "^1.6.3",
     "tempfile": "^4.0.0",
     "unused-filename": "^4.0.1",
-    "ytdl-core": "^4.11.4"
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

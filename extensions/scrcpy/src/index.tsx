@@ -14,9 +14,11 @@ type Values = {
 };
 
 export default function Command() {
-  const devices = useDevices();
+  const [devices, handleDeviceChange] = useDevices();
 
   function handleSubmit(values: Values) {
+    const serial = values["device"];
+    handleDeviceChange({ serial });
     exec(
       `${getScrcpyDir()}/scrcpy \
         ${values["turnScreenOff"] ? "--turn-screen-off" : ""} \
@@ -24,7 +26,8 @@ export default function Command() {
         ${values["hidKeyboard"] ? "--hid-keyboard" : ""} \
         ${values["hidMouse"] ? "--hid-mouse" : ""} \
         ${values["disableAudio"] ? "--no-audio" : ""} \
-        -m ${values["size"]} -s ${values["device"]}`,
+        -m ${values["size"]} \
+        -s ${serial}`,
       {
         env: {
           ...process.env,
@@ -39,7 +42,7 @@ export default function Command() {
             message: err.message,
           });
         }
-      }
+      },
     );
   }
 
@@ -51,11 +54,19 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="device" title="Device Serial" storeValue>
-        {devices.map((device) => (
-          <Form.Dropdown.Item key={device} value={device} title={device} />
-        ))}
+      <Form.Dropdown id="device" title="Device Serial">
+        {devices.map((device) => {
+          if (device.default) {
+            return (
+              <Form.Dropdown.Section key={device.serial} title="Previous Device">
+                <Form.Dropdown.Item value={device.serial} title={device.serial} />
+              </Form.Dropdown.Section>
+            );
+          }
+          return <Form.Dropdown.Item key={device.serial} value={device.serial} title={device.serial} />;
+        })}
       </Form.Dropdown>
+
       <Form.Dropdown id="size" title="Screen Size" storeValue>
         <Form.Dropdown.Item value="1024" title="1024" />
         <Form.Dropdown.Item value="0" title="Device size" />

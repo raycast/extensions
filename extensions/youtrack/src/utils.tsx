@@ -74,3 +74,17 @@ export const issueStates = {
   ISSUE_RESOLVED: "Resolved",
   ISSUE_OPEN: "Open",
 };
+
+export function isURL(s: string) {
+  try {
+    new URL(s);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+export function removeMarkdownImages(issueBody: string) {
+  const imagePattern = /!\[[^\]]*\]\([^)]+\){[^}]*}|!\[]\([^)]+\)/g;
+  return issueBody.replace(imagePattern, "");
+}
