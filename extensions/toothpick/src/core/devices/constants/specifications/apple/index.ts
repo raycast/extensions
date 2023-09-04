@@ -1,4 +1,4 @@
-import { DeviceDefinition } from "src/types/device";
+import { DeviceDefinition } from "../../../devices.types";
 import airpods from "./airpods";
 import beats from "./beats";
 import magicKeyboard from "./magic-keyboard";

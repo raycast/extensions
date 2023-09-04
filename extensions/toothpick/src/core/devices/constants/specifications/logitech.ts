@@ -1,6 +1,6 @@
-import { DeviceDefinition } from "src/types/device";
+import { DeviceDefinition } from "../../devices.types";
 
-export default {
+const devices: Record<string, DeviceDefinition> = {
   "0xB023": {
     name: "MX Master 3",
     main: "icons/devices/logitech/mx.master.svg",
@@ -9,4 +9,6 @@ export default {
     name: "MX Master 3S",
     main: "icons/devices/logitech/mx.master.svg",
   },
-} as Record<string, DeviceDefinition>;
+};
+
+export default devices;

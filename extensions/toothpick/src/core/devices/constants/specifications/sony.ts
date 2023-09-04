@@ -1,6 +1,6 @@
-import { DeviceDefinition } from "src/types/device";
+import { DeviceDefinition } from "../../devices.types";
 
-export default {
+const devices: Record<string, DeviceDefinition> = {
   "0x0DF0": {
     name: "WH-1000XM5",
     main: "icons/devices/sony/wh.1000xm5.svg",
@@ -21,4 +21,6 @@ export default {
     name: "WF-1000XM3",
     main: "icons/devices/sony/wf.1000xm3.svg",
   },
-} as Record<string, DeviceDefinition>;
+};
+
+export default devices;
