@@ -7,10 +7,10 @@ export function getCache(name: string) {
   return value ? JSON.parse(value) : null;
 }
 
-export function setCache(name: string, value: any) {
+export function setCache(name: string, value: object) {
   cache.set(name, JSON.stringify(value));
 }
 
-export function clearCache(){
-  cache.clear()
+export function clearCache() {
+  cache.clear();
 }

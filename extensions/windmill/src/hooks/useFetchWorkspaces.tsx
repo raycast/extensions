@@ -1,14 +1,14 @@
 import { LocalStorage } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { WorkspaceConfig } from "../types";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import { clearCache } from "../cache";
 
 export function useFetchWorkspaces() {
   const [workspaces, setWorkspaces] = useState<WorkspaceConfig[]>([]);
 
   const _fetchWorkspaces = async () => {
-      setWorkspaces(await fetchWorkspaces());
+    setWorkspaces(await fetchWorkspaces());
   };
 
   useEffect(() => {
@@ -21,72 +21,76 @@ export function useFetchWorkspaces() {
   }, []);
 
   const _removeWorkspace = useCallback(async (id: string) => {
-    const workspaces = await removeWorkspace(id)
-    setWorkspaces(workspaces)
-  }, [])
+    const workspaces = await removeWorkspace(id);
+    setWorkspaces(workspaces);
+  }, []);
 
-  return { workspaces, fetchWorkspaces: _fetchWorkspaces, saveWorkspace: _saveWorkspace, removeWorkspace: _removeWorkspace };
+  return {
+    workspaces,
+    fetchWorkspaces: _fetchWorkspaces,
+    saveWorkspace: _saveWorkspace,
+    removeWorkspace: _removeWorkspace,
+  };
 }
 
 export async function fetchWorkspaces(): Promise<WorkspaceConfig[]> {
-  const storedWorkspaces = await LocalStorage.getItem('workspaces');
-  if (typeof storedWorkspaces === 'string') {
-    return (JSON.parse(storedWorkspaces));
+  const storedWorkspaces = await LocalStorage.getItem("workspaces");
+  if (typeof storedWorkspaces === "string") {
+    return JSON.parse(storedWorkspaces);
   } else {
-    return ([]);
+    return [];
   }
 }
 
 export async function removeWorkspace(id: string) {
-  const storedWorkspaces = await LocalStorage.getItem('workspaces');
-  let workspaces: WorkspaceConfig[] = []
+  const storedWorkspaces = await LocalStorage.getItem("workspaces");
+  let workspaces: WorkspaceConfig[] = [];
 
   try {
-    if (typeof storedWorkspaces === 'string') {
+    if (typeof storedWorkspaces === "string") {
       workspaces = JSON.parse(storedWorkspaces);
     }
   } catch (error) {
-    workspaces = []
-    console.error(error)
+    workspaces = [];
+    console.error(error);
   }
 
   const newWorkspaces = workspaces.filter((workspace: WorkspaceConfig) => workspace.id !== id);
 
-  clearCache()
+  clearCache();
 
-  await LocalStorage.setItem('workspaces', JSON.stringify(newWorkspaces));
-  return workspaces
+  await LocalStorage.setItem("workspaces", JSON.stringify(newWorkspaces));
+  return workspaces;
 }
 
 export async function saveWorkspace(workspace: WorkspaceConfig) {
-
-  const storedWorkspaces = await LocalStorage.getItem('workspaces');
-  let workspaces: WorkspaceConfig[] = []
+  const storedWorkspaces = await LocalStorage.getItem("workspaces");
+  let workspaces: WorkspaceConfig[] = [];
 
   try {
-    if (typeof storedWorkspaces === 'string') {
+    if (typeof storedWorkspaces === "string") {
       workspaces = JSON.parse(storedWorkspaces);
     }
   } catch (error) {
-    workspaces = []
-    console.error(error)
+    workspaces = [];
+    console.error(error);
   }
 
   if (workspace.id) {
     // If the workspace exists, update it
-    const index = workspaces.findIndex(c => c.id === workspace.id);
+    const index = workspaces.findIndex((c) => c.id === workspace.id);
     if (index >= 0) {
       workspaces[index] = workspace;
     } else {
-      throw new Error('Workspace Not Found!')
+      throw new Error("Workspace Not Found!");
     }
   } else {
-    workspace.id = uuidv4()
+    workspace.id = uuidv4();
     workspaces.push(workspace);
   }
 
-  clearCache()
+  clearCache();
 
-  await LocalStorage.setItem('workspaces', JSON.stringify(workspaces));
-  return workspaces
+  await LocalStorage.setItem("workspaces", JSON.stringify(workspaces));
+  return workspaces;
 }
