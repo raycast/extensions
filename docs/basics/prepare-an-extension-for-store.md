@@ -154,7 +154,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 - Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
   - To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
 - See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)
-- With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD
+- With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD or a `{PR_MERGE_DATE}` placeholder. It will automatically be replaced with the date when the pull request was merged
   - Make sure your change title is within square brackets
   - Separate your title and date with a hyphen `-` and spaces either side of the hyphen
 - Below is an example of a changelog that follows the correct format
