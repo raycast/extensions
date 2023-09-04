@@ -34,8 +34,7 @@ The 'Top Creators' section showcases the leaderboard of the top 10 creators who 
 
 ### **Player Tasks**
 
-You can search for player created workshop tasks 
-![Aimlab](./metadata/aimlab-7.png)
+You can search for custom player created workshop tasks and this section showcases the leaderboard of that task.
 
 # Extra Info
 
