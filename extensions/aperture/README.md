@@ -11,6 +11,10 @@
 
 Single command to start and stop recording your screen. The recording will be saved to the specified folder and post save actions can be configured in the extension preferences.
 
+An indicator icon is displayed in the menu bar while the screen is being recorded. This icon can be left clicked to stop the recording or right clicked to show a menu with more options.
+
+![assets/indicator.png](assets/indicator.png)
+
 ## Preferences
 
 Command where you're able to configure the recording options such as frames per second, show cursor, highlight clicks, video codec, etc.
