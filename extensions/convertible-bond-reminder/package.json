@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "convertible-bond",
-      "title": "convertible bond",
+      "title": "Convertible Bond",
       "subtitle": "convertible bond",
       "description": "Check convertible bond today",
       "mode": "menu-bar",
