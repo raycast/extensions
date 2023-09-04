@@ -1,6 +1,6 @@
 # Charged Changelog
 
-## [Starknet Transaction Hash Update] - 2023-06-24
+## [Starknet Transaction Hash Update] - 2023-09-04
 
 Added support to calculate transaction hashes
 
