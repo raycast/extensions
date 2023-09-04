@@ -19,6 +19,13 @@
       "subtitle": "View balances and add expenses",
       "description": "Add new expense to Splitwise",
       "mode": "view"
+    },
+    {
+      "name": "list-expenses",
+      "title": "List Expenses",
+      "subtitle": "View expenses",
+      "description": "View Splitwise expenses",
+      "mode": "view"
     }
   ],
   "preferences": [
