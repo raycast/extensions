@@ -6,7 +6,7 @@ NOTE: if you want to call the app version of this library, use the following:
 Then, you can use all the methods and properties below via your locally-instantiated objTrans script object. 
 
 CHANGES (to this overall script file - handler changes should be documented WITHIN handler's comnmens):
-	-- 2019-03-07 ( dshockley ): Added explicit 'on run'. 
+	-- 2019-03-07 ( danshockley ): Added explicit 'on run'. 
 	-- 2017-12-21 ( eshagdar ): This script needs to return just the object since there are other libraries that depend on it.
 
 *)
@@ -21,26 +21,27 @@ end run
 on fmObjectTranslator_Instantiate(prefs)
 	
 	script fmObjectTranslator
-		-- version 4.1.2, Daniel A. Shockley
+		-- version 4.1.3, Daniel A. Shockley
 		
-		-- 4.1.2 - 2023-03-10 ( dshockley ): In prettifyXML, no longer try to use tabs instead of tidy's spaces. DO still avoid extra line-breaks around CDATA, which means scanning for leading whitespace for both CR and LF line breaks, since the recently-added HEREDOC method converted CRs to LFs. 
-		-- 4.1.1 - 2023-03-10 ( dshockley ): Renamed function to "isStringValidFMObjectXML" instead of "checkStringForValidXML" to be more specific. Added isStringAnyValidXML. 
-		-- 4.1 - 2023-03-04 ( dshockley ): Update logConsole to 2.0 - prepend ScriptName onto message, since tag option no longer seems to work. Updated prettifyXML to 1.8 - use a HEREDOC when skipping temp file, since the shopt/xpg_echo modification of echo to preserve backslashes no longer seems to work properly. 
-		-- 4.0.9 - 2020-08-11 ( dshockley ): Fix to log for addHeaderFooter. 
-		-- 4.0.8 - 2019-07-17 ( dshockley ): Added "ValueList" object support (code "XMVL"), per GitHub Issue #6. 
+		-- 4.1.3 - 2023-03-13 ( danshockley ): Added modern note in the recordFromList function. Renamed dshockley to danshockley in comments. 
+		-- 4.1.2 - 2023-03-10 ( danshockley ): In prettifyXML, no longer try to use tabs instead of tidy's spaces. DO still avoid extra line-breaks around CDATA, which means scanning for leading whitespace for both CR and LF line breaks, since the recently-added HEREDOC method converted CRs to LFs. 
+		-- 4.1.1 - 2023-03-10 ( danshockley ): Renamed function to "isStringValidFMObjectXML" instead of "checkStringForValidXML" to be more specific. Added isStringAnyValidXML. 
+		-- 4.1 - 2023-03-04 ( danshockley ): Update logConsole to 2.0 - prepend ScriptName onto message, since tag option no longer seems to work. Updated prettifyXML to 1.8 - use a HEREDOC when skipping temp file, since the shopt/xpg_echo modification of echo to preserve backslashes no longer seems to work properly. 
+		-- 4.0.9 - 2020-08-11 ( danshockley ): Fix to log for addHeaderFooter. 
+		-- 4.0.8 - 2019-07-17 ( danshockley ): Added "ValueList" object support (code "XMVL"), per GitHub Issue #6. 
 		-- 4.0.7 - 2019-03-12 ( eshagdar ): debugMode should be set to false by default. Users can overwrite it if they need to turn it on.
-		-- 4.0.6 - 2019-03-07 ( dshockley ): Updated isStringValidFMObjectXML to 1.2. 
+		-- 4.0.6 - 2019-03-07 ( danshockley ): Updated isStringValidFMObjectXML to 1.2. 
 		-- 4.0.5 - 2019-02-15 ( jwillinghalpern ): preserve backslashes when prettifying xml with shell script.
 		-- 4.0.4 - 2019-01-18 ( eshagdar ): remove EndOfText character ( ascii 3 ).
 		-- 4.0.3 - 2018-12-04 ( dshockley, eshagdar ): remove unneeded whitespace around CDATA inside Calculation tags. 
-		-- 4.0.2 - 2018-10-29 ( dshockley ): prettify used to fail (and just get raw XML) when 'too large'. Use temp file to avoid fail. Bug-fix in dataObjectToUTF8. 
-		-- 4.0.1 - 2018-10-29 ( dshockley ): BUG-FIX - using wrong variable in prettify resulted in placeholders not be replaced. Neatened up code. 
+		-- 4.0.2 - 2018-10-29 ( danshockley ): prettify used to fail (and just get raw XML) when 'too large'. Use temp file to avoid fail. Bug-fix in dataObjectToUTF8. 
+		-- 4.0.1 - 2018-10-29 ( danshockley ): BUG-FIX - using wrong variable in prettify resulted in placeholders not be replaced. Neatened up code. 
 		-- 4.0 - 2018-10-25 ( dshockley/eshagdar ): Addded indentation to prettify. Tidy CANNOT output tabs, so preserve tabs 1st.
 		-- 3.9.8 - 2018-04-20 ( dshockley/eshagdar ): when doing prettify or simpleFormat, convert all ASCII 13 (Carriage Returns) into ASCII 10 (LineFeed) so that there is not a MIX of line endings. If prettify, do NOT also do SimpleFormat. 
-		-- 3.9.7 - 2018-04-20 ( dshockley ): remove "preserve-entities" from tidy, since that was an attempt to deal with layout objects, which we no longer even attempt to prettify, and using it causes problems with other objects. 
-		-- 3.9.6 - 2018-04-10 ( dshockley ): do NOT prettify layout objects even if specified since they are already quasi-formatted. Stick with tidy after all (not xmllint for now). 
+		-- 3.9.7 - 2018-04-20 ( danshockley ): remove "preserve-entities" from tidy, since that was an attempt to deal with layout objects, which we no longer even attempt to prettify, and using it causes problems with other objects. 
+		-- 3.9.6 - 2018-04-10 ( danshockley ): do NOT prettify layout objects even if specified since they are already quasi-formatted. Stick with tidy after all (not xmllint for now). 
 		-- 3.9.5 - 2018-04-04 ( dshockley/eshagdar ): improved prettifyXML to also 'preserve-entities' because it otherwise munges whitespace within a value wrapped by tags. Specifically, it was changing "<Type>SVG </Type>" to "<Type>SVG</Type>", which resulted in breaking button icons on FileMaker buttons. ALSO, when editing XML, insert LineFeeds, not Carriage Returns. When stripping XML header for layout objects, also remove possible leading blank line. 
-		-- 3.9.4 - 2017-12-18 ( dshockley ): added support for LayoutObjects to addHeaderFooter and removeHeaderFooter. Updated getTextBetween. 
+		-- 3.9.4 - 2017-12-18 ( danshockley ): added support for LayoutObjects to addHeaderFooter and removeHeaderFooter. Updated getTextBetween. 
 		-- 3.9.3 - 2017-11-03 ( eshagdar ): when running this file directly, return the script object ( don't run a sample ).
 		-- 3.9.2 - 2017-04-25 ( dshockley/eshagdar ): added removeHeaderFooter, addHeaderFooter. 
 		-- 3.9.1 - 2016-11-02 ( dshockley/eshagdar ): always reset currentCode before reading clipboard; debugMode now logs the tempDataPosix in dataObjectToUTF8; add more error-trapping and error-handling.
@@ -550,7 +551,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			-- version 1.2
 			-- Checks someString for XML that represents FM objects. Returns true if it does, false if not. 
 			
-			-- 1.2 - 2019-03-07 ( dshockley ): Added capture of error -1700. 
+			-- 1.2 - 2019-03-07 ( danshockley ): Added capture of error -1700. 
 			-- 1.1 - 2016-11-02 ( dshockley/eshagdar ): added comment, changed test to length of instead of empty string.
 			
 			if debugMode then logConsole(ScriptName, "isStringValidFMObjectXML: START")
@@ -658,7 +659,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			-- version 1.2
 			
 			-- 1.2 - 2018-04-04 ( dshockley/eshagdar ): remove leading blank line after removing header.
-			-- 1.1 - 2017-12-18 ( dshockley ): handles layout objects special header.
+			-- 1.1 - 2017-12-18 ( danshockley ): handles layout objects special header.
 			-- 1.0 - 2017-04-25 ( dshockley/eshagdar ): first created.
 			
 			
@@ -728,8 +729,8 @@ on fmObjectTranslator_Instantiate(prefs)
 		on addHeaderFooter(someXML)
 			-- version 1.2
 			
-			-- 1.2 - 2020-08-11 ( dshockley ): log was using wrong function name. 
-			-- 1.1 - 2017-12-18 ( dshockley ): support layout objects.
+			-- 1.2 - 2020-08-11 ( danshockley ): log was using wrong function name. 
+			-- 1.1 - 2017-12-18 ( danshockley ): support layout objects.
 			-- 1.0 - 2017-04-25 ( dshockley/eshagdar ): first created.
 			
 			if debugMode then logConsole(ScriptName, "addHeaderFooter: START")
@@ -944,7 +945,7 @@ on fmObjectTranslator_Instantiate(prefs)
 		on dataObjectToUTF8(prefs)
 			-- version 2.9
 			
-			-- 2.9 - 2018-10-29 ( dshockley ): BUG-FIX: the error handler closed a non-existent variable. 
+			-- 2.9 - 2018-10-29 ( danshockley ): BUG-FIX: the error handler closed a non-existent variable. 
 			-- 2.8 - 2016-11-02 ( dshockley/eshagdar ): debugMode now logs the tempDataPosix
 			-- 2.7 - by default, look for someObject instead of 'fmObjects' (but allow calling code to specify 'fmObjects' for backwards compatibility).
 			-- 2.6 - can return the UTF8 ITSELF, or instead a path to the temp file this creates.
@@ -1374,6 +1375,7 @@ on fmObjectTranslator_Instantiate(prefs)
 		
 		on recordFromList(assocList)
 			-- version 2003-11-06, Nigel Garvey, AppleScript-Users mailing list
+			-- more recent discussion (2021): https://www.macscripter.net/t/convert-a-list-to-a-record/72860/13
 			try
 				{«class usrf»:assocList}'s x
 			on error msg

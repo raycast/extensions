@@ -111,7 +111,7 @@ function CloseTab(props: { tab: Tab; onTabClosed?: () => void }) {
       title="Close Tab"
       icon={{ source: Icon.XMarkCircle }}
       onAction={handleAction}
-      shortcut={{ modifiers: ["cmd"], key: "w" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
     />
   );
 }

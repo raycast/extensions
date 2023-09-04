@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getCurWeather } from "../utils/weather-utils";
-import { Cache, environment, LaunchType } from "@raycast/api";
-import { CacheKey, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
+import { Cache, environment, LaunchType, updateCommandMetadata } from "@raycast/api";
+import { CacheKey, getMenuItem, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
 import { GeoLocation, OpenMeteoWeather } from "../types/types";
 
 export const getCurrentWeather = () => {
@@ -18,27 +18,31 @@ export const getCurrentWeather = () => {
     let oldRefreshTime = 0;
     if (typeof cacheWeather === "string" && !isEmpty(cacheWeather)) {
       try {
-        setWeather(JSON.parse(cacheWeather) as OpenMeteoWeather);
+        const oldWeather = JSON.parse(cacheWeather) as OpenMeteoWeather;
+        setWeather(oldWeather);
+        const menuItems: string[] = getMenuItem(oldWeather);
+        updateCommandMetadata({ subtitle: menuItems.join(" | ") });
       } catch (e) {
-        console.debug(`Could not parse cached weather: ${cacheWeather}`, e);
+        console.error(`Could not parse cached weather: ${cacheWeather}`, e);
       }
     }
     if (typeof cacheLocation === "string" && !isEmpty(cacheLocation)) {
       try {
         setLocation(JSON.parse(cacheLocation) as GeoLocation);
       } catch (e) {
-        console.debug(`Could not parse cached location: ${cacheLocation}`, e);
+        console.error(`Could not parse cached location: ${cacheLocation}`, e);
       }
     }
     if (typeof cacheTime === "string" && !isEmpty(cacheTime)) {
       try {
         oldRefreshTime = JSON.parse(cacheTime) as number;
       } catch (e) {
-        console.debug(`Could not parse cached time: ${cacheTime}`, e);
+        console.error(`Could not parse cached time: ${cacheTime}`, e);
       }
     }
     const newRefreshTime = Date.now();
-    const isRefresh = shouldRefresh(oldRefreshTime, newRefreshTime) || preferencesChanged();
+    const isPreferencesChanged = preferencesChanged();
+    const isRefresh = shouldRefresh(oldRefreshTime, newRefreshTime) || isPreferencesChanged;
 
     if (isRefresh || environment.launchType === LaunchType.Background) {
       try {
@@ -46,6 +50,8 @@ export const getCurrentWeather = () => {
         if (typeof weather !== "undefined") {
           setWeather(weather);
           cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(weather));
+          const menuItems: string[] = getMenuItem(weather);
+          updateCommandMetadata({ subtitle: menuItems.join(" | ") });
         } else {
           cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(""));
         }

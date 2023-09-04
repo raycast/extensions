@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { DevicesMap } from "./constants/devices";
+import { DevicesMap } from "./core/devices/constants/specifications";
 import { useState } from "react";
 
 export default function SupportedDevicesView() {

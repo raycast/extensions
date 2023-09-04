@@ -95,12 +95,10 @@ export default function Command() {
             const searchTrending = await trendinghResponse.text();
             const $ = cheerio.load(searchTrending);
             const trendingPmidsList: string[] = [];
-
             $(".docsum-wrap").each((index, element) => {
               const pmid = $(element).find(".docsum-pmid").text();
               trendingPmidsList.push(pmid);
             });
-
             if (trendingPmidsList.length !== 0) {
               const summaryUrl =
                 `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${trendingPmidsList.join(
@@ -1019,7 +1017,6 @@ function EntryActions(
           icon={Icon.Book}
           title="Read Abstract"
           target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
-          // shortcut={{ modifiers: [], key: "arrowRight" }}
         />
         <Action.Open
           icon={Icon.Globe}
@@ -1075,6 +1072,51 @@ function EntryActions(
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
         <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["shift"], key: "p" }} />
+        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+        <Action
+          icon={Icon.ArrowClockwise}
+          title={"Reload Trending Articles"}
+          onAction={() => reloadArticles(fetchData)}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+        />
+        <Action
+          icon={Icon.Trash}
+          title={"Clear All History"}
+          onAction={() => clearAllHistory(fetchData, getHistoryAndFavourites)}
+        />
+        <Action
+          icon={Icon.Trash}
+          title={"Clear All Favourites"}
+          onAction={() => clearAllFavourites(fetchData, getHistoryAndFavourites)}
+        />
+      </ActionPanel>
+    );
+  } else {
+    return (
+      <ActionPanel>
+        <Action.Push
+          icon={Icon.Book}
+          title="Read Abstract"
+          target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
+          shortcut={{ modifiers: [], key: "arrowRight" }}
+        />
+        <Action
+          icon={Icon.Trash}
+          title={"Clear All History"}
+          onAction={() => clearAllHistory(fetchData, getHistoryAndFavourites)}
+        />
+        <Action
+          icon={Icon.Trash}
+          title={"Clear All Favourites"}
+          onAction={() => clearAllFavourites(fetchData, getHistoryAndFavourites)}
+        />
+        <Action.Open
+          icon={Icon.MagnifyingGlass}
+          title="Open Search in Browser"
+          target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+        />
+        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowClockwise}

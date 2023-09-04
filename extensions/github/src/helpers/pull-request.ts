@@ -69,7 +69,7 @@ export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFra
         avatarUrl = reviewer.teamAvatarURL;
       }
 
-      return { id: reviewer.id, ...getGitHubUser({ name, login, avatarUrl }) };
+      return { id: "id" in reviewer ? reviewer.id : "", ...getGitHubUser({ name, login, avatarUrl }) };
     }
   });
 
@@ -77,7 +77,7 @@ export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFra
     pullRequest.reviews?.nodes?.map((review) => {
       return { id: review?.author?.id, ...getGitHubUser(review?.author) };
     }),
-    "id"
+    "id",
   );
 
   return [...(requests ?? []), ...(reviews ?? [])];

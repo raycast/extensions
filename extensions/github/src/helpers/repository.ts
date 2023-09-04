@@ -70,7 +70,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   function visitRepository(repository: ExtendedRepositoryFieldsFragment) {
     const nextRepositories = [repository, ...(history?.filter((item) => item !== repository) ?? [])].slice(
       0,
-      VISITED_REPOSITORIES_LENGTH
+      VISITED_REPOSITORIES_LENGTH,
     );
     setHistory(nextRepositories);
   }

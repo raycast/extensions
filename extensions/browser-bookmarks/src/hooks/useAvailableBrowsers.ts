@@ -9,6 +9,9 @@ export const BROWSERS_BUNDLE_ID = {
   firefox: "org.mozilla.firefox",
   safari: "com.apple.safari",
   edge: "com.microsoft.edgemac",
+  edgeDev: "com.microsoft.edgemac.dev",
+  edgeCanary: "com.microsoft.edgemac.canary",
+  vivaldi: "com.vivaldi.vivaldi",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

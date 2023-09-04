@@ -1,0 +1,331 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-ollama",
+  "title": "Ollama AI",
+  "description": "Performe Local Inference with Ollama",
+  "icon": "icon.png",
+  "author": "massimiliano_pasquini",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MassimilianoPasquini97/raycast_ollama.git"
+  },
+  "preferences": [
+    {
+      "name": "ollamaShowMetadata",
+      "description": "Show inference statistics",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Inference Statistics",
+      "label": "Check for showing inference statistics"
+    },
+    {
+      "name": "ollamaChatModel",
+      "description": "Select model used for perform 'Chat With Ollama'",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Chat whit Ollama",
+      "default": "llama2:latest"
+    },
+    {
+      "name": "ollamaAskModel",
+      "description": "Select model used for perform 'Ask Ollama'",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Ask Ollama",
+      "default": "llama2:latest"
+    },
+    {
+      "name": "ollamaCasualModel",
+      "description": "Select model used for perform 'Change Tone to Casual' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Change Tone to Casual",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaCodeExplain",
+      "description": "Select model used for perform 'Explain Code Step by Step' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Explain Code Step by Step",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaConfidentModel",
+      "description": "Select model used for perform 'Change Tone to Confident' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Change Tone to Confident",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaExplainSimpleTerms",
+      "description": "Select model used for perform 'Explain This in Simple Terms' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Explain This in Simple Terms",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaFixSpellingGrammar",
+      "description": "Select model used for perform 'Fix Spelling and Grammar' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Fix Spelling and Grammar",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaFriendlyModel",
+      "description": "Select model used for perform 'Change Tone to Friendly' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Change Tone to Friendly",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaImproveWriting",
+      "description": "Select model used for perform 'Improve Writing' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Improve Writing",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaLongerModel",
+      "description": "Select model used for perform 'Make Longer' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Make Longer",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaProfessionalModel",
+      "description": "Select model used for perform 'Change Tone to Professional' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Change Tone to Professional",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaShorterModel",
+      "description": "Select model used for perform 'Make Shorter' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Make Shorter",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaTranslateModel",
+      "description": "Select model used for perform 'Translate' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Translate",
+      "default": "orca:latest"
+    },
+    {
+      "name": "ollamaRephraseAsTweetModel",
+      "description": "Select model used for perform 'Rephrase as Tweet' task",
+      "type": "textfield",
+      "required": true,
+      "title": "Model - Rephrase as Tweet",
+      "default": "orca:latest"
+    }
+  ],
+  "commands": [
+    {
+      "name": "ollama-chat",
+      "title": "Chat With Ollama",
+      "subtitle": "Ollama",
+      "description": "Chat with Ollama",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-ask",
+      "title": "Ask Ollama",
+      "subtitle": "Ollama",
+      "description": "Ask ollama any question",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ollama-casual",
+      "title": "Change Tone to Casual",
+      "subtitle": "Ollama",
+      "description": "Make selected text more casual",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-code-explain",
+      "title": "Explain Code Step by Step",
+      "subtitle": "Ollama",
+      "description": "Explain the selected code step by step",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-confident",
+      "title": "Change Tone to Confident",
+      "subtitle": "Ollama",
+      "description": "Make selected text more confident",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-explain",
+      "title": "Explain This in Simple Terms",
+      "subtitle": "Ollama",
+      "description": "Explain selected text in simple terms",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-fix-spelling-grammar",
+      "title": "Fix Spelling and Grammar",
+      "subtitle": "Ollama",
+      "description": "Fix selected text from spelling and grammar error",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-friendly",
+      "title": "Change Tone to Friendly",
+      "subtitle": "Ollama",
+      "description": "Make selected text more friendly",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-improve-writing",
+      "title": "Improve Writing",
+      "subtitle": "Ollama",
+      "description": "Improve writing of selected text",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-longer",
+      "title": "Make Longer",
+      "subtitle": "Ollama",
+      "description": "Make selected text longher",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-professional",
+      "title": "Change Tone to Professional",
+      "subtitle": "Ollama",
+      "description": "Make selected text more professional",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-shorter",
+      "title": "Make Shorter",
+      "subtitle": "Ollama",
+      "description": "Make selected text shorter",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-translate",
+      "title": "Translate",
+      "subtitle": "Ollama",
+      "description": "Translate selected text",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-tweet",
+      "title": "Rephrase as Tweet",
+      "subtitle": "Ollama",
+      "description": "Rephrase selected text as Tweet",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-models",
+      "title": "Manage Models",
+      "subtitle": "Ollama",
+      "description": "Manage installed models",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-custom-create",
+      "title": "Create Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-custom-chat",
+      "title": "Custom Chat",
+      "subtitle": "Ollama",
+      "description": "Create a custom chatbot using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "model",
+          "placeholder": "Model",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ollama-custom-command",
+      "title": "Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "model",
+          "placeholder": "Model",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ollama-custom-ask",
+      "title": "Custom Ask Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom ask command using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "model",
+          "placeholder": "Model",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

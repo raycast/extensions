@@ -174,11 +174,17 @@ export default function CommandChatView(props: {
             .join("\n\n")}###\n\n`
         : ``
     }${
-      ((currentChat && currentChat.useSelectedFilesContext) || useFiles) && files?.paths?.length
+      ((currentChat && currentChat.useSelectedFilesContext) ||
+        useFiles ||
+        (currentChat == undefined && useFiles == undefined)) &&
+      files?.paths?.length
         ? `\n\nYou will also consider these files: ###${contents?.contents || ""}###\n\n`
         : ``
     }${
-      ((currentChat && currentChat.useConversationContext) || useConversation) && conversation.length
+      ((currentChat && currentChat.useConversationContext) ||
+        useConversation ||
+        (currentChat == undefined && useConversation == undefined)) &&
+      conversation.length
         ? `\n\nYou will also consider our conversation history. The history so far: ###${conversation
             .map((entry) =>
               entry.replaceAll(/(USER_QUERY|MODEL_RESPONSE):/g, "").replaceAll(/{{cmd:(.*?):(.*?)}}/g, "")
@@ -189,7 +195,9 @@ export default function CommandChatView(props: {
             ""
           )}###`
     }${
-      (currentChat && currentChat.allowAutonomy) || autonomousFeatures
+      (currentChat && currentChat.allowAutonomy) ||
+      autonomousFeatures ||
+      (currentChat == undefined && autonomousFeatures == undefined)
         ? `\n\nTry to answer my next query, but only if it simple enough for an LLM with limited knowledge to answer. If you cannot fulfill the query, if the query requires new information, or if the query invokes an action such as searching, choose the command from the following list that is most likely to carries out the goal expressed in my next query, and then respond with the number of the command you want to run in the format {{cmd:commandNumber:input}}. Replace the input with a short string according to my query. For example, if I say 'search google for AI', the input would be 'AI'. Here are the commands: ###${commandDescriptions.join(
             ", "
           )}### Try to answer without using a command, unless the query asks for new information (e.g. latest news, weather, stock prices, etc.) or invokes an action (e.g. searching, opening apps). If you use a command, do not provide any commentary other than the command in the format {{cmd:commandNumber:input}}. Make sure the command is relevant to the current query.`

@@ -13,6 +13,7 @@ export type CreateIssuePayload = {
   assigneeId?: string;
   cycleId?: string;
   projectId?: string;
+  projectMilestoneId?: string;
   parentId?: string;
 };
 
@@ -46,6 +47,10 @@ export async function createIssue(payload: CreateIssuePayload) {
 
   if (payload.projectId) {
     issueCreateInput += `, projectId: "${payload.projectId}"`;
+  }
+
+  if (payload.projectId && payload.projectMilestoneId) {
+    issueCreateInput += `, projectMilestoneId: "${payload.projectMilestoneId}"`;
   }
 
   if (payload.parentId) {

@@ -5,13 +5,30 @@
   "description": "Search and open Radix content directly from Raycast.",
   "icon": "icon.png",
   "author": "peduarte",
+  "contributors": [
+    "emlez"
+  ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "colors",
+      "title": "Radix Colors",
+      "subtitle": "Documentation",
+      "description": "Search Radix Colors and open its documentation in the browser",
+      "mode": "view"
+    },
     {
       "name": "primitives",
       "title": "Radix Primitives",
       "subtitle": "Documentation",
       "description": "Search Radix Primitives and open its documentation in the browser",
+      "mode": "view"
+    },
+    {
+      "name": "themes",
+      "title": "Radix Themes",
+      "subtitle": "Documentation",
+      "description": "Search Radix Themes and open its documentation in the browser",
       "mode": "view"
     }
   ],

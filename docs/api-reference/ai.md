@@ -41,7 +41,7 @@ export default async function command() {
 {% tab title="Error handling" %}
 
 ```typescript
-import { AI, showToast } from "@raycast/api";
+import { AI, showToast, Toast } from "@raycast/api";
 
 export default async function command() {
   try {

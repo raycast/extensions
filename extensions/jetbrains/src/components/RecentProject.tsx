@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Application, Icon, List, useNavigation } from "@raycast/api";
 import { OpenJetBrainsToolbox } from "./OpenJetBrainsToolbox";
 import React, { useMemo } from "react";
-import { AppHistory, recentEntry } from "../util";
+import { AppHistory, recentEntry, ToolboxApp } from "../util";
 import { OpenInJetBrainsApp } from "./OpenInJetBrainsApp";
 import { SortTools } from "../sortTools";
 
@@ -9,7 +9,7 @@ interface RecentProjectProps {
   app: AppHistory;
   recent: recentEntry;
   tools: AppHistory[];
-  toolbox: Application;
+  toolbox: ToolboxApp;
   addFav?: (item: string) => Promise<void>;
   remFav?: (item: string) => Promise<void>;
   sortOrder: string;
@@ -58,7 +58,7 @@ export function RecentProject({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInJetBrainsApp tool={app} recent={recent} />
+            <OpenInJetBrainsApp tool={app} recent={recent} toolboxApp={toolbox} />
             <Action.ShowInFinder path={recent.path} />
             {recent.exists ? <Action.OpenWith path={recent.path} /> : null}
             <Action.CopyToClipboard
@@ -69,7 +69,12 @@ export function RecentProject({
           </ActionPanel.Section>
           <ActionPanel.Section>
             {otherTools.map((tool) => (
-              <OpenInJetBrainsApp key={`${tool.title}-${recent.path}`} tool={tool} recent={recent} />
+              <OpenInJetBrainsApp
+                key={`${tool.title}-${recent.path}`}
+                tool={tool}
+                recent={recent}
+                toolboxApp={toolbox}
+              />
             ))}
             <OpenJetBrainsToolbox app={toolbox} />
           </ActionPanel.Section>

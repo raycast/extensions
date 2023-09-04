@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import { ExtensionPreferences, OrganizeColorsCommandPreferences } from "./types";
 
-export const extensionPreferences: ExtensionPreferences = getPreferenceValues();
-export const organizeColorsCommandPreferences: OrganizeColorsCommandPreferences = getPreferenceValues();
+export const extensionPreferences: Preferences = getPreferenceValues();
+export const organizeColorsCommandPreferences: Preferences.OrganizeColors = getPreferenceValues();
