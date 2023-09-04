@@ -49,7 +49,7 @@ You are all set up 🥳!
 
 ### Context Awareness
 
-Obsidian Smart Capture currently captures link of the active browser tab (Safari and Chrome) and highlighted text if any.
+Obsidian Smart Capture currently captures link of the active browser tab (Safari, Chrome, Arc, Brave, Firefox, Edge & Opera) and highlighted text if any.
 
 Try selecting some text on Chrome and Safari and press `⌘ L` (or your custom hotkey) to open Obsidian Smart Capture. Press `⌘ ⏎` to capture it
 
