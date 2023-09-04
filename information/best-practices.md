@@ -43,9 +43,9 @@ export default function Command() {
 
 Ideally, your extension doesn't depend on any runtime dependencies. In reality, sometimes locally installed apps or CLIs are required to perform functionality. Here are a few tips to guarantee a good user experience:
 
-- If a command requires a runtime dependency to run (e.g. an app that needs to be installed by the user), show a helpful message.
-  - If your extension is tightly coupled to an app, f.e. searching tabs in Safari or using AppleScript to control Spotify, checks don't always have to be strict because users most likely don't install the extension without having the dependency installed locally.
-- If only some functionality of your extension requires the runtime dependency, consider making this functionality only available if the dependency is installed. Typically, this is the best case for [actions](terminology.md#action), e.g. to open a URL in the desktop app instead of the browser.
+* If a command requires a runtime dependency to run (e.g. an app that needs to be installed by the user), show a helpful message.
+  * If your extension is tightly coupled to an app, f.e. searching tabs in Safari or using AppleScript to control Spotify, checks don't always have to be strict because users most likely don't install the extension without having the dependency installed locally.
+* If only some functionality of your extension requires the runtime dependency, consider making this functionality only available if the dependency is installed. Typically, this is the best case for [actions](terminology.md#action), e.g. to open a URL in the desktop app instead of the browser.
 
 ### Show loading indicator
 
@@ -78,14 +78,13 @@ export default function Command() {
 }
 ```
 
----
+
 
 ## Forms
 
 ### Use Forms Validation
 
-When an end-user enters some data, you can check to see that this input is in a format you expect.
-If the data isn't correctly formatted, you can set the `error` prop on the Form item to show a message explaining what needs to be corrected, and lets them try again.
+When an end-user enters some data, you can check to see that this input is in a format you expect. If the data isn't correctly formatted, you can set the `error` prop on the Form item to show a message explaining what needs to be corrected, and lets them try again.
 
 ![](../.gitbook/assets/form-validation.png)
 
