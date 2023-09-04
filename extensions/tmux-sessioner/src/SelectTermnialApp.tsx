@@ -10,7 +10,7 @@ const ALLOWED_APPS_BUNDLEID = [
   "com.googlecode.iterm2",
   "com.apple.Terminal",
   "dev.warp.Warp-Stable",
-  "com.github.wez.wezterm"
+  "com.github.wez.wezterm",
 ];
 
 export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?: (value: boolean) => void }) => {
@@ -21,7 +21,7 @@ export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?:
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const apps = (await getApplications()).filter((app) => ALLOWED_APPS_BUNDLEID.includes(app.bundleId || ''));
+      const apps = (await getApplications()).filter((app) => ALLOWED_APPS_BUNDLEID.includes(app.bundleId || ""));
 
       setApps(apps);
       setLoading(false);
