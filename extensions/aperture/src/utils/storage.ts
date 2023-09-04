@@ -23,12 +23,12 @@ export async function saveRecordingData(recording: Recording) {
 }
 
 export async function saveRecordingPreferences(value: RecordingOptions) {
-  await LocalStorage.setItem("preferences", JSON.stringify(value));
+  await LocalStorage.setItem(STORAGE_KEY.RECORDING_PREFERENCES, JSON.stringify(value));
 }
 
 export async function getStoredRecordingPreferences(): Promise<RecordingPreferences> {
   try {
-    const serializedPreferences = await LocalStorage.getItem<string>("preferences");
+    const serializedPreferences = await LocalStorage.getItem<string>(STORAGE_KEY.RECORDING_PREFERENCES);
     if (!serializedPreferences) return DEFAULT_RECORDING_OPTIONS;
     return { ...DEFAULT_RECORDING_OPTIONS, ...JSON.parse<RecordingOptions>(serializedPreferences) };
   } catch {
