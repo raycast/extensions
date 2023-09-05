@@ -66,49 +66,49 @@ const EventActionsList = ({ event }: { event: Event }) => {
           <Action
             title="15min"
             onAction={() => {
-              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_15M");
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_15M");
             }}
           />
           <Action
             title="30min"
             onAction={() => {
-              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_30M");
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_30M");
             }}
           />
           <Action
             title="1hr"
             onAction={() => {
-              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_1H");
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_1H");
             }}
           />
           <Action
             title="2hrs"
             onAction={() => {
-              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_2H");
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_2H");
             }}
           />
           <Action
             title="4hrs"
             onAction={() => {
-              RescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_4H");
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_4H");
             }}
           />
           <Action
             title="1 day"
             onAction={() => {
-              RescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
+              rescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
             }}
           />
           <Action
             title="2 days"
             onAction={() => {
-              RescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
+              rescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
             }}
           />
           <Action
             title="1 week"
             onAction={() => {
-              RescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
+              rescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
             }}
           />
         </ActionPanel.Submenu>
