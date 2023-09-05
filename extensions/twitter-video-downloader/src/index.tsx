@@ -29,7 +29,6 @@ export default function Command() {
   async function checkClipboardValue() {
     const ClipboardText = await Clipboard.readText();
     if (
-      // TODO: Improve URL validation
       ClipboardText &&
       ClipboardText.includes("twitter.com") &&
       ClipboardText.split("/").length > 4
