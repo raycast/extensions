@@ -15,7 +15,7 @@
 This extension lets you control your Bluetooth devices with a few keystrokes.  
 Connecting to your Bluetooth devices has never been faster :)
 
-![Header](assets/header.png)
+![Header](metadata/toothpick-1.png)
 
 ## Getting Started
 

@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Add trimming support] - 2023-09-03
+
+- Added optional `Start Time` and `End Time` fields to trim the output video
+
 ## [Sanitizing file name] - 2023-08-08
 
 ## [Added new format] - 2023-08-05
