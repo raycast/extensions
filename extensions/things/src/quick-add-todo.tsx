@@ -1,18 +1,9 @@
-import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast, environment } from '@raycast/api';
+import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
 import { handleError, silentlyOpenThingsURL } from './api';
 import qs from 'qs';
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
-    if (!environment.canAccess(AI)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: 'You need Raycast Pro to use this command.',
-        message: 'This command uses Raycast AI (part of Raycast Pro) to process your text written in natural language.',
-      });
-      return;
-    }
-
     const preferences = getPreferenceValues<Preferences.QuickAddTodo>();
 
     if (preferences.shouldCloseMainWindow) {
