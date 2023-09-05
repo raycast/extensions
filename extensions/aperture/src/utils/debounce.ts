@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const debounce = <Fn extends (...args: any) => any>(func: Fn, delay = 200) => {
   let timeout: NodeJS.Timeout;
   const debounced = (...args: any) => {
