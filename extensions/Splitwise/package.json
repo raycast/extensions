@@ -31,7 +31,7 @@
   "preferences": [
     {
       "name": "personalAccessToken",
-      "title": "Personal Access Token", 
+      "title": "Personal Access Token",
       "placeholder": "API Key",
       "description": "See the extension's README for instructions about how to create a token",
       "type": "password",
@@ -71,6 +71,7 @@
   "dependencies": {
     "@raycast/api": "^1.47.2",
     "@raycast/utils": "^1.4.16",
+    "axios": "^1.5.0",
     "got": "^12.5.3"
   },
   "devDependencies": {
