@@ -1,6 +1,10 @@
 # Mute microphone Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Fixes] - 2023-09-04
+
+- Fix issue where the extension may not work on Macs with Intel processors
+
+## [Improvements] - 2023-08-29
 
 - Dramatically increase command execution speed
 
