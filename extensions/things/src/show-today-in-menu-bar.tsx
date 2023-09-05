@@ -68,7 +68,7 @@ export default function ShowTodayInMenuBar() {
 
                 <MenuBarExtra.Submenu title="Schedule" icon={Icon.Calendar}>
                   <MenuBarExtra.Item {...listItems.today} onAction={() => schedule(todo, 'today')} />
-                  <MenuBarExtra.Item {...listItems.today} onAction={() => schedule(todo, 'evening')} />
+                  <MenuBarExtra.Item {...listItems.evening} onAction={() => schedule(todo, 'evening')} />
                   <MenuBarExtra.Item {...listItems.tomorrow} onAction={() => schedule(todo, 'tomorrow')} />
                   <MenuBarExtra.Item {...listItems.anytime} onAction={() => schedule(todo, 'anytime')} />
                   <MenuBarExtra.Item {...listItems.someday} onAction={() => schedule(todo, 'someday')} />
