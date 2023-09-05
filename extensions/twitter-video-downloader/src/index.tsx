@@ -103,19 +103,19 @@ export default function Command() {
 				<ActionPanel>
 					<Action.SubmitForm
 						icon={Icon.Download}
-						title="Download video"
+						title="Download Video"
 						onSubmit={handleSubmit}
 					/>
 					<Action.ShowInFinder
 						icon={Icon.Folder}
-						title="Open downloads folder"
+						title="Open Downloads Folder"
 						path={DOWNLOADS_DIR}
 						shortcut={Keyboard.Shortcut.Common.Duplicate}
 					/>
 					{IsDownloadComplete && (
 						<Action.Open
 							icon={Icon.Video}
-							title="Open the video"
+							title="Open the Video"
 							target={`${DOWNLOADS_DIR}/${Filename}`}
 							shortcut={Keyboard.Shortcut.Common.Open}
 						/>
@@ -123,7 +123,7 @@ export default function Command() {
 					{IsDownloadComplete && (
 						<Action.CopyToClipboard
 							icon={Icon.Clipboard}
-							title="Copy video to clipboard"
+							title="Copy Video to Clipboard"
 							content={ClipboardContent}
 							shortcut={Keyboard.Shortcut.Common.Copy}
 						/>
