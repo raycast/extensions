@@ -66,7 +66,7 @@ export default function Command() {
 				style: Toast.Style.Failure,
 			});
 		const ProgressToast = await showToast({
-			title: "Downloading video, please wait",
+			title: "Downloading Video, Please Wait",
 			style: Toast.Style.Animated,
 		});
 		Axios.get(DirectURL, {
@@ -78,20 +78,20 @@ export default function Command() {
 				Response.data.pipe(Writer);
 				Writer.on("finish", async () => {
 					showToast({
-						title: "Download complete",
+						title: "Download Complete",
 					});
 					SetClipboardContent({ file: `${DOWNLOADS_DIR}/${TweetID}.mp4` });
 					SetIsDownloadComplete(true);
 				}).on("error", () => {
 					showToast({
-						title: "Error while downloading video",
+						title: "Error While Downloading Video",
 						style: Toast.Style.Failure,
 					});
 				});
 			})
 			.catch(() => {
 				showToast({
-					title: "Error while fetching video",
+					title: "Error While Fetching Video",
 					style: Toast.Style.Failure,
 				});
 			});
