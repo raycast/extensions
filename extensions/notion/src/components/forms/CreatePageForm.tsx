@@ -11,6 +11,7 @@ import {
 } from "../../hooks";
 import { createDatabasePage } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
+import type { DatabaseProperty } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
 
 import { PagePropertyField } from "./PagePropertyField";
@@ -22,14 +23,26 @@ type CreatePageFormProps = {
 
 export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: CreatePageFormProps) {
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
-  const { setRecentPage } = useRecentPages();
   const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
   const { data: databaseProperties } = useDatabaseProperties(databaseId);
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
 
-  const { pop } = useNavigation();
+  function filterProperties(dp: DatabaseProperty) {
+    return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
+  }
+  function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
+    if (a.type == "title") return -1;
+    if (b.type == "title") return 1;
+    if (!databaseView?.create_properties) return 0;
+    const valueA = databaseView.create_properties.indexOf(a.id);
+    const valueB = databaseView.create_properties.indexOf(b.id);
+    if (valueA > valueB) return 1;
+    if (valueA < valueB) return -1;
+    return 0;
+  }
+
   async function handleSubmit(values: Form.Values) {
     const titleKey = Object.keys(values).find((key) => key.includes("property::title"));
     if (!titleKey || !values[titleKey]) {
@@ -57,7 +70,7 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
           primaryAction: {
             title: "Open Page",
             shortcut: { modifiers: ["cmd"], key: "o" },
-            onAction: () => handleOnOpenPage(page, setRecentPage),
+            onAction: () => handleOnOpenPage(page, useRecentPages().setRecentPage),
           },
           secondaryAction: page.url
             ? {
@@ -72,7 +85,7 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
 
         if (mutate) {
           mutate();
-          pop();
+          useNavigation().pop();
         }
       }
     } catch {
@@ -148,22 +161,8 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
         </>
       )}
       {databaseProperties
-        ?.filter(
-          (dp) =>
-            dp.id !== "title" &&
-            dp.type !== "title" &&
-            (!databaseView?.create_properties || databaseView.create_properties.includes(dp.id)),
-        )
-        .sort((dpa, dpb) => {
-          if (!databaseView?.create_properties) {
-            return 0;
-          }
-          const value_a = databaseView.create_properties.indexOf(dpa.id);
-          const value_b = databaseView.create_properties.indexOf(dpb.id);
-          if (value_a > value_b) return 1;
-          if (value_a < value_b) return -1;
-          return 0;
-        })
+        ?.filter(filterProperties)
+        .sort(sortProperties)
         .map((property) => {
           let options: Parameters<typeof PagePropertyField>[0]["options"] = property.options;
           if (property.type == "people") options = users;
