@@ -3,7 +3,7 @@
 ------------------------
 
 Author: Stephen Kaplan _(HelloImSteven)_ <br />
-Last Updated: 2023-06-18 <br />
+Last Updated: 2023-09-02 <br />
 Pins Version: 1.4.0
 
 ------------------------

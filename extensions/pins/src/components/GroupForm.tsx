@@ -57,7 +57,6 @@ export default function GroupForm(props: { group?: Group; setGroups?: (groups: G
                 setParentError("Group cannot be its own parent!");
                 return false;
               }
-              console.log(values.idField);
               if (environment.commandName == "new-group") {
                 await createNewGroup(
                   values.nameField,
