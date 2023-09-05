@@ -38,14 +38,14 @@ export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?:
           <Action.SubmitForm
             title="Submit Terminal App Name"
             onSubmit={async (values) => {
-              LocalStorage.setItem("terminalAppName", values.terminalAppName);
+              LocalStorage.setItem("terminalAppBundleId", values.terminalAppBundleId);
               const toast = await showToast({
                 style: Toast.Style.Animated,
                 title: "Setup Terminal",
               });
 
               toast.style = Toast.Style.Success;
-              toast.message = `Terminal ${values.terminalAppName} is setup successfully for tmux sessioner`;
+              toast.message = `Terminal ${values.terminalAppBundleId} is setup successfully for tmux sessioner`;
 
               setIsTerminalSetup && setIsTerminalSetup(true);
               pop();
@@ -56,7 +56,7 @@ export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?:
     >
       <Form.Description text="Choose your default terminal App" />
       <Form.Description text="When switch to session, it will open the session in the selected terminal app." />
-      <Form.Dropdown id="terminalAppName" isLoading={loading}>
+      <Form.Dropdown id="terminalAppBundleId" isLoading={loading}>
         {apps?.map((app, index) => (
           <Form.Dropdown.Item key={index} value={app.name} title={app.name} icon={applicationIconFromPath(app.path)} />
         ))}
