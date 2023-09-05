@@ -1,4 +1,4 @@
-import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useState } from "react";
 
 import {
@@ -9,10 +9,11 @@ import {
   useRelations,
   useUsers,
 } from "../../hooks";
-import { createDatabasePage, notionColorToTintColor, getPageIcon } from "../../utils/notion";
+import { createDatabasePage } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
-import { DatabasePropertyOption, Page } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
+
+import { PagePropertyField } from "./PagePropertyField";
 
 type CreatePageFormProps = {
   databaseId?: string;
@@ -87,9 +88,6 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
     });
   }
 
-  const titleProperty = databaseProperties?.find((dp) => dp.id === "title");
-  const databasePropertiesButTitle = databaseProperties?.filter((dp) => dp.id !== "title");
-
   return (
     <Form
       isLoading={isLoadingDatabases || isLoadingRelationPages}
@@ -102,7 +100,7 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
           {databaseView && setDatabaseView ? (
             <ActionPanel.Section title="View options">
               <ActionSetVisibleProperties
-                databaseProperties={databasePropertiesButTitle || []}
+                databaseProperties={databaseProperties?.filter((dp) => dp.id !== "title") || []}
                 selectedPropertiesIds={databaseView?.create_properties || databaseProperties.map((x) => x.id)}
                 onSelect={(propertyId) => {
                   setDatabaseView({
@@ -149,12 +147,6 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
           <Form.Separator key="separator" />
         </>
       )}
-
-      <Form.TextField
-        id="property::title::title"
-        title={titleProperty?.name ? titleProperty?.name : "Untitled"}
-        placeholder="Title"
-      />
       {databaseProperties
         ?.filter(
           (dp) =>
@@ -172,97 +164,12 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
           if (value_a < value_b) return -1;
           return 0;
         })
-        .map((dp) => {
-          const key = "property::" + dp.type + "::" + dp.id;
-          const id = key;
-          const title = dp.name;
-
-          let placeholder = dp.type.replace(/_/g, " ");
-          placeholder = placeholder.charAt(0).toUpperCase() + placeholder.slice(1);
-
-          switch (dp.type) {
-            case "date":
-              return <Form.DatePicker key={key} id={id} title={title} />;
-            case "checkbox":
-              return <Form.Checkbox key={key} id={id} title={title} label={placeholder} />;
-            case "select":
-              return (
-                <Form.Dropdown key={key} id={id} title={title}>
-                  {(dp.options as DatabasePropertyOption[])?.map((opt) => {
-                    if (!opt.id) {
-                      return null;
-                    }
-                    return (
-                      <Form.Dropdown.Item
-                        key={"option::" + opt.id}
-                        value={opt.id}
-                        title={opt.name ? opt.name : "Untitled"}
-                        icon={
-                          opt.color ? { source: Icon.Dot, tintColor: notionColorToTintColor(opt.color) } : undefined
-                        }
-                      />
-                    );
-                  })}
-                </Form.Dropdown>
-              );
-            case "multi_select":
-              return (
-                <Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
-                  {(dp.options as DatabasePropertyOption[])?.map((opt) => {
-                    if (!opt.id) {
-                      return null;
-                    }
-                    return (
-                      <Form.TagPicker.Item
-                        key={"option::" + opt.id}
-                        value={opt.id}
-                        title={opt.name ? opt.name : "Untitled"}
-                        icon={
-                          opt.color ? { source: Icon.Dot, tintColor: notionColorToTintColor(opt.color) } : undefined
-                        }
-                      />
-                    );
-                  })}
-                </Form.TagPicker>
-              );
-            case "relation":
-              if (!dp.relation_id || !relationPages) return null;
-
-              return (
-                <Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
-                  {relationPages[dp.relation_id]?.map((rp: Page) => {
-                    return (
-                      <Form.TagPicker.Item
-                        key={"relation::" + rp.id}
-                        value={rp.id}
-                        title={rp.title ? rp.title : "Untitled"}
-                        icon={getPageIcon(rp)}
-                      />
-                    );
-                  })}
-                </Form.TagPicker>
-              );
-            case "people":
-              return (
-                <Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
-                  {users?.map((u) => {
-                    return (
-                      <Form.TagPicker.Item
-                        key={"people::" + u.id}
-                        value={u.id}
-                        title={u.name ? u.name : "Unknown"}
-                        icon={u.avatar_url ? { source: u.avatar_url, mask: Image.Mask.Circle } : undefined}
-                      />
-                    );
-                  })}
-                </Form.TagPicker>
-              );
-            // Formulas can't be set on creation
-            case "formula":
-              return null;
-            default:
-              return <Form.TextField key={key} id={id} title={title} placeholder={placeholder} />;
-          }
+        .map((property) => {
+          let options: Parameters<typeof PagePropertyField>[0]["options"] = property.options;
+          if (property.type == "people") options = users;
+          else if (property.type == "relation" && property.relation_id && relationPages)
+            options = relationPages[property.relation_id];
+          return <PagePropertyField key={property.id} property={property} options={options} />;
         })}
       <Form.Separator />
       <Form.TextArea
