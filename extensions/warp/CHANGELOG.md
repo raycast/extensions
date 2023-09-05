@@ -1,5 +1,9 @@
 # Warp Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- "Open Directory" command now supports marking directories as favorite
+
 ## [Initial Release] - 2023-06-29
 
 - "Open Directory" command
