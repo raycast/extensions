@@ -17,8 +17,8 @@ export async function linkWithBridge(
 
   return {
     ipAddress: bridgeIpAddress,
-    username: bridgeUsername ?? (await getUsernameFromBridge(bridgeIpAddress, bridgeId, certificate)),
-    id: bridgeId ?? bridgeCertificate.subject.CN,
+    username: bridgeUsername ? bridgeUsername : await getUsernameFromBridge(bridgeIpAddress, bridgeId, certificate),
+    id: bridgeId ? bridgeId : bridgeCertificate.subject.CN,
     certificateType: isSelfSigned ? "self-signed" : "signed-by-hue-bridge-root-ca",
     certificate: isSelfSigned ? pemString : undefined,
   };

@@ -16,6 +16,15 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.9.1
+
+- Fix an issue where `useForm`'s `reset` function would not reset the value of some fields (which defeats its purpose...)
+
+### v1.9.0
+
+- Add a new [`useFrecencySorting`](./react-hooks/useFrecencySorting.md) hook.
+- Change the default `options.timeout` of `useExec` to 10s.
+
 ### v1.8.0
 
 - Add a new [`runAppleScript`](./functions/runAppleScript.md) function.

@@ -1,6 +1,9 @@
 linear
 github
+browser-bookmarks
+raycast-explorer
 google-workspace
+jira
 zoom
 hypersonic
 asana
@@ -22,3 +25,7 @@ todoist
 screen-studio
 openverse
 putio
+warp
+getsound
+reclaim-ai
+posthog

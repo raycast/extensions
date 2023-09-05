@@ -15,7 +15,7 @@ import HueClient from "./HueClient";
 import { BridgeConfig, GroupedLight, Light, Room, Scene, Zone } from "./types";
 import React from "react";
 import createHueClient from "./createHueClient";
-import { discoverBridgeUsingMdns, discoverBridgeUsingHuePublicApi } from "../helpers/hueNetworking";
+import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "../helpers/hueNetworking";
 import { linkWithBridge } from "./linkWithBridge";
 import * as net from "net";
 import Style = Toast.Style;

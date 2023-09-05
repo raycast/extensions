@@ -16,6 +16,23 @@ async function getApplications(path?: PathLike): Promise<Application[]>;
 
 #### Example
 
+{% tabs %}
+{% tab title="Find Application" %}
+
+```typescript
+import { getApplications, Application } from "@raycast/api";
+
+// it is a lot more reliable to get an app by its bundle ID than its path
+async function findApplication(bundleId: string): Application | undefined {
+  const installedApplications = await getApplications();
+  return installedApplications.filter((application) => application.bundleId == bundleId);
+}
+```
+
+{% endtab %}
+
+{% tab title="List Installed Applications" %}
+
 ```typescript
 import { getApplications } from "@raycast/api";
 
@@ -25,6 +42,9 @@ export default async function Command() {
   console.log(installedApplications.map((a) => a.name).join(", "));
 }
 ```
+
+{% endtab %}
+{% endtabs %}
 
 #### Parameters
 

@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [New field: Command to execute] - 2023-08-30
+
+- Added a new optional field to execute a command on the remote server after logging in.
+
 ## [New window or tab] - 2023-05-16
 
 - Adding preference to allow the user to define which way the new SSH-Connection will be opened.

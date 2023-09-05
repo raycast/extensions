@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toggle-scroll-bars-visibility",
+  "title": "Toggle Scroll Bars Visibility",
+  "description": "Change scroll bars visibility in macOS.",
+  "icon": "extension-icon.png",
+  "author": "danulqua",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Scroll Bars Visibility",
+      "description": "Toggles scroll bars visibility between \"Automatic\" and \"Always\".",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-automatic",
+      "title": "Set Scroll Bars Visibility To \"Automatic\"",
+      "description": "Sets scroll bars visibility to \"Automatic\".",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-when-scrolling",
+      "title": "Set Scroll Bars Visibility To \"When Scrolling\"",
+      "description": "Sets scroll bars visibility to \"When Scrolling\".",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-always",
+      "title": "Set Scroll Bars Visibility To \"Always\"",
+      "description": "Sets scroll bars visibility to \"Always\".",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-current-value",
+      "title": "View Current Scroll Bars Visibility Value",
+      "description": "Views current scroll bars visibility value.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "script:run": "cd script && swift run script",
+    "script:build": "cd script && swift build -c release --arch arm64 --arch x86_64 && npm run script:move",
+    "script:move": "cd script && cp .build/apple/Products/Release/script ../assets/scripts/set-scroll-bars-visibility",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+  }
+}

@@ -1,5 +1,9 @@
 # Country Changelog
 
+## [Update] - 2023-07-26
+
+- Added Country Alpha3 Code to details
+
 ## [Enhancement] - 2023-05-30
 
 - Added possibility to search for cca3 code

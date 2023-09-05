@@ -25,6 +25,8 @@ const CONFIG = {
   homeTLUrl: "/api/v1/timelines/home",
   publicTLUrl: "/api/v1/timelines/public",
 };
+const sanitize = (instance: string): string =>
+  instance.endsWith("/") ? instance.slice(0, -1).trim() : instance.trim();
 
 const requestApi = async <T>(
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
@@ -39,6 +41,8 @@ const requestApi = async <T>(
     throw new Error("instance is required");
   }
 
+  const sanitizedInstance = sanitize(instance);
+
   const tokenSet = await client.getTokens();
   const headers: HeadersInit = { Authorization: `Bearer ${tokenSet?.accessToken}` };
 
@@ -46,7 +50,7 @@ const requestApi = async <T>(
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(`https://${instance}/${endpoint}`, {
+  const response = await fetch(`https://${sanitizedInstance}${endpoint}`, {
     method,
     headers,
     body: isFormData ? body : JSON.stringify(body),

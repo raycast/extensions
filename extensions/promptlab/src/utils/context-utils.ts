@@ -1,7 +1,42 @@
-import { runAppleScript, runAppleScriptSync } from "run-applescript";
 import * as os from "os";
-import { filterString } from "./calendar-utils";
-import * as fs from "fs";
+import { getPreferenceValues } from "@raycast/api";
+import { ExtensionPreferences, JSONObject } from "./types";
+import fetch from "node-fetch";
+import { runAppleScript } from "@raycast/utils";
+
+/**
+ * Removes extraneous symbols from a string and limits it to (by default) 3000 characters.
+ *
+ * @param str The string to filter.
+ * @param cutoff The length to limit the string to, defaults to 3000.
+ * @returns The filtered string.
+ */
+export const filterString = (str: string, cutoff?: number): string => {
+  /* Removes unnecessary/invalid characters from strings. */
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  if (preferences.condenseAmount == "high") {
+    // Remove some useful characters for the sake of brevity
+    return str
+      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@: ~\n\r<>]/g, "")
+      .replaceAll('"', "'")
+      .substring(0, cutoff || str.length);
+  } else if (preferences.condenseAmount == "medium") {
+    // Remove uncommon characters
+    return str
+      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@: ~\n\r<>+*&|]/g, "")
+      .replaceAll('"', "'")
+      .substring(0, cutoff || str.length);
+  } else if (preferences.condenseAmount == "low") {
+    // Remove all characters except for letters, numbers, and punctuation
+    return str
+      .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@:; ~\n\r\t<>%^$~+*_&|]/g, "")
+      .replaceAll('"', "'")
+      .substring(0, cutoff || str.length);
+  } else {
+    // Just remove quotes and cut off at the limit
+    return str.replaceAll('"', "'").substring(0, cutoff || str.length);
+  }
+};
 
 /**
  * Gets the URL of the active tab in Safari.
@@ -14,6 +49,17 @@ const getCurrentSafariURL = async (): Promise<string> => {
             return URL of document 1
         end tell
     end try`);
+};
+
+/**
+ * Gets the visible text of the active tab in Safari (avoiding paywalls and other issues with the URL).
+ *
+ * @returns A promise which resolves to the visible text of the active tab as a string.
+ */
+export const getSafariTabText = async (): Promise<string> => {
+  return runAppleScript(`try
+    tell application "Safari" to return text of current tab of window 1
+  end try`);
 };
 
 /**
@@ -149,23 +195,68 @@ const getChromiumURL = async (browserName: string): Promise<string> => {
 };
 
 /**
+ * Gets the URL of the active tab in Orion.
+ * @returns A promise which resolves to the URL of the active tab as a string.
+ */
+const getOrionURL = async (): Promise<string> => {
+  return runAppleScript(`try
+    tell application "Orion"
+      return URL of current tab of window 1
+    end tell
+  end try`);
+};
+
+/**
+ * Gets the URL of the active tab in OmniWeb.
+ * @returns A promise which resolves to the URL of the active tab as a string.
+ */
+const getOmniWebURL = async (): Promise<string> => {
+  return runAppleScript(`tell application "OmniWeb" to return address of active tab of browser 1`);
+};
+
+/**
+ * Gets the URL of the active tab in SigmaOS.
+ * @returns A promise which resolves to the URL of the active tab as a string.
+ */
+const getSigmaOSURL = async (): Promise<string> => {
+  return runAppleScript(`tell application "SigmaOS" to return URL of active tab of window 1`);
+};
+
+/**
  * The browsers from which the current URL can be obtained.
  */
 export const SupportedBrowsers = [
-  "Safari",
-  "Chromium",
-  "Google Chrome",
-  "Opera",
-  "Opera Neon",
-  "Vivaldi",
-  "Microsoft Edge",
-  "Brave Browser",
-  "Iron",
-  "Yandex",
-  "Blisk",
-  "Epic",
   "Arc",
+  "Blisk",
+  "Brave Browser Beta",
+  "Brave Browser Dev",
+  "Brave Browser Nightly",
+  "Brave Browser",
+  "Chromium",
+  "Epic",
+  "Google Chrome Beta",
+  "Google Chrome Canary",
+  "Google Chrome Dev",
+  "Google Chrome",
   "iCab",
+  "Iron",
+  "Maxthon Beta",
+  "Maxthon",
+  "Microsoft Edge Beta",
+  "Microsoft Edge Canary",
+  "Microsoft Edge Dev",
+  "Microsoft Edge",
+  "Opera Beta",
+  "Opera Developer",
+  "Opera GX",
+  "Opera Neon",
+  "Opera",
+  "Orion",
+  "Safari",
+  "Vivaldi",
+  "Yandex",
+  "OmniWeb",
+  "SigmaOS",
 ];
 
 /**
@@ -179,19 +270,95 @@ export const getCurrentURL = async (browserName: string): Promise<string> => {
     case "Safari":
       return getCurrentSafariURL();
       break;
-    case "Google Chrome":
-    case "Microsoft Edge":
-    case "Brave Browser":
-    case "Opera":
-    case "Vivaldi":
-    case "Chromium":
-      return getChromiumURL(browserName);
-      break;
     case "Arc":
       return getArcURL();
       break;
     case "iCab":
       return getiCabURL();
+    case "Orion":
+      return getOrionURL();
+      break;
+    case "OmniWeb":
+      return getOmniWebURL();
+      break;
+    case "SigmaOS":
+      return getSigmaOSURL();
+      break;
+    default:
+      return getChromiumURL(browserName);
+      break;
+  }
+  return "";
+};
+
+/**
+ * Executes a JavaScript script in the active tab of the specified browser.
+ *
+ * @param browserName The name of the browser application. Must be a member of {@link SupportedBrowsers}.
+ * @returns A promise which resolves to the result of the script as a string.
+ */
+export const runJSInActiveTab = async (script: string, browserName: string): Promise<string> => {
+  switch (browserName) {
+    case "Safari":
+      return runAppleScript(`tell application "Safari"
+          set theTab to current tab of window 1
+          tell theTab
+            return do JavaScript "try {
+              ${script}
+            } catch {
+              '';
+            }"
+          end tell
+        end tell`);
+      break;
+    case "Arc":
+      return runAppleScript(`tell application "Arc"
+          set theTab to active tab of front window
+          set js to "try {
+            ${script}
+          } catch {
+            '';
+          }"
+          
+          tell front window's active tab
+            return execute javascript js
+          end tell
+        end tell`);
+      break;
+    case "iCab":
+    case "SigmaOS":
+      // No way to return script
+      break;
+    case "Orion":
+      return runAppleScript(`tell application "Orion"
+          set theTab to current tab of window 1
+          do JavaScript "try {
+                      ${script}
+                    } catch {
+                      '';
+                    }" in theTab
+        end tell`);
+      break;
+    case "OmniWeb":
+      return runAppleScript(`tell application "OmniWeb"
+          do script "try {
+            ${script}
+          } catch {
+            '';
+          }" window browser 1
+        end tell`);
+      break;
+    default:
+      return runAppleScript(`tell application "${browserName}"
+          set theTab to active tab of window 1
+          tell theTab
+            return execute javascript "try {
+                      ${script}
+                    } catch {
+                      '';
+                    }"
+          end tell
+        end tell`);
       break;
   }
   return "";
@@ -203,43 +370,10 @@ export const getCurrentURL = async (browserName: string): Promise<string> => {
  * @param URL The URL to get the HTML of.
  * @returns The HTML as a string.
  */
-export const getURLHTML = (URL: string): string => {
-  return runAppleScriptSync(`use framework "Foundation"
-    set theResult to ""
-    on getURLHTML(theURL)
-        global theResult
-        set theURL to current application's NSURL's URLWithString:theURL
-        set theSessionConfiguration to current application's NSURLSessionConfiguration's defaultSessionConfiguration()
-        set theSession to current application's NSURLSession's sessionWithConfiguration:(theSessionConfiguration) delegate:(me) delegateQueue:(missing value)
-        set theRequest to current application's NSURLRequest's requestWithURL:theURL
-        set theTask to theSession's dataTaskWithRequest:theRequest
-        theTask's resume()
-        
-        set completedState to current application's NSURLSessionTaskStateCompleted
-        set canceledState to current application's NSURLSessionTaskStateCanceling
-        
-        repeat while theTask's state() is not completedState and theTask's state() is not canceledState
-            delay 0.1
-        end repeat
-        
-        return theResult
-    end getURLHTML
-    
-    on URLSession:tmpSession dataTask:tmpTask didReceiveData:tmpData
-        global theResult
-        set theText to (current application's NSString's alloc()'s initWithData:tmpData encoding:(current application's NSASCIIStringEncoding)) as string
-
-        set theResult to theResult & theText
-    end URLSession:dataTask:didReceiveData:
-    return getURLHTML("${URL}")`);
+export const getURLHTML = async (URL: string): Promise<string> => {
+  const request = await fetch(URL);
+  return await request.text();
 };
-
-/**
- * A JSON object returned by {@link getJSONResponse}.
- */
-interface JSONObject {
-  [key: string]: string | JSONObject;
-}
 
 /**
  * Gets the JSON objects returned from a URL.
@@ -247,8 +381,8 @@ interface JSONObject {
  * @param URL The url to a .json document.
  * @returns The JSON as a {@link JSONObject}.
  */
-export const getJSONResponse = (URL: string): JSONObject => {
-  const raw = getURLHTML(URL);
+export const getJSONResponse = async (URL: string): Promise<JSONObject> => {
+  const raw = await getURLHTML(URL);
   return JSON.parse(raw);
 };
 
@@ -259,14 +393,16 @@ export const getJSONResponse = (URL: string): JSONObject => {
  * @returns A promise resolving to the visible text as a string.
  */
 export const getTextOfWebpage = async (URL: string): Promise<string> => {
-  const html = getURLHTML(URL);
+  const html = await getURLHTML(URL);
   const filteredString = html
+    .replaceAll(/(<br ?\/?>|[\n\r]+)/g, "\n")
     .replaceAll(
       /(<script[\s\S\n\r]+?<\/script>|<style[\s\S\n\r]+?<\/style>|<nav[\s\S\n\r]+?<\/nav>|<link[\s\S\n\r]+?<\/link>|<form[\s\S\n\r]+?<\/form>|<button[\s\S\n\r]+?<\/button>|<!--[\s\S\n\r]+?-->|<select[\s\S\n\r]+?<\/select>|<[\s\n\r\S]+?>)/g,
-      " "
+      "\t"
     )
-    .replaceAll(/[\s\n\r]+/g, " ")
-    .replaceAll(/(\([^A-Za-z0-9]*\)|(?<=[,.!?%*])[,.!?%*]*?\s*[,.!?%*])/g, " ");
+    .replaceAll(/([\t ]*[\n\r][\t ]*)+/g, "\r")
+    .replaceAll(/(\([^A-Za-z0-9\n]*\)|(?<=[,.!?%*])[,.!?%*]*?\s*[,.!?%*])/g, " ")
+    .replaceAll(/{{(.*?)}}/g, "$1");
   return filteredString;
 };
 
@@ -276,8 +412,8 @@ export const getTextOfWebpage = async (URL: string): Promise<string> => {
  * @returns A promise resolving to the transcript as a string, or "No transcript available." if there is no transcript.
  */
 export const getYouTubeVideoTranscriptById = async (videoId: string): Promise<string> => {
-  const html = getURLHTML(`https://www.youtube.com/watch?v=${videoId}`);
-  const captionsJSON = JSON.parse(html.split(`"captions":`)[1].split(`,"videoDetails"`)[0].replace("\n", ""))[
+  const html = await getURLHTML(`https://www.youtube.com/watch?v=${videoId}`);
+  const captionsJSON = JSON.parse(html.split(`"captions":`)?.[1]?.split(`,"videoDetails"`)?.[0]?.replace("\n", ""))[
     "playerCaptionsTracklistRenderer"
   ];
 
@@ -285,15 +421,14 @@ export const getYouTubeVideoTranscriptById = async (videoId: string): Promise<st
     return "No transcript available.";
   }
 
-  const title = html.matchAll(/title":"((.| )*?),"lengthSeconds/g).next().value[1];
+  const title = html.matchAll(/title":"((.| )*?),"lengthSeconds/g).next().value?.[1];
   const captionTracks = captionsJSON["captionTracks"];
   const englishCaptionTrack = captionTracks.find((track: JSONObject) => track["languageCode"] === "en");
   if (!englishCaptionTrack) {
     return "No transcript available.";
   }
 
-  const transcriptURL = "https://youtube.com" + englishCaptionTrack["baseUrl"];
-  const transcriptText = await getTextOfWebpage(transcriptURL);
+  const transcriptText = await getTextOfWebpage(englishCaptionTrack["baseUrl"]);
   return filterString(`Video Title: ${title}\n\nTranscript:\n${transcriptText}`);
 };
 
@@ -303,7 +438,7 @@ export const getYouTubeVideoTranscriptById = async (videoId: string): Promise<st
  * @returns A promise resolving to the transcript as a string, or "No transcript available." if there is no transcript.
  */
 export const getYouTubeVideoTranscriptByURL = async (videoURL: string): Promise<string> => {
-  const videoId = videoURL.split("v=")[1].split("&")[0];
+  const videoId = videoURL.split("v=")[1]?.split("&")[0];
   return getYouTubeVideoTranscriptById(videoId);
 };
 
@@ -312,9 +447,9 @@ export const getYouTubeVideoTranscriptByURL = async (videoURL: string): Promise<
  * @param searchText The text to search for.
  * @returns The ID of the first matching video.
  */
-export const getMatchingYouTubeVideoID = (searchText: string): string => {
-  const html = getURLHTML(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchText)}`);
-  const videoID = html.matchAll(/videoId\\x22:\\x22(.*?)\\x22,/g).next().value[1];
+export const getMatchingYouTubeVideoID = async (searchText: string): Promise<string> => {
+  const html = await getURLHTML(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchText)}`);
+  const videoID = html.matchAll(/videoId\\x22:\\x22(.*?)\\x22,/g).next().value?.[1];
   return videoID;
 };
 
@@ -444,8 +579,8 @@ export const getLastEmail = async (): Promise<string> => {
  * @param days The number of days to get the forecast for (either 1 or 7)
  * @returns The forecast as a JSON object.
  */
-export const getWeatherData = (days: number): JSONObject => {
-  const jsonObj = getJSONResponse("https://get.geojs.io/v1/ip/geo.json");
+export const getWeatherData = async (days: number): Promise<JSONObject> => {
+  const jsonObj = await getJSONResponse("https://get.geojs.io/v1/ip/geo.json");
   const latitude = jsonObj["latitude"];
   const longitude = jsonObj["longitude"];
   const timezone = (jsonObj["timezone"] as string).replace("/", "%2F");
@@ -483,42 +618,6 @@ export const getMenubarOwningApplication = async (
   includePaths?: boolean
 ): Promise<string | { name: string; path: string }> => {
   const app = await runAppleScript(`use framework "Foundation"
-  use scripting additions
-  set workspace to current application's NSWorkspace's sharedWorkspace()
-  set runningApps to workspace's runningApplications()
-  
-  set targetApp to missing value
-  repeat with theApp in runningApps
-    if theApp's ownsMenuBar() then
-      set targetApp to theApp
-      exit repeat
-    end if
-  end repeat
-  
-  if targetApp is missing value then
-    return ""
-  else
-    ${
-      includePaths
-        ? `return {targetApp's localizedName() as text, targetApp's bundleURL()'s fileSystemRepresentation() as text}`
-        : `return targetApp's localizedName() as text`
-    }
-  end if`);
-
-  if (includePaths) {
-    const data = app.split(", ");
-    return { name: data[0], path: data[1] };
-  }
-  return app;
-};
-
-/**
- * The same as {@link getMenubarOwningApplication}, but synchronous.
- * @param includePaths Whether to include the path of the application.
- * @returns The name of the application as a string, or an object containing the name and path if includePaths is true.
- */
-export const getMenubarOwningApplicationSync = (includePaths?: boolean): string | { name: string; path: string } => {
-  const app = runAppleScriptSync(`use framework "Foundation"
   use scripting additions
   set workspace to current application's NSWorkspace's sharedWorkspace()
   set runningApps to workspace's runningApplications()

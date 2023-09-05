@@ -6,6 +6,7 @@ import CompletedTasks from "./components/CompletedTasks";
 import InboxTasks from "./components/InboxTasks";
 import LabelTasks from "./components/LabelTasks";
 import ProjectTasks from "./components/ProjectTasks";
+import TaskDetail from "./components/TaskDetail";
 import TodayTasks from "./components/TodayTasks";
 import UpcomingTasks from "./components/UpcomingTasks";
 import View from "./components/View";
@@ -79,6 +80,11 @@ export function Home({ launchContext }: LaunchProps) {
     return data?.labels.sort((a, b) => a.item_order - b.item_order) ?? [];
   }, [data]);
 
+  // If task we return earlier the taskDetail component directly
+  if (view.startsWith("task_")) {
+    const taskId = view.replace("task_", "");
+    return <TaskDetail taskId={taskId} />;
+  }
   return (
     <List
       navigationTitle={navigationTitle}

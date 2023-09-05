@@ -32,6 +32,10 @@ Q: I got my token damaged error during refresh
 
 A: Try a few time, in case problem hasn't been resolved try to re-install extension, any way all synced services should work fine
 
-Q: I got `currpted` OTP for some of my records
+Q: I got `corrupted` OTP for some of my records
 
-A: That mean extension couldn't decrypt your OTP, pls submit a [GitHub issue](https://github.com/raycast/extensions/issues/new/choose) for Authy extension. 
+A: That means the extension couldn't decrypt your OTP, pls submit a [GitHub issue](https://github.com/raycast/extensions/issues/new/choose) for Authy extension. 
+
+Q: I got `corrupted` OTP for ALL of my records
+
+A: That means extension the couldn't decrypt any of your OTPs, The likely cause is that your Authy Backup Password is incorrect. Please check or reset the password.  
