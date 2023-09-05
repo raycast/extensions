@@ -42,7 +42,7 @@ function NoteForm() {
 
   function collectionTitle(tag: CollectionProp) {
     if (tag.heading) {
-      return `${tag.heading} > ${tag.name}`;
+      return `${tag.heading} › ${tag.name}`;
     }
     return `${tag.name}`;
   }
@@ -76,6 +76,7 @@ function NoteForm() {
               if (note.length > 0) {
                 const data = {
                   note,
+                  comment: values.comment,
                   collections: values.collections,
                   starred: !!values.starred,
                 };

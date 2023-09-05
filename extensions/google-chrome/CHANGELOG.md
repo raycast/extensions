@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [New shortcut] - 2023-08-21
+
+- Changed shortcut for Close Tab in the Search Tab command.
+
 ## [Added better debug] - 2023-04-25
 
 - Increase exception message to diagnose issues

@@ -32,7 +32,9 @@ export interface AnydockProfile {
 }
 async function isAnyboxInstalled() {
   const applications = await getApplications();
-  return applications.some(({ bundleId }) => bundleId === "cc.anybox.Anybox");
+  return applications.some(
+    ({ bundleId }) => bundleId === "cc.anybox.Anybox" || bundleId === "ltd.anybox.Anybox-setapp"
+  );
 }
 
 export async function checkForAnyboxInstallation() {
@@ -54,13 +56,12 @@ export async function checkForAnyboxInstallation() {
   }
 }
 
-function request(path: string, method: string, body?: any, closeWindow = false) {
+function request(path: string, method: string, body?: any, closeWindow = false, headers = {}) {
+  const combinedHeaders = { ...headers, "Content-Type": "application/json" };
   return fetch(`http://127.0.0.1:6391/${path}`, {
     method,
     body: JSON.stringify(body),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: combinedHeaders,
   })
     .then((res) => {
       if (res.status === 200) {
@@ -89,8 +90,14 @@ export function handleError(error: FetchError) {
       message: "It looks like Anybox is not running.",
       primaryAction: {
         title: "Open Anybox",
-        onAction: (toast) => {
-          open("open", "cc.anybox.Anybox");
+        onAction: async (toast) => {
+          const installedApplications = await getApplications();
+          const app = installedApplications.filter((application) => application.bundleId == "ltd.anybox.Anybox-setapp");
+          if (app.length > 0) {
+            open("open", "ltd.anybox.Anybox-setapp");
+          } else {
+            open("open", "cc.anybox.Anybox");
+          }
           toast.hide();
         },
       },
@@ -128,8 +135,8 @@ export async function fetchProfiles() {
   return GET("anydock-profiles") as Promise<[AnydockProfile]>;
 }
 
-export async function fetchSearchEngines() {
-  return GET("search-engines") as Promise<[Link]>;
+export async function fetchSearchEngines(key: string) {
+  return request("search-engines", "GET", undefined, false, { "x-api-key": key }) as Promise<[Link]>;
 }
 
 async function fetchFilters() {

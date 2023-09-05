@@ -30,6 +30,7 @@ export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry |
 
 export enum VSCodeBuild {
   Code = "Code",
+  Cursor = "Cursor",
   Insiders = "Code - Insiders",
   VSCodium = "VSCodium",
 }
