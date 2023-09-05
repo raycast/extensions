@@ -17,14 +17,14 @@ async function runTerminal(item: ISSHConnection) {
   if (item.sshKey) {
     identity = `-i ${item.sshKey} `;
   }
-  let customport = "";
+  let customPort = "";
   if (item.port) {
-    customport = `-p ${item.port} `;
+    customPort = `-p ${item.port} `;
   }
-  let customcommand = "";
+  let customCommand = "";
   let interactive = "";
   if (item.command) {
-    customcommand = `\\"${item.command}\\" `;
+    customCommand = `\\"${item.command}\\" `;
     interactive = "-t";
   }
   let address = item.address;
@@ -32,7 +32,7 @@ async function runTerminal(item: ISSHConnection) {
     address = `${encodeURIComponent(item.user)}@${address}`;
   }
 
-  const command = `ssh ${interactive} ${identity} ${address} ${customport} ${customcommand}`;
+  const command = ["ssh", interactive, identity, address, customPort, customCommand].filter(Boolean).join(" ");
 
   const scriptWarp = `
       -- For the latest version:
