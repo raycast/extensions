@@ -27,25 +27,25 @@ export default function Command() {
   const [TextField, SetTextField] = useState<string>("");
 
   async function checkClipboardValue() {
-    handleSubmit({ VideoURL: (await Clipboard.readText()) || "", ProvidedByExtension: true });
-  }
-
-  function fillInput(VideoURL: string) {
-    SetTextField(VideoURL);
+    const ClipboardText = await Clipboard.readText();
+    if (
+      // TODO: Improve URL validation
+      ClipboardText &&
+      ClipboardText.includes("twitter.com") &&
+      ClipboardText.split("/").length > 4
+    )
+      handleSubmit({ VideoURL: ClipboardText || "", ProvidedByExtension: true });
   }
 
   function handleSubmit(Values: FormValues) {
     try {
-      const [Username, TweetID] = [Values.VideoURL.split("/")[3], Values.VideoURL.split("/")[5]];
-      if (!Username || !TweetID) {
-        if (Values.ProvidedByExtension) return;
-        else throw new Error("Invalid URL");
-      }
+      if (Values.ProvidedByExtension) return SetTextField(Values.VideoURL);
+      const [Username, TweetID] = [TextField.split("/")[3], TextField.split("/")[5]];
+      if (!Username || !TweetID) throw new Error("Invalid URL");
 
       SetFilename(`${TweetID}.mp4`);
 
-      Values.ProvidedByExtension && fillInput(Values.VideoURL);
-      !Values.ProvidedByExtension && handleDownload(Username, TweetID);
+      handleDownload(Username, TweetID);
     } catch {
       showToast({
         title: "Invalid URL",
@@ -69,23 +69,28 @@ export default function Command() {
       responseType: "stream",
       onDownloadProgress: (Event) =>
         (ProgressToast.message = Math.round(Event.progress! * 100) + "%"),
-    }).then((Response) => {
-      Response.data.pipe(Writer);
-      Writer.on("finish", async () => {
-        showToast({
-          title: "Download complete",
+    })
+      .then((Response) => {
+        Response.data.pipe(Writer);
+        Writer.on("finish", async () => {
+          showToast({
+            title: "Download complete",
+          });
+          SetClipboardContent({ file: `${DOWNLOADS_DIR}/${TweetID}.mp4` });
+          SetIsDownloadComplete(true);
+        }).on("error", () => {
+          showToast({
+            title: "Error while downloading video",
+            style: Toast.Style.Failure,
+          });
         });
-        SetClipboardContent({ file: `${DOWNLOADS_DIR}/${TweetID}.mp4` });
-        SetIsDownloadComplete(true);
-        !Writer.closed && Writer.close();
-      }).on("error", () => {
+      })
+      .catch(() => {
         showToast({
-          title: "Error while downloading video",
+          title: "Error while fetching video",
           style: Toast.Style.Failure,
         });
-        !Writer.closed && Writer.close();
       });
-    });
   }
 
   return (
