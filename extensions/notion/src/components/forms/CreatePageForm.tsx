@@ -14,12 +14,12 @@ import { handleOnOpenPage } from "../../utils/openPage";
 import { DatabasePropertyOption, Page } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
 
-type CreateDatabaseFormProps = {
+type CreatePageFormProps = {
   databaseId?: string;
   mutate?: () => Promise<void>;
 };
 
-export function CreateDatabaseForm({ databaseId: initialDatabaseId, mutate }: CreateDatabaseFormProps) {
+export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: CreatePageFormProps) {
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { setRecentPage } = useRecentPages();
   const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
