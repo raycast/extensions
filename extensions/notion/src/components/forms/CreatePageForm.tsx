@@ -19,15 +19,24 @@ import { PagePropertyField } from "./PagePropertyField";
 type CreatePageFormProps = {
   databaseId?: string;
   mutate?: () => Promise<void>;
+  defaults?: Record<string, Form.Value>;
 };
 
-export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: CreatePageFormProps) {
+export function CreatePageForm({ databaseId: initialDatabaseId, mutate, defaults }: CreatePageFormProps) {
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
   const { data: databaseProperties } = useDatabaseProperties(databaseId);
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
+
+  const propsRequireLoad = (() => {
+    if (!defaults) return false;
+    const asyncProp = Object.keys(defaults).find((id) => {
+      return id.startsWith("property::relation") || id.startsWith("property::people");
+    });
+    return Boolean(asyncProp);
+  })();
 
   function filterProperties(dp: DatabaseProperty) {
     return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
@@ -93,6 +102,13 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
     }
   }
 
+  function copyDeeplink(values: Form.Values) {
+    const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
+    const launchContext = encodeURIComponent(JSON.stringify(values));
+    Clipboard.copy(url + "?launchContext=" + launchContext);
+    showToast({ title: "Copied deeplink to clipboard" });
+  }
+
   if (!isLoadingDatabases && !databases.length) {
     showToast({
       style: Toast.Style.Failure,
@@ -108,7 +124,12 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={(values) => handleSubmit(values)} />
+            <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} />
+            <Action.SubmitForm
+              title="Copy Deeplink to Command as Configured"
+              icon={Icon.Clipboard}
+              onSubmit={copyDeeplink}
+            />
           </ActionPanel.Section>
           {databaseView && setDatabaseView ? (
             <ActionPanel.Section title="View options">
@@ -160,22 +181,27 @@ export function CreatePageForm({ databaseId: initialDatabaseId, mutate }: Create
           <Form.Separator key="separator" />
         </>
       )}
-      {databaseProperties
-        ?.filter(filterProperties)
-        .sort(sortProperties)
-        .map((property) => {
-          let options: Parameters<typeof PagePropertyField>[0]["options"] = property.options;
-          if (property.type == "people") options = users;
-          else if (property.type == "relation" && property.relation_id && relationPages)
-            options = relationPages[property.relation_id];
-          return <PagePropertyField key={property.id} property={property} options={options} />;
-        })}
-      <Form.Separator />
-      <Form.TextArea
-        id="content"
-        title="Page Content"
-        enableMarkdown
-        info="Parses Markdown to Notion Blocks. 
+
+      {propsRequireLoad && (isLoadingDatabases || isLoadingRelationPages) ? null : (
+        <>
+          {databaseProperties
+            ?.filter(filterProperties)
+            .sort(sortProperties)
+            .map((property) => {
+              const key = "property::" + property.type + "::" + property.id;
+              const defaultValue = defaults?.[key];
+              let options: Parameters<typeof PagePropertyField>[0]["options"] = property.options;
+              if (property.type == "people") options = users;
+              else if (property.type == "relation" && property.relation_id && relationPages)
+                options = relationPages[property.relation_id];
+              return <PagePropertyField key={key} property={property} options={options} defaultValue={defaultValue} />;
+            })}
+          <Form.Separator />
+          <Form.TextArea
+            id="content"
+            title="Page Content"
+            enableMarkdown
+            info="Parses Markdown to Notion Blocks. 
         
 It supports:
 - Headings (levels 4 to 6 are treated as 3 on Notion)
@@ -184,7 +210,9 @@ It supports:
 - Text formatting; italics, bold, strikethrough, inline code, hyperlinks
 
 Please note that HTML tags and thematic breaks are not supported in Notion due to its limitations."
-      />
+          />
+        </>
+      )}
     </Form>
   );
 }
