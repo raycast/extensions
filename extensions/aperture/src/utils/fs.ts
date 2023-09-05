@@ -1,5 +1,5 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { format } from "date-fns";
+import formatDate from "date-fns/format";
 import { statSync } from "fs";
 import { rename } from "fs/promises";
 import { join } from "path";
@@ -25,7 +25,7 @@ export function waitUntilFileIsAvailable(path: string): Promise<void> {
 
 export async function moveFileToSaveLocation(filePath: string, endTime = new Date()) {
   const savePath = getPreferenceValues<Preferences>().savePath;
-  const savedFilePath = join(savePath, `Aperture ${format(endTime, "yyyy-MM-dd 'at' HH.mm.ss")}.mp4`);
+  const savedFilePath = join(savePath, `Aperture ${formatDate(endTime, "yyyy-MM-dd 'at' HH.mm.ss")}.mp4`);
   await rename(filePath, savedFilePath);
 
   return savedFilePath;

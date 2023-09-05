@@ -16,7 +16,7 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { formatDistanceToNow } from "date-fns";
+import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { dirname } from "path";
 import { Aperture } from "~/api/aperture";
 import { Recording } from "~/types/recording";
