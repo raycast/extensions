@@ -7,7 +7,8 @@
     "author": "Aayush9029",
     "contributors": [
         "thomaslombart",
-        "lukaszmtw"
+        "lukaszmtw",
+        "erics118"
     ],
     "license": "MIT",
     "commands": [
@@ -130,24 +131,32 @@
             "subtitle": "CleanShot X",
             "description": "Pin Screenshot to the Screen.",
             "icon": "pin.png",
-            "mode": "no-view"
+            "mode": "no-view",
+            "arguments": [
+              {
+                "name": "filepath",
+                "placeholder": "File Path",
+                "type": "text",
+                "required": false
+              }
+            ]
         }
     ],
     "categories": [
         "Applications"
     ],
     "dependencies": {
-        "@raycast/api": "^1.39.2"
+        "@raycast/api": "^1.57.2"
     },
     "devDependencies": {
-        "@types/node": "~16.10.0",
-        "@types/react": "^17.0.28",
-        "@typescript-eslint/eslint-plugin": "^5.0.0",
-        "@typescript-eslint/parser": "^5.0.0",
-        "eslint": "^7.32.0",
-        "eslint-config-prettier": "^8.3.0",
-        "react-devtools": "^4.19.2",
-        "typescript": "^4.4.3"
+        "@types/node": "~20.5.9",
+        "@types/react": "^18.2.21",
+        "@typescript-eslint/eslint-plugin": "^6.6.0",
+        "@typescript-eslint/parser": "^6.6.0",
+        "eslint": "^8.48.0",
+        "eslint-config-prettier": "^9.0.0",
+        "react-devtools": "^4.28.0",
+        "typescript": "^5.2.2"
     },
     "scripts": {
         "build": "ray build -e dist",
