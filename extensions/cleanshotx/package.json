@@ -99,7 +99,15 @@
             "subtitle": "CleanShot X",
             "description": "Annotate Mode",
             "icon": "annotate.png",
-            "mode": "no-view"
+            "mode": "no-view",
+            "arguments": [
+              {
+                "name": "filepath",
+                "placeholder": "File Path",
+                "type": "text",
+                "required": false
+              }
+            ]
         },
         {
             "name": "open-from-clipboard",
@@ -118,12 +126,44 @@
             "mode": "no-view"
         },
         {
-            "name": "restore-recently-closed",
-            "title": "Restore Recently Closed",
-            "subtitle": "CleanShot X",
-            "description": "Restore Recently Closed Overlay",
-            "icon": "capture-previous-area.png",
-            "mode": "no-view"
+          "name": "hide-desktop-icons",
+          "title": "Hide Desktop Icons",
+          "subtitle": "CleanShot X",
+          "description": "Hide Desktop Icons Visibility",
+          "icon": "hide-desktop-icons.png",
+          "mode": "no-view"
+        },
+        {
+          "name": "show-desktop-icons",
+          "title": "Show Desktop Icons",
+          "subtitle": "CleanShot X",
+          "description": "Show Desktop Icons Visibility",
+          "icon": "show-desktop-icons.png",
+          "mode": "no-view"
+        },
+        {
+          "name": "restore-recently-closed",
+          "title": "Restore Recently Closed",
+          "subtitle": "CleanShot X",
+          "description": "Restore Recently Closed Overlay",
+          "icon": "capture-previous-area.png",
+          "mode": "no-view"
+        },
+        {
+          "name": "add-quick-access-overlay",
+          "title": "Add Quick Access Overlay",
+          "subtitle": "CleanShot X",
+          "description": "Add Quick Access Overlay",
+          "icon": "add-quick-access-overlay.png",
+          "mode": "no-view",
+          "arguments": [
+            {
+              "name": "filepath",
+              "placeholder": "File Path",
+              "type": "text",
+              "required": true
+            }
+          ]
         },
         {
             "name": "pin",
