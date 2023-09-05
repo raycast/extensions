@@ -27,7 +27,7 @@ const EventActionsList = ({ event }: { event: Event }) => {
     setEventActions(actions);
   };
 
-  const RescheduleTask = async (calendarId: string, eventId: string, reschedule: string) => {
+  const rescheduleTask = async (calendarId: string, eventId: string, reschedule: string) => {
     await showToast(Toast.Style.Animated, "Rescheduling event...");
     try {
       const executeReschedule = await handleRescheduleTask(calendarId, eventId, reschedule);
