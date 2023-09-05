@@ -200,7 +200,7 @@ export default function ViewPinsCommand() {
       if (preferences.showFragment) addTextFragmentAccessory(pin, accessories);
       if (preferences.showFrequency) addFrequencyAccessory(pin, accessories, maxTimesOpened);
 
-      const group = groups.find((group) => group.name == pin.group);
+      const group = groups.find((group) => group.name == pin.group) || { name: "None", icon: "Minus", id: -1 };
       return (
         <List.Item
           title={pin.name || cutoff(pin.url, 20)}
@@ -288,13 +288,15 @@ export default function ViewPinsCommand() {
         description="Add a custom pin (⌘N)  or install some examples (⌘E)"
         icon="no-view.png"
       />
-      {preferences.showGroups
-        ? [{ name: "None", icon: "Minus", id: -1 }].concat(groups).map((group) => (
-            <List.Section title={group.name == "None" ? "Other" : group.name} key={group.id}>
-              {getPinListItems(pins.filter((pin) => pin.group == group.name))}
-            </List.Section>
-          ))
-        : getPinListItems(pins)}
+      {[{ name: "None", icon: "Minus", id: -1 }].concat(groups).map((group) =>
+        preferences.showGroups ? (
+          <List.Section title={group.name == "None" ? "Other" : group.name} key={group.id}>
+            {getPinListItems(pins.filter((pin) => pin.group == group.name))}
+          </List.Section>
+        ) : (
+          getPinListItems(pins.filter((pin) => pin.group == group.name))
+        )
+      )}
 
       <RecentApplicationsList
         pinActions={

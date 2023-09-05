@@ -3,7 +3,7 @@
 ------------------------
 
 Author: Stephen Kaplan _(HelloImSteven)_ <br />
-Last Updated: 2023-09-02 <br />
+Last Updated: 2023-09-05 <br />
 Pins Version: 1.4.0
 
 ------------------------
@@ -32,6 +32,7 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{as:...}}` or <br /> `{{AS:..}}` | The return value of an AppleScript script. |
 | `{{clipboardText}}` or <br /> `{{clipboard}}` | The current text content of the clipboard. |
 | `{{copy:...}}` | Copies the specified text to the clipboard. |
+| `{{currentAppBundleID}}` or <br /> `{{currentAppID}}` or <br /> `{{currentApplicationBundleID}}` or <br /> `{{currentApplicationID}}` | The bundle ID of the frontmost application. |
 | `{{currentAppName}}` or <br /> `{{currentApp}}` or <br /> `{{currentApplicationName}}` or <br /> `{{currentApplication}}` | The name of the frontmost application. |
 | `{{currentAppPath}}` or <br /> `{{currentApplicationPath}}` | The POSIX path to the bundle of the frontmost application. |
 | `{{currentDirectory}}` | The POSIX path of Finder's current insertion location. This is the desktop if no Finder windows are open. |
@@ -42,6 +43,8 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{delete [name]}}` | Deletes the persistent variable with the specified name. |
 | `{{file:...}}` | The text content of a path at the specified path. The path can be absolute or relative to the user's home directory using `~/`. |
 | `{{get [name]}}` | Gets the value of the persistent variable with the specified name. |
+| `{{groupNames}}` | The comma-separated list of names of all groups. Specify an amount of groups to randomly select using `{{groupNames amount=[number]}}`. |
+| `{{groups}}` | The JSON representation of all groups. Specify an amount of groups to randomly select using `{{groups amount=[number]}}`. |
 | `{{homedir}}` or <br /> `{{homeDirectory}}` | The path to the user's home directory. |
 | `{{hostname}}` | The hostname of the computer. |
 | `{{ignore:...}}` or <br /> `{{IGNORE:...}}` | Ignores all content contained within. Useful for running placeholders without inserting their return value. |
@@ -49,6 +52,9 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{js:...}}` or <br /> `{{JS:...}}` | The return value of sandboxed JavaScript code. See [JavaScript Placeholder Reference](#javascript-placeholder-reference) for more information. |
 | `{{jxa:...}}` or <br /> `{{JXA:...}}` | The return value of a JXA script. |
 | `{{paste:...}}` | Pastes the specified text into the frontmost application. |
+| `{{pinNames}}` | The comma-separated list of names of all pins, sorted by date last used. Specify an amount of pins to randomly select using `{{pinNames amount=[number]}}`. |
+| `{{pins}}` | The JSON representation of all pins. Specify an amount of pins to randomly select using `{{pins amount=[number]}}`. |
+| `{{pinTargets}}` | The newline-separated list of targets of all pins, sorted by date last used. Specify an amount of pins to randomly select using `{{pinTargets amount=[number]}}`. |
 | `{{previousApp}}` or <br /> `{{previousAppName}}` or <br /> `{{lastApp}}` or <br /> `{{lastAppName}}` or <br /> `{{previousApplication}}` or <br /> `{{previousApplicationName}}` or <br /> `{{lastApplication}}` or <br /> `{{lastApplicationName}}` | The name of the last application that was active before the current one. |
 | `{{previousPinName}}` or <br /> `{{lastPinName}}` | The URL-encoded name of the last pin that was opened. |
 | `{{previousPinTarget}}` or <br /> `{{lastPinTarget}}` | The URL-encoded target of the last pin that was opened. |
@@ -62,9 +68,11 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{shell:...}}` | The return value of a shell script. The shell is ZSH by default, but you can specify a different shell using the format `{{shell bin/bash:...}}`. |
 | `{{shortcut:...}}` | The value returned after executing the specified Siri Shortcut. Specify input to the shortcut using `{{shortcut:... input="..."}}`. |
 | `{{shortcuts}}` | The comma-separated list of Siri Shortcuts installed on the system. |
+| `{{statistics}}` or <br /> `{{stats}}` or <br /> `{{pinStats}}` or <br /> `{{pinStatistics}}` | Statistics for all pins in tabular format. Specify a sort strategy using `{{statistics sort="[strategy]"}}`. The available strategies are "alpha", "alphabetical", "freq", "frequency", "recency", and "dateCreated". The default strategy is "frequency". You can also specify an amount of pins to randomly select using `{{statistics amount=[number]}}`. |
 | `{{systemLanguage}}` or <br /> `{{language}}` | The configured language for the system. |
 | `{{time}}` or <br /> `{{currentTime}}` | The current time. Use `{{time format="..."}}` to specify a custom time format. Defaults to `HH:mm:s a`. |
 | `{{toast:...}}` or <br /> `{{hud:...}}` | Displays a toast/HUD notification with the specified text. Specify an optional style and detailed text using `{{toast style="[success/failure/fail]":Title,Message}}`. The default style is `success`. If the Raycast window is open when the pin is executed, the notification will display as a toast; otherwise, it will display as a HUD. |
+| `{{type:...}}` | Types the specified text into the frontmost application. |
 | `{{url:...}}` or <br /> `{{URL:...}}` | The visible text content at the specified URL. Example: `{{url:https://google.com}}`. |
 | `{{usedUUIDs}}` | The list of UUIDs previously used by the `{{uuid}}` placeholder since Pins' LocalStorage was last reset. |
 | `{{user}}` or <br /> `{{username}}` | The current user's system username. |
@@ -90,6 +98,7 @@ Placeholders are evaluated in the following order, from first to last:
 | Information | `{{selectedFileContents}}` |
 | Information | `{{currentAppName}}` |
 | Information | `{{currentAppPath}}` |
+| Information | `{{currentAppBundleID}}` |
 | Information | `{{currentDirectory}}` |
 | Information | `{{currentURL}}` |
 | Information | `{{currentTabText}}` |
@@ -106,12 +115,19 @@ Placeholders are evaluated in the following order, from first to last:
 | Information | `{{usedUUIDs}}` |
 | Information | `{{previousPinName}}` |
 | Information | `{{previousPinTarget}}` |
+| Information | `{{pinNames}}` |
+| Information | `{{pinTargets}}` |
+| Information | `{{pins}}` |
+| Information | `{{pinStatistics}}` |
+| Information | `{{groupNames}}` |
+| Information | `{{groups}}` |
 | Script | `{{url:...}}`** |
 | Script | `{{file:...}}` |
-| Directive | `{{copy:...}}` |
-| Directive | `{{paste:...}}` |
 | Directive | `{{set [name]:...}}` |
 | Directive | `{{AI:...}}` |
+| Directive | `{{copy:...}}` |
+| Directive | `{{paste:...}}` |
+| Directive | `{{type:...}}` |
 | Directive | `{{alert:...}}` |
 | Directive | `{{dialog:...}}` |
 | Directive | `{{say:...}}` |

@@ -19,12 +19,13 @@ import * as vm from "vm";
 import { getStorage, setStorage } from "./utils";
 import { StorageKey } from "./constants";
 import { execSync } from "child_process";
-import { getPreviousPin } from "./Pins";
+import { Pin, getPinStatistics, getPreviousPin, sortPins } from "./Pins";
 import { LocalDataObject, getFinderSelection } from "./LocalData";
 import path from "path";
 import { runAppleScript } from "@raycast/utils";
 import { LocationManager } from "./scripts";
 import { scheduleTargetEvaluation } from "./scheduled-execution";
+import { Group, SortStrategy } from "./Groups";
 
 /**
  * A placeholder type that associates Regex patterns with functions that applies the placeholder to a string, rules that determine whether or not the placeholder should be replaced, and aliases that can be used to achieve the same result.
@@ -323,6 +324,22 @@ const placeholders: Placeholder = {
   },
 
   /**
+   * Placeholder for the bundle ID of the current application. Barring any issues, this should always be replaced.
+   */
+  "{{currentAppBundleID}}": {
+    name: "Current Application Bundle ID",
+    aliases: ["{{currentAppBundle}}", "{{currentAppID}}", "{{currentApplicationID}}"],
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      try {
+        return (await getFrontmostApplication()).bundleId || "";
+      } catch (e) {
+        return "";
+      }
+    },
+  },
+
+  /**
    * Placeholder for the list of names of all non-background applications currently running. The list is newline-separated by default, but can be changed with the `delim` argument.
    *
    * Syntax: `{{runningApplications delim="[string]"}}`
@@ -504,7 +521,6 @@ const placeholders: Placeholder = {
     aliases: ["{{streetAddress}}"],
     rules: [],
     apply: async (str: string, context?: LocalDataObject) => {
-      console.log("ahh");
       return await LocationManager.getStreetAddress();
     },
   },
@@ -726,6 +742,166 @@ const placeholders: Placeholder = {
   },
 
   /**
+   * Placeholder for the comma-separated list of pin names. The list is sorted by most recently opened pin first.
+   */
+  "{{pinNames( amount=[0-9]+)?}}": {
+    name: "Pin Names",
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      let numToSelect = parseInt(str.match(/(?<=amount=)[0-9]+/)?.[0] || "-1");
+      try {
+        const pins: Pin[] = (await getStorage(StorageKey.LOCAL_PINS)) || [];
+        if (numToSelect >= 0) {
+          numToSelect = Math.min(numToSelect, pins.length);
+          while (pins.length > numToSelect) {
+            pins.splice(Math.floor(Math.random() * pins.length), 1);
+          }
+        }
+        const pinNames = pins
+          .sort((a, b) => new Date(b.lastOpened || 0).getTime() - new Date(a.lastOpened || 0).getTime())
+          .map((pin) => pin.name);
+        return pinNames.join(", ");
+      } catch (e) {
+        return "";
+      }
+    },
+  },
+
+  /**
+   * Placeholder for the newline-separated list of pin targets. The list is sorted by most recently opened pin first.
+   */
+  "{{pinTargets( amount=[0-9]+)?}}": {
+    name: "Pin Targets",
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      let numToSelect = parseInt(str.match(/(?<=amount=)[0-9]+/)?.[0] || "-1");
+      try {
+        const pins: Pin[] = (await getStorage(StorageKey.LOCAL_PINS)) || [];
+        if (numToSelect >= 0) {
+          numToSelect = Math.min(numToSelect, pins.length);
+          while (pins.length > numToSelect) {
+            pins.splice(Math.floor(Math.random() * pins.length), 1);
+          }
+        }
+        const pinTargets = pins
+          .sort((a, b) => new Date(b.lastOpened || 0).getTime() - new Date(a.lastOpened || 0).getTime())
+          .map((pin) => pin.url);
+        return pinTargets.join(", ").replaceAll("{{", "[[").replaceAll("}}", "]]");
+      } catch (e) {
+        return "";
+      }
+    },
+  },
+
+  /**
+   * Placeholder for the JSON representation of all pins.
+   */
+  "{{pins( amount=[0-9]+)?}}": {
+    name: "Pins JSON",
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      let numToSelect = parseInt(str.match(/(?<=amount=)[0-9]+/)?.[0] || "-1");
+      try {
+        const pins: Pin[] = (await getStorage(StorageKey.LOCAL_PINS)) || [];
+        if (numToSelect >= 0) {
+          numToSelect = Math.min(numToSelect, pins.length);
+          const selectedPins = [];
+          for (let i = 0; i < numToSelect; i++) {
+            const randomIndex = Math.floor(Math.random() * pins.length);
+            selectedPins.push(pins[randomIndex]);
+            pins.splice(randomIndex, 1);
+          }
+          return JSON.stringify(selectedPins).replaceAll("{{", "[[").replaceAll("}}", "]]");
+        }
+        return JSON.stringify(pins).replaceAll("{{", "[[").replaceAll("}}", "]]");
+      } catch (e) {
+        return "";
+      }
+    },
+  },
+
+  /**
+   * Placeholder for the JSON representation of all pins.
+   */
+  '{{(statistics|stats|pinStats|pinStatistics)( sort="(alpha|alphabetical|freq|frequency|recency|dateCreated)")?( amount=[0-9]+)?}}':
+    {
+      name: "Pin Statistics",
+      rules: [],
+      apply: async (str: string, context?: LocalDataObject) => {
+        let sortMethod = str.match(/(?<=sort=("|')).*?(?=("|'))/)?.[0] || "freq";
+        if (sortMethod == "alpha") sortMethod = "alphabetical";
+        if (sortMethod == "freq") sortMethod = "frequency";
+
+        let numToSelect = parseInt(str.match(/(?<=amount=)[0-9]+/)?.[0] || "-1");
+
+        try {
+          const pins: Pin[] = (await getStorage(StorageKey.LOCAL_PINS)) || [];
+          const groups: Group[] = (await getStorage(StorageKey.LOCAL_GROUPS)) || [];
+
+          if (numToSelect >= 0) {
+            numToSelect = Math.min(numToSelect, pins.length);
+            while (pins.length > numToSelect) {
+              pins.splice(Math.floor(Math.random() * pins.length), 1);
+            }
+          }
+
+          const stats = sortPins(pins, groups, sortMethod as SortStrategy).map(
+            (pin) => `${pin.name}:\n\t${(getPinStatistics(pin, pins) as string).replaceAll("\n\n", "\n\t")}`
+          );
+          return stats.join("\n\n");
+        } catch (e) {
+          return "";
+        }
+      },
+    },
+
+  /**
+   * Placeholder for the comma-separated list of group names. The list's order matches the order of groups in the 'View Pins' command.
+   */
+  "{{groupNames( amount=[0-9]+)?}}": {
+    name: "Group Names",
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      let numToSelect = parseInt(str.match(/(?<=amount=)[0-9]+/)?.[0] || "-1");
+      try {
+        const groups: Group[] = (await getStorage(StorageKey.LOCAL_GROUPS)) || [];
+        if (numToSelect >= 0) {
+          numToSelect = Math.min(numToSelect, groups.length);
+          while (groups.length > numToSelect) {
+            groups.splice(Math.floor(Math.random() * groups.length), 1);
+          }
+        }
+        return groups.map((group) => group.name).join(", ");
+      } catch (e) {
+        return "";
+      }
+    },
+  },
+
+  /**
+   * Placeholder for the JSON representation of all groups.
+   */
+  "{{groups( amount=[0-9]+)?}}": {
+    name: "Groups JSON",
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      let numToSelect = parseInt(str.match(/(?<=amount=)[0-9]+/)?.[0] || "-1");
+      try {
+        const groups: Group[] = (await getStorage(StorageKey.LOCAL_GROUPS)) || [];
+        if (numToSelect >= 0) {
+          numToSelect = Math.min(numToSelect, groups.length);
+          while (groups.length > numToSelect) {
+            groups.splice(Math.floor(Math.random() * groups.length), 1);
+          }
+        }
+        return JSON.stringify(groups).replaceAll("{{", "[[").replaceAll("}}", "]]");
+      } catch (e) {
+        return "";
+      }
+    },
+  },
+
+  /**
    * Placeholder for the visible text content at a given URL.
    */
   "{{(url|URL):.*?}}": {
@@ -767,41 +943,6 @@ const placeholders: Placeholder = {
   },
 
   /**
-   * Directive to copy the provided text to the clipboard. The placeholder will always be replaced with an empty string.
-   */
-  "{{copy:[^}]*?}}": {
-    name: "Copy to Clipboard",
-    rules: [],
-    apply: async (str: string, context?: LocalDataObject) => {
-      const text = str.match(/(?<=(copy:))[^}]*?(?=}})/)?.[0];
-      console.log(text);
-      if (!text) return "";
-      await Clipboard.copy(text);
-      if (environment.commandName == "index") {
-        await showHUD("Copied to Clipboard");
-      } else {
-        await showToast({ title: "Copied to Clipboard" });
-      }
-      return "";
-    },
-  },
-
-  /**
-   * Directive to paste the provided text in the frontmost application. The placeholder will always be replaced with an empty string.
-   */
-  "{{paste:[^}]*?}}": {
-    name: "Paste from Clipboard",
-    rules: [],
-    apply: async (str: string, context?: LocalDataObject) => {
-      const text = str.match(/(?<=(paste:))[^}]*?(?=}})/)?.[0];
-      if (!text) return "";
-      await Clipboard.paste(text);
-      await showHUD("Pasted Into Frontmost App");
-      return "";
-    },
-  },
-
-  /**
    * Directive to set the value of a persistent variable. If the variable does not exist, it will be created. The placeholder will always be replaced with an empty string.
    */
   "{{set [a-zA-Z0-9_]+:.*?}}": {
@@ -834,15 +975,80 @@ const placeholders: Placeholder = {
           /{{(askAI|askai|AI|ai)( model="(([^{]|{(?!{)|{{[\s\S]*?}})*?)")?( creativity=(([^{]|{(?!{)|{{[\s\S]*?}})*?))?:(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/
         );
         if (matches && environment.canAccess(AI)) {
+          const toast = await showToast({ title: "Querying AI...", style: Toast.Style.Animated });
           const model = matches[3] == "text-davinci-003" ? "text-davinci-003" : "gpt-3.5-turbo";
           const creativity = matches[6] || "1.0";
-          const query = matches[8].substring(0, 2000);
-          const result = await AI.ask(query, { model: model, creativity: parseFloat(creativity) || 1.0 });
+          let query = matches[8].substring(0, model == "text-davinci-003" ? 4000 : 2048);
+          let result = "";
+          let attempt = 0;
+          let waiting = true;
+          while (waiting) {
+            try {
+              result = await AI.ask(query, { model: model, creativity: parseFloat(creativity) || 1.0 });
+            } catch {
+              attempt++;
+              query = query.substring(0, query.length / 1.5);
+            }
+            if (result != "" || attempt > 10) {
+              waiting = false;
+            }
+          }
+          toast.title = "Received Response";
+          toast.style = Toast.Style.Success;
           return result.trim().replaceAll('"', "'");
         }
         return "";
       },
     },
+
+  /**
+   * Directive to copy the provided text to the clipboard. The placeholder will always be replaced with an empty string.
+   */
+  "{{copy:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
+    name: "Copy to Clipboard",
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      const text = str.match(/(?<=(copy:))(([^{]|{(?!{)|{{[\s\S]*?}})*?)(?=}})/)?.[0];
+      if (!text) return "";
+      await Clipboard.copy(text);
+      if (environment.commandName == "index") {
+        await showHUD("Copied to Clipboard");
+      } else {
+        await showToast({ title: "Copied to Clipboard" });
+      }
+      return "";
+    },
+  },
+
+  /**
+   * Directive to paste the provided text in the frontmost application. The placeholder will always be replaced with an empty string.
+   */
+  "{{paste:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
+    name: "Paste Text",
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      const text = str.match(/(?<=(paste:))(([^{]|{(?!{)|{{[\s\S]*?}})*?)(?=}})/)?.[0];
+      if (!text) return "";
+      await Clipboard.paste(text);
+      await showHUD("Pasted Into Frontmost App");
+      return "";
+    },
+  },
+
+  /**
+   * Directive to type the provided text into the frontmost application. The placeholder will always be replaced with an empty string.
+   */
+  "{{type:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
+    name: "Type Text",
+    rules: [],
+    apply: async (str: string, context?: LocalDataObject) => {
+      const text = str.match(/(?<=(type:))(([^{]|{(?!{)|{{[\s\S]*?}})*?)(?=}})/)?.[0];
+      if (!text) return "";
+      await showHUD("Typing Into Frontmost App");
+      await runAppleScript(`tell application "System Events" to keystroke "${text}"`);
+      return "";
+    },
+  },
 
   /**
    * Directive to display an alert with the provided text. The placeholder will always be replaced with an empty string.
@@ -862,11 +1068,18 @@ const placeholders: Placeholder = {
         const timeout = parseInt(matches[2]) || 10;
         const query = matches[3];
         const message = matches[6] || undefined;
-        await runAppleScript(
-          `display alert "${query.replaceAll('"', "'")}"${
-            message ? ` message "${message.replaceAll('"', "'")}"` : ""
-          } giving up after ${timeout}`
-        );
+        try {
+          await runAppleScript(
+            `display alert "${query.replaceAll('"', "'")}"${
+              message ? ` message "${message.replaceAll('"', "'")}"` : ""
+            } giving up after ${timeout}`
+          );
+        } catch (e) {
+          if ((e as Error).message.includes("timed out")) {
+            await showHUD("Alert Timed Out");
+          }
+          return "";
+        }
       }
       return "";
     },
@@ -913,7 +1126,7 @@ const placeholders: Placeholder = {
    *
    * All arguments are optional. If no voice, speed, pitch, or volume are provided, the system defaults will be used.
    */
-  '{{say( voice="[A-Za-z)( ._-]")?( speed=[0-9.]+?)?( pitch=([0-9.]+?))?( volume=[0-9.]+?)?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)':
+  '{{say( voice="[A-Za-z)( ._-]")?( speed=[0-9.]+?)?( pitch=([0-9.]+?))?( volume=[0-9.]+?)?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}':
     {
       name: "Speak Text",
       rules: [],
@@ -1090,9 +1303,10 @@ const placeholders: Placeholder = {
           selectedFileContents: async () =>
             await Placeholders.allPlaceholders["{{selectedFileContents}}"].apply("{{selectedFileContents}}"),
           shortcuts: async () => await Placeholders.allPlaceholders["{{shortcuts}}"].apply("{{shortcuts}}"),
-          copy: async (text: string) => await Placeholders.allPlaceholders["{{copy:[^}]*?}}"].apply(`{{copy:${text}}}`),
+          copy: async (text: string) =>
+            await Placeholders.allPlaceholders["{{copy:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}"].apply(`{{copy:${text}}}`),
           paste: async (text: string) =>
-            await Placeholders.allPlaceholders["{{paste:[^}]*?}}"].apply(`{{paste:${text}}}`),
+            await Placeholders.allPlaceholders["{{paste:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}"].apply(`{{paste:${text}}}`),
           ignore: async (text: string) =>
             await Placeholders.allPlaceholders["{{(ignore|IGNORE):[^}]*?}}"].apply(`{{ignore:${text}}}`),
           ai: async (prompt: string, model?: string, creativity?: number) =>
@@ -1115,7 +1329,7 @@ const placeholders: Placeholder = {
             ),
           say: async (message: string, voice?: string, speed?: number, pitch?: number, volume?: number) =>
             await Placeholders.allPlaceholders[
-              '{{say( voice="[A-Za-z)( ._-]")?( speed=[0-9.]+?)?( pitch=([0-9.]+?))?( volume=[0-9.]+?)?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)'
+              '{{say( voice="[A-Za-z)( ._-]")?( speed=[0-9.]+?)?( pitch=([0-9.]+?))?( volume=[0-9.]+?)?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}'
             ].apply(
               `{{say${voice ? ` voice="${voice}"` : ""}${speed ? ` speed=${speed}` : ""}${
                 pitch ? ` pitch=${pitch}` : ""

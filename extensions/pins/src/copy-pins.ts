@@ -32,22 +32,28 @@ export default async function ExportPinsCommand() {
 
   let data = "";
   const jsonData = await getPinsJSON();
-  if (preferences.exportFormat == "csv") {
-    try {
+  try {
+    if (preferences.exportFormat == "csv") {
       const d1 = Papa.unparse(jsonData.pins);
       const d2 = Papa.unparse(jsonData.groups);
       data = `${d1}\n\n\n${d2}`;
-    } catch (err) {
-      console.error(err);
+    } else if (preferences.exportFormat == "json") {
+      data = JSON.stringify(jsonData, null, 2);
+    } else if (preferences.exportFormat == "yaml") {
+      data = YAML.stringify(jsonData);
+    } else if (preferences.exportFormat == "xml") {
+      data = XML.json2xml(JSON.stringify({ data: jsonData }), { spaces: 2, compact: true });
+    } else if (preferences.exportFormat == "toml") {
+      data = TOML.stringify(jsonData);
     }
-  } else if (preferences.exportFormat == "json") {
-    data = JSON.stringify(jsonData, null, 2);
-  } else if (preferences.exportFormat == "yaml") {
-    data = YAML.stringify(jsonData);
-  } else if (preferences.exportFormat == "xml") {
-    data = XML.json2xml(JSON.stringify({ data: jsonData }), { spaces: 2, compact: true });
-  } else if (preferences.exportFormat == "toml") {
-    data = TOML.stringify(jsonData);
+  } catch (err) {
+    await showToast({
+      title: "Failed to export pin data.",
+      message: `Could not convert data into target type (${preferences.exportFormat})`,
+      style: Toast.Style.Failure,
+    });
+    console.error(err);
+    return;
   }
 
   if (

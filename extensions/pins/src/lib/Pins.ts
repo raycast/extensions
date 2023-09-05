@@ -29,7 +29,7 @@ import * as os from "os";
 import { Placeholders } from "./placeholders";
 import path from "path";
 import { LocalDataObject } from "./LocalData";
-import { Group } from "./Groups";
+import { Group, SortStrategy } from "./Groups";
 
 /**
  * A pin object.
@@ -178,6 +178,7 @@ export const usePins = () => {
  */
 export const openPin = async (pin: Pin, preferences: { preferredBrowser: string }, context?: LocalDataObject) => {
   const startDate = new Date();
+
   try {
     if (pin.fragment) {
       // Copy the text fragment to the clipboard
@@ -189,41 +190,42 @@ export const openPin = async (pin: Pin, preferences: { preferredBrowser: string 
         await showToast({ title: "Copied To Clipboard" });
       }
       await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
-      return;
-    }
-
-    const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
-    const target = await Placeholders.applyToString(targetRaw, context);
-    if (target == "") return;
-
-    const isPath = pin.url.startsWith("/") || pin.url.startsWith("~");
-    const targetApplication = !pin.application || pin.application == "None" ? undefined : pin.application;
-    if (isPath) {
-      // Open the path in the target application (fallback to default application for the file type)
-      if (fs.existsSync(target)) {
-        await open(path.resolve(target), targetApplication);
-        await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
-      } else {
-        throw new Error("File does not exist.");
-      }
     } else {
-      if (target.match(/^[a-zA-Z](?![%])[a-zA-Z0-9+.-]+?:.*/g)) {
-        // Open the URL in the target application (fallback to preferred browser, then default browser)
-        await open(encodeURI(target), targetApplication || preferences.preferredBrowser);
-        await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
-      } else {
-        // Open Terminal command in the default Terminal application
-        await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
-        if (pin.execInBackground) {
-          // Run the Terminal command in the background
-          await runCommand(target);
+      const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
+      const target = await Placeholders.applyToString(targetRaw, context);
+
+      if (target != "") {
+        const isPath = pin.url.startsWith("/") || pin.url.startsWith("~");
+        const targetApplication = !pin.application || pin.application == "None" ? undefined : pin.application;
+        if (isPath) {
+          // Open the path in the target application (fallback to default application for the file type)
+          if (fs.existsSync(target)) {
+            await open(path.resolve(target), targetApplication);
+            await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
+          } else {
+            throw new Error("File does not exist.");
+          }
         } else {
-          // Run the Terminal command in a new Terminal tab
-          await runCommandInTerminal(target);
+          if (target.match(/^[a-zA-Z](?![%])[a-zA-Z0-9+.-]+?:.*/g)) {
+            // Open the URL in the target application (fallback to preferred browser, then default browser)
+            await open(encodeURI(target), targetApplication || preferences.preferredBrowser);
+            await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
+          } else {
+            // Open Terminal command in the default Terminal application
+            await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
+            if (pin.execInBackground) {
+              // Run the Terminal command in the background
+              await runCommand(target);
+            } else {
+              // Run the Terminal command in a new Terminal tab
+              await runCommandInTerminal(target);
+            }
+          }
         }
       }
     }
   } catch (error) {
+    console.error(error);
     if (environment.commandName == "view-pins") {
       await showToast({
         title: "Failed to open " + (pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)),
@@ -453,20 +455,36 @@ export const getPreviousPin = async (): Promise<Pin | undefined> => {
  * @param groups The list of groups to sort by.
  * @returns The sorted list of pins.
  */
-export const sortPins = (pins: Pin[], groups: Group[]) => {
+export const sortPins = (pins: Pin[], groups: Group[], sortMethod?: SortStrategy) => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   return [...pins].sort((p1, p2) => {
     const group = groups.find((group) => group.name == p1.group);
-    if (group?.sortStrategy == "alphabetical" || (!group && preferences.defaultSortStrategy == "alphabetical")) {
+    if (
+      sortMethod == "alphabetical" ||
+      (sortMethod == undefined &&
+        (group?.sortStrategy == "alphabetical" || (!group && preferences.defaultSortStrategy == "alphabetical")))
+    ) {
       return p1.name.localeCompare(p2.name);
-    } else if (group?.sortStrategy == "frequency" || (!group && preferences.defaultSortStrategy == "frequency")) {
+    } else if (
+      sortMethod == "frequency" ||
+      (sortMethod == undefined &&
+        (group?.sortStrategy == "frequency" || (!group && preferences.defaultSortStrategy == "frequency")))
+    ) {
       return (p2.timesOpened || 0) - (p1.timesOpened || 0);
-    } else if (group?.sortStrategy == "recency" || (!group && preferences.defaultSortStrategy == "recency")) {
+    } else if (
+      sortMethod == "recency" ||
+      (sortMethod == undefined &&
+        (group?.sortStrategy == "recency" || (!group && preferences.defaultSortStrategy == "recency")))
+    ) {
       return (p1.lastOpened ? new Date(p1.lastOpened) : new Date(0)).getTime() >
         (p2.lastOpened ? new Date(p2.lastOpened) : new Date(0)).getTime()
         ? -1
         : 1;
-    } else if (group?.sortStrategy == "dateCreated" || (!group && preferences.defaultSortStrategy == "dateCreated")) {
+    } else if (
+      sortMethod == "dateCreated" ||
+      (sortMethod == undefined &&
+        (group?.sortStrategy == "dateCreated" || (!group && preferences.defaultSortStrategy == "dateCreated")))
+    ) {
       return (p1.dateCreated ? new Date(p1.dateCreated) : new Date(0)).getTime() >
         (p2.dateCreated ? new Date(p2.dateCreated) : new Date(0)).getTime()
         ? -1
