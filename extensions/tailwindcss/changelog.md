@@ -1,5 +1,7 @@
 # Tailwind CSS Changelog
 
+## [Add a preference to display CSS spacing units in pixels] - 2023-09-03
+
 ## [Allow for HEX value search] - 2023-07-22
 - Add HEX values as possible keyword for the `Search Colors` command
 
