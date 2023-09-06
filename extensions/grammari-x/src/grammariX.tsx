@@ -104,6 +104,7 @@ export default function Command() {
       searchText={state.chat.question}
       isLoading={state.isLoading}
       isShowingDetail={isShowingDetail}
+      searchBarPlaceholder="Enter your text here"
       onSearchTextChange={(newValue) => {
         setState((previous) => ({
           ...previous,
