@@ -23,7 +23,6 @@ export default function SearchClasses() {
       {results.map(({ selector, classes }) => (
         <List.Item
           key={selector}
-          accessories={[{ text: classes }]}
           title={selector}
           accessories={[{ text: formatClasses(classes) }]}
           actions={<ClassesAction selector={selector} classes={formatClasses(classes)} />}
