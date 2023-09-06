@@ -405,6 +405,7 @@
 /extensions/gopass                                   @bake
 /extensions/grafana                                  @Lp-Francois
 /extensions/grafbase                                 @mlafeldt @notrab
+/extensions/grammari-x                               @hakob8956
 /extensions/graphcdn                                 @mathieudutour
 /extensions/greip                                    @gre-dev @pernielsentikaer
 /extensions/growthbook                               @farisaziz12
