@@ -61,6 +61,15 @@ export default function Command() {
                   shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => {
                     removeFavoriteStop(favorite);
+                    setFavorites((prevFavorites): Favorite[] => {
+                      return prevFavorites.filter((prevFavorite) => {
+                        return (
+                          prevFavorite.route.id !== favorite.route.id ||
+                          prevFavorite.directionId !== favorite.directionId ||
+                          prevFavorite.stop.id !== favorite.stop.id
+                        );
+                      });
+                    });
                   }}
                 />
               </ActionPanel>
