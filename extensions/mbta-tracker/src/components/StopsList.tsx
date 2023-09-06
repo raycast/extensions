@@ -4,7 +4,7 @@ import { PredictionsList } from "./PredictionsList";
 import type { Favorite, Route, StopsResponse, Stop } from "../types";
 import { appendApiKey, FavoriteService } from "../utils";
 import { addFavoriteStop, removeFavoriteStop } from "../lib/stops";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
   route: Route;
@@ -19,14 +19,19 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
   );
 
   const favoriteStops = useCachedPromise(FavoriteService.favorites);
-  const [stops, setStops] = useState<Stop[]>(
-    data?.data.map((stop) => {
-      return {
-        ...stop,
-        isFavorite: isFavorite(route, directionId, stop),
-      };
-    }) || []
-  );
+
+  const [stops, setStops] = useState<Stop[]>([]);
+
+  useEffect(() => {
+    setStops(
+      data?.data.map((stop) => {
+        return {
+          ...stop,
+          isFavorite: isFavorite(route, directionId, stop),
+        };
+      }) || []
+    );
+  }, [isLoading]);
 
   function isFavorite(route: Route, directionId: number, stop: Stop): boolean {
     return (
