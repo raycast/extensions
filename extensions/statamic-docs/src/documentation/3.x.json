@@ -89,6 +89,10 @@
       "url": "https://statamic.dev/caching"
     },
     {
+      "title": "Computed Values",
+      "url": "https://statamic.dev/computed-values"
+    },
+    {
       "title": "Data Inheritance",
       "url": "https://statamic.dev/data-inheritance"
     },
@@ -107,6 +111,10 @@
     {
       "title": "Multi-Site",
       "url": "https://statamic.dev/multi-site"
+    },
+    {
+      "title": "Preferences",
+      "url": "https://statamic.dev/preferences"
     },
     {
       "title": "Revisions",
@@ -149,10 +157,6 @@
     {
       "title": "Antlers Templates",
       "url": "https://statamic.dev/antlers"
-    },
-    {
-      "title": "New Antlers Parser",
-      "url": "https://statamic.dev/new-antlers-parser"
     },
     {
       "title": "Blade Templates",
@@ -217,6 +221,10 @@
       "url": "https://statamic.dev/dashboard"
     },
     {
+      "title": "Navigation",
+      "url": "https://statamic.dev/customizing-the-cp-nav"
+    },
+    {
       "title": "Blueprints",
       "url": "https://statamic.dev/blueprints"
     },
@@ -278,6 +286,10 @@
     }
   ],
   "Resources": [
+    {
+      "title": "Content Manager's Guide",
+      "url": "https://statamic.dev/content-managers-guide"
+    },
     {
       "title": "Code of Conduct",
       "url": "https://statamic.dev/code-of-conduct"
