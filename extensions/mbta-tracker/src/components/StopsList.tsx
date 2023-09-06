@@ -19,13 +19,13 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
   );
 
   const favoriteStops = useCachedPromise(FavoriteService.favorites);
-  const [stops, setStops] = useState(
+  const [stops, setStops] = useState<Stop[]>(
     data?.data.map((stop) => {
       return {
         ...stop,
         isFavorite: isFavorite(route, directionId, stop),
       };
-    })
+    }) || []
   );
 
   function isFavorite(route: Route, directionId: number, stop: Stop): boolean {
@@ -39,7 +39,7 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select origin MBTA stop...">
-      {(stops || []).map((stop: Stop) => (
+      {stops.map((stop: Stop) => (
         <List.Item
           key={stop.id}
           title={stop.attributes.name}
