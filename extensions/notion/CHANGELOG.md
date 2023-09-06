@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Deep links] - 2023-09-01
+
+- New action to `Create Database Page` that copies a [deeplink](https://manual.raycast.com/deeplink) to open the command as configured.
+- Add support for _status_ property.
+
 ## [Small fixes] - 2023-08-16
 
 - Hide formula fields when creating database pages
@@ -13,6 +18,7 @@ This update introduces a new `Quick Capture` command. This lets you quickly save
 The page preview now includes a secondary action allowing you to see a metadata panel with page properties. Many properties are supported, including title, emails, numbers, checkboxes, statuses, and more! Speaking of properties, page properties in the list view now make use of Raycast components, improving their visual appearance. Tooltips have also been added to make it easier to identify the property you are viewing. Additionally, when searching Notion pages, you can now see the last author who edited the page.
 
 Page list items have also gained some actions to enhance the extension's power. Now you can:
+
 - Create quick links to your favorite pages
 - Delete pages
 - Copy a page's formatted URL (useful in chat apps such as Slack)
