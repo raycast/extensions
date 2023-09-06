@@ -93,10 +93,9 @@ export default function Command() {
       ? results.filter((result) => !favorites.find((favorite) => favorite.path === result.path))
       : [];
 
-  const filteredFavorites =
-    category === Category.FAVORITES && searchText
-      ? favorites.filter((favorite) => favorite.name.toLowerCase().includes(searchText.toLowerCase()))
-      : favorites;
+  const filteredFavorites = searchText
+    ? favorites.filter((favorite) => favorite.name.toLowerCase().includes(searchText.toLowerCase()))
+    : favorites;
 
   const isLoading = isSearchResultsLoading || isFavoritesLoading;
 
