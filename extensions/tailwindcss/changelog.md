@@ -1,5 +1,10 @@
 # Tailwind CSS Changelog
 
+## [] - 2023-09-06
+
+- Updated "Copy CSS" shortcut in Search Classes to cmd+shift+.
+- Updated Tailwind
+
 ## [Updated CSS classes] - 2022-11-29
 
 ## [Generate all CSS classes] - 2022-11-27

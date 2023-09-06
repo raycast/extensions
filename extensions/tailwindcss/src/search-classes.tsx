@@ -21,7 +21,11 @@ export default function SearchClasses() {
                 content={selector}
                 shortcut={{ modifiers: ["cmd"], key: "." }}
               />
-              <Action.CopyToClipboard title="Copy CSS" content={classes} shortcut={{ modifiers: ["cmd"], key: "," }} />
+              <Action.CopyToClipboard
+                title="Copy CSS"
+                content={classes}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              />
             </ActionPanel>
           }
         />
