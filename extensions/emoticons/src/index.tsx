@@ -29,17 +29,27 @@ export default function Command() {
       ],
     },
     {
-      id: 3,
       type: "Surprise",
       items: ["(・o・)", "(⊙_⊙)", "＼(°o°)／", "(@_@)", "(●_●)", "(⁠‘⁠◉⁠⌓⁠◉⁠’⁠)", "(((;ꏿ_ꏿ;)))", "(ﾉﾟ0ﾟ)⁠ﾉ"],
     },
     {
-      id: 4,
       type: "Dissapproval",
-      items: ["ಠ_ಠ", "ಠ⁠︵⁠ಠ", "ರ_ರ", "ಠಿ_ಠಿ", "ಠಿ_ಠ", "ಠ⁠﹏⁠ಠ", "(￣～￣)", "ಠ╭╮ಠ"],
+      items: [
+        "ಠ_ಠ",
+        "ಠ⁠︵⁠ಠ",
+        "ರ_ರ",
+        "ಠಿ_ಠಿ",
+        "ಠಿ_ಠ",
+        "ಠ⁠﹏⁠ಠ",
+        "(￣～￣)",
+        "ಠ╭╮ಠ",
+        "(¬､¬)",
+        "(⩺_⩹)",
+        "（＞д＜）",
+        "⋋_⋌",
+      ],
     },
     {
-      id: 5,
       type: "Indifference",
       items: [
         "(￢_￢)",
@@ -53,12 +63,10 @@ export default function Command() {
       ],
     },
     {
-      id: 6,
       type: "Smug",
       items: ["ಠ⁠‿⁠ಠ", "(￢‿￢)", "ಠ‿↼", "( ͡° ͜ʖ ͡°)"],
     },
     {
-      id: 7,
       type: "Pain",
       items: [
         ">_<",
@@ -76,15 +84,27 @@ export default function Command() {
       ],
     },
     {
-      id: 8,
       type: "Confusion",
-      items: ["(・_・;)", "(￣～￣;)", "(ーー;)", "(・・)?", "(-_-;)・・・", "(＠_＠)", "(o_O)", "(●__●)"],
+      items: [
+        "(・_・;)",
+        "(￣～￣;)",
+        "(ーー;)",
+        "(・・)?",
+        "(-_-;)・・・",
+        "(＠_＠)",
+        "(o_O)",
+        "(●__●)",
+        "(☉_ ☉)",
+        "ఠ _ ఠ",
+        "(º～º)",
+        "(?_?)",
+      ],
     },
   ];
 
   return (
     <List isShowingDetail>
-      {data.map((section) => {
+      {data.map((section, sectionIndex) => {
         const header = "| • | • | • | • |";
         const headerSeparator = "|:---:|:---:|:---:|:---:|";
 
@@ -109,7 +129,7 @@ ${headerSeparator}
 ${markdownRows}
 `;
 
-        return <List.Item title={section.type} key={section.id} detail={<List.Item.Detail markdown={markdown} />} />;
+        return <List.Item title={section.type} key={sectionIndex} detail={<List.Item.Detail markdown={markdown} />} />;
       })}
     </List>
   );
