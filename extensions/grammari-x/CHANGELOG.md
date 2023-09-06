@@ -1,3 +1,3 @@
 # GrammariX Changelog
 
-## [Initial Version] - 2023-08-22
+## [Initial Version] - 2023-09-06
