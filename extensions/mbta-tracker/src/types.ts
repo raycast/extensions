@@ -26,6 +26,7 @@ export interface Stop {
     name: string;
   };
   id: string;
+  isFavorite: boolean;
 }
 
 export interface PredictionsResponse {

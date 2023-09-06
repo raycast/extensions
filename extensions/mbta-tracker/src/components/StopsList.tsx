@@ -4,6 +4,7 @@ import { PredictionsList } from "./PredictionsList";
 import type { Favorite, Route, StopsResponse, Stop } from "../types";
 import { appendApiKey, FavoriteService } from "../utils";
 import { addFavoriteStop, removeFavoriteStop } from "../lib/stops";
+import { useState } from "react";
 
 interface Props {
   route: Route;
@@ -18,24 +19,34 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
   );
 
   const favoriteStops = useCachedPromise(FavoriteService.favorites);
+  const [stops, setStops] = useState(
+    data?.data.map((stop) => {
+      return {
+        ...stop,
+        isFavorite: isFavorite(route, directionId, stop),
+      };
+    })
+  );
 
-  function isFavorite(route: Route, directionId: number, stop: Stop): boolean | undefined {
-    return favoriteStops.data?.some(
-      (favorite: Favorite) =>
-        favorite.route.id === route.id && favorite.directionId === directionId && favorite.stop.id === stop.id
+  function isFavorite(route: Route, directionId: number, stop: Stop): boolean {
+    return (
+      favoriteStops.data?.some(
+        (favorite: Favorite) =>
+          favorite.route.id === route.id && favorite.directionId === directionId && favorite.stop.id === stop.id
+      ) || false
     );
   }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Select origin MBTA stop...">
-      {(data?.data || []).map((stop) => (
+      {(stops || []).map((stop: Stop) => (
         <List.Item
           key={stop.id}
           title={stop.attributes.name}
           icon={{ source: Icon.CircleFilled, tintColor: route.attributes.color }}
           accessories={[
             { text: stop.attributes.address || stop.attributes.municipality, icon: Icon.Pin },
-            { icon: isFavorite(route, directionId, stop) ? Icon.Star : null, tooltip: "Saved as Favorite" },
+            { icon: stop.isFavorite ? Icon.Star : null, tooltip: "Saved as Favorite" },
           ]}
           actions={
             <ActionPanel>
@@ -53,13 +64,25 @@ export const StopsList = ({ route, directionId }: Props): JSX.Element => {
                 }
               />
               <Action
-                title={isFavorite(route, directionId, stop) ? "Remove Favorite" : "Add Favorite"}
-                icon={isFavorite(route, directionId, stop) ? Icon.StarDisabled : Icon.Star}
-                shortcut={isFavorite(route, directionId, stop) ? Keyboard.Shortcut.Common.Remove : null}
+                title={stop.isFavorite ? "Remove Favorite" : "Add Favorite"}
+                icon={stop.isFavorite ? Icon.StarDisabled : Icon.Star}
+                shortcut={stop.isFavorite ? Keyboard.Shortcut.Common.Remove : null}
                 onAction={() => {
-                  isFavorite(route, directionId, stop)
+                  stop.isFavorite
                     ? removeFavoriteStop({ route, directionId, stop })
                     : addFavoriteStop(route, directionId, stop);
+                  setStops((prevStops): Stop[] => {
+                    return (prevStops || []).map((prevStop) => {
+                      if (prevStop.id === stop.id) {
+                        return {
+                          ...prevStop,
+                          isFavorite: !prevStop.isFavorite,
+                        };
+                      } else {
+                        return prevStop;
+                      }
+                    });
+                  });
                 }}
               />
             </ActionPanel>
