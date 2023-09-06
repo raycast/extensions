@@ -53,7 +53,7 @@ export function RecentProject({
       accessories={[{ text: app.title }]}
       title={recent.title}
       keywords={keywords}
-      icon={recent.icon}
+      icon={recent.icon.endsWith('.app') ? {fileIcon: recent.icon} : recent.icon}
       subtitle={recent.parts}
       actions={
         <ActionPanel>

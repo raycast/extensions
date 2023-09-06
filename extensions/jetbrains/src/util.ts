@@ -337,7 +337,7 @@ export const getV2History = async (): Promise<AppHistory[]> => {
         if (!channel.channel ?? null) {
           return null;
         }
-        const icon = await getJetBrainsAppIcon(channel.channel.installationDirectory);
+        const icon = channel.channel.installationDirectory; // await getJetBrainsAppIcon(channel.channel.installationDirectory);
         const shell = shellFromChannel(channel);
         const tool = shell ? await which(shell, { path: scriptDir }).catch(() => false) : false;
         return {
