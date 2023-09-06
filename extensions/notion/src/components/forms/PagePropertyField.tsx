@@ -55,6 +55,7 @@ export function PagePropertyField({ property, options, defaultValue }: PagePrope
         <Form.Checkbox id={id} title={title} label={placeholder} defaultValue={typeCheck(defaultValue, "boolean")} />
       );
     case "select":
+    case "status":
       return (
         <Form.Dropdown id={id} title={title} defaultValue={typeCheck(defaultValue, "string")}>
           {options?.map(createMapOptionsFunc(Form.Dropdown.Item))}

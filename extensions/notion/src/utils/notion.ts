@@ -187,6 +187,12 @@ export async function fetchDatabaseProperties(databaseId: string) {
         case "relation":
           databaseProperty.relation_id = property.relation.database_id;
           break;
+        case "status":
+          databaseProperty.options.push(
+            ...property.status.groups.flatMap(({ option_ids }) =>
+              option_ids.map((id) => property.status.options.find((option) => option.id == id)!),
+            ),
+          );
       }
 
       databaseProperties.push(databaseProperty);
