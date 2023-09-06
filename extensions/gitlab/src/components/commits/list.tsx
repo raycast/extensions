@@ -54,7 +54,9 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     return null;
   };
 
-  const statusIcon: Image.ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
+  const statusIcon: Image.ImageLike | undefined = status?.status
+    ? getCIJobStatusIcon(status.status, status.allow_failure)
+    : undefined;
   const icon: Image.ImageLike | undefined = statusIcon
     ? statusIcon
     : { source: GitLabIcons.commit, tintColor: Color.Green };
@@ -75,6 +77,10 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
       }
     />
   );
+}
+
+function RecentCommitsListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Commits" icon={{ source: GitLabIcons.commit, tintColor: Color.PrimaryText }} />;
 }
 
 export function RecentCommitsList(): JSX.Element {
@@ -107,6 +113,7 @@ export function RecentCommitsList(): JSX.Element {
       {commits?.map((e) => (
         <EventCommitListItem event={e} key={`${e.id}`} />
       ))}
+      <RecentCommitsListEmptyView />
     </List>
   );
 }
@@ -115,6 +122,7 @@ export interface CommitStatus {
   status: string;
   author: User;
   ref?: string;
+  allow_failure: boolean;
 }
 
 export interface Commit {

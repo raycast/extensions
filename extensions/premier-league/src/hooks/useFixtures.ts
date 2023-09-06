@@ -8,6 +8,8 @@ interface PropsType {
   page: number;
   sort: string;
   statuses: string;
+  comps: string;
+  compSeasons: string;
 }
 
 const useFixtures = (props: PropsType) => {
@@ -22,7 +24,7 @@ const useFixtures = (props: PropsType) => {
       setFixtures(data);
       setLastPage(lastPage);
     });
-  }, [props.teams]);
+  }, [props.teams, props.comps, props.compSeasons]);
 
   useEffect(() => {
     showToast({

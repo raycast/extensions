@@ -11,10 +11,12 @@ interface AppContextProps extends StorageValues {
 }
 
 const initialStorageValues: StorageValues = Object.freeze({
-  clients: [],
-  projects: [],
-  tags: [],
+  me: null,
   workspaces: [],
+  projects: [],
+  clients: [],
+  tags: [],
+  tasks: [],
   timeEntries: [],
   runningTimeEntry: null,
 });

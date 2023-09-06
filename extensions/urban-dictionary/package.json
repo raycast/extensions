@@ -5,6 +5,10 @@
   "description": "Search on urban dictionary",
   "icon": "urban.png",
   "author": "Sheraff",
+  "contributors": [
+    "zhenpewu",
+    "pernielsentikaer"
+  ],
   "categories": [
     "Web",
     "Fun"
@@ -21,29 +25,30 @@
           "name": "query",
           "type": "text",
           "required": false,
-          "placeholder": "search"
+          "placeholder": "Query"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@types/node-fetch": "^2.6.2",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.53.0",
+    "@raycast/utils": "^1.7.1"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "publish": "ray publish"
+    "lint": "ray lint"
   }
 }

@@ -1,5 +1,9 @@
 # Logseq Changelog
 
+## [Fix search] - 2023-06-06
+
+- Fix protocol change in Logseq in the search functionality [Issue](https://github.com/raycast/extensions/issues/5415)
+
 ## [Support for org files] - 2022-10-14
 
 Add org files support for LogSearch by fetching preferred format from Logseq config

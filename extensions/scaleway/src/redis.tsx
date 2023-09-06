@@ -1,3 +1,3 @@
-import { Redis } from './redis/Redis'
+import { Redis } from './products/redis/Redis'
 
 export default () => <Redis />

@@ -1,5 +1,58 @@
 # GitHub Changelog
 
+## [Pull request templates] - 2023-08-08
+
+- Support all pull request templates when creating pull requests.
+
+## [Bug fix] - 2023-08-07
+
+- Fixed a bug (`Cannot read properties of null (reading 'name')`) which caused the extension to crash.
+
+## [Added missing value] - 2023-08-04
+
+- Fix missing repo name for non numberTag cases 
+
+## [Menu Commands] - 2023-07-18
+
+- Add repo name to `Unread Notifications` Menu
+
+## [Menu Commands] - 2023-07-10
+
+- Add Issues Menu Command
+- Add Pull Requests Menu Command
+
+## [Support rerun failed workflow jobs] - 2023-06-27
+
+- Support rerun failed workflow jobs in `Workflow Runs` command
+
+## [Show Issue/PR number in Notification] - 2023-06-19
+
+- Add Issue/PR number in `Notification` command
+
+## [Add more branches to the into field] - 2023-06-16
+
+- Add more branches to the into field in Create Pull Request command (#4642)
+
+## [Menu bar mark all as read] - 2023-05-20
+
+- Add `Mark All as Read` command to menu bar action
+- Fix `graphql` not being part of devDependencies
+
+## [Notifications fixes] - 2023-04-05
+
+- Add `issuecomment` prefix to read notifications
+- Don't show success toast when opening a notification
+
+## [Clear form fields] - 2023-01-19
+
+- Clear form fields when creating an issue
+- Clear form fields when creating a pull request
+
+## [Add linked branch actions] - 2023-01-11
+
+- Add `Create Branch` command
+- Add create, delete branch actions directly from an issue action panel
+
 ## [Add text colors and tags] - 2022-12-16
 
 - Add colors to review decisions and remove icons to avoid confusion with CI checks

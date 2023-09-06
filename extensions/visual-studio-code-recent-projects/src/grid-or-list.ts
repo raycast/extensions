@@ -14,6 +14,13 @@ export function ListOrGridSection<T>(props: ListOrGridSectionProps, context?: T)
   return layout === "list" ? List.Section(props, context) : Grid.Section(props, context);
 }
 
+type ListOrGridItemProps = List.Item.Props | Grid.Item.Props;
+export function ListOrGridItem<T>(props: ListOrGridItemProps, context?: T) {
+  return layout === "list"
+    ? List.Item(props as List.Item.Props, context)
+    : Grid.Item(props as Grid.Item.Props, context);
+}
+
 type ListOrGridEmptyViewProps = List.EmptyView.Props | Grid.EmptyView.Props;
 export function ListOrGridEmptyView<T>(props: ListOrGridEmptyViewProps, context?: T) {
   return layout === "list" ? List.EmptyView(props, context) : Grid.EmptyView(props, context);

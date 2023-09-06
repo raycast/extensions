@@ -2,7 +2,8 @@ import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from 
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { getTrackData } from "../../api/api";
-import { ITrackData, TrackingDetail } from "../../model/trackData";
+import { ITrackData } from "../../model/trackData";
+import { isEmpty } from "../../utils/utils";
 
 interface IProps {
   vendorKey: string;
@@ -26,11 +27,11 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
     if (defaultTrackNumber !== undefined) search(trackNumber);
   }, [trackNumber]);
 
-  const search = (trackParameter: string) => {
+  const search = (invoiceNo: string) => {
     setLoading(true);
-    getTrackData(vendorKey, trackParameter)
+    getTrackData(vendorKey, invoiceNo)
       .then((response) => {
-        setTrackNumber(trackParameter);
+        setTrackNumber(invoiceNo);
         setTrackData(response.data);
         if (defaultTrackNumber) handleSave(response.data);
       })
@@ -51,24 +52,19 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
     }
   };
 
-  const handleSave = (data: ITrackData) => {
-    const value = `${data.itemName || "UNKNOWN"}//${data.completeYN}`;
+  const handleSave = (trackData: ITrackData) => {
+    const value = `${trackData.data[0].itemName || ""}//${trackData.isCompleted}`;
     LocalStorage.setItem(`${vendorKey}-${trackNumber}`, value).then(() =>
       showToast({ style: Toast.Style.Success, title: "Saved." })
     );
   };
+
   const convertDate = (dateString: string) => {
-    const replacedDateString = dateString.replace(/\./gi, "-");
-    return moment(replacedDateString).format("YYYY-MM-DD HH:mm");
+    return isEmpty(dateString) ? "" : moment(dateString).format("YYYY-MM-DD HH:mm");
   };
 
-  const resolveSubTitle = (trackingDetail: TrackingDetail): string => {
-    if (trackingDetail.trackingWhere === "") return trackingDetail.trackingDescription;
-    else return `${trackingDetail.trackingDescription} (${trackingDetail.trackingWhere})`;
-  };
-
-  function ListItems() {
-    const hasTrackingDetails = !hasError && trackData && trackData.details?.length > 0;
+  const ListItems = () => {
+    const hasTrackingDetails = !hasError && trackData;
     if (!searchText && !defaultTrackNumber) {
       return <List.EmptyView icon="📦" title="Type your invoice number to get started" />;
     }
@@ -78,10 +74,10 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
     if (hasTrackingDetails) {
       return (
         <>
-          <List.Section title={trackData.completeYN ? "Delivery completed" : "Delivery NOT completed"}>
+          <List.Section title={trackData.isCompleted ? "Delivery completed" : "Delivery NOT completed"}>
             <List.Item
-              title={"Item : " + (trackData.itemName || "UNKNOWN")}
-              icon={trackData.completeYN ? Icon.Checkmark : Icon.XmarkCircle}
+              title={"Item : " + (trackData.data[0].itemName || "")}
+              icon={trackData.isCompleted ? Icon.Checkmark : Icon.XmarkCircle}
               accessoryTitle={vendorName}
               actions={
                 !defaultTrackNumber && (
@@ -93,17 +89,19 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
             />
           </List.Section>
           <List.Section title="Delivery history">
-            {trackData.details.map((tracking, index) => {
-              return (
-                <List.Item
-                  key={index}
-                  icon={Icon.Binoculars}
-                  title={tracking.trackingKind}
-                  subtitle={resolveSubTitle(tracking)}
-                  accessoryTitle={convertDate(tracking.trackingTimeString)}
-                />
-              );
-            })}
+            {trackData.data
+              .sort((prev, next) => (prev.trackingTimeString > next.trackingTimeString ? 1 : -1))
+              .map((tracking, index) => {
+                return (
+                  <List.Item
+                    key={index}
+                    icon={Icon.Binoculars}
+                    title={tracking.trackingKind || tracking.trackingLevel || ""}
+                    subtitle={tracking.trackingDescription}
+                    accessoryTitle={convertDate(tracking.trackingTimeString)}
+                  />
+                );
+              })}
           </List.Section>
         </>
       );
@@ -118,7 +116,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
       );
     }
     return <List.EmptyView icon="📦" title="Couldn't find your parcel" description="Try a different invoice number" />;
-  }
+  };
   return (
     <List
       throttle={true}

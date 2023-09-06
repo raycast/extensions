@@ -32,7 +32,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
 
-  const { handleSubmit, itemProps, values, setValue } = useForm<PullRequestFormValues>({
+  const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<PullRequestFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating pull request" });
 
@@ -59,7 +59,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
 
           // It's not possible to add a PR to a project from the initPullRequest call
           await Promise.all(
-            values.projects.map((projectId) => github.addPullRequestToProject({ pullRequestId, projectId }))
+            values.projects.map((projectId) => github.addPullRequestToProject({ pullRequestId, projectId })),
           );
 
           const pullRequest = updateResult?.updatePullRequest?.pullRequest;
@@ -81,6 +81,21 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
             };
           }
         }
+
+        reset({
+          title: "",
+          from: "",
+          into: "",
+          draft: false,
+          description: "",
+          reviewers: [],
+          assignees: [],
+          labels: [],
+          projects: [],
+          milestone: "",
+        });
+
+        focus("repository");
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed creating pull request";
@@ -108,7 +123,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     },
   });
 
-  const { data } = useCachedPromise(
+  const { data, isLoading } = useCachedPromise(
     (repository) => {
       const selectedRepository = repositories?.find((r) => r.id === repository);
 
@@ -119,12 +134,14 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       return github.dataForRepository({ owner: selectedRepository.owner.login, name: selectedRepository.name });
     },
     [values.repository],
-    { execute: !!values.repository }
+    { execute: !!values.repository },
   );
 
-  const intoBranch = data?.repository?.defaultBranchRef;
+  const defaultBranch = data?.repository?.defaultBranchRef;
 
-  const branches = data?.repository?.refs?.nodes?.filter((node) => intoBranch?.id !== node?.id && !!node?.name);
+  const fromBranches = data?.repository?.refs?.nodes?.filter((node) => defaultBranch?.id !== node?.id && !!node?.name);
+
+  const intoBranches = data?.repository?.refs?.nodes?.filter((node) => node?.name !== values.from);
 
   const collaborators = data?.repository?.collaborators?.nodes;
 
@@ -137,10 +154,14 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const milestones = data?.repository?.milestones?.nodes;
 
   useEffect(() => {
-    const template = data?.repository?.pullRequestTemplateLowercase ?? data?.repository?.pullRequestTemplateUppercase;
+    const template = data?.repository?.pullRequestTemplates?.[0];
 
-    if (template && "text" in template && template.text && !values.description) {
-      setValue("description", template.text);
+    if (template && template.body && !values.description) {
+      setValue("description", template.body);
+    }
+
+    if (defaultBranch) {
+      setValue("into", defaultBranch.name);
     }
   }, [data]);
 
@@ -164,6 +185,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
         </ActionPanel>
       }
       enableDrafts
+      isLoading={isLoading}
     >
       <Form.Dropdown {...itemProps.repository} title="Repository" storeValue>
         {repositories?.map((repository) => {
@@ -179,8 +201,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       </Form.Dropdown>
 
       <Form.Dropdown {...itemProps.from} title="From">
-        {branches
-          ? branches.map((branch) => {
+        {fromBranches
+          ? fromBranches.map((branch) => {
               if (!branch) {
                 return null;
               }
@@ -190,8 +212,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           : null}
       </Form.Dropdown>
 
-      <Form.Dropdown {...itemProps.into} title="Into">
-        {intoBranch ? <Form.Dropdown.Item title={intoBranch.name} value={intoBranch.name} /> : null}
+      <Form.Dropdown {...itemProps.into} title="Into" storeValue>
+        {intoBranches
+          ? intoBranches.map((branch) => {
+              if (!branch) {
+                return null;
+              }
+
+              return <Form.Dropdown.Item key={branch?.id} title={branch.name} value={branch.name} />;
+            })
+          : null}
       </Form.Dropdown>
 
       <Form.Checkbox {...itemProps.draft} label="As draft" />

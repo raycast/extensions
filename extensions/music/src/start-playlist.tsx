@@ -1,11 +1,10 @@
-import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, Icon, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
 import { Playlist } from "./util/models";
-import { SFSymbols } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 
@@ -75,13 +74,10 @@ export default function PlaySelected() {
             {data.map((playlist) => (
               <List.Item
                 key={playlist.id}
-                title={playlist.name}
-                accessoryTitle={
-                  SFSymbols.PLAYLIST +
-                  ` ${playlist.count}   ` +
-                  SFSymbols.TIME +
-                  ` ${Math.floor(Number(playlist.duration) / 60)} min`
-                }
+                title={playlist.name ?? "Unknown Playlist"}
+                accessories={[
+                  { text: `${playlist.count} songs ·` + ` ${Math.floor(Number(playlist.duration) / 60)} min` },
+                ]}
                 icon={{ source: "../assets/icon.png" }}
                 actions={<Actions playlist={playlist} pop={pop} />}
               />
@@ -98,8 +94,8 @@ interface ActionsProps {
 }
 
 function Actions({ playlist: { name, id }, pop }: ActionsProps) {
-  const title1 = SFSymbols.PLAY + `  Start Playlist "${name}"`;
-  const title2 = SFSymbols.SHUFFLE + `  Shuffle Playlist "${name}"`;
+  const title1 = `Start Playlist "${name}"`;
+  const title2 = `Shuffle Playlist "${name}"`;
 
   const handleSubmit = (shuffle?: boolean) => async () => {
     await pipe(
@@ -114,8 +110,8 @@ function Actions({ playlist: { name, id }, pop }: ActionsProps) {
 
   return (
     <ActionPanel title={title1}>
-      <Action title={title1} onAction={handleSubmit(false)} />
-      <Action title={title2} onAction={handleSubmit(true)} />
+      <Action title={title1} onAction={handleSubmit(false)} icon={Icon.Play} />
+      <Action title={title2} onAction={handleSubmit(true)} icon={Icon.Shuffle} />
     </ActionPanel>
   );
 }

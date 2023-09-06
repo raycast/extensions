@@ -19,6 +19,13 @@ export function getExportResponse(response: unknown) {
   );
 }
 
+export function isReadyToFetch() {
+  const isProfileSelected = !!process.env.AWS_PROFILE;
+  const isAwsVaultSessionActive = !!process.env.AWS_VAULT;
+
+  return isProfileSelected || isAwsVaultSessionActive;
+}
+
 export function resourceToConsoleLink(resourceId: string | undefined, resourceType: string) {
   const { AWS_REGION } = process.env;
 
@@ -28,12 +35,14 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
     case "AWS::SSM::Parameter":
       return `${AWS_URL_BASE}/systems-manager/parameters/${resourceId}/description?region=${AWS_REGION}`;
     case "AWS::SecretsManager::Secret":
-      return `${AWS_URL_BASE}/secretsmanager/secret?name=${encodeURI(resourceId)}&region=${AWS_REGION}`;
+      return `https://${AWS_REGION}.console.aws.amazon.com/secretsmanager/secret?name=${encodeURI(
+        resourceId,
+      )}&region=${AWS_REGION}`;
     case "AWS::EC2::Instance":
       return `${AWS_URL_BASE}/ec2/v2/home?region=${AWS_REGION}#InstanceDetails:instanceId=${resourceId}`;
     case "AWS::Logs::LogGroup":
       return `${AWS_URL_BASE}/cloudwatch/home?region=${AWS_REGION}#logsV2:log-groups/log-group/${encodeURIComponent(
-        resourceId
+        resourceId,
       )}`;
     case "AWS::CloudFormation::Stack":
       return `${AWS_URL_BASE}/cloudformation/home?region=${AWS_REGION}#/stacks/stackinfo?stackId=${resourceId}`;

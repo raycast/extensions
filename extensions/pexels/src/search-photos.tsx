@@ -45,7 +45,7 @@ export default function SearchPhotos() {
     >
       <PexelsEmptyView title={emptyViewTitle()} layout={preferences.layout} />
       {pexelsPhotos?.photos.map((value, index) => (
-        <PhotosListItem key={index} pexelsPhoto={value} index={index} />
+        <PhotosListItem key={index} item={value} index={index} />
       ))}
     </List>
   ) : (
@@ -71,7 +71,7 @@ export default function SearchPhotos() {
     >
       <PexelsEmptyView title={emptyViewTitle()} layout={preferences.layout} />
       {pexelsPhotos?.photos.map((value, index) => (
-        <PhotosGridItem key={index} pexelsPhoto={value} index={index} />
+        <PhotosGridItem key={index} item={value} index={index} />
       ))}
     </Grid>
   );

@@ -11,8 +11,10 @@
   ],
   "contributors": [
     "FezVrasta",
-    "henrique",
-    "metakirby5"
+    "metakirby5",
+    "AlanHuang",
+    "nirtamir2",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -37,8 +39,12 @@
       "type": "dropdown",
       "required": true,
       "title": "First Language",
-      "default": "en",
+      "default": "auto",
       "data": [
+        {
+          "title": "🌐 Auto-detect",
+          "value": "auto"
+        },
         {
           "title": "🇿🇦 Afrikaans",
           "value": "af"
@@ -96,7 +102,7 @@
           "value": "zh-CN"
         },
         {
-          "title": "🇹🇼 Taiwanese Mandarin",
+          "title": "Chinese Traditional",
           "value": "zh-TW"
         },
         {
@@ -177,7 +183,7 @@
         },
         {
           "title": "🇮🇱 Hebrew",
-          "value": "he"
+          "value": "iw"
         },
         {
           "title": "🇮🇳 Hindi",
@@ -537,7 +543,7 @@
           "value": "zh-CN"
         },
         {
-          "title": "🇨🇳 Chinese Traditional",
+          "title": "🇹🇼 Taiwanese Mandarin",
           "value": "zh-TW"
         },
         {
@@ -618,7 +624,7 @@
         },
         {
           "title": "🇮🇱 Hebrew",
-          "value": "he"
+          "value": "iw"
         },
         {
           "title": "🇮🇳 Hindi",
@@ -695,6 +701,10 @@
         {
           "title": "🇱🇻 Latvian",
           "value": "lv"
+        },
+        {
+          "title": "🏛 Latin",
+          "value": "la"
         },
         {
           "title": "🇱🇹 Lithuanian",
@@ -918,10 +928,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
-    "@types/debounce": "^1.2.1",
-    "@vitalets/google-translate-api": "^7.0.0",
-    "debounce": "^1.2.1"
+    "@iamtraction/google-translate": "^2.0.1",
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -929,12 +938,15 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
+    "prettier": "^3.0.1",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

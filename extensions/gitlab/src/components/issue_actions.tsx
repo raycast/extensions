@@ -60,7 +60,7 @@ function ShowIssueLabelsAction(props: { labels: Label[] }) {
   }
   return (
     <Action.Push
-      title="Show attached Labels"
+      title="Show Attached Labels"
       target={<LabelList labels={props.labels} />}
       shortcut={{ modifiers: ["cmd"], key: "l" }}
       icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
@@ -81,7 +81,7 @@ export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard
   if (issue.state === "opened") {
     return (
       <Action
-        title="Add a to do"
+        title="Add a to Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}

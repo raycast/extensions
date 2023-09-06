@@ -34,9 +34,9 @@ export const authenticatedFetch = (token: string, baseUrl: string) => ({
     }
     return (await response.json()) as T;
   },
-  put: async <T>(endpoint: string, body: unknown): Promise<T> => {
+  patch: async <T>(endpoint: string, body: unknown): Promise<T> => {
     const response = await fetch(baseUrl + endpoint, {
-      method: "PUT",
+      method: "PATCH",
       headers: {
         ...getAuthHeader(token),
         "Content-Type": "application/json",

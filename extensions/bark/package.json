@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bark",
+  "title": "Bark",
+  "description": "Send messages to Bark via Raycast",
+  "icon": "extension-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "send-message-to-bark",
+      "title": "Send Message to Bark",
+      "description": "Send messages to Bark via Raycast",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoGetMessage",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Automatically get the selected text as a message.",
+          "label": "Auto Get Message"
+        },
+        {
+          "name": "autoCloseWindow",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "description": "Automatically close the main window after sending a message.",
+          "label": "Auto Close Window"
+        }
+      ]
+    },
+    {
+      "name": "quick-send-message-to-bark",
+      "title": "Quick Send Message",
+      "description": "Send the selected text to Bark via Raycast",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "deviceToken",
+      "type": "password",
+      "required": true,
+      "title": "Device Token",
+      "description": "Bark device token."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.0",
+    "axios": "^1.3.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

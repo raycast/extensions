@@ -4,12 +4,11 @@ import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD 
 import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
 import { dirname, basename, join } from "path";
+import { compressImageResponseScheme } from "./zodSchema";
+import { Preference } from "./types";
+import { resolveOutputPath } from "./lib/utils";
 
-type Preferences = {
-  apiKey: string;
-};
-
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues<Preference>();
 
 type Props = {
   arguments: {
@@ -111,11 +110,7 @@ const _compressAndResizeImage = async (
     body: readStream,
   });
 
-  const resJson = (await resPost.json()) as {
-    output: { size: number; url: string };
-    error: string;
-    message: string;
-  };
+  const resJson = compressImageResponseScheme.parse(await resPost.json());
 
   // Validate
   if ("error" in resJson) {
@@ -140,10 +135,14 @@ const _compressAndResizeImage = async (
     }),
   });
 
-  const outputDir = join(dirname(filePath), "resized-images");
-  if (!existsSync(outputDir)) {
-    mkdirSync(outputDir);
+  let outputDir = dirname(filePath);
+  if (!preferences.overwrite) {
+    outputDir = resolveOutputPath(filePath, preferences.destinationFolderPath);
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir);
+    }
   }
+
   const outputPath = join(outputDir, basename(filePath));
   const outputFileStream = createWriteStream(outputPath);
 

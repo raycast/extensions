@@ -1,77 +1,89 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
-import useTeams from "../hooks/useTeams";
 import useProjects from "../hooks/useProjects";
 import usePriorities from "../hooks/usePriorities";
 import useMe from "../hooks/useMe";
 import useUsers from "../hooks/useUsers";
-
-import { getTeamIcon } from "../helpers/teams";
+import useRoadmaps from "../hooks/useRoadmaps";
 
 import Project from "./Project";
+import { ProjectResult } from "../api/getProjects";
 
 export default function ProjectList() {
-  const { teamsWithProjects, isLoadingTeams } = useTeams();
-  const [selectedTeam, setSelectedTeam] = useState<string>(
-    teamsWithProjects && teamsWithProjects.length === 1 ? teamsWithProjects[0].id : ""
-  );
-  const { milestones, projectsByMilestoneId, upcomingProjects, isLoadingProjects, mutateProjects } =
-    useProjects(selectedTeam);
+  const [roadmap, setRoadmap] = useCachedState<string>("");
+
+  const { projects, isLoadingProjects, mutateProjects } = useProjects();
+  const { roadmaps, isLoadingRoadmaps } = useRoadmaps();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
   const { users, isLoadingUsers } = useUsers();
 
+  const filteredProjects = useMemo(() => {
+    if (!projects) {
+      return [];
+    }
+
+    if (roadmap === "") {
+      return projects;
+    }
+
+    const projectsNormalizedById = projects.reduce((acc, project) => {
+      return {
+        ...acc,
+        [project.id]: project,
+      };
+    }, {} as Record<string, ProjectResult | undefined>);
+
+    const currentRoadmap = roadmaps?.find((r) => r.id === roadmap);
+
+    return (
+      currentRoadmap?.projects.nodes.map((project) => {
+        return projectsNormalizedById[project.id];
+      }) || []
+    );
+  }, [roadmap, projects, roadmaps]);
+
   return (
     <List
-      isLoading={isLoadingProjects || isLoadingTeams || isLoadingPriorities || isLoadingMe || isLoadingUsers}
-      {...(teamsWithProjects && teamsWithProjects.length > 1
+      isLoading={isLoadingProjects || isLoadingRoadmaps || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      {...(roadmaps && roadmaps.length > 0
         ? {
             searchBarAccessory: (
-              <List.Dropdown tooltip="Change Team" onChange={setSelectedTeam} storeValue>
-                <List.Dropdown.Item value="" title="All teams" />
+              <List.Dropdown tooltip="Change Roadmap" onChange={setRoadmap} value={roadmap}>
+                <List.Dropdown.Item value="" title="All Projects" />
 
                 <List.Dropdown.Section>
-                  {teamsWithProjects?.map((team) => (
-                    <List.Dropdown.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
+                  {roadmaps?.map((roadmap) => (
+                    <List.Dropdown.Item key={roadmap.id} value={roadmap.id} title={roadmap.name} />
                   ))}
                 </List.Dropdown.Section>
               </List.Dropdown>
             ),
           }
         : {})}
-      searchBarPlaceholder="Filter by project title, lead, status, or milestone name"
+      searchBarPlaceholder="Filter by project title, lead, status, or team keys"
       filtering={{ keepSectionOrder: true }}
     >
-      {milestones.map((milestone) => (
-        <List.Section title={milestone.name} key={milestone.id}>
-          {projectsByMilestoneId[milestone.id]?.map((project) => (
-            <Project
-              project={project}
-              key={project.id}
-              teamId={selectedTeam}
-              priorities={priorities}
-              users={users}
-              me={me}
-              mutateProjects={mutateProjects}
-            />
-          ))}
-        </List.Section>
-      ))}
+      {filteredProjects?.map((project) => {
+        if (!project) {
+          return null;
+        }
 
-      <List.Section title="Upcoming">
-        {upcomingProjects?.map((project) => (
+        return (
           <Project
             project={project}
             key={project.id}
-            teamId={selectedTeam}
             priorities={priorities}
             users={users}
             me={me}
             mutateProjects={mutateProjects}
           />
-        ))}
-      </List.Section>
+        );
+      })}
+
+      <List.EmptyView title="There are no projects in the roadmap yet." />
     </List>
   );
 }

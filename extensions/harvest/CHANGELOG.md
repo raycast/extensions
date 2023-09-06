@@ -1,5 +1,23 @@
 # Harvest Changelog
 
+## [Menu Bar Fixes] - 2023-07-24
+
+- Fix: Menu bar widget snows the running timer in the format based on the user's preference
+- New option added to hide the timer from the menu bar widget
+
+## [Customize Time Entry Form] - 2023-06-11
+
+- Add new preference to show all times using hours/minutes, decimal, or whatever your company prefers in your Harvest account (default)
+
+## [Menu Bar Support] - 2023-05-22
+
+- Add support for a menu bar widget that shows the current running timer.
+- Add Callback URLs to trigger other apps when a timer is started or stopped.
+
+## [Better Project Search] - 2023-01-31
+
+- Add user preference to show the client's name for the selected project in the time entry form
+
 ## [Better Project Search] - 2022-09-29
 
 - You can now search via client name in the project dropdown

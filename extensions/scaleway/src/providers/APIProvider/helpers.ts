@@ -11,7 +11,7 @@ import { loadProfileFromConfigurationFile } from '@scaleway/configuration-loader
 import type { Profile } from '@scaleway/sdk'
 
 type PreferenceValues = Profile & {
-  profileName: 'string'
+  profileName?: string
 }
 
 const { error } = console
@@ -65,11 +65,13 @@ export const getPreferenceUser = () => {
       getPreferenceValues<PreferenceValues>()
 
     if (profileName) {
-      const config = loadProfileFromConfigurationFile({
-        profileName,
-      })
+      try {
+        const config = loadProfileFromConfigurationFile({
+          profileName,
+        })
 
-      if (!config) {
+        return config
+      } catch (err) {
         showAlertError(
           'Your profile is not well configure, check your file ~/.config/scw/config.yaml',
           `Profile Config ${profileName}`
@@ -77,8 +79,6 @@ export const getPreferenceUser = () => {
           .then()
           .catch(() => {})
       }
-
-      return config
     }
 
     return {

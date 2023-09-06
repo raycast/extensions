@@ -4,26 +4,6 @@ export enum PlayerState {
   STOPPED = "stopped",
 }
 
-export enum SFSymbols {
-  WARNING = "􀁟",
-  ADD_TO_LIBRARY = "􀈄",
-  DISLIKE = "􀊂",
-  LOVE = "􀊵",
-  TRACK_NEXT = "􀊌",
-  TRACK_PREVIOUS = "􀊊",
-  PLAY = "􀊃",
-  PLAY_FILL = "􀊄",
-  PAUSE = "􀊆",
-  PLAYPAUSE = "􀊈",
-  SHUFFLE = "􀊝",
-  ARTIST = "􀑫",
-  PLAYLIST = "􀑬",
-  MUSIC_NOTE = "􀑪",
-  STAR = "􀋂",
-  STAR_FILL = "􀋃",
-  TIME = "􀐫",
-}
-
 export interface Track {
   id?: string;
   name: string;
@@ -60,3 +40,7 @@ export interface ScriptError extends Error {
 export const ScriptError = {
   is: (error: Error): error is ScriptError => "shortMessaage" in error,
 };
+
+export interface Preferences {
+  volumeSteps: string;
+}

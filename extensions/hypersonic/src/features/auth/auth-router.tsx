@@ -8,7 +8,7 @@ import { useLocalPreferences } from '@/services/notion/hooks/use-local-preferenc
 
 export function AuthRouter() {
   const { token } = useAuth()
-  const { preferences, revalidate } = useLocalPreferences()
+  const { preferences, revalidatePreferences } = useLocalPreferences()
 
   if (!token) {
     return <Transparent />
@@ -19,7 +19,7 @@ export function AuthRouter() {
   }
 
   if (!preferences?.databaseId) {
-    return <ConfigurationForm revalidate={revalidate} />
+    return <ConfigurationForm revalidate={revalidatePreferences} />
   }
 
   return <TodoList />

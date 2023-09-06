@@ -34,7 +34,7 @@ export default async function () {
 
     const { errors, link } = (await response.json()) as { link: string; errors?: [] };
     if (errors) {
-      return await reportError(new Error("Invalid URL String"));
+      return await reportError(new Error(`Bitly API Error - ${JSON.stringify(errors)}, Clipboard Text - ${clipboard}`));
     }
 
     await Clipboard.copy(link);

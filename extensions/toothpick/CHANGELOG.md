@@ -1,5 +1,47 @@
 # Toothpick Changelog
 
+## [Blueutil Bluetooth Backend] - 2023-09-01
+
+- Added 'blueutil' as experimental Bluetooth backend
+- Fixed 'Connect device' & 'Disconnect device' toast notifications
+- Updated dependencies
+
+## [QoL Improvements and Device Additions] - 2023-06-14
+
+- Added rudimentary mappings for the following devices:
+  - Logitech MX Master 3 (custom icon)
+  - Logitech MX Master 3S (custom icon)
+  - Sony WH-1000XM5 (custom icon)
+  - Sony WH-1000XM4 (custom icon)
+  - Sony WH-1000XM3 (custom icon)
+  - Bose QC 35 (custom icon)
+  - Bose QC 35 II (custom icon)
+- Hooked favorite device commands' subtitles to corresponding device's name
+- Configured SVG optimization
+- Cleaned up codebase a little bit
+- Added a guide for setting up favorite devices in README.md
+
+## [Partial Device Support Addition] - 2023-02-17
+
+- Added rudimentary mappings for the following devices:
+  - Jabra Elite 85t (custom icon)
+- Cleaned up codebase a little bit
+
+## [Partial Device Support Addition] - 2023-02-10
+
+- Added rudimentary mappings for the following devices:
+  - Google Pixel Buds Pro (custom icon)
+
+## [Partial Device Support Addition] - 2023-01-25
+
+- Added rudimentary mappings for the following devices:
+  - Sony WF-1000XM3 (battery level and custom icon)
+
+## [Partial Device Support Addition] - 2023-01-18
+
+- Added rudimentary mappings for the following devices:
+  - Sony WF-1000XM4 (battery level and custom icon)
+
 ## [Partial Device Support Additions] - 2022-12-13
 
 - Added rudimentary mappings for the following devices:

@@ -20,61 +20,38 @@
       "preferences": [
         {
           "name": "appendSeparator",
-          "type": "dropdown",
-          "required": true,
+          "type": "textfield",
+          "required": false,
           "title": "Append Separator",
           "description": "Separator between text when appending text",
-          "default": "",
-          "data": [
-            {
-              "title": "No Separator",
-              "value": ""
-            },
-            {
-              "title": "⏎",
-              "value": "\n"
-            },
-            {
-              "title": "␣",
-              "value": " "
-            },
-            {
-              "title": ",",
-              "value": ","
-            },
-            {
-              "title": ".",
-              "value": "."
-            },
-            {
-              "title": ";",
-              "value": ";"
-            },
-            {
-              "title": ":",
-              "value": ":"
-            },
-            {
-              "title": "/",
-              "value": "/"
-            },
-            {
-              "title": "|",
-              "value": "|"
-            },
-            {
-              "title": "+",
-              "value": "+"
-            },
-            {
-              "title": "-",
-              "value": "-"
-            },
-            {
-              "title": "=",
-              "value": "="
-            }
-          ]
+          "default": ""
+        },
+        {
+          "name": "trimBeforeAppendClipboardText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Clipboard Text",
+          "label": "Trim Before Append",
+          "description": "Trim clipboard text before appending text",
+          "default": false
+        },
+        {
+          "name": "trimBeforeAppendSelectedText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Selected Text",
+          "label": "Trim Before Append",
+          "description": "Trim selected text before appending text",
+          "default": false
+        },
+        {
+          "name": "trimAppendedText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appended Text",
+          "label": "Trim After Append",
+          "description": "Trim appended text on the clipboard after appending text",
+          "default": false
         }
       ]
     },
@@ -87,77 +64,54 @@
       "preferences": [
         {
           "name": "appendSeparator",
-          "type": "dropdown",
-          "required": true,
+          "type": "textfield",
+          "required": false,
           "title": "Prepend Separator",
           "description": "Separator between text when prepending text",
-          "default": "",
-          "data": [
-            {
-              "title": "No Separator",
-              "value": ""
-            },
-            {
-              "title": "⏎",
-              "value": "\n"
-            },
-            {
-              "title": "␣",
-              "value": " "
-            },
-            {
-              "title": ",",
-              "value": ","
-            },
-            {
-              "title": ".",
-              "value": "."
-            },
-            {
-              "title": ";",
-              "value": ";"
-            },
-            {
-              "title": ":",
-              "value": ":"
-            },
-            {
-              "title": "/",
-              "value": "/"
-            },
-            {
-              "title": "|",
-              "value": "|"
-            },
-            {
-              "title": "+",
-              "value": "+"
-            },
-            {
-              "title": "-",
-              "value": "-"
-            },
-            {
-              "title": "=",
-              "value": "="
-            }
-          ]
+          "default": ""
+        },
+        {
+          "name": "trimBeforeAppendClipboardText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Clipboard Text",
+          "label": "Trim Before Append",
+          "description": "Trim clipboard text before appending text",
+          "default": false
+        },
+        {
+          "name": "trimBeforeAppendSelectedText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Selected Text",
+          "label": "Trim Before Append",
+          "description": "Trim selected text before appending text",
+          "default": false
+        },
+        {
+          "name": "trimAppendedText",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appended Text",
+          "label": "Trim After Append",
+          "description": "Trim appended text on the clipboard after appending text",
+          "default": false
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.1"
+    "@raycast/api": "^1.55.1"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "20.4.2",
+    "@types/react": "18.2.14",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",

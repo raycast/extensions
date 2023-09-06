@@ -2,11 +2,15 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
+  Color,
   getPreferenceValues,
   Icon,
+  Image,
   List,
   LocalStorage,
   open,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import fetch from "node-fetch";
 import React, { useEffect, useState } from "react";
@@ -76,8 +80,49 @@ export default function Command() {
   );
 }
 
-function ProjectDetails({ project }: { project: Project }) {
+function ProjectDetails({ project: _project }: { project: Project }) {
   const [loading, setLoading] = useState(false);
+  const [project, setProject] = useState(_project);
+  const [timestamp, setTimestamp] = useState(
+    toHumanTime(project.deployment_started_at ? Date.parse(project.deployment_started_at) - Date.now() : -1)
+  );
+
+  useEffect(() => {
+    async function fetchProject() {
+      setLoading(true);
+      const project = await getProject();
+      if (project) {
+        setProject(project);
+      }
+      setLoading(false);
+    }
+
+    fetchProject();
+  }, []);
+
+  useEffect(() => {
+    if (project.deployment_started_at === null) return;
+
+    const interval = setInterval(() => {
+      setTimestamp(toHumanTime(Date.parse(project.deployment_started_at) - Date.now()));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [project.deployment_started_at]);
+
+  async function getProject(): Promise<Project | undefined> {
+    const response = await fetch(`https://envoyer.io/api/projects/${project.id}`, {
+      headers: {
+        Authorization: `Bearer ${getPreferenceValues().envoyer_api_key}`,
+      },
+    });
+
+    try {
+      const data = (await response.json()) as { project: Project };
+      return data.project;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return (
     <List navigationTitle={project.name} isLoading={loading}>
@@ -91,8 +136,20 @@ function ProjectDetails({ project }: { project: Project }) {
         }
       />
       <List.Item
-        title="View Last Deployment"
+        title={project.status === "deploying" ? "View Current Deployment" : "View Last Deployment"}
         icon="command-icon.png"
+        accessories={[
+          {
+            text:
+              project.deployment_started_at !== null
+                ? `Deployed ${timestamp} by ${project.last_deployment_author}`
+                : `Last deployed ${project.last_deployment_timestamp} by ${project.last_deployment_author}`,
+            icon: {
+              source: project.last_deployment_avatar,
+              mask: Image.Mask.Circle,
+            },
+          },
+        ]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
@@ -101,35 +158,76 @@ function ProjectDetails({ project }: { project: Project }) {
           </ActionPanel>
         }
       />
-      <List.Item
-        title="Start New Deployment"
-        icon="command-icon.png"
-        actions={
-          <ActionPanel>
-            <Action
-              title="Start New Deployment"
-              icon={{
-                source: {
-                  light: "deploy.svg",
-                  dark: "deploy-dark.svg",
-                },
-              }}
-              onAction={async () => {
-                setLoading(true);
-                await fetch(`https://envoyer.io/api/projects/${project.id}/deployments`, {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${getPreferenceValues().envoyer_api_key}`,
+      {project.status !== "deploying" && (
+        <List.Item
+          title="Start New Deployment"
+          accessories={[
+            {
+              text: project.branch,
+              icon: {
+                tintColor: Color.SecondaryText,
+                source: "branch.svg",
+              },
+            },
+          ]}
+          icon="command-icon.png"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Start New Deployment"
+                icon={{
+                  source: {
+                    light: "deploy.svg",
+                    dark: "deploy-dark.svg",
                   },
-                });
-                await open(`https://envoyer.io/projects/${project.id}`);
-                await closeMainWindow();
-                setLoading(false);
-              }}
-            />
-          </ActionPanel>
-        }
-      />
+                }}
+                onAction={async () => {
+                  const toast = await showToast({
+                    style: Toast.Style.Animated,
+                    title: "Deploying...",
+                  });
+
+                  await fetch(`https://envoyer.io/api/projects/${project.id}/deployments`, {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${getPreferenceValues().envoyer_api_key}`,
+                    },
+                  });
+
+                  toast.style = Toast.Style.Success;
+                  toast.title = "New deployment started!";
+
+                  if (getPreferenceValues().open_on_deploy) {
+                    await open(`https://envoyer.io/projects/${project.id}`);
+                    await closeMainWindow();
+                  } else {
+                    setLoading(true);
+                    for (let i = 0; i < 10; i++) {
+                      await new Promise((resolve) => setTimeout(resolve, 1000));
+                      const newProject = await getProject();
+                      if (newProject !== undefined && project.last_deployment_id !== newProject.last_deployment_id) {
+                        setProject(newProject);
+                        break;
+                      }
+                    }
+                    setLoading(false);
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
+}
+
+function toHumanTime(time: number) {
+  const timeFormatter = new Intl.RelativeTimeFormat("en", { style: "long", numeric: "always" });
+  // If there are minutes
+  if (Math.abs(time) > 1000 * 60) {
+    return timeFormatter.format(parseInt(String(time / (1000 * 60)), 10), "minutes");
+  }
+
+  return timeFormatter.format(parseInt(String(time / 1000), 10), "seconds");
 }

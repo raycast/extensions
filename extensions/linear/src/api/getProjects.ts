@@ -1,7 +1,5 @@
-import { Milestone, Project, User } from "@linear/sdk";
+import { Project, User } from "@linear/sdk";
 import { getLinearClient } from "../helpers/withLinearClient";
-
-export type MilestoneResult = Pick<Milestone, "id" | "name" | "sortOrder">;
 
 export type ProjectResult = Pick<
   Project,
@@ -12,11 +10,9 @@ export type ProjectResult = Pick<
 } & {
   lead: Pick<User, "id" | "displayName" | "avatarUrl" | "email"> | null;
 } & {
-  milestone: MilestoneResult | null;
-} & {
   members: { nodes: { id: string }[] };
 } & {
-  teams: { nodes: { id: string }[] };
+  teams: { nodes: { id: string; key: string }[] };
 };
 
 const projectFragment = `
@@ -34,11 +30,6 @@ const projectFragment = `
     avatarUrl
     email
   }
-  milestone {
-    id
-    name
-    sortOrder
-  }
   startDate
   targetDate
   members {
@@ -48,6 +39,7 @@ const projectFragment = `
   }
   teams {
     nodes {
+      key
       id
     }
   }
@@ -91,4 +83,34 @@ export async function getProjects(teamId?: string) {
 
     return data?.team.projects.nodes;
   }
+}
+
+type Roadmap = {
+  id: string;
+  name: string;
+  projects: { nodes: { id: string }[] };
+};
+
+export async function getRoadmaps() {
+  const { graphQLClient } = getLinearClient();
+
+  const { data } = await graphQLClient.rawRequest<{ roadmaps: { nodes: Roadmap[] } }, Record<string, unknown>>(
+    `
+      query {
+        roadmaps {
+          nodes {
+            id
+            name
+            projects {
+              nodes {
+                id
+              }
+            }
+          }
+        }
+      }
+    `
+  );
+
+  return data?.roadmaps.nodes;
 }

@@ -1,13 +1,13 @@
 # Storage
 
-The storage APIs can be used to store non-sensitive data that is persisted across command launches.
+The storage APIs can be used to store data in Raycast's [local encrypted database](../information/security.md#data-storage).
 
 All commands in an extension have shared access to the stored data. Extensions can _not_ access the storage of other extensions.
 
 Values can be managed through functions such as [`LocalStorage.getItem`](storage.md#localstorage.getitem), [`LocalStorage.setItem`](storage.md#localstorage.setitem), or [`LocalStorage.removeItem`](storage.md#localstorage.removeitem). A typical use case is storing user-related data, for example entered todos.
 
 {% hint style="info" %}
-The API is not meant to store large amounts of data. For this, use [Node's built-in APIs to write files](https://nodejs.dev/learn/writing-files-with-nodejs), e.g. to the extension's [support directory](environment.md#environment).
+The API is not meant to store large amounts of data. For this, use [Node's built-in APIs to write files](https://nodejs.dev/en/learn/writing-files-with-nodejs/), e.g. to the extension's [support directory](environment.md#environment).
 {% endhint %}
 
 ## API Reference

@@ -1,5 +1,9 @@
 # Reverso Context Changelog
 
+## [Added 2nd command for 2nd langs pair] - 2023-01-24
+
+- Added 2nd command so you can now configure 2 independent pairs of languages and set different shortcuts for each of them
+
 ## [Improvements] - 2023-01-09
 
 - Small refactoring

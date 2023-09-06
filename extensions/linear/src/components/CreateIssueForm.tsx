@@ -9,12 +9,14 @@ import {
   getPreferenceValues,
   useNavigation,
   showToast,
+  Color,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
+import { createAttachment } from "../api/attachments";
 
 import useLabels from "../hooks/useLabels";
 import useStates from "../hooks/useStates";
@@ -22,9 +24,10 @@ import useTeams from "../hooks/useTeams";
 import useCycles from "../hooks/useCycles";
 import useIssues from "../hooks/useIssues";
 import useProjects from "../hooks/useProjects";
+import useMilestones from "../hooks/useMilestones";
 
 import { getEstimateScale } from "../helpers/estimates";
-import { getOrderedStates, statusIcons } from "../helpers/states";
+import { getOrderedStates, getStatusIcon } from "../helpers/states";
 import { getErrorMessage } from "../helpers/errors";
 import { priorityIcons } from "../helpers/priorities";
 import { getUserIcon } from "../helpers/users";
@@ -33,12 +36,14 @@ import { getProjectIcon, projectStatusText } from "../helpers/projects";
 import { getTeamIcon } from "../helpers/teams";
 
 import IssueDetail from "./IssueDetail";
+import { getMilestoneIcon } from "../helpers/milestones";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
   cycleId?: string;
   teamId?: string;
   projectId?: string;
+  milestoneId?: string;
   parentId?: string;
   priorities: IssuePriorityValue[] | undefined;
   users: User[] | undefined;
@@ -60,16 +65,12 @@ export type CreateIssueValues = {
   dueDate: Date | null;
   cycleId: string;
   projectId: string;
+  milestoneId: string;
   parentId: string;
+  attachments: string[];
 };
 
-type Preferences = {
-  signature: boolean;
-  autofocusField: "teamId" | "title";
-  copyToastAction: "key" | "url" | "title";
-};
-
-function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], issue: IssueResult) {
+function getCopyToastAction(copyToastAction: Preferences.CreateIssue["copyToastAction"], issue: IssueResult) {
   if (copyToastAction === "url") {
     return { title: "Copy Issue URL", onAction: () => Clipboard.copy(issue.url) };
   }
@@ -78,12 +79,12 @@ function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], iss
     return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
   }
 
-  return { title: "Copy Issue Key", onAction: () => Clipboard.copy(issue.identifier) };
+  return { title: "Copy Issue ID", onAction: () => Clipboard.copy(issue.identifier) };
 }
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature, autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
+  const { autofocusField, copyToastAction } = getPreferenceValues<Preferences.CreateIssue>();
 
   const { teams, isLoadingTeams } = useTeams();
   const hasMoreThanOneTeam = teams && teams.length > 1;
@@ -91,15 +92,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
-
-      let payloadDescription = values.description || "";
-      if (signature) {
-        if (values.description) {
-          payloadDescription += "\n\n---\n";
-        }
-
-        payloadDescription += "Created via [Raycast](https://www.raycast.com)";
-      }
 
       const teamId = hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id;
 
@@ -113,7 +105,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         const payload: CreateIssuePayload = {
           teamId,
           title: values.title,
-          description: payloadDescription,
+          description: values.description || "",
           stateId: values.stateId,
           labelIds: values.labelIds,
           dueDate: values.dueDate,
@@ -121,6 +113,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           ...(values.assigneeId ? { assigneeId: values.assigneeId } : {}),
           ...(values.cycleId ? { cycleId: values.cycleId } : {}),
           ...(values.projectId ? { projectId: values.projectId } : {}),
+          ...(values.milestoneId ? { projectId: values.milestoneId } : {}),
           ...(values.parentId ? { parentId: values.parentId } : {}),
           priority: parseInt(values.priority),
         };
@@ -152,13 +145,31 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             labelIds: [],
             dueDate: null,
             parentId: "",
+            attachments: [],
           });
 
-          if (hasMoreThanOneTeam) {
-            return focus(autofocusField);
-          }
+          hasMoreThanOneTeam && autofocusField ? focus(autofocusField) : focus("title");
 
-          return focus("teamId");
+          if (values.attachments.length > 0) {
+            const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
+
+            try {
+              toast.message = `Uploading ${attachmentWord}…`;
+              await Promise.all(
+                values.attachments.map((attachment) =>
+                  createAttachment({
+                    issueId: issue.id,
+                    url: attachment,
+                  })
+                )
+              );
+              toast.message = `Successfully uploaded ${attachmentWord}`;
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = `Failed uploading ${attachmentWord}`;
+              toast.message = getErrorMessage(error);
+            }
+          }
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -184,6 +195,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       dueDate: props.draftValues?.dueDate,
       cycleId: props.draftValues?.cycleId || props.cycleId,
       projectId: props.draftValues?.projectId || props.projectId,
+      milestoneId: props.draftValues?.milestoneId || props.milestoneId,
       parentId: props.draftValues?.parentId || props.parentId,
     },
   });
@@ -193,6 +205,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { cycles } = useCycles(values.teamId);
   const { issues } = useIssues(getLastCreatedIssues);
   const { projects } = useProjects(values.teamId);
+  const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId });
 
   useEffect(() => {
     if (teams?.length === 1) {
@@ -218,6 +231,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const hasLabels = labels && labels.length > 0;
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
+  const hasMilestones = milestones && milestones.length > 0;
   const hasIssues = issues && issues.length > 0;
 
   return (
@@ -259,12 +273,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         {hasStates
           ? orderedStates.map((state) => {
               return (
-                <Form.Dropdown.Item
-                  title={state.name}
-                  value={state.id}
-                  key={state.id}
-                  icon={{ source: statusIcons[state.type], tintColor: state.color }}
-                />
+                <Form.Dropdown.Item title={state.name} value={state.id} key={state.id} icon={getStatusIcon(state)} />
               );
             })
           : null}
@@ -365,6 +374,23 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         </Form.Dropdown>
       ) : null}
 
+      {hasMilestones ? (
+        <Form.Dropdown title="Milestone" storeValue {...itemProps.milestoneId}>
+          <Form.Dropdown.Item title="No Milestone" value="" icon={{ source: "linear-icons/no-milestone.svg" }} />
+
+          {milestones.map((milestone) => {
+            return (
+              <Form.Dropdown.Item
+                title={`${milestone.name} (${milestone.targetDate || "No Target Date"})`}
+                value={milestone.id}
+                key={milestone.id}
+                icon={getMilestoneIcon(milestone)}
+              />
+            );
+          })}
+        </Form.Dropdown>
+      ) : null}
+
       {hasIssues ? (
         <Form.Dropdown title="Parent" {...itemProps.parentId}>
           <Form.Dropdown.Item
@@ -379,12 +405,16 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                 title={`${issue.identifier} - ${issue.title}`}
                 value={issue.id}
                 key={issue.id}
-                icon={{ source: statusIcons[issue.state.type], tintColor: issue.state.color }}
+                icon={getStatusIcon(issue.state)}
               />
             );
           })}
         </Form.Dropdown>
       ) : null}
+
+      <Form.Separator />
+
+      <Form.FilePicker title="Attachment" {...itemProps.attachments} />
     </Form>
   );
 }

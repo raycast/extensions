@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youtube-downloader",
+  "title": "YouTube Downloader",
+  "description": "Download YouTube video from Raycast",
+  "icon": "youtube.png",
+  "author": "vimtor",
+  "contributors": [
+    "pernielsentikaer",
+    "d2a"
+  ],
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download Video",
+      "subtitle": "YouTube",
+      "description": "Download YouTube video with parameters",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadPath",
+      "title": "Download Path",
+      "description": "Path to download video",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Path",
+      "description": "Path to the ffmpeg executable",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ffmpeg",
+      "required": true
+    },
+    {
+      "name": "ffprobePath",
+      "title": "ffprobe Path",
+      "description": "Path to the ffprobe executable. Usually installed alog with ffmpeg.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/ffprobe",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "date-fns": "^2.30.0",
+    "fluent-ffmpeg": "2.1.2",
+    "patch-package": "^6.5.1",
+    "pretty-bytes": "^6.1.0",
+    "sanitize-filename": "^1.6.3",
+    "tempfile": "^4.0.0",
+    "unused-filename": "^4.0.1",
+    "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/fluent-ffmpeg": "^2.1.21",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "postinstall": "patch-package"
+  }
+}

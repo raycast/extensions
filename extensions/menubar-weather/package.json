@@ -5,6 +5,10 @@
   "description": "Show current weather on the menu bar",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "r22",
+    "fuksman"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,6 +20,24 @@
     }
   ],
   "preferences": [
+    {
+      "name": "iconStyle",
+      "type": "dropdown",
+      "title": "Icon Style",
+      "description": "Choose the style of the menu bar weather icon",
+      "required": false,
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        },
+        {
+          "title": "SF Symbols",
+          "value": "sf-symbols"
+        }
+      ]
+    },
     {
       "name": "cityName",
       "type": "textfield",
@@ -66,7 +88,7 @@
       "title": "Wind Speed Unit",
       "description": "Units of wind speed",
       "required": true,
-      "default": "",
+      "default": "ms",
       "data": [
         {
           "title": "Km/h",
@@ -105,11 +127,69 @@
       ]
     },
     {
+      "name": "tempType",
+      "type": "dropdown",
+      "title": "Show in menubar",
+      "description": "Temperature type",
+      "required": false,
+      "default": "temperature",
+      "data": [
+        {
+          "title": "Forecast",
+          "value": "temperature"
+        },
+        {
+          "title": "Feels-like",
+          "value": "apparent_temperature"
+        }
+      ]
+    },
+    {
+      "name": "menuUVI",
+      "type": "checkbox",
+      "label": "UV Index",
+      "description": "Show UV index in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuPressure",
+      "type": "checkbox",
+      "label": "Pressure",
+      "description": "Show pressure in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuHumidity",
+      "type": "checkbox",
+      "label": "Humidity",
+      "description": "Show humidity in menu",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "menuWind",
+      "type": "checkbox",
+      "label": "Wind",
+      "description": "Show wind in menu",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "showSun",
       "type": "checkbox",
       "label": "Sunrise and sunset",
-      "title": "Additional Info",
-      "description": "Show sunrise and sunset",
+      "title": "Show in details",
+      "description": "Show sunrise and sunset in details",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showUVI",
+      "type": "checkbox",
+      "label": "UV Index",
+      "description": "Show UV Index in details",
       "required": false,
       "default": true
     },
@@ -117,7 +197,7 @@
       "name": "showLocation",
       "type": "checkbox",
       "label": "Geolocation Information",
-      "description": "Show geolocation information",
+      "description": "Show geolocation information in details",
       "required": false,
       "default": true
     },
@@ -125,24 +205,24 @@
       "name": "showForecast",
       "type": "checkbox",
       "label": "7-day weather forecast",
-      "description": "Show 7-day weather forecast",
+      "description": "Show 7-day weather forecast in details",
       "required": false,
       "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "axios": "^1.1.3"
+    "@raycast/api": "^1.57.1",
+    "axios": "^1.4.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "20.4.4",
+    "@types/react": "18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.1.0",
+    "@typescript-eslint/parser": "^6.1.0",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",

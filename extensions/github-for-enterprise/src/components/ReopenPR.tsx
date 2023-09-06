@@ -1,14 +1,16 @@
 import { REOPEN_PR } from "@/queries/pull-requests";
 import { fetcher } from "@/utils";
-import { ActionPanel, Color, showToast, ToastStyle } from "@raycast/api";
-import React from "react";
+import { Color, showToast, Action, Toast } from "@raycast/api";
 import { useSWRConfig } from "swr";
 
 export default function ReopenPR({ id, number }: any) {
   const { mutate } = useSWRConfig();
 
   async function reopenPR() {
-    showToast(ToastStyle.Animated, "Reopening pull request");
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Reopening pull request",
+    });
 
     try {
       await fetcher({
@@ -20,18 +22,21 @@ export default function ReopenPR({ id, number }: any) {
 
       mutate("prs");
       mutate("prs-open");
-      showToast(ToastStyle.Success, `Pull request #${number} reopened`);
+      showToast({
+        style: Toast.Style.Success,
+        title: `Pull request #${number} reopened`,
+      });
     } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to reopen pull request",
-        error instanceof Error ? error.message : error.toString()
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to reopen pull request",
+        message: error instanceof Error ? error.message : error.toString(),
+      });
     }
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Reopen Pull Request"
       icon={{
         source: "pull-request.png",

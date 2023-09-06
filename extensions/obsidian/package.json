@@ -1,14 +1,19 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "obsidian",
   "title": "Obsidian",
   "description": "Control Obsidian with Raycast",
-  "icon": "command-icon.png",
-  "author": "marcjulian",
+  "icon": "extension_icon.png",
+  "author": "KevinBatdorf",
   "categories": [
     "Productivity"
   ],
-  "contributes": [
-    "iancanderson"
+  "contributors": [
+    "marcjulian",
+    "iancanderson",
+    "pernielsentikaer",
+    "ofalvai",
+    "adamadamsmusic"
   ],
   "license": "MIT",
   "preferences": [
@@ -19,6 +24,36 @@
       "title": "Path to Vault",
       "required": false,
       "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+    },
+    {
+      "name": "excludedFolders",
+      "type": "textfield",
+      "placeholder": "folder1, folder2, ...",
+      "title": "Exclude following folders",
+      "required": false,
+      "description": "Specify which folders to exclude (comma separated)"
+    },
+    {
+      "name": "removeYAML",
+      "title": "Remove content",
+      "label": "Hide YAML frontmatter",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide YAML frontmatter for copying and viewing notes"
+    },
+    {
+      "name": "removeLatex",
+      "label": "Hide LaTeX",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide LaTeX (surrounded by $$ or $) for copying and viewing notes"
+    },
+    {
+      "name": "removeLinks",
+      "label": "Hide Links",
+      "type": "checkbox",
+      "required": false,
+      "description": "Hide links for copying and viewing notes"
     }
   ],
   "commands": [
@@ -44,35 +79,91 @@
       ],
       "preferences": [
         {
-          "name": "excludedFolders",
+          "name": "appendTemplate",
           "type": "textfield",
-          "placeholder": "folder1, folder2, ...",
-          "title": "Exclude following folders",
+          "title": "Template for Append action",
           "required": false,
-          "description": "Specify which folders to exclude (comma separated)"
+          "description": "Specify a template for Append action (e.g. '- {content}')"
         },
         {
-          "name": "removeYAML",
-          "title": "Remove content",
-          "label": "Hide YAML frontmatter",
-          "type": "checkbox",
+          "name": "appendSelectedTemplate",
+          "type": "textfield",
+          "title": "Template for Append Selected Text action",
           "required": false,
-          "description": "Hide YAML frontmatter for copying and viewing notes"
+          "description": "Specify a template for Append Selected Text action (e.g. '- {content}')"
         },
         {
-          "name": "removeLatex",
-          "label": "Hide LaTeX",
+          "name": "showDetail",
           "type": "checkbox",
+          "label": "Show Detail",
+          "title": "Show Detail",
           "required": false,
-          "description": "Hide LaTeX (surrounded by $$ or $) for copying and viewing notes"
+          "description": "Show the notes content in a detail view",
+          "default": true
         },
         {
-          "name": "removeLinks",
-          "label": "Hide Links",
+          "name": "showMetadata",
           "type": "checkbox",
+          "label": "Show Metadata",
+          "title": "Show Metadata",
           "required": false,
-          "description": "Hide links for copying and viewing notes"
+          "description": "Show the notes metadata in a detail view (only works when Show Detail is enabled)",
+          "default": false
         },
+        {
+          "name": "searchContent",
+          "type": "checkbox",
+          "label": "Search Content",
+          "title": "Search Content",
+          "required": false,
+          "description": "Use the content of notes for searching",
+          "default": false
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "title": "Primary Action",
+          "required": false,
+          "description": "Select a primary action to be executed on enter",
+          "defaultValue": "quicklook",
+          "data": [
+            {
+              "title": "Quick Look",
+              "value": "quicklook"
+            },
+            {
+              "title": "Open in Obsidian",
+              "value": "obsidian"
+            },
+            {
+              "title": "Open in new Pane",
+              "value": "newpane"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "starredNotesCommand",
+      "title": "Bookmarked Notes",
+      "subtitle": "Obsidian",
+      "description": "Search, open, view, copy, paste and edit bookmarked notes in Obsidian.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "searchArgument",
+          "placeholder": "Note",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tagArgument",
+          "placeholder": "Tag",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
         {
           "name": "appendTemplate",
           "type": "textfield",
@@ -180,6 +271,15 @@
           "title": "Name of heading in note in which to append",
           "required": false,
           "description": "If no heading is set, text will be appended to the end of the daily note"
+        },
+        {
+          "name": "silent",
+          "type": "checkbox",
+          "label": "Silent Mode",
+          "title": "Silent Mode",
+          "required": false,
+          "description": "Don't open daily note when appending to the daily note.",
+          "default": true
         }
       ]
     },
@@ -197,6 +297,24 @@
       "description": "Create new note",
       "mode": "view",
       "preferences": [
+        {
+          "name": "blankNote",
+          "type": "checkbox",
+          "label": "Blank Note",
+          "title": "Blank Note",
+          "required": false,
+          "description": "Create a blank note",
+          "default": false
+        },
+        {
+          "name": "openOnCreate",
+          "type": "checkbox",
+          "title": "Open Note on Creation",
+          "label": "Open Note on Creation",
+          "default": true,
+          "required": false,
+          "description": "Open the created note in Obsidian"
+        },
         {
           "name": "prefPath",
           "type": "textfield",
@@ -250,15 +368,6 @@
           "default": ""
         },
         {
-          "name": "openOnCreate",
-          "type": "checkbox",
-          "title": "Open Note on Creation",
-          "label": "Open Note on Creation",
-          "default": true,
-          "required": false,
-          "description": "Open the created note in Obsidian"
-        },
-        {
           "name": "folderActions",
           "type": "textfield",
           "placeholder": "folder1, folder2, folder3, ...",
@@ -270,150 +379,12 @@
       ]
     },
     {
-      "name": "pinnedNotesCommand",
-      "title": "Pinned Notes",
-      "subtitle": "Obsidian",
-      "description": "Search, open, view, copy, paste and edit pinned notes.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "searchArgument",
-          "placeholder": "Note",
-          "type": "text",
-          "required": false
-        },
-        {
-          "name": "tagArgument",
-          "placeholder": "Tag",
-          "type": "text",
-          "required": false
-        }
-      ],
-      "preferences": [
-        {
-          "name": "removeYAML",
-          "title": "Remove content",
-          "label": "Hide YAML frontmatter",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide YAML frontmatter for copying and viewing notes"
-        },
-        {
-          "name": "removeLatex",
-          "label": "Hide LaTeX",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide LaTeX (surrounded by $$ or $) for copying and viewing notes"
-        },
-        {
-          "name": "removeLinks",
-          "label": "Hide Links",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide links for copying and viewing notes"
-        },
-        {
-          "name": "appendTemplate",
-          "type": "textfield",
-          "title": "Template for Append action",
-          "required": false,
-          "description": "Specify a template for Append action (e.g. '- {content}')"
-        },
-        {
-          "name": "appendSelectedTemplate",
-          "type": "textfield",
-          "title": "Template for Append Selected Text action",
-          "required": false,
-          "description": "Specify a template for Append Selected Text action (e.g. '- {content}')"
-        },
-        {
-          "name": "showDetail",
-          "type": "checkbox",
-          "label": "Show Detail",
-          "title": "Show Detail",
-          "required": false,
-          "description": "Show the notes content in a detail view",
-          "default": true
-        },
-        {
-          "name": "showMetadata",
-          "type": "checkbox",
-          "label": "Show Metadata",
-          "title": "Show Metadata",
-          "required": false,
-          "description": "Show the notes metadata in a detail view (only works when Show Detail is enabled)",
-          "default": false
-        },
-        {
-          "name": "searchContent",
-          "type": "checkbox",
-          "label": "Search Content",
-          "title": "Search Content",
-          "required": false,
-          "description": "Use the content of notes for searching",
-          "default": false
-        },
-        {
-          "name": "primaryAction",
-          "type": "dropdown",
-          "title": "Primary Action",
-          "required": false,
-          "description": "Select a primary action to be executed on enter",
-          "defaultValue": "quicklook",
-          "data": [
-            {
-              "title": "Quick Look",
-              "value": "quicklook"
-            },
-            {
-              "title": "Open in Obsidian",
-              "value": "obsidian"
-            },
-            {
-              "title": "Open in new Pane",
-              "value": "newpane"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "randomNoteCommand",
       "title": "Random Note",
       "subtitle": "Obsidian",
       "description": "Open random note",
       "mode": "view",
       "preferences": [
-        {
-          "name": "excludedFolders",
-          "type": "textfield",
-          "placeholder": "folder1, folder2, ...",
-          "title": "Exclude following folders",
-          "required": false,
-          "description": "Specify which folders to exclude (comma separated)"
-        },
-        {
-          "name": "removeYAML",
-          "title": "Remove content",
-          "label": "Hide YAML frontmatter",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide YAML frontmatter for copying and viewing notes"
-        },
-        {
-          "name": "removeLatex",
-          "label": "Hide LaTeX",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide LaTeX (surrounded by $$ or $) for copying and viewing notes"
-        },
-        {
-          "name": "removeLinks",
-          "label": "Hide Links",
-          "type": "checkbox",
-          "required": false,
-          "description": "Hide links for copying and viewing notes"
-        },
         {
           "name": "appendTemplate",
           "type": "textfield",
@@ -511,26 +482,88 @@
       "subtitle": "Obsidian",
       "description": "See your pinned notes at a glance and control actions from the menu bar.",
       "mode": "menu-bar"
+    },
+    {
+      "name": "appendTaskCommand",
+      "title": "Append Task",
+      "subtitle": "Obsidian",
+      "description": "Append a task to a note of your choice",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Your task",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "dueDate",
+          "placeholder": "YYYY-MM-DD",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "description": "Path of note",
+          "name": "notePath",
+          "required": true,
+          "title": "Path of the note you wish to append the task to",
+          "type": "textfield"
+        },
+        {
+          "name": "noteTag",
+          "required": false,
+          "title": "Tag to append to the beginning of the task.",
+          "description": "Defaults to #task for compatibility with Obsidian Tasks.",
+          "type": "textfield",
+          "default": "#task"
+        },
+        {
+          "description": "Name of Obsidian vault where note is",
+          "name": "vaultName",
+          "required": false,
+          "title": "Name of Obsidian vault where note is",
+          "type": "textfield"
+        },
+        {
+          "description": "If no heading is not set, text will be appended to the end of the note",
+          "name": "heading",
+          "required": false,
+          "title": "Name of heading in note in which to append",
+          "type": "textfield"
+        },
+        {
+          "default": true,
+          "description": "Don't open note when appending.",
+          "label": "Silent Mode",
+          "name": "silent",
+          "required": false,
+          "title": "Silent Mode",
+          "type": "checkbox"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.47.0",
     "@types/uuid": "^8.3.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.52",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "eslint": "^8.42.0",
+    "prettier": "^2.8.8",
     "typescript": "^4.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

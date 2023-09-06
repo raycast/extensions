@@ -226,7 +226,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   };
 
   const response = await fetch(
-    `https://nixos-search-7-1733963800.us-east-1.bonsaisearch.net/latest-32-nixos-${branchName}/_search`,
+    `https://nixos-search-7-1733963800.us-east-1.bonsaisearch.net/latest-42-nixos-${branchName}/_search`,
     {
       method: "post",
       signal: signal,

@@ -30,7 +30,49 @@
         "css"
       ],
       "description": "Search Tailwind CSS utility classes",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "measuringUnit",
+          "title": "Measuring Unit",
+          "description": "Measuring unit to use for spacing-related properties",
+          "type": "dropdown",
+          "required": true,
+          "default": "rem",
+          "data": [
+            {
+              "title": "REM",
+              "value": "rem"
+            },
+            {
+              "title": "Pixels",
+              "value": "px"
+            }
+          ]
+        },
+        {
+          "name": "defaultAction",
+          "title": "Default Action",
+          "description": "Action to perform when pressing enter",
+          "type": "dropdown",
+          "required": false,
+          "default": "selector",
+          "data": [
+            {
+              "title": "Copy Selector",
+              "value": "selector"
+            },
+            {
+              "title": "Copy CSS",
+              "value": "css"
+            },
+            {
+              "title": "Copy Class Name",
+              "value": "class"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "search-colors",

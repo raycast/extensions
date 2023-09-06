@@ -112,7 +112,7 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 ## Screenshots
 
-![An example of an extension with screenshot metadata](https://user-images.githubusercontent.com/17166544/159986998-a67ebd18-ae24-4b19-8123-ac1c600d18b3.png)
+![An example of an extension with screenshot metadata](../.gitbook/assets/hn-store.png)
 
 - Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 - You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
@@ -154,7 +154,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 - Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
   - To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
 - See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)
-- With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD
+- With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD or a `{PR_MERGE_DATE}` placeholder. It will automatically be replaced with the date when the pull request was merged
   - Make sure your change title is within square brackets
   - Separate your title and date with a hyphen `-` and spaces either side of the hyphen
 - Below is an example of a changelog that follows the correct format
@@ -245,8 +245,8 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
   - ❌ `Copy url`, `set project`, `Set priority`
 - Provide icons for actions if there are other actions with icons in the list
   - Avoid having a list of actions where some have icons and some don't
-- Add ellipses `...` for actions that will have a submenu. Don't repeat parent the action name in the submenu
-  - ✅ `Set Priority...` and submenu would have `Low`, `Medium`, `High`
+- Add ellipses `…` for actions that will have a submenu. Don't repeat parent the action name in the submenu
+  - ✅ `Set Priority…` and submenu would have `Low`, `Medium`, `High`
   - ❌ `Set Priority` and submenu would have `Set Priority Low`, `Set Priority Medium`, etc
 
 ### Navigation

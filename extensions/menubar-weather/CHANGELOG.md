@@ -1,5 +1,31 @@
 # Menubar Weather Changelog
 
+## [Add new weather icon] - 2023-08-21
+
+- Now you can choose SF Symbols style weather icons, thanks to [Arttu](https://www.raycast.com/r22) for the SF Symbols icons
+
+## [Add command subtitle] - 2023-07-24
+
+- Now you can view the weather directly from the subtitle of the command.
+- Fix the problem that the weather information is not updated properly after changing the settings
+
+## [Add menubar info configutation] - 2023-07-11
+
+- You can choose temperature type, UVI, pressure, humidity and rain to display in the menubar
+
+## [Add UV Index] - 2023-07-03
+
+- UV Index (UVI) is now included in the current weather and forecast
+- UVI can be disabled in the Preferences
+
+## [Fix bug] - 2023-06-19
+
+- Fix a bug that caused the extension to crash if cached data couldn't be parsed properly
+
+## [Update UI] - 2023-03-29
+
+- Add wind direction display
+
 ## [Fix bug] - 2022-12-13
 
 - Fix the bug of pop-up Toast error when refreshing in the background

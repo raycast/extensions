@@ -7,6 +7,7 @@
 - [Community](https://raycast.com/community)
 - [GitHub](https://github.com/raycast/extensions)
 - [Store](https://raycast.com/store)
+- [Icon Generator](https://icon.ray.so)
 - [Extension Icon Template](https://www.figma.com/community/file/1030764827259035122)
 
 ## Basics
@@ -35,11 +36,15 @@
 ## Information
 
 - [Best Practices](information/best-practices.md)
-- [CLI](information/cli.md)
+- [Tools](information/tools/README.md)
+  - [CLI](information/tools/cli.md)
+  - [ESLint](information/tools/eslint.md)
+  - [VS Code (community tool)](information/tools/vscode.md)
 - [File Structure](information/file-structure.md)
 - [Lifecycle](information/lifecycle/README.md)
   - [Arguments](information/lifecycle/arguments.md)
   - [Background Refresh](information/lifecycle/background-refresh.md)
+  - [Deeplinks](information/lifecycle/deeplinks.md)
 - [Manifest](information/manifest.md)
 - [Security](information/security.md)
 - [Terminology](information/terminology.md)
@@ -47,7 +52,9 @@
 
 ## API Reference
 
+- [AI](api-reference/ai.md)
 - [Cache](api-reference/cache.md)
+- [Command](api-reference/command.md)
 - [Clipboard](api-reference/clipboard.md)
 - [Environment](api-reference/environment.md)
 - [Feedback](api-reference/feedback/README.md)
@@ -79,4 +86,6 @@
   - [v1.28.0](migration/v1.28.0.md)
   - [v1.31.0](migration/v1.31.0.md)
   - [v1.37.0](migration/v1.37.0.md)
+  - [v1.48.8](migration/v1.48.8.md)
+  - [v1.50.0](migration/v1.50.0.md)
 - [FAQ](faq.md)

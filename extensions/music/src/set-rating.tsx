@@ -14,7 +14,6 @@ import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
 import { Track } from "./util/models";
-import { SFSymbols } from "./util/models";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
@@ -41,7 +40,7 @@ export default function SetRating() {
 
 function Actions({ value }: { value: number }) {
   const { pop } = useNavigation();
-  const title = SFSymbols.STAR + "  Rate track";
+  const title = "Rate track";
 
   const handleRating = async () => {
     await pipe(
@@ -51,7 +50,7 @@ function Actions({ value }: { value: number }) {
         showToast(Toast.Style.Failure, "Could not rate this track");
       }),
       TE.map(() => {
-        showHUD(SFSymbols.STAR_FILL.repeat(value));
+        showHUD("Rated " + "⭐".repeat(value));
         closeMainWindow();
       })
     )();
@@ -61,7 +60,7 @@ function Actions({ value }: { value: number }) {
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleRating} />
+      <Action title={title} onAction={handleRating} icon={Icon.Stars} />
     </ActionPanel>
   );
 }

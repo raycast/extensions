@@ -1,5 +1,14 @@
 # IP Geolocation Changelog
 
+## [Command metadata] - 2023-08-14
+
+- Command metadata: show IP address in the command palette
+
+## [New command] - 2023-02-07
+
+- New command: Copy Local IP Address
+- Now display IPv4 and IPv6 information separately
+
 ## [Update UI] - 2022-12-05
 
 - Update UI: new extension icon, new information icon

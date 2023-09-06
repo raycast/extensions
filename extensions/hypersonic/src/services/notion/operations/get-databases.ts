@@ -10,6 +10,7 @@ export async function getDatabases(): Promise<Database[]> {
   const databases = await notionClient.search({
     filter: { property: 'object', value: 'database' },
   })
+
   const normalizedDatabases = databases.results.map((database) => {
     const d = database as DatabaseObjectResponse
 
@@ -49,7 +50,7 @@ const normalizeColumns = (
   const columns: Database['columns'] = {
     title: [],
     date: [],
-    status: [{ data: { type: 'status', name: 'None' }, value: '{}' }],
+    status: [],
     project: [{ data: { databaseId: '', propertyName: 'None' }, value: '{}' }],
     assignee: [{ name: 'None', value: NONE_VALUE }],
     tags: [{ name: 'None', value: NONE_VALUE }],
@@ -66,10 +67,17 @@ const normalizeColumns = (
     }
 
     if (item.type === 'status') {
+      const completeGroup = item.status.groups[2]
+
+      const completedOptions = item.status?.options
+        .filter((option) => completeGroup?.option_ids.includes(option.id))
+        .map((option) => option.name)
+
       const data = {
         type: item.type,
         name: item.name,
         doneName: item.status?.options[item.status.options.length - 1]?.name,
+        completedStatuses: completedOptions,
         inProgressId:
           item.status.groups[1].option_ids[
             item.status.groups[1].option_ids.length - 1

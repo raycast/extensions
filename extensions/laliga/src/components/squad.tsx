@@ -18,11 +18,7 @@ export default function ClubSquad(props: Team) {
   }, [props.slug]);
 
   return (
-    <Grid
-      throttle
-      navigationTitle={`Squad | ${props.nickname} | Club`}
-      isLoading={loading}
-    >
+    <Grid throttle navigationTitle={`Squad | ${props.nickname} | Club`} isLoading={loading}>
       {members.map((member) => {
         return (
           <Grid.Item
@@ -32,11 +28,7 @@ export default function ClubSquad(props: Team) {
             content={member.photos["001"]["512x556"] || ""}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Player Profile"
-                  icon={Icon.Sidebar}
-                  target={<Player {...member} />}
-                />
+                <Action.Push title="Player Profile" icon={Icon.Sidebar} target={<Player {...member} />} />
               </ActionPanel>
             }
           />

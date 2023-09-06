@@ -3,7 +3,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -59,9 +59,9 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
 
 async function fetchFunctions(
   nextMarker?: string,
-  functions?: FunctionConfiguration[]
+  functions?: FunctionConfiguration[],
 ): Promise<FunctionConfiguration[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));
 
   const combinedFunctions = [...(functions || []), ...(Functions || [])];

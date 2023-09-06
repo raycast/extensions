@@ -3,6 +3,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { XcodeSimulatorState } from "../../models/xcode-simulator/xcode-simulator-state.model";
 import { operationWithUserFeedback } from "../../shared/operation-with-user-feedback";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
+import { XcodeSimulatorOpenUrlForm } from "./xcode-simulator-open-url-form.component";
 
 /**
  * Xcode Simulator List Item
@@ -46,6 +47,14 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
             }}
           />
           <Action.ShowInFinder path={props.simulator.dataPath} />
+          {props.simulator.state === XcodeSimulatorState.booted ? (
+            <Action.Push
+              icon={Icon.Link}
+              title="Open URL"
+              target={<XcodeSimulatorOpenUrlForm simulator={props.simulator} />}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+          ) : undefined}
         </ActionPanel>
       }
     />

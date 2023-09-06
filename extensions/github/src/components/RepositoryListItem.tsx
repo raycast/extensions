@@ -1,4 +1,4 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -14,6 +14,8 @@ type RepositoryListItemProps = {
 };
 
 export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
+  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
+
   const owner = getGitHubUser(repository.owner);
   const numberOfStars = repository.stargazerCount;
   const updatedAt = new Date(repository.updatedAt);
@@ -42,7 +44,7 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
   return (
     <List.Item
       icon={owner.icon}
-      title={repository.name}
+      title={`${preferences.displayOwnerName ? `${repository.owner.login}/` : ""}${repository.name}`}
       {...(numberOfStars > 0
         ? {
             subtitle: {

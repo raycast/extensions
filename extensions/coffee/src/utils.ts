@@ -31,7 +31,11 @@ function preventArguments(args?: string | undefined) {
 
 export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) {
   if (updateMenubar) {
-    await launchCommand({ name: "index", type: LaunchType.Background, context: { caffinated: false } });
+    try {
+      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffinated: false } });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   if (hudMessage) {
@@ -44,7 +48,11 @@ export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) 
 export async function startCaffeinate(updateMenubar = true, hudMessage?: string, args?: string | undefined) {
   await stopCaffeinate(false);
   if (updateMenubar) {
-    await launchCommand({ name: "index", type: LaunchType.Background, context: { caffinated: true } });
+    try {
+      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffinated: true } });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   if (hudMessage) {

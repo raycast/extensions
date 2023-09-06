@@ -70,7 +70,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   function visitRepository(repository: ExtendedRepositoryFieldsFragment) {
     const nextRepositories = [repository, ...(history?.filter((item) => item !== repository) ?? [])].slice(
       0,
-      VISITED_REPOSITORIES_LENGTH
+      VISITED_REPOSITORIES_LENGTH,
     );
     setHistory(nextRepositories);
   }
@@ -79,7 +79,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
 
   const data = history
-    .filter((r) => r.nameWithOwner.includes(searchText ?? ""))
+    .filter((r) => r.nameWithOwner.toLowerCase().includes(searchText?.toLowerCase() ?? ""))
     .filter((r) => r.nameWithOwner.match(repositoryFilter));
 
   return { data, visitRepository };

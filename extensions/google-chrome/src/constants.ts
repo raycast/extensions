@@ -1,4 +1,8 @@
-export const defaultChromeProfilePath = ["Application Support", "Google", "Chrome", "Default"];
+export const defaultChromeProfilePath = ["Application Support", "Google", "Chrome"];
+export const defaultChromeStatePath = ["Application Support", "Google", "Chrome", "Local State"];
+export const DEFAULT_CHROME_PROFILE_ID = "Default";
+export const CHROME_PROFILE_KEY = "CHROME_PROFILE_KEY";
+export const CHROME_PROFILES_KEY = "CHROME_PROFILES_KEY";
 
 export const DownloadText = `
   # 🚨Error: Google Chrome browser is not installed

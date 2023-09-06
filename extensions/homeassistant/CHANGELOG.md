@@ -1,5 +1,55 @@
 # Home Assistant Changelog
 
+## [Fix] - 2023-08-15
+
+- Updates from HACS will be shown in the menu regardless of the update entity states
+
+## [HACS-Menu] - 2023-08-03
+
+- Add HACS updates to menubar
+- Add `Update without Backup` menu to support updates for integration which does not support backups
+
+## [Menu] - 2023-07-25
+
+- Add Media Player Menu Bar command
+- Add Entities Menu Bar command to allow to add specific entities in the Menu Bar
+- Add Lights Menu Bar command
+- Add Covers Menu Bar command
+- Add Batteries Menu Bar command
+- Notifications menu now contains battery low battery states as well as updates
+
+## [Modernize] - 2023-07-16
+
+- Add support for switching assist pipelines
+- Persistent Notifications can now be dismissed in the menu bar
+
+## [Fix] - 2023-06-25
+
+- Use nearest resolve url also for http requests
+
+## [Fix] - 2023-06-24
+
+- Get persistent notifications via websocket API instead of entities because since 2023.06 the entity option does not exist anymore.
+
+## [Update] - 2023-06-14
+
+- Add home network detection to switch between an internal url and an external one
+- Add `Connection Check` root command
+- Add support for `.local` urls (mDNS)
+
+## [Update] - 2023-05-04
+
+- Hide hidden or disabled entities
+- Add `Assist` root command
+
+## [Fix] . 2023-03-15
+
+- Inject https agent only on `https` urls - fix [#5358](https://github.com/raycast/extensions/issues/5358)
+
+## [Fix] - 2023-03-08
+
+- Fixed that some commands didn't fully support ignore certs preference.
+
 ## [Weather Menu Bar] - 2022-11-28
 - Add weather entity menubar command
 

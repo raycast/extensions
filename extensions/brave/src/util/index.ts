@@ -1,5 +1,5 @@
 import path from "path";
-import { defaultBraveProfilePath } from "../constants";
+import { DEFAULT_BRAVE_PROFILE_ID, defaultBraveProfilePath, defaultBraveStatePath } from "../constants";
 
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -9,7 +9,10 @@ const userLibraryDirectoryPath = () => {
   return path.join(process.env.HOME, "Library");
 };
 
-export const getHistoryDbPath = () => path.join(userLibraryDirectoryPath(), ...defaultBraveProfilePath, "History");
+export const getHistoryDbPath = (profile?: string) =>
+  path.join(userLibraryDirectoryPath(), ...defaultBraveProfilePath, profile ?? DEFAULT_BRAVE_PROFILE_ID, "History");
 
-export const getBookmarksFilePath = () =>
-  path.join(userLibraryDirectoryPath(), ...defaultBraveProfilePath, "Bookmarks");
+export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultBraveStatePath);
+
+export const getBookmarksFilePath = (profile?: string) =>
+  path.join(userLibraryDirectoryPath(), ...defaultBraveProfilePath, profile ?? DEFAULT_BRAVE_PROFILE_ID, "Bookmarks");

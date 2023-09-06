@@ -1,5 +1,5 @@
 import path from "path";
-import { defaultVivaldiProfilePath } from "../constants";
+import { DEFAULT_VIVALDI_PROFILE_ID, defaultVivaldiStatePath, defaultVivaldiProfilePath } from "../constants";
 
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -9,7 +9,15 @@ const userLibraryDirectoryPath = () => {
   return path.join(process.env.HOME, "Library");
 };
 
-export const getHistoryDbPath = () => path.join(userLibraryDirectoryPath(), ...defaultVivaldiProfilePath, "History");
+export const getHistoryDbPath = (profile?: string) =>
+  path.join(userLibraryDirectoryPath(), ...defaultVivaldiProfilePath, profile ?? DEFAULT_VIVALDI_PROFILE_ID, "History");
 
-export const getBookmarksFilePath = () =>
-  path.join(userLibraryDirectoryPath(), ...defaultVivaldiProfilePath, "Bookmarks");
+export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultVivaldiStatePath);
+
+export const getBookmarksFilePath = (profile?: string) =>
+  path.join(
+    userLibraryDirectoryPath(),
+    ...defaultVivaldiProfilePath,
+    profile ?? DEFAULT_VIVALDI_PROFILE_ID,
+    "Bookmarks"
+  );

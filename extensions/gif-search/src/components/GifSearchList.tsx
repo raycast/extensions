@@ -77,7 +77,7 @@ export function GifSearchList(props: GifListProps) {
           </ListOrGridDropdown>
         ) : undefined
       }
-      enableFiltering={props.enableFiltering}
+      filtering={props.enableFiltering}
       isLoading={props.isLoading}
       throttle={true}
       searchBarPlaceholder={props.searchBarPlaceholder}

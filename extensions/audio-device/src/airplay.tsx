@@ -37,10 +37,10 @@ export function AirPlaySelector() {
           }}
           title={item.name}
           subtitle={item.type}
-          accessoryIcon={active === item.name ? Icon.Checkmark : undefined}
           actions={
             <ActionPanel>
               <Action
+                title={`Select ${item.name}`}
                 onAction={async () => {
                   await setOutputDevice(item.name);
                   closeMainWindow({ clearRootSearch: true });
@@ -48,7 +48,6 @@ export function AirPlaySelector() {
                   showHUD(`Active output audio device set to ${item.name}`);
                   setActive(item.name);
                 }}
-                title={`Select ${item.name}`}
               />
               <Action
                 title={`Copy Device Name to Clipboard`}
@@ -62,6 +61,11 @@ export function AirPlaySelector() {
               />
             </ActionPanel>
           }
+          accessories={[
+            {
+              icon: active === item.name ? Icon.Checkmark : undefined,
+            },
+          ]}
         />
       ))}
     </List>

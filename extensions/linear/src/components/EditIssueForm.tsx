@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast, Color } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
@@ -14,7 +14,7 @@ import useIssues from "../hooks/useIssues";
 import useProjects from "../hooks/useProjects";
 
 import { getEstimateScale } from "../helpers/estimates";
-import { getOrderedStates, statusIcons } from "../helpers/states";
+import { getOrderedStates, getStatusIcon } from "../helpers/states";
 import { getErrorMessage } from "../helpers/errors";
 import { priorityIcons } from "../helpers/priorities";
 import { getUserIcon } from "../helpers/users";
@@ -25,6 +25,8 @@ import { getTeamIcon } from "../helpers/teams";
 import useIssueDetail from "../hooks/useIssueDetail";
 import { MutatePromise } from "@raycast/utils";
 import { CreateIssueValues } from "./CreateIssueForm";
+import useMilestones from "../hooks/useMilestones";
+import { getMilestoneIcon } from "../helpers/milestones";
 
 type EditIssueFormProps = {
   issue: IssueResult;
@@ -59,6 +61,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
           ...(values.assigneeId ? { assigneeId: values.assigneeId } : {}),
           ...(values.cycleId ? { cycleId: values.cycleId } : {}),
           ...(values.projectId ? { projectId: values.projectId } : {}),
+          ...(values.milestoneId ? { projectMilestoneId: values.milestoneId } : {}),
           ...(values.parentId ? { parentId: values.parentId } : {}),
           priority: parseInt(values.priority),
         };
@@ -105,6 +108,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       dueDate: issue.dueDate ? new Date(issue.dueDate) : null,
       cycleId: props.issue.cycle?.id,
       projectId: props.issue.project?.id,
+      milestoneId: props.issue.projectMilestone?.id,
       parentId: props.issue.parent?.id,
     },
   });
@@ -121,6 +125,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
   const { cycles } = useCycles(values.teamId);
   const { issues } = useIssues(getLastCreatedIssues);
   const { projects } = useProjects(values.teamId);
+  const { milestones } = useMilestones(values.projectId);
 
   const team = teams?.find((team) => team.id === values.teamId);
 
@@ -140,6 +145,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
   const hasLabels = labels && labels.length > 0;
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
+  const hasMilestones = milestones && milestones.length > 0;
   const hasIssues = issues && issues.length > 0;
 
   return (
@@ -174,12 +180,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
         {hasStates
           ? orderedStates.map((state) => {
               return (
-                <Form.Dropdown.Item
-                  title={state.name}
-                  value={state.id}
-                  key={state.id}
-                  icon={{ source: statusIcons[state.type], tintColor: state.color }}
-                />
+                <Form.Dropdown.Item title={state.name} value={state.id} key={state.id} icon={getStatusIcon(state)} />
               );
             })
           : null}
@@ -280,6 +281,23 @@ export default function EditIssueForm(props: EditIssueFormProps) {
         </Form.Dropdown>
       ) : null}
 
+      {hasMilestones ? (
+        <Form.Dropdown title="Milestone" storeValue {...itemProps.milestoneId}>
+          <Form.Dropdown.Item title="No Milestone" value="" icon={{ source: "linear-icons/no-milestone.svg" }} />
+
+          {milestones.map((milestone) => {
+            return (
+              <Form.Dropdown.Item
+                title={`${milestone.name}  (${milestone.targetDate || "No Target Date"})`}
+                value={milestone.id}
+                key={milestone.id}
+                icon={getMilestoneIcon(milestone)}
+              />
+            );
+          })}
+        </Form.Dropdown>
+      ) : null}
+
       {hasIssues ? (
         <Form.Dropdown title="Parent" {...itemProps.parentId}>
           <Form.Dropdown.Item
@@ -294,7 +312,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
                 title={`${issue.identifier} - ${issue.title}`}
                 value={issue.id}
                 key={issue.id}
-                icon={{ source: statusIcons[issue.state.type], tintColor: issue.state.color }}
+                icon={getStatusIcon(issue.state)}
               />
             );
           })}

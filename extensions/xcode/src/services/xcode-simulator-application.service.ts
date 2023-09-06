@@ -260,14 +260,24 @@ export class XcodeSimulatorApplicationService {
       // Initialize simulator sandbox paths promise by:
       // 1. Reading the data application directory path child directories
       // 2. Retrieve all bundle identifiers alongside with the sandbox directory path
-      simulatorSandBoxPathsPromise = readDirectoryAsync(dataApplicationDirectoryPath, {
-        withFileTypes: true,
-      })
-        .then((entries) => {
-          return entries
-            .filter((entry) => entry.isDirectory())
-            .map((entry) => Path.join(dataApplicationDirectoryPath, entry.name));
-        })
+      simulatorSandBoxPathsPromise = execAsync(
+        [
+          // List all child directories in data application directory
+          `ls -l ${dataApplicationDirectoryPath}`,
+          // Format output in the following format "{Month}-{Day}-{Hour}-{Minute} {Path}"
+          `awk '{print $6 "-" $7 "-" $8 " " $9}'`,
+          // Remove duplicates by first component (separated by whitespace)
+          `awk '!seen[$1]++'`,
+          // Drop first component (separated by whitespace)
+          `awk '{$1=""; print $0}'`,
+        ].join(" | ")
+      )
+        .then((output) =>
+          output.stdout
+            .trim()
+            .split("\n")
+            .map((path) => Path.join(dataApplicationDirectoryPath, path.trim()))
+        )
         .then((paths) =>
           Promise.allSettled(
             paths.map((path) =>

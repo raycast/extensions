@@ -1,5 +1,13 @@
 # Wi-Fi Changelog
 
+## [Added Connected Section] - 2023-05-24
+
+- Show connected section at the beginning of the list when connected to a Wi-Fi network
+
+## [Added keyword] - 2023-02-14
+
+Added keywords so users easier can find it in the store
+
 ## [Fix bug] - 2022-10-14
 
 - Fix the bug that can't remember password

@@ -1,6 +1,6 @@
 # Clipboard
 
-Use the Clipboard APIs to work with text from your clipboard and current selection. You can write contents to the clipboard through [`Clipboard.copy`](clipboard.md#clipboard.copy) and clear it through [`Clipboard.clear`](clipboard.md#clipboard.clear). The [`Clipboard.paste`](clipboard.md#clipboard.paste) function inserts text at the current cursor position in your frontmost app.
+Use the Clipboard APIs to work with content from your clipboard. You can write contents to the clipboard through [`Clipboard.copy`](clipboard.md#clipboard.copy) and clear it through [`Clipboard.clear`](clipboard.md#clipboard.clear). The [`Clipboard.paste`](clipboard.md#clipboard.paste) function inserts text at the current cursor position in your frontmost app.
 
 The action [`Action.CopyToClipboard`](user-interface/actions.md#action.copytoclipboard) can be used to copy content of a selected list item to the clipboard and the action [`Action.Paste`](user-interface/actions.md#action.paste) can be used to insert text at in your frontmost app.
 
@@ -13,7 +13,7 @@ Copies text or a file to the clipboard.
 #### Signature
 
 ```typescript
-async function copy(content: string | Content): Promise<void>;
+async function copy(content: string | number | Content, options?: CopyOptions): Promise<void>;
 ```
 
 #### Example
@@ -38,6 +38,9 @@ export default async function Command() {
   } catch (error) {
     console.log(`Could not copy file '${file}'. Reason: ${error}`);
   }
+
+  // copy transient data
+  await Clipboard.copy("my-secret-password", { transient: true });
 }
 ```
 
@@ -101,6 +104,37 @@ export default async function Command() {
 
 A Promise that resolves when the clipboard is cleared.
 
+### Clipboard.read
+
+Reads the clipboard content as plain text, file name, or HTML.
+
+#### Signature
+
+```typescript
+async function read(options?: { offset?: number }): Promise<ReadContent>;
+```
+
+#### Example
+
+```typescript
+import { Clipboard } from "@raycast/api";
+
+export default async () => {
+  const { text, file, html } = await Clipboard.read();
+  console.log(text);
+  console.log(file);
+  console.log(html);
+};
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="Clipboard.read" />
+
+#### Return
+
+A promise that resolves when the clipboard content was read as plain text, file name, or HTML.
+
 ### Clipboard.readText
 
 Reads the clipboard as plain text.
@@ -108,7 +142,7 @@ Reads the clipboard as plain text.
 #### Signature
 
 ```typescript
-async function readText(): Promise<string | undefined>;
+async function readText(options?: { offset?: number }): Promise<string | undefined>;
 ```
 
 #### Example
@@ -122,6 +156,10 @@ export default async function Command() {
 }
 ```
 
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="Clipboard.readText" />
+
 #### Return
 
 A promise that resolves when the clipboard content was read as plain text.
@@ -130,7 +168,7 @@ A promise that resolves when the clipboard content was read as plain text.
 
 ### Clipboard.Content
 
-Type of Content that is copied and pasted to and from the Clipboard
+Type of content that is copied and pasted to and from the Clipboard
 
 ```typescript
 type Content =
@@ -140,4 +178,29 @@ type Content =
   | {
       file: PathLike;
     };
+```
+
+### Clipboard.ReadContent
+
+Type of content that is read from the Clipboard
+
+```typescript
+type Content =
+  | {
+      text: string;
+    }
+  | {
+      file?: string;
+    }
+  | {
+      html?: string;
+    };
+```
+
+### Clipboard.CopyOptions
+
+Type of options passed to `Clipboard.copy`.
+
+```typescript
+type CopyOptions = { transient: boolean };
 ```

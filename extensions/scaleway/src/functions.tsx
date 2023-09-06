@@ -1,3 +1,3 @@
-import { ServerlessFunctions } from './functions/ServerlessFunction'
+import { ServerlessFunctions } from './products/functions/ServerlessFunction'
 
 export default () => <ServerlessFunctions />

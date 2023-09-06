@@ -1,8 +1,11 @@
-import { Notification, Organization, Comment, User } from "@linear/sdk";
+import { Organization, Comment, User, IssueNotification } from "@linear/sdk";
 import { IssueFragment, IssueResult } from "./getIssues";
 import { getLinearClient } from "../helpers/withLinearClient";
 
-export type NotificationResult = Pick<Notification, "id" | "type" | "createdAt" | "readAt" | "reactionEmoji"> & {
+export type NotificationResult = Pick<
+  IssueNotification,
+  "id" | "type" | "createdAt" | "readAt" | "reactionEmoji" | "snoozedUntilAt"
+> & {
   comment: Pick<Comment, "body">;
 } & {
   issue?: IssueResult;
@@ -26,6 +29,7 @@ export async function getNotifications() {
             type
             createdAt
             readAt
+            snoozedUntilAt
             actor {
               displayName
               avatarUrl

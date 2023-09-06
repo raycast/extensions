@@ -7,7 +7,7 @@ import {
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function CodePipeline() {
   const { data: pipelines, error, isLoading, revalidate } = useCachedPromise(fetchPipelines);
@@ -61,9 +61,9 @@ const iconMap: { [key: string]: Icon } = {
 };
 
 async function fetchPipelines(token?: string, accPipelines?: PipelineSummary[]): Promise<PipelineSummary[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { nextToken, pipelines } = await new CodePipelineClient({}).send(
-    new ListPipelinesCommand({ nextToken: token })
+    new ListPipelinesCommand({ nextToken: token }),
   );
   const combinedPipelines = [...(accPipelines || []), ...(pipelines || [])];
 
@@ -80,7 +80,7 @@ async function fetchExecutionState(pipelineName?: string) {
   }
 
   const { pipelineExecutionSummaries } = await new CodePipelineClient({}).send(
-    new ListPipelineExecutionsCommand({ pipelineName })
+    new ListPipelineExecutionsCommand({ pipelineName }),
   );
   return pipelineExecutionSummaries?.[0];
 }

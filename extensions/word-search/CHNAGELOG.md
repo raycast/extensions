@@ -1,5 +1,9 @@
 # Word Search Changelog
 
+## [Added Preference for default action] - 2023-02-28
+
+- Added a new preference option to set the Primary Action on `return` keypress
+
 ## [Added new Word Search] - 2022-12-20
 
 - Added new command "Spell a Word"

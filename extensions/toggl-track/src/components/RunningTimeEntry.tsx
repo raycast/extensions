@@ -14,8 +14,9 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
   const stopTimeEntry = async () => {
     await showToast(Toast.Style.Animated, "Stopping time entry...");
     try {
-      await toggl.stopTimeEntry({ id: runningTimeEntry.id });
+      await toggl.stopTimeEntry({ id: runningTimeEntry.id, workspaceId: runningTimeEntry.workspace_id });
       await storage.runningTimeEntry.refresh();
+      await storage.timeEntries.refresh();
       await showToast(Toast.Style.Success, `Stopped time entry`);
     } catch (e) {
       await showToast(Toast.Style.Failure, "Failed to stop time entry");
@@ -30,9 +31,9 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
           (runningTimeEntry.billable ? "$  " : "") +
           dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
         }
-        accessoryTitle={getProjectById(runningTimeEntry?.pid)?.name}
-        accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(runningTimeEntry?.pid)?.hex_color }}
-        icon={{ source: Icon.Clock, tintColor: getProjectById(runningTimeEntry?.pid)?.hex_color }}
+        accessoryTitle={getProjectById(runningTimeEntry?.project_id)?.name}
+        accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(runningTimeEntry?.project_id)?.color }}
+        icon={{ source: Icon.Clock, tintColor: getProjectById(runningTimeEntry?.project_id)?.color }}
         actions={
           <ActionPanel>
             <Action.SubmitForm icon={{ source: Icon.Clock }} onSubmit={stopTimeEntry} title="Stop Time Entry" />

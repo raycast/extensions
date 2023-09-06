@@ -13,6 +13,7 @@ export type Preferences = {
       type: 'status' | 'checkbox'
       name: string
       doneName?: string
+      completedStatuses?: string[]
       inProgressId?: string
       notStartedId?: string
     }
@@ -26,6 +27,7 @@ export type Preferences = {
         type?: 'status' | 'checkbox'
         name?: string
         doneName?: string
+        completedStatuses?: string[]
       }
     }
   }

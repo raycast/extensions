@@ -1,9 +1,5 @@
 import { getSelectedText, showToast, ToastStyle, showHUD, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
-import tempy from "tempy";
-import fs from "fs";
 import { encodeURI } from "js-base64";
-import { runAppleScript } from "run-applescript";
 import open from "open";
 
 interface Preferences {
@@ -27,10 +23,9 @@ export default async () => {
   }
 
   const base64Text = encodeURI(selectedText);
-  const tempFile = tempy.file({ extension: "png" });
 
   await showToast(ToastStyle.Animated, "Generating screenshot");
 
-  const url = `https://ray.so/?theme=${preferences.theme}&background=${preferences.background}&darkMode=${preferences.darkMode}&spacing=${preferences.padding}&code=${base64Text}`;
+  const url = `https://ray.so/#theme=${preferences.theme}&background=${preferences.background}&darkMode=${preferences.darkMode}&padding=${preferences.padding}&code=${base64Text}`;
   open(url);
 };

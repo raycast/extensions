@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nato-phonetic-alphabet",
+  "title": "NATO Phonetic Alphabet",
+  "description": "For knowing and conveniently using the NATO phonetic alphabet.",
+  "icon": "command-icon.png",
+  "author": "jns",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "full-alphabet",
+      "title": "Full Alphabet",
+      "description": "List the full alphabet",
+      "mode": "view"
+    },
+    {
+      "name": "spell",
+      "title": "Spell",
+      "description": "Spell a term or sentence as in the NATO equivalent",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "Term",
+          "placeholder": "boat",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

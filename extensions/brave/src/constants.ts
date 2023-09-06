@@ -1,4 +1,8 @@
-export const defaultBraveProfilePath = ["Application Support", "BraveSoftware", "Brave-Browser", "Default"];
+export const defaultBraveProfilePath = ["Application Support", "BraveSoftware", "Brave-Browser"];
+export const defaultBraveStatePath = ["Application Support", "BraveSoftware", "Brave-Browser", "Local State"];
+export const DEFAULT_BRAVE_PROFILE_ID = "Default";
+export const BRAVE_PROFILE_KEY = "BRAVE_PROFILE_KEY";
+export const BRAVE_PROFILES_KEY = "BRAVE_PROFILES_KEY";
 
 export const DownloadText = `
 # 🚨Error: Brave browser is not installed
@@ -11,11 +15,7 @@ If you have [Homebrew](https://brew.sh/) installed then press ⏎ (Enter Key) to
 [![Brave](https://brave.com/static-assets/images/brave-logo.svg)]()
 `;
 
-export const NoBookmarksText = `
-# 🚨Error: Brave browser has no bookmarks. Please add some bookmarks to continue using this command.
-
-[![Brave](https://brave.com/static-assets/images/brave-logo.svg)]()
-`;
+export const NoBookmarksText = `This profile has no bookmarks.`;
 
 export const UnknownErrorText = `
 # 🚨Error: Something happened while trying to run your command

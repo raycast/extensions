@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "papermatch",
+  "title": "PaperMatch",
+  "description": "Toggle the system's appearance while updating the wallpaper for each appearance mode.",
+  "icon": "PM_Ext.png",
+  "author": "marlonr",
+  "contributors": [
+    "andrewmonty"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "title": "Light Mode Image",
+      "name": "lightModePath",
+      "type": "file",
+      "description": "Select wallpaper image for light mode.",
+      "required": true
+    },
+    {
+      "title": "Dark Mode Image",
+      "name": "darkModePath",
+      "type": "file",
+      "description": "Select wallpaper image for dark mode.",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "toggle-system-appearance",
+      "title": "Toggle System Appearance",
+      "description": "Toggles the system's appearance while updating the wallpaper.",
+      "icon": "PM_Toggle.png",
+      "type": "file",
+      "required": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "update-wallpaper",
+      "title": "Update Wallpaper",
+      "description": "Updates the wallpaper for the current appearance. Use this command to update the wallpaper without having to change themes.",
+      "icon": "PM_Update.png",
+      "type": "",
+      "required": false,
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

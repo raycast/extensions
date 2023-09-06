@@ -2,9 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imessage-2fa",
   "title": "iMessage 2FA",
-  "description": "View iMessage messages and Two Factor Authentication Code",
+  "description": "View messages and two factor authentication codes",
   "icon": "iMessage-icon.png",
   "author": "yuercl",
+  "contributors": [
+    "thomas",
+    "arronhunt",
+    "ronaldheft"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -12,15 +17,26 @@
   "commands": [
     {
       "name": "index",
-      "title": "View 2FA",
-      "subtitle": "iMessage",
-      "description": "View iMessage messages and Two Factor Authentication Code",
+      "title": "View 2FA Codes",
+      "subtitle": "Messages",
+      "description": "View messages and two factor authentication codes",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "default": "1",
+      "description": "For searching iMessage from N days ago and now",
+      "name": "lookBackDays",
+      "required": false,
+      "title": "Search last days for 2FA",
+      "type": "textfield"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.40.3",
-    "@raycast/utils": "^1.4.9"
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.4.9",
+    "@use-it/interval": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "16.10.3",
@@ -38,15 +54,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  },
-  "preferences": [
-    {
-      "title": "Search last days for 2FA",
-      "name": "lookBackDays",
-      "type": "textfield",
-      "required": false,
-      "description": "For searching iMessage from N days ago and now",
-      "default": "1"
-    }
-  ]
+  }
 }

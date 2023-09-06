@@ -7,7 +7,7 @@ export async function getPopularVideos(pn: number) {
   const cache = new Cache();
   const cookie = cache.get("cookie") || "{}";
 
-  const res: Bilibili.popularVideosResponse = await got(API.popularVideos(pn, 20), {
+  const res: Bilibili.PopularVideosResponse = await got(API.popularVideos(pn, 20), {
     headers: {
       cookie,
     },

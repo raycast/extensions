@@ -9,7 +9,7 @@ import {
 } from "@aws-sdk/client-cloudformation";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
@@ -83,9 +83,9 @@ function CloudFormationStackResources({ stackName }: { stackName: string }) {
 }
 
 async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { NextToken, StackSummaries } = await new CloudFormationClient({}).send(
-    new ListStacksCommand({ NextToken: token })
+    new ListStacksCommand({ NextToken: token }),
   );
 
   const combinedStacks = [...(stacks || []), ...(StackSummaries || [])];
@@ -100,10 +100,10 @@ async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<Sta
 async function fetchStackResources(
   stackName: string,
   token?: string,
-  stacks?: StackResourceSummary[]
+  stacks?: StackResourceSummary[],
 ): Promise<StackResourceSummary[]> {
   const { StackResourceSummaries, NextToken } = await new CloudFormationClient({}).send(
-    new ListStackResourcesCommand({ StackName: stackName, NextToken: token })
+    new ListStackResourcesCommand({ StackName: stackName, NextToken: token }),
   );
 
   if (NextToken) {

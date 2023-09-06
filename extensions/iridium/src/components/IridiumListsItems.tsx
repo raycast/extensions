@@ -9,14 +9,14 @@ export class IridiumListsItems {
   public static TabHistory = HistoryItem;
 }
 
-function HistoryItem({ entry: { url, title, id } }: { entry: HistoryEntry }): ReactElement {
+function HistoryItem({ profile, entry: { url, title, id } }: { entry: HistoryEntry; profile: string }): ReactElement {
   return (
     <List.Item
-      id={id.toString()}
+      id={`${profile}-${id}`}
       title={title}
       subtitle={url}
       icon={getFavicon(url)}
-      actions={<IridiumActions.TabHistory title={title} url={url} />}
+      actions={<IridiumActions.TabHistory title={title} url={url} profile={profile} />}
     />
   );
 }

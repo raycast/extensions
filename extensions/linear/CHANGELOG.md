@@ -1,6 +1,53 @@
 # Linear Changelog
 
-## [Fix icons] - 2022-20-12
+## [Fix] - 2023-08-23
+
+Fixed "Workflow state not in same team as issue" error for Break Issue into Sub-issues error.
+
+## [Add milestone functionality] - 2023-08-16
+
+Linear now allows users to create milestones within projects. This feature is now available on this extension.
+
+## [Add "Break Issue Into Sub-Issues" action] - 2023-05-09
+
+Thanks to AI, the Linear extension has a new issue action: `Break Issue Into Sub-Issues`. It takes the issue title and description as context and generates actionable sub-issues that you can choose to create or not.
+
+## [Set title field as default in Create Issue command] - 2023-05-02
+
+Previously, the `Team` field was the default one when the user had more than one team in the `Create Issue` command. Since users often add issues to the same team, let's make the `Title` field the default.
+
+## [Remove Raycast signature] - 2023-04-19
+
+- Remove Raycast signature preference from the `Create Issue` command
+
+## [Add multiple attachments when creating an issue] - 2023-02-28
+
+- Add support for multiple attachments in the `Create Issue` command
+- Fixed a bug where the title form field was not focused if the teams field was hidden.
+
+## [Add support for roadmaps] - 2023-02-23
+
+- Add roadmaps dropdown in `Search Projects` command
+- Add target date and teams accessories in `Search Projects` command
+
+## [Adjust colors contrast in light mode] - 2023-02-08
+
+- Adjust color contrast on icons so that they're more visible in light mode
+
+## [Add attachment to Create Issue command] - 2023-01-24
+
+- Add a file picker on the `Create Issue` command to add a single attachment on a newly created Linear issue
+
+## [Add due date action] - 2023-01-19
+
+- Add a new action to set due dates on issues
+- Add due date accessory on issue list items
+
+## [Quick Add Comment to Issue command] - 2023-01-18
+
+- Add a new command allowing you to quickly add a comment to an issue using its issue ID.
+
+## [Fix icons] - 2022-12-20
 
 - Fix a bug where Linear icons would not show up in the list's accessories for projects
 - Fix a bug where Linear icons would not show up if the corresponding icon in the file system doesn't exist

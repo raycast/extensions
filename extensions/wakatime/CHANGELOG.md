@@ -1,5 +1,11 @@
 # WakaTime Changelog
 
+## [Fixes Data Range Names] - 2023-02-18
+
+### Fixed
+
+- Change the property name used to access data ranges
+
 ## [Update API Regex] - 2023-01-02
 
 ### Fixed

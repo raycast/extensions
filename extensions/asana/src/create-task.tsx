@@ -8,6 +8,7 @@ export type TaskFormValues = {
   name: string;
   assignee: string;
   due_date: Date | null;
+  start_date: Date | null;
 };
 
 export default function Command(props: { draftValues?: TaskFormValues }) {

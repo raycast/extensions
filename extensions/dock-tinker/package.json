@@ -5,6 +5,9 @@
   "description": "Custom hidden preferences of Dock.\nBackup, restore and reset Dock state.",
   "icon": "dock-tinker.png",
   "author": "koinzhang",
+  "contributors": [
+    "garrucho"
+  ],
   "categories": [
     "Developer Tools",
     "System"
@@ -51,6 +54,13 @@
       "title": "Toggle Auto Hide Delay",
       "subtitle": "Dock",
       "description": "Disable Dock auto-hide time delay.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-contents-immutable",
+      "title": "Toggle Lock Contents",
+      "subtitle": "Dock",
+      "description": "Lock Dock contents, preventing unwanted changes.",
       "mode": "no-view"
     },
     {

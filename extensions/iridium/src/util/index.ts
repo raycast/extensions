@@ -1,5 +1,5 @@
 import path from "path";
-import { defaultIridiumProfilePath } from "../constants";
+import { DEFAULT_IRIDIUM_PROFILE_ID, defaultIridiumStatePath, defaultIridiumProfilePath } from "../constants";
 
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -9,7 +9,15 @@ const userLibraryDirectoryPath = () => {
   return path.join(process.env.HOME, "Library");
 };
 
-export const getHistoryDbPath = () => path.join(userLibraryDirectoryPath(), ...defaultIridiumProfilePath, "History");
+export const getHistoryDbPath = (profile?: string) =>
+  path.join(userLibraryDirectoryPath(), ...defaultIridiumProfilePath, profile ?? DEFAULT_IRIDIUM_PROFILE_ID, "History");
 
-export const getBookmarksFilePath = () =>
-  path.join(userLibraryDirectoryPath(), ...defaultIridiumProfilePath, "Bookmarks");
+export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultIridiumStatePath);
+
+export const getBookmarksFilePath = (profile?: string) =>
+  path.join(
+    userLibraryDirectoryPath(),
+    ...defaultIridiumProfilePath,
+    profile ?? DEFAULT_IRIDIUM_PROFILE_ID,
+    "Bookmarks"
+  );

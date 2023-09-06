@@ -6,6 +6,7 @@ export function useFilter() {
     projectId: null,
     user: null,
     tag: null,
+    status: null,
   })
 
   return { filterTodo, setFilterTodo }

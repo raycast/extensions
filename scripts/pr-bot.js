@@ -58,7 +58,7 @@ module.exports = async ({ github, context, core, changedFiles }) => {
       issue_number: context.issue.number,
       owner: context.repo.owner,
       repo: context.repo.repo,
-      labels: ["extension fix / improvement", `extension: ${findExtensionName(ext)}`],
+      labels: ["extension fix / improvement", limitLabelLength(`extension: ${findExtensionName(ext)}`)],
     });
 
     if (owners[0] === sender) {
@@ -142,4 +142,8 @@ async function comment({ github, context, comment }) {
       body: comment,
     });
   }
+}
+
+function limitLabelLength(label) {
+  return label.length > 50 ? label.substring(0, 49) + "…" : label;
 }

@@ -13,7 +13,9 @@ export function CommitListItem(props: { commit: Commit; projectID: number }): JS
   const icon: Image.ImageLike = status?.author?.avatar_url
     ? { source: status.author.avatar_url, mask: Image.Mask.Circle }
     : { source: GitLabIcons.commit, tintColor: Color.Green };
-  const statusIcon: Image.ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
+  const statusIcon: Image.ImageLike | undefined = status?.status
+    ? getCIJobStatusIcon(status.status, status.allow_failure)
+    : undefined;
   return (
     <List.Item
       key={commit.id}

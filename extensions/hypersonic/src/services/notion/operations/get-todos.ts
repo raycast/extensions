@@ -15,10 +15,26 @@ export async function getTodos({
   const preferences = await loadPreferences()
   const status = preferences.properties.status
 
-  const donePropertyQuery =
-    status.type === 'status' && status.doneName
-      ? { status: { does_not_equal: status.doneName } }
-      : { checkbox: { equals: false } }
+  let donePropertyQuery: any = [
+    { property: status.name, checkbox: { equals: false } },
+  ]
+
+  if (status.type === 'status') {
+    // Make it compatible with the old version without groups
+    donePropertyQuery = [
+      {
+        property: status.name,
+        status: { does_not_equal: status.doneName },
+      },
+    ]
+
+    if (status.completedStatuses && status.completedStatuses.length > 0) {
+      donePropertyQuery = status.completedStatuses.map((completeStatus) => ({
+        property: status.name,
+        status: { does_not_equal: completeStatus },
+      }))
+    }
+  }
 
   const dynamicFiltersQuery = [
     ...(filter?.projectId && preferences.properties.project
@@ -45,16 +61,21 @@ export async function getTodos({
           },
         ]
       : []),
+    ...(filter?.status?.id && preferences.properties.status.type === 'status'
+      ? [
+          {
+            property: status.name,
+            status: { equals: filter.status.name },
+          },
+        ]
+      : []),
   ]
 
   const response = await notionClient.databases.query({
     database_id: databaseId,
     filter: {
       and: [
-        {
-          property: status.name,
-          ...donePropertyQuery,
-        },
+        ...(!filter.status?.id ? donePropertyQuery : []),
         ...dynamicFiltersQuery,
       ],
     },
@@ -75,7 +96,6 @@ export async function getTodos({
     normalizeTodo({
       page,
       preferences: preferences.properties,
-      inProgressId: status.inProgressId,
     })
   )
 

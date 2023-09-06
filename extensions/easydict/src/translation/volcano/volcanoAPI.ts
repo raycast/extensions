@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-26 15:52
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-17 20:38
+ * @lastEditTime: 2023-03-31 16:02
  * @fileName: volcanoAPI.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,8 +10,8 @@
 
 import axios from "axios";
 import { requestCostTime } from "../../axiosConfig";
-import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
-import { checkIfPreferredLanguagesContainChinese } from "../../detectLanauge/utils";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanguage/types";
+import { checkIfPreferredLanguagesContainChinese } from "../../detectLanguage/utils";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
 import { chineseLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getVolcanoLangCode, getYoudaoLangCodeFromVolcanoCode } from "../../language/languages";
@@ -47,27 +47,33 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
     Category: "", // 默认使用通用翻译领域，无需填写
   };
 
-  const signObjet = genVolcanoSign(query, params);
-  if (!signObjet) {
+  const signObject = genVolcanoSign(query, params);
+  if (!signObject) {
     console.warn(`Volcano AccessKey or SecretKey is empty`);
-    const result: QueryTypeResult = {
+    const errorInfo: RequestErrorInfo = {
       type: type,
-      result: undefined,
-      translations: [],
-      queryWordInfo: queryWordInfo,
+      code: "",
+      message: "Volcano AccessKey or SecretKey is empty",
     };
-    return Promise.resolve(result);
+    return Promise.reject(errorInfo);
   }
 
-  const url = signObjet.getUrl();
-  const config = signObjet.getConfig();
+  const url = signObject.getUrl();
+  const config = signObject.getConfig();
 
   return new Promise((resolve, reject) => {
     axios
       .post(url, params, config)
       .then((res) => {
+        // log res
+        console.warn(`Volcano Translate res: ${JSON.stringify(res.data, null, 4)}`);
+
         const volcanoResult = res.data as VolcanoTranslateResult;
-        const volcanoError = volcanoResult.ResponseMetaData.Error;
+
+        console.warn(`ResponseMetaData: ${JSON.stringify(volcanoResult.ResponseMetadata, null, 4)}`);
+
+        const volcanoError = volcanoResult.ResponseMetadata?.Error;
+
         if (volcanoError) {
           console.error(`Volcano translate error: ${JSON.stringify(volcanoResult)}`);
           const errorInfo: RequestErrorInfo = {
@@ -75,20 +81,23 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
             code: volcanoError.Code || "",
             message: volcanoError.Message || "",
           };
-          return reject(errorInfo);
+          reject(errorInfo);
+          return;
         }
 
-        const translations = volcanoResult.TranslationList[0].Translation.split("\n");
-        const result: QueryTypeResult = {
-          type: type,
-          result: volcanoResult,
-          translations: translations,
-          queryWordInfo: queryWordInfo,
-        };
-        resolve(result);
+        if (volcanoResult.TranslationList) {
+          const translations = volcanoResult.TranslationList[0].Translation.split("\n");
+          const result: QueryTypeResult = {
+            type: type,
+            result: volcanoResult,
+            translations: translations,
+            queryWordInfo: queryWordInfo,
+          };
+          resolve(result);
 
-        console.log(`Volcano Translate: ${translations}`);
-        console.warn(`Volcano Translate cost time: ${res.headers[requestCostTime]} ms`);
+          console.log(`Volcano Translate: ${translations}`);
+          console.warn(`Volcano Translate cost time: ${res.headers[requestCostTime]} ms`);
+        }
       })
       .catch((error) => {
         if (error.message === "canceled") {
@@ -118,9 +127,9 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
     TextList: [text],
   };
 
-  const signObjet = genVolcanoSign(query, params);
+  const signObject = genVolcanoSign(query, params);
 
-  if (!signObjet) {
+  if (!signObject) {
     console.warn(`Volcano AccessKey or SecretKey is empty`);
     const result: DetectedLangModel = {
       type: type,
@@ -132,8 +141,8 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
     return Promise.resolve(result);
   }
 
-  const url = signObjet.getUrl();
-  const config = signObjet.getConfig();
+  const url = signObject.getUrl();
+  const config = signObject.getConfig();
 
   return new Promise((resolve, reject) => {
     axios

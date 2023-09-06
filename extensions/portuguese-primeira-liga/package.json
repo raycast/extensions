@@ -43,11 +43,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.48.0",
     "@types/cheerio": "^0.22.31",
     "axios": "^0.26.0",
     "cheerio": "^1.0.0-rc.10",
-    "lodash": "^4.17.21"
+    "country-emoji": "^1.5.6",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",

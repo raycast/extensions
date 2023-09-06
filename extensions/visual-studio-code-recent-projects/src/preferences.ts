@@ -1,11 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences, VSCodeBuild } from "./types";
 
-export const preferences: Preferences = getPreferenceValues();
+const preferences: Preferences = getPreferenceValues();
 
-export const layout = preferences.layout;
-
-export function getBundleIdentifier() {
+function getBundleIdentifier() {
   switch (preferences.build) {
     case VSCodeBuild.Code:
       return "com.microsoft.VSCode";
@@ -13,5 +11,13 @@ export function getBundleIdentifier() {
       return "com.microsoft.VSCodeInsiders";
     case VSCodeBuild.VSCodium:
       return "VSCodium";
+    case VSCodeBuild.Cursor:
+      return "Cursor";
   }
 }
+
+export const build = preferences.build;
+export const bundleIdentifier = getBundleIdentifier();
+export const layout = preferences.layout;
+export const keepSectionOrder = preferences.keepSectionOrder;
+export const closeOtherWindows = preferences.closeOtherWindows;

@@ -1,38 +1,10 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-  Icon,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import type { PrayerType, Prayers, Preferences } from "./prayer-types";
+import { List, ActionPanel, Action, getPreferenceValues, Icon, openExtensionPreferences } from "@raycast/api";
+import type { Prayers, Preferences } from "./prayer-types";
+import { convertHours } from "../utils/convertHours";
+import { fetchPrayers } from "../utils/fetchPrayers";
 export default function Command() {
   const userPreference: Preferences = getPreferenceValues();
-  const { isLoading, data: prayerTimes } = useFetch<PrayerType>(
-    `https://api.aladhan.com/v1/timingsByCity?city=${encodeURI(userPreference.city)}&country=${encodeURI(
-      userPreference.country
-    )}&method=${encodeURI(userPreference.calculation_methods)}&school=${encodeURI(
-      userPreference.hanfi === true ? "1" : "0"
-    )}`,
-    {
-      keepPreviousData: true,
-      onError: (error: Error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: `${error} Check your preferences`,
-          message: `Country ${userPreference.country} City ${userPreference.city}`,
-          primaryAction: {
-            title: "Change Preferences",
-            onAction: () => openExtensionPreferences(),
-          },
-        });
-      },
-    }
-  );
+  const { isLoading, data: prayerTimes } = fetchPrayers();
 
   const prayers: Prayers | undefined = prayerTimes?.data.timings;
   return (
@@ -42,11 +14,14 @@ export default function Command() {
           <List.Item
             key={key}
             title={key}
-            subtitle={value}
+            subtitle={userPreference.twelve_hours_system === true ? convertHours(value) : value}
             icon={Icon.Sun}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy to Clipboard" content={`${key} time, ${value}`} />
+                <Action.CopyToClipboard
+                  title="Copy to Clipboard"
+                  content={`${key} time, ${userPreference.twelve_hours_system === true ? convertHours(value) : value}`}
+                />
                 <Action
                   shortcut={{ modifiers: ["opt"], key: "," }}
                   onAction={() => openExtensionPreferences()}

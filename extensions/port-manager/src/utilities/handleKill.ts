@@ -1,8 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
-import { IProcessInfo } from "../models/interfaces";
+import { ProcessInfo } from "../models/interfaces";
 
 export async function handleKill(
-  process: IProcessInfo,
+  process: ProcessInfo,
   killCallback: () => Promise<void>,
   reloadCallback?: () => Promise<void>
 ) {

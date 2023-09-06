@@ -37,7 +37,7 @@ function useCachedPromise<T, U>(
 
 With a few options:
 
-- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See [Promise Argument dependent on List search text](#promise-argument-dependent-on-list-search-text) for more information.
 
 Including the [useCachedState](./useCachedState.md)'s options:
 
@@ -65,7 +65,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = useCachedPromise(
     async (url: string) => {
@@ -90,7 +90,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Promise Argument dependent on List search text
@@ -104,15 +104,15 @@ import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
-      const result = await response.text();
+      const result = await response.json();
       return result;
     },
-    ["https://api.example"],
+    [`https://api.example?q=${searchText}`],
     {
       // to make sure the screen isn't flickering when the searchText changes
       keepPreviousData: true,
@@ -126,7 +126,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -141,7 +141,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
@@ -188,7 +188,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Types
@@ -200,7 +200,7 @@ An object corresponding to the execution state of the function.
 ```ts
 // Initial State
 {
-  isLoading: true,
+  isLoading: true, // or `false` if `options.execute` is `false`
   data: undefined,
   error: undefined
 }

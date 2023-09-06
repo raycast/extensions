@@ -29,7 +29,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
 
-  const { handleSubmit, itemProps, values, setValue } = useForm<IssueFormValues>({
+  const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<IssueFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
@@ -48,7 +48,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
         if (issue) {
           // It's not possible to add an issue to a project from the createIssue call
           await Promise.all(
-            values.projects.map((projectId) => github.addIssueToProject({ issueId: issue.id, projectId }))
+            values.projects.map((projectId) => github.addIssueToProject({ issueId: issue.id, projectId })),
           );
 
           toast.style = Toast.Style.Success;
@@ -66,6 +66,18 @@ export function IssueForm({ draftValues }: IssueFormProps) {
             onAction: () => Clipboard.copy(issue.url),
           };
         }
+
+        reset({
+          title: "",
+          description: "",
+          reviewers: [],
+          assignees: [],
+          labels: [],
+          projects: [],
+          milestone: "",
+        });
+
+        focus("repository");
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed creating issue";
@@ -99,7 +111,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
       return github.dataForRepository({ owner: selectedRepository.owner.login, name: selectedRepository.name });
     },
     [values.repository],
-    { execute: !!values.repository }
+    { execute: !!values.repository },
   );
 
   const collaborators = data?.repository?.collaborators?.nodes;

@@ -46,11 +46,18 @@ export async function createTodo(
             },
           }
         : {}),
-
       ...(preferences.properties.url
         ? {
             [preferences.properties.url]: {
               url: todo?.contentUrl ? todo.contentUrl : null,
+            },
+          }
+        : {}),
+      ...(preferences.properties.status &&
+      preferences.properties.status.type === 'status'
+        ? {
+            [preferences.properties.status.name]: {
+              status: todo?.status?.id ? { id: todo?.status?.id } : null,
             },
           }
         : {}),
@@ -60,7 +67,6 @@ export async function createTodo(
   const normalizedTodo = normalizeTodo({
     page: data,
     preferences: preferences.properties,
-    inProgressId: preferences.properties.status.inProgressId,
   })
 
   return normalizedTodo

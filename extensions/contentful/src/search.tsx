@@ -153,14 +153,14 @@ export default function ContentfulSearch() {
       }
     >
       {entries?.items.map((entry) => {
-        const titleField = entry.fields[contentTypesDict[entry.sys.contentType.sys.id].displayField];
+        const titleField = entry.fields[contentTypesDict[entry.sys.contentType.sys.id]?.displayField];
         const title = titleField ? titleField["en-US"] : "title";
         return (
           <ContentfulContentEntryItem
             key={entry.sys.id}
             entry={entry}
             title={title}
-            type={contentTypesDict[entry.sys.contentType.sys.id].name}
+            type={contentTypesDict[entry.sys.contentType.sys.id]?.name}
             space={space}
             showDetail={showDetail}
             toggleDetail={toggleDetail}
