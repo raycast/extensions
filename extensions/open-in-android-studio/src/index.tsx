@@ -1,7 +1,7 @@
 import { getApplications, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 
-const asPackageName = "com.google.android.studio"
+const asPackageName = "com.google.android.studio";
 
 /**
  * Gets the selected Finder window.
@@ -44,7 +44,6 @@ export default async () => {
         title: "Install Android Studio",
         onAction: () => open("https://developer.android.com/studio"),
       },
-     
     });
     return;
   }
