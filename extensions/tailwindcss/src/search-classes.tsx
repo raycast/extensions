@@ -24,20 +24,6 @@ export default function SearchClasses() {
         <List.Item
           key={selector}
           accessories={[{ text: classes }]}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard
-                title="Copy Selector"
-                content={selector}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
-              />
-              <Action.CopyToClipboard
-                title="Copy CSS"
-                content={classes}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-              />
-            </ActionPanel>
-          }
           title={selector}
           accessories={[{ text: formatClasses(classes) }]}
           actions={<ClassesAction selector={selector} classes={formatClasses(classes)} />}
