@@ -9,6 +9,8 @@ import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import { CLINotFoundError, VaultIsLockedError } from "~/utils/errors";
+import { join } from "path";
+import { chmod } from "fs/promises";
 
 export class Bitwarden {
   private env: Env;
@@ -21,10 +23,12 @@ export class Bitwarden {
   constructor() {
     const { cliPath, clientId, clientSecret, serverCertsPath } = getPreferenceValues<Preferences>();
     const serverUrl = getServerUrlPreference();
-    this.cliPath = cliPath || (process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw");
 
-    if (!existsSync(this.cliPath)) {
-      throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
+    if (cliPath) {
+      if (!existsSync(cliPath)) throw new CLINotFoundError(`Bitwarden CLI not found at ${cliPath}`);
+      this.cliPath = cliPath;
+    } else {
+      this.cliPath = join(environment.supportPath, "bw");
     }
 
     this.env = {
@@ -36,9 +40,29 @@ export class Bitwarden {
     };
 
     this.initPromise = (async () => {
+      await this.prepareCliBinary();
       await this.checkServerUrl(serverUrl);
       this.lockReason = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
     })();
+  }
+
+  async prepareCliBinary() {
+    if (existsSync(this.cliPath)) return;
+    const toast = await showToast({ title: "Updating Bitwarden CLI...", style: Toast.Style.Animated });
+    try {
+      const zipPath = join(environment.assetsPath, "bitwarden-cli.tar.gz");
+      await execa("curl", [
+        "https://vault.bitwarden.com/download/?app=cli&platform=macos",
+        "-Lo",
+        `${environment.assetsPath}/bitwarden-cli.tar.gz`,
+      ]);
+      await execa("tar", ["-xzf", zipPath, "-C", environment.supportPath], { env: { LC_ALL: "C" } });
+      await chmod(this.cliPath, "755");
+      await toast.hide();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to initialize Bitwarden CLI";
+    }
   }
 
   setActionCallback<TAction extends keyof ActionCallbacks>(action: TAction, callback: ActionCallbacks[TAction]): this {
