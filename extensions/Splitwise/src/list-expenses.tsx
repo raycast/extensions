@@ -4,9 +4,6 @@ import { useFetch } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 const loadingLimit = getPreferenceValues().loadingLimit;
 
-// TODOS
-// - [ ] Add a way to update expenses -> https://dev.splitwise.com/#tag/expenses/paths/~1update_expense~1{id}/post
-
 // ------------ API ------------
 import { personalAccessToken } from "./preferences"; // Personal Access Token
 const OPTIONS = {
@@ -23,79 +20,57 @@ function GetExpense(limit: string): [Expense[], boolean, any, any] {
     {
       method: "GET",
       ...OPTIONS,
-      keepPreviousData: true,
+      keepPreviousData: false,
     }
   );
   const fetchedExpenses = data?.expenses || [];
-  console.log("Executed get_expenses"); // DEBUG
 
   if (error) {
     console.log(`Error while fetching expenses: \n ${error}`);
   }
-
   return [fetchedExpenses, isLoading, revalidate, mutate];
 }
 
 const DeleteExpense = async (id: number, mutate: any) => {
-    await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
-    try {
-      const response = await mutate(
-        await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, OPTIONS),
-        {
-          optimisticUpdate(expenses: Expense[]) {
-            return delete expenses[id];
-          },
-          revalidate: true,
-          rollbackOnError: true,
-        }
-      );
-      console.log(response.data);
-      if (response.data.success) {
-        showToast({ style: Toast.Style.Success, title: "Expense deleted" });
-      } else {
-        showToast({ style: Toast.Style.Failure, title: "Could not delete expense", message: response.data.errors.expense });
+  await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
+  try {
+    const responseDelete = await mutate(
+      await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, OPTIONS),
+      {
+        optimisticUpdate(expenses: Expense[]) {
+          return delete expenses[id];
+        },
+        revalidate: true,
+        rollbackOnError: true,
       }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Could not delete expense", message: error.message });
-      console.error(error);
+    );
+
+    if (responseDelete.data.success) {
+      showToast({ style: Toast.Style.Success, title: "Expense deleted" });
+    } else {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't delete!",
+        message: responseDelete.data.errors.expense,
+      });
     }
-  };
+  } catch (error: any) {
+    showToast({ style: Toast.Style.Failure, title: "Couldn't delete!", message: error.message });
+    console.error(error);
+  }
+};
 
 // ------------ MAIN ------------
-import { Action, ActionPanel, Icon, Image, List, showToast, Toast, Color, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, showToast, Toast, Color, Form, useNavigation } from "@raycast/api";
 import axios from "axios";
+import { useEffect } from "react";
 
 export default function Command() {
-  //   const handleDeleteExpense = (id: number) => {delete_expense(id)};
-  const [expenses, loadingExpenses, revalidate, Mutate] = GetExpense(loadingLimit);
-  
-  const mutate = Mutate;
-  const handleDeleteExpense = (id: number) => {
-    DeleteExpense(id, mutate);
-    };
-//   const handleDeleteExpense = async (id: number) => {
-//     await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
-//     try {
-//       const response = await mutate(
-//         await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, OPTIONS),
-//         {
-//           optimisticUpdate(expenses: Expense[]) {
-//             return delete expenses[id];
-//           },
-//           revalidate: true,
-//           rollbackOnError: true,
-//         }
-//       );
-//       if (response.data.success) {
-//         showToast({ style: Toast.Style.Success, title: "Expense deleted" });
-//       } else {
-//         showToast({ style: Toast.Style.Failure, title: "Could not delete expense", message: response.data.errors.expense });
-//       }
-//     } catch (error) {
-//       showToast({ style: Toast.Style.Failure, title: "Could not delete expense", message: error.message });
-//       console.error(error);
-//     }
-//   };
+  const [expenses, loadingExpenses, revalidate, Mutate] = GetExpense(loadingLimit); // FETCH EXPENSES
+
+  const handleDeleteExpense = (expenseID: number) => {
+    DeleteExpense(expenseID, Mutate);
+  };
 
   return (
     <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses}>
@@ -130,7 +105,6 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Separator />
 
                     <List.Item.Detail.Metadata.Label
-                    //   title={`Created by ${expense.created_by["first_name"]}`}
                       title={`Date`}
                       icon={Icon.Calendar}
                       text={new Date(expense.date).toDateString()}
@@ -176,7 +150,7 @@ export default function Command() {
                         ))}
                     </List.Item.Detail.Metadata.TagList>
 
-                    {expense.repeats === true && ( // REPEATING EXPENSE
+                    {expense.repeats === true && ( // REPEATING EXPENSES
                       <>
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Label title="Repeating Expense" text={expense.repeat_interval} />
@@ -212,10 +186,92 @@ export default function Command() {
                   icon={Icon.Trash}
                   onAction={() => handleDeleteExpense(expense.id)}
                 />
+                <Action.Push title="Change values" target={<ChangeValues expense={expense} />} icon={Icon.Pencil} />
               </ActionPanel>
             }
           />
         ))}
     </List>
+  );
+}
+
+// ------------ FORM ------------
+// import { useState } from "react";
+// comment out cost since "users__0__paid_share" etc. implementation necessary -> https://dev.splitwise.com/#tag/expenses/paths/~1update_expense~1{id}/post
+
+async function handleSubmit(values: any) {
+  await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
+  try {
+    const responseSubmit = await axios({
+      method: "post",
+      url: `https://secure.splitwise.com/api/v3.0/update_expense/${values.id}`,
+      ...OPTIONS,
+      data: {
+        description: values.description,
+        // cost: values.cost,
+        date: values.date,
+        group_id: values.group_id,
+      },
+    });
+
+    if (Object.keys(responseSubmit.data.errors).length === 0) {
+      showToast({ style: Toast.Style.Success, title: `Expense '${values.description}' updated` });
+    } else {
+      showToast({ style: Toast.Style.Failure, title: "Couldn't update!", message: responseSubmit.data.errors.base });
+    }
+  } catch (error: any) {
+    showToast({ style: Toast.Style.Failure, title: "Couldn't update!", message: error.message });
+    console.log(error);
+  }
+}
+
+function ChangeValues(handedOverValues: { expense: Expense }) {
+  const { expense } = handedOverValues;
+  //   const [defaultCosts, setCosts] = useState<string>(expense.cost);
+  //   const [nameError, setNameError] = useState<string | undefined>();
+
+  const { pop } = useNavigation();
+
+  return (
+    <Form
+      navigationTitle={`Change values of '${expense.description}'`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit changes"
+            onSubmit={(values) => {
+              handleSubmit({
+                id: expense.id,
+                description: values.description as string,
+                // cost: values.cost as string,
+                date: values.date,
+                group_id: expense.group_id as number,
+              }).then(() => {
+                pop();
+              });
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Description" id="description" defaultValue={expense.description} />
+      {/* <Form.TextField
+        title={`Costs in ${expense.currency_code}`}
+        id="cost"
+        onChange={setCosts}
+        value={defaultCosts}
+        error={nameError}
+        onBlur={(input) => {
+          if (!input.target.value?.match(/^\d+(\.\d{1,2})?$/)) {
+            // check if input is integer or float with 1 or 2 decimal places
+            setNameError("The field should't be empty!");
+          } else {
+            setCosts;
+            setNameError(undefined);
+          }
+        }}
+      /> */}
+      <Form.DatePicker title="Date of Expense" id="date" defaultValue={new Date(expense.date)} />
+    </Form>
   );
 }
