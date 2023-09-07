@@ -1,9 +1,7 @@
-import { join } from "path";
+import { getHistoryPath } from "src/utils";
 import { HistoryItem } from "../types";
 import { useSQL } from "@raycast/utils";
-import { getOrionBasePath } from "src/utils";
 
-const HISTORY_DB = join(getOrionBasePath(), "Defaults/history");
 const LIMIT = 100;
 
 const getHistoryQuery = (searchText?: string) => {
@@ -29,8 +27,10 @@ const getHistoryQuery = (searchText?: string) => {
 };
 
 const useHistorySearch = (searchText?: string) => {
+  const historyPath = getHistoryPath();
+
   const query = getHistoryQuery(searchText);
-  return useSQL<HistoryItem>(HISTORY_DB, query);
+  return useSQL<HistoryItem>(historyPath, query);
 };
 
 export default useHistorySearch;

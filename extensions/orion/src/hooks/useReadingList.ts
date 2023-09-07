@@ -2,16 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { parseFileSync } from "bplist-parser";
 
 import { Bookmark, OrionReadingListItem, OrionReadingListPlistResult } from "../types";
-import { join } from "path";
-import { getOrionBasePath } from "src/utils";
+import { getReadingListPath } from "src/utils";
 
-const READING_LIST_PATH = join(getOrionBasePath(), "Defaults/reading_list.plist");
 
 const useBookmarks = () => {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>();
+  const readingListPath = getReadingListPath();
 
   const fetchItems = useCallback(async () => {
-    const bookmarksPlist = parseFileSync(READING_LIST_PATH) as OrionReadingListPlistResult;
+    const bookmarksPlist = parseFileSync(readingListPath) as OrionReadingListPlistResult;
     const items = bookmarksPlist[0];
     const bookmarks = parseBookmarks(items);
     setBookmarks(bookmarks);

@@ -34,6 +34,13 @@
       "subtitle": "Orion",
       "description": "Browse your open tabs",
       "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Search Profiles",
+      "subtitle": "Orion",
+      "description": "Browse your profiles",
+      "mode": "view"
     }
   ],
   "preferences": [

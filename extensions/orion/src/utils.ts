@@ -38,11 +38,30 @@ export function groupHistoryByDay(groups: Map<string, HistoryItem[]>, entry: His
 }
 
 export function getOrionBasePath() {
-  return join(homedir(), "/Library/Application Support", getOrionAppIdentifier());
+  return join(homedir(), "Library", "Application Support", getOrionAppIdentifier());
 }
 
 export function getOrionAppIdentifier() {
   return getPreferenceValues()["orion-rc"] ? "Orion RC" : "Orion";
+}
+
+export function getFavoritesPath(profile: string = "Defaults") {
+  const profileFolder = profile;
+  return join(getOrionBasePath(), profileFolder, "favourites.plist")
+}
+
+export function getHistoryPath(profile: string = "Defaults") {
+  const profileFolder = profile;
+  return join(getOrionBasePath(), profileFolder, "history")
+}
+
+export function getReadingListPath(profile: string = "Defaults") {
+  const profileFolder = profile;
+  return join(getOrionBasePath(), profileFolder, "reading_list.plist")
+}
+
+export function getProfilesPath() {
+  return join(getOrionBasePath(), "profiles")
 }
 
 export const executeJxa = async (script: string) => {
