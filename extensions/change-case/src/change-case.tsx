@@ -222,7 +222,7 @@ export default function Command(props: LaunchProps) {
 
   const CaseItem = (props: { case: CaseType; modified: string; pinned?: boolean; recent?: boolean }): JSX.Element => {
     const context = encodeURIComponent(`{"case":"${props.case}"}`);
-    const deeplink = `raycast://extensions/es183923/${environment.extensionName}/${environment.commandName}?context=${context}`;
+    const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
     return (
       <List.Item
