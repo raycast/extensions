@@ -103,7 +103,7 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
 
   const context = encodeURIComponent(`{"path":"${filePath}"}`);
-  const deeplink = `raycast://extensions/es183923/${environment.extensionName}/${environment.commandName}?context=${context}`;
+  const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
   return (
     <List.Item
