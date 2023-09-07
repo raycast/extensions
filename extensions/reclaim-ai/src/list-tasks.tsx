@@ -48,7 +48,7 @@ function TaskList() {
   const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const { getAllTasks, addTime, updateTask, doneTask } = useTask();
+  const { getAllTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
 
   // Get tasks via API
   useEffect(() => {
@@ -88,7 +88,22 @@ function TaskList() {
     try {
       const setTaskDone = await doneTask(task);
       if (setTaskDone) {
-        showToast(Toast.Style.Success, `Marked "${task.title}" done!`);
+        showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
+      } else {
+        throw new Error("Update task request failed.");
+      }
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
+    }
+  };
+
+  // Set task to incomplete
+  const handleIncompleteTask = async (task: Task) => {
+    await showToast(Toast.Style.Animated, "Updating task...");
+    try {
+      const setTaskDone = await incompleteTask(task);
+      if (setTaskDone) {
+        showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
       } else {
         throw new Error("Update task request failed.");
       }
@@ -242,6 +257,14 @@ function TaskList() {
                             shortcut={{ modifiers: ["cmd"], key: "t" }}
                           >
                             <Action
+                              icon={{ source: Icon.Circle }}
+                              title="Add 15min"
+                              onAction={() => {
+                                const time = 15;
+                                handleAddTime(task, time);
+                              }}
+                            />
+                            <Action
                               icon={{ source: Icon.CircleProgress25 }}
                               title="Add 30min"
                               onAction={() => {
@@ -298,6 +321,15 @@ function TaskList() {
                         url={`https://app.reclaim.ai/tasks/${task.id}`}
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                       />
+                      {task.status === "ARCHIVED" && (
+                        <Action
+                          icon={Icon.Undo}
+                          title="Mark incomplete"
+                          onAction={() => {
+                            handleIncompleteTask(task);
+                          }}
+                        />
+                      )}
                     </ActionPanel>
                   }
                 />
