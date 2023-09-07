@@ -7,9 +7,7 @@ export default function Command() {
 
   return (
     <List isLoading={!bookmarks} searchBarPlaceholder="Search by title or domain name">
-      {bookmarks?.map((bookmark) => (
-        <BookmarkListItem key={bookmark.uuid} bookmark={bookmark} />
-      ))}
+      {bookmarks?.map((bookmark) => <BookmarkListItem key={bookmark.uuid} bookmark={bookmark} />)}
     </List>
   );
 }

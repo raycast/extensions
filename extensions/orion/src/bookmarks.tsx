@@ -8,15 +8,16 @@ export default function Command() {
   const { folders, bookmarks, isLoading } = useBookmarks();
   const [folder, setFolder] = useState<string>("");
 
+  const filteredBookmarks = folder ? bookmarks?.filter((bookmark) => bookmark.folders.includes(folder)) : bookmarks;
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search by title, domain name, or folder"
       searchBarAccessory={<BookmarksFolderDropdown folders={folders} onChange={setFolder} />}
     >
-      {(folder ? bookmarks?.filter((bookmark) => bookmark.folders.includes(folder)) : bookmarks).map((bookmark) => (
-        <BookmarkListItem key={bookmark.uuid} bookmark={bookmark} />
-      ))}
+      {filteredBookmarks &&
+        filteredBookmarks.map((bookmark) => <BookmarkListItem key={bookmark.uuid} bookmark={bookmark} />)}
     </List>
   );
 }

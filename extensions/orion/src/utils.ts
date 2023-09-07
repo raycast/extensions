@@ -77,7 +77,7 @@ const normalizeText = (text: string) =>
 
 export function search<T extends object>(collection: T[], keys: string[], searchText: string): T[] {
   return collection.filter((item) =>
-    keys.some((key) => normalizeText((item as Record<string, string>)[key]).includes(normalizeText(searchText)))
+    keys.some((key) => normalizeText((item as Record<string, string>)[key]).includes(normalizeText(searchText))),
   );
 }
 
