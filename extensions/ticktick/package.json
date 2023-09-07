@@ -55,8 +55,28 @@
       "name": "create",
       "title": "Add Task",
       "subtitle": "TickTick",
-      "description": "Convenient way to easily add new task.",
+      "description": "Add task in TickTick.",
       "mode": "view"
+    },
+    {
+      "name": "quickAdd",
+      "title": "Quick Add Task",
+      "subtitle": "TickTick",
+      "description": "Quick way to add task in TickTick.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {

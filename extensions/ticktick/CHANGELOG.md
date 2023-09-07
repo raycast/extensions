@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Added] - 2023-09-07
+
+- Add `Quick Add Task`
+
 ## [Added] - 2023-07-25
 
 - Support complete task.
