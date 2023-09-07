@@ -1,70 +1,10 @@
-import { GetExpenses, Expense } from "./get_expenses"; // Types
-import { useFetch } from "@raycast/utils";
+import { Expense } from "./get_expenses"; // Types
 
-import { getPreferenceValues } from "@raycast/api";
-const loadingLimit = getPreferenceValues().loadingLimit;
+import { GetExpense, DeleteExpense, handleSubmit, loadingLimit } from "./hooks/useAPI";
 
-// ------------ API ------------
-import { personalAccessToken } from "./preferences"; // Personal Access Token
-const OPTIONS = {
-  headers: {
-    Authorization: `Bearer ${personalAccessToken}`,
-    Content: "application/json",
-  },
-};
-
-// ------------ FUNCTIONS ------------
-function GetExpense(limit: string): [Expense[], boolean, any, any] {
-  const { isLoading, data, error, revalidate, mutate } = useFetch<GetExpenses>(
-    `https://secure.splitwise.com/api/v3.0/get_expenses?limit=${limit}`,
-    {
-      method: "GET",
-      ...OPTIONS,
-      keepPreviousData: false,
-    }
-  );
-  const fetchedExpenses = data?.expenses || [];
-
-  if (error) {
-    console.log(`Error while fetching expenses: \n ${error}`);
-  }
-  return [fetchedExpenses, isLoading, revalidate, mutate];
-}
-
-const DeleteExpense = async (id: number, mutate: any) => {
-  await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
-  try {
-    const responseDelete = await mutate(
-      await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, OPTIONS),
-      {
-        optimisticUpdate(expenses: Expense[]) {
-          return delete expenses[id];
-        },
-        revalidate: true,
-        rollbackOnError: true,
-      }
-    );
-
-    if (responseDelete.data.success) {
-      showToast({ style: Toast.Style.Success, title: "Expense deleted" });
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't delete!",
-        message: responseDelete.data.errors.expense,
-      });
-    }
-  } catch (error: any) {
-    showToast({ style: Toast.Style.Failure, title: "Couldn't delete!", message: error.message });
-    console.error(error);
-  }
-};
+import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation } from "@raycast/api";
 
 // ------------ MAIN ------------
-import { Action, ActionPanel, Icon, Image, List, showToast, Toast, Color, Form, useNavigation } from "@raycast/api";
-import axios from "axios";
-import { useEffect } from "react";
-
 export default function Command() {
   const [expenses, loadingExpenses, revalidate, Mutate] = GetExpense(loadingLimit); // FETCH EXPENSES
 
@@ -174,6 +114,12 @@ export default function Command() {
                   url={`https://secure.splitwise.com/#/all/expenses/${expense.id}`}
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
+                <Action.Push
+                  title="Change values"
+                  icon={Icon.Pencil}
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  target={<ChangeValues expense={expense} />}
+                />
                 <Action
                   title="Reload"
                   icon={Icon.Repeat}
@@ -186,7 +132,6 @@ export default function Command() {
                   icon={Icon.Trash}
                   onAction={() => handleDeleteExpense(expense.id)}
                 />
-                <Action.Push title="Change values" target={<ChangeValues expense={expense} />} icon={Icon.Pencil} />
               </ActionPanel>
             }
           />
@@ -196,35 +141,7 @@ export default function Command() {
 }
 
 // ------------ FORM ------------
-// import { useState } from "react";
-// comment out cost since "users__0__paid_share" etc. implementation necessary -> https://dev.splitwise.com/#tag/expenses/paths/~1update_expense~1{id}/post
-
-async function handleSubmit(values: any) {
-  await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
-  try {
-    const responseSubmit = await axios({
-      method: "post",
-      url: `https://secure.splitwise.com/api/v3.0/update_expense/${values.id}`,
-      ...OPTIONS,
-      data: {
-        description: values.description,
-        // cost: values.cost,
-        date: values.date,
-        group_id: values.group_id,
-      },
-    });
-
-    if (Object.keys(responseSubmit.data.errors).length === 0) {
-      showToast({ style: Toast.Style.Success, title: `Expense '${values.description}' updated` });
-    } else {
-      showToast({ style: Toast.Style.Failure, title: "Couldn't update!", message: responseSubmit.data.errors.base });
-    }
-  } catch (error: any) {
-    showToast({ style: Toast.Style.Failure, title: "Couldn't update!", message: error.message });
-    console.log(error);
-  }
-}
-
+// Comment out some lines since updating cost not working at the moment
 function ChangeValues(handedOverValues: { expense: Expense }) {
   const { expense } = handedOverValues;
   //   const [defaultCosts, setCosts] = useState<string>(expense.cost);
