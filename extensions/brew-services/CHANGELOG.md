@@ -1,10 +1,11 @@
 # Brew Services Changelog
 
-## [Features] - [Unreleased]
+## [More Icons] - 2023-09-07
 
 - Updated code to work with the latest dependencies
 - Revert changes from 2021-12-09
 - Add icons in more places
+- Add more error handling
 
 ## [Fixes] - 2022-1-03
 
