@@ -60,7 +60,7 @@ export async function authorize() {
   alreadyAuthorizing = new Promise((resolve, reject) => {
     async function run() {
       const authRequest = await client.authorizationRequest({
-        endpoint: "https://notion.oauth-proxy.raycast.com/authorize",
+        endpoint: "https://notion.oauth.raycast.com/authorize",
         clientId,
         scope: "",
         extraParameters: { owner: "user" },
@@ -82,7 +82,7 @@ export async function authorize() {
 }
 
 export async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string) {
-  const response = await fetch("https://notion.oauth-proxy.raycast.com/token", {
+  const response = await fetch("https://notion.oauth.raycast.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
