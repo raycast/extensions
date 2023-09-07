@@ -15,10 +15,7 @@
   "preferences": [
     {
       "name": "defaultDate",
-      "title": "Default Date",
-      "description": "",
       "type": "dropdown",
-      "defaultValue": "none",
       "data": [
         {
           "title": "None",
@@ -41,9 +38,10 @@
           "value": "nextWeek"
         }
       ],
-      "default": "upcoming",
-      "label": "Default Date",
-      "required": false
+      "default": "none",
+      "required": false,
+      "title": "Default Date",
+      "description": "Default date for new task."
     }
   ],
   "commands": [
