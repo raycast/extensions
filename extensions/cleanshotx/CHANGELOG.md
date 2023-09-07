@@ -1,5 +1,13 @@
 # Cleanshot X Changelog
 
+## [Add new commands and arguments] - 2023-09-07
+
+- Added `Add Quick Access Overlay` command with a required filepath argument
+- Added `Hide Desktop Icons` command
+- Added `Show Desktop Icons` command
+- Added optional `filepath` argument to `Annotate` command
+- Added optional `filepath` argument to `Pin` command
+
 ## [Corrected title] - 2023-01-11
 - Corrected the title of the extension to match the application.
 
