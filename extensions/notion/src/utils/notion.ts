@@ -181,6 +181,15 @@ export async function fetchDatabaseProperties(databaseId: string) {
             property.select.options,
           );
           break;
+        case "status":
+          (databaseProperty.options as DatabasePropertyOption[]).push({
+            id: "_select_null_",
+            name: "No Selection",
+          });
+          databaseProperty.options = (databaseProperty.options as DatabasePropertyOption[]).concat(
+            property.status.options,
+          );
+          break;
         case "multi_select":
           databaseProperty.options = property.multi_select.options;
           break;
@@ -363,6 +372,29 @@ export async function createDatabasePage(values: Form.Values) {
   }
 }
 
+export async function deleteDatabase(databaseId: string) {
+  try {
+    await authorize();
+
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Deleting database",
+    });
+
+    await notion.databases.update({
+      database_id: databaseId,
+      archived: true,
+    });
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Database deleted",
+    });
+  } catch (err) {
+    return handleError(err, "Failed to delete database", undefined);
+  }
+}
+
 export async function deletePage(pageId: string) {
   try {
     await authorize();
@@ -535,19 +567,21 @@ function pageMapper(jsonPage: NotionObject): Page {
   return page;
 }
 
-export function notionColorToTintColor(notionColor: string | undefined): Color {
+export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
+  // ordered by appearance in option configuration
+  // colors obtained by using color picker on notion app
   const colorMapper = {
-    default: Color.PrimaryText,
-    gray: Color.PrimaryText,
-    brown: Color.Yellow,
-    red: Color.Red,
-    blue: Color.Blue,
-    green: Color.Green,
-    yellow: Color.Yellow,
-    orange: Color.Orange,
-    purple: Color.Purple,
-    pink: Color.Magenta,
-  } as Record<string, Color>;
+    default: { light: "#E3E2E0", dark: "#373737" }, // AKA "light gray in an option"
+    gray: { light: "#E3E2E0", dark: "#5A5A5A" },
+    brown: { light: "#EEE0DB", dark: "#603B2D" },
+    orange: { light: "#D6BEAC", dark: "#844C1D" },
+    yellow: { light: "#FEECC7", dark: "#89632A" },
+    green: { light: "#DBEDDB", dark: "#2B593F" },
+    blue: { light: "#D4E4EE", dark: "#29456C" },
+    purple: { light: "#E8DEED", dark: "#493064" },
+    pink: { light: "#F4E0E9", dark: "#69314C" },
+    red: { light: "#FFE2DE", dark: "#6E362F" },
+  } as Record<string, Color.ColorLike>;
 
   return notionColor ? colorMapper[notionColor] : colorMapper["default"];
 }
