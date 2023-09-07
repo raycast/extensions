@@ -62,11 +62,7 @@ export default function ProjectList(): JSX.Element {
           {appHistory
             .filter((app) => filter === "" || filter === app.title)
             .map((app, id) => (
-              <MenuBarExtra.Submenu
-                icon={app.icon}
-                title={app.title}
-                key={app.title}
-              >
+              <MenuBarExtra.Submenu icon={app.icon} title={app.title} key={app.title}>
                 <MenuBarExtra.Item
                   icon={app.icon}
                   title={`Open ${app.title}`}
