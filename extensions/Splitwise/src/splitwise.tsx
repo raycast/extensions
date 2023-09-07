@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, Image, List, Form, showToast, Toast, Color } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, Form, showToast, Toast, Color, useNavigation } from "@raycast/api";
 import { useState } from "react";
 
-import { Entity, ExpenseParams, Friend, Group, Body, FriendOrGroupProps, Expense } from "./types";
-import { getFriends, getGroups, postExpense } from "./api";
+import { Entity, ExpenseParams, Friend, Group, Body, FriendOrGroupProps, Expense } from "./types/friends_groups.types";
+import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
 
 export default function Command() {
   const [friends, loadingFriends] = getFriends();
@@ -83,7 +83,7 @@ function FillForm(props: FriendOrGroupProps) {
     >
       <Form.Description
         title={`${props.friend ? "Friend" : "Group"}`}
-        text={props.friend ? `${props.friend.first_name} ${props.friend.last_name}` : props.group.name}
+        text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
       />
       <Form.TextArea
         id="input"
@@ -99,6 +99,8 @@ function FillForm(props: FriendOrGroupProps) {
 }
 
 function ShareSecretAction(props: { input: string; resetDescription: () => void } & FriendOrGroupProps) {
+  const { pop } = useNavigation();
+
   async function handleSubmit() {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -147,5 +149,14 @@ function ShareSecretAction(props: { input: string; resetDescription: () => void 
     }
   }
 
-  return <Action.SubmitForm icon={Icon.Wallet} title="Add Expense" onSubmit={handleSubmit} />;
+  return (
+    <Action.SubmitForm
+      icon={Icon.Wallet}
+      title="Add Expense"
+      onSubmit={() => {
+        handleSubmit()
+        .then(() => pop());
+      }}
+    />
+  );
 }

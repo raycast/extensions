@@ -1,19 +1,9 @@
-import { GetExpenses, Expense } from "../get_expenses.js"; // Types
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { GetExpenses, Expense } from "../types/get_expenses.types"; // Types
+import { showToast, Toast } from "@raycast/api";
+import { HEADER } from "./userPreferences";
 
 import { useFetch } from "@raycast/utils";
 import axios from "axios";
-
-export const loadingLimit = getPreferenceValues().loadingLimit;
-
-// ------------ API header------------
-import { personalAccessToken } from "../preferences.js"; // Personal Access Token
-const OPTIONS = {
-  headers: {
-    Authorization: `Bearer ${personalAccessToken}`,
-    Content: "application/json",
-  },
-};
 
 // FUNCTIONS
 export function GetExpense(limit: string): [Expense[], boolean, any, any] {
@@ -21,7 +11,7 @@ export function GetExpense(limit: string): [Expense[], boolean, any, any] {
     `https://secure.splitwise.com/api/v3.0/get_expenses?limit=${limit}`,
     {
       method: "GET",
-      ...OPTIONS,
+      ...HEADER,
       keepPreviousData: false,
     }
   );
@@ -37,7 +27,7 @@ export const DeleteExpense = async (id: number, mutate: any) => {
   await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
   try {
     const responseDelete = await mutate(
-      await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, OPTIONS),
+      await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, HEADER),
       {
         optimisticUpdate(expenses: Expense[]) {
           return delete expenses[id];
@@ -63,14 +53,13 @@ export const DeleteExpense = async (id: number, mutate: any) => {
 };
 
 // FORM FUNCTION
-
-export async function handleSubmit(values: any) {
+export async function UpdateExpense(values: any) {
   await showToast({ style: Toast.Style.Animated, title: "Updating Expense" });
   try {
     const responseSubmit = await axios({
       method: "post",
       url: `https://secure.splitwise.com/api/v3.0/update_expense/${values.id}`,
-      ...OPTIONS,
+      ...HEADER,
       data: {
         description: values.description,
         // cost: values.cost,

@@ -1,6 +1,7 @@
-import { Expense } from "./get_expenses"; // Types
+import { Expense } from "./types/get_expenses.types"; // Types
 
-import { GetExpense, DeleteExpense, handleSubmit, loadingLimit } from "./hooks/useAPI";
+import { GetExpense, DeleteExpense, UpdateExpense } from "./hooks/useList";
+import { loadingLimit } from "./hooks/userPreferences";
 
 import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation } from "@raycast/api";
 
@@ -13,7 +14,7 @@ export default function Command() {
   };
 
   return (
-    <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses}>
+    <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses} >
       {expenses
         .filter((expense) => expense.deleted_at === null)
         .map((expense) => (
@@ -118,7 +119,7 @@ export default function Command() {
                   title="Change values"
                   icon={Icon.Pencil}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  target={<ChangeValues expense={expense} />}
+                  target={<ChangeValues expense={expense}/>}
                 />
                 <Action
                   title="Reload"
@@ -141,7 +142,7 @@ export default function Command() {
 }
 
 // ------------ FORM ------------
-// Comment out some lines since updating cost not working at the moment
+// Comment out some lines due to updating costs not working at the moment
 function ChangeValues(handedOverValues: { expense: Expense }) {
   const { expense } = handedOverValues;
   //   const [defaultCosts, setCosts] = useState<string>(expense.cost);
@@ -157,15 +158,14 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
           <Action.SubmitForm
             title="Submit changes"
             onSubmit={(values) => {
-              handleSubmit({
+              UpdateExpense({
                 id: expense.id,
                 description: values.description as string,
                 // cost: values.cost as string,
                 date: values.date,
                 group_id: expense.group_id as number,
-              }).then(() => {
-                pop();
-              });
+              })
+              .then(() => pop());
             }}
           />
         </ActionPanel>
