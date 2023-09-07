@@ -14,11 +14,35 @@
   ],
   "preferences": [
     {
-      "name": "autoFillEnabled",
-      "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
-      "type": "checkbox",
-      "defaultValue": false,
-      "label": "Auto Fill with AI",
+      "name": "defaultDate",
+      "title": "Default Date",
+      "description": "",
+      "type": "dropdown",
+      "defaultValue": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Today",
+          "value": "today"
+        },
+        {
+          "title": "Tomorrow",
+          "value": "tomorrow"
+        },
+        {
+          "title": "Day after Tomorrow",
+          "value": "dayAfterTomorrow"
+        },
+        {
+          "title": "Next Week",
+          "value": "nextWeek"
+        }
+      ],
+      "default": "upcoming",
+      "label": "Default Date",
       "required": false
     }
   ],
@@ -56,7 +80,17 @@
       "title": "Add Task",
       "subtitle": "TickTick",
       "description": "Add task in TickTick.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoFillEnabled",
+          "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
+          "type": "checkbox",
+          "defaultValue": false,
+          "label": "Auto Fill with AI",
+          "required": false
+        }
+      ]
     },
     {
       "name": "quickAdd",

@@ -18,6 +18,7 @@ import useDebouncedCallback from "./hooks/useDebouncedCallback";
 import { getProjects } from "./service/project";
 import { formatToServerDate } from "./utils/date";
 import guessProject from "./service/ai/guessProject";
+import { getDefaultDate } from "./service/preference";
 
 interface FormValues {
   list: string;
@@ -29,6 +30,9 @@ interface FormValues {
 export default function TickTickCreate() {
   const { isInitCompleted } = useStartApp();
   const { autoFillEnabled } = getPreferenceValues<Preferences>();
+  const defaultDate = useMemo(() => {
+    return getDefaultDate();
+  }, []);
 
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
   const [title, setTitle] = useState<string>("");
@@ -154,7 +158,13 @@ export default function TickTickCreate() {
         })}
       </Form.Dropdown>
       <Form.TextArea ref={descRef} id="desc" title="Description" placeholder="" />
-      <Form.DatePicker ref={dueDatePickerRef} id="dueDate" title="Due Date" type={Form.DatePicker.Type.DateTime} />
+      <Form.DatePicker
+        defaultValue={defaultDate}
+        ref={dueDatePickerRef}
+        id="dueDate"
+        title="Due Date"
+        type={Form.DatePicker.Type.DateTime}
+      />
     </Form>
   );
 }

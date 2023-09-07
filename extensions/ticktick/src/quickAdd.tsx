@@ -1,6 +1,8 @@
 import { closeMainWindow, LaunchProps, Toast } from "@raycast/api";
 import { addTask } from "./service/osScript";
 import { getProjects, initGlobalProjectInfo } from "./service/project";
+import { getDefaultDate } from "./service/preference";
+import { formatToServerDate } from "./utils/date";
 
 export default async function QuickAddTask(props: LaunchProps) {
   const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
@@ -13,7 +15,7 @@ export default async function QuickAddTask(props: LaunchProps) {
       projectId: getProjects().find((project) => project.name === "Inbox")?.id || "",
       title,
       description,
-      dueDate: undefined,
+      dueDate: formatToServerDate(getDefaultDate()),
       isAllDay: false,
     });
 

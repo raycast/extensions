@@ -3,6 +3,7 @@
 ## [Added] - 2023-09-07
 
 - Add `Quick Add Task`
+- Add `Default Date` preference
 
 ## [Added] - 2023-07-25
 
