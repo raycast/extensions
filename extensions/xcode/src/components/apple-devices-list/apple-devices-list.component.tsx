@@ -27,7 +27,7 @@ export function AppleDevicesList(): JSX.Element {
               .sort((a, b) => (a > b ? 1 : -1))
               .map((device) => (
                 <AppleDevicesListItem
-                  key={`${device.codeName}${device.name}`}
+                  key={`${device.identifier}${device.name}`}
                   device={device}
                   revalidate={devices.revalidate}
                 />

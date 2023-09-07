@@ -34,7 +34,7 @@ export const TemplateForm = ({ initValues, callback }: P) => {
       });
   }, [chatGo]);
 
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit } = useForm<FormValues>({
     onSubmit(values) {
       let fn = null;
       if (initValues?.id) {

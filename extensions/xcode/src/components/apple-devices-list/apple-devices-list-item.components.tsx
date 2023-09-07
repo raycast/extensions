@@ -5,14 +5,14 @@ export function AppleDevicesListItem(props: { device: AppleDevice; revalidate: (
   return (
     <List.Item
       title={props.device.name}
-      subtitle={props.device.codeName}
+      subtitle={props.device.identifier}
       keywords={[
         props.device.name,
-        props.device.codeName,
+        props.device.identifier,
         props.device.type,
-        props.device.codeName.toLowerCase().replaceAll(props.device.type.toLowerCase(), ""),
-        props.device.codeName.toLowerCase().replaceAll(props.device.type.toLowerCase(), "").replaceAll(",", "."),
-        props.device.codeName.toLowerCase().replaceAll(props.device.type.toLowerCase(), "").replaceAll(",", ""),
+        props.device.identifier.toLowerCase().replaceAll(props.device.type.toLowerCase(), ""),
+        props.device.identifier.toLowerCase().replaceAll(props.device.type.toLowerCase(), "").replaceAll(",", "."),
+        props.device.identifier.toLowerCase().replaceAll(props.device.type.toLowerCase(), "").replaceAll(",", ""),
       ]}
     />
   );

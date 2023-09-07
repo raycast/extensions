@@ -31,6 +31,24 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "measuringUnit",
+          "title": "Measuring Unit",
+          "description": "Measuring unit to use for spacing-related properties",
+          "type": "dropdown",
+          "required": true,
+          "default": "rem",
+          "data": [
+            {
+              "title": "REM",
+              "value": "rem"
+            },
+            {
+              "title": "Pixels",
+              "value": "px"
+            }
+          ]
+        },
+        {
           "name": "defaultAction",
           "title": "Default Action",
           "description": "Action to perform when pressing enter",
@@ -80,7 +98,7 @@
     "Developer Tools"
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.57.2",
     "color-convert": "^2.0.1",
     "css": "^3.0.0",
     "lodash": "^4.17.21",

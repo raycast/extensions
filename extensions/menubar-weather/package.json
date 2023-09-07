@@ -6,6 +6,7 @@
   "icon": "extension-icon.png",
   "author": "koinzhang",
   "contributors": [
+    "r22",
     "fuksman"
   ],
   "license": "MIT",
@@ -19,6 +20,24 @@
     }
   ],
   "preferences": [
+    {
+      "name": "iconStyle",
+      "type": "dropdown",
+      "title": "Icon Style",
+      "description": "Choose the style of the menu bar weather icon",
+      "required": false,
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        },
+        {
+          "title": "SF Symbols",
+          "value": "sf-symbols"
+        }
+      ]
+    },
     {
       "name": "cityName",
       "type": "textfield",
@@ -69,7 +88,7 @@
       "title": "Wind Speed Unit",
       "description": "Units of wind speed",
       "required": true,
-      "default": "",
+      "default": "ms",
       "data": [
         {
           "title": "Km/h",
@@ -192,7 +211,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.2",
+    "@raycast/api": "^1.57.1",
     "axios": "^1.4.0"
   },
   "devDependencies": {

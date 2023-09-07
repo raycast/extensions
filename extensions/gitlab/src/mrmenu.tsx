@@ -11,6 +11,7 @@ import {
   MenuBarSubmenu,
   getBoundedPreferenceNumber,
 } from "./components/menu";
+import { GitLabIcons } from "./icons";
 
 async function launchReviewsCommand(): Promise<void> {
   return launchCommand({ name: "reviews", type: LaunchType.UserInitiated });
@@ -40,7 +41,7 @@ export default function MenuCommand(): JSX.Element {
     <MenuBarRoot
       isLoading={isLoading}
       title={getShowItemsCountPreference() ? (totalCount <= 0 ? undefined : `${totalCount}`) : undefined}
-      icon={{ source: "mropen.png", tintColor: Color.PrimaryText }}
+      icon={{ source: GitLabIcons.merge_request, tintColor: { light: "#000", dark: "#FFF", adjustContrast: false } }}
       tooltip="GitLab Merge Requests"
       error={error}
     >
@@ -62,7 +63,7 @@ export default function MenuCommand(): JSX.Element {
           >
             {mrsAssigned?.map((m) => (
               <MenuBarItem
-                icon={"mropen.png"}
+                icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
                 title={`!${m.iid} ${m.title}`}
                 tooltip={m.reference_full}
                 onAction={() => open(m.web_url)}
@@ -87,7 +88,10 @@ export default function MenuCommand(): JSX.Element {
           >
             {mrsReview?.map((m) => (
               <MenuBarItem
-                icon={"mropen.png"}
+                icon={{
+                  source: GitLabIcons.merge_request,
+                  tintColor: { light: "#000", dark: "#FFF", adjustContrast: false },
+                }}
                 title={`!${m.iid} ${m.title}`}
                 tooltip={m.reference_full}
                 onAction={() => open(m.web_url)}

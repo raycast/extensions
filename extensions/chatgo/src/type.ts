@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export type Set<T> = React.Dispatch<React.SetStateAction<T>>;
 
 export interface Question {
@@ -166,6 +164,7 @@ export interface TemplateBaseOps {
   tags: string[];
   avatar: string;
   is_pub: boolean;
+  hot_index: number;
   sample: string;
 }
 

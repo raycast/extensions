@@ -1,5 +1,8 @@
 # Wikipedia Changelog
 
+## [Add search in browser] - 2023-09-03
+- Added `Search in Browser` action to the `Search Page` command to open the search in Wikipedia
+
 ## [Recent Searches] - 2023-07-04
 - Added `Recent Searches` inside the `Search Page` to show your previously viewed articles
 

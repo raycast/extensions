@@ -1,3 +1,6 @@
+/**
+ * Near-exhaustive list of file extensions for text files that can be read as plain text.
+ */
 export const textFileExtensions = [
   "rtf",
   "1",
@@ -310,6 +313,9 @@ export const textFileExtensions = [
   "ascii",
 ];
 
+/**
+ * File extensions that are considered images and are supported by Apple's Vision framework.
+ */
 export const imageFileExtensions = [
   "bmp",
   "crw",
@@ -329,8 +335,14 @@ export const imageFileExtensions = [
   "xmp",
 ];
 
+/**
+ * File extensions that are considered to be videos and are supported by Apple's Core Media framework.
+ */
 export const videoFileExtensions = ["avi", "flv", "m4v", "mkv", "mov", "mp4", "mpeg", "mpg", "webm", "wmv"];
 
+/**
+ * File extensions that are considered audio files and are supported by Apple's AV Foundation framework.
+ */
 export const audioFileExtensions = [
   "aac",
   "ac4",
@@ -347,3 +359,8 @@ export const audioFileExtensions = [
   "snd",
   "wav",
 ];
+
+/**
+ * Spreadsheet file extensions supported by the XLSX package.
+ */
+export const spreadsheetFileExtensions = ["xls", "xlsx", "xlsm", "xlsb", "ods", "numbers"];

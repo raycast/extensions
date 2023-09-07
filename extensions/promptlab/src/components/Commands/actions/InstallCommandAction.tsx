@@ -53,6 +53,7 @@ export default function InstallCommandAction(props: {
           useRectangleDetection: command.useRectangleDetection == "TRUE" ? true : false,
           useBarcodeDetection: command.useBarcodeDetection == "TRUE" ? true : false,
           useFaceDetection: command.useFaceDetection == "TRUE" ? true : false,
+          useHorizonDetection: command.useHorizonDetection == "TRUE" ? true : false,
           outputKind: command.outputKind,
           actionScript: command.actionScript,
           showResponse: command.showResponse == "TRUE" ? true : false,

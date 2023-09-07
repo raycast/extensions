@@ -16,7 +16,7 @@ import { abbreviateNames, displayCollaborations, selectUrl } from "./utils";
 import ItemComponent from "./ItemComponent";
 
 const API_PATH =
-  "https://inspirehep.net/api/literature?fields=titles,collaborations,authors.full_name,earliest_date,citation_count,arxiv_eprints,publication_info,number_of_pages,abstracts,keywords,document_type,dois,imprints&size=9";
+  "https://inspirehep.net/api/literature?fields=titles,collaborations,authors.full_name,earliest_date,citation_count,arxiv_eprints,publication_info,number_of_pages,abstracts,keywords,document_type,dois,imprints,external_system_identifiers&size=9";
 
 type ListComponentProps = {
   isLoading: boolean;

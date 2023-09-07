@@ -1,5 +1,23 @@
 # Home Assistant Changelog
 
+## [Fix] - 2023-08-15
+
+- Updates from HACS will be shown in the menu regardless of the update entity states
+
+## [HACS-Menu] - 2023-08-03
+
+- Add HACS updates to menubar
+- Add `Update without Backup` menu to support updates for integration which does not support backups
+
+## [Menu] - 2023-07-25
+
+- Add Media Player Menu Bar command
+- Add Entities Menu Bar command to allow to add specific entities in the Menu Bar
+- Add Lights Menu Bar command
+- Add Covers Menu Bar command
+- Add Batteries Menu Bar command
+- Notifications menu now contains battery low battery states as well as updates
+
 ## [Modernize] - 2023-07-16
 
 - Add support for switching assist pipelines

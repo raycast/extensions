@@ -4,30 +4,22 @@ import { AppleDevicesListFilter } from "../models/apple-device/apple-devices-lis
 import fetch from "node-fetch";
 
 export class AppleDevicesService {
-  private static url =
-    "https://gist.githubusercontent.com/adamawolf/3048717/raw/56e9ab1104e06ca4181b678822b9b8b054c935ad/Apple_mobile_device_types.txt";
+  private static url = "https://api.ipsw.me/v4/devices";
 
   static async devices(filter: AppleDevicesListFilter): Promise<AppleDevice[]> {
     const response = await fetch(AppleDevicesService.url);
-    const text = await response.text();
-    const lines = text.split("\n");
+    const json = (await response.json()) as AppleDevice[];
     return (
-      lines
-        .map((line) => AppleDevicesService.parse(line))
+      json
+        .map((x) => {
+          const type = AppleDevicesService.deviceTypeFor(x.name);
+          if (type === null) return null;
+          return { type: type, name: x.name, identifier: x.identifier };
+        })
         .filter((x) => x !== null)
         .map((x) => x as AppleDevice)
         .filter((x) => filter === AppleDevicesListFilter.all || x.type === (filter as unknown as AppleDeviceType)) ?? []
     );
-  }
-
-  private static parse(line: string): AppleDevice | null {
-    const parts = line.split(" : ");
-    if (parts.length !== 2) return null;
-    const name = parts[1];
-    const codeName = parts[0];
-    const type = this.deviceTypeFor(name);
-    if (type === null) return null;
-    return { type: type, name: name, codeName: codeName };
   }
 
   private static deviceTypeFor(name: string): AppleDeviceType | null {
@@ -37,6 +29,8 @@ export class AppleDevicesService {
       return AppleDeviceType.ipad;
     } else if (name.toLowerCase().includes(AppleDeviceType.watch.toLowerCase())) {
       return AppleDeviceType.watch;
+    } else if (name.toLowerCase().includes(AppleDeviceType.mac.toLowerCase())) {
+      return AppleDeviceType.mac;
     } else {
       return null;
     }
