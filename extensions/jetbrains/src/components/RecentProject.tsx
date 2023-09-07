@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Application, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { OpenJetBrainsToolbox } from "./OpenJetBrainsToolbox";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { AppHistory, recentEntry, ToolboxApp } from "../util";
 import { OpenInJetBrainsApp } from "./OpenInJetBrainsApp";
 import { SortTools } from "../sortTools";
@@ -53,7 +53,7 @@ export function RecentProject({
       accessories={[{ text: app.title }]}
       title={recent.title}
       keywords={keywords}
-      icon={recent.icon.endsWith('.app') ? {fileIcon: recent.icon} : recent.icon}
+      icon={recent.icon.endsWith(".app") ? { fileIcon: recent.icon } : recent.icon}
       subtitle={recent.parts}
       actions={
         <ActionPanel>
@@ -114,7 +114,7 @@ export function RecentProject({
             />
             <Action
               icon={Icon.Window}
-              title={`Toggle screenshot mode ${screenshotMode ? "off" : "on"}`}
+              title={`Toggle Screenshot Mode ${screenshotMode ? "off" : "on"}`}
               onAction={toggleScreenshotMode}
             />
           </ActionPanel.Section>

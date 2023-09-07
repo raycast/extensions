@@ -28,7 +28,7 @@ export default function ProjectList(): JSX.Element {
               onAction={() => open(toolboxApp?.path)}
             />
           )}
-          <MenuBarExtra.Separator />
+          <MenuBarExtra.Section />
           {myFavs.length && filter === "" ? (
             <>
               {myFavs.map((fav) => (
@@ -50,17 +50,19 @@ export default function ProjectList(): JSX.Element {
                   )}
                 />
               ))}
-              <MenuBarExtra.Separator />
+              <MenuBarExtra.Section />
             </>
           ) : null}
           {appHistory
             .filter((app) => filter === "" || filter === app.title)
             .map((app, id) => (
               <MenuBarExtra.Submenu
-                icon={app.icon.endsWith('.app') ? {fileIcon: app.icon} : app.icon}
-                title={app.title} key={app.title}>
+                icon={app.icon.endsWith(".app") ? { fileIcon: app.icon } : app.icon}
+                title={app.title}
+                key={app.title}
+              >
                 <MenuBarExtra.Item
-                  icon={app.icon.endsWith('.app') ? {fileIcon: app.icon} : app.icon}
+                  icon={app.icon.endsWith(".app") ? { fileIcon: app.icon } : app.icon}
                   title={`Open ${app.title}`}
                   onAction={() => open(app.app?.path ?? "")}
                 />
@@ -68,7 +70,7 @@ export default function ProjectList(): JSX.Element {
                 {app.entries
                   ? app.entries
                       .filter((entry) => filter !== "" || (histories[id] ?? []).includes(entry.path))
-                      .map((recent: recentEntry, index) =>
+                      .map((recent: recentEntry) =>
                         recent?.path ? (
                           <MenuBarExtra.Item
                             key={`${app.title}-${recent.path}`}
