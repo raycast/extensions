@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - 2023-08-31
+
+- Resolves an issue where "2FA" is identified as the code
+
 ## [Update] - 2023-08-18
 
 - Adds support for uppercase alphanumberic 2FA codes between 3 and 8 characters

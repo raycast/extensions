@@ -1,5 +1,13 @@
 # Notion Changelog
 
+## [Fix bugs and add colors] - 2023-09-06
+
+- Fix status property support in database list view, database kanban view, and create page view
+- Fix action panel calling "Databases" as "Pages"
+- Fix deleting databases
+- Use notion-provided colors
+
+
 ## [Small fixes] - 2023-08-16
 
 - Hide formula fields when creating database pages
