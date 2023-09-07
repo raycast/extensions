@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
@@ -11,6 +11,7 @@ import { getServerUrlPreference } from "~/utils/preferences";
 import { CLINotFoundError, VaultIsLockedError } from "~/utils/errors";
 import { join } from "path";
 import { chmod } from "fs/promises";
+import { waitForFileAvailable } from "~/utils/fs";
 
 export class Bitwarden {
   private env: Env;
@@ -48,7 +49,15 @@ export class Bitwarden {
 
   async prepareCliBinary() {
     if (existsSync(this.cliPath)) return;
-    const toast = await showToast({ title: "Updating Bitwarden CLI...", style: Toast.Style.Animated });
+
+    const toast = await showToast({
+      title: "Downloading Bitwarden CLI...",
+      style: Toast.Style.Animated,
+      primaryAction: {
+        title: "Open Download Page",
+        onAction: () => open("https://bitwarden.com/help/cli/#download-and-install"),
+      },
+    });
     try {
       const zipPath = join(environment.assetsPath, "bitwarden-cli.tar.gz");
       await execa("curl", [
@@ -57,6 +66,7 @@ export class Bitwarden {
         `${environment.assetsPath}/bitwarden-cli.tar.gz`,
       ]);
       await execa("tar", ["-xzf", zipPath, "-C", environment.supportPath], { env: { LC_ALL: "C" } });
+      await waitForFileAvailable(this.cliPath);
       await chmod(this.cliPath, "755");
       await toast.hide();
     } catch (error) {
