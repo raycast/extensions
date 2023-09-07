@@ -1,5 +1,9 @@
 # Jira Search Self Hosted Changelog
 
+## [Update] - 2023-09-07
+
+- Updated dependencies
+
 ## [Update] - 2022-07-30
 
 Added a new filter based on the assignee of a ticket. This filter can accept either the email address of the user, or the user's full name in quotes.
