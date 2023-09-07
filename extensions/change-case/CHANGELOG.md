@@ -1,5 +1,9 @@
 # Change Case Changelog
 
+## [Support Quicklinks] - 2023-09-07
+
+- Added support for quicklinks to quickly convert to a selected case
+
 ## [Added new case] - 2023-05-15
 
 - Added Slug case
