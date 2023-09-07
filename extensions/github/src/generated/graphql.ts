@@ -24237,7 +24237,7 @@ export type StartRepositoryMigrationInput = {
   accessToken?: InputMaybe<Scalars["String"]>;
   /** A unique identifier for the client performing the mutation. */
   clientMutationId?: InputMaybe<Scalars["String"]>;
-  /** Whether to continue the migration on error. Defaults to `false`. We strongly recommend setting this to `true` for the smoothest migration experience. *This default will change to `true` on September 4, 2023.* */
+  /** Whether to continue the migration on error. Defaults to `true`. */
   continueOnError?: InputMaybe<Scalars["Boolean"]>;
   /** The signed URL to access the user-uploaded git archive. */
   gitArchiveUrl?: InputMaybe<Scalars["String"]>;

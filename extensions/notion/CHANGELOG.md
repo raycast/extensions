@@ -1,9 +1,16 @@
 # Notion Changelog
 
-## [Deep links] - 2023-09-01
+## [Deep links] - 2023-09-07
 
 - New action to `Create Database Page` that copies a [deeplink](https://manual.raycast.com/deeplink) to open the command as configured.
 - Add support for _status_ property.
+
+## [Fix bugs and add colors] - 2023-09-06
+
+- Fix status property support in database list view, database kanban view, and create page view
+- Fix action panel calling "Databases" as "Pages"
+- Fix deleting databases
+- Use notion-provided colors
 
 ## [Small fixes] - 2023-08-16
 

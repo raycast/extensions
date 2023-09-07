@@ -45,7 +45,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.0",
+    "@raycast/api": "^1.57.2",
     "@raycast/utils": "^1.6.1",
     "node-fetch": "^3.2.10"
   },
@@ -55,7 +55,7 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-prettier": "^8.10.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },

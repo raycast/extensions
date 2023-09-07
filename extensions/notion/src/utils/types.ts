@@ -19,7 +19,6 @@ export interface Database {
 // Currently supported properties
 const _supportedPropTypes = [
   "title",
-  "status",
   "number",
   "rich_text",
   "url",
@@ -32,6 +31,7 @@ const _supportedPropTypes = [
   "formula",
   "people",
   "relation",
+  "status",
 ] satisfies PagePropertyType["type"][];
 export const supportedPropTypes: PagePropertyType["type"][] = _supportedPropTypes;
 
