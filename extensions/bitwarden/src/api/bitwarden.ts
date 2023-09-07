@@ -47,28 +47,42 @@ export class Bitwarden {
     })();
   }
 
-  async prepareCliBinary() {
+  private async prepareCliBinary() {
     if (existsSync(this.cliPath)) return;
 
     const toast = await showToast({
-      title: "Downloading Bitwarden CLI...",
-      message: "Please wait",
+      title: "Initializing Bitwarden CLI",
       style: Toast.Style.Animated,
       primaryAction: {
         title: "Open Download Page",
         onAction: () => open("https://bitwarden.com/help/cli/#download-and-install"),
       },
     });
+    const zipPath = join(environment.supportPath, "bitwarden-cli.tar.gz");
     try {
-      const zipPath = join(environment.assetsPath, "bitwarden-cli.tar.gz");
-      await execa("curl", ["https://vault.bitwarden.com/download/?app=cli&platform=macos", "-Lo", zipPath]);
-      await execa("tar", ["-xzf", zipPath, "-C", environment.supportPath], { env: { LC_ALL: "C" } });
-      await waitForFileAvailable(this.cliPath);
-      await chmod(this.cliPath, "755");
+      try {
+        toast.message = "Downloading...";
+        await execa("curl", ["https://vault.bitwarden.com/download/?app=cli&platform=macos", "-Lo", zipPath]);
+      } catch (downloadError) {
+        toast.title = "Failed to download Bitwarden CLI";
+        throw downloadError;
+      }
+      try {
+        toast.message = "Extracting...";
+        await execa("tar", ["-xzf", zipPath, "-C", environment.supportPath], { env: { LC_ALL: "C" } });
+        await waitForFileAvailable(this.cliPath);
+        await execa("rm", ["-rf", zipPath]);
+        await chmod(this.cliPath, "755");
+      } catch (extractError) {
+        toast.title = "Failed to extract Bitwarden CLI";
+        throw extractError;
+      }
       await toast.hide();
     } catch (error) {
+      toast.message = "Please try again";
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to initialize Bitwarden CLI";
+      await execa("rm", ["-rf", zipPath, this.cliPath]);
+      throw error;
     }
   }
 
