@@ -31,6 +31,13 @@ export class VaultIsLockedError extends DisplayableError {
   }
 }
 
+export class EnsureCliBinError extends DisplayableError {
+  constructor(message?: string) {
+    super(message ?? "Failed do download Bitwarden CLI");
+    this.name = "EnsureCliBinError";
+  }
+}
+
 export function getDisplayableErrorMessage(error: any) {
   if (error instanceof DisplayableError) return error.message;
   return undefined;
