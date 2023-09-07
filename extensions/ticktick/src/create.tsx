@@ -54,10 +54,8 @@ export default function TickTickCreate() {
       if (!isInitCompleted) return;
       const result = await addTask({
         projectId: values.list,
-        // eslint-disable-next-line no-useless-escape
-        title: values.title.replace(/"/g, `\"`),
-        // eslint-disable-next-line no-useless-escape
-        description: values.desc.replace(/"/g, `\"`),
+        title: values.title.replace(/"/g, `\\"`),
+        description: values.desc.replace(/"/g, `\\"`),
         dueDate: formatToServerDate(values.dueDate),
         isAllDay: false,
       });
