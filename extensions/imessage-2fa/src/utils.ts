@@ -35,14 +35,12 @@ export function extractCode(original: string) {
     //   "Your code is 45678!"
     //   "Your code is:98765!"
     code = m[2];
-  }
-  if ((m = /^(\d{4,8})(\sis your.*code)/.exec(message)) !== null) {
+  } else if ((m = /^(\d{4,8})(\sis your.*code)/.exec(message)) !== null) {
     // 4-8 digits followed by "is your [...] code"
     // examples:
     //   "2773 is your Microsoft account verification code"
     code = m[1];
-  }
-  if ((m = /(code:|is:|码)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+  } else if ((m = /(code:|is:|码)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
     // "code:" OR "is:", optional whitespace, then 4-8 consecutive digits
     // examples:
     //   "Your Airbnb verification code is: 1234."
@@ -50,14 +48,12 @@ export function extractCode(original: string) {
     //   "Here is your authorization code:9384"
     //   "【抖音】验证码9316，用于手机验证"
     code = m[2];
-  }
-  if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+  } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
     // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits
     // examples:
     //   "Please enter code 548 on Zocdoc."
     code = m[2];
-  }
-  if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+  } else if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
     // line beginning OR "code:" OR "is:" OR word boundary, optional whitespace, 3 consecutive digits, a hyphen, then 3 consecutive digits
     // but NOT a phone number (###-###-####)
     // examples:
@@ -72,8 +68,7 @@ export function extractCode(original: string) {
       return `${first}${second}`;
     }
     return "";
-  }
-  if ((m = /\b(?=[A-Z]*[0-9])(?=[0-9]*[A-Z])[0-9A-Z]{3,8}\b/.exec(message)) !== null) {
+  } else if ((m = /\b(?=[A-Z]*[0-9])(?=[0-9]*[A-Z])[0-9A-Z]{3,8}\b/.exec(message)) !== null) {
     // 3-8 character uppercase alphanumeric string, containing at least one letter and one number
     // examples:
     //   "5WGU8G"

@@ -3,7 +3,7 @@
   "name": "conventional-commits",
   "title": "Conventional Commits",
   "description": "Provides a list of conventional commits prefixes and descriptions that can be inserted into your active window",
-  "icon": "../assets/command-icon.png",
+  "icon": "command-icon.png",
   "author": "niemtec",
   "categories": [
     "Developer Tools",
