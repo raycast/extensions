@@ -2,7 +2,11 @@
 
 ## [Update] - 2023-09-07
 
-- Updated dependencies
+Updated dependencies
+
+## [Update] - 2023-08-16
+
+Added an ability to search projects by title and key case-insensitive
 
 ## [Update] - 2022-07-30
 

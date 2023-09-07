@@ -1,5 +1,5 @@
 import { OAuth } from "@raycast/api";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const clientId = "1191201745684312";
 
@@ -47,6 +47,14 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
 
     return response.data;
   } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(
+        "Authentication error: unable to fetch tokens.\n\n" +
+          error.message +
+          "\n" +
+          JSON.stringify(error.response?.data)
+      );
+    }
     throw new Error("Authentication error: unable to fetch tokens");
   }
 }
@@ -61,6 +69,14 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
 
     return tokenResponse;
   } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(
+        "Authentication error: unable to refresh tokens.\n\n" +
+          error.message +
+          "\n" +
+          JSON.stringify(error.response?.data)
+      );
+    }
     throw new Error("Authentication error: unable to refresh tokens");
   }
 }

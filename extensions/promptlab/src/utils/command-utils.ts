@@ -1,9 +1,9 @@
-import { runAppleScript } from "run-applescript";
 import { objcImports, replaceAllHandler, rselectHandler, splitHandler, trimHandler } from "./scripts";
 import { exec } from "child_process";
 import { Command, CommandOptions, StoreCommand } from "./types";
 import { LocalStorage, AI } from "@raycast/api";
 import { Placeholders } from "./placeholders";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Runs the action script of a PromptLab command, providing the AI response as the `response` variable.

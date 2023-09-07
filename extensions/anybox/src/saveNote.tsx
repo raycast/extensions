@@ -21,6 +21,7 @@ interface SaveNoteResponse {
 function NoteForm() {
   const preferences = getPreferenceValues<Preferences>();
   const [note, setNote] = useState<string>();
+  const [comment, setComment] = useState<string>();
   const [collections, setCollections] = useState<CollectionProp[]>([]);
   const { pop } = useNavigation();
 
@@ -41,7 +42,7 @@ function NoteForm() {
 
   function collectionTitle(tag: CollectionProp) {
     if (tag.heading) {
-      return `${tag.heading} > ${tag.name}`;
+      return `${tag.heading} › ${tag.name}`;
     }
     return `${tag.name}`;
   }
@@ -58,11 +59,12 @@ function NoteForm() {
               if (note.length > 0) {
                 const data = {
                   note,
+                  comment: values.comment,
                   collections: values.collections,
                   starred: !!values.starred,
                 };
-                pop();
                 await postAndCloseMainWindow("save", data);
+                pop();
               }
             }}
           />
@@ -74,14 +76,15 @@ function NoteForm() {
               if (note.length > 0) {
                 const data = {
                   note,
+                  comment: values.comment,
                   collections: values.collections,
                   starred: !!values.starred,
                 };
-                pop();
                 const result = (await postAndCloseMainWindow("save", data)) as SaveNoteResponse;
                 if (result.url) {
                   open(result.url);
                 }
+                pop();
               }
             }}
           />
@@ -89,6 +92,7 @@ function NoteForm() {
       }
     >
       <Form.TextArea title="Note" id="note" value={note} onChange={setNote} />
+      <Form.TextArea title="Comment" id="comment" value={comment} onChange={setComment} />
       <Form.TagPicker id="collections" title="Collections" defaultValue={[]}>
         {collections.map((val) => {
           return <Form.TagPicker.Item value={val.id} title={collectionTitle(val)} key={val.id} />;

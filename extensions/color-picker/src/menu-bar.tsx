@@ -18,13 +18,13 @@ export default function Command() {
     <MenuBarExtra icon={Icon.EyeDropper}>
       <MenuBarExtra.Item
         title="Pick Color"
-        onAction={async () =>
-          await launchCommand({
+        onAction={() => {
+          launchCommand({
             name: "pick-color",
             type: LaunchType.Background,
             context: { source: "menu-bar" },
-          })
-        }
+          });
+        }}
       />
       <MenuBarExtra.Section>
         {history?.slice(0, 9).map((historyItem, index) => {

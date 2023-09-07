@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cobalt",
+  "title": "Cobalt",
+  "description": "Download videos and audio from popular social media platforms with ease.",
+  "icon": "command-icon.png",
+  "author": "aelew",
+  "categories": [
+    "Applications",
+    "Data",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download Media",
+      "subtitle": "Cobalt",
+      "description": "Download video and/or audio from social media with customizable settings.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Download directory",
+      "description": "Where Cobalt should save downloaded files.",
+      "default": "~/Downloads",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "apiInstanceUrl",
+      "title": "API Instance URL",
+      "description": "Want to use a different Cobalt API instance? Change your instance URL here!",
+      "placeholder": "https://co.wuk.sh",
+      "default": "https://co.wuk.sh",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "vimeoDownloadType",
+      "title": "Vimeo download type",
+      "description": "Progressive: direct file link to Vimeo's CDN. Max quality is 1080p.\nDash: video and audio are merged into one file. Max quality is 4K.\n\nPick progressive if you want the best editor/player/social media compatibility.\nIf progressive download isn't available, dash is used instead.",
+      "type": "dropdown",
+      "required": false,
+      "default": "progressive",
+      "data": [
+        {
+          "title": "Progressive",
+          "value": "progressive"
+        },
+        {
+          "title": "Dash",
+          "value": "dash"
+        }
+      ]
+    },
+    {
+      "name": "notifyOnDownload",
+      "label": "Notify on successful download",
+      "description": "Sends you a notification when your download is complete.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "removeTikTokWatermark",
+      "label": "Remove TikTok and Douyin watermarks",
+      "description": "Whether downloaded TikTok & Douyin videos should have watermarks removed.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "downloadOriginalTikTokSound",
+      "label": "Use original TikTok audio",
+      "description": "Downloads the original sound used in the TikTok video without any additional changes by the post's author.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "muteVideoAudio",
+      "label": "Mute video audio",
+      "description": "Disable the audio track in video downloads.",
+      "type": "checkbox",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.0",
+    "@raycast/utils": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

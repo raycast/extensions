@@ -5,6 +5,9 @@
   "description": "Lets you pick a wallpaper from a folder of finder",
   "icon": "command-icon.png",
   "author": "hugomarfani",
+  "contributors": [
+    "danulqua"
+  ],
   "categories": [
     "System"
   ],
@@ -24,6 +27,28 @@
       "description": "The directory where your wallpapers are stored",
       "type": "directory",
       "required": true
+    },
+    {
+      "name": "displaySize",
+      "title": "Display Size",
+      "description": "Grid size of the wallpaper picker",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ],
+      "default": "medium",
+      "required": false
     },
     {
       "name": "showTitle",
