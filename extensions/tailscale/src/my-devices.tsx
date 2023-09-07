@@ -25,7 +25,7 @@ function MyDeviceList() {
   }, []);
 
   return (
-    <List isLoading={devices === undefined}>
+    <List isLoading={!devices}>
       {devices?.map((device) => (
         <List.Item
           title={device.name}

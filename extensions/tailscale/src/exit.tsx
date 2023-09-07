@@ -57,7 +57,7 @@ function ExitNodeList() {
   }, []);
 
   return (
-    <List isLoading={exitNodes === undefined}>
+    <List isLoading={!exitNodes}>
       {isActive && (
         <List.Item
           key="_disable"
