@@ -18,9 +18,8 @@ export interface Database {
 
 // Currently supported properties
 export const supportedPropTypes: PagePropertyType["type"][] = [
-  "title",
-  "status",
   "number",
+  "title",
   "rich_text",
   "url",
   "email",
@@ -32,6 +31,7 @@ export const supportedPropTypes: PagePropertyType["type"][] = [
   "formula",
   "people",
   "relation",
+  "status",
 ];
 
 // all possible types:
@@ -49,10 +49,11 @@ export interface DatabaseProperty {
     | "date"
     | "checkbox"
     | "select"
+    | "multi_select"
     | "formula"
     | "people"
     | "relation"
-    | "multi_select";
+    | "status";
   name: string;
   options: DatabasePropertyOption[];
   relation_id?: string;
