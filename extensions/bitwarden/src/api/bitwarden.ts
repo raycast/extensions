@@ -52,6 +52,7 @@ export class Bitwarden {
 
     const toast = await showToast({
       title: "Downloading Bitwarden CLI...",
+      message: "Please wait",
       style: Toast.Style.Animated,
       primaryAction: {
         title: "Open Download Page",
@@ -60,11 +61,7 @@ export class Bitwarden {
     });
     try {
       const zipPath = join(environment.assetsPath, "bitwarden-cli.tar.gz");
-      await execa("curl", [
-        "https://vault.bitwarden.com/download/?app=cli&platform=macos",
-        "-Lo",
-        `${environment.assetsPath}/bitwarden-cli.tar.gz`,
-      ]);
+      await execa("curl", ["https://vault.bitwarden.com/download/?app=cli&platform=macos", "-Lo", zipPath]);
       await execa("tar", ["-xzf", zipPath, "-C", environment.supportPath], { env: { LC_ALL: "C" } });
       await waitForFileAvailable(this.cliPath);
       await chmod(this.cliPath, "755");
