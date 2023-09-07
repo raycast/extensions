@@ -51,7 +51,7 @@ const searchInDEVONThink = async (databaseUUID: string, query: string) => {
           return "[]";
       }
 
-      return JSON.stringify(results.map(result => result.properties()));
+      return JSON.stringify(results.slice(0, 20).map(result => result.properties()));
   `) as string;
 
   const results = JSON.parse(resultsString) as SearchResult[];
