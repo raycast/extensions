@@ -14,7 +14,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "splitwise",
+      "name": "add-expense",
       "title": "Add Expense",
       "subtitle": "View balances and add expenses",
       "description": "Add new expense to Splitwise",
