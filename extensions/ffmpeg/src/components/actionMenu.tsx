@@ -9,14 +9,14 @@ export function ActionMenu() {
     <ActionPanel.Submenu title="Display Setting" icon={Icon.WrenchScrewdriver}>
       <ActionPanel.Section title="Files">
         <Action
-          title="All files"
+          title="All Files"
           icon={Icon.BulletPoints}
           onAction={() => {
             refreshSelectedFiles({ filterFileType: false });
           }}
         />
         <Action
-          title="Only supported files"
+          title="Only Supported Files"
           icon={Icon.Filter}
           onAction={() => {
             refreshSelectedFiles({ filterFileType: true });
