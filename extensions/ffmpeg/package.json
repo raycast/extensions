@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ffmpeg",
-  "title": "Fast media analysis and manipulation using FFmpeg",
-  "description": "Use FFmpeg for view media file info",
+  "title": "FFmpeg - View, Analyze and Manipulate",
+  "description": "Use FFmpeg to view media file info",
   "icon": "command-icon.png",
   "author": "RenderCoder",
   "version": "1.0.0",
