@@ -1,6 +1,6 @@
 # Pick Your Wallpaper Changelog
 
-## [1.0.4] - {PR_MERGE_DATE}
+## [1.0.4] - 2023-09-08
 
 - Added new command for setting a selected picture in Finder as a desktop wallpaper
 - Fixed the issue where the app would throw an error when trying to show the selected wallpaper in Finder
