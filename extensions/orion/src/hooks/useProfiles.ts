@@ -33,8 +33,8 @@ function parseProfiles(items: any): ProfileList {
       id: "Defaults",
       color: items.defaults.color,
       dataPath: join(getOrionBasePath(), "Defaults"),
-      // TODO: fix this
-      appPath: "/Applications/Orion RC.app",
+      // TODO: dynamically find location
+      appPath: `/Applications/${getOrionAppIdentifier()}.app`,
     },
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     profiles: items.profiles.map((p: any) => {
@@ -43,14 +43,15 @@ function parseProfiles(items: any): ProfileList {
         id: p.identifier,
         color: p.color,
         dataPath: join(getOrionBasePath(), p.identifier),
-        // TODO: fix this
+        // TODO: dynamically find location
+        // format: /Users/USER/Applications/Orion( RC)/Orion( RC) Profiles/Orion - PROFILE_NAME.app
         appPath: join(
           homedir(),
           "Applications",
           getOrionAppIdentifier(),
-          "Orion RC Profiles",
+          `${getOrionAppIdentifier()} Profiles`,
           p.identifier,
-          "Orion RC - " + p.name + ".app",
+          `${getOrionAppIdentifier()} - ${p.name}.app`,
         ),
       };
     }),
