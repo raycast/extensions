@@ -1,7 +1,17 @@
 import { Icon, List } from "@raycast/api";
-import { ProfileList } from "../types";
+import { Profile, ProfileList } from "../types";
 import { useEffect } from "react";
 import { idToColor } from "../utils";
+
+function ProfileItem(props: { profile: Profile }) {
+  return (
+    <List.Dropdown.Item
+      value={props.profile.id}
+      title={props.profile.name}
+      icon={{ source: Icon.PersonCircle, tintColor: idToColor(props.profile.color) }}
+    />
+  );
+}
 
 export default function ProfileDropDown(props: {
   profiles?: ProfileList;
@@ -22,13 +32,9 @@ export default function ProfileDropDown(props: {
 
   return (
     <List.Dropdown tooltip="Select Profile" value={selectedProfileId} onChange={onProfileSelected}>
-      <List.Dropdown.Item value={profiles.default.id} title={profiles.default.name} />
+      <ProfileItem profile={profiles.default} />
       {profiles.profiles.map((profile) => (
-        <List.Dropdown.Item
-          value={profile.id}
-          title={profile.name}
-          icon={{ source: Icon.PersonCircle, tintColor: idToColor(profile.color) }}
-        />
+        <ProfileItem profile={profile} />
       ))}
     </List.Dropdown>
   );

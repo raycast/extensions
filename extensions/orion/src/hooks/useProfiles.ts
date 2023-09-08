@@ -11,9 +11,9 @@ const useProfiles = () => {
   const profilesPath = getProfilesPath();
 
   useEffect(() => {
+    // profilesPlist is an array of one element
     const profilesPlist = parseFileSync(profilesPath);
-    const items = profilesPlist[0];
-    const profiles = parseProfiles(items);
+    const profiles = parseProfiles(profilesPlist[0]);
     setProfiles(profiles);
   }, []);
 
@@ -25,6 +25,7 @@ export const useSelectedProfileId = (id: string) => {
   return { selectedProfileId, setSelectedProfileId };
 };
 
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 function parseProfiles(items: any): ProfileList {
   return {
     default: {
@@ -35,6 +36,7 @@ function parseProfiles(items: any): ProfileList {
       // TODO: fix this
       appPath: "/Applications/Orion RC.app",
     },
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     profiles: items.profiles.map((p: any) => {
       return {
         name: p.name,
