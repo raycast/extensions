@@ -15,7 +15,7 @@ ${Object.entries(identity)
 
     return `| ${shortcutKey ? `${shortcutKey}.` : "&nbsp;"}\t**${label}** | ${value} |`;
   })
-  .filter((ele) => ele !== null)
+  .filter(Boolean)
   .join("\n")}
 `;
 }
