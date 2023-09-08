@@ -6,7 +6,7 @@ import { DataStorage } from "../shared/DataStorage";
 
 export class JsonDailyLogRepository implements DailyLogRepository {
   constructor(private readonly dataStorage: DataStorage) {}
-  
+
   private saveLogs(logs: DailyLog[], date: Date): void {
     const logsJson = JSON.stringify(logs);
     this.dataStorage.save(logsJson, date);

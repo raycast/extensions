@@ -8,8 +8,6 @@ import { getJsonDailyLogPath } from "../shared/getDailyLogPath";
 export function makeDailyLogRepository(): DailyLogRepository {
   return new MigrationDayDailyLogRepository(
     new LegacyDailyLogRepository(),
-    new JsonDailyLogRepository(
-      new LocalFilesDataStorage(getJsonDailyLogPath)
-    )
+    new JsonDailyLogRepository(new LocalFilesDataStorage(getJsonDailyLogPath))
   );
 }
