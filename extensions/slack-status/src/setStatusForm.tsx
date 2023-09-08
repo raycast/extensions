@@ -1,4 +1,4 @@
-import { ActionPanel, Form, FormValues, showToast, SubmitFormAction, ToastStyle, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { slackEmojiCodeMap } from "./emojiCodes";
 import { SlackStatusPreset, SlackStatusResponseState } from "./interfaces";
 import { SlackClient } from "./slackClient";
@@ -14,7 +14,7 @@ export function SetCustomStatusForm(props: {
   currentStatusResponseState: SlackStatusResponseState;
 }) {
   const { pop } = useNavigation();
-  function handleSubmit(values: FormValues) {
+  function handleSubmit(values: Form.Values) {
     console.log(values);
     if (!validateForm(values)) {
       return;
@@ -31,14 +31,14 @@ export function SetCustomStatusForm(props: {
         if (success) {
           pop();
         }
-      }
+      },
     );
   }
   return <StatusForm mode={StatusFormMode.SetCustomStatus} onSubmit={handleSubmit} />;
 }
 
 export function CreateStatusPresetForm(props: { onCompletion: (preset: SlackStatusPreset) => void }) {
-  function handleSubmit(values: FormValues) {
+  function handleSubmit(values: Form.Values) {
     if (!validateForm(values)) {
       return;
     }
@@ -56,7 +56,7 @@ export function EditStatusPresetForm(props: {
   preset: SlackStatusPreset;
   onCompletion: (preset: SlackStatusPreset) => void;
 }) {
-  function handleSubmit(values: FormValues) {
+  function handleSubmit(values: Form.Values) {
     if (!validateForm(values)) {
       return;
     }
@@ -72,7 +72,7 @@ export function EditStatusPresetForm(props: {
 
 function StatusForm(props: {
   mode: StatusFormMode;
-  onSubmit: (values: FormValues) => void;
+  onSubmit: (values: Form.Values) => void;
   preset?: SlackStatusPreset;
 }) {
   let submitActionTitle = "";
@@ -95,7 +95,7 @@ function StatusForm(props: {
       navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
-          <SubmitFormAction title={submitActionTitle} onSubmit={props.onSubmit} />
+          <Action.SubmitForm title={submitActionTitle} onSubmit={props.onSubmit} />
         </ActionPanel>
       }
     >
@@ -135,9 +135,12 @@ function StatusForm(props: {
   );
 }
 
-function validateForm(values: FormValues): boolean {
+function validateForm(values: Form.Values): boolean {
   if (!values.statusText) {
-    showToast(ToastStyle.Failure, "Please set status text");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Please set status text",
+    });
     return false;
   }
   return true;
