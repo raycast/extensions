@@ -1,19 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { parseFileSync } from "bplist-parser";
 
 import { Bookmark, OrionFavoriteItem, OrionFavoritesPlistResult } from "../types";
 import { getFavoritesPath, unique } from "../utils";
 import { showToast, Toast } from "@raycast/api";
 
-const useBookmarks = () => {
+const useBookmarks = (selectedProfileId: string) => {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [folders, setFolders] = useState<string[]>([]);
   const [isLoading, setLoading] = useState(true);
-  const bookmarksPath = getFavoritesPath();
 
-  const fetchItems = useCallback(async () => {
+  useEffect(() => {
+    const bookmarksPath = getFavoritesPath(selectedProfileId);
     setLoading(true);
-
     try {
       const bookmarksPlist = parseFileSync(bookmarksPath) as OrionFavoritesPlistResult;
       const items = Object.values(bookmarksPlist[0]);
@@ -23,15 +22,11 @@ const useBookmarks = () => {
       setFolders(Array.from(folders.values()));
       setLoading(false);
     } catch (e) {
-      await showToast(Toast.Style.Failure, "Error loading bookmarks", "Be sure to run Orion at least once.");
+      showToast(Toast.Style.Failure, "Error loading bookmarks", "Be sure to run Orion at least once.");
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+  }, [selectedProfileId]);
 
   return { folders, bookmarks, isLoading };
 };

@@ -52,7 +52,6 @@ export interface Tab {
   window_id: number;
 }
 
-
 // Profiles
 
 export interface Profile {
@@ -60,11 +59,11 @@ export interface Profile {
   name: string;
   color: number;
   id: string;
-  dataPath: string;
-  appPath: string;
+  dataPath?: string;
+  appPath?: string;
 }
 
 export interface ProfileList {
-  default: Profile,
-  profiles: Profile[]
+  default: Profile;
+  profiles: Profile[];
 }

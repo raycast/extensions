@@ -2,7 +2,7 @@ import { homedir } from "os";
 import { URL } from "url";
 import { HistoryItem, Tab } from "src/types";
 import { join } from "path";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import osascript from "osascript-tag";
 
 export function extractDomainName(urlString: string) {
@@ -47,21 +47,21 @@ export function getOrionAppIdentifier() {
 
 export function getFavoritesPath(profile: string = "Defaults") {
   const profileFolder = profile;
-  return join(getOrionBasePath(), profileFolder, "favourites.plist")
+  return join(getOrionBasePath(), profileFolder, "favourites.plist");
 }
 
 export function getHistoryPath(profile: string = "Defaults") {
   const profileFolder = profile;
-  return join(getOrionBasePath(), profileFolder, "history")
+  return join(getOrionBasePath(), profileFolder, "history");
 }
 
 export function getReadingListPath(profile: string = "Defaults") {
   const profileFolder = profile;
-  return join(getOrionBasePath(), profileFolder, "reading_list.plist")
+  return join(getOrionBasePath(), profileFolder, "reading_list.plist");
 }
 
 export function getProfilesPath() {
-  return join(getOrionBasePath(), "profiles")
+  return join(getOrionBasePath(), "profiles");
 }
 
 export const executeJxa = async (script: string) => {
@@ -115,10 +115,32 @@ export const getUrlDomain = (url: string) => {
   }
 };
 
-const parseUrl = (url: string) => {
+export const parseUrl = (url: string) => {
   try {
     return new URL(url);
   } catch (err) {
     return null;
   }
+};
+
+export const idToColor = (id: number) => {
+  switch (id) {
+    case 0:
+      return "#98989D";
+    case 1:
+      return "#CC66FF";
+    case 2:
+      return "#F7509E";
+    case 3:
+      return "#FF5045";
+    case 4:
+      return "#FFA915";
+    case 5:
+      return "#FFE018";
+    case 6:
+      return "#3EFD56";
+    case 7:
+      return "#A2A2A7";
+  }
+  return Color.PrimaryText;
 };
