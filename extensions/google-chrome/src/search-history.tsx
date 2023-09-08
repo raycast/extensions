@@ -10,17 +10,17 @@ import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "./constants";
 const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
   allEntries
     ? allEntries.reduce((acc, cur) => {
-        const title = new Date(cur.lastVisited).toLocaleDateString(undefined, {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        const groupEntries = acc.get(title) ?? [];
-        groupEntries.push(cur);
-        acc.set(title, groupEntries);
-        return acc;
-      }, new Map<string, HistoryEntry[]>())
+      const title = new Date(cur.lastVisited).toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      const groupEntries = acc.get(title) ?? [];
+      groupEntries.push(cur);
+      acc.set(title, groupEntries);
+      return acc;
+    }, new Map<string, HistoryEntry[]>())
     : new Map<string, HistoryEntry[]>();
 
 export default function Command(): ReactElement {

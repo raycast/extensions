@@ -4,21 +4,21 @@ import { parseFileSync } from "bplist-parser";
 import { Bookmark, OrionReadingListItem, OrionReadingListPlistResult } from "../types";
 import { getReadingListPath } from "src/utils";
 
-const useBookmarks = () => {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>();
-  const readingListPath = getReadingListPath();
+const useReadingList = (selectedProfileId: string) => {
+  const [readingList, setReadingList] = useState<Bookmark[]>();
+  const readingListPath = getReadingListPath(selectedProfileId);
 
   useEffect(() => {
     const bookmarksPlist = parseFileSync(readingListPath) as OrionReadingListPlistResult;
     const items = bookmarksPlist[0];
-    const bookmarks = parseBookmarks(items);
-    setBookmarks(bookmarks);
-  }, []);
+    const readingList = parseReadingList(items);
+    setReadingList(readingList);
+  }, [selectedProfileId]);
 
-  return { bookmarks };
+  return { readingList };
 };
 
-function parseBookmarks(items: OrionReadingListItem[]) {
+function parseReadingList(items: OrionReadingListItem[]) {
   return items
     .filter((item) => !!item.url)
     .map((oBookmark) => {
@@ -34,4 +34,4 @@ function parseBookmarks(items: OrionReadingListItem[]) {
     });
 }
 
-export default useBookmarks;
+export default useReadingList;

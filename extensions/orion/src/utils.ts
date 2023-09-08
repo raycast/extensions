@@ -45,17 +45,17 @@ export function getOrionAppIdentifier() {
   return getPreferenceValues()["orion-rc"] ? "Orion RC" : "Orion";
 }
 
-export function getFavoritesPath(profile: string = "Defaults") {
+export function getFavoritesPath(profile: string) {
   const profileFolder = profile;
   return join(getOrionBasePath(), profileFolder, "favourites.plist");
 }
 
-export function getHistoryPath(profile: string = "Defaults") {
+export function getHistoryPath(profile: string) {
   const profileFolder = profile;
   return join(getOrionBasePath(), profileFolder, "history");
 }
 
-export function getReadingListPath(profile: string = "Defaults") {
+export function getReadingListPath(profile: string) {
   const profileFolder = profile;
   return join(getOrionBasePath(), profileFolder, "reading_list.plist");
 }

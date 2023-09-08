@@ -26,8 +26,8 @@ const getHistoryQuery = (searchText?: string) => {
   `;
 };
 
-const useHistorySearch = (searchText?: string) => {
-  const historyPath = getHistoryPath();
+const useHistorySearch = (selectedProfileId: string, searchText?: string) => {
+  const historyPath = getHistoryPath(selectedProfileId);
 
   const query = getHistoryQuery(searchText);
   return useSQL<HistoryItem>(historyPath, query);
