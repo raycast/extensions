@@ -243,7 +243,6 @@ const globFromChannel = (channel: Channel) => {
     (extension: Extension) => extension?.defaultConfigDirectories ?? false
   );
   if (defaults?.defaultConfigDirectories === undefined) {
-    console.log(channel.tool.toolName);
     return ["Space Desktop", "Fleet", "dotTrace"].includes(channel.tool.toolName)
       ? [`${environment.assetsPath}/unsupported.xml`]
       : [`${environment.assetsPath}/missing.xml`];
