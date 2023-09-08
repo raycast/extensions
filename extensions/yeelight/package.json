@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yeelight",
+  "title": "Yeelight",
+  "description": "Control your Yeelight lights",
+  "icon": "yeelight-icon.png",
+  "author": "j3sch",
+  "license": "MIT",
+  "categories": [
+    "Applications"
+  ],
+  "commands": [
+    {
+      "name": "controlLights",
+      "title": "Control lights",
+      "subtitle": "Yeelight",
+      "description": "Control Yeelight lights",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.0",
+    "yeelight-awesome": "^1.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "20.5.9",
+    "@types/react": "18.2.21",
+    "eslint": "^8.48.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
