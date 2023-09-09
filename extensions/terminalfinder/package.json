@@ -87,6 +87,10 @@
       "title": "Kitty → Finder"
     }
   ],
+  "contributors": [
+    "nicoandmee",
+    "yedongze"
+  ],
   "dependencies": {
     "@raycast/api": "^1.48.5",
     "@raycast/utils": "^1.9.1"
