@@ -37,7 +37,7 @@
       "default": "selected",
       "required": false
     },
-    { 
+    {
       "name": "action",
       "type": "dropdown",
       "title": "Primary Action",
@@ -246,7 +246,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.58.0",
     "change-case-all": "^1.0.14",
     "execa": "^6.1.0"
   },
