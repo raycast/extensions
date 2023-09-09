@@ -237,7 +237,7 @@ export default function Command() {
                 <Action
                   title="Pin Case"
                   icon={Icon.Pin}
-                  shortcut={{ key: "p", modifiers: ["cmd"] }}
+                  shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
                   onAction={() => {
                     setPinned([props.case, ...pinned]);
                     if (props.recent) {
