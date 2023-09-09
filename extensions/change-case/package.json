@@ -4,9 +4,10 @@
   "title": "Change Case",
   "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
   "icon": "command-icon.png",
-  "author": "es183923",
+  "author": "erics118",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "nagauta"
   ],
   "license": "MIT",
   "commands": [
