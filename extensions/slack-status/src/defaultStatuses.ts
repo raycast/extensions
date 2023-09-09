@@ -1,6 +1,6 @@
 import { SlackStatusPreset } from "./interfaces";
 
-export const defaultStatuses: SlackStatusPreset[] = [
+export const DEFAULT_STATUSES: SlackStatusPreset[] = [
   {
     title: "Focus Mode",
     emojiCode: ":technologist:",

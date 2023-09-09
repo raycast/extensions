@@ -18,7 +18,7 @@ import {
   SlackStatusResponse,
   SlackStatusResponseState,
 } from "./interfaces";
-import { defaultStatuses } from "./defaultStatuses";
+import { DEFAULT_STATUSES } from "./defaultStatuses";
 import { durationToString, keyForStatusPreset, statusExpirationText } from "./utils";
 import { SlackClient } from "./slackClient";
 import { CreateStatusPresetForm, EditStatusPresetForm, SetCustomStatusForm } from "./setStatusForm";
@@ -378,7 +378,7 @@ function useStoredPresets(): SlackStatusPresetsListState {
     if (stored) {
       return stored;
     } else {
-      return defaultStatuses;
+      return DEFAULT_STATUSES;
     }
   });
 
