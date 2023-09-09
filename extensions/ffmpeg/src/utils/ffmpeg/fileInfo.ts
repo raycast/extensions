@@ -67,9 +67,9 @@ function parseFFProbeOutputToData(ffprobeOutput: FFProbeData) {
       (stream["codec_tag_string"] !== "[0][0][0][0]"
         ? `(${stream["codec_tag_string"]} / ${stream["codec_tag"]})`
         : "") || "";
-    
-    const profile = (stream["profile"] ? `(${stream["profile"]})` : "");
-  
+
+    const profile = stream["profile"] ? `(${stream["profile"]})` : "";
+
     const fps = Number(stream["r_frame_rate"].split("/")[0]) / Number(stream["r_frame_rate"].split("/")[1]);
 
     const videoSection = {} as SectionListItem;
