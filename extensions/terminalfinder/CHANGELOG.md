@@ -1,5 +1,9 @@
 # Terminal Finder Changelog
 
+## [Update] - 2023-09-09
+
+- [nicoandmee](https://github.com/nicoandmee) added support for [Kitty](https://sw.kovidgoyal.net/kitty/) terminal.
+
 ## [Update] - 2023-03-02
 
 - Updated `@raycast/api`

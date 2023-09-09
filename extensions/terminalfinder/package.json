@@ -1,79 +1,97 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "terminalfinder",
-  "title": "Terminal Finder",
-  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp) and vice versa",
-  "icon": "command-icon.png",
   "author": "yedongze",
-  "license": "MIT",
   "commands": [
     {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
+      "name": "clipboardToKitty",
+      "subtitle": "Open Path",
+      "title": "Clipboard → Kitty"
+    },
+    {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
       "name": "clipboardToITerm",
-      "title": "Clipboard → iTerm",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "title": "Clipboard → iTerm"
     },
     {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
       "name": "clipboardToTerminal",
-      "title": "Clipboard → Terminal",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "title": "Clipboard → Terminal"
     },
     {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
       "name": "clipboardToWarp",
-      "title": "Clipboard → Warp",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "title": "Clipboard → Warp"
     },
     {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
       "name": "finderToITerm",
-      "title": "Finder → iTerm",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "title": "Finder → iTerm"
     },
     {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
       "name": "finderToTerminal",
-      "title": "Finder → Terminal",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "title": "Finder → Terminal"
     },
     {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
       "name": "finderToWarp",
-      "title": "Finder → Warp",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "title": "Finder → Warp"
     },
     {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
+      "name": "finderToKitty",
+      "subtitle": "Open Path",
+      "title": "Finder → Kitty"
+    },
+    {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
       "name": "iTermToFinder",
-      "title": "iTerm → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "title": "iTerm → Finder"
     },
     {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
       "name": "terminalToFinder",
-      "title": "Terminal → Finder",
       "subtitle": "Open Path",
-      "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "title": "Terminal → Finder"
     },
     {
-      "name": "warpToFinder",
-      "title": "Warp → Finder",
-      "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
-      "mode": "no-view"
+      "mode": "no-view",
+      "name": "warpToFinder",
+      "subtitle": "Open Path",
+      "title": "Warp → Finder"
+    },
+    {
+      "description": "Open current Finder directory in Terminal",
+      "mode": "no-view",
+      "name": "kittyToFinder",
+      "subtitle": "Open Path",
+      "title": "Kitty → Finder"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.5"
+    "@raycast/api": "^1.48.5",
+    "@raycast/utils": "^1.9.1"
   },
+  "description": "Open currently selected Finder (or Path Finder) window in Terminal (or iTerm2, Warp, Kitty) and vice versa",
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
@@ -84,8 +102,12 @@
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
+  "icon": "command-icon.png",
+  "license": "MIT",
+  "name": "terminalfinder",
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
-  }
+  },
+  "title": "Terminal Finder"
 }

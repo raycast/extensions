@@ -1,36 +1,35 @@
 import { Clipboard, Toast, showToast } from "@raycast/api";
-import { runAppleScript } from "./utils";
+import { runAppleScript } from "@raycast/utils";
 
 export default async () => {
   const directory = await Clipboard.readText();
+  console.log("clipboard: ", directory);
 
-      const script = `
-      on readJSON(strJSON)
-        set ca to current application
-        set {x, e} to ca's NSJSONSerialization's JSONObjectWithData:((ca's NSString's stringWithString:strJSON)'s dataUsingEncoding:(ca's NSUTF8StringEncoding)) options:0 |error|:(reference)
-        if x is missing value then
-          error e's localizedDescription() as text
-        else
-          item 1 of ((ca's NSArray's arrayWithObject:x) as list)
-        end if
-      end readJSON
-
-      -- start kitty if not already running
-      try
-        set kittyWindows to do shell script "/Applications/Kitty.app/Contents/MacOS/kitty @ --to unix:/tmp/mykitty ls"
-        set kittyWindows to readJSON(kittyWindows)
-      on error
-        set kittyWindows to {}
-      end try
-
-      tell application "kitty" to activate
-
-      if (count of kittyWindows) > 0 then
-        do shell script "/Applications/Kitty.app/Contents/MacOS/kitty @ --to unix:/tmp/mykitty new-window --location=neighbor --new-tab --cwd=${directory}"
+  const script = `
+      set pathList to "${directory}"
+      set command to "clear; cd " & pathList
+    tell application "System Events"
+      if not (exists (processes where name is "kitty")) then
+          set open_cmd to "/Applications/Kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes --listen-on unix:/tmp/mykitty"
+          do shell script open_cmd
       else
-        do shell script "/Applications/Kitty.app/Contents/MacOS/kitty --to unix:/tmp/mykitty new-window --cwd=${directory}"
+          set activeApp to ""
+          repeat while activeApp is not "kitty"
+            tell application "System Events"
+              set activeApp to name of first application process whose frontmost is true
+            end tell
+          end repeat
+          tell application "kitty" to activate
+
+          do shell script "/Applications/kitty.app/Contents/MacOS/kitty @ --to unix:/tmp/mykitty new-window --new-tab --cwd " & quoted form of pathList
+          do shell script "/Applications/Kitty.app/Contents/MacOS/kitty @ --to unix:/tmp/mykitty send-text " & quoted form of command
+          tell application "System Events"
+              key code 36 -- enter key
+          end tell
       end if
+    end tell
 `;
+
   try {
     const result = await runAppleScript(script);
     await showToast(Toast.Style.Success, "Done", result);
