@@ -3,11 +3,9 @@ import { runAppleScript } from "@raycast/utils";
 
 export default async () => {
   const directory = await Clipboard.readText();
-  console.log("clipboard: ", directory);
-
   const script = `
-      set pathList to "${directory}"
-      set command to "clear; cd " & pathList
+    set pathList to "${directory}"
+    set command to "clear; cd " & pathList
     tell application "System Events"
       if not (exists (processes where name is "kitty")) then
           set open_cmd to "/Applications/Kitty.app/Contents/MacOS/kitty -o allow_remote_control=yes --listen-on unix:/tmp/mykitty"

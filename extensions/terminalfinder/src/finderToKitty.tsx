@@ -36,8 +36,6 @@ export default async () => {
 
   try {
     const result = await runAppleScript(script);
-    console.dir(result);
-
     await showToast(Toast.Style.Success, "Done", result);
   } catch (err) {
     await showToast(Toast.Style.Failure, "Something went wrong");
