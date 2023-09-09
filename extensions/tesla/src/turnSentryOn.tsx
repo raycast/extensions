@@ -1,5 +1,5 @@
 import ViewCar from "./viewCar";
 
 export default function Command() {
-  return <ViewCar command="enableSentryMode" loadingMessage="Enabling Sentry Mode..." />;
+  return <ViewCar command="enable_sentry" loadingMessage="Enabling Sentry Mode..." />;
 }
