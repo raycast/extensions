@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Issue } from "../api/issues";
 import { getUserAvatar } from "../helpers/avatars";
 import { getStatusColor } from "../helpers/issues";
+import useAuthenticatedUri from "../hooks/useAuthenticatedUri";
 
 import IssueActions from "./IssueActions";
 
@@ -47,11 +48,12 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
     accessories.push({ icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority.name}` });
   }
 
+  const { dataUri } = useAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
   return (
     <List.Item
       key={issue.id}
       keywords={keywords}
-      icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
+      icon={{ value: dataUri, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
       title={issue.fields.summary || "Unknown issue title"}
       subtitle={issue.key}
       accessories={accessories}
