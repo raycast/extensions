@@ -86,7 +86,7 @@ async function readContent(preferredSource: string) {
   }
 }
 
-function modifyCasesRapper(input: string, case_: Case) {
+function modifyCasesWrapper(input: string, case_: Case) {
   const modifiedArr: string[] = [];
   const lines = input.split("\n");
   for (const line of lines) {
@@ -299,7 +299,7 @@ export default function Command() {
           <CaseItem
             key={key}
             case={key as CaseType}
-            modified={modifyCasesRapper(clipboard, functions[key])}
+            modified={modifyCasesWrapper(clipboard, functions[key])}
             pinned={true}
           />
         ))}
@@ -309,7 +309,7 @@ export default function Command() {
           <CaseItem
             key={key}
             case={key as CaseType}
-            modified={modifyCasesRapper(clipboard, functions[key])}
+            modified={modifyCasesWrapper(clipboard, functions[key])}
             recent={true}
           />
         ))}
@@ -323,7 +323,7 @@ export default function Command() {
               !pinned.includes(key as CaseType)
           )
           .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={modifyCasesRapper(clipboard, func)} />
+            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(clipboard, func)} />
           ))}
       </List.Section>
     </List>
