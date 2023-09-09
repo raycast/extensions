@@ -3,7 +3,7 @@ import { URL } from "url";
 import { HistoryItem, Tab } from "src/types";
 import { join } from "path";
 import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import osascript from "osascript-tag";
+import { runAppleScript } from "@raycast/utils";
 
 export function extractDomainName(urlString: string) {
   try {
@@ -66,7 +66,7 @@ export function getProfilesPath() {
 
 export const executeJxa = async (script: string) => {
   try {
-    return await osascript.jxa({ parse: true })`${script}`;
+    return await runAppleScript(script, { language: "JavaScript" ,humanReadableOutput: false});
   } catch (err: unknown) {
     console.log(err);
     if (typeof err === "string") {

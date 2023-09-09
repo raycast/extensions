@@ -57,13 +57,12 @@
   "dependencies": {
     "@raycast/api": "^1.58.0",
     "@raycast/utils": "^1.9.1",
-    "bplist-parser": "^0.3.2",
-    "osascript-tag": "^0.1.2"
+    "bplist-parser": "^0.3.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
-    "eslint": "^8.48.0",
+    "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
