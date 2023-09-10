@@ -36,6 +36,7 @@ export default function Command() {
     <List>
       {data.results.map((charge) => (
         <List.Item
+          key={charge.id}
           title={`${charge.starting_battery}% - ${charge.ending_battery}% (${charge.miles_added} miles)`}
           subtitle={getElapsedTime(charge.started_at, charge.ended_at)}
           accessories={[

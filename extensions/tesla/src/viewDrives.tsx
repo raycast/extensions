@@ -25,6 +25,7 @@ export default function Command() {
     <List isShowingDetail>
       {data.results.map((drive) => (
         <List.Item
+          key={drive.id}
           title={getFormattedTime(drive.started_at)}
           detail={
             <List.Item.Detail
@@ -35,12 +36,20 @@ export default function Command() {
                     text={getElapsedTime(drive.started_at, drive.ended_at).replace("0h ", "")}
                   />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="From" text={drive.starting_location} />
-                  <List.Item.Detail.Metadata.Label title="To" text={drive.ending_location} />
+                  <List.Item.Detail.Metadata.Label
+                    title="From"
+                    text={drive.starting_saved_location ?? drive.starting_location}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="To"
+                    text={drive.ending_saved_location ?? drive.ending_location}
+                  />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Battery"
-                    text={`${drive.starting_battery}% - ${drive.ending_battery}% (${drive.odometer_distance} miles)`}
+                    text={`${drive.starting_battery}% - ${drive.ending_battery}% (${
+                      drive.starting_battery - drive.ending_battery
+                    }%)`}
                     icon={{ source: Icon.Battery, tintColor: Color.Green }}
                   />
                   <List.Item.Detail.Metadata.Separator />
@@ -54,7 +63,10 @@ export default function Command() {
                     text={drive.ending_odometer.toLocaleString("en-US") + " miles"}
                   />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Total Range Used" text={`Used ${drive.rated_range_used}`} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Total Range Used"
+                    text={`Used ${drive.rated_range_used} to go ${drive.odometer_distance} miles`}
+                  />
                   <List.Item.Detail.Metadata.Label
                     title="Range Efficiency"
                     text={`${Math.round((drive.odometer_distance / drive.rated_range_used) * 100)}%`}

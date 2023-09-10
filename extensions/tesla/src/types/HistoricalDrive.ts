@@ -1,4 +1,6 @@
 export interface HistoricalDrive {
+  starting_saved_location?: string;
+  ending_saved_location?: string;
   id: number;
   started_at: number;
   ended_at: number;

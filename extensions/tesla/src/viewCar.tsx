@@ -58,6 +58,15 @@ export default function ViewCar(props: ViewCarProps) {
     },
   });
 
+  // Refresh car every 6 seconds
+  // 5 to prevent ratelimit
+  // so 6 to be safe
+  useEffect(() => {
+    const interval = setInterval(() => revalidate(), 6000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const runCommand = async () => {
     if (!props.command || !props.loadingMessage) return;
 
