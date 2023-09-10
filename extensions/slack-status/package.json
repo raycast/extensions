@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "statusList",
+      "name": "setStatus",
       "title": "Set Status",
       "subtitle": "Slack",
       "description": "Quickly change your Slack status",

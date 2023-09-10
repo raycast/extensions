@@ -1,0 +1,358 @@
+import {
+  AI,
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  Toast,
+  clearSearchBar,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
+import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
+import { durationTitleMap } from "./durations";
+import { getCodeForEmoji, getEmojiForCode } from "./emojis";
+import { StatusForm } from "./form";
+import { useSlack } from "./slack";
+import { SlackStatusPreset } from "./types";
+import { showToastWithPromise } from "./utils";
+
+// Status Actions
+
+export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undefined> }) {
+  const slack = useSlack();
+  return (
+    <Action
+      title="Clear Status"
+      icon={Icon.XMarkCircle}
+      onAction={async () => {
+        await showToastWithPromise(
+          props.mutate(
+            slack.users.profile.set({
+              profile: JSON.stringify({
+                status_text: "",
+                status_expiration: 0,
+                status_emoji: "",
+              }),
+            }),
+            {
+              optimisticUpdate() {
+                return {};
+              },
+            },
+          ),
+          {
+            loading: "Clearing status...",
+            success: "Cleared status",
+            error: "Failed clearing status",
+          },
+        );
+      }}
+    />
+  );
+}
+
+export function SetStatusWithAIAction(props: { statusText: string; mutate: MutatePromise<Profile | undefined> }) {
+  const slack = useSlack();
+  return (
+    <Action
+      title="Set Status"
+      icon={Icon.Stars}
+      onAction={async () => {
+        showToastWithPromise(
+          async () => {
+            const answer = await AI.ask(
+              `What's a good emoji for this Slack status? 
+            Slack status: ${props.statusText}. 
+            Single emoji for Slack status:`,
+              { creativity: "low" },
+            );
+
+            const profile: Profile = {
+              status_emoji: getCodeForEmoji(answer.trim()),
+              status_text: props.statusText,
+              status_expiration: 0,
+            };
+
+            await clearSearchBar();
+
+            await props.mutate(
+              slack.users.profile.set({
+                profile: JSON.stringify(profile),
+              }),
+              {
+                optimisticUpdate() {
+                  return profile;
+                },
+              },
+            );
+          },
+          {
+            loading: "Setting status with AI...",
+            success: "Set status with AI",
+            error: "Failed setting status with AI",
+          },
+        );
+      }}
+    />
+  );
+}
+
+export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: MutatePromise<Profile | undefined> }) {
+  const slack = useSlack();
+  return (
+    <Action
+      title="Set Status"
+      icon={Icon.Pencil}
+      onAction={async () => {
+        showToastWithPromise(
+          async () => {
+            let expiration = 0;
+            if (props.preset.defaultDuration > 0) {
+              const expirationDate = new Date();
+              expirationDate.setMinutes(expirationDate.getMinutes() + props.preset.defaultDuration);
+              expiration = Math.floor(expirationDate.getTime() / 1000);
+            }
+
+            const profile: Profile = {
+              status_emoji: props.preset.emojiCode,
+              status_text: props.preset.title,
+              status_expiration: expiration,
+            };
+
+            await props.mutate(
+              slack.users.profile.set({
+                profile: JSON.stringify(profile),
+              }),
+              {
+                optimisticUpdate() {
+                  return profile;
+                },
+              },
+            );
+          },
+          {
+            loading: "Setting status...",
+            success: "Set status",
+            error: "Failed setting status",
+          },
+        );
+      }}
+    />
+  );
+}
+
+export function SetStatusWithDuration(props: {
+  preset: SlackStatusPreset;
+  mutate: MutatePromise<Profile | undefined>;
+}) {
+  const slack = useSlack();
+
+  return (
+    <ActionPanel.Submenu icon={Icon.Clock} title="Set Status with Duration...">
+      {Object.entries(durationTitleMap).map(([duration, title]) => {
+        return (
+          <Action
+            key={`${title}-${duration}`}
+            title={title}
+            icon={Icon.Clock}
+            onAction={async () => {
+              showToastWithPromise(
+                async () => {
+                  const parsedDuration = parseInt(duration);
+
+                  let expiration = 0;
+                  if (parsedDuration > 0) {
+                    const expirationDate = new Date();
+                    expirationDate.setMinutes(expirationDate.getMinutes() + parsedDuration);
+                    expiration = Math.floor(expirationDate.getTime() / 1000);
+                  }
+
+                  const profile: Profile = {
+                    status_emoji: props.preset.emojiCode,
+                    status_text: props.preset.title,
+                    status_expiration: expiration,
+                  };
+
+                  await props.mutate(
+                    slack.users.profile.set({
+                      profile: JSON.stringify(profile),
+                    }),
+                    {
+                      optimisticUpdate() {
+                        return profile;
+                      },
+                    },
+                  );
+                },
+                {
+                  loading: "Setting status with duration...",
+                  success: "Set status with duration",
+                  error: "Failed setting status with duration",
+                },
+              );
+            }}
+          />
+        );
+      })}
+    </ActionPanel.Submenu>
+  );
+}
+
+export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | undefined> }) {
+  const slack = useSlack();
+  const { pop } = useNavigation();
+
+  return (
+    <Action.Push
+      title="Set Custom Status"
+      icon={Icon.Pencil}
+      shortcut={Keyboard.Shortcut.Common.New}
+      target={
+        <StatusForm
+          actionTitle="Set Custom Status"
+          onSubmit={async (values) => {
+            showToastWithPromise(
+              async () => {
+                const duration = parseInt(values.duration);
+
+                let expiration = 0;
+                if (duration > 0) {
+                  const expirationDate = new Date();
+                  expirationDate.setMinutes(expirationDate.getMinutes() + duration);
+                  expiration = Math.floor(expirationDate.getTime() / 1000);
+                }
+
+                const profile: Profile = {
+                  status_emoji: values.emoji,
+                  status_text: values.statusText,
+                  status_expiration: expiration,
+                };
+
+                await props.mutate(
+                  slack.users.profile.set({
+                    profile: JSON.stringify(profile),
+                  }),
+                  {
+                    optimisticUpdate() {
+                      return profile;
+                    },
+                  },
+                );
+
+                pop();
+              },
+              {
+                loading: "Setting custom status...",
+                success: "Set custom status",
+                error: "Failed setting custom status",
+              },
+            );
+          }}
+        />
+      }
+    />
+  );
+}
+
+// Presets Actions
+
+export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatusPreset) => void }) {
+  const { pop } = useNavigation();
+
+  return (
+    <Action.Push
+      title="Create Preset"
+      icon={Icon.NewDocument}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+      target={
+        <StatusForm
+          actionTitle="Create Preset"
+          onSubmit={async (values) => {
+            props.onCreate({
+              title: values.statusText,
+              emojiCode: values.emoji,
+              defaultDuration: parseInt(values.duration),
+            });
+
+            pop();
+
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Created preset",
+              message: `${getEmojiForCode(values.emoji)} ${values.statusText}`,
+            });
+          }}
+        />
+      }
+    />
+  );
+}
+
+export function DeleteStatusPresetAction(props: { onDelete: () => void }) {
+  return (
+    <Action
+      title="Delete Preset"
+      icon={Icon.Trash}
+      shortcut={Keyboard.Shortcut.Common.Remove}
+      style={Action.Style.Destructive}
+      onAction={async () => {
+        const confirmed = await confirmAlert({
+          icon: Icon.Trash,
+          title: "Delete preset?",
+          message: "Are you sure you want to delete this preset permanently?",
+          rememberUserChoice: true,
+        });
+
+        if (!confirmed) {
+          return;
+        }
+
+        props.onDelete();
+        await showToast({ style: Toast.Style.Success, title: "Deleted preset" });
+      }}
+    />
+  );
+}
+
+export function EditStatusPresetAction(props: {
+  preset: SlackStatusPreset;
+  onEdit: (editedPreset: SlackStatusPreset) => void;
+}) {
+  const { pop } = useNavigation();
+
+  return (
+    <Action.Push
+      title="Edit Preset"
+      icon={Icon.Pencil}
+      shortcut={Keyboard.Shortcut.Common.Edit}
+      target={
+        <StatusForm
+          actionTitle="Update Preset"
+          initalValues={{
+            emoji: props.preset.emojiCode,
+            statusText: props.preset.title,
+            duration: props.preset.defaultDuration.toString(),
+          }}
+          onSubmit={async (values) => {
+            props.onEdit({
+              title: values.statusText,
+              emojiCode: values.emoji,
+              defaultDuration: parseInt(values.duration),
+            });
+
+            pop();
+
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Updated preset",
+              message: `${getEmojiForCode(values.emoji)} ${values.statusText}`,
+            });
+          }}
+        />
+      }
+    />
+  );
+}

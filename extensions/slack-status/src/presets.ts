@@ -1,8 +1,35 @@
 import { environment } from "@raycast/api";
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { useEffect, useState } from "react";
-import { DEFAULT_STATUSES } from "./defaultStatuses";
-import { SlackStatusPreset } from "./interfaces";
+import { SlackStatusPreset } from "./types";
+
+export const DEFAULT_PRESETS: SlackStatusPreset[] = [
+  {
+    title: "Focus Mode",
+    emojiCode: ":technologist:",
+    defaultDuration: 120,
+  },
+  {
+    title: "In a Meeting",
+    emojiCode: ":spiral_calendar_pad:",
+    defaultDuration: 30,
+  },
+  {
+    title: "Eating",
+    emojiCode: ":hamburger:",
+    defaultDuration: 60,
+  },
+  {
+    title: "Coffee Break",
+    emojiCode: ":coffee:",
+    defaultDuration: 15,
+  },
+  {
+    title: "AFK",
+    emojiCode: ":walking:",
+    defaultDuration: 0,
+  },
+];
 
 function storePresets(presets: SlackStatusPreset[]) {
   try {
@@ -31,7 +58,7 @@ export function usePresets() {
     if (stored) {
       return stored;
     } else {
-      return DEFAULT_STATUSES;
+      return DEFAULT_PRESETS;
     }
   });
 
