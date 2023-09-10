@@ -1,9 +1,9 @@
 import { Detail } from "@raycast/api";
 
 export default function Command() {
-    return (
-        <Detail
-            markdown="
+  return (
+    <Detail
+      markdown="
   ```
   <type>[optional scope]: <description>
 
@@ -39,6 +39,6 @@ export default function Command() {
   ```
 
   "
-        />
-    );
+    />
+  );
 }
