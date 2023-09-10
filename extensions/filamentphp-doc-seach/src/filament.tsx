@@ -52,6 +52,9 @@ export default function SearchFilamentDocumentation() {
     return await algoliaIndex
       .search(query, {
         hitsPerPage: 15,
+        facetFilters: [
+          'version:3.x'
+        ]
       })
       .then((res) => {
         return Object.entries(_.groupBy(res.hits, "hierarchy.lvl1")) || [];
