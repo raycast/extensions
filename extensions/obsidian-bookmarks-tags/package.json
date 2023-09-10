@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-bookmarks-tags",
+  "title": "Obsidian Tagged Bookmarks",
+  "description": "A plugin that fetches all http bookmarks from Obsidian",
+  "icon": "command-icon.png",
+  "author": "catacgc",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bookmarks",
+      "title": "Obsidian Bookmarks",
+      "description": "Filter bookmarks from obsidian",
+      "mode": "view"
+    },
+    {
+      "name": "refresh",
+      "title": "Refresh Bookmarks",
+      "description": "Fetch bookmarks from obsidian",
+      "mode": "no-view",
+      "subtitle": "Runs every 10m",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vault",
+      "title": "Obsidian Vault Path",
+      "required": true,
+      "label": "Obsidian Vault Path",
+      "type": "textfield",
+      "placeholder": "/Users/username/Documents/Vault Path",
+      "description": "the Obsidian Vault Path"
+    },
+    {
+      "name": "tagName",
+      "title": "Tag Name",
+      "placeholder": "#res",
+      "required": false,
+      "label": "Tag Name",
+      "type": "textfield",
+      "description": "the tag name"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "@raycast/utils": "^1.2.0",
+    "axios": "^1.4.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "version": "1.0.0"
+}
