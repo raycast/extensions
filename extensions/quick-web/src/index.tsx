@@ -177,7 +177,7 @@ class UrlBuilder extends UrlPattern {
   build() {
     let urlPatternCopy = this.urlPattern;
     this.argPlaceHolder2ValueMap.forEach((value, key) => {
-      urlPatternCopy = urlPatternCopy.replace(key, value);
+      urlPatternCopy = urlPatternCopy.replaceAll(key, value);
     });
     urlPatternCopy = urlPatternCopy.replace("$$", encodeURIComponent(encodeURIComponent(this.customizedInput)));
     console.log("build:", urlPatternCopy);

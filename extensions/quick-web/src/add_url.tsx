@@ -15,10 +15,6 @@ export default function AddUrlConfigCommand(props: LaunchProps<{ draftValues: Co
   const [webNameError, setWebNameError] = useState<string | undefined>();
   const [urlError, setUrlError] = useState<string | undefined>();
 
-  const [webNameInit, setWebNameInit] = useState<boolean>(true);
-  const [urlInit, setUrlInit] = useState<boolean>(true);
-  const [argListInit, setArgListInit] = useState<boolean>(true);
-
   const [allArgs, setAllArgs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -31,10 +27,6 @@ export default function AddUrlConfigCommand(props: LaunchProps<{ draftValues: Co
   }, []);
 
   function validateUrl(urlPattern: string | undefined, argList: string[]) {
-    console.log(urlInit, argListInit);
-    if (urlInit || argListInit) {
-      return;
-    }
     if (urlPattern == undefined || urlPattern.trim().length == 0) {
       setUrlError("The field shouldn't be empty!");
       return;
@@ -54,10 +46,6 @@ export default function AddUrlConfigCommand(props: LaunchProps<{ draftValues: Co
   }
 
   async function validateWebName(webName: string | undefined) {
-    console.log(webNameInit);
-    if (webNameInit) {
-      return;
-    }
     if (webName == undefined || webName.trim().length == 0) {
       setWebNameError("The field shouldn't be empty!");
       return;
@@ -101,7 +89,6 @@ export default function AddUrlConfigCommand(props: LaunchProps<{ draftValues: Co
         onChange={async (newValue) => {
           setWebName(newValue);
           await validateWebName(newValue);
-          setWebNameInit(false);
         }}
         value={webName}
         onBlur={async (event) => {
@@ -117,7 +104,6 @@ export default function AddUrlConfigCommand(props: LaunchProps<{ draftValues: Co
         onChange={(newValue) => {
           setUrlPattern(newValue);
           validateUrl(newValue, argList);
-          setUrlInit(false);
         }}
         value={urlPattern}
         onBlur={(event) => {
@@ -131,7 +117,6 @@ export default function AddUrlConfigCommand(props: LaunchProps<{ draftValues: Co
         onChange={(newValue) => {
           setArgList(newValue);
           validateUrl(urlPattern, newValue);
-          setArgListInit(false);
         }}
         onBlur={(event) => {
           let temp = event.target.value;
