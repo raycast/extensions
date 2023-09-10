@@ -2,8 +2,6 @@
 
 This extension allows you to force quit running applications from Raycast.
 
-![ForceQuit](./assets/command-icon.png)
-
 ## Usage
 
 - Type `Force Quit` to see a list of running applications

@@ -8,6 +8,8 @@ import {
   Action,
   ActionPanel,
   confirmAlert,
+  showToast,
+  Toast,
 } from "@raycast/api";
 
 import { type Application } from "./types";
@@ -110,25 +112,42 @@ export default function Command() {
 
   const closeApplication = useCallback(
     async (application: Application) => {
-      const confirmation = await confirmAlert({
-        title: "Force Quit",
-        message: `Are you sure you want to force quit ${application.name}?`,
-        icon: Icon.XMarkCircle,
-        primaryAction: {
+      try {
+        const confirmation = await confirmAlert({
           title: "Force Quit",
-          style: Alert.ActionStyle.Destructive,
-        },
-        dismissAction: {
-          title: "Cancel",
-          style: Alert.ActionStyle.Cancel,
-        },
-      });
+          message: `Are you sure you want to force quit ${application.name}?`,
+          icon: Icon.XMarkCircle,
+          primaryAction: {
+            title: "Force Quit",
+            style: Alert.ActionStyle.Destructive,
+          },
+          dismissAction: {
+            title: "Cancel",
+            style: Alert.ActionStyle.Cancel,
+          },
+        });
 
-      if (!confirmation) return;
+        if (!confirmation) return;
 
-      setLoadingState(true);
-      await execASync(`kill -9 ${application.pid}`);
-      await hydrateApplications();
+        await showToast({
+          title: "Closing Application",
+          style: Toast.Style.Animated,
+        });
+
+        await execASync(`kill -9 ${application.pid}`);
+        await hydrateApplications();
+
+        await showToast({
+          title: "Application Closed",
+          style: Toast.Style.Success,
+        });
+      } catch (err) {
+        await showToast({
+          title: `Unable to close ${application.name}`,
+          message: err instanceof Error ? err.message : "Something went wrong",
+          style: Toast.Style.Failure,
+        });
+      }
     },
     [hydrateApplications]
   );
