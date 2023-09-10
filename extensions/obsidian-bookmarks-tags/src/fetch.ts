@@ -9,11 +9,12 @@ export async function searchBookmarks(preferences: Preferences) {
   
   const configFile = `${preferences.vault}/${PATH}`
   const restApiConfigStr = await readFile(configFile, { encoding: 'utf8' })
-  const restApiData: {apiKey: string, crypto: {cert: string, privateKey: string, publicKey: string}} = JSON.parse(restApiConfigStr)
+  const restApiData: {port: number, apiKey: string, crypto: {cert: string, privateKey: string, publicKey: string}} = JSON.parse(restApiConfigStr)
+
+  console.log(restApiData.port)
 
   const http = axios.create({
-    baseURL: 'https://127.0.0.1:27124',
-    // baseURL: 'http://127.0.0.1:27123',
+    baseURL: `https://127.0.0.1:${restApiData.port}`,
     timeout: 2500,
     headers: {
       common: {
