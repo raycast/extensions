@@ -1,13 +1,8 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { slackEmojiCodeMap } from "./emojis";
 import { durationTitleMap } from "./durations";
-
-type FormValues = {
-  emoji: string;
-  statusText: string;
-  duration: string;
-};
+import { slackEmojiCodeMap } from "./emojis";
+import { FormValues } from "./types";
 
 export function StatusForm(props: {
   navigationTitle?: string;

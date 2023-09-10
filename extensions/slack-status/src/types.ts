@@ -9,3 +9,9 @@ export type SlackStatusPreset = {
   title: string;
   defaultDuration: number; // 0 means "don't clear"
 };
+
+export type FormValues = {
+  emoji: string;
+  statusText: string;
+  duration: string;
+};

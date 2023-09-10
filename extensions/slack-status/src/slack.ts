@@ -1,8 +1,8 @@
-import { WebClient } from "@slack/web-api";
-import { OAuthSessionConfig, useOAuthSession } from "./oauth";
 import { OAuth, getApplications } from "@raycast/api";
-import fetch from "node-fetch";
 import { usePromise } from "@raycast/utils";
+import { WebClient } from "@slack/web-api";
+import fetch from "node-fetch";
+import { OAuthSessionConfig, useOAuthSession } from "./oauth";
 
 type SlackOAuthResponse = {
   ok: boolean;

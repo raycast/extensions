@@ -10,12 +10,12 @@ import {
   SetStatusWithAIAction,
   SetStatusWithDuration,
 } from "./actions";
+import { getTitleForDuration } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { withOAuthSession } from "./oauth";
 import { usePresets } from "./presets";
 import { SlackOAuthSessionConfig, useSlackProfile } from "./slack";
-import { getTitleForDuration } from "./durations";
-import { getStatusIcon, getStatusTitle, getStatusSubtitle } from "./utils";
+import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
 
 const slackOAuthConfig = new SlackOAuthSessionConfig({
   clientId: "851756884692.5546927290212",

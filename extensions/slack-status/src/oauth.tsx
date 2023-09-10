@@ -1,5 +1,5 @@
 import { Detail, MenuBarExtra, environment } from "@raycast/api";
-import { useState, useMemo, ComponentType, ReactElement, ReactNode } from "react";
+import { ComponentType, ReactElement, ReactNode, useMemo, useState } from "react";
 
 export interface OAuthSessionConfig {
   authorize(): Promise<string>;
