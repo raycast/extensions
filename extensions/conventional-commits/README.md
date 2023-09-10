@@ -6,6 +6,8 @@ A [Raycast](https://www.raycast.com) extension designed to provide a reference l
 
 Each prefix contains a brief description explaining a typical usecase, once selected Raycast inserts the prefix into your current text field.
 
+You can also view the message structure of Conventional Commits.
+
 ## Usage
 
 ![Command Screenshot](./screenshots/cc-screenshot.png)
@@ -30,5 +32,13 @@ The following prefixes are available:
 - Continuous Integration
 - Chore
 - Revert
+
+![Commit Message Screenshot](./screenshots/cc-screenshot-3.png)
+
+1. Open Raycast
+2. Start typing the full or partial command name
+3. Select "View Conventional Commit Message Structure" from the menu
+4. Make a selection of the prefix you want to insert into the current window and press enter
+
 
 Something missing? Raise an issue in the repo [here](https://github.com/niemtec/conventional-commits/issues)!
