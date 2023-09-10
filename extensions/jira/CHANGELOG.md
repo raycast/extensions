@@ -2,7 +2,7 @@
 
 ## [Render authenticated image URIs] - 2023-09-10
 
-- Now successfully renders images and icons that require authenticated http requests
+- Now successfully renders images and icons that require authenticated HTTP requests
 
 ## [Fix searching for sprints] - 2023-09-06
 

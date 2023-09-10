@@ -46,6 +46,7 @@ export default function IssueListItem({ issue, mutate }: IssueListItemProps) {
   if (issue.fields.priority) {
     accessories.push({ icon: issue.fields.priority.iconUrl, tooltip: `Priority: ${issue.fields.priority.name}` });
   }
+
   return (
     <List.Item
       key={issue.id}

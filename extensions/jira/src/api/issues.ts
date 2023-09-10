@@ -137,6 +137,13 @@ export type Issue = {
   };
 };
 
+export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
+  const resolvedIconUri = await getAuthenticatedUri(issuetype.iconUrl, "image/jpeg");
+  issuetype.iconUrl = resolvedIconUri;
+
+  return issuetype;
+};
+
 type GetIssuesResponse = {
   issues: Issue[];
 };
@@ -151,14 +158,18 @@ export async function getIssues({ jql } = { jql: "" }) {
   };
 
   const result = await request<GetIssuesResponse>("/search", { params });
+
   if (!result?.issues) {
     return result?.issues;
   }
 
-  const resolvedIssues = await Promise.all(result.issues.map(async (issue) => {
-    issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
-    return issue;
-  }));
+  const resolvedIssues = await Promise.all(
+    result.issues.map(async (issue) => {
+      issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
+      return issue;
+    })
+  );
+
   return resolvedIssues;
 }
 
@@ -196,13 +207,17 @@ export async function getCreateIssueMetadata(projectId: string) {
     return result?.projects;
   }
 
-  const resolvedProjects = await Promise.all(result?.projects.map(async (project) => {
-    const resolvedIssueTypes = await Promise.all(project.issuetypes.map(async (issueType) => {
-      issueType.iconUrl = await getAuthenticatedUri(issueType.iconUrl, "image/jpeg");
-      return issueType;
-    }));
-    return { ...project, issuetypes: resolvedIssueTypes };
-  }));
+  const resolvedProjects = await Promise.all(
+    result.projects.map(async (project) => {
+      const resolvedIssueTypes = await Promise.all(
+        project.issuetypes.map(async (issueType) => {
+          issueType.iconUrl = await getAuthenticatedUri(issueType.iconUrl, "image/jpeg");
+          return issueType;
+        })
+      );
+      return { ...project, issuetypes: resolvedIssueTypes };
+    })
+  );
 
   return resolvedProjects;
 }
@@ -277,13 +292,6 @@ export type IssueDetail = Issue & {
   renderedFields: Record<string, string | null | undefined>;
 };
 
-export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
-  const resolvedIconUri = await getAuthenticatedUri(issuetype.iconUrl, "image/jpeg");
-  issuetype.iconUrl = resolvedIconUri;
-
-  return issuetype;
-}
-
 export async function getIssue(issueIdOrKey: string) {
   const params = { expand: "transitions,names,schema,renderedFields" };
 
@@ -292,9 +300,13 @@ export async function getIssue(issueIdOrKey: string) {
   if (!issue) {
     return issue;
   }
+
   issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
   if (issue.fields.parent) {
-    issue.fields.parent.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.parent.fields.issuetype.iconUrl, "image/jpeg");
+    issue.fields.parent.fields.issuetype.iconUrl = await getAuthenticatedUri(
+      issue.fields.parent.fields.issuetype.iconUrl,
+      "image/jpeg"
+    );
   }
 
   return issue;
