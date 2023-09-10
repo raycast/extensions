@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "Andreto",
+    "ericfennis",
+    "csandman",
+    "jguddas",
+    "karsa-mistmere"
+  ],
+  "tags": [
+    "hatchet"
+  ],
+  "categories": [
+    "tools",
+    "gaming"
+  ]
+}

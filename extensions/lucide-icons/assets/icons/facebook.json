@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "colebemis",
+    "csandman",
+    "ericfennis"
+  ],
+  "tags": [
+    "logo",
+    "social"
+  ],
+  "categories": [
+    "account",
+    "social",
+    "brands"
+  ]
+}

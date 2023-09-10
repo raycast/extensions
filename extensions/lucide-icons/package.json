@@ -11,7 +11,8 @@
   ],
   "license": "MIT",
   "contributors": [
-    "lin"
+    "lin",
+    "williamwelsh"
   ],
   "commands": [
     {
@@ -31,7 +32,7 @@
     "@typescript-eslint/parser": "^5.55.0",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.7.0",
-    "lucide-static": "^0.126.0",
+    "lucide-static": "^0.276.0",
     "prettier": "^2.8.4",
     "typescript": "^5.0.2"
   },

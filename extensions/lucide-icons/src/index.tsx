@@ -4,6 +4,13 @@ import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { useMemo } from "react";
 
+interface IMetadata {
+  $schema: string;
+  contributors: string[];
+  tags: string[];
+  categories: string[];
+}
+
 // Lucide's toPascalCase function
 export const toPascalCase = (string: string) => {
   const camelCase = string.replace(/^([A-Z])|[\s-_]+(\w)/g, (match, p1, p2) =>
@@ -14,7 +21,7 @@ export const toPascalCase = (string: string) => {
 };
 
 export default function Command() {
-  const files = useMemo(
+  const svgFiles = useMemo(
     () =>
       readdirSync(join(environment.assetsPath, "icons"))
         .filter((file) => file.endsWith(".svg"))
@@ -24,16 +31,33 @@ export default function Command() {
     []
   );
 
+  const data = useMemo(
+    () =>
+      svgFiles.map(([path, name]) => {
+        // Read corresponding JSON file and retrieve tags
+        const jsonPath = join(environment.assetsPath, "icons", `${name}.json`);
+        const jsonContent = JSON.parse(readFileSync(jsonPath, "utf8")) as IMetadata;
+
+        return {
+          path: path,
+          name: name,
+          keywords: [...jsonContent.tags, ...jsonContent.categories],
+        };
+      }),
+    [svgFiles]
+  );
+
   const [color, setColor] = useCachedState<Color>("color", Color.PrimaryText);
   const [columns, setColumns] = useCachedState<number>("size", 8);
 
   return (
     <Grid columns={columns} inset={Grid.Inset.Large}>
-      {files.map(([path, name]) => (
+      {data.map(({ path, name, keywords }) => (
         <Grid.Item
           key={name}
           content={{ source: path, tintColor: color }}
           title={name}
+          keywords={keywords}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://lucide.dev/icon/${name}`} />

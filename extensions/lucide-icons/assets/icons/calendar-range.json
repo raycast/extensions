@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "karsa-mistmere",
+    "ericfennis"
+  ],
+  "tags": [
+    "date",
+    "time",
+    "event",
+    "range",
+    "period"
+  ],
+  "categories": [
+    "time"
+  ]
+}

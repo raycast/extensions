@@ -1,0 +1,23 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "karsa-mistmere",
+    "ericfennis"
+  ],
+  "tags": [
+    "date",
+    "time",
+    "event",
+    "confirm",
+    "subscribe",
+    "schedule",
+    "done",
+    "todo",
+    "tick",
+    "complete",
+    "task"
+  ],
+  "categories": [
+    "time"
+  ]
+}

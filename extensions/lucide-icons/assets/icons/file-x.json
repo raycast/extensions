@@ -1,0 +1,15 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "ericfennis"
+  ],
+  "tags": [
+    "lost",
+    "delete",
+    "remove",
+    "document"
+  ],
+  "categories": [
+    "files"
+  ]
+}

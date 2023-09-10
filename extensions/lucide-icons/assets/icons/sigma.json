@@ -1,0 +1,20 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "mittalyashu",
+    "johnletey",
+    "ericfennis"
+  ],
+  "tags": [
+    "sum",
+    "calculate",
+    "formula",
+    "maths",
+    "enumeration",
+    "enumerate"
+  ],
+  "categories": [
+    "text",
+    "maths"
+  ]
+}

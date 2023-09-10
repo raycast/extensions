@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "karsa-mistmere"
+  ],
+  "tags": [
+    "building",
+    "hostel",
+    "motel",
+    "inn"
+  ],
+  "categories": [
+    "buildings",
+    "maps",
+    "travel"
+  ]
+}

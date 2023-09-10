@@ -1,0 +1,14 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "colebemis"
+  ],
+  "tags": [
+    "ellipsis",
+    "menu",
+    "options"
+  ],
+  "categories": [
+    "layout"
+  ]
+}

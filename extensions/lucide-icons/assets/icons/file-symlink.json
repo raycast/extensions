@@ -1,0 +1,14 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "karsa-mistmere"
+  ],
+  "tags": [
+    "symlink",
+    "symbolic",
+    "link"
+  ],
+  "categories": [
+    "files"
+  ]
+}

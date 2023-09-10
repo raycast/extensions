@@ -1,0 +1,19 @@
+{
+  "$schema": "../icon.schema.json",
+  "aliases": [
+    "file-cog-2"
+  ],
+  "contributors": [
+    "karsa-mistmere"
+  ],
+  "tags": [
+    "executable",
+    "settings",
+    "cog",
+    "edit",
+    "gear"
+  ],
+  "categories": [
+    "files"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "colebemis",
+    "csandman",
+    "ericfennis"
+  ],
+  "tags": [
+    "on",
+    "off",
+    "device",
+    "switch",
+    "reboot",
+    "restart"
+  ],
+  "categories": [
+    "connectivity"
+  ]
+}

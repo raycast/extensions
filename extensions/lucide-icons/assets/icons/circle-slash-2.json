@@ -1,0 +1,29 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "danielbayley"
+  ],
+  "tags": [
+    "diameter",
+    "zero",
+    "Ø",
+    "nothing",
+    "null",
+    "void",
+    "ban",
+    "maths",
+    "divide",
+    "division",
+    "half",
+    "split",
+    "/"
+  ],
+  "categories": [
+    "shapes",
+    "maths",
+    "development"
+  ],
+  "aliases": [
+    "circle-slashed"
+  ]
+}

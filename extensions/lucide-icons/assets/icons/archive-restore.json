@@ -1,0 +1,19 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "karsa-mistmere",
+    "ericfennis"
+  ],
+  "tags": [
+    "unarchive",
+    "index",
+    "backup",
+    "box",
+    "storage",
+    "records"
+  ],
+  "categories": [
+    "files",
+    "mail"
+  ]
+}

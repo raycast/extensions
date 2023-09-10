@@ -1,0 +1,23 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "colebemis",
+    "csandman",
+    "ericfennis",
+    "karsa-mistmere",
+    "jguddas"
+  ],
+  "tags": [
+    "logo",
+    "social",
+    "video",
+    "play"
+  ],
+  "categories": [
+    "account",
+    "multimedia",
+    "social",
+    "text",
+    "brands"
+  ]
+}

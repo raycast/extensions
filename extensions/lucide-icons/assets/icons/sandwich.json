@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "kemie"
+  ],
+  "tags": [
+    "food",
+    "snack",
+    "dish",
+    "restaurant",
+    "lunch",
+    "meal"
+  ],
+  "categories": [
+    "food-beverage"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "ericfennis",
+    "karsa-mistmere"
+  ],
+  "tags": [
+    "lost",
+    "document",
+    "find",
+    "browser"
+  ],
+  "categories": [
+    "files"
+  ]
+}

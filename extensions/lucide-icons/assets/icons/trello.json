@@ -1,0 +1,18 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "bdbch",
+    "csandman",
+    "mittalyashu",
+    "ericfennis"
+  ],
+  "tags": [
+    "logo",
+    "brand"
+  ],
+  "categories": [
+    "account",
+    "brands",
+    "development"
+  ]
+}

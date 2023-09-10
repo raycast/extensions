@@ -1,0 +1,20 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "danielbayley",
+    "karsa-mistmere"
+  ],
+  "tags": [
+    "find",
+    "search",
+    "data",
+    "txt",
+    "pdf",
+    "document"
+  ],
+  "categories": [
+    "text",
+    "files",
+    "cursors"
+  ]
+}

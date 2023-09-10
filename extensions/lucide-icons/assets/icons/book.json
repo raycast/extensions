@@ -1,0 +1,19 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "colebemis",
+    "csandman",
+    "ericfennis"
+  ],
+  "tags": [
+    "read",
+    "dictionary",
+    "booklet",
+    "magazine",
+    "library"
+  ],
+  "categories": [
+    "gaming",
+    "development"
+  ]
+}

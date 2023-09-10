@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "colebemis",
+    "csandman",
+    "ericfennis",
+    "karsa-mistmere"
+  ],
+  "tags": [
+    "logo",
+    "version control"
+  ],
+  "categories": [
+    "brands",
+    "development"
+  ]
+}

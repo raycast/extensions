@@ -1,0 +1,15 @@
+{
+  "$schema": "../icon.schema.json",
+  "tags": [
+    "electricity",
+    "energy",
+    "transmission line",
+    "telegraph pole",
+    "power lines"
+  ],
+  "categories": [
+    "buildings",
+    "home",
+    "sustainability"
+  ]
+}

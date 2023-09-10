@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "maxwellito",
+    "karsa-mistmere"
+  ],
+  "tags": [
+    "pencil",
+    "drawing",
+    "undo",
+    "delete",
+    "clear"
+  ],
+  "categories": [
+    "text"
+  ]
+}

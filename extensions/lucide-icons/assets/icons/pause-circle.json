@@ -1,0 +1,16 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "colebemis",
+    "ericfennis"
+  ],
+  "tags": [
+    "music",
+    "audio",
+    "stop"
+  ],
+  "categories": [
+    "multimedia",
+    "shapes"
+  ]
+}

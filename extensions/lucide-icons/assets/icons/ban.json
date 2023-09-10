@@ -1,0 +1,26 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "danielbayley"
+  ],
+  "aliases": ["slash"],
+  "tags": [
+    "cancel",
+    "no",
+    "stop",
+    "forbidden",
+    "prohibited",
+    "error",
+    "incorrect",
+    "mistake",
+    "wrong",
+    "failure",
+    "circle",
+    "slash",
+    "null",
+    "void"
+  ],
+  "categories": [
+    "account"
+  ]
+}

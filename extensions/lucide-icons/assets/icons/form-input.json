@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "mittalyashu",
+    "ericfennis"
+  ],
+  "tags": [
+    "2fa",
+    "authenticate",
+    "login",
+    "field",
+    "text"
+  ],
+  "categories": [
+    "text"
+  ]
+}

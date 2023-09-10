@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "danielbayley"
+  ],
+  "tags": [
+    "code",
+    "version control",
+    "git",
+    "repository",
+    "private"
+  ],
+  "categories": [
+    "development",
+    "security"
+  ]
+}

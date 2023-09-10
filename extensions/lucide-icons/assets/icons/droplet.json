@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "colebemis",
+    "ericfennis",
+    "csandman",
+    "johnletey"
+  ],
+  "tags": [
+    "water",
+    "weather"
+  ],
+  "categories": [
+    "weather",
+    "gaming"
+  ]
+}

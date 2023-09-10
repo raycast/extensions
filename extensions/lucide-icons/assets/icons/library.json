@@ -1,0 +1,17 @@
+{
+  "$schema": "../icon.schema.json",
+  "contributors": [
+    "johnletey",
+    "csandman",
+    "ericfennis"
+  ],
+  "tags": [
+    "book",
+    "music",
+    "album"
+  ],
+  "categories": [
+    "photography",
+    "multimedia"
+  ]
+}
