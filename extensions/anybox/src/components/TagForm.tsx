@@ -1,8 +1,8 @@
 import { ActionPanel, Action, Form, useNavigation, Icon } from "@raycast/api";
-import { postAndCloseMainWindow, fetchCollections } from "../utilities/fetch";
+import { postAndCloseMainWindow, fetchTags } from "../utilities/fetch";
 import { useState, useEffect } from "react";
 
-interface CollectionProp {
+interface TagProp {
   id: string;
   name: string;
   heading?: string;
@@ -13,33 +13,25 @@ interface Props {
   title: string;
 }
 
-interface CollectionProp {
+interface TagProp {
   id: string;
   name: string;
-  heading?: string;
 }
 
-export default function CollectionsForm(props: Props) {
+export default function TagForm(props: Props) {
   const [starred] = useState<boolean>(false);
-  const [collections, setCollections] = useState<CollectionProp[]>([]);
+  const [tags, setTags] = useState<TagProp[]>([]);
   const { pop } = useNavigation();
   const command = props.command;
   const title = props.title;
 
   useEffect(() => {
-    fetchCollections().then((tags) => {
+    fetchTags().then((tags) => {
       if (Array.isArray(tags)) {
-        setCollections(tags);
+        setTags(tags);
       }
     });
   }, []);
-
-  function collectionTitle(tag: CollectionProp) {
-    if (tag.heading) {
-      return `${tag.heading} › ${tag.name}`;
-    }
-    return `${tag.name}`;
-  }
 
   return (
     <Form
@@ -50,7 +42,7 @@ export default function CollectionsForm(props: Props) {
             icon={Icon.SaveDocument}
             onSubmit={async (values) => {
               const data = {
-                collections: values.collections,
+                tags: values.tags,
                 starred: !!values.starred,
               };
               await postAndCloseMainWindow(command, data);
@@ -60,9 +52,9 @@ export default function CollectionsForm(props: Props) {
         </ActionPanel>
       }
     >
-      <Form.TagPicker id="collections" title="Collections" defaultValue={[]}>
-        {collections.map((val) => {
-          return <Form.TagPicker.Item value={val.id} title={collectionTitle(val)} key={val.id} />;
+      <Form.TagPicker id="tags" title="Tags" defaultValue={[]}>
+        {tags.map((val) => {
+          return <Form.TagPicker.Item value={val.id} title={val.name} key={val.id} />;
         })}
       </Form.TagPicker>
       <Form.Checkbox id="starred" label="Starred" defaultValue={starred} />

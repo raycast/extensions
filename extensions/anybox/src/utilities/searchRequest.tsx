@@ -3,8 +3,9 @@ import { handleError } from "./fetch";
 import { URLSearchParams } from "url";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 
-interface Collection {
+interface Tag {
   name: string;
+  originalName: string;
   color: string;
   icon: string;
 }
@@ -17,9 +18,9 @@ export interface SearchQuery {
   // Limit search scope to one specific Smart List.
   filter?: string;
 
-  // Identifier of Collection.
-  // Limit search scope to one specific collection.
-  collection?: string;
+  // Identifier of tag.
+  // Limit search scope to one specific tag.
+  tag?: string;
 
   // Limit search scope to starred or unstarred.
   starred?: "yes" | "no";
@@ -35,7 +36,7 @@ export interface SearchQuery {
 }
 
 export interface Link {
-  collections: Collection[];
+  tags: Tag[];
   dateLastOpened: string;
   dateAdded: string;
   preferredBrowser: string;
@@ -52,7 +53,7 @@ export interface Link {
 export interface Preferences {
   api_key: string;
   usePinyin: boolean;
-  searchCollections: boolean;
+  searchTags: boolean;
   searchLinkDescriptions: boolean;
 }
 
