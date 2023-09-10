@@ -6,7 +6,8 @@
   "icon": "slack-icon.png",
   "author": "petr",
   "contributors": [
-    "jhjr"
+    "jhjr",
+    "thomas"
   ],
   "license": "MIT",
   "commands": [
