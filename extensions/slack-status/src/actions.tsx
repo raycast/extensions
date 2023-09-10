@@ -70,8 +70,10 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               { creativity: "low" },
             );
 
+            const emoji = answer.trim();
+
             const profile: Profile = {
-              status_emoji: getCodeForEmoji(answer.trim()),
+              status_emoji: getCodeForEmoji(emoji),
               status_text: props.statusText,
               status_expiration: 0,
             };
@@ -88,10 +90,18 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
                 },
               },
             );
+
+            return {
+              text: props.statusText,
+              emoji: answer,
+            };
           },
           {
             loading: "Setting status with AI...",
-            success: "Set status with AI",
+            success: (value) => ({
+              title: "Set status with AI",
+              message: `${value.emoji} ${value.text}`,
+            }),
             error: "Failed setting status with AI",
           },
         );

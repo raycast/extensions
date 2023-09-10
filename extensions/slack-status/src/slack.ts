@@ -1,4 +1,4 @@
-import { OAuth, getApplications } from "@raycast/api";
+import { OAuth } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import fetch from "node-fetch";
@@ -30,11 +30,6 @@ export function useSlackProfile() {
     }
     return response.profile;
   });
-}
-
-export async function isSlackInstalled() {
-  const applications = await getApplications();
-  return applications.find((app) => app.bundleId === "com.tinyspeck.slackmacgap") !== undefined;
 }
 
 export class SlackOAuthSessionConfig implements OAuthSessionConfig {
