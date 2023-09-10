@@ -64,18 +64,36 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
         showToastWithPromise(
           async () => {
             const answer = await AI.ask(
-              `What's a good emoji for this Slack status? 
-            Slack status: ${props.statusText}. 
-            Single emoji for Slack status:`,
+              `You help a Slack user set their status.
+              
+              Respond with the following JSON for the Slack status:
+              {
+                "text": <string for status text, should be short and sweet, no punctuation at the end, e.g. "Working out", "Listening to Drake's new album", "Coffe break">,
+                "emoji": <string for single emoji matching the text of the status>,
+                "duration": <optional integer for duration of status in seconds, only include if user specified duration or end of status in their description>
+              }
+
+              Current time of users status: ${new Date().toLocaleTimeString()}. User's description of their status: ${
+                props.statusText
+              }. 
+
+              Your suggested Slack status:`,
               { creativity: "low" },
             );
 
-            const emoji = answer.trim();
+            const parsedAnswer = JSON.parse(answer);
+
+            if (typeof parsedAnswer.emoji !== "string" || typeof parsedAnswer.text !== "string") {
+              throw new Error("AI generated invalid status 🤷");
+            }
 
             const profile: Profile = {
-              status_emoji: getCodeForEmoji(emoji),
-              status_text: props.statusText,
-              status_expiration: 0,
+              status_emoji: getCodeForEmoji(parsedAnswer.emoji),
+              status_text: parsedAnswer.text,
+              status_expiration:
+                parsedAnswer.duration && typeof parsedAnswer.duration === "number"
+                  ? new Date().getTime() / 1000 + parsedAnswer.duration
+                  : 0,
             };
 
             await clearSearchBar();
@@ -91,10 +109,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               },
             );
 
-            return {
-              text: props.statusText,
-              emoji: answer,
-            };
+            return parsedAnswer;
           },
           {
             loading: "Setting status with AI...",
