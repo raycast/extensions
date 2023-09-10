@@ -25,6 +25,26 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
+      <List.Item
+        title="Open Cal.com Dashboard"
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url="https://app.cal.com" />
+          </ActionPanel>
+        }
+      />
+      {user && (
+        <List.Item
+          title="Copy My Link"
+          subtitle={"/" + user.username}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy My Link" content={`https://cal.com/${user.username}`} />
+              <Action.OpenInBrowser url={`https://cal.com/${user.username}`} />
+            </ActionPanel>
+          }
+        />
+      )}
       {items?.map((item) => (
         <List.Item
           key={item.id}
