@@ -323,10 +323,7 @@ export async function createDatabasePage(values: Form.Values) {
             type DatePropertyTimeZone = Required<DateProperty["time_zone"]>;
             arg.properties[propId] = {
               date: {
-                start: format(
-                  subMinutes(new Date(value), new Date().getTimezoneOffset()),
-                  "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                ),
+                start: subMinutes(new Date(value), new Date().getTimezoneOffset()).toISOString(),
                 time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as DatePropertyTimeZone,
               },
             };
