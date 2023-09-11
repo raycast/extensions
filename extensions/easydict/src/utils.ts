@@ -1,139 +1,51 @@
-import { Clipboard, environment, getApplications, getPreferenceValues, LocalStorage } from "@raycast/api";
-import { eudicBundleId } from "./components";
-import { clipboardQueryTextKey, languageItemList } from "./consts";
-import { LanguageItem, MyPreferences, QueryRecoredItem, TranslateFormatResult } from "./types";
+/*
+ * @author: tisfeng
+ * @createTime: 2022-08-04 12:28
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-03-17 23:41
+ * @fileName: utils.ts
+ *
+ * Copyright (c) 2022 by tisfeng, All Rights Reserved.
+ */
 
+import { Clipboard, getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
+import { AxiosError } from "axios";
 import CryptoJS from "crypto-js";
+import { clipboardQueryTextKey } from "./consts";
+import { LanguageDetectType } from "./detectLanguage/types";
+import { LingueeListItemType } from "./dictionary/linguee/types";
+import { QueryWordInfo, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
+import { myPreferences } from "./preferences";
+import { Easydict } from "./releaseVersion/versionInfo";
+import {
+  DictionaryType,
+  ListDisplayItem,
+  QueryRecordedItem as QueryRecordedItem,
+  QueryType,
+  RequestErrorInfo,
+  RequestType,
+  TranslationType,
+} from "./types";
+
+/**
+ * Max length for word to query dictionary.
+ */
+const maxWordLength = 20;
+
+/**
+ * Eudic bundleIds.
+ *
+ * There are two Eudic versions on the Mac, one free version bundleId is `com.eusoft.freeeudic`, and the other paid version bundleId is `com.eusoft.eudic`. But their URL Schemes are the same, eudic://
+ */
+const eudicBundleIds = ["com.eusoft.freeeudic", "com.eusoft.eudic"];
 
 // Time interval for automatic query of the same clipboard text, avoid frequently querying the same word. Default 10min
-export const clipboardQueryInterval = 10 * 60 * 1000;
+const clipboardQueryInterval = 10 * 60 * 1000;
 
-export const maxLineLengthOfChineseTextDisplay = 45;
-export const maxLineLengthOfEnglishTextDisplay = 95;
-
-export const myPreferences: MyPreferences = getPreferenceValues();
-export const defaultLanguage1 = getLanguageItemFromLanguageId(myPreferences.language1);
-export const defaultLanguage2 = getLanguageItemFromLanguageId(myPreferences.language2);
-
-const defaultEncrytedYoudaoAppId = "U2FsdGVkX19SpBCGxMeYKP0iS1PWKmvPeqIYNaZjAZC142Y5pLrOskw0gqHGpVS1";
-const defaultEncrytedYoudaoAppKey =
-  "U2FsdGVkX1/JF2ZMngmTw8Vm+P0pHWmHKLQhGpUtYiDc0kLZl6FKw1Vn3hMyl7iL7owwReGJCLsovDxztZKb9g==";
-export const defaultYoudaoAppId = myDecrypt(defaultEncrytedYoudaoAppId);
-export const defaultYoudaoAppSecret = myDecrypt(defaultEncrytedYoudaoAppKey);
-
-const defaultEncryptedBaiduAppId = "U2FsdGVkX1/QHkSw+8qxr99vLkSasBfBRmA6Kb5nMyjP8IJazM9DcOpd3cOY6/il";
-const defaultEncryptedBaiduAppSecret = "U2FsdGVkX1+a2LbZ0+jntJTQjpPKUNWGrlr4NSBOwmlah7iP+w2gefq1UpCan39J";
-export const defaultBaiduAppId = myDecrypt(defaultEncryptedBaiduAppId);
-export const defaultBaiduAppSecret = myDecrypt(defaultEncryptedBaiduAppSecret);
-
-const defaultEncryptedTencentSecretId =
-  "U2FsdGVkX19lHBVXE+CEZI9cENSToLIGzHDsUIE+RyvIC66rgxumDmpYPDY4MdaTSbrq7MIyDvtgXaLvzijYSg==";
-const defaultEncryptedTencentSecretKey =
-  "U2FsdGVkX1+N6wDYXNiUISwKOM97cY03RjXmC+0+iodFo3b4NTNC1J8RR6xqcbdyF7z3Z2yQRMHHxn4m02aUvA==";
-export const defaultTencentSecretId = myDecrypt(defaultEncryptedTencentSecretId);
-export const defaultTencentSecretKey = myDecrypt(defaultEncryptedTencentSecretKey);
-
-const defaultEncryptedCaiyunToken = "U2FsdGVkX1+ihWvHkAfPMrWHju5Kg4EXAm1AVbXazEeHaXE1jdeUzZZrhjdKmS6u";
-export const defaultCaiyunToken = myDecrypt(defaultEncryptedCaiyunToken);
-
-// export function: Determine whether the title of the result exceeds the maximum value of one line.
-export function isTranslateResultTooLong(formatResult: TranslateFormatResult | null): boolean {
-  if (!formatResult) {
-    return false;
-  }
-
-  const isChineseTextResult = formatResult.queryWordInfo.toLanguage === "zh-CHS";
-  const isEnglishTextResult = formatResult.queryWordInfo.toLanguage === "en";
-
-  for (const translation of formatResult.translations) {
-    const textLength = translation.text.length;
-    if (isChineseTextResult) {
-      if (textLength > maxLineLengthOfChineseTextDisplay) {
-        return true;
-      }
-    } else if (isEnglishTextResult) {
-      if (textLength > maxLineLengthOfEnglishTextDisplay) {
-        return true;
-      }
-    } else if (textLength > maxLineLengthOfEnglishTextDisplay) {
-      return true;
-    }
-  }
-  return false;
-}
-
-export function isPreferredChinese(): boolean {
-  const lanuguageIdPrefix = "zh";
-  const preferences: MyPreferences = getPreferenceValues();
-  if (preferences.language1.startsWith(lanuguageIdPrefix) || preferences.language2.startsWith(lanuguageIdPrefix)) {
-    return true;
-  }
-  return false;
-}
-
-export function getLanguageItemFromLanguageId(youdaoLanguageId: string): LanguageItem {
-  for (const langItem of languageItemList) {
-    if (langItem.youdaoLanguageId === youdaoLanguageId) {
-      return langItem;
-    }
-  }
-  return {
-    youdaoLanguageId: "",
-    aliyunLanguageId: "",
-    languageTitle: "",
-    languageVoice: [""],
-  };
-}
-
-export function getLanguageItemFromTencentDetectLanguageId(tencentLanguageId: string): LanguageItem {
-  for (const langItem of languageItemList) {
-    const tencentDetectLanguageId = langItem.tencentDetectLanguageId || langItem.tencentLanguageId;
-    if (tencentDetectLanguageId === tencentLanguageId) {
-      return langItem;
-    }
-  }
-  return {
-    youdaoLanguageId: "",
-    aliyunLanguageId: "",
-    languageTitle: "",
-    languageVoice: [""],
-  };
-}
-
-// function: get another language item expcept chinese
-
-function getLanguageItemExpceptChinese(from: LanguageItem, to: LanguageItem): LanguageItem {
-  if (from.youdaoLanguageId === "zh-CHS") {
-    return to;
-  } else {
-    return from;
-  }
-}
-
-export function getEudicWebTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
-  const eudicWebLanguageId = getLanguageItemExpceptChinese(from, to).eudicWebLanguageId;
-  if (eudicWebLanguageId) {
-    return `https://dict.eudic.net/dicts/${eudicWebLanguageId}/${encodeURI(queryText)}`;
-  }
-  return "";
-}
-
-export function getYoudaoWebTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
-  const youdaoWebLanguageId = getLanguageItemExpceptChinese(from, to).youdaoWebLanguageId;
-  if (youdaoWebLanguageId) {
-    return `https://www.youdao.com/w/${youdaoWebLanguageId}/${encodeURI(queryText)}`;
-  }
-  return "";
-}
-
-export function getGoogleWebTranslateURL(queryText: string, from: LanguageItem, to: LanguageItem): string {
-  const fromLanguageId = from.googleLanguageId || from.youdaoLanguageId;
-  const toLanguageId = to.googleLanguageId || to.youdaoLanguageId;
-  const text = encodeURI(queryText);
-  return `https://translate.google.cn/?sl=${fromLanguageId}&tl=${toLanguageId}&text=${text}&op=translate`;
-}
-
-// function: query the clipboard text from LocalStorage
+/**
+ * query the clipboard text from LocalStorage
+ * * deprecate
+ */
 export async function tryQueryClipboardText(queryClipboardText: (text: string) => void) {
   const text = await Clipboard.readText();
   console.log("query clipboard text: " + text);
@@ -145,9 +57,9 @@ export async function tryQueryClipboardText(queryClipboardText: (text: string) =
     }
 
     if (jsonString) {
-      const queryRecoredItem: QueryRecoredItem = JSON.parse(jsonString);
-      const timestamp = queryRecoredItem.timestamp;
-      const queryText = queryRecoredItem.queryText;
+      const queryRecordedItem: QueryRecordedItem = JSON.parse(jsonString);
+      const timestamp = queryRecordedItem.timestamp;
+      const queryText = queryRecordedItem.queryText;
       if (queryText === text) {
         const now = new Date().getTime();
         console.log(`before: ${new Date(timestamp).toUTCString()}`);
@@ -162,133 +74,190 @@ export async function tryQueryClipboardText(queryClipboardText: (text: string) =
   }
 }
 
-// function: save last Clipboard text and timestamp
+/**
+ * save last Clipboard text and timestamp
+ */
 export function saveQueryClipboardRecord(text: string) {
   const jsonString: string = JSON.stringify({
     queryText: text,
     timestamp: new Date().getTime(),
   });
   LocalStorage.setItem(clipboardQueryTextKey, jsonString);
-
   console.log("saveQueryClipboardRecord: " + jsonString);
 }
 
-// function: remove all punctuation from the text
-export function removeEnglishPunctuation(text: string) {
-  return text.replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-./:;<=>?@[\]^_`{|}~]/g, "");
-}
-
-// function: remove all Chinese punctuation and blank space from the text
-export function removeChinesePunctuation(text: string) {
-  return text.replace(
-    /[\u3002|\uff1f|\uff01|\uff0c|\u3001|\uff1b|\uff1a|\u201c|\u201d|\u2018|\u2019|\uff08|\uff09|\u300a|\u300b|\u3008|\u3009|\u3010|\u3011|\u300e|\u300f|\u300c|\u300d|\ufe43|\ufe44|\u3014|\u3015|\u2026|\u2014|\uff5e|\ufe4f|\uffe5]/g,
-    ""
-  );
-}
-
-// function: remove all punctuation from the text
-export function removePunctuation(text: string) {
-  return removeEnglishPunctuation(removeChinesePunctuation(text));
-}
-
-// function: remove all blank space from the text
-export function removeBlankSpace(text: string) {
-  return text.replace(/\s/g, "");
-}
-
-// function: check if the text contains Chinese characters
-export function isContainChinese(text: string) {
-  return /[\u4e00-\u9fa5]/g.test(text);
-}
-
-// function: check if text isEnglish or isNumber
-export function isEnglishOrNumber(text: string) {
-  const pureText = removePunctuation(removeBlankSpace(text));
-  console.log("pureText: " + pureText);
-  return /^[a-zA-Z0-9]+$/.test(pureText);
-}
-
-// function: get the language type represented by the string, priority to use English and Chinese, and then auto
-export function detectInputTextLanguageId(inputText: string): string {
-  let fromLanguageId = "auto";
-  const EnglishLanguageId = "en";
-  const ChineseLanguageId = "zh-CHS";
-  if (
-    isEnglishOrNumber(inputText) &&
-    (defaultLanguage1.youdaoLanguageId === EnglishLanguageId || defaultLanguage2.youdaoLanguageId === EnglishLanguageId)
-  ) {
-    fromLanguageId = EnglishLanguageId;
-  } else if (
-    isContainChinese(inputText) &&
-    (defaultLanguage1.youdaoLanguageId === ChineseLanguageId || defaultLanguage2.youdaoLanguageId === ChineseLanguageId)
-  ) {
-    fromLanguageId = ChineseLanguageId;
-  }
-
-  console.log("fromLanguage-->:", fromLanguageId);
-  return fromLanguageId;
-}
-
-// function: return and update the autoSelectedTargetLanguage according to the languageId
-export function getAutoSelectedTargetLanguageId(accordingLanguageId: string): string {
-  let targetLanguageId = "auto";
-  if (accordingLanguageId === defaultLanguage1.youdaoLanguageId) {
-    targetLanguageId = defaultLanguage2.youdaoLanguageId;
-  } else if (accordingLanguageId === defaultLanguage2.youdaoLanguageId) {
-    targetLanguageId = defaultLanguage1.youdaoLanguageId;
-  }
-
-  const targetLanguage = getLanguageItemFromLanguageId(targetLanguageId);
-
-  console.log(`languageId: ${accordingLanguageId}, auto selected target: ${targetLanguage.youdaoLanguageId}`);
-  return targetLanguage.youdaoLanguageId;
-}
-
-async function traverseAllInstalledApplications(updateIsInstalledEudic: (isInstalled: boolean) => void) {
-  const installedApplications = await getApplications();
-  LocalStorage.setItem(eudicBundleId, false);
-  updateIsInstalledEudic(false);
-
+/**
+ * traverse all applications, check if Eudic is installed
+ */
+export async function checkIfInstalledEudic(): Promise<boolean> {
+  const installedApplications = await getApplications(); // cost time: 20 ms
   for (const application of installedApplications) {
-    console.log(application.bundleId);
-    if (application.bundleId === eudicBundleId) {
-      updateIsInstalledEudic(true);
-      LocalStorage.setItem(eudicBundleId, true);
-
-      console.log("isInstalledEudic: true");
+    const appBundleId = application.bundleId;
+    if (appBundleId && eudicBundleIds.includes(appBundleId)) {
+      return Promise.resolve(true);
     }
   }
+  return Promise.resolve(false);
 }
 
-export function checkIsInstalledEudic(setIsInstalledEudic: (isInstalled: boolean) => void) {
-  LocalStorage.getItem<boolean>(eudicBundleId).then((isInstalledEudic) => {
-    console.log("is install Eudic: ", isInstalledEudic);
-
-    if (isInstalledEudic == true) {
-      setIsInstalledEudic(true);
-    } else if (isInstalledEudic == false) {
-      setIsInstalledEudic(false);
-    } else {
-      traverseAllInstalledApplications(setIsInstalledEudic);
-    }
+export function checkIfNeedShowReleasePrompt(callback: (isShowing: boolean) => void) {
+  const currentEasydict = new Easydict();
+  currentEasydict.getCurrentVersionInfo().then((easydict) => {
+    const isShowingReleasePrompt = easydict.isNeedPrompt && !easydict.hasPrompted;
+    // console.log("isShowingReleasePrompt: ", isShowingReleasePrompt);
+    callback(isShowingReleasePrompt);
   });
 }
 
-export function myEncrypt(text: string) {
-  // console.warn("encrypt:", text);
-  const ciphertext = CryptoJS.AES.encrypt(text, environment.extensionName).toString();
-  // console.warn("ciphertext: ", ciphertext);
-  return ciphertext;
+/**
+ * Trim the text to the max length, default 1830.
+ *
+ * * Note: google web translate max length is 1830.
+ *
+ * 例如，百度翻译 query 长度限制：为保证翻译质量，请将单次请求长度控制在 6000 bytes 以内（汉字约为输入参数 2000 个）
+ */
+export function trimTextLength(text: string, length = 1830) {
+  text = text.trim();
+  if (text.length > length) {
+    return text.substring(0, length) + "...";
+  }
+  return text.substring(0, length);
 }
 
-export function myDecrypt(ciphertext: string) {
-  // console.warn("decrypt:", ciphertext);
-  const bytes = CryptoJS.AES.decrypt(ciphertext, environment.extensionName);
-  const originalText = bytes.toString(CryptoJS.enc.Utf8);
-  // console.warn("originalText: ", originalText);
-  return originalText;
+/**
+ * Get enabled dictionary services.
+ */
+export function getEnabledDictionaryServices(): DictionaryType[] {
+  const enabledDictionaryServices: DictionaryType[] = [];
+  if (myPreferences.enableLingueeDictionary) {
+    enabledDictionaryServices.push(DictionaryType.Linguee);
+  }
+  if (myPreferences.enableYoudaoDictionary) {
+    enabledDictionaryServices.push(DictionaryType.Youdao);
+  }
+  return enabledDictionaryServices;
 }
 
-export function isShowMultipleTranslations(formatResult: TranslateFormatResult) {
-  return !formatResult.explanations && !formatResult.forms && !formatResult.webPhrases && !formatResult.webTranslation;
+/**
+ * Show error toast according to errorInfo.
+ */
+export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
+  if (!errorInfo?.type) {
+    console.warn(`showErrorToast, errorInfo type is undefined: ${JSON.stringify(errorInfo, null, 4)}`);
+    return;
+  }
+
+  console.error(`show error toast: ${JSON.stringify(errorInfo, null, 4)}`);
+  const type = errorInfo.type.toString();
+  showToast({
+    style: Toast.Style.Failure,
+    title: `${type} Error` + `${errorInfo.code ? `: ${errorInfo.code}` : ""}`,
+    message: errorInfo.message,
+  });
+}
+
+/**
+ * Get request error info.
+ */
+export function getTypeErrorInfo(type: RequestType, error: AxiosError): RequestErrorInfo {
+  const errorCode = error.response?.status;
+  const errorMessage = error.response?.statusText || error.message || "something error 😭";
+  const errorInfo: RequestErrorInfo = {
+    type: type,
+    code: `${errorCode || ""}`,
+    message: errorMessage,
+  };
+  return errorInfo;
+}
+
+/**
+ * Check is word, only word.length < 20 is valid.
+ */
+export function checkIsWordLength(word: string) {
+  return word.trim().length < maxWordLength;
+}
+
+/**
+ * Check queryWordInfo is word, not accurate, just a rough judgment.
+ *
+ * * Use queryWordInfo `isWord` when need accurate judgment.
+ */
+export function checkIsWord(queryWordInfo: QueryWordInfo) {
+  if (queryWordInfo.isWord !== undefined) {
+    return queryWordInfo.isWord;
+  }
+  return checkIsWordLength(queryWordInfo.word);
+}
+
+/**
+ * Copy text to Clipboard.
+ */
+export function copyToClipboard(text: string) {
+  Clipboard.copy(text);
+}
+
+/**
+ * Check type is Dictionary type.
+ */
+export function checkIsDictionaryType(type: QueryType): boolean {
+  if (Object.values(DictionaryType).includes(type as DictionaryType)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Check type is Translation type.
+ */
+export function checkIsTranslationType(type: QueryType): boolean {
+  if (Object.values(TranslationType).includes(type as TranslationType)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * check type is LanguageDetect type.
+ */
+export function checkIsLanguageDetectType(type: RequestType): boolean {
+  if (Object.values(LanguageDetectType).includes(type as LanguageDetectType)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * check type is YoudaoDictionaryListItem type.
+ */
+export function checkIsYoudaoDictionaryListItem(listItem: ListDisplayItem): boolean {
+  const { queryType, displayType } = listItem;
+  if (
+    queryType === DictionaryType.Youdao &&
+    Object.values(YoudaoDictionaryListItemType).includes(displayType as YoudaoDictionaryListItemType)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * check type is LingueeListItem type.
+ */
+export function checkIsLingueeListItem(listItem: ListDisplayItem): boolean {
+  const { queryType, displayType } = listItem;
+  if (
+    queryType === DictionaryType.Linguee &&
+    Object.values(LingueeListItemType).includes(displayType as LingueeListItemType)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function md5(text: string): string {
+  return CryptoJS.MD5(text).toString();
+}
+
+export function printObject(name: string, obj: unknown, space = 4) {
+  console.log(`${name}: ${JSON.stringify(obj, null, space)}`);
 }

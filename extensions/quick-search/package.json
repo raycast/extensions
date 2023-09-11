@@ -39,23 +39,21 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.26.2",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.45.2"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.3",
-    "@types/node": "^16.11.12",
-    "@types/react": "^17.0.37",
-    "@typescript-eslint/eslint-plugin": "^5.6.0",
-    "@typescript-eslint/parser": "^5.6.0",
-    "eslint": "^8.4.1",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "jest": "^27.4.4",
-    "ts-jest": "^27.1.1",
+    "prettier": "^2.5.1",
     "typescript": "^4.5.3"
   }
 }

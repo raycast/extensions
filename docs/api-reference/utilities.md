@@ -1,6 +1,6 @@
-# Utilities
+# System Utilities
 
-This list of Utility APIs makes your life easier as a developer. They also expose some of Raycast's native functionality to allow deep integration into the user's setup. For example, you can use the Application APIs to check if a desktop application is installed and then provide an action to deep-link into it.
+This set of utilities exposes some of Raycast's native functionality to allow deep integration into the user's setup. For example, you can use the Application APIs to check if a desktop application is installed and then provide an action to deep-link into it.
 
 ## API Reference
 
@@ -16,15 +16,35 @@ async function getApplications(path?: PathLike): Promise<Application[]>;
 
 #### Example
 
+{% tabs %}
+{% tab title="Find Application" %}
+
+```typescript
+import { getApplications, Application } from "@raycast/api";
+
+// it is a lot more reliable to get an app by its bundle ID than its path
+async function findApplication(bundleId: string): Application | undefined {
+  const installedApplications = await getApplications();
+  return installedApplications.filter((application) => application.bundleId == bundleId);
+}
+```
+
+{% endtab %}
+
+{% tab title="List Installed Applications" %}
+
 ```typescript
 import { getApplications } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const installedApplications = await getApplications();
   console.log("The following applications are installed on your Mac:");
   console.log(installedApplications.map((a) => a.name).join(", "));
-};
+}
 ```
+
+{% endtab %}
+{% endtabs %}
 
 #### Parameters
 
@@ -49,12 +69,10 @@ async function getDefaultApplication(path: PathLike): Promise<Application>;
 ```typescript
 import { getDefaultApplication } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const defaultApplication = await getDefaultApplication(__filename);
-  console.log(
-    `Default application for JavaScript is: ${defaultApplication.name}`
-  );
-};
+  console.log(`Default application for JavaScript is: ${defaultApplication.name}`);
+}
 ```
 
 #### Parameters
@@ -63,7 +81,32 @@ export default async () => {
 
 #### Return
 
-The default [Application](#application) that would open the file. Throws an error if no application was found.
+A Promise that resolves with the default [Application](#application) that would open the file. If no application was found, the promise will be rejected.
+
+### getFrontmostApplication
+
+Returns the frontmost application.
+
+#### Signature
+
+```typescript
+async function getFrontmostApplication(): Promise<Application>;
+```
+
+#### Example
+
+```typescript
+import { getFrontmostApplication } from "@raycast/api";
+
+export default async function Command() => {
+  const defaultApplication = await getFrontmostApplication();
+  console.log(`The frontmost application is: ${frontmostApplication.name}`);
+};
+```
+
+#### Return
+
+A Promise that resolves with the frontmost [Application](#application). If no application was found, the promise will be rejected.
 
 ### showInFinder
 
@@ -82,7 +125,9 @@ import { showInFinder } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 
-showInFinder(join(homedir(), "Downloads"));
+export default async function Command() {
+  await showInFinder(join(homedir(), "Downloads"));
+}
 ```
 
 #### Parameters
@@ -111,11 +156,11 @@ import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 
-export default async () => {
+export default async function Command() {
   const file = join(homedir(), "Desktop", "yolo.txt");
   await writeFile(file, "I will be deleted soon!");
   await trash(file);
-};
+}
 ```
 
 #### Parameters
@@ -133,10 +178,7 @@ Opens a target with the default application or specified application.
 #### Signature
 
 ```typescript
-async function open(
-  target: string,
-  application?: Application | string
-): Promise<void>;
+async function open(target: string, application?: Application | string): Promise<void>;
 ```
 
 #### Example
@@ -144,9 +186,9 @@ async function open(
 ```typescript
 import { open } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await open("https://www.raycast.com", "com.google.Chrome");
-};
+}
 ```
 
 #### Parameters

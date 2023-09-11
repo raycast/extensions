@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "session",
   "title": "Session - Pomodoro Focus Timer",
-  "description": "Control Session pomodoro timers. Requires v2.1.6 or later installed: www.stayinsession.com",
+  "description": "Control Session pomodoro timers. Requires v2.6.23 or later installed: www.stayinsession.com",
   "icon": "session.png",
   "author": "jameslyons",
   "categories": [
@@ -42,6 +42,12 @@
       "name": "session-abandon",
       "title": "Abandon Session",
       "description": "Abandons a focus session in Session app",
+      "mode": "no-view"
+    },
+    {
+      "name": "break-start",
+      "title": "Start Break",
+      "description": "Starts a break in Session app",
       "mode": "no-view"
     }
   ],

@@ -1,9 +1,9 @@
 import { CREATE_ISSUE, GET_ISSUE_TEMPLATES, GET_REPOSITORIES } from "@/queries/issues";
 import { CreateIssue, GetIssueTemplates, GetRepositories, Repository } from "@/types";
 import { fetcher } from "@/utils";
-import { ActionPanel, Form, FormValues, popToRoot, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Form, FormValues, popToRoot, showToast, ToastStyle } from "@raycast/api";
 import matter from "gray-matter";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useSWRImmutable from "swr/immutable";
 
 export default function Command() {
@@ -23,7 +23,7 @@ export default function Command() {
           name: repository?.name,
           owner: repository?.owner.login,
         },
-      })
+      }),
   );
 
   const templates = useMemo(
@@ -38,7 +38,7 @@ export default function Command() {
           content,
         };
       }) || [],
-    [issueTemplates]
+    [issueTemplates],
   );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -63,7 +63,7 @@ export default function Command() {
                 ...a,
                 [k]: values[k],
               }),
-              {}
+              {},
             ),
         },
       });
@@ -83,10 +83,9 @@ export default function Command() {
   return (
     <Form
       isLoading={!data}
-      onSubmit={createIssue}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Issue" onSubmit={createIssue} />
+          <Action.SubmitForm title="Create Issue" onSubmit={createIssue} />
         </ActionPanel>
       }
     >

@@ -1,10 +1,13 @@
-import { getPreference } from "./preference";
 import { Dropbox } from "dropbox";
 import { files } from "dropbox/types/dropbox_types";
+import { authorize } from "./auth";
 
-export function getDropboxClient(): Dropbox {
-  const p = getPreference();
-  return new Dropbox({ accessToken: p.dropbox_access_token });
+async function getDropboxClient(): Promise<Dropbox> {
+  const tokenSet = await authorize();
+  if (!tokenSet) {
+    throw new Error("no dropbox token");
+  }
+  return new Dropbox({ accessToken: tokenSet.accessToken });
 }
 
 export interface ListFileResp {
@@ -32,7 +35,7 @@ export async function dbxListAnyFiles(req: { path: string; query: string; cursor
 }
 
 export async function dbxListFiles(path: string): Promise<ListFileResp> {
-  const dbx = getDropboxClient();
+  const dbx = await getDropboxClient();
   const resp = await dbx.filesListFolder({
     path: path,
     include_deleted: false,
@@ -45,7 +48,7 @@ export async function dbxListFiles(path: string): Promise<ListFileResp> {
 }
 
 export async function dbxListFilesContinue(cursor: string): Promise<ListFileResp> {
-  const dbx = getDropboxClient();
+  const dbx = await getDropboxClient();
   const resp = await dbx.filesListFolderContinue({
     cursor: cursor,
   });
@@ -57,7 +60,7 @@ export async function dbxListFilesContinue(cursor: string): Promise<ListFileResp
 }
 
 export async function dbxSearchFiles(query: string): Promise<ListFileResp> {
-  const dbx = getDropboxClient();
+  const dbx = await getDropboxClient();
   const resp = await dbx.filesSearchV2({
     query: query,
     include_highlights: false,
@@ -66,7 +69,7 @@ export async function dbxSearchFiles(query: string): Promise<ListFileResp> {
 }
 
 export async function dbxSearchFilesContinue(cursor: string): Promise<ListFileResp> {
-  const dbx = getDropboxClient();
+  const dbx = await getDropboxClient();
   const resp = await dbx.filesSearchContinueV2({
     cursor: cursor,
   });

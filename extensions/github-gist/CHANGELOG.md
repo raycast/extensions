@@ -1,5 +1,27 @@
 # GitHub Gist Changelog
 
+## [Update] - 2023-07-26
+
+- Updated dependencies
+
+## [Update] - 2023-04-12
+
+- Updated dependencies
+- Enable syntax highlighting
+
+## [Update] - 2023-04-12
+
+- Updated dependencies
+
+## [Optimize extension] - 2022-09-30 
+
+- Optimize Search Gists command loading speed
+
+## [Delete Gist action optimization] - 2022-07-04
+
+- Optimize delete Gist action: a warning will pop up to prompt the user to confirm before deleting the gist
+- Update toast text
+
 ## [Add "Load More"] - 2022-05-15
 
 - Update settings item: you can choose the number(30-100) of Gist loaded per page.

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import plist from "plist";
@@ -25,7 +25,11 @@ type TypeMacroGroup = Partial<{
   macros: TypeMacro[];
 }>;
 
-export default function Command() {
+interface Arguments {
+  name?: string;
+}
+
+export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   const [data, setData] = useState<TypeMacroGroup[]>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,13 +47,34 @@ export default function Command() {
     }
   }
 
+  function editMacro(macro: TypeMacro) {
+    runAppleScript(
+      `tell application "Keyboard Maestro"
+        editMacro "${macro.uid}"
+        activate
+      end tell`
+    );
+  }
+
   useEffect(() => {
     init();
   }, []);
 
+  const [searchText, setSearchText] = useState(props.arguments.name ?? "");
+  const [filteredList, filterList] = useState(data);
+
+  useEffect(() => {
+    filterList(
+      data?.map((item) => {
+        const macros = item.macros?.filter((o) => o.name?.toLowerCase().includes(searchText.toLowerCase()));
+        return { ...item, macros };
+      })
+    );
+  }, [searchText, data]);
+
   return (
-    <List isLoading={isLoading}>
-      {data
+    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText}>
+      {filteredList
         ?.filter((o) => o.enabled)
         .map((group) => (
           <List.Section id={group.uid} title={group.name}>
@@ -62,7 +87,15 @@ export default function Command() {
                   title={macro?.name ?? ""}
                   actions={
                     <ActionPanel>
-                      <Action.Open title="Run Macro" target={`kmtrigger://macro=${macro.uid}`} />
+                      <Action.Open title="Run Macro" target={`kmtrigger://macro=${macro.uid}`} icon={Icon.Terminal} />
+                      <Action
+                        title="Edit Macro"
+                        onAction={() => {
+                          editMacro(macro);
+                        }}
+                        icon={Icon.Pencil}
+                        shortcut={{ key: "e", modifiers: ["cmd"] }}
+                      />
                     </ActionPanel>
                   }
                 />

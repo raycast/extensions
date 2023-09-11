@@ -1,133 +1,101 @@
+/*
+ * @author: tisfeng
+ * @createTime: 2022-06-04 21:58
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-03-16 18:32
+ * @fileName: types.ts
+ *
+ * Copyright (c) 2022 by tisfeng, All Rights Reserved.
+ */
+
+import { Image } from "@raycast/api";
+import { RawResponse } from "@vitalets/google-translate-api/dist/cjs/types";
+import { ChildProcess } from "child_process";
 import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/services/tmt/v20180321/tmt_models";
-import { DicionaryType, SectionType, TranslateType } from "./consts";
-import { IcibaDictionaryResult } from "./dict/iciba/interface";
+import { LanguageDetectType } from "./detectLanguage/types";
+import { IcibaDictionaryResult } from "./dictionary/iciba/interface";
+import { LingueeDictionaryResult, LingueeListItemType } from "./dictionary/linguee/types";
+import {
+  QueryWordInfo,
+  YoudaoDictionaryFormatResult,
+  YoudaoDictionaryListItemType,
+  YoudaoWebTranslateResult,
+} from "./dictionary/youdao/types";
+import { LanguageItem } from "./language/type";
+import { BingTranslateResult } from "./translation/microsoft/types";
+import { VolcanoDetectResult, VolcanoTranslateResult } from "./translation/volcano/types";
 
-export interface TranslateTypeResult {
-  type: TranslateType | DicionaryType;
-  result:
-    | YoudaoTranslateResult
-    | BaiduTranslateResult
-    | TencentTranslateResult
-    | CaiyunTranslateResult
-    | IcibaDictionaryResult
-    | YoudaoDictionaryResult
-    | null;
-  errorInfo?: RequestErrorInfo;
-}
-
-export interface YoudaoTranslateResult {
-  l: string;
-  query: string;
-  returnPhrase: [];
-  errorCode: string;
-  translation: string[];
-  web?: TranslateResultKeyValueItem[];
-  basic?: YoudaoTranslateResultBasicItem;
-  isWord: boolean;
-  speakUrl: string;
-}
-
-export type YoudaoDictionaryResult = YoudaoTranslateResult;
-
-export interface QueryWordInfo {
-  word: string;
-  phonetic?: string;
-  speech?: string;
-  fromLanguage: string;
-  toLanguage: string;
-  isWord: boolean;
-  examTypes?: string[];
-  audioPath?: string;
-  speechUrl: string; // youdao tts url
-}
-
-export interface YoudaoTranslateResultBasicItem {
-  explains: string[];
-  "us-phonetic"?: string; // American phonetic
-  "us-speech"?: string;
-  phonetic?: string; // Chinese word phonetic
-  exam_type?: string[];
-  wfs?: YoudaoTranslateResultBasicFormsItem[];
-}
-export interface YoudaoTranslateResultBasicFormsItem {
-  wf?: YoudaoTranslateResultBasicFormItem;
-}
-export interface YoudaoTranslateResultBasicFormItem {
-  name: string;
-  value: string;
-}
-
-export interface YoudaoTranslateReformatResult {
-  type: SectionType;
-  children?: YoudaoTranslateReformatResultItem[];
-}
-export interface YoudaoTranslateReformatResultItem {
-  key: string;
-  title: string;
-  copyText: string;
-  subtitle?: string;
-  phonetic?: string;
-  speech?: string;
-  examTypes?: string[];
-}
-
-export interface MyPreferences {
-  language1: string;
-  language2: string;
-  youdaoAppId: string;
-  youdaoAppSecret: string;
-  baiduAppId: string;
-  baiduAppSecret: string;
-  caiyunToken: string;
-  tencentSecretId: string;
-  tencentSecretKey: string;
-  tencentProjectId: string;
-  isAutomaticQuerySelectedText: boolean;
-  isAutomaticPlayWordAudio: boolean;
-  isDisplayTargetTranslationLanguage: boolean;
-  enableBaiduTranslate: boolean;
-  enableTencentTranslate: boolean;
-  enableCaiyunTranslate: boolean;
-}
-
-export interface ListItemActionPanelItem {
+export interface ActionListPanelProps {
+  displayItem: ListDisplayItem;
   isInstalledEudic: boolean;
-  isShowOpenInEudicWeb: boolean;
-  eudicWebUrl: string;
-  isShowOpenInYoudaoWeb: boolean;
-  youdaoWebUrl: string;
-  copyText: string;
-  queryText: string;
-  queryWordInfo: QueryWordInfo;
-  currentFromLanguage: LanguageItem;
-  currentTargetLanguage: LanguageItem;
+  isShowingReleasePrompt: boolean;
   onLanguageUpdate: (language: LanguageItem) => void;
 }
 
-export interface RequestErrorInfo {
-  errorCode: string;
-  errorMessage: string;
+export enum TranslationType {
+  Youdao = "Youdao Translate",
+  Baidu = "Baidu Translate",
+  Tencent = "Tencent Translate",
+  Caiyun = "Caiyun Translate",
+  Apple = "Apple Translate",
+  DeepL = "DeepL Translate",
+  Google = "Google Translate",
+  Bing = "Bing Translate",
+  Volcano = "Volcano Translate",
+  OpenAI = "OpenAI Translate",
 }
 
-export interface LanguageItem {
-  youdaoLanguageId: string;
-  aliyunLanguageId: string;
-  tencentDetectLanguageId?: string; // tencent detect language id, [Japanese is "jp", Korean is "kr"] different from tencentLanguageId
-  tencentLanguageId?: string;
-  baiduLanguageId?: string;
-  caiyunLanguageId?: string;
-  languageTitle: string;
-  languageVoice: string[];
-  googleLanguageId?: string;
-  youdaoWebLanguageId?: string;
-  eudicWebLanguageId?: string;
+export enum DictionaryType {
+  Youdao = "Youdao Dictionary",
+  Iciba = "Iciba Dictionary",
+  Eudic = "Eudic Dictionary",
+  Linguee = "Linguee Dictionary",
+}
+
+export type QueryType = TranslationType | DictionaryType;
+export type RequestType = TranslationType | DictionaryType | LanguageDetectType;
+
+export interface QueryTypeResult {
+  type: QueryType;
+  queryWordInfo: QueryWordInfo; // dictionary type must has own word info.
+  result?: QueryResponse; // when language is not supported, result is undefined.
+  translations: string[]; // each translation is a paragraph.
+  oneLineTranslation?: string; // one line translation. will automatically give value when updating if type is TranslationType.
+  errorInfo?: RequestErrorInfo;
+
+  onMessage?: (message: { content: string; role: string }) => void;
+  onError?: (error: string) => void;
+  onFinish?: (reason: string) => void;
+}
+
+export type QueryResponse =
+  | YoudaoDictionaryFormatResult
+  | YoudaoWebTranslateResult
+  | BingTranslateResult
+  | BaiduTranslateResult
+  | BaiduWebLanguageDetect
+  | TencentTranslateResult
+  | CaiyunTranslateResult
+  | DeepLTranslateResult
+  | IcibaDictionaryResult
+  | LingueeDictionaryResult
+  | AppleTranslateResult
+  | VolcanoTranslateResult
+  | VolcanoDetectResult
+  | GoogleTranslateResult
+  | OpenAITranslateResult;
+
+export interface RequestErrorInfo {
+  type: RequestType;
+  message: string;
+  code?: string;
 }
 
 export interface BaiduTranslateResult {
   from?: string;
   to?: string;
   trans_result?: BaiduTranslateItem[];
-  error_code?: string;
+  error_code?: string; // has value when error happens
   error_msg?: string;
 }
 export interface BaiduTranslateItem {
@@ -135,14 +103,21 @@ export interface BaiduTranslateItem {
   dst: string;
 }
 
-export type TencentTranslateResult = TextTranslateResponse;
+export interface BaiduWebLanguageDetect {
+  error?: number; // 0
+  msg?: string; // "success"
+  lan?: string; // "en"
+}
 
-// export interface TencentTranslateResult {
-//   TargetText: string;
-//   Source: string;
-//   Target: string;
-//   RequestId: string;
-// }
+export interface TencentTranslateResult extends TextTranslateResponse {
+  Error: TencentError;
+}
+
+// {"Code":"InvalidParameterValue","Message":"不支持的语种：ar_to_zh"}
+export interface TencentError {
+  Code: string;
+  Message: string;
+}
 
 export interface CaiyunTranslateResult {
   rc: string;
@@ -150,57 +125,89 @@ export interface CaiyunTranslateResult {
   confidence: number;
 }
 
-export interface TranslateSourceResult {
-  youdaoResult: YoudaoTranslateResult;
-  baiduResult?: BaiduTranslateResult;
-  tencentResult?: TencentTranslateResult;
-  caiyunResult?: CaiyunTranslateResult;
-  icibaResult?: IcibaDictionaryResult;
+export interface DeepLTranslateResult {
+  translations: DeepLTranslationItem[]; //  deepL may return multiple translations for the text.
 }
-
-export interface TranslateFormatResult {
-  queryWordInfo: QueryWordInfo;
-  translations: TranslateItem[];
-  explanations?: string[];
-  forms?: YoudaoTranslateResultBasicFormsItem[];
-  webTranslation?: TranslateResultKeyValueItem;
-  webPhrases?: TranslateResultKeyValueItem[];
-}
-
-export interface TranslateItem {
-  type: TranslateType;
+export interface DeepLTranslationItem {
+  detected_source_language: string;
   text: string;
 }
-export interface TranslateResultKeyValueItem {
-  key: string;
-  value: string[];
+
+export type GoogleTranslateResult = {
+  text: string;
+  raw: RawResponse;
+};
+
+export interface AppleTranslateResult {
+  translatedText: string;
 }
 
-export interface TranslateDisplayResult {
-  type: SectionType | TranslateType;
-  sectionTitle?: SectionType | TranslateType | string;
-  items?: TranslateDisplayItem[];
+export interface OpenAITranslateResult {
+  translatedText: string;
 }
-export interface TranslateDisplayItem {
+
+export interface TranslationItem {
+  type: TranslationType;
+  text: string;
+}
+
+export interface QueryResult {
+  type: QueryType;
+  sourceResult: QueryTypeResult;
+  displaySections?: DisplaySection[]; // if sourceResult.result is not null, displaySections is not null.
+  hideDisplay?: boolean; // this value comes from preferences. if true, set displaySections to null.
+}
+
+export interface DisplaySection {
+  type: ListItemDisplayType;
+  sectionTitle?: string;
+  items: ListDisplayItem[];
+}
+
+export interface ListDisplayItem {
+  queryWordInfo: QueryWordInfo;
   key: string;
   title: string;
+  subtitle?: string;
+  displayType: ListItemDisplayType; // LingueeListItemType.Example
+  queryType: QueryType; // LingueeListItemType
   copyText: string;
   tooltip?: string;
-  subtitle?: string;
-  queryWordInfo: QueryWordInfo;
-  phonetic?: string;
   speech?: string;
+  detailsMarkdown?: string;
+  sourceData?: QueryResponse;
+
+  // accessory item
+  accessoryItem?: ListAccessoryItem;
+}
+
+export interface ListAccessoryItem {
+  phonetic?: string;
   examTypes?: string[];
-  translationMarkdown?: string;
+  example?: string; // French word example text
 }
 
-export interface ClipboardRecoredItem {
+export type ListItemDisplayType = LingueeListItemType | YoudaoDictionaryListItemType | QueryType;
+
+export interface ClipboardRecordedItem {
   key: string;
-  vale: string;
+  value: string;
 }
 
-export interface QueryRecoredItem {
+export interface QueryRecordedItem {
   timestamp: number;
   queryText: string;
   result?: string;
+}
+
+export interface WebQueryItem {
+  type: QueryType;
+  webUrl: string;
+  icon: Image.ImageLike;
+  title: string;
+}
+
+export interface AbortObject {
+  abortController?: AbortController;
+  childProcess?: ChildProcess;
 }

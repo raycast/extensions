@@ -7,15 +7,14 @@ import {
   getDeploymentStatusIcon,
   getDeploymentUrl,
   getDomainStatusIcon,
-  getEmail,
-  getKey,
+  getToken,
   getPageUrl,
   getRepoUrl,
   handleNetworkError,
   toUrl,
 } from './utils';
 
-const service = new Service(getEmail(), getKey());
+const service = new Service(getToken());
 
 function Command() {
   const [accounts, setAccounts] = useState<Account[]>([]);

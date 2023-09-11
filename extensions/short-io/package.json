@@ -28,6 +28,14 @@
       "mode": "view"
     },
     {
+      "name": "search-links-menu-bar",
+      "icon": "search-link-icon-menu-bar.png",
+      "title": "Search Links",
+      "subtitle": "Short.io",
+      "description": "Search short links with your own domain.",
+      "mode": "menu-bar"
+    },
+    {
       "name": "shorten-link-with-domain",
       "icon": "shorten-link-with-domain-icon.png",
       "title": "Shorten Link With Domain",
@@ -55,12 +63,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
+    "@raycast/api": "^1.40.1",
     "axios": "^0.27.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

@@ -1,67 +1,44 @@
 import getStandings from "../utils/getStandings";
-import { useState, useEffect } from "react";
-import { Team, Conferences } from "../types/standings.types";
+import { useCallback } from "react";
+import { Conference, ConferenceStanding, Team } from "../types/standings.types";
+import { useCachedPromise } from "@raycast/utils";
 
-const useStandings = (): {
-  standings: Conferences;
-  loading: boolean;
-  error: boolean;
-} => {
-  const [standings, setStandings] = useState<Conferences>({ eastern: [], western: [] });
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
+const getConferenceStandings = (conferenceStanding: ConferenceStanding): Team[] =>
+  conferenceStanding.standings.entries
+    .map((data) => ({
+      id: data.team.id,
+      name: data.team.displayName,
+      logo: data.team.logos[0].href,
+      link: data.team.links[0].href,
+      seed: data.stats?.find((stat) => stat.name === "playoffSeed")?.value,
+      wins: data.stats?.find((stat) => stat.name === "wins")?.value,
+      losses: data.stats?.find((stat) => stat.name === "losses")?.value,
+      streak: data.stats?.find((stat) => stat.name === "streak")?.displayValue,
+    }))
+    .sort((a: Team, b: Team) => {
+      return (a?.seed || 0) - (b?.seed || 0);
+    });
 
-  useEffect(() => {
-    const getTeamStandings = async () => {
-      let data: any = null;
+const useStandings = () => {
+  const fetchTeamStandings = useCallback(async () => {
+    const data = await getStandings({ year: new Date().getUTCFullYear().toString(), group: "conference" });
 
-      try {
-        data = await getStandings({ year: new Date().getUTCFullYear().toString(), group: "conference" });
-      } catch (error) {
-        setError(true);
-        return error;
-      }
+    const easternConference = data?.children?.find(
+      (conference) => conference?.name === `${Conference.Eastern} Conference`
+    );
+    const westernConference = data?.children?.find(
+      (conference) => conference?.name === `${Conference.Western} Conference`
+    );
 
-      const eastern: Array<Team> = data.children[0].standings.entries
-        .map((data: any) => {
-          return {
-            id: data.team.id,
-            name: data.team.displayName,
-            logo: data.team.logos[0].href,
-            link: data.team.links[0].href,
-            rank: data.stats[0].value,
-            wins: data.stats[1].value,
-            losses: data.stats[2].value,
-          };
-        })
-        .sort((a: Team, b: Team) => {
-          return a.rank - b.rank;
-        });
+    if (!easternConference || !westernConference) throw new Error("Could not find conference standings");
 
-      const western: Array<Team> = data.children[1].standings.entries
-        .map((data: any) => {
-          return {
-            id: data.team.id,
-            name: data.team.displayName,
-            logo: data.team.logos[0].href,
-            link: data.team.links[0].href,
-            rank: data.stats[0].value,
-            wins: data.stats[1].value,
-            losses: data.stats[2].value,
-          };
-        })
-        .sort((a: Team, b: Team) => {
-          return a.rank - b.rank;
-        });
+    const easternStandings = getConferenceStandings(easternConference);
+    const westernStandings = getConferenceStandings(westernConference);
 
-      setStandings({ eastern, western });
-      setLoading(false);
-    };
-
-    getTeamStandings();
+    return { easternStandings, westernStandings };
   }, []);
 
-  return { standings, loading, error };
+  return useCachedPromise(fetchTeamStandings);
 };
 
 export default useStandings;

@@ -1,58 +1,104 @@
-import useSWR from "swr";
-import React from "react";
-import { List } from "@raycast/api";
-import { Task } from "@doist/todoist-api-typescript";
-import { handleError, todoist } from "./api";
-import { SWRKeys, ViewMode } from "./types";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { formatDistanceToNow } from "date-fns";
+import { useMemo, useState } from "react";
+
+import LabelListItem from "./components/LabelListItem";
+import ProjectListItem from "./components/ProjectListItem";
+import TaskComments from "./components/TaskComments";
+import TaskDetail from "./components/TaskDetail";
 import TaskListItem from "./components/TaskListItem";
+import View from "./components/View";
+import { getCollaboratorIcon, getUserIcon } from "./helpers/collaborators";
+import { getPriorityIcon } from "./helpers/priorities";
+import { ViewMode, searchBarPlaceholder } from "./helpers/tasks";
+import useSyncData from "./hooks/useSyncData";
 
-export default function Search() {
-  const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ filter: "all" }));
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+function SearchTasks() {
+  const { data, setData, isLoading } = useSyncData();
 
-  const [filteredTasks, setFilteredTasks] = React.useState<Task[]>([]);
-  const [projectId, setProjectId] = React.useState("");
+  const [searchType, setSearchType] = useState("");
 
-  const placeholder = "Filter tasks by name, priority (e.g p1), or project name (e.g Work)";
+  const items = useMemo(() => {
+    if (!data) return null;
 
-  if (getProjectsError) {
-    handleError({ error: getProjectsError, title: "Unable to get tasks" });
-  }
-
-  if (getTasksError) {
-    handleError({ error: getTasksError, title: "Unable to get tasks" });
-  }
-
-  React.useEffect(() => {
-    if (tasks) {
-      setFilteredTasks(projectId ? tasks.filter((task) => task.projectId === parseInt(projectId)) : tasks);
+    if (searchType === "tasks") {
+      return data.items.map((task) => (
+        <TaskListItem key={task.id} task={task} mode={ViewMode.search} data={data} setData={setData} />
+      ));
     }
-  }, [tasks, projectId]);
 
-  const searchBarAccessory = (
-    <List.Dropdown tooltip="Select project" onChange={(projectId) => setProjectId(projectId)}>
-      <List.Dropdown.Item title="All tasks" value="" />
+    if (searchType === "projects") {
+      return data.projects.map((project) => (
+        <ProjectListItem key={project.id} project={project} data={data} setData={setData} />
+      ));
+    }
 
-      {projects?.map((project) => {
-        return <List.Dropdown.Item key={project.id} title={project.name} value={String(project.id)} />;
-      })}
-    </List.Dropdown>
-  );
+    if (searchType === "labels") {
+      return data.labels.map((label) => <LabelListItem key={label.id} label={label} data={data} setData={setData} />);
+    }
+
+    if (searchType === "comments") {
+      return data.notes.map((note) => {
+        const collaborator = data.collaborators.find((collaborator) => collaborator.id === note.posted_uid);
+        const correspondingTask = data.items.find((task) => task.id === note.item_id);
+
+        if (!correspondingTask) return null;
+
+        const icon = collaborator ? getCollaboratorIcon(collaborator) : data ? getUserIcon(data.user) : Icon.Person;
+
+        return (
+          <List.Item
+            key={note.id}
+            title={note.content}
+            subtitle={formatDistanceToNow(new Date(note.posted_at), { addSuffix: true })}
+            accessories={[
+              { text: correspondingTask.content, icon: getPriorityIcon(correspondingTask) },
+              { icon: note.file_attachment ? Icon.Link : null },
+            ]}
+            icon={icon}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Show Task Comments"
+                  target={<TaskComments task={correspondingTask} />}
+                  icon={Icon.Bubble}
+                />
+
+                <Action.Push
+                  title="Show Task"
+                  target={<TaskDetail taskId={correspondingTask.id} />}
+                  icon={Icon.Sidebar}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      });
+    }
+  }, [searchType, setData, data]);
 
   return (
     <List
-      searchBarPlaceholder={placeholder}
-      {...(projects ? { searchBarAccessory } : {})}
-      isLoading={(!tasks && !getTasksError) || (!projects && !getProjectsError)}
+      isLoading={isLoading}
+      searchBarPlaceholder={searchBarPlaceholder}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select View" onChange={setSearchType} storeValue>
+          <List.Dropdown.Item title="Tasks" value="tasks" icon={Icon.BulletPoints} />
+          <List.Dropdown.Item title="Projects" value="projects" icon={Icon.List} />
+          <List.Dropdown.Item title="Labels" value="labels" icon={Icon.Tag} />
+          <List.Dropdown.Item title="Comments" value="comments" icon={Icon.SpeechBubble} />
+        </List.Dropdown>
+      }
     >
-      {filteredTasks.map((task) => (
-        <TaskListItem
-          key={task.id}
-          task={task}
-          mode={projectId ? ViewMode.project : ViewMode.search}
-          {...(projects ? { projects } : {})}
-        />
-      ))}
+      {items}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <SearchTasks />
+    </View>
   );
 }

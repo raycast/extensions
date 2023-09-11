@@ -1,5 +1,5 @@
 import { List, ActionPanel, PushAction, Icon } from "@raycast/api";
-import { Project } from "../types";
+import { Project, Task } from "../types";
 import { TaskList } from "../views";
 
 export function ProjectListItem({
@@ -8,8 +8,8 @@ export function ProjectListItem({
   refreshRecords,
 }: {
   project: Project;
-  timeRecords: Array<any>;
-  refreshRecords: () => Promise<Array<any>>;
+  timeRecords: Array<Task>;
+  refreshRecords: () => Promise<Array<Task>>;
 }) {
   return (
     <List.Item

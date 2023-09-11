@@ -1,6 +1,5 @@
-import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/api";
 
-import { useEffect, useState } from "react";
 import { homedir } from "os";
 import path from "path";
 import fs from "fs";
@@ -10,67 +9,6 @@ const execp = promisify(exec);
 import parseGitConfig = require("parse-git-config");
 import parseGithubURL = require("parse-github-url");
 import getDefaultBrowser from "default-browser";
-
-const CacheFile = path.join(environment.supportPath, "cache.json");
-
-export interface GitRepo {
-  name: string;
-  fullPath: string;
-  icon: string;
-  defaultBrowserId: string;
-  remotes: RemoteRepo[];
-}
-
-interface GitRemote {
-  url: string;
-}
-
-export interface RemoteRepo {
-  name: string;
-  host: string;
-  url: string;
-}
-
-export class Cache {
-  version = 2;
-  repos: GitRepo[];
-
-  constructor() {
-    makeSupportPath();
-    this.repos = [];
-    try {
-      fs.accessSync(CacheFile, fs.constants.R_OK);
-    } catch (err) {
-      return;
-    }
-    const jsonData = fs.readFileSync(CacheFile).toString();
-    if (jsonData.length > 0) {
-      const cache: Cache = JSON.parse(jsonData);
-      if (cache.version && cache.version === this.version) {
-        this.repos = cache.repos;
-      }
-    }
-  }
-
-  save(): void {
-    const jsonData = JSON.stringify(this, null, 2) + "\n";
-    fs.writeFileSync(CacheFile, jsonData);
-  }
-
-  setRepos(repos: GitRepo[]): void {
-    this.repos = repos;
-  }
-
-  clear(): void {
-    this.repos = [];
-    this.save();
-  }
-}
-
-export interface RepoSearchResponse {
-  sectionTitle: string;
-  repos: GitRepo[];
-}
 
 export interface OpenWith {
   name: string;
@@ -89,29 +27,74 @@ export interface Preferences {
   openWith5?: OpenWith;
 }
 
-export function resolvePath(filepath: string): string {
-  if (filepath.length > 0 && filepath[0] === "~") {
-    return path.join(homedir(), filepath.slice(1));
-  }
-  return filepath;
+export interface GitRepo {
+  name: string;
+  fullPath: string;
+  icon: string;
+  defaultBrowserId: string;
+  remotes: RemoteRepo[];
 }
 
-export function tildifyPath(p: string): string {
-  const normalizedPath = path.normalize(p) + path.sep;
-
-  return (
-    normalizedPath.indexOf(homedir()) === 0
-      ? normalizedPath.replace(homedir() + path.sep, `~${path.sep}`)
-      : normalizedPath
-  ).slice(0, -1);
+export interface RemoteRepo {
+  name: string;
+  host: string;
+  url: string;
 }
 
-function makeSupportPath() {
-  fs.mkdirSync(environment.supportPath, { recursive: true });
+interface GitRemote {
+  url: string;
 }
 
-export async function loadPreferences(): Promise<Preferences> {
+function getPreferences(): Preferences {
   return getPreferenceValues<Preferences>();
+}
+
+export class GitRepoService {
+  private static favoritesStorageKey = "git-repos-favorites";
+
+  static async gitRepos(): Promise<GitRepo[]> {
+    const preferences = getPreferences();
+    if (preferences.repoScanPath.length == 0) {
+      showToast(Toast.Style.Failure, "", "Directories to scan has not been defined in settings");
+      return [];
+    }
+    const [repoPaths, unresolvedPaths] = parsePath(preferences.repoScanPath);
+    if (unresolvedPaths.length > 0) {
+      showToast(
+        Toast.Style.Failure,
+        "",
+        `Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`
+      );
+    }
+    const repos = await findRepos(repoPaths, preferences.repoScanDepth ?? 3, preferences.includeSubmodules ?? false);
+
+    return repos;
+  }
+
+  static async favorites(): Promise<string[]> {
+    const favoritesItem: string | undefined = await LocalStorage.getItem(GitRepoService.favoritesStorageKey);
+    if (favoritesItem) {
+      return JSON.parse(favoritesItem) as string[];
+    } else {
+      return [];
+    }
+  }
+
+  static async addToFavorites(repo: GitRepo) {
+    const favorites = await GitRepoService.favorites();
+    favorites.push(repo.fullPath);
+    await GitRepoService.saveFavorites(favorites);
+  }
+
+  static async removeFromFavorites(repo: GitRepo) {
+    let favorites = await GitRepoService.favorites();
+    favorites = favorites.filter((favorite) => favorite !== repo.fullPath);
+    await GitRepoService.saveFavorites(favorites);
+  }
+
+  private static async saveFavorites(favorites: string[]) {
+    await LocalStorage.setItem(GitRepoService.favoritesStorageKey, JSON.stringify(favorites));
+  }
 }
 
 function gitRemotes(path: string): RemoteRepo[] {
@@ -131,6 +114,23 @@ function gitRemotes(path: string): RemoteRepo[] {
     }
   }
   return repos;
+}
+
+export function resolvePath(filepath: string): string {
+  if (filepath.length > 0 && filepath[0] === "~") {
+    return path.join(homedir(), filepath.slice(1));
+  }
+  return filepath;
+}
+
+export function tildifyPath(p: string): string {
+  const normalizedPath = path.normalize(p) + path.sep;
+
+  return (
+    normalizedPath.indexOf(homedir()) === 0
+      ? normalizedPath.replace(homedir() + path.sep, `~${path.sep}`)
+      : normalizedPath
+  ).slice(0, -1);
 }
 
 export function parsePath(path: string): [string[], string[]] {
@@ -179,8 +179,32 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
   }
 }
 
+async function findSubmodules(path: string): Promise<string[]> {
+  const { stdout } = await execp(
+    `grep "\\[submodule"  ${path + "/.gitmodules"} | sed "s%\\[submodule \\"%\${1%/.git}/%g" | sed "s/\\"]//g"`
+  );
+  const paths = stdout.split("\n").filter((e) => e);
+  const submodulePaths = paths.map((subPath) => {
+    const temp = `${path}${subPath}`;
+    return temp;
+  });
+  return submodulePaths;
+}
+
+async function findWorktrees(path: string, maxDepth: number): Promise<GitRepo[]> {
+  let foundRepos: GitRepo[] = [];
+  const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type f`;
+  const { stdout, stderr } = await execp(findCmd);
+  if (!stderr) {
+    const repoPaths = stdout.split("\n").filter((e) => e);
+    const repos = parseRepoPaths(path, repoPaths, false);
+    foundRepos = foundRepos.concat(repos);
+    foundRepos.map((repo) => (repo.icon = "git-worktree-icon.png"));
+  }
+  return foundRepos;
+}
+
 export async function findRepos(paths: string[], maxDepth: number, includeSubmodules: boolean): Promise<GitRepo[]> {
-  const cache = new Cache();
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
@@ -188,7 +212,6 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
       const { stdout, stderr } = await execp(findCmd);
       if (stderr) {
         showToast(Toast.Style.Failure, "Find Failed", stderr);
-        console.error(`error: ${stderr}`);
         return [];
       }
       const repoPaths = stdout.split("\n").filter((e) => e);
@@ -234,116 +257,6 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
   foundRepos.map((repo) => {
     repo.defaultBrowserId = defaultBrowser.id;
   });
-  cache.setRepos(foundRepos);
-  cache.save();
+
   return foundRepos;
-}
-
-async function findSubmodules(path: string): Promise<string[]> {
-  const { stdout } = await execp(
-    `grep "\\[submodule"  ${path + "/.gitmodules"} | sed "s%\\[submodule \\"%\${1%/.git}/%g" | sed "s/\\"]//g"`
-  );
-  const paths = stdout.split("\n").filter((e) => e);
-  const submodulePaths = paths.map((subPath) => {
-    const temp = `${path}${subPath}`;
-    return temp;
-  });
-  return submodulePaths;
-}
-
-async function findWorktrees(path: string, maxDepth: number): Promise<GitRepo[]> {
-  let foundRepos: GitRepo[] = [];
-  const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type f`;
-  const { stdout, stderr } = await execp(findCmd);
-  if (!stderr) {
-    const repoPaths = stdout.split("\n").filter((e) => e);
-    const repos = parseRepoPaths(path, repoPaths, false);
-    foundRepos = foundRepos.concat(repos);
-    foundRepos.map((repo) => (repo.icon = "git-worktree-icon.png"));
-  }
-  return foundRepos;
-}
-
-export function useRepoCache(query: string | undefined): {
-  response?: RepoSearchResponse;
-  error?: string;
-  isLoading: boolean;
-} {
-  const [response, setResponse] = useState<RepoSearchResponse>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [fetched, setIsFetched] = useState<boolean>(false);
-  const cache = new Cache();
-
-  let cancel = false;
-  let repos = cache.repos;
-
-  function filterRepos(repos: GitRepo[], query: string): GitRepo[] {
-    return repos.filter((repo) => repo.name.toLocaleLowerCase().includes(query.toLowerCase()));
-  }
-
-  useEffect(() => {
-    async function fetchRepos() {
-      if (cancel || fetched) {
-        return;
-      }
-      setError(undefined);
-
-      try {
-        const preferences = await loadPreferences();
-        if (preferences.repoScanPath.length == 0) {
-          setError("Directories to scan has not been defined in settings");
-          return;
-        }
-        const [repoPaths, unresolvedPaths] = parsePath(preferences.repoScanPath);
-        if (unresolvedPaths.length > 0) {
-          setError(`Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`);
-        }
-        const repos = await findRepos(
-          repoPaths,
-          preferences.repoScanDepth ?? 3,
-          preferences.includeSubmodules ?? false
-        );
-
-        if (!cancel) {
-          let filteredRepos = repos;
-          let sectionTitle = `${filteredRepos.length} Repo${filteredRepos.length != 1 ? "s" : ""}`;
-          if (query && query?.length > 0) {
-            filteredRepos = filterRepos(filteredRepos, query);
-            sectionTitle = `${filteredRepos.length} Repo${filteredRepos.length != 1 ? "s" : ""} Found`;
-          }
-          setResponse({ sectionTitle: sectionTitle, repos: filteredRepos });
-          setIsFetched(true);
-        }
-      } catch (e) {
-        if (!cancel) {
-          setError(e as string);
-        }
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    let sectionTitle = `${repos.length} Repo${repos.length != 1 ? "s" : ""}`;
-    if (query && query.length > 0) {
-      repos = filterRepos(repos, query);
-      sectionTitle = `${repos.length} Repo${repos.length != 1 ? "s" : ""} Found`;
-    }
-
-    if (cache.repos.length > 0) {
-      setResponse({ sectionTitle: sectionTitle, repos: repos });
-    }
-
-    if (!fetched) {
-      fetchRepos();
-    }
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return { response, error, isLoading };
 }

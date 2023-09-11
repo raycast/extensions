@@ -1,6 +1,5 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
-import fetch from "node-fetch";
-import { useEffect, useState } from "react";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
 type Variables = Record<string, string>;
 
@@ -11,48 +10,33 @@ interface GraphQLResponse<T> {
   }[];
 }
 
-async function graphql<T>(query: string, variables?: Variables) {
+interface UseQueryOptions {
+  query: string;
+  errorMessage: string;
+  variables?: Variables;
+}
+
+export function useQuery<T>({ query, errorMessage, variables }: UseQueryOptions) {
   const preferences = getPreferenceValues();
 
-  const res = await fetch("https://graphql.buildkite.com/v1", {
+  return useFetch<T>("https://graphql.buildkite.com/v1", {
     method: "POST",
     body: JSON.stringify({ query, variables }),
     headers: {
       Authorization: `Bearer ${preferences.token}`,
     },
+    keepPreviousData: true,
+    async parseResponse(response) {
+      const { errors, data } = (await response.json()) as GraphQLResponse<T>;
+
+      if (errors?.length) {
+        throw new Error(errors[0].message);
+      }
+
+      return data;
+    },
+    onError() {
+      showToast(Toast.Style.Failure, errorMessage);
+    },
   });
-
-  if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText}`);
-  }
-
-  const { errors, data } = (await res.json()) as GraphQLResponse<T>;
-
-  if (errors?.length) {
-    throw new Error(errors[0].message);
-  }
-
-  return data;
-}
-
-export function useQuery<T>(
-  queryKey: string[],
-  options: {
-    query: string;
-    errorMessage: string;
-    variables?: Variables;
-  }
-) {
-  const [state, setState] = useState<T>();
-
-  useEffect(() => {
-    graphql<T>(options.query, options.variables)
-      .then(setState)
-      .catch((error) => {
-        console.error(error);
-        showToast(ToastStyle.Failure, options.errorMessage);
-      });
-  }, queryKey);
-
-  return state;
 }

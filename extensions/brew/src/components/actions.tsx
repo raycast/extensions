@@ -8,6 +8,7 @@ import {
   brewUpgrade,
   brewUpgradeAll,
 } from "../brew";
+import { preferences } from "../preferences";
 import { showActionToast, showFailureToast } from "../utils";
 import { Cask, Formula, OutdatedFormula, Nameable } from "../brew";
 
@@ -137,7 +138,7 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean> {
 async function upgradeAll(): Promise<boolean> {
   const abort = showActionToast({ title: "Upgrading all formula", cancelable: true });
   try {
-    await brewUpgradeAll(abort);
+    await brewUpgradeAll(preferences.greedyUpgrades, abort);
     showToast(Toast.Style.Success, "Upgrade formula succeeded");
     return true;
   } catch (err) {

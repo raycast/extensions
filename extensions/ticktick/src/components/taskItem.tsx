@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useCallback, useMemo } from "react";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { useMemo, useRef, useState } from "react";
 import { getProjectNameById } from "../service/project";
 import { Task } from "../service/task";
 import { addSpaceBetweenEmojiAndText } from "../utils/text";
+import { toggleTask } from "../service/osScript";
 
 const TaskItem: React.FC<{
   id: Task["id"];
@@ -12,12 +13,17 @@ const TaskItem: React.FC<{
   tags: Task["tags"];
   actionType: "today" | "week" | "project";
   detailMarkdown: string;
+  copyContent: string;
+  refresh: () => void;
 }> = (props) => {
-  const { id, title, priority, projectId, actionType, detailMarkdown, tags } = props;
+  const { id, title, priority, projectId, actionType, detailMarkdown, tags, copyContent, refresh } = props;
 
   const projectName = useMemo(() => {
     return getProjectNameById(projectId) || "";
   }, [projectId]);
+
+  const togglingRef = useRef(false);
+  const [isChecked, setIsChecked] = useState(false);
 
   const checkboxColor = useMemo(() => {
     switch (priority) {
@@ -58,15 +64,32 @@ const TaskItem: React.FC<{
   return (
     <List.Item
       title={title || "Untitled"}
-      icon={{ source: Icon.Circle, tintColor: checkboxColor }}
+      icon={{ source: isChecked ? Icon.CheckCircle : Icon.Circle, tintColor: checkboxColor }}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Open">
-            <Action.Open title="Open in TickTick" target={target} icon={Icon.Window} />
-          </ActionPanel.Section>
+          <Action.Open title="View" target={target} icon={Icon.Eye} />
+          <Action
+            title="Compete"
+            onAction={async () => {
+              if (togglingRef.current) return;
+              togglingRef.current = true;
+              setIsChecked(true);
+              const result = await toggleTask(id);
+              if (result) {
+                refresh();
+                showToast(Toast.Style.Success, `${title} Completed`);
+              } else {
+                setIsChecked(false);
+              }
+              togglingRef.current = false;
+            }}
+            icon={Icon.CheckCircle}
+            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+          />
+          <Action.CopyToClipboard title="Copy" content={copyContent} icon={Icon.Clipboard} />
         </ActionPanel>
       }
-      accessoryTitle={addSpaceBetweenEmojiAndText(projectName)}
+      accessories={[{ text: addSpaceBetweenEmojiAndText(projectName) }]}
       detail={
         <List.Item.Detail
           markdown={detailMarkdown}

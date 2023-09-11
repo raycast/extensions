@@ -13,7 +13,7 @@ interface FormValues extends Omit<PhoneChat, "id" | "pinned"> {
 }
 
 export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneChatFormProps) {
-  const { chats, updateChats } = useWhatsAppChats();
+  const [chats, setChats] = useWhatsAppChats();
   const isCreation = !defaultValue;
 
   async function handleSubmit(formValues: FormValues) {
@@ -42,7 +42,7 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
     }
 
     if (isCreation) {
-      await updateChats([...chats, savedChat]);
+      setChats([...chats, savedChat]);
       await showToast(Toast.Style.Success, `Created new chat`, savedChat.name);
     } else {
       const newChats = chats.map((chat) => {
@@ -51,7 +51,7 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
         }
         return chat;
       });
-      await updateChats(newChats);
+      setChats(newChats);
       await showToast(Toast.Style.Success, `Updated existing chat`, savedChat.name);
     }
 

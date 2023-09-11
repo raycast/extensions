@@ -30,3 +30,17 @@ export interface Album {
   artist: string;
   count?: string;
 }
+
+export interface ScriptError extends Error {
+  shortMessage: string;
+  command: string;
+  failed: boolean;
+}
+
+export const ScriptError = {
+  is: (error: Error): error is ScriptError => "shortMessaage" in error,
+};
+
+export interface Preferences {
+  volumeSteps: string;
+}

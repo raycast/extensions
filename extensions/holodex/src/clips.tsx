@@ -2,9 +2,9 @@ import { ActionPanel, Image, List } from "@raycast/api";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useCallback, useState } from "react";
 import { Actions } from "./components/Actions";
-import { DetailView } from "./components/Details";
+import { VideoDetail } from "./components/Details";
 import { apiRequest, useQuery } from "./lib/api";
-import { Clip, Video } from "./lib/interfaces";
+import { HClip, Video } from "./lib/interfaces";
 import { getPreferences, OrgDropdown } from "./lib/preferences";
 
 export default function Command() {
@@ -54,12 +54,14 @@ export function ClipItem({ video }: { video: Video }) {
   return (
     <List.Item
       title={video.channelName}
-      // accessoryTitle={parts.join(" ")}
       icon={{ source: video.avatarUrl, mask: Image.Mask.Circle }}
-      detail={<DetailView {...video} />}
+      detail={<VideoDetail {...video} />}
+      accessories={video.mentions
+        .slice(0, 2)
+        .map((mention) => ({ icon: { source: mention.photo, mask: Image.Mask.Circle } }))}
       actions={
         <ActionPanel title={`Clip: ${video.videoId}`}>
-          <Actions video={video} isInDetail={true} />
+          <Actions video={video} />
         </ActionPanel>
       }
     />
@@ -112,10 +114,9 @@ async function performSearch(signal: AbortSignal, org: string, query?: string): 
           },
           signal,
         })
-  ) as Clip[];
+  ) as HClip[];
 
   return response.map((video) => {
-    console.log(video);
     const channelName = (preferEnglishName && video.channel.english_name) || video.channel.name;
 
     return {
@@ -130,6 +131,8 @@ async function performSearch(signal: AbortSignal, org: string, query?: string): 
       avatarUrl: video.channel.photo,
       type: video.type,
       liveViewers: 0,
+      mentions: video.mentions ?? [],
+      clips: [],
     };
   });
 }

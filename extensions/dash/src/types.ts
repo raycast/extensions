@@ -14,5 +14,10 @@ export interface Docset {
   keyword: string;
   pluginKeyword: string;
   suggestedKeyword: string;
+  effectiveKeyword?: string;
   iconPath?: string;
+}
+
+export interface DashArguments {
+  searchstring: string;
 }

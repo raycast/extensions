@@ -2,16 +2,29 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "port-manager",
   "title": "Port Manager",
-  "description": "Find, open and kill ports",
+  "description": "Find open ports and close them",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
   "icon": "command-icon.png",
   "author": "lucaschultz",
   "license": "MIT",
   "commands": [
     {
       "name": "open-ports",
-      "title": "Kill Port",
+      "title": "List Open Ports",
       "description": "Show and Close Opened Ports",
       "mode": "view"
+    },
+    {
+      "name": "open-ports-menu-bar",
+      "title": "List Open Ports in Menu Bar",
+      "description": "List open ports in menu bar",
+      "mode": "menu-bar",
+      "icon": "command-icon.png",
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -20,21 +33,42 @@
       "type": "checkbox",
       "required": false,
       "title": "Use Sudo",
-      "description": "See https://github.com/raycast/extensions/tree/main/extensions/port-manager#readme",
+      "description": "See raycast.com/lucaschultz/port-manager",
       "default": false,
       "label": "Run lsof and kill commands as sudo"
+    },
+    {
+      "name": "killSignal",
+      "description": "The signal used to kill the process",
+      "type": "dropdown",
+      "required": true,
+      "default": "select",
+      "title": "Kill Signal",
+      "data": [
+        {
+          "title": "Ask before each kill",
+          "value": "ask"
+        },
+        {
+          "title": "Alway use SIGTERM",
+          "value": "15"
+        },
+        {
+          "title": "Always use SIGKILL",
+          "value": "9"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0"
+    "@raycast/api": "^1.57.0",
+    "@raycast/utils": "^1.9.1",
+    "nanoid": "^4.0.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"

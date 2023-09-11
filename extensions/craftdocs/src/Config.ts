@@ -1,9 +1,12 @@
 import { homedir } from "os";
-import { readdirSync } from "fs";
+import { readdirSync, existsSync } from "fs";
 import path from "path";
 
-const craftDataRoot = "~/Library/Containers/com.lukilabs.lukiapp/Data/Library/Application Support/com.lukilabs.lukiapp";
-const searchPath = `${craftDataRoot}/Search`;
+const bundleIds = ["com.lukilabs.lukiapp", "com.lukilabs.lukiapp-setapp"];
+const [craftDataRoot] = bundleIds
+  .map((id) => path.join(homedir(), `/Library/Containers/${id}/Data/Library/Application Support/${id}`))
+  .filter(existsSync);
+const searchPath = path.join(craftDataRoot, "Search");
 
 type SpaceSQLite = {
   path: string;

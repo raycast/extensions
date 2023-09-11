@@ -108,7 +108,7 @@ export default function CreateShortcut(props: {
             <Form.Dropdown.Item
               key={value[0]}
               title={value[0]}
-              icon={{ source: "solid-circle.png", tintColor: value[1] as Color }}
+              icon={{ source: Icon.CircleFilled, tintColor: value[1] as Color }}
               value={value[1]}
             />
           );
@@ -312,7 +312,7 @@ function CreateShortcutActions(props: {
     <ActionPanel>
       <Action
         title="Create Shortcut"
-        icon={Icon.Download}
+        icon={Icon.PlusCircle}
         onAction={async () => {
           const _checkInfo = checkInfo(info.name, tactions);
           const _checkAffix = checkAffix(tactions);

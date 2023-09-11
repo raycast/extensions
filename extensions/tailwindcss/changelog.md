@@ -1,5 +1,32 @@
 # Tailwind CSS Changelog
 
+## [Update] - 2023-09-06
+- Updated "Copy CSS" shortcut in Search Classes to cmd+shift+.
+- Updated Tailwind
+
+## [Add a preference to display CSS spacing units in pixels] - 2023-09-03
+
+## [Allow for HEX value search] - 2023-07-22
+- Add HEX values as possible keyword for the `Search Colors` command
+
+## [Add actions to copy color class names] - 2023-03-12
+- Add actions to copy colors as background, text and border class names for the `Search Colors` command
+
+## [Default Action for Search Classes] - 2023-03-12
+- Add a preference to set the default action for the `Search Classes` command
+
+## [Search Classes command improvements] - 2023-01-21
+- Search by class content instead of only by selector
+- Add an action to copy the class name
+
+## [Updated CSS classes] - 2022-11-29
+
+## [Generate all CSS classes] - 2022-11-27
+- Generate all CSS classes for the `Search Classes` command
+
+## [Fixed typo] - 2022-09-12
+- Renamed grid-col- to grid-cols
+
 ## [Search Colors and Components command] - 2022-06-27
 - Add `Search Colors` command
 - Add `Search Components` command

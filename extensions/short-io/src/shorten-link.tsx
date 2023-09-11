@@ -15,6 +15,7 @@ export default function ShortenLink(props: { paraDomain?: string }) {
   const { defaultDomain, domainLoading } = getDefaultDomain(paraDomain);
 
   const [originalLink, setOriginalLink] = useState<string>("");
+  const [originalLinkError, setOriginalLinkError] = useState<string | undefined>();
   const [slug, setSlug] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [shortLink, setShortLink] = useState<string>("");
@@ -45,7 +46,7 @@ export default function ShortenLink(props: { paraDomain?: string }) {
                 return;
               }
               if (isEmpty(originalLink)) {
-                await showToast(Style.Failure, "Error.", "Please enter a link to shorten.");
+                setOriginalLinkError("The field should't be empty!");
                 return;
               }
               await showToast(Style.Animated, "Shortening...");
@@ -81,7 +82,25 @@ export default function ShortenLink(props: { paraDomain?: string }) {
       }
     >
       <Form.Description title={"Domain"} text={defaultDomain} />
-      <Form.TextField id={"Original Link"} title={"Original Link"} value={originalLink} onChange={setOriginalLink} />
+      <Form.TextField
+        id={"Original Link"}
+        title={"Original Link"}
+        value={originalLink}
+        error={originalLinkError}
+        onChange={(newValue) => {
+          setOriginalLink(newValue);
+          if (newValue.length > 0) {
+            setOriginalLinkError(undefined);
+          }
+        }}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setOriginalLinkError("The field should't be empty!");
+          } else {
+            setOriginalLinkError(undefined);
+          }
+        }}
+      />
       <Form.TextField id={"Slug"} title={"Slug"} placeholder={"Optional"} value={slug} onChange={setSlug} />
       <Form.TextField id={"Title"} title={"Title"} placeholder={"Optional"} value={title} onChange={setTitle} />
       {!isEmpty(shortLink) && <Form.Description title={"Short Link"} text={shortLink} />}

@@ -1,7 +1,7 @@
 /**
  * Corresponds to Apple Map's four possible modes of travel.
  */
-export enum TravelMode {
+export enum TransportType {
   Driving = "d",
   Walking = "w",
   Transit = "r",
@@ -22,13 +22,19 @@ export interface Preferences {
  *
  * @param origin The origin address
  * @param destination The destination address
- * @param travelmode One of three possible travel modes
+ * @param transportType One of four possible travel modes
  * @returns A properly URI encoded string according to Apple Maps documentation
  */
-export function makeDirectionsURL(origin: string, destination: string, travelmode: string): string {
+export function makeDirectionsURL(origin: string, destination: string, transportType: string): string {
   const mapsBase = "maps://";
   return (
-    mapsBase + "?saddr=" + encodeURI(origin) + "&daddr=" + encodeURI(destination) + "&dirflg=" + encodeURI(travelmode)
+    mapsBase +
+    "?saddr=" +
+    encodeURI(origin) +
+    "&daddr=" +
+    encodeURI(destination) +
+    "&dirflg=" +
+    encodeURI(transportType)
   );
 }
 

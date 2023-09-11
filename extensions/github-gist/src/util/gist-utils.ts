@@ -20,7 +20,7 @@ export interface Gist {
 
 export enum GITHUB_GISTS {
   MY_GISTS = "My Gists",
-  STARRED = "My Starred",
+  STARRED = "Starred Gists",
   ALL_GISTS = "All Public Gists",
 }
 export const githubGists = Object.values(GITHUB_GISTS);
@@ -53,11 +53,13 @@ export async function requestGist(route: string, page: number, perPage: number) 
       file: [],
     };
     for (const value of Object.values(_data.files)) {
-      _gist.file.push({
-        filename: String(value.filename),
-        language: String(value.language),
-        raw_url: String(value.raw_url),
-      });
+      if (value !== undefined) {
+        _gist.file.push({
+          filename: String(value.filename),
+          language: String(value.language),
+          raw_url: String(value.raw_url),
+        });
+      }
     }
     _gists.push(_gist);
   });

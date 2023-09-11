@@ -13,7 +13,7 @@ A HUD will automatically hide the main window and show a compact message at the 
 #### Signature
 
 ```typescript
-async function showHUD(title: string): Promise<void>;
+async function showHUD(title: string, options?: { clearRootSearch?: boolean; popToRootType?: PopToRootType }): Promise<void>;
 ```
 
 #### Example
@@ -21,9 +21,19 @@ async function showHUD(title: string): Promise<void>;
 ```typescript
 import { showHUD } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await showHUD("Hey there 👋");
-};
+}
+```
+
+`showHUD` closes the main window when called, so you can use the same options as `closeMainWindow`:
+
+```typescript
+import { showHUD } from "@raycast/api";
+
+export default async function Command() {
+  await showHUD("Hey there 👋", { clearRootSearch: true, PopToRootType.Immediate });
+}
 ```
 
 #### Parameters

@@ -1,8 +1,8 @@
-import { closeMainWindow } from "@raycast/api";
+import { pipe } from "fp-ts/lib/function";
+
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
 export default async () => {
-  await closeMainWindow();
-  await handleTaskEitherError(music.currentTrack.love)();
+  await pipe(music.currentTrack.love, handleTaskEitherError("Failed to love the track", "Loved"))();
 };

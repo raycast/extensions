@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "inkdrop",
+  "title": "Inkdrop",
+  "description": "Control Inkdrop with Raycast",
+  "icon": "inkdrop_icon.png",
+  "author": "yaeda",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "address",
+      "type": "textfield",
+      "placeholder": "127.0.0.1",
+      "title": "bindAddress",
+      "required": true,
+      "description": "IP address of Inkdrop's client server"
+    },
+    {
+      "name": "port",
+      "type": "textfield",
+      "placeholder": "19840",
+      "title": "port",
+      "required": true,
+      "description": "Port of Inkdrop's client server"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "title": "username",
+      "required": true,
+      "description": "Username of Inkdrop's client server"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "title": "password",
+      "required": true,
+      "description": "Password of Inkdrop's client server"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Inkdrop",
+      "description": "Search notes in Inkdrop",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "Inkdrop",
+      "description": "Crete new note",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0",
+    "luxon": "^2.4.0",
+    "node-fetch": "^3.2.5"
+  },
+  "devDependencies": {
+    "@types/luxon": "^2.3.2",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

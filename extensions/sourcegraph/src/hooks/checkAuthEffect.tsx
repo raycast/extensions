@@ -1,5 +1,5 @@
 import { useNavigation } from "@raycast/api";
-import ExpandableErrorToast from "../components/ExpandableErrorToast";
+import ExpandableToast from "../components/ExpandableToast";
 
 import { Sourcegraph, instanceName } from "../sourcegraph";
 import { AuthError, checkAuth } from "../sourcegraph/gql/auth";
@@ -23,13 +23,13 @@ export default function checkAuthEffect(src: Sourcegraph) {
           "\n\nThis may be an issue with your configuration - try updating the Sourcegraph extension settings!";
         const toast =
           err instanceof AuthError
-            ? ExpandableErrorToast(
+            ? ExpandableToast(
                 push,
                 "Authentication error",
                 `Failed to authenticate against ${srcName}`,
                 `${err.message}. ${helpText}`
               )
-            : ExpandableErrorToast(
+            : ExpandableToast(
                 push,
                 "Authentication error",
                 `Encountered error authenticating against ${srcName}`,

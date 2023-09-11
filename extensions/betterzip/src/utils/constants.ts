@@ -12,4 +12,5 @@ export const archiveFormat = [
   ".rar ",
   ".dmg",
   ".iso",
+  ".nupkg",
 ];

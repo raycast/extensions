@@ -19,7 +19,7 @@ export function FolderPage(props: { folderName: string; folderPath: string; isOp
       isLoading={loading}
       searchBarPlaceholder={folderPath}
       onSelectionChange={(id) => {
-        if (typeof id !== "undefined") setCurrentItem(id);
+        if (typeof id === "string") setCurrentItem(id);
       }}
     >
       <FolderPageListEmptyView

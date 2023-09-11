@@ -3,6 +3,7 @@
 Plugin for Raycast to explore your [ClickUpTasks](https://github.com/Ali-Parandeh/raycast-clickup-extension).
 
 ## How to obtain an API Token
+
 - Go to [ClickUp](https://app.clickup.com/login)
 - Click on **USER SETTINGS**
 - Click on **APPS**
@@ -24,10 +25,10 @@ Plugin for Raycast to explore your [ClickUpTasks](https://github.com/Ali-Parande
 - [ ] View and browse subtasks
 - [ ] Copy task links to clipboard
 - [ ] View assignees from Tasks view
-- [ ] Set assignees, sprint scores, time estimates, priorities, tags and due dates from Raycast 
-- [ ] Update status and priority of tasks from Raycast 
-- [ ] Add subtasks and checklists from Raycast 
-- [ ] Add Task dependencies from Raycast 
+- [ ] Set assignees, sprint scores, time estimates, priorities, tags and due dates from Raycast
+- [ ] Update status and priority of tasks from Raycast
+- [ ] Add subtasks and checklists from Raycast
+- [ ] Add Task dependencies from Raycast
 - [ ] Create folders, lists and tasks from Raycast
 - [ ] List Tasks by sprints
 - [ ] Search tasks comments from Raycast

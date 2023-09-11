@@ -27,7 +27,7 @@ export function Results(props: ResultsProps) {
                 key={value[0]}
                 accessoryTitle={value[0]}
                 title={value[1]}
-                icon={{ source: Icon.Circle, tintColor: value[1] }}
+                icon={{ source: Icon.Circle, tintColor: { light: value[1], dark: value[1], adjustContrast: false } }}
                 actions={
                   <ActionPanel>
                     <CopyToClipboardAction title="Copy to Clipboard" content={value[1]} />

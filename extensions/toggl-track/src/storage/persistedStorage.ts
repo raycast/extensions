@@ -1,4 +1,4 @@
-import { setLocalStorageItem, getLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import dayjs from "dayjs";
 import { Refreshable, Storable } from "./types";
 
@@ -21,12 +21,12 @@ function persistedStorage<T>({
     lastRefresh = dayjs().toISOString();
     const fetcher = async () => {
       const data = await fetch();
-      await setLocalStorageItem(
+      await LocalStorage.setItem(
         key,
         JSON.stringify({
           lastRefresh,
           data,
-        })
+        }),
       );
       return data;
     };
@@ -40,7 +40,7 @@ function persistedStorage<T>({
 
   return {
     get: async () => {
-      const rawItem = await getLocalStorageItem<string>(key);
+      const rawItem = await LocalStorage.getItem<string>(key);
       if (rawItem) {
         const { lastRefresh, data } = JSON.parse(rawItem) as Storable<T>;
 

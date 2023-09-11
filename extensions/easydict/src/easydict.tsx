@@ -1,386 +1,240 @@
-import { Fragment, useEffect, useState } from "react";
-import { ActionFeedback, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
-import { Action, ActionPanel, Color, getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
-import {
-  LanguageItem,
-  TranslateDisplayResult,
-  TranslateTypeResult,
-  YoudaoTranslateResult,
-  BaiduTranslateResult,
-  TranslateFormatResult,
-} from "./types";
-import {
-  BaiduRequestStateCode,
-  getYoudaoErrorInfo,
-  maxInputTextLength,
-  youdaoErrorCodeLink,
-  YoudaoRequestStateCode,
-} from "./consts";
-import {
-  checkIsInstalledEudic,
-  defaultLanguage1,
-  defaultLanguage2,
-  getAutoSelectedTargetLanguageId,
-  getEudicWebTranslateURL,
-  detectInputTextLanguageId,
-  getLanguageItemFromTencentDetectLanguageId,
-  getLanguageItemFromLanguageId,
-  getYoudaoWebTranslateURL,
-  myPreferences,
-  isTranslateResultTooLong,
-  isShowMultipleTranslations,
-} from "./utils";
-import {
-  requestBaiduTextTranslate,
-  requestCaiyunTextTranslate,
-  requestTencentTextTranslate,
-  requestYoudaoDictionary,
-  tencentLanguageDetect,
-} from "./request";
-import {
-  formatTranslateDisplayResult,
-  formatYoudaoDictionaryResult,
-  updateFormateResultWithBaiduTranslation,
-  updateFormateResultWithCaiyunTranslation,
-  updateFormateResultWithTencentTranslation,
-} from "./formatData";
-import { playWordAudio } from "./audio";
-import { downloadYoudaoAudio } from "./dict/youdao/request";
+/*
+ * @author: tisfeng
+ * @createTime: 2022-06-23 14:19
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-03-17 22:48
+ * @fileName: easydict.tsx
+ *
+ * Copyright (c) 2022 by tisfeng, All Rights Reserved.
+ */
 
-let youdaoTranslateTypeResult: TranslateTypeResult | undefined;
-let delayFetchTranslateAPITimer: NodeJS.Timeout;
-let delayUpdateTargetLanguageTimer: NodeJS.Timeout;
+import { Icon, LaunchProps, List, getSelectedText } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { configAxiosProxy, delayGetSystemProxy } from "./axiosConfig";
+import { ListActionPanel, checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories } from "./components";
+import { DataManager } from "./dataManager/dataManager";
+import { QueryWordInfo } from "./dictionary/youdao/types";
+import { LanguageItem } from "./language/type";
+import { myPreferences, preferredLanguage1 } from "./preferences";
+import { DisplaySection } from "./types";
+import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
 
-export default function () {
-  checkLanguageIsSame();
+const disableConsoleLog = false;
 
-  // Delay the time to call the query API. Since API has frequency limit.
-  const delayRequestTime = 600;
+if (disableConsoleLog) {
+  // Since too many logs will cause bugs, we need to disable the console.log in development. Ref: https://github.com/raycast/extensions/pull/3917#issuecomment-1370771358
+  console.log = function () {
+    // do nothing
+  };
+}
+
+console.log(`enter easydict.tsx`);
+
+const dataManager = new DataManager();
+
+interface EasydictArguments {
+  queryText?: string;
+}
+
+export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
+  const isConflict = checkIfPreferredLanguagesConflict();
+  if (isConflict) {
+    return isConflict;
+  }
+
+  const { queryText } = props.arguments;
+  const trimQueryText = queryText ? trimTextLength(queryText) : props.fallbackText;
 
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
   const [isInstalledEudic, setIsInstalledEudic] = useState<boolean>(false);
+  const [isShowingReleasePrompt, setIsShowingReleasePrompt] = useState<boolean>(false);
 
-  // use to display input text
-  const [inputText, setInputText] = useState<string>("");
-  // searchText = inputText.trim(), avoid frequent request API
-  const [searchText, setSearchText] = useState<string>("");
-  const [translateDisplayResult, setTranslateDisplayResult] = useState<TranslateDisplayResult[]>();
+  // check if need show release prompt, every time the list is rendered.
+  checkIfNeedShowReleasePrompt((isShowing) => {
+    setIsShowingReleasePrompt(isShowing);
+  });
+
   /**
-     the language type of text, depending on the language type of the current input text, it is preferred to judge whether it is English or Chinese according to the preferred language, and then auto
-     */
-  const [currentFromLanguageItem, setCurrentFromLanguageItem] = useState<LanguageItem>(defaultLanguage1);
-  /*
-    default translation language, based on user's preference language, can only defaultLanguage1 or defaultLanguage2 depending on the currentFromLanguageState. cannot be changed manually.
-    */
-  const [autoSelectedTargetLanguageItem, setAutoSelectedTargetLanguageItem] = useState<LanguageItem>(defaultLanguage1);
-  /*
-    the user selected translation language, for display, can be changed manually. default userSelectedTargetLanguage is the autoSelectedTargetLanguage.
-    */
+   * Use to display input text.
+   *
+   * * Note: default value should be undefined, it used to call setup function.
+   */
+  const [inputText, setInputText] = useState<string>();
+  /**
+   * searchText = inputText.trim(), avoid frequent request API with blank input.
+   */
+  const [searchText, setSearchText] = useState<string>("");
+
+  const [displayResult, setDisplayResult] = useState<DisplaySection[]>([]);
+
+  /**
+   * the language type of text, depending on the language type of the current input text.
+   *
+   * Todo: directly use language id.
+   */
+  const [currentFromLanguageItem, setCurrentFromLanguageItem] = useState<LanguageItem>(preferredLanguage1);
+  /**
+   * default translation language, based on user's preference language, can only defaultLanguage1 or defaultLanguage2 depending on the currentFromLanguageState. cannot be changed manually.
+   */
+  const [autoSelectedTargetLanguageItem, setAutoSelectedTargetLanguageItem] =
+    useState<LanguageItem>(preferredLanguage1);
+  /**
+   * the user selected translation language, used for display, can be changed manually. default userSelectedTargetLanguage is the autoSelectedTargetLanguage.
+   */
   const [userSelectedTargetLanguageItem, setUserSelectedTargetLanguageItem] =
     useState<LanguageItem>(autoSelectedTargetLanguageItem);
 
-  async function querySearchText(fromLanguage: string, targetLanguage: string) {
-    console.log(`querySearchText fromTo: ${fromLanguage} -> ${targetLanguage}`);
-
-    youdaoTranslateTypeResult = await requestYoudaoDictionary(searchText, fromLanguage, targetLanguage);
-
-    const youdaoResult = youdaoTranslateTypeResult.result as YoudaoTranslateResult;
-    console.log(`youdaoResult: ${JSON.stringify(youdaoResult, null, 2)}`);
-    const youdaoErrorCode = youdaoResult.errorCode;
-    youdaoTranslateTypeResult.errorInfo = getYoudaoErrorInfo(youdaoErrorCode);
-
-    if (youdaoErrorCode === YoudaoRequestStateCode.AccessFrequencyLimited.toString()) {
-      delaySearchQueryText(fromLanguage, targetLanguage);
-      return;
-    } else if (youdaoErrorCode !== YoudaoRequestStateCode.Success.toString()) {
-      console.error(`youdao error: ${JSON.stringify(youdaoTranslateTypeResult.errorInfo)}`);
-      updateTranslateDisplayResult(null);
-      return;
-    }
-    let formatResult = formatYoudaoDictionaryResult(youdaoTranslateTypeResult);
-    downloadYoudaoAudio(formatResult.queryWordInfo, () => {
-      if (myPreferences.isAutomaticPlayWordAudio && formatResult.queryWordInfo.isWord) {
-        playWordAudio(formatResult.queryWordInfo.word);
-      }
-    });
-
-    const [from, to] = youdaoResult.l.split("2"); // from2to
-    if (from === to) {
-      const target = getAutoSelectedTargetLanguageId(from);
-      setAutoSelectedTargetLanguageItem(getLanguageItemFromLanguageId(target));
-      querySearchText(from, target);
-      return;
-    }
-
-    setCurrentFromLanguageItem(getLanguageItemFromLanguageId(from));
-    updateTranslateDisplayResult(formatResult);
-    checkIsInstalledEudic(setIsInstalledEudic);
-
-    if (isShowMultipleTranslations(formatResult)) {
-      if (myPreferences.enableBaiduTranslate) {
-        console.log("requestBaiduTextTranslate");
-        requestBaiduTextTranslate(searchText, fromLanguage, targetLanguage)
-          .then((baiduRes) => {
-            console.log("requestBaiduTextTranslate success");
-            const baiduTranslateResult = baiduRes.result as BaiduTranslateResult;
-            const baiduErrorCode = baiduTranslateResult.error_code;
-
-            if (baiduErrorCode) {
-              if (baiduErrorCode === BaiduRequestStateCode.AccessFrequencyLimited.toString()) {
-                delaySearchQueryText(fromLanguage, targetLanguage);
-                return;
-              }
-
-              baiduRes.errorInfo = {
-                errorCode: baiduErrorCode,
-                errorMessage: baiduTranslateResult.error_msg || "",
-              };
-              showToast({
-                style: Toast.Style.Failure,
-                title: `${baiduRes.type}: ${baiduErrorCode}`,
-                message: baiduRes.errorInfo.errorMessage,
-              });
-              console.error(`${baiduRes.type}: ${baiduErrorCode}`);
-              console.error(baiduRes.errorInfo.errorMessage);
-            } else {
-              formatResult = updateFormateResultWithBaiduTranslation(baiduRes, formatResult);
-              updateTranslateDisplayResult(formatResult);
-            }
-          })
-          .catch((err) => {
-            console.error(`requestBaiduTextTranslate error: ${err}`);
-          });
-      }
-
-      if (myPreferences.enableTencentTranslate) {
-        console.log(`requestTencentTextTranslate`);
-        requestTencentTextTranslate(searchText, fromLanguage, targetLanguage)
-          .then((tencentRes) => {
-            console.log(`requestTencentTextTranslate success`);
-            formatResult = updateFormateResultWithTencentTranslation(tencentRes, formatResult);
-            updateTranslateDisplayResult(formatResult);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
-
-      if (myPreferences.enableCaiyunTranslate) {
-        console.log("requestCaiyunTextTranslate");
-        requestCaiyunTextTranslate(searchText, fromLanguage, targetLanguage)
-          .then((caiyunRes) => {
-            console.log("requestCaiyunTextTranslate success");
-            if (caiyunRes.errorInfo) {
-              showToast({
-                style: Toast.Style.Failure,
-                title: `${caiyunRes.type.split(" ")[0]} Error: ${caiyunRes.errorInfo.errorCode}`,
-                message: caiyunRes.errorInfo.errorMessage,
-              });
-              console.error(`caiyun error: ${caiyunRes.errorInfo.errorCode}, ${caiyunRes.errorInfo.errorMessage}`);
-            } else {
-              formatResult = updateFormateResultWithCaiyunTranslation(caiyunRes, formatResult);
-              updateTranslateDisplayResult(formatResult);
-            }
-          })
-          .catch((err) => {
-            console.error(`requestCaiyunTextTranslate error: ${err}`);
-          });
-      }
-    }
-
-    return;
+  function updateDisplaySections(displayItems: DisplaySection[]) {
+    setIsShowingDetail(dataManager.isShowDetail);
+    setDisplayResult(displayItems);
   }
 
-  // function check first language and second language is the same
-  function checkLanguageIsSame() {
-    if (defaultLanguage1.youdaoLanguageId === defaultLanguage2.youdaoLanguageId) {
-      return (
-        <List>
-          <List.Item
-            title={"Language Conflict"}
-            icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-            subtitle={"Your first Language with second Language must be different."}
-          />
-        </List>
-      );
-    }
-  }
-
-  function delaySearchQueryText(fromLanguage: string, targetLanguage: string) {
-    delayUpdateTargetLanguageTimer = setTimeout(() => {
-      querySearchText(fromLanguage, targetLanguage);
-    }, delayRequestTime);
-  }
-
-  async function tryQuerySelecedtText() {
-    try {
-      let selectedText = await getSelectedText();
-      console.log("selectedText: ", selectedText);
-      selectedText = selectedText.trim().substring(0, maxInputTextLength);
-      setInputText(selectedText);
-      setSearchText(selectedText);
-    } catch (error) {
-      // do nothing
-    }
-  }
+  // Todo: need to optimize these callbacks.
+  dataManager.updateLoadingState = setLoadingState;
+  dataManager.updateListDisplaySections = updateDisplaySections;
+  dataManager.updateCurrentFromLanguageItem = setCurrentFromLanguageItem;
+  dataManager.updateAutoSelectedTargetLanguageItem = setAutoSelectedTargetLanguageItem;
 
   useEffect(() => {
-    if (searchText.length) {
-      setLoadingState(true);
-      clearTimeout(delayUpdateTargetLanguageTimer);
+    if (inputText === undefined) {
+      setup();
+    }
 
-      tencentLanguageDetect(searchText).then(
-        (data) => {
-          console.log("tencent language detect: ", data);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputText]);
 
-          const languageId = data.Lang || "auto";
-          const youdaoLanguageId = getLanguageItemFromTencentDetectLanguageId(languageId).youdaoLanguageId;
-          translateWithSourceLanguageId(youdaoLanguageId);
-        },
-        (err) => {
-          console.error("tencent language detect error: ", err);
+  /**
+   * Do something setup when the extension is activated. Only run once.
+   */
+  function setup() {
+    // console.log(`setup when extension is activated.`);
 
-          const currentLanguageId = detectInputTextLanguageId(searchText);
-          translateWithSourceLanguageId(currentLanguageId);
-        }
-      );
-      return;
+    if (trimQueryText?.length) {
+      console.warn(`---> arguments queryText: ${trimQueryText}`);
+    }
+
+    const startTime = Date.now();
+
+    const userInputText = trimQueryText;
+
+    // If enabled system proxy, we need to wait for the system proxy to be ready.
+    if (myPreferences.enableSystemProxy) {
+      // If has arguments, use arguments text as input text first.
+      if (userInputText?.length) {
+        configAxiosProxy().then(() => {
+          console.log(`after config proxy`);
+          updateInputTextAndQueryText(userInputText as string, false);
+        });
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        Promise.all([getSelectedText(), configAxiosProxy()])
+          .then(([selectedText]) => {
+            console.log(`after config proxy, getSelectedText: ${selectedText}`);
+            console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
+            updateInputTextAndQueryText(trimTextLength(selectedText), false);
+          })
+          .catch((error) => {
+            console.error(`set up, config proxy error: ${error}`);
+            querySelecedtText().then(() => {
+              console.log(`after query selected text`);
+              delayGetSystemProxy();
+            });
+          });
+      } else {
+        configAxiosProxy();
+      }
     } else {
-      if (myPreferences.isAutomaticQuerySelectedText) {
-        tryQuerySelecedtText();
+      if (userInputText?.length) {
+        updateInputTextAndQueryText(userInputText, false);
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        querySelecedtText().then(() => {
+          console.log(`after query selected text`);
+        });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchText]);
 
-  function translateWithSourceLanguageId(youdaoLanguageId: string) {
-    console.log("currentLanguageId: ", youdaoLanguageId);
-    setCurrentFromLanguageItem(getLanguageItemFromLanguageId(youdaoLanguageId));
+    delayGetSystemProxy();
 
-    // priority to use user selected target language
-    let tartgetLanguageId = userSelectedTargetLanguageItem.youdaoLanguageId;
-    console.log("userSelectedTargetLanguage: ", tartgetLanguageId);
-
-    // if conflict, use auto selected target language
-    if (youdaoLanguageId === tartgetLanguageId) {
-      tartgetLanguageId = getAutoSelectedTargetLanguageId(youdaoLanguageId);
-      setAutoSelectedTargetLanguageItem(getLanguageItemFromLanguageId(tartgetLanguageId));
-      console.log("autoSelectedTargetLanguage: ", tartgetLanguageId);
-    }
-    querySearchText(youdaoLanguageId, tartgetLanguageId);
+    checkIfInstalledEudic().then((isInstalled) => {
+      setIsInstalledEudic(isInstalled);
+    });
   }
 
-  function ListDetail() {
-    if (!youdaoTranslateTypeResult) return null;
-
-    const youdaoErrorCode = (youdaoTranslateTypeResult.result as YoudaoTranslateResult).errorCode;
-    const youdaoErrorMessage = youdaoTranslateTypeResult?.errorInfo?.errorMessage;
-    const isYoudaoRequestError = youdaoErrorCode !== YoudaoRequestStateCode.Success.toString();
-
-    if (isYoudaoRequestError) {
-      return (
-        <List.Item
-          title={"Youdao Request Error"}
-          subtitle={youdaoErrorMessage?.length ? `: ${youdaoErrorMessage}` : ""}
-          accessories={[
-            {
-              text: `Error Code: ${youdaoErrorCode}`,
-            },
-          ]}
-          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="See Error Code Meaning" icon={Icon.QuestionMark} url={youdaoErrorCodeLink} />
-              <ActionFeedback />
-            </ActionPanel>
-          }
-        />
-      );
-    }
-
-    const eudicWebUrl = getEudicWebTranslateURL(
-      searchText || "",
-      currentFromLanguageItem,
-      autoSelectedTargetLanguageItem
-    );
-
-    const youdaoWebUrl = getYoudaoWebTranslateURL(
-      searchText || "",
-      currentFromLanguageItem,
-      autoSelectedTargetLanguageItem
-    );
-
-    return (
-      <Fragment>
-        {translateDisplayResult?.map((resultItem, idx) => {
-          return (
-            <List.Section key={idx} title={resultItem.sectionTitle}>
-              {resultItem.items?.map((item) => {
-                return (
-                  <List.Item
-                    key={item.key}
-                    icon={{
-                      value: getListItemIcon(resultItem.type),
-                      tooltip: item.tooltip || "",
-                    }}
-                    title={item.title}
-                    subtitle={item.subtitle}
-                    accessories={getWordAccessories(resultItem.type, item)}
-                    detail={<List.Item.Detail markdown={item.translationMarkdown} />}
-                    actions={
-                      <ListActionPanel
-                        isInstalledEudic={isInstalledEudic}
-                        isShowOpenInEudicWeb={eudicWebUrl.length != 0}
-                        isShowOpenInYoudaoWeb={youdaoWebUrl.length != 0}
-                        eudicWebUrl={eudicWebUrl}
-                        youdaoWebUrl={youdaoWebUrl}
-                        queryText={searchText}
-                        queryWordInfo={item.queryWordInfo}
-                        copyText={item.copyText}
-                        currentFromLanguage={currentFromLanguageItem}
-                        currentTargetLanguage={autoSelectedTargetLanguageItem}
-                        onLanguageUpdate={(value) => {
-                          setAutoSelectedTargetLanguageItem(value);
-                          setUserSelectedTargetLanguageItem(value);
-                          querySearchText(currentFromLanguageItem.youdaoLanguageId, value.youdaoLanguageId);
-                        }}
-                      />
-                    }
-                  />
-                );
-              })}
-            </List.Section>
-          );
-        })}
-      </Fragment>
-    );
+  /**
+   * Try to detect the selected text, if detect success, then query the selected text.
+   */
+  function querySelecedtText(): Promise<void> {
+    return new Promise((resolve) => {
+      getSelectedText()
+        .then((selectedText) => {
+          selectedText = trimTextLength(selectedText);
+          console.warn(`getSelectedText: ${selectedText}`); // cost about 20 ms
+          updateInputTextAndQueryText(selectedText, false);
+          resolve();
+        })
+        .catch((error) => {
+          console.log(`getSelectedText error: ${error}`);
+          resolve();
+        });
+    });
   }
 
-  function onInputChangeEvent(text: string) {
-    setInputText(text);
+  /**
+   * User select target language manually.
+   *
+   * Todo: move it to dataManager.
+   */
+  const updateSelectedTargetLanguageItem = (selectedLanguageItem: LanguageItem) => {
+    console.log(`selected language: ${selectedLanguageItem.youdaoLangCode}`);
+    console.log(`current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`);
 
-    let trimText = text.trim();
-    if (trimText.length === 0) {
-      updateTranslateDisplayResult(null);
+    if (selectedLanguageItem.youdaoLangCode === userSelectedTargetLanguageItem.youdaoLangCode) {
       return;
     }
 
-    clearTimeout(delayFetchTranslateAPITimer);
+    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoLangCode}`);
+    setAutoSelectedTargetLanguageItem(selectedLanguageItem);
+    setUserSelectedTargetLanguageItem(selectedLanguageItem);
 
-    // start delay timer for fetch translate API
-    if (trimText.length > 0 && trimText !== searchText) {
-      delayFetchTranslateAPITimer = setTimeout(() => {
-        trimText = trimText.substring(0, maxInputTextLength);
-        setSearchText(trimText);
-      }, delayRequestTime);
+    const queryWordInfo: QueryWordInfo = {
+      word: searchText,
+      fromLanguage: currentFromLanguageItem.youdaoLangCode,
+      toLanguage: selectedLanguageItem.youdaoLangCode,
+    };
+
+    // Clean up previous query results immediately before new query.
+    dataManager.clearQueryResult();
+    dataManager.queryTextWithTextInfo(queryWordInfo);
+  };
+
+  /**
+   * Update input text and search text, then query text according to @isDelay
+   */
+  function updateInputTextAndQueryText(text: string, isDelay: boolean) {
+    console.log(`update input text: ${text}, length: ${text.length}`);
+
+    setInputText(text);
+    const trimText = trimTextLength(text);
+    setSearchText(trimText);
+
+    // If trimText is empty, then do not query.
+    if (trimText.length === 0) {
+      console.log("trimText is empty, do not query");
+      dataManager.clearQueryResult();
+      return;
+    }
+
+    // Only different input text, then clear old results before new input text query.
+    if (trimText !== searchText) {
+      dataManager.clearQueryResult();
+      const toLanguage = userSelectedTargetLanguageItem.youdaoLangCode;
+      dataManager.delayQueryText(trimText, toLanguage, isDelay);
     }
   }
 
-  function updateTranslateDisplayResult(formatResult: TranslateFormatResult | null) {
-    setTranslateDisplayResult(formatTranslateDisplayResult(formatResult));
-    setIsShowingDetail(isTranslateResultTooLong(formatResult));
-    setLoadingState(false);
+  function onInputChange(text: string) {
+    // console.warn(`onInputChange: ${text}`);
+    updateInputTextAndQueryText(text, true);
   }
 
   return (
@@ -389,15 +243,40 @@ export default function () {
       isShowingDetail={isShowingDetail}
       searchBarPlaceholder={"Search word or translate text..."}
       searchText={inputText}
-      onSearchTextChange={onInputChangeEvent}
-      actions={
-        <ActionPanel>
-          <ActionFeedback />
-        </ActionPanel>
-      }
+      onSearchTextChange={onInputChange}
+      actions={null}
     >
-      <List.EmptyView icon={Icon.TextDocument} title="Type a word to look up or translate" />
-      <ListDetail />
+      {displayResult.map((resultItem, idx) => {
+        const sectionKey = `${resultItem.type}${idx}`;
+        return (
+          <List.Section key={sectionKey} title={resultItem.sectionTitle}>
+            {resultItem.items?.map((item) => {
+              return (
+                <List.Item
+                  key={item.key}
+                  icon={{
+                    value: getListItemIcon(item),
+                    tooltip: item.tooltip || "",
+                  }}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  accessories={getWordAccessories(item)}
+                  detail={<List.Item.Detail markdown={item.detailsMarkdown} />}
+                  actions={
+                    <ListActionPanel
+                      displayItem={item}
+                      isShowingReleasePrompt={isShowingReleasePrompt}
+                      isInstalledEudic={isInstalledEudic}
+                      onLanguageUpdate={updateSelectedTargetLanguageItem}
+                    />
+                  }
+                />
+              );
+            })}
+          </List.Section>
+        );
+      })}
+      <List.EmptyView icon={Icon.BlankDocument} title="Type a word to look up or translate" />
     </List>
   );
 }

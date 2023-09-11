@@ -28,10 +28,6 @@ interface CoinInfo {
   };
 }
 
-interface MarketCapRankedCoinList {
-  [key: number]: Coin;
-}
-
 export default class Service {
   async getPrice(id: string, currency: string): Promise<number | undefined> {
     const response = await client.get<Price>('/simple/price', {
@@ -65,33 +61,6 @@ export default class Service {
   async getCoinList(): Promise<Coin[]> {
     const response = await client.get<Coin[]>('/coins/list');
     return response.data;
-  }
-
-  async getTopCoins(currency: string, count: number): Promise<Coin[]> {
-    const coins: MarketCapRankedCoinList = {};
-    const requests = [];
-    const perPage = 250;
-    const totalPages = Math.ceil(count / perPage);
-    let currentPage = 1;
-
-    while (currentPage < totalPages) {
-      requests.push(
-        client.get<CoinInfo[]>(
-          `/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=${perPage}&page=${currentPage}`,
-        ),
-      );
-      currentPage++;
-    }
-
-    const results = await Promise.all(requests);
-
-    results.forEach((result) => {
-      result.data.forEach(({ id, symbol, name, market_cap_rank }) => {
-        coins[market_cap_rank] = { id, symbol, name };
-      });
-    });
-
-    return Object.values(coins);
   }
 
   async getCoinPriceHistory(id: string, days = 30) {

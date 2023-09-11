@@ -41,14 +41,40 @@ export default function Table() {
           };
         }
 
+        const accessories: List.Item.Accessory[] = [
+          {
+            text: {
+              color: Color.PrimaryText,
+              value: entry.points.toString(),
+            },
+            tooltip: "Points",
+          },
+          { icon },
+        ];
+
+        if (!showStats) {
+          accessories.unshift(
+            {
+              icon: Icon.SoccerBall,
+              text: entry.gamesPlayed.toString(),
+              tooltip: "Played",
+            },
+            {
+              icon: Icon.Goal,
+              text: `${entry.goalsScored} - ${entry.goalsAgainst}`,
+              tooltip: "Goals For - Goals Against",
+            }
+          );
+        }
+
         return (
           <List.Item
-            key={entry.rank}
+            key={entry.club.id}
             icon={entry.club.logoUrl}
             title={entry.rank.toString()}
             subtitle={entry.club.nameFull}
             keywords={[entry.club.nameFull, entry.club.nameShort]}
-            accessories={[{ text: entry.points.toString() }, { icon }]}
+            accessories={accessories}
             detail={
               <List.Item.Detail
                 metadata={

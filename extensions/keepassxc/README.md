@@ -22,9 +22,11 @@ There are 3 parameters required for this extension to work:
 
 ### Shortcuts
 
-- `Enter` : Copy and Paste Password
-- `Cmd`+`Enter` : Copy Password
-- `Cmd`+`B` : Copy Username
+- `Enter` : Paste Password
+- `Shift`+`Enter` : Paste Username
+- `Cmd`+`P` : Copy Password
+- `Cmd`+`U` : Copy Username
+- `Cmd`+`T` : Copy TOTP
 
 ## Password Security Note
 
@@ -36,8 +38,10 @@ This extension works by using `keepassxc-cli`(inside `KeePassXC.app`) in command
 ### Related commands
 
 ```bash
-# List entries
+# List entries for version < 2.7
 keepassxc-cli locate -q /path/to/database.kdbx /
+# List entries for version >= 2.7
+keepassxc-cli find -q /path/to/database.kdbx /
 
 # Get password by entry
 keepassxc-cli show -q -a Password /path/to/database.kdbx entry_name

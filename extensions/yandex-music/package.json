@@ -62,6 +62,13 @@
       "subtitle": "Yandex Music",
       "description": "Removes current track from \"Liked\" collection in Yandex Music.",
       "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Yandex Music",
+      "description": "Searchs tracks, podcasts, albums and artists in Yandex Music.",
+      "mode": "view"
     }
   ],
   "dependencies": {

@@ -109,7 +109,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       <Action
         icon={Icon.Star}
         key="toggleFav"
-        title="Remove from Favorites"
+        title="Remove From Favorites"
         onAction={removeFav}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
@@ -126,7 +126,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
 
   const isRecent = recentIds?.get(service as ServiceName)?.has(id.toString());
   const removeRecent = isRecent ? (
-    <Action icon={Icon.Clock} key="removeRecent" title="Remove from Recents" onAction={removeFromRecents} />
+    <Action icon={Icon.Clock} key="removeRecent" title="Remove From Recents" onAction={removeFromRecents} />
   ) : undefined;
 
   const actions: Array<(JSX.Element | undefined)[]> = [

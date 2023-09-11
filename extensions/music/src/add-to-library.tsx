@@ -1,8 +1,9 @@
-import { closeMainWindow } from "@raycast/api";
+import { pipe } from "fp-ts/lib/function";
+
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
-export default async () => {
-  await closeMainWindow();
-  await handleTaskEitherError(music.currentTrack.addToLibrary)();
-};
+export default pipe(
+  music.currentTrack.addToLibrary,
+  handleTaskEitherError("Failed to Add to Library", "Added to library")
+);

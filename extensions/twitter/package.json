@@ -5,6 +5,9 @@
   "description": "Send and search Tweets",
   "icon": "twitter.png",
   "author": "tonka3000",
+  "contributors": [
+    "peduarte"
+  ],
   "license": "MIT",
   "commands": [
     {

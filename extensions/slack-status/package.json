@@ -5,6 +5,9 @@
   "description": "Quickly change your Slack status",
   "icon": "slack-icon.png",
   "author": "petr",
+  "contributors": [
+    "jhjr"
+  ],
   "license": "MIT",
   "commands": [
     {
