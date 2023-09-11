@@ -1,5 +1,5 @@
-# Filament Documentation Search
+# Filament Documentation Search Plugin
 
-![Raycast Filament Search](media/filamentphp.gif)
+Easily search filament documentation without need to use the website search.
 
 [Filament](https://filamentphp.com) search
