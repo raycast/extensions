@@ -22,7 +22,7 @@ function retrieveSpaces() {
     const space = new Space();
 
     if (spaceItem.startsWith("(\n")) {
-      const filteredSpaceItem = spaceItem.replace("(\n", "").trim().replaceAll('"', "");
+      const filteredSpaceItem = spaceItem.replace("(\n", "").trim().replaceAll('"', "").replace("\n)", "");
 
       space.name = filteredSpaceItem;
       space.url = "spaces://" + filteredSpaceItem.replace(/ /g, "").toLowerCase();

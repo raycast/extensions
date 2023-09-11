@@ -12,27 +12,36 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "activate",
-      "title": "Activate",
+      "name": "create-mode",
+      "title": "Create Mode",
       "subtitle": "Zen Mode",
-      "description": "It activates zen mode based on your app preferences.",
+      "description": "It opens a window to create a new mode.",
       "mode": "no-view"
     },
     {
-      "name": "deactivate",
-      "title": "Deactivate",
+      "name": "show-my-modes",
+      "title": "Show My Modes",
       "subtitle": "Zen Mode",
-      "description": "It deactivates zen mode based on your app preferences.",
+      "description": "It shows list of modes available from your Zen mode app.",
+      "mode": "view"
+    },
+    {
+      "name": "stop-mode",
+      "title": "Stop Mode",
+      "subtitle": "Zen Mode",
+      "description": "It deactivates the mode if it is active.",
       "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.35.2",
-    "open": "^8.4.0"
+    "open": "^8.4.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

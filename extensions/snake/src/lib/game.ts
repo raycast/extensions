@@ -1,4 +1,4 @@
-import { TextSize } from "./text";
+import { TextSize } from "../components/snake";
 import { getRandomInt } from "./utils";
 
 const foodSymbol = "O";
@@ -105,7 +105,7 @@ export class Field {
   }
 
   setSize(textSize: TextSize) {
-    if (textSize === TextSize.Medium) {
+    if (textSize === "medium") {
       this.width = 104;
       this.height = 18;
     } else {

@@ -49,7 +49,7 @@ export function AccountListItem({
     >
       <List.Item
         icon={{
-          source: `https://cryptoicon-api.vercel.app/api/icon/${cryptoCurrency.toLowerCase()}`,
+          source: `https://farisaziz12.github.io/cryptoicon-api/icons/${cryptoCurrency.toLowerCase()}.png`,
           mask: ImageMask.Circle,
         }}
         actions={

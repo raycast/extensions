@@ -1,5 +1,13 @@
 # GIF Search Changelog
 
+## [Add preference for Grid trending item size] - 2022-07-07
+- Adds a new preference to control the size of grid items in the Trending view
+
+## [Fix Tenor bug in Grid view] - 2022-07-05
+- Fixes bug where medium-sized Tenor grid gifs weren't animating
+- Switches the default layout type to grid
+- Default initial state grid items to "small"
+
 ## [Add Grid Item Size option] - 2022-06-07
 - Adds preference for controlling the Grid Item Size
 - Use original gif files when displaying Large Grid items

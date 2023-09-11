@@ -1,15 +1,17 @@
-import { LocalStorage } from "@raycast/api";
+import fs from "fs";
+import path from "path";
+import { LocalStorage, environment } from "@raycast/api";
+
 import GithubOcto from "../Octokit";
 import { TopicType } from "../types/GithubType";
-import fs from "fs";
 
-const data_path = __dirname + "/data";
+const DATA_PATH = path.resolve(environment.supportPath, "data");
 
 /**
  * Get the specified page from Github as raw file
  * @param topic|string
  */
-async function getPageFromGithub(topic: TopicType) {
+async function getPageFromGithub(topic: TopicType): Promise<string> {
   const octokit = new GithubOcto();
 
   const { data } = await octokit.request(`GET /repos/vercel/next.js/contents/docs/${topic.path}`, {
@@ -20,54 +22,31 @@ async function getPageFromGithub(topic: TopicType) {
 
   if (!data) throw new Error("Please visit https://nextjs.org/");
 
-  const isWritten = writeToFile(topic.name, data);
-  if (!isWritten) throw new Error("Failed to write to file!");
-  LocalStorage.setItem(`${topic.name}_updated_at`, Date.now());
-}
+  await writeToFile(topic.path, data);
 
-/**
- * Create or sync the data folder.
- * @returns boolean
- */
-const createDataFolder = () => {
-  try {
-    if (!fs.existsSync(data_path)) {
-      fs.mkdirSync(data_path);
-    }
-    return true;
-  } catch (err) {
-    throw new Error("Failed to create data folder!");
-  }
-};
+  return data;
+}
 
 /**
  * Write the given content to the file.
- * @param name Filename
+ * @param fpath file path
  * @param content Contents of the file
- * @returns
+ * @return
  */
-function writeToFile(name: string, content: string) {
-  try {
-    fs.writeFileSync(`${data_path}/${name}.md`, content);
-    return true;
-  } catch (err) {
-    clearStorageItem(`${name}_updated_at`);
-    throw new Error("Failed to write to file!");
-  }
-}
+async function writeToFile(fpath: string, content: string): Promise<void> {
+  const filepath = path.resolve(DATA_PATH, fpath);
+  const dir = path.dirname(filepath);
 
-/**
- * Read contents of the file.
- * @param name Filename
- * @returns
- */
-async function readFromFile(name: string) {
   try {
-    const data = fs.readFileSync(`${data_path}/${name}.md`, "utf8");
-    return data;
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(path.dirname(filepath), { recursive: true });
+    }
+
+    fs.writeFileSync(filepath, content);
+    await updateStorageItem(fpath);
   } catch (err) {
-    clearStorageItem(`${name}_updated_at`);
-    throw new Error("Failed to read from file!");
+    await clearStorageItem(fpath);
+    throw err;
   }
 }
 
@@ -76,29 +55,27 @@ async function readFromFile(name: string) {
  * @param topic
  * @returns
  */
-export async function getPageFromCache(topic: TopicType): Promise<string> {
-  const topicData: string = await readFromFile(topic.name);
-  if (!topicData) {
-    throw new Error("Cached results not loaded!");
+export async function getPageFromCache(topic: TopicType): Promise<string | undefined> {
+  try {
+    return fs.readFileSync(path.resolve(DATA_PATH, topic.path), "utf8");
+  } catch (err) {
+    clearStorageItem(topic.path);
+    console.error("Failed to get data from cache:", err);
+    return undefined;
   }
-  return topicData;
 }
 
 /**
  * Check for updates in docs and update cache
  */
 export async function checkForUpdates(topic: TopicType): Promise<string | null> {
-  const data_folder = createDataFolder();
-  if (!data_folder) throw new Error("Failed to create folder!");
-
-  const last_updated: string = await LocalStorage.getItem(`${topic.name}_updated_at`);
+  const last_updated: string = await getStorageItem(topic.path);
   const last_updated_date = new Date(last_updated).setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
 
   // If the data is older than 24hours, fetch it from Github
   if (last_updated === undefined || today > last_updated_date) {
-    await getPageFromGithub(topic);
-    return await getPageFromCache(topic);
+    return await getPageFromGithub(topic);
   }
 
   return null;
@@ -106,8 +83,21 @@ export async function checkForUpdates(topic: TopicType): Promise<string | null> 
 
 /**
  * Remove the value for the given key from the local storage.
- * @param key
  */
 async function clearStorageItem(key: string) {
-  await LocalStorage.removeItem(key);
+  await LocalStorage.removeItem(`${key}_updated_at`);
+}
+
+/**
+ * Update the value for the given key from the local storage.
+ */
+async function updateStorageItem(key: string): Promise<void> {
+  await LocalStorage.setItem(`${key}_updated_at`, Date.now());
+}
+
+/**
+ * Get the value for the given key from the local storage.
+ */
+async function getStorageItem(key: string): Promise<string | undefined> {
+  return LocalStorage.getItem<string>(`${key}_updated_at`);
 }

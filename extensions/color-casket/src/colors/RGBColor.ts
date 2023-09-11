@@ -1,7 +1,7 @@
 import convert from "color-convert";
 
 import Color from "./Color";
-import { RGB } from "color-convert/conversions";
+import { APPLE, RGB } from "color-convert/conversions";
 import { HEXColor, HSLColor, KeywordColor } from "./index";
 import { Keyboard } from "@raycast/api";
 

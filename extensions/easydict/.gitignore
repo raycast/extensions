@@ -102,3 +102,15 @@ dist
 
 # TernJS port file
 .tern-port
+
+# .DS_Store
+.DS_Store
+
+# Icon/r
+Icon*
+
+# vscode
+.vscode/
+
+# Webstorm config
+.idea/

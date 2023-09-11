@@ -1,46 +1,13 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
-
-interface Preferences {
-  apiKey: string;
-}
-
-interface HeartbeatItem {
-  id: string;
-  type: string;
-  attributes: HeartbeatItemAttributes;
-}
-
-interface HeartbeatItemAttributes {
-  url: string;
-  name: string;
-  period: number;
-  grace: number;
-  call: boolean;
-  sms: boolean;
-  email: boolean;
-  push: boolean;
-  status: string;
-}
-
-interface State {
-  isLoading: boolean;
-  items: HeartbeatItem[];
-  error?: any;
-}
+import { ActionCopyHeartbeatUrl, ActionDeleteHeartbeat } from "./actions";
+import { statusMap } from "./constants";
+import { HeartbeatItem, HeartbeatsState, Preferences } from "./interface";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<State>({ items: [], isLoading: true });
-  const statusMap = {
-    paused: "⏸",
-    pending: "🔍",
-    maintenance: "🚧",
-    up: "✅",
-    validating: "🤔",
-    down: "❌",
-  } as { [key: string]: string };
+  const [state, setState] = useState<HeartbeatsState>({ items: [], isLoading: true });
 
   useEffect(() => {
     async function fetchHeartbeats() {
@@ -108,16 +75,14 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open Heartbeat URL in Browser" url={item.attributes.url} />
-              <Action
-                title="Copy Heartbeat URL"
-                icon={Icon.Clipboard}
-                onAction={async () => {
-                  await Clipboard.copy(item.attributes.url);
-
-                  showToast({
-                    title: "Copied",
-                    message: "Heartbeat URL copied to clipboard",
-                  });
+              <ActionCopyHeartbeatUrl url={item.attributes.url} />
+              <ActionDeleteHeartbeat
+                item={item}
+                onDeleted={() => {
+                  setState((previous) => ({
+                    ...previous,
+                    items: previous.items.filter((_item) => _item.id !== item.id),
+                  }));
                 }}
               />
             </ActionPanel>

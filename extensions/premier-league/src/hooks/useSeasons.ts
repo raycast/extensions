@@ -6,14 +6,14 @@ interface Season {
   id: number;
 }
 
-const useSeasons = () => {
+const useSeasons = (comps = "1") => {
   const [seasons, setSeasons] = useState<Season[]>([]);
 
   useEffect(() => {
-    getSeasons().then((data) => {
+    getSeasons(comps).then((data) => {
       setSeasons(data);
     });
-  }, []);
+  }, [comps]);
 
   return seasons;
 };

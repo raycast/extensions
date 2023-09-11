@@ -1,9 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchItemInput, ItemInput } from "../utils/input-utils";
-import { Alert, confirmAlert, getApplications, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  Alert,
+  confirmAlert,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { boardsSort } from "../utils/open-link-utils";
-import { suggestApps } from "../utils/constants";
-import { ItemType, LocalStorageKey, OpenLinkApplication } from "../types/types";
+import { CacheKey, suggestApps } from "../utils/constants";
+import { AppType, ItemType, OpenLinkApplication } from "../types/types";
+import { Preferences } from "../types/preferences";
 
 export const getItemInput = (refresh: number) => {
   const [itemInput, setItemInput] = useState<ItemInput>(new ItemInput());
@@ -29,6 +39,7 @@ export const getOpenLinkApp = (itemInput: ItemInput, refresh: number) => {
   const [customApps, setCustomApps] = useState<OpenLinkApplication[]>([]);
   const [otherApps, setOtherApps] = useState<OpenLinkApplication[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { showBrowser, showEmail, showOther } = getPreferenceValues<Preferences>();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -36,11 +47,31 @@ export const getOpenLinkApp = (itemInput: ItemInput, refresh: number) => {
     const allApplications = await getApplications();
 
     //custom apps
-    const localBrowsers = await LocalStorage.getItem<string>(LocalStorageKey.CUSTOM_APPS);
+    const localBrowsers = await LocalStorage.getItem<string>(CacheKey.PREFERRED_APP);
     const _customApps: OpenLinkApplication[] = typeof localBrowsers == "string" ? JSON.parse(localBrowsers) : [];
-
     const _customAppPaths = _customApps.map((value) => value.path);
-    const _buildInPaths = suggestApps.map((value) => value.path);
+    const _buildInPaths = suggestApps.map((value) => {
+      switch (value.type) {
+        case AppType.BROWSER: {
+          if (showBrowser) {
+            return value.path;
+          }
+          break;
+        }
+        case AppType.EMAIL_CLIENT: {
+          if (showEmail) {
+            return value.path;
+          }
+          break;
+        }
+        case AppType.OTHER: {
+          if (showOther) {
+            return value.path;
+          }
+          break;
+        }
+      }
+    });
 
     const _buildInApps: OpenLinkApplication[] = [];
     const _otherApps: OpenLinkApplication[] = [];
@@ -58,7 +89,7 @@ export const getOpenLinkApp = (itemInput: ItemInput, refresh: number) => {
           rankURL: suggestApps[suggestIncludeIndex].rank,
           rankEmail: suggestApps[suggestIncludeIndex].rank,
         });
-      } else if (!value.bundleId?.startsWith("com.apple") && !value.path.startsWith("/System") && !customInclude) {
+      } else if (!customInclude) {
         //other apps
         _otherApps.push({
           bundleId: value.bundleId,

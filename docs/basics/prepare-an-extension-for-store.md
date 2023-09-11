@@ -21,7 +21,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ## Extensions and Commands Naming
 
-- Extension and command titles should follow the [**Title Case**](https://titlecaseconverter.com/rules/#NYT) convention
+- Extension and command titles should follow [**Apple Style Guide**](https://help.apple.com/applestyleguide/#/apsgb744e4a3?sub=apdca93e113f1d64) convention
   - ✅ `Google Workplace`, `Doppler Share Secrets`, `Search in Database`
   - ❌ `Hacker news`, `my issues`
   - 🤔 It's okay to use lower case for names and trademarks that are canonically written with lower case letters. E.g. `iOS` , `macOS` , `npm`.
@@ -63,8 +63,13 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ## Extension Icon
 
+{% hint style="info" %}
+We made a new icon generator tool to ease the process of creating icons for your extensions. You can find it [here](https://icon.ray.so/).
+{% endhint %}
+
 - The published extension in the Store should have a 512x512px icon in `png` format
-- The icon should look good in both dark and light themes (you can switch the theme in Raycast Preferences → Appearance)
+- The icon should look good in both light and dark themes (you can switch the theme in Raycast Preferences → Appearance)
+- If you have separate light and dark icons, refer to the `package.json` [manifest](https://developers.raycast.com/information/manifest#extension-properties) documentation on how to configure them
 - Extensions that use the default Raycast icon will be rejected
 - This [Icon Template](https://www.figma.com/community/file/1030764827259035122/Extensions-Icon-Template) can help you with making and exporting a proper icon
 - Make sure to remove unused assets and icons
@@ -73,7 +78,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 ## Provide README if Additional Configuration Required
 
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
-- Supporting README media: Put all linked media files in a top-level `metadata` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
+- Supporting README media: Put all linked media files in a top-level `media` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
 
 ![Onboarding button linking to the README file](../.gitbook/assets/required-preference.png)
 
@@ -107,7 +112,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ## Screenshots
 
-![An example of an extension with screenshot metadata](https://user-images.githubusercontent.com/17166544/159986998-a67ebd18-ae24-4b19-8123-ac1c600d18b3.png)
+![An example of an extension with screenshot metadata](../.gitbook/assets/hn-store.png)
 
 - Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 - You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
@@ -117,15 +122,22 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with an ease.
 
 #### How to use it?
-1) Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2) Open the command
-3) Press the hotkey, remember to tick `Save to Metadata`
+
+1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
+2. Open the command
+3. Press the hotkey, remember to tick `Save to Metadata`
 
 {% hint style="info" %}
 This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you’ve made.
 
 You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
 {% endhint %}
+
+### Specifications
+
+| Screenshot size                | Aspect ratio | Format | Dark mode support |
+| ------------------------------ | ------------ | ------ | ----------------- |
+| 2000 x 1250 pixels (landscape) | 16:10        | PNG    | No                |
 
 ### Do's & Dont's
 
@@ -233,8 +245,8 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
   - ❌ `Copy url`, `set project`, `Set priority`
 - Provide icons for actions if there are other actions with icons in the list
   - Avoid having a list of actions where some have icons and some don't
-- Add ellipses `...` for actions that will have a submenu. Don't repeat parent the action name in the submenu
-  - ✅ `Set Priority...` and submenu would have `Low`, `Medium`, `High`
+- Add ellipses `…` for actions that will have a submenu. Don't repeat parent the action name in the submenu
+  - ✅ `Set Priority…` and submenu would have `Low`, `Medium`, `High`
   - ❌ `Set Priority` and submenu would have `Set Priority Low`, `Set Priority Medium`, etc
 
 ### Navigation
@@ -259,6 +271,10 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 - For a better visual experience, add placeholders in text field and text area components. This includes preferences.
 - Don't leave the search bar without a placeholder
+
+### Analytics
+
+- It’s not allowed to include external analytics in extensions. Later on, we will add support to give developers more insights into how their extension is being used.
 
 ### Localization / Language
 

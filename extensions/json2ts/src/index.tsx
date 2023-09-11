@@ -1,13 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  SubmitFormAction,
-  showToast,
-  ToastStyle,
-  copyTextToClipboard,
-  showHUD,
-  popToRoot,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, showHUD, popToRoot, Toast, Clipboard } from "@raycast/api";
 import { json2ts } from "json-ts";
 
 interface CommandForm {
@@ -20,20 +11,20 @@ export default function Command() {
     const { jsonTextarea, rootName } = values;
 
     if (jsonTextarea.length === 0) {
-      await showToast(ToastStyle.Failure, "Empty JSON");
+      await showToast(Toast.Style.Failure, "Empty JSON");
       return;
     }
 
     if (rootName.length === 0) {
-      await showToast(ToastStyle.Failure, "Empty interface name");
+      await showToast(Toast.Style.Failure, "Empty interface name");
       return;
     }
 
     try {
       const ts = json2ts(values.jsonTextarea, { rootName, flow: false, prefix: "" });
-      await copyTextToClipboard(ts);
+      await Clipboard.copy(ts);
     } catch (e) {
-      await showToast(ToastStyle.Failure, "Invalid JSON");
+      await showToast(Toast.Style.Failure, "Invalid JSON");
       return;
     }
 
@@ -45,7 +36,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Generate" />
         </ActionPanel>
       }
     >

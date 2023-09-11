@@ -16,45 +16,102 @@
   ],
   "preferences": [
     {
+      "name": "version", 
+      "title": "SF Symbols Version",
+      "description": "Show symbols from specified SF Symbols version.",
+      "type": "dropdown",
+      "required": false,
+      "default": "beta",
+      "data": [
+        {
+          "value": "beta",
+          "title": "Beta"
+        },
+        {
+          "value": "stable",
+          "title": "Stable"
+        }
+      ]
+    },
+    {
       "name": "primaryAction",
       "type": "dropdown",
       "title": "Primary Action",
-      "description": "Choose to paste or copy the selected symbol by default",
+      "description": "Choose a primary action",
       "required": false,
       "data": [
         {
-          "title": "Paste to Active App",
-          "value": "paste"
+          "title": "Copy Symbol to Clipboard",
+          "value": "copySymbol"
         },
         {
-          "title": "Copy to Clipboard",
-          "value": "copy"
+          "title": "Paste Symbol to Active App",
+          "value": "pasteSymbol"
         },
         {
           "title": "Copy Name to Clipboard",
           "value": "copyName"
+        },
+        {
+          "title": "Paste Name to Active App",
+          "value": "pasteName"
         }
       ],
-      "default": "paste"
+      "default": "copySymbol"
+    },
+    {
+      "name": "gridItemSize",
+      "type": "dropdown",
+      "title": "Grid Item Size",
+      "description": "Grid item size for displaying SF Symbols",
+      "required": false,
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        }
+      ],
+      "default": "small"
+    },
+    {
+      "name": "showName", 
+      "type": "checkbox", 
+      "title": "Show SF Symbols Name",
+      "label": "Show Name", 
+      "description": "Show SF Symbols name in grid view",
+      "required": false, 
+      "default": true
+    }, 
+    {
+      "name": "showRecent", 
+      "type": "checkbox", 
+      "title": "Show Recent Symbols",
+      "label": "Show Recent", 
+      "description": "Show recently used SF Symbols",
+      "required": false, 
+      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3"
+    "@raycast/api": "^1.38.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "2.5.1",
-    "react-devtools": "^4.19.2",
+    "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

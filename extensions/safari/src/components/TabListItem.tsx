@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { Tab } from "../types";
-import { getTitle, getFaviconUrl, getTabUrl, getUrlDomain } from "../utils";
+import { getTitle, getTabUrl, getUrlDomain } from "../utils";
 import CloseLocalTabAction from "./CloseLocalTabAction";
 import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
 import CopyTitleAction from "./CopyTitleAction";
@@ -31,16 +32,15 @@ const Actions = (props: { tab: Tab; refresh: () => void }) => (
 
 const TabListItem = (props: { tab: Tab; refresh: () => void }) => {
   const url = getTabUrl(props.tab.url);
-  const domain = getUrlDomain(url);
 
   return (
     <List.Item
       title={getTitle(props.tab)}
-      icon={getFaviconUrl(domain)}
+      icon={getFavicon(props.tab.url)}
       actions={<Actions tab={props.tab} refresh={props.refresh} />}
       accessories={[
         {
-          text: domain,
+          text: getUrlDomain(url),
           tooltip: props.tab.url,
         },
       ]}

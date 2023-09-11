@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "recents",
+  "title": "Recents",
+  "description": "Show Recently used files and folders in Raycast",
+  "icon": "recents.png",
+  "author": "GastroGeek",
+  "contributors": [
+    "kgrhartlage"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "recents",
+      "title": "Recents",
+      "description": "Show Recently used files and folders in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "recentApplications",
+      "title": "Recent Applications",
+      "description": "Show Recently used applications in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "recentDocuments",
+      "title": "Recent Documents",
+      "description": "Show Recently used documents in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "recentDownloads",
+      "title": "Recent Downloads",
+      "description": "Show Recently used downloads in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "recentFolders",
+      "title": "Recent Folders",
+      "description": "Show Recently used folders in Raycast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "limit",
+      "title": "Limit",
+      "description": "The maximum number of items to display",
+      "type": "textfield",
+      "default": "1000",
+      "required": false
+    },
+    {
+      "name": "excludeFolders",
+      "label": "Exclude Folders",
+      "description": "From all results (except those in 'Recent Folders' command)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.3",
+    "mdfind": "^1.0.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

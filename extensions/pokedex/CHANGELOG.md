@@ -1,5 +1,8 @@
 # Pokédex Changelog
 
+## [Improvements] - 2023-02-03
+- Added Gen 9 Pokémons
+
 ## [Improvements] - 2022-06-16
 
 - Using new Grid layout
@@ -24,7 +27,7 @@
 
 - Added more Pokémon details: Training, Breeding, Forms
 - Added Pokémon type icon
-- Added Pokémon details by preferred language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish
+- Added Pokémon details by prefered language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish
 - Fixed extension icon
 
 ## [Initial Version] - 2022-02-18

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "just-focus",
+  "title": "Just Focus",
+  "description": "Control Just Focus via Raycast.",
+  "icon": "extension-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-pomodoro-timer",
+      "title": "Start Pomodoro Timer",
+      "subtitle": "Just Focus",
+      "description": "Start a pomodoro timer.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-pomodoro-timer",
+      "title": "Stop Pomodoro Timer",
+      "subtitle": "Just Focus",
+      "description": "Stop current pomodoro timer.",
+      "mode": "no-view"
+    },
+    {
+      "name": "take-a-short-break",
+      "title": "Take a Short Break",
+      "subtitle": "Just Focus",
+      "description": "Take a short break.",
+      "mode": "no-view"
+    },
+    {
+      "name": "take-a-long-break",
+      "title": "Take a Long Break",
+      "subtitle": "Just Focus",
+      "description": "Take a long break.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

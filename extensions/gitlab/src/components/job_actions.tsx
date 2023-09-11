@@ -1,4 +1,7 @@
-import { Action, Color, Icon } from "@raycast/api";
+import { Action, Color, Icon, showToast, Toast } from "@raycast/api";
+import { gitlab } from "../common";
+import { getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
+import { Job } from "./jobs";
 
 export function RefreshJobsAction(props: { onRefreshJobs?: () => void }): JSX.Element {
   const handle = () => {
@@ -14,4 +17,20 @@ export function RefreshJobsAction(props: { onRefreshJobs?: () => void }): JSX.El
       onAction={handle}
     />
   );
+}
+
+export function RetryJobAction(props: { job: Job }): JSX.Element {
+  async function handle() {
+    try {
+      console.log("job_actions:25");
+      console.log(props);
+      const job = props.job;
+      const jobId = getIdFromGqlId(job.id);
+      await gitlab.post(`projects/${job.projectId}/jobs/${jobId}/retry`);
+      showToast(Toast.Style.Success, "Restarted job");
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Failed to restart job");
+    }
+  }
+  return <Action title="Retry" icon={{ source: Icon.Repeat, tintColor: Color.PrimaryText }} onAction={handle} />;
 }

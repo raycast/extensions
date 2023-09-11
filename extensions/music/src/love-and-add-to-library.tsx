@@ -1,15 +1,11 @@
-import { closeMainWindow } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
-import * as music from "./util/scripts";
-import { handleTaskEitherError } from "./util/utils";
 import * as TE from "fp-ts/TaskEither";
 
-export default async () => {
-  await closeMainWindow();
+import * as music from "./util/scripts";
+import { handleTaskEitherError } from "./util/utils";
 
-  await pipe(
-    music.currentTrack.love,
-    TE.chain(() => music.currentTrack.addToLibrary),
-    handleTaskEitherError
-  )();
-};
+export default pipe(
+  music.currentTrack.love,
+  TE.chain(() => pipe(music.currentTrack.addToLibrary)),
+  handleTaskEitherError("Failed to save/love the track", "Loved & added to library")
+);

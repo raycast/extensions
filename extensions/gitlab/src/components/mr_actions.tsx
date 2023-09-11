@@ -26,7 +26,7 @@ export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }
       showErrorToast(getErrorMessage(error), "Failed to close Merge Request");
     }
   }
-  return <Action title="Close MR" icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }} onAction={handleAction} />;
+  return <Action title="Close MR" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handleAction} />;
 }
 
 export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void }): JSX.Element {
@@ -104,7 +104,7 @@ export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: Keyboar
   if (mr.state === "opened") {
     return (
       <Action
-        title="Add a to do"
+        title="Add a To Do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
         onAction={handleAction}

@@ -4,9 +4,16 @@ import { fetchInputItem } from "./utils/input-item";
 import { Preferences } from "./types/preferences";
 
 export default async () => {
-  const { actionAfterConversion } = getPreferenceValues<Preferences>();
+  const { tones, actionAfterConversion } = getPreferenceValues<Preferences>();
   const inputItem = await fetchInputItem();
-  const _pinyin = pinyin(inputItem);
+  let _pinyin: string;
+  if (tones === "none") {
+    _pinyin = pinyin(inputItem, { toneType: "none" });
+  } else if (tones === "num") {
+    _pinyin = pinyin(inputItem, { toneType: "num" });
+  } else {
+    _pinyin = pinyin(inputItem);
+  }
   if (actionAfterConversion === "Paste") {
     await Clipboard.paste(_pinyin);
     await showHUD(`Paste: ${_pinyin}`);

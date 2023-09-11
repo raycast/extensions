@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 
@@ -10,8 +10,6 @@ export function usePages(file: File) {
   const abort = useRef<AbortController>();
 
   useEffect(() => {
-    console.debug("Fetch pages...");
-
     async function fetch() {
       abort.current?.abort();
       abort.current = new AbortController();
@@ -38,7 +36,7 @@ export function usePages(file: File) {
   return pages;
 }
 
-async function fetchPages(file: File, signal: AbortSignal): Promise<Node[]> {
+async function fetchPages(file: File, signal: any): Promise<Node[]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
 
   try {
@@ -59,7 +57,7 @@ async function fetchPages(file: File, signal: AbortSignal): Promise<Node[]> {
     }
 
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load pages");
+    showToast(Toast.Style.Failure, "Could not load pages");
     return Promise.resolve([]);
   }
 }

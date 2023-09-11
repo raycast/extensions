@@ -22,8 +22,17 @@
       "name": "leaderboard",
       "subtitle": "WakaTime",
       "title": "Show Public Leaderboard",
-      "description": "Show your rank in the public global leaderboard",
-      "mode": "view"
+      "description": "Check your rank against others all around the world.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "description": "Use your WakaTime API key to use your account",
+          "type": "password",
+          "required": false,
+          "title": "WakaTime API Key"
+        }
+      ]
     },
     {
       "name": "private-leaderboards",
@@ -31,6 +40,14 @@
       "title": "Show Private Leaderboards",
       "description": "Show your private leaderboards",
       "mode": "view"
+    },
+    {
+      "name": "today-summary",
+      "subtitle": "WakaTime",
+      "title": "Show Today Summary",
+      "description": "Show Today's Summary in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -44,19 +61,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2",
-    "date-fns": "^2.28.0",
-    "node-fetch": "^3.2.4"
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.18",
+    "date-fns": "^2.29.3",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "^18.14.0",
+    "@types/react": "^18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",

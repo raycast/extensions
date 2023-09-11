@@ -6,6 +6,10 @@
   "icon": "command-icon.png",
   "author": "fuksman",
   "license": "MIT",
+  "contributors": [
+    "pernielsentikaer",
+    "pomdtr"
+  ],
   "commands": [
     {
       "name": "feeds",
@@ -30,14 +34,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.39.0",
+    "@raycast/utils": "^1.4.11",
     "javascript-time-ago": "^2.3.9",
+    "nanoid": "^4.0.0",
     "node-fetch": "^3.0.0",
+    "node-html-markdown": "^1.2.0",
     "rss-parser": "^3.12.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

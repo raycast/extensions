@@ -1,0 +1,153 @@
+name: Sync Utils Docs
+on:
+  push:
+    paths:
+      - "docs/utils-reference/**"
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  pull-utils-docs-from-upstream:
+    if: github.repository == 'raycast/extensions' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: raycast/github-actions/setup-node@master
+
+      - name: Setup git
+        uses: raycast/github-actions/setup-git@master
+
+      - name: Pull the docs
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+        run: |
+          cd ${{ github.workspace }}
+
+          git clone --depth=1 --single-branch --branch "main" "https://$API_TOKEN_GITHUB@github.com/raycast/utils.git" "raycast-utils"
+
+          rm -rf docs/utils-reference
+
+          rsync -arv "raycast-utils/docs/utils-reference/" "docs/utils-reference"
+
+          rm -rf raycast-utils
+
+          if [[ $(git diff --stat) != '' ]]; then
+            git add docs
+            git commit -m 'Docs: Update the utils docs'
+            git push origin main
+            echo 'has_commit=true' >> $GITHUB_OUTPUT
+          else
+            echo 'No changes'
+            echo 'has_commit=false' >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify Failure to Slack
+        if: failure()
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
+
+  push-utils-docs-to-upstream:
+    if: github.repository == 'raycast/extensions' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: raycast/github-actions/setup-node@master
+
+      - name: Get changed files in the docs folder
+        id: changed-files
+        uses: tj-actions/changed-files@v19
+        with:
+          files: |
+            docs/utils-reference/**
+
+      - name: Setup git
+        uses: raycast/github-actions/setup-git@master
+
+      - name: Update the docs in the main repo
+        if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
+        id: commit
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+        run: |
+          ###########################
+          # sync docs
+          ###########################
+
+          echo "🛠️ Syncing to main repo..."
+
+          cd ${{ github.workspace }}
+
+          git clone --depth=1 --single-branch --branch "main" "https://$API_TOKEN_GITHUB@github.com/raycast/utils.git" "raycast-utils"
+
+          for file in ${{ steps.changed-files.outputs.deleted_files }}; do
+            echo "Removing $file"
+            # If it's already removed, that's ok
+            rm "$file" || true
+          done
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "Updating $file"
+            # If this fails, it's because there is a space in the filename
+            # so it's from GitBook messing things up. Ignore it
+            rsync -arv "$file" "$file" || true
+          done
+
+          cd raycast-utils
+
+          if [[ $(git diff --stat) != '' ]]; then
+            git checkout -b docs-sync-${{ github.sha }}
+            git add .
+            git commit -m 'Utils Docs: Update from the extensions repo'
+            git push origin docs-sync-${{ github.sha }}
+            echo 'has_commit=true' >> $GITHUB_OUTPUT
+          else
+            echo 'No changes'
+            echo 'has_commit=false' >> $GITHUB_OUTPUT
+          fi
+
+      - name: Open PR on the main repo
+        uses: actions/github-script@v6
+        if: steps.commit.outputs.has_commit == 'true'
+        with:
+          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          script: |
+            github.rest.pulls.create({
+              owner: 'raycast',
+              repo: 'utils',
+              head: 'docs-sync-${{ github.sha }}',
+              base: 'main',
+              title: 'Docs: Update from the extensions repo'
+            })
+
+      - name: Notify Failure to Slack
+        if: failure()
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}

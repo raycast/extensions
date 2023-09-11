@@ -2,7 +2,7 @@ export interface Doc {
   name: string;
   slug: string;
   type: string;
-  links: Links;
+  links?: Links;
   version: string;
   release: string;
   mtime: number;

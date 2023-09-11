@@ -19,6 +19,7 @@ export function OpenLinkAppGridItem(props: {
     <Grid.Item
       title={application.name}
       content={{ fileIcon: application.path }}
+      quickLook={{ path: application.path, name: application.name }}
       actions={
         <ActionOnOpenLinkApp
           isCustom={isCustom}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nixpkgs-search",
+  "title": "NixPkgs Search",
+  "description": "Query NixPkgs like search.nixos.org",
+  "icon": "nix-snowflake.png",
+  "author": "aiotter",
+  "categories": ["Developer Tools"],
+  "keywords": ["Nix", "NixPkgs", "NixOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search NixPkgs",
+      "description": "Search Nix Packages",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+    "name": "searchSize",
+    "description": "Number of result which will be shown at once",
+    "type": "textfield",
+    "required": false,
+    "title": "Search result count",
+    "default": "20"
+    },
+    {
+    "name": "branchName",
+    "description": "Branch name of NixOS/nixpkgs to query against",
+    "type": "textfield",
+    "required": false,
+    "title": "NixPkgs verison",
+    "default": "unstable"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "node-fetch": "3.1.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

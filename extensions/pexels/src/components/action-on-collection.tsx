@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Icon, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import React from "react";
 import { ActionToPexels } from "./action-to-pexels";
 import { Collection } from "pexels";
 import ViewCollectionMedias from "../view-collection-medias";
+import { ActionOpenPreferences } from "./action-open-preferences";
 
 export function ActionOnCollection(props: { collection: Collection }) {
   const { collection } = props;
@@ -14,14 +15,8 @@ export function ActionOnCollection(props: { collection: Collection }) {
         target={<ViewCollectionMedias id={collection.id} title={collection.title} />}
       />
       <ActionToPexels />
-      <ActionPanel.Section>
-        <Action
-          icon={Icon.Gear}
-          title="Open Extension Preferences"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          onAction={openExtensionPreferences}
-        />
-      </ActionPanel.Section>
+
+      <ActionOpenPreferences />
     </ActionPanel>
   );
 }

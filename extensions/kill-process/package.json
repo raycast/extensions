@@ -2,68 +2,109 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kill-process",
   "title": "Kill Process",
-  "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+  "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
   "icon": "icon.png",
   "author": "rolandleth",
+  "contributors": [
+    "crazyones110",
+    "zhenpewu",
+    "Saafo"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Kill Process",
-      "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+      "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name.",
+      "label": "Filtering should search process paths",
+      "name": "shouldSearchInPaths",
+      "required": false,
+      "title": "Filtering",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether the pid of the process should be searched for the query, or only the process name.",
+      "label": "Filtering should search process pid",
+      "name": "shouldSearchInPid",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether apps are listed before other results when filtering.",
+      "label": "Prioritize apps when filtering",
+      "name": "shouldPrioritizeAppsWhenFiltering",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether processes are sorted by CPU or memory usage.",
+      "label": "Sort processes by memory usage",
+      "name": "sortByMem",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether aggregate processes belong to the same app.",
+      "label": "Aggregate apps",
+      "name": "aggregateApps",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process PID info.",
+      "label": "Show PID",
+      "name": "shouldShowPID",
+      "required": false,
+      "title": "Display",
+      "type": "checkbox"
+    },
+    {
+      "description": "Show process Path.",
+      "label": "Show Process Path",
+      "name": "shouldShowPath",
+      "required": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Refresh duration in milliseconds. The minimum value is 1000ms and to disable auto-refresh, set it to 0.",
+      "label": "Refresh Duration",
+      "name": "refreshDuration",
+      "required": false,
+      "title": "Refresh Duration",
+      "type": "textfield",
+      "default": "3000"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.53.3",
+    "pretty-bytes": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
-  },
-  "preferences": [
-    {
-      "name": "shouldSearchInPaths",
-      "type": "checkbox",
-      "required": false,
-      "title": "Filtering",
-      "label": "Filtering should search process paths",
-      "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name."
-    },
-    {
-      "name": "shouldPrioritizeAppsWhenFiltering",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Prioritize apps when filtering",
-      "description": "Determines whether apps are listed before other results when filtering."
-    },
-    {
-      "name": "shouldShowPID",
-      "type": "checkbox",
-      "required": false,
-      "title": "Display",
-      "label": "Show PID",
-      "description": "Show process PID info."
-    },
-    {
-      "name": "shouldShowPath",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Show Process Path",
-      "description": "Show process Path."
-    }
-  ]
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
 }

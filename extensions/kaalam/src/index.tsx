@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import dayjs from "dayjs";
 
 export default function Command() {
@@ -29,14 +29,25 @@ export default function Command() {
           icon="list-icon.png"
           title={item.title}
           subtitle={item.subtitle}
-          accessoryIcon={{ source: Icon.Circle }}
+          accessories={[{ icon: Icon.Clock }]}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction content={item.title} />
+              <Action.CopyToClipboard content={item.title} />
             </ActionPanel>
           }
         />
       ))}
+      <List.Item
+        icon="list-icon.png"
+        title={today.getTime().toString()}
+        subtitle="Unix timestamp"
+        accessories={[{ icon: Icon.Clock }]}
+        actions={
+          <ActionPanel>
+            <Action.CopyToClipboard content={today.getTime().toString()} />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }

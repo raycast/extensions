@@ -1,4 +1,4 @@
-import { Color, Icon, getPreferenceValues, ActionPanel, List } from "@raycast/api";
+import { Color, Icon, getPreferenceValues, ActionPanel, List, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TopQueries, domainDetails } from "./interfaces";
 import { AddToListAction, cleanPiholeURL, fetchRequestTimeout } from "./utils";
@@ -11,7 +11,7 @@ export default function () {
   useEffect(() => {
     async function getQueryInfo() {
       const response = await fetchRequestTimeout(
-        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?topItems=20&auth=${API_TOKEN}`
+        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?topItems=25&auth=${API_TOKEN}`
       );
       if (response == "query-aborted" || response == undefined) {
         updateTimeoutInfo("query-aborted");
@@ -24,6 +24,8 @@ export default function () {
             domainURL: Object.keys(top_queries)[i],
             blockCount: Object.values(top_queries)[i].toString(),
           } as domainDetails);
+        }
+        for (let i = 0; i < Object.keys(top_ads).length; i++) {
           top_ads_array.push({
             domainURL: Object.keys(top_ads)[i],
             blockCount: Object.values(top_ads)[i].toString(),
@@ -61,6 +63,7 @@ export default function () {
                 actions={
                   <ActionPanel title="Actions">
                     <AddToListAction domain={item.domainURL} listType="black" />
+                    <Action.CopyToClipboard content={item.domainURL} />
                   </ActionPanel>
                 }
               />
@@ -76,6 +79,7 @@ export default function () {
                 actions={
                   <ActionPanel title="Actions">
                     <AddToListAction domain={item.domainURL} listType="white" />
+                    <Action.CopyToClipboard content={item.domainURL} />
                   </ActionPanel>
                 }
               />

@@ -17,9 +17,9 @@ export interface Database {
 }
 
 // Currently supported properties
-export const supportedPropTypes = [
-  "title",
+export const supportedPropTypes: PagePropertyType["type"][] = [
   "number",
+  "title",
   "rich_text",
   "url",
   "email",
@@ -31,6 +31,7 @@ export const supportedPropTypes = [
   "formula",
   "people",
   "relation",
+  "status",
 ];
 
 // all possible types:
@@ -48,10 +49,11 @@ export interface DatabaseProperty {
     | "date"
     | "checkbox"
     | "select"
+    | "multi_select"
     | "formula"
     | "people"
     | "relation"
-    | "multi_select";
+    | "status";
   name: string;
   options: DatabasePropertyOption[];
   relation_id?: string;
@@ -69,7 +71,9 @@ export interface Page {
   id: string;
   parent_page_id?: string;
   parent_database_id?: string;
+  created_by?: string;
   last_edited_time?: number;
+  last_edited_user?: string;
   title: string | null;
   icon_emoji: string | null;
   icon_file: string | null;
@@ -100,17 +104,11 @@ export interface KabanView {
   canceled_ids: string[];
 }
 
-type UnwrapRecord<T> = T extends Record<string, infer U> ? U : T;
+export type UnwrapRecord<T> = T extends Record<never, infer U> ? U : never;
+export type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
+export type UnwrapArray<T> = T extends Array<infer U> ? U : never;
 
-type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
-type UnwrapArray<T> = T extends Array<infer U> ? U : T;
-
-function getPropertiesTypes(page: UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>) {
-  if (page.object === "page" && "properties" in page) {
-    return page.properties;
-  }
-  throw new Error("this function won't ever be called, it's only for typescript");
-}
-
-export type PagePropertyType = UnwrapRecord<ReturnType<typeof getPropertiesTypes>>;
+type NotionProperties<T, TObject> = T extends { object: TObject; properties: infer U } ? U : never;
+export type PagePropertyType = UnwrapRecord<NotionProperties<NotionObject, "page">>;

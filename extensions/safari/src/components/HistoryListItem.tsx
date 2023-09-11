@@ -1,6 +1,7 @@
 import { ActionPanel, List, Action } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { HistoryItem } from "../types";
-import { getFaviconUrl, getUrlDomain } from "../utils";
+import { getUrlDomain } from "../utils";
 import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
 import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
@@ -29,16 +30,14 @@ const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
 };
 
 const HistoryListItem = (props: { entry: HistoryItem; searchText?: string }) => {
-  const domain = getUrlDomain(props.entry.url);
-
   return props.entry.title ? (
     <List.Item
       title={props.entry.title}
-      icon={getFaviconUrl(domain)}
+      icon={getFavicon(props.entry.url)}
       actions={<Actions entry={props.entry} searchText={props.searchText} />}
       accessories={[
         {
-          text: domain,
+          text: getUrlDomain(props.entry.url),
           tooltip: props.entry.url,
         },
       ]}

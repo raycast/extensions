@@ -6,7 +6,7 @@ export function EmptyView(props: { layout: string }) {
   return layout === "List" ? (
     <List.EmptyView
       title={"No Font"}
-      icon={{ source: { light: "empty-icons/empty-icon.svg", dark: "empty-icons/empty-icon@dark.svg" } }}
+      icon={{ source: { light: "empty-icons/empty-icon.png", dark: "empty-icons/empty-icon@dark.png" } }}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />
@@ -16,7 +16,7 @@ export function EmptyView(props: { layout: string }) {
   ) : (
     <Grid.EmptyView
       title={"No Font"}
-      icon={{ source: { light: "empty-icons/empty-icon.svg", dark: "empty-icons/empty-icon@dark.svg" } }}
+      icon={{ source: { light: "empty-icons/empty-icon.png", dark: "empty-icons/empty-icon@dark.png" } }}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />

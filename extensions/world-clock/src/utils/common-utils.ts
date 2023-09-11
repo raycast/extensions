@@ -7,6 +7,8 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
+const { dateFormat } = getPreferenceValues<Preferences>();
+
 export const getStarredTimezones = async () => {
   const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
   const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);
@@ -66,13 +68,12 @@ export const buildIntervalTime = (dateTime: string | number) => {
 export const buildFullDateTime = (dateTime: Date) => {
   if (hour24) {
     const time = buildHour24Time(dateTime);
-    const _datetime = dateTime.toLocaleDateString() + " " + time;
-    return _datetime;
+    return dateTime.toLocaleDateString(dateFormat) + " " + time;
   } else {
     return (
-      dateTime.toLocaleDateString() +
+      dateTime.toLocaleDateString(dateFormat) +
       " " +
-      dateTime.toLocaleString("en-US", {
+      dateTime.toLocaleTimeString("en-US", {
         hour12: true,
         hour: "2-digit",
         minute: "2-digit",
@@ -117,22 +118,21 @@ export const calculateTimeInfoByOffset = (unixtime: number, offset: string) => {
     minute: "2-digit",
     second: "2-digit",
   });
-  let _datetime = dateTime.toLocaleString("en-US", {
-    hour12: true,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-  let _utcDatetime = utc.toLocaleString("en-us", {
-    hour12: true,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  let _datetime = dateTime.toLocaleDateString(dateFormat) + " " + time;
+  let _utcDatetime =
+    utc.toLocaleDateString(dateFormat) +
+    " " +
+    utc.toLocaleTimeString("en-US", {
+      hour12: true,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
   if (hour24) {
     time = buildHour24Time(dateTime);
-    _datetime = dateTime.toLocaleDateString() + " " + time;
-    _utcDatetime = utc.toLocaleDateString() + " " + buildHour24Time(utc);
+    _datetime = dateTime.toLocaleDateString(dateFormat) + " " + time;
+    _utcDatetime = utc.toLocaleDateString(dateFormat) + " " + buildHour24Time(utc);
   }
   return {
     time: time,

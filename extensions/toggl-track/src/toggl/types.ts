@@ -1,53 +1,58 @@
+// https://developers.track.toggl.com/docs/api/me#response
+export interface Me {
+  default_workspace_id: number;
+}
+
+// https://developers.track.toggl.com/docs/api/workspaces#response-4
 export interface Workspace {
   id: number;
   name: string;
   premium: boolean;
-  admin: boolean;
-  default_hourly_rate: number;
-  default_currency: string;
-  only_admins_may_create_projects: boolean;
-  only_admins_see_billable_rates: boolean;
-  rounding: number;
-  rounding_minutes: number;
-  at: Date;
-  logo_url: string;
 }
 
+// https://developers.track.toggl.com/docs/api/projects/index.html#response-8
 export interface Project {
-  id: number;
-  wid: number;
-  cid: number;
-  name: string;
-  billable: boolean;
-  is_private: boolean;
   active: boolean;
-  template: boolean;
-  at: Date;
-  created_at: Date;
-  color: string;
-  auto_estimates: boolean;
-  actual_hours: number;
-  hex_color: string;
-}
-
-export interface TimeEntry {
-  id: number;
-  pid: number;
-  wid: number;
   billable: boolean;
-  start: Date;
-  duration: number;
-  description: string;
-  tags: string[];
+  client_id: number;
+  color: string;
+  id: number;
+  name: string;
+  workspace_id: number;
 }
 
+// https://developers.track.toggl.com/docs/api/clients#response
 export interface Client {
   id: number;
   name: string;
 }
 
+// https://developers.track.toggl.com/docs/api/tags#response
 export interface Tag {
   id: number;
-  wid: number;
   name: string;
+  workspace_id: number;
+}
+
+// https://developers.track.toggl.com/docs/api/tasks/index.html#response
+export interface Task {
+  active: boolean;
+  id: number;
+  name: string;
+  project_id: number;
+  workspace_id: number;
+  user_id: number | null;
+}
+
+// https://developers.track.toggl.com/docs/api/time_entries#response
+export interface TimeEntry {
+  at: string;
+  billable: boolean;
+  description: string;
+  id: number;
+  project_id: number;
+  start: string;
+  duration: number;
+  tags: string[];
+  workspace_id: number;
 }

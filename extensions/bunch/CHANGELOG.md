@@ -1,5 +1,13 @@
 # Bunch Changelog
 
+## [Update Raycast API] - 2022-12-02
+
+- Update Raycast API version to 1.44.0
+
+## [Text field validation] - 2022-07-04
+
+- Add text field validation
+
 ## [Support Bunch Beta] - 2022-06-24
 
 - Support Bunch Beta

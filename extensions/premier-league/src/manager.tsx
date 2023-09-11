@@ -49,7 +49,7 @@ export default function Manager() {
             title={p.name.display}
             subtitle={p.currentTeam?.name}
             content={{
-              source: `https://resources.premierleague.com/premierleague/photos/players/40x40/${p.altIds.opta}.png`,
+              source: `https://resources.premierleague.com/premierleague/photos/players/250x250/${p.altIds.opta}.png`,
               fallback: "player-missing.png",
             }}
             actions={

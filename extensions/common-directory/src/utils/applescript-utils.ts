@@ -1,6 +1,7 @@
 import { runAppleScript } from "run-applescript";
 import { DirectoryInfo, DirectoryType } from "../types/directory-info";
 import { getDirectoryName, isEmpty } from "./common-utils";
+import { Clipboard } from "@raycast/api";
 
 const scriptFinderInsertLocation = `
 if application "Finder" is not running then
@@ -80,18 +81,5 @@ export const getChooseFolder = async () => {
     return finderPath;
   } catch (e) {
     return finderPath;
-  }
-};
-
-const scriptCopyFile = (path: string) => {
-  return `tell app "Finder" to set the clipboard to (POSIX file "${path}")`;
-};
-
-export const copyFileByPath = async (path: string) => {
-  try {
-    await runAppleScript(scriptCopyFile(path));
-    return "";
-  } catch (e) {
-    return String(e);
   }
 };

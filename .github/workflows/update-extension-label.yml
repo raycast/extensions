@@ -1,0 +1,38 @@
+name: Update Extension's Label
+on:
+  label:
+    types: [created]
+
+jobs:
+  issue_open:
+    name: Label created
+    if: github.repository == 'raycast/extensions'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          script: |
+            if (context.payload.label.name.startsWith('extension: ')) {
+              await github.rest.issues.updateLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: context.payload.label.name,
+                color: 'CCCCCC',
+                description: 'Issues related to the ' + context.payload.label.name.replace('extension: ', '') + ' extension'
+              })
+            }
+
+      - name: Notify Failure to Slack
+        if: failure()
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}

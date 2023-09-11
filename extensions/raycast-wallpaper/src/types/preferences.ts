@@ -1,6 +1,6 @@
 export interface Preferences {
   layout: string;
-  itemSize: string;
+  columns: string;
   applyTo: string;
   picturesDirectory: string;
 }

@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, Grid, Icon, List } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, Grid, List } from "@raycast/api";
 import React from "react";
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { Preferences } from "../types/preferences";

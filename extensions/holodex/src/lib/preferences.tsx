@@ -7,6 +7,7 @@ export interface Preferences {
   language: string;
   preferEnglishName: boolean;
   preferYouTube: boolean;
+  externalVideoPlayer: "" | "IINA" | "mpv" | "VLC";
 }
 
 export function getPreferences() {

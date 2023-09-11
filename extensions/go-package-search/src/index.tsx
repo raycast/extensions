@@ -10,7 +10,7 @@ export default function Command() {
     <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Go packages..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
+          <SearchListItem key={searchResult.path ?? searchResult.url} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
@@ -21,15 +21,27 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
       icon={searchResult.search ? Icon.MagnifyingGlass : "list-icon.png"}
-      key={searchResult.fullPath}
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessories={[{ text: searchResult.fullPath, icon: searchResult.standardLibrary ? Icon.Pin : undefined }]}
+      accessories={[
+        {
+          icon: searchResult.standardLibrary ? Icon.CheckCircle : undefined,
+          tooltip: searchResult.standardLibrary ? "Standard Library" : "",
+        },
+        {
+          text: searchResult.version,
+          tooltip: searchResult.version,
+        },
+      ]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={searchResult.url} />
-          </ActionPanel.Section>
+          <Action.OpenInBrowser url={searchResult.url} />
+          {searchResult.path ? (
+            <ActionPanel.Section title="Go">
+              <Action.CopyToClipboard title="Copy Package Path" content={searchResult.path} />
+              <Action.CopyToClipboard title="Copy Download Command" content={`go get ${searchResult.path}`} />
+            </ActionPanel.Section>
+          ) : null}
         </ActionPanel>
       }
     />
@@ -87,17 +99,14 @@ function useSearch() {
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const hasSearchText = searchText.length !== 0;
-  const searchItem = {
+  const searchItem: SearchResult = {
     name: hasSearchText ? `Search ${searchText}` : "Open pkg.go.dev",
-    fullPath: "",
     description: hasSearchText ? "on pkg.go.dev" : "",
     standardLibrary: false,
     search: true,
     url: hasSearchText ? `https://pkg.go.dev/search?q=${searchText}` : "https://pkg.go.dev",
   };
-
   const results: SearchResult[] = [searchItem];
-
   if (!hasSearchText) {
     return results;
   }
@@ -113,38 +122,42 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
   const root = parse(await response.text());
   const searchResults = root.querySelector("div.SearchResults");
-
   if (!searchResults) {
-    throw new Error("Could not find search results");
+    return Promise.reject(new Error("Could not find search results"));
   }
 
   const items = searchResults.querySelectorAll("div.SearchSnippet");
-
   if (items.length === 0) {
     return results;
   }
 
   items.forEach((item) => {
     const name = item.querySelector('[data-test-id="snippet-title"]')?.text?.split("(")[0]?.trim();
-    const fullPath = item.querySelector("span.SearchSnippet-header-path")?.text?.trim();
-    const description = item.querySelector('[data-test-id="snippet-synopsis"]')?.text?.trim();
-    const url = `https://pkg.go.dev/${fullPath?.slice(1, fullPath.length - 1)}`;
-    const standardLibrary = item.querySelector("span.go-Chip") != null;
-
-    if (name == null || fullPath == null || url == null) {
+    if (!name) {
       return;
     }
 
+    let path = item.querySelector("span.SearchSnippet-header-path")?.text?.trim();
+    if (!path) {
+      return;
+    }
+    path = path.slice(1, -1);
+
+    const description = item.querySelector('[data-test-id="snippet-synopsis"]')?.text?.trim();
+    const url = `https://pkg.go.dev/${path}`;
+    const standardLibrary = !!item.querySelector("span.go-Chip");
+    const version = item.querySelector("div.SearchSnippet-infoLabel > span:nth-child(3) > strong")?.text?.trim();
+
     results.push({
       name,
-      fullPath,
+      path,
       standardLibrary,
       description,
       url,
+      version,
       search: false,
     });
   });
-
   return results;
 }
 
@@ -155,9 +168,10 @@ interface SearchState {
 
 interface SearchResult {
   name: string;
-  fullPath?: string;
+  path?: string;
   standardLibrary: boolean;
   search: boolean;
   description?: string;
   url: string;
+  version?: string;
 }

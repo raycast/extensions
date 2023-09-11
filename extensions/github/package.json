@@ -1,0 +1,237 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github",
+  "title": "GitHub",
+  "description": "Work with issues, pull requests, manage workflows, search repositories and stay on top of notifications",
+  "icon": "icon.png",
+  "access": "public",
+  "author": "thomaslombart",
+  "owner": "raycast",
+  "contributors": [
+    "tholanda",
+    "tonka3000",
+    "khasbilegt",
+    "pernielsentikaer",
+    "loxygenk",
+    "oilbeater",
+    "LunaticMuch"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-pull-requests",
+      "title": "My Pull Requests",
+      "description": "List pull requests you created, participated in, or were mentioned in.",
+      "mode": "view"
+    },
+    {
+      "name": "search-pull-requests",
+      "title": "Search Pull Requests",
+      "description": "Search recent pull requests globally in all repositories.",
+      "mode": "view"
+    },
+    {
+      "name": "create-pull-request",
+      "title": "Create Pull Request",
+      "description": "Create a pull request in one of your GitHub repositories.",
+      "mode": "view"
+    },
+    {
+      "name": "created-issues",
+      "title": "Created Issues",
+      "description": "List issues created by you.",
+      "mode": "view"
+    },
+    {
+      "name": "open-issues",
+      "title": "Open Issues",
+      "description": "List issues assigned to you or mentioning you.",
+      "mode": "view"
+    },
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "description": "Search recent issues globally in all repositories.",
+      "mode": "view"
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Create an issue in one of your GitHub repositories.",
+      "mode": "view"
+    },
+    {
+      "name": "create-branch",
+      "title": "Create Branch",
+      "description": "Create a branch in one of your GitHub repositories",
+      "mode": "view"
+    },
+    {
+      "name": "search-repositories",
+      "title": "Search Repositories",
+      "description": "Search in your public or private repositories by name.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeForks",
+          "type": "checkbox",
+          "required": false,
+          "title": "Options",
+          "default": true,
+          "label": "Include Forks",
+          "description": "Includes forked repositories in search results"
+        },
+        {
+          "name": "includeArchived",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Include Archived",
+          "description": "Includes archived repositories in search results"
+        },
+        {
+          "name": "displayOwnerName",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Display Owner Names",
+          "description": "Display owner name alongside repository name in search results"
+        }
+      ]
+    },
+    {
+      "name": "workflow-runs",
+      "title": "Workflow Runs",
+      "description": "Manage workflow runs for a selected GitHub repository.",
+      "mode": "view"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "List inbox notifications from all repositories or a selected repository.",
+      "mode": "view"
+    },
+    {
+      "name": "unread-notifications",
+      "title": "Unread Notifications",
+      "description": "Shows unread notifications in the macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "label": "Always Show",
+          "name": "alwaysShow",
+          "description": "Show the menu bar extra even when you don't have any unread notifications.",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "my-discussions",
+      "title": "My Discussions",
+      "description": "Show your Discussions",
+      "mode": "view"
+    },
+    {
+      "name": "open-issues-menu",
+      "title": "Open Issues Menu Bar",
+      "description": "Display Open Issues in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Issues shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Issues",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Issues Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Count",
+          "title": "Appearance",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "open-pull-request-menu",
+      "title": "My Pull Requests Menu Bar",
+      "description": "Display My Pull Request in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxitems",
+          "description": "Maximum Pull Requests shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Pull Requests",
+          "placeholder": "10"
+        },
+        {
+          "name": "showtext",
+          "description": "Show Pull Requests Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Count",
+          "title": "Appearance",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "type": "password",
+      "required": false,
+      "title": "GitHub Token",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
+      "link": "https://github.com/settings/tokens",
+      "placeholder": "Enter your personal access token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.3",
+    "@raycast/utils": "^1.9.0",
+    "date-fns": "^2.30.0",
+    "graphql-request": "^5.1.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "octokit": "^2.1.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^3.2.2",
+    "@graphql-codegen/typescript": "^3.0.2",
+    "@graphql-codegen/typescript-graphql-request": "^4.5.9",
+    "@graphql-codegen/typescript-operations": "^3.0.2",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.184",
+    "@types/node": "^18.15.11",
+    "concurrently": "^8.2.0",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.37.0",
+    "eslint-plugin-import": "^2.27.5",
+    "graphql": "^16.6.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "concurrently \"ray develop\" \"yarn generate --watch\"",
+    "format": "ray lint --fix",
+    "lint": "ray lint",
+    "generate": "graphql-codegen --config codegen.ts"
+  }
+}

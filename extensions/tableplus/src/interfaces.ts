@@ -12,6 +12,9 @@ export type Connection = {
   database: string;
   Driver: string;
   Environment: string | "local" | "development" | "testing" | "staging" | "production";
+  icon: string;
+  subtitle: string;
+  version: number;
 };
 
 export type Group = {
@@ -19,10 +22,6 @@ export type Group = {
   name: string;
   connections: Connection[];
 };
-
-export interface Preferences {
-  path?: string;
-}
 
 type Environment = Connection["Environment"];
 export const tintColors: { [key: Environment]: Color } = {

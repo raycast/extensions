@@ -5,6 +5,10 @@
   "description": "Quickly search packages on https://pkg.go.dev",
   "icon": "command-icon.png",
   "author": "bstncartwright",
+  "contributors": [
+    "k8scat",
+    "BalliAsghar"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -21,7 +25,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.40.1",
     "node-fetch": "^3.0.0",
     "node-html-parser": "^5.3.3"
   },

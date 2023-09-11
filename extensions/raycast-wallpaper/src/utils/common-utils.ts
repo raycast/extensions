@@ -1,11 +1,12 @@
-import { environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
+import { Cache, environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
 import fse, { existsSync } from "fs-extra";
-import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
 import { Preferences } from "../types/preferences";
-import { RaycastWallpaper } from "../types/types";
+import { RaycastWallpaper, RaycastWallpaperWithInfo } from "../types/types";
 import axios from "axios";
+import { runAppleScript } from "@raycast/utils";
 
+export const cache = new Cache();
 export const cachePath = environment.supportPath;
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -37,7 +38,7 @@ export async function downloadPicture(wallpaper: { title: string; url: string })
   await showToast(Toast.Style.Animated, "Downloading...");
 
   const picturePath = `${getSavedDirectory()}/${wallpaper.title}.png`;
-  await fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)), async (error) => {
+  fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)), async (error) => {
     if (error != null) {
       await showToast(Toast.Style.Failure, String(error));
     } else {
@@ -65,7 +66,7 @@ export async function downloadPicture(wallpaper: { title: string; url: string })
   });
 }
 
-export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
+export const setWallpaper = async (wallpaper: RaycastWallpaperWithInfo) => {
   const toast = await showToast(Toast.Style.Animated, "Downloading and setting wallpaper...");
 
   const { applyTo } = getPreferenceValues<Preferences>();
@@ -120,6 +121,49 @@ export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
   }
 };
 
+export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
+  const { applyTo } = getPreferenceValues<Preferences>();
+  const fixedPathName = buildCachePath(wallpaper);
+
+  try {
+    const actualPath = fixedPathName;
+
+    if (!existsSync(actualPath)) {
+      await cachePicture(wallpaper);
+    }
+
+    const result = await runAppleScript(`
+      set temp_folder to (POSIX path of "${actualPath}")
+      set q_temp_folder to quoted form of temp_folder
+
+      set x to alias (POSIX file temp_folder)
+
+      try
+        tell application "System Events"
+          tell ${applyTo} desktop
+            set picture to (x as text)
+            return "ok"
+          end tell
+        end tell
+      on error
+        set dialogTitle to "Error Setting Wallpaper"
+        set dialogText to "Please make sure you have given Raycast the required permission. To make sure, click the button below and grant Raycast the 'System Events' permission."
+
+        display alert dialogTitle message dialogText buttons {"Cancel", "Open Preferences"} default button 2 as informational
+          if button returned of result is "Open Preferences" then
+            do shell script "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Automation'"
+          end if
+
+        return "error"
+      end try
+    `);
+
+    if (result !== "ok") throw new Error("Error setting wallpaper.");
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export const buildCachePath = (raycastWallpaper: RaycastWallpaper) => {
   return cachePath.endsWith("/")
     ? `${cachePath}${raycastWallpaper.title}.png`
@@ -131,7 +175,7 @@ export const checkCache = (wallpaper: RaycastWallpaper) => {
   return fse.pathExistsSync(fixedPath);
 };
 
-export async function cachePicture(wallpaper: { title: string; url: string }) {
+export async function cachePicture(wallpaper: RaycastWallpaper) {
   const picturePath = buildCachePath(wallpaper);
   await fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)));
 }

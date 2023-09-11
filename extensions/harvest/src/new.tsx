@@ -10,9 +10,10 @@ import {
   confirmAlert,
   Icon,
   LocalStorage,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
+import { formatHours, isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -37,14 +38,13 @@ export default function Command({
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
   const [taskId, setTaskId] = useState<string | undefined>(entry?.task.id.toString());
   const [notes, setNotes] = useState<string | undefined>(entry?.notes);
-  const [hours, setHours] = useState<string | undefined>(entry?.hours.toString());
+  const [hours, setHours] = useState<string | undefined>(formatHours(entry?.hours?.toFixed(2), company));
   const [spentDate, setSpentDate] = useState<Date>(viewDate);
-
-  // console.log(projectId);
+  const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
 
   useEffect(() => {
     if (error) {
-      if (error.isAxiosError && error.response?.status === 401) {
+      if (isAxiosError(error) && error.response?.status === 401) {
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid Token",
@@ -98,16 +98,18 @@ export default function Command({
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Project Selected",
       });
+      return;
     }
     if (values.task_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Task Selected",
       });
+      return;
     }
 
     setTimeFormat(hours);
@@ -181,7 +183,7 @@ export default function Command({
   }
 
   function setTimeFormat(value?: string) {
-    // This function can be called direclty from the onBlur event to better match the Harvest app behavior when it exists
+    // This function can be called directly from the onBlur event to better match the Harvest app behavior when it exists
     if (!value) return;
 
     if (company?.time_format === "decimal") {
@@ -225,6 +227,12 @@ export default function Command({
         </ActionPanel>
       }
     >
+      {showClient && (
+        <Form.Description
+          text={projects.find((o) => o.project.id === parseInt(projectId ?? "0"))?.client.name ?? ""}
+          title="Client"
+        />
+      )}
       <Form.Dropdown
         id="project_id"
         title="Project"
@@ -242,6 +250,7 @@ export default function Command({
                 const code = project.project.code;
                 return (
                   <Form.Dropdown.Item
+                    keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
                     title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
                     key={project.id}
@@ -281,7 +290,7 @@ export default function Command({
         title="Date"
         type={Form.DatePicker.Type.Date}
         value={spentDate}
-        onChange={setSpentDate}
+        onChange={(newValue) => newValue && setSpentDate(newValue)}
       />
     </Form>
   );

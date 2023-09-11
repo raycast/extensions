@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 import { find } from "lodash";
-import { Newspaper, Preferences, Table } from "../types";
+import { Newspaper, Preferences, Table, TopScorer } from "../types";
 import cheerio from "cheerio";
 
 const footballDataApiKey = getPreferenceValues<Preferences>().apiKey;
@@ -73,3 +73,20 @@ function getNewspapersData(html: cheerio.Root, ids: string[]): Newspaper[] {
     };
   });
 }
+
+export const getTopScorers = async (): Promise<TopScorer[]> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${footballDataEndpoint}/competitions/PPL/scorers`,
+    headers,
+  };
+
+  try {
+    const { data } = await axios(config);
+
+    return data.scorers;
+  } catch (e) {
+    showFailureToast();
+    return [];
+  }
+};
