@@ -9,7 +9,6 @@ import {
   Action,
   Alert,
   confirmAlert,
-  Color,
   Form,
   useNavigation,
   popToRoot,
@@ -84,12 +83,8 @@ export async function deleteDirectory(folderPath: string, folderName: string, re
   return;
 }
 
-export function getFileSize(preferences: PreferencesType, fileData: FileDataType): string {
-  if (preferences.showFileSize) {
-    return String(filesize(fileData.size, { round: 0, spacer: "" }));
-  } else {
-    return "";
-  }
+export function getFileSize(fileData: FileDataType): string {
+  return String(filesize(fileData.size, { round: 0, spacer: "" }));
 }
 
 export function getStartDirectory(): string {
@@ -98,9 +93,11 @@ export function getStartDirectory(): string {
   return resolve(startDirectory);
 }
 
-export function DirectoryItem(props: { fileData: FileDataType; refresh: () => void }) {
+export function DirectoryItem(props: { fileData: FileDataType; refresh: () => void; isSymlink?: boolean }) {
+  const isSymlink = props.isSymlink ?? false;
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
+  const typeName = `${isSymlink ? "Symlink " : ""}Directory`;
 
   const context = encodeURIComponent(`{"path":"${filePath}"}`);
   const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
@@ -111,31 +108,33 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
       title={props.fileData.name}
       subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
       icon={{ fileIcon: filePath }}
+      quickLook={{ path: filePath, name: props.fileData.name }}
       actions={
-        <ActionPanel>
-          <Action.Push title="Open Directory" icon={Icon.ArrowRight} target={<Directory path={filePath} />} />
-          <Action.OpenWith
-            path={filePath}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-            onOpen={() => popToRoot({ clearSearchBar: true })}
-          />
-          <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
-          <Action.CopyToClipboard
-            title="Copy Directory Path"
-            content={`${filePath}/`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
-          <Action.Push
-            target={<RenameItem filePath={filePath} refresh={props.refresh} isDirectory={true} />}
-            title="Rename Directory"
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            icon={Icon.Pencil}
-          />
-          <Action.CreateQuicklink
-            title="Create Quicklink to this Directory"
-            quicklink={{ name: `Open ${filePath}`, link: deeplink }}
-          />
+        <ActionPanel title={props.fileData.name}>
           <ActionPanel.Section>
+            <Action.Push title={`Open ${typeName}`} icon={Icon.ArrowRight} target={<Directory path={filePath} />} />
+            <Action.OpenWith path={filePath} onOpen={() => popToRoot({ clearSearchBar: true })} />
+            <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+            <Action.ToggleQuickLook title="Quick Look" shortcut={{ modifiers: ["cmd"], key: "y" }} />
+            <Action.CopyToClipboard
+              title={`Copy ${typeName} Path`}
+              content={filePath + "/"}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CreateQuicklink
+              title={`Create Quicklink to This ${typeName}`}
+              quicklink={{ name: `Open ${filePath}`, link: deeplink }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push
+              target={<RenameItem filePath={filePath} refresh={props.refresh} typeName={typeName} />}
+              title={`Rename ${typeName}`}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              icon={Icon.Pencil}
+            />
             <Action.Trash
               title="Move to Trash"
               shortcut={
@@ -143,13 +142,13 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
               }
               paths={filePath}
               onTrash={() => {
-                showToast(Toast.Style.Success, "Moved to Trash", `Directory: ${filePath}`);
+                showToast(Toast.Style.Success, "Moved to Trash", `${typeName}: ${filePath}`);
                 props.refresh();
               }}
             />
             {preferences.showDeleteActions && (
               <Action
-                title="Delete Directory"
+                title={`Delete ${typeName}`}
                 icon={Icon.Eraser}
                 style={Action.Style.Destructive}
                 shortcut={
@@ -167,40 +166,50 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
   );
 }
 
-export function FileItem(props: { fileData: FileDataType; refresh: () => void }) {
+export function FileItem(props: { fileData: FileDataType; refresh: () => void; isSymlink?: boolean }) {
+  const isSymlink = props.isSymlink ?? false;
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
+  const typeName = `${isSymlink ? "Symlink " : ""}File`;
+
   return (
     <List.Item
       key={filePath}
       id={filePath}
       title={props.fileData.name}
       icon={{ fileIcon: filePath }}
+      quickLook={{ path: filePath, name: props.fileData.name }}
       subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
-      accessories={[
-        {
-          icon: Icon.HardDrive,
-          text: getFileSize(preferences, props.fileData),
-        },
-      ]}
+      accessories={
+        preferences.showFileSize
+          ? [
+            {
+              icon: Icon.HardDrive,
+              text: getFileSize(props.fileData),
+            },
+          ]
+          : []
+      }
       actions={
-        <ActionPanel>
-          <Action.Open title="Open File" target={filePath} />
-          <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
-          <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-          <Action.CopyToClipboard
-            title="Copy File Path"
-            content={filePath}
-            shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
-          />
-          <Action.Push
-            target={<RenameItem filePath={filePath} refresh={props.refresh} isDirectory={false} />}
-            title={`Rename File`}
-            icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-
+        <ActionPanel title={props.fileData.name}>
           <ActionPanel.Section>
+            <Action.Open title={`Open ${typeName}`} target={filePath} />
+            <Action.OpenWith path={filePath} />
+            <Action.ShowInFinder path={filePath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+            <Action.ToggleQuickLook title="Quick Look" shortcut={{ modifiers: ["cmd"], key: "y" }} />
+            <Action.CopyToClipboard
+              title={`Copy ${typeName} Path`}
+              content={filePath}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.Push
+              target={<RenameItem filePath={filePath} refresh={props.refresh} typeName={typeName} />}
+              title={`Rename ${typeName}`}
+              icon={Icon.Pencil}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
             <Action.Trash
               title="Move to Trash"
               shortcut={
@@ -214,7 +223,7 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
             />
             {preferences.showDeleteActions && (
               <Action
-                title="Delete File"
+                title={`Delete ${typeName}`}
                 icon={Icon.Eraser}
                 style={Action.Style.Destructive}
                 shortcut={
@@ -233,100 +242,15 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void })
 }
 
 export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void }) {
-  const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const a = fs.readlinkSync(filePath);
   const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
   const originalFileData = fs.lstatSync(originalPath, { throwIfNoEntry: false });
+
   if (originalFileData?.isDirectory() ?? false) {
-    return (
-      <List.Item
-        id={filePath}
-        title={props.fileData.name}
-        icon={{ fileIcon: filePath }}
-        subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Open Symlink Directory"
-              icon={Icon.ArrowRight}
-              target={<Directory path={originalPath} />}
-            />
-            <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            <Action.CopyToClipboard
-              title="Copy Symlink Path"
-              content={filePath}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-            <Action.CopyToClipboard
-              title="Copy Original Directory Path"
-              content={filePath}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-            />
-            {preferences.showDeleteActions && (
-              <Action
-                title="Delete Symlink Directory"
-                icon={Icon.Eraser}
-                style={Action.Style.Destructive}
-                shortcut={
-                  preferences.standardShortcuts
-                    ? { modifiers: ["ctrl", "shift"], key: "x" }
-                    : { modifiers: ["cmd"], key: "d" }
-                }
-                onAction={() => deleteDirectory(filePath, props.fileData.name, props.refresh)}
-              />
-            )}
-          </ActionPanel>
-        }
-      />
-    );
+    return <DirectoryItem fileData={props.fileData} refresh={props.refresh} isSymlink={true} />;
   } else {
-    return (
-      <List.Item
-        id={filePath}
-        title={props.fileData.name}
-        icon={{ fileIcon: filePath }}
-        subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
-        accessories={
-          !originalFileData
-            ? [{ icon: { source: Icon.ExclamationMark, tintColor: Color.Red }, tooltip: "Broken Symlink" }]
-            : []
-        }
-        actions={
-          <ActionPanel>
-            {originalFileData && (
-              <>
-                <Action.Open title="Open File" target={originalPath} />
-                <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-              </>
-            )}
-            <Action.CopyToClipboard
-              title="Copy Symlink Path"
-              content={filePath}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-            <Action.CopyToClipboard
-              title="Copy Original File Path"
-              content={originalPath}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-            />
-            {preferences.showDeleteActions && (
-              <Action
-                title="Delete Symlink File"
-                icon={Icon.Eraser}
-                style={Action.Style.Destructive}
-                shortcut={
-                  preferences.standardShortcuts
-                    ? { modifiers: ["ctrl", "shift"], key: "x" }
-                    : { modifiers: ["cmd"], key: "d" }
-                }
-                onAction={() => deleteFile(filePath, props.fileData.name, props.refresh)}
-              />
-            )}
-          </ActionPanel>
-        }
-      />
-    );
+    return <FileItem fileData={props.fileData} refresh={props.refresh} isSymlink={true} />;
   }
 }
 
@@ -414,7 +338,7 @@ export function Directory(props: { path: string }) {
   }
 }
 
-export function RenameItem(props: { filePath: string; refresh: () => void; isDirectory: boolean }) {
+export function RenameItem(props: { filePath: string; refresh: () => void; typeName: string }) {
   const [itemName, setItemName] = useState<string>(basename(props.filePath));
   const { pop } = useNavigation();
 
@@ -422,11 +346,7 @@ export function RenameItem(props: { filePath: string; refresh: () => void; isDir
     const newFilePath = `${dirname(props.filePath)}/${itemName}`;
     if (props.filePath !== newFilePath) {
       fs.renameSync(props.filePath, newFilePath);
-      showToast(
-        Toast.Style.Success,
-        `${props.isDirectory ? "Directory" : "File"} Renamed`,
-        `${basename(props.filePath)} -> ${itemName}`,
-      );
+      showToast(Toast.Style.Success, `${props.typeName} Renamed`, `${basename(props.filePath)} -> ${itemName}`);
       props.refresh();
       pop();
     }
@@ -438,18 +358,14 @@ export function RenameItem(props: { filePath: string; refresh: () => void; isDir
       navigationTitle={basename(props.filePath)}
       actions={
         <ActionPanel>
-          <Action
-            title={`Rename ${props.isDirectory ? "Directory" : "File"}`}
-            onAction={renameItem}
-            icon={Icon.Pencil}
-          />
+          <Action title={`Rename ${props.typeName}`} onAction={renameItem} icon={Icon.Pencil} />
           <Action title="Cancel" shortcut={{ modifiers: ["cmd"], key: "." }} onAction={pop} icon={Icon.Undo} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="itemName"
-        title={`Rename ${props.isDirectory ? "Directory" : "File"}`}
+        title={`Rename ${props.typeName}`}
         placeholder="Enter new name"
         value={itemName}
         onChange={setItemName}
