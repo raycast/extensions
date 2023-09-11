@@ -108,6 +108,13 @@
       "subtitle": "Tesla",
       "description": "Change the car image displayed",
       "mode": "view"
+    },
+    {
+      "name": "flashLights",
+      "title": "Flash Lights",
+      "subtitle": "Tesla",
+      "description": "Flash the lights",
+      "mode": "view"
     }
   ],
   "preferences": [
