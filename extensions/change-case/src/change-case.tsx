@@ -16,7 +16,7 @@ import {
   getFrontmostApplication,
   environment,
   LaunchProps,
-  popToRoot
+  popToRoot,
 } from "@raycast/api";
 import * as changeCase from "change-case-all";
 import { useEffect, useState } from "react";
@@ -130,8 +130,8 @@ export default function Command(props: LaunchProps) {
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
     (async () => {
-      let content = await readContent(preferredSource);
-      let converted = functions[immediatelyConvertToCase](content);
+      const content = await readContent(preferredSource);
+      const converted = functions[immediatelyConvertToCase](content);
 
       Clipboard.copy(converted);
 
@@ -146,7 +146,6 @@ export default function Command(props: LaunchProps) {
 
   const [pinned, setPinned] = useState<CaseType[]>([]);
   const [recent, setRecent] = useState<CaseType[]>([]);
-
 
   useEffect(() => {
     setPinned(getPinnedCases());
