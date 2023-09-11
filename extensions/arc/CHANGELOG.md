@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Improvements] - 2023-09-11
+## [Improvements] - {PR_MERGE_DATE}
 
 - Added a new `Open New Blank Window` command that opens a blank window in Arc
 - Added some new keywords to help with searching for the Arc Browser extension
