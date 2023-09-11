@@ -1,5 +1,11 @@
 # Anybox Changelog
 
+## [Feature Improvement] - 2023-09-11
+
+- Rename “Collection” to “Tag”.
+- Support nested tags.
+- Update APIs to match Anybox 2.0.
+
 ## [Bug Fixes] - 2023-08-31
 
 - Fix “Save and Open in Anybox” not adding comment.

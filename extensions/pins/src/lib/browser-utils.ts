@@ -1,4 +1,14 @@
-import { runAppleScript } from "run-applescript";
+/**
+ * @module lib/browser-utils.ts A collection of functions for interacting with browsers, e.g. obtaining the current tab's URL. Supported browsers are specified in {@link SupportedBrowsers}.
+ *
+ * @summary Utilities for interacting with browsers.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-09-04 17:30:30
+ * Last modified  : 2023-09-04 17:31:35
+ */
+
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Gets the URL of the active tab in Safari.

@@ -17,12 +17,10 @@ func getSelectedValue() -> String {
 }
 
 func setScrollBars(_ value: String) {
-  let domain = "AppleShowScrollBars"
-
-  UserDefaults.standard.setPersistentDomain(
-    [domain: Optional(value) as Any],
-    forName: UserDefaults.globalDomain
-  )
+  if var settings = UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain) {
+    settings["AppleShowScrollBars"] = value
+    UserDefaults.standard.setPersistentDomain(settings, forName: UserDefaults.globalDomain)
+  }
 
   let notifyEvent = Notification.Name("AppleShowScrollBarsSettingChanged")
   DistributedNotificationCenter.default().post(name: notifyEvent, object: nil)

@@ -5,7 +5,7 @@ import { Collection } from "../types";
 import { scrapeCollections } from "../utils/scrapper";
 import CollectionGridItem from "../components/CollectionGridItem";
 
-export default function CurrentMonthPublications() {
+export default function BrowseCollections() {
   const [collectionList, setCollectionList] = useState<Collection[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const { isLoading, data } = useFetch("https://miscomics.com.mx/manga", {
@@ -19,15 +19,15 @@ export default function CurrentMonthPublications() {
   return (
     <Grid
       isLoading={isLoading}
-      columns={5}
-      inset={Grid.Inset.Small}
+      columns={6}
+      aspectRatio="2/3"
       searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={true}
     >
       <Grid.Section title={`${collectionList.length} Manga collections were found`}>
-        {collectionList.map((collection, idx) => (
-          <CollectionGridItem key={idx + collection.name} collection={collection} />
+        {collectionList.map((collection) => (
+          <CollectionGridItem key={collection.id} collection={collection} />
         ))}
       </Grid.Section>
     </Grid>
