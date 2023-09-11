@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Icon, List, openExtensionPreferences, useNavigation } from "@raycast/api";
 import { Fragment } from "react";
 import usePreferences from "./hooks/preferences";
-import { WordTranslation } from "./translationDetails";
 import { useRecentSearches, useSearchTranslations } from "./hooks/translations";
+import PreferencesTranslationDropdown from "./preferencesTranslationDropdown";
+import { WordTranslation } from "./translationDetails";
 
 export default function Command() {
   const { preferences, translation } = usePreferences();
@@ -18,6 +19,7 @@ export default function Command() {
           <SettingsAction />
         </ActionPanel>
       }
+      searchBarAccessory={<PreferencesTranslationDropdown />}
       filtering={false}
       isLoading={isLoading}
       searchBarPlaceholder={`Search ${translation.from} to ${translation.to} translations...`}
@@ -48,15 +50,15 @@ export default function Command() {
         </List.Section>
       ) : (
         <List.Section title="Recent Searches">
-          {recentSearches?.map(({ word, lang }, index) => (
+          {recentSearches?.map(({ word, sourceLangKey, targetLangKey }, index) => (
             <List.Item
               key={index}
               title={word}
-              subtitle={lang}
+              subtitle={`${sourceLangKey} -> ${targetLangKey}`}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title={word}>
-                    <DetailActions word={word} lang={lang} translationKey={preferences.translationKey} />
+                    <DetailActions word={word} lang={sourceLangKey} translationKey={sourceLangKey + targetLangKey} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action
@@ -95,8 +97,8 @@ function DetailActions({ word, lang, translationKey }: { word: string; lang: str
   const { addRecentSearch } = useRecentSearches();
   const navigation = useNavigation();
   const key = translationKey;
-  const otherLang = key.replace(lang, "");
-  const urlTranslationKey = lang + otherLang;
+  const targetLangKey = key.replace(lang, "");
+  const urlTranslationKey = lang + targetLangKey;
   const url = `https://www.wordreference.com/${urlTranslationKey}/${word}`;
 
   return (
@@ -105,7 +107,7 @@ function DetailActions({ word, lang, translationKey }: { word: string; lang: str
         title="Show Translation"
         onAction={() => {
           navigation.push(<WordTranslation word={word} lang={lang} baseUrl={urlTranslationKey} />);
-          addRecentSearch({ word, lang, translationKey: urlTranslationKey });
+          addRecentSearch({ word, sourceLangKey: lang, targetLangKey });
         }}
         icon={Icon.ChevronRight}
       />

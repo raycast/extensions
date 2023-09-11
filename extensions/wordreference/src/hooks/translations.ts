@@ -45,14 +45,12 @@ export function useSearchTranslations() {
 
 interface RecentSearch {
   word: string;
-  lang: string;
-  translationKey: string;
+  sourceLangKey: string;
+  targetLangKey: string;
 }
 
 export function useRecentSearches() {
-  const [recentSearches, setRecentSearches] = useCachedState<
-    { word: string; lang: string; translationKey: string }[] | undefined
-  >("recentSearches", undefined);
+  const [recentSearches, setRecentSearches] = useCachedState<RecentSearch[] | undefined>("recentSearches", undefined);
 
   async function loadRecentSearches() {
     const recentSearchesString = await LocalStorage.getItem<string>("recentSearches");
@@ -67,10 +65,15 @@ export function useRecentSearches() {
     await LocalStorage.setItem("recentSearches", JSON.stringify(searches));
   }
 
-  const addRecentSearch = ({ word, lang, translationKey }: { word: string; lang: string; translationKey: string }) => {
+  const addRecentSearch = ({ word, sourceLangKey, targetLangKey }: RecentSearch) => {
     const newRecentSearches =
-      recentSearches?.filter((recentSearch) => recentSearch.word !== word || recentSearch.lang !== lang) || [];
-    newRecentSearches.unshift({ word, lang, translationKey });
+      recentSearches?.filter(
+        (recentSearch) =>
+          recentSearch.word !== word ||
+          recentSearch.sourceLangKey !== sourceLangKey ||
+          recentSearch.targetLangKey !== targetLangKey
+      ) || [];
+    newRecentSearches.unshift({ word, sourceLangKey, targetLangKey });
     setRecentSearches(newRecentSearches);
     saveRecentSearches(newRecentSearches);
   };
