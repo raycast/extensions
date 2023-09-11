@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "custom-command-search",
+  "title": "Custom Command Search",
+  "description": "Search multiple url or cmd in your different environments.",
+  "icon": "cmd-icon.png",
+  "author": "niudear",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "command",
+      "title": "Search Custom Cmd",
+      "description": "Search cmd or url by keyword.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customYamlPath",
+      "type": "textfield",
+      "required": false,
+      "default": "./default-config.yaml",
+      "title": "Custom Yaml Config Path",
+      "description": "If you want to customize the routing configuration, please specify the file address"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.0",
+    "@raycast/utils": "^1.9.1",
+    "yaml": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

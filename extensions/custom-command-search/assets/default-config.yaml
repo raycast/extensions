@@ -1,0 +1,15 @@
+- key: ss
+  remark: Search Engine
+  tags: sousuo,baidu,duoji
+  values:
+    - cmd: https://www.baidu.com/s?wd={clip_0}
+      remark: Baidu search
+    - cmd: https://www.google.com/search?q={clip_0}
+      remark: Google search
+- key: cc
+  remark: Common Command
+  values:
+    - cmd: git info
+      remark: git info
+    - cmd: echo '${clip_0}'
+      remark: echo with clip
