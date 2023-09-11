@@ -3,7 +3,7 @@
 ## 2023-09-10
 
 - Sorts event types to match their order in the dashboard
-- Add links to dashboard and public page
+- Adds actions to open your dashboard and copy the link to your public page
 
 ## [Initial Version] - 2022-09-07
 

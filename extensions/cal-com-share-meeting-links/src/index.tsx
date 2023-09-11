@@ -25,32 +25,11 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      <List.Item
-        title="Open Cal.com Dashboard"
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser url="https://app.cal.com" />
-          </ActionPanel>
-        }
-      />
-      {user && (
-        <List.Item
-          title="Copy My Link"
-          subtitle={"/" + user.username}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy My Link" content={`https://cal.com/${user.username}`} />
-              <Action.OpenInBrowser url={`https://cal.com/${user.username}`} />
-            </ActionPanel>
-          }
-        />
-      )}
       {items?.map((item) => (
         <List.Item
           key={item.id}
           title={item.title}
           accessories={getAccessories(item)}
-          subtitle={item.description}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
@@ -61,6 +40,18 @@ export default function Command() {
                 url={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
                 title="Preview URL"
               />
+              <ActionPanel.Section title="Quick Links">
+                <Action.OpenInBrowser
+                  title="Open Dashboard"
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  url="https://app.cal.com"
+                />
+                <Action.CopyToClipboard
+                  title="Copy My Link"
+                  shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  content={`https://cal.com/${user?.username}`}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
