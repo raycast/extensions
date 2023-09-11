@@ -12,7 +12,7 @@ function Search() {
 
   const sections = [
     { title: "Recent", pages: recentPages ?? [] },
-    { title: "Search", pages: searchPages ?? [] },
+    { title: "Search", pages: searchPages?.filter((p) => !recentPages?.some((q) => p.id == q.id)) ?? [] },
   ];
 
   return (
