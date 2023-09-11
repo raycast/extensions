@@ -183,11 +183,11 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void; i
       accessories={
         preferences.showFileSize
           ? [
-            {
-              icon: Icon.HardDrive,
-              text: getFileSize(props.fileData),
-            },
-          ]
+              {
+                icon: Icon.HardDrive,
+                text: getFileSize(props.fileData),
+              },
+            ]
           : []
       }
       actions={
