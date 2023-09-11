@@ -84,7 +84,7 @@ export async function deleteDirectory(folderPath: string, folderName: string, re
 }
 
 export function getFileSize(fileData: FileDataType): string {
-  return String(filesize(fileData.size, { round: 0, spacer: "" }));
+  return filesize(fileData.size, { round: 0, spacer: "" });
 }
 
 export function getStartDirectory(): string {
@@ -93,9 +93,14 @@ export function getStartDirectory(): string {
   return resolve(startDirectory);
 }
 
-export function DirectoryItem(props: { fileData: FileDataType; refresh: () => void; isSymlink?: boolean; originalPath?: string }) {
+export function DirectoryItem(props: {
+  fileData: FileDataType;
+  refresh: () => void;
+  isSymlink?: boolean;
+  originalPath?: string;
+}) {
   const isSymlink = props.isSymlink ?? false;
-  const originalPath = props.originalPath ?? ""
+  const originalPath = props.originalPath ?? "";
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const typeName = `${isSymlink ? "Symlink " : ""}Directory`;
@@ -122,13 +127,13 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
               content={filePath + "/"}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
-            {
-              isSymlink && <Action.CopyToClipboard
+            {isSymlink && (
+              <Action.CopyToClipboard
                 title={`Copy Original Directory Path`}
                 content={originalPath}
                 shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
               />
-            }
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CreateQuicklink
@@ -174,7 +179,12 @@ export function DirectoryItem(props: { fileData: FileDataType; refresh: () => vo
   );
 }
 
-export function FileItem(props: { fileData: FileDataType; refresh: () => void; isSymlink?: boolean; originalPath?: string }) {
+export function FileItem(props: {
+  fileData: FileDataType;
+  refresh: () => void;
+  isSymlink?: boolean;
+  originalPath?: string;
+}) {
   const isSymlink = props.isSymlink ?? false;
   const originalPath = props.originalPath ?? "";
   const preferences: PreferencesType = getPreferenceValues();
@@ -192,11 +202,11 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void; i
       accessories={
         preferences.showFileSize
           ? [
-            {
-              icon: Icon.HardDrive,
-              text: getFileSize(props.fileData),
-            },
-          ]
+              {
+                icon: Icon.HardDrive,
+                text: getFileSize(props.fileData),
+              },
+            ]
           : []
       }
       actions={
@@ -211,13 +221,13 @@ export function FileItem(props: { fileData: FileDataType; refresh: () => void; i
               content={filePath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
-            {
-              isSymlink && <Action.CopyToClipboard
+            {isSymlink && (
+              <Action.CopyToClipboard
                 title={`Copy Original File Path`}
                 content={originalPath}
                 shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
               />
-            }
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push
@@ -264,7 +274,9 @@ export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void
   const originalFileData = fs.lstatSync(originalPath, { throwIfNoEntry: false });
 
   if (originalFileData?.isDirectory() ?? false) {
-    return <DirectoryItem fileData={props.fileData} refresh={props.refresh} isSymlink={true} originalPath={originalPath} />;
+    return (
+      <DirectoryItem fileData={props.fileData} refresh={props.refresh} isSymlink={true} originalPath={originalPath} />
+    );
   } else {
     return <FileItem fileData={props.fileData} refresh={props.refresh} isSymlink={true} originalPath={originalPath} />;
   }
