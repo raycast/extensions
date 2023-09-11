@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2023-09-11
+
+- Download, if needed, the official CLI binary on extension start, instead of depending on the user to install it
+- Cleanup possible existing CLI binaries when downloading a new one, to save space
+
 ## [Fix] - 2023-08-29
 
 - Fixed crash in Logout command
