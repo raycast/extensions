@@ -485,7 +485,7 @@
 /extensions/jellyfin                                 @darmiel
 /extensions/jenkins                                  @k8scat
 /extensions/jetbrains                                @gdsmith @adrienbaron @dima-m711
-/extensions/jira                                     @thomaslombart @FezVrasta @igor9silva @jesperorb @teziovsky
+/extensions/jira                                     @thomaslombart @FezVrasta @igor9silva @jesperorb @teziovsky @richardfontein
 /extensions/jira-search                              @svenwiegand
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand @koseduhemak @rnprest @LunaticMuch @nick318
 /extensions/jira-time-tracking                       @niallpaterson
