@@ -6,4 +6,5 @@ export interface ISSHConnection {
   port?: string;
   sshKey?: string;
   command?: string;
+  subtitle?: string; // Can be used to force a specific subtitle for the host. if not provided - subtitle will be generated from connection details
 }

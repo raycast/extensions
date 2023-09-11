@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [Read SSH Hosts from ~/.ssh/config] - 2023-09-11
+
+- Allow auto suggest of SSH hosts defined in `~/.ssh/config` file
+
 ## [Make user field optional] - 2023-09-06
 
 - Make user field optional in connection config - to support user-less hosts (e.g. pseudo hosts that are configured in `~/.ssh/config`)

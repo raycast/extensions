@@ -1,16 +1,18 @@
-import { List, ActionPanel, showHUD, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { ActionPanel, List, getPreferenceValues, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import useSSHConnections from "./hooks/useSSHConnections";
 import { ISSHConnection } from "./types";
-import { getConnections, saveConnections } from "./storage.api";
+import buildSubtitle from "./helpers/buildSubtitle";
 
 interface Preferences {
   terminal: string;
   openin: string;
+  showConfigHosts: boolean;
 }
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
 export const openIn = preferences["openin"];
+export const showConfigHosts = preferences["showConfigHosts"];
 
 async function runTerminal(item: ISSHConnection) {
   let identity = "";
@@ -211,27 +213,7 @@ async function runTerminal(item: ISSHConnection) {
 }
 
 export default function Command() {
-  const [connectionsList, setConnectionsList] = useState<ISSHConnection[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-
-      const items: ISSHConnection[] = await getConnections();
-
-      setConnectionsList(items);
-      setLoading(false);
-    })();
-  }, []);
-
-  async function removeItem(item: ISSHConnection) {
-    let items: ISSHConnection[] = await getConnections();
-    items = items.filter((i) => i.id !== item.id);
-
-    await saveConnections(items);
-    setConnectionsList(items);
-  }
+  const { loading, connectionsList, removeItem } = useSSHConnections(showConfigHosts);
 
   return (
     <List isLoading={loading}>
@@ -242,7 +224,7 @@ export default function Command() {
             id={item.id}
             key={item.name}
             title={item.name}
-            subtitle={getSubtitle(item)}
+            subtitle={buildSubtitle(item)}
           />
         );
       })}
@@ -275,10 +257,4 @@ function Action({
       </ActionPanel>
     </>
   );
-}
-
-function getSubtitle(item: ISSHConnection) {
-  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${
-    item.sshKey ? " SSH Key: " + item.sshKey : ""
-  } ${item.command ? ' Command: "' + item.command + '"' : ""}`;
 }
