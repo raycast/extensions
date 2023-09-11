@@ -10,7 +10,18 @@
   "categories": [
     "Web",
     "Applications",
-    "Productivity"
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "browser",
+    "arc",
+    "history",
+    "search",
+    "tabs",
+    "open",
+    "windows",
+    "web"
   ],
   "license": "MIT",
   "contributors": [
@@ -20,7 +31,8 @@
     "pernielsentikaer",
     "danpalmer",
     "hugivar",
-    "danulqua"
+    "danulqua",
+    "Vaibhav-Satishkumar"
   ],
   "commands": [
     {
@@ -34,6 +46,13 @@
       "name": "new-window",
       "title": "Open New Window",
       "description": "Create and open a new window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "description": "Create and open a new blank window",
       "mode": "no-view",
       "subtitle": "Arc"
     },
