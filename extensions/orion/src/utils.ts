@@ -66,7 +66,7 @@ export function getProfilesPath() {
 
 export const executeJxa = async (script: string) => {
   try {
-    return await runAppleScript(script, { language: "JavaScript" ,humanReadableOutput: false});
+    return await runAppleScript(script, { language: "JavaScript", humanReadableOutput: false });
   } catch (err: unknown) {
     console.log(err);
     if (typeof err === "string") {
