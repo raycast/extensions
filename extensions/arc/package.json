@@ -3,7 +3,7 @@
   "name": "arc",
   "title": "Arc",
   "description": "Search and quickly navigate Arc's history and open tabs.",
-  "icon": "icon-dark.png",
+  "icon": "icon.png",
   "author": "thomas",
   "owner": "the-browser-company",
   "access": "public",
@@ -20,7 +20,8 @@
     "pernielsentikaer",
     "danpalmer",
     "hugivar",
-    "danulqua"
+    "danulqua",
+    "rgrunberg"
   ],
   "commands": [
     {
