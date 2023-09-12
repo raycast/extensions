@@ -20,6 +20,7 @@
     "AI",
     "note",
     "website",
+    "video",
     "baking",
     "lister"
   ],
@@ -30,11 +31,28 @@
       "title": "List Ingredients",
       "description": "Use selected text to receive ingredients list.",
       "mode": "view"
+    },
+    {
+      "name": "youtubeVideoIngridients",
+      "title": "List Ingredients From YouTube Video",
+      "description": "Using the transcript from the youtube video, you will be able to receive ingredients list from YouTube video.",
+      "subtitle": "Enter a valid youtube video url.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "Video URL or ID",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.57.2",
-    "@raycast/utils": "1.9.1"
+    "@raycast/utils": "1.9.1",
+    "youtube-transcript": "^1.0.6",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
