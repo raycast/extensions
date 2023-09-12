@@ -6,13 +6,17 @@ import { useFetch } from "@raycast/utils";
 import axios from "axios";
 
 // FUNCTIONS
+
+const test = {
+  count: 0,
+};
 export function GetExpense(limit: string): [Expense[], boolean, any, any] {
   const { isLoading, data, error, revalidate, mutate } = useFetch<GetExpenses>(
     `https://secure.splitwise.com/api/v3.0/get_expenses?limit=${limit}`,
     {
       method: "GET",
       ...HEADER,
-      keepPreviousData: false,
+      keepPreviousData: true,
     }
   );
   const fetchedExpenses = data?.expenses || [];

@@ -2,19 +2,23 @@ import { Expense } from "./types/get_expenses.types"; // Types
 
 import { GetExpense, DeleteExpense, UpdateExpense } from "./hooks/useList";
 import { loadingLimit } from "./hooks/userPreferences";
+import { GetCurrentUser } from "./hooks/useCurrentUser";
 
-import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation, Cache, Keyboard } from "@raycast/api";
 
 // ------------ MAIN ------------
 export default function Command() {
   const [expenses, loadingExpenses, revalidate, Mutate] = GetExpense(loadingLimit); // FETCH EXPENSES
+
+  const currentUser = GetCurrentUser(); // FETCH CURRENT USER
+  const currentUserID = currentUser?.id;
 
   const handleDeleteExpense = (expenseID: number) => {
     DeleteExpense(expenseID, Mutate);
   };
 
   return (
-    <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses} >
+    <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses}>
       {expenses
         .filter((expense) => expense.deleted_at === null)
         .map((expense) => (
@@ -24,7 +28,17 @@ export default function Command() {
             title={expense.description}
             accessories={[
               {
-                tag: { value: `${expense.cost} ${expense.currency_code}`, color: Color.SecondaryText },
+                tag: {
+                  value: `${expense.cost} ${expense.currency_code}`,
+                  color:
+                    Number(
+                      expense.users
+                        .filter((user) => Number(user.net_balance) > 0 && user.user.id === currentUserID)
+                        .map((user) => user.net_balance)
+                    ) > 0
+                      ? Color.Green
+                      : Color.Red,
+                },
                 tooltip: `Amount: ${expense.cost} ${expense.currency_code}`,
               },
             ]}
@@ -33,10 +47,9 @@ export default function Command() {
                 isLoading={loadingExpenses}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Description" />
                     <List.Item.Detail.Metadata.TagList title={expense.description}>
                       <List.Item.Detail.Metadata.TagList.Item
-                        text={`${expense.currency_code} ${expense.cost} `}
+                        text={`${expense.cost} ${expense.currency_code}`}
                         color={Color.PrimaryText}
                         key={expense.id}
                         icon={Icon.Coins}
@@ -66,7 +79,7 @@ export default function Command() {
                         .filter((user) => Number(user.paid_share) > 0)
                         .map((user) => (
                           <List.Item.Detail.Metadata.TagList.Item
-                            text={`${user.user.first_name} paid ${expense.currency_code} ${user.paid_share}`}
+                            text={`${user.user.first_name} paid ${user.paid_share} ${expense.currency_code}`}
                             icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                             color={Color.Green}
                             key={user.user_id}
@@ -81,9 +94,9 @@ export default function Command() {
                         .filter((user) => Number(user.net_balance) < 0)
                         .map((user) => (
                           <List.Item.Detail.Metadata.TagList.Item
-                            text={`${user.user.first_name} owes ${expense.currency_code} ${String(
-                              Number(user.net_balance) * -1
-                            )}`}
+                            text={`${user.user.first_name} owes ${String(Number(user.net_balance) * -1)} ${
+                              expense.currency_code
+                            }`}
                             icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                             color={Color.Red}
                             key={user.user_id}
@@ -101,7 +114,11 @@ export default function Command() {
                     {expense.receipt.original !== null && ( // RECEIPT
                       <>
                         <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Link title="Receipt" text="View" target={expense.receipt.original} />
+                        <List.Item.Detail.Metadata.Link
+                          title="Receipt"
+                          text="View receipt"
+                          target={expense.receipt.original}
+                        />
                       </>
                     )}
                   </List.Item.Detail.Metadata>
@@ -113,18 +130,18 @@ export default function Command() {
                 <Action.OpenInBrowser
                   title="Open Expense in Splitwise"
                   url={`https://secure.splitwise.com/#/all/expenses/${expense.id}`}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
                 <Action.Push
                   title="Change values"
                   icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  target={<ChangeValues expense={expense}/>}
+                  target={<ChangeValues expense={expense} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action
                   title="Reload"
                   icon={Icon.Repeat}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={() => revalidate()}
                 />
                 <Action
@@ -132,6 +149,7 @@ export default function Command() {
                   style={Action.Style.Destructive}
                   icon={Icon.Trash}
                   onAction={() => handleDeleteExpense(expense.id)}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel>
             }
@@ -164,8 +182,7 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
                 // cost: values.cost as string,
                 date: values.date,
                 group_id: expense.group_id as number,
-              })
-              .then(() => pop());
+              }).then(() => pop());
             }}
           />
         </ActionPanel>

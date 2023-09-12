@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-const { personalAccessToken } = getPreferenceValues();
 
+const { personalAccessToken } = getPreferenceValues();
 export const { loadingLimit } = getPreferenceValues();
 
 export const HEADER = {
