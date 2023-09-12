@@ -65,6 +65,15 @@ export function ImageActions({ linkToDetails, image }: ActionsProps) {
           content={image.id}
         />
       </ActionPanel.Section>
+
+      <ActionPanel.Section title="Report">
+        <Action.OpenInBrowser
+          icon={Icon.Flag}
+          title="Report Image"
+          url={`${FRONTEND_BASE}/image/${image.id}/report`}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   )
 }
