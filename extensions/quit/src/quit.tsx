@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showHUD, Detail, Alert, confirmAlert, showToast } from "@raycast/api";
+import { ActionPanel, Action, List, showHUD, Detail, Alert, confirmAlert, showToast, popToRoot } from "@raycast/api";
 import { execSync } from "child_process";
 import { runAppleScript, runAppleScriptSync } from "run-applescript";
 
@@ -36,6 +36,7 @@ async function quitApp(appPath: string, appNames: Map<string, string>) {
         onAction: async () => {
           await showToast({ title: "Hang tight! Quitting all apps" });
           await runAppleScript(quitScript).then(() => {
+            popToRoot();
             showHUD(HUDmsg);
           });
         },
@@ -53,6 +54,7 @@ async function quitApp(appPath: string, appNames: Map<string, string>) {
       end try 
     `;
     await runAppleScript(quitScript).then(() => {
+      popToRoot();
       showHUD(HUDmsg);
     });
   }
