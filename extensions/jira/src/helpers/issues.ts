@@ -66,7 +66,7 @@ export function getIssueListSections(issues?: Issue[]) {
 
 export function getIssueDescription(description: string) {
   const nodeToMarkdown = new NodeHtmlMarkdown(
-    {},
+    { keepDataImages: true },
     // For some reasons, Jira doesn't wrap code blocks within a <code> block
     // but only within a <pre> block which is not recognized by NodeHtmlMarkdown.
     {

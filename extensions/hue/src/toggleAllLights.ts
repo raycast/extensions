@@ -1,4 +1,13 @@
-import { Cache, closeMainWindow, environment, LocalStorage, showHUD, Toast, updateCommandMetadata } from "@raycast/api";
+import {
+  Cache,
+  closeMainWindow,
+  environment,
+  getPreferenceValues,
+  LocalStorage,
+  showHUD,
+  Toast,
+  updateCommandMetadata,
+} from "@raycast/api";
 import { BRIDGE_CONFIG_KEY } from "./helpers/constants";
 import createHueClient from "./lib/createHueClient";
 import { Light } from "./lib/types";
@@ -60,17 +69,19 @@ export default async function ToggleAllLights() {
 }
 
 async function toggleLightsAndNotifyUser(lights: Light[], onLights: Light[], hueClient: HueClient): Promise<void> {
+  const { toggleAllLights } = getPreferenceValues<Preferences>();
   const toast = new Toast({
     style: Toast.Style.Animated,
     title: "",
     message: "Please wait…",
   });
 
+  const toggleOn = onLights.length === 0 || (toggleAllLights === "on" && lights.length !== onLights.length);
   let toastTitle: string;
   let successMessage: string;
   let failureMessage: string;
 
-  if (onLights.length === 0) {
+  if (toggleOn) {
     toastTitle = "Turning on all lights…";
     successMessage = `Turned on all ${lights.length} lights.`;
     failureMessage = `failed turning on ${lights.length} lights.`;
@@ -84,10 +95,13 @@ async function toggleLightsAndNotifyUser(lights: Light[], onLights: Light[], hue
   toast.show().then();
 
   const settledPromises = await Promise.allSettled(
-    lights.map((light) => {
-      const on = onLights.includes(light);
-      return hueClient.updateLight(light, { on: { on: !on } });
-    })
+    lights
+      .filter((light) => {
+        return toggleOn ? !onLights.includes(light) : onLights.includes(light);
+      })
+      .map((light) => {
+        return hueClient.updateLight(light, { on: { on: toggleOn } });
+      }),
   );
 
   const lightsTurnedOn = settledPromises.filter((p) => p.status === "fulfilled").length;

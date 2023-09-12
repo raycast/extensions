@@ -1,9 +1,8 @@
-// This Works
 import React, { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import { Preferences } from "./types/preferences";
-import { runAppleScriptSilently } from "./utils";
+import { applyWallpaperUpdate, isValidFile } from "./utils";
 import { Action, ActionPanel, Grid, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { File } from "./types/file";
 
@@ -24,14 +23,7 @@ function getWallpapers(directoryPath: string = wallpaperDir): File[] {
     if (fileStats.isDirectory()) {
       result = result.concat(getWallpapers(newFile.path));
     } else {
-      const extname = path.extname(file);
-      if (
-        extname === ".jpg" ||
-        extname === ".jpeg" ||
-        extname === ".png" ||
-        extname === ".gif" ||
-        extname === ".heic"
-      ) {
+      if (isValidFile(newFile)) {
         result.push(newFile);
       }
     }
@@ -41,18 +33,6 @@ function getWallpapers(directoryPath: string = wallpaperDir): File[] {
 }
 
 const wallpaperFiles = getWallpapers();
-
-export function applyWallpaperUpdate(file: string) {
-  return `tell application "System Events"
-            tell appearance preferences
-              tell application "System Events"
-                tell every desktop
-                  set picture to "${file}"
-                end tell
-              end tell
-            end tell
-          end tell`;
-}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -82,15 +62,11 @@ export default function Command() {
         <Grid.Item
           key={file.path}
           title={preferences.showTitle ? file.name.split(".")[0].replace(/[-_]/g, " ") : ""}
-          content={{ source: `${file.path}` }}
+          content={{ source: file.path }}
           actions={
             <ActionPanel>
-              <Action
-                title="Set as Wallpaper"
-                icon={Icon.Desktop}
-                onAction={() => runAppleScriptSilently(applyWallpaperUpdate(file.path))}
-              />
-              <Action.ShowInFinder path={`${file}`} />
+              <Action title="Set as Wallpaper" icon={Icon.Desktop} onAction={() => applyWallpaperUpdate(file.path)} />
+              <Action.ShowInFinder path={file.path} />
               <Action
                 title="Open Preferences"
                 icon={Icon.Gear}

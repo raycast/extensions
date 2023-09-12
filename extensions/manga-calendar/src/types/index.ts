@@ -1,4 +1,5 @@
 export interface Manga {
+  id: string;
   name: string;
   volume: string;
   price: string;
@@ -13,6 +14,7 @@ export interface MangaList {
 }
 
 export interface Collection {
+  id: string;
   name: string;
   url: string;
   frontImageUrl: string;

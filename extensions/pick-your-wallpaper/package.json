@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pick-your-wallpaper",
   "title": "Pick Your Wallpaper",
-  "description": "Lets you pick a wallpaper from a folder of finder",
+  "description": "Lets you pick a wallpaper from a folder of finder.",
   "icon": "command-icon.png",
   "author": "hugomarfani",
   "contributors": [
@@ -16,48 +16,54 @@
     {
       "name": "choose-wallpaper",
       "title": "Choose Wallpaper",
-      "description": "Pick a wallpaper from a folder of finder",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "wallpaperFolder",
-      "title": "Wallpaper Folder Directory",
-      "description": "The directory where your wallpapers are stored",
-      "type": "directory",
-      "required": true
-    },
-    {
-      "name": "displaySize",
-      "title": "Display Size",
-      "description": "Grid size of the wallpaper picker",
-      "type": "dropdown",
-      "data": [
+      "description": "Pick a wallpaper from a folder of finder.",
+      "mode": "view",
+      "preferences": [
         {
-          "title": "Small",
-          "value": "small"
+          "name": "wallpaperFolder",
+          "title": "Wallpaper Folder Directory",
+          "description": "The directory where your wallpapers are stored",
+          "type": "directory",
+          "required": true
         },
         {
-          "title": "Medium",
-          "value": "medium"
+          "name": "displaySize",
+          "title": "Display Size",
+          "description": "Grid size of the wallpaper picker",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ],
+          "default": "medium",
+          "required": false
         },
         {
-          "title": "Large",
-          "value": "large"
+          "name": "showTitle",
+          "label": "Show Wallpaper Titles",
+          "title": "Shows Wallpaper Titles",
+          "description": "Shows the wallpaper titles in the picker",
+          "type": "checkbox",
+          "defaultValue": true,
+          "required": false
         }
-      ],
-      "default": "medium",
-      "required": false
+      ]
     },
     {
-      "name": "showTitle",
-      "label": "Show Wallpaper Titles",
-      "title": "Shows Wallpaper Titles",
-      "description": "Shows the wallpaper titles in the picker",
-      "type": "checkbox",
-      "defaultValue": true,
-      "required": false
+      "name": "set-as-wallpaper",
+      "title": "Set as Wallpaper",
+      "description": "Set selected picture as a desktop wallpaper.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

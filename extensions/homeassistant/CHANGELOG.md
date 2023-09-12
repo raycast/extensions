@@ -1,5 +1,10 @@
 # Home Assistant Changelog
 
+## [Fix] - 2023-09-10
+
+- Notifications could not be opened from the Menubar and instead throw an error
+- Fix possible crashes when commands are not enable
+
 ## [Fix] - 2023-08-15
 
 - Updates from HACS will be shown in the menu regardless of the update entity states

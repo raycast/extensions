@@ -1307,7 +1307,7 @@ const raycast: Prompt[] = [
   {
     id: "improve-writing-custom",
     type: "text",
-    title: "Improve Writting - Editable",
+    title: "Improve Writing - Editable",
     prompt: `Act as a spelling corrector and improver. Reply to each message with rewritten text using following instructions to rewrite it:
     - Fix spelling, grammar and punctuation
     - Improve clarity and conciseness
@@ -1370,14 +1370,13 @@ const raycast: Prompt[] = [
     id: "make-longer-custom",
     type: "text",
     title: "Make Longer - Editable",
-    prompt: `Act as a content writer. Expand the text with the following instructions:
-    - Use the same style and tone of voice
-    - Expand the key information and concepts
-    - Avoid repetition
-    - Stay factual close to the provided text
-    Use english language
-
-    ${generateSelection("Text", "Expanded text")}`,
+    prompt:
+      `Act as a content writer. Expand the text with the following instructions:
+- Use the same style and tone of voice
+- Expand the key information and concepts
+- Avoid repetition
+- Stay factual close to the provided text
+Use english language` + generateSelection("Text", "Expanded text"),
     creativity: "high",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
@@ -1386,28 +1385,27 @@ const raycast: Prompt[] = [
       selection: "Raycast is awesome.",
       output: `Raycast is an incredibly powerful and versatile productivity tool that has gained widespread acclaim and popularity. It offers a wide range of features and functionalities designed to enhance efficiency and streamline workflows. With its intuitive interface and seamless integration with various applications and services, Raycast empowers users to perform tasks and access information swiftly and effortlessly.
 
-      One of the key strengths of Raycast is its extensive library of plugins. These plugins extend the functionality of the tool by providing additional capabilities and integrations with popular tools and services. From project management and communication platforms to code editors and file management systems, Raycast's plugins cater to a diverse range of needs and preferences, allowing users to customize their workflow and maximize productivity.
+One of the key strengths of Raycast is its extensive library of plugins. These plugins extend the functionality of the tool by providing additional capabilities and integrations with popular tools and services. From project management and communication platforms to code editors and file management systems, Raycast's plugins cater to a diverse range of needs and preferences, allowing users to customize their workflow and maximize productivity.
       
-      Furthermore, Raycast's search capabilities are truly remarkable. Its lightning-fast search functionality enables users to quickly find and access files, contacts, emails, and more, without the need to navigate through multiple applications or windows. By simply typing a few keywords, users can retrieve the information they need in an instant, saving valuable time and effort.
+Furthermore, Raycast's search capabilities are truly remarkable. Its lightning-fast search functionality enables users to quickly find and access files, contacts, emails, and more, without the need to navigate through multiple applications or windows. By simply typing a few keywords, users can retrieve the information they need in an instant, saving valuable time and effort.
       
-      Another noteworthy aspect of Raycast is its emphasis on keyboard shortcuts and navigation. By leveraging the power of keyboard commands, users can perform actions and execute tasks with remarkable speed and efficiency. This not only reduces reliance on the mouse but also promotes a seamless and uninterrupted workflow.
+Another noteworthy aspect of Raycast is its emphasis on keyboard shortcuts and navigation. By leveraging the power of keyboard commands, users can perform actions and execute tasks with remarkable speed and efficiency. This not only reduces reliance on the mouse but also promotes a seamless and uninterrupted workflow.
       
-      In addition to its impressive features, Raycast also boasts a sleek and user-friendly interface. The clean design and intuitive layout make it easy for users to navigate and access the various functionalities of the tool. Whether you're a seasoned power user or a beginner, Raycast's interface ensures a smooth and enjoyable user experience.
+In addition to its impressive features, Raycast also boasts a sleek and user-friendly interface. The clean design and intuitive layout make it easy for users to navigate and access the various functionalities of the tool. Whether you're a seasoned power user or a beginner, Raycast's interface ensures a smooth and enjoyable user experience.
       
-      Overall, Raycast is a game-changer in the realm of productivity tools. Its extensive features, customizable plugins, lightning-fast search capabilities, keyboard shortcuts, and user-friendly interface combine to create a truly exceptional tool that enhances productivity and simplifies workflows. Whether you're a professional, student, or anyone looking to optimize their daily tasks, Raycast is undoubtedly a must-have tool in your arsenal.`,
+Overall, Raycast is a game-changer in the realm of productivity tools. Its extensive features, customizable plugins, lightning-fast search capabilities, keyboard shortcuts, and user-friendly interface combine to create a truly exceptional tool that enhances productivity and simplifies workflows. Whether you're a professional, student, or anyone looking to optimize their daily tasks, Raycast is undoubtedly a must-have tool in your arsenal.`,
     },
   },
   {
     id: "make-shorter-custom",
     type: "text",
     title: "Make Shorter - Editable",
-    prompt: `Act as a content writer. Make the text shorter with the following instructions:
-    - Use the same style and tone of voice
-    - Reduce repetition
-    - Keep key information
-    Use english language
-
-    ${generateSelection("Text", "Expanded text")}`,
+    prompt:
+      `Act as a content writer. Make the text shorter with the following instructions:
+- Use the same style and tone of voice
+- Reduce repetition
+- Keep key information
+Use english language` + generateSelection("Text", "Expanded text"),
     creativity: "high",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
@@ -1423,17 +1421,16 @@ const raycast: Prompt[] = [
     id: "change-tone-to-professional",
     type: "text",
     title: "Change Tone to Professional - Editable",
-    prompt: `Act as a professional content writer and editor. Rewrite the text to ensure:
-    - Professional tone of voice
-    - Formal language
-    - Accurate facts
-    - Correct spelling, grammar, and punctuation
-    - Concise phrasing
-    - meaning  unchanged
-    - Length retained
-    Use english language
-
-    ${generateSelection("Text", "Rewritten text")}`,
+    prompt:
+      `Act as a professional content writer and editor. Rewrite the text to ensure:
+  - Professional tone of voice
+  - Formal language
+  - Accurate facts
+  - Correct spelling, grammar, and punctuation
+  - Concise phrasing
+  - meaning  unchanged
+  - Length retained
+  Use english language` + generateSelection("Text", "Rewritten text"),
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
@@ -1449,14 +1446,13 @@ const raycast: Prompt[] = [
     id: "change-tone-to-friendly",
     type: "text",
     title: "Change Tone to Friendly - Editable",
-    prompt: `Act as a content writer and editor. Rewrite the text to ensure:
-    - Friendly and optimistic tone of voice
-    - Correct spelling, grammar, and punctuation
-    - Meaning unchanged
-    - Length retained
-    Use english language
-
-    ${generateSelection("Text", "Rewritten text")}`,
+    prompt:
+      `Act as a content writer and editor. Rewrite the text to ensure:
+- Friendly and optimistic tone of voice
+- Correct spelling, grammar, and punctuation
+- Meaning unchanged
+- Length retained
+Use english language` + generateSelection("Text", "Rewritten text"),
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
@@ -1472,17 +1468,16 @@ const raycast: Prompt[] = [
     id: "change-tone-to-confident-custom",
     type: "text",
     title: "Change Tone to Confident - Editable",
-    prompt: `Act as a content writer and editor. Rewrite the text with the following instructions:
-    - Use confident, formal and friendly tone of voice
-    - Avoid hedging, be definite where possible
-    - Skip apologies
-    - Focus on main arguments
-    - Correct spelling, grammar, and punctuation
-    - Keep meaning unchanged
-    - Keep length retained
-    Use english language
-
-    ${generateSelection("Text", "Rewritten text")}`,
+    prompt:
+      `Act as a content writer and editor. Rewrite the text with the following instructions:
+- Use confident, formal and friendly tone of voice
+- Avoid hedging, be definite where possible
+- Skip apologies
+- Focus on main arguments
+- Correct spelling, grammar, and punctuation
+- Keep meaning unchanged
+- Keep length retained
+Use english language` + generateSelection("Text", "Rewritten text"),
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
@@ -1498,18 +1493,17 @@ const raycast: Prompt[] = [
     id: "change-tone-to-casual-custom",
     type: "text",
     title: "Change Tone to Casual - Editable",
-    prompt: `Act as a content writer and editor. Rewrite the text with the following instructions:
-    - Use casual and friendly tone of voice
-    - Use active voice
-    - Keep sentences shorts
-    - Ok to use slang and contractions
-    - Keep grammatical person
-    - Correct spelling, grammar, and punctuation
-    - Keep meaning unchanged
-    - Keep length retained
-    Use english language
-
-    ${generateSelection("Text", "Rewritten text")}`,
+    prompt:
+      `Act as a content writer and editor. Rewrite the text with the following instructions:
+- Use casual and friendly tone of voice
+- Use active voice
+- Keep sentences shorts
+- Ok to use slang and contractions
+- Keep grammatical person
+- Correct spelling, grammar, and punctuation
+- Keep meaning unchanged
+- Keep length retained
+Use english language` + generateSelection("Text", "Rewritten text"),
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
@@ -1525,22 +1519,22 @@ const raycast: Prompt[] = [
     id: "rephrase-as-tweet-custom",
     type: "text",
     title: "Rephrase as Tweet - Editable",
-    prompt: `You're an expert in the field and have the perfect opportunity to share your ideas and insights with a huge audience!. Rewrite the text as a tweet that is:
-    - Casual and upbeat
-    - Creative and catchy
-    - Focused on key takeaways that challenge the status quo
-    - Engaging and punchy
-    - IMPORTANT: less than 25 words.
-    - IMPORTANT: doesn't include hash, hashtags and words starting with #, i.e. #innovation #Technology
-    Use english language
+    prompt:
+      `You're an expert in the field and have the perfect opportunity to share your ideas and insights with a huge audience!. Rewrite the text as a tweet that is:
+- Casual and upbeat
+- Creative and catchy
+- Focused on key takeaways that challenge the status quo
+- Engaging and punchy
+- IMPORTANT: less than 25 words.
+- IMPORTANT: doesn't include hash, hashtags and words starting with #, i.e. #innovation #Technology
+Use english language
 
-    Text:
-    The concept of Rayday is simple. Every Friday, everyone can use the day to work on something that benefits Raycast. From new features, to fixing bugs, drafting documentation or tidying up, it’s time for us to take a break from project work. As well as getting creative with our own ideas, it’s a great chance to act on feedback from our users and community too.
+Text:
+The concept of Rayday is simple. Every Friday, everyone can use the day to work on something that benefits Raycast. From new features, to fixing bugs, drafting documentation or tidying up, it’s time for us to take a break from project work. As well as getting creative with our own ideas, it’s a great chance to act on feedback from our users and community too.
 
-    Tweet:
-    ⚒️ We hack every Friday – we call it 'Rayday'. Everyone can use the day to work on something that benefits Raycast – aside from normal project work.
-
-    ${generateSelection("Text", "Tweet")}`,
+Tweet:
+⚒️ We hack every Friday – we call it 'Rayday'. Everyone can use the day to work on something that benefits Raycast – aside from normal project work.` +
+      generateSelection("Text", "Tweet"),
     creativity: "high",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
@@ -1555,101 +1549,105 @@ const raycast: Prompt[] = [
   {
     id: "explain-code-custom",
     type: "code",
-    title: "Explain Code - Editable",
-    prompt: `Act as a software engineer with deep understanding of any programming language and it's documentation.. Explain how the code works step by step in a list. Be concise with a casual tone of voice and write it as documentation for others.
-    Code:
-    \`\`\`
-    function GoToPreviousPageAction() {
-      const [page, setPage] = useGlobalState("page");
-      return (
-        <Action
-          icon={Icon.ArrowLeftCircle}
-          title="Go to Previous Page"
-          shortcut={{ modifiers: ["cmd"], key: "[" }}
-          onAction={() => setPage(Math.max(page - 1, 0))}
-        />
-      );
-    }
-    \`\`\`
-    Explanation:
-    The code is a React component that goes to the previous page.
-    1. The component renders an 'Action' component with an icon, title, and shortcut.
-    3. The 'useGlobalState' hook is used to get the current page number from the global state.
-    4. The 'onAction' prop is used to set the page number to one less than the current page number.
-    5. This will cause the page to go back one page when the action is taken.
-    6. The page is capped at 0 so that the page is never negative.
+    title: "Explain Code Step by Step - Editable",
+    prompt:
+      `Act as a software engineer with deep understanding of any programming language and it's documentation. Explain how the code works step by step in a list. Be concise with a casual tone of voice and write it as documentation for others.
 
-    ${generateSelection("Code", "Explanation")}`,
+Code:
+\`\`\`
+function GoToPreviousPageAction() {
+  const [page, setPage] = useGlobalState("page");
+  return (
+    <Action
+      icon={Icon.ArrowLeftCircle}
+      title="Go to Previous Page"
+      shortcut={{ modifiers: ["cmd"], key: "[" }}
+      onAction={() => setPage(Math.max(page - 1, 0))}
+    />
+  );
+}
+\`\`\`
+
+Explanation:
+The code is a React component that goes to the previous page.
+1. The component renders an 'Action' component with an icon, title, and shortcut.
+3. The 'useGlobalState' hook is used to get the current page number from the global state.
+4. The 'onAction' prop is used to set the page number to one less than the current page number.
+5. This will cause the page to go back one page when the action is taken.
+6. The page is capped at 0 so that the page is never negative` + generateSelection("Code", "Explanation"),
     creativity: "medium",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
     model: "openai_gpt35_turbo",
     example: {
       selection: `function bubbleSort(arr){
-        for(let i = 0; i < arr.length; i++){
-            for(let j = 0; j < arr.length - i - 1; j++){
-                if(arr[j + 1] < arr[j]){
-                    [arr[j + 1],arr[j]] = [arr[j],arr[j + 1]]
-                }
-            }
-        };
-        return arr;
-    };`,
+  for(let i = 0; i < arr.length; i++){
+      for(let j = 0; j < arr.length - i - 1; j++){
+          if(arr[j + 1] < arr[j]){
+              [arr[j + 1],arr[j]] = [arr[j],arr[j + 1]]
+          }
+      }
+  };
+  return arr;
+};`,
       output: `The code is an implementation of the bubble sort algorithm in JavaScript.
-      1. The bubbleSort function takes an array (arr) as input.
-      2. It uses two nested for loops to iterate over the array.
-      3. The outer loop (i) controls the number of passes over the array.
-      4. The inner loop (j) compares adjacent elements and swaps them if they are in the wrong order.
-      5. If the element at index j + 1 is less than the element at index j, a swap is performed using array destructuring.
-      6. This process is repeated for each pair of adjacent elements until the end of the array.
-      7. After each pass, the largest element "bubbles" to the end of the array.
-      8. The outer loop continues until all elements are in their correct sorted positions.
-      9. Finally, the sorted array is returned.
-      10. The bubble sort algorithm has a time complexity of O(n^2), where n is the number of elements in the array.`,
+1. The bubbleSort function takes an array (arr) as input.
+2. It uses two nested for loops to iterate over the array.
+3. The outer loop (i) controls the number of passes over the array.
+4. The inner loop (j) compares adjacent elements and swaps them if they are in the wrong order.
+5. If the element at index j + 1 is less than the element at index j, a swap is performed using array destructuring.
+6. This process is repeated for each pair of adjacent elements until the end of the array.
+7. After each pass, the largest element "bubbles" to the end of the array.
+8. The outer loop continues until all elements are in their correct sorted positions.
+9. Finally, the sorted array is returned.
+10. The bubble sort algorithm has a time complexity of O(n^2), where n is the number of elements in the array.`,
     },
   },
   {
     id: "find-bugs-custom",
     type: "code",
-    title: "Find Bugs - Editable",
-    prompt: `Act as a software engineer with deep understanding of any programming language. Review the code to fix logical bugs in the code. Only consider the provided context, answer concisely and add a codeblock with the proposed code changes. If you can't confidently find bugs, answer with "LGTM 👍".
-    Code:🚁
-    \`\`\`
-    function PrevAction() {
-      const [page, setPage] = useGlobalState("page");
-      return (
-        <Action
-          title="Go to Previous Page"
-          onAction={() => setPage(page - 1)}
-        />
-      );
-    }
-    \`\`\`
-    Review:
-    The code is missing a check to make sure 'page' is greater than 0 before subtracting 1. Otherwise, the page could be set to -1 which might cause unexpected behavior.
-    \`\`\`
-    function PrevAction() {
-      const [page, setPage] = useGlobalState("page");
-      return (
-        <Action
-          title="Go to Previous Page"
-          onAction={() => setPage(Math.max(page - 1, 0))}
-        />
-      );
-    }
-    \`\`\`
-    Code:
-    \`\`\`
-    private func submit(_ text: String) {
-      guard !text.isEmpty else { return }
-      let prompt = OpenAIPrompt(prompt: text, imitateChatGPT: true)
-      submit(prompt)
-    }
-    \`\`\`
-    Problems:
-    Nothing found - LGTM 👌
+    title: "Find Bugs in Code - Editable",
+    prompt:
+      `Act as a software engineer with deep understanding of any programming language. Review the code to fix logical bugs in the code. Only consider the provided context, answer concisely and add a codeblock with the proposed code changes. If you can't confidently find bugs, answer with "LGTM 👍".
+    
+Code:
+\`\`\`
+function PrevAction() {
+  const [page, setPage] = useGlobalState("page");
+  return (
+    <Action
+      title="Go to Previous Page"
+      onAction={() => setPage(page - 1)}
+    />
+  );
+}
+\`\`\`
 
-    ${generateSelection("Code", "Problems")}`,
+Review:
+The code is missing a check to make sure 'page' is greater than 0 before subtracting 1. Otherwise, the page could be set to -1 which might cause unexpected behavior.
+\`\`\`
+function PrevAction() {
+  const [page, setPage] = useGlobalState("page");
+  return (
+    <Action
+      title="Go to Previous Page"
+      onAction={() => setPage(Math.max(page - 1, 0))}
+    />
+  );
+}
+\`\`\`
+
+Code:
+\`\`\`
+private func submit(_ text: String) {
+  guard !text.isEmpty else { return }
+  let prompt = OpenAIPrompt(prompt: text, imitateChatGPT: true)
+  submit(prompt)
+}
+\`\`\`
+
+Problems:
+Nothing found - LGTM 👌` + generateSelection("Code", "Problems"),
     creativity: "medium",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
@@ -1657,18 +1655,16 @@ const raycast: Prompt[] = [
     example: {
       selection: `var desert = document.querySelector('.desert');
 
-      if (desert.id = 'chocolate') {
-          console.log("yum!")
-      }`,
+if (desert.id = 'chocolate') {
+    console.log("yum!")
+}`,
       output:
         "The code has a logical bug in the if statement. The assignment operator (=) is used instead of the equality operator (== or ===) for comparison. This means that the condition `desert.id = 'chocolate'` will always evaluate to true because it assigns the value 'chocolate' to `desert.id` instead of comparing it. To fix this, you should use the equality operator (== or ===) for comparison." +
-        `javascript
-      var desert = document.querySelector('.desert');
+        `var desert = document.querySelector('.desert');
       
-      if (desert.id === 'chocolate') {
-          console.log("yum!")
-      }
-      `,
+if (desert.id === 'chocolate') {
+    console.log("yum!")
+}`,
     },
   },
 ];
