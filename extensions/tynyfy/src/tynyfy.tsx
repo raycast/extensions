@@ -83,47 +83,44 @@ export default function Command() {
   }
 
   return (
-    <>
-      <Form
-        actions={
-          <ActionPanel>
-            <Action
-              title={reqType == "new" ? "Shorten the URL" : "Copy the Customized URL"}
-              shortcut={{ modifiers: [], key: "return" }}
-              onAction={() => {
-                getShortUrl();
-              }}
-            />
-            {reqType === "update" ? <Action.Paste content={shortUrl} /> : null}
-          </ActionPanel>
-        }
-      >
-        <Form.TextField
-          id="url"
-          title="Enter the URL"
-          placeholder="Enter the URL to shorten"
-          value={url}
-          error={urlError}
-          onChange={setUrl}
-          autoFocus={true}
-          onFocus={() => setReqType("new")}
-        />
-        {slug !== undefined && (
-          <>
-            <Form.TextField
-              ref={slugRef}
-              id="edited_url"
-              title="Customize the URL"
-              placeholder="slug"
-              value={slug}
-              error={slugError}
-              onChange={setSlug as any}
-              onFocus={() => setReqType("update")}
-            />
-            <Form.Description text={`https://tynyfy.com/t/${slug}`} />
-          </>
-        )}
-      </Form>
-    </>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action
+            title={reqType == "new" ? "Shorten the URL" : "Copy the Customized URL"}
+            shortcut={{ modifiers: [], key: "return" }}
+            onAction={() => {
+              getShortUrl();
+            }}
+          />
+          {reqType === "update" ? <Action.Paste content={shortUrl} /> : null}
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="url"
+        title="Enter the URL"
+        placeholder="Enter the URL to shorten"
+        value={url}
+        error={urlError}
+        onChange={setUrl}
+        onFocus={() => setReqType("new")}
+      />
+      {slug !== undefined && (
+        <>
+          <Form.TextField
+            ref={slugRef}
+            id="edited_url"
+            title="Customize the URL"
+            placeholder="slug"
+            value={slug}
+            error={slugError}
+            onChange={setSlug as any}
+            onFocus={() => setReqType("update")}
+          />
+          <Form.Description text={`https://tynyfy.com/t/${slug}`} />
+        </>
+      )}
+    </Form>
   );
 }
