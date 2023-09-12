@@ -4,16 +4,13 @@ import {
   Icon,
   List,
   environment,
-  Clipboard,
   AI,
-  Detail,
   getSelectedText,
   Toast,
   showToast,
   popToRoot,
 } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-
 import { useEffect, useState } from "react";
 
 export default function Command() {
@@ -21,7 +18,7 @@ export default function Command() {
 
   try {
     useEffect(() => {
-      const fetchData = async () => {
+      (async () => {
         try {
           const text = await getSelectedText();
           setSelectedText(text);
@@ -30,9 +27,7 @@ export default function Command() {
           popToRoot();
           showToast({ style: Toast.Style.Failure, title: "Error", message: "Could not get selected text." });
         }
-      };
-
-      fetchData();
+      })();
     }, []);
   } catch (error) {
     console.log("An error occurred in the promise:", error);
@@ -85,12 +80,12 @@ export default function Command() {
                         content={`${String(item.title)} - ${String(item.accessory.text)}`}
                       />
                       <Action.Paste
-                        title="Copy Ingredient with Quantity"
+                        title="Paste Ingredient with Quantity"
                         content={`${String(item.title)} - ${String(item.accessory.text)}`}
                       />
                       <Action.CopyToClipboard title="Copy Ingredient" content={String(item.title)} />
-                      <Action.CopyToClipboard title="Copy Quantity" content={String(item.accessory.text)} />
                       <Action.Paste title="Paste Ingredient" content={String(item.accessory.text)} />
+                      <Action.CopyToClipboard title="Copy Quantity" content={String(item.accessory.text)} />
                       <Action.Paste title="Paste Quantity" content={String(item.accessory.text)} />
                     </ActionPanel>
                   }
