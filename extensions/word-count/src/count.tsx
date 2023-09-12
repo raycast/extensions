@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, getSelectedText, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { count } from "./lib/count";
+import { readFromClipboard } from "./utils";
 
 export default function Command() {
   const [text, setText] = useState("");
@@ -9,15 +10,19 @@ export default function Command() {
 
   useEffect(() => {
     (async () => {
-      const clipboard = await Clipboard.readText();
+      try {
+        const selectedText = await getSelectedText();
 
-      if (clipboard) {
-        setText(clipboard.trim());
-        showToast({
-          style: Toast.Style.Success,
-          title: `Text loaded from clipboard`,
-          message: `[⌘ + E] to reset`,
-        });
+        if (selectedText) {
+          setText(selectedText.trim());
+          return;
+        }
+
+        const clipboard = await readFromClipboard();
+        setText(clipboard);
+      } catch {
+        const clipboard = await readFromClipboard();
+        setText(clipboard);
       }
     })();
   }, []);
