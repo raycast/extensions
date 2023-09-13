@@ -8,7 +8,7 @@ class OpenAIModule {
   }
 
   async summarizeArticle(url: string): Promise<string> {
-    const prompt = `Please summarize the article and provide a only short summary with markdown. ${url}`;
+    const prompt = `Please summarize the article and provide a only short summary with title with markdown. ${url}`;
     return await this.gptRequest(prompt);
   }
 
