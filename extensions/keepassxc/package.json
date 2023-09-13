@@ -5,6 +5,9 @@
   "description": "Access the KeePass database with the KeepassXC-cli. Please make sure KeePassXC is installed.",
   "icon": "keepassxc.png",
   "author": "zkytech",
+  "contributors": [
+    "Sulfyderz"
+  ],
   "license": "MIT",
   "commands": [
     {
