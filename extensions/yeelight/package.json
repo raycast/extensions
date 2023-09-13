@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "controlLights",
-      "title": "Control lights",
+      "title": "Control Lights",
       "subtitle": "Yeelight",
       "description": "Control Yeelight lights",
       "mode": "view"
