@@ -1,5 +1,13 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast } from "@raycast/api";
-import { loadEntries, pastePassword, pasteUsername, pasteTOTP, copyPassword, copyUsername, copyTOTP } from "./utils/keepassLoader";
+import {
+  loadEntries,
+  pastePassword,
+  pasteUsername,
+  pasteTOTP,
+  copyPassword,
+  copyUsername,
+  copyTOTP,
+} from "./utils/keepassLoader";
 import { useState, useEffect } from "react";
 
 const errorHandler = (e: { message: string }) => {
@@ -44,9 +52,9 @@ export default function Command() {
           accessoryTitle={
             entry.split("/").length > 2
               ? entry
-                  .split("/")
-                  .slice(1, entry.split("/").length - 1)
-                  .join("\t")
+                .split("/")
+                .slice(1, entry.split("/").length - 1)
+                .join("\t")
               : ""
           }
           keywords={entry.split("/").slice(1)}
