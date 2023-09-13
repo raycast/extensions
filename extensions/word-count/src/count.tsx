@@ -10,20 +10,22 @@ export default function Command() {
 
   useEffect(() => {
     (async () => {
+      let content = "";
+
       try {
         const selectedText = await getSelectedText();
-
         if (selectedText) {
-          setText(selectedText.trim());
-          return;
+          content = selectedText.trim();
         }
-
-        const clipboard = await readFromClipboard();
-        setText(clipboard);
       } catch {
-        const clipboard = await readFromClipboard();
-        setText(clipboard);
+        // ignore error, fallback to clipboard
       }
+
+      if (!content) {
+        content = await readFromClipboard();
+      }
+
+      setText(content);
     })();
   }, []);
 
