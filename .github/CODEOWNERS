@@ -183,7 +183,7 @@
 /extensions/contentful                               @ewgenius
 /extensions/control-d                                @httpjamesm
 /extensions/conventional-comments                    @krzysztofzuraw
-/extensions/conventional-commits                     @niemtec
+/extensions/conventional-commits                     @niemtec @Lucria
 /extensions/convert                                  @nielsvanrijn
 /extensions/convert-px-to-vw-vh                      @atiipik
 /extensions/convert-typescript-to-javascript         @bengry
