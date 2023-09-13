@@ -23,9 +23,9 @@ export default function ProjectList(): JSX.Element {
     prefActions,
   } = useAppHistory();
 
-  if (isLoading) {
+  if (isLoading && toolboxApp !== false) {
     return <List searchBarPlaceholder={`Search recent projects…`} isLoading={true} />;
-  } else if (toolboxApp === undefined) {
+  } else if (toolboxApp === false || toolboxApp === undefined) {
     const message = [
       "# Unable to find JetBrains Toolbox",
       `Please check that you have installed [JetBrains Toolbox](${tbUrl})`,

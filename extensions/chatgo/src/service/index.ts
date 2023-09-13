@@ -1,7 +1,7 @@
 import axios from "axios";
-import { ChatParams, GetImagesOps, TemplateBase, TemplateBaseOps } from "../type";
+import { ChatParams, GetImagesOps, TemplateBaseOps } from "../type";
 
-export const HOST = "http://www.chatgo.pro";
+export const HOST = "https://www.chatgo.pro";
 
 axios.defaults.baseURL = HOST;
 

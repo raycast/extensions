@@ -4,7 +4,11 @@
   "title": "Change Case",
   "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
   "icon": "command-icon.png",
-  "author": "es183923",
+  "author": "erics118",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "contributors": [
     "pernielsentikaer"
   ],
@@ -245,22 +249,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "change-case-all": "^1.0.14",
-    "execa": "^6.1.0"
+    "@raycast/api": "^1.57.2",
+    "change-case-all": "^1.0.15"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "~18.6.4",
-    "@types/react": "^18.0.15",
-    "eslint": "^8.21.0",
-    "react-devtools": "^4.25.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "~20.5.8",
+    "@types/react": "^18.2.21",
+    "eslint": "^8.48.0",
+    "react-devtools": "^4.28.0",
     "typescript": "^4.7.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

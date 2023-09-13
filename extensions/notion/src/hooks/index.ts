@@ -109,7 +109,6 @@ export function useRecentPages() {
 
     const updatedPages = data.filter((page) => page.id !== id);
 
-    console.log(updatedPages);
     await LocalStorage.setItem("RECENTLY_OPENED_PAGES", JSON.stringify(updatedPages));
     mutate();
   }
