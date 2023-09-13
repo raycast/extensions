@@ -13,6 +13,15 @@ export type Tunnel = {
     uri: string;
   };
   forwards_to: string;
+  metadata: string;
+};
+
+export type ReservedDomain = {
+  id: string;
+  uri: string;
+  created_at: string;
+  description: string;
+  domain: string;
 };
 
 export type NgrokError = {

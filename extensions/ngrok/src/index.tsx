@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, useNavigation } from "@raycast/api";
 
-import { useTunnels } from "./hooks";
+import { useReservedDomains, useTunnels } from "./hooks";
 import AddTunnel from "./components/add-tunnel";
 import BaseActions from "./components/base-actions";
 import { Tunnel, stopTunnel } from "./api";
@@ -8,7 +8,8 @@ import { Tunnel, stopTunnel } from "./api";
 export default function TunnelsList() {
   const { push } = useNavigation();
 
-  const { isLoading: isLoadingTunnels, data, revalidate } = useTunnels();
+  const { isLoading: isLoadingTunnels, data: dataTunnels, revalidate: revalidateTunnels } = useTunnels();
+  const { isLoading: isLoadingDomains, data: dataDomains, revalidate: revalidateDomains } = useReservedDomains();
 
   const handleStop = async (tunnel: Tunnel) => {
     const toast = await showToast({
@@ -30,28 +31,38 @@ export default function TunnelsList() {
       }
     }
 
-    revalidate();
+    revalidateTunnels();
+  };
+
+  const reload = () => {
+    revalidateTunnels();
+    revalidateDomains();
   };
 
   return (
-    <List navigationTitle="Manage Tunnels" isLoading={isLoadingTunnels}>
-      {!data || data.tunnels.length === 0 ? (
+    <List navigationTitle="Manage Tunnels" isLoading={isLoadingTunnels || isLoadingDomains}>
+      {!dataTunnels || dataTunnels.tunnels.length === 0 ? (
         <List.EmptyView
           icon={Icon.Link}
           title="Create an ngrok tunnel"
           description="⌘ + N"
           actions={
             <ActionPanel>
-              <BaseActions goToCreate={() => push(<AddTunnel revalidate={revalidate} />)} reload={() => revalidate()} />
+              <BaseActions
+                goToCreate={() =>
+                  push(<AddTunnel revalidate={revalidateTunnels} domains={dataDomains?.reserved_domains || []} />)
+                }
+                reload={reload}
+              />
             </ActionPanel>
           }
         />
       ) : (
-        data.tunnels.map((tunnel) => (
+        dataTunnels.tunnels.map((tunnel) => (
           <List.Item
             key={tunnel.id}
             title={tunnel.public_url}
-            subtitle={`Forwards to ➡️ ${tunnel.forwards_to}`}
+            subtitle={`Forwards to ➡️ ${tunnel.forwards_to}${tunnel.metadata ? ` - [${tunnel.metadata}]` : ""}`}
             actions={
               <ActionPanel title={tunnel.public_url}>
                 <Action.CopyToClipboard title="Copy URL" content={tunnel.public_url} />
@@ -65,8 +76,10 @@ export default function TunnelsList() {
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <BaseActions
-                    goToCreate={() => push(<AddTunnel revalidate={revalidate} />)}
-                    reload={() => revalidate()}
+                    goToCreate={() =>
+                      push(<AddTunnel revalidate={revalidateTunnels} domains={dataDomains?.reserved_domains || []} />)
+                    }
+                    reload={reload}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
