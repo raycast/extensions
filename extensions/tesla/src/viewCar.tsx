@@ -173,7 +173,6 @@ ${formatCarModelName(data.vehicle_config.car_type)} v${data.vehicle_state.car_ve
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={data.display_name}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
