@@ -73,10 +73,15 @@ export function getShortcut(index: number) {
 
 export function getIcon(color: string | Color) {
   const hex = typeof color === "string" ? color : getFormattedColor(color);
+  if (!hex) {
+    return undefined;
+  }
+
   const icon: Image.ImageLike = {
     source: Icon.CircleFilled,
     tintColor: { light: hex, dark: hex, adjustContrast: false },
   };
+
   return icon;
 }
 
