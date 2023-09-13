@@ -2,7 +2,7 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
-- "Open Directory" command now supports marking directories as favorite
+- "Open Directory" command now supports pinning directories for fast access. To pin or unpin a directory, use "Pin Directory" or "Unpin Directory" actions (⌘⇧P)
 
 ## [Initial Release] - 2023-06-29
 

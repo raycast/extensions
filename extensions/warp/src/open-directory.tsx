@@ -11,11 +11,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState<Category>(Category.ALL);
   const [results, setResults] = useState<SearchResult[]>([]);
-  const {
-    data: favorites,
-    setData: setFavorites,
-    isLoading: isFavoritesLoading,
-  } = useLocalStorage<SearchResult[]>("favoriteDirs", []);
+  const { data: pins, setData: setPins, isLoading: isPinsLoading } = useLocalStorage<SearchResult[]>("pinnedDirs", []);
   const abortable = useRef<AbortController>();
 
   const maxResults = 250;
@@ -54,50 +50,48 @@ export default function Command() {
     setCategory(newValue);
   }
 
-  async function onFavorite(searchResult: SearchResult) {
-    if (favorites.find((favorite) => favorite.path === searchResult.path)) {
-      setFavorites((state) => state.filter((favorite) => favorite.path !== searchResult.path));
-      await showToast(Toast.Style.Success, `Removed from favorites`);
+  async function onPin(searchResult: SearchResult) {
+    if (pins.find((pinned) => pinned.path === searchResult.path)) {
+      setPins((state) => state.filter((pinned) => pinned.path !== searchResult.path));
+      await showToast(Toast.Style.Success, `Unpinned`);
     } else {
-      setFavorites((state) => [...state, searchResult]);
-      await showToast(Toast.Style.Success, `Added to favorites`);
+      setPins((state) => [...state, searchResult]);
+      await showToast(Toast.Style.Success, `Pinned`);
     }
   }
 
   async function onRearrange(searchResult: SearchResult, direction: "up" | "down") {
-    const favoriteIndex = favorites.findIndex((favorite) => favorite.path === searchResult.path);
-    const newFavorites = [...favorites];
+    const pinnedIndex = pins.findIndex((pinned) => pinned.path === searchResult.path);
+    const newPins = [...pins];
 
     if (direction === "up") {
-      newFavorites[favoriteIndex] = newFavorites[favoriteIndex - 1];
-      newFavorites[favoriteIndex - 1] = { ...searchResult };
+      newPins[pinnedIndex] = newPins[pinnedIndex - 1];
+      newPins[pinnedIndex - 1] = { ...searchResult };
       await showToast(Toast.Style.Success, `Moved up`);
     } else {
-      newFavorites[favoriteIndex] = newFavorites[favoriteIndex + 1];
-      newFavorites[favoriteIndex + 1] = { ...searchResult };
+      newPins[pinnedIndex] = newPins[pinnedIndex + 1];
+      newPins[pinnedIndex + 1] = { ...searchResult };
       await showToast(Toast.Style.Success, `Moved down`);
     }
 
-    setFavorites(newFavorites);
+    setPins(newPins);
   }
 
   function getValidRearrangeDirections(searchResult: SearchResult) {
     return {
-      up: favorites.findIndex((favorite) => favorite === searchResult) > 0,
-      down: favorites.findIndex((favorite) => favorite === searchResult) < favorites.length - 1,
+      up: pins.findIndex((pinned) => pinned === searchResult) > 0,
+      down: pins.findIndex((pinned) => pinned === searchResult) < pins.length - 1,
     };
   }
 
   const filteredResults =
-    category === Category.ALL
-      ? results.filter((result) => !favorites.find((favorite) => favorite.path === result.path))
-      : [];
+    category === Category.ALL ? results.filter((result) => !pins.find((pinned) => pinned.path === result.path)) : [];
 
-  const filteredFavorites = searchText
-    ? favorites.filter((favorite) => favorite.name.toLowerCase().includes(searchText.toLowerCase()))
-    : favorites;
+  const filteredPins = searchText
+    ? pins.filter((pinned) => pinned.name.toLowerCase().includes(searchText.toLowerCase()))
+    : pins;
 
-  const isLoading = isSearchResultsLoading || isFavoritesLoading;
+  const isLoading = isSearchResultsLoading || isPinsLoading;
 
   return (
     <List
@@ -111,14 +105,14 @@ export default function Command() {
       {!searchText && (
         <List.EmptyView title="Search for a directory" description="Open a directory on your computer in Warp" />
       )}
-      <List.Section title="Favorites">
-        {filteredFavorites.map((searchResult) => (
+      <List.Section title={Category.PINNED}>
+        {filteredPins.map((searchResult) => (
           <SearchListItem
             key={searchResult.path}
             searchResult={searchResult}
-            isFavorite={true}
+            isPinned={true}
             validRearrangeDirections={getValidRearrangeDirections(searchResult)}
-            onFavorite={() => onFavorite(searchResult)}
+            onPin={() => onPin(searchResult)}
             onRearrange={onRearrange}
           />
         ))}
@@ -128,8 +122,8 @@ export default function Command() {
           <SearchListItem
             key={searchResult.path}
             searchResult={searchResult}
-            isFavorite={false}
-            onFavorite={() => onFavorite(searchResult)}
+            isPinned={false}
+            onPin={() => onPin(searchResult)}
           />
         ))}
       </List.Section>
@@ -143,19 +137,19 @@ function CategoryDropdown(props: { onCategoryChange: (newValue: Category) => voi
   return (
     <List.Dropdown tooltip="Select Category" storeValue onChange={(newValue) => onCategoryChange(newValue as Category)}>
       <List.Dropdown.Item title={Category.ALL} value={Category.ALL} />
-      <List.Dropdown.Item title={Category.FAVORITES} value={Category.FAVORITES} />
+      <List.Dropdown.Item title={Category.PINNED} value={Category.PINNED} />
     </List.Dropdown>
   );
 }
 
 function SearchListItem(props: {
   searchResult: SearchResult;
-  isFavorite: boolean;
+  isPinned: boolean;
   validRearrangeDirections?: { up: boolean; down: boolean };
-  onFavorite: () => void;
+  onPin: () => void;
   onRearrange?: (searchResult: SearchResult, direction: "up" | "down") => void;
 }) {
-  const { searchResult, isFavorite, validRearrangeDirections, onFavorite, onRearrange } = props;
+  const { searchResult, isPinned, validRearrangeDirections, onPin, onRearrange } = props;
 
   return (
     <List.Item
@@ -182,27 +176,27 @@ function SearchListItem(props: {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            {!isFavorite ? (
+            {!isPinned ? (
               <Action
-                title="Add to Favorites"
-                icon={Icon.Star}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                onAction={onFavorite}
+                title="Pin Directory"
+                icon={Icon.Pin}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                onAction={onPin}
               />
             ) : (
               <Action
-                title="Remove from Favorites"
-                icon={Icon.StarDisabled}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                onAction={onFavorite}
+                title="Unpin Directory"
+                icon={Icon.PinDisabled}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                onAction={onPin}
               />
             )}
 
-            {isFavorite && onRearrange && (
+            {isPinned && onRearrange && (
               <>
                 {validRearrangeDirections?.up && (
                   <Action
-                    title="Move Up in Favorites"
+                    title="Move Up in Pinned"
                     icon={Icon.ArrowUp}
                     shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
                     onAction={() => onRearrange(searchResult, "up")}
@@ -211,7 +205,7 @@ function SearchListItem(props: {
 
                 {validRearrangeDirections?.down && (
                   <Action
-                    title="Move Down in Favorites"
+                    title="Move Down in Pinned"
                     icon={Icon.ArrowDown}
                     shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
                     onAction={() => onRearrange(searchResult, "down")}

@@ -5,5 +5,5 @@ export interface SearchResult {
 
 export enum Category {
   ALL = "All",
-  FAVORITES = "Favorites",
+  PINNED = "Pinned",
 }
