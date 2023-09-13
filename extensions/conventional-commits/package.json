@@ -17,7 +17,6 @@
     {
       "name": "index",
       "title": "Insert Conventional Commit Prefix",
-      "subtitle": "Insert a conventional commit prefix into your current window",
       "description": "Provides a list of conventional commits prefixes and descriptions that can be inserted into your active window",
       "mode": "view"
     },
