@@ -27,8 +27,13 @@ export function GifGrid(props: GifGridProps) {
           <Grid.Dropdown tooltip="Change GIF Provider" storeValue={true} onChange={props.onDropdownChange}>
             <Grid.Dropdown.Section>
               <Grid.Dropdown.Item
-                title="Giphy"
+                title="Giphy GIFs"
                 value={GIF_SERVICE.GIPHY}
+                icon={{ source: "giphy-logo-square-180.png" }}
+              />
+              <Grid.Dropdown.Item
+                title="Giphy Clips"
+                value={GIF_SERVICE.GIPHY_CLIPS}
                 icon={{ source: "giphy-logo-square-180.png" }}
               />
               <Grid.Dropdown.Item

@@ -19,7 +19,7 @@ interface GifActionsProps {
 }
 
 export function GifActions({ item, showViewDetails, service, visitGifItem }: GifActionsProps) {
-  const { id, url, gif_url, slug } = item;
+  const { id, url, gif_url } = item;
   const { state, dispatch } = useContext(AppContext);
   const { favIds, recentIds } = state;
 
@@ -40,7 +40,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
       title: "Copying...",
     })
       .then((toast) => {
-        return copyFileToClipboard(gif_url, `${slug}.gif`).then((file) => {
+        return copyFileToClipboard(item.download_url, item.download_name).then((file) => {
           toast.hide();
           showHUD(`Copied GIF "${file}" to clipboard`);
         });

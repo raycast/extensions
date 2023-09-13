@@ -20,6 +20,8 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
   switch (service) {
     case GIF_SERVICE.GIPHY:
       return await giphy(force);
+    case GIF_SERVICE.GIPHY_CLIPS:
+      return await giphy(force, "videos");
     case GIF_SERVICE.TENOR:
       return await tenor(force);
     case GIF_SERVICE.FINER_GIFS:

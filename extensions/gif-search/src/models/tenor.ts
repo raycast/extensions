@@ -137,11 +137,14 @@ export class TenorAPI {
 export function mapTenorResponse(tenorResp: TenorGif) {
   const mediaItem = tenorResp.media[0];
   const title = tenorResp.title || tenorResp.h1_title || tenorResp.content_description;
+  const slug = slugify(title);
   return <IGif>{
     id: tenorResp.id,
     title: title,
     url: tenorResp.itemurl,
-    slug: slugify(title),
+    slug,
+    download_url: mediaItem.gif.url,
+    download_name: `${slug}.gif`,
     preview_gif_url: mediaItem.tinygif.url,
     gif_url: mediaItem.gif.url,
     metadata: {

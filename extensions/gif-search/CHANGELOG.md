@@ -1,9 +1,10 @@
 # GIF Search Changelog
 
-## [Simplify extension and add recent and favorites ranking]
+## [GIF Search Improvements]
 
 - Remove the list layout to simplify both the extension's user experience and developer experience.
 - Add "frecency" sorting to recents and favorites so that often-used GIFs come first.
+- Add support for Giphy Clips
 
 ## [Add preference for Grid trending item size] - 2022-07-07
 - Adds a new preference to control the size of grid items in the Trending view

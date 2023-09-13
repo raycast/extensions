@@ -9,9 +9,10 @@ export const API_KEY = "apiKey";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
-export type ServiceName = "giphy" | "tenor" | "finergifs" | "favorites" | "recents";
+export type ServiceName = "giphy" | "giphy-clips" | "tenor" | "finergifs" | "favorites" | "recents";
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
+  GIPHY_CLIPS: "giphy-clips",
   TENOR: "tenor",
   FINER_GIFS: "finergifs",
   FAVORITES: "favorites",
@@ -27,7 +28,9 @@ export function getServices() {
 export function getServiceTitle(service?: ServiceName) {
   switch (service) {
     case GIF_SERVICE.GIPHY:
-      return "Giphy";
+      return "Giphy GIFs";
+    case GIF_SERVICE.GIPHY_CLIPS:
+      return "Giphy Clips";
     case GIF_SERVICE.TENOR:
       return "Tenor";
     case GIF_SERVICE.FINER_GIFS:
@@ -40,14 +43,17 @@ export function getServiceTitle(service?: ServiceName) {
 const preferences = getPreferenceValues<Preferences>();
 
 export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean) {
-  if (serviceName !== "giphy" && serviceName !== "tenor") {
+  // giphy-clips is a special case, it uses the same API key as giphy
+  const name = serviceName === "giphy-clips" ? "giphy" : serviceName;
+
+  if (name !== "giphy" && name !== "tenor") {
     throw new Error("Only Giphy and Tenor require API keys");
   }
 
-  let apiKey = preferences[`${serviceName}-${API_KEY}`];
+  let apiKey = preferences[`${name}-${API_KEY}`];
   if (!apiKey) {
     const config = await fetchConfig(forceRefresh);
-    apiKey = config.apiKeys[serviceName];
+    apiKey = config.apiKeys[name];
   }
 
   return apiKey;

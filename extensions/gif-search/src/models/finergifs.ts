@@ -86,10 +86,14 @@ export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
   const [, season, episode] = finerGifsResp.fields.fileid.match(EPISODE_NUM_REGEX) || new Array(2);
   const epInt = parseInt(season, 10);
 
+  const slug = slugify(finerGifsResp.fields.text);
+
   return <IGif>{
     id: finerGifsResp.fields.fileid,
     title: finerGifsResp.fields.text,
-    slug: slugify(finerGifsResp.fields.text),
+    slug,
+    download_url: gifUrl.toString(),
+    download_name: `${slug}.gif`,
     preview_gif_url: gifUrl.toString(),
     gif_url: gifUrl.toString(),
     metadata:
