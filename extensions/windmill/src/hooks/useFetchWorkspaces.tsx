@@ -6,9 +6,17 @@ import { clearCache } from "../cache";
 
 export function useFetchWorkspaces() {
   const [workspaces, setWorkspaces] = useState<WorkspaceConfig[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const _fetchWorkspaces = async () => {
-    setWorkspaces(await fetchWorkspaces());
+    try {
+      setIsLoading(true);
+      setWorkspaces(await fetchWorkspaces());
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -30,6 +38,7 @@ export function useFetchWorkspaces() {
     fetchWorkspaces: _fetchWorkspaces,
     saveWorkspace: _saveWorkspace,
     removeWorkspace: _removeWorkspace,
+    isLoading,
   };
 }
 

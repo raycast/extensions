@@ -14,27 +14,25 @@ import { Kind } from "../types";
 
 export function useFetchList(kind: Kind, workspaces: WorkspaceConfig[]) {
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchAndProcessData = async () => {
-      setLoading(true);
-      const items = await getItems(kind, workspaces);
-      setItems(items);
-      setLoading(false);
-    };
-
-    fetchAndProcessData();
-  }, [workspaces]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const refreshItems = async () => {
-    setLoading(true);
-    const items = await getItems(kind, workspaces, true);
-    setItems(items);
-    setLoading(false);
+    try {
+      setIsLoading(true);
+      const items = await getItems(kind, workspaces, true);
+      setItems(items);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return { items, setItems, refreshItems, loading };
+  useEffect(() => {
+    refreshItems();
+  }, [workspaces]);
+
+  return { items, setItems, refreshItems, isLoading };
 }
 
 async function getItems(kind: Kind, workspaces: WorkspaceConfig[], force = false) {

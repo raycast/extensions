@@ -5,7 +5,15 @@ import { ItemList } from "./components/ItemList";
 const kind = "script";
 
 export default function ListFlowsCommand() {
-  const { workspaces } = useFetchWorkspaces();
-  const { items, refreshItems } = useFetchList(kind, workspaces);
-  return <ItemList kind={kind} items={items} workspaces={workspaces} refreshItems={refreshItems} />;
+  const { workspaces, isLoading: workspacesLoading } = useFetchWorkspaces();
+  const { items, refreshItems, isLoading: listLoading } = useFetchList(kind, workspaces);
+  return (
+    <ItemList
+      isLoading={workspacesLoading || listLoading}
+      kind={kind}
+      items={items}
+      workspaces={workspaces}
+      refreshItems={refreshItems}
+    />
+  );
 }

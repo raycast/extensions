@@ -5,11 +5,13 @@ import { WorkspaceConfig, Kind, ExtendedWindmillWorkspacePair } from "../types";
 import { useState } from "react";
 
 export function ItemList({
+  isLoading,
   kind,
   items,
   workspaces,
   refreshItems,
 }: {
+  isLoading: boolean;
   kind: Kind;
   items: ExtendedWindmillWorkspacePair[];
   workspaces: WorkspaceConfig[];
@@ -24,10 +26,6 @@ export function ItemList({
 
   const noWorkspaces = workspaces.length === 0;
 
-  if (!items) {
-    return <Detail markdown="Loading..." />;
-  }
-
   const [currentWorkspace, setCurrentWorkspace] = useState("All");
 
   function onWorkspaceChange(workspace: string) {
@@ -35,8 +33,11 @@ export function ItemList({
   }
 
   return (
-    <List searchBarAccessory={<WorkspaceDropdown workspaces={workspaces} onWorkspaceChange={onWorkspaceChange} />}>
-      {noWorkspaces ? (
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={<WorkspaceDropdown workspaces={workspaces} onWorkspaceChange={onWorkspaceChange} />}
+    >
+      {noWorkspaces && !isLoading ? (
         <List.EmptyView
           title="No Workspaces Found"
           description="Press Enter to add a new workspace."
@@ -61,8 +62,8 @@ export function ItemList({
           .filter((item_workspace) => currentWorkspace === "All" || item_workspace[1].id === currentWorkspace)
           .map((item_workspace: ExtendedWindmillWorkspacePair) => {
             const [item, workspace] = item_workspace;
-            console.log("item", item);
-            console.log("workspace", workspace);
+            // console.log("item", item);
+            // console.log("workspace", workspace);
 
             return (
               <List.Item

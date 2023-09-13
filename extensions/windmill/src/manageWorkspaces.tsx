@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { WorkspaceForm } from "./components/WorkspaceForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useFetchWorkspaces } from "./hooks/useFetchWorkspaces";
 
@@ -8,7 +8,7 @@ import { LaunchProps } from "@raycast/api";
 import { WorkspaceConfig } from "./types";
 
 export default function ListWorkspacesCommand(props: LaunchProps) {
-  const { workspaces, fetchWorkspaces } = useFetchWorkspaces();
+  const { workspaces, fetchWorkspaces, isLoading } = useFetchWorkspaces();
   const [searchText, setSearchText] = useState("");
 
   // Check if the context { createNew: true } is passed with launchCommand()
@@ -17,8 +17,8 @@ export default function ListWorkspacesCommand(props: LaunchProps) {
   }
 
   return (
-    <List onSearchTextChange={(newValue) => setSearchText(newValue)}>
-      {workspaces.length === 0 ? (
+    <List onSearchTextChange={(newValue) => setSearchText(newValue)} isLoading={isLoading}>
+      {!isLoading && workspaces.length === 0 ? (
         <List.EmptyView
           title="No Workspaces found"
           description={
