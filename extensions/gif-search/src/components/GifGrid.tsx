@@ -1,9 +1,9 @@
 import { Image, Icon, Color, Grid } from "@raycast/api";
-import { GIF_SERVICE } from "../preferences";
+import { GIF_SERVICE, GRID_COLUMNS } from "../preferences";
 
-import { GifListSection, GifListSectionProps } from "./GifListSection";
+import { GifGridSection, GifGridSectionProps } from "./GifGridSection";
 
-export interface GifListProps {
+export interface GifGridProps {
   isLoading?: boolean;
   showDropdown?: boolean;
   showDetail?: boolean;
@@ -14,17 +14,17 @@ export interface GifListProps {
   searchBarPlaceholder?: string;
   emptyStateText?: string;
   emptyStateIcon?: Image.ImageLike;
-  sections: GifListSectionProps[];
-  itemSize: Grid.ItemSize;
+  sections: GifGridSectionProps[];
+  itemSize: "small" | "medium" | "large";
 }
 
-export function GifSearchList(props: GifListProps) {
+export function GifGrid(props: GifGridProps) {
   return (
     <Grid
-      itemSize={props.itemSize}
+      columns={GRID_COLUMNS[props.itemSize]}
       searchBarAccessory={
         props.showDropdown ? (
-          <Grid.Dropdown tooltip="" storeValue={true} onChange={props.onDropdownChange}>
+          <Grid.Dropdown tooltip="Change GIF Provider" storeValue={true} onChange={props.onDropdownChange}>
             <Grid.Dropdown.Section>
               <Grid.Dropdown.Item
                 title="Giphy"
@@ -63,7 +63,7 @@ export function GifSearchList(props: GifListProps) {
         <Grid.EmptyView title={props.emptyStateText} icon={props.emptyStateIcon} />
       ) : (
         props.sections.map((sProps) => (
-          <GifListSection
+          <GifGridSection
             key={sProps.title}
             title={sProps.title}
             results={sProps.results}

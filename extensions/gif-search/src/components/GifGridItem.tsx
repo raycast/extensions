@@ -2,9 +2,9 @@ import { useContext } from "react";
 
 import { List, Icon, Color, Grid } from "@raycast/api";
 
-import { GifDetailsActions } from "./GifDetailsActions";
+import { GifActions } from "./GifActions";
 
-import AppContext from "../components/AppContext";
+import AppContext from "./AppContext";
 import { IGif } from "../models/gif";
 import { ServiceName, getGridItemSize } from "../preferences";
 
@@ -24,7 +24,7 @@ export function GifResult(props: { item: IGif; index: number; service?: ServiceN
     <Grid.Item
       title={title}
       content={{ source: isLargeGridSize ? gif_url : preview_gif_url }}
-      actions={<GifDetailsActions item={props.item} showViewDetails={true} service={props.service} />}
+      actions={<GifActions item={props.item} showViewDetails={true} service={props.service} />}
     />
   );
 }

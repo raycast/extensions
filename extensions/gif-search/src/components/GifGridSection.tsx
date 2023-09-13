@@ -1,9 +1,9 @@
-import { GifResult } from "./GifResult";
+import { GifResult } from "./GifGridItem";
 import type { IGif } from "../models/gif";
 import { ServiceName } from "../preferences";
 import { Grid } from "@raycast/api";
 
-export interface GifListSectionProps {
+export interface GifGridSectionProps {
   title?: string;
   term?: string;
   hide?: boolean;
@@ -11,7 +11,7 @@ export interface GifListSectionProps {
   service?: ServiceName;
 }
 
-export function GifListSection(props: GifListSectionProps) {
+export function GifGridSection(props: GifGridSectionProps) {
   let { title } = props;
   if (props.term) {
     title = `GIF results for "${props.term}"`;

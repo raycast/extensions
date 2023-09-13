@@ -1,9 +1,6 @@
 import formatRelative from "date-fns/formatRelative";
 import fromUnixTime from "date-fns/fromUnixTime";
 import fetch from "node-fetch";
-import path from "path";
-
-import { environment } from "@raycast/api";
 
 import { getAPIKey, GIF_SERVICE } from "../preferences";
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";

@@ -4,14 +4,14 @@ import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard } from 
 
 import { getDefaultAction, ServiceName } from "../preferences";
 
-import AppContext from "../components/AppContext";
+import AppContext from "./AppContext";
 import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
 
-export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean; service?: ServiceName }) {
+export function GifActions(props: { item: IGif; showViewDetails: boolean; service?: ServiceName }) {
   const actions = getActions(props.item, props.showViewDetails, props.service);
 
   return (

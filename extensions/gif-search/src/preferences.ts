@@ -3,13 +3,9 @@ import fetch from "node-fetch";
 import path from "path";
 import differenceInDays from "date-fns/differenceInDays";
 
-import { getPreferenceValues, environment, Grid } from "@raycast/api";
+import { getPreferenceValues, environment } from "@raycast/api";
 
 export const API_KEY = "apiKey";
-export const MAX_RESULTS = "maxResults";
-export const DEFAULT_ACTION = "defaultAction";
-export const GRID_ITEM_SIZE = "gridItemSize";
-export const GRID_TRENDING_ITEM_SIZE = "gridTrendingItemSize";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
@@ -41,20 +37,14 @@ export function getServiceTitle(service?: ServiceName) {
   return "";
 }
 
-export type Preference = { [preferenceName: string]: any };
-
-let prefs: Preference;
-
-export function getPrefs() {
-  if (!prefs) {
-    prefs = getPreferenceValues<Preference>();
-  }
-
-  return prefs;
-}
+const preferences = getPreferenceValues<Preferences>();
 
 export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean) {
-  let apiKey = getPrefs()[`${serviceName}-${API_KEY}`];
+  if (serviceName !== "giphy" && serviceName !== "tenor") {
+    throw new Error("Only Giphy and Tenor require API keys");
+  }
+
+  let apiKey = preferences[`${serviceName}-${API_KEY}`];
   if (!apiKey) {
     const config = await fetchConfig(forceRefresh);
     apiKey = config.apiKeys[serviceName];
@@ -64,11 +54,11 @@ export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean
 }
 
 export function getDefaultAction(): string {
-  return getPrefs()[DEFAULT_ACTION];
+  return preferences.defaultAction;
 }
 
 export function getMaxResults(): number {
-  return parseInt(getPrefs()[MAX_RESULTS], 10) ?? 10;
+  return parseInt(preferences.maxResults, 10) ?? 10;
 }
 
 export type Config = {
@@ -102,16 +92,16 @@ export async function fetchConfig(forceRefresh?: boolean) {
   return config;
 }
 
-export const GRID_SIZE: { [key: string]: Grid.ItemSize } = {
-  small: Grid.ItemSize.Small,
-  medium: Grid.ItemSize.Medium,
-  large: Grid.ItemSize.Large,
+export const GRID_COLUMNS: { [key: string]: number } = {
+  small: 8,
+  medium: 5,
+  large: 3,
 };
 
 export function getGridItemSize() {
-  return GRID_SIZE[getPrefs()[GRID_ITEM_SIZE]];
+  return preferences.gridItemSize;
 }
 
 export function getGridTrendingItemSize() {
-  return GRID_SIZE[getPrefs()[GRID_TRENDING_ITEM_SIZE]];
+  return preferences.gridTrendingItemSize;
 }

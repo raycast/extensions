@@ -2,7 +2,6 @@ import formatRelative from "date-fns/formatRelative";
 
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import type { IGif as GiphyGif } from "@giphy/js-types";
-import { environment } from "@raycast/api";
 
 import { getAPIKey, GIF_SERVICE } from "../preferences";
 

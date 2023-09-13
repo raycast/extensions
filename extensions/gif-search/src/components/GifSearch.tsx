@@ -15,7 +15,7 @@ import AppContext, { initialState, reduceAppState } from "./AppContext";
 
 import useLocalGifs from "../hooks/useLocalGifs";
 import useSearchAPI from "../hooks/useSearchAPI";
-import { GifSearchList } from "./GifSearchList";
+import { GifGrid } from "./GifGrid";
 import useGifPopulator, { GifIds } from "../hooks/useGifPopulator";
 
 export function GifSearch() {
@@ -139,10 +139,10 @@ export function GifSearch() {
     }
   }, [favIds?.error, favItems?.errors, recentIds?.error, recentItems?.errors]);
 
-  let searchList: JSX.Element;
+  let grid: JSX.Element;
   if (showAllFavs()) {
-    searchList = (
-      <GifSearchList
+    grid = (
+      <GifGrid
         itemSize={itemSize}
         isLoading={isLoadingFavIds || isLoadingFavs}
         showDropdown={true}
@@ -159,8 +159,8 @@ export function GifSearch() {
       />
     );
   } else if (showAllRecents()) {
-    searchList = (
-      <GifSearchList
+    grid = (
+      <GifGrid
         itemSize={itemSize}
         isLoading={isLoadingRecentIds || isLoadingRecents}
         showDropdown={true}
@@ -177,8 +177,8 @@ export function GifSearch() {
       />
     );
   } else {
-    searchList = (
-      <GifSearchList
+    grid = (
+      <GifGrid
         itemSize={itemSize}
         isLoading={isLoading || isLoadingFavIds || isLoadingFavs || isLoadingRecents}
         showDropdown={true}
@@ -213,5 +213,5 @@ export function GifSearch() {
     );
   }
 
-  return <AppContext.Provider value={{ state, dispatch }}>{searchList}</AppContext.Provider>;
+  return <AppContext.Provider value={{ state, dispatch }}>{grid}</AppContext.Provider>;
 }

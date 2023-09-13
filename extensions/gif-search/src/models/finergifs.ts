@@ -28,7 +28,7 @@ export default function finergifs() {
       return (await api.search(term, { offset, limit, abort })).results.map(mapFinerGifsResponse);
     },
 
-    async trending(opt?: APIOpt) {
+    async trending() {
       return [];
     },
 
