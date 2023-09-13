@@ -4,7 +4,7 @@
   "title": "NPM To All",
   "description": "Paste npm command as yarn, pnpm or bun command",
   "icon": "npm.png",
-  "author": "aljadaan",
+  "author": "aljadan",
   "categories": [
     "Productivity",
     "System",
