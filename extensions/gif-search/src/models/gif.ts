@@ -2,7 +2,7 @@
 const DETAIL_WINDOW_HEIGHT = 190;
 
 export interface IGif {
-  id: string | number;
+  id: string;
   title: string;
   url?: string;
   slug: string;

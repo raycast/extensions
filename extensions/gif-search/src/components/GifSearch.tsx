@@ -154,7 +154,7 @@ export function GifSearch() {
         emptyStateText="Add some GIFs to your Favorites first!"
         emptyStateIcon={Icon.Star}
         sections={Array.from(favItems?.items || []).map(([service, gifs]) => {
-          return { title: getServiceTitle(service), results: gifs, service };
+          return { title: getServiceTitle(service), results: gifs, service, isLocalGifSection: true };
         })}
       />
     );
@@ -172,7 +172,7 @@ export function GifSearch() {
         emptyStateText="Work with some GIFs first..."
         emptyStateIcon={Icon.Clock}
         sections={Array.from(recentItems?.items || []).map(([service, gifs]) => {
-          return { title: getServiceTitle(service), results: gifs, service };
+          return { title: getServiceTitle(service), results: gifs, service, isLocalGifSection: true };
         })}
       />
     );
@@ -195,12 +195,14 @@ export function GifSearch() {
             results: favItems?.items?.get(searchService as ServiceName),
             service: searchService,
             hide: !favItems?.items || !!results?.term,
+            isLocalGifSection: true,
           },
           {
             title: "Recent",
             results: recentItems?.items?.get(searchService as ServiceName),
             service: searchService,
             hide: !recentItems?.items || !!results?.term,
+            isLocalGifSection: true,
           },
           {
             title: "Trending",

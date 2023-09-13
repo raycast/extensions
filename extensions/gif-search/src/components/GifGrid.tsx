@@ -70,6 +70,7 @@ export function GifGrid(props: GifGridProps) {
             term={sProps.term}
             hide={sProps.hide}
             service={sProps.service}
+            isLocalGifSection={sProps.isLocalGifSection}
           />
         ))
       )}

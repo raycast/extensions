@@ -11,28 +11,25 @@ import { IGif } from "../models/gif";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
 
-export function GifActions(props: { item: IGif; showViewDetails: boolean; service?: ServiceName }) {
-  const actions = getActions(props.item, props.showViewDetails, props.service);
-
-  return (
-    <ActionPanel title={props.item.title}>
-      {actions.map((section, index) => (
-        <ActionPanel.Section key={index}>{section}</ActionPanel.Section>
-      ))}
-    </ActionPanel>
-  );
+interface GifActionsProps {
+  item: IGif;
+  showViewDetails: boolean;
+  service?: ServiceName;
+  visitGifItem?: (gif: IGif) => void;
 }
 
-export function getActions(item: IGif, showViewDetails: boolean, service?: ServiceName) {
+export function GifActions({ item, showViewDetails, service, visitGifItem }: GifActionsProps) {
   const { id, url, gif_url, slug } = item;
   const { state, dispatch } = useContext(AppContext);
   const { favIds, recentIds } = state;
 
   const actionIds = new Map([[service as ServiceName, new Set([id.toString()])]]);
 
-  const trackUsage = () => dispatch({ type: "add", save: true, recentIds: actionIds, service });
+  const trackUsage = () => {
+    dispatch({ type: "add", save: true, recentIds: actionIds, service });
+    visitGifItem?.(item);
+  };
   const removeFromRecents = () => dispatch({ type: "remove", save: true, recentIds: actionIds, service });
-
   const addToFav = () => dispatch({ type: "add", save: true, favIds: actionIds, service });
 
   const removeFav = () => dispatch({ type: "remove", save: true, favIds: actionIds, service });
@@ -62,15 +59,28 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       );
 
   const openUrlInBrowser = url ? (
-    <Action.OpenInBrowser key="openUrlInBrowser" url={url} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} />
+    <Action.OpenInBrowser
+      key="openUrlInBrowser"
+      url={url}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+      onOpen={trackUsage}
+    />
   ) : undefined;
-  const copyGifUrl = <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF Link" content={stripQParams(gif_url)} />;
+  const copyGifUrl = (
+    <Action.CopyToClipboard
+      key="copyGifUrl"
+      title="Copy GIF Link"
+      content={stripQParams(gif_url)}
+      onCopy={trackUsage}
+    />
+  );
   const copyGifMarkdown = (
     <Action.CopyToClipboard
       key="copyGifMarkdown"
       title="Copy GIF Markdown"
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       content={`![${item.title}](${stripQParams(gif_url)})`}
+      onCopy={trackUsage}
     />
   );
   const copyPageUrl = url ? (
@@ -158,5 +168,11 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
     }
   }
 
-  return actions;
+  return (
+    <ActionPanel title={item.title}>
+      {actions.map((section, index) => (
+        <ActionPanel.Section key={index}>{section}</ActionPanel.Section>
+      ))}
+    </ActionPanel>
+  );
 }
