@@ -8,7 +8,8 @@
   "contributors": [
     "GastroGeek",
     "sxn",
-    "itsnwa"
+    "itsnwa",
+    "hakob_nersesian"
   ],
   "categories": [
     "News"
@@ -22,10 +23,22 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "default": "",
+      "description": "Enter the OpenAI access token for the summarize function.(BETA)",
+      "name": "openaiAccessToken",
+      "placeholder": "[Enter Your Access Token]",
+      "required": false,
+      "title": "OpenAI access token (Summarizer function).",
+      "type": "textfield"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.16",
     "lodash": "^4.17.21",
+    "openai": "^4.6.0",
     "rss-parser": "3.12.0"
   },
   "devDependencies": {
