@@ -44,7 +44,7 @@ export default function TunnelsList() {
       {!dataTunnels || dataTunnels.tunnels.length === 0 ? (
         <List.EmptyView
           icon={Icon.Link}
-          title="Create an ngrok tunnel"
+          title="Create ngrok tunnel"
           description="⌘ + N"
           actions={
             <ActionPanel>
