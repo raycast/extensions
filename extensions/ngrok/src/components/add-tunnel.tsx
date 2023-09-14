@@ -35,7 +35,7 @@ export default function AddTunnel({ revalidate, domains }: Props) {
       if (!ngrokBin) {
         await showToast({
           style: Toast.Style.Failure,
-          title: `Couldn't found ngrok CLI`,
+          title: `Couldn't find ngrok CLI`,
         });
         return;
       }
