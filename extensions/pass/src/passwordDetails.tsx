@@ -31,14 +31,14 @@ const DeletePassword = async (props: passwords_path_structure) => {
     title: "Decrypting file",
   });
 
-  cmd.stdout!.on("data", async(data) => {
+  cmd.stdout!.on("data", async (data) => {
     toast.style = Toast.Style.Success;
     toast.title = data;
-    await showHUD("Password deleted")
+    await showHUD("Password deleted");
   });
-  
-  cmd.on('close', (code) => {
-    if(code != 0){
+
+  cmd.on("close", (code) => {
+    if (code != 0) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to delete password";
     }
@@ -52,14 +52,14 @@ const CopyPassword = async (props: passwords_path_structure) => {
     title: "Decrypting file",
   });
 
-  cmd.stdout!.on("data", async(data) => {
+  cmd.stdout!.on("data", async (data) => {
     toast.style = Toast.Style.Success;
     toast.title = data;
-    await showHUD(data)
+    await showHUD(data);
   });
-  
-  cmd.on('close', (code) => {
-    if(code != 0){
+
+  cmd.on("close", (code) => {
+    if (code != 0) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to copy password";
     }
@@ -73,20 +73,19 @@ const CopyOTP = async (props: passwords_path_structure) => {
     title: "Decrypting file",
   });
 
-  cmd.stdout!.on("data", async(data) => {
+  cmd.stdout!.on("data", async (data) => {
     toast.style = Toast.Style.Success;
     toast.title = data;
-    await showHUD(data)
+    await showHUD(data);
   });
-  
-  cmd.on('close', (code) => {
-    if(code != 0){
+
+  cmd.on("close", (code) => {
+    if (code != 0) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to copy OTP";
     }
   });
 };
-
 
 function PasswordMetadata(props: passwords_path_structure) {
   const ParseMetadata = (raw_data: string) => {
@@ -121,13 +120,13 @@ function PasswordMetadata(props: passwords_path_structure) {
                   <Action.CopyToClipboard title={`Copy value of '${val.name}'`} content={val.value} />
                   <Action
                     title={"Copy Password"}
-                    onAction={() => CopyPassword(props)} 
-                    shortcut={{modifiers: ['ctrl'], key: "c"}}
+                    onAction={() => CopyPassword(props)}
+                    shortcut={{ modifiers: ["ctrl"], key: "c" }}
                   />
                   <Action
                     title={"Copy OTP"}
-                    onAction={() => CopyOTP(props)} 
-                    shortcut={{modifiers: ['ctrl'], key: "o"}}
+                    onAction={() => CopyOTP(props)}
+                    shortcut={{ modifiers: ["ctrl"], key: "o" }}
                   />
                 </ActionPanel>
               }
@@ -146,18 +145,14 @@ export default function GetPasswordDetails(props: passwords_path_structure) {
       <Action.Push
         title={"Browse metadata"}
         target={<PasswordMetadata pass_file_path={props.pass_file_path} pass_file_name={props.pass_file_name} />}
-        shortcut={{ modifiers: ["cmd"], key: "enter" }}
+        shortcut={{ modifiers: ["cmd"], key: "o" }}
       />
       <Action
         title={"Copy Password"}
-        onAction={() => CopyPassword(props)} 
-        shortcut={{modifiers: ['ctrl'], key: "c"}}
+        onAction={() => CopyPassword(props)}
+        shortcut={{ modifiers: ["ctrl"], key: "c" }}
       />
-      <Action
-        title={"Copy OTP"}
-        onAction={() => CopyOTP(props)} 
-        shortcut={{modifiers: ['ctrl'], key: "o"}}
-      />
+      <Action title={"Copy OTP"} onAction={() => CopyOTP(props)} shortcut={{ modifiers: ["ctrl"], key: "o" }} />
       <Action.Push
         shortcut={{ modifiers: ["ctrl"], key: "a" }}
         title={"Create Pass Entry"}
@@ -169,7 +164,5 @@ export default function GetPasswordDetails(props: passwords_path_structure) {
         title={"Delete Pass Entry"}
       />
     </ActionPanel>
-    
   );
 }
- 

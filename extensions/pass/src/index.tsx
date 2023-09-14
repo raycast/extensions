@@ -1,15 +1,15 @@
-import { List, getPreferenceValues, Toast, showToast} from "@raycast/api";
+import { List, getPreferenceValues, Toast, showToast } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import * as recursive from "recursive-readdir";
-import BadPasswordPath from "./errors/bad_password_path";
 
+import BadPasswordPath from "./errors_handling/bad_password_path";
 import GetPasswordDetails, { passwords_path_structure } from "./passwordDetails";
 import { Preferences } from "./utils";
 
-
 function ParsePassFileName(pass_file_path: string) {
-  const password_store_name = "password-store/";
-  const pass_id = pass_file_path.lastIndexOf("password-store/");
+  const preferences = getPreferenceValues<Preferences>();
+  const password_store_name = preferences.passwords_store_path;
+  const pass_id = pass_file_path.lastIndexOf(password_store_name);
   let pass_path = pass_file_path.slice(pass_id);
   pass_path = pass_path.slice(password_store_name.length).slice(0, -4);
   return pass_path;
@@ -17,25 +17,27 @@ function ParsePassFileName(pass_file_path: string) {
 
 function LoadPassFilesList(PATH_TO_STORE: string) {
   const [files, setFiles] = useState<passwords_path_structure[]>([{ pass_file_name: "", pass_file_path: "" }]);
-  const [error_loading, setError] = useState<boolean>(false)
+  const [error_loading, setError] = useState<boolean>(false);
   const OMMIT_FILES = [".git", ".*"];
 
   const loadPasswordsStore = useCallback(() => {
     recursive.default(PATH_TO_STORE, OMMIT_FILES, (err, files: string[]) => {
-      console.error(err);``
-      if(err){
+      console.error(err);
+      ``;
+      if (err) {
         showToast({
           style: Toast.Style.Failure,
           title: "Could not load files",
         });
-        setError(true)
-        return
+        setError(true);
+        return;
       }
-      if(files.length > 0){
+      if (files.length > 0) {
         setFiles(
           files.map((val) => {
             return { pass_file_name: ParsePassFileName(val), pass_file_path: val };
-          }))
+          })
+        );
       } else {
         showToast({
           style: Toast.Style.Failure,
@@ -58,9 +60,8 @@ function LoadPassFilesList(PATH_TO_STORE: string) {
       }
     />
   ));
-    
 
-  return !error_loading ? <List>{listItems}</List> : <BadPasswordPath />
+  return !error_loading ? <List>{listItems}</List> : <BadPasswordPath />;
 }
 
 export default function Command() {

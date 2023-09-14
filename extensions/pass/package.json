@@ -6,8 +6,8 @@
   "icon": "command-icon.png",
   "author": "tafeen",
   "categories": [
-    "Applications",
-    "Developer Tools"
+    "Security",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
