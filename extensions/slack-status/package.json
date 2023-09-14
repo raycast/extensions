@@ -19,6 +19,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "title": "Access Token",
+      "description": "Your Slack access token for manual installation of the extension",
+      "placeholder": "See README.md for manual setup",
+      "required": false
+    }
+  ],
   "categories": [
     "Communication",
     "Productivity"

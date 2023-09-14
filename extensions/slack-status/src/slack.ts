@@ -36,6 +36,7 @@ export class SlackOAuthSessionConfig implements OAuthSessionConfig {
   private baseUrl: string;
   private clientId: string;
   private userScopes: string[];
+  private defaultAccessToken?: string;
 
   private client = new OAuth.PKCEClient({
     redirectMethod: OAuth.RedirectMethod.Web,
@@ -45,13 +46,19 @@ export class SlackOAuthSessionConfig implements OAuthSessionConfig {
     description: "Connect your Slack account to set your status",
   });
 
-  constructor(options: { baseUrl?: string; clientId: string; userScopes: string[] }) {
+  constructor(options: { baseUrl?: string; clientId: string; userScopes: string[]; defaultAccessToken?: string }) {
     this.baseUrl = options.baseUrl ?? "https://slack.oauth.raycast.com";
     this.clientId = options.clientId;
-    this.userScopes = options?.userScopes ?? [];
+    this.userScopes = options.userScopes ?? [];
+    this.defaultAccessToken = options.defaultAccessToken;
   }
 
   async authorize() {
+    if (this.defaultAccessToken) {
+      await this.client.removeTokens();
+      return this.defaultAccessToken;
+    }
+
     const existingTokens = await this.client.getTokens();
 
     if (existingTokens?.accessToken) {
