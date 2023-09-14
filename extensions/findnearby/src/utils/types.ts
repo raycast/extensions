@@ -12,11 +12,11 @@ export enum TravelMode {
  * Corresponds to Google Map's four possible modes of travel.
  */
 export enum PlaceType {
-    Park = "park",
-    Cafe = "cafe",
-    Japan = "japanese resturant",
-    Thai = "thai resturant",
-  }
+  Park = "park",
+  Cafe = "cafe",
+  Japan = "japanese resturant",
+  Thai = "thai resturant",
+}
 
 /**
  * Corresponds to the preferences defined in package.json.
