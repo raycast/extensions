@@ -52,8 +52,8 @@ const { provider: providerName } = getPreferenceValues<{
 const provider = getProvider(providerName);
 
 const { alwayShowMetadata } = getPreferenceValues<{
-    alwayShowMetadata: boolean;
-  }>();
+  alwayShowMetadata: boolean;
+}>();
 
 export const ContentView = (props: ContentViewProps) => {
   const { query, history, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
