@@ -32,7 +32,7 @@ function StatusList() {
       <List.EmptyView
         icon={Icon.Stars}
         title={searchText ? `Set status to '${searchText}'` : undefined}
-        description="AI picks the best emoji, text and duration for your status"
+        description="Raycast AI picks the best emoji, text and duration for your status"
         actions={
           <ActionPanel>{searchText && <SetStatusWithAIAction statusText={searchText} mutate={mutate} />}</ActionPanel>
         }
