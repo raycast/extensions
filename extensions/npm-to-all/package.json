@@ -13,21 +13,21 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "npm-to-yarn",
+      "name": "yarn",
       "title": "Paste as Yarn Command",
       "description": "Paste npm command as yarn command",
       "mode": "no-view",
       "icon": "yarn.png"
     },
     {
-      "name": "npm-to-pnpm",
+      "name": "pnpm",
       "title": "Paste as PNPM Command",
       "description": "Paste npm command as pnpm command",
       "mode": "no-view",
       "icon": "pnpm.png"
     },
     {
-      "name": "npm-to-bun",
+      "name": "bun",
       "title": "Paste as Bun Command",
       "description": "Paste npm command as bun command",
       "mode": "no-view",
