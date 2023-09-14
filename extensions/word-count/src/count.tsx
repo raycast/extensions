@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form, getSelectedText, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { count } from "./lib/count";
-import { readFromClipboard } from "./utils";
+import { readFromSelection, readFromClipboard } from "./utils";
 
 export default function Command() {
   const [text, setText] = useState("");
@@ -10,16 +10,7 @@ export default function Command() {
 
   useEffect(() => {
     (async () => {
-      let content = "";
-
-      try {
-        const selectedText = await getSelectedText();
-        if (selectedText) {
-          content = selectedText.trim();
-        }
-      } catch {
-        // ignore error, fallback to clipboard
-      }
+      let content = await readFromSelection();
 
       if (!content) {
         content = await readFromClipboard();
