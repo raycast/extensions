@@ -5,7 +5,7 @@ interface Preferences {
 }
 
 export default async function Command(props: LaunchProps) {
-  showToast(Toast.Style.Animated, "Generating...");
+  showToast(Toast.Style.Animated, "Generating... (the first generation takes a bit longer)");
   const preferences = getPreferenceValues<Preferences>();
   const { project } = props.arguments;
   try {
