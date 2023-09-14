@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2013-09-08
+
+- Fixed irregular identity table
+
 ## [Fix] - 2023-08-29
 
 - Fixed crash in Logout command
