@@ -89,7 +89,7 @@ export default function AddTunnel({ revalidate, domains }: Props) {
         </ActionPanel>
       }
     >
-      <Form.Description text="Create an ngrok tunnel" />
+      <Form.Description text="Create a ngrok tunnel" />
       <Form.TextField title="Port" placeholder="Enter the localhost port to expose" {...itemProps.port} />
       <Form.TextField title="Label" placeholder="(optional) Enter a label for this tunnel" {...itemProps.label} />
       <Form.Dropdown title="Domain" {...itemProps.domain}>
