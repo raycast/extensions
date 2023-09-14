@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Insert an Excuse",
-      "subtitle": "Insert a random developer excuse",
+      "title": "Insert Developer Excuse",
       "description": "Inserts a randomly picked developer excuse into your current window",
       "mode": "no-view"
     }
