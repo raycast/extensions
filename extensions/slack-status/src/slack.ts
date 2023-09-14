@@ -42,7 +42,7 @@ export class SlackOAuthSessionConfig implements OAuthSessionConfig {
     providerName: "Slack",
     providerIcon: "slack.svg",
     providerId: "slack",
-    description: "Connect your Slack account to post weekly updates",
+    description: "Connect your Slack account to set your status",
   });
 
   constructor(options: { baseUrl?: string; clientId: string; userScopes: string[] }) {
@@ -75,21 +75,16 @@ export class SlackOAuthSessionConfig implements OAuthSessionConfig {
   }
 
   private async fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string) {
-    const params = new URLSearchParams();
-    params.append("client_id", this.clientId);
-    params.append("code", authCode);
-    params.append("code_verifier", authRequest.codeVerifier);
-    params.append("grant_type", "authorization_code");
-    params.append("client_secret", "7845b90631f6b0daae10f8a331b5c3ce"); // TODO(RAY-10396): Remove after proxy is fixed
-    params.append("redirect_uri", "https://slack.oauth.raycast.com/redirect"); // TODO(RAY-10396): Remove after proxy is fixed
-
-    // TODO(RAY-10396): Switch to `${this.baseUrl}/token` after proxy is fixed
-    const response = await fetch("https://slack.com/api/oauth.v2.access", {
+    const response = await fetch(`${this.baseUrl}/token`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: this.clientId,
+        code: authCode,
+        code_verifier: authRequest.codeVerifier,
+        grant_type: "authorization_code",
+        redirect_uri: authRequest.redirectURI,
+      }),
     });
 
     if (!response.ok) {
@@ -106,7 +101,6 @@ export class SlackOAuthSessionConfig implements OAuthSessionConfig {
     return {
       access_token: parsedResponse.authed_user.access_token,
       scope: parsedResponse.authed_user.scope,
-      refresh_token: "",
     };
   }
 }
