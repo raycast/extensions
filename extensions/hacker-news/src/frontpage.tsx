@@ -78,6 +78,9 @@ function StoryListItem(props: {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchSummary = async () => {
+    if (!openAI) {
+      throw new Error("openAI is not initialized");
+    }
     if (props.item.link) {
       setIsLoading(true); // Show loading state
       try {
