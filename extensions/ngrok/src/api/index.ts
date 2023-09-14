@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
 
 import { config } from "./config";
-import type { NgrokError, ReservedDomain, Tunnel } from "./types";
 import { runAppleScript } from "@raycast/utils";
+import type { NgrokError, ReservedDomain, Tunnel } from "./types";
 
 export * from "./types";
 

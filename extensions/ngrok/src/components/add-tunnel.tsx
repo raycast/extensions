@@ -11,8 +11,8 @@ import {
 } from "@raycast/api";
 import { useExec, useForm } from "@raycast/utils";
 
+import { validateLabel, validatePort } from "../utils/validators";
 import { createTunnel, checkIsNgrokReady, connectNgrok, ReservedDomain } from "../api";
-import { validateDomain, validateLabel, validatePort } from "../utils/validators";
 
 interface FormValues {
   port: string;
@@ -74,7 +74,6 @@ export default function AddTunnel({ revalidate, domains }: Props) {
     },
     validation: {
       port: validatePort,
-      domain: validateDomain,
       label: validateLabel,
     },
   });

@@ -1,9 +1,9 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, useNavigation } from "@raycast/api";
 
-import { useReservedDomains, useTunnels } from "./hooks";
+import { Tunnel, stopTunnel } from "./api";
 import AddTunnel from "./components/add-tunnel";
 import BaseActions from "./components/base-actions";
-import { Tunnel, stopTunnel } from "./api";
+import { useReservedDomains, useTunnels } from "./hooks";
 
 export default function TunnelsList() {
   const { push } = useNavigation();
@@ -69,9 +69,11 @@ export default function TunnelsList() {
                 <Action.OpenInBrowser url={tunnel.public_url} />
                 <ActionPanel.Section title="Danger zone">
                   <Action
+                    icon={Icon.Stop}
                     title="Stop Tunnel"
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                     onAction={() => handleStop(tunnel)}
+                    style={Action.Style.Destructive}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
