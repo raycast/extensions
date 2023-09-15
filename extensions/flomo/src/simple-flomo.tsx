@@ -76,36 +76,57 @@ export default function Command() {
       }
 
       function formatReferences(references: string): string {
+        if (!references) {
+          return "";
+        }
+      
         const refs = references
           .split(/,|，|\n/)
           .map((ref) => ref.trim())
           .filter(Boolean);
         let formattedRefs = "\n参考资料\n";
         refs.forEach((ref, index) => {
-          formattedRefs += `[${index + 1}] ${ref}\n`;
+          formattedRefs += `[${index + 1}] ${ref}`;
+          if (index !== refs.length - 1) {
+            formattedRefs += "\n";
+          }
         });
         return formattedRefs;
       }
-
+      
       const references = formatReferences(values.reference);
-      const content =
-        values.tagPosition === "front"
-          ? `${tags.join(" ")}\n${values.content}\n${references}`
-          : `${values.content} \n${tags.join(" ")}\n${references}`;
-      const response = await fetch(apiKey, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ content }),
-      });
-
-      if (response.ok) {
-        showToast(Toast.Style.Success, "成功发送到Flomo!");
-      } else {
-        showToast(Toast.Style.Failure, "发送失败");
+      let content = values.content;
+      if (values.tagPosition === "front" && tags.length > 0) {
+        content = `${tags.join(" ")}\n${content}`;
+      }
+      
+      if (references) {
+        content += `\n${references}`;
+      }
+      
+      if (values.tagPosition !== "front" && tags.length > 0) {
+        content += `\n${tags.join(" ")}`;
+      }
+      
+      try {
+        const response = await fetch(apiKey, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content }),
+        });
+    
+        if (response.ok) {
+          showToast(Toast.Style.Success, "成功发送到Flomo!");
+        } else {
+          showToast(Toast.Style.Failure, "发送失败，请在 Raycast 插件设置中检查 API_KEY 是否填写正确");
+        }
+      } catch (error) {
+        showToast(Toast.Style.Failure, "发送失败，请在 Raycast 插件设置中检查 API_KEY 是否填写正确");
       }
     },
+
     validation: {
       content: FormValidation.Required,
     },

@@ -1,4 +1,4 @@
-# ToFlomo Changelog
+# Simple flomo Changelog
 
 ## [Initial Version] - 2023-09-15
 
@@ -11,3 +11,9 @@
   - 参考文献
   - [1] google.com
   - [2] baidu.com
+
+## [Bug fix] - 2023-09-15
+
+- API 输入错误报错提示
+- tag 在后的情况下应置于参考资料之后
+- 修复了多余的换行符问题
