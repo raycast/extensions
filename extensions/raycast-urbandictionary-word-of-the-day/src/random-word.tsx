@@ -19,13 +19,13 @@ export default function Command() {
   // Fetch word of the day from urban dictionary
 
   useEffect(() => {
-    fetch("https://api.urbandictionary.com/v0/words_of_the_day").then(async (response) => {
+    fetch("https://api.urbandictionary.com/v0/random").then(async (response) => {
       const jsondata = (await response.json()) as DefintionList;
-      const wordOfTheDay = jsondata.list[0];
-      const title = wordOfTheDay.word;
-      let subtitle = wordOfTheDay.definition;
+      const randomWord = jsondata.list[0];
+      const title = randomWord.word;
+      let subtitle = randomWord.definition;
       subtitle = subtitle.replaceAll("[", "").replaceAll("]", "");
-      setMarkdown(`# ${title}\n\n${subtitle}\n\n\n✅: ${wordOfTheDay.thumbs_up} ❌: ${wordOfTheDay.thumbs_down}`);
+      setMarkdown(`# ${title}\n\n${subtitle}\n\n\n✅: ${randomWord.thumbs_up} ❌: ${randomWord.thumbs_down}`);
     });
 
     return () => {

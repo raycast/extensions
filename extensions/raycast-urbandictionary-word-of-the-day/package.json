@@ -24,6 +24,13 @@
       "subtitle": "Urban Dictionary",
       "description": "Opens the word of the day on Urban Dictionary",
       "mode": "view"
+    },
+    {
+      "name": "random-word",
+      "title": "Random Word",
+      "subtitle": "Urban Dictionary",
+      "description": "Fetches a random word",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -45,5 +52,5 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "version": "1.3.0"
+  "version": "1.4.0"
 }
