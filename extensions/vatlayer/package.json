@@ -65,7 +65,7 @@
     },
     {
       "name": "get-all-vat-rates",
-      "title": "Get VAT Rates for all EU members",
+      "title": "Get VAT Rates for All EU members",
       "subtitle": "vatlayer",
       "description": "Get VAT Rates for all EU members",
       "mode": "view"
