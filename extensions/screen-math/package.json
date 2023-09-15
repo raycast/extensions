@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "sum-numbers",
-      "title": "Sum Numbers On Screen",
-      "description": "Sum the numbers in selected area",
+      "title": "Sum Numbers on Screen",
+      "description": "Sum the numbers in the selected area",
       "mode": "no-view"
     }
   ],
