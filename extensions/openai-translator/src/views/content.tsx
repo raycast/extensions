@@ -281,9 +281,9 @@ export const ContentView = (props: ContentViewProps) => {
       })}
       <ActionPanel.Section title="Options">
         <Action
-          title="Hide Metadata"
-          icon={Icon.Eye}
-          shortcut={{ modifiers: ["cmd", "ctrl"], key: "h" }}
+          title={showMetadata ? "Hide Metadata" : "Show Metadata"}
+          icon={showMetadata ? Icon.EyeSlash : Icon.Eye}
+          shortcut={{ modifiers: ["cmd", "ctrl"], key: "m" }}
           onAction={() => {
             setShowMetadata(!showMetadata);
           }}
