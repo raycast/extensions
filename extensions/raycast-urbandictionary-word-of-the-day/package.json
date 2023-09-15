@@ -44,5 +44,5 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "version": "1.1.2"
+  "version": "1.2.3"
 }
