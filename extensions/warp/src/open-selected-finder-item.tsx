@@ -16,7 +16,27 @@ const getSelectedPathFinderItems = async () => {
   `;
 
   const paths = await runAppleScript(script);
-  return paths.split(","); // Assuming the paths are comma-separated
+  return paths.split(",");
+};
+
+const fallback = async (): Promise<boolean> => {
+  const app = await getFrontmostApplication();
+
+  if (app.name !== "Finder") {
+    return false;
+  }
+
+  const currentDirectory = await runAppleScript(
+    `tell application "Finder" to get POSIX path of (target of front window as alias)`
+  );
+
+  if (!currentDirectory) {
+    return false;
+  }
+
+  await open(newTab(currentDirectory));
+
+  return true;
 };
 
 export default async function Command() {
@@ -33,11 +53,16 @@ export default async function Command() {
     }
 
     if (selectedItems.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No directory selected",
-        message: "Please select a directory in Finder or Path Finder first",
-      });
+      const ranFallback = await fallback();
+
+      if (ranFallback === false) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No directory selected",
+          message: "Please select a directory in Finder or Path Finder first",
+        });
+      }
+
       return;
     }
 
