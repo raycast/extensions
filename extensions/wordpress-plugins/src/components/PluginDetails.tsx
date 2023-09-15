@@ -22,7 +22,7 @@ export function PluginDetails({ data }: IPluginDetails) {
   return (
     <Detail
       markdown={pluginBody(data)}
-      navigationTitle={data.title}
+      navigationTitle={data.name}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Version" text={data.version} />

@@ -8,7 +8,6 @@ import { PluginDetails } from "./components/PluginDetails";
 export interface Plugin {
   name: string;
   slug: string;
-  title: string;
   version: string;
   tested: string;
   last_updated: string;
@@ -40,7 +39,7 @@ export default function Command() {
       searchText={searchText}
       throttle={true}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Plugin"
+      navigationTitle="Search Plugins"
       searchBarPlaceholder="Search for a plugin"
       isLoading={isLoading}
     >

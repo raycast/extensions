@@ -12,7 +12,7 @@ export function Versions({ versions, slug }: Versions) {
   const sortedVersionNum = toSemver(versionNum);
 
   return (
-    <List searchBarPlaceholder="Search for a version">
+    <List searchBarPlaceholder="Search for a version" navigationTitle="Search Versions">
       {versions &&
         sortedVersionNum.map((version, index) => {
           return (
@@ -20,7 +20,7 @@ export function Versions({ versions, slug }: Versions) {
               key={index}
               title={version}
               actions={
-                <ActionPanel title="Plugin versions">
+                <ActionPanel title="Plugin Version">
                   <Action.OpenInBrowser url={versions[version]} title="Download Version" icon={Icon.Download} />
                   <Action.CopyToClipboard
                     content={`"wpackagist-plugin/${slug}": "${version}"`}
