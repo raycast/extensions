@@ -79,7 +79,7 @@ export default function Command() {
         if (!references) {
           return "";
         }
-      
+
         const refs = references
           .split(/,|，|\n/)
           .map((ref) => ref.trim())
@@ -93,21 +93,21 @@ export default function Command() {
         });
         return formattedRefs;
       }
-      
+
       const references = formatReferences(values.reference);
       let content = values.content;
       if (values.tagPosition === "front" && tags.length > 0) {
         content = `${tags.join(" ")}\n${content}`;
       }
-      
+
       if (references) {
         content += `\n${references}`;
       }
-      
+
       if (values.tagPosition !== "front" && tags.length > 0) {
         content += `\n${tags.join(" ")}`;
       }
-      
+
       try {
         const response = await fetch(apiKey, {
           method: "POST",
@@ -116,7 +116,7 @@ export default function Command() {
           },
           body: JSON.stringify({ content }),
         });
-    
+
         if (response.ok) {
           showToast(Toast.Style.Success, "成功发送到Flomo!");
         } else {
