@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flomo",
+  "title": "Simple flomo",
+  "description": "一个可以预选标签、粘贴资料来源的快捷 flomo 输入插件",
+  "icon": "flomo-logo.png",
+  "author": "Lyson",
+  "categories": ["Data","Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "simple-flomo",
+      "title": "Quick Input to flomo",
+      "description": "这是一个用于记录笔记的命令",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.1",
+    "@raycast/utils": "^1.10.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "请输入你的flomo_api_key",
+      "type": "password",
+      "required": true
+    }
+  ]
+}
