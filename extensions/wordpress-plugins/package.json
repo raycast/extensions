@@ -29,8 +29,8 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.2",
-    "@raycast/utils": "^1.4.16",
+    "@raycast/api": "^1.58.1",
+    "@raycast/utils": "^1.10.0",
     "date-fns": "^2.30.0",
     "html-entities": "^2.3.3",
     "to-semver": "^4.0.0"
