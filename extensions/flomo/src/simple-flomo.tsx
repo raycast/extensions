@@ -272,7 +272,7 @@ export default function Command() {
       {values.tag8 && <Form.Checkbox {...itemProps.tag8Checked} label={values.tag8} id="tag8Checked" />}
       {values.tag9 && <Form.Checkbox {...itemProps.tag9Checked} label={values.tag9} id="tag9Checked" />}
       <Form.TextArea title="其他标签" {...itemProps.tag10} id="tag10" placeholder="Other tags" info="#开头，空格分隔" />
-      <Form.Dropdown title="标签位置" {...itemProps.tagPosition}>
+      <Form.Dropdown title="标签位置" id="tagPosition" onChange={(value) => setValue("tagPosition", value)} storeValue>
         <Form.Dropdown.Item value="front" title="tag在前" />
         <Form.Dropdown.Item value="back" title="tag在后" />
       </Form.Dropdown>
