@@ -65,7 +65,10 @@ export default function Command() {
                     />
                     {expense.updated_by && (
                       <List.Item.Detail.Metadata.Label
-                        title={`Last updated by ${expense.updated_by["first_name"]}`}
+                        // title={`Last updated by ${expense.updated_by["first_name"]}`}
+                        title={`Last updated by ${
+                          expense.updated_by["id"] === currentUserID ? "You" : expense.updated_by["first_name"]
+                        }`}
                         icon={Icon.Pencil}
                         text={new Date(expense.updated_at).toDateString()}
                       />
@@ -78,7 +81,10 @@ export default function Command() {
                         .filter((user) => Number(user.paid_share) > 0)
                         .map((user) => (
                           <List.Item.Detail.Metadata.TagList.Item
-                            text={`${user.user.first_name} paid ${user.paid_share} ${expense.currency_code}`}
+                            // text={`${user.user.first_name} paid ${user.paid_share} ${expense.currency_code}`}
+                            text={`${user.user.id === currentUserID ? "You" : user.user.first_name} paid ${
+                              user.paid_share
+                            } ${expense.currency_code}`}
                             icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                             color={Color.Green}
                             key={user.user_id}
@@ -93,9 +99,9 @@ export default function Command() {
                         .filter((user) => Number(user.net_balance) < 0)
                         .map((user) => (
                           <List.Item.Detail.Metadata.TagList.Item
-                            text={`${user.user.first_name} owes ${String(Number(user.net_balance) * -1)} ${
-                              expense.currency_code
-                            }`}
+                            text={`${
+                              user.user.id === currentUserID ? "You owe" : user.user.first_name + " owes"
+                            } ${String(Number(user.net_balance) * -1)} ${expense.currency_code}`}
                             icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                             color={Color.Red}
                             key={user.user_id}
