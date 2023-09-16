@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Image, List, Form, Color, useNavigation, Keyboard } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 
-import { Entity, ExpenseParams, Friend, Group, Body, FriendOrGroupProps, Expense } from "./types/friends_groups.types";
+import { Entity, ExpenseParams, FriendOrGroupProps } from "./types/friends_groups.types";
 import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
 
 export default function Command() {
@@ -29,11 +29,14 @@ export default function Command() {
             title={[friend.first_name, friend.last_name].join(" ")}
             accessories={[
               // return the amount and currency code if they are present, if not, don't show anything
-              friend.balance.length > 0 ? 
-              {tag: {
-                value: `${friend.balance[0].amount} ${friend.balance[0].currency_code}`,
-                color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
-              }}: {},
+              friend.balance.length > 0
+                ? {
+                    tag: {
+                      value: `${friend.balance[0].amount} ${friend.balance[0].currency_code}`,
+                      color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
+                    },
+                  }
+                : {},
               lastInteractionAccessory(friend),
             ]}
             actions={
@@ -97,10 +100,7 @@ function FillForm(props: FriendOrGroupProps) {
       navigationTitle="Add Expense"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Add Expense"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Add Expense" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -112,7 +112,7 @@ function FillForm(props: FriendOrGroupProps) {
         title="Natural Language Input"
         placeholder={props.friend ? `I owe ${props.friend.first_name} 12.82 for movie tickets` : `I paid 23 for pizza`}
         {...itemProps.input}
-        info = "Enter a description of the expense in plain English. We'll do the rest!"
+        info="Enter a description of the expense in plain English. We'll do the rest!"
       />
     </Form>
   );

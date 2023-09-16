@@ -4,9 +4,8 @@ import { GetExpense, DeleteExpense, UpdateExpense } from "./hooks/useList";
 import { loadingLimit } from "./hooks/userPreferences";
 import { GetCurrentUser } from "./hooks/useCurrentUser";
 
-import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation, Cache, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation, Keyboard } from "@raycast/api";
 
-// ------------ MAIN ------------
 export default function Command() {
   const [expenses, loadingExpenses, revalidate, Mutate] = GetExpense(loadingLimit); // FETCH EXPENSES
 

@@ -1,7 +1,6 @@
 import { useFetch } from "@raycast/utils";
 import { HEADER } from "./userPreferences";
-import { GetFriends, GetGroups, Friend, Group, ExpenseParams, Body } from "../types/friends_groups.types";
-import got from "got";
+import { GetFriends, GetGroups, Friend, Group, ExpenseParams } from "../types/friends_groups.types";
 import axios from "axios";
 import { showToast, Toast } from "@raycast/api";
 
@@ -66,11 +65,3 @@ export async function postExpense(paramsJson: ExpenseParams) {
     showToast({ style: Toast.Style.Failure, title: "Couldn't add Expense!", message: error.message });
   }
 }
-
-// export async function postExpense(paramsJson: ExpenseParams) {
-//   return got.post<Body>("https://secure.splitwise.com/api/v3.0/parse_sentence", {
-//     headers: HEADER.headers,
-//     json: paramsJson,
-//     responseType: "json",
-//   });
-// }

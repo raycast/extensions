@@ -5,8 +5,6 @@ import { HEADER } from "./userPreferences";
 import { useFetch } from "@raycast/utils";
 import axios from "axios";
 
-// FUNCTIONS
-
 const test = {
   count: 0,
 };
