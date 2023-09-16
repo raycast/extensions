@@ -57,9 +57,7 @@ export default function Command() {
         isLoading: true,
       }));
 
-      let output = "";
-
-      output = await executeCommand(command, state.chat.question);
+      const output = await executeCommand(command, state.chat.question);
       setState((previous) => ({
         ...previous,
         isLoading: false,
