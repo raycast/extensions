@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Icon, Image, List, Form, showToast, Toast, Color, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Icon, Image, List, Form, Color, useNavigation, Keyboard } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 
 import { Entity, ExpenseParams, Friend, Group, Body, FriendOrGroupProps, Expense } from "./types/friends_groups.types";
 import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
 
 export default function Command() {
-  const [friends, loadingFriends] = getFriends();
-  const [groups, loadingGroups] = getGroups();
+  const [friends, loadingFriends, revalidateFriends] = getFriends();
+  const [groups, loadingGroups, revalidateGroups] = getGroups();
 
   function cmpUpdatedAt(a: Entity, b: Entity) {
     return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
@@ -29,6 +29,12 @@ export default function Command() {
             title={[friend.first_name, friend.last_name].join(" ")}
             accessories={[
               // return the amount and currency code if they are present, if not, don't show anything
+              // {
+              //   tag: friend.balance.filter((b) => b).map((b) => ({
+              //     value: `${b.amount} ${b.currency_code}`,
+              //     color: Number(b.amount) < 0 ? Color.Red : Color.Green,
+              //   }))[0] // use the first element of the filtered array as the value of the tag element
+              // },
               {
                 text: {
                   value: `${
@@ -45,6 +51,12 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Wallet} title="Add Expense" target={<FillForm friend={friend} />} />
+                <Action
+                  title="Reload"
+                  icon={Icon.Repeat}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={() => revalidateFriends()}
+                />
               </ActionPanel>
             }
           />
@@ -60,6 +72,12 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Wallet} title="Add Expense" target={<FillForm group={Group} />} />
+                <Action
+                  title="Reload"
+                  icon={Icon.Repeat}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={() => revalidateGroups()}
+                />
               </ActionPanel>
             }
           />
@@ -70,14 +88,39 @@ export default function Command() {
 }
 
 function FillForm(props: FriendOrGroupProps) {
-  const [input, setDescription] = useState<string>("");
+  const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps } = useForm<{ input: string }>({
+    onSubmit: (values) => {
+      const paramsJson: ExpenseParams = {
+        input: `${values.input}`,
+        autosave: true,
+      };
+      props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
+      postExpense(paramsJson).then(() => pop());
+    },
+    validation: {
+      input: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       navigationTitle="Add Expense"
       actions={
         <ActionPanel>
-          <ShareSecretAction input={input} resetDescription={() => setDescription("")} {...props} />
+          <Action.SubmitForm
+            title="Add Expense"
+            // onSubmit={(values) => {
+            //   const paramsJson: ExpenseParams = {
+            //     input: `${values.input}`,
+            //     autosave: true,
+            //   };
+            //   props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
+            //   postExpense(paramsJson).then(() => pop());
+            // }}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
@@ -86,77 +129,74 @@ function FillForm(props: FriendOrGroupProps) {
         text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
       />
       <Form.TextArea
-        id="input"
+        // id="input"
         title="Natural Language Input"
-        value={input}
-        onChange={setDescription}
-        placeholder={
-          props.friend ? `I owe ${props.friend.first_name} 12.82 for cinema...` : `I paid 23 bucks for pizza...`
-        }
+        placeholder={props.friend ? `I owe ${props.friend.first_name} 12.82 for movie tickets` : `I paid 23 for pizza`}
+        {...itemProps.input}
       />
     </Form>
   );
 }
 
-function ShareSecretAction(props: { input: string; resetDescription: () => void } & FriendOrGroupProps) {
-  const { pop } = useNavigation();
+// function AddNewExpense(props: { input: string; resetDescription: () => void } & FriendOrGroupProps) {
+//   const { pop } = useNavigation();
 
-  async function handleSubmit() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Add Expense",
-    });
+//   async function handleSubmit() {
+//     const toast = await showToast({
+//       style: Toast.Style.Animated,
+//       title: "Add Expense",
+//     });
 
-    function successToast(expense: Expense) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Yay!";
-      toast.message = `Added "${expense.description}" worth ${expense.cost} ${expense.currency_code}!`;
+//     function successToast(expense: Expense) {
+//       toast.style = Toast.Style.Success;
+//       toast.title = "Yay!";
+//       toast.message = `Added "${expense.description}" worth ${expense.cost} ${expense.currency_code}!`;
 
-      props.resetDescription();
-    }
+//       props.resetDescription();
+//     }
 
-    function failureToast(expense: Expense) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "D'oh! Invalid input!";
+//     function failureToast(expense: Expense) {
+//       toast.style = Toast.Style.Failure;
+//       toast.title = "D'oh! Invalid input!";
 
-      let errorString = "";
-      const response_error = expense.errors;
-      for (const key in response_error) {
-        errorString += key + ": " + response_error[key] + "\n";
-      }
-      toast.message = `${errorString}`;
-    }
+//       let errorString = "";
+//       const response_error = expense.errors;
+//       for (const key in response_error) {
+//         errorString += key + ": " + response_error[key] + "\n";
+//       }
+//       toast.message = `${errorString}`;
+//     }
 
-    try {
-      const paramsJson: ExpenseParams = {
-        input: `${props.input}`,
-        autosave: true,
-      };
+//     try {
+//       const paramsJson: ExpenseParams = {
+//         input: `${props.input}`,
+//         autosave: true,
+//       };
 
-      props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
+//       props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
 
-      postExpense(paramsJson).then(({ body }) => {
-        if (body.valid == true) {
-          successToast(body.expense);
-        } else {
-          failureToast(body.expense);
-        }
-      });
-    } catch (errors) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "D'oh!";
-      toast.message = String(errors);
-    }
-  }
+//       postExpense(paramsJson).then(({ body }) => {
+//         if (body.valid == true) {
+//           successToast(body.expense);
+//         } else {
+//           failureToast(body.expense);
+//         }
+//       });
+//     } catch (errors) {
+//       toast.style = Toast.Style.Failure;
+//       toast.title = "D'oh!";
+//       toast.message = String(errors);
+//     }
+//   }
 
-  return (
-    <Action.SubmitForm
-      icon={Icon.Wallet}
-      title="Add Expense"
-      onSubmit={() => {
-        handleSubmit()
-        .then(() => pop());
-      }}
-    />
-  );
-}
+//   return (
+//     <Action.SubmitForm
+//       icon={Icon.Wallet}
+//       title="Add Expense"
+//       onSubmit={() => {
+//         handleSubmit()
+//         .then(() => pop());
+//       }}
+//     />
+//   );
+// }
