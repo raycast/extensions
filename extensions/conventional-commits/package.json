@@ -5,6 +5,9 @@
   "description": "Provides a list of conventional commits prefixes and descriptions that can be inserted into your active window",
   "icon": "command-icon.png",
   "author": "niemtec",
+  "contributors": [
+    "lucria"
+  ],
   "categories": [
     "Developer Tools",
     "Documentation"
@@ -14,8 +17,13 @@
     {
       "name": "index",
       "title": "Insert Conventional Commit Prefix",
-      "subtitle": "Insert a conventional commit prefix into your current window",
       "description": "Provides a list of conventional commits prefixes and descriptions that can be inserted into your active window",
+      "mode": "view"
+    },
+    {
+      "name": "commit-message-structure",
+      "title": "View Conventional Commit Message Structure",
+      "description": "Display the Conventional Commit Message Structure",
       "mode": "view"
     }
   ],

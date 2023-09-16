@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
@@ -8,26 +8,7 @@ import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
-import { EnsureCliBinError, CLINotFoundError, VaultIsLockedError } from "~/utils/errors";
-import { join } from "path";
-import { chmod, rename, rm } from "fs/promises";
-import { decompressFile, removeFilesThatStartWith, waitForFileAvailable } from "~/utils/fs";
-import { getFileSha256 } from "~/utils/crypto";
-
-const cliInfo = {
-  version: "2023.8.2",
-  sha256: "9bd011ef98bee098206a6242f7e4f5ed923062ea6eefaee28015c3616a90d166",
-  downloadPage: "https://github.com/bitwarden/clients/releases",
-  getBinFilename: function () {
-    return `bw-${this.version}`;
-  },
-  getDownloadUrl: function () {
-    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
-  },
-  checkHashMatchesFile: async function (filePath: string) {
-    return (await getFileSha256(filePath)) === this.sha256;
-  },
-};
+import { CLINotFoundError, VaultIsLockedError } from "~/utils/errors";
 
 export class Bitwarden {
   private env: Env;
@@ -40,12 +21,10 @@ export class Bitwarden {
   constructor() {
     const { cliPath, clientId, clientSecret, serverCertsPath } = getPreferenceValues<Preferences>();
     const serverUrl = getServerUrlPreference();
+    this.cliPath = cliPath || (process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw");
 
-    if (cliPath) {
-      if (!existsSync(cliPath)) throw new CLINotFoundError(`Bitwarden CLI not found at ${cliPath}`);
-      this.cliPath = cliPath;
-    } else {
-      this.cliPath = join(environment.supportPath, cliInfo.getBinFilename());
+    if (!existsSync(this.cliPath)) {
+      throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
 
     this.env = {
@@ -57,53 +36,9 @@ export class Bitwarden {
     };
 
     this.initPromise = (async () => {
-      await this.ensureCliBinary();
       await this.checkServerUrl(serverUrl);
       this.lockReason = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
     })();
-  }
-
-  private async ensureCliBinary() {
-    if (existsSync(this.cliPath)) return;
-    const { supportPath } = environment;
-    // remove old binaries to check if it's an update and because they are 100MB+
-    const hadOldBinaries = await removeFilesThatStartWith("bw-", supportPath);
-
-    const toast = await showToast({
-      title: `${hadOldBinaries ? "Updating" : "Initializing"} Bitwarden CLI`,
-      style: Toast.Style.Animated,
-      primaryAction: { title: "Open Download Page", onAction: () => open(cliInfo.downloadPage) },
-    });
-    const zipPath = join(supportPath, "bw.zip");
-    try {
-      try {
-        toast.message = "Downloading...";
-        await execa("curl", [cliInfo.getDownloadUrl(), "-Lo", zipPath]);
-        const isValidFile = await cliInfo.checkHashMatchesFile(zipPath);
-        if (!isValidFile) throw new EnsureCliBinError("File hash does not match");
-      } catch (downloadError) {
-        toast.title = "Failed to download Bitwarden CLI";
-        throw downloadError;
-      }
-      try {
-        toast.message = "Extracting...";
-        await decompressFile(zipPath, supportPath);
-        const decompressedBinPath = join(supportPath, "bw");
-        await waitForFileAvailable(decompressedBinPath);
-        await rename(decompressedBinPath, this.cliPath);
-        await chmod(this.cliPath, "755");
-        await rm(zipPath, { force: true });
-      } catch (extractError) {
-        toast.title = "Failed to extract Bitwarden CLI";
-        throw extractError;
-      }
-      await toast.hide();
-    } catch (error) {
-      toast.message = error instanceof EnsureCliBinError ? error.message : "Please try again";
-      toast.style = Toast.Style.Failure;
-      await execa("rm", ["-rf", zipPath, this.cliPath]);
-      throw error;
-    }
   }
 
   setActionCallback<TAction extends keyof ActionCallbacks>(action: TAction, callback: ActionCallbacks[TAction]): this {

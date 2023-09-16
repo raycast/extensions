@@ -1,9 +1,8 @@
 # Bitwarden Changelog
 
-## [Improvements] - 2023-09-11
+## [Fix] - 2013-09-08
 
-- Download, if needed, the official CLI binary on extension start, instead of depending on the user to install it
-- Cleanup possible existing CLI binaries when downloading a new one, to save space
+- Fixed irregular identity table
 
 ## [Fix] - 2023-08-29
 
