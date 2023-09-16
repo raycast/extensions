@@ -48,6 +48,11 @@ export default function Command() {
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={() => revalidateFriends()}
                 />
+                <Action.OpenInBrowser
+                  title="Open in Browser"
+                  url={`https://secure.splitwise.com/#/friends/${friend.id}`}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
               </ActionPanel>
             }
           />
@@ -68,6 +73,11 @@ export default function Command() {
                   icon={Icon.Repeat}
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={() => revalidateGroups()}
+                />
+                <Action.OpenInBrowser
+                  title="Open in Browser"
+                  url={`https://secure.splitwise.com/#/groups/${Group.id}`}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
               </ActionPanel>
             }
