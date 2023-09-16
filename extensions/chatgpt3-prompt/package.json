@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "chatgpt3-prompt",
-  "title": "ChatGPT3 Prompt",
-  "description": "Prompt list for interacting with ChatGPT3",
+  "name": "chatgpt-prompt",
+  "title": "ChatGPT Prompt",
+  "description": "Prompt list for interacting with ChatGPT",
   "icon": "command-icon.png",
   "author": "denizyoldas",
   "contributors": [
@@ -15,8 +15,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "GPT3 Prompts Search",
-      "description": "OpenAI GPT3 Prompt List",
+      "title": "GPT Prompts Search",
+      "description": "OpenAI GPT Prompt List",
       "mode": "view",
       "preferences": [
         {
