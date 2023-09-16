@@ -96,6 +96,13 @@
       ]
     },
     {
+      "name": "playDiscoverWeekly",
+      "title": "Play Discover Weekly",
+      "subtitle": "Spotify",
+      "description": "Play spotify's discover weekly",
+      "mode": "no-view"
+    },
+    {
       "name": "togglePlayPause",
       "title": "Toggle Play/Pause",
       "subtitle": "Spotify",
