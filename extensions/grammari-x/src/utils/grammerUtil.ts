@@ -31,7 +31,6 @@ class OpenAIModule {
   }
 
   private async aiRequest(prompt: string): Promise<string> {
-    return await this.raycastAiRequest(prompt);
     if (environment.canAccess(AI)) return await this.raycastAiRequest(prompt);
     else if (this.openai != null) return await this.gptRequest(prompt);
     else throw new Error("AI module not initialized");
