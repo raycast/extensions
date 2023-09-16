@@ -5,9 +5,6 @@ import { HEADER } from "./userPreferences";
 import { useFetch } from "@raycast/utils";
 import axios from "axios";
 
-const test = {
-  count: 0,
-};
 export function GetExpense(limit: string): [Expense[], boolean, any, any] {
   const { isLoading, data, error, revalidate, mutate } = useFetch<GetExpenses>(
     `https://secure.splitwise.com/api/v3.0/get_expenses?limit=${limit}`,
