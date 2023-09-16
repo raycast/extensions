@@ -1,13 +1,24 @@
-import { runAppleScriptSync } from "run-applescript";
+import { runAppleScript, runAppleScriptSync } from "run-applescript";
 import { List, Action, ActionPanel } from "@raycast/api";
 import { Bookmark } from "./type";
 import { getFavicon } from "@raycast/utils";
 import fs from "fs";
 
+export async function launchHookmark() {
+  // await closeMainWindow();
+  await runAppleScript(`
+  tell application "Hookmark"
+    activate
+    delay 5
+  end tell
+  `);
+}
+
+
 export async function getBookmarks() {
   const response = runAppleScriptSync(`
     set _output to ""
-  
+
     tell application "Hookmark"
       set _bookmark_name_list to name of every bookmark
       set _bookmark_addr_list to address of every bookmark
@@ -115,10 +126,10 @@ export function getHookIconPath() {
   let iconPath = "";
   if (fs.existsSync(HookPath)) {
     iconPath = HookPath;
-  }
-
-  if (fs.existsSync(HookPathSetapp)) {
+  } else if (fs.existsSync(HookPathSetapp)) {
     iconPath = HookPathSetapp;
+  } else {
+    console.error('Hookmark not found');
   }
   return iconPath;
 }

@@ -1,4 +1,4 @@
-import { LaunchProps, ActionPanel, List, Action, closeMainWindow } from "@raycast/api";
+import { LaunchProps, ActionPanel, List, Action } from "@raycast/api";
 import { useCachedPromise, getFavicon } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getBookmarks, openInHook, getHookIconPath, ShowHookedSubmenu } from "./utils/hookmark";
@@ -9,6 +9,7 @@ export default function Command(props: LaunchProps) {
   checkHookmarkInstallation();
 
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
+  // need to await the getBookmarks function
   const { data, isLoading, error } = useCachedPromise(getBookmarks);
 
   if (error) {

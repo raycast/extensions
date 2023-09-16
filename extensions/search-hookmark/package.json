@@ -25,6 +25,12 @@
       "mode": "no-view"
     },
     {
+      "name": "copy-markdown-link",
+      "title": "Copy Markdown Link",
+      "description": "Copy markdown link of front",
+      "mode": "no-view"
+    },
+    {
       "name": "hook-to-copied-link",
       "title": "Hook to Copied Link",
       "description": "Hook the current bookmark to copied item",

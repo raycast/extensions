@@ -1,4 +1,21 @@
 import { getApplications, showToast, Toast, open } from "@raycast/api";
+import { launchHookmark } from "./hookmark";
+import { exec } from "child_process";
+
+function isHookmarkRunning(): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    exec("pgrep Hookmark", (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+      } else if (stderr) {
+        reject(new Error(stderr));
+      } else {
+        resolve(stdout.trim() !== "");
+      }
+    });
+  });
+}
+
 
 async function isHookmarkInstalled() {
   const applications = await getApplications();
@@ -22,6 +39,15 @@ export async function checkHookmarkInstallation() {
       },
     };
 
+    await showToast(options);
+  } 
+  
+  if (!(await isHookmarkRunning())) {
+    launchHookmark()
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "Hookmark is not running, activate it now"
+    };
     await showToast(options);
   }
 }
