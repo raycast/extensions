@@ -29,23 +29,11 @@ export default function Command() {
             title={[friend.first_name, friend.last_name].join(" ")}
             accessories={[
               // return the amount and currency code if they are present, if not, don't show anything
-              // {
-              //   tag: friend.balance.filter((b) => b).map((b) => ({
-              //     value: `${b.amount} ${b.currency_code}`,
-              //     color: Number(b.amount) < 0 ? Color.Red : Color.Green,
-              //   }))[0] // use the first element of the filtered array as the value of the tag element
-              // },
-              {
-                text: {
-                  value: `${
-                    friend.balance[0]?.amount && friend.balance[0]?.currency_code
-                      ? `${friend.balance[0].amount} ${friend.balance[0].currency_code}`
-                      : ""
-                  }`,
-                  color: Number(friend.balance[0]?.amount) < 0 ? Color.Red : Color.Green,
-                },
-              },
-              { icon: `${friend.balance[0]?.amount && friend.balance[0]?.currency_code ? Icon.Coins : ""}` },
+              friend.balance.length > 0 ? 
+              {tag: {
+                value: `${friend.balance[0].amount} ${friend.balance[0].currency_code}`,
+                color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
+              }}: {},
               lastInteractionAccessory(friend),
             ]}
             actions={
@@ -111,14 +99,6 @@ function FillForm(props: FriendOrGroupProps) {
         <ActionPanel>
           <Action.SubmitForm
             title="Add Expense"
-            // onSubmit={(values) => {
-            //   const paramsJson: ExpenseParams = {
-            //     input: `${values.input}`,
-            //     autosave: true,
-            //   };
-            //   props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
-            //   postExpense(paramsJson).then(() => pop());
-            // }}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
@@ -129,74 +109,11 @@ function FillForm(props: FriendOrGroupProps) {
         text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
       />
       <Form.TextArea
-        // id="input"
         title="Natural Language Input"
         placeholder={props.friend ? `I owe ${props.friend.first_name} 12.82 for movie tickets` : `I paid 23 for pizza`}
         {...itemProps.input}
+        info = "Enter a description of the expense in plain English. We'll do the rest!"
       />
     </Form>
   );
 }
-
-// function AddNewExpense(props: { input: string; resetDescription: () => void } & FriendOrGroupProps) {
-//   const { pop } = useNavigation();
-
-//   async function handleSubmit() {
-//     const toast = await showToast({
-//       style: Toast.Style.Animated,
-//       title: "Add Expense",
-//     });
-
-//     function successToast(expense: Expense) {
-//       toast.style = Toast.Style.Success;
-//       toast.title = "Yay!";
-//       toast.message = `Added "${expense.description}" worth ${expense.cost} ${expense.currency_code}!`;
-
-//       props.resetDescription();
-//     }
-
-//     function failureToast(expense: Expense) {
-//       toast.style = Toast.Style.Failure;
-//       toast.title = "D'oh! Invalid input!";
-
-//       let errorString = "";
-//       const response_error = expense.errors;
-//       for (const key in response_error) {
-//         errorString += key + ": " + response_error[key] + "\n";
-//       }
-//       toast.message = `${errorString}`;
-//     }
-
-//     try {
-//       const paramsJson: ExpenseParams = {
-//         input: `${props.input}`,
-//         autosave: true,
-//       };
-
-//       props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
-
-//       postExpense(paramsJson).then(({ body }) => {
-//         if (body.valid == true) {
-//           successToast(body.expense);
-//         } else {
-//           failureToast(body.expense);
-//         }
-//       });
-//     } catch (errors) {
-//       toast.style = Toast.Style.Failure;
-//       toast.title = "D'oh!";
-//       toast.message = String(errors);
-//     }
-//   }
-
-//   return (
-//     <Action.SubmitForm
-//       icon={Icon.Wallet}
-//       title="Add Expense"
-//       onSubmit={() => {
-//         handleSubmit()
-//         .then(() => pop());
-//       }}
-//     />
-//   );
-// }
