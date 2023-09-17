@@ -1,4 +1,10 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+  "extends": [
+    "@raycast"
+  ],
+  "rules": {
+    "@typescript-eslint/no-inferrable-types": "error",
+    "@typescript-eslint/no-unused-vars": "error"
+  }
 }

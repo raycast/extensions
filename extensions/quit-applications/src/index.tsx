@@ -45,7 +45,7 @@ function getAccessoryByActionState(actionType: ConfirmActionType): List.Item.Acc
 
     default: {
       const _unreachable: never = actionType;
-      throw new Error(`Unreachable action type: ${actionType}`);
+      throw new Error(`Unreachable action type: ${_unreachable}`);
     }
   }
 }
@@ -144,7 +144,7 @@ export default function Applist() {
 
       default: {
         const _unreachable: never = actionType;
-        throw new Error(`Unreachable action type: ${actionType}`);
+        throw new Error(`Unreachable action type: ${_unreachable}`);
       }
     }
   }
@@ -168,7 +168,7 @@ export default function Applist() {
 
       default: {
         const _unreachable: never = actionType;
-        throw new Error(`Unreachable action type: ${actionType}`);
+        throw new Error(`Unreachable action type: ${_unreachable}`);
       }
     }
   }
@@ -189,7 +189,7 @@ export default function Applist() {
 
       default: {
         const _unreachable: never = actionType;
-        throw new Error(`Unreachable action type: ${actionType}`);
+        throw new Error(`Unreachable action type: ${_unreachable}`);
       }
     }
   }
