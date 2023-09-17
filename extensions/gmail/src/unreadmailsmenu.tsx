@@ -5,6 +5,7 @@ import {
   getGMailCurrentProfile,
   getGMailMessageHeaderValue,
   getGMailMessages,
+  markMessageAsRead,
   messageThreadUrl,
 } from "./lib/gmail";
 import { gmail_v1 } from "@googleapis/gmail";
@@ -14,10 +15,7 @@ import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "./compone
 import View from "./components/view";
 import { getGMailClient } from "./lib/withGmailClient";
 
-function MessageMenubarItem(props: {
-  message: gmail_v1.Schema$Message;
-  onMailOpen?: (message: gmail_v1.Schema$Message) => void;
-}) {
+function MessageMenubarItem(props: { message: gmail_v1.Schema$Message; onAction?: () => void }) {
   const m = props.message;
   const subject = getGMailMessageHeaderValue(m, "Subject") || "<No Subject>";
   const from = getGMailMessageHeaderValue(m, "From");
@@ -27,31 +25,13 @@ function MessageMenubarItem(props: {
     .filter((e) => e && e.length > 0)
     .join(" ");
 
-  const { gmail } = getGMailClient();
-  const handle = async () => {
-    try {
-      const profile = await getGMailCurrentProfile(gmail);
-      const threadUrlWeb = messageThreadUrl(profile, m);
-      if (threadUrlWeb && threadUrlWeb.length > 0) {
-        open(threadUrlWeb);
-        showHUD("Open Mail in Browser");
-        if (props.onMailOpen) {
-          props.onMailOpen(m);
-        }
-      } else {
-        throw new Error("Invalid URL");
-      }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
-    }
-  };
   return (
     <MenuBarExtra.Item
       key={m.id}
       title={ensureShortText(subject, { maxLength: 40 })}
       icon={getAvatarIcon(getFirstValidLetter(from) || "?")}
       tooltip={`From: ${fromClean}\nReceived: ${!internalDate ? "?" : internalDate.toLocaleString()}`}
-      onAction={handle}
+      onAction={props.onAction}
     />
   );
 }
@@ -66,12 +46,28 @@ function UnreadMenuCommand(): JSX.Element {
     [query],
     { keepPreviousData: true },
   );
+  async function openMailAndMarkAsRead(message: gmail_v1.Schema$Message) {
+    const profile = await getGMailCurrentProfile(gmail);
+    const threadUrlWeb = messageThreadUrl(profile, message);
+    if (threadUrlWeb && threadUrlWeb.length > 0) {
+      open(threadUrlWeb);
+      await markMessageAsRead(message);
+      showHUD("Open Mail in Browser");
+    } else {
+      throw new Error("Invalid URL");
+    }
+  }
+
   const onMailOpen = async (message: gmail_v1.Schema$Message) => {
-    await mutate(undefined, {
-      optimisticUpdate(data) {
-        return data?.filter((m) => m.data.id !== message.id);
-      },
-    });
+    try {
+      await mutate(openMailAndMarkAsRead(message), {
+        optimisticUpdate(data) {
+          return data?.filter((m) => m.data.id !== message.id);
+        },
+      });
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) });
+    }
   };
   const unreadCount = data?.length || 0;
   return (
@@ -87,7 +83,7 @@ function UnreadMenuCommand(): JSX.Element {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         {!error && unreadCount <= 0 && <MenuBarExtra.Item title="No Unread Mails" />}
-        {data?.map((m) => <MessageMenubarItem key={m.data.id} message={m.data} onMailOpen={onMailOpen} />)}
+        {data?.map((m) => <MessageMenubarItem key={m.data.id} message={m.data} onAction={() => onMailOpen(m.data)} />)}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarItemConfigureCommand />
