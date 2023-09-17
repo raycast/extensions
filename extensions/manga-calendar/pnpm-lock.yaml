@@ -6,11 +6,11 @@ settings:
 
 dependencies:
   '@raycast/api':
-    specifier: ^1.55.2
-    version: 1.55.2(@types/node@18.8.3)(@types/react@18.0.9)
+    specifier: ^1.58.0
+    version: 1.58.0(@types/node@18.8.3)(@types/react@18.0.9)
   '@raycast/utils':
     specifier: ^1.9.0
-    version: 1.9.0(@raycast/api@1.55.2)
+    version: 1.9.0(@raycast/api@1.58.0)
   cheerio:
     specifier: 1.0.0-rc.12
     version: 1.0.0-rc.12
@@ -130,8 +130,8 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@raycast/api@1.55.2(@types/node@18.8.3)(@types/react@18.0.9):
-    resolution: {integrity: sha512-Gct1bxRYNJkGcE1qfZoAE+FDByj2/wXOowFK1ORdEsbjP5YSeVK9mDsb/Z7DFzVyLQ5jZn4tNpF5sEvsVkgVwQ==}
+  /@raycast/api@1.58.0(@types/node@18.8.3)(@types/react@18.0.9):
+    resolution: {integrity: sha512-nWOL4UIn3KlEwDKvZDCWlX+oeNN77zC5V95AFp14Z2C23uc5FABC2ZIBfirQ2j5C10X4PHRg+S39rwDHQAeuLA==}
     hasBin: true
     requiresBuild: true
     peerDependencies:
@@ -181,12 +181,12 @@ packages:
       - typescript
     dev: true
 
-  /@raycast/utils@1.9.0(@raycast/api@1.55.2):
+  /@raycast/utils@1.9.0(@raycast/api@1.58.0):
     resolution: {integrity: sha512-o0zVq1t1Hya4W/gSADhOZckARCFmizlf0U/4jq/OqM8TFoJl1+i+2wfPVouWMvT8155O7QBLSf8T6N5bT4J5Vw==}
     peerDependencies:
       '@raycast/api': '>=1.52.0'
     dependencies:
-      '@raycast/api': 1.55.2(@types/node@18.8.3)(@types/react@18.0.9)
+      '@raycast/api': 1.58.0(@types/node@18.8.3)(@types/react@18.0.9)
       content-type: 1.0.5
       cross-fetch: 3.1.8
       dequal: 2.0.3

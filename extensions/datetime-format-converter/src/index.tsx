@@ -1,6 +1,11 @@
 import { Form, List, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import dayjs from "dayjs";
 
+import localizedFormat from "dayjs/plugin/localizedFormat";
+dayjs.extend(localizedFormat);
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+
 export default function main() {
   const { push } = useNavigation();
 
@@ -43,11 +48,25 @@ export default function main() {
     }
 
     return [
-      dTime.format("YYYY-MM-DD hh:mm:ss").toString(),
-      dTime.format("YYYY-MM-DD hh:mm:ss.SSS").toString(),
+      // ISO 8601 or similar
+      dTime.format("YYYY-MM-DD").toString(),
+      dTime.format("YYYY-MM-DD HH:mm:ss").toString(),
+      dTime.format("YYYY-MM-DD HH:mm:ss.SSS").toString(),
+      dTime.format("YYYY-MM-DD HH:mm:ssZ").toString(),
       dTime.format().toString(),
-      dTime.valueOf().toString(),
+      dTime.utc().format().toString(),
+
+      // Unix timestamps
       dTime.unix().toString(),
+      dTime.valueOf().toString(),
+
+      // Localized formats
+      dTime.format("L").toString(),
+      dTime.format("L LT").toString(),
+      dTime.format("LLL").toString(),
+      dTime.format("LLLL").toString(),
+      dTime.format("LT").toString(),
+      dTime.format("LTS").toString(),
     ];
   }
 

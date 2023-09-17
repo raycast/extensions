@@ -1,10 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 
-const newMatch = /### Extension\s*https:\/\/(?:www\.)?raycast\.com\/[^\/]+\/([^\/\s]+)/;
+const newMatch = /### Extension\s*https:\/\/(?:www\.)?raycast\.com\/([^\/]+\/[^\/\s]+)/;
 const newMatchGitHub =
   /### Extension\s*https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
-const oldMatch =
+const oldMatchGithub =
   /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
 const closeIssueMatch = /@raycastbot close this issue/;
@@ -22,34 +22,39 @@ module.exports = async ({ github, context, core }) => {
     return;
   }
 
-  const codeowners = await getCodeOwners({ github, context });
+  let owners;
 
-  const [, ext] =
-    newMatch.exec(context.payload.issue.body) ||
-    newMatchGitHub.exec(context.payload.issue.body) ||
-    oldMatch.exec(context.payload.issue.body) ||
-    [];
+  if (newMatch.test(context.payload.issue.body)) {
+    const [, ext] = newMatch.exec(context.payload.issue.body);
 
-  if (!ext) {
-    console.log(`could not find the extension in the body`);
-    await comment({
-      github,
-      context,
-      comment: `We could not find the extension related to this issue. Please update the issue with the link to the extension.`,
-    });
-    await github.rest.issues.addLabels({
-      issue_number: context.payload.issue.number,
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      labels: ["status: stalled"],
-    });
-    return;
+    const codeowners = await getCodeOwners({ github, context });
+    owners = codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[ext]}`];
+  } else {
+    const [, ext] =
+      newMatch.exec(context.payload.issue.body) ||
+      newMatchGitHub.exec(context.payload.issue.body) ||
+      oldMatch.exec(context.payload.issue.body) ||
+      [];
+
+    if (!ext) {
+      console.log(`could not find the extension in the body`);
+      await comment({
+        github,
+        context,
+        comment: `We could not find the extension related to this issue. Please update the issue with the link to the extension.`,
+      });
+      await github.rest.issues.addLabels({
+        issue_number: context.payload.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: ["status: stalled"],
+      });
+      return;
+    }
+
+    const codeowners = await getCodeOwners({ github, context });
+    owners = codeowners[`/extensions/${ext}`];
   }
-
-  const owners =
-    codeowners[`/extensions/${ext}`] ||
-    // some extensions don't have a folder that match their name
-    codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[ext]}`];
 
   if (!owners) {
     console.log(`could not find the extension ${ext}`);

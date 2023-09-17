@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 
 class CommitItem {
   prefix: string;
@@ -59,7 +59,7 @@ const listItems: CommitItem[] = [
   },
   {
     prefix: "build: ",
-    title: "Builds",
+    title: "Build",
     subtitle: "Changes that affect the build system or external dependencies",
     icon: "../assets/build.png",
   },
@@ -71,13 +71,13 @@ const listItems: CommitItem[] = [
   },
   {
     prefix: "chore: ",
-    title: "Chores",
+    title: "Chore",
     subtitle: "Other changes that do not modify src or test files",
     icon: "../assets/chore.png",
   },
   {
     prefix: "revert: ",
-    title: "Reverts",
+    title: "Revert",
     subtitle: "Reverts a previous commit",
     icon: "../assets/revert.png",
   },

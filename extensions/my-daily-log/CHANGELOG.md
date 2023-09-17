@@ -1,5 +1,9 @@
 # my-daily-log Changelog
 
+## [Fixes] - 2023-09-08
+
+- Fixed a bug where if the folder for logs did not exist, the extension would crash
+
 ## [Update] - 2023-03-31
 
 - Added new Daily Summary report command using RaycastAI
