@@ -59,28 +59,7 @@ Link **all DocSearch** into Raycast.
      }
      ```
 
-   - Finally, write some code to the properties of commands in the [package.json](/package.json)
-     ```json
-     ...
-        "commands": [
-           {
-              "name": "vuepress1",  // The name of the file you created
-              "title": "Search Documentation",
-              "subtitle": "Vuepress v1",
-              "description": "Search Vuepress v1 documentation",
-              "arguments": [
-                 {
-                    "name": "search",
-                    "placeholder": "Search...",
-                    "type": "text"
-                 }
-              ],
-              "mode": "view"
-           },
-           ...
-        ]
-     ...
-     ```
+   - Run the command `npm run generate`. This will create the entry file and config. After that, you can run the command `npm run dev` to test it, and `npm run build` to build it.
 
 #### Meilisearch
 
@@ -115,27 +94,6 @@ Link **all DocSearch** into Raycast.
      }
      ```
 
-   - Finally, write some code to the properties of commands in the [package.json](/package.json)
-     ```json
-     ...
-        "commands": [
-           {
-              "name": "rsshub",  // The name of the file you created
-              "title": "Search Documentation",
-              "subtitle": "RSSHub",
-              "description": "Search RSSHub documentation",
-              "arguments": [
-                 {
-                    "name": "search",
-                    "placeholder": "Search...",
-                    "type": "text"
-                 }
-              ],
-              "mode": "view"
-           },
-           ...
-        ]
-     ...
-     ```
+   - Run the command `npm run generate`. This will create the entry file and config. After that, you can run the command `npm run dev` to test it, and `npm run build` to build it.
 
 **Enjoy! Welcome to contribute.**
