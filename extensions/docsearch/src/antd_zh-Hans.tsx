@@ -1,5 +1,5 @@
 import { SearchDocumentation } from "./components";
 
 export default function Command(props: { arguments: { search?: string } }) {
-  return <SearchDocumentation id="885d77e7-300b-4713-8755-6b5f69fc1ac0" quickSearch={props.arguments?.search} />;
+  return <SearchDocumentation id="baf3801b-95f5-4800-b77e-13c97e98877e" quickSearch={props.arguments?.search} />;
 }
