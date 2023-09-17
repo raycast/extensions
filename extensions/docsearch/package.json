@@ -682,7 +682,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "generate": "ts-node .factory/generate.ts && ts-node .format/format.ts && prettier -w README.md package.json && ray lint --fix",
-    "fix-lint": "ts-node .factory/generate.ts && ts-node .format/format.ts && prettier -w README.md package.json && ray lint --fix",
+    "fix-lint": "ts-node .format/format.ts && prettier -w README.md && ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
   }
