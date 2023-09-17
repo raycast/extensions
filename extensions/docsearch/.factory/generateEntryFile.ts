@@ -4,7 +4,7 @@ import { API } from "../src/types";
 import fs from "fs";
 
 function generateFilePath(item: API) {
-  return `./src/${(item.name + (item.lang ? '_'+item.lang: '')).toLowerCase()}.tsx`.replace(' ','_')
+  return `./src/${item.name.toLowerCase() + (item.lang ? '_'+item.lang: '')}.tsx`.replace(' ','_')
 }
 
 export default function generateEntryFile() {

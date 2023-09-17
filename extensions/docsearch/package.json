@@ -33,7 +33,7 @@
       "mode": "view"
     },
     {
-      "name": "antd_zh-hans",
+      "name": "antd_zh-Hans",
       "icon": "/logo/antd.png",
       "title": "Antd(中文)",
       "subtitle": "DocSearch",
@@ -63,7 +63,7 @@
       "mode": "view"
     },
     {
-      "name": "antdv_zh-hans",
+      "name": "antdv_zh-Hans",
       "icon": "/logo/antdv.png",
       "title": "Antdv(中文)",
       "subtitle": "DocSearch",
@@ -168,7 +168,7 @@
       "mode": "view"
     },
     {
-      "name": "echarts_zh-hans",
+      "name": "echarts_zh-Hans",
       "icon": "/logo/echarts.png",
       "title": "Echarts(中文)",
       "subtitle": "DocSearch",
@@ -303,7 +303,7 @@
       "mode": "view"
     },
     {
-      "name": "pnpm_zh-hans",
+      "name": "pnpm_zh-Hans",
       "icon": "/logo/pnpm.png",
       "title": "Pnpm(中文)",
       "subtitle": "DocSearch",
@@ -378,7 +378,7 @@
       "mode": "view"
     },
     {
-      "name": "react_zh-hans",
+      "name": "react_zh-Hans",
       "icon": "/logo/react.ico",
       "title": "React(中文)",
       "subtitle": "DocSearch",
@@ -453,7 +453,7 @@
       "mode": "view"
     },
     {
-      "name": "slidev_zh-hans",
+      "name": "slidev_zh-Hans",
       "icon": "/logo/slidev.png",
       "title": "Slidev(中文)",
       "subtitle": "DocSearch",
@@ -498,7 +498,7 @@
       "mode": "view"
     },
     {
-      "name": "taro_zh-hans",
+      "name": "taro_zh-Hans",
       "icon": "/logo/taro.png",
       "title": "Taro(中文)",
       "subtitle": "DocSearch",
@@ -543,7 +543,7 @@
       "mode": "view"
     },
     {
-      "name": "vite_zh-hans",
+      "name": "vite_zh-Hans",
       "icon": "/logo/vite.png",
       "title": "Vite(中文)",
       "subtitle": "DocSearch",
@@ -603,7 +603,7 @@
       "mode": "view"
     },
     {
-      "name": "vue3_zh-hans",
+      "name": "vue3_zh-Hans",
       "icon": "/logo/vue.png",
       "title": "Vue3(中文)",
       "subtitle": "DocSearch",
@@ -682,7 +682,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "generate": "ts-node .factory/generate.ts && ts-node .format/format.ts && prettier -w README.md package.json && ray lint --fix",
-    "fix-lint": "ts-node .format/format.ts && prettier -w README.md && ray lint --fix",
+    "fix-lint": "ts-node .factory/generate.ts && ts-node .format/format.ts && prettier -w README.md package.json && ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
   }

@@ -8,7 +8,7 @@ const langMap: { [key:string]: string} = {
 
 function generateCommand() {
   return data.map((item) => ({
-    "name": (item.name + (item.lang ? '_'+item.lang: '')).replace(' ','_').toLowerCase(),
+    "name": (item.name.toLowerCase() + (item.lang ? '_'+item.lang: '')).replace(' ','_'),
     "icon": item.icon.replace('../assets', ''),
     "title": item.name + (item.lang ? `(${langMap[item.lang]})` : ''),
     "subtitle": "DocSearch",
