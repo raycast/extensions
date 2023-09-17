@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Icon,
   MenuBarExtra,
@@ -12,6 +13,7 @@ import {
   openCommandPreferences,
   Image,
 } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { pause } from "./api/pause";
 import { play } from "./api/play";
 import { skipToNext } from "./api/skipToNext";
@@ -32,14 +34,19 @@ import { useMe } from "./hooks/useMe";
 import { formatTitle } from "./helpers/formatTitle";
 import { getErrorMessage } from "./helpers/getError";
 
-function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
-  const preferences = getPreferenceValues<{
-    maxTextLength?: boolean;
-    showEllipsis?: boolean;
-    iconType?: "spotify-icon" | "cover-image";
-  }>();
+import { useSpotifyAppData } from "./hooks/useSpotifyAppData";
 
-  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
+function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
+  const preferences = getPreferenceValues<Preferences.NowPlayingMenuBar>();
+
+  const [uriFromSpotify, setUriFromSpotify] = useCachedState<string | undefined>("currentlyPlayingUri", undefined);
+  const shouldExecute = React.useRef<boolean>(false);
+
+  const { spotifyAppData, spotifyAppDataIsLoading, spotifyAppDataRevalidate } = useSpotifyAppData();
+
+  const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying({
+    options: { execute: shouldExecute.current },
+  });
 
   // The hooks below will only execute when the Menu Bar is opened
   const { myDevicesData } = useMyDevices({ options: { execute: launchType === LaunchType.UserInitiated } });
@@ -50,7 +57,20 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     options: { execute: launchType === LaunchType.UserInitiated },
   });
 
-  const isPlaying = currentlyPlayingData?.is_playing === true;
+  React.useEffect(() => {
+    if (spotifyAppData?.state === "NOT_RUNNING" || spotifyAppData?.state === "NOT_PLAYING") {
+      setUriFromSpotify(undefined);
+      shouldExecute.current = false;
+      return;
+    }
+
+    if (uriFromSpotify !== spotifyAppData?.uri) {
+      setUriFromSpotify(spotifyAppData?.uri);
+      shouldExecute.current = true;
+    }
+  }, [uriFromSpotify, shouldExecute, spotifyAppData]);
+
+  const isPlaying = spotifyAppData?.state === "PLAYING";
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
@@ -59,8 +79,16 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const dataIsOld =
     currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > tenMinutesInMilliseconds;
 
+  if (spotifyAppData?.state === "NOT_RUNNING") {
+    return (
+      <OpenSpotify isLoading={spotifyAppDataIsLoading || currentlyPlayingIsLoading || currentlyPlayingIsLoading} />
+    );
+  }
+
   if ((dataIsOld && !isPlaying) || !currentlyPlayingData?.item) {
-    return <NothingPlaying isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading} />;
+    return (
+      <NothingPlaying isLoading={spotifyAppDataIsLoading || currentlyPlayingIsLoading || currentlyPlayingIsLoading} />
+    );
   }
 
   const { item } = currentlyPlayingData;
@@ -166,7 +194,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   return (
     <MenuBarExtra
-      isLoading={currentlyPlayingIsLoading || currentlyPlayingIsLoading}
+      isLoading={spotifyAppDataIsLoading || currentlyPlayingIsLoading || currentlyPlayingIsLoading}
       icon={
         preferences.iconType === "cover-image" && coverImageUrl
           ? {
@@ -185,7 +213,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           onAction={async () => {
             try {
               await pause();
-              await currentlyPlayingRevalidate();
+              await spotifyAppDataRevalidate();
             } catch (err) {
               const error = getErrorMessage(err);
               showHUD(error);
@@ -200,7 +228,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           onAction={async () => {
             try {
               await play();
-              await currentlyPlayingRevalidate();
+              await spotifyAppDataRevalidate();
             } catch (err) {
               const error = getErrorMessage(err);
               showHUD(error);
@@ -309,8 +337,35 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   );
 }
 
+function OpenSpotify({ isLoading }: { title?: string; isLoading: boolean }) {
+  const preferences = getPreferenceValues<Preferences.NowPlayingMenuBar>();
+
+  return preferences.hideIconWhenIdle ? null : (
+    <MenuBarExtra icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }} isLoading={isLoading}>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item title="Spotify needs to be opened" />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Spotify"
+          icon="spotify-icon.svg"
+          onAction={() => (isSpotifyInstalled ? open("spotify:") : open("https://play.spotify.com"))}
+        />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Configure Command"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openCommandPreferences}
+        />
+      </MenuBarExtra.Section>
+    </MenuBarExtra>
+  );
+}
+
 function NothingPlaying({ title = "Nothing is playing right now", isLoading }: { title?: string; isLoading: boolean }) {
-  return (
+  const preferences = getPreferenceValues<Preferences.NowPlayingMenuBar>();
+  return preferences.hideIconWhenIdle ? null : (
     <MenuBarExtra icon={{ source: { dark: "menu-icon-dark.svg", light: "menu-icon-light.svg" } }} isLoading={isLoading}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item title={title} />

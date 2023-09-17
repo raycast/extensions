@@ -1,30 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { parseFileSync } from "bplist-parser";
 
 import { Bookmark, OrionReadingListItem, OrionReadingListPlistResult } from "../types";
-import { join } from "path";
-import { getOrionBasePath } from "src/utils";
+import { getReadingListPath } from "src/utils";
 
-const READING_LIST_PATH = join(getOrionBasePath(), "Defaults/reading_list.plist");
-
-const useBookmarks = () => {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>();
-
-  const fetchItems = useCallback(async () => {
-    const bookmarksPlist = parseFileSync(READING_LIST_PATH) as OrionReadingListPlistResult;
-    const items = bookmarksPlist[0];
-    const bookmarks = parseBookmarks(items);
-    setBookmarks(bookmarks);
-  }, []);
+const useReadingList = (selectedProfileId: string) => {
+  const [readingList, setReadingList] = useState<Bookmark[]>();
+  const readingListPath = getReadingListPath(selectedProfileId);
 
   useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+    const bookmarksPlist = parseFileSync(readingListPath) as OrionReadingListPlistResult;
+    const items = bookmarksPlist[0];
+    const readingList = parseReadingList(items);
+    setReadingList(readingList);
+  }, [selectedProfileId]);
 
-  return { bookmarks };
+  return { readingList };
 };
 
-function parseBookmarks(items: OrionReadingListItem[]) {
+function parseReadingList(items: OrionReadingListItem[]) {
   return items
     .filter((item) => !!item.url)
     .map((oBookmark) => {
@@ -40,4 +34,4 @@ function parseBookmarks(items: OrionReadingListItem[]) {
     });
 }
 
-export default useBookmarks;
+export default useReadingList;

@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { getPageContent, getPageData, getPageLinks, getPageMetadata } from "../utils/api";
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { processMetadata, renderContent, replaceLinks, toSentenceCase, toTitleCase } from "../utils/formatting";
 import { ChangeLanguageSubmenu } from "./change-language-submenu";
 import { useLanguage } from "../utils/language";
 import Style = Toast.Style;
+import { useRecentArticles } from "../utils/recents";
 
 const preferences = getPreferenceValues();
 
@@ -28,6 +29,7 @@ function formatMetadataValue(label: string, value?: Date | null | string) {
 
 export default function WikipediaPage({ title }: { title: string }) {
   const [language] = useLanguage();
+  const { addToReadArticles } = useRecentArticles();
   const [showMetadata, setShowMetadata] = useCachedState("showMetadata", false);
   const { data: content, isLoading: isLoadingContent } = usePromise(getPageContent, [title, language]);
   const { data: metadata, isLoading: isLoadingMetadata } = usePromise(getPageMetadata, [title, language]);
@@ -43,20 +45,24 @@ export default function WikipediaPage({ title }: { title: string }) {
     },
   });
 
+  useEffect(() => {
+    addToReadArticles(title);
+  }, [title]);
+
   const body = content ? renderContent(content, 2, links, language) : "";
 
   const markdown = page
     ? `
   # ${page.title}
-  
+
   ${page.description ? `>${toSentenceCase(page.description)}\n\n` : ""}
-  
+
   ${replaceLinks(page.extract, language, links)}
 
   ${page.thumbnail?.source ? `![](${page.thumbnail?.source})` : ""}
-  
+
   ${body ? "---" : ""}
-  
+
   ${body}`
     : "";
 

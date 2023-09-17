@@ -1,93 +1,97 @@
-import { openExtensionPreferences, ActionPanel, Action, Grid, Icon } from "@raycast/api";
+import { openExtensionPreferences, ActionPanel, Action, Grid, Icon, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
 import { useState, ReactNode } from "react";
 
-import { walletPath, fetchFiles } from "./utils";
-import { Card, Pocket } from "./types";
+import { walletPath, fetchFiles, fetchPocketNames, purgePreviews } from "./utils";
+import { Card, Pocket, Preferences } from "./types";
+
+let savedPockets: Pocket[];
 
 export default function Command() {
   const [pocket, setPocket] = useState<string>();
-  const { isLoading, data, revalidate } = usePromise(loadGridComponents, [pocket]);
+  const {
+    isLoading: isGridLoading,
+    data: gridData,
+    revalidate: revalidateGrid,
+  } = usePromise(loadGridComponents, [pocket]);
+  const {
+    isLoading: isDropdownLoading,
+    data: dropdownData,
+    revalidate: revalidateDropdown,
+  } = usePromise(loadDropdownComponents);
 
   return (
     <Grid
       columns={5}
-      isLoading={isLoading}
+      isLoading={isGridLoading}
       inset={Grid.Inset.Large}
-      searchBarPlaceholder={`Search ${data?.cardCount || 0} Cards...`}
+      searchBarPlaceholder={`Search ${gridData?.cardCount || 0} Cards...`}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Pocket"
-          storeValue
+          storeValue={getPreferenceValues<Preferences>().rememberPocketFilter}
           onChange={(newValue) => setPocket(newValue)}
           defaultValue="All Cards"
           key="Dropdown"
+          isLoading={isDropdownLoading}
         >
-          {data?.dropdownNodes}
+          {dropdownData}
         </Grid.Dropdown>
       }
       actions={<ActionPanel>{loadGenericActionNodes()}</ActionPanel>}
     >
-      {data?.pocketNodes}
+      {gridData?.pocketNodes}
     </Grid>
   );
 
   async function loadGridComponents(sortedPocket?: string) {
-    return fetchFiles(walletPath).then((pockets) => {
-      const dropdownNodes = loadGridDropdownNodes(pockets);
-      const pocketNodes: ReactNode[] = [];
-      let cardCount = 0;
+    if (!savedPockets) {
+      savedPockets = await fetchFiles();
+    }
+    const pockets = savedPockets;
 
-      if (sortedPocket) {
-        pockets.forEach((pocket) => {
-          if (pocket.name == sortedPocket) {
-            pocketNodes.push(loadPocketNodes(pocket, { hideTitle: true }));
-            cardCount += pocket.cards.length;
-          }
-        });
+    const pocketNodes: ReactNode[] = [];
+    let cardCount = 0;
+
+    if (sortedPocket) {
+      let pocket;
+
+      if (sortedPocket == ".unsorted") {
+        pocket = pockets.find((pocket) => !pocket.name);
       } else {
-        pocketNodes.push(
-          <Grid.EmptyView
-            title="No Cards Found"
-            key="Empty View"
-            description="Use ⌘E to add images to the Wallet directory!"
-          />
-        );
-        pockets.forEach((pocket) => {
-          pocketNodes.push(loadPocketNodes(pocket));
-          cardCount += pocket.cards.length;
-        });
+        pocket = pockets.find((pocket) => pocket.name == sortedPocket);
       }
 
-      return { pocketNodes, dropdownNodes, cardCount };
-    });
+      if (pocket) {
+        pocketNodes.push(loadPocketNodes(pocket, { hideTitle: true }));
+        cardCount = pocket.cards.length;
+      }
+    } else {
+      pockets.forEach((pocket) => {
+        pocketNodes.push(loadPocketNodes(pocket));
+        cardCount += pocket.cards.length;
+      });
+    }
+
+    pocketNodes.push(
+      <Grid.EmptyView
+        title="No Cards Found"
+        key="Empty View"
+        description="Use ⌘E to add images to the Wallet directory!"
+      />
+    );
+
+    return { pocketNodes, cardCount };
   }
 
-  function loadGridDropdownNodes(pockets: Pocket[]) {
-    return [
-      <Grid.Dropdown.Item title="All Cards" value="" key="" />,
-      <Grid.Dropdown.Section title="Pockets" key="Section">
-        {pockets
-          .filter((pocket) => pocket.name)
-          .map((pocket) => (
-            <Grid.Dropdown.Item
-              title={pocket.name || "Unsorted"}
-              value={pocket.name || "Unsorted"}
-              key={pocket.name || "Unsorted"}
-            />
-          ))}
-      </Grid.Dropdown.Section>,
-    ];
-  }
-
-  function loadPocketNodes(pocket: Pocket, ops?: { hideTitle?: boolean }) {
+  function loadPocketNodes(pocket: Pocket, config?: { hideTitle?: boolean }) {
     return (
-      <Grid.Section title={ops?.hideTitle ? undefined : pocket.name || undefined} key={pocket.name || "unsorted"}>
+      <Grid.Section title={config?.hideTitle ? undefined : pocket.name || undefined} key={pocket.name || ".unsorted"}>
         {pocket.cards.map((card) => (
           <Grid.Item
             key={card.path}
-            content={card.path}
+            content={card.preview ?? { fileIcon: card.path }}
             title={card.name.replace(":", "/")}
             keywords={[card.name]}
             actions={loadCardActionNodes(card)}
@@ -96,6 +100,20 @@ export default function Command() {
         ))}
       </Grid.Section>
     );
+  }
+
+  async function loadDropdownComponents() {
+    const pocketNames = fetchPocketNames();
+
+    return [
+      <Grid.Dropdown.Item title="All Cards" value="" key="" icon={Icon.Wallet} />,
+      <Grid.Dropdown.Item title="Unsorted" value=".unsorted" key=".unsorted" icon={Icon.Filter} />,
+      <Grid.Dropdown.Section title="Pockets" key="Section">
+        {pocketNames.map((name) => (
+          <Grid.Dropdown.Item title={name} value={name} key={name} />
+        ))}
+      </Grid.Dropdown.Section>,
+    ];
   }
 
   function loadCardActionNodes(item: Card) {
@@ -116,18 +134,35 @@ export default function Command() {
       <ActionPanel.Section>
         <Action.ShowInFinder title="Edit Wallet" shortcut={{ modifiers: ["cmd"], key: "e" }} path={walletPath} />
         <Action
-          title="Reload Wallet"
-          icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-          onAction={revalidate}
-        />
-        <Action
           title="Change Wallet Directory"
           icon={Icon.Folder}
           shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           onAction={openExtensionPreferences}
         />
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          onAction={revalidate}
+        />
+        <Action
+          title="Reset Video Previews"
+          icon={Icon.ArrowClockwise}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          onAction={purgeRevalidate}
+        />
       </ActionPanel.Section>
     );
+  }
+
+  async function revalidate() {
+    savedPockets = await fetchFiles();
+    revalidateGrid();
+    revalidateDropdown();
+  }
+
+  function purgeRevalidate() {
+    purgePreviews();
+    revalidate();
   }
 }

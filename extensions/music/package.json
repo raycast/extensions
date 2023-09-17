@@ -7,7 +7,8 @@
   "author": "fedevitaledev",
   "contributors": [
     "peterdev22",
-    "danpalmer"
+    "danpalmer",
+    "itsjustxan"
   ],
   "license": "MIT",
   "keywords": [
@@ -114,6 +115,13 @@
       "title": "Dislike Track",
       "subtitle": "Apple Music",
       "description": "Dislike currently playing track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike-skip",
+      "title": "Dislike and Skip Track",
+      "subtitle": "Apple Music",
+      "description": "Dislike and skip currently playing track.",
       "mode": "no-view"
     },
     {

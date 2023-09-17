@@ -40,7 +40,7 @@ export function getGitHubURL(notification: Notification, userId?: string) {
       notification.subject.url,
       notification.id,
       userId,
-      latestCommentId ? "#issuecomment-" + latestCommentId : undefined
+      latestCommentId ? "#issuecomment-" + latestCommentId : undefined,
     );
   } else if (notification.subject.type === "CheckSuite") {
     return generateGitHubUrl(`${notification.repository.html_url}/actions`, notification.id, userId);
@@ -107,7 +107,9 @@ export function getNotificationSubtitle(notification: Notification) {
   const reason = getNotificationReason(notification);
   const numberTag = getIssueOrPrNumberTag(notification);
 
-  return numberTag ? `${numberTag} ･ ${reason}` : reason;
+  return numberTag
+    ? `${numberTag} ･ ${notification.repository.full_name} ･ ${reason}`
+    : `${notification.repository.full_name} ･ ${reason}`;
 }
 
 export function getNotificationReason(notification: Notification) {

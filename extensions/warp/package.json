@@ -3,8 +3,12 @@
   "name": "warp",
   "title": "Warp",
   "description": "Open Warp tabs/windows and launch configurations.",
-  "icon": "command-icon-v2.png",
+  "icon": "extension-icon.png",
   "author": "joetannenbaum",
+  "contributors": [
+    "danulqua",
+    "theRubberDuckiee"
+  ],
   "owner": "warpdotdev",
   "access": "public",
   "categories": [

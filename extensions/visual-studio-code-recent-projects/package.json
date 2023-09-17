@@ -14,7 +14,9 @@
     "elijahs",
     "vimtor",
     "tonka3000",
-    "fazle_rabbi"
+    "fazle_rabbi",
+    "oilbeater",
+    "QIanGua"
   ],
   "keywords": [
     "vscode"
@@ -75,6 +77,10 @@
         {
           "value": "VSCodium",
           "title": "VSCodium"
+        },
+        {
+          "value": "Cursor",
+          "title": "Cursor"
         }
       ]
     },

@@ -10,3 +10,13 @@ raycast-env.d.ts
 .DS_Store
 
 .idea
+
+# Swift Script
+script/.build
+script/Packages
+script/*.xcodeproj
+xcuserdata/
+DerivedData/
+.swiftpm/config/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc

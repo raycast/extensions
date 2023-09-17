@@ -7,7 +7,7 @@ export async function getDynamicFeed() {
   const cache = new Cache();
   const cookie = cache.get("cookie") || "{}";
 
-  const res: Bilibili.dynamicFeedAllResponse = await got(API.dynamicFeedAll(1, -480), {
+  const res: Bilibili.DynamicFeedAllResponse = await got(API.dynamicFeedAll(1, -480), {
     headers: {
       cookie,
     },

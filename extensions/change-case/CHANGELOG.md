@@ -1,5 +1,10 @@
 # Change Case Changelog
 
+
+## [Support Quicklinks] - 2023-09-07
+
+- Added support for quicklinks to quickly convert to a selected case
+
 ## [Update] - 2023-08-08
 
 - Support change case for multi lines

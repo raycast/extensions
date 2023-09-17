@@ -69,7 +69,7 @@ export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFra
         avatarUrl = reviewer.teamAvatarURL;
       }
 
-      return { id: reviewer.id, ...getGitHubUser({ name, login, avatarUrl }) };
+      return { id: "id" in reviewer ? reviewer.id : "", ...getGitHubUser({ name, login, avatarUrl }) };
     }
   });
 
@@ -77,7 +77,7 @@ export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFra
     pullRequest.reviews?.nodes?.map((review) => {
       return { id: review?.author?.id, ...getGitHubUser(review?.author) };
     }),
-    "id"
+    "id",
   );
 
   return [...(requests ?? []), ...(reviews ?? [])];
@@ -116,7 +116,7 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
 export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | null): List.Item.Accessory | null {
   switch (reviewDecision) {
     case "REVIEW_REQUIRED":
-      return { tag: { value: "Review requested", color: Color.Orange } };
+      return { tag: { value: "Review required", color: Color.Orange } };
     case "CHANGES_REQUESTED":
       return { tag: { value: "Changes requested", color: Color.Red } };
     case "APPROVED":

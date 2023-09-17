@@ -1,5 +1,21 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2023-08-25
+
+- Adds support for Cursor as an option in the extension settings.
+
+## [Fix] - 2023-08-09
+
+- Fixed a bug that caused the extension to crash if wrong build was selected
+
+## [Fixes] - 2023-08-02
+
+- Fix some issues with invalid URLs that cause crashes.
+
+## [Update] - 2023-07-12
+
+- Make it possible to open remote workspaces.
+
 ## [Update] - 2023-06-29
 
 - Make it possible to open the currently opened Finder folder on vscode

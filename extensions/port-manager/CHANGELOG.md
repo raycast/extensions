@@ -1,5 +1,14 @@
 # Port Manager Changelog
 
+## [Menu Bar COmmand] - 2023-08-18
+
+- Added simple menu bar command
+- Added preference to always use the same kill signal
+- Changed shortcut to kill parent process from `⌘` + `p` to `⌘` + `⌥` + `p`
+- Changed shortcut to show process info from `⌘` + `i` to `⌘` + `⇧` + `d`
+- Use color and icon in alerts
+- Fixed bug where the extension would crash when `lsof` returned a warning, thank you [Grzegorz Leoniec](https://github.com/appinteractive)
+
 ## [New Actions] - 2022-07-15
 
 - *Show Info* action (`⌘` + `i`) to display process information

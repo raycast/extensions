@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "the-noble-quran",
+  "title": "The Noble Quran",
+  "description": "Explore The Noble Quran",
+  "icon": "quran_logo.png",
+  "author": "BalliAsghar",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quran",
+      "title": "Quran",
+      "subtitle": "The Noble Quran",
+      "description": "Explore The Noble Quran",
+      "mode": "view"
+    },
+    {
+      "name": "favorite",
+      "title": "Favorite Ayah",
+      "subtitle": "The Noble Quran",
+      "description": "Favorite Ayah",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "edition",
+      "title": "Edition",
+      "description": "Select Quran Edition",
+      "type": "dropdown",
+      "default": "en.maududi",
+      "required": false,
+      "data": [
+        {
+          "value": "en.ahmedali",
+          "title": "Ahmed Ali"
+        },
+        {
+          "value": "en.ahmedraza",
+          "title": "Ahmed Raza Khan"
+        },
+        {
+          "value": "en.arberry",
+          "title": "A. J. Arberry"
+        },
+        {
+          "value": "en.asad",
+          "title": "Muhammad Asad"
+        },
+        {
+          "value": "en.daryabadi",
+          "title": "Abdul Majid Daryabadi"
+        },
+        {
+          "value": "en.hilali",
+          "title": "Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan"
+        },
+        {
+          "value": "en.pickthall",
+          "title": "Mohammed Marmaduke William Pickthall"
+        },
+        {
+          "value": "en.qaribullah",
+          "title": "Hasan al-Fatih Qaribullah and Ahmad Darwish"
+        },
+        {
+          "value": "en.sahih",
+          "title": "Saheeh International"
+        },
+        {
+          "value": "en.sarwar",
+          "title": "Muhammad Sarwar"
+        },
+        {
+          "value": "en.yusufali",
+          "title": "Abdullah Yusuf Ali"
+        },
+        {
+          "value": "en.maududi",
+          "title": "Abul Ala Maududi"
+        },
+        {
+          "value": "en.shakir",
+          "title": "Mohammad Habib Shakir"
+        },
+        {
+          "value": "en.transliteration",
+          "title": "English Transliteration"
+        },
+        {
+          "value": "en.walk",
+          "title": "Ibrahim Walk"
+        },
+        {
+          "value": "en.itani",
+          "title": "Clear Qur'an by Talal Itani"
+        },
+        {
+          "value": "en.mubarakpuri",
+          "title": "Mubarakpuri"
+        },
+        {
+          "value": "en.qarai",
+          "title": "Qarai"
+        },
+        {
+          "value": "en.wahiduddin",
+          "title": "Wahiduddin Khan"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.1",
+    "@raycast/utils": "^1.8.0",
+    "axios": "^1.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

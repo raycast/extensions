@@ -29,9 +29,8 @@ export class GerritAPI {
 
   public async inspect(): Promise<Response> {
     const instanceUrl = new URL(this.gerrit.url);
-    instanceUrl.pathname = `${instanceUrl.pathname}/config/server/version`;
-    this.gerrit.version = (await this.request(instanceUrl)).replaceAll('"', "");
-    this.gerrit.password
+    this.gerrit.version = (await this.request(new URL(`${this.gerrit.url}/config/server/version`))).replaceAll('"', "");
+    this.gerrit.password && this.gerrit.username
       ? (instanceUrl.pathname += "/a/config/server/preferences")
       : (instanceUrl.pathname += "/config/server/info");
     const result = JSON.parse(await this.request(instanceUrl));
@@ -128,7 +127,6 @@ export class GerritAPI {
   }
 
   public async getProjects(projectQuery: string) {
-    // let api = this.gerrit.url;
     const instanceUrl = new URL(this.gerrit.url);
     instanceUrl.pathname += this.gerrit.authorized ? "/a/projects/" : "/projects/";
     instanceUrl.search = projectQuery ? `query=${projectQuery}` : "d";
@@ -186,8 +184,10 @@ export class GerritAPI {
       ...init,
     });
     if (!resp.ok) {
-      if (resp.status === 403) {
+      if (resp.status === 401) {
         return Promise.reject(new Error("Invalid credentials"));
+      } else if (resp.status == 403) {
+        return Promise.reject(new Error("Forbidden"));
       }
       return Promise.reject(`${resp.status} ${await resp.text()}`);
     }
