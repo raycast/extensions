@@ -12,9 +12,7 @@ const preference: Preferences = getPreferenceValues();
 function doNotify(title: string, type: Bilibili.DynamicType, subtitle: string, link: string) {
   if (preference.justNotifyVideos && type !== "DYNAMIC_TYPE_AV") return;
   if (!preference.terminalNotifierPath) {
-    runAppleScript(
-      `display notification "${subtitle}" with title "${title} - Bilibili"`,
-    );
+    runAppleScript(`display notification "${subtitle}" with title "${title} - Bilibili"`);
     return;
   }
 
@@ -30,11 +28,9 @@ function doNotify(title: string, type: Bilibili.DynamicType, subtitle: string, l
   ]);
 
   if (status) {
-    runAppleScript(
-      `display notification "${subtitle}" with title "${title} - Bilibili"`,
-    );
+    runAppleScript(`display notification "${subtitle}" with title "${title} - Bilibili"`);
   }
-};
+}
 
 function notify(item: Bilibili.DynamicItem) {
   switch (item.type) {
@@ -43,7 +39,7 @@ function notify(item: Bilibili.DynamicItem) {
         item.modules.module_author.name,
         item.type,
         item.modules.module_dynamic.major.archive.title,
-        item.modules.module_dynamic.major.archive.jump_url,
+        item.modules.module_dynamic.major.archive.jump_url
       );
       break;
     case "DYNAMIC_TYPE_FORWARD":
@@ -53,7 +49,7 @@ function notify(item: Bilibili.DynamicItem) {
         item.modules.module_author.name,
         item.type,
         item.modules.module_dynamic.desc.text,
-        `https://www.bilibili.com/opus/${item.id_str}`,
+        `https://www.bilibili.com/opus/${item.id_str}`
       );
       break;
     case "DYNAMIC_TYPE_MUSIC":
@@ -61,20 +57,18 @@ function notify(item: Bilibili.DynamicItem) {
         item.modules.module_author.name,
         item.type,
         item.modules.module_dynamic.major.music.title,
-        formatUrl(item.modules.module_dynamic.major.music.jump_url),
+        formatUrl(item.modules.module_dynamic.major.music.jump_url)
       );
       break;
     case "DYNAMIC_TYPE_LIVE_RCMD":
       // eslint-disable-next-line no-case-declarations
-      const liveDate = JSON.parse(
-        item.modules.module_dynamic.major.live_rcmd.content,
-      );
+      const liveDate = JSON.parse(item.modules.module_dynamic.major.live_rcmd.content);
 
       doNotify(
         item.modules.module_author.name,
         item.type,
         liveDate.live_play_info.title,
-        formatUrl(liveDate.live_play_info.link),
+        formatUrl(liveDate.live_play_info.link)
       );
       break;
   }
@@ -87,18 +81,14 @@ function sleep(time: number) {
 export default async function Command() {
   if (!checkLogin()) return;
 
-  console.log("running")
+  console.log("running");
   const items = await getDynamicFeed();
   const newNotifications = items.map((item) => item.id_str);
-  const oldNotifications: string[] = JSON.parse(
-    (await LocalStorage.getItem("notifications")) || "[]",
-  );
+  const oldNotifications: string[] = JSON.parse((await LocalStorage.getItem("notifications")) || "[]");
 
   if (oldNotifications.length !== 0) {
     const startNotifyIndex = oldNotifications
-      .map((oldNotifyId) =>
-        newNotifications.findIndex((newNotifyId) => newNotifyId === oldNotifyId)
-      )
+      .map((oldNotifyId) => newNotifications.findIndex((newNotifyId) => newNotifyId === oldNotifyId))
       .filter((item) => item >= 0)[0];
 
     const unNotifies = newNotifications.slice(0, startNotifyIndex);
