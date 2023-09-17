@@ -3,7 +3,7 @@ import packageData from "../package.json"
 import fs from 'fs'
 
 const langMap: { [key:string]: string} = {
-  "zh-Hans": "中文",
+  "zh-hans": "中文",
 }
 
 function generateCommand() {
@@ -12,7 +12,7 @@ function generateCommand() {
     "icon": item.icon.replace('../assets', ''),
     "title": item.name + (item.lang ? `(${langMap[item.lang]})` : ''),
     "subtitle": "DocSearch",
-    "description": `Search ${item.name}${item.lang && '(' + langMap[item.lang] + ')'} documentation`,
+    "description": `Search ${item.name}${item.lang && '(' + langMap[item.lang.toLowerCase()] + ')'} documentation`,
     "arguments": [
       {
         "name": "search",
