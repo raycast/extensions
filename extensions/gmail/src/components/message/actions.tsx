@@ -19,6 +19,7 @@ import {
   getLabelName,
   isMailDraft,
   isMailUnread,
+  sendUpdateRequestToMenus,
 } from "./utils";
 import path from "path";
 import * as fs from "fs";
@@ -86,6 +87,7 @@ export function MessageMarkAsReadAction(props: {
             if (props.onRevalidate) {
               props.onRevalidate();
             }
+            sendUpdateRequestToMenus();
           },
           title: "Marking Mail as Read",
           finishTitle: "Marked Mail as Read",
@@ -120,6 +122,7 @@ export function MessageMarkAllAsReadAction(props: {
           await markMessagesAsRead(props.messages);
           toast.style = Toast.Style.Success;
           toast.title = `Marked ${props.messages.length} Mails as Read`;
+          sendUpdateRequestToMenus();
 
           if (props.onRevalidate) {
             props.onRevalidate();
@@ -167,6 +170,7 @@ export function MessageMarkAsUnreadAction(props: {
             if (props.onRevalidate) {
               props.onRevalidate();
             }
+            sendUpdateRequestToMenus();
           },
           title: "Marking Mail as Unread",
           finishTitle: "Marked Mail as Unread",
@@ -209,6 +213,7 @@ export function MessageDeleteAction(props: {
         await moveMessageToTrash(props.message);
         toast.style = Toast.Style.Success;
         toast.title = "Moved Mail to Trash";
+        sendUpdateRequestToMenus();
       }
 
       if (props.onRevalidate) {

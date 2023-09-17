@@ -3,6 +3,7 @@
 ## [Menu] - 2023-09-16
 
 - Unread Menu Command: Mark clicked mails as read immediately to have a more intuitive counter in the menubar
+- Mark mails as read in the list view commands will update the menu commands as well
 - Upgrade to 1.58 API
 
 ## [Labels] - 2023-08-11
