@@ -69,8 +69,7 @@ function UnreadMenuCommand(): JSX.Element {
   const onMailOpen = async (message: gmail_v1.Schema$Message) => {
     await mutate(undefined, {
       optimisticUpdate(data) {
-        const nd = data?.filter((m) => m.data.id !== message.id);
-        return nd;
+        return data?.filter((m) => m.data.id !== message.id);
       },
     });
   };
