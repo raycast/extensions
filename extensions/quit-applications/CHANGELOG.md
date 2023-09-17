@@ -1,5 +1,11 @@
 # Quit Applications Changelog
 
+## [Force Quit] - 2023-09-27
+
+- Added the option to force quit an application
+- Added prompts to confirm actions (quit, force quit, restart)
+- Improved reliability of the load applications method
+  
 ## [Bug fix - Quit-Applications crashing] - 2023-04-26
 
 - Fix the case where some of the apps (e.g. MasOS Stocks app) were causing the quit applications to crash
@@ -19,6 +25,6 @@
 
 ## [Enhancement] - 2022-12-14
 
-Fixed a glitch when quitting an aplication.
+Fixed a glitch when quitting an application.
 
 ## [Initial Quit Applications implementation] - 2022-10-27

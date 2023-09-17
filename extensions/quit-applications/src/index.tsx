@@ -1,190 +1,367 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
-import React from "react";
-import { runAppleScript } from "run-applescript";
-import { execSync } from "child_process";
+import { useState, useEffect, useCallback } from "react";
+import { List, Color, Alert, Action, ActionPanel, confirmAlert, showToast, Toast } from "@raycast/api";
 
-function applicationNameFromPath(path: string): string {
-  /* Example:
-   * '/Applications/Visual Studio Code.app' -> 'Visual Studio Code'
-   */
+import * as scripts from "./scripts";
+import { exec, common, widget } from "./utils";
 
-  const pathParts = path.split("/");
-  const appName = pathParts[pathParts.length - 1];
-  return appName.replace(".app", "");
+import { type Application, type State, type ConfirmActionType, ConfirmActionTypes } from "./types";
+
+import { CancelledByUserError } from "./errors";
+
+function getAccessoryByActionState(actionType: ConfirmActionType): List.Item.Accessory[] {
+  switch (actionType) {
+    case ConfirmActionTypes.RESTART: {
+      return [
+        {
+          text: {
+            value: "Restarting",
+            color: Color.Blue,
+          },
+        },
+      ];
+    }
+
+    case ConfirmActionTypes.QUIT: {
+      return [
+        {
+          text: {
+            value: "Quitting",
+            color: Color.Orange,
+          },
+        },
+      ];
+    }
+
+    case ConfirmActionTypes.FORCE_QUIT: {
+      return [
+        {
+          text: {
+            value: "Force Quitting",
+            color: Color.Red,
+          },
+        },
+      ];
+    }
+
+    default: {
+      const _unreachable: never = actionType;
+      throw new Error(`Unreachable action type: ${actionType}`);
+    }
+  }
 }
 
-function applicationIconFromPath(path: string): string {
-  /* Example:
-   * '/Applications/Visual Studio Code.app' -> '/Applications/Visual Studio Code.app/Contents/Resources/{file name}.icns'
-   */
+function handleError(err: unknown): string | undefined {
+  if (err instanceof CancelledByUserError) {
+    return err.message;
+  }
 
-  // read path/Contents/Info.plist and look for <key>CFBundleIconFile</key> or <key>CFBundleIconName</key>
-  // the actual icon file is located at path/Contents/Resources/{file name}.icns
+  if (err instanceof Error) {
+    return err.message;
+  }
+}
 
-  const infoPlist = `${path}/Contents/Info.plist`;
+async function handleConfirm(application: Application, actionType: ConfirmActionType): Promise<void> {
+  const confirmation = await confirmAlert({
+    title: `${actionType} ${application.name}`,
+    message: `Are you sure you want to ${actionType}?`,
+    primaryAction: {
+      title: actionType,
+      style: Alert.ActionStyle.Destructive,
+    },
+    dismissAction: {
+      title: "Cancel",
+      style: Alert.ActionStyle.Cancel,
+    },
+  });
 
-  const possibleIconKeyNames = ["CFBundleIconFile", "CFBundleIconName"];
+  if (!confirmation) {
+    throw new CancelledByUserError(`${actionType} cancelled`);
+  }
+}
 
-  let iconFileName = null;
+async function handleRestartApplication(app: Application): Promise<void> {
+  await handleConfirm(app, ConfirmActionTypes.RESTART);
+  await exec.applescript(scripts.restartApplication(app.name));
+}
 
-  for (const keyName of possibleIconKeyNames) {
-    try {
-      iconFileName = execSync(["plutil", "-extract", keyName, "raw", '"' + infoPlist + '"'].join(" "))
-        .toString()
-        .trim();
-      break;
-    } catch (error) {
-      continue;
+async function handleQuitApplication(app: Application): Promise<void> {
+  await handleConfirm(app, ConfirmActionTypes.QUIT);
+  await exec.applescript(scripts.quitApplication(app.name));
+}
+
+async function handleForceQuitApplication(app: Application): Promise<void> {
+  await handleConfirm(app, ConfirmActionTypes.FORCE_QUIT);
+  await exec.shellWithOutput(`kill -9 ${app.pid}`);
+}
+
+async function loadUserApplications(): Promise<Application[]> {
+  try {
+    const output = await exec.applescript(scripts.dumpApplications());
+
+    const data = output.split(",").map((item) => item.trim());
+
+    const groups = common.clusterBy(data, 3);
+
+    const applicationList = common.mapArrayToObject<string, Application>(groups, ["name", "pid", "path"]);
+
+    const applications = applicationList
+      .map(widget.fetchApplicationIcon)
+      .sort(widget.sortApplicationsInAlphabeticalOrder);
+
+    return applications;
+  } catch (err) {
+    return [];
+  }
+}
+
+export default function Applist() {
+  const [state, setState] = useState<State>({
+    query: "",
+    isLoading: false,
+    applications: [],
+  });
+
+  const [quitQueue, setQuitQueue] = useState<Application[]>([]);
+  const [forceQuitQueue, setForceQuitQueue] = useState<Application[]>([]);
+  const [restartQueue, setForceRestartQueue] = useState<Application[]>([]);
+
+  function addToQueue(application: Application, actionType: ConfirmActionType): void {
+    switch (actionType) {
+      case ConfirmActionTypes.RESTART: {
+        setForceRestartQueue((queue) => [...queue, application]);
+        break;
+      }
+
+      case ConfirmActionTypes.QUIT: {
+        setQuitQueue((queue) => [...queue, application]);
+        break;
+      }
+
+      case ConfirmActionTypes.FORCE_QUIT: {
+        setForceQuitQueue((queue) => [...queue, application]);
+        break;
+      }
+
+      default: {
+        const _unreachable: never = actionType;
+        throw new Error(`Unreachable action type: ${actionType}`);
+      }
     }
   }
 
-  if (!iconFileName) {
-    // no icon found. fallback to empty string (no icon)
-    return "";
+  function removeFromQueue(application: Application, actionType: ConfirmActionType): void {
+    switch (actionType) {
+      case ConfirmActionTypes.RESTART: {
+        setForceRestartQueue((queue) => queue.filter((item) => item.pid !== application.pid));
+        break;
+      }
+
+      case ConfirmActionTypes.QUIT: {
+        setQuitQueue((queue) => queue.filter((item) => item.pid !== application.pid));
+        break;
+      }
+
+      case ConfirmActionTypes.FORCE_QUIT: {
+        setForceQuitQueue((queue) => queue.filter((item) => item.pid !== application.pid));
+        break;
+      }
+
+      default: {
+        const _unreachable: never = actionType;
+        throw new Error(`Unreachable action type: ${actionType}`);
+      }
+    }
   }
 
-  // if icon doesn't end with .icns, add it
-  if (!iconFileName.endsWith(".icns")) {
-    iconFileName = `${iconFileName}.icns`;
+  function isInQueue(application: Application, actionType: ConfirmActionType): boolean {
+    switch (actionType) {
+      case ConfirmActionTypes.RESTART: {
+        return restartQueue.some((item) => item.pid === application.pid);
+      }
+
+      case ConfirmActionTypes.QUIT: {
+        return quitQueue.some((item) => item.pid === application.pid);
+      }
+
+      case ConfirmActionTypes.FORCE_QUIT: {
+        return forceQuitQueue.some((item) => item.pid === application.pid);
+      }
+
+      default: {
+        const _unreachable: never = actionType;
+        throw new Error(`Unreachable action type: ${actionType}`);
+      }
+    }
   }
 
-  const iconPath = `${path}/Contents/Resources/${iconFileName}`;
-  console.log(iconPath);
-  return iconPath;
-}
+  const setLoadingState = useCallback(
+    (isLoading: boolean) => {
+      setState((state) => ({ ...state, isLoading }));
+    },
+    [setState]
+  );
 
-async function getRunningAppsPaths(): Promise<string[]> {
-  const result = await runAppleScript(`
-    set appPaths to {}
-    tell application "System Events"
-      repeat with aProcess in (get file of every process whose background only is false)
-        set processPath to POSIX path of aProcess
-        set end of appPaths to processPath
-      end repeat
-    end tell
+  const handleSearchTextChange = useCallback(
+    (query: string) => {
+      setState((state) => ({ ...state, query }));
+    },
+    [setState]
+  );
 
-    return appPaths
-  `);
+  const hydrateApplications = useCallback(async function () {
+    setLoadingState(true);
+    const applications = await loadUserApplications();
 
-  return result.split(", ").map((appPath) => appPath.trim());
-}
+    setState((state) => ({ ...state, applications }));
+    setLoadingState(false);
+  }, []);
 
-function quitApp(app: string) {
-  return runAppleScript(`tell application "${app}" to quit`);
-}
+  const quitApplication = useCallback(
+    async (application: Application) => {
+      try {
+        setLoadingState(true);
+        addToQueue(application, ConfirmActionTypes.QUIT);
 
-function restartApp(app: string) {
-  return runAppleScript(`tell application "${app}"
-                            repeat while its running
-                              quit
-                              delay 0.5
-	                          end repeat
-	                          activate
-                        end tell`);
-}
+        await showToast({
+          title: "Quitting Application",
+          style: Toast.Style.Animated,
+        });
 
-function quitAppWithToast(app: string): boolean {
-  try {
-    quitApp(app);
-    showToast({
-      style: Toast.Style.Success,
-      title: `Quit ${app}`,
-    });
-    return true;
-  } catch {
-    showToast({
-      style: Toast.Style.Failure,
-      title: `Unable to quit ${app}`,
-    });
-    return false;
-  }
-}
+        await handleQuitApplication(application);
+        await hydrateApplications();
 
-function restartAppWithToast(app: string): boolean {
-  try {
-    restartApp(app);
-    showToast({
-      style: Toast.Style.Success,
-      title: `Restarted ${app}`,
-    });
-    return true;
-  } catch {
-    showToast({
-      style: Toast.Style.Failure,
-      title: `Unable to restart ${app}`,
-    });
-    return false;
-  }
-}
+        await showToast({
+          title: `Closed ${application.name}`,
+          style: Toast.Style.Success,
+        });
+      } catch (err) {
+        await showToast({
+          title: `Unable to quit ${application.name}`,
+          message: handleError(err),
+          style: Toast.Style.Failure,
+        });
+      }
 
-interface AppListState {
-  apps: {
-    name: string;
-    iconPath: string;
-  }[];
-  isLoading: boolean;
-}
+      removeFromQueue(application, ConfirmActionTypes.QUIT);
+      setLoadingState(false);
+    },
+    [setLoadingState, hydrateApplications]
+  );
 
-class AppList extends React.Component<Record<string, never>, AppListState> {
-  constructor(props: Record<string, never>) {
-    super(props);
+  const restartApplication = useCallback(
+    async (application: Application) => {
+      try {
+        setLoadingState(true);
+        addToQueue(application, ConfirmActionTypes.RESTART);
 
-    this.state = {
-      apps: [],
-      isLoading: true,
-    };
-  }
+        await showToast({
+          title: `Restarting ${application.name}`,
+          style: Toast.Style.Animated,
+        });
 
-  componentDidMount() {
-    getRunningAppsPaths().then((appCandidatePaths) => {
-      // filter out all apps that do not end with .app
-      const appPaths = appCandidatePaths.filter((appPath) => appPath.endsWith(".app"));
-      const appNames = appPaths.map((appPath) => applicationNameFromPath(appPath));
-      const appIcons = appPaths.map((appPath) => applicationIconFromPath(appPath));
+        await handleRestartApplication(application);
+        await hydrateApplications();
 
-      const apps = appNames.map((appName, index) => {
-        return {
-          name: appName,
-          iconPath: appIcons[index],
-        };
-      });
+        await showToast({
+          title: `Restarted ${application.name}`,
+          style: Toast.Style.Success,
+        });
+      } catch (err) {
+        await showToast({
+          title: `Unable to restart ${application.name}`,
+          message: handleError(err),
+          style: Toast.Style.Failure,
+        });
+      }
 
-      this.setState({ apps: apps, isLoading: false });
-    });
-  }
+      removeFromQueue(application, ConfirmActionTypes.RESTART);
+      setLoadingState(false);
+    },
+    [setLoadingState, hydrateApplications]
+  );
 
-  render() {
-    return (
-      <List isLoading={this.state.isLoading}>
-        {this.state.apps.map((app) => (
+  const forceQuitApplication = useCallback(
+    async (application: Application) => {
+      try {
+        setLoadingState(true);
+        addToQueue(application, ConfirmActionTypes.FORCE_QUIT);
+
+        await showToast({
+          title: `Forcing ${application.name} to quit`,
+          style: Toast.Style.Animated,
+        });
+
+        await handleForceQuitApplication(application);
+        await hydrateApplications();
+
+        await showToast({
+          title: `Forced ${application.name} to quit`,
+          style: Toast.Style.Success,
+        });
+      } catch (err) {
+        await showToast({
+          title: `Unable to force ${application.name} to quit`,
+          message: handleError(err),
+          style: Toast.Style.Failure,
+        });
+      }
+
+      removeFromQueue(application, ConfirmActionTypes.FORCE_QUIT);
+      setLoadingState(false);
+    },
+    [hydrateApplications, setLoadingState]
+  );
+
+  useEffect(() => {
+    hydrateApplications();
+  }, []);
+
+  return (
+    <List
+      filtering={true}
+      isLoading={state.isLoading}
+      searchText={state.query}
+      onSearchTextChange={handleSearchTextChange}
+    >
+      {state.applications.map((application) => {
+        const isRestarting = isInQueue(application, ConfirmActionTypes.RESTART);
+        const isQuitting = isInQueue(application, ConfirmActionTypes.QUIT);
+        const isForceQuitting = isInQueue(application, ConfirmActionTypes.FORCE_QUIT);
+
+        const accessories = [
+          ...(isRestarting ? getAccessoryByActionState(ConfirmActionTypes.RESTART) : []),
+          ...(isQuitting ? getAccessoryByActionState(ConfirmActionTypes.QUIT) : []),
+          ...(isForceQuitting ? getAccessoryByActionState(ConfirmActionTypes.FORCE_QUIT) : []),
+        ];
+
+        return (
           <List.Item
-            title={app.name}
-            key={app.name}
-            icon={app.iconPath}
+            key={application.pid}
+            title={application.name}
+            icon={{
+              fileIcon: application.fileIcon,
+            }}
+            accessories={accessories}
             actions={
               <ActionPanel>
-                <Action
-                  title="Quit"
-                  onAction={() => {
-                    const success = quitAppWithToast(app.name);
-                    if (success) {
-                      this.setState({ apps: this.state.apps.filter((a) => a.name !== app.name) });
-                    }
-                  }}
-                />
+                <ActionPanel.Section>
+                  <Action title="Quit" onAction={() => quitApplication(application)} />
+                  <Action title="Force Quit" onAction={() => forceQuitApplication(application)} />
+                </ActionPanel.Section>
+
                 <Action
                   title="Restart"
-                  onAction={() => {
-                    restartAppWithToast(app.name);
+                  shortcut={{
+                    modifiers: ["cmd", "opt"],
+                    key: "r",
                   }}
+                  onAction={() => restartApplication(application)}
                 />
               </ActionPanel>
             }
           />
-        ))}
-      </List>
-    );
-  }
+        );
+      })}
+    </List>
+  );
 }
-
-export default AppList;
