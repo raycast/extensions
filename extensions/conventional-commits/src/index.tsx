@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 
 class CommitItem {
   prefix: string;

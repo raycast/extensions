@@ -15,7 +15,6 @@ export default function ResultSection({
   setIsShowingDetail: (value: boolean) => void;
 }) {
   const savedChat = useSavedChat();
-  console.log(chat);
   return (
     <List.Section title="Result">
       {chat.answer ? (

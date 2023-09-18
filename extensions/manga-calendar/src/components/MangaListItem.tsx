@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import DetailsView from "./DetailsView";
 import { Manga, Publisher } from "../types";
 import { OpenPublisherStore } from "./OpenPublisherStore";
@@ -32,7 +32,7 @@ export default function MangaListItem({ manga }: Props) {
     <List.Item
       title={`${manga.name} #${manga.volume}`}
       subtitle={manga.editorial}
-      icon={{ source: manga.frontImageUrl, mask: Image.Mask.Circle }}
+      icon={{ source: manga.frontImageUrl, mask: Image.Mask.Circle, fallback: Color.Blue }}
       accessories={[{ icon: Icon.Coins }, { text: `$${manga.price}.00` }]}
       actions={
         <ActionPanel>

@@ -1,5 +1,11 @@
-import { closeMainWindow } from "@raycast/api";
+import { FileSystemItem, closeMainWindow } from "@raycast/api";
+import path from "path";
 import { runAppleScript } from "run-applescript";
+
+export function isValidFile(file: FileSystemItem) {
+  const extname = path.extname(file.path);
+  return [".jpg", ".jpeg", ".png", ".gif", ".heic"].includes(extname);
+}
 
 /**
  * Runs the AppleScript and closes the main window afterwards.
@@ -14,4 +20,18 @@ import { runAppleScript } from "run-applescript";
 export async function runAppleScriptSilently(appleScript: string) {
   await closeMainWindow();
   await runAppleScript(appleScript);
+}
+
+export function applyWallpaperUpdate(file: string) {
+  return runAppleScriptSilently(`
+    tell application "System Events"
+      tell appearance preferences
+        tell application "System Events"
+          tell every desktop
+            set picture to "${file}"
+          end tell
+        end tell
+      end tell
+    end tell
+  `);
 }
