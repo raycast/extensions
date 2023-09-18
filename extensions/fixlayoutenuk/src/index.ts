@@ -1,18 +1,14 @@
-import { Clipboard, getSelectedText, showToast, Toast } from "@raycast/api";
+import { Clipboard, getSelectedText } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 const enChars = "qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>?";
 const ukChars = "йцукенгшщзхїфівапролджєячсмитьбю.ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄЯЧСМИТЬБЮ,";
 const ignoreChars = ".,";
 
+//noinspection JSUnusedGlobalSymbols
 export default async function main()
 {
 	const inputText = await getSelectedText();
-	await showToast({
-		style: Toast.Style.Success,
-		title: inputText,
-		message: inputText
-	});
 
 	if (!inputText)
 		return;

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fixlayoutenuk",
-  "title": "FixLayoutEnUk",
+  "title": "Fix Layout EnUk",
   "description": "Fixes typed text with wong keyboard layout.\nEnglish <-> Ukrainian",
   "icon": "command-icon.png",
   "author": "canab",
