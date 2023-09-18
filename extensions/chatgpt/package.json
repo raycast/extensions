@@ -3,7 +3,7 @@
   "name": "chatgpt",
   "title": "ChatGPT",
   "description": "Interact with OpenAI's ChatGPT directly from your command bar",
-  "icon": "icon.png",
+  "icon": "gpt.png",
   "author": "abielzulio",
   "contributors": [
     "erodactyl",
@@ -15,7 +15,8 @@
     "sykuang",
     "thanhlongb",
     "k8scat",
-    "Nauxscript"
+    "Nauxscript",
+    "bomberfish"
   ],
   "categories": [
     "Productivity",

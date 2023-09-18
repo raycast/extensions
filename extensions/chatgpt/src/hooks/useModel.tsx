@@ -9,7 +9,7 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Default",
   prompt: "You are a helpful assistant.",
-  option: "gpt-3.5-turbo",
+  option: "gpt-4",
   temperature: "1",
   pinned: false,
 };
@@ -19,7 +19,7 @@ export function useModel(): ModelHook {
   const [isLoading, setLoading] = useState<boolean>(true);
   const gpt = useChatGPT();
   const { useAzure, azureDeployment } = getConfiguration();
-  const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
+  const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301", "gpt-4", "gpt-4-0613"]);
 
   useEffect(() => {
     if (!useAzure) {

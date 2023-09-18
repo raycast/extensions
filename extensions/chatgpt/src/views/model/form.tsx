@@ -58,7 +58,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     initialValues: {
       name: model?.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
-      option: model?.option ?? "gpt-3.5-turbo",
+      option: model?.option ?? "gpt-4",
       prompt: model?.prompt ?? "",
       pinned: model?.pinned ?? false,
     },
