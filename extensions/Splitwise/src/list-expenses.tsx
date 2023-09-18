@@ -1,4 +1,4 @@
-import { Expense } from "./types/get_expenses.types"; // Types
+import { Expense } from "./types/get_expenses.types";
 
 import { GetExpense, DeleteExpense, UpdateExpense } from "./hooks/useList";
 import { loadingLimit } from "./hooks/userPreferences";
@@ -27,6 +27,7 @@ export default function Command() {
             title={expense.description}
             accessories={[
               { icon: expense.group_id ? Icon.TwoPeople : "", tooltip: "Group Expense" },
+              { icon: expense.payment ? Icon.BankNote : "", tooltip: "Payment" },
               {
                 tag: {
                   value: `${expense.cost} ${expense.currency_code}`,
@@ -95,7 +96,7 @@ export default function Command() {
 
                     <List.Item.Detail.Metadata.Separator />
 
-                    <List.Item.Detail.Metadata.TagList title={`Pays back `}>
+                    <List.Item.Detail.Metadata.TagList title={`Pays back`}>
                       {expense.users
                         .filter((user) => Number(user.net_balance) < 0)
                         .map((user) => (
@@ -113,7 +114,11 @@ export default function Command() {
                     {expense.group_id && ( // GROUP EXPENSES
                       <>
                         <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Link title="Group Expense" text="View Group" target={`https://secure.splitwise.com/#/groups/${expense.group_id}`} />
+                        <List.Item.Detail.Metadata.Link
+                          title="Group Expense"
+                          text="View Group"
+                          target={`https://secure.splitwise.com/#/groups/${expense.group_id}`}
+                        />
                       </>
                     )}
 
@@ -129,7 +134,7 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Link
                           title="Receipt"
-                          text="View receipt"
+                          text="View Receipt"
                           target={expense.receipt.original}
                         />
                       </>
@@ -145,12 +150,14 @@ export default function Command() {
                   url={`https://secure.splitwise.com/#/all/expenses/${expense.id}`}
                   shortcut={Keyboard.Shortcut.Common.Open}
                 />
-                <Action.Push
-                  title="Change values"
-                  icon={Icon.Pencil}
-                  target={<ChangeValues expense={expense} />}
-                  shortcut={Keyboard.Shortcut.Common.Edit}
-                />
+                {expense.users.filter((user) => Number(user.paid_share) > 0).length <= 1 && ( // if more than one person paid, don't allow to change values
+                  <Action.Push
+                    title="Change values"
+                    icon={Icon.Pencil}
+                    target={<ChangeValues expense={expense} />}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                  />
+                )}
                 <Action
                   title="Reload"
                   icon={Icon.Repeat}
@@ -174,65 +181,68 @@ export default function Command() {
 
 // ------------ FORM ------------
 // Comment out some lines due to updating costs not working at the moment
-
-// import { useState } from "react";
 import { useForm, FormValidation } from "@raycast/utils";
+import { getFriends } from "./hooks/useFriends_Groups";
 
 function ChangeValues(handedOverValues: { expense: Expense }) {
   const { expense } = handedOverValues;
-  // const [defaultCosts, setCosts] = useState<string>(expense.cost);
-  // const [nameError, setNameError] = useState<string | undefined>();
-
   const { pop } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<Expense | any>({ //Expense
-    onSubmit: (input) => {
-      const paid_share = Number(input.cost);
-      
-      const numberShares = input.owes.length + 1;
-      // const owed_share = Number(input.cost) / numberShares;
-      
-      let share = Math.floor(Number(input.cost) * 100 / numberShares) / 100;
-      let adjustedShare = (Number(input.cost) - share) / (numberShares-1);
-      adjustedShare = Math.round(adjustedShare * 100) / 100;
+  const [friends] = getFriends();
+  const currentUser = GetCurrentUser() as any; // FETCH CURRENT USER
+  const friendsWithCurrentUser = [...friends, currentUser];
 
-      const paramsJson: any  = {
-        // id: `${expense.id}` as string,
+  const { handleSubmit, itemProps } = useForm<Expense | any>({
+    //Expense
+    onSubmit: (input) => {
+      const numberShares = input.owes?.length;
+      const cost = Number(input.cost);
+
+      let share = Math.floor((cost * 100) / numberShares) / 100;
+      let adjustedShare = (cost - share) / (numberShares - 1);
+      adjustedShare = isNaN(adjustedShare) ? 0 : Math.round(adjustedShare * 100) / 100;
+
+      // drop input.paid from input.owes
+      input.owes = input.owes?.filter((user: any) => user !== input.paid);
+
+      const paramsJson: any = {
         cost: input.cost as string,
         description: input.description as string,
-        date: new Date(input.date).toISOString(),
+        date: input.date,
         group_id: expense.group_id as number,
+        users__0__user_id: input.paid as number,
+        users__0__paid_share: input.cost,
+        users__0__owed_share: share,
       };
 
-      paramsJson[`users__0__user_id`] = input.paid as number;
-      paramsJson[`users__0__paid_share`] = `${paid_share}`;
-      paramsJson[`users__0__owed_share`] = share;
-
       let counter = 1;
-      input.owes.map((user:any) => {
+      input.owes?.map((user: any) => {
         paramsJson[`users__${counter}__user_id`] = user as number;
         paramsJson[`users__${counter}__owed_share`] = adjustedShare;
         counter++;
       });
 
       UpdateExpense(expense.id, paramsJson).then(() => pop());
-      // console.log(paramsJson, expense.id); pop();
+      // console.log(paramsJson, expense.id); // DEBUG
     },
 
     initialValues: {
       cost: expense.cost,
       description: expense.description,
       date: new Date(expense.date),
-      // paid: expense.users.filter((user) => Number(user.paid_share) > 0).map((user) => String(user.user.id)),
-      paid: expense.users.filter((user) => Number(user.paid_share) > 0).map((user) => String(user.user.id))[0],
-      owes: expense.users.filter((user) => Number(user.net_balance) < 0).map((user) => String(user.user.id)),
+      paid: expense.users.filter((user) => Number(user.paid_share) > 0)[0].user.id.toString(),
+      owes: expense.users.filter((user) => Number(user.owed_share) > 0).map((user) => String(user.user.id)),
     },
 
     validation: {
       description: FormValidation.Required,
       date: FormValidation.Required,
       paid: FormValidation.Required,
-      owes: FormValidation.Required,
+      owes: (input) => {
+        if (input.length < 2) {
+          return "Select at least 2 people";
+        }
+      },
 
       cost: (input) => {
         if (!input?.match(/^\d+(\.\d{1,2})?$/)) {
@@ -241,7 +251,6 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
         }
       },
     },
-
   });
 
   return (
@@ -249,83 +258,66 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
       navigationTitle={`Change values of '${expense.description}'`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit changes"
-            onSubmit={handleSubmit}
-            // onSubmit={(values) => {
-            //   UpdateExpense({
-            //     id: expense.id,
-            //     description: values.description as string,
-            //     // cost: values.cost as string,
-            //     date: values.date,
-            //     group_id: expense.group_id as number,
-            //   }).then(() => pop());
-            // }}
-          />
+          <Action.SubmitForm title="Submit changes" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="Description"
-        {...itemProps.description} //id="description" // defaultValue={expense.description}
-      />
-      <Form.TextField
-        title={`Cost in ${expense.currency_code}`}
-        {...itemProps.cost}
-        // id="cost"
-        // onChange={setCosts}
-        // value={defaultCosts}
-        // error={nameError}
-        // onBlur={(input) => {
-        //   if (!input.target.value?.match(/^\d+(\.\d{1,2})?$/)) {
-        //     // check if input is integer or float with 1 or 2 decimal places
-        //     setNameError("The field should't be empty!");
-        //   } else {
-        //     setCosts;
-        //     setNameError(undefined);
-        //   }
-        // }}
-        // defaultValue={expense.cost}
-      />
-      <Form.DatePicker
-        title="Date of Expense"
-        {...itemProps.date} //id="date" defaultValue={new Date(expense.date)}
-      />
+      <Form.TextField title="Description" {...itemProps.description} />
+      <Form.DatePicker title="Date of Expense" {...itemProps.date} />
+      <Form.TextField title={`Cost in ${expense.currency_code}`} {...itemProps.cost} />
 
       <Form.Separator />
 
-      <Form.Dropdown
-        title="Who paid?"
-        {...itemProps.paid}
-        // info="If multiple people selected, the paid share will be split equally"
-      >
+      <Form.Dropdown title="Who paid?" {...itemProps.paid}>
+        {friendsWithCurrentUser.map((friend) => (
+          <Form.Dropdown.Item
+            key={friend.id}
+            value={String(friend.id)}
+            title={[friend.first_name, friend.last_name].join(" ")}
+            icon={{ source: friend.picture.small, mask: Image.Mask.Circle }}
+          />
+        ))}
+      </Form.Dropdown>
+      {/* <Form.Dropdown title="Who paid?" {...itemProps.paid}>
         {expense.users.map((user) => (
           <Form.Dropdown.Item
             key={user.user.id}
             value={String(user.user.id)}
             title={[user.user.first_name, user.user.last_name].join(" ")}
-            icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle}}
+            icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
           />
         ))}
-      </Form.Dropdown>
+      </Form.Dropdown> */}
 
       <Form.TagPicker
         title="Who owes?"
         {...itemProps.owes}
         info="Expense will be split equally among the involved people"
-        // id="owes"
-        // defaultValue={expense.users.filter((user) => Number(user.net_balance) < 0).map((user) => String(user.user.id))}
+      >
+        {friendsWithCurrentUser.map((friend) => (
+          <Form.TagPicker.Item
+            key={friend.id}
+            value={String(friend.id)}
+            title={[friend.first_name, friend.last_name].join(" ")}
+            icon={{ source: friend.picture.small, mask: Image.Mask.Circle }}
+          />
+        ))}
+      </Form.TagPicker>
+
+      {/* <Form.TagPicker
+        title="Who owes?"
+        {...itemProps.owes}
+        info="Expense will be split equally among the involved people"
       >
         {expense.users.map((user) => (
           <Form.TagPicker.Item
             key={user.user.id}
             value={String(user.user.id)}
-            title={user.user.first_name}
-            icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle}}
+            title={[user.user.first_name, user.user.last_name].join(" ")}
+            icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
           />
         ))}
-      </Form.TagPicker>
-
+      </Form.TagPicker> */}
     </Form>
   );
 }
