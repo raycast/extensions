@@ -70,7 +70,7 @@ export default function Command(props: LaunchProps) {
     return (
       <List searchBarPlaceholder="" searchText="">
         <List.EmptyView
-          title={`BPM: ${bpm} | Accents: Per ${group} Clicks | Clicks: ${taps}`}
+          title={`BPM: ${bpm} | Accents: Per ${group || 1} ${group == 1 ? "Click" : "Clicks"} | Clicks: ${taps}`}
           description={description}
           icon={taps % 2 === 0 ? "metronome-left.png" : "metronome-right.png"}
           actions={
