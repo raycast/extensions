@@ -3,13 +3,14 @@
   "name": "browser-bookmarks",
   "title": "Browser Bookmarks",
   "description": "Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari or Vivaldi.",
-  "icon": "icon.png",
+  "icon": "extension-icon.png",
   "author": "thomaslombart",
   "owner": "raycast",
   "access": "public",
   "contributors": [
     "sasivarnan",
-    "ahp"
+    "ahp",
+    "danulqua"
   ],
   "categories": [
     "Web"
