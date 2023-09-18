@@ -137,7 +137,7 @@ const pastePassword = async (entry: string) => {
 const copyPassword = async (entry: string) =>
   getPassword(entry).then((password) => {
     showHUD("Password has been Copied to Clipboard");
-    return Clipboard.copy(password).then(() => password);
+    return protectedCopy(password).then(() => password);
   });
 
 const pasteUsername = async (entry: string) => {
@@ -163,7 +163,7 @@ const pasteTOTP = async (entry: string) => {
 const copyTOTP = async (entry: string) =>
   getTOTP(entry).then((otp) => {
     showHUD("TOTP has been Copied to Clipboard");
-    return Clipboard.copy(otp).then(() => otp);
+    return protectedCopy(otp).then(() => otp);
   });
 
 const getTOTP = (entry: string) =>
@@ -192,13 +192,14 @@ const getTOTP = (entry: string) =>
 
 async function protectedCopy(concealString: string) {
   // await closeMainWindow();
+  const escapedConcealString = concealString.replace(/\\/g, "\\\\");
   const script = `
       use framework "Foundation"
       set type to current application's NSPasteboardTypeString
       set pb to current application's NSPasteboard's generalPasteboard()
       pb's clearContents()
       pb's setString:"" forType:"org.nspasteboard.ConcealedType"
-      pb's setString:"${concealString}" forType:type
+      pb's setString:"${escapedConcealString}" forType:type
     `;
   try {
     await runAppleScript(script);
