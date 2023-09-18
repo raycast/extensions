@@ -228,12 +228,13 @@ export default function Applist() {
         });
 
         await handleQuitApplication(application);
-        await hydrateApplications();
 
         await showToast({
           title: `Closed ${application.name}`,
           style: Toast.Style.Success,
         });
+
+        await hydrateApplications();
       } catch (err) {
         await showToast({
           title: `Unable to quit ${application.name}`,
@@ -254,18 +255,17 @@ export default function Applist() {
         setLoadingState(true);
         addToQueue(application, ConfirmActionTypes.RESTART);
 
+        // No animation here because Raycast closes when the application restarts
+        // This leads to the toast getting stuck in the animation state
+
         await showToast({
           title: `Restarting ${application.name}`,
-          style: Toast.Style.Animated,
+          style: Toast.Style.Success,
         });
 
         await handleRestartApplication(application);
-        await hydrateApplications();
 
-        await showToast({
-          title: `Restarted ${application.name}`,
-          style: Toast.Style.Success,
-        });
+        await hydrateApplications();
       } catch (err) {
         await showToast({
           title: `Unable to restart ${application.name}`,
@@ -292,12 +292,13 @@ export default function Applist() {
         });
 
         await handleForceQuitApplication(application);
-        await hydrateApplications();
 
         await showToast({
           title: `Forced ${application.name} to quit`,
           style: Toast.Style.Success,
         });
+
+        await hydrateApplications();
       } catch (err) {
         await showToast({
           title: `Unable to force ${application.name} to quit`,
