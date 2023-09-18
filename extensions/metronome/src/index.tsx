@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import sound from "sound-play";
 
 export default function Command(props: LaunchProps) {
-  const { bpm, group } = props.arguments;
+  const { bpm, group = 1 } = props.arguments; // Set default value for group
   const [taps, setTaps] = useState<number>(0);
   const groupPositionRef = useRef<number>(1);
   const [isRunning, setIsRunning] = useState(true); // Added state variable for metronome status
@@ -58,12 +58,12 @@ export default function Command(props: LaunchProps) {
   }, [bpm, group, isRunning]);
 
   if (
-    Number.isInteger(Number(bpm)) &&
+    !isNaN(Number(bpm)) &&
     Number(bpm) > 0 &&
     Number(bpm) < 500 &&
-    Number.isInteger(Number(group)) &&
-    Number(group) > 0 &&
-    Number(group) < 500
+    !isNaN(Number(group) || 1) &&
+    Number(group || 1) > 0 &&
+    Number(group || 1) < 500
   ) {
     const description = isRunning ? "Click ↵ to pause" : "Click ↵ to play";
 
@@ -89,7 +89,7 @@ export default function Command(props: LaunchProps) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid Inputs",
-      message: "Inputs must be positive integers below 500",
+      message: "Inputs must be positive numbers below 500",
     });
     popToRoot();
     return null;
