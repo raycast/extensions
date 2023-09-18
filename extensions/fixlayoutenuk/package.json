@@ -4,7 +4,7 @@
   "title": "Fix Layout EnUk",
   "description": "Fixes typed text with wong keyboard layout.\nEnglish <-> Ukrainian",
   "icon": "command-icon.png",
-  "author": "canab",
+  "author": "yaroslav_kihtan",
   "categories": [
     "Productivity"
   ],

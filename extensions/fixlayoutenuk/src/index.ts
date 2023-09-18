@@ -6,44 +6,41 @@ const ukChars = "йцукенгшщзхїфівапролджєячсмитьб�
 const ignoreChars = ".,";
 
 //noinspection JSUnusedGlobalSymbols
-export default async function main()
-{
-	const inputText = await getSelectedText();
+export default async function main() {
+  const inputText = await getSelectedText();
 
-	if (!inputText)
-		return;
+  if (!inputText) return;
 
-	const inputChars = inputText?.split("");
-	let outputText = "";
+  const inputChars = inputText?.split("");
+  let outputText = "";
 
-	const isEn = inputChars.some((c) => enChars.includes(c) && !ignoreChars.includes(c));
-	if (isEn) {
-		for (const c of inputChars) {
-			const i = enChars.indexOf(c);
-			if (i >= 0) outputText += ukChars[i];
-			else outputText += c;
-		}
-		await Clipboard.paste(outputText);
-		await switchLayout();
-		return;
-	}
+  const isEn = inputChars.some((c) => enChars.includes(c) && !ignoreChars.includes(c));
+  if (isEn) {
+    for (const c of inputChars) {
+      const i = enChars.indexOf(c);
+      if (i >= 0) outputText += ukChars[i];
+      else outputText += c;
+    }
+    await Clipboard.paste(outputText);
+    await switchLayout();
+    return;
+  }
 
-	const isUk = inputChars.some((c) => ukChars.includes(c) && !ignoreChars.includes(c));
-	if (isUk) {
-		for (const c of inputChars) {
-			const i = ukChars.indexOf(c);
-			if (i >= 0) outputText += enChars[i];
-			else outputText += c;
-		}
-		await Clipboard.paste(outputText);
-		await switchLayout();
-		return;
-	}
+  const isUk = inputChars.some((c) => ukChars.includes(c) && !ignoreChars.includes(c));
+  if (isUk) {
+    for (const c of inputChars) {
+      const i = ukChars.indexOf(c);
+      if (i >= 0) outputText += enChars[i];
+      else outputText += c;
+    }
+    await Clipboard.paste(outputText);
+    await switchLayout();
+    return;
+  }
 }
 
-async function switchLayout()
-{
-	await runAppleScript(`
+async function switchLayout() {
+  await runAppleScript(`
 		tell application "System Events"
             keystroke space using {control down}
 		end tell
