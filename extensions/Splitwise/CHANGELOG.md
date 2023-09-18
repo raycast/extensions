@@ -2,7 +2,7 @@
 
 ## [Update] - 2023-16-09
 - Added new command `List Expenses` which allows to list all expenses and edit them
-- Added validation to `Add Expense` command
+- Added validation and pop() to `Add Expense` command
 - Changed friend's balance from text to tags
 - Improved API Calls
 

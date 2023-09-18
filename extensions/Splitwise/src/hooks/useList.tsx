@@ -52,19 +52,19 @@ export const DeleteExpense = async (id: number, mutate: any) => {
 };
 
 // FORM FUNCTION
-export async function UpdateExpense(values: any) {
+export async function UpdateExpense(expenseID: number, values: any) {
   await showToast({ style: Toast.Style.Animated, title: "Updating Expense" });
   try {
     const responseSubmit = await axios({
       method: "post",
-      url: `https://secure.splitwise.com/api/v3.0/update_expense/${values.id}`,
+      url: `https://secure.splitwise.com/api/v3.0/update_expense/${expenseID}`,
       ...HEADER,
-      data: {
-        description: values.description,
+      data: values//{
+        // description: values.description,
         // cost: values.cost,
-        date: values.date,
-        group_id: values.group_id,
-      },
+        // date: values.date,
+        // group_id: values.group_id,
+      // },
     });
 
     if (Object.keys(responseSubmit.data.errors).length === 0) {
