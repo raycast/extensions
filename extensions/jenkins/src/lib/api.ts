@@ -108,9 +108,9 @@ export class JenkinsAPI {
   async request(url: RequestInfo, init?: RequestInit) {
     let urlAgent;
     if (url.toString().startsWith("http://")) {
-      new http.Agent({});
+      urlAgent = new http.Agent({});
     } else if (url.toString().startsWith("https://")) {
-      new https.Agent({ rejectUnauthorized: !this.jenkins.unsafeHttps });
+      urlAgent = new https.Agent({ rejectUnauthorized: !this.jenkins.unsafeHttps });
     } else {
       return Promise.reject(new Error("Wrong scheme in URL"));
     }
