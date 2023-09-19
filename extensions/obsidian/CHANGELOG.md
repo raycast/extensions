@@ -1,5 +1,8 @@
 # Obsidian Changelog
 
+## [Menubar cache bug fixes] - 2023-09-15
+- Fixes a bug where the cache fallback would crash the extension
+
 ## [Apply templates on task file name] - 2023-08-5
 - The Append Task command will now apply template placeholders to file name for dynamic file names
 

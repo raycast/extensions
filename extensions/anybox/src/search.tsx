@@ -2,12 +2,12 @@ import { List, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import searchRequest, { SearchQuery, Link, Preferences } from "./utilities/searchRequest";
 import LinkItem from "./components/LinkItem";
-import CollectionItem from "./components/CollectionItem";
-import { CollectionProp, fetchCollections, fetchSearchEngines } from "./utilities/fetch";
+import TagItem from "./components/TagItem";
+import { TagProp, fetchTags as fetchTags, fetchSearchEngines } from "./utilities/fetch";
 
 interface State {
   links: Link[];
-  collections: CollectionProp[];
+  tags: TagProp[];
   isLoading: boolean;
   isSearchEngines: boolean;
 }
@@ -28,15 +28,15 @@ function looseMatch(query: string, content: string): boolean {
   return true;
 }
 
-let collectionsResult: CollectionProp[];
-fetchCollections().then((res) => {
-  collectionsResult = res;
+let tagsResult: TagProp[];
+fetchTags().then((res) => {
+  tagsResult = res;
 });
 
 export default function SearchResult() {
   const [state, setState] = useState<State>({
     links: [],
-    collections: [],
+    tags: [],
     isLoading: true,
     isSearchEngines: false,
   });
@@ -54,37 +54,36 @@ export default function SearchResult() {
       let linksResult = await searchRequest(query);
 
       if (Array.isArray(linksResult)) {
-        let filteredCollections: CollectionProp[];
+        let filteredTags: TagProp[];
 
         if (!linksResult.length) {
-          const searchEngines = await fetchSearchEngines();
+          const searchEngines = await fetchSearchEngines(preferences.api_key);
           if (Array.isArray(searchEngines) && searchEngines.length) {
             linksResult = searchEngines;
             isSearchEngines = true;
           }
         }
 
-        if (preferences.searchCollections) {
-          filteredCollections = collectionsResult
+        if (preferences.searchTags) {
+          filteredTags = tagsResult
             .filter((val) => {
-              return looseMatch(searchText, val.heading + " " + val.name);
+              return looseMatch(searchText, val.name);
             })
-            .filter((val) => val.count > 0)
             .slice(0, 5);
         } else {
-          filteredCollections = [];
+          filteredTags = [];
         }
 
         setState({
           links: linksResult,
-          collections: filteredCollections,
+          tags: filteredTags,
           isLoading: false,
           isSearchEngines,
         });
       } else {
         setState({
           links: [],
-          collections: [],
+          tags: [],
           isLoading: false,
           isSearchEngines: false,
         });
@@ -97,9 +96,9 @@ export default function SearchResult() {
   let navigationTitle: string;
   let searchBarPlaceholder: string;
 
-  if (preferences.searchCollections) {
-    navigationTitle = "Search for Links and Collections";
-    searchBarPlaceholder = "Search for links and collections in Anybox";
+  if (preferences.searchTags) {
+    navigationTitle = "Search for Links and Tags";
+    searchBarPlaceholder = "Search for links and tags in Anybox";
   } else {
     navigationTitle = "Search for Links";
     searchBarPlaceholder = "Search for links in Anybox";
@@ -114,8 +113,8 @@ export default function SearchResult() {
       navigationTitle={navigationTitle}
       searchBarPlaceholder={searchBarPlaceholder}
     >
-      {state.collections.map((item) => {
-        return <CollectionItem item={item} key={item.id} />;
+      {state.tags.map((item) => {
+        return <TagItem item={item} key={item.id} />;
       })}
       {state.links.map((item) => {
         return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;

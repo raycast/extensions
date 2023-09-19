@@ -5,6 +5,7 @@ import { Alert, Color, Icon, LocalStorage, Toast, confirmAlert, showToast } from
 
 export function useSearchTranslations({ initialSearch = "" }: { initialSearch?: string }) {
   const [searchText, setSearchText] = useState(initialSearch);
+
   const { preferences } = usePreferences();
 
   const { data, isLoading } = useFetch<{ word: string; lang: string }[]>(

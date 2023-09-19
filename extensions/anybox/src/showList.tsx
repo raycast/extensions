@@ -5,25 +5,16 @@ import { getAndCloseMainWindow, fetchSidebar } from "./utilities/fetch";
 interface SidebarItemProps {
   id: string;
   name: string;
-  heading?: string;
   type?: string;
   icon?: string;
   color?: string;
-  count: number;
-}
-
-function itemTitle(item: SidebarItemProps) {
-  if (item.heading) {
-    return `${item.heading} › ${item.name}`;
-  }
-  return item.name;
 }
 
 function itemSubtitle(item: SidebarItemProps) {
   if (item.type === "filter") {
     return "Smart List";
-  } else if (item.type == "collection") {
-    return "Collection";
+  } else if (item.type == "tag") {
+    return "Tag";
   } else {
     return "Preset";
   }
@@ -38,7 +29,7 @@ function itemSubtitle(item: SidebarItemProps) {
 // case File = "/show/file"
 // case Trash = "/show/trash"
 // Case Filter = "/show/filter/:identifier"
-// Case Collection = "/show/collection/:identifier"
+// Case Tag = "/show/tag/:identifier"
 // Case Heading = "/show/heading/:identifier"
 
 export default function Sidebar() {
@@ -60,15 +51,14 @@ export default function Sidebar() {
       {items.map((item) => {
         return (
           <List.Item
-            title={itemTitle(item)}
-            subtitle={itemSubtitle(item)}
+            title={item.name}
             icon={{
               source: `http://127.0.0.1:6391/sf-symbols/${item.icon}`,
               mask: Image.Mask.RoundedRectangle,
               fallback: Icon.List,
               tintColor: item.color || Color.Purple,
             }}
-            accessories={[{ text: item.count > 0 ? String(item.count) : "0" }]}
+            accessories={[{ text: itemSubtitle(item) }]}
             key={item.id}
             actions={
               <ActionPanel>
@@ -82,8 +72,8 @@ export default function Sidebar() {
                   onAction={() => {
                     if (item.type == "filter") {
                       getAndCloseMainWindow(`show/filter/${item.id}`);
-                    } else if (item.type == "collection") {
-                      getAndCloseMainWindow(`show/collection/${item.id}`);
+                    } else if (item.type == "tag") {
+                      getAndCloseMainWindow(`show/tag/${item.id}`);
                     } else {
                       getAndCloseMainWindow(`show/${item.id}`);
                     }

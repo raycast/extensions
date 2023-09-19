@@ -41,7 +41,7 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
     <Detail
       markdown={`# ${page.title}\n` + (data ? data.markdown : "*Loading...*")}
       isLoading={isLoading}
-      navigationTitle={" →  " + pageName}
+      navigationTitle={pageName}
       {...(showMetadata
         ? {
             metadata: (
@@ -207,7 +207,7 @@ function getMetadata(
       ) : null;
     case "rich_text":
       return value.rich_text.length > 0 ? (
-        <Detail.Metadata.Label key={value.id} title={title} text={value.rich_text[0].plain_text} />
+        <Detail.Metadata.Label key={value.id} title={title} text={value.rich_text[0]?.plain_text} />
       ) : null;
     case "select":
       return value.select ? (
@@ -223,7 +223,7 @@ function getMetadata(
       ) : null;
     case "title":
       return value.title.length > 0 ? (
-        <Detail.Metadata.Label key={value.id} title={title} text={value.title[0].plain_text} />
+        <Detail.Metadata.Label key={value.id} title={title} text={value.title[0]?.plain_text} />
       ) : null;
     case "url":
       return value.url ? <Detail.Metadata.Link key={value.id} title={title} text={title} target={value.url} /> : null;

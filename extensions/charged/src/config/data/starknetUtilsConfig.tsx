@@ -154,6 +154,9 @@ export const STARKNET_UTILS_CONFIG: StarknetUtils[] = [
       declare function computeCompiledClassHash(casm: CompiledSierraCasm): string;
       declare function computeSierraContractClassHash(sierra: CompiledSierra): string;
       declare function calculateContractAddressFromHash(salt: BigNumberish, classHash: BigNumberish, constructorCalldata: RawArgs, deployerAddress: BigNumberish): string;
+      declare function calculateTransactionHash(contractAddress: BigNumberish, version: BigNumberish, calldata: RawCalldata, maxFee: BigNumberish, chainId: StarknetChainId, nonce: BigNumberish): string;
+      declare function calculateDeclareTransactionHash(classHash: string, senderAddress: BigNumberish, version: BigNumberish, maxFee: BigNumberish, chainId: StarknetChainId, nonce: BigNumberish, compiledClassHash?: string): string;
+      declare function calculateDeployAccountTransactionHash(contractAddress: BigNumberish, classHash: BigNumberish, constructorCalldata: RawCalldata, salt: BigNumberish, version: BigNumberish, maxFee: BigNumberish, chainId: StarknetChainId, nonce: BigNumberish): string;
     `
       ),
       {

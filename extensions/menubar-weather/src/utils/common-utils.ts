@@ -17,6 +17,7 @@ import {
   precipitationUnits,
   tempUnits,
   windAngle2Direction,
+  iconStyle,
 } from "./weather-utils";
 import { OpenMeteoWeather } from "../types/types";
 
@@ -25,6 +26,7 @@ export enum CacheKey {
   LOCATION = "Location",
   REFRESH_TIME = "Refresh Time",
 
+  ICON_STYLE = "Icon Style",
   CITY_NAME = "City Name",
   LONGITUDE = "Longitude",
   LATITUDE = "Latitude",
@@ -102,6 +104,7 @@ export function shouldRefresh(oldRefreshTime: number, newRefreshTime: number) {
 const cache = new Cache();
 
 export function preferencesChanged() {
+  const oldIconStyle = getCacheString(CacheKey.ICON_STYLE);
   const oldCityName = getCacheString(CacheKey.CITY_NAME);
   const oldLon = getCacheString(CacheKey.LONGITUDE);
   const oldLat = getCacheString(CacheKey.LATITUDE);
@@ -122,6 +125,8 @@ export function preferencesChanged() {
   const newLon = typeof longitude === "undefined" ? "" : longitude;
   const newLat = typeof latitude === "undefined" ? "" : latitude;
 
+  cache.set(CacheKey.ICON_STYLE, JSON.stringify(iconStyle));
+  cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
   cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
   cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
   cache.set(CacheKey.LATITUDE, JSON.stringify(newLat));
@@ -139,6 +144,7 @@ export function preferencesChanged() {
   cache.set(CacheKey.SHOW_UVI, JSON.stringify(showUVI));
 
   return (
+    oldIconStyle !== iconStyle ||
     oldCityName !== newCityName ||
     oldLon !== newLon ||
     oldLat !== newLat ||

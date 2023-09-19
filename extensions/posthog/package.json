@@ -5,6 +5,8 @@
   "description": "Open the web app, search for projects, persons, feature flags, and cohorts.",
   "icon": "posthog-logo.png",
   "author": "david_newell",
+  "owner": "posthog",
+  "access": "public",
   "categories": [
     "Applications",
     "Developer Tools"

@@ -1,10 +1,12 @@
-import { getPreferenceValues, Icon } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types/preferences";
 import { isEmpty } from "./common-utils";
 import { getOpenMeteoLocation, getOpenMeteoWeather } from "./axios-utils";
 import { Daily, GeoLocation } from "../types/types";
+import { getDefaultWeatherIcons, getWeatherIcons, weatherDescriptions } from "./icon-utils";
 
 export const {
+  iconStyle,
   cityName,
   tempUnits,
   windSpeedUnits,
@@ -84,96 +86,9 @@ export function isEmptyLonLat() {
  */
 export function getWeatherDescription(weatherCode: number | undefined) {
   if (typeof weatherCode === "undefined") {
-    return {
-      description: "No weather info",
-      icon: {
-        source: {
-          light: "menubar-icon.png",
-          dark: "menubar-icon@dark.png",
-        },
-      },
-    };
+    return getDefaultWeatherIcons();
   }
-  switch (weatherCode) {
-    case 0:
-      return { description: "Clear sky", icon: Icon.Sun };
-    case 1:
-      return { description: "Mainly clear", icon: Icon.CloudSun };
-    case 2:
-      return { description: "Partly cloudy", icon: Icon.Cloud };
-    case 3:
-      return { description: "Overcast", icon: Icon.Cloud };
-    case 45:
-      return { description: "Fog", icon: Icon.Snippets };
-    case 48:
-      return { description: "Depositing rime fog", icon: Icon.Snippets };
-    case 51:
-      return { description: "Light drizzle", icon: Icon.CloudRain };
-    case 53:
-      return { description: "Moderate drizzle", icon: Icon.CloudRain };
-    case 55:
-      return { description: "Dense intensity drizzle", icon: Icon.CloudRain };
-    case 56:
-      return { description: "Light freezing drizzle", icon: Icon.CloudRain };
-    case 57:
-      return {
-        description: "Dense intensity freezing drizzle",
-        icon: Icon.CloudRain,
-      };
-    case 61:
-      return { description: "Slight rain", icon: Icon.CloudRain };
-    case 63:
-      return { description: "Moderate rain", icon: Icon.CloudRain };
-    case 65:
-      return { description: "Heavy intensity rain", icon: Icon.CloudRain };
-    case 66:
-      return { description: "Light freezing rain", icon: Icon.CloudRain };
-    case 67:
-      return {
-        description: "Heavy intensity freezing rain",
-        icon: Icon.CloudRain,
-      };
-    case 71:
-      return { description: "Slight snow fall", icon: Icon.CloudSnow };
-    case 73:
-      return { description: "Moderate snow fall", icon: Icon.CloudSnow };
-    case 75:
-      return { description: "Heavy intensity snow fall", icon: Icon.CloudSnow };
-    case 77:
-      return { description: "Snow grains", icon: Icon.CloudSnow };
-    case 80:
-      return { description: "Slight rain showers", icon: Icon.CloudRain };
-    case 81:
-      return { description: "Moderate rain showers", icon: Icon.CloudRain };
-    case 82:
-      return { description: "Violent rain showers", icon: Icon.CloudRain };
-    case 85:
-      return { description: "Slight snow showers", icon: Icon.CloudSnow };
-    case 86:
-      return { description: "Heavy snow showers", icon: Icon.CloudSnow };
-    case 95:
-      return {
-        description: "Slight or moderate Thunderstorm",
-        icon: Icon.CloudLightning,
-      };
-    case 96:
-      return { description: "slight thunderstorm", icon: Icon.CloudLightning };
-    case 99:
-      return {
-        description: "Heavy hail thunderstorm",
-        icon: Icon.CloudLightning,
-      };
-    default:
-      return {
-        description: "No weather info",
-        icon: {
-          source: {
-            light: "menubar-icon.png",
-            dark: "menubar-icon@dark.png",
-          },
-        },
-      };
-  }
+  return { description: weatherDescriptions.get(weatherCode) + "", icon: getWeatherIcons(weatherCode) };
 }
 
 export const windAngle2Direction = (windAngle: number) => {
@@ -234,6 +149,7 @@ export const windAngle2Direction = (windAngle: number) => {
   }
   return { icon: "⏺", symbol: "C", direction: "" };
 };
+
 export const windDirection = (windAngle: number) => {
   const windDirectionInfo = windAngle2Direction(windAngle);
   return `${windDirectionInfo.icon} ${windDirectionInfo.direction}(${windDirectionInfo.symbol})`;
