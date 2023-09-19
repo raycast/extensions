@@ -3,7 +3,6 @@ import * as React from "react";
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 
 const DeepLink = new Map([
-  ["🤖 Chat", "raycast://extensions/massimiliano_pasquini/raycast-ollama/ollama-custom-chat"],
   ["🔧 Command", "raycast://extensions/massimiliano_pasquini/raycast-ollama/ollama-custom-command"],
 ]);
 
