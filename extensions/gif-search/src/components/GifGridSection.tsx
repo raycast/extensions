@@ -13,7 +13,7 @@ export interface GifGridSectionProps {
   isLocalGifSection?: boolean;
 }
 
-export function GifGridSection(props: GifGridSectionProps) {
+export function GifGridSection(props: GifGridSectionProps & { loadMoreGifs: () => void }) {
   const results = [...(props.results ?? [])];
   const { data: sortedGifs, visitItem: visitGifItem } = useFrecencySorting(results, {
     namespace: props.service,
@@ -29,7 +29,14 @@ export function GifGridSection(props: GifGridSectionProps) {
   return !props.hide ? (
     <Grid.Section title={title} key={props.title}>
       {gifs?.map((result, index) => (
-        <GifGridItem key={result.id} item={result} index={index} service={props.service} visitGifItem={visitGifItem} />
+        <GifGridItem
+          key={result.id}
+          item={result}
+          index={index}
+          service={props.service}
+          visitGifItem={visitGifItem}
+          loadMoreGifs={props.loadMoreGifs}
+        />
       ))}
     </Grid.Section>
   ) : null;

@@ -21,24 +21,22 @@ import useGifPopulator, { GifIds } from "../hooks/useGifPopulator";
 export function GifSearch() {
   const limit = getMaxResults();
 
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchService, setSearchService] = useState<ServiceName>();
-  const [results, isLoading, setSearchTerm, searchTerm, search] = useSearchAPI({ limit });
+  const [results, isLoading, loadMore] = useSearchAPI({ term: searchTerm, service: searchService, limit });
 
   const [itemSize, setItemSize] = useState(getGridTrendingItemSize());
+
+  const loadMoreGifs = () => {
+    loadMore();
+  };
 
   const onServiceChange = (service: string) => {
     setSearchService(service as ServiceName);
     setSearchTerm(searchTerm);
   };
 
-  // Perform initial GIF API search
   useEffect(() => {
-    if (!searchService) {
-      return;
-    }
-
-    search(searchTerm, searchService);
-
     if (searchTerm) {
       setItemSize(getGridItemSize());
     } else {
@@ -153,6 +151,7 @@ export function GifSearch() {
         searchBarPlaceholder="Search favorites..."
         emptyStateText="Add some GIFs to your Favorites first!"
         emptyStateIcon={Icon.Star}
+        loadMoreGifs={loadMoreGifs}
         sections={Array.from(favItems?.items || []).map(([service, gifs]) => {
           return { title: getServiceTitle(service), results: gifs, service, isLocalGifSection: true };
         })}
@@ -170,6 +169,7 @@ export function GifSearch() {
         enableFiltering={true}
         searchBarPlaceholder="Search recents..."
         emptyStateText="Work with some GIFs first..."
+        loadMoreGifs={loadMoreGifs}
         emptyStateIcon={Icon.Clock}
         sections={Array.from(recentItems?.items || []).map(([service, gifs]) => {
           return { title: getServiceTitle(service), results: gifs, service, isLocalGifSection: true };
@@ -189,6 +189,7 @@ export function GifSearch() {
         emptyStateIcon={Icon.MagnifyingGlass}
         onDropdownChange={onServiceChange}
         onSearchTextChange={setSearchTerm}
+        loadMoreGifs={loadMoreGifs}
         sections={[
           {
             title: "Favorites",

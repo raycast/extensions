@@ -15,6 +15,7 @@ export interface GifGridProps {
   emptyStateText?: string;
   emptyStateIcon?: Image.ImageLike;
   sections: GifGridSectionProps[];
+  loadMoreGifs: () => void;
   itemSize: "small" | "medium" | "large";
 }
 
@@ -76,6 +77,7 @@ export function GifGrid(props: GifGridProps) {
             hide={sProps.hide}
             service={sProps.service}
             isLocalGifSection={sProps.isLocalGifSection}
+            loadMoreGifs={props.loadMoreGifs}
           />
         ))
       )}

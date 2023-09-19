@@ -17,9 +17,10 @@ interface GifActionsProps {
   showViewDetails: boolean;
   service?: ServiceName;
   visitGifItem?: (gif: IGif) => void;
+  loadMoreGifs?: () => void;
 }
 
-export function GifActions({ item, showViewDetails, service, visitGifItem }: GifActionsProps) {
+export function GifActions({ item, showViewDetails, service, visitGifItem, loadMoreGifs }: GifActionsProps) {
   const { id, url, gif_url } = item;
   const { state, dispatch } = useContext(AppContext);
   const { favIds, recentIds } = state;
@@ -226,6 +227,15 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
       {actions.map((section, index) => (
         <ActionPanel.Section key={index}>{section}</ActionPanel.Section>
       ))}
+
+      {loadMoreGifs ? (
+        <Action
+          title="Load More GIFs"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          icon={Icon.ArrowDown}
+          onAction={loadMoreGifs}
+        />
+      ) : null}
     </ActionPanel>
   );
 }
