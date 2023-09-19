@@ -6,6 +6,7 @@ export const BROWSERS_BUNDLE_ID = {
   braveBeta: "com.brave.browser.beta",
   chrome: "com.google.chrome",
   chromeDev: "com.google.chrome.dev",
+  chromeBeta: "com.google.chrome.beta",
   firefox: "org.mozilla.firefox",
   safari: "com.apple.safari",
   edge: "com.microsoft.edgemac",
