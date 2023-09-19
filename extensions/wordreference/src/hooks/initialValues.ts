@@ -24,7 +24,7 @@ export default function useInitialValues({ commandProps }: Props) {
         selectedText = selectedText.replace(/(\r\n|\n|\r)/gm, " ");
         setWord(selectedText);
       }
-    } finally {
+    } catch (error) {
       // Continue regardless of error
     }
   };

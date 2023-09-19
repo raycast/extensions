@@ -37,7 +37,7 @@
           "title": "Selected text",
           "description": "When enabled, the extension will automatically search the selected text",
           "type": "checkbox",
-          "label": "Automaticcaly use selected text as initial search",
+          "label": "Automatically use the selected text.",
           "required": false
         }
       ]
