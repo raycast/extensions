@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard, showInFinder, open } from "@raycast/api";
 
 import { getDefaultAction, ServiceName } from "../preferences";
 
@@ -10,6 +10,7 @@ import { IGif } from "../models/gif";
 
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
+import downloadFile from "../lib/downloadFile";
 
 interface GifActionsProps {
   item: IGif;
@@ -58,14 +59,50 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
         })
       );
 
-  const openUrlInBrowser = url ? (
-    <Action.OpenInBrowser
-      key="openUrlInBrowser"
-      url={url}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-      onOpen={trackUsage}
+  const downloadGIFAction = async () => {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Downloading GIF", message: item.download_name });
+      const filePath = await downloadFile(item.download_url, item.download_name);
+
+      if (typeof filePath === "string") {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Downloaded GIF",
+          message: filePath,
+          primaryAction: {
+            title: "Open File",
+            shortcut: { modifiers: ["cmd"], key: "o" },
+            onAction() {
+              open(filePath);
+            },
+          },
+          secondaryAction: {
+            title: "Show GIF in Finder",
+            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            onAction() {
+              showInFinder(filePath);
+            },
+          },
+        });
+      }
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to download GIF",
+        message: item.download_name,
+      });
+    }
+  };
+
+  const copyFile = (
+    <Action
+      icon={Icon.Clipboard}
+      key="copyFile"
+      title="Copy GIF"
+      onAction={() => copyFileAction().then(trackUsage)}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
-  ) : undefined;
+  );
   const copyGifUrl = (
     <Action.CopyToClipboard
       key="copyGifUrl"
@@ -81,34 +118,6 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       content={`![${item.title}](${stripQParams(gif_url)})`}
       onCopy={trackUsage}
-    />
-  );
-  const copyPageUrl = url ? (
-    <Action.CopyToClipboard
-      key="copyPageUrl"
-      title="Copy Page Link"
-      content={url}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-      onCopy={trackUsage}
-    />
-  ) : undefined;
-  const copyFile = (
-    <Action
-      icon={Icon.Clipboard}
-      key="copyFile"
-      title="Copy GIF"
-      onAction={() => copyFileAction().then(trackUsage)}
-      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-    />
-  );
-  const viewDetails = (
-    <Action.Push
-      icon={Icon.Eye}
-      key="viewDetails"
-      title="View GIF Details"
-      target={<GifDetails item={item} service={service} />}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-      onPush={trackUsage}
     />
   );
 
@@ -136,13 +145,57 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
 
   const isRecent = recentIds?.get(service as ServiceName)?.has(id.toString());
   const removeRecent = isRecent ? (
-    <Action icon={Icon.Clock} key="removeRecent" title="Remove From Recents" onAction={removeFromRecents} />
+    <Action
+      icon={Icon.Clock}
+      key="removeRecent"
+      title="Remove From Recents"
+      onAction={removeFromRecents}
+      shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+    />
   ) : undefined;
+
+  const viewDetails = (
+    <Action.Push
+      icon={Icon.Eye}
+      key="viewDetails"
+      title="View GIF Details"
+      target={<GifDetails item={item} service={service} />}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      onPush={trackUsage}
+    />
+  );
+
+  const copyPageUrl = url ? (
+    <Action.CopyToClipboard
+      key="copyPageUrl"
+      title="Copy Page Link"
+      content={url}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      onCopy={trackUsage}
+    />
+  ) : undefined;
+  const openUrlInBrowser = url ? (
+    <Action.OpenInBrowser
+      key="openUrlInBrowser"
+      url={url}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+      onOpen={trackUsage}
+    />
+  ) : undefined;
+  const downloadFileAction = (
+    <Action
+      key="downloadFile"
+      shortcut={{ modifiers: ["cmd", "opt"], key: "d" }}
+      icon={Icon.Download}
+      title="Download GIF"
+      onAction={downloadGIFAction}
+    />
+  );
 
   const actions: Array<(JSX.Element | undefined)[]> = [
     [copyFile, copyGifUrl, copyGifMarkdown],
     [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
-    [copyPageUrl, openUrlInBrowser],
+    [copyPageUrl, openUrlInBrowser, downloadFileAction],
   ];
 
   const defaultAction = actions[0]?.[0];
