@@ -48,7 +48,8 @@
       "title": "Copy Local IP Address",
       "icon": "copy-local-ip-address.png",
       "description": "Copy local IPv4 address.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "interval": "1h"
     }
   ],
   "preferences": [
@@ -114,8 +115,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "axios": "^0.27.2",
+    "@raycast/api": "^1.57.1",
+    "axios": "^1.4.0",
     "public-ip": "^6.0.1"
   },
   "devDependencies": {

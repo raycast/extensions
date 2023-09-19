@@ -142,6 +142,10 @@ function getItemIcon(item: RefData): string {
       return "conferencePaper.png";
     case "document":
       return "document.png";
+    case "preprint":
+      return "preprint.png";
+    case "patent":
+      return "patent.png";
     default:
       return "default.png";
   }
@@ -216,7 +220,7 @@ export const View = ({
                   detail={<List.Item.Detail markdown={getItemDetail(item)} />}
                   actions={
                     <ActionPanel>
-                      {item.attachment && item.attachment.key !== `` && (
+                      {item.attachment && item.attachment.key && item.attachment.key !== `` && (
                         <Action.OpenInBrowser
                           icon={Icon.ArrowRightCircleFilled}
                           title="Open PDF"

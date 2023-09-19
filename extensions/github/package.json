@@ -14,7 +14,8 @@
     "pernielsentikaer",
     "loxygenk",
     "oilbeater",
-    "LunaticMuch"
+    "LunaticMuch",
+    "aeorge"
   ],
   "categories": [
     "Developer Tools",
@@ -203,13 +204,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.0",
+    "@raycast/api": "^1.56.3",
     "@raycast/utils": "^1.9.0",
-    "date-fns": "^2.29.3",
+    "date-fns": "^2.30.0",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.1",
-    "octokit": "^2.0.14"
+    "node-fetch": "^3.3.2",
+    "octokit": "^2.1.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.2.2",
@@ -219,7 +220,7 @@
     "@raycast/eslint-config": "^1.0.6",
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.15.11",
-    "concurrently": "^8.0.1",
+    "concurrently": "^8.2.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.37.0",
     "eslint-plugin-import": "^2.27.5",

@@ -17,9 +17,9 @@ export interface Database {
 }
 
 // Currently supported properties
-export const supportedPropTypes = [
-  "title",
+export const supportedPropTypes: PagePropertyType["type"][] = [
   "number",
+  "title",
   "rich_text",
   "url",
   "email",
@@ -31,6 +31,7 @@ export const supportedPropTypes = [
   "formula",
   "people",
   "relation",
+  "status",
 ];
 
 // all possible types:
@@ -48,10 +49,11 @@ export interface DatabaseProperty {
     | "date"
     | "checkbox"
     | "select"
+    | "multi_select"
     | "formula"
     | "people"
     | "relation"
-    | "multi_select";
+    | "status";
   name: string;
   options: DatabasePropertyOption[];
   relation_id?: string;
@@ -69,7 +71,9 @@ export interface Page {
   id: string;
   parent_page_id?: string;
   parent_database_id?: string;
+  created_by?: string;
   last_edited_time?: number;
+  last_edited_user?: string;
   title: string | null;
   icon_emoji: string | null;
   icon_file: string | null;

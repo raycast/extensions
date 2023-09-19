@@ -1,11 +1,19 @@
 # Browser Bookmarks Changelog
 
+## [Extension Icon] - {PR_MERGE_DATE}
+
+- Update extension icon to match Raycast icons style and avoid any mismatch with "Day One" app
+
+## [Support for Vivaldi and Edge Dev Browsers] - 2023-07-30
+
+- Add support for `Vivaldi`, `Edge Dev` and `Edge Canary` browsers
+
 ## [Improvements] - 2023-07-19
 
 - Show the domain of the bookmark as a subtitle. Note that you can disable this setting in the preferences.
 - Updated the fuzzy search parameters to enhance accuracy and relevance in search results.
 
-## [Support for Brave Beta and Chrome Dev] - 2023-07-09
+## [Support for Brave Beta and Chrome Dev Browser] - 2023-07-09
 
 - Add support for `Brave Beta` and `Chrome Dev` browsers
 

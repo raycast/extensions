@@ -1,7 +1,7 @@
 import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { State } from "../haapi";
-import { useHAStates } from "../hooks";
+import { State } from "@lib/haapi";
+import { useHAStates } from "./hooks";
 
 export function StatesAttributesList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();

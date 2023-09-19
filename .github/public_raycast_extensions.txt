@@ -1,6 +1,7 @@
 linear
 github
 browser-bookmarks
+raycast-explorer
 google-workspace
 jira
 zoom
@@ -27,3 +28,5 @@ putio
 warp
 getsound
 reclaim-ai
+posthog
+notion

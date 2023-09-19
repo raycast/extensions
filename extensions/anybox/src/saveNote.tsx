@@ -1,11 +1,10 @@
 import { ActionPanel, Action, Form, Clipboard, Icon, useNavigation, getPreferenceValues, open } from "@raycast/api";
-import { postAndCloseMainWindow, fetchCollections } from "./utilities/fetch";
+import { postAndCloseMainWindow, fetchTags } from "./utilities/fetch";
 import { useState, useEffect } from "react";
 
-interface CollectionProp {
+interface TagProp {
   id: string;
   name: string;
-  heading?: string;
 }
 
 interface Preferences {
@@ -21,7 +20,8 @@ interface SaveNoteResponse {
 function NoteForm() {
   const preferences = getPreferenceValues<Preferences>();
   const [note, setNote] = useState<string>();
-  const [collections, setCollections] = useState<CollectionProp[]>([]);
+  const [comment, setComment] = useState<string>();
+  const [tags, setTags] = useState<TagProp[]>([]);
   const { pop } = useNavigation();
 
   useEffect(() => {
@@ -32,19 +32,12 @@ function NoteForm() {
         }
       }
     });
-    fetchCollections().then((tags) => {
+    fetchTags().then((tags) => {
       if (Array.isArray(tags)) {
-        setCollections(tags);
+        setTags(tags);
       }
     });
   }, []);
-
-  function collectionTitle(tag: CollectionProp) {
-    if (tag.heading) {
-      return `${tag.heading} > ${tag.name}`;
-    }
-    return `${tag.name}`;
-  }
 
   return (
     <Form
@@ -58,11 +51,12 @@ function NoteForm() {
               if (note.length > 0) {
                 const data = {
                   note,
-                  collections: values.collections,
+                  comment: values.comment,
+                  tags: values.tags,
                   starred: !!values.starred,
                 };
-                pop();
                 await postAndCloseMainWindow("save", data);
+                pop();
               }
             }}
           />
@@ -74,14 +68,15 @@ function NoteForm() {
               if (note.length > 0) {
                 const data = {
                   note,
-                  collections: values.collections,
+                  comment: values.comment,
+                  tags: values.tags,
                   starred: !!values.starred,
                 };
-                pop();
                 const result = (await postAndCloseMainWindow("save", data)) as SaveNoteResponse;
                 if (result.url) {
                   open(result.url);
                 }
+                pop();
               }
             }}
           />
@@ -89,9 +84,10 @@ function NoteForm() {
       }
     >
       <Form.TextArea title="Note" id="note" value={note} onChange={setNote} />
-      <Form.TagPicker id="collections" title="Collections" defaultValue={[]}>
-        {collections.map((val) => {
-          return <Form.TagPicker.Item value={val.id} title={collectionTitle(val)} key={val.id} />;
+      <Form.TextArea title="Comment" id="comment" value={comment} onChange={setComment} />
+      <Form.TagPicker id="tags" title="Tags" defaultValue={[]}>
+        {tags.map((val) => {
+          return <Form.TagPicker.Item value={val.id} title={val.name} key={val.id} />;
         })}
       </Form.TagPicker>
       <Form.Checkbox id="starred" label="Starred" defaultValue={false} />

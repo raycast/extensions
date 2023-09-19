@@ -1,12 +1,43 @@
 # Changelog
 
+## 1.58.0 - 2023-09-06
+
+### ✨ New
+
+- **Alert**: Add a new option `rememberUserChoice` to show a checkbox to remember the user choice the next time the same Alert would be shown.
+- **DatePicker**: You can know check whether the user picked a full day or a specific time with `Form.DatePicker.isFullDay(date)`.
+
+### 💎 Improvements
+
+- The “Fork Extension” action is now also available in the Store for installed extensions.
+- All the APIs that accepts a file path will now resolve `~` if necessary.
+
+### 🐞 Fixes
+
+- Fix an issue where some Toasts would not disappear after the command was terminated.
+- Fix an issue where List Item’s accessories with an icon could have their text cut off.
+- Fix `getFrontmostApplication` failing for some applications.
+- The “Fork Extension” will now be more robust dealing with unexpected `package.json` formats.
+- Fixed an issue where newly created Extensions would not use the correct username after it had been updated.
+- Fix an issue where it was possible to set a multiline `searchText`
+
+## 1.57.0 - 2023-08-09
+
+### 🐞 Fixes
+
+- **Metadata**: Fixed various rendering issues with `TagList`.
+- **Menu Bar Extra**: Fixed a bug that caused section titles to be unreadable on macOS Sonoma.
+- **Menu Bar Extra**: Fixed a bug that could cause a menu bar command to be unloaded while its menu is open.
+- **Form**: Fixed stale suggestions in the DatePicker when changing its type.
+- **Icon**: Fixed the `AppWindowGrid2x2` icon only showing a square.
+
 ## 1.56.0 - 2023-07-26
 
 ### ✨ New
 
 - **Clipboard**: `Clipboard.read()` now supports an `offset` option to access the Clipboard History (limited to the last 5)
 - **Grid:** Grid items can now have an icon accessory
-- **Shortcuts:** Providing a consistent user experience should now be easier thanks to the new  `Keyboard.Shortcut.Common` export.
+- **Shortcuts:** Providing a consistent user experience should now be easier thanks to the new `Keyboard.Shortcut.Common` export.
 
 ### 💎 Improvements
 
