@@ -63,7 +63,7 @@ export default function Command() {
               />
               <Action.CopyToClipboard
                 title="Copy List"
-                content={items.join(",")}
+                content={items.join(", ")}
                 shortcut={{ modifiers: ["cmd"], key: "l" }}
               />
               <Action.Trash
