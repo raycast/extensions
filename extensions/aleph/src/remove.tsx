@@ -8,7 +8,7 @@ export default async () => {
     showHUD("Removed Nikud");
   } catch (e) {
     if (typeof e === "string") {
-      await showToast(ToastStyle.Failure, "Encode failed", e);
+      await showToast(ToastStyle.Failure, "Accessibility permission denied.", e);
     }
   }
 };

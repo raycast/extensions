@@ -1,5 +1,7 @@
 # Flow Changelog
 
+## [Fix broken start commands] - 2023-09-03
+
 ## [Start Commands & Keywords] - 2022-03-16
 - Improve command search by adding keywords like `pause` for command like `Stop Timer`
 - Replace `Next Session` command for `Start Next Focus`

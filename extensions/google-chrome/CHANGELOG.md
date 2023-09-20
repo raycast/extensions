@@ -1,4 +1,11 @@
 # Google Chrome Changelog
+## [New shortcut] - 2023-09-18
+
+- Add shortcut for make quick quicklinks when searching tabs.
+
+## [New shortcut] - 2023-08-21
+
+- Changed shortcut for Close Tab in the Search Tab command.
 
 ## [Added better debug] - 2023-04-25
 

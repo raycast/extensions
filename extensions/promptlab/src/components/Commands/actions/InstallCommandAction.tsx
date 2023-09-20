@@ -1,7 +1,7 @@
 import { Action, Icon, LocalStorage, Toast, showToast } from "@raycast/api";
 import { Command, StoreCommand } from "../../../utils/types";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 
 /**
  * Action to install a command from the PromptLab store.
@@ -29,7 +29,7 @@ export default function InstallCommandAction(props: {
     <Action
       title="Install Command"
       icon={Icon.Plus}
-      shortcut={{ modifiers: ["cmd"], key: "i" }}
+      shortcut={getActionShortcut("InstallCommandAction", settings)}
       onAction={async () => {
         let cmdName = command.name;
         if (knownCommandNames?.includes(command.name)) {
@@ -53,6 +53,7 @@ export default function InstallCommandAction(props: {
           useRectangleDetection: command.useRectangleDetection == "TRUE" ? true : false,
           useBarcodeDetection: command.useBarcodeDetection == "TRUE" ? true : false,
           useFaceDetection: command.useFaceDetection == "TRUE" ? true : false,
+          useHorizonDetection: command.useHorizonDetection == "TRUE" ? true : false,
           outputKind: command.outputKind,
           actionScript: command.actionScript,
           showResponse: command.showResponse == "TRUE" ? true : false,
@@ -75,7 +76,7 @@ export default function InstallCommandAction(props: {
           showInMenuBar: false,
         };
         LocalStorage.setItem(cmdName, JSON.stringify(commandData)).then(() => {
-          showToast({ title: "Command Installed", message: `${command.name}" has been installed.` });
+          showToast({ title: "Command Installed", message: `${command.name} has been installed.` });
           Promise.resolve(LocalStorage.allItems()).then((commandData) => {
             const commandDataFiltered = Object.values(commandData).filter(
               (cmd, index) =>
