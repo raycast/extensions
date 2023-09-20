@@ -21,7 +21,12 @@ function GroupListDropDown(props: {
       <List.Dropdown.Item title="All Groups" value={""} />
       <List.Dropdown.Section>
         {gi.groups?.map((g) => (
-          <List.Dropdown.Item key={`${g.id}`} icon={getTextIcon(getFirstChar(g.name))} title={g.full_name} value={`${g.id}`} />
+          <List.Dropdown.Item
+            key={`${g.id}`}
+            icon={getTextIcon(getFirstChar(g.name))}
+            title={g.full_name}
+            value={`${g.id}`}
+          />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>

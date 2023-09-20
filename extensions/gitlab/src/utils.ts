@@ -29,7 +29,7 @@ export function projectIconUrl(project: Project): string | undefined {
 export function getFirstChar(text: string): string {
   const firstChar = text.codePointAt(0);
 
-  return firstChar ? String.fromCodePoint(firstChar) : '';
+  return firstChar ? String.fromCodePoint(firstChar) : "";
 }
 
 export function projectIcon(project: Project): Image.ImageLike {
