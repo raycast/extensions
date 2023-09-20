@@ -70,7 +70,7 @@ export default function Command() {
                 onTrash={() => setItems([])}
                 paths={LIST_HISTORY}
                 title="Clear List"
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
               />
             </ActionPanel>
           }
