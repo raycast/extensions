@@ -47,6 +47,7 @@ const cases = [
 
 type CaseType = (typeof cases)[number];
 type Cases = { [key: string]: (input: string, options?: object) => string };
+type Case = (input: string, options?: object) => string;
 
 class NoTextError extends Error {
   constructor() {
@@ -76,6 +77,15 @@ async function readContent(preferredSource: string) {
   }
 
   throw new NoTextError();
+}
+
+function modifyCasesWrapper(input: string, case_: Case) {
+  const modifiedArr: string[] = [];
+  const lines = input.split("\n");
+  for (const line of lines) {
+    modifiedArr.push(case_(line));
+  }
+  return modifiedArr.join("\n");
 }
 
 const cache = new Cache();
@@ -241,7 +251,7 @@ export default function Command(props: LaunchProps) {
                 <Action
                   title="Pin Case"
                   icon={Icon.Pin}
-                  shortcut={{ key: "p", modifiers: ["cmd"] }}
+                  shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
                   onAction={() => {
                     setPinned([props.case, ...pinned]);
                     if (props.recent) {
@@ -304,12 +314,22 @@ export default function Command(props: LaunchProps) {
     <List isShowingDetail={true}>
       <List.Section title="Pinned">
         {pinned?.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} pinned={true} />
+          <CaseItem
+            key={key}
+            case={key as CaseType}
+            modified={modifyCasesWrapper(clipboard, functions[key])}
+            pinned={true}
+          />
         ))}
       </List.Section>
       <List.Section title="Recent">
         {recent.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} recent={true} />
+          <CaseItem
+            key={key}
+            case={key as CaseType}
+            modified={modifyCasesWrapper(clipboard, functions[key])}
+            recent={true}
+          />
         ))}
       </List.Section>
       <List.Section title="All Cases">
@@ -321,7 +341,7 @@ export default function Command(props: LaunchProps) {
               !pinned.includes(key as CaseType)
           )
           .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={func(clipboard)} />
+            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(clipboard, func)} />
           ))}
       </List.Section>
     </List>
