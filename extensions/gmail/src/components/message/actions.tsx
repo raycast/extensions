@@ -312,7 +312,7 @@ export function MessageCopyWebUrlAction(props: { message: gmail_v1.Schema$Messag
   return (
     <Action.CopyToClipboard
       content={url}
-      title="Copy Web Url to Clipboard"
+      title="Copy Web URL to Clipboard"
       shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
     />
   );
