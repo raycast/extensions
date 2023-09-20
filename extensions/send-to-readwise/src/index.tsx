@@ -11,12 +11,14 @@ interface Preferences {
 interface ReadwiseFormValues {
   content: string;
   reference: string;
+  note: string;
 }
 
 interface Highlight {
   title: string;
   text: string;
   url?: string;
+  note?: string;
 }
 
 export default function Command() {
@@ -49,12 +51,15 @@ export default function Command() {
 
       try {
         const url = values.reference;
+        const note = values.note;
         console.log("Sending request with URL:", url);
+        console.log("Sending request with Note:", note);
         const today = new Date().toISOString().slice(0, 10);
         const highlights: Highlight[] = [
           {
             title: today,
             text: content,
+            note: note,
           },
         ];
 
@@ -101,14 +106,20 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Note" {...itemProps.content} id="content" placeholder="Write down here…" />
+      <Form.TextArea title="Highlight" {...itemProps.content} id="content" placeholder="(Required) Write down your fleeting notes…" info="🪄 Small tips! If you are reading documents on a computer, then I think using the Readwise Chrome extension is a better choice.
+⚡️ However, if you aim to record your sudden enlightenments, then using this Raycast plugin might be a better way!
+📝 Your notes will be saved under a Readwise book named after today's date. For example: 2023-09-20."/>
       <Form.TextArea
         title="Reference"
         {...itemProps.reference}
         id="reference"
-        placeholder="urls"
-        info="Use a comma (either in Chinese or English) or a new line to separate multiple links. ⚠️ Please note, links must start with http or https to be rendered as hyperlinks in Readwise, otherwise they will be in markdown format. ☝️ If you have also set up to import from Readwise to note-taking software like Heptabase, Notion, etc., they can be normally rendered as hyperlinks in such note-taking software without starting with http or https."
+        placeholder="(Optional) urls"
+        info="✨ Use a comma (either in Chinese or English) or a new line to separate multiple links.
+☝️ If you have also set up to export from Readwise to note-taking software like Heptabase, Notion, etc., they can be normally rendered as hyperlinks in such note-taking software."
       />
+      <Form.TextArea title="Comment" {...itemProps.note} id="note" placeholder="(Optional) Tags or comments…" info="1⃣️ Add a comment to the highlight. If the Highlight is identical, the comment sent later will completely overwrite the comment sent earlier.
+2⃣️ Inline tagging is supported, for usage methods please refer to https://blog.readwise.io/tag-your-highlights-while-you-read/.
+3⃣️ If you have triggered the first one, the tags already applied to the highlight through inline tagging will not be overwritten in Readwise." />
     </Form>
   );
 }
