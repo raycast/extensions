@@ -106,9 +106,15 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Highlight" {...itemProps.content} id="content" placeholder="(Required) Write down your fleeting notes…" info="🪄 Small tips! If you are reading documents on a computer, then I think using the Readwise Chrome extension is a better choice.
+      <Form.TextArea
+        title="Highlight"
+        {...itemProps.content}
+        id="content"
+        placeholder="(Required) Write down your fleeting notes…"
+        info="🪄 Small tips! If you are reading documents on a computer, then I think using the Readwise Chrome extension is a better choice.
 ⚡️ However, if you aim to record your sudden enlightenments, then using this Raycast plugin might be a better way!
-📝 Your notes will be saved under a Readwise book named after today's date. For example: 2023-09-20."/>
+📝 Your notes will be saved under a Readwise book named after today's date. For example: 2023-09-20."
+      />
       <Form.TextArea
         title="Reference"
         {...itemProps.reference}
@@ -117,9 +123,15 @@ export default function Command() {
         info="✨ Use a comma (either in Chinese or English) or a new line to separate multiple links.
 ☝️ If you have also set up to export from Readwise to note-taking software like Heptabase, Notion, etc., they can be normally rendered as hyperlinks in such note-taking software."
       />
-      <Form.TextArea title="Comment" {...itemProps.note} id="note" placeholder="(Optional) Tags or comments…" info="1⃣️ Add a comment to the highlight. If the Highlight is identical, the comment sent later will completely overwrite the comment sent earlier.
+      <Form.TextArea
+        title="Comment"
+        {...itemProps.note}
+        id="note"
+        placeholder="(Optional) Tags or comments…"
+        info="1⃣️ Add a comment to the highlight. If the Highlight is identical, the comment sent later will completely overwrite the comment sent earlier.
 2⃣️ Inline tagging is supported, for usage methods please refer to https://blog.readwise.io/tag-your-highlights-while-you-read/.
-3⃣️ If you have triggered the first one, the tags already applied to the highlight through inline tagging will not be overwritten in Readwise." />
+3⃣️ If you have triggered the first one, the tags already applied to the highlight through inline tagging will not be overwritten in Readwise."
+      />
     </Form>
   );
 }
