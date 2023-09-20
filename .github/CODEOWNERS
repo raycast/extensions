@@ -485,7 +485,7 @@
 /extensions/itranslate                               @404J
 /extensions/iwork                                    @SKaplanOfficial
 /extensions/jellyfin                                 @darmiel
-/extensions/jenkins                                  @k8scat
+/extensions/jenkins                                  @k8scat @vkhitrin
 /extensions/jetbrains                                @gdsmith @adrienbaron @dima-m711
 /extensions/jira                                     @thomaslombart @FezVrasta @igor9silva @jesperorb @teziovsky @richardfontein
 /extensions/jira-search                              @svenwiegand
