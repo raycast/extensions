@@ -1,3 +1,3 @@
 # UniFi Changelog
 
-## [Initial Version] - 2023-09-03
+## [Initial Version] - {PR_MERGE_DATE}
