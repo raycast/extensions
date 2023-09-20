@@ -48,31 +48,35 @@ export default function Command() {
       }
 
       try {
-        const url = values.reference
-        console.log('Sending request with URL:', url);
+        const url = values.reference;
+        console.log("Sending request with URL:", url);
         const today = new Date().toISOString().slice(0, 10);
-        const highlights: Highlight[] = [{
-          title: today,
-          text: content,
-        }];
-        
+        const highlights: Highlight[] = [
+          {
+            title: today,
+            text: content,
+          },
+        ];
+
         const response = await fetch(READWISE_API_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Token ${apiKey}`
+            Authorization: `Token ${apiKey}`,
           },
           body: JSON.stringify({ highlights }),
         });
-      
-        console.log('Received response from Readwise API:', response.status, response.statusText);    
-      
+
+        console.log("Received response from Readwise API:", response.status, response.statusText);
+
         if (response.ok) {
-          console.log('Sent URL:', url);
+          console.log("Sent URL:", url);
           showToast(Toast.Style.Success, "Successfully sent to Readwise!");
         } else {
           const responseBody = await response.text();
-          console.error(`${responseBody} -> Request failed, status code: ${response.status}, response body: ${responseBody}`);
+          console.error(
+            `${responseBody} -> Request failed, status code: ${response.status}, response body: ${responseBody}`
+          );
           console.log(`API Key: ${apiKey}`);
           console.log(`Failed URL: ${url}`);
           showToast(Toast.Style.Failure, "Sending failed, please check the API_KEY in Raycast settings.");

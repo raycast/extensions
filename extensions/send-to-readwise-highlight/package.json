@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "send-to-readwise-highlight",
-  "title": "Send to Readwise highlight",
+  "title": "Send to Readwise Highlight",
   "description": "Input note to readwise directly.",
   "icon": "readwise-icon.png",
   "author": "Lyson",
