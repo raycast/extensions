@@ -298,6 +298,26 @@ export function MessageOpenInBrowserAction(props: { message: gmail_v1.Schema$Mes
   return <Action.OpenInBrowser url={url} onOpen={handle} />;
 }
 
+export function MessageCopyWebUrlAction(props: { message: gmail_v1.Schema$Message; onOpen?: () => void }) {
+  const m = props.message;
+  if (m.id === undefined) {
+    return null;
+  }
+  const { gmail } = getGMailClient();
+  const { profile } = useCurrentProfile(gmail);
+  const url = isMailDraft(m) ? messageDraftEditUrl(profile, m) : messageThreadUrl(profile, m);
+  if (!url) {
+    return null;
+  }
+  return (
+    <Action.CopyToClipboard
+      content={url}
+      title="Copy Web Url to Clipboard"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+    />
+  );
+}
+
 export function MessageShowDetailsAction(props: { detailsShown: boolean; onAction?: (newValue: boolean) => void }) {
   const handle = () => {
     if (props.onAction) {
