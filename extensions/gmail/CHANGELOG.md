@@ -5,7 +5,7 @@
 - Unread Menu Command: Mark clicked mails as read immediately to have a more intuitive counter in the menubar
 - Mark mails as read in the list view commands will update the menu commands as well
 - Show Refresh action on empty list views
-- Add action to copy the web url to the clipboard from the selected mail
+- Add action to copy the web URL to the clipboard from the selected mail
 - Upgrade to 1.58 API
 
 ## [Labels] - 2023-08-11
