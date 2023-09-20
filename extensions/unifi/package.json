@@ -33,10 +33,10 @@
   "preferences": [
     {
       "name": "controllerUrl",
-      "description": "Url of your UniFi Controller",
+      "description": "URL of your UniFi Controller",
       "type": "textfield",
       "required": true,
-      "title": "Controller Url"
+      "title": "Controller URL"
     },
     {
       "name": "username",
