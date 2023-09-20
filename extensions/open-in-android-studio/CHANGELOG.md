@@ -4,4 +4,5 @@
 - Add your own Android Studio project to Favorites
 - Show your Favorite Android Studio Projects for quick access.
 
+
 ## [Initial Version] - 2023-09-06

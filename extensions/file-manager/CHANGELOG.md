@@ -1,5 +1,18 @@
 # File Manager Changelog
 
+## [Update] - 2023-09-12
+
+- Removed dedicated code for symlink file and directories, and instead pass it on to DirectoryItem or SymlinkItem
+- Added sections to actions
+- Added toggle quick look action to everything
+fix showFileSize showing just icon when the preference is disabled
+
+## [Update] - 2023-09-08
+
+- Added support for quicklinks to open file manager to a specific folder
+- Replace using shell scripts with using the node:fs alternatives
+- Added cmd-f shortcut to open in finder
+
 ## [Features] - 2023-08-06
 
 - Added Actions OpenWith for directories.

@@ -1,5 +1,9 @@
 # Apple Devices Changelog
 
+## [Added new devices] - 2023-09-15
+
+- Added iPhone 15 Lineup
+
 ## [Added preferences] - 2023-06-17
 
 - New preference option: Default Device Type

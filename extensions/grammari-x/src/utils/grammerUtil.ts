@@ -9,23 +9,22 @@ class OpenAIModule {
   }
 
   async fixGrammer(inputText: string): Promise<string> {
-    const prompt = `The following text has grammar mistakes. Please correct it: "${inputText}" and return only corrected version without any context`;
+    const prompt = `The following text has grammar mistakes and is in its original language. Please correct the grammar mistakes without translating it: "${inputText}" and return only the corrected version without any context`;
     return await this.gptRequest(prompt);
   }
 
-  async correctGrammer(inputText: string): Promise<string> {
-    const prompt = `Please paraphrase this sentence: "${inputText}" and return only paraphrased version without any context`;
+  async paraphraseGrammer(inputText: string): Promise<string> {
+    const prompt = `Please paraphrase the following sentence in its original language without translating it: "${inputText}" and return only the paraphrased version without any context`;
     return await this.gptRequest(prompt);
   }
 
   async changeTone(inputText: string, toneType: ToneType) {
-    console.log(inputText, toneType);
-    const prompt = `Transform the following sentence to have a "${toneType}" tone: "${inputText}"  and return only transformed version without any context`;
+    const prompt = `Transform the following sentence to have a "${toneType}" tone, but keep it in its original language: "${inputText}" and return only the transformed version without any context`;
     return await this.gptRequest(prompt);
   }
 
   async continueText(inputText: string) {
-    const prompt = `Based on the following information, continue the text "${inputText}" and return only transformed version without any context`;
+    const prompt = `Based on the following information in its original language, continue the text: "${inputText}" and return only the continued version without any context`;
     return await this.gptRequest(prompt);
   }
 

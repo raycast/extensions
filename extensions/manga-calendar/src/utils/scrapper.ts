@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { Collection, Manga, MangaList } from "../types";
+import { generateKey } from "./generateKey";
 
 // This work for both Calendario /calendario/manga and Colección /manga/:nombre
 export async function scrapeManga(body: string): Promise<Manga[]> {
@@ -8,6 +9,7 @@ export async function scrapeManga(body: string): Promise<Manga[]> {
     const Shelf: Manga[] = [];
     $("div.g-coleccion div.comic").map((_idx, el) => {
       const manga: Manga = {
+        id: generateKey(),
         name: $(el).attr("data-c")?.split(" ").slice(0, -1).join(" ") || "",
         volume: $(el).attr("data-no") || "",
         price: $(el).attr("data-p") || "",
@@ -50,6 +52,7 @@ export async function scrapeCollections(body: string) {
 
     $("div.colex").map((_idx, el) => {
       const collection: Collection = {
+        id: generateKey(),
         name: $(el).find("div.n").text() || "",
         url: $(el).find("a").attr("href") || "",
         frontImageUrl: $(el).find("img").attr("src") || "",

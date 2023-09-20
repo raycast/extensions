@@ -6,6 +6,7 @@ import { getMangaCalendar } from "../utils/scrapper";
 import { monthNames } from "../utils/months";
 import MangaListItem from "../components/MangaListItem";
 import { DateDropdown } from "../components/DateDropdown";
+import { generateKey } from "../utils/generateKey";
 
 export default function CurrentMonthPublications() {
   const currentDate = new Date();
@@ -56,16 +57,12 @@ export default function CurrentMonthPublications() {
       onSearchTextChange={setSearchText}
       searchBarAccessory={<DateDropdown dateList={publicationDates} onDropdownChange={setSelectedDate} />}
     >
-      {Object.entries(filteredMangaList).map(([date, mangasByDate], idx) => {
+      {Object.entries(filteredMangaList).map(([date, mangasByDate]) => {
         return (
           mangasByDate && (
-            <List.Section
-              key={idx}
-              title={date}
-              subtitle={`Latest releases ${currentMonth.toUpperCase()}-${currentYear}`}
-            >
-              {mangasByDate.map((manga, idx) => (
-                <MangaListItem key={(manga.name + manga.volume, idx)} manga={manga} />
+            <List.Section key={generateKey()} title={date.includes("00") ? "No Date" : date}>
+              {mangasByDate.map((manga) => (
+                <MangaListItem key={manga.id} manga={manga} />
               ))}
             </List.Section>
           )

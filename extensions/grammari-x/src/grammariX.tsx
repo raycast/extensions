@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { List, Clipboard, showToast, Toast } from "@raycast/api";
 import { OpenAIModule } from "./utils/grammerUtil";
 import { CommandType, ToneType } from "./types";
@@ -36,6 +36,12 @@ export default function Command() {
 
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
+  useEffect(() => {
+    if (state.chat && state.chat.answer && !isHistoryPaused) {
+      add(state.chat);
+    }
+  }, [state]);
+
   async function onExecute(command: CommandType) {
     try {
       setState((previous) => ({
@@ -52,14 +58,12 @@ export default function Command() {
         isLoading: false,
         chat: {
           ...previous.chat,
-          answer: output,
+          answer: output.trim(),
+          question: previous.chat.question.trim(),
         },
       }));
 
       if (output) {
-        if (!isHistoryPaused) {
-          add(state.chat);
-        }
         Clipboard.copy(output);
         await showToast({
           style: Toast.Style.Success,
@@ -85,7 +89,7 @@ export default function Command() {
       case CommandType.Fix:
         return openAI.fixGrammer(text);
       case CommandType.Paraphrase:
-        return openAI.correctGrammer(text);
+        return openAI.paraphraseGrammer(text);
       case CommandType.ToneChange:
         return openAI.changeTone(text, state.toneType);
       case CommandType.ContinueText:

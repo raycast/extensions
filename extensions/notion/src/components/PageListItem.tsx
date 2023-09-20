@@ -2,7 +2,7 @@ import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/ap
 import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues, Color } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
-import { deletePage, notionColorToTintColor, getPageIcon } from "../utils/notion";
+import { deletePage, notionColorToTintColor, getPageIcon, deleteDatabase } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
 import { DatabaseView, Page, DatabaseProperty, User, PagePropertyType } from "../utils/types";
 
@@ -11,6 +11,10 @@ import { PageDetail } from "./PageDetail";
 import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
 import { CreateDatabaseForm, DatabaseViewForm, AppendToPageForm } from "./forms";
+
+function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 type PageListItemProps = {
   page: Page;
@@ -71,7 +75,7 @@ export function PageListItem({
   }
 
   const quickEditProperties = databaseProperties?.filter((property) =>
-    ["checkbox", "select", "multi_select", "people"].includes(property.type),
+    ["checkbox", "select", "multi_select", "status", "people"].includes(property.type),
   );
 
   const visiblePropertiesIds: string[] =
@@ -113,6 +117,8 @@ export function PageListItem({
     raycast: openInRaycastAction[page.object],
     notion: openInNotionAction,
   };
+
+  const pageWord = capitalize(page.object);
 
   return (
     <List.Item
@@ -163,20 +169,23 @@ export function PageListItem({
             <ActionCreateQuicklink page={page} />
 
             <Action
-              title="Delete Page"
+              title={`Delete ${pageWord}`}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={async () => {
                 if (
                   await confirmAlert({
-                    title: "Delete Page",
+                    title: `Delete ${pageWord}`,
                     icon: { source: Icon.Trash, tintColor: Color.Red },
-                    message:
-                      "Do you want to delete this page? Don't worry, you'll be able to restore it from Notion's trash.",
+                    message: `Do you want to delete this ${page.object}? Don't worry, you'll be able to restore it from Notion's trash.`,
                   })
                 ) {
-                  await deletePage(page.id);
+                  if (page.object === "database") {
+                    deleteDatabase(page.id);
+                  } else {
+                    deletePage(page.id);
+                  }
                   await removeRecentPage(page.id);
                   await mutate();
                 }
@@ -224,7 +233,7 @@ export function PageListItem({
           {page.url ? (
             <ActionPanel.Section>
               <Action.CopyToClipboard
-                title="Copy Page URL"
+                title={`Copy ${pageWord} URL`}
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
@@ -237,12 +246,12 @@ export function PageListItem({
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
               />
               <Action.Paste
-                title="Paste Page URL"
+                title={`Paste ${pageWord} URL`}
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
               />
               <Action.CopyToClipboard
-                title="Copy Page Title"
+                title={`Copy ${pageWord} Title`}
                 content={title}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
