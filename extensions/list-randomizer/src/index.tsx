@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, clearSearchBar } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, clearSearchBar } from "@raycast/api";
 import fs from "fs";
 import { useEffect, useState } from "react";
 import { LIST_HISTORY, getInitialValue } from "./fileWrite";
@@ -54,8 +54,13 @@ export default function Command() {
           title={item}
           actions={
             <ActionPanel>
-              <Action title="Add" onAction={() => addItem()} />
-              <Action title="Randomize" onAction={() => randomize()} shortcut={{ modifiers: ["cmd"], key: "j" }} />
+              <Action title="Add" icon={Icon.Plus} onAction={() => addItem()} />
+              <Action
+                title="Randomize"
+                icon={Icon.Wand}
+                onAction={() => randomize()}
+                shortcut={{ modifiers: ["cmd"], key: "j" }}
+              />
               <Action.CopyToClipboard
                 title="Copy List"
                 content={items.join(",")}
