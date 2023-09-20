@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-latex",
-  "title": "LaTeX to image",
+  "title": "LaTeX to Image",
   "description": "Converts LaTeX text to image. Copy the image to the Clipboard.",
   "icon": "bird.png",
   "author": "Noamko",
