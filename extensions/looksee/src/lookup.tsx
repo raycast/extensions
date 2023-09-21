@@ -4,7 +4,6 @@ import { LookupResponse } from "./common/types/lookupResponse";
 import { VendorInformation } from "./lookup/VendorInformation";
 import { FetchError } from "./lookup/FetchError";
 import { EmptyError } from "./lookup/EmptyError";
-
 import { useLookupHistoryStorage } from "./lookup/useLookupHistoryStorage";
 
 export default function lookup(props: LaunchProps<{ arguments: Arguments.Lookup }>) {
