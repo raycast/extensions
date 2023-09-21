@@ -1,50 +1,71 @@
-import { existsSync, readdirSync, readFile } from "fs";
+import { existsSync, readFile } from "fs";
 import os from "os";
 import { promisify } from "util";
 
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 
-const ARC_SIDEBAR_PATH = `${os.homedir()}/Library/Application Support/Arc/StorableSidebar.json`;
+import { BROWSERS_BUNDLE_ID } from "./useAvailableBrowsers";
+
+const ARC_BOOKMARKS_PATH = `${os.homedir()}/Library/Application Support/Arc`;
 
 const read = promisify(readFile);
 
-type BookmarkURL = {
-  guid: string;
-  name: string;
-  url: string;
-  type: "url";
+type Item = {
+  id: string;
+  parentID: string | null;
+  childrenIds: string[];
 };
 
-type BookmarkFolder = {
-  guid: string;
-  name: string;
-  type: "folder";
-  children: BookmarkItem[];
+type BookmarkURL = Item & {
+  title: string | null;
+  data: {
+    tab: {
+      savedTitle: string;
+      savedURL: string;
+    };
+  };
+};
+
+type BookmarkFolder = Item & {
+  title: string;
+  data: {
+    list: unknown;
+  };
 };
 
 type BookmarkItem = BookmarkURL | BookmarkFolder;
 
-type BookmarksRoot = {
-  roots: {
-    bookmark_bar: BookmarkFolder;
-    other: BookmarkFolder;
+type Container = {
+  items?: (string | BookmarkItem)[];
+};
+
+type SidebarRoot = {
+  sidebar: {
+    containers: Container[];
   };
 };
 
-function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
+const isBookmarkURL = (bookmark: BookmarkItem): bookmark is BookmarkURL =>
+  (bookmark.data as { tab?: unknown }).tab !== undefined;
+
+type Bookmark = {
+  id: string;
+  title: string;
+  url: string;
+  folder: string;
+};
+
+function getBookmarks(bookmark: BookmarkItem, hierarchy = ""): Bookmark[] {
   const bookmarks = [];
 
-  if (bookmark.type === "folder") {
-    bookmark.children?.map((child) => {
-      bookmarks.push(...getBookmarks(child, hierarchy === "" ? bookmark.name : `${hierarchy}/${bookmark.name}`));
-    });
-  }
+  if (isBookmarkURL(bookmark)) {
+    const bookmarkTitle = bookmark.title || bookmark.data.tab.savedTitle;
+    const title = hierarchy === "" ? bookmarkTitle : `${hierarchy}/${bookmarkTitle}`;
 
-  if (bookmark.type === "url") {
     bookmarks.push({
-      id: bookmark.guid,
-      title: bookmark.name,
-      url: bookmark.url,
+      id: bookmark.id,
+      title,
+      url: bookmark.data.tab.savedURL,
       folder: hierarchy,
     });
   }
@@ -55,45 +76,52 @@ function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
 type Folder = {
   id: string;
   title: string;
+  childrenIds: string[];
 };
 
-function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Folder[] {
+const truthy = <T>(value: T | null | undefined): value is T => Boolean(value);
+
+const isFolder = (bookmark: BookmarkItem): bookmark is BookmarkFolder =>
+  (bookmark.data as { list?: unknown }).list !== undefined;
+
+function getFolders(container: BookmarkItem[], item: BookmarkItem, hierarchy = ""): Folder[] {
   const folders: Folder[] = [];
 
-  if (bookmark.type === "folder") {
-    const title = hierarchy === "" ? bookmark.name : `${hierarchy}/${bookmark.name}`;
+  if (isFolder(item)) {
+    const title = hierarchy === "" ? item.title : `${hierarchy}/${item.title}`;
 
     return [
-      { title, id: bookmark.guid },
-      ...(bookmark.children?.map((child) => getFolders(child, title)) || []).flat(),
+      {
+        title,
+        id: item.id,
+        childrenIds: item.childrenIds,
+      },
+      ...(
+        item.childrenIds
+          ?.map((childId) => container.find((item) => item.id === childId))
+          .filter(truthy)
+          .map((child) => getFolders(container, child, title)) || []
+      ).flat(),
     ];
   }
 
   return folders;
 }
 
-async function getChromiumProfiles(path: string) {
-  if (!existsSync(`${path}/Local State`)) {
+async function getArcProfiles() {
+  const path = `${ARC_BOOKMARKS_PATH}/User Data/Local State`;
+  if (!existsSync(path)) {
     return { profiles: [], defaultProfile: "" };
   }
 
-  const file = await read(`${path}/Local State`, "utf-8");
+  const file = await read(path, "utf-8");
   const localState = JSON.parse(file);
 
-  const profileInfoCache: Record<string, any> = localState.profile.info_cache;
-
-  const profiles = Object.entries(profileInfoCache)
-    // Only keep profiles that have bookmarks
-    .filter(([profilePath]) => {
-      const profileDirectory = readdirSync(`${path}/${profilePath}`);
-      return profileDirectory.includes("Bookmarks");
-    })
-    .map(([path, profile]) => {
-      return {
-        path,
-        name: profile.name,
-      };
-    });
+  const profileInfoCache: Record<string, { name: string }> = localState.profile.info_cache;
+  const profiles = Object.entries(profileInfoCache).map(([path, profile]) => ({
+    path,
+    name: path === "Default" ? "Default" : profile.name,
+  }));
 
   const defaultProfile = localState.profile?.last_used?.length > 0 ? localState.profile.last_used : profiles[0].path;
 
@@ -104,12 +132,12 @@ async function getChromiumProfiles(path: string) {
 export default function useArcBookmarks(enabled: boolean) {
   const [currentProfile, setCurrentProfile] = useCachedState("arc-profile", "");
   const { data: profiles } = useCachedPromise(
-    async (enabled, path) => {
+    async (enabled) => {
       if (!enabled) {
         return;
       }
 
-      const { profiles, defaultProfile } = await getChromiumProfiles(path);
+      const { profiles, defaultProfile } = await getArcProfiles();
 
       // Initially set the current profile when nothing is set in the cache yet
       if (currentProfile === "") {
@@ -118,43 +146,48 @@ export default function useArcBookmarks(enabled: boolean) {
 
       return profiles;
     },
-    [enabled, path]
+    [enabled]
   );
 
   const { data, isLoading, mutate } = useCachedPromise(
-    async (profile, enabled, path) => {
-      if (!profile || !enabled || !existsSync(`${path}/${profile}/Bookmarks`)) {
+    async (profile, enabled) => {
+      if (!profile || !enabled || !existsSync(`${ARC_BOOKMARKS_PATH}/StorableSidebar.json`)) {
         return;
       }
 
-      const file = await read(`${path}/${profile}/Bookmarks`);
-      return JSON.parse(file.toString()) as BookmarksRoot;
+      const file = await read(`${ARC_BOOKMARKS_PATH}/StorableSidebar.json`);
+      return JSON.parse(file.toString()) as SidebarRoot;
     },
-    [currentProfile, enabled, path]
+    [currentProfile, enabled]
   );
 
-  const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
-  const toolbarFolders = data ? getFolders(data.roots.bookmark_bar) : [];
+  const container =
+    data?.sidebar.containers
+      .find((container) => container.items)
+      ?.items?.filter((value): value is BookmarkItem => typeof value !== "string") ?? [];
 
-  const otherBookmarks = data ? getBookmarks(data.roots.other) : [];
-  const otherFolders = data ? getFolders(data.roots.other) : [];
+  // const profileItems = getProfileItems(container);
 
-  const bookmarks = [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
-    return {
-      ...bookmark,
-      id: `${bookmark.id}-${browserBundleId}`,
-      browser: browserBundleId,
-    };
-  });
+  const bookmarks = container
+    .flatMap((item) => getBookmarks(item))
+    .map((bookmark) => {
+      return {
+        ...bookmark,
+        id: `${bookmark.id}-${BROWSERS_BUNDLE_ID.arc}`,
+        browser: BROWSERS_BUNDLE_ID.arc,
+      };
+    });
 
-  const folders = [...toolbarFolders, ...otherFolders].map((folder) => {
-    return {
-      ...folder,
-      id: `${folder.id}-${browserBundleId}`,
-      icon: browserIcon,
-      browser: browserBundleId,
-    };
-  });
+  const folders = container
+    .flatMap((item) => getFolders(container, item))
+    .map((folder) => {
+      return {
+        ...folder,
+        id: `${folder.id}-${BROWSERS_BUNDLE_ID.arc}`,
+        icon: "arc.png",
+        browser: BROWSERS_BUNDLE_ID.arc,
+      };
+    });
 
   return {
     bookmarks,

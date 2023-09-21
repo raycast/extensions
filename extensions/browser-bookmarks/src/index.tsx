@@ -385,15 +385,15 @@ export default function Command() {
                     <SelectBrowserAction browsers={browsers} setBrowsers={setBrowsers} />
                   ) : null}
 
-                  {/* <SelectProfileSubmenu */}
-                  {/*   bundleId={BROWSERS_BUNDLE_ID.arc} */}
-                  {/*   name="Arc" */}
-                  {/*   icon="arc.png" */}
-                  {/*   shortcut={{ modifiers: ["cmd", "shift"], key: "a" }} */}
-                  {/*   profiles={arc.profiles} */}
-                  {/*   currentProfile={arc.currentProfile} */}
-                  {/*   setCurrentProfile={arc.setCurrentProfile} */}
-                  {/* /> */}
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.arc}
+                    name="Arc"
+                    icon="arc.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    profiles={arc.profiles}
+                    currentProfile={arc.currentProfile}
+                    setCurrentProfile={arc.setCurrentProfile}
+                  />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.brave}
                     name="Brave"
