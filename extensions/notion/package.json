@@ -92,7 +92,7 @@
   "dependencies": {
     "@mozilla/readability": "^0.4.4",
     "@notionhq/client": "^2.2.13",
-    "@raycast/api": "^1.58.1",
+    "@raycast/api": "^1.59.0",
     "@raycast/utils": "^1.10.0",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^2.30.0",
@@ -102,7 +102,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",
-    "@types/node": "20.6.0",
+    "@types/node": "20.6.3",
     "@types/react": "18.2.22",
     "eslint": "^8.49.0",
     "prettier": "^3.0.3",

@@ -318,12 +318,21 @@ export async function createDatabasePage(values: Form.Values) {
           case "date": {
             type DateProperty = Exclude<Extract<DatabaseCreateProperty, { type?: "date" }>["date"], null>;
             type DatePropertyTimeZone = Required<DateProperty["time_zone"]>;
-            arg.properties[propId] = {
-              date: {
-                start: subMinutes(new Date(value), new Date().getTimezoneOffset()).toISOString(),
-                time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as DatePropertyTimeZone,
-              },
-            };
+            const time = subMinutes(new Date(value), new Date().getTimezoneOffset()).toISOString().split("T")[0];
+            if (Form.DatePicker.isFullDay(value)) {
+              arg.properties[propId] = {
+                date: {
+                  start: time.split("T")[0],
+                },
+              };
+            } else {
+              arg.properties[propId] = {
+                date: {
+                  start: time,
+                  time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as DatePropertyTimeZone,
+                },
+              };
+            }
             break;
           }
 
