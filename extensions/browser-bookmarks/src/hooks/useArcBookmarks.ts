@@ -35,8 +35,24 @@ type BookmarkFolder = Item & {
 
 type BookmarkItem = BookmarkURL | BookmarkFolder;
 
+type Space = {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  containerIDs: ("pinned" | "unpinned" | (string & {}))[];
+  id: string;
+  title: string;
+  profile: {
+    default?: unknown;
+    custom?: {
+      _0: {
+        directoryBasename: string;
+      };
+    };
+  };
+};
+
 type Container = {
   items?: (string | BookmarkItem)[];
+  spaces?: (string | Space)[];
 };
 
 type SidebarRoot = {
@@ -44,6 +60,20 @@ type SidebarRoot = {
     containers: Container[];
   };
 };
+
+function getContainerIds(container: Container, currentProfile: string): string[] {
+  return (container.spaces ?? [])
+    .filter((value): value is Space => typeof value !== "string")
+    .filter((space) =>
+      currentProfile === "Default"
+        ? space.profile.default !== undefined
+        : space.profile.custom?._0.directoryBasename === currentProfile
+    )
+    .map((space) => {
+      const pinnedIndex = space.containerIDs.findIndex((id) => id === "pinned");
+      return space.containerIDs[pinnedIndex + 1];
+    });
+}
 
 const isBookmarkURL = (bookmark: BookmarkItem): bookmark is BookmarkURL =>
   (bookmark.data as { tab?: unknown }).tab !== undefined;
@@ -84,7 +114,7 @@ const truthy = <T>(value: T | null | undefined): value is T => Boolean(value);
 const isFolder = (bookmark: BookmarkItem): bookmark is BookmarkFolder =>
   (bookmark.data as { list?: unknown }).list !== undefined;
 
-function getFolders(container: BookmarkItem[], item: BookmarkItem, hierarchy = ""): Folder[] {
+function getFolders(root: BookmarkItem[], item: BookmarkItem, hierarchy = ""): Folder[] {
   const folders: Folder[] = [];
 
   if (isFolder(item)) {
@@ -98,9 +128,9 @@ function getFolders(container: BookmarkItem[], item: BookmarkItem, hierarchy = "
       },
       ...(
         item.childrenIds
-          ?.map((childId) => container.find((item) => item.id === childId))
+          ?.map((childId) => root.find((item) => item.id === childId))
           .filter(truthy)
-          .map((child) => getFolders(container, child, title)) || []
+          .map((child) => getFolders(root, child, title)) || []
       ).flat(),
     ];
   }
@@ -161,30 +191,35 @@ export default function useArcBookmarks(enabled: boolean) {
     [currentProfile, enabled]
   );
 
-  const container =
-    data?.sidebar.containers
-      .find((container) => container.items)
-      ?.items?.filter((value): value is BookmarkItem => typeof value !== "string") ?? [];
+  const container = data?.sidebar.containers.find((container) => container.items);
+  const containerIds = container ? getContainerIds(container, currentProfile) : [];
+  const root = (container?.items ?? [])
+    .filter((value): value is BookmarkItem => typeof value !== "string")
+    .filter((item) => containerIds.includes(item.parentID ?? ""));
 
-  // const profileItems = getProfileItems(container);
-
-  const bookmarks = container
-    .flatMap((item) => getBookmarks(item))
-    .map((bookmark) => {
-      return {
-        ...bookmark,
-        id: `${bookmark.id}-${BROWSERS_BUNDLE_ID.arc}`,
-        browser: BROWSERS_BUNDLE_ID.arc,
-      };
-    });
-
-  const folders = container
-    .flatMap((item) => getFolders(container, item))
+  const folders = root
+    .flatMap((item) => getFolders(root, item))
     .map((folder) => {
       return {
         ...folder,
         id: `${folder.id}-${BROWSERS_BUNDLE_ID.arc}`,
         icon: "arc.png",
+        browser: BROWSERS_BUNDLE_ID.arc,
+      };
+    });
+
+  console.log(folders.flatMap((folder) => folder.childrenIds));
+  const parentIds = (container?.items ?? [])
+    .concat(folders.flatMap((folder) => folder.childrenIds))
+    .filter((value): value is BookmarkItem => typeof value !== "string")
+    .filter((item) => containerIds.includes(item.parentID ?? ""));
+
+  const bookmarks = parentIds
+    .flatMap((item) => getBookmarks(item))
+    .map((bookmark) => {
+      return {
+        ...bookmark,
+        id: `${bookmark.id}-${BROWSERS_BUNDLE_ID.arc}`,
         browser: BROWSERS_BUNDLE_ID.arc,
       };
     });
