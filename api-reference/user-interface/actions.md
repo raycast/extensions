@@ -75,10 +75,10 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | content<mark style="color:red;">*</mark> | The contents that will be copied to the clipboard. | <code>string</code> or <code>number</code> or <code>[Clipboard.Content](../clipboard.md#clipboard.content)</code> | - |
+| concealed | Indicates whether the content be treated as confidential. If `true`, it will not be recorded in the Clipboard History. | <code>boolean</code> | `false` |
 | icon | A optional icon displayed for the Action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Clipboard](icons-and-images.md#icon) |
 | shortcut | The keyboard shortcut for the Action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the Action. | <code>string</code> | `"Copy to Clipboard"` |
-| transient | Indicates whether the content should be copied to the clipboard temporarily or not. | <code>boolean</code> | `false` |
 | onCopy | Callback when the content was copied to clipboard. | <code>(content: string \| number \| [Clipboard.Content](../clipboard.md#clipboard.content)) => void</code> | - |
 
 ### Action.Open
@@ -550,3 +550,35 @@ The types of date components the user can pick with an `Action.PickDate`.
 | -------- | ---------------------------------------------------------------- |
 | DateTime | Hour and second can be picked in addition to year, month and day |
 | Date     | Only year, month, and day can be picked                          |
+
+### Action.PickDate.isFullDay
+
+A method that determines if a given date represents a full day or a specific time.
+
+```tsx
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Todo"
+        actions={
+          <ActionPanel>
+            <Action.PickDate
+              title="Set Due Date…"
+              onChange={(date) => {
+                if (Action.PickDate.isFullDay(values.reminderDate)) {
+                  // the event is for a full day
+                } else {
+                  // the event is at a specific time
+                }
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
