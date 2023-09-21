@@ -142,7 +142,7 @@ export async function fetchDatabases() {
             icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
             icon_file: x.icon?.type === "file" ? x.icon.file.url : null,
             icon_external: x.icon?.type === "external" ? x.icon.external.url : null,
-          }) as Database,
+          } as Database)
       );
   } catch (err) {
     return handleError(err, "Failed to fetch databases", []);
@@ -178,7 +178,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
             name: "No Selection",
           });
           databaseProperty.options = (databaseProperty.options as DatabasePropertyOption[]).concat(
-            property.select.options,
+            property.select.options
           );
           break;
         case "status":
@@ -187,7 +187,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
             name: "No Selection",
           });
           databaseProperty.options = (databaseProperty.options as DatabasePropertyOption[]).concat(
-            property.status.options,
+            property.status.options
           );
           break;
         case "multi_select":
@@ -210,7 +210,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
 export async function queryDatabase(
   databaseId: string,
   query: string | undefined,
-  sort: "last_edited_time" | "created_time" = "last_edited_time",
+  sort: "last_edited_time" | "created_time" = "last_edited_time"
 ) {
   try {
     await authorize();
@@ -325,14 +325,13 @@ export async function createDatabasePage(values: Form.Values) {
               date: {
                 start: format(
                   subMinutes(new Date(value), new Date().getTimezoneOffset()),
-                  "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                  "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
                 ),
                 time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as DatePropertyTimeZone,
               },
             };
             break;
           }
-
           case "checkbox":
             arg.properties[propId] = {
               checkbox: value === 1 ? true : false,
@@ -349,6 +348,13 @@ export async function createDatabasePage(values: Form.Values) {
             arg.properties[propId] = {
               multi_select: value.map((multi_select_id: string) => ({ id: multi_select_id })),
             };
+            break;
+          case "status":
+            if (value !== "_select_null_") {
+              arg.properties[propId] = {
+                status: { id: value },
+              };
+            }
             break;
           case "relation":
             arg.properties[propId] = {
@@ -482,7 +488,7 @@ export async function fetchUsers() {
             name: x.name,
             type: x.type,
             avatar_url: x.avatar_url,
-          }) as User,
+          } as User)
       );
   } catch (err) {
     return handleError(err, "Failed to fetch users", []);
