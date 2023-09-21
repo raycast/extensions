@@ -62,7 +62,7 @@ type SidebarRoot = {
 };
 
 function getContainerIds(container: Container, currentProfile: string): string[] {
-  return (container.spaces ?? [])
+  const containerIds = (container.spaces ?? [])
     .filter((value): value is Space => typeof value !== "string")
     .filter((space) =>
       currentProfile === "Default"
@@ -73,6 +73,8 @@ function getContainerIds(container: Container, currentProfile: string): string[]
       const pinnedIndex = space.containerIDs.findIndex((id) => id === "pinned");
       return space.containerIDs[pinnedIndex + 1];
     });
+
+  return containerIds;
 }
 
 const isBookmarkURL = (bookmark: BookmarkItem): bookmark is BookmarkURL =>
@@ -193,28 +195,19 @@ export default function useArcBookmarks(enabled: boolean) {
 
   const container = data?.sidebar.containers.find((container) => container.items);
   const containerIds = container ? getContainerIds(container, currentProfile) : [];
-  const root = (container?.items ?? [])
-    .filter((value): value is BookmarkItem => typeof value !== "string")
-    .filter((item) => containerIds.includes(item.parentID ?? ""));
+  const root = (container?.items ?? []).filter((value): value is BookmarkItem => typeof value !== "string");
 
   const folders = root
-    .flatMap((item) => getFolders(root, item))
-    .map((folder) => {
-      return {
-        ...folder,
-        id: `${folder.id}-${BROWSERS_BUNDLE_ID.arc}`,
-        icon: "arc.png",
-        browser: BROWSERS_BUNDLE_ID.arc,
-      };
-    });
+    .filter((item) => containerIds.includes(item.parentID ?? ""))
+    .flatMap((item) => getFolders(root, item));
 
-  console.log(folders.flatMap((folder) => folder.childrenIds));
-  const parentIds = (container?.items ?? [])
-    .concat(folders.flatMap((folder) => folder.childrenIds))
-    .filter((value): value is BookmarkItem => typeof value !== "string")
-    .filter((item) => containerIds.includes(item.parentID ?? ""));
+  const parentIds = folders
+    .map((folder) => [folder.id, folder.childrenIds])
+    .concat(containerIds)
+    .flat(Infinity);
 
-  const bookmarks = parentIds
+  const bookmarks = root
+    .filter((item) => parentIds.includes(item.parentID ?? ""))
     .flatMap((item) => getBookmarks(item))
     .map((bookmark) => {
       return {
@@ -226,7 +219,12 @@ export default function useArcBookmarks(enabled: boolean) {
 
   return {
     bookmarks,
-    folders,
+    folders: folders.map((folder) => ({
+      ...folder,
+      id: `${folder.id}-${BROWSERS_BUNDLE_ID.arc}`,
+      icon: "arc.png",
+      browser: BROWSERS_BUNDLE_ID.arc,
+    })),
     isLoading,
     mutate,
     profiles: profiles || [],
