@@ -10,8 +10,6 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
       id={bookmark.RepositoryIdentifier}
       title={bookmark.Name}
       icon={{ source: "icon-folder.png", tintColor: Color.Blue }}
-      accessoryTitle={bookmark.getBranch}
-      accessoryIcon={{ source: "icon-branches.png", tintColor: Color.PrimaryText }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -47,6 +45,12 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
           </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: bookmark.getBranch,
+          icon: { source: "icon-branches.png", tintColor: Color.PrimaryText },
+        },
+      ]}
     />
   );
 }
