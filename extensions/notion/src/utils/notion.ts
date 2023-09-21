@@ -2,7 +2,7 @@ import { Client, isNotionClientError } from "@notionhq/client";
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { showToast, Color, Form, Toast, OAuth, getPreferenceValues, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
-import { format, subMinutes } from "date-fns";
+import { subMinutes } from "date-fns";
 import fetch from "node-fetch";
 import { NotionToMarkdown } from "notion-to-md";
 

@@ -1,7 +1,15 @@
 import { LocalStorage, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { fetchDatabaseProperties, fetchUsers, fetchDatabases, queryDatabase, search, fetchPage, fetchDatabase } from "../utils/notion";
+import {
+  fetchDatabaseProperties,
+  fetchUsers,
+  fetchDatabases,
+  queryDatabase,
+  search,
+  fetchPage,
+  fetchDatabase,
+} from "../utils/notion";
 import { DatabaseProperty, DatabaseView, Page } from "../utils/types";
 
 export function useUsers() {
@@ -70,7 +78,7 @@ export function useDatabasesView(databaseId: string) {
 export class RecentPage {
   id: string;
   last_visited_time: number;
-  type: Page['object'];
+  type: Page["object"];
 
   constructor(page: Page) {
     this.id = page.id;
@@ -89,18 +97,20 @@ export function useRecentPages() {
     if (!data || typeof data !== "string") return [];
 
     const recentPages = JSON.parse(data) as RecentPage[];
-    
+
     // for each RecentPage object, turn it into a Page object, and filter out any undefined values
-    const recentPagesWithContent: Page[] = (await Promise.all(recentPages.map((p) => {
-      // convert each RecentPage object into a Page object
-      if (p.type === 'page') {
-        return fetchPage(p.id)
-      }else {
-        return fetchDatabase(p.id)
-      }
-    }))).filter(
-      (x): x is Page => x !== undefined,
-    );
+    const recentPagesWithContent: Page[] = (
+      await Promise.all(
+        recentPages.map((p) => {
+          // convert each RecentPage object into a Page object
+          if (p.type === "page") {
+            return fetchPage(p.id);
+          } else {
+            return fetchDatabase(p.id);
+          }
+        }),
+      )
+    ).filter((x): x is Page => x !== undefined);
 
     return recentPagesWithContent;
   });
@@ -108,7 +118,7 @@ export function useRecentPages() {
   async function setRecentPage(page: Page) {
     if (!data) return;
 
-    let recentPages = [...data].map(p => new RecentPage(p));
+    let recentPages = [...data].map((p) => new RecentPage(p));
 
     // check if the page is already in the recent pages
     const cachedPageIndex = data.findIndex((x) => x.id === page.id);
