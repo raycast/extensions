@@ -1,4 +1,4 @@
-import { LookupResponse } from "../types/lookupResponse";
+import { LookupResponse } from "../common/types/lookupResponse";
 import { Detail } from "@raycast/api";
 
 interface VendorInformationProps {

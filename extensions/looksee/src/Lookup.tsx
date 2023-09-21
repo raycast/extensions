@@ -1,9 +1,11 @@
 import { LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { LookupResponse } from "./types/lookupResponse";
-import { VendorInformation } from "./components/VendorInformation";
-import { FetchError } from "./components/FetchError";
-import { EmptyError } from "./components/EmptyError";
+import { LookupResponse } from "./common/types/lookupResponse";
+import { VendorInformation } from "./lookup/VendorInformation";
+import { FetchError } from "./lookup/FetchError";
+import { EmptyError } from "./lookup/EmptyError";
+
+import { useLookupHistoryStorage } from "./lookup/useLookupHistoryStorage";
 
 export default function lookup(props: LaunchProps<{ arguments: Arguments.Lookup }>) {
   const { address } = props.arguments;
@@ -12,6 +14,8 @@ export default function lookup(props: LaunchProps<{ arguments: Arguments.Lookup 
   const showFetchError = !isLoading && !!error;
   const showEmptyError = !isLoading && !showFetchError && !data;
   const showVendorInfo = !showFetchError && !showEmptyError;
+
+  useLookupHistoryStorage(address, isLoading, data);
 
   return (
     <>

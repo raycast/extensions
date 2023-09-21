@@ -4,3 +4,4 @@
 
 - Initial version
 - Add MAC, OUI, IAB lookup command
+- Add Lookup History command
