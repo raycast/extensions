@@ -1,5 +1,6 @@
 import { LookupResponse } from "../common/types/lookupResponse";
 import { Detail } from "@raycast/api";
+import { getLookupResponseMarkdown } from "../common/getLookupResponseMarkdown";
 
 interface VendorInformationProps {
   isLoading: boolean;
@@ -19,15 +20,5 @@ const getVendorInformationMarkdown = (targetAddress: string, lookup?: LookupResp
 # Vendor information
 > __${targetAddress}__
 
-    🌍 Country: ${lookup?.country}  
-    🏢 Company: ${lookup?.company}  
-    📫 Address L1: ${lookup?.addressL1}  
-    📫 Address L2: ${lookup?.addressL2}  
-    📫 Address L3: ${lookup?.addressL3}  
-    📫 Address L3: ${lookup?.addressL3}  
-    📠 Hex start: ${lookup?.startHex}  
-    📠 Hex end: ${lookup?.endHex}  
-    📠 Dec start: ${lookup?.startDec}  
-    📠 Dec end: ${lookup?.endDec}  
-    📜 Type: ${lookup?.type}
+${getLookupResponseMarkdown(lookup)}
 `;
