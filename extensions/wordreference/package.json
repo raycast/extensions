@@ -3,7 +3,7 @@
   "name": "wordreference",
   "title": "WordReference Dictionary Translation",
   "description": "Quickly find a word translation using WordReference",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "icon": "icon.png",
   "author": "Katatsu",
   "categories": [
@@ -18,7 +18,29 @@
       "title": "Translate Word",
       "subtitle": "WordReference",
       "description": "Translate a word and find its definitions using WordReference",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "word",
+          "placeholder": "Word",
+          "type": "text"
+        },
+        {
+          "name": "language",
+          "placeholder": "Language",
+          "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "useSelectedText",
+          "title": "Selected text",
+          "description": "When enabled, the extension will automatically search the selected text",
+          "type": "checkbox",
+          "label": "Automatically use the selected text.",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

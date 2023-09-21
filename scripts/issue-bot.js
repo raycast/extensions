@@ -23,18 +23,17 @@ module.exports = async ({ github, context, core }) => {
   }
 
   let owners;
+  let extension;
 
   if (newMatch.test(context.payload.issue.body)) {
     const [, ext] = newMatch.exec(context.payload.issue.body);
+    extension = ext;
 
     const codeowners = await getCodeOwners({ github, context });
     owners = codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[ext]}`];
   } else {
-    const [, ext] =
-      newMatch.exec(context.payload.issue.body) ||
-      newMatchGitHub.exec(context.payload.issue.body) ||
-      oldMatch.exec(context.payload.issue.body) ||
-      [];
+    const [, ext] = newMatchGitHub.exec(context.payload.issue.body) || oldMatch.exec(context.payload.issue.body) || [];
+    extension = ext;
 
     if (!ext) {
       console.log(`could not find the extension in the body`);
@@ -57,7 +56,7 @@ module.exports = async ({ github, context, core }) => {
   }
 
   if (!owners) {
-    console.log(`could not find the extension ${ext}`);
+    console.log(`could not find the extension ${extension}`);
     await comment({
       github,
       context,
@@ -103,7 +102,7 @@ module.exports = async ({ github, context, core }) => {
     issue_number: context.payload.issue.number,
     owner: context.repo.owner,
     repo: context.repo.repo,
-    labels: [limitLabelLength(`extension: ${ext}`)],
+    labels: [limitLabelLength(`extension: ${extension}`)],
   });
 
   try {

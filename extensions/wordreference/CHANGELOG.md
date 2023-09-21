@@ -2,6 +2,13 @@
 
 All notable changes to "Raycast WordReference Extension" will be documented in this file.
 
+## [1.1.0] - 2023-09-19
+
+### Added
+
+- Option : Automatically use the selected text in the search bar.
+- Command arguments "Word" and "Language" for a faster search.
+
 ## [1.0.0] - 2023-08-11
 
 ### Added

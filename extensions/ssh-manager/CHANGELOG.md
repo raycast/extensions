@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [Modify hosts from  ~/.ssh/config] - 2023-09-20
+
+- This change adds the ability to view/modify ssh hosts from ~/.ssh/config file in addition to localStorage
+
 ## [Make user field optional] - 2023-09-06
 
 - Make user field optional in connection config - to support user-less hosts (e.g. pseudo hosts that are configured in `~/.ssh/config`)
