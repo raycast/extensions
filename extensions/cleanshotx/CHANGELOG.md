@@ -1,5 +1,9 @@
 # Cleanshot X Changelog
 
+## [Update] - 2023-09-21
+
+- Fixed a race condition where screenshot would be taken before the raycast window closes.
+
 ## [Add new commands and arguments] - 2023-09-07
 
 - Added `Add Quick Access Overlay` command with a required filepath argument
