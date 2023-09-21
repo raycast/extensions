@@ -26,4 +26,3 @@ export async function searchPages(query: string): Promise<ParsedPage[]> {
   const parsedPages = pages.map((page) => parsePage(page as PageObjectResponse));
   return parsedPages;
 }
-

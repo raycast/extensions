@@ -2,6 +2,7 @@ import { Client } from "@notionhq/client";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../config/index";
 import { markdownToBlocks } from "@tryfabric/martian";
+import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -25,7 +26,7 @@ function preprocessText(str: string): string {
 }
 
 export async function createConceptNotionPage(title: string, markdown: string): Promise<string> {
-  const notionObjects = markdownToBlocks(preprocessText(markdown));
+  const notionObjects: BlockObjectRequest[] = markdownToBlocks(preprocessText(markdown)) as BlockObjectRequest[];
 
   const response = await notion.pages.create({
     parent: { database_id: preferences.conceptDatabaseKey },
@@ -43,7 +44,6 @@ export async function createConceptNotionPage(title: string, markdown: string): 
         ],
       },
     },
-    // @ts-ignore
     children: [...notionObjects],
   });
 
