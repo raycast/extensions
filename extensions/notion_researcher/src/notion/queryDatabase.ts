@@ -8,21 +8,28 @@ import { parsePage } from "./utils";
 const preferences = getPreferenceValues<Preferences>();
 
 const notion = new Client({ auth: preferences.notionApiKey });
+const databaseId = preferences.conceptDatabaseKey;
 
-export async function searchPages(query: string): Promise<ParsedPage[]> {
-  const response = await notion.search({
-    query: query,
+export async function queryDatabase(query: string): Promise<ParsedPage[]> {
+  const response = await notion.databases.query({
+    database_id: databaseId,
     filter: {
-      value: "page",
-      property: "object",
+      property: "Title",
+      title: {
+        contains: query,
+      },
     },
-    sort: {
-      direction: "descending",
-      timestamp: "last_edited_time",
-    },
-    page_size: 10,
+    sorts: [
+      {
+        property: "Created time",
+        direction: "descending",
+      },
+    ],
+    page_size: 15,
   });
+
   const pages = response.results;
   const parsedPages = pages.map((page) => parsePage(page as PageObjectResponse));
+
   return parsedPages;
 }
