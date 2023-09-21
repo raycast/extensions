@@ -2,10 +2,10 @@ import { LaunchProps } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { LookupResponse } from "./types/lookupResponse";
 import { VendorInformation } from "./components/VendorInformation";
-import { FetchError } from "./components/FetchError";
-import { EmptyError } from "./components/EmptyError";
+import { FetchError } from "./common/FetchError";
+import { EmptyError } from "./common/EmptyError";
 
-export default function lookup(props: LaunchProps<{ arguments: Arguments.Index }>) {
+export default function Lookup(props: LaunchProps<{ arguments: Arguments.Lookup }>) {
   const { address } = props.arguments;
   const { isLoading, data, error } = useFetch<LookupResponse[]>(`https://www.macvendorlookup.com/api/v2/${address}`);
 

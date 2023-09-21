@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "lookup",
       "title": "Lookup",
       "description": "Displays vendor information about a MAC address, OUI or IAB",
       "mode": "view",

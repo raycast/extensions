@@ -1,11 +1,11 @@
 import { Detail } from "@raycast/api";
 
-interface ErrorProps {
+interface FetchErrorProps {
   targetAddress: string;
   error: Error;
 }
 
-export const FetchError = ({ targetAddress, error }: ErrorProps) => (
+export const FetchError = ({ targetAddress, error }: FetchErrorProps) => (
   <Detail navigationTitle="Fetch error" markdown={getFetchErrorMarkdown(targetAddress, error)} />
 );
 

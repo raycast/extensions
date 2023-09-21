@@ -1,10 +1,10 @@
 import { Detail } from "@raycast/api";
 
-interface EmptyResponseViewProps {
+interface EmptyErrorProps {
   targetAddress: string;
 }
 
-export const EmptyError = ({ targetAddress }: EmptyResponseViewProps) => (
+export const EmptyError = ({ targetAddress }: EmptyErrorProps) => (
   <Detail navigationTitle="Empty response" markdown={getEmptyErrorMarkdown(targetAddress)} />
 );
 
