@@ -17,9 +17,9 @@ export interface Database {
 }
 
 // Currently supported properties
-export const supportedPropTypes: PagePropertyType["type"][] = [
-  "number",
+const _supportedPropTypes = [
   "title",
+  "number",
   "rich_text",
   "url",
   "email",
@@ -32,28 +32,15 @@ export const supportedPropTypes: PagePropertyType["type"][] = [
   "people",
   "relation",
   "status",
-];
+] satisfies PagePropertyType["type"][];
+export const supportedPropTypes: PagePropertyType["type"][] = _supportedPropTypes;
 
 // all possible types:
 // "number" | "title" | "rich_text" | "url" | "email" | "phone_number" | "date" | "checkbox" | "select" | "formula" | "people" | "relation" | "multi_select" | "rollup" | "files" | "created_by" | "created_time" | "last_edited_by" | "last_edited_time"
 
 export interface DatabaseProperty {
   id: string;
-  type:
-    | "number"
-    | "title"
-    | "rich_text"
-    | "url"
-    | "email"
-    | "phone_number"
-    | "date"
-    | "checkbox"
-    | "select"
-    | "multi_select"
-    | "formula"
-    | "people"
-    | "relation"
-    | "status";
+  type: (typeof _supportedPropTypes)[number];
   name: string;
   options: DatabasePropertyOption[];
   relation_id?: string;

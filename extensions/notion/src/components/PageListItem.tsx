@@ -10,7 +10,7 @@ import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";
 import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
-import { CreateDatabaseForm, DatabaseViewForm, AppendToPageForm } from "./forms";
+import { CreatePageForm, DatabaseViewForm, AppendToPageForm } from "./forms";
 
 function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -161,7 +161,7 @@ export function PageListItem({
                 title="Create New Page"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<CreateDatabaseForm databaseId={page.id} mutate={mutate} />}
+                target={<CreatePageForm databaseId={page.id} mutate={mutate} />}
               />
             )}
 

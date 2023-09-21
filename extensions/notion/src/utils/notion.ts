@@ -181,21 +181,18 @@ export async function fetchDatabaseProperties(databaseId: string) {
             property.select.options,
           );
           break;
-        case "status":
-          (databaseProperty.options as DatabasePropertyOption[]).push({
-            id: "_select_null_",
-            name: "No Selection",
-          });
-          databaseProperty.options = (databaseProperty.options as DatabasePropertyOption[]).concat(
-            property.status.options,
-          );
-          break;
         case "multi_select":
           databaseProperty.options = property.multi_select.options;
           break;
         case "relation":
           databaseProperty.relation_id = property.relation.database_id;
           break;
+        case "status":
+          databaseProperty.options.push(
+            ...property.status.groups.flatMap(({ option_ids }) =>
+              option_ids.map((id) => property.status.options.find((option) => option.id == id)!),
+            ),
+          );
       }
 
       databaseProperties.push(databaseProperty);
@@ -593,7 +590,7 @@ function pageMapper(jsonPage: NotionObject): Page {
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
   // ordered by appearance in option configuration
   // colors obtained by using color picker on notion app
-  const colorMapper = {
+  const colorMapper: Record<string, Color.ColorLike> = {
     default: { light: "#E3E2E0", dark: "#373737" }, // AKA "light gray in an option"
     gray: { light: "#E3E2E0", dark: "#5A5A5A" },
     brown: { light: "#EEE0DB", dark: "#603B2D" },
@@ -604,7 +601,7 @@ export function notionColorToTintColor(notionColor: string | undefined): Color.C
     purple: { light: "#E8DEED", dark: "#493064" },
     pink: { light: "#F4E0E9", dark: "#69314C" },
     red: { light: "#FFE2DE", dark: "#6E362F" },
-  } as Record<string, Color.ColorLike>;
+  };
 
   return notionColor ? colorMapper[notionColor] : colorMapper["default"];
 }
