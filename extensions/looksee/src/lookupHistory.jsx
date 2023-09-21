@@ -8,11 +8,7 @@ export default function LookupHistory() {
   const historyItems = useLookupHistory();
 
   return (
-    <List
-      navigationTitle={"Lookup History"}
-      searchBarPlaceholder={"Search Previous Lookups"}
-      isShowingDetail={showingDetail}
-    >
+    <List searchBarPlaceholder={"Search Previous Lookups"} isShowingDetail={showingDetail}>
       {historyItems?.map((item) => {
         const props = {
           detail: item.success ? (

@@ -5,7 +5,7 @@ interface EmptyErrorProps {
 }
 
 export const EmptyError = ({ targetAddress }: EmptyErrorProps) => (
-  <Detail navigationTitle="Empty response" markdown={getEmptyErrorMarkdown(targetAddress)} />
+  <Detail markdown={getEmptyErrorMarkdown(targetAddress)} />
 );
 
 const getEmptyErrorMarkdown = (targetAddress: string) => `

@@ -10,7 +10,6 @@ interface VendorInformationProps {
 
 export const VendorInformation = ({ isLoading, targetAddress, lookupResponse }: VendorInformationProps) => (
   <Detail
-    navigationTitle={"Vendor information"}
     isLoading={isLoading}
     markdown={!isLoading ? getVendorInformationMarkdown(targetAddress, lookupResponse) : undefined}
   />

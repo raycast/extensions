@@ -6,7 +6,7 @@ interface FetchErrorProps {
 }
 
 export const FetchError = ({ targetAddress, error }: FetchErrorProps) => (
-  <Detail navigationTitle="Fetch error" markdown={getFetchErrorMarkdown(targetAddress, error)} />
+  <Detail markdown={getFetchErrorMarkdown(targetAddress, error)} />
 );
 
 const getFetchErrorMarkdown = (targetAddress: string, error: Error) => `
