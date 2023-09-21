@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "perchance-generator",
   "title": "Perchance Generator",
-  "description": "Input the project name and receive the generated text.",
+  "description": "Input the generator name and receive the generated text.",
   "icon": "command-icon.png",
   "author": "Vaibhav-Satishkumar",
   "categories": [
@@ -25,7 +25,7 @@
     {
       "name": "index",
       "title": "Generate Using Perchance",
-      "description": "Template with a plain detail view",
+      "description": "Get the generated text using perchance by inputting the generator name. If a generator name isn't inputted, the default generator will be used.",
       "mode": "view",
       "arguments": [
         {
