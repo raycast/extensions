@@ -62,7 +62,6 @@ export function PageListItem({
   }
 
   const lastEditedUser = users?.find((u) => u.id === page.last_edited_user);
-
   if (page.last_edited_time) {
     const date = new Date(page.last_edited_time);
     accessories.push({
@@ -123,7 +122,7 @@ export function PageListItem({
   return (
     <List.Item
       title={title}
-      icon={{ value: icon, tooltip: page.object === "database" ? "Database" : "Page" }}
+      icon={{ value: icon, tooltip: pageWord }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>

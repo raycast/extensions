@@ -259,7 +259,7 @@ export async function createDatabasePage(values: Form.Values) {
     };
 
     if (content) {
-      // TODO: why do I need to cast this?
+      // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
       arg.children = markdownToBlocks(content) as BlockObjectRequest[];
     }
 
@@ -460,6 +460,32 @@ export async function fetchPageContent(pageId: string) {
       markdown:
         results.length === 0 ? "*Page is empty*" : n2m.toMarkdownString(await n2m.blocksToMarkdown(results)).parent,
     };
+  } catch (err) {
+    return handleError(err, "Failed to fetch page content", undefined);
+  }
+}
+
+export async function fetchPage(pageId: string) {
+  try {
+    await authorize();
+    const page = await notion.pages.retrieve({
+      page_id: pageId,
+    });
+
+    return pageMapper(page);
+  } catch (err) {
+    return handleError(err, "Failed to fetch page content", undefined);
+  }
+}
+
+export async function fetchDatabase(pageId: string) {
+  try {
+    await authorize();
+    const page = await notion.databases.retrieve({
+      database_id: pageId,
+    });
+
+    return pageMapper(page);
   } catch (err) {
     return handleError(err, "Failed to fetch page content", undefined);
   }
