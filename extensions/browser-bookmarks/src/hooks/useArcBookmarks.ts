@@ -50,9 +50,19 @@ type Space = {
   };
 };
 
+type TopAppsContainerId = {
+  default?: unknown;
+  custom?: {
+    _0: {
+      directoryBasename: string;
+    };
+  };
+};
+
 type Container = {
   items?: (string | BookmarkItem)[];
   spaces?: (string | Space)[];
+  topAppsContainerIDs?: (string | TopAppsContainerId)[];
 };
 
 type SidebarRoot = {
@@ -60,6 +70,17 @@ type SidebarRoot = {
     containers: Container[];
   };
 };
+
+function getTopAppsContainerId(container: Container, currentProfile: string) {
+  const containerIds = container.topAppsContainerIDs;
+  const index = containerIds?.findIndex(
+    (item) =>
+      typeof item !== "string" &&
+      (currentProfile === "Default" ? item.default !== undefined : item.custom?._0.directoryBasename === currentProfile)
+  );
+
+  return index != null ? (containerIds?.[index + 1] as string) : undefined;
+}
 
 function getContainerIds(container: Container, currentProfile: string): string[] {
   const containerIds = (container.spaces ?? [])
@@ -74,7 +95,7 @@ function getContainerIds(container: Container, currentProfile: string): string[]
       return space.containerIDs[pinnedIndex + 1];
     });
 
-  return containerIds;
+  return [...containerIds, getTopAppsContainerId(container, currentProfile)].filter(truthy);
 }
 
 const isBookmarkURL = (bookmark: BookmarkItem): bookmark is BookmarkURL =>
@@ -87,16 +108,16 @@ type Bookmark = {
   folder: string;
 };
 
-function getBookmarks(bookmark: BookmarkItem, hierarchy = ""): Bookmark[] {
+function getBookmarks(foldres: Folder[], bookmark: BookmarkItem): Bookmark[] {
   const bookmarks = [];
 
   if (isBookmarkURL(bookmark)) {
     const bookmarkTitle = bookmark.title || bookmark.data.tab.savedTitle;
-    const title = hierarchy === "" ? bookmarkTitle : `${hierarchy}/${bookmarkTitle}`;
+    const hierarchy = foldres.find((folder) => folder.childrenIds.includes(bookmark.id))?.title ?? "";
 
     bookmarks.push({
       id: bookmark.id,
-      title,
+      title: bookmarkTitle,
       url: bookmark.data.tab.savedURL,
       folder: hierarchy,
     });
@@ -208,7 +229,7 @@ export default function useArcBookmarks(enabled: boolean) {
 
   const bookmarks = root
     .filter((item) => parentIds.includes(item.parentID ?? ""))
-    .flatMap((item) => getBookmarks(item))
+    .flatMap((item) => getBookmarks(folders, item))
     .map((bookmark) => {
       return {
         ...bookmark,
@@ -220,10 +241,10 @@ export default function useArcBookmarks(enabled: boolean) {
   return {
     bookmarks,
     folders: folders.map((folder) => ({
-      ...folder,
-      id: `${folder.id}-${BROWSERS_BUNDLE_ID.arc}`,
-      icon: "arc.png",
       browser: BROWSERS_BUNDLE_ID.arc,
+      icon: "arc.png",
+      id: `${folder.id}-${BROWSERS_BUNDLE_ID.arc}`,
+      title: folder.title,
     })),
     isLoading,
     mutate,

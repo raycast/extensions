@@ -185,6 +185,7 @@ export default function Command() {
 
   useEffect(() => {
     const folders = [
+      ...arc.folders,
       ...brave.folders,
       ...braveBeta.folders,
       ...chrome.folders,
@@ -199,6 +200,7 @@ export default function Command() {
 
     setFolders(folders);
   }, [
+    arc.folders,
     brave.folders,
     braveBeta.folders,
     chrome.folders,
