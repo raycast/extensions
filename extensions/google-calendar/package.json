@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-calendar",
+  "title": "Google Calendar",
+  "description": "Manage Google Calendars",
+  "icon": "command-icon.png",
+  "author": "tonka3000",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "description": "caliiiiiiiiii",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientid",
+      "description": "Client ID",
+      "type": "textfield",
+      "required": true,
+      "title": "OAuth Client ID"
+    }
+  ],
+  "dependencies": {
+    "@googleapis/calendar": "^9.3.1",
+    "@raycast/api": "^1.58.1",
+    "@raycast/utils": "^1.10.0",
+    "cross-fetch": "^4.0.0",
+    "googleapis": "^126.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
