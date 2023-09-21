@@ -4,7 +4,7 @@
 
 - Add support for `Arc` browser
 
-## [Extension Icon] - {PR_MERGE_DATE}
+## [Extension Icon] - 2023-09-18
 
 - Update extension icon to match Raycast icons style and avoid any mismatch with "Day One" app
 
