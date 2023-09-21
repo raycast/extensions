@@ -602,6 +602,7 @@
 /extensions/mattermost                               @Ernest0-Production
 /extensions/maven-central-repository                 @koinzhang
 /extensions/mayar                                    @moerdowo
+/extensions/mbta-tracker                             @djpowers
 /extensions/md-to-excel                              @victor-defi
 /extensions/mem                                      @brianfakhoury
 /extensions/meme-generator                           @timoransky
