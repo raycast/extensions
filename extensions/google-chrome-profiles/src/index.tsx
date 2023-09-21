@@ -1,7 +1,20 @@
-import { Action, ActionPanel, Clipboard, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  environment,
+  Icon,
+  Image,
+  LaunchProps,
+  List,
+  popToRoot,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
-import { runAppleScript } from "run-applescript";
-import { readFile } from "fs/promises";
+import { runAppleScript } from "@raycast/utils";
+import { readFile } from "node:fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 import {
@@ -15,7 +28,54 @@ import {
 import getPrefs from "./util/preferences";
 import { createBookmarkListItem, matchSearchText, isValidUrl, formatAsUrl } from "./util/util";
 
-export default function Command() {
+const ProfileItem = (props: { index: number; profile: Profile }) => {
+  const { index, profile } = props;
+
+  const context = encodeURIComponent(JSON.stringify({ index: index, directory: profile.directory }));
+  const deeplink = `raycast://extensions/frouo/${environment.extensionName}/${environment.commandName}?context=${context}`;
+
+  return (
+    <List.Item
+      key={index}
+      icon={profile.ga?.pictureURL ? { source: profile.ga.pictureURL, mask: Image.Mask.Circle } : Icon.Person}
+      title={profile.name}
+      subtitle={profile.ga?.email}
+      keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="Show Bookmarks"
+            icon={Icon.Link}
+            target={<ListBookmarks profile={profile} />}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
+          />
+          <Action
+            title="Open in Google Chrome"
+            icon={Icon.Globe}
+            onAction={async () => {
+              await openGoogleChrome(profile.directory, "about:blank", () => showHUD("Opening profile..."));
+            }}
+          />
+          <Action.CreateQuicklink
+            title={`Create Quicklink to ${profile.name} Profile`}
+            quicklink={{ name: `Open ${profile.name} Profile`, link: deeplink }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+};
+
+export default function Command(props: LaunchProps) {
+  const immediatelyOpenProfile = props.launchContext?.index;
+  if (immediatelyOpenProfile) {
+    const profile = props.launchContext?.directory;
+    const link = "about:blank";
+    openGoogleChrome(profile, link, () => showHUD("Opening profile..."));
+    popToRoot();
+    return;
+  }
+
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
   const [error, setError] = useState<Error>();
 
@@ -44,32 +104,7 @@ export default function Command() {
   return (
     <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
       {profiles &&
-        profiles.sort(sortAlphabetically).map((profile, index) => (
-          <List.Item
-            key={index}
-            icon={profile.ga?.pictureURL ? { source: profile.ga.pictureURL, mask: Image.Mask.Circle } : Icon.Person}
-            title={profile.name}
-            subtitle={profile.ga?.email}
-            keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Show Bookmarks"
-                  icon={Icon.Link}
-                  target={<ListBookmarks profile={profile} />}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
-                />
-                <Action
-                  title="Open in Google Chrome"
-                  icon={Icon.Globe}
-                  onAction={async () => {
-                    await openGoogleChrome(profile.directory, "about:blank", () => showHUD("Opening profile..."));
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        profiles.sort(sortAlphabetically).map((profile, index) => <ProfileItem index={index} profile={profile} />)}
     </List>
   );
 }
@@ -122,7 +157,7 @@ const openGoogleChrome = async (profileDirectory: string, link: string, willOpen
     await willOpen();
     await runAppleScript(script);
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Could not found\nGoogle Chrome.app in Applications folder");
+    await showToast(Toast.Style.Failure, "Could not find\nGoogle Chrome.app in Applications folder");
   }
 };
 
@@ -185,7 +220,7 @@ function ListBookmarks(props: { profile: Profile }) {
             ? createBookmarkListItem(clipboard, "Go to the URL in the clipboard")
             : createBookmarkListItem(newTabUrlWithQuery(clipboard), "Search text in the clipboard"),
         ]
-      : []
+      : [],
   );
 
   if (error && (bookmarks?.length ?? 0) == 0) {
