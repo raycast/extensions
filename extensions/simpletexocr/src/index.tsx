@@ -1,6 +1,6 @@
-import { environment, closeMainWindow, getPreferenceValues, Clipboard } from "@raycast/api";
+import { environment, closeMainWindow, getPreferenceValues, Clipboard, showHUD } from "@raycast/api";
 import { join } from "path";
-import { exec } from "child_process";
+import { execSync } from "child_process";
 import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
@@ -8,27 +8,17 @@ import fs from "fs";
 export default async () => {
   await closeMainWindow();
   const savePath = join(environment.supportPath, "capture.png");
-  let flag = false;
-  exec(`/usr/sbin/screencapture -i '${savePath}'`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
-    flag = true;
-  });
-  while (!flag) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
+
+  execSync(`/usr/sbin/screencapture -i '${savePath}'`);
+  // 检查文件是否存在
+  if (!fs.existsSync(savePath)) {
+    await showHUD("❌ 截图失败");
+    return;
   }
-  // open saved image
   const token = getPreferenceValues().token;
-
   const file = fs.readFileSync(savePath);
-
   const formData = new FormData();
   formData.append("file", file, "capture.png");
-
   const headers = {
     "Content-Type": "multipart/form-data",
     token: token,
@@ -37,4 +27,5 @@ export default async () => {
   await Clipboard.copy(res.data.res.latex);
   // remove file
   fs.unlinkSync(savePath);
+  await showHUD("✅ OCR 成功");
 };
