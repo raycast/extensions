@@ -2,7 +2,7 @@
 
 Interact with Tyme 3 to track your time.
 
-![Extension preview](./metadata/tyme-3-time-tracker-1.png)
+![Extension preview](./files/tyme-3-time-tracker-1.png)
 
 ## Disclaimer
 
