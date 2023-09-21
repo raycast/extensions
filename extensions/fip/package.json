@@ -48,7 +48,7 @@
     {
       "name": "choose_radio",
       "title": "Choose Radio",
-      "subtitle": "Select a FIP radio to play",
+      "subtitle": "Fip Radio",
       "description": "Choose a radio to play",
       "mode": "view"
     }
