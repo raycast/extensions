@@ -37,7 +37,7 @@ export default function Command(props: LaunchProps) {
         actions={
           <ActionPanel>
             <Action title="Reload" onAction={() => revalidate()} />
-            <Action.Paste title="Copy to Clipboard" content={`${data}`} />
+            <Action.Paste title="Paste" content={`${data}`} />
             <Action.CopyToClipboard title="Copy to Clipboard" content={`${data}`} />
             <Action.OpenInBrowser title="Open in Browser" url={`https://perchance.org/${selectedGenerator}`} />
           </ActionPanel>
