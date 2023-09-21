@@ -15,6 +15,7 @@ import { useState, useMemo, useEffect } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
+import useArcBookmarks from "./hooks/useArcBookmarks";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
@@ -93,6 +94,7 @@ export default function Command() {
   const [query, setQuery] = useState("");
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
+  const hasArc = browsers.includes(BROWSERS_BUNDLE_ID.arc) ?? false;
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
@@ -104,6 +106,7 @@ export default function Command() {
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
 
+  const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const chrome = useChromeBookmarks(hasChrome);
@@ -120,6 +123,7 @@ export default function Command() {
 
   useEffect(() => {
     const bookmarks = [
+      ...arc.bookmarks,
       ...brave.bookmarks,
       ...braveBeta.bookmarks,
       ...chrome.bookmarks,
@@ -164,6 +168,7 @@ export default function Command() {
 
     setBookmarks(bookmarks);
   }, [
+    arc.bookmarks,
     brave.bookmarks,
     braveBeta.bookmarks,
     chrome.bookmarks,
@@ -257,6 +262,9 @@ export default function Command() {
   }, [folders, bookmarks]);
 
   function mutateBookmarks() {
+    if (hasArc) {
+      arc.mutate();
+    }
     if (hasBrave) {
       brave.mutate();
     }
@@ -323,6 +331,7 @@ export default function Command() {
       isLoading={
         isLoadingBrowsers ||
         isLoadingFrecencies ||
+        arc.isLoading ||
         brave.isLoading ||
         braveBeta.isLoading ||
         chrome.isLoading ||
@@ -376,6 +385,15 @@ export default function Command() {
                     <SelectBrowserAction browsers={browsers} setBrowsers={setBrowsers} />
                   ) : null}
 
+                  {/* <SelectProfileSubmenu */}
+                  {/*   bundleId={BROWSERS_BUNDLE_ID.arc} */}
+                  {/*   name="Arc" */}
+                  {/*   icon="arc.png" */}
+                  {/*   shortcut={{ modifiers: ["cmd", "shift"], key: "a" }} */}
+                  {/*   profiles={arc.profiles} */}
+                  {/*   currentProfile={arc.currentProfile} */}
+                  {/*   setCurrentProfile={arc.setCurrentProfile} */}
+                  {/* /> */}
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.brave}
                     name="Brave"

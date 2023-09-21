@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Arc] - {PR_MERGE_DATE}
+
+- Add support for `Arc` browser
+
 ## [Extension Icon] - {PR_MERGE_DATE}
 
 - Update extension icon to match Raycast icons style and avoid any mismatch with "Day One" app
