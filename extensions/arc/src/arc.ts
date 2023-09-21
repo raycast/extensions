@@ -148,6 +148,23 @@ export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise
     end tell
   `);
 }
+export async function makeNewBlankWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Arc"
+	    activate
+    end tell
+    delay(0.5)
+    tell application "Arc"
+	    activate
+    end tell
+
+    tell application "System Events"
+	    tell process "Arc"
+		    click menu item "Blank window" of menu "File" of menu bar 1
+	    end tell
+    end tell
+  `);
+}
 
 export async function makeNewLittleArcWindow(url: string) {
   await runAppleScript(`

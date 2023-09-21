@@ -8,6 +8,14 @@
   "categories": [
     "Finance"
   ],
+  "keywords": [
+    "mono",
+    "bank",
+    "currency",
+    "money",
+    "cards",
+    "jars"
+  ],
   "license": "MIT",
   "commands": [
     {

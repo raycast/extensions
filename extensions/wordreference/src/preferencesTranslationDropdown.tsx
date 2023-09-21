@@ -14,7 +14,7 @@ export default function PreferencesTranslationDropdown() {
       {translationDictionaries.map(({ language, dictionaries }) => (
         <List.Dropdown.Section key={language} title={language}>
           {dictionaries.map(({ key, from, to }) => (
-            <List.Dropdown.Item key={key} value={key} title={`${from} - ${to}`} />
+            <List.Dropdown.Item key={key} value={key} title={`${from} - ${to} (${key})`} />
           ))}
         </List.Dropdown.Section>
       ))}

@@ -94,15 +94,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.2",
+    "@raycast/api": "^1.58.0",
     "filesize": "^10.0.12"
   },
   "devDependencies": {
-    "@types/node": "~20.5.9",
+    "@types/node": "~20.6.0",
     "@types/react": "^18.2.21",
-    "@typescript-eslint/eslint-plugin": "^6.5.0",
-    "@typescript-eslint/parser": "^6.5.0",
-    "eslint": "^8.48.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
     "react-devtools": "^4.28.0",
     "typescript": "^5.2.2"

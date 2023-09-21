@@ -1,5 +1,9 @@
 # Conventional Commits Changelog
 
+## [New Command] - 2023-09-10
+
+- [FEAT] Add feature to view conventional commit message structure
+
 ## [Extension Icon Fix] - 2023-09-03
 
 - [FIX] Fixed missing extension icon.

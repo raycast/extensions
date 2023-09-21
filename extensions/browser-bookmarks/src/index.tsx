@@ -476,6 +476,7 @@ export default function Command() {
       <List.EmptyView
         title="You don't have any bookmarks"
         description="Press ⏎ to select the browsers you want to import bookmarks from."
+        icon="empty-state.png"
         actions={
           <ActionPanel>
             <SelectBrowserAction browsers={browsers} setBrowsers={setBrowsers} />

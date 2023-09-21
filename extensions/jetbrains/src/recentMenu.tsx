@@ -1,24 +1,30 @@
 import React from "react";
-import { MenuBarExtra, open } from "@raycast/api";
-import { JetBrainsIcon, recentEntry } from "./util";
+import { MenuBarExtra, open, Icon } from "@raycast/api";
+import { JetBrainsIcon, recentEntry, toolsInstall } from "./util";
 import { openInApp } from "./components/OpenInJetBrainsApp";
 import { useAppHistory } from "./useAppHistory";
+import { openToolbox } from "./components/OpenJetBrainsToolbox";
 
 const maxTitleLength = 32;
+const menuIcon = {
+  source: {
+    dark: `${toolsInstall}/Contents/Resources/toolbox-tray-dark@2x.png`,
+    light: `${toolsInstall}/Contents/Resources/toolbox-tray@2x.png`,
+  },
+};
 
 export default function ProjectList(): JSX.Element {
   const { isLoading, toolboxApp, appHistory, myFavs, filter, histories } = useAppHistory();
-  const v2 = Boolean(toolboxApp?.isV2);
+  const v2 = toolboxApp === false ? false : Boolean(toolboxApp?.isV2);
+  if (toolboxApp === undefined || toolboxApp === false) {
+    return (
+      <MenuBarExtra isLoading={isLoading} icon={menuIcon}>
+        <MenuBarExtra.Item title={"Jetbrains Toolbox not found, please install it"} />
+      </MenuBarExtra>
+    );
+  }
   return (
-    <MenuBarExtra
-      isLoading={isLoading}
-      icon={{
-        source: {
-          dark: "/Applications/JetBrains Toolbox.app/Contents/Resources/toolbox-tray-dark@2x.png",
-          light: "/Applications/JetBrains Toolbox.app/Contents/Resources/toolbox-tray@2x.png",
-        },
-      }}
-    >
+    <MenuBarExtra isLoading={isLoading} icon={menuIcon}>
       {isLoading ? null : (
         <>
           {toolboxApp && (
@@ -28,7 +34,7 @@ export default function ProjectList(): JSX.Element {
               onAction={() => open(toolboxApp?.path)}
             />
           )}
-          <MenuBarExtra.Separator />
+          <MenuBarExtra.Section />
           {myFavs.length && filter === "" ? (
             <>
               {myFavs.map((fav) => (
@@ -50,7 +56,7 @@ export default function ProjectList(): JSX.Element {
                   )}
                 />
               ))}
-              <MenuBarExtra.Separator />
+              <MenuBarExtra.Section />
             </>
           ) : null}
           {appHistory
@@ -65,25 +71,34 @@ export default function ProjectList(): JSX.Element {
                 {app.entries && <MenuBarExtra.Separator />}
                 {app.entries
                   ? app.entries
-                      .filter((entry) => filter !== "" || (histories[id] ?? []).includes(entry.path))
-                      .map((recent: recentEntry, index) =>
+                      .filter((recent) => filter !== "" || (histories[id] ?? []).includes(recent.path))
+                      .filter((recent) => recent.path !== "unsupported")
+                      .map((recent: recentEntry) =>
                         recent?.path ? (
-                          <MenuBarExtra.Item
-                            key={`${app.title}-${recent.path}`}
-                            icon={app.icon}
-                            title={`Open ${
-                              recent.title.length < maxTitleLength
-                                ? recent.title
-                                : recent.title.substring(0, maxTitleLength - 1) + "…"
-                            }`}
-                            subtitle={`← ${
-                              recent.title.length + recent.parts.length < maxTitleLength
-                                ? recent.parts
-                                : recent.parts.substring(0, maxTitleLength - recent.title.length - 2) + "…"
-                            }`}
-                            tooltip={`Open ${recent.path} in ${app.title}`}
-                            onAction={openInApp(app, recent, v2)}
-                          />
+                          recent.path === "missing" && recent.title === "missing" ? (
+                            <MenuBarExtra.Item
+                              key={`${app.title}-${recent.path}`}
+                              title={`Missing config, please relaunch JetBrains Toolbox`}
+                              onAction={() => openToolbox(toolboxApp, true)}
+                              icon={Icon.ExclamationMark}
+                            />
+                          ) : (
+                            <MenuBarExtra.Item
+                              key={`${app.title}-${recent.path}`}
+                              title={`Open ${
+                                recent.title.length < maxTitleLength
+                                  ? recent.title
+                                  : recent.title.substring(0, maxTitleLength - 1) + "…"
+                              }`}
+                              subtitle={`← ${
+                                recent.title.length + recent.parts.length < maxTitleLength
+                                  ? recent.parts
+                                  : recent.parts.substring(0, maxTitleLength - recent.title.length - 2) + "…"
+                              }`}
+                              tooltip={`Open ${recent.path} in ${app.title}`}
+                              onAction={openInApp(app, recent, v2)}
+                            />
+                          )
                         ) : null
                       )
                   : null}
