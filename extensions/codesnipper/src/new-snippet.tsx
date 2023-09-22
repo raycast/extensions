@@ -54,7 +54,7 @@ export default function Command() {
   async function submitCode() {
     if (code.length != 0) {
       dropContentErrorIfNeeded();
-      let link = `codesnipper://create?title=${encodeURIComponent(name)}&folder=${encodeURIComponent(
+      const link = `codesnipper://create?title=${encodeURIComponent(name)}&folder=${encodeURIComponent(
         folder
       )}&code=${encodeURIComponent(code)}`;
       console.log(link);

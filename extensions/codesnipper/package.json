@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codesnipper",
   "title": "CodeSnipper",
-  "description": "Access you code snippets from CodeSnipper with RayCast and paste them to your project.",
+  "description": "Access you code snippets from CodeSnipper with Raycast and paste them to your project.",
   "icon": "command-icon.png",
   "author": "timo",
   "categories": [

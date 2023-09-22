@@ -38,14 +38,14 @@ export default function Command() {
 
   // Function to open a note using its UUID
   async function openNote(note: SnippetItem) {
-    let id = uuidStringify(note.UUID).toUpperCase(); // Convert UUID to string and format it
-    let link = "codesnipper://snippets/" + id; // Create a custom link for the note
+    const id = uuidStringify(note.UUID).toUpperCase(); // Convert UUID to string and format it
+    const link = "codesnipper://snippets/" + id; // Create a custom link for the note
     await open(link); // Open the note using Raycast's open function
   }
 
   // Function to copy code to clipboard
   async function copyCode(note: SnippetItem) {
-    let code = note.code; // Get the code from the note
+    const code = note.code; // Get the code from the note
     Clipboard.copy(code ?? ""); // Copy the code to clipboard
     showToast({
       style: Toast.Style.Success,
@@ -171,7 +171,7 @@ const Information = ({ snippet }: { snippet: SnippetItem }) => {
 
   // Define an async function named copyCode that takes a parameter note of type SnippetItem
   async function copyCode(note: SnippetItem) {
-    let code = note.snippet; // Get the code from the note
+    const code = note.snippet; // Get the code from the note
     Clipboard.copy(code ?? ""); // Copy the code to clipboard
     showToast({
       style: Toast.Style.Success,
@@ -206,14 +206,14 @@ const CodeDetail = ({ snippet }: { snippet: SnippetItem }) => {
 
   // Define an async function named openNote that takes a parameter note of type SnippetItem
   async function openNote(note: SnippetItem) {
-    let id = uuidStringify(note.UUID).toUpperCase(); // Convert UUID to string and format it
-    let link = "codesnipper://snippets/" + id; // Create a custom link for the note
+    const id = uuidStringify(note.UUID).toUpperCase(); // Convert UUID to string and format it
+    const link = "codesnipper://snippets/" + id; // Create a custom link for the note
     await open(link); // Open the note using Raycast's open function
   }
 
   // Define an async function named copyCode that takes a parameter note of type SnippetItem
   async function copyCode(note: SnippetItem) {
-    let code = note.code; // Get the code from the note
+    const code = note.code; // Get the code from the note
     Clipboard.copy(code ?? ""); // Copy the code to clipboard
     showToast({
       style: Toast.Style.Success,
