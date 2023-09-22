@@ -56,7 +56,7 @@ export default function Command() {
               accessories={[{ text: parseAuthorNameFromUrl(plugin.author) }]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Show details" target={<PluginDetails data={plugin} />} icon={Icon.Tag} />
+                  <Action.Push title="Show Details" target={<PluginDetails data={plugin} />} icon={Icon.Tag} />
                 </ActionPanel>
               }
             />
