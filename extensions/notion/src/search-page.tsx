@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 
 import { PageListItem, View } from "./components";
 import { useRecentPages, useSearchPages, useUsers } from "./hooks";
@@ -41,7 +41,6 @@ function Search() {
           </List.Section>
         );
       })}
-
       <List.EmptyView title="No pages found" />
     </List>
   );
