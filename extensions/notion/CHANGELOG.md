@@ -5,6 +5,7 @@
 - Fix last edited time showing as the current time
 - Fix duped recent pages after page title changed
 - Allow selecting just a date without a time
+- Support quick edit status property
 
 ## [Deep links] - 2023-09-07
 
