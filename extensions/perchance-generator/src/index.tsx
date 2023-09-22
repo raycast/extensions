@@ -25,25 +25,25 @@ export default function Command(props: LaunchProps) {
       "https://cat-sequoia-parcel.glitch.me/api?generator=" + selectedGenerator + "&list=output"
     );
 
-    if (data === undefined) {
+    if (data == "undefined") {
       showToast({ style: Toast.Style.Failure, title: "Error", message: "That generator might not exist 🙁" });
       popToRoot();
+    } else {
+      return (
+        <Detail
+          isLoading={isLoading}
+          markdown={`# ${data}`}
+          actions={
+            <ActionPanel>
+              <Action title="Reload" onAction={() => revalidate()} />
+              <Action.Paste title="Paste" content={`${data}`} />
+              <Action.CopyToClipboard title="Copy to Clipboard" content={`${data}`} />
+              <Action.OpenInBrowser title="Open in Browser" url={`https://perchance.org/${selectedGenerator}`} />
+            </ActionPanel>
+          }
+        />
+      );
     }
-
-    return (
-      <Detail
-        isLoading={isLoading}
-        markdown={`# ${data}`}
-        actions={
-          <ActionPanel>
-            <Action title="Reload" onAction={() => revalidate()} />
-            <Action.Paste title="Paste" content={`${data}`} />
-            <Action.CopyToClipboard title="Copy to Clipboard" content={`${data}`} />
-            <Action.OpenInBrowser title="Open in Browser" url={`https://perchance.org/${selectedGenerator}`} />
-          </ActionPanel>
-        }
-      />
-    );
   } catch (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: "Something went wrong" });
   }

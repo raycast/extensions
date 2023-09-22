@@ -41,11 +41,11 @@
   "preferences": [
     {
       "name": "project",
-      "title": "Generator Name",
+      "title": "Default Generator Name",
       "description": "When you don't enter the argument for the generator name, this will be the default generation. The way you can find the name of the generator is by looking at the endpoint of the perchance generator's url.",
       "type": "textfield",
       "required": true,
-      "placeholder": "Enter the name of the desired generator name from perchance."
+      "placeholder": "Enter the name of the desired default generator name from perchance."
     }
   ],
   "dependencies": {
@@ -63,7 +63,7 @@
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
-  "scripts": {
+    "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
