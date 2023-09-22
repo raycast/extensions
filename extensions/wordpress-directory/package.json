@@ -3,10 +3,10 @@
   "name": "wordpress-directory",
   "title": "WordPress Directory",
   "description": "Search WordPress plugins.",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "oberonlai",
   "categories": [
-    "Web"
+	"Web"
   ],
   "license": "MIT",
   "commands": [
