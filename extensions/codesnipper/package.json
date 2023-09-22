@@ -24,14 +24,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Copy snippet",
+      "title": "Copy Snippet",
       "subtitle": "Search sippets and copy them to your clipboard",
       "description": "Search through your snippets and copy them to your clipboard to paste them into your project.",
       "mode": "view"
     },
     {
       "name": "new-snippet",
-      "title": "Create a new snippet",
+      "title": "Create A New Snippet",
       "subtitle": "Create a new snippet",
       "description": "Create a new snippet.",
       "mode": "view"

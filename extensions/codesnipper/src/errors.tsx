@@ -30,7 +30,7 @@ export const testPermissionErrorType = (error: unknown): PermissionErrorTypes =>
   if (error instanceof PermissionError && error.type === "fullDiskAccess") {
     return "fullDiskAccess";
   }
-  
+
   // Check if the error message includes "1002", return "accessibility" if true
   if (error.message.includes("1002")) {
     return "accessibility";

@@ -12,7 +12,7 @@ import { Action, ActionPanel, Form, showToast, Toast, Detail, Icon, open } from 
 export default function Command() {
   // Use custom hook to retrieve SQL folders and error state
   const sqlState = useSqlFolders();
-  
+
   // Define state variables
   const [failedToOpenMessage, setFailedToOpenMessage] = useState("");
   const [folder, setFolder] = useState<string>("");
@@ -51,11 +51,13 @@ export default function Command() {
   });
 
   // Function to submit code
-  async function submitCode(){
+  async function submitCode() {
     if (code.length != 0) {
       dropContentErrorIfNeeded();
-      let link = `codesnipper://create?title=${encodeURIComponent(name)}&folder=${encodeURIComponent(folder)}&code=${encodeURIComponent(code)}`
-      console.log(link)
+      let link = `codesnipper://create?title=${encodeURIComponent(name)}&folder=${encodeURIComponent(
+        folder
+      )}&code=${encodeURIComponent(code)}`;
+      console.log(link);
       await open(link);
     } else {
       setContentError("Code is required");
