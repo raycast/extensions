@@ -1,5 +1,9 @@
 # Hacker News Changelog
 
+## [🎉 Improvments] - (2023-09-22)
+
+- Add a summarizer for articles with the option of BLOB and also support for Raycast Pro users.
+
 ## [🐛 Fixes] - (2022-08-16)
 
 - Use custom User Agent + cache responses for each topic for 5 minutes to avoid being rate limited

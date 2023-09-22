@@ -35,7 +35,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
+    "@raycast/api": "^1.50.0",
     "@raycast/utils": "^1.4.16",
     "lodash": "^4.17.21",
     "openai": "^4.6.0",

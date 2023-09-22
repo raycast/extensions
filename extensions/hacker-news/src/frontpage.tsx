@@ -63,7 +63,7 @@ function setTitle(title: string, topic: Topic) {
 
 function getWindowContent(title: string, topic: Topic) {
   const _title = setTitle(title, topic);
-  const _informationContent = "To summarize the article, please press *'Cmd(⌘) + ]'*.";
+  const _informationContent = "To summarize the article, please press *'Cmd(⌘) + ['*.";
   return "# " + _title + "  \n" + _informationContent;
 }
 
@@ -146,7 +146,7 @@ function Actions(props: {
       <ActionPanel.Section>
         <Action
           title="Toggle Summarize Window"
-          shortcut={{ modifiers: ["cmd"], key: "[" }}
+          shortcut={{ modifiers: ["cmd"], key: "]" }}
           onAction={async () => {
             if (openAI != null) props.setIsShowingDetail((prev) => !prev);
             else
@@ -157,21 +157,15 @@ function Actions(props: {
               });
           }}
         />
-        <Action
-          title="Summarize Article"
-          onAction={async () => {
-            if (props.isShowingDetail) {
+        {props.isShowingDetail && (
+          <Action
+            title="Summarize Article"
+            onAction={async () => {
               props.fetchSummary();
-            } else {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Cannot execute command",
-                message: "You should enable summarize window first",
-              });
-            }
-          }}
-          shortcut={{ modifiers: ["cmd"], key: "]" }}
-        />
+            }}
+            shortcut={{ modifiers: ["cmd"], key: "[" }}
+          />
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
