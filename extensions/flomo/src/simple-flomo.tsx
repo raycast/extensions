@@ -68,7 +68,7 @@ export default function Command() {
         const userTags = values.tag10.split(" ").filter(Boolean);
         for (const tag of userTags) {
           if (!tag.startsWith("#")) {
-            showToast(Toast.Style.Failure, "标签必须以#开头，并且紧跟标签名");
+            showToast(Toast.Style.Failure, "Tags must start with # and directly follow the tag name.");
             return;
           }
           tags.push(tag);
@@ -84,7 +84,7 @@ export default function Command() {
           .split(/,|，|\n/)
           .map((ref) => ref.trim())
           .filter(Boolean);
-        let formattedRefs = "\n参考资料\n";
+        let formattedRefs = "\nReferences\n";
         refs.forEach((ref, index) => {
           formattedRefs += `[${index + 1}] ${ref}`;
           if (index !== refs.length - 1) {
@@ -118,12 +118,12 @@ export default function Command() {
         });
 
         if (response.ok) {
-          showToast(Toast.Style.Success, "成功发送到Flomo!");
+          showToast(Toast.Style.Success, "Successfully sent to Flomo!");
         } else {
-          showToast(Toast.Style.Failure, "发送失败，请在 Raycast 插件设置中检查 API_KEY 是否填写正确");
+          showToast(Toast.Style.Failure, "Send failed. Check API_KEY correctness in Raycast plugin settings.");
         }
       } catch (error) {
-        showToast(Toast.Style.Failure, "发送失败，请在 Raycast 插件设置中检查 API_KEY 是否填写正确");
+        showToast(Toast.Style.Failure, "Send failed. Check API_KEY correctness in Raycast plugin settings.");
       }
     },
 
@@ -132,7 +132,7 @@ export default function Command() {
     },
   });
 
-  const defaultTags = ["Cmd+shift+enter  修改默认标签｜留空不显示｜最多 9 个", "", "", "", "", "", "", "", ""];
+  const defaultTags = ["#Cmd+shift+enter->Modify.default.tag","#Leave.blank.to.not.display.preset","#Maximum.of.9.tag.preset", "", "", "", "", "", ""];
 
   useEffect(() => {
     const fetchTagsAndPosition = async () => {
@@ -153,7 +153,7 @@ export default function Command() {
           const tags = tag.split(" ");
           for (const t of tags) {
             if (!t.startsWith("#") || t.length === 1 || t[1] === " ") {
-              showToast(Toast.Style.Failure, "标签必须以#开头，并且#后面必须有其他内容，内容不能为空格");
+              showToast(Toast.Style.Failure, "Tags must start with # and directly follow the tag name.");
               return;
             }
           }
@@ -162,11 +162,10 @@ export default function Command() {
         setValue(`tag${i}` as keyof FlomoFormValues, tag);
       }
     }
-    showToast(Toast.Style.Success, "标签预设修改成功!");
+    showToast(Toast.Style.Success, "Tag preset modification succeeded!");
     pop();
   };
 
-  // 定义一个新的组件来显示修改标签预设的表单
   function TagPresetsForm() {
     const { handleSubmit, itemProps, setValue, values } = useForm<FlomoFormValues>({
       onSubmit: handleSaveTagPresets,
@@ -185,83 +184,84 @@ export default function Command() {
     return (
       // 子表单
       <Form
-        navigationTitle="修改标签预设"
+        navigationTitle="Modify tag preset"
         actions={
           <ActionPanel>
-            <Action title="保存" onAction={() => handleSubmit(values)} />
+            <Action title="Save" onAction={() => handleSubmit(values)} />
           </ActionPanel>
         }
       >
         <Form.TextField
-          title="预设标签1"
+          title="Preset tag 1"
           {...itemProps.tag1}
           id="tag1"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
+          info="⚠️ Please note, there should be no space after the # in a tag. Spaces imply the start of a new tag.
+⚠️ If an error occurs, please ensure that all preset tags that have been filled out are error-free."
         />
         <Form.TextField
-          title="预设标签2"
+          title="Preset tag 2"
           {...itemProps.tag2}
           id="tag2"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
         />
         <Form.TextField
-          title="预设标签3"
+          title="Preset tag 3"
           {...itemProps.tag3}
           id="tag3"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
         />
         <Form.TextField
-          title="预设标签4"
+          title="Preset tag 4"
           {...itemProps.tag4}
           id="tag4"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
         />
         <Form.TextField
-          title="预设标签5"
+          title="Preset tag 5"
           {...itemProps.tag5}
           id="tag5"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
         />
         <Form.TextField
-          title="预设标签6"
+          title="Preset tag 6"
           {...itemProps.tag6}
           id="tag6"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
         />
         <Form.TextField
-          title="预设标签7"
+          title="Preset tag 7"
           {...itemProps.tag7}
           id="tag7"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
         />
         <Form.TextField
-          title="预设标签8"
+          title="Preset tag 8"
           {...itemProps.tag8}
           id="tag8"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
         />
         <Form.TextField
-          title="预设标签9"
+          title="Preset tag 9"
           {...itemProps.tag9}
           id="tag9"
-          placeholder="请输入标签或标签组，多标签用空格分隔…"
+          placeholder="Enter tags with #, separated by spaces..."
         />
       </Form>
     );
   }
 
   return (
-    // 主表单
     <Form
-      navigationTitle="发送到Flomo"
+      navigationTitle="Send to flomo"
       actions={
         <ActionPanel>
-          <Action title="发送" onAction={() => handleSubmit(values)} />
-          <Action.Push title="修改标签预设" target={<TagPresetsForm />} />
+          <Action title="Send" onAction={() => handleSubmit(values)} />
+          <Action.Push title="Modify Default Tag Preset" target={<TagPresetsForm />} />
         </ActionPanel>
       }
     >
-      <Form.TextArea title="笔记内容" {...itemProps.content} id="content" placeholder="持续不断记录，意义自然浮现…" />
+      <Form.TextArea title="Memo" {...itemProps.content} id="content" placeholder="Keep Noting, Meaning's Floating..." />
       {values.tag1 && <Form.Checkbox {...itemProps.tag1Checked} label={values.tag1} id="tag1Checked" />}
       {values.tag2 && <Form.Checkbox {...itemProps.tag2Checked} label={values.tag2} id="tag2Checked" />}
       {values.tag3 && <Form.Checkbox {...itemProps.tag3Checked} label={values.tag3} id="tag3Checked" />}
@@ -271,17 +271,17 @@ export default function Command() {
       {values.tag7 && <Form.Checkbox {...itemProps.tag7Checked} label={values.tag7} id="tag7Checked" />}
       {values.tag8 && <Form.Checkbox {...itemProps.tag8Checked} label={values.tag8} id="tag8Checked" />}
       {values.tag9 && <Form.Checkbox {...itemProps.tag9Checked} label={values.tag9} id="tag9Checked" />}
-      <Form.TextArea title="其他标签" {...itemProps.tag10} id="tag10" placeholder="Other tags" info="#开头，空格分隔" />
-      <Form.Dropdown title="标签位置" id="tagPosition" onChange={(value) => setValue("tagPosition", value)} storeValue>
-        <Form.Dropdown.Item value="front" title="tag在前" />
-        <Form.Dropdown.Item value="back" title="tag在后" />
+      <Form.TextArea title="Other tags" {...itemProps.tag10} id="tag10" placeholder="Other tags" info="Start with #, separated by space." />
+      <Form.Dropdown title="Tag position" id="tagPosition" onChange={(value) => setValue("tagPosition", value)} storeValue>
+        <Form.Dropdown.Item value="front" title="Tag at the front" />
+        <Form.Dropdown.Item value="back" title="Tag at the back" />
       </Form.Dropdown>
       <Form.TextArea
-        title="参考资料"
+        title="References"
         {...itemProps.reference}
         id="reference"
         placeholder="URLs"
-        info="逗号（中英皆可）或换行来分隔多个链接"
+        info="Use a comma (either in Chinese or English) or a new line to separate multiple links."
       />
     </Form>
   );

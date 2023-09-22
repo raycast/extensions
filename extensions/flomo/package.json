@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flomo",
   "title": "Simple flomo",
-  "description": "一个可以预选标签、粘贴资料来源的快捷 flomo 输入插件",
+  "description": "A quick Flomo input plugin that allows pre-selection of tags and pasting of source references.",
   "icon": "flomo-logo.png",
   "author": "Lyson",
   "categories": ["Data","Productivity"],
@@ -11,7 +11,7 @@
     {
       "name": "simple-flomo",
       "title": "Quick Input to flomo",
-      "description": "这是一个用于记录笔记的命令",
+      "description": "This is flomo's quick input command. Here, you can preset tags for quick addition by ticking. Leave blank to show no presets. For users used to adding references to memos, just insert URLs at References, separated by lines or commas, the program automatically formats them beautifully. Also, you can choose to place your tag's position at the front or end of the memo, as per your preference.",
       "mode": "view"
     }
   ],
@@ -39,7 +39,7 @@
     {
       "name": "apiKey",
       "title": "API Key",
-      "description": "请输入你的flomo_api_key",
+      "description": "Please enter your flomo API key",
       "type": "password",
       "required": true
     }
