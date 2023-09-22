@@ -95,6 +95,7 @@ export default function Command() {
               title={{ value: article.title, tooltip: article.created }}
               detail={
                 <List.Item.Detail
+                  // eslint-disable-next-line no-useless-escape
                   markdown={`![Illustration](${BASE_URL}${article.imageToUse}) \ 
               ${article.introtext}`}
                 />
