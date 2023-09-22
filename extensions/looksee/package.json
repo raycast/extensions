@@ -15,6 +15,7 @@
     {
       "name": "lookup",
       "title": "Lookup",
+      "subtitle": "LookSee",
       "description": "Displays vendor information about a MAC address, OUI or IAB",
       "mode": "view",
       "arguments": [
@@ -29,6 +30,7 @@
     {
       "name": "lookupHistory",
       "title": "Lookup History",
+      "subtitle": "LookSee",
       "description": "Displays previous lookups",
       "mode": "view"
     }
