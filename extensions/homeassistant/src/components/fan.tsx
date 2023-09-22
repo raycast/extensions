@@ -64,7 +64,7 @@ function FanSpeedAddAction(props: {
 }
 
 export function FanSpeedUpAction(props: { state: State }): JSX.Element | null {
-  return <FanSpeedAddAction state={props.state} add={1} shortcut={{ modifiers: ["cmd"], key: "+" }} />;
+  return <FanSpeedAddAction state={props.state} add={1} shortcut={{ modifiers: ["cmd"], key: "=" }} />;
 }
 
 export function FanSpeedDownAction(props: { state: State }): JSX.Element | null {

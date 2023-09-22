@@ -19,7 +19,11 @@ function getBrightnessValues(): number[] {
 
 function hasBrightnessSupport(state: State): boolean {
   const modes = state.attributes.supported_color_modes;
-  if (modes && Array.isArray(modes) && (modes.includes("brightness") || modes.includes("color_temp"))) {
+  if (
+    modes &&
+    Array.isArray(modes) &&
+    (modes.includes("brightness") || modes.includes("color_temp"))
+  ) {
     // we assume that brightness support exists when color_temp is present.
     // This is required to support which does not provide brightness support mode
     return true;
@@ -39,11 +43,16 @@ export function getLightRGBFromState(state: State): RGB | undefined {
   return undefined;
 }
 
-export function BrightnessControlAction(props: { state: State }): JSX.Element | null {
+export function BrightnessControlAction(props: {
+  state: State;
+}): JSX.Element | null {
   const state = props.state;
 
   const handle = async (bvalue: number) => {
-    await ha.callService("light", "turn_on", { entity_id: state.entity_id, brightness_pct: `${bvalue}` });
+    await ha.callService("light", "turn_on", {
+      entity_id: state.entity_id,
+      brightness_pct: `${bvalue}`,
+    });
   };
 
   if (hasBrightnessSupport(state)) {
@@ -55,7 +64,11 @@ export function BrightnessControlAction(props: { state: State }): JSX.Element | 
         shortcut={{ modifiers: ["cmd"], key: "b" }}
       >
         {brightnessValues.map((value) => (
-          <Action key={`${value}`} title={`${value} %`} onAction={() => handle(value)} />
+          <Action
+            key={`${value}`}
+            title={`${value} %`}
+            onAction={() => handle(value)}
+          />
         ))}
       </ActionPanel.Submenu>
     );
@@ -71,7 +84,10 @@ function BrightnessAddAction(props: {
   const state = props.state;
 
   const handle = async (bvalue: number) => {
-    await ha.callService("light", "turn_on", { entity_id: state.entity_id, brightness_pct: `${bvalue}` });
+    await ha.callService("light", "turn_on", {
+      entity_id: state.entity_id,
+      brightness_pct: `${bvalue}`,
+    });
   };
 
   if (hasBrightnessSupport(state)) {
@@ -87,7 +103,10 @@ function BrightnessAddAction(props: {
     return (
       <Action
         title={`Brightness ${props.add < 0 ? "Down" : "Up"}`}
-        icon={{ source: props.add < 0 ? Icon.ChevronDown : Icon.ChevronUp, tintColor: Color.PrimaryText }}
+        icon={{
+          source: props.add < 0 ? Icon.ChevronDown : Icon.ChevronUp,
+          tintColor: Color.PrimaryText,
+        }}
         shortcut={props.shortcut}
         onAction={() => handle(brightnessPctUp)}
       />
@@ -96,15 +115,33 @@ function BrightnessAddAction(props: {
   return null;
 }
 
-export function BrightnessUpAction(props: { state: State }): JSX.Element | null {
-  return <BrightnessAddAction state={props.state} add={1} shortcut={{ modifiers: ["cmd"], key: "+" }} />;
+export function BrightnessUpAction(props: {
+  state: State;
+}): JSX.Element | null {
+  return (
+    <BrightnessAddAction
+      state={props.state}
+      add={1}
+      shortcut={{ modifiers: ["cmd"], key: "=" }}
+    />
+  );
 }
 
-export function BrightnessDownAction(props: { state: State }): JSX.Element | null {
-  return <BrightnessAddAction state={props.state} add={-1} shortcut={{ modifiers: ["cmd"], key: "-" }} />;
+export function BrightnessDownAction(props: {
+  state: State;
+}): JSX.Element | null {
+  return (
+    <BrightnessAddAction
+      state={props.state}
+      add={-1}
+      shortcut={{ modifiers: ["cmd"], key: "-" }}
+    />
+  );
 }
 
-function getLightMinMaxK(state: State): [min: number | undefined, max: number | undefined] {
+function getLightMinMaxK(
+  state: State
+): [min: number | undefined, max: number | undefined] {
   const min_mireds = state.attributes.min_mireds as number | undefined;
   const max_mireds = state.attributes.max_mireds as number | undefined;
   if (min_mireds && max_mireds && max_mireds > min_mireds) {
@@ -115,12 +152,17 @@ function getLightMinMaxK(state: State): [min: number | undefined, max: number | 
   return [undefined, undefined];
 }
 
-export function ColorTempControlAction(props: { state: State }): JSX.Element | null {
+export function ColorTempControlAction(props: {
+  state: State;
+}): JSX.Element | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
 
   const handle = async (K: number) => {
-    await ha.callService("light", "turn_on", { entity_id: state.entity_id, kelvin: `${K}` });
+    await ha.callService("light", "turn_on", {
+      entity_id: state.entity_id,
+      kelvin: `${K}`,
+    });
   };
 
   const getKTempValues = (): number[] | undefined => {
@@ -178,7 +220,10 @@ function ColorTempControlAddAction(props: {
   const add = props.add;
 
   const handle = async (K: number) => {
-    await ha.callService("light", "turn_on", { entity_id: state.entity_id, kelvin: `${K}` });
+    await ha.callService("light", "turn_on", {
+      entity_id: state.entity_id,
+      kelvin: `${K}`,
+    });
   };
 
   if (modes && Array.isArray(modes) && modes.includes("color_temp")) {
@@ -216,19 +261,33 @@ function ColorTempControlAddAction(props: {
   return null;
 }
 
-export function ColorTempControlUpAction(props: { state: State }): JSX.Element | null {
+export function ColorTempControlUpAction(props: {
+  state: State;
+}): JSX.Element | null {
   return (
-    <ColorTempControlAddAction state={props.state} add={50} shortcut={{ modifiers: ["cmd", "shift"], key: "+" }} />
+    <ColorTempControlAddAction
+      state={props.state}
+      add={50}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "+" }}
+    />
   );
 }
 
-export function ColorTempControlDownAction(props: { state: State }): JSX.Element | null {
+export function ColorTempControlDownAction(props: {
+  state: State;
+}): JSX.Element | null {
   return (
-    <ColorTempControlAddAction state={props.state} add={-50} shortcut={{ modifiers: ["cmd", "shift"], key: "-" }} />
+    <ColorTempControlAddAction
+      state={props.state}
+      add={-50}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "-" }}
+    />
   );
 }
 
-export function ColorRgbControlAction(props: { state: State }): JSX.Element | null {
+export function ColorRgbControlAction(props: {
+  state: State;
+}): JSX.Element | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
 
@@ -249,8 +308,13 @@ export function ColorRgbControlAction(props: { state: State }): JSX.Element | nu
         {lightRGBColors.map((color) => (
           <Action
             key={`${color.name}`}
-            title={`${color.name.charAt(0).toUpperCase()}${color.name.slice(1)}`}
-            icon={{ source: "lightbulb.png", tintColor: RGBtoColorLike(color.value) }}
+            title={`${color.name.charAt(0).toUpperCase()}${color.name.slice(
+              1
+            )}`}
+            icon={{
+              source: "lightbulb.png",
+              tintColor: RGBtoColorLike(color.value),
+            }}
             onAction={() => handle(color.value)}
           />
         ))}
