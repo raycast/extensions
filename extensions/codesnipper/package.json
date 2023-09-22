@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codesnipper",
+  "title": "CodeSnipper",
+  "description": "Access you code snippets from CodeSnipper with RayCast and paste them to your project.",
+  "icon": "command-icon.png",
+  "author": "timo",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "folders",
+      "title": "Folder name",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show folder name next to each snippet",
+      "description": "Show the folder name next to a snippet",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Copy snippet",
+      "subtitle": "Search sippets and copy them to your clipboard",
+      "description": "Search through your snippets and copy them to your clipboard to paste them into your project.",
+      "mode": "view"
+    },
+    {
+      "name": "new-snippet",
+      "title": "Create a new snippet",
+      "subtitle": "Create a new snippet",
+      "description": "Create a new snippet.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1",
+    "file-url": "^4.0.0",
+    "sql.js": "^1.7.0",
+    "sugar": "^2.0.6",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/sql.js": "^1.4.3",
+    "@types/uuid": "^9.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
