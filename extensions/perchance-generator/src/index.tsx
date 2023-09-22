@@ -7,8 +7,8 @@ import {
   Toast,
   showToast,
   popToRoot,
+  Icon,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 
 interface Preferences {
@@ -29,16 +29,18 @@ export default function Command(props: LaunchProps) {
       showToast({ style: Toast.Style.Failure, title: "Error", message: "That generator might not exist 🙁" });
       popToRoot();
     } else {
+      const markdownData = isLoading ? "Loading..." : data;
+
       return (
         <Detail
           isLoading={isLoading}
-          markdown={`# ${data}`}
+          markdown={`# ${markdownData}`}
           actions={
             <ActionPanel>
-              <Action title="Reload" onAction={() => revalidate()} />
-              <Action.Paste title="Paste" content={`${data}`} />
-              <Action.CopyToClipboard title="Copy to Clipboard" content={`${data}`} />
-              <Action.OpenInBrowser title="Open in Browser" url={`https://perchance.org/${selectedGenerator}`} />
+              <Action title="Reload" icon={Icon.RotateClockwise} onAction={() => revalidate()} />
+              <Action.Paste content={`${data}`} />
+              <Action.CopyToClipboard content={`${data}`} />
+              <Action.OpenInBrowser url={`https://perchance.org/${selectedGenerator}`} />
             </ActionPanel>
           }
         />
