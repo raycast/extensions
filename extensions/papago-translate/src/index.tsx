@@ -53,7 +53,7 @@ const PapagoTranslate = (props: LaunchProps<{ arguments: { initializeText: strin
     setIsLoading(false);
   };
 
-  const clearHistory = async () => {
+  const deleteAllItemInStorage = async () => {
     await confirmAlert({
       title: "Remove History",
       message: "Do you want to remove all history?",
@@ -66,6 +66,24 @@ const PapagoTranslate = (props: LaunchProps<{ arguments: { initializeText: strin
           void LocalStorage.clear();
           setSearchText("");
           void getAllSearchTextFromStore();
+          setIsLoading(false);
+        },
+      },
+    });
+  };
+
+  const deleteSingleItemInStorage = async (key: string) => {
+    await confirmAlert({
+      title: "Remove Item",
+      message: "Do you want to remove this item in history?",
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      primaryAction: {
+        title: "Yes",
+        style: Alert.ActionStyle.Destructive,
+        onAction: () => {
+          setIsLoading(true);
+          LocalStorage.removeItem(key);
+          getAllSearchTextFromStore();
           setIsLoading(false);
         },
       },
@@ -101,10 +119,25 @@ const PapagoTranslate = (props: LaunchProps<{ arguments: { initializeText: strin
                     title="Copy Translated Text to Clipboard"
                     content={JSON.parse(value).translatedText}
                   />
+                  <Action.OpenInBrowser
+                    title="Open in Browser"
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    url={`https://papago.naver.com/?&st=${encodeURIComponent(JSON.parse(value).searchText.trim())}`}
+                  />
+                  <Action
+                    title="Remove This Item in History"
+                    onAction={() => {
+                      void deleteSingleItemInStorage(key);
+                    }}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    icon={Icon.Trash}
+                  />
                   <Action
                     title="Remove All History"
-                    onAction={clearHistory}
+                    onAction={deleteAllItemInStorage}
                     style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                     icon={Icon.Trash}
                   />
                 </ActionPanel.Section>
