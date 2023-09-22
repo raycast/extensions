@@ -1,6 +1,6 @@
 # Year in Progress Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2023-09-22
 
 - Make progress icon dynamic
 
