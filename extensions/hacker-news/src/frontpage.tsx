@@ -145,7 +145,7 @@ function Actions(props: {
 
       <ActionPanel.Section>
         <Action
-          title="Toggle summarize window"
+          title="Toggle Summarize Window"
           shortcut={{ modifiers: ["cmd"], key: "[" }}
           onAction={async () => {
             if (openAI != null) props.setIsShowingDetail((prev) => !prev);
@@ -158,7 +158,7 @@ function Actions(props: {
           }}
         />
         <Action
-          title="Summarize article"
+          title="Summarize Article"
           onAction={async () => {
             if (props.isShowingDetail) {
               props.fetchSummary();
