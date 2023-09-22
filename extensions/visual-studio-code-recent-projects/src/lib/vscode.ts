@@ -168,6 +168,7 @@ export function getBuildNamePreference(): string {
 const buildSchemes: Record<string, string> = {
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
+  Cursor: "cursor"
 };
 
 export function getBuildScheme(): string {
@@ -181,6 +182,7 @@ export function getBuildScheme(): string {
 const buildAppNames: Record<string, string> = {
   Code: "Visual Studio Code",
   "Code - Insiders": "Visual Studio Code - Insiders",
+  Cursor: "Cursor"
 };
 
 function getBuildAppName(): string {
