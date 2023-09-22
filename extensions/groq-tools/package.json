@@ -28,7 +28,7 @@
     },
     {
       "name": "format-groq-from-clipboard",
-      "title": "Format From Clipboard",
+      "title": "Format from Clipboard",
       "subtitle": "GROQ",
       "description": "Format a GROQ query from your clipboard.",
       "mode": "view"
