@@ -25,7 +25,7 @@ export default function Command(props: LaunchProps) {
       "https://cat-sequoia-parcel.glitch.me/api?generator=" + selectedGenerator + "&list=output"
     );
 
-    if (data == "undefined") {
+    if (String(data) == "undefined") {
       showToast({ style: Toast.Style.Failure, title: "Error", message: "That generator might not exist 🙁" });
       popToRoot();
     } else {
