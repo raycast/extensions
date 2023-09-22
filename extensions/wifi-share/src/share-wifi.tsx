@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, Clipboard } from "@raycast/api";
 import { exec } from "child_process";
-import QRCode from 'qrcode'
+import QRCode from "qrcode";
 
 const DetailPassword = ({
 	networkName,
@@ -34,12 +34,16 @@ const DetailPassword = ({
 						setIsLoading(false);
 						return;
 					}
-					QRCode.toDataURL(`WIFI:S:${networkName};T:WPA;P:${password.trim()};;`, {
-						scale: 9,
-						rendererOpts: { quality: 1 }
-					}, function (err, u) {
-						setUrl(u);
-					})
+					QRCode.toDataURL(
+						`WIFI:S:${networkName};T:WPA;P:${password.trim()};;`,
+						{
+							scale: 9,
+							rendererOpts: { quality: 1 },
+						},
+						function (err, u) {
+							setUrl(u);
+						}
+					);
 					exec("open /Applications/Raycast.app", (error, stdout, stderr) => {
 						toast.style = Toast.Style.Success;
 						toast.title = "Permission checked successed ✅";
@@ -67,7 +71,7 @@ const DetailPassword = ({
 				</Detail.Metadata>
 			}
 		/>
-	)
+	);
 };
 
 export default function Command() {
