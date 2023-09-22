@@ -132,7 +132,17 @@ export default function Command() {
     },
   });
 
-  const defaultTags = ["#Cmd+shift+enter->Modify.default.tag","#Leave.blank.to.not.display.preset","#Maximum.of.9.tag.preset", "", "", "", "", "", ""];
+  const defaultTags = [
+    "#Cmd+shift+enter->Modify.default.tag",
+    "#Leave.blank.to.not.display.preset",
+    "#Maximum.of.9.tag.preset",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ];
 
   useEffect(() => {
     const fetchTagsAndPosition = async () => {
@@ -261,7 +271,12 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Memo" {...itemProps.content} id="content" placeholder="Keep Noting, Meaning's Floating..." />
+      <Form.TextArea
+        title="Memo"
+        {...itemProps.content}
+        id="content"
+        placeholder="Keep Noting, Meaning's Floating..."
+      />
       {values.tag1 && <Form.Checkbox {...itemProps.tag1Checked} label={values.tag1} id="tag1Checked" />}
       {values.tag2 && <Form.Checkbox {...itemProps.tag2Checked} label={values.tag2} id="tag2Checked" />}
       {values.tag3 && <Form.Checkbox {...itemProps.tag3Checked} label={values.tag3} id="tag3Checked" />}
@@ -271,8 +286,19 @@ export default function Command() {
       {values.tag7 && <Form.Checkbox {...itemProps.tag7Checked} label={values.tag7} id="tag7Checked" />}
       {values.tag8 && <Form.Checkbox {...itemProps.tag8Checked} label={values.tag8} id="tag8Checked" />}
       {values.tag9 && <Form.Checkbox {...itemProps.tag9Checked} label={values.tag9} id="tag9Checked" />}
-      <Form.TextArea title="Other tags" {...itemProps.tag10} id="tag10" placeholder="Other tags" info="Start with #, separated by space." />
-      <Form.Dropdown title="Tag position" id="tagPosition" onChange={(value) => setValue("tagPosition", value)} storeValue>
+      <Form.TextArea
+        title="Other tags"
+        {...itemProps.tag10}
+        id="tag10"
+        placeholder="Other tags"
+        info="Start with #, separated by space."
+      />
+      <Form.Dropdown
+        title="Tag position"
+        id="tagPosition"
+        onChange={(value) => setValue("tagPosition", value)}
+        storeValue
+      >
         <Form.Dropdown.Item value="front" title="Tag at the front" />
         <Form.Dropdown.Item value="back" title="Tag at the back" />
       </Form.Dropdown>
