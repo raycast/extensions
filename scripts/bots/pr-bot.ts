@@ -1,8 +1,18 @@
-const fs = require("fs");
-const path = require("path");
+import { context as Context, getOctokit } from "@actions/github";
+import * as Core from "@actions/core";
+import { PullRequestEvent } from "@octokit/webhooks-types";
 
-module.exports = async ({ github, context, core, changedFiles }) => {
-  const codeowners = getCodeOwners();
+type API = {
+  github: ReturnType<typeof getOctokit>;
+  context: typeof Context & {
+    payload: PullRequestEvent;
+  };
+  core: typeof Core;
+};
+
+module.exports = async ({ github, context }: API) => {
+  const changedFiles: string[] = JSON.parse(process.env.CHANGED_FILES || "[]");
+  const codeowners = await getCodeOwners({ github, context });
 
   const touchedExtensions = new Set(
     changedFiles
@@ -30,7 +40,12 @@ module.exports = async ({ github, context, core, changedFiles }) => {
     creator: sender,
     state: "all",
   });
-  const issues = await github.paginate(opts);
+  const issues = await github.paginate<{
+    owner: string;
+    repo: string;
+    number: number;
+    pull_request: boolean;
+  }>(opts);
 
   const isFirstContribution = issues.every((issue) => issue.number === context.issue.number || !issue.pull_request);
 
@@ -58,7 +73,10 @@ module.exports = async ({ github, context, core, changedFiles }) => {
       issue_number: context.issue.number,
       owner: context.repo.owner,
       repo: context.repo.repo,
-      labels: ["extension fix / improvement", limitLabelLength(`extension: ${findExtensionName(ext)}`)],
+      labels: [
+        "extension fix / improvement",
+        limitLabelLength(`extension: ${await findExtensionName(ext, { github, context })}`),
+      ],
     });
 
     if (owners[0] === sender) {
@@ -93,30 +111,39 @@ module.exports = async ({ github, context, core, changedFiles }) => {
   }
 };
 
-function getCodeOwners() {
-  const codeowners = fs.readFileSync(path.join(__dirname, "../.github/CODEOWNERS"), "utf8");
+async function getCodeOwners({ github, context }: Pick<API, "github" | "context">) {
+  const codeowners = await getGitHubFile(".github/CODEOWNERS", { github, context });
 
   const regex = /(\/extensions\/[\w-]+) +(.+)/g;
   const matches = codeowners.matchAll(regex);
 
-  return Array.from(matches).reduce((prev, match) => {
+  return Array.from(matches).reduce<{ [key: string]: string[] }>((prev, match) => {
     prev[match[1]] = match[2].split(" ").map((x) => x.replace(/^@/, ""));
     return prev;
   }, {});
 }
 
-function findExtensionName(ext) {
-  const map = JSON.parse(fs.readFileSync(path.join(__dirname, "../.github/extensionName2Folder.json"), "utf8"));
+async function getExtensionName2Folder({ github, context }: Pick<API, "github" | "context">) {
+  const file = await getGitHubFile(".github/extensionName2Folder.json", { github, context });
+  return JSON.parse(file) as { [key: string]: string };
+}
 
-  const folder = ext.replace("/extensions/", "");
+async function getGitHubFile(path: string, { github, context }: Pick<API, "github" | "context">) {
+  const { data } = await github.rest.repos.getContent({
+    mediaType: {
+      format: "raw",
+    },
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    path,
+  });
 
-  const foundExtension = Object.entries(map).find(([name, _folder]) => _folder === folder);
-
-  return foundExtension ? foundExtension[0] : undefined;
+  // @ts-ignore
+  return data as string;
 }
 
 // Create a new comment or update the existing one
-async function comment({ github, context, comment }) {
+async function comment({ github, context, comment }: Pick<API, "github" | "context"> & { comment: string }) {
   // Get the existing comments on the PR
   const { data: comments } = await github.rest.issues.listComments({
     owner: context.repo.owner,
@@ -125,7 +152,7 @@ async function comment({ github, context, comment }) {
   });
 
   // Find any comment already made by the bot
-  const botComment = comments.find((comment) => comment.user.login === "raycastbot");
+  const botComment = comments.find((comment) => comment.user?.login === "raycastbot");
 
   if (botComment) {
     await github.rest.issues.updateComment({
@@ -144,6 +171,16 @@ async function comment({ github, context, comment }) {
   }
 }
 
-function limitLabelLength(label) {
+function limitLabelLength(label: string) {
   return label.length > 50 ? label.substring(0, 49) + "…" : label;
+}
+
+async function findExtensionName(ext: string, api: Pick<API, "github" | "context">) {
+  const map = await getExtensionName2Folder(api);
+
+  const folder = ext.replace("/extensions/", "");
+
+  const foundExtension = Object.entries(map).find(([name, _folder]) => _folder === folder);
+
+  return foundExtension ? foundExtension[0] : undefined;
 }
