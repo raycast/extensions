@@ -65,9 +65,19 @@ function getNLSVariable(text: string | undefined): string | undefined {
     return m[1];
   }
 }
+const cliPaths: Record<string, string> = {
+  Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
+  "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
+  Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
+  VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium"
+};
 
 export function getVSCodeCLIFilename(): string {
-  return `/Applications/${getBuildAppName()}.app/Contents/Resources/app/bin/code`;
+  const name = cliPaths[getBuildNamePreference()];
+  if (!name || name.length <= 0) {
+    return cliPaths.Code;
+  }
+  return name;
 }
 
 export class VSCodeCLI {
@@ -168,7 +178,8 @@ export function getBuildNamePreference(): string {
 const buildSchemes: Record<string, string> = {
   Code: "vscode",
   "Code - Insiders": "vscode-insiders",
-  Cursor: "cursor"
+  Cursor: "cursor",
+  VSCodium: "vscode-oss"
 };
 
 export function getBuildScheme(): string {
@@ -177,18 +188,4 @@ export function getBuildScheme(): string {
     return buildSchemes.Code;
   }
   return scheme;
-}
-
-const buildAppNames: Record<string, string> = {
-  Code: "Visual Studio Code",
-  "Code - Insiders": "Visual Studio Code - Insiders",
-  Cursor: "Cursor"
-};
-
-function getBuildAppName(): string {
-  const name = buildAppNames[getBuildNamePreference()];
-  if (!name || name.length <= 0) {
-    return buildAppNames.Code;
-  }
-  return name;
 }
