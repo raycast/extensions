@@ -81,8 +81,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Papago",
-      "subtitle": "파파고",
+      "title": "Translate",
+      "subtitle": "Papago",
       "description": "Papago Translate extension for Raycast",
       "mode": "view",
       "arguments": [

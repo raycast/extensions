@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List, Icon, LocalStorage, LaunchProps, openExtensionPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Icon,
+  LocalStorage,
+  LaunchProps,
+  openExtensionPreferences,
+  Alert,
+  confirmAlert,
+  Color,
+} from "@raycast/api";
 import moment from "moment";
 import { getTranslationText } from "./api";
 
@@ -10,7 +21,7 @@ interface I_searchTexts {
 const PapagoTranslate = (props: LaunchProps<{ arguments: { initializeText: string } }>) => {
   const { initializeText } = props.arguments;
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState(initializeText ?? "");
   const [searchTexts, setSearchTexts] = useState<I_searchTexts>({});
 
@@ -42,12 +53,23 @@ const PapagoTranslate = (props: LaunchProps<{ arguments: { initializeText: strin
     setIsLoading(false);
   };
 
-  const clearHistory = () => {
-    setIsLoading(true);
-    void LocalStorage.clear();
-    setSearchText("");
-    void getAllSearchTextFromStore();
-    setIsLoading(false);
+  const clearHistory = async () => {
+    await confirmAlert({
+      title: "Remove History",
+      message: "Do you want to remove all history?",
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      primaryAction: {
+        title: "Yes",
+        style: Alert.ActionStyle.Destructive,
+        onAction: () => {
+          setIsLoading(true);
+          void LocalStorage.clear();
+          setSearchText("");
+          void getAllSearchTextFromStore();
+          setIsLoading(false);
+        },
+      },
+    });
   };
 
   useEffect(() => {
@@ -62,7 +84,6 @@ const PapagoTranslate = (props: LaunchProps<{ arguments: { initializeText: strin
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      navigationTitle="word or sentence"
       searchBarPlaceholder="Please enter a word or sentence"
     >
       {Object.entries(searchTexts)
@@ -75,12 +96,19 @@ const PapagoTranslate = (props: LaunchProps<{ arguments: { initializeText: strin
             detail={<List.Item.Detail markdown={JSON.parse(value).translatedText} />}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Translated Text to Clipboard"
-                  content={JSON.parse(value).translatedText}
-                />
-                <Action title="Remove All History" onAction={clearHistory} icon={Icon.Trash} />
-                <Action title="Setting" onAction={openExtensionPreferences} icon={Icon.Gear} />
+                <ActionPanel.Section>
+                  <Action.CopyToClipboard
+                    title="Copy Translated Text to Clipboard"
+                    content={JSON.parse(value).translatedText}
+                  />
+                  <Action
+                    title="Remove All History"
+                    onAction={clearHistory}
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
+                  />
+                </ActionPanel.Section>
+                <Action title="Settings" onAction={openExtensionPreferences} icon={Icon.Gear} />
               </ActionPanel>
             }
           />
