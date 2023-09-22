@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "findnearby",
-  "title": "Google Map Explorer",
+  "title": "Google Maps Explorer",
   "description": "Explore new places near you",
   "icon": "command-icon.png",
   "author": "lichinlin",
@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Find Nearby",
+      "subtitle": "Google Maps",
       "description": "Find places nearby on Google Maps.",
       "mode": "view"
     }
