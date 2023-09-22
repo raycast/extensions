@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Icon, getPreferenceValues } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { URLSearchParams } from "node:url";
 
@@ -57,19 +57,19 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       break;
   }
 
+  const date = new Date(searchResult.dateUpdated ? searchResult.dateUpdated : searchResult.dateInserted);
+
   return (
     <List.Item
       title={searchResult.name}
       keywords={[searchResult.recordType]}
       subtitle={searchResult.breadcrumbs}
-      accessories={[
-        { date: new Date(searchResult.dateUpdated ? searchResult.dateUpdated : searchResult.dateInserted) },
-      ]}
+      accessories={[{ date: date, tooltip: date.toLocaleString() }]}
       icon={iconCode}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
+            <Action.OpenInBrowser url={searchResult.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
