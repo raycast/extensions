@@ -3,31 +3,41 @@ import View from "./components/view";
 import { getCalendarClient } from "./lib/withCalendarClient";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
+import { CalendarEvent, getEvents } from "./lib/api";
+import { stringToDate } from "./lib/utils";
+
+function EventListItem(props: { event: CalendarEvent }) {
+  const event = props.event.event;
+  const cal = props.event.calendar;
+  const datetime = stringToDate(event.start?.dateTime);
+  const date = stringToDate(event.start?.date);
+  return (
+    <List.Item
+      title={event.summary || "?"}
+      accessories={[
+        { tag: { value: cal.summary, color: cal.backgroundColor ? cal.backgroundColor : undefined } },
+        { date: datetime ? datetime : date },
+      ]}
+    />
+  );
+}
 
 function RootCommand() {
   const { calendar } = getCalendarClient();
   const [searchText, setSearchText] = useState<string>("");
   const { isLoading, data, error, revalidate } = useCachedPromise(
     async (q: string) => {
-      const r = await calendar.calendarList.list();
-      const calIds = r.data.items?.map((c) => c.id).filter((c) => c) as string[] | undefined;
-      if (calIds) {
-        const maxDate = new Date();
-        maxDate.setDate(maxDate.getDate() + 7);
-        const res = await Promise.all(
-          calIds.map((c) =>
-            calendar.events.list({ calendarId: c, timeMin: new Date().toISOString(), timeMax: maxDate.toISOString() })
-          )
-        );
-        return res;
-      }
+      return await getEvents(calendar);
     },
     [searchText],
     { keepPreviousData: true }
   );
+
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchText={searchText}>
-      {data?.map((c) => c.data.items?.map((item) => <List.Item key={item.id} title={item.summary || "?"} />))}
+      {data?.map((e) => (
+        <EventListItem key={e.event.id} event={e} />
+      ))}
     </List>
   );
 }
