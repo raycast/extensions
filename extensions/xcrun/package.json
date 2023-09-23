@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "xcrun",
+  "title": "XCRun",
+  "description": "Control IOS Simulator using Raycast.",
+  "icon": "icon.png",
+  "author": "3llomi",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "uninstall",
+      "title": "Uninstall App",
+      "subtitle": "Uninstall App from Simulator",
+      "description": "Uninstall App from Simulator by bundle id.",
+      "mode": "view"
+    },
+    {
+      "name": "launch",
+      "title": "Launch App",
+      "subtitle": "Launching App from Simulator",
+      "description": "Launching App from Simulator by bundle id.",
+      "mode": "view"
+    },
+    {
+      "name": "terminate",
+      "title": "Terminate App",
+      "subtitle": "Terminate App from Simulator",
+      "description": "Terminate App from Simulator by bundle id.",
+      "mode": "view"
+    },
+    {
+      "name": "getAppContainer",
+      "title": "Get App Container",
+      "subtitle": "Get App container from Simulator",
+      "description": "Get App container from Simulator by bundle id.",
+      "mode": "view"
+    },
+    {
+      "name": "icloudSync",
+      "title": "iCloud Sync",
+      "subtitle": "Trigger iCloud Sync",
+      "description": "Trigger iCloud Sync in Simulator",
+      "mode": "view"
+    },
+    {
+      "name": "openUrl",
+      "title": "Open URL",
+      "subtitle": "Open URL in Simulator",
+      "description": "Open URL in Simulator",
+      "mode": "view"
+    },
+    {
+      "name": "privacy",
+      "title": "Permissions Control",
+      "subtitle": "Grant,Revoke and reset Permissions in Simulator",
+      "description": "Control Permissions in IOS Simulator",
+      "mode": "view"
+    },
+    {
+      "name": "rename",
+      "title": "Rename Simulator",
+      "subtitle": "Rename IOS Simulator",
+      "description": "Rename IOS Simulator",
+      "mode": "view"
+    },
+    {
+      "name": "push",
+      "title": "Push Notification to Simulator",
+      "subtitle": "Push Payload notification to IOS Simulator",
+      "description": "Push Payload notification to IOS Simulator using JSON file.",
+      "mode": "view"
+    },
+    {
+      "name": "getSimulators",
+      "title": "Get All Simulators",
+      "subtitle": "Get IOS Simulators",
+      "description": "Get IOS Simulators",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/uuid": "^9.0.4",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
