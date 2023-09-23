@@ -88,7 +88,7 @@ class FileManager {
     }
 
     try {
-      const fileInfo = await getFileInfoData(filePath);
+      const fileInfo = getFileInfoData(filePath);
 
       this.state$.batch(() => {
         this.state$.fileSize.set(fileSizeInBytes);

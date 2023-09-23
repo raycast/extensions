@@ -332,7 +332,6 @@ export async function createDatabasePage(values: Form.Values) {
             };
             break;
           }
-
           case "checkbox":
             arg.properties[propId] = {
               checkbox: value === 1 ? true : false,
@@ -349,6 +348,13 @@ export async function createDatabasePage(values: Form.Values) {
             arg.properties[propId] = {
               multi_select: value.map((multi_select_id: string) => ({ id: multi_select_id })),
             };
+            break;
+          case "status":
+            if (value !== "_select_null_") {
+              arg.properties[propId] = {
+                status: { id: value },
+              };
+            }
             break;
           case "relation":
             arg.properties[propId] = {

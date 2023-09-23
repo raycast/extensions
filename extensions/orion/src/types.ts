@@ -51,3 +51,19 @@ export interface Tab {
   url: string;
   window_id: number;
 }
+
+// Profiles
+
+export interface Profile {
+  // unused shortcut property
+  name: string;
+  color: number;
+  id: string;
+  dataPath?: string;
+  appPath?: string;
+}
+
+export interface ProfileList {
+  default: Profile;
+  profiles: Profile[];
+}

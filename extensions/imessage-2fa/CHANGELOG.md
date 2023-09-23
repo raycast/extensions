@@ -2,7 +2,7 @@
 
 ## [Update] - 2023-09-23
 
-- Resolves an issue text codes would not be detected if their pattern resembled a phone number shortcode
+- Resolves an issue where text codes would not be detected if their pattern resembled a phone number shortcode
 
 ## [Update] - 2023-09-11
 
