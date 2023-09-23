@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - 2023-09-23
+
+- Resolves an issue text codes would not be detected if their pattern resembled a phone number shortcode
+
 ## [Update] - 2023-09-11
 
 - Resolves an issue where whitespace (both missing or additional) could prevent code detection
