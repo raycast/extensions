@@ -28,7 +28,7 @@
   ],
   "dependencies": {
     "@googleapis/calendar": "^9.3.1",
-    "@raycast/api": "^1.58.1",
+    "@raycast/api": "^1.59.0",
     "@raycast/utils": "^1.10.0",
     "cross-fetch": "^4.0.0",
     "googleapis": "^126.0.1"
