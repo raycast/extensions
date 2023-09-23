@@ -34,7 +34,7 @@ export interface QueryResult {
 }
 
 export const gqlRequest = async <T = any>(query: string, token?: string): Promise<T | null> => {
-  const res = await fetch("https://api.fly.io/graphql", {
+  const res = await fetch(flyioGraphqlUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(token != null ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({ query }),

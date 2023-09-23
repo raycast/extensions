@@ -15,7 +15,6 @@ export default function Command() {
   async function getOrgs() {
     const preferences: Preferences = getPreferenceValues();
     const organizations = await fetchOrganizations(preferences.flyioApiKey ?? "");
-    console.log(`Organizations: ${JSON.stringify(organizations)}`);
     if (organizations) {
       setOrganizations(organizations);
     }
@@ -35,6 +34,10 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser title="Go Overview" url={`${flyioBaseUrl}/${app?.node?.name}`} />
+                      <Action.OpenInBrowser
+                        title="Open App"
+                        url={`https://${app?.node?.hostname}`}
+                      />
                       <Action.CopyToClipboard
                         title="Copy Hostname"
                         content={app?.node?.hostname}
