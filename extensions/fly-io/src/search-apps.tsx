@@ -34,10 +34,7 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser title="Go Overview" url={`${flyioBaseUrl}/${app?.node?.name}`} />
-                      <Action.OpenInBrowser
-                        title="Open App"
-                        url={`https://${app?.node?.hostname}`}
-                      />
+                      <Action.OpenInBrowser title="Open App" url={`https://${app?.node?.hostname}`} />
                       <Action.CopyToClipboard
                         title="Copy Hostname"
                         content={app?.node?.hostname}
