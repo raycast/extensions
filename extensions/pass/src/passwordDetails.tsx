@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, showToast, Toast, showHUD, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, showHUD, getPreferenceValues, Icon } from "@raycast/api";
 import { useState } from "react";
 import { useExec } from "@raycast/utils";
 import { userInfo } from "os";
@@ -120,11 +120,13 @@ function PasswordMetadata(props: passwords_path_structure) {
                   <Action.CopyToClipboard title={`Copy value of '${val.name}'`} content={val.value} />
                   <Action
                     title={"Copy Password"}
+                    icon={Icon.CopyClipboard}
                     onAction={() => CopyPassword(props)}
                     shortcut={{ modifiers: ["ctrl"], key: "c" }}
                   />
                   <Action
                     title={"Copy OTP"}
+                    icon={Icon.CopyClipboard}
                     onAction={() => CopyOTP(props)}
                     shortcut={{ modifiers: ["ctrl"], key: "o" }}
                   />
@@ -144,21 +146,31 @@ export default function GetPasswordDetails(props: passwords_path_structure) {
     <ActionPanel>
       <Action.Push
         title={"Browse metadata"}
+        icon={Icon.AppWindowList}
         target={<PasswordMetadata pass_file_path={props.pass_file_path} pass_file_name={props.pass_file_name} />}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
       />
       <Action
         title={"Copy Password"}
+        icon={Icon.CopyClipboard}
         onAction={() => CopyPassword(props)}
         shortcut={{ modifiers: ["ctrl"], key: "c" }}
       />
-      <Action title={"Copy OTP"} onAction={() => CopyOTP(props)} shortcut={{ modifiers: ["ctrl"], key: "o" }} />
+      <Action
+        title={"Copy OTP"}
+        icon={Icon.CopyClipboard}
+        onAction={() => CopyOTP(props)}
+        shortcut={{ modifiers: ["ctrl"], key: "o" }}
+      />
       <Action.Push
+        icon={Icon.Plus}
         shortcut={{ modifiers: ["ctrl"], key: "a" }}
         title={"Create Pass Entry"}
         target={<CreatePassForm />}
       />
       <Action
+        style={Action.Style.Destructive}
+        icon={Icon.Trash}
         shortcut={{ modifiers: ["ctrl"], key: "d" }}
         onAction={() => DeletePassword(props)}
         title={"Delete Pass Entry"}

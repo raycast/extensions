@@ -1,8 +1,7 @@
 import { List, getPreferenceValues, Toast, showToast } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { usePromise } from "@raycast/utils";
 import * as recursive from "recursive-readdir";
 
-import BadPasswordPath from "./errors_handling/bad_password_path";
 import GetPasswordDetails, { passwords_path_structure } from "./passwordDetails";
 import { Preferences } from "./utils";
 
@@ -16,52 +15,50 @@ function ParsePassFileName(pass_file_path: string) {
 }
 
 function LoadPassFilesList(PATH_TO_STORE: string) {
-  const [files, setFiles] = useState<passwords_path_structure[]>([{ pass_file_name: "", pass_file_path: "" }]);
-  const [error_loading, setError] = useState<boolean>(false);
-  const OMMIT_FILES = [".git", ".*"];
 
-  const loadPasswordsStore = useCallback(() => {
-    recursive.default(PATH_TO_STORE, OMMIT_FILES, (err, files: string[]) => {
-      console.error(err);
-      ``;
-      if (err) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Could not load files",
-        });
-        setError(true);
-        return;
-      }
-      if (files.length > 0) {
-        setFiles(
-          files.map((val) => {
+  const OMMIT_FILES = [".git", ".*"];
+  
+  const { data = [] } = usePromise(
+    async () => {
+      return await new Promise((resolve, reject) => { recursive.default(PATH_TO_STORE, OMMIT_FILES, (err, files: string[]) => {
+        if (err || files == undefined) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "'Password store' path is incorrect.",
+            message: "Please update 'Password store' in extension preferences and try again.",
+          });
+          reject([])
+        }
+        if (files.length > 0) {
+          const loaded_files = files.map((val) => {
             return { pass_file_name: ParsePassFileName(val), pass_file_path: val };
           })
-        );
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "No files in store",
-        });
-      }
-    });
-  }, [files]);
+          resolve(loaded_files)
+        } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "No files in password store",
+          });
+          reject([])
+        }
+      });
+    })
+    }
+  )
 
-  useEffect(() => {
-    loadPasswordsStore();
-  }, []);
-
-  const listItems = files.map((pass_file: passwords_path_structure, index: number) => (
-    <List.Item
-      key={index}
-      title={pass_file.pass_file_name}
-      actions={
-        <GetPasswordDetails pass_file_name={pass_file.pass_file_name} pass_file_path={pass_file.pass_file_path} />
-      }
-    />
-  ));
-
-  return !error_loading ? <List>{listItems}</List> : <BadPasswordPath />;
+    return(
+    <List>
+      { Array.isArray(data) ? data.map((pass_file: passwords_path_structure, index: number) => (
+        <List.Item
+          key={index}
+          title={pass_file.pass_file_name}
+          actions={
+            <GetPasswordDetails pass_file_name={pass_file.pass_file_name} pass_file_path={pass_file.pass_file_path} />
+          }
+        />
+      )) : <></>}
+    </List>
+    );
 }
 
 export default function Command() {
