@@ -1,5 +1,11 @@
 # CommerceQuest.space Changelog
 
+## [Filter Search-results by Type] - 2023-09-19
+- Added a Dropdown to filter Search-results by Type  
+
+## [Detail View] - 2023-09-18
+- Added a Detail view with a Preview of a Forum thread
+
 ## [Public Release] - 2023-09-17
 - Cleanup and refactoring for initial public release of Extension
 
