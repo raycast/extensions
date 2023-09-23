@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linkinize",
+  "title": "Linkinize",
+  "description": "Linkinize Bookmarks For Teams",
+  "icon": "icon.png",
+  "author": "linkinize",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Linkinize",
+      "subtitle": "Search through your Bookmarks",
+      "description": "Ultimate Bookmark manager made for teams",
+      "mode": "view"
+    },
+    {
+      "name": "organizations",
+      "title": "Switch Workspace",
+      "subtitle": "Switch Your Workspace",
+      "description": "Switch Your Linkinize Workspace",
+      "mode": "view"
+    },
+    {
+      "name": "synchronize",
+      "title": "Synchronize",
+      "subtitle": "Synchronize your Bookmarks",
+      "description": "Synchronize your Workspace Bookmarks",
+      "mode": "no-view",
+      "interval": "30m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@types/got": "^9.6.12",
+    "axios": "^1.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
