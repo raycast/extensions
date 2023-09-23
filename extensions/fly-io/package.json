@@ -13,15 +13,27 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "search projects",
+      "name": "search-apps",
+      "title": "Search Apps",
       "subtitle": "Fly.io",
-      "description": "search projects on Fly.io",
+      "description": "search Apps on Fly.io",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "flyioApiKey",
+      "type": "password",
+      "title": "Flyio API Key",
+      "required": false,
+      "description": "type your Flyio api key for auth",
+      "placeholder": "xxxxxxxxxx",
+      "label": "Flyio api key"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.58.1"
+    "@raycast/api": "^1.58.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
