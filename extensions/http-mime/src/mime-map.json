@@ -1,1 +1,60 @@
-{"Data interchange": [{"mime": "application/atom+xml", "exts": [".atom"]}, {"mime": "application/json", "exts": [".json", ".map", ".topojson"]}, {"mime": "application/ld+json", "exts": [".jsonld"]}, {"mime": "application/rss+xml", "exts": [".rss"]}, {"mime": "application/geo+json", "exts": [".geojson"]}, {"mime": "application/rdf+xml", "exts": [".rdf"]}, {"mime": "application/xml", "exts": [".xml"]}], "JavaScript": [{"mime": "text/javascript", "exts": [".js", ".mjs"]}], "Manifest files": [{"mime": "application/manifest+json", "exts": [".webmanifest"]}, {"mime": "application/x-web-app-manifest+json", "exts": [".webapp"]}, {"mime": "text/cache-manifest", "exts": [".appcache"]}], "Media files": [{"mime": "audio/mp4", "exts": [".f4a", ".f4b", ".m4a"]}, {"mime": "audio/ogg", "exts": [".oga", ".ogg", ".opus"]}, {"mime": "image/bmp", "exts": [".bmp"]}, {"mime": "image/svg+xml", "exts": [".svg", ".svgz"]}, {"mime": "image/webp", "exts": [".webp"]}, {"mime": "video/mp4", "exts": [".f4v", ".f4p", ".m4v", ".mp4"]}, {"mime": "video/ogg", "exts": [".ogv"]}, {"mime": "video/webm", "exts": [".webm"]}, {"mime": "image/x-icon", "exts": [".cur", ".ico"]}], "HEIF Images": [{"mime": "image/heic", "exts": [".heic"]}, {"mime": "image/heif", "exts": [".heif"]}], "HEIF Image Sequence": [{"mime": "image/heics", "exts": [".heics"]}, {"mime": "image/heifs", "exts": [".heifs"]}], "AVIF Images": [{"mime": "image/avif", "exts": [".avif"]}], "AVIF Image Sequence": [{"mime": "image/avis", "exts": [".avis"]}], "WebAssembly": [{"mime": "application/wasm", "exts": [".wasm"]}], "Web fonts": [{"mime": "font/woff", "exts": [".woff"]}, {"mime": "font/woff2", "exts": [".woff2"]}, {"mime": "application/vnd.ms-fontobject", "exts": [".eot"]}, {"mime": "font/ttf", "exts": [".ttf"]}, {"mime": "font/collection", "exts": [".ttc"]}, {"mime": "font/otf", "exts": [".otf"]}], "Other": [{"mime": "application/octet-stream", "exts": [".safariextz"]}, {"mime": "application/x-bb-appworld", "exts": [".bbaw"]}, {"mime": "application/x-chrome-extension", "exts": [".crx"]}, {"mime": "application/x-opera-extension", "exts": [".oex"]}, {"mime": "application/x-xpinstall", "exts": [".xpi"]}, {"mime": "text/calendar", "exts": [".ics"]}, {"mime": "text/markdown", "exts": [".markdown", ".md"]}, {"mime": "text/vcard", "exts": [".vcard", ".vcf"]}, {"mime": "text/vnd.rim.location.xloc", "exts": [".xloc"]}, {"mime": "text/vtt", "exts": [".vtt"]}, {"mime": "text/x-component", "exts": [".htc"]}]}
+{
+  "Data interchange": [
+    { "mime": "application/atom+xml", "exts": [".atom"] },
+    { "mime": "application/json", "exts": [".json", ".map", ".topojson"] },
+    { "mime": "application/ld+json", "exts": [".jsonld"] },
+    { "mime": "application/rss+xml", "exts": [".rss"] },
+    { "mime": "application/geo+json", "exts": [".geojson"] },
+    { "mime": "application/rdf+xml", "exts": [".rdf"] },
+    { "mime": "application/xml", "exts": [".xml"] }
+  ],
+  "JavaScript": [{ "mime": "text/javascript", "exts": [".js", ".mjs"] }],
+  "Manifest files": [
+    { "mime": "application/manifest+json", "exts": [".webmanifest"] },
+    { "mime": "application/x-web-app-manifest+json", "exts": [".webapp"] },
+    { "mime": "text/cache-manifest", "exts": [".appcache"] }
+  ],
+  "Media files": [
+    { "mime": "audio/mp4", "exts": [".f4a", ".f4b", ".m4a"] },
+    { "mime": "audio/ogg", "exts": [".oga", ".ogg", ".opus"] },
+    { "mime": "image/bmp", "exts": [".bmp"] },
+    { "mime": "image/svg+xml", "exts": [".svg", ".svgz"] },
+    { "mime": "image/webp", "exts": [".webp"] },
+    { "mime": "video/mp4", "exts": [".f4v", ".f4p", ".m4v", ".mp4"] },
+    { "mime": "video/ogg", "exts": [".ogv"] },
+    { "mime": "video/webm", "exts": [".webm"] },
+    { "mime": "image/x-icon", "exts": [".cur", ".ico"] }
+  ],
+  "HEIF Images": [
+    { "mime": "image/heic", "exts": [".heic"] },
+    { "mime": "image/heif", "exts": [".heif"] }
+  ],
+  "HEIF Image Sequence": [
+    { "mime": "image/heics", "exts": [".heics"] },
+    { "mime": "image/heifs", "exts": [".heifs"] }
+  ],
+  "AVIF Images": [{ "mime": "image/avif", "exts": [".avif"] }],
+  "AVIF Image Sequence": [{ "mime": "image/avis", "exts": [".avis"] }],
+  "WebAssembly": [{ "mime": "application/wasm", "exts": [".wasm"] }],
+  "Web fonts": [
+    { "mime": "font/woff", "exts": [".woff"] },
+    { "mime": "font/woff2", "exts": [".woff2"] },
+    { "mime": "application/vnd.ms-fontobject", "exts": [".eot"] },
+    { "mime": "font/ttf", "exts": [".ttf"] },
+    { "mime": "font/collection", "exts": [".ttc"] },
+    { "mime": "font/otf", "exts": [".otf"] }
+  ],
+  "Other": [
+    { "mime": "application/octet-stream", "exts": [".safariextz"] },
+    { "mime": "application/x-bb-appworld", "exts": [".bbaw"] },
+    { "mime": "application/x-chrome-extension", "exts": [".crx"] },
+    { "mime": "application/x-opera-extension", "exts": [".oex"] },
+    { "mime": "application/x-xpinstall", "exts": [".xpi"] },
+    { "mime": "text/calendar", "exts": [".ics"] },
+    { "mime": "text/markdown", "exts": [".markdown", ".md"] },
+    { "mime": "text/vcard", "exts": [".vcard", ".vcf"] },
+    { "mime": "text/vnd.rim.location.xloc", "exts": [".xloc"] },
+    { "mime": "text/vtt", "exts": [".vtt"] },
+    { "mime": "text/x-component", "exts": [".htc"] }
+  ]
+}
