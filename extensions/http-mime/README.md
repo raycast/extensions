@@ -1,3 +1,7 @@
-# MIME-File
+# HTTP-MIME
 
-lookup table for MIME to file extension mapping
+Search MIME types for HTTP Content-Type
+
+# Dev
+
+`scripts/build-mime-file.ipynb` was used to build `mime-map.json``
