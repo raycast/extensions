@@ -1,6 +1,6 @@
 import { Cache, LaunchType, launchCommand, showToast } from "@raycast/api";
-import { LINKINIZE_DOMAIN, BOOKMARKS, ORGANIZATIONS, TOKEN } from "./constants";
-import { logout } from "./support";
+import { LINKINIZE_DOMAIN, BOOKMARKS, ORGANIZATIONS, TOKEN, ACTIVE_ORGANIZATION, CLICKS } from "./constants";
+import { getInteractions, logout } from "./support";
 import axios, { AxiosResponse } from "axios";
 
 const cache = new Cache();
@@ -17,10 +17,14 @@ export default async function Command() {
 }
 
 async function synchronize(token: string) {
+  const data = Buffer.from(getInteractions()).toString("base64");
   axios
     .post(
       `${LINKINIZE_DOMAIN}/api/sync`,
-      { data: null },
+      {
+        data: data,
+        source: "raycast",
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -30,6 +34,8 @@ async function synchronize(token: string) {
     .then(async function (response: AxiosResponse) {
       await cache.set(BOOKMARKS, JSON.stringify(response.data.active.bookmarks));
       await cache.set(ORGANIZATIONS, JSON.stringify(response.data.organizations));
+      await cache.set(ACTIVE_ORGANIZATION, response.data.active.organization_id);
+      await cache.remove(CLICKS);
       return;
     })
     .catch(async function (error) {

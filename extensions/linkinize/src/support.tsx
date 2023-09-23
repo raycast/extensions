@@ -1,6 +1,6 @@
 import { Cache, LaunchType, LocalStorage, Toast, launchCommand, showToast } from "@raycast/api";
-import { LoginPayload } from "./interfaces";
-import { LINKINIZE_DOMAIN, TOKEN } from "./constants";
+import { Bookmark, LoginPayload } from "./interfaces";
+import { ACTIVE_ORGANIZATION, BOOKMARKS, CLICKS, LINKINIZE_DOMAIN, TOKEN } from "./constants";
 import axios, { AxiosError, AxiosResponse } from "axios";
 
 const cache = new Cache();
@@ -61,4 +61,26 @@ export async function handleAPIErrors(error: AxiosError) {
       await showToast({ title: "Error", message: "Not found, please try again.", style: Toast.Style.Failure });
       break;
   }
+}
+
+export function recordInteraction(url: string) {
+  const bookmarks = cache.get(BOOKMARKS);
+  const cachedBookmarks = bookmarks ? JSON.parse(bookmarks) : [];
+  const bookmark = cachedBookmarks.find((obj: Bookmark) => obj.url === url);
+  if (!bookmark) {
+    return;
+  }
+  const cached = cache.get(CLICKS);
+  const clicks = cached ? JSON.parse(cached) : [];
+  clicks.push({
+    id: bookmark.id,
+    at: Math.round(Date.now() / 1000),
+    oid: cache.get(ACTIVE_ORGANIZATION),
+  });
+  cache.set(CLICKS, JSON.stringify(clicks));
+}
+
+export function getInteractions() {
+  const cached = cache.get(CLICKS);
+  return cached ? cached : JSON.stringify([]);
 }

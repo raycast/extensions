@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, Cache } from "@raycast/api";
 import { BOOKMARKS } from "./constants";
 import { Bookmark } from "./interfaces";
+import { recordInteraction } from "./support";
 
 export function Search(cache: Cache) {
   const cached = cache.get(BOOKMARKS);
@@ -13,7 +14,7 @@ export function Search(cache: Cache) {
           key={item.id}
           actions={
             <ActionPanel title={item.name}>
-              <Action.OpenInBrowser url={item.url} />
+              <Action.OpenInBrowser url={item.url} onOpen={(url) => recordInteraction(url)} />
               <Action.CopyToClipboard title="Copy Link" content={item.url} />
             </ActionPanel>
           }
