@@ -260,6 +260,10 @@ export type AddTaskArgs = {
   description?: string;
   project_id?: string;
   due?: DateOrString;
+  duration?: {
+    unit: "minute" | "day";
+    amount: number;
+  };
   priority?: number;
   parent_id?: string | null;
   child_order?: number;
