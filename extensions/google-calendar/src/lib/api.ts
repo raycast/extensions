@@ -4,7 +4,6 @@ import { stringToDate } from "./utils";
 
 export async function getAuthorizedCalendarClient() {
   await authorize();
-  console.log("get client");
   const t = await client.getTokens();
 
   const oAuth2Client = new auth.OAuth2(OAuthClientId());
@@ -27,6 +26,10 @@ export interface CalendarEvent {
 export interface CalendarEvents {
   calendar: calendar_v3.Schema$CalendarListEntry;
   events: calendar_v3.Schema$Events;
+}
+
+export async function getCalendars(calendar: calendar_v3.Calendar) {
+  return await calendar.calendarList.list();
 }
 
 export async function getEventsPerCalendar(calendar: calendar_v3.Calendar) {

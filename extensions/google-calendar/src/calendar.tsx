@@ -1,23 +1,57 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import View from "./components/view";
 import { getCalendarClient } from "./lib/withCalendarClient";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { CalendarEvent, getEvents } from "./lib/api";
-import { stringToDate } from "./lib/utils";
+import { CalendarEvent, getCalendars, getEvents, startOfEvent } from "./lib/api";
+
+function OpenEventInBrowser(props: { event: CalendarEvent }) {
+  const e = props.event;
+  if (!e.event.htmlLink) {
+    return null;
+  }
+  return <Action.OpenInBrowser url={e.event.htmlLink} />;
+}
+
+function CalendarDropdown() {
+  const { calendar } = getCalendarClient();
+  const { isLoading, data, error } = useCachedPromise(
+    async () => {
+      return await getCalendars(calendar);
+    },
+    [],
+    { keepPreviousData: true }
+  );
+  if (error) {
+    showFailureToast(error);
+  }
+  return (
+    <List.Dropdown isLoading={isLoading} tooltip="Calendars">
+      <List.Dropdown.Item title="All" value="-" />
+      {data?.data.items?.map((c) => (
+        <List.Dropdown.Item title={c.summary || "?"} value={c.id || ""} key={c.id} />
+      ))}
+    </List.Dropdown>
+  );
+}
 
 function EventListItem(props: { event: CalendarEvent }) {
   const event = props.event.event;
   const cal = props.event.calendar;
-  const datetime = stringToDate(event.start?.dateTime);
-  const date = stringToDate(event.start?.date);
+  const start = startOfEvent(event);
   return (
     <List.Item
       title={event.summary || "?"}
+      icon={Icon.Calendar}
       accessories={[
         { tag: { value: cal.summary, color: cal.backgroundColor ? cal.backgroundColor : undefined } },
-        { date: datetime ? datetime : date },
+        { date: start, tooltip: start ? start.toLocaleDateString() : undefined },
       ]}
+      actions={
+        <ActionPanel>
+          <OpenEventInBrowser event={props.event} />
+        </ActionPanel>
+      }
     />
   );
 }
@@ -34,7 +68,12 @@ function RootCommand() {
   );
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchText={searchText}>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchText={searchText}
+      searchBarAccessory={<CalendarDropdown />}
+    >
       {data?.map((e) => (
         <EventListItem key={e.event.id} event={e} />
       ))}
