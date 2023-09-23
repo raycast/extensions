@@ -9,7 +9,7 @@ import { TracksSection } from "./components/TracksSection";
 import { PlaylistsSection } from "./components/PlaylistsSection";
 import { debounce } from "./helpers/debounce";
 import { ShowsSection } from "./components/ShowsSection";
-import { EpisodesSection } from "./components/EpisodessSection";
+import { EpisodesSection } from "./components/EpisodesSection";
 
 const filters = {
   all: "All",
