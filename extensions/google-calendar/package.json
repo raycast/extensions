@@ -11,9 +11,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "calendar",
-      "title": "Calendar",
-      "description": "caliiiiiiiiii",
+      "name": "my-week",
+      "title": "My Week",
+      "description": "List My Week",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Calendar",
+      "description": "Query calendar",
       "mode": "view"
     }
   ],

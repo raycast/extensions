@@ -1,0 +1,47 @@
+import { List } from "@raycast/api";
+import View from "./components/view";
+import { getCalendarClient } from "./lib/withCalendarClient";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { getEvents, groupEventsByDay } from "./lib/api";
+import { calendar_v3 } from "@googleapis/calendar";
+import { CalendarDropdown, EventListItem } from "./components/event/list";
+import { nowDate } from "./lib/utils";
+
+function RootCommand() {
+  const { calendar } = getCalendarClient();
+  const [selectedCalendar, setSelectedCalendar] = useState<calendar_v3.Schema$CalendarListEntry>();
+  const { isLoading, data, error } = useCachedPromise(
+    async (specificCalendar) => {
+      const maxDate = nowDate();
+      maxDate.setDate(maxDate.getDate() + 7);
+      return await getEvents(calendar, { specificCalendar: specificCalendar, start: nowDate(), end: maxDate });
+    },
+    [selectedCalendar],
+    { keepPreviousData: true }
+  );
+  if (error) {
+    showFailureToast(error);
+  }
+  const days = groupEventsByDay(data);
+
+  return (
+    <List isLoading={isLoading} searchBarAccessory={<CalendarDropdown onSelected={setSelectedCalendar} />}>
+      {days?.map((d) => (
+        <List.Section key={d.day.toLocaleDateString()} title={d.day.toLocaleDateString()}>
+          {d.events.map((e) => (
+            <EventListItem key={e.event.id} event={e} />
+          ))}
+        </List.Section>
+      ))}
+    </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <RootCommand />
+    </View>
+  );
+}
