@@ -1,6 +1,6 @@
 import { authorize, client, OAuthClientId } from "./oauth";
 import { calendar_v3, auth } from "@googleapis/calendar";
-import { stringToDate } from "./utils";
+import { nowDate, stringToDate } from "./utils";
 
 export async function getAuthorizedCalendarClient() {
   await authorize();
@@ -29,7 +29,7 @@ export interface CalendarEvents {
 }
 
 export async function getCalendars(calendar: calendar_v3.Calendar) {
-  return await calendar.calendarList.list();
+  return await calendar.calendarList.list({ showDeleted: false, showHidden: false });
 }
 
 export async function getEventsPerCalendar(calendar: calendar_v3.Calendar) {
@@ -42,8 +42,9 @@ export async function getEventsPerCalendar(calendar: calendar_v3.Calendar) {
       return calendar.events
         .list({
           calendarId: c.id || "",
-          timeMin: new Date().toISOString(),
+          timeMin: nowDate().toISOString(),
           timeMax: maxDate.toISOString(),
+          singleEvents: true,
         })
         .then((req) => {
           const data: CalendarEvents = {
@@ -85,4 +86,28 @@ export async function getEvents(calendar: calendar_v3.Calendar) {
   return eventsAll.sort(
     (a, b) => (startOfEvent(a.event) || fallbackDate).getTime() - (startOfEvent(b.event) || fallbackDate).getTime()
   );
+}
+
+export interface CalendarDayEvents {
+  day: Date;
+  events: CalendarEvent[];
+}
+
+export function groupEventsByDay(events: CalendarEvent[] | null | undefined) {
+  if (!events || events.length <= 0) {
+    return undefined;
+  }
+  const days: Record<string, CalendarEvent[]> = {};
+  for (const e of events) {
+    const start = startOfEvent(e.event);
+    if (!start) {
+      continue;
+    }
+    const key = start.toISOString();
+    const d = days[key] || [];
+    d.push(e);
+    days[key] = d;
+  }
+  const result: CalendarDayEvents[] = Object.keys(days).map((k) => ({ day: new Date(k), events: days[k] }));
+  return result;
 }
