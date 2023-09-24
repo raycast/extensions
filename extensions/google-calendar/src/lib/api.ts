@@ -28,27 +28,33 @@ export interface CalendarEvents {
   events: calendar_v3.Schema$Events;
 }
 
+export interface CalendarQueryOptions {
+  query?: string;
+  specificCalendar?: calendar_v3.Schema$CalendarListEntry;
+  start?: Date | null;
+  end?: Date | null;
+  maxResults?: number;
+}
+
 export async function getCalendars(calendar: calendar_v3.Calendar) {
   return await calendar.calendarList.list({ showDeleted: false, showHidden: false });
 }
 
-export async function getEventsPerCalendar(
-  calendar: calendar_v3.Calendar,
-  options?: { query?: string; specificCalendar?: calendar_v3.Schema$CalendarListEntry }
-) {
+export async function getEventsPerCalendar(calendar: calendar_v3.Calendar, options?: CalendarQueryOptions) {
   const r = await calendar.calendarList.list();
   const calendars = options?.specificCalendar ? [options.specificCalendar] : r.data.items;
   if (calendars) {
     const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 7);
+    maxDate.setDate(maxDate.getDate() + 30);
     const promises = calendars.map((c) => {
       return calendar.events
         .list({
           calendarId: c.id || "",
-          timeMin: nowDate().toISOString(),
-          timeMax: maxDate.toISOString(),
+          timeMin: (options?.start || nowDate()).toISOString(),
+          timeMax: options?.end === null ? undefined : (options?.end || maxDate).toISOString(),
           singleEvents: true,
           q: options?.query,
+          maxResults: options?.maxResults,
         })
         .then((req) => {
           const data: CalendarEvents = {
@@ -76,14 +82,8 @@ export function startOfEvent(event: calendar_v3.Schema$Event | undefined) {
   }
 }
 
-export async function getEvents(
-  calendar: calendar_v3.Calendar,
-  options?: { query?: string; specificCalendar?: calendar_v3.Schema$CalendarListEntry }
-) {
-  const calendars = await getEventsPerCalendar(calendar, {
-    query: options?.query,
-    specificCalendar: options?.specificCalendar,
-  });
+export async function getEvents(calendar: calendar_v3.Calendar, options?: CalendarQueryOptions) {
+  const calendars = await getEventsPerCalendar(calendar, options);
   let eventsAll: CalendarEvent[] = [];
   for (const cal of calendars || []) {
     const items = cal.events.items;
