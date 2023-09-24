@@ -34,7 +34,7 @@ function RootCommand() {
           title={`${sameDay(today, d.day) ? "Today" : dayOfWeek(d.day)} - ${d.day.toLocaleDateString()}`}
         >
           {d.events.map((e) => (
-            <EventListItem key={e.event.id} event={e} />
+            <EventListItem key={e.event.id} event={e} isSingleCalendar={selectedCalendar ? true : false} />
           ))}
         </List.Section>
       ))}
