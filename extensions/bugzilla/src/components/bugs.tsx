@@ -1,13 +1,14 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Detail } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Color, Detail, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { BugzillaAPI } from "../utils/api/bugzilla";
 import { BugzillaInstance } from "../interfaces/bugzilla";
 import { Bug } from "../interfaces/bug";
+import { Preferences } from "../interfaces/preferences";
+import { listBugzilla } from "../utils/api/storage";
 
-interface BugProps {
-  bugzilla: BugzillaInstance;
+export interface FetchProps {
   bugs?: string[];
-  searchParams: Map<string, string>;
+  currentUserSearchParam: string;
   navigationTitle: string;
   quicksearch?: boolean;
 }
@@ -17,7 +18,13 @@ interface BugDetailsProps {
   bug: Bug;
 }
 
-function BugItem(props: BugDetailsProps): JSX.Element {
+const bugzillaPreferences = getPreferenceValues<Preferences>();
+
+interface DropdownProps {
+  instanceList: BugzillaInstance[];
+}
+
+export function BugItem(props: BugDetailsProps): JSX.Element {
   return (
     <List.Item
       key={props.bug.id}
@@ -135,7 +142,7 @@ function BugDetails(details: BugDetailsProps): JSX.Element {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item key="submittable" text={details.bug.status} color={Color.SecondaryText} />
+            <Detail.Metadata.TagList.Item key={details.bug.id} text={details.bug.status} color={Color.SecondaryText} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Product" text={`${details.bug.product}`} />
@@ -169,104 +176,189 @@ function BugDetails(details: BugDetailsProps): JSX.Element {
   );
 }
 
-export function QuicksearchBugs(props: BugProps) {
-  const [bugs, setBugs] = useState<Bug[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [queryText, setSearchText] = useState<string>("");
-
-  const fetch = useCallback(
-    async function fetch(text: string) {
-      setIsLoading(true);
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Executing Query",
-      });
-      if (queryText !== text) {
-        setSearchText(text);
-        toast.message = text;
-      } else {
-        setSearchText("");
-      }
+export function QuicksearchBugs() {
+  const searchParams = new Map<string, string>([["limit", bugzillaPreferences.bugs_limit]]);
+  async function fetch(query: string) {
+    if (selectedBugzilla !== undefined) {
       try {
-        const bugzillaAPI = new BugzillaAPI(props.bugzilla);
-        const bugs = text ? await bugzillaAPI.getBugs(props.searchParams, text) : [];
-        text ? setBugs(bugs.filter((bug: Bug) => bug ?? [])) : setBugs([]);
-        toast.hide();
+        if (query) {
+          setIsLoading(true);
+          toast.message = query;
+          toast.show();
+          const bugzillaAPI = new BugzillaAPI(selectedBugzilla);
+          const result = await bugzillaAPI.getBugs(searchParams, query);
+          query ? setBugs(result.filter((bug: Bug) => bug ?? [])) : setBugs([]);
+        } else {
+          setBugs([]);
+        }
       } catch (err) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Fetch failed";
-        toast.message = String(err);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Query Failed",
+          message: String(err),
+        });
       } finally {
+        toast.hide();
         setIsLoading(false);
       }
-    },
-    [setBugs]
-  );
+    }
+  }
+  function BugzillaDropdown({ instanceList }: DropdownProps) {
+    return (
+      <List.Dropdown
+        tooltip="Select Bugzilla Instance"
+        onChange={(value) => {
+          setSelectedBugzilla(instanceList.find((i) => i.id === value));
+        }}
+        placeholder="Search Bugzilla Instance"
+      >
+        {instanceList.map((instance: BugzillaInstance) => (
+          <List.Dropdown.Item key={instance.id} value={instance.id} title={instance.displayName} />
+        ))}
+      </List.Dropdown>
+    );
+  }
+  const [bugs, setBugs] = useState<Bug[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [bugzillaList, setBugzillaList] = useState<BugzillaInstance[]>([]);
+  const [selectedBugzilla, setSelectedBugzilla] = useState<BugzillaInstance>();
+  const toast = new Toast({ style: Toast.Style.Animated, title: "Executing Query" });
 
-  // If not cleared, when clearing search it sends an API call :(
-  // Needs to fix
+  const loadInstances = useCallback(async function fetch() {
+    setBugzillaList(await listBugzilla());
+  }, []);
+
   useEffect(() => {
+    loadInstances();
     setIsLoading(false);
   }, []);
 
+  useEffect(() => {
+    fetch("");
+  }, [selectedBugzilla]);
+
   return (
     <List
-      navigationTitle={props.navigationTitle}
+      searchBarAccessory={<BugzillaDropdown instanceList={bugzillaList} />}
+      navigationTitle="Quick Search"
       isLoading={isLoading}
+      searchBarPlaceholder="Execute Quick Search Query"
       filtering={false}
       onSearchTextChange={fetch}
-      searchBarPlaceholder="Execute Quick Search Query"
       throttle
     >
-      <List.EmptyView title={queryText && !isLoading ? "No Bugs Found" : "No Query"} icon="Bugzilla.png" />
-      <List.Section title="Bugs" subtitle={bugs.length + ""}>
-        {bugs.map((b) => (
-          <BugItem bugzilla={props.bugzilla} bug={b} />
-        ))}
-      </List.Section>
+      {bugzillaList.length === 0 ? (
+        <List.EmptyView
+          title="No Instances Found"
+          description="Add a Bugzilla instance using `Manage Bugzilla Instances` command"
+          icon="Bugzilla.png"
+        />
+      ) : (
+        <></>
+      )}
+
+      {selectedBugzilla !== undefined ? <List.EmptyView title="No Bugs Found" icon="Bugzilla.png" /> : <></>}
+      {selectedBugzilla !== undefined ? (
+        <List.Section title="Bugs" subtitle={bugs.length + ""}>
+          {bugs.map((b) => (
+            <BugItem bugzilla={selectedBugzilla} bug={b} key={b.id} />
+          ))}
+        </List.Section>
+      ) : (
+        <></>
+      )}
     </List>
   );
 }
 
-export function FetchBugs(props: BugProps) {
-  const [bugs, setBugs] = useState<Bug[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const fetch = useCallback(
-    async function fetch() {
-      setIsLoading(true);
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: "Executing Query",
-      });
+export function FetchBugs(props: FetchProps) {
+  const searchParams = new Map<string, string>([
+    ["is_open", "false"],
+    ["resolution", "---"],
+    ["limit", bugzillaPreferences.bugs_limit],
+  ]);
+  async function fetch() {
+    if (selectedBugzilla !== undefined) {
       try {
-        const bugzillaAPI = new BugzillaAPI(props.bugzilla);
-        const bugs = await bugzillaAPI.getBugs(props.searchParams);
-        setBugs(bugs.filter((bug: Bug) => bug ?? []));
-        toast.hide();
+        setIsLoading(true);
+        toast.show();
+        const bugzillaAPI = new BugzillaAPI(selectedBugzilla);
+        searchParams.set(props.currentUserSearchParam, selectedBugzilla.login);
+        const result = await bugzillaAPI.getBugs(searchParams);
+        setBugs(result.filter((bug: Bug) => bug ?? []));
       } catch (err) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Fetch failed";
-        toast.message = String(err);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Query Failed",
+          message: String(err),
+        });
       } finally {
+        toast.hide();
         setIsLoading(false);
       }
-    },
-    [setBugs]
-  );
+    }
+  }
+  function BugzillaDropdown({ instanceList }: DropdownProps) {
+    return (
+      <List.Dropdown
+        tooltip="Select Bugzilla Instance"
+        onChange={(value) => {
+          setSelectedBugzilla(instanceList.find((i) => i.id === value));
+        }}
+        placeholder="Search Bugzilla Instance"
+      >
+        {instanceList.map((instance: BugzillaInstance) => (
+          <List.Dropdown.Item key={instance.id} value={instance.id} title={instance.displayName} />
+        ))}
+      </List.Dropdown>
+    );
+  }
+  const [bugs, setBugs] = useState<Bug[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [bugzillaList, setBugzillaList] = useState<BugzillaInstance[]>([]);
+  const [selectedBugzilla, setSelectedBugzilla] = useState<BugzillaInstance>();
+  const toast = new Toast({ style: Toast.Style.Animated, title: "Executing Query" });
+
+  const loadInstances = useCallback(async function fetch() {
+    setBugzillaList(await listBugzilla());
+  }, []);
+
+  useEffect(() => {
+    loadInstances();
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     fetch();
-  }, []);
+  }, [selectedBugzilla]);
 
   return (
-    <List navigationTitle={props.navigationTitle} isLoading={isLoading} searchBarPlaceholder="Filter Bug IDs">
-      <List.EmptyView title={"No Bugs Found"} icon="Bugzilla.png" />
-      <List.Section title="Bugs" subtitle={bugs.length + ""}>
-        {bugs.map((b) => (
-          <BugItem bugzilla={props.bugzilla} bug={b} />
-        ))}
-      </List.Section>
+    <List
+      searchBarAccessory={<BugzillaDropdown instanceList={bugzillaList} />}
+      navigationTitle={props.navigationTitle}
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter Bug IDs"
+    >
+      {bugzillaList.length === 0 ? (
+        <List.EmptyView
+          title="No Instances Found"
+          description="Add a Bugzilla instance using `Manage Bugzilla Instances` command"
+          icon="Bugzilla.png"
+        />
+      ) : (
+        <></>
+      )}
+
+      {selectedBugzilla !== undefined ? <List.EmptyView title={"No Bugs Found"} icon="Bugzilla.png" /> : <></>}
+      {selectedBugzilla !== undefined ? (
+        <List.Section title="Bugs" subtitle={bugs.length + ""}>
+          {bugs.map((b) => (
+            <BugItem bugzilla={selectedBugzilla} bug={b} key={b.id} />
+          ))}
+        </List.Section>
+      ) : (
+        <></>
+      )}
     </List>
   );
 }

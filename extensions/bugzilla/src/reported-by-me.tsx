@@ -1,5 +1,5 @@
-import { bugzillaMenu } from "./components/menu";
+import { FetchBugs } from "./components/bugs";
 
-export default function Command() {
-  return bugzillaMenu("reported-by-me");
+export default function Command(): JSX.Element {
+  return <FetchBugs navigationTitle="Open Bugs Assigned To Me" currentUserSearchParam="creator" />;
 }

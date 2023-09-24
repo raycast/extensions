@@ -10,30 +10,31 @@ import {
   Form,
   Color,
   popToRoot,
-  getPreferenceValues,
 } from "@raycast/api";
-import { FetchBugs, QuicksearchBugs } from "./bugs";
-import { BugzillaAPI } from "../utils/api/bugzilla";
-import { BugzillaInstance } from "../interfaces/bugzilla";
-import { Preferences } from "../interfaces/preferences";
-import { addBugzilla, deleteBugzilla, listBugzilla } from "../utils/api/storage";
+import { BugzillaAPI } from "./utils/api/bugzilla";
+import { BugzillaInstance } from "./interfaces/bugzilla";
+import { addBugzilla, deleteBugzilla, listBugzilla } from "./utils/api/storage";
 import { useState, useCallback, useEffect } from "react";
 import { format } from "date-fns";
 
-export function bugzillaMenu(menuAction: string): JSX.Element {
+export default function Command(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [bugzillaList, setBugzillaList] = useState<BugzillaInstance[]>([]);
-  const [hasBugzilla, setHasBugzilla] = useState<boolean>(false);
+  const [queryText, setSearchText] = useState<string>("");
 
-  const fetch = useCallback(
-    async function fetch(searchText: string) {
+  const loadInstances = useCallback(
+    async function loadInstances(text: string) {
       setIsLoading(true);
       try {
         const bugzillaList = await listBugzilla();
         setBugzillaList(bugzillaList);
-        setHasBugzilla(bugzillaList.length > 0);
-        const results = bugzillaList.filter((g) => g.displayName.toLowerCase().includes(searchText.toLowerCase()));
+        const results = bugzillaList.filter((g) => g.displayName.toLowerCase().includes(text.toLowerCase()));
         setBugzillaList(results);
+        if (queryText !== text) {
+          setSearchText(text);
+        } else {
+          setSearchText("");
+        }
       } catch (err) {
         showToast({
           style: Toast.Style.Failure,
@@ -48,14 +49,13 @@ export function bugzillaMenu(menuAction: string): JSX.Element {
   );
 
   useEffect(() => {
-    fetch("");
+    loadInstances(queryText);
   }, []);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={fetch} searchBarPlaceholder="Filter Instances">
+    <List isLoading={isLoading} onSearchTextChange={loadInstances} searchBarPlaceholder="Filter Instances">
       <List.EmptyView
-        title={hasBugzilla ? "No Instances Found" : "No Instances Added"}
-        description={hasBugzilla ? "" : "Add a Bugzilla instance to get started"}
+        title={"No Instances Found"}
         icon="Bugzilla.png"
         actions={
           <ActionPanel>
@@ -70,12 +70,7 @@ export function bugzillaMenu(menuAction: string): JSX.Element {
       />
       <List.Section title="Instances" subtitle={bugzillaList.length + ""}>
         {bugzillaList.map((bugzilla) => (
-          <BugzillaItem
-            key={bugzilla.displayName}
-            bugzilla={bugzilla}
-            setBugzillaList={setBugzillaList}
-            actionItem={menuAction}
-          />
+          <BugzillaItem key={bugzilla.displayName} bugzilla={bugzilla} setBugzillaList={setBugzillaList} />
         ))}
       </List.Section>
     </List>
@@ -85,96 +80,15 @@ export function bugzillaMenu(menuAction: string): JSX.Element {
 function BugzillaItem(props: {
   bugzilla: BugzillaInstance;
   setBugzillaList: (f: (v: BugzillaInstance[]) => BugzillaInstance[]) => void;
-  actionItem: string;
 }) {
-  const bugzillaPreferences = getPreferenceValues<Preferences>();
-  let primaryAction: JSX.Element = <></>;
-  if (props.actionItem == "assigned-to-me") {
-    primaryAction = (
-      <Action.Push
-        icon={Icon.BarCode}
-        title="Browse Bugs"
-        target={
-          <FetchBugs
-            bugzilla={props.bugzilla}
-            navigationTitle={`${props.bugzilla.displayName}`}
-            searchParams={
-              new Map<string, string>([
-                ["assigned_to", props.bugzilla.login],
-                ["is_open", "false"],
-                ["resolution", "---"],
-                ["limit", bugzillaPreferences.bugs_limit],
-              ])
-            }
-          />
-        }
-      />
-    );
-  } else if (props.actionItem == "reported-by-me") {
-    primaryAction = (
-      <Action.Push
-        icon={Icon.BarCode}
-        title="Browse Bugs"
-        target={
-          <FetchBugs
-            bugzilla={props.bugzilla}
-            navigationTitle={`${props.bugzilla.displayName}`}
-            searchParams={
-              new Map<string, string>([
-                ["creator", props.bugzilla.login],
-                ["is_open", "true"],
-                ["resolution", "---"],
-                ["limit", bugzillaPreferences.bugs_limit],
-              ])
-            }
-          />
-        }
-      />
-    );
-  } else if (props.actionItem == "cc") {
-    primaryAction = (
-      <Action.Push
-        icon={Icon.BarCode}
-        title="Browse Bugs"
-        target={
-          <FetchBugs
-            bugzilla={props.bugzilla}
-            navigationTitle={`${props.bugzilla.displayName}`}
-            searchParams={
-              new Map<string, string>([
-                ["cc", props.bugzilla.login],
-                ["is_open", "true"],
-                ["resolution", "---"],
-                ["limit", bugzillaPreferences.bugs_limit],
-              ])
-            }
-          />
-        }
-      />
-    );
-  } else if (props.actionItem == "quicksearch") {
-    primaryAction = (
-      <Action.Push
-        icon={Icon.BarCode}
-        title="Browse Bugs"
-        target={
-          <QuicksearchBugs
-            bugzilla={props.bugzilla}
-            navigationTitle={`${props.bugzilla.displayName}`}
-            searchParams={new Map<string, string>([["limit", bugzillaPreferences.bugs_limit]])}
-          />
-        }
-      />
-    );
-  }
+  const primaryAction: JSX.Element = <></>;
   return (
     <List.Item
       title={props.bugzilla.displayName}
       subtitle={props.bugzilla.url}
       icon={{
         tooltip: `Version: ${props.bugzilla.version}`,
-        // need to check if this actually works
-        source: "Bugzilla.png",
+        value: "Bugzilla.png",
       }}
       accessories={[
         {
@@ -320,7 +234,6 @@ function AddBugzilla(props: {
                   });
                 });
                 showToast(Toast.Style.Success, `Instance ${input.displayName} was ${action} successfully`);
-                // A workaround since I was not able to reload previously loaded list items when using pop()
                 popToRoot();
               } catch (err) {
                 showToast(Toast.Style.Failure, `Instance ${input.displayName} was not ${action}`, String(err));

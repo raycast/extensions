@@ -44,6 +44,7 @@ export class BugzillaAPI {
     const instanceUrl = new URL(this.bugzilla.url);
     instanceUrl.pathname += `/rest/bug`;
     instanceUrl.searchParams.append("id", bugId);
+    // Older instances may not expose `description` field via API
     instanceUrl.searchParams.append("include_fields", "description");
     const comments = JSON.parse(await this.request(instanceUrl))["bugs"][0]["description"];
     return comments;
@@ -52,9 +53,9 @@ export class BugzillaAPI {
   async request(url: URL, init?: RequestInit) {
     let urlAgent;
     if (url.toString().startsWith("http://")) {
-      new http.Agent({});
+      urlAgent = new http.Agent({});
     } else if (url.toString().startsWith("https://")) {
-      new https.Agent({ rejectUnauthorized: !this.bugzilla.unsafeHttps });
+      urlAgent = new https.Agent({ rejectUnauthorized: !this.bugzilla.unsafeHttps });
     } else {
       return Promise.reject(new Error("Wrong scheme in URL"));
     }
@@ -72,6 +73,7 @@ export class BugzillaAPI {
       ...init,
     });
     const parsedResponse = await resp.text();
+
     if (!resp.ok) {
       if (resp.status === 400) {
         return Promise.reject(new Error(`API Error: ${parsedResponse}`));

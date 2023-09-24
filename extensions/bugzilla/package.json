@@ -27,6 +27,12 @@
   ],
   "commands": [
     {
+      "name": "manage-instances",
+      "title": "Manage Bugzilla Instances",
+      "description": "Manage Bugzilla instances",
+      "mode": "view"
+    },
+    {
       "name": "quicksearch",
       "title": "Quick Search",
       "description": "Quicksearch bugs",

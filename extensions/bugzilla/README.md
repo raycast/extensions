@@ -18,14 +18,14 @@
 - The default queries in this extension might not work on all instances.
   Please report any issues you encounter.
 - Older instances may not return the `description` field.
-- Default query limit is set to `100`, which can be changed in the extension preference.
+- The default query limit is set to `100`, which can be changed in the extension preference.
 
 ## About
 
 Interact with Bugzilla instances to view bugs.
 
 This extension leverages the REST API (XMLRPC and JSONRPC are not supported)
-endpoints which may not be available on old instances.
+endpoints, which may not be available on old instances.
 Bugzilla version(s) `>= 5.0` are supported.
 
 Multiple Bugzilla instances are supported.
@@ -34,13 +34,17 @@ Supports providing a custom single header for authorization purposes, for exampl
 `Bugzilla_api_key: ${apiKey}`
 (`${apiKey}` will be interpolated to the provided API key).
 
-In the current scope of the extension, no plans to support any operations that modify
+In the current scope of the extension, there are no plans to support any operations that modify
 bugs in Bugzilla.  
 The extension aims to provide information at a glance, especially if working with
 multiple instances.  
 Users should keep using the web interface to modify Bugzilla bugs.
 
 ## Commands
+
+### `Manage Bugzilla Instances`
+
+Add/Manage Bugzilla instances.
 
 ### `Open Bugs Reported By Me`
 
