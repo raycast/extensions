@@ -3,7 +3,7 @@ import View from "./components/view";
 import { getCalendarClient } from "./lib/withCalendarClient";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { CalendarEvent, getCalendars, getEvents, startOfEvent } from "./lib/api";
+import { CalendarEvent, getCalendars, getEvents, groupEventsByDay, startOfEvent } from "./lib/api";
 
 function OpenEventInBrowser(props: { event: CalendarEvent }) {
   const e = props.event;
@@ -11,6 +11,10 @@ function OpenEventInBrowser(props: { event: CalendarEvent }) {
     return null;
   }
   return <Action.OpenInBrowser url={e.event.htmlLink} />;
+}
+
+function ConsoleLogAction(props: { event: CalendarEvent }) {
+  return <Action title="Print to Console" onAction={() => console.log(props.event)} />;
 }
 
 function CalendarDropdown() {
@@ -42,6 +46,7 @@ function EventListItem(props: { event: CalendarEvent }) {
   return (
     <List.Item
       title={event.summary || "?"}
+      subtitle={event.location ?? undefined}
       icon={Icon.Calendar}
       accessories={[
         { tag: { value: cal.summary, color: cal.backgroundColor ? cal.backgroundColor : undefined } },
@@ -50,6 +55,7 @@ function EventListItem(props: { event: CalendarEvent }) {
       actions={
         <ActionPanel>
           <OpenEventInBrowser event={props.event} />
+          <ConsoleLogAction event={props.event} />
         </ActionPanel>
       }
     />
@@ -67,6 +73,8 @@ function RootCommand() {
     { keepPreviousData: true }
   );
 
+  const days = groupEventsByDay(data);
+
   return (
     <List
       isLoading={isLoading}
@@ -74,8 +82,12 @@ function RootCommand() {
       searchText={searchText}
       searchBarAccessory={<CalendarDropdown />}
     >
-      {data?.map((e) => (
-        <EventListItem key={e.event.id} event={e} />
+      {days?.map((d) => (
+        <List.Section key={d.day.toLocaleDateString()} title={d.day.toLocaleDateString()}>
+          {d.events.map((e) => (
+            <EventListItem key={e.event.id} event={e} />
+          ))}
+        </List.Section>
       ))}
     </List>
   );
