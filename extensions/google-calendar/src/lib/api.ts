@@ -121,3 +121,15 @@ export function groupEventsByDay(events: CalendarEvent[] | null | undefined) {
   const result: CalendarDayEvents[] = Object.keys(days).map((k) => ({ day: new Date(k), events: days[k] }));
   return result;
 }
+
+export interface GooPreferences {
+  "goo.contactsGivenName"?: string;
+  "goo.contactsEventType"?: string;
+  "goo.contactsEmail"?: string;
+  "goo.contactsProfileId"?: string;
+  "goo.contactsFullName"?: string;
+  "goo.isGPlusUser"?: string;
+  "goo.contactsContactId"?: string;
+  "goo.contactsIsMyContact"?: string;
+  "goo.contactsPhotoUrl"?: string;
+}

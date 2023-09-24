@@ -1,4 +1,4 @@
-import { Action } from "@raycast/api";
+import { Action, Icon, environment } from "@raycast/api";
 import { CalendarEvent } from "../../lib/api";
 
 export function OpenEventInBrowser(props: { event: CalendarEvent }) {
@@ -10,5 +10,15 @@ export function OpenEventInBrowser(props: { event: CalendarEvent }) {
 }
 
 export function ConsoleLogAction(props: { event: CalendarEvent }) {
-  return <Action title="Print to Console" onAction={() => console.log(props.event)} />;
+  if (!environment.isDevelopment) {
+    return null;
+  }
+  return <Action title="Print Event to Console" icon={Icon.Terminal} onAction={() => console.log(props.event)} />;
+}
+
+export function CopyEventToClipboardAction(props: { event: CalendarEvent }) {
+  if (!environment.isDevelopment) {
+    return null;
+  }
+  return <Action.CopyToClipboard title="Copy Event to Clipboard" content={JSON.stringify(props.event, null, 4)} />;
 }
