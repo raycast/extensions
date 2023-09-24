@@ -82,6 +82,18 @@ export function startOfEvent(event: calendar_v3.Schema$Event | undefined) {
   }
 }
 
+export function endOfEvent(event: calendar_v3.Schema$Event | undefined) {
+  if (!event?.end) {
+    return undefined;
+  }
+  if (event.end.dateTime) {
+    return stringToDate(event.end.dateTime);
+  }
+  if (event.end.date) {
+    return stringToDate(event.end.date);
+  }
+}
+
 export async function getEvents(calendar: calendar_v3.Calendar, options?: CalendarQueryOptions) {
   const calendars = await getEventsPerCalendar(calendar, options);
   let eventsAll: CalendarEvent[] = [];
