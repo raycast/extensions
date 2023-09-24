@@ -6,7 +6,7 @@ import { useState } from "react";
 import { getEvents, groupEventsByDay } from "./lib/api";
 import { calendar_v3 } from "@googleapis/calendar";
 import { CalendarDropdown, EventListItem } from "./components/event/list";
-import { nowDate } from "./lib/utils";
+import { dayOfWeek, nowDate, sameDay } from "./lib/utils";
 
 function RootCommand() {
   const { calendar } = getCalendarClient();
@@ -24,11 +24,15 @@ function RootCommand() {
     showFailureToast(error);
   }
   const days = groupEventsByDay(data);
+  const today = nowDate();
 
   return (
     <List isLoading={isLoading} searchBarAccessory={<CalendarDropdown onSelected={setSelectedCalendar} />}>
       {days?.map((d) => (
-        <List.Section key={d.day.toLocaleDateString()} title={d.day.toLocaleDateString()}>
+        <List.Section
+          key={d.day.toLocaleDateString()}
+          title={`${sameDay(today, d.day) ? "Today" : dayOfWeek(d.day)} - ${d.day.toLocaleDateString()}`}
+        >
           {d.events.map((e) => (
             <EventListItem key={e.event.id} event={e} />
           ))}
