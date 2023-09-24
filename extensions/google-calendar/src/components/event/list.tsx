@@ -1,9 +1,10 @@
 import { List, Icon, ActionPanel, Image } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "googleapis";
-import { getCalendars, CalendarEvent, startOfEvent, GooPreferences } from "../../lib/api";
+import { getCalendars, CalendarEvent, startOfEvent, GooPreferences, endOfEvent } from "../../lib/api";
 import { getCalendarClient } from "../../lib/withCalendarClient";
 import { OpenEventInBrowser, ConsoleLogAction, CopyEventToClipboardAction } from "./actions";
+import { addDaysToDate, extractDateString, sameDay, timeOfDate } from "../../lib/utils";
 
 export function CalendarDropdown(props: {
   onSelected?: (cal: calendar_v3.Schema$CalendarListEntry | undefined) => void;
@@ -46,16 +47,34 @@ export function EventListItem(props: { event: CalendarEvent }) {
   const event = props.event.event;
   const cal = props.event.calendar;
   const start = startOfEvent(event);
+  const end = endOfEvent(event);
   const keywords: string[] = [];
   if (event.location) {
     keywords.push(event.location);
   }
+  const getTimeTitle = () => {
+    if (start && end) {
+      if (sameDay(start, end)) {
+        return `${timeOfDate(start)} - ${timeOfDate(end)}`;
+      } else {
+        const startPlus1Day = addDaysToDate(start, 1);
+        if (end.getTime() === startPlus1Day.getTime()) {
+          return "All Day";
+        }
+        return `${timeOfDate(start)} - ${timeOfDate(end)} (${extractDateString(end)})`;
+      }
+    }
+    if (start) {
+      return "All Day";
+    }
+    return "?";
+  };
   const gooPrefs = event.gadget?.preferences as GooPreferences | undefined;
   const contactPhotoLink = gooPrefs?.["goo.contactsPhotoUrl"];
   const isBirthday = gooPrefs?.["goo.contactsEventType"] === "BIRTHDAY";
   return (
     <List.Item
-      title={event.summary || "?"}
+      title={`${getTimeTitle()}  |  ${event.summary || "?"}`}
       subtitle={event.location ?? undefined}
       icon={isBirthday ? "🎂" : { source: Icon.Calendar, tintColor: cal.backgroundColor }}
       keywords={keywords}

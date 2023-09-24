@@ -19,3 +19,12 @@ export function sameDay(d1: Date, d2: Date) {
 export function dayOfWeek(date: Date) {
   return date.toLocaleDateString("en-US", { weekday: "long" });
 }
+
+export function timeOfDate(date: Date) {
+  const t = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  return t;
+}
+
+export function addDaysToDate(date: Date, days: number) {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
