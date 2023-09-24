@@ -32,9 +32,12 @@ export async function getCalendars(calendar: calendar_v3.Calendar) {
   return await calendar.calendarList.list({ showDeleted: false, showHidden: false });
 }
 
-export async function getEventsPerCalendar(calendar: calendar_v3.Calendar) {
+export async function getEventsPerCalendar(
+  calendar: calendar_v3.Calendar,
+  options?: { query?: string; specificCalendar?: calendar_v3.Schema$CalendarListEntry }
+) {
   const r = await calendar.calendarList.list();
-  const calendars = r.data.items;
+  const calendars = options?.specificCalendar ? [options.specificCalendar] : r.data.items;
   if (calendars) {
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 7);
@@ -45,6 +48,7 @@ export async function getEventsPerCalendar(calendar: calendar_v3.Calendar) {
           timeMin: nowDate().toISOString(),
           timeMax: maxDate.toISOString(),
           singleEvents: true,
+          q: options?.query,
         })
         .then((req) => {
           const data: CalendarEvents = {
@@ -72,8 +76,14 @@ export function startOfEvent(event: calendar_v3.Schema$Event | undefined) {
   }
 }
 
-export async function getEvents(calendar: calendar_v3.Calendar) {
-  const calendars = await getEventsPerCalendar(calendar);
+export async function getEvents(
+  calendar: calendar_v3.Calendar,
+  options?: { query?: string; specificCalendar?: calendar_v3.Schema$CalendarListEntry }
+) {
+  const calendars = await getEventsPerCalendar(calendar, {
+    query: options?.query,
+    specificCalendar: options?.specificCalendar,
+  });
   let eventsAll: CalendarEvent[] = [];
   for (const cal of calendars || []) {
     const items = cal.events.items;
