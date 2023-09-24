@@ -23,7 +23,7 @@ Command where you're able to configure the recording options such as frames per 
 
 ## Native modules
 
--  `aperture-cli` - Native screen recorder. This binary is the output of the `build:aperture-cli` command, which builds the Swift CLI application from [aperture-none](https://github.com/wulkano/aperture-node).
+-  `aperture-cli` - Native screen recorder. This binary is the output of the `build:aperture-cli` command, which builds the Swift CLI application from [aperture-node](https://github.com/wulkano/aperture-node).
 -  `aperture-indicator` - Native macOS application that shows a menu bar indicator when the screen is being recorded. This app can be built by running the `build:aperture-indicator` command. Its source code is located in the [Sources/aperture-indicator](Sources/aperture-indicator/) directory.
 
 # Acknowledgements
