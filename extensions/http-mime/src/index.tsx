@@ -1,21 +1,41 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { useState } from "react";
 import MIME_MAP from "./mime-map.json";
 
 export default function Command() {
+  const [showDetail, setShowDetail] = useState(false);
   return (
-    <List>
-      {Object.entries(MIME_MAP).map(([cat, items]) => (
+    <List isShowingDetail={showDetail}>
+      {Object.entries(MIME_MAP).map(([cat, cat_map]) => (
         <List.Section key={cat} title={cat}>
-          {items.map((item) => (
+          {Object.entries(cat_map).map(([mime, item]) => (
             <List.Item
-              key={item.mime}
+              key={mime}
               icon={Icon.Dot}
-              title={item.mime}
-              subtitle={item.exts.join(" ")}
-              accessories={[{ icon: Icon.CopyClipboard, text: "Copy" }]}
+              title={mime}
+              subtitle={item.description ?? ""}
+              accessories={[{ text: item.exts.join(" ") }]}
+              detail={
+                <List.Item.Detail
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="Description" text={item.description ?? ""} />
+                      <List.Item.Detail.Metadata.Label title="Exts" text={item.exts.join(" ")} />
+                      <List.Item.Detail.Metadata.Separator />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard content={item.mime} />
+                  <Action
+                    icon={showDetail ? Icon.ArrowsContract : Icon.ArrowsExpand}
+                    title={`${showDetail ? "Hide" : "Show"} Detail Panel`}
+                    onAction={() => {
+                      setShowDetail(!showDetail);
+                    }}
+                  />
+                  <Action.CopyToClipboard content={mime} />
                 </ActionPanel>
               }
             />
