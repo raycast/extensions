@@ -1,6 +1,6 @@
 import { authorize, client, OAuthClientId } from "./oauth";
 import { calendar_v3, auth } from "@googleapis/calendar";
-import { nowDate, stringToDate } from "./utils";
+import { extractDateString, nowDate, stringToDate } from "./utils";
 
 export async function getAuthorizedCalendarClient() {
   await authorize();
@@ -103,7 +103,7 @@ export function groupEventsByDay(events: CalendarEvent[] | null | undefined) {
     if (!start) {
       continue;
     }
-    const key = start.toISOString();
+    const key = extractDateString(start);
     const d = days[key] || [];
     d.push(e);
     days[key] = d;
