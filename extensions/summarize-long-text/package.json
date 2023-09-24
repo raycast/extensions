@@ -1,0 +1,172 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "summarize-long-text",
+  "title": "Summarize Long Text",
+  "description": "Summarize long texts with AI recursively",
+  "icon": "icon.png",
+  "author": "arthur",
+  "preferences": [
+    {
+      "name": "chosenModel",
+      "title": "Choose AI Model",
+      "description": "Choose between Raycast AI or GPT models",
+      "type": "dropdown",
+      "default": "raycast ai 4",
+      "data": [
+        {
+          "value": "raycast-text-davinci-003",
+          "title": "Raycast AI 3"
+        },
+        {
+          "value": "raycast-gpt-3.5-turbo",
+          "title": "Raycast AI 3.5"
+        },
+        {
+          "value": "OPENAI-gpt-3.5",
+          "title": "OpenAI gpt-3.5"
+        },
+        {
+          "value": "OPENAI-gpt-3.5-turbo-16k",
+          "title": "OpenAI gpt-3.5 turbo 16k"
+        },
+        {
+          "value": "OPENAI-gpt-4",
+          "title": "OpenAI gpt-4"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "creativity",
+      "title": "Creativity",
+      "description": "Choose how creative the AI should be.",
+      "type": "dropdown",
+      "default": "0.75",
+      "data": [
+        {
+          "value": "0",
+          "title": "None"
+        },
+        {
+          "value": "0.25",
+          "title": "very low (0.25)"
+        },
+        {
+          "value": "0.5",
+          "title": "low (0.5)"
+        },
+        {
+          "value": "0.75",
+          "title": "Medium (0.75)"
+        },
+        {
+          "value": "1.0",
+          "title": "High (1.0)"
+        },
+        {
+          "value": "1.5",
+          "title": "Very High (1.5)"
+        },
+        {
+          "value": "2",
+          "title": "Maximum"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "openaiApiToken",
+      "title": "OpenAI API Token",
+      "description": "Your OpenAI API Token. Required if you choose ChatGPT as your AI.",
+      "type": "password",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "The language for the summary (can be different than the source text).",
+      "type": "textfield",
+      "default": "english",
+      "required": false
+    },
+    {
+      "name": "maxChars",
+      "title": "Maximum Characters",
+      "description": "What is the maximum number of characters for the summary? Higher means more detail, but could exceed token limit for further summarization.",
+      "type": "dropdown",
+      "default": "6000",
+      "data": [
+        {
+          "value": "2000",
+          "title": "very, very Short (~500 tokens)"
+        },
+        {
+          "value": "4000",
+          "title": "Very Short (~1000 tokens)"
+        },
+        {
+          "value": "6000",
+          "title": "Short (~1500 tokens)"
+        },
+        {
+          "value": "8000",
+          "title": "Medium (~2000 tokens, best for Raycast AI)"
+        },
+        {
+          "value": "12000",
+          "title": "Large (~3000 tokens, best for GPT)"
+        },
+        {
+          "value": "20000",
+          "title": "Very large (~5000 tokens, ideal for GPT 16K)"
+        },
+        {
+          "value": "30000",
+          "title": "Maximum (~7500 tokens, only for GPT 16K and larger)"
+        }
+      ],
+      "required": false
+    }
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarizeLongText",
+      "title": "Recursively Summarize Long Text With Final Summary",
+      "description": "Split long text in blocks, summarize each, then summarize the block summaries",
+      "mode": "view"
+    },
+    {
+      "name": "summarizeBlocks",
+      "title": "Summarize Chunks of Long Text, No Final Summary",
+      "description": "Summarize long text in blocks, summarize each, then return the block summaries",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.1",
+    "cohere-ai": "^6.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "js-tiktoken": "^1.0.7",
+    "langchain": "^0.0.151",
+    "openai": "^4.8.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
