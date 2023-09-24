@@ -9,20 +9,22 @@ export function Search(cache: Cache) {
 
   return (
     <List>
-      {items.sort((a: Bookmark, b: Bookmark) => b.weight -  a.weight).map((item: Bookmark) => (
-        <List.Item
-          key={item.id}
-          actions={
-            <ActionPanel title={item.name}>
-              <Action.OpenInBrowser url={item.url} onOpen={(url) => recordInteraction(url)} />
-              <Action.CopyToClipboard title="Copy Link" content={item.url} />
-            </ActionPanel>
-          }
-          icon={item.favicon}
-          subtitle={item.description}
-          title={item.name}
-        />
-      ))}
+      {items
+        .sort((a: Bookmark, b: Bookmark) => b.weight - a.weight)
+        .map((item: Bookmark) => (
+          <List.Item
+            key={item.id}
+            actions={
+              <ActionPanel title={item.name}>
+                <Action.OpenInBrowser url={item.url} onOpen={(url) => recordInteraction(url)} />
+                <Action.CopyToClipboard title="Copy Link" content={item.url} />
+              </ActionPanel>
+            }
+            icon={item.favicon}
+            subtitle={item.description}
+            title={item.name}
+          />
+        ))}
     </List>
   );
 }
