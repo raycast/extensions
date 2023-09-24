@@ -9,7 +9,7 @@ export function Search(cache: Cache) {
 
   return (
     <List>
-      {items.map((item: Bookmark) => (
+      {items.sort((a: Bookmark, b: Bookmark) => b.weight -  a.weight).map((item: Bookmark) => (
         <List.Item
           key={item.id}
           actions={

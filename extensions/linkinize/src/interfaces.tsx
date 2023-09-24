@@ -9,6 +9,7 @@ export interface Bookmark {
   url: string;
   id: string;
   favicon: string;
+  weight: number
 }
 
 export interface Organization {
