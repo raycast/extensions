@@ -13,12 +13,15 @@ export default function Command() {
               key={mime}
               icon={Icon.Dot}
               title={mime}
-              subtitle={item.description ?? ""}
-              accessories={[{ text: item.exts.join(" ") }]}
+              // subtitle={item.description ?? ""}
+              // accessories={[{ text: item.exts.join(" ") }]}
+              subtitle={item.exts.join(" ")}
+              accessories={[{ text: item.description ?? "" }]}
               detail={
                 <List.Item.Detail
                   metadata={
                     <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="MIME" text={mime} />
                       <List.Item.Detail.Metadata.Label title="Description" text={item.description ?? ""} />
                       <List.Item.Detail.Metadata.Label title="Exts" text={item.exts.join(" ")} />
                       <List.Item.Detail.Metadata.Separator />
