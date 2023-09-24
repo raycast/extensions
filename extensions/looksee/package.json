@@ -5,6 +5,9 @@
   "description": "Use www.macvendorlookup.com from Raycast",
   "icon": "command-icon.png",
   "author": "olavgjerde",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "System",
     "Web",
