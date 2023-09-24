@@ -3,7 +3,7 @@
   "name": "google-calendar",
   "title": "Google Calendar",
   "description": "Manage Google Calendars",
-  "icon": "command-icon.png",
+  "icon": "google_calendar.png",
   "author": "tonka3000",
   "categories": [
     "Productivity"

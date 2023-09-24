@@ -56,7 +56,7 @@ function EventListItem(props: { event: CalendarEvent }) {
     <List.Item
       title={event.summary || "?"}
       subtitle={event.location ?? undefined}
-      icon={Icon.Calendar}
+      icon={{ source: Icon.Calendar, tintColor: cal.backgroundColor }}
       accessories={[
         { tag: { value: cal.summary, color: cal.backgroundColor ? cal.backgroundColor : undefined } },
         { date: start, tooltip: start ? start.toLocaleDateString() : undefined },
