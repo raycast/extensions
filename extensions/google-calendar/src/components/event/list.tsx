@@ -43,7 +43,7 @@ export function CalendarDropdown(props: {
   );
 }
 
-export function EventListItem(props: { event: CalendarEvent }) {
+export function EventListItem(props: { event: CalendarEvent; isSingleCalendar?: boolean }) {
   const event = props.event.event;
   const cal = props.event.calendar;
   const start = startOfEvent(event);
@@ -72,6 +72,7 @@ export function EventListItem(props: { event: CalendarEvent }) {
   const gooPrefs = event.gadget?.preferences as GooPreferences | undefined;
   const contactPhotoLink = gooPrefs?.["goo.contactsPhotoUrl"];
   const isBirthday = gooPrefs?.["goo.contactsEventType"] === "BIRTHDAY";
+  const isSingleCalendar = props.isSingleCalendar;
   return (
     <List.Item
       title={`${getTimeTitle()}  |  ${event.summary || "?"}`}
@@ -81,8 +82,12 @@ export function EventListItem(props: { event: CalendarEvent }) {
       accessories={[
         { icon: event.gadget?.iconLink },
         { icon: contactPhotoLink ? { source: contactPhotoLink, mask: Image.Mask.Circle } : undefined },
-        { tag: { value: cal.summary, color: cal.backgroundColor ? cal.backgroundColor : undefined } },
-        { date: start, tooltip: start ? start.toLocaleDateString() : undefined },
+        {
+          tag:
+            isSingleCalendar === false || isSingleCalendar === undefined
+              ? { value: cal.summary, color: cal.backgroundColor ? cal.backgroundColor : undefined }
+              : undefined,
+        },
       ]}
       actions={
         <ActionPanel>
