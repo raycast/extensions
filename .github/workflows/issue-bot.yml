@@ -11,28 +11,20 @@ jobs:
     if: ${{ !github.event.issue.pull_request }} && github.repository == 'raycast/extensions'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
+      - uses: oven-sh/setup-bun@v1
         with:
-          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-          script: |
-            const { data } = await github.rest.repos.getContent({
-              mediaType: {
-                format: "raw",
-              },
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: "scripts/issue-bot.js",
-            });
-
-            const fn = Buffer.from(data.content, 'base64')
-            require('fs').writeFileSync('./issue-bot.js', fn)
-
-            const script = require('./issue-bot')
-            await script({
-              github,
-              context,
-              core
-            })
+          bun-version: latest
+      - name: Setup Bot
+        run: bun create github.com/raycast/github-action-bot
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+      - name: Run bot
+        run: |
+          cd github-action-bot
+          bun run index.ts
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          SCRIPT: "scripts/bots/issue-bot.ts"
 
       - name: Notify Failure to Slack
         if: failure()

@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.59.0 - 2023-09-21
+
+### ✨ New
+
+- **PickDate**: Similar to `Form.DatePicker`, you can also check whether the user picked a full day or a specific time with `Action.PickDate.isFullDay(date)`.
+
+### 💎 Improvements
+
+- **Clipboard**: The `transient` option is renamed to `concealed`.
+
+### 🐞 Fixes
+
+- **MenuBarExtra:** Right-clicking `MenuBarExtra.Item`s should now work in macOS Sonoma.
+
 ## 1.58.0 - 2023-09-06
 
 ### ✨ New

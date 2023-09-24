@@ -2,6 +2,7 @@ import { getApplications } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 export const BROWSERS_BUNDLE_ID = {
+  arc: "company.thebrowser.browser",
   brave: "com.brave.browser",
   braveBeta: "com.brave.browser.beta",
   chrome: "com.google.chrome",

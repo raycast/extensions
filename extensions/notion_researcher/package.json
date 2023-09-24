@@ -6,7 +6,10 @@
   "icon": "command_icon.png",
   "author": "raz_gaon",
   "license": "MIT",
-  "categories": ["Productivity", "Applications"],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
   "preferences": [
     {
       "name": "notionApiKey",
@@ -15,7 +18,7 @@
       "description": "Notion token to allow access to the database",
       "type": "password",
       "required": true
-    },    
+    },
     {
       "name": "openaiApiKey",
       "title": "OpenAI Key",
@@ -36,7 +39,7 @@
   "commands": [
     {
       "name": "addPaper",
-      "icon": "command_icon.png",      
+      "icon": "command_icon.png",
       "title": "Add Research Papers",
       "description": "Add a research paper from Arxiv to a Notion database with metadata, references, and explanations.",
       "mode": "view",
@@ -48,29 +51,47 @@
           "description": "Notion database identifier",
           "type": "textfield",
           "required": true
-        }        
+        }
       ]
     },
     {
       "name": "createDatabase",
-      "icon": "command_icon.png",      
+      "icon": "command_icon.png",
       "title": "Create Research Database",
       "description": "Create the database to hold the research papers.",
       "mode": "view"
+    },
+    {
+      "name": "addConcept",
+      "icon": "command_icon.png",
+      "title": "Add Concept to Database",
+      "description": "Add a concept explanation to Database",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "conceptDatabaseKey",
+          "title": "Notion Concepts Database Key",
+          "placeholder": "Your Database Key...",
+          "description": "Notion database identifier",
+          "type": "textfield",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^2.2.11",
-    "@raycast/api": "^1.57.1",
-    "@raycast/utils": "^1.9.1",
+    "@notionhq/client": "^2.2.13",
+    "@raycast/api": "^1.58.1",
+    "@raycast/utils": "^1.10.0",
+    "@tryfabric/martian": "^1.2.4",
     "arxivjs": "^0.0.11",
     "got": "^11.8.2",
     "notion-types": "^6.16.0",
-    "openai": "^4.3.0",
+    "openai": "^4.8.0",
     "use-debounce": "^9.0.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "1.0.6",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "dotenv": "^16.3.1",

@@ -4,23 +4,26 @@ Link **all DocSearch** into Raycast.
 
 ![interface](./metadata/docsearch-1.png)
 
-### Supported Documentations
+### Supported Documentations (43)
 
-|                   Documentations                    |                                                       |                                                              |
-| :-------------------------------------------------: | :---------------------------------------------------: | :----------------------------------------------------------: |
-|    [Apollo](https://www.apollographql.com/docs)     |         [Arthas](https://arthas.aliyun.com/)          |            [Bootstrap](https://getbootstrap.com/)            |
-|             [Clerk](https://clerk.dev)              |          [Dubbo](https://dubbo.apache.org/)           | [Echarts(zh-Hans)](https://echarts.apache.org/zh/index.html) |
-| [Echarts](https://echarts.apache.org/en/index.html) |               [Flet](https://flet.dev/)               |             [GitBook](https://docs.gitbook.com/)             |
-|            [Homebrew](https://brew.sh/)             |            [IPFS](https://docs.ipfs.tech/)            |             [Laravel 9.x](https://laravel.com/)              |
-|             [Nuxt](https://nuxtjs.org/)             |            [Nuxt3](https://v3.nuxtjs.org/)            |               [Prettier](https://prettier.io/)               |
-|         [RSSHub](https://docs.rsshub.app/)          |      [Raycast](https://developers.raycast.com/)       |        [React(zh-Hans)](https://zh-hans.reactjs.org/)        |
-|            [React](https://reactjs.org/)            | [React Bootstrap](https://react-bootstrap.github.io/) |           [React Native](https://reactnative.dev/)           |
-|             [Remix](https://remix.run/)             |        [Slidev(zh-Hans)](https://cn.sli.dev/)         |                  [Slidev](https://sli.dev/)                  |
-|        [Supabase](https://supabase.com/docs)        |      [TailwindCSS v3](https://tailwindcss.com/)       |               [Unidata](https://unidata.app/)                |
-|       [Vite(zh-Hans)](https://cn.vitejs.dev/)       |              [Vite](https://vitejs.dev/)              |                [Vitest](https://vitest.dev/)                 |
-|      [Vue Router4](https://router.vuejs.org/)       |          [Vue3(zh-Hans)](https://vuejs.org/)          |                  [Vue3](https://vuejs.org/)                  |
-|            [VueUse](https://vueuse.org/)            |      [Vuepress v1](https://vuepress.vuejs.org/)       |        [Vuepress v2](https://v2.vuepress.vuejs.org/)         |
-|         [pnpm(zh-Hans)](https://pnpm.io/zh)         |              [pnpm](https://pnpm.io/zh)               |
+|                        Documentations                        |                                                       |                                                         |
+| :----------------------------------------------------------: | :---------------------------------------------------: | :-----------------------------------------------------: |
+|         [Antd(zh-Hans)](https://ant.design/index-cn)         |              [Antd](https://ant.design/)              | [Antdv(zh-Hans)](https://antdv.com/components/overview) |
+|      [Antdv](https://antdv.com/components/overview-cn)       |     [Apollo](https://www.apollographql.com/docs)      |          [Arthas](https://arthas.aliyun.com/)           |
+|            [Bootstrap](https://getbootstrap.com/)            |              [Clerk](https://clerk.dev)               |           [Dubbo](https://dubbo.apache.org/)            |
+| [Echarts(zh-Hans)](https://echarts.apache.org/zh/index.html) |  [Echarts](https://echarts.apache.org/en/index.html)  |                [Flet](https://flet.dev/)                |
+|             [GitBook](https://docs.gitbook.com/)             |             [Homebrew](https://brew.sh/)              |             [IPFS](https://docs.ipfs.tech/)             |
+|             [Laravel 9.x](https://laravel.com/)              |              [Nuxt](https://nuxtjs.org/)              |             [Nuxt3](https://v3.nuxtjs.org/)             |
+|             [Pnpm(zh-Hans)](https://pnpm.io/zh)              |              [Pnpm](https://pnpm.io/zh)               |            [Prettier](https://prettier.io/)             |
+|              [RSSHub](https://docs.rsshub.app/)              |      [Raycast](https://developers.raycast.com/)       |     [React(zh-Hans)](https://zh-hans.reactjs.org/)      |
+|                [React](https://reactjs.org/)                 | [React Bootstrap](https://react-bootstrap.github.io/) |        [React Native](https://reactnative.dev/)         |
+|                 [Remix](https://remix.run/)                  |        [Slidev(zh-Hans)](https://cn.sli.dev/)         |               [Slidev](https://sli.dev/)                |
+|            [Supabase](https://supabase.com/docs)             |      [TailwindCSS V3](https://tailwindcss.com/)       |      [Taro(zh-Hans)](https://docs.taro.zone/docs/)      |
+|               [Unidata](https://unidata.app/)                |        [Vite(zh-Hans)](https://cn.vitejs.dev/)        |               [Vite](https://vitejs.dev/)               |
+|                [Vitest](https://vitest.dev/)                 |       [Vue Router4](https://router.vuejs.org/)        |           [Vue3(zh-Hans)](https://vuejs.org/)           |
+|                  [Vue3](https://vuejs.org/)                  |             [VueUse](https://vueuse.org/)             |       [Vuepress V1](https://vuepress.vuejs.org/)        |
+
+| [Vuepress V2](https://v2.vuepress.vuejs.org/)
 
 ### Add Other Documentation
 
@@ -56,28 +59,7 @@ Link **all DocSearch** into Raycast.
      }
      ```
 
-   - Finally, write some code to the properties of commands in the [package.json](/package.json)
-     ```json
-     ...
-        "commands": [
-           {
-              "name": "vuepress1",  // The name of the file you created
-              "title": "Search Documentation",
-              "subtitle": "Vuepress v1",
-              "description": "Search Vuepress v1 documentation",
-              "arguments": [
-                 {
-                    "name": "search",
-                    "placeholder": "Search...",
-                    "type": "text"
-                 }
-              ],
-              "mode": "view"
-           },
-           ...
-        ]
-     ...
-     ```
+   - Run the command `npm run generate`. This will create the entry file and config. After that, you can run the command `npm run dev` to test it, and `npm run build` to build it.
 
 #### Meilisearch
 
@@ -112,27 +94,6 @@ Link **all DocSearch** into Raycast.
      }
      ```
 
-   - Finally, write some code to the properties of commands in the [package.json](/package.json)
-     ```json
-     ...
-        "commands": [
-           {
-              "name": "rsshub",  // The name of the file you created
-              "title": "Search Documentation",
-              "subtitle": "RSSHub",
-              "description": "Search RSSHub documentation",
-              "arguments": [
-                 {
-                    "name": "search",
-                    "placeholder": "Search...",
-                    "type": "text"
-                 }
-              ],
-              "mode": "view"
-           },
-           ...
-        ]
-     ...
-     ```
+   - Run the command `npm run generate`. This will create the entry file and config. After that, you can run the command `npm run dev` to test it, and `npm run build` to build it.
 
 **Enjoy! Welcome to contribute.**
