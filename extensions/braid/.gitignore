@@ -6,9 +6,6 @@
 # Raycast specific files
 raycast-env.d.ts
 
-# Icons
-assets/icons
-
 # misc
 .DS_Store
 /.idea/
