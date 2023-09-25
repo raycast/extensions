@@ -7,9 +7,10 @@ import {
   nsfwPromptString,
 } from "@ts/errors";
 
-export default function GridError({ error }: { error: string }) {
+export default function GridError({ error, searchBarAccessory }: { error: string; searchBarAccessory?: JSX.Element }) {
   return (
     <Grid
+      searchBarAccessory={searchBarAccessory}
       actions={
         (error === insufficientCreditsCode || error === notEnoughCreditsString) && (
           <ActionPanel>

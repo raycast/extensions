@@ -1,8 +1,16 @@
 import { useFetch } from "@raycast/utils";
 import { itemsPerPage, scoreThreshold } from "@ts/constants";
-import { TGalleryPage, THistoryPage } from "@ts/types";
+import { TGalleryPage, THistoryFilter, THistoryPage } from "@ts/types";
 
-export default function useHistory({ search, token }: { search: string | undefined; token: string | undefined }): {
+export default function useHistory({
+  search,
+  token,
+  filter,
+}: {
+  search: string | undefined;
+  token: string | undefined;
+  filter: THistoryFilter;
+}): {
   historyPage: TGalleryPage | undefined;
   historyPageError: Error | undefined;
   isLoadingHistoryPage: boolean;
@@ -14,6 +22,9 @@ export default function useHistory({ search, token }: { search: string | undefin
   url.searchParams.append("score_threshold", scoreThreshold.toString());
   if (search) {
     url.searchParams.append("search", search);
+  }
+  if (filter === "favorites") {
+    url.searchParams.append("is_favorited", "true");
   }
   const { data, error, isLoading } = useFetch<THistoryPage>(url.toString(), {
     method: "GET",

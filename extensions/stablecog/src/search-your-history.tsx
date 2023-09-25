@@ -1,4 +1,4 @@
-import { Grid } from "@raycast/api";
+import { Grid, Icon } from "@raycast/api";
 import { useState } from "react";
 import useHistory from "@hooks/useHistory";
 import GridSearchingPlaceholder from "@components/GridSearchingPlaceholder";
@@ -9,24 +9,29 @@ import GalleryItemActions from "@components/GalleryItemActions";
 import { defaultGridColumns } from "@ts/constants";
 import { getThumbnailImgUrl } from "@ts/helpers";
 import GridError from "@components/GridError";
+import { THistoryFilter } from "@ts/types";
 
 export default function Command() {
-  const [query, setQuery] = useState("");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<THistoryFilter>("all");
   const { token, isTokenLoading } = useToken();
-  const { historyPage, isLoadingHistoryPage, historyPageError } = useHistory({ search: query, token: token });
+  const { historyPage, isLoadingHistoryPage, historyPageError } = useHistory({ search, token, filter });
+
+  const searchBarAccessory = <SearchBarAccessory setFilter={setFilter} />;
 
   if (isTokenLoading) return <LoadingToken />;
-  if (historyPageError) return <GridError error={historyPageError.message} />;
-  if (historyPage === undefined) return <GridSearchingPlaceholder />;
-  if (historyPage.hits.length === 0) return <GridNoItemsPlaceholder />;
+  if (historyPageError) return <GridError error={historyPageError.message} searchBarAccessory={searchBarAccessory} />;
+  if (historyPage === undefined) return <GridSearchingPlaceholder searchBarAccessory={searchBarAccessory} />;
+  if (historyPage.hits.length === 0) return <GridNoItemsPlaceholder searchBarAccessory={searchBarAccessory} />;
 
   return (
     <Grid
       searchBarPlaceholder="Search your history..."
-      onSearchTextChange={setQuery}
+      onSearchTextChange={setSearch}
       isLoading={isLoadingHistoryPage}
       columns={defaultGridColumns}
       throttle={true}
+      searchBarAccessory={searchBarAccessory}
     >
       {historyPage.hits.map((hit) => (
         <Grid.Item
@@ -38,5 +43,14 @@ export default function Command() {
         ></Grid.Item>
       ))}
     </Grid>
+  );
+}
+
+function SearchBarAccessory({ setFilter }: { setFilter: (filter: THistoryFilter) => void }) {
+  return (
+    <Grid.Dropdown onChange={(newValue) => setFilter(newValue === "favorites" ? "favorites" : "all")} tooltip="Filters">
+      <Grid.Dropdown.Item title="All" value="all" icon={Icon.AppWindowGrid3x3} />
+      <Grid.Dropdown.Item title="Favorites" value="favorites" icon={Icon.Star} />
+    </Grid.Dropdown>
   );
 }

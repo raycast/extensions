@@ -81,3 +81,5 @@ export interface TGenerationFormValues {
   aspect_ratio: TAspectRatio;
   num_outputs: TNumOutputs;
 }
+
+export type THistoryFilter = "all" | "favorites";
