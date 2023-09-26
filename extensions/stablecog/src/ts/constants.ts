@@ -1,4 +1,4 @@
-export const loadingGif = "stars-512w.gif";
+export const loadingGif = "stars-512.gif";
 
 export const defaultGridColumns = 4;
 export const defaultGridColumnsForImagine = 2;
