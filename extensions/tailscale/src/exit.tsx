@@ -1,7 +1,6 @@
 import { ActionPanel, List, Action, showToast, popToRoot, closeMainWindow, Toast, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execSync } from "child_process";
-import { LooseObject, loadDevices } from "./shared";
+import { LooseObject, loadDevices, tailscale } from "./shared";
 
 function loadExitNodes(self: LooseObject, data: LooseObject) {
   const devices = loadDevices(self, data);
@@ -22,14 +21,12 @@ function isExitNodeActive(devices: any) {
 }
 
 function setExitNode(host: string, allowLAN: boolean) {
-  const command = `/Applications/Tailscale.app/Contents/MacOS/Tailscale set --exit-node "${host}"`;
-  console.log(command);
   popToRoot();
   closeMainWindow();
-  execSync(command).toString().trim();
+  tailscale(`set --exit-node "${host}"`);
 
   if (allowLAN) {
-    execSync("/Applications/Tailscale.app/Contents/MacOS/Tailscale set --exit-node-allow-lan-access").toString().trim();
+    tailscale(`set --exit-node-allow-lan-access`);
   }
 }
 
@@ -39,7 +36,7 @@ function ExitNodeList() {
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = execSync("/Applications/Tailscale.app/Contents/MacOS/Tailscale status --json").toString().trim();
+        const ret = tailscale(`status --json`)!;
         const data: LooseObject = JSON.parse(ret);
 
         if (!data.Self.Online) {
@@ -60,14 +57,14 @@ function ExitNodeList() {
   }, []);
 
   return (
-    <List isLoading={exitNodes === undefined}>
+    <List isLoading={!exitNodes}>
       {isActive && (
         <List.Item
           key="_disable"
           title="Turn off exit node"
           actions={
             <ActionPanel>
-              <Action title="Turn off Exit Node" onAction={() => setExitNode("", false)} />
+              <Action title="Turn Off Exit Node" onAction={() => setExitNode("", false)} />
             </ActionPanel>
           }
         />

@@ -7,7 +7,10 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {}
+type ExtensionPreferences = {
+  /** Tailscale CLI Path - Location to the Tailscale CLI (Defaults to `/Applications/Tailscale.app/Contents/MacOS/Tailscale`) */
+  "tailscalePath"?: string
+}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences

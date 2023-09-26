@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, EpicScope, EpicState, searchData } from "../gitlabapi";
-import { hashRecord, showErrorToast } from "../utils";
+import { getFirstChar, hashRecord, showErrorToast } from "../utils";
 import { EpicListItem, includeGroupAncestorPreference } from "./epics";
 import { GroupInfo, useMyGroups } from "./groups";
 import { getTextIcon } from "../icons";
@@ -21,7 +21,12 @@ function GroupListDropDown(props: {
       <List.Dropdown.Item title="All Groups" value={""} />
       <List.Dropdown.Section>
         {gi.groups?.map((g) => (
-          <List.Dropdown.Item key={`${g.id}`} icon={getTextIcon(g.name[0])} title={g.full_name} value={`${g.id}`} />
+          <List.Dropdown.Item
+            key={`${g.id}`}
+            icon={getTextIcon(getFirstChar(g.name))}
+            title={g.full_name}
+            value={`${g.id}`}
+          />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>

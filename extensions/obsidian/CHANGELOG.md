@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix] - 2023-09-24
+
+- Filter out vault paths that don't actually exist.
+
 ## [Menubar cache bug fixes] - 2023-09-15
 - Fixes a bug where the cache fallback would crash the extension
 
