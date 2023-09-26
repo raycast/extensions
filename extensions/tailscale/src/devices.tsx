@@ -1,16 +1,13 @@
 import { ActionPanel, List, Action, Icon, showToast, Toast, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execSync } from "child_process";
-import { Device, LooseObject, loadDevices } from "./shared";
+import { Device, LooseObject, loadDevices, tailscale } from "./shared";
 
 function DeviceList() {
   const [devices, setDevices] = useState<Device[]>();
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = await execSync("/Applications/Tailscale.app/Contents/MacOS/Tailscale status --json")
-          .toString()
-          .trim();
+        const ret = tailscale(`status --json`)!;
         const data: LooseObject = JSON.parse(ret);
 
         if (!data.Self.Online) {
@@ -27,7 +24,7 @@ function DeviceList() {
   }, []);
 
   return (
-    <List isLoading={devices === undefined}>
+    <List isLoading={!devices}>
       {devices?.map((device) => (
         <List.Item
           title={device.name}

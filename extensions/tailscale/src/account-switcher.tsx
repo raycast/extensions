@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execSync } from "child_process";
+import { tailscale } from "./shared";
 
 interface User {
   active: boolean;
@@ -39,7 +39,6 @@ function loadUsers(unparsedUsers: string[]) {
 
     users.push(user);
   }
-  console.log(users);
   return users;
 }
 
@@ -48,14 +47,12 @@ function AccountSwitchList() {
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = execSync("/Applications/Tailscale.app/Contents/MacOS/Tailscale switch --list").toString().trim();
-        console.log(ret);
+        const ret = tailscale(`--list`);
         const data: string[] = ret.split("\n");
 
         const _list = loadUsers(data);
         setUsers(_list);
       } catch (error) {
-        console.log(error);
         showToast(Toast.Style.Failure, "Couldn't load users. Make sure Tailscale is connected.");
       }
     }
@@ -68,7 +65,7 @@ function AccountSwitchList() {
   // return a list of users, starting with all of the inactive users.
   // output the active user last.
   return (
-    <List isLoading={users === undefined}>
+    <List isLoading={!users}>
       {users
         ?.sort((a, b) => +a.active - +b.active)
         .map((user) => (
@@ -87,11 +84,9 @@ function AccountSwitchList() {
                       title: "Switching user account",
                       message: `${user.name}`,
                     });
-                    const command = `/Applications/Tailscale.app/Contents/MacOS/Tailscale switch ${user.name}`;
-                    console.log(command);
                     popToRoot();
                     closeMainWindow();
-                    const ret = execSync(command).toString().trim();
+                    const ret = tailscale(`switch ${user.name}`);
 
                     if (ret.includes("Success") || ret.includes("Already")) {
                       showHUD(`Active Tailscale user is ${user.name}`);
