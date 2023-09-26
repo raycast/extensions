@@ -1,4 +1,4 @@
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { execSync } from "node:child_process";
 
 export interface Device {
@@ -11,13 +11,14 @@ export interface Device {
   ipv6: string;
   os: string;
   online: boolean;
-  lastseen: any;
+  lastseen: Date;
   exitnode: boolean;
   exitnodeoption: boolean;
 }
 
-export class NotConnectedError extends Error {}
 export class InvalidPathError extends Error {}
+export class NotRunningError extends Error {}
+export class NotConnectedError extends Error {}
 
 export type StatusDevice = {
   Active: boolean;
@@ -52,7 +53,7 @@ export type StatusResponse = {
 };
 
 export function getStatus() {
-  const resp = tailscale(`status --json`)!;
+  const resp = tailscale(`status --json`);
   const data = JSON.parse(resp) as StatusResponse;
   if (!data || !data.Self.Online) {
     throw new NotConnectedError();
@@ -120,23 +121,37 @@ export function tailscale(parameters: string): string {
         throw new InvalidPathError();
       }
       if (err.message.includes("is Tailscale running?")) {
-        throw new NotConnectedError();
+        throw new NotRunningError();
       }
     }
     throw err;
   }
 }
 
-export function handleError(err: unknown, fallbackMessage: string) {
+export type ErrorDetails = {
+  title: string;
+  description: string;
+};
+
+export function getErrorDetails(err: unknown, fallbackMessage: string): ErrorDetails {
   if (err instanceof InvalidPathError) {
-    showToast(
-      Toast.Style.Failure,
-      "Your Tailscale CLI Path is invalid. Update your extension preferences to fix this.",
-    );
-    return;
+    return {
+      title: "Can’t find the Tailscale CLI",
+      description: "Your Tailscale CLI Path is invalid.\nUpdate your extension preferences to fix this.",
+    };
+  } else if (err instanceof NotRunningError) {
+    return {
+      title: "Can’t connect to Tailscale",
+      description: "Make sure Tailscale is running and try again.",
+    };
   } else if (err instanceof NotConnectedError) {
-    showToast(Toast.Style.Failure, "Can’t connect to Tailscale. Make sure Tailscale is open and running.");
-    return;
+    return {
+      title: "Not connected to a tailnet",
+      description: "Tailscale is running, but you’re not connected to a tailnet.\nLog in and try again.",
+    };
   }
-  showToast(Toast.Style.Failure, fallbackMessage);
+  return {
+    title: "Something went wrong",
+    description: fallbackMessage,
+  };
 }

@@ -1,6 +1,6 @@
-import { ActionPanel, List, Action, showToast, popToRoot, closeMainWindow, Toast, Image } from "@raycast/api";
+import { ActionPanel, List, Action, popToRoot, closeMainWindow, Image, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { StatusResponse, getStatus, getDevices, tailscale } from "./shared";
+import { StatusResponse, getStatus, getDevices, tailscale, ErrorDetails, getErrorDetails } from "./shared";
 
 function loadExitNodes(status: StatusResponse) {
   const devices = getDevices(status);
@@ -31,6 +31,7 @@ function setExitNode(host: string, allowLAN: boolean) {
 
 function ExitNodeList() {
   const [isActive, setIsActive] = useState<boolean>(false);
+  const [error, setError] = useState<ErrorDetails>();
   const [exitNodes, setExitNodes] = useState<any>();
   useEffect(() => {
     async function fetch() {
@@ -38,66 +39,73 @@ function ExitNodeList() {
         const status = getStatus();
         const _list = loadExitNodes(status);
         setExitNodes(_list);
-
         if (isExitNodeActive(_list)) {
           setIsActive(true);
         }
       } catch (error) {
-        showToast(Toast.Style.Failure, "Couldn't load exit nodes. Make sure Tailscale is connected.");
+        setError(getErrorDetails(error, "Couldn't load exit nodes."));
       }
     }
     fetch();
   }, []);
 
   return (
-    <List isLoading={!exitNodes}>
-      {isActive && (
-        <List.Item
-          key="_disable"
-          title="Turn off exit node"
-          actions={
-            <ActionPanel>
-              <Action title="Turn Off Exit Node" onAction={() => setExitNode("", false)} />
-            </ActionPanel>
-          }
-        />
+    <List isLoading={!exitNodes && !error}>
+      {error ? (
+        <List.EmptyView icon={Icon.Warning} title={error.title} description={error.description} />
+      ) : (
+        <>
+          {isActive && (
+            <List.Item
+              key="_disable"
+              title="Turn off exit node"
+              actions={
+                <ActionPanel>
+                  <Action title="Turn Off Exit Node" onAction={() => setExitNode("", false)} />
+                </ActionPanel>
+              }
+            />
+          )}
+          {exitNodes?.map((exitNode: any) => (
+            <List.Item
+              title={exitNode.name}
+              subtitle={exitNode.ipv4 + "    " + exitNode.os}
+              key={exitNode.key}
+              icon={
+                exitNode.online
+                  ? {
+                      source: {
+                        light: "connected_light.png",
+                        dark: "connected_dark.png",
+                      },
+                      mask: Image.Mask.Circle,
+                    }
+                  : {
+                      source: {
+                        light: "lastseen_light.png",
+                        dark: "lastseen_dark.png",
+                      },
+                      mask: Image.Mask.Circle,
+                    }
+              }
+              accessories={[
+                {
+                  text: exitNode.exitnode ? `        Connected` : "",
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.name, false)} />
+                  <Action
+                    title="Use as Exit Node and Allow LAN Access"
+                    onAction={() => setExitNode(exitNode.name, true)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </>
       )}
-
-      {exitNodes?.map((exitNode: any) => (
-        <List.Item
-          title={exitNode.name}
-          subtitle={exitNode.ipv4 + "    " + exitNode.os}
-          key={exitNode.key}
-          icon={
-            exitNode.online
-              ? {
-                  source: {
-                    light: "connected_light.png",
-                    dark: "connected_dark.png",
-                  },
-                  mask: Image.Mask.Circle,
-                }
-              : {
-                  source: {
-                    light: "lastseen_light.png",
-                    dark: "lastseen_dark.png",
-                  },
-                  mask: Image.Mask.Circle,
-                }
-          }
-          accessories={[
-            {
-              text: exitNode.exitnode ? `        Connected` : "",
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action title="Use as Exit Node" onAction={() => setExitNode(exitNode.name, false)} />
-              <Action title="Use as Exit Node and Allow LAN Access" onAction={() => setExitNode(exitNode.name, true)} />
-            </ActionPanel>
-          }
-        />
-      ))}
     </List>
   );
 }
