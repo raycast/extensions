@@ -52,6 +52,27 @@ export class MattermostClient {
     });
   }
 
+  static signIn(): Promise<void> {
+    const preference = getPreferenceValues<Preference>();
+    const [username, password] = preference.credentials.split(":");
+    return axios
+      .post<UserProfile>(
+        "/users/login",
+        JSON.stringify({
+          login_id: username,
+          password: password,
+        }),
+        MattermostClient.config()
+      )
+      .then((response) => {
+        const token = response.headers["token"];
+        console.log(response.statusText);
+        MattermostClient.token = token;
+        console.log("successfull login");
+        return LocalStorage.setItem("mattermost-token", token);
+      });
+  }
+
   static async login(): Promise<void> {
     console.log("try login");
     const preference = getPreferenceValues<Preference>();
@@ -61,28 +82,8 @@ export class MattermostClient {
         this.token = preference.credentials;
         return Promise.resolve();
       case "logpass": {
-        function signIn(): Promise<void> {
-          const [username, password] = preference.credentials.split(":");
-          return axios
-            .post<UserProfile>(
-              "/users/login",
-              JSON.stringify({
-                login_id: username,
-                password: password,
-              }),
-              MattermostClient.config()
-            )
-            .then((response) => {
-              const token = response.headers["token"];
-              console.log(response.statusText);
-              MattermostClient.token = token;
-              console.log("successfull login");
-              return LocalStorage.setItem("mattermost-token", token);
-            });
-        }
-
         if (this.token.length == 0) {
-          return signIn();
+          return this.signIn();
         }
 
         console.log("already logged with token: " + this.token);
