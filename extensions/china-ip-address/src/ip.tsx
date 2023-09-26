@@ -10,18 +10,17 @@ export default function Command() {
   const [ip, setIp] = useState("");
   const { pop } = useNavigation();
   const [localIp] = useState(() => address("public", "ipv4").toString());
-  
+
   useEffect(() => {
-      const regex = /ipCallback\(\{ip:"([\d.]+)"\}\)/;
-      async function getIp() {
-          try {
-              const { data } = await axios.get("https://www.taobao.com/help/getip.php");
+    const regex = /ipCallback\(\{ip:"([\d.]+)"\}\)/;
+    async function getIp() {
+      try {
+        const { data } = await axios.get("https://www.taobao.com/help/getip.php");
         if (data === "") {
           throw new Error("empty response");
         }
         const match = data.match(regex);
         if (!match) {
-        //   throw new Error("invalid response");
           setIp("Failure, Your IP is not a Chinese IP.");
         } else {
           const ipAddress = match[1];
