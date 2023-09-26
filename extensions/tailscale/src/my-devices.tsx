@@ -1,24 +1,19 @@
-import { ActionPanel, List, Action, Icon, showToast, Toast, Image } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Device, LooseObject, loadDevices, tailscale } from "./shared";
+import { Device, getStatus, handleError, getDevices } from "./shared";
 
 function MyDeviceList() {
   const [devices, setDevices] = useState<Device[]>();
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = tailscale(`status --json`)!;
-        const data: LooseObject = JSON.parse(ret);
-
-        if (!data.Self.Online) {
-          throw "Tailscale not connected";
-        }
-        const me: string = data.Self.UserID;
-        const _list = loadDevices(data.Self, data.Peer);
+        const status = getStatus();
+        const me: string = status.Self.UserID.toString();
+        const _list = getDevices(status);
         const _mylist = _list.filter((device) => device.userid === me);
         setDevices(_mylist);
       } catch (error) {
-        showToast(Toast.Style.Failure, "Couldn't load devices. Make sure Tailscale is connected.");
+        handleError(error, "Couldn't load devices. Make sure Tailscale is connected.");
       }
     }
     fetch();

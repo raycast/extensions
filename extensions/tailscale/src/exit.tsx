@@ -1,10 +1,9 @@
 import { ActionPanel, List, Action, showToast, popToRoot, closeMainWindow, Toast, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { LooseObject, loadDevices, tailscale } from "./shared";
+import { StatusResponse, getStatus, getDevices, tailscale } from "./shared";
 
-function loadExitNodes(self: LooseObject, data: LooseObject) {
-  const devices = loadDevices(self, data);
-
+function loadExitNodes(status: StatusResponse) {
+  const devices = getDevices(status);
   return devices.filter((element) => {
     return element.exitnodeoption;
   });
@@ -36,21 +35,15 @@ function ExitNodeList() {
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = tailscale(`status --json`)!;
-        const data: LooseObject = JSON.parse(ret);
-
-        if (!data.Self.Online) {
-          throw "Tailscale not connected";
-        }
-
-        const _list = loadExitNodes(data.Self, data.Peer);
+        const status = getStatus();
+        const _list = loadExitNodes(status);
         setExitNodes(_list);
 
         if (isExitNodeActive(_list)) {
           setIsActive(true);
         }
       } catch (error) {
-        showToast(Toast.Style.Failure, "Couldn't load exitNodes. Make sure Tailscale is connected.");
+        showToast(Toast.Style.Failure, "Couldn't load exit nodes. Make sure Tailscale is connected.");
       }
     }
     fetch();

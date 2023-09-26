@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { tailscale } from "./shared";
+import { handleError, tailscale } from "./shared";
 
 interface User {
   active: boolean;
@@ -47,13 +47,12 @@ function AccountSwitchList() {
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = tailscale(`--list`);
-        const data: string[] = ret.split("\n");
-
+        const ret = tailscale(`switch --list`);
+        const data = ret.split("\n");
         const _list = loadUsers(data);
         setUsers(_list);
       } catch (error) {
-        showToast(Toast.Style.Failure, "Couldn't load users. Make sure Tailscale is connected.");
+        handleError(error, "Couldn't load users. Make sure Tailscale is connected.");
       }
     }
     fetch();
