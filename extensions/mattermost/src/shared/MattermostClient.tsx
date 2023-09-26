@@ -91,7 +91,7 @@ export class MattermostClient {
           .catch((error) => {
             if (error.message.includes("401")) {
               console.warn("token expired, relogin");
-              return signIn();
+              return this.signIn();
             }
           })
           .then();
