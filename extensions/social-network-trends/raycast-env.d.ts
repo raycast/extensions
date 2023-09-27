@@ -16,7 +16,7 @@ declare namespace Preferences {
   /** Preferences accessible in the `search-trends-of-social-network` command */
   export type SearchTrendsOfSocialNetwork = ExtensionPreferences & {
   /** Preferences - Remember Gist Filter Tag. */
-  "rememberTag"?: boolean
+  "rememberTag": boolean
 }
   /** Preferences accessible in the `search-trends-of-social-network-menu-bar` command */
   export type SearchTrendsOfSocialNetworkMenuBar = ExtensionPreferences & {}
@@ -27,4 +27,14 @@ declare namespace Arguments {
   export type SearchTrendsOfSocialNetwork = {}
   /** Arguments passed to the `search-trends-of-social-network-menu-bar` command */
   export type SearchTrendsOfSocialNetworkMenuBar = {}
+}
+
+
+declare module "swift:*" {
+  function run<T = unknown, U = any>(command: string, input?: U): Promise<T>;
+  export default run;
+	export class SwiftError extends Error {
+    stderr: string;
+    stdout: string;
+  }
 }
