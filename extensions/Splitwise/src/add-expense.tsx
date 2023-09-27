@@ -4,6 +4,8 @@ import { useForm, FormValidation } from "@raycast/utils";
 import { Entity, ExpenseParams, FriendOrGroupProps } from "./types/friends_groups.types";
 import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
 
+import { getCurrency_code } from "./utils/utils";
+
 export default function Command() {
   const [friends, loadingFriends, revalidateFriends] = getFriends();
   const [groups, loadingGroups, revalidateGroups] = getGroups();
@@ -32,7 +34,7 @@ export default function Command() {
               friend.balance.length > 0
                 ? {
                     tag: {
-                      value: `${Number(friend.balance[0].amount).toFixed(2)} ${friend.balance[0].currency_code}`,
+                      value: `${Number(friend.balance[0].amount).toFixed(2)} ${getCurrency_code(friend.balance[0].currency_code)}`,
                       color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
                     },
                   }
