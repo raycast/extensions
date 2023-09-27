@@ -3,13 +3,13 @@ import wifi, { WiFiNetwork } from "node-wifi";
 import { LocalStorageKey } from "../utils/constants";
 import { WifiNetworkWithPassword, WifiPasswordCache } from "../types/types";
 import { getCurWifiStatus, uniqueWifiNetWork } from "../utils/common-utils";
-import { LocalStorage } from "@raycast/api";
+import { Cache, LocalStorage } from "@raycast/api";
 
 wifi.init({
   iface: null,
 });
 
-export const getWifiList = (refresh: number) => {
+export const useWifiList = (refresh: number) => {
   const [wifiPasswordCaches, setWifiPasswordCaches] = useState<WifiPasswordCache[]>([]);
   const [publicWifi, setPublicWifi] = useState<WiFiNetwork[]>([]);
   const [wifiWithPasswordList, setWifiWithPasswordList] = useState<WifiNetworkWithPassword[]>([]);
@@ -104,7 +104,34 @@ export const getWifiList = (refresh: number) => {
   };
 };
 
-export const getWifiStatus = () => {
+export const useCurWifi = () => {
+  const [curWifi, setCurWifi] = useState<WiFiNetwork[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const cache = new Cache();
+    const curWifiCache = cache.get(LocalStorageKey.CUR_WIFI);
+    if (typeof curWifiCache === "string") {
+      setCurWifi(JSON.parse(curWifiCache));
+    }
+    const _curWifi = await wifi.getCurrentConnections();
+    setCurWifi(_curWifi);
+    setLoading(false);
+    cache.set(LocalStorageKey.CUR_WIFI, JSON.stringify(_curWifi));
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return {
+    curWifi: curWifi.length != 0 ? curWifi[0] : undefined,
+    loading: loading,
+  };
+};
+
+export const useWifiStatus = () => {
   const [wifiStatus, setWifiStatus] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {

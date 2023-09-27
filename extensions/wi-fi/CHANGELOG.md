@@ -1,5 +1,9 @@
 # Wi-Fi Changelog
 
+## [Added Menubar Command] - {PR_MERGE_DATE}
+
+- Wi-Fi Signal: Show Wi-Fi signal strength in the menubar
+
 ## [Added Connected Section] - 2023-05-24
 
 - Show connected section at the beginning of the list when connected to a Wi-Fi network
