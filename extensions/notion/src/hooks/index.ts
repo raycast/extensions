@@ -93,8 +93,24 @@ export class RecentPage {
 
 export function useRecentPages() {
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const data = await LocalStorage.getItem("RECENT_PAGES");
-    if (!data || typeof data !== "string") return [];
+    let data = await LocalStorage.getItem("RECENT_PAGES");
+
+    // try migrating the old recently opened pages to the new format
+    if (!data || typeof data !== "string") {
+      const oldData = await LocalStorage.getItem("RECENTLY_OPENED_PAGES");
+
+      // no old data either, return an empty array
+      if (!oldData || typeof oldData !== "string") return [];
+
+      const oldRecentPages = JSON.parse(oldData) as Page[];
+
+      data = JSON.stringify(oldRecentPages.map((p) => new RecentPage(p)));
+
+      // save the new data
+      await LocalStorage.setItem("RECENT_PAGES", data);
+      // remove the old data
+      await LocalStorage.removeItem("RECENTLY_OPENED_PAGES");
+    }
 
     const recentPages = JSON.parse(data) as RecentPage[];
 
