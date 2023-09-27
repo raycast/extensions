@@ -486,7 +486,7 @@ export async function fetchPage(pageId: string) {
 
     return pageMapper(page);
   } catch (err) {
-    return handleError(err, "Failed to fetch page content", undefined);
+    return handleError(err, "Failed to fetch page", undefined);
   }
 }
 
@@ -499,7 +499,7 @@ export async function fetchDatabase(pageId: string) {
 
     return pageMapper(page);
   } catch (err) {
-    return handleError(err, "Failed to fetch page content", undefined);
+    return handleError(err, "Failed to fetch database", undefined);
   }
 }
 
