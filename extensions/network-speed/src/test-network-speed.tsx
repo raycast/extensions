@@ -7,14 +7,14 @@ import { ActionOpenNetworkSpeed } from "./components/action-open-network-speed";
 
 export default function Command() {
   const { testSequentially } = getPreferenceValues<Preferences>();
-  const { networkSpeedInfo, networkSpeed, loading } = checkNetworkSpeed(0, testSequentially);
+  const { networkSpeedInfo, networkSpeed, networkSpeedLoading, loading } = checkNetworkSpeed(0, testSequentially);
 
   return (
-    <List searchBarPlaceholder="Network speed" filtering={false}>
+    <List searchBarPlaceholder="Search network speed info" filtering={false}>
       <List.EmptyView
         icon={"loading/loading-graph.gif"}
         title={loading ? "Testing Your Connection..." : "No info"}
-        description={loading ? "Takes about 20 seconds" : ""}
+        description={loading ? networkSpeedLoading : ""}
         actions={
           <ActionPanel>
             <ActionOpenCommandPreferences />

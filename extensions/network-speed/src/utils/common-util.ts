@@ -1,4 +1,5 @@
 import { NetworkSpeed } from "../types/type";
+import exp from "constants";
 
 export function getNetSpeed(testSequentially: boolean, execResult: string) {
   let network: NetworkSpeed;
@@ -47,4 +48,17 @@ export function getNetSpeed(testSequentially: boolean, execResult: string) {
   }
 
   return network;
+}
+
+export function extractSpeedLoadingInfo(str: string) {
+  const downlinkRegex = /Downlink: capacity [\d.]+ Mbps/;
+  const uplinkRegex = /Uplink: capacity [\d.]+ Mbps/;
+
+  const downlinkMatch = str.match(downlinkRegex);
+  const uplinkMatch = str.match(uplinkRegex);
+
+  const downlink = downlinkMatch ? downlinkMatch[0] : "";
+  const uplink = uplinkMatch ? uplinkMatch[0] : "";
+
+  return `${downlink}, ${uplink}`.replaceAll("capacity", "");
 }
