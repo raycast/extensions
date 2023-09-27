@@ -32,7 +32,7 @@ export default function Command() {
               friend.balance.length > 0
                 ? {
                     tag: {
-                      value: `${friend.balance[0].amount} ${friend.balance[0].currency_code}`,
+                      value: `${Number(friend.balance[0].amount).toFixed(2)} ${friend.balance[0].currency_code}`,
                       color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
                     },
                   }
