@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Add custom tailscale path] - 2023-09-07
+
+- Added a preference for users to specify a custom path to the `tailscale` CLI
+
 ## [Improve UI for disconnecting exit node] - 2023-04-29
 
 - Updated the icon and accessory text for the "Turn off exit node" action

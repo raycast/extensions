@@ -5,6 +5,9 @@
   "description": "Stay motivated by see the progress of the year.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "danulqua"
+  ],
   "categories": [
     "Productivity",
     "Fun"

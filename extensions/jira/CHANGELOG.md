@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Render authenticated image URIs] - 2023-09-10
+
+- Now successfully renders images and icons that require authenticated HTTP requests
+
 ## [Fix searching for sprints] - 2023-09-06
 
 - Fixes an issue where searching for sprints would fail if the start date is not defined.

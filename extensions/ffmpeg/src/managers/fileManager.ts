@@ -88,7 +88,7 @@ class FileManager {
     }
 
     try {
-      const fileInfo = await getFileInfoData(filePath);
+      const fileInfo = getFileInfoData(filePath);
 
       this.state$.batch(() => {
         this.state$.fileSize.set(fileSizeInBytes);
@@ -137,13 +137,13 @@ class FileManager {
   copy = {
     fileInfo: () => {
       Clipboard.copy(this.getFileInfoMarkdown());
-      showHUD("File Info Copyed!");
+      showHUD("File Info Copied!");
     },
     filePath: () => {
       const filePath = this.state$.selectedFilePath.get();
       if (filePath) {
         Clipboard.copy(filePath);
-        showHUD("File Path Copyed!");
+        showHUD("File Path Copied!");
       }
     },
   };
