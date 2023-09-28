@@ -82,7 +82,7 @@ export default function Command() {
                           expense.updated_by["id"] === currentUserID ? "You" : expense.updated_by["first_name"]
                         }`}
                         icon={Icon.Pencil}
-                        text={new Date(expense.date).toLocaleString(undefined, {
+                        text={new Date(expense.updated_at).toLocaleString(undefined, {
                           dateStyle: "full",
                           timeStyle: "short",
                         })}
