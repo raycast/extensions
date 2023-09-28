@@ -223,7 +223,7 @@ export default function Command() {
 // Comment out some lines due to updating costs not working at the moment
 import { useForm, FormValidation } from "@raycast/utils";
 import { getFriends } from "./hooks/useFriends_Groups";
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 
 function ChangeValues(handedOverValues: { expense: Expense }) {
   const { expense } = handedOverValues;
@@ -278,8 +278,8 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
         counter++;
       });
 
-      // UpdateExpense(expense.id, paramsJson).then(() => pop());
-      console.log(paramsJson); // DEBUG
+      UpdateExpense(expense.id, paramsJson).then(() => pop());
+      // console.log(paramsJson); // DEBUG
     },
 
     initialValues: {
@@ -338,28 +338,10 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
           />
         ))}
       </Form.Dropdown>
-
-      {/* <Form.Dropdown title="Who paid?" {...itemProps.paid}>
-        {expense.users.map((user) => (
-          <Form.Dropdown.Item
-            key={user.user.id}
-            value={String(user.user.id)}
-            title={[user.user.first_name, user.user.last_name].join(" ")}
-            icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
-          />
-        ))}
-      </Form.Dropdown> */}
-
       <Form.TagPicker
         title="Who owes?"
         {...itemProps.owes}
         info="Expense will be split equally among the involved people"
-        // onChange={() => setValue("owes", values.owes)}
-        // value={userOwe}
-        // onChange={(values) => {
-        //   setUserOwe(values);
-        // }}
-        // onChange={() => setUserOwe}
       >
         {friendsWithCurrentUser.map((friend) => (
           <Form.TagPicker.Item
@@ -380,16 +362,6 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
             key={friend.id}
             title={friend.first_name}
             defaultValue={expense.users.filter((user) => user.user.id === friend.id)[0].owed_share.toString()}
-          />
-        ))} */}
-
-      {/* {splitEqually === false &&
-        expense.users.map((user) => (
-          <Form.TextField
-            id={String(user.user.id)}
-            key={user.user.id}
-            title={user.user.first_name}
-            defaultValue={user.owed_share}
           />
         ))} */}
 
