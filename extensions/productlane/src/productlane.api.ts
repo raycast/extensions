@@ -67,6 +67,7 @@ export async function submitInsight({ text, painLevel, state, email }: CreateIns
           painLevel: painLevel,
           state: state,
           contactEmail: email,
+          origin: "API_KEY_USER", // Will mark the insight as created by the user who created the API key initially.
           notify: {
             email: false,
           },
