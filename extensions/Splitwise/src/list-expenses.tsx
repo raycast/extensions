@@ -160,14 +160,15 @@ export default function Command() {
                     url={`https://secure.splitwise.com/#/all/expenses/${expense.id}`}
                     shortcut={Keyboard.Shortcut.Common.Open}
                   />
-                  {expense.users.filter((user) => Number(user.paid_share) > 0).length <= 1 && expenseSplitEqually(expense.users.map((user) => user.owed_share)) === true && (
-                    <Action.Push
-                      title="Change values"
-                      icon={Icon.Pencil}
-                      target={<ChangeValues expense={expense} />}
-                      shortcut={Keyboard.Shortcut.Common.Edit}
-                    />
-                  )}
+                  {expense.users.filter((user) => Number(user.paid_share) > 0).length <= 1 &&
+                    expenseSplitEqually(expense.users.map((user) => user.owed_share)) === true && (
+                      <Action.Push
+                        title="Change values"
+                        icon={Icon.Pencil}
+                        target={<ChangeValues expense={expense} />}
+                        shortcut={Keyboard.Shortcut.Common.Edit}
+                      />
+                    )}
                   {expense.receipt.original !== null && (
                     <Action.OpenInBrowser title="Open Receipt" url={expense.receipt.original} icon={Icon.Receipt} />
                   )}
@@ -302,7 +303,7 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
         onChange={() => setSplitEqually(!splitEqually)}
         id="split"
       /> */}
-      <Form.Dropdown title="Who paid?" {...itemProps.paid} >
+      <Form.Dropdown title="Who paid?" {...itemProps.paid}>
         {friendsWithCurrentUser.map((friend) => (
           <Form.Dropdown.Item
             key={friend.id}
@@ -338,7 +339,6 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
             defaultValue={expense.users.filter((user) => user.user.id === friend.id)[0].owed_share.toString()}
           />
         ))} */}
-
     </Form>
   );
 }
