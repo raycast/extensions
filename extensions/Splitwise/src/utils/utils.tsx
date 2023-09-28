@@ -17,7 +17,7 @@ export function getCurrency_code(currency_code: string) {
 }
 
 export function getColor(expense: Expense, currentUserID: number) {
-  let netBalance = expense.users
+  const netBalance = expense.users
     .filter((user) => user.user.id === currentUserID)
     .map((user) => Number(user.net_balance))[0];
 

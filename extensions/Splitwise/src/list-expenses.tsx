@@ -211,7 +211,7 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
       const numberShares = input.owes?.length;
       const cost = Number(input.cost);
 
-      let share = Math.floor((cost * 100) / numberShares) / 100;
+      const share = Math.floor((cost * 100) / numberShares) / 100;
       let adjustedShare = (cost - share) / (numberShares - 1);
       adjustedShare = isNaN(adjustedShare) ? 0 : Math.round(adjustedShare * 100) / 100;
 
@@ -255,7 +255,8 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
           return "Select at least 2 people";
         }
       },
-      cost: (input) => { // check if input is integer or float with 1 or 2 decimal places
+      cost: (input) => {
+        // check if input is integer or float with 1 or 2 decimal places
         if (!input?.match(/^\d+(\.\d{1,2})?$/)) {
           return "Decimal value (2 places)";
         }
