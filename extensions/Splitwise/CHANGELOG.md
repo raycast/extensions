@@ -3,7 +3,7 @@
 ## [New Features] - 2023-29-09
 
 - Added new command `List Expenses` which allows to list all expenses, edit, and delete them
-- Added 'reload' and 'open in browser' to `Add Expense` command
+- Added 'Reload' and 'Open in Browser' to `Add Expense` command
 - Improved API Calls
 
 ## [New Features] - 2023-08-09

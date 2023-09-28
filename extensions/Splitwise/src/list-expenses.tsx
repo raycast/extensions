@@ -195,29 +195,11 @@ export default function Command() {
 }
 
 // ------------ FORM ------------
-// Comment out some lines due to updating costs not working at the moment
 import { useForm, FormValidation } from "@raycast/utils";
 import { getFriends } from "./hooks/useFriends_Groups";
-// import { useState, useEffect } from "react";
 
 function ChangeValues(handedOverValues: { expense: Expense }) {
   const { expense } = handedOverValues;
-
-  // const [splitEqually, setSplitEqually] = useState(false);
-  // useEffect(() => {
-  //   const similarThreshold = 0.03;
-  //   const checkSimilarOwedShares = (owedShares: string[]) => {
-  //     const owedShareNumbers = owedShares.map((owedShare) => Number(owedShare));
-  //     const firstOwedShare = owedShareNumbers[0];
-  //     const isSimilarOwedShares = owedShareNumbers.every(
-  //       (owedShare) => Math.abs(owedShare - firstOwedShare) <= similarThreshold
-  //     );
-  //     if (!isSimilarOwedShares) {
-  //       setSplitEqually(true);
-  //     }
-  //   };
-  //   checkSimilarOwedShares(expense.users.map((user) => user.owed_share));
-  // }, []);
 
   const { pop } = useNavigation();
   const [friends] = getFriends();
@@ -254,7 +236,6 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
       });
 
       UpdateExpense(expense.id, paramsJson).then(() => pop());
-      // console.log(paramsJson); // DEBUG
     },
 
     initialValues: {
@@ -263,7 +244,6 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
       date: new Date(expense.date),
       paid: expense.users.filter((user) => Number(user.paid_share) > 0)[0].user.id.toString(),
       owes: expense.users.filter((user) => Number(user.owed_share) > 0).map((user) => String(user.user.id)),
-      // split: splitEqually,
     },
 
     validation: {
@@ -275,9 +255,8 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
           return "Select at least 2 people";
         }
       },
-      cost: (input) => {
+      cost: (input) => { // check if input is integer or float with 1 or 2 decimal places
         if (!input?.match(/^\d+(\.\d{1,2})?$/)) {
-          // check if input is integer or float with 1 or 2 decimal places
           return "Decimal value (2 places)";
         }
       },
@@ -297,12 +276,6 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
       <Form.DatePicker title="Date of Expense" {...itemProps.date} />
       <Form.TextField title={`Cost in ${getCurrency_code(expense.currency_code)}`} {...itemProps.cost} />
       <Form.Separator />
-      {/* <Form.Checkbox
-        label="Split expense equally"
-        value={splitEqually}
-        onChange={() => setSplitEqually(!splitEqually)}
-        id="split"
-      /> */}
       <Form.Dropdown title="Who paid?" {...itemProps.paid}>
         {friendsWithCurrentUser.map((friend) => (
           <Form.Dropdown.Item
@@ -327,18 +300,6 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
           />
         ))}
       </Form.TagPicker>
-
-      {/* {splitEqually === false &&
-        friendsWithCurrentUser
-        .filter((friend) => values.owes.includes(String(friend.id)))
-        .map((friend) => (
-          <Form.TextField
-            id={String(friend.id)}
-            key={friend.id}
-            title={friend.first_name}
-            defaultValue={expense.users.filter((user) => user.user.id === friend.id)[0].owed_share.toString()}
-          />
-        ))} */}
     </Form>
   );
 }
