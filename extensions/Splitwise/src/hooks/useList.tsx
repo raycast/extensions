@@ -59,12 +59,7 @@ export async function UpdateExpense(expenseID: number, values: any) {
       method: "post",
       url: `https://secure.splitwise.com/api/v3.0/update_expense/${expenseID}`,
       ...HEADER,
-      data: values//{
-        // description: values.description,
-        // cost: values.cost,
-        // date: values.date,
-        // group_id: values.group_id,
-      // },
+      data: values,
     });
 
     if (Object.keys(responseSubmit.data.errors).length === 0) {
