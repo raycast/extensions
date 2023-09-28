@@ -1,37 +1,12 @@
-import { Expense } from "./types/get_expenses.types";
+import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation, Keyboard } from "@raycast/api";
 
+import { Expense } from "./types/get_expenses.types";
 import { GetExpense, DeleteExpense, UpdateExpense } from "./hooks/useList";
 import { loadingLimit } from "./hooks/userPreferences";
 import { GetCurrentUser } from "./hooks/useCurrentUser";
 import { getGroups } from "./hooks/useFriends_Groups";
 
-import { getCurrency_code } from "./utils/utils";
-
-import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation, Keyboard } from "@raycast/api";
-
-function getColor(expense: Expense, currentUserID: number) {
-  let netBalance = expense.users
-    .filter((user) => user.user.id === currentUserID)
-    .map((user) => Number(user.net_balance))[0];
-
-  if (netBalance > 0) {
-    return Color.Green;
-  } else if (netBalance < 0) {
-    return Color.Red;
-  } else {
-    return Color.PrimaryText;
-  }
-}
-
-function expenseSplitEqually(owes: string[]) {
-  const similarThreshold = 0.03;
-  const owedShareNumbers = owes.map((owedShare) => Number(owedShare));
-  const firstOwedShare = owedShareNumbers[0];
-  const isSimilarOwedShares = owedShareNumbers.every(
-    (owedShare) => Math.abs(owedShare - firstOwedShare) <= similarThreshold
-  );
-  return isSimilarOwedShares;
-}
+import { getCurrency_code, getColor, expenseSplitEqually } from "./utils/utils";
 
 export default function Command() {
   const [expenses, loadingExpenses, revalidate, Mutate] = GetExpense(loadingLimit); // FETCH EXPENSES
@@ -65,7 +40,6 @@ export default function Command() {
                 tag: {
                   value: `${Number(expense.cost).toFixed(2)} ${getCurrency_code(expense.currency_code)}`,
                   color: getColor(expense, currentUserID),
-                  // color: currentUserID ? getColor(expense, currentUserID) : Color.PrimaryText,
                 },
                 tooltip: `Amount: ${Number(expense.cost).toFixed(2)} ${getCurrency_code(expense.currency_code)}`,
               },
@@ -186,7 +160,7 @@ export default function Command() {
                     url={`https://secure.splitwise.com/#/all/expenses/${expense.id}`}
                     shortcut={Keyboard.Shortcut.Common.Open}
                   />
-                  {expense.users.filter((user) => Number(user.paid_share) > 0).length <= 1 && expenseSplitEqually(expense.users.map((user) => user.owed_share)) === true && ( // if more than 1 person paid, don't allow to change values
+                  {expense.users.filter((user) => Number(user.paid_share) > 0).length <= 1 && expenseSplitEqually(expense.users.map((user) => user.owed_share)) === true && (
                     <Action.Push
                       title="Change values"
                       icon={Icon.Pencil}
