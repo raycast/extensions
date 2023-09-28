@@ -47,8 +47,8 @@ export default function Command() {
 
   const detailContent = React.useMemo(() => {
     if (!searchResult?.passages.length) return null;
-    return { markdown: createMarkdown(searchResult), clipboardText: createClipboardText(searchResult) };
-  }, [searchResult]);
+    return { markdown: createMarkdown(prefs, searchResult), clipboardText: createClipboardText(prefs, searchResult) };
+  }, [prefs, searchResult]);
 
   function getEmptyViewText() {
     if (isLoading) {
@@ -114,9 +114,7 @@ export default function Command() {
   );
 }
 
-function createMarkdown(searchResult: ReferenceSearchResult) {
-  const prefs = getPreferenceValues<Preferences>();
-
+function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult) {
   return (
     searchResult.passages
       .map((p) => {
@@ -128,8 +126,7 @@ function createMarkdown(searchResult: ReferenceSearchResult) {
   );
 }
 
-function createClipboardText(searchResult: ReferenceSearchResult) {
-  const prefs = getPreferenceValues<Preferences>();
+function createClipboardText(prefs: Preferences, searchResult: ReferenceSearchResult) {
   const copyright = prefs.includeCopyright ? `\n\n${searchResult.copyright}` : "";
 
   return (
