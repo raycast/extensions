@@ -11,12 +11,12 @@ export default async (props: { arguments: { nameOrMacAddress: string } }) => {
     return;
   }
 
-  const devices = getDevicesService(bluetoothBackend).getDevices();
+  const devices = getDevicesService(bluetoothBackend)?.getDevices() ?? [];
 
   const device = devices.find(
     (device) =>
       ratio(device.name, props.arguments.nameOrMacAddress) > fuzzyRatio ||
-      device.macAddress === props.arguments.nameOrMacAddress,
+      device.macAddress === props.arguments.nameOrMacAddress
   );
 
   if (device === undefined) {
