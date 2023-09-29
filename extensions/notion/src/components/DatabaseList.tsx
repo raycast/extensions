@@ -83,7 +83,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
               title="Create New Page"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={<CreatePageForm databaseId={databaseId} mutate={mutate} />}
+              target={<CreatePageForm defaults={{ database: databaseId }} mutate={mutate} />}
             />
           </ActionPanel>
         }

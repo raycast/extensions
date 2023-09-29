@@ -15,13 +15,19 @@ import { ActionSetVisibleProperties } from "../actions";
 
 import { PagePropertyField } from "./PagePropertyField";
 
-type CreatePageFormProps = {
-  databaseId?: string;
-  mutate?: () => Promise<void>;
-  defaults?: Record<string, Form.Value>;
+export type CreatePageFormValues = {
+  database: string | undefined;
+  [K: string]: Form.Value | undefined;
 };
 
-export function CreatePageForm({ databaseId: initialDatabaseId, mutate, defaults }: CreatePageFormProps) {
+type CreatePageFormProps = {
+  mutate?: () => Promise<void>;
+  defaults?: CreatePageFormValues;
+};
+
+export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
+  const initialDatabaseId = defaults?.database;
+
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
   const { data: databaseProperties } = useDatabaseProperties(databaseId);

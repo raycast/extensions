@@ -171,7 +171,7 @@ export function PageListItem({
                 title="Create New Page"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<CreatePageForm databaseId={page.id} mutate={mutate} />}
+                target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} />}
               />
             )}
 
