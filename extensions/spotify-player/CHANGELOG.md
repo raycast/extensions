@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2023-09-29
+
+- Show a Liked Songs playlist in search and library commands.
+
 ## [Feature] - 2023-07-31
 
 - New Menu Bar Player preference to hide the icon when Spotify is not running, or when there is nothing playing.
