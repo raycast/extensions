@@ -1,6 +1,6 @@
 import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   useDatabaseProperties,
@@ -38,11 +38,13 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
 
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   for (const { id, type } of databaseProperties) {
+    let value = defaults?.[id];
+    if (type == "date" && value) value = new Date(value as string);
     const key = "property::" + type + "::" + id;
-    initialValues[key] = defaults?.[key];
+    initialValues[key] = value;
   }
 
-  const { itemProps, handleSubmit } = useForm<CreatePageFormValues>({
+  const { itemProps, values, handleSubmit } = useForm<CreatePageFormValues>({
     initialValues,
     async onSubmit(values) {
       const titleKey = Object.keys(values).find((key) => key.includes("property::title"));
@@ -109,11 +111,14 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     return 0;
   }
 
-  function copyDeeplink(values: Form.Values) {
+  type Quicklink = Action.CreateQuicklink.Props["quicklink"];
+  function getQuicklink(): Quicklink {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
-    Clipboard.copy(url + "?launchContext=" + launchContext);
-    showToast({ title: "Copied deeplink to clipboard" });
+    let name: string | undefined;
+    const databseTitle = databases.find((d) => d.id == databaseId)?.title;
+    if (databseTitle) name = "Create new page in " + databseTitle;
+    return { name, link: url + "?launchContext=" + launchContext };
   }
 
   if (!isLoadingDatabases && !databases.length) {
@@ -127,7 +132,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   function itemPropsFor<T extends DatabaseProperty["type"]>(property: DatabaseProperty) {
     const id = "property::" + property.type + "::" + property.id;
     return {
-      ...(itemProps[property.id] as FieldProps<T>),
+      ...(itemProps[id] as FieldProps<T>),
       title: property.name,
       key: id,
       id,
@@ -144,10 +149,10 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} />
-            <Action.SubmitForm
-              title="Copy Deeplink to Command as Configured"
-              icon={Icon.Clipboard}
-              onSubmit={copyDeeplink}
+            <Action.CreateQuicklink
+              title="Create Deeplink to Command as Configured"
+              quicklink={getQuicklink()}
+              icon={Icon.Link}
             />
           </ActionPanel.Section>
           {databaseView && setDatabaseView ? (
