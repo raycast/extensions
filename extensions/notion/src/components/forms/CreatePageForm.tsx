@@ -1,4 +1,5 @@
 import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
+import { useForm } from "@raycast/utils";
 import { useState } from "react";
 
 import {
@@ -13,7 +14,7 @@ import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
 import { ActionSetVisibleProperties } from "../actions";
 
-import { PagePropertyField } from "./PagePropertyField";
+import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
 
 export type CreatePageFormValues = {
   database: string | undefined;
@@ -35,13 +36,64 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
 
-  const propsRequireLoad = (() => {
-    if (!defaults) return false;
-    const asyncProp = Object.keys(defaults).find((id) => {
-      return id.startsWith("property::relation") || id.startsWith("property::people");
-    });
-    return Boolean(asyncProp);
-  })();
+  const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
+  for (const { id, type } of databaseProperties) {
+    const key = "property::" + type + "::" + id;
+    initialValues[key] = defaults?.[key];
+  }
+
+  const { itemProps, handleSubmit } = useForm<CreatePageFormValues>({
+    initialValues,
+    async onSubmit(values) {
+      const titleKey = Object.keys(values).find((key) => key.includes("property::title"));
+      if (!titleKey || !values[titleKey]) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Title Required",
+          message: "Please set title value",
+        });
+        return;
+      }
+
+      try {
+        await showToast({ style: Toast.Style.Animated, title: "Creating page" });
+
+        if (initialDatabaseId) {
+          values.database = initialDatabaseId;
+        }
+
+        const page = await createDatabasePage(values);
+
+        if (page) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Created page",
+            primaryAction: {
+              title: "Open Page",
+              shortcut: { modifiers: ["cmd"], key: "o" },
+              onAction: () => handleOnOpenPage(page, useRecentPages().setRecentPage),
+            },
+            secondaryAction: page.url
+              ? {
+                  title: "Copy URL",
+                  shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                  onAction: () => {
+                    Clipboard.copy(page.url as string);
+                  },
+                }
+              : undefined,
+          });
+
+          if (mutate) {
+            mutate();
+            useNavigation().pop();
+          }
+        }
+      } catch {
+        await showToast({ style: Toast.Style.Failure, title: "Failed to create page" });
+      }
+    },
+  });
 
   function filterProperties(dp: DatabaseProperty) {
     return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
@@ -55,56 +107,6 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     if (valueA > valueB) return 1;
     if (valueA < valueB) return -1;
     return 0;
-  }
-
-  async function handleSubmit(values: Form.Values) {
-    const titleKey = Object.keys(values).find((key) => key.includes("property::title"));
-    if (!titleKey || !values[titleKey]) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Title Required",
-        message: "Please set title value",
-      });
-      return;
-    }
-
-    try {
-      await showToast({ style: Toast.Style.Animated, title: "Creating page" });
-
-      if (initialDatabaseId) {
-        values.database = initialDatabaseId;
-      }
-
-      const page = await createDatabasePage(values);
-
-      if (page) {
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Created page",
-          primaryAction: {
-            title: "Open Page",
-            shortcut: { modifiers: ["cmd"], key: "o" },
-            onAction: () => handleOnOpenPage(page, useRecentPages().setRecentPage),
-          },
-          secondaryAction: page.url
-            ? {
-                title: "Copy URL",
-                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-                onAction: () => {
-                  Clipboard.copy(page.url as string);
-                },
-              }
-            : undefined,
-        });
-
-        if (mutate) {
-          mutate();
-          useNavigation().pop();
-        }
-      }
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Failed to create page" });
-    }
   }
 
   function copyDeeplink(values: Form.Values) {
@@ -121,6 +123,18 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
       message: "Please make sure you have access to at least one database",
     });
   }
+
+  function itemPropsFor<T extends DatabaseProperty["type"]>(property: DatabaseProperty) {
+    const id = "property::" + property.type + "::" + property.id;
+    return {
+      ...(itemProps[property.id] as FieldProps<T>),
+      title: property.name,
+      key: id,
+      id,
+    };
+  }
+
+  const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
 
   return (
     <Form
@@ -163,7 +177,14 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     >
       {initialDatabaseId ? null : (
         <>
-          <Form.Dropdown id="database" title="Database" onChange={setDatabaseId} storeValue>
+          <Form.Dropdown
+            title="Database"
+            {...itemProps.database}
+            onChange={(value) => {
+              setDatabaseId(value);
+              itemProps.database.onChange?.(value);
+            }}
+          >
             {databases?.map((d) => {
               return (
                 <Form.Dropdown.Item
@@ -187,26 +208,13 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
         </>
       )}
 
-      {propsRequireLoad && (isLoadingDatabases || isLoadingRelationPages) ? null : (
-        <>
-          {databaseProperties
-            ?.filter(filterProperties)
-            .sort(sortProperties)
-            .map((property) => {
-              const key = "property::" + property.type + "::" + property.id;
-              const defaultValue = defaults?.[key];
-              let options: Parameters<typeof PagePropertyField>[0]["options"] = property.options;
-              if (property.type == "people") options = users;
-              else if (property.type == "relation" && property.relation_id && relationPages)
-                options = relationPages[property.relation_id];
-              return <PagePropertyField key={key} property={property} options={options} defaultValue={defaultValue} />;
-            })}
-          <Form.Separator />
-          <Form.TextArea
-            id="content"
-            title="Page Content"
-            enableMarkdown
-            info="Parses Markdown to Notion Blocks. 
+      {databaseProperties?.filter(filterProperties).sort(sortProperties).map(convertToField)}
+      <Form.Separator />
+      <Form.TextArea
+        id="content"
+        title="Page Content"
+        enableMarkdown
+        info="Parses Markdown to Notion Blocks. 
         
 It supports:
 - Headings (levels 4 to 6 are treated as 3 on Notion)
@@ -215,9 +223,7 @@ It supports:
 - Text formatting; italics, bold, strikethrough, inline code, hyperlinks
 
 Please note that HTML tags and thematic breaks are not supported in Notion due to its limitations."
-          />
-        </>
-      )}
+      />
     </Form>
   );
 }
