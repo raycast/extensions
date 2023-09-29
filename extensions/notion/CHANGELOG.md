@@ -7,11 +7,10 @@
 - Allow selecting just a date without a time
 - Support quick edit status property
 
-## [Deep links] - 2023-09-07
+## [Deep links] - 2023-09-29
 
 - New action to `Create Database Page` that copies a [deeplink](https://manual.raycast.com/deeplink) to open the command as configured.
-- Add support for _status_ property.
-- 
+
 ## [Small enhancements] - 2023-09-22
 
 - Add support for selecting options from Status properties

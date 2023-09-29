@@ -9,8 +9,10 @@ import {
   search,
   fetchPage,
   fetchDatabase,
+  type Page,
+  type DatabaseProperty,
 } from "../utils/notion";
-import { DatabaseProperty, DatabaseView, Page } from "../utils/types";
+import { DatabaseView } from "../utils/types";
 
 export function useUsers() {
   const value = useCachedPromise(() => fetchUsers());
