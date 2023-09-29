@@ -1,6 +1,6 @@
 import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import {
   useDatabaseProperties,

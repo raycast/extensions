@@ -1,5 +1,5 @@
 import type { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
-import { format, subMinutes } from "date-fns";
+import { subMinutes } from "date-fns";
 
 import { _supportedPropTypes } from "..";
 import { Form } from "@raycast/api";

@@ -8,6 +8,7 @@ import { PagePropertyType } from "./page";
 
 export * from "./database";
 export * from "./page";
+export * from "./fetch";
 export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
 export const _supportedPropTypes = [
