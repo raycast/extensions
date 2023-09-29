@@ -16,7 +16,6 @@ export function createConvertToFieldFunc(
       case "date":
         return <Form.DatePicker {...itemPropsFor<typeof property.type>(property)} />;
       case "checkbox":
-        const a = itemPropsFor<typeof property.type>(property);
         return <Form.Checkbox {...itemPropsFor<typeof property.type>(property)} label={placeholder} />;
       case "select":
       case "status":
@@ -27,7 +26,7 @@ export function createConvertToFieldFunc(
         );
       case "multi_select":
       case "relation":
-      case "people":
+      case "people": {
         let options: typeof property.options | Page[] | User[] | undefined;
         if (property.type == "multi_select") options = property.options;
         else if (property.type == "people") options = users;
@@ -38,6 +37,7 @@ export function createConvertToFieldFunc(
             {options?.map(createMapOptionsFunc(Form.TagPicker.Item))}
           </Form.TagPicker>
         );
+      }
       case "formula":
         return null;
       default:

@@ -3,11 +3,12 @@ import { showToast, Toast, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
 
+import { UnwrapRecord } from "../types";
+
 import { authorize, notion } from "./authorize";
 import { handleError, pageMapper } from "./global";
 
 import { NotionObject } from ".";
-import { UnwrapRecord } from "../types";
 
 export async function deletePage(pageId: string) {
   try {

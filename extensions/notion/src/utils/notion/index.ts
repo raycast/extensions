@@ -1,7 +1,8 @@
-import { Color, Icon } from "@raycast/api";
 import { Client } from "@notionhq/client";
+import { Color, Icon } from "@raycast/api";
 
 import { UnwrapArray, UnwrapPromise } from "../types";
+
 import { DatabaseProperty } from "./database/property";
 import { PagePropertyType } from "./page";
 

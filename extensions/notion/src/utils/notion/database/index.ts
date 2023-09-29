@@ -1,12 +1,12 @@
+import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
-import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
-
-import { authorize, notion } from "../authorize";
-import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
-import { formatDatabaseProperty } from "./property";
 
 import { supportedPropTypes } from "..";
+import { authorize, notion } from "../authorize";
+import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
+
+import { formatDatabaseProperty } from "./property";
 import { DatabaseProperty, DatabasePropertyOption } from "./property";
 
 export type { DatabaseProperty, DatabasePropertyOption };
