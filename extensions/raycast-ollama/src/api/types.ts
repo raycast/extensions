@@ -74,6 +74,9 @@ export interface OllamaApiGenerateResponseDone {
   done: boolean;
   context: number[];
   total_duration: number;
+  load_duration: number;
+  sample_count: number;
+  sample_duration: number;
   prompt_eval_count: number;
   prompt_eval_duration: number;
   eval_count: number;
@@ -93,6 +96,9 @@ export interface OllamaApiGenerateResponse {
 export interface OllamaApiGenerateResponseMetadata {
   model: string;
   total_duration: number;
+  load_duration: number;
+  sample_count: number;
+  sample_duration: number;
   prompt_eval_count: number;
   prompt_eval_duration: number;
   eval_count: number;

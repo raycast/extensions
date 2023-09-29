@@ -45,7 +45,7 @@ function OpenIssuesMenu() {
   return (
     <MenuBarRoot
       title={displayTitlePreference() ? `${data?.length}` : undefined}
-      icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+      icon="issue-opened.svg"
       isLoading={isLoading}
       tooltip="GitHub Open Issues"
     >

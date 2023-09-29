@@ -5,13 +5,16 @@
   "description": "The fastest way to search and create Notion pages.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
+  "owner": "notion",
+  "access": "public",
   "license": "MIT",
   "contributors": [
     "mathieudutour",
     "metakirby5",
     "thomaslombart",
     "erics118",
-    "bkeys818"
+    "bkeys818",
+    "alexs"
   ],
   "categories": [
     "Applications",

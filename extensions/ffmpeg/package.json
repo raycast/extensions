@@ -5,6 +5,9 @@
   "description": "Use FFmpeg to view media file info",
   "icon": "command-icon.png",
   "author": "RenderCoder",
+  "contributors": [
+    "blekmus"
+  ],
   "version": "1.0.0",
   "categories": [
     "Media",

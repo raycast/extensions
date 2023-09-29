@@ -1,29 +1,20 @@
 import { Detail } from "@raycast/api";
-import { Action, ActionPanel, useNavigation } from "@raycast/api";
+import { Action, ActionPanel } from "@raycast/api";
 
 export function TipForInstallFFmpeg() {
-  const content = `# FFmpeg Tip - Install dependencies
+  const content = `
+# Welcome to FFmpeg
 
-**Unable to detect a local FFmpeg installation. Please install this dependency to use this plugin.**
+Before you can start using this plugin please install [FFmpeg](https://ffmpeg.org).
 
-Instructions for installing FFmpeg on macOS:
+__Instructions__:
 
 1. Open Terminal.
-2. If you haven't already install Homebrew, by entering the following command in Terminal: 
-\`\`\`
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-\`\`\`
-3. Once you've installed Homebrew, you can install FFmpeg by typing in the following command:
-\`\`\`
-brew install ffmpeg
-\`\`\`
+2. If you haven't already, install [Homebrew](https://brew.sh/).
+3. Run \`brew install ffmpeg\`.
+4. That's it! You can now use this plugin.
 
-After the installation is complete, you should be able to use the plugin.
-
-------
-
-Of course, you can also download it from the FFmpeg official website, please visit https://ffmpeg.org/download.html
-
+_Alternatively, you can download FFmpeg straight from the [official website](https://ffmpeg.org/download.html) rather than using Homebrew._
 `;
 
   return (
@@ -32,9 +23,9 @@ Of course, you can also download it from the FFmpeg official website, please vis
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard title="Copy install FFmpeg command" content={`brew install ffmpeg`} />
+            <Action.CopyToClipboard title="Copy Command to Install FFmpeg" content={`brew install ffmpeg`} />
             <Action.CopyToClipboard
-              title="Copy install Homebrew command"
+              title="Copy Command to Install Homebrew"
               content={`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`}
             />
           </ActionPanel.Section>

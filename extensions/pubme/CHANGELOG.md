@@ -1,5 +1,11 @@
 # PubMe Changelog
 
+## [Version 1.4.1] - 2023-09-04
+- Fixed: Changed the variable "retmax" to "required" (Raycast otherwise does not set the default value but "undefined," which breaks the whole search)
+- Fixed: removed the option to open an article with just the right arrow key (→) when there is a search query (so you move the cursor again with it)
+- Fixed: changed the shortcut for "Open Article in Browser" to ⇧ + ⏎ (because ⌘ + ⏎ is now reserved by Raycast)
+- Fixed: changed the shortcut for "Copy PMID" to ⇧ + P (because ⌘ + P is now reserved by Raycast)
+
 ## [Version 1.4] - 2023-07-21
 - NEW: History - by default the last 3 articles are shown on the new home screen (you can change the number of entries in settings)
 - NEW: Favourites - pin an article to the main screen, you will see a "★" in front of the navigation title at the bottom if the article is a favourite (shortcut to favourite and unfavourite: ⌘ + F; you can also unfavourite an article in Home)
