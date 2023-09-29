@@ -106,7 +106,13 @@ export default function Command() {
               subtitle={team.name}
             >
               {project.files?.map((file) => (
-                <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
+                <FileGridItem
+                  key={file.key + "-file"}
+                  file={file}
+                  desktopApp={desktopApp}
+                  onVisit={visitFile}
+                  searchkeywords={project.name}
+                />
               ))}
             </Grid.Section>
           ) : (
