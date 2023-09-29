@@ -1,7 +1,6 @@
 import { ActionPanel, Color, Action, Icon } from "@raycast/api";
 
-import { getPropertyIcon } from "../../utils/notion";
-import { DatabaseProperty } from "../../utils/types";
+import { getPropertyIcon, DatabaseProperty } from "../../utils/notion";
 
 export function ActionSetVisibleProperties(props: {
   databaseProperties: DatabaseProperty[];

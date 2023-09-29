@@ -3,8 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabasesView } from "../hooks";
-import { queryDatabase, getPageName } from "../utils/notion";
-import { Page, User } from "../utils/types";
+import { queryDatabase, getPageName, Page, User } from "../utils/notion";
 
 import { DatabaseView } from "./DatabaseView";
 import { CreatePageForm } from "./forms";

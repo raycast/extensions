@@ -2,9 +2,18 @@ import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/ap
 import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues, Color } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
-import { deletePage, notionColorToTintColor, getPageIcon, deleteDatabase } from "../utils/notion";
+import {
+  deletePage,
+  notionColorToTintColor,
+  getPageIcon,
+  deleteDatabase,
+  Page,
+  PagePropertyType,
+  DatabaseProperty,
+  User,
+} from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
-import { DatabaseView, Page, DatabaseProperty, User, PagePropertyType } from "../utils/types";
+import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";

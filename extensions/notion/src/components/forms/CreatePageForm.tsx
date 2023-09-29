@@ -9,9 +9,8 @@ import {
   useRelations,
   useUsers,
 } from "../../hooks";
-import { createDatabasePage } from "../../utils/notion";
+import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
-import type { DatabaseProperty } from "../../utils/types";
 import { ActionSetVisibleProperties } from "../actions";
 
 import { PagePropertyField } from "./PagePropertyField";

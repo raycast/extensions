@@ -1,7 +1,6 @@
 import { Form, Icon, Image, showToast, Toast } from "@raycast/api";
 
-import { notionColorToTintColor, getPageIcon } from "../../utils/notion";
-import { DatabaseProperty, Page, User } from "../../utils/types";
+import { notionColorToTintColor, getPageIcon, Page, DatabaseProperty, User } from "../../utils/notion";
 
 interface PagePropertyFieldProp {
   property: Pick<DatabaseProperty, "id" | "name" | "type">;
