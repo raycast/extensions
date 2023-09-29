@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, Color, Form, useNavigation, Keyboard, Detail } from "@raycast/api";
 
 import { Expense } from "./types/get_expenses.types";
 import { GetExpense, DeleteExpense, UpdateExpense } from "./hooks/useList";
@@ -57,7 +57,7 @@ export default function Command() {
                         icon={Icon.Coins}
                       />
                     </List.Item.Detail.Metadata.TagList>
-                    {expense.group_id && ( // GROUP EXPENSES
+                    {expense.group_id ? ( // GROUP EXPENSES
                       <>
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Link
@@ -66,7 +66,7 @@ export default function Command() {
                           target={`https://secure.splitwise.com/#/groups/${expense.group_id}`}
                         />
                       </>
-                    )}
+                    ) : null}
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label // DATE OF CREATION
                       title={`Created by ${
@@ -76,7 +76,7 @@ export default function Command() {
                       text={new Date(expense.date).toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" })}
                       key={expense.created_by["id"]}
                     />
-                    {expense.updated_by && (
+                    {expense.updated_by ? (
                       <List.Item.Detail.Metadata.Label // DATE OF LAST UPDATE
                         title={`Last updated by ${
                           expense.updated_by["id"] === currentUserID ? "You" : expense.updated_by["first_name"]
@@ -87,7 +87,7 @@ export default function Command() {
                           timeStyle: "short",
                         })}
                       />
-                    )}
+                    ) : null}
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.TagList title={`Paid by`}>
                       {expense.users
@@ -132,13 +132,13 @@ export default function Command() {
                           />
                         ))}
                     </List.Item.Detail.Metadata.TagList>
-                    {expense.repeats === true && ( // REPEATING EXPENSES
+                    {expense.repeats === true ? ( // REPEATING EXPENSES
                       <>
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Label title="Repeating Expense" text={expense.repeat_interval} />
                       </>
-                    )}
-                    {expense.receipt.original !== null && ( // RECEIPT
+                    ) : null}
+                    {expense.receipt.original !== null ? ( // RECEIPT
                       <>
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Link
@@ -147,7 +147,7 @@ export default function Command() {
                           target={expense.receipt.original}
                         />
                       </>
-                    )}
+                    ) : null}
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -161,17 +161,22 @@ export default function Command() {
                     shortcut={Keyboard.Shortcut.Common.Open}
                   />
                   {expense.users.filter((user) => Number(user.paid_share) > 0).length <= 1 &&
-                    expenseSplitEqually(expense.users.map((user) => user.owed_share)) === true && (
-                      <Action.Push
-                        title="Change values"
-                        icon={Icon.Pencil}
-                        target={<ChangeValues expense={expense} />}
-                        shortcut={Keyboard.Shortcut.Common.Edit}
-                      />
-                    )}
-                  {expense.receipt.original !== null && (
-                    <Action.OpenInBrowser title="Open Receipt" url={expense.receipt.original} icon={Icon.Receipt} />
-                  )}
+                  expenseSplitEqually(expense.users.map((user) => user.owed_share)) === true ? (
+                    <Action.Push
+                      title="Change values"
+                      icon={Icon.Pencil}
+                      target={<ChangeValues expense={expense} />}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
+                    />
+                  ) : null}
+                  {expense.receipt.original !== null ? (
+                    <Action.Push
+                      title="View Receipt"
+                      icon={Icon.Receipt}
+                      target={<ReceiptDetail expense={expense} />}
+                      shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                    />
+                  ) : null}
                 </ActionPanel.Section>
                 <Action
                   title="Reload"
@@ -192,6 +197,15 @@ export default function Command() {
         ))}
     </List>
   );
+}
+
+// ------------ FORM ------------
+function ReceiptDetail(handedOverValues: { expense: Expense }) {
+  const markdown = `
+  ![Receipt](${handedOverValues.expense.receipt.original}?raycast-width=384&raycast-height=410)
+  `;
+
+  return <Detail navigationTitle={`Receipt of '${handedOverValues.expense.description}'`} markdown={markdown} />;
 }
 
 // ------------ FORM ------------
