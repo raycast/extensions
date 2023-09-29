@@ -2,8 +2,8 @@ import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from
 import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabases } from "../../hooks";
-import { notionColorToTintColor } from "../../utils/notion";
-import { DatabaseView, DatabaseProperty, DatabasePropertyOption } from "../../utils/types";
+import { notionColorToTintColor, DatabaseProperty, DatabasePropertyOption } from "../../utils/notion";
+import { DatabaseView } from "../../utils/types";
 
 export function DatabaseViewForm(props: {
   databaseId: string;
