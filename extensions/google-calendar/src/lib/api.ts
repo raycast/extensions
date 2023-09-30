@@ -58,6 +58,17 @@ export async function getEventsPerCalendar(calendar: calendar_v3.Calendar, optio
   if (calendars) {
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 30);
+    const cleanQuery = () => {
+      const q = options?.query;
+      if (!q) {
+        return undefined;
+      }
+      if (q.trim().length <= 0) {
+        return undefined;
+      }
+      return q;
+    };
+    console.log(cleanQuery());
     const promises = calendars.map((c) => {
       return calendar.events
         .list({
@@ -65,8 +76,9 @@ export async function getEventsPerCalendar(calendar: calendar_v3.Calendar, optio
           timeMin: (options?.start || nowDate()).toISOString(),
           timeMax: options?.end === null ? undefined : (options?.end || maxDate).toISOString(),
           singleEvents: true,
-          q: options?.query,
+          q: cleanQuery(),
           maxResults: options?.maxResults,
+          orderBy: "startTime",
         })
         .then((req) => {
           const data: CalendarEvents = {
