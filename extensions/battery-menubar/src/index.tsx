@@ -63,46 +63,46 @@ export default function Command() {
   const batteryColor = !batt
     ? undefined
     : batt.latest.charging
-    ? Color.Blue
-    : batt.latest.capacity < 0.1
-    ? Color.Red
-    : batt.latest.capacity < 0.2
-    ? Color.Orange
-    : batt.latest.capacity < 0.3
-    ? Color.Yellow
-    : undefined;
+      ? Color.Blue
+      : batt.latest.capacity < 0.1
+        ? Color.Red
+        : batt.latest.capacity < 0.2
+          ? Color.Orange
+          : batt.latest.capacity < 0.3
+            ? Color.Yellow
+            : undefined;
 
   const remainingColor =
     !batt || batt.latest.charging
       ? undefined
       : batt.latest.timeRemaining == null
-      ? Color.SecondaryText
-      : batt.latest.timeRemaining < (Number(preferences.remainingRed) || 0) * 60
-      ? Color.Red
-      : batt.latest.timeRemaining < (Number(preferences.remainingOrange) || 0) * 60
-      ? Color.Orange
-      : batt.latest.timeRemaining < (Number(preferences.remainingYellow) || 0) * 60
-      ? Color.Yellow
-      : undefined;
+        ? Color.SecondaryText
+        : batt.latest.timeRemaining < (Number(preferences.remainingRed) || 0) * 60
+          ? Color.Red
+          : batt.latest.timeRemaining < (Number(preferences.remainingOrange) || 0) * 60
+            ? Color.Orange
+            : batt.latest.timeRemaining < (Number(preferences.remainingYellow) || 0) * 60
+              ? Color.Yellow
+              : undefined;
 
   const powerColor =
     !batt || batt.latest.charging || !batt.latest.watts
       ? undefined
       : -batt.latest.watts > (Number(preferences.highPowerUsage) || 500)
-      ? Color.Yellow
-      : undefined;
+        ? Color.Yellow
+        : undefined;
 
   const iconColor = !batt
     ? Color.SecondaryText
     : batt.latest.charging && batt.latest.capacity == 1
-    ? undefined
-    : batt.latest.charging
-    ? Color.Blue
-    : remainingColor
-    ? remainingColor
-    : powerColor
-    ? powerColor
-    : undefined;
+      ? undefined
+      : batt.latest.charging
+        ? Color.Blue
+        : remainingColor
+          ? remainingColor
+          : powerColor
+            ? powerColor
+            : undefined;
 
   const battPct = batt ? Math.round(batt?.latest.capacity * 100) : null;
 
@@ -114,8 +114,8 @@ export default function Command() {
             battPct == null
               ? Icon.Battery
               : battPct == 100
-              ? Icon.BatteryCharging
-              : // @ts-expect-error Yep, this is a hack
+                ? Icon.BatteryCharging
+                : // @ts-expect-error Yep, this is a hack
                 Icon[`Number${String(battPct).padStart(2, "0")}`],
           tintColor: iconColor,
         }
@@ -126,12 +126,12 @@ export default function Command() {
         preferences.showInfo === "remaining"
           ? timeRemaining || "--:--"
           : preferences.showInfo === "watts"
-          ? batt?.latest.watts
-            ? `${Math.round(batt.latest.watts * 10) / 10}W`
-            : "--W"
-          : preferences.showInfo === "percent"
-          ? "%"
-          : ""
+            ? batt?.latest.watts
+              ? `${Math.round(batt.latest.watts * 10) / 10}W`
+              : "--W"
+            : preferences.showInfo === "percent"
+              ? "%"
+              : ""
       }
     >
       <MenuBarExtra.Section title="Battery">
@@ -153,15 +153,6 @@ export default function Command() {
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
-              icon={{
-                source: Icon.Bolt,
-                tintColor: powerColor,
-              }}
-              title={batt.latest.watts ? `${Math.round(Math.abs(batt.latest.watts))}W` : "--"}
-              subtitle={batt.latest.charging ? "Power input (~1 min)" : "Power draw (~1 min)"}
-              onAction={openBatterySettings}
-            />
-            <MenuBarExtra.Item
               icon={{ source: Icon.Check, tintColor: iconColor }}
               title={batt.latest.health.toFixed(2) + "%"}
               subtitle={"Battery health"}
@@ -171,6 +162,16 @@ export default function Command() {
               icon={{ source: Icon.RotateAntiClockwise, tintColor: iconColor }}
               title={batt.latest.cycles.toFixed(0)}
               subtitle={"Battery cycles"}
+              onAction={openBatterySettings}
+            />
+
+            <MenuBarExtra.Item
+              icon={{
+                source: Icon.Bolt,
+                tintColor: powerColor,
+              }}
+              title={batt.latest.watts ? `${Math.round(Math.abs(batt.latest.watts))}W` : "--"}
+              subtitle={batt.latest.charging ? "Power input (~1 min)" : "Power draw (~1 min)"}
               onAction={openBatterySettings}
             />
 
