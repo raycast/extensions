@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-toggl-track",
+  "title": "Raycast Toggl Track",
+  "description": "Handle Toogle Track  tasks with Raycast",
+  "icon": "extension_icon.png",
+  "author": "saarnilauri",
+  "categories": [
+    "Productivity"
+  ],
+  "screenshots": ["assets/preview.png"],
+  "commands": [
+    {
+      "name": "start-toggl-time-entry",
+      "title": "Toggl Start",
+      "description": "Start tracking your work",
+      "mode": "view"
+    },
+    {
+      "name": "continue-toggl-time-entry",
+      "title": "Toggl Continue",
+      "description": "Continue tracking your work",
+      "mode": "view"
+    },
+    {
+      "name": "stop-toggl-time-entry",
+      "title": "Toggl Stop",
+      "description": "Stop tracking",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "togglAPIKey",
+      "key": "togglAPIKey",
+      "title": "Toggl API Key",
+      "description": "Enter your API key",
+      "type": "password",
+      "defaultValue": "",
+      "isSensitive": true,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@types/luxon": "^3.3.2",
+    "is-online": "^10.0.0",
+    "luxon": "^3.4.3",
+    "node-fetch": "^3.3.2",
+    "toggl-client": "^3.5.0",
+    "toggl-track": "^0.7.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT"
+}

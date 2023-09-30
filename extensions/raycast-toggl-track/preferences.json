@@ -1,0 +1,22 @@
+{
+    "schema": {
+      "type": "object",
+      "properties": {
+        "togglApiToken": {
+          "type": "string",
+          "title": "Toggl Access Token",
+          "description": "Access token for your Toggl account",
+          "pattern": "^[a-z0-9]{32}$",
+          "patternErrorMessage": "Please ensure your access token is 32 characters long and contains only lowercase letters and numbers",
+          "minLength": 32,
+          "maxLength": 32
+        }
+      },
+      "required": [
+        "togglApiToken"
+      ]
+    },
+    "initialValues": {
+      "togglApiToken": ""
+    }
+  }
