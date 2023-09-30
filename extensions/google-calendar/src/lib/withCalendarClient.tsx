@@ -2,6 +2,7 @@ import { Detail, environment, MenuBarExtra } from "@raycast/api";
 import { calendar_v3 } from "@googleapis/calendar";
 import { useMemo, useState } from "react";
 import { getAuthorizedCalendarClient } from "./api";
+import { showFailureToast } from "@raycast/utils";
 
 let calendar: calendar_v3.Calendar | null = null;
 
@@ -10,7 +11,11 @@ export function withCalendarClient(component: JSX.Element) {
 
   useMemo(() => {
     (async function () {
-      calendar = await getAuthorizedCalendarClient();
+      try {
+        calendar = await getAuthorizedCalendarClient();
+      } catch (error) {
+        showFailureToast(error);
+      }
 
       forceRerender(x + 1);
     })();
