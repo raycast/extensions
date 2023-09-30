@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, popToRoot, closeMainWindow, Image, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { StatusResponse, getStatus, getDevices, tailscale, ErrorDetails, getErrorDetails } from "./shared";
+import { StatusResponse, getStatus, getDevices, tailscale, ErrorDetails, getErrorDetails, Device } from "./shared";
 
 function loadExitNodes(status: StatusResponse) {
   const devices = getDevices(status);
@@ -9,14 +9,8 @@ function loadExitNodes(status: StatusResponse) {
   });
 }
 
-function isExitNodeActive(devices: any) {
-  for (const device of devices) {
-    if (device.exitnode) {
-      return true;
-    }
-  }
-
-  return false;
+function isExitNodeActive(devices: Device[]) {
+  return devices.some((d) => d.exitnode);
 }
 
 function setExitNode(host: string, allowLAN: boolean) {
@@ -32,7 +26,7 @@ function setExitNode(host: string, allowLAN: boolean) {
 function ExitNodeList() {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [error, setError] = useState<ErrorDetails>();
-  const [exitNodes, setExitNodes] = useState<any>();
+  const [exitNodes, setExitNodes] = useState<Device[]>([]);
   useEffect(() => {
     async function fetch() {
       try {
@@ -66,7 +60,7 @@ function ExitNodeList() {
               }
             />
           )}
-          {exitNodes?.map((exitNode: any) => (
+          {exitNodes?.map((exitNode) => (
             <List.Item
               title={exitNode.name}
               subtitle={exitNode.ipv4 + "    " + exitNode.os}
