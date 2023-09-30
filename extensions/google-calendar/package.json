@@ -21,6 +21,12 @@
       "title": "Search Calendar",
       "description": "Query calendar",
       "mode": "view"
+    },
+    {
+      "name": "openinbrowser",
+      "title": "Open in Browser",
+      "description": "Open your Calendar in the Browser",
+      "mode": "no-view"
     }
   ],
   "preferences": [

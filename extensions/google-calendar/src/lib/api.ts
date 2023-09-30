@@ -40,6 +40,18 @@ export async function getCalendars(calendar: calendar_v3.Calendar) {
   return await calendar.calendarList.list({ showDeleted: false, showHidden: false });
 }
 
+export async function getUserEmailAddress(calendar: calendar_v3.Calendar) {
+  const primaryCalendar = await calendar.calendarList.get({ calendarId: "primary" });
+  const address = primaryCalendar.data.id;
+  if (!address) {
+    throw Error("Could not get address from Primary Calendar");
+  }
+  if (!address.endsWith("@gmail.com")) {
+    throw Error(`The email address from the Primary Account does not end with @gmail.com '${address}'`);
+  }
+  return address;
+}
+
 export async function getEventsPerCalendar(calendar: calendar_v3.Calendar, options?: CalendarQueryOptions) {
   const r = await calendar.calendarList.list();
   const calendars = options?.specificCalendar ? [options.specificCalendar] : r.data.items;
@@ -144,4 +156,9 @@ export interface GooPreferences {
   "goo.contactsContactId"?: string;
   "goo.contactsIsMyContact"?: string;
   "goo.contactsPhotoUrl"?: string;
+}
+
+export async function calendarWebUrlBase(calendar: calendar_v3.Calendar) {
+  const address = await getUserEmailAddress(calendar);
+  return `https://calendar.google.com/calendar/u/${address}`;
 }
