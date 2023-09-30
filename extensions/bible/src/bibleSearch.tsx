@@ -115,14 +115,18 @@ export default function Command() {
 }
 
 function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult) {
+  const copyright = prefs.includeCopyright ? `\n\n---\n\n*${searchResult.copyright}*` : "";
+
   return (
     searchResult.passages
       .map((p) => {
         const passageText = p.verses.join(prefs.oneVersePerLine ? "  \n" : " ");
         const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        return `${passageText}  \n${p.reference} (${versionAbbr})`;
+        const reference = prefs.includeReferences ? `  \n${p.reference} (${versionAbbr})` : "";
+
+        return passageText + reference;
       })
-      .join("\n\n") + `\n\n---\n\n*${searchResult.copyright}*`
+      .join("\n\n") + copyright
   );
 }
 
