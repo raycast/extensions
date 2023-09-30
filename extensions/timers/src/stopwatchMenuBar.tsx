@@ -2,10 +2,11 @@ import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
 import useStopwatches from "./hooks/useStopwatches";
 import { formatTime } from "./formatUtils";
-import { Preferences } from "./types";
+import { Preferences, Stopwatch } from "./types";
 
 export default function Command() {
-  const { stopwatches, isLoading, refreshSWes, handlePauseSW, handleStartSW } = useStopwatches();
+  const { stopwatches, isLoading, refreshSWes, handlePauseSW, handleStartSW, handleStopSW, handleUnpauseSW } =
+    useStopwatches();
   useEffect(() => {
     refreshSWes();
     setInterval(() => {
@@ -34,6 +35,10 @@ export default function Command() {
     }
   };
 
+  const swTitleSuffix = (sw: Stopwatch) => {
+    return sw.lastPaused === "----" ? " elapsed" : " (paused)";
+  };
+
   return (
     <MenuBarExtra
       icon={prefs.showMenuBarItemWhen !== "never" ? Icon.Stopwatch : undefined}
@@ -43,14 +48,19 @@ export default function Command() {
       <MenuBarExtra.Item title="Click running stopwatch to pause" />
       {stopwatches?.map((sw) => (
         <MenuBarExtra.Item
-          title={sw.name + ": " + formatTime(sw.timeElapsed) + " elapsed"}
+          title={sw.name + ": " + formatTime(sw.timeElapsed) + swTitleSuffix(sw)}
           key={sw.swID}
-          onAction={() => handlePauseSW(sw.swID)}
+          onAction={() => (sw.lastPaused === "----" ? handlePauseSW(sw.swID) : handleUnpauseSW(sw.swID))}
         />
       ))}
+      <MenuBarExtra.Section>
+        {stopwatches?.map((sw) => (
+          <MenuBarExtra.Item title={`Delete "${sw.name}"`} key={sw.swID} onAction={() => handleStopSW(sw)} />
+        ))}
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Start Stopwatch" onAction={() => handleStartSW()} key="startSW" />
+        <MenuBarExtra.Item title="Start New Stopwatch" onAction={() => handleStartSW()} key="startSW" />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
