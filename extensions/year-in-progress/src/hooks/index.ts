@@ -4,7 +4,5 @@ import { getDefaultProgress } from "../utils/progress";
 
 export const useCachedProgressState = (): [Progress[], React.Dispatch<React.SetStateAction<Progress[]>>] => {
   const defaultProgress = getDefaultProgress();
-  const [userProgress, setUserProgress] = useRaycastCachedState<Progress[]>("userProgress", defaultProgress);
-
-  return [userProgress, setUserProgress];
+  return useRaycastCachedState<Progress[]>("userProgress", defaultProgress);
 };

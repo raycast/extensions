@@ -29,7 +29,7 @@ export default function XInProgress() {
     setIsShowingDetail((prev) => !prev);
   }, []);
 
-  const onChangeShowFromMenuBar = useCallback(
+  const onChangeShowInMenuBar = useCallback(
     async (currentProgress: Progress) => {
       const newUserProgress = userProgress.map((progress) => {
         if (progress.title === currentProgress.title) {
@@ -60,6 +60,7 @@ export default function XInProgress() {
                 userProgress.map((progress) => {
                   if (progress.title === values.title) {
                     return {
+                      ...progress,
                       ...values,
                       key: values.title,
                     };
@@ -140,7 +141,16 @@ export default function XInProgress() {
   const onDeleteProgress = useCallback(
     async (title: string) => {
       if (await confirmAlert({ title: "Are you sure?" })) {
-        setUserProgress(userProgress.filter((progress) => progress.title !== title));
+        setUserProgress(
+          userProgress
+            .filter((progress) => progress.title !== title)
+            .map((progress, idx) => {
+              if (idx === 0) {
+                return { ...progress, isCurrentMenubarProgress: true };
+              }
+              return progress;
+            })
+        );
         await showToast({
           style: Toast.Style.Success,
           title: `${title} is deleted!`,
@@ -167,7 +177,7 @@ export default function XInProgress() {
             <ProgressActionPanel
               progress={progress}
               onShowDetails={onShowDetails}
-              onChangeShowFromMenuBar={() => onChangeShowFromMenuBar(progress)}
+              onChangeShowFromMenuBar={() => onChangeShowInMenuBar(progress)}
               onEditProgress={onEditProgress}
               onAddProgress={onAddProgress}
               onDeteleProgress={onDeleteProgress}
@@ -182,7 +192,7 @@ export default function XInProgress() {
       getProgressSubtitle,
       getIcon,
       onShowDetails,
-      onChangeShowFromMenuBar,
+      onChangeShowInMenuBar,
       onEditProgress,
       onAddProgress,
       onDeleteProgress,

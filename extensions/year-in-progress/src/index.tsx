@@ -1,10 +1,9 @@
 import { MenuBarExtra, openExtensionPreferences } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useCachedProgressState } from "./hooks";
 import { Progress } from "./types";
 import { getIcon } from "./utils/icon";
-import { getProgressNumber, getProgressSubtitle, getYear } from "./utils/progress";
+import { getProgressNumber, getProgressSubtitle } from "./utils/progress";
 
 function buildMenubarTitle(progress: Progress) {
   return {
@@ -14,19 +13,10 @@ function buildMenubarTitle(progress: Progress) {
 }
 
 export default function Command() {
-  const [userProgress] = useCachedProgressState();
-  const menubarProgress = userProgress.filter((progress) => progress.showInMenuBar);
-  const latestMenubarProgress = menubarProgress[0];
-
-  const [menubarTitle, setMenubarTitle] = useCachedState("menubarTitle", buildMenubarTitle(latestMenubarProgress));
-
-  useEffect(() => {
-    const isExistInMenubarProgress =
-      menubarProgress.findIndex((progress) => progress.menubarTitle === menubarTitle.title) !== -1;
-    if (!isExistInMenubarProgress) {
-      setMenubarTitle(buildMenubarTitle(latestMenubarProgress));
-    }
-  }, [menubarProgress, latestMenubarProgress, buildMenubarTitle]);
+  const [userProgress, setUserProgress] = useCachedProgressState();
+  const allMenubarProgress = userProgress.filter((progress) => progress.showInMenuBar);
+  const currentMenubarProgress = allMenubarProgress.filter((progress) => progress.isCurrentMenubarProgress)[0];
+  const menubarTitle = buildMenubarTitle(currentMenubarProgress);
 
   const renderProgress = useCallback(
     (progress: Progress) => {
@@ -39,7 +29,12 @@ export default function Command() {
           icon={getIcon(progressNumber)}
           subtitle={subtitle}
           onAction={() => {
-            setMenubarTitle({ title: progress.menubarTitle, progressNumber });
+            setUserProgress(() => {
+              return userProgress.map((p) => ({
+                ...p,
+                isCurrentMenubarProgress: p.key === progress.key ? true : false,
+              }));
+            });
           }}
         />
       );
@@ -53,11 +48,11 @@ export default function Command() {
       icon={getIcon(menubarTitle.progressNumber)}
     >
       <MenuBarExtra.Section title={`🟢 Pinned Progress`}>
-        {menubarProgress.filter((p) => p.pinned).map(renderProgress)}
+        {allMenubarProgress.filter((p) => p.pinned).map(renderProgress)}
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title={`🔵 All Progress`}>
-        {menubarProgress.filter((p) => !p.pinned).map(renderProgress)}
+        {allMenubarProgress.filter((p) => !p.pinned).map(renderProgress)}
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
