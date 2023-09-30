@@ -20,14 +20,14 @@ export interface Project {
   user_id: number;
 }
 
-async function fetchProjects(client: Toggl): Promise<Array<Project>> {
+async function fetchProjects(client: Toggl): Promise<Project[]> {
   const projects = await client.me.projects();
 
   return projects;
 }
 
-const getProjectById = (projects:Array<Project>, projectId : number) => {
+const getProjectById = (projects: Project[], projectId: number) => {
   return projects.filter((project) => project.id === projectId).at(0);
-}
+};
 
 export { fetchProjects, getProjectById };

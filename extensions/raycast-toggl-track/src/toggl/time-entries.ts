@@ -83,8 +83,8 @@ async function stopRunningTimeEntry(client: Toggl): Promise<ITimeEntry> {
 
   if (activeEntry) {
     const stopped = await stopTogglTimeEntry(activeEntry.workspace_id, activeEntry.id);
-    if(!stopped){
-        showHUD("🤦‍♂️ stopping failed!");
+    if (!stopped) {
+      showHUD("🤦‍♂️ stopping failed!");
     }
   }
 

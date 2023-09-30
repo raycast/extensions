@@ -23,7 +23,7 @@ export default function InternetStatus({ onlineComponent }: InternetStatusProps)
   // Initially check internet status when the component is loaded
   checkInternetStatus();
 
-  if(!checked) return <Detail isLoading={true} />
+  if (!checked) return <Detail isLoading={true} />;
 
   if (!isItOnline) {
     return (

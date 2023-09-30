@@ -15,7 +15,7 @@ export default function NewTimeEntry() {
   const client = ToggleClient(preferences.togglAPIKey);
 
   fetchProjects(client).then((projects: Project[]) => {
-      setProjects(projects);
+    setProjects(projects);
   });
 
   function dropDescriptionErrorIfNeeded() {

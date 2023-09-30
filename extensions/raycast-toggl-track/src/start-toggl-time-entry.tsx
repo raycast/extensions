@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import ApiKeyMissing from "./components/api-key-missing";
-import NewTimeEntry from './components/new-time-entry';
+import NewTimeEntry from "./components/new-time-entry";
 import InternetStatus from "./components/internet-status";
 interface Preferences {
   togglAPIKey: string;
@@ -12,9 +12,10 @@ export default function Command() {
   if (!("togglAPIKey" in preferences)) {
     return <ApiKeyMissing />;
   } else {
-
-    return <InternetStatus
+    return (
+      <InternetStatus
         onlineComponent={<NewTimeEntry />} // Replace with your custom component
-      />;
+      />
+    );
   }
 }
