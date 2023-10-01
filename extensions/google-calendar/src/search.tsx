@@ -53,6 +53,10 @@ function RootCommand() {
           ))}
         </List.Section>
       ))}
+      <List.EmptyView
+        title={!searchText || searchText.trim().length < 0 ? "Nothing to do" : "No Events found"}
+        icon={"google_calendar.png"}
+      />
     </List>
   );
 }
