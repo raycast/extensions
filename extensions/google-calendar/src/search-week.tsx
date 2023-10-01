@@ -12,6 +12,7 @@ import { useCalendarSettings } from "./lib/settings";
 function RootCommand() {
   const { calendar } = getCalendarClient();
   const { settings } = useCalendarSettings();
+  const [searchText, setSearchText] = useState<string>();
   const [selectedCalendar, setSelectedCalendar] = useState<calendar_v3.Schema$CalendarListEntry>();
   const { isLoading, data, error } = useCachedPromise(
     async (specificCalendar) => {
@@ -29,7 +30,13 @@ function RootCommand() {
   const today = nowDate();
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<CalendarDropdown onSelected={setSelectedCalendar} />}>
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering={true}
+      searchBarAccessory={<CalendarDropdown onSelected={setSelectedCalendar} />}
+    >
       {days?.map((d) => (
         <List.Section
           key={d.day.toLocaleDateString()}
@@ -48,6 +55,10 @@ function RootCommand() {
           ))}
         </List.Section>
       ))}
+      <List.EmptyView
+        title={!searchText || searchText.trim().length < 0 ? "Nothing to do this Week 😁" : "No Events found"}
+        icon={"google_calendar.png"}
+      />
     </List>
   );
 }
