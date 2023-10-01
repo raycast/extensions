@@ -20,8 +20,12 @@ export function dayOfWeek(date: Date) {
   return date.toLocaleDateString("en-US", { weekday: "long" });
 }
 
-export function timeOfDate(date: Date) {
-  const t = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+export function timeOfDate(date: Date, options?: { hour24?: boolean }) {
+  const t = date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: options?.hour24 === true ? false : true,
+  });
   return t;
 }
 

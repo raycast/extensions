@@ -7,9 +7,11 @@ import { getEvents, groupEventsByDay } from "./lib/api";
 import { calendar_v3 } from "@googleapis/calendar";
 import { CalendarDropdown, EventListItem } from "./components/event/list";
 import { dayOfWeek, nowDate, sameDay } from "./lib/utils";
+import { useCalendarSettings } from "./lib/settings";
 
 function RootCommand() {
   const { calendar } = getCalendarClient();
+  const { settings } = useCalendarSettings();
   const [selectedCalendar, setSelectedCalendar] = useState<calendar_v3.Schema$CalendarListEntry>();
   const { isLoading, data, error } = useCachedPromise(
     async (specificCalendar) => {
@@ -34,7 +36,12 @@ function RootCommand() {
           title={`${sameDay(today, d.day) ? "Today" : dayOfWeek(d.day)} - ${d.day.toLocaleDateString()}`}
         >
           {d.events.map((e) => (
-            <EventListItem key={e.event.id} event={e} isSingleCalendar={selectedCalendar ? true : false} />
+            <EventListItem
+              key={e.event.id}
+              event={e}
+              isSingleCalendar={selectedCalendar ? true : false}
+              settings={settings}
+            />
           ))}
         </List.Section>
       ))}
