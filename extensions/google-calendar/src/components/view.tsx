@@ -1,4 +1,4 @@
-import { withCalendarClient } from "../lib/withCalendarClient";
+import { withCalendarClient } from "@lib/withCalendarClient";
 
 /**
  * Makes sure that we have a authenticated calendar client available in the children

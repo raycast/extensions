@@ -1,6 +1,6 @@
-import View from "./components/view";
-import { addDaysToDate, nowDate } from "./lib/utils";
-import { EventRangeList } from "./components/eventrange/list";
+import View from "@components/view";
+import { addDaysToDate, nowDate } from "@lib/utils";
+import { EventRangeList } from "@components/eventrange/list";
 
 function RootCommand() {
   const start = nowDate();

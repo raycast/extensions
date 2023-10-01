@@ -2,11 +2,11 @@ import { List } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "googleapis";
 import { useState } from "react";
-import { getEvents, groupEventsByDay } from "../../lib/api";
-import { useCalendarSettings } from "../../lib/settings";
-import { nowDate, sameDay, dayOfWeek } from "../../lib/utils";
-import { getCalendarClient } from "../../lib/withCalendarClient";
-import { CalendarDropdown, EventListItem } from "../event/list";
+import { getEvents, groupEventsByDay } from "@lib/api";
+import { useCalendarSettings } from "@lib/settings";
+import { nowDate, sameDay, dayOfWeek } from "@lib/utils";
+import { getCalendarClient } from "@lib/withCalendarClient";
+import { CalendarDropdown, EventListItem } from "@components/event/list";
 
 export function EventRangeList(props: { start: Date; end?: Date }) {
   const start = props.start;

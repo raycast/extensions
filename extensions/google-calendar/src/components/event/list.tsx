@@ -1,11 +1,11 @@
 import { List, Icon, ActionPanel, Image } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { calendar_v3 } from "googleapis";
-import { getCalendars, CalendarEvent, startOfEvent, GooPreferences, endOfEvent } from "../../lib/api";
-import { getCalendarClient } from "../../lib/withCalendarClient";
+import { getCalendars, CalendarEvent, startOfEvent, GooPreferences, endOfEvent } from "@lib/api";
+import { getCalendarClient } from "@lib/withCalendarClient";
 import { OpenEventInBrowser, ConsoleLogAction, CopyEventToClipboardAction } from "./actions";
-import { addDaysToDate, extractDateString, sameDay, timeOfDate } from "../../lib/utils";
-import { show24hFormat } from "../../lib/settings";
+import { addDaysToDate, extractDateString, sameDay, timeOfDate } from "@lib/utils";
+import { show24hFormat } from "@lib/settings";
 
 export function CalendarDropdown(props: {
   onSelected?: (cal: calendar_v3.Schema$CalendarListEntry | undefined) => void;
