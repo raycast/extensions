@@ -6,6 +6,7 @@ import { getCalendarClient } from "@lib/withCalendarClient";
 import { OpenEventInBrowser, ConsoleLogAction, CopyEventToClipboardAction } from "./actions";
 import { addDaysToDate, extractDateString, sameDay, timeOfDate } from "@lib/utils";
 import { show24hFormat } from "@lib/settings";
+import { getEventReminders } from "./utils";
 
 export function CalendarDropdown(props: {
   onSelected?: (cal: calendar_v3.Schema$CalendarListEntry | undefined) => void;
@@ -82,6 +83,24 @@ export function EventListItem(props: {
   const contactPhotoLink = gooPrefs?.["goo.contactsPhotoUrl"];
   const isBirthday = gooPrefs?.["goo.contactsEventType"] === "BIRTHDAY";
   const isSingleCalendar = props.isSingleCalendar;
+  const attendees = event.attendees?.filter((a) => a.organizer !== true);
+  const hasAttendees = attendees && attendees.length > 0;
+  const attendeesStateTooltip = () => {
+    if (!attendees || attendees.length <= 0) {
+      return "";
+    }
+    return attendees.map((a) => `${a.email}: ${a.responseStatus}`).join("\n");
+  };
+  const attendeesAccepted = attendees?.filter((a) => a.responseStatus === "accepted").length;
+  const reminders = getEventReminders(props.event);
+  const remindersTooltip = () => {
+    if (!reminders || reminders.length <= 0) {
+      return "";
+    }
+    // FIXME Convert minutes into human readable format
+    const rems = reminders.map((m) => `${m} min`).join(", ");
+    return `Reminders: ${rems}`;
+  };
   return (
     <List.Item
       title={`${getTimeTitle()}  |  ${event.summary || "?"}`}
@@ -89,7 +108,15 @@ export function EventListItem(props: {
       icon={isBirthday ? "🎂" : { source: Icon.Calendar, tintColor: cal.backgroundColor }}
       keywords={keywords}
       accessories={[
-        { icon: event.gadget?.iconLink },
+        {
+          icon: reminders && reminders.length > 0 ? Icon.Clock : undefined,
+          tooltip: reminders && reminders.length > 0 ? remindersTooltip() : undefined,
+        },
+        {
+          icon: hasAttendees ? Icon.TwoPeople : undefined,
+          text: hasAttendees ? `${attendeesAccepted}/${attendees.length}` : undefined,
+          tooltip: hasAttendees ? attendeesStateTooltip() : undefined,
+        },
         { icon: contactPhotoLink ? { source: contactPhotoLink, mask: Image.Mask.Circle } : undefined },
         {
           tag:
