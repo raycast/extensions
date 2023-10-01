@@ -3,6 +3,11 @@
   "display": "Node 18",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@lib/*" : ["lib/*"],
+      "@components/*" : ["components/*"]
+    },
     "lib": ["es2021"],
     "module": "commonjs",
     "target": "es2021",

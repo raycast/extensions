@@ -5,9 +5,9 @@ import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getEvents, groupEventsByDay } from "./lib/api";
 import { calendar_v3 } from "@googleapis/calendar";
-import { CalendarDropdown, EventListItem } from "./components/event/list";
-import { dayOfWeek, nowDate, sameDay } from "./lib/utils";
-import { useCalendarSettings } from "./lib/settings";
+import { CalendarDropdown, EventListItem } from "@components/event/list";
+import { dayOfWeek, nowDate, sameDay } from "@lib/utils";
+import { useCalendarSettings } from "@lib/settings";
 
 function RootCommand() {
   const { calendar } = getCalendarClient();

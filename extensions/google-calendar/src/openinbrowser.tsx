@@ -1,5 +1,5 @@
 import { open, showHUD } from "@raycast/api";
-import { calendarWebUrlBase, getAuthorizedCalendarClient } from "./lib/api";
+import { calendarWebUrlBase, getAuthorizedCalendarClient } from "@lib/api";
 import { showFailureToast } from "@raycast/utils";
 
 export default async function OpenInBrowserMain() {

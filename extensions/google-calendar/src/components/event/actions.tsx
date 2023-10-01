@@ -1,5 +1,5 @@
 import { Action, Icon, environment } from "@raycast/api";
-import { CalendarEvent } from "../../lib/api";
+import { CalendarEvent } from "@lib/api";
 
 export function OpenEventInBrowser(props: { event: CalendarEvent }) {
   const e = props.event;
