@@ -5,6 +5,7 @@ import { getCalendars, CalendarEvent, startOfEvent, GooPreferences, endOfEvent }
 import { getCalendarClient } from "../../lib/withCalendarClient";
 import { OpenEventInBrowser, ConsoleLogAction, CopyEventToClipboardAction } from "./actions";
 import { addDaysToDate, extractDateString, sameDay, timeOfDate } from "../../lib/utils";
+import { show24hFormat } from "../../lib/settings";
 
 export function CalendarDropdown(props: {
   onSelected?: (cal: calendar_v3.Schema$CalendarListEntry | undefined) => void;
@@ -43,7 +44,11 @@ export function CalendarDropdown(props: {
   );
 }
 
-export function EventListItem(props: { event: CalendarEvent; isSingleCalendar?: boolean }) {
+export function EventListItem(props: {
+  event: CalendarEvent;
+  isSingleCalendar?: boolean;
+  settings?: calendar_v3.Schema$Settings;
+}) {
   const event = props.event.event;
   const cal = props.event.calendar;
   const start = startOfEvent(event);
@@ -52,16 +57,20 @@ export function EventListItem(props: { event: CalendarEvent; isSingleCalendar?: 
   if (event.location) {
     keywords.push(event.location);
   }
+  const format24h = show24hFormat(props.settings);
+  const formatTimeOfDate = (d: Date) => {
+    return timeOfDate(d, { hour24: format24h });
+  };
   const getTimeTitle = () => {
     if (start && end) {
       if (sameDay(start, end)) {
-        return `${timeOfDate(start)} - ${timeOfDate(end)}`;
+        return `${formatTimeOfDate(start)} - ${formatTimeOfDate(end)}`;
       } else {
         const startPlus1Day = addDaysToDate(start, 1);
         if (end.getTime() === startPlus1Day.getTime()) {
           return "All Day";
         }
-        return `${timeOfDate(start)} - ${timeOfDate(end)} (${extractDateString(end)})`;
+        return `${formatTimeOfDate(start)} - ${formatTimeOfDate(end)} (${extractDateString(end)})`;
       }
     }
     if (start) {

@@ -68,7 +68,6 @@ export async function getEventsPerCalendar(calendar: calendar_v3.Calendar, optio
       }
       return q;
     };
-    console.log(cleanQuery());
     const promises = calendars.map((c) => {
       return calendar.events
         .list({
