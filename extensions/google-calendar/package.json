@@ -11,8 +11,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "my-week",
-      "title": "My Week",
+      "name": "search-week",
+      "title": "Search Week",
       "description": "List My Week",
       "mode": "view"
     },
