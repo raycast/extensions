@@ -13,14 +13,14 @@
   "commands": [
     {
       "name": "toggle-desktop-icons",
-      "title": "Toggle Desktop Icon Visibility",
+      "title": "Toggle Icon Visibility",
       "subtitle": "Desktop",
       "description": "Toggle Desktop icons visible or hidden",
       "mode": "no-view"
     },
     {
       "name": "show-desktop-icons",
-      "title": "Show Desktop Icons",
+      "title": "Show Icons",
       "subtitle": "Desktop",
       "description": "Show Desktop icons",
       "mode": "no-view",
@@ -28,7 +28,7 @@
     },
     {
       "name": "hide-desktop-icons",
-      "title": "Hide Desktop Icons",
+      "title": "Hide Icons",
       "subtitle": "Desktop",
       "description": "Hide Desktop icons",
       "mode": "no-view",
@@ -36,14 +36,14 @@
     },
     {
       "name": "toggle-desktop-widgets",
-      "title": "Toggle Desktop Widget Visibility",
+      "title": "Toggle Widget Visibility",
       "subtitle": "Desktop",
       "description": "Toggle Desktop widgets visible or hidden",
       "mode": "no-view"
     },
     {
       "name": "show-desktop-widgets",
-      "title": "Show Desktop Widgets",
+      "title": "Show Widgets",
       "subtitle": "Desktop",
       "description": "Show Desktop widgets",  
       "mode": "no-view",
@@ -51,7 +51,7 @@
     },
     {
       "name": "hide-desktop-widgets",
-      "title": "Hide Desktop Widgets",
+      "title": "Hide Widgets",
       "subtitle": "Desktop",
       "description": "Hide Desktop widgets",
       "mode": "no-view",
