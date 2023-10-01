@@ -13,7 +13,25 @@
     {
       "name": "search-week",
       "title": "Search Week",
-      "description": "List My Week",
+      "description": "Search next 7 Days",
+      "mode": "view"
+    },
+    {
+      "name": "search-month",
+      "title": "Search Month",
+      "description": "Search next 30 Days",
+      "mode": "view"
+    },
+    {
+      "name": "search-quarter",
+      "title": "Search Quarter",
+      "description": "Search next 90 Days",
+      "mode": "view"
+    },
+    {
+      "name": "search-year",
+      "title": "Search Year",
+      "description": "Search next 365 Days",
       "mode": "view"
     },
     {
