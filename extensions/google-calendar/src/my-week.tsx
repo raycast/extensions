@@ -33,7 +33,10 @@ function RootCommand() {
       {days?.map((d) => (
         <List.Section
           key={d.day.toLocaleDateString()}
-          title={`${sameDay(today, d.day) ? "Today" : dayOfWeek(d.day)} - ${d.day.toLocaleDateString()}`}
+          title={`${sameDay(today, d.day) ? "Today" : dayOfWeek(d.day)} - ${d.day.toLocaleDateString("en-US", {
+            day: "2-digit",
+            month: "long",
+          })}`}
         >
           {d.events.map((e) => (
             <EventListItem
