@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "android-emulator",
+  "title": "Android Emulator",
+  "description": "Control Android Emulator from Raycast",
+  "icon": "icon.png",
+  "author": "3llomi",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-emulators",
+      "title": "List Emulators",
+      "subtitle": "List Running Android Emulators",
+      "description": "List Running Android Emulators",
+      "mode": "view"
+    },
+    {
+      "name": "fold",
+      "title": "Fold/Unfold",
+      "subtitle": "Fold or Unfold Emulator",
+      "description": "Fold or Unfold Emulator",
+      "mode": "view"
+    },
+    {
+      "name": "rotate",
+      "title": "Rotate",
+      "subtitle": "Rotates the AVD counterclockwise in 45 degree increments.",
+      "description": "Rotates the AVD counterclockwise in 45 degree increments",
+      "mode": "view"
+    },
+    {
+      "name": "emitText",
+      "title": "Emit Text",
+      "subtitle": "Emit Text to Android Emulator",
+      "description": "Emit Text to Android Emulator",
+      "mode": "view"
+    },
+    {
+      "name": "setChargingState",
+      "title": "Set Charging State",
+      "subtitle": "Sets AC charging state to on or off",
+      "description": "Sets AC charging state to on or off",
+      "mode": "view"
+    },
+    {
+      "name": "setBatteryPercentage",
+      "title": "Set Battery Percentage",
+      "subtitle": "Sets remaining battery capacity state as a percent from 0 to 100.",
+      "description": "Sets remaining battery capacity state as a percent from 0 to 100.",
+      "mode": "view"
+    },
+    {
+      "name": "setNetworkSpeed",
+      "title": "Set Network Speed",
+      "subtitle": "Set Network Speed",
+      "description": "Set Network Speed",
+      "mode": "view"
+    },
+    {
+      "name": "simulateCall",
+      "title": "Simulate a Call",
+      "subtitle": "Simulate Incoming call, accept, and reject",
+      "description": "Simulate Incoming call, accept, and reject",
+      "mode": "view"
+    },
+    {
+      "name": "simulateSMS",
+      "title": "Simulate Incoming SMS Message",
+      "subtitle": "Simulate Incoming SMS Message",
+      "description": "Simulate Incoming SMS Message",
+      "mode": "view"
+    },
+    {
+      "name": "simulateFingerprint",
+      "title": "Simulate Fingerprint",
+      "subtitle": "Touch/Lift Fingerprint",
+      "description": "Touch/Lift Fingerprint",
+      "mode": "view"
+    },
+    {
+      "name": "startEmulator",
+      "title": "Start Emulator",
+      "subtitle": "Start Android Emulator",
+      "description": "Start Android Emulator",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
