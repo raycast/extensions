@@ -4,7 +4,7 @@ import { EventRangeList } from "./components/eventrange/list";
 
 function RootCommand() {
   const start = nowDate();
-  const end = addDaysToDate(start, 7);
+  const end = addDaysToDate(start, 30);
   return <EventRangeList start={start} end={end} />;
 }
 
