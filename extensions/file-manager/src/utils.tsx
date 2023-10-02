@@ -202,11 +202,11 @@ export function FileItem(props: {
       accessories={
         preferences.showFileSize
           ? [
-              {
-                icon: Icon.HardDrive,
-                text: getFileSize(props.fileData),
-              },
-            ]
+            {
+              icon: Icon.HardDrive,
+              text: getFileSize(props.fileData),
+            },
+          ]
           : []
       }
       actions={
@@ -270,6 +270,7 @@ export function FileItem(props: {
 export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void }) {
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const a = fs.readlinkSync(filePath);
+
   const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
   const originalFileData = fs.lstatSync(originalPath, { throwIfNoEntry: false });
 
@@ -298,6 +299,10 @@ export function createItem(fileData: FileDataType, refresh: () => void) {
 export function getDirectoryData(path: string): FileDataType[] {
   const preferences: PreferencesType = getPreferenceValues();
   let files: string[] = fs.readdirSync(path);
+
+  // Ignore the "Icon" file
+  files = files.filter((name) => name !== "Icon\r");
+
   if (!preferences.showDots) {
     files = files.filter((file) => !file.startsWith("."));
   }
