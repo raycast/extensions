@@ -1,3 +1,7 @@
+import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+
 export interface Device {
   self: boolean;
   key: number;
@@ -55,6 +59,16 @@ export function loadDevices(self: LooseObject, data: LooseObject) {
     };
     devices.push(device);
   }
-  console.log(devices);
   return devices;
+}
+
+const prefs = getPreferenceValues();
+
+export const tailscalePath: string =
+  prefs.tailscalePath && prefs.tailscalePath.length > 0
+    ? prefs.tailscalePath
+    : "/Applications/Tailscale.app/Contents/MacOS/Tailscale";
+
+export function tailscale(parameters: string): string {
+  return execSync(`${tailscalePath} ${parameters}`).toString().trim();
 }

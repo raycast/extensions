@@ -1,7 +1,7 @@
 import { Detail } from "@raycast/api";
 import FileSizeFormat from "@saekitominaga/file-size-format";
 
-import { GifDetailsActions } from "./GifDetailsActions";
+import { GifActions } from "./GifActions";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
 import { getServiceTitle, ServiceName } from "../preferences";
 
@@ -30,7 +30,7 @@ export function GifDetails(props: { item: IGif; service?: ServiceName }) {
   return (
     <Detail
       markdown={renderGifMarkdownDetails(props.item)}
-      actions={<GifDetailsActions item={props.item} showViewDetails={false} service={props.service} />}
+      actions={<GifActions item={props.item} showViewDetails={false} service={props.service} />}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Title" text={title} />

@@ -1,9 +1,15 @@
-import { closeMainWindow, environment, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { unlinkSync } from "fs";
 import { getTimers } from "./timerUtils";
 import { Timer } from "./types";
 
 export default async () => {
+  if (!getPreferenceValues().ringContinuously) {
+    return await showToast({
+      style: Toast.Style.Failure,
+      title: "Ring Continuously setting not enabled!",
+    });
+  }
   const timers = getTimers();
   timers.filter((t: Timer) => t.timeLeft === 0);
   if (timers.length === 0) {
