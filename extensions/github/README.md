@@ -9,7 +9,7 @@ You can use a personal access token instead of logging in through OAuth to authe
 The following link can be used as a shortcut to create your token:
 https://github.com/settings/tokens/new?description=RayCast&scopes=repo,read:org,read:user,read:project,notifications
 
-Otherwise, you can manually create a token:
+Otherwise, you can manually create it:
 1. Go to https://github.com/settings/tokens
 2. Click "Generate new token" then "Generate new token (classic)
 3. Add a "Note" for the token.
