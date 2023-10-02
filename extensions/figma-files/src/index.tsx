@@ -69,12 +69,14 @@ export default function Command() {
       tooltip={teamID.length > 1 ? "Teams" : "Projects"}
       defaultValue="All"
       onChange={handleDropdownChange}
-      storeValue
+      storeValue={false}
     >
       <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" />
-      {data?.map((team) => (
-        <Grid.Dropdown.Item key={team.name} title={team.name} value={`team=${team.name}`} icon="team.svg" />
-      ))}
+
+      {teamID.length > 1 &&
+        data?.map((team) => (
+          <Grid.Dropdown.Item key={team.name} title={team.name} value={`team=${team.name}`} icon="team.svg" />
+        ))}
 
       {data?.map((team) => (
         <Grid.Dropdown.Section title={team.name} key={team.name}>
