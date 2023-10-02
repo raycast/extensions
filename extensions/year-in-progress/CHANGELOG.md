@@ -1,5 +1,9 @@
 # Year in Progress Changelog
 
+## [Bugfix] - 2023-10-02
+
+- Fixed [bug](https://github.com/raycast/extensions/issues/8458) where menubar progress not updating its percentage
+
 ## [Improvements] - 2023-09-22
 
 - Make progress icon dynamic
