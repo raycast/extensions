@@ -1,5 +1,10 @@
 # Figma Files Changelog
 
+## [Improved search and filter options] - 2023-10-02
+
+- You can now search for projects.
+- The dropdown filter now lists all projects inside a team even when multiple teams are configured.
+
 ## [Support for opening file branches and improvements] - 2023-06-07
 
 - Added support for opening a specific branch of a file through the CMD+K menu.
