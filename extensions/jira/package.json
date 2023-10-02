@@ -64,7 +64,7 @@
       "preferences": [
         {
           "name": "sortByFavourite",
-          "description": "If checked then any filters marked as a favourite in JIRA will be displayed first in the filter selection dropdown",
+          "description": "If checked, any filters marked as favourite in Jira will be displayed first in the filter selection dropdown.",
           "type": "checkbox",
           "required": false,
           "title": "Favourite Filters",
