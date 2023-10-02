@@ -3,7 +3,7 @@ import { Progress } from "./types";
 import { defaultProgress, getSubtitle } from "./utils/progress";
 
 export default async function command() {
-  const yearProgress = defaultProgress.find((p) => p.key === "year") as Progress;
+  const yearProgress = defaultProgress.find((p) => p.title === "Year In Progress") as Progress;
   const progressBar = getSubtitle(yearProgress.progressNum);
 
   updateCommandMetadata({ subtitle: `${progressBar}` });
