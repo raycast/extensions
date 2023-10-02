@@ -18,7 +18,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const {
@@ -82,7 +82,7 @@ export default function Command() {
       onChange={handleDropdownChange}
       storeValue={false}
     >
-      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" /
+      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" />
       {teamID.length > 1 &&
         data?.map((team) => (
           <Grid.Dropdown.Item key={team.name} title={team.name} value={`team=${team.name}`} icon="team.svg" />
@@ -158,7 +158,7 @@ export default function Command() {
               {project.files?.map((file) => (
                 <FileGridItem
                   key={file.key + "-file"}
-                  searchkeywords={project.name}          
+                  searchkeywords={project.name}
                   revalidate={revalidateStarredFiles}
                   file={file}
                   desktopApp={desktopApp}
@@ -177,8 +177,8 @@ export default function Command() {
             >
               <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
             </Grid.Section>
-          ),
-        ),
+          )
+        )
       )}
     </Grid>
   );

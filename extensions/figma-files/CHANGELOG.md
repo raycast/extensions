@@ -11,7 +11,6 @@
 - Added accessory icon in grid to identify files with branches.
 - Added tooltip on hover to view entire file names.
 
-
 ## [Support for opening file branches and improvements] - 2023-06-07
 
 - Added support for opening a specific branch of a file through the CMD+K menu.

@@ -16,8 +16,7 @@ export default function FileGridItem(props: {
   onVisit: (file: File) => void;
   searchkeywords?: string;
 }) {
-
-  const { file, extraKey, desktopApp, onVisit, revalidate, SearchKeywords } = props;
+  const { file, extraKey, desktopApp, onVisit, revalidate, searchkeywords } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
   const isStarred = props.starredFiles.some((item) => item.name === file.name);
 
