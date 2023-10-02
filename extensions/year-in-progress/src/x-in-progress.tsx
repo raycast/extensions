@@ -1,125 +1,142 @@
 import {
   Action,
   ActionPanel,
-  confirmAlert,
   Icon,
-  launchCommand,
   LaunchType,
   List,
-  showToast,
   Toast,
+  confirmAlert,
+  launchCommand,
+  showToast,
   useNavigation,
 } from "@raycast/api";
-import { useCallback, useState } from "react";
-import AddProgressForm, { AddProgressFormValue } from "./components/AddProgressForm";
-import ProgressActionPanel from "./components/ProgressActionPanel";
-import ProgressDetail from "./components/ProgressDetail";
-import { useCachedProgressState } from "./hooks";
-import { Progress } from "./types";
+import { useState } from "react";
+import AddOrEditProgress from "./components/add-or-edit-progress";
+import ProgressDetail from "./components/progress-detail";
+import { useLocalStorageProgress } from "./hooks/use-local-storage-progress";
 import { getIcon } from "./utils/icon";
-import { getProgressNumber, getProgressSubtitle } from "./utils/progress";
+import { Progress, getProgressNumByDate, getSubtitle } from "./utils/progress";
 
 export default function XInProgress() {
   const navigation = useNavigation();
-
-  const [userProgress, setUserProgress] = useCachedProgressState();
+  const [state, setState, getLatestState] = useLocalStorageProgress();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  const onShowDetails = useCallback(() => {
+  const onShowingDetails = () => {
     setIsShowingDetail((prev) => !prev);
-  }, []);
+  };
 
-  const onChangeShowInMenuBar = useCallback(
-    async (currentProgress: Progress) => {
-      const newUserProgress = userProgress.map((progress) => {
-        if (progress.title === currentProgress.title) {
-          return { ...progress, showInMenuBar: !progress.showInMenuBar };
-        }
-        return progress;
-      });
-      setUserProgress(newUserProgress);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: `"${currentProgress.title}" is ${currentProgress.showInMenuBar ? "hidden" : "shown"} from the Menu Bar!`,
-      });
-
-      await launchCommand({ name: "index", type: LaunchType.UserInitiated });
-    },
-    [userProgress]
-  );
-
-  const onEditProgress = useCallback(
-    (currentProgress: Progress) => {
-      navigation.push(
-        <AddProgressForm
-          defaultFormValues={currentProgress}
-          onSubmit={async (values: AddProgressFormValue) => {
-            try {
-              setUserProgress(
-                userProgress.map((progress) => {
-                  if (progress.title === values.title) {
-                    return {
-                      ...progress,
-                      ...values,
-                      key: values.title,
-                    };
-                  }
-                  return progress;
-                })
-              );
-              navigation.pop();
-              await showToast({
-                style: Toast.Style.Success,
-                title: `${values.title} is updated!`,
-              });
-
-              await launchCommand({ name: "index", type: LaunchType.UserInitiated });
-            } catch (err) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Failed to update progress :(",
-              });
-            }
-          }}
-        />
-      );
-    },
-    [userProgress]
-  );
-
-  const onPinProgress = useCallback(
-    async (currentProgress: Progress) => {
-      const newUserProgress = userProgress.map((progress) => {
-        if (progress.title === currentProgress.title) {
+  const togglePinProgress = (targetProgress: Progress) => {
+    setState((prev) => ({
+      ...prev,
+      allProgress: prev.allProgress.map((progress) => {
+        if (progress.key === targetProgress.key) {
           return { ...progress, pinned: !progress.pinned };
         }
         return progress;
+      }),
+    }));
+  };
+
+  const toggleShowInMenubar = async (targetProgress: Progress) => {
+    setState((prev) => {
+      const shown = targetProgress.menubar.shown ? false : true;
+      const newAllProgress = prev.allProgress.map((progress) => {
+        if (progress.key === targetProgress.key) {
+          return { ...progress, menubar: { shown, title: progress.menubar.title } };
+        }
+        return progress;
       });
-      setUserProgress(newUserProgress);
+      let nextMenubarProgressKey = prev.currMenubarProgressKey;
+      if (shown && !prev.currMenubarProgressKey) {
+        nextMenubarProgressKey = targetProgress.key;
+      }
+      if (!shown && prev.currMenubarProgressKey === targetProgress.key) {
+        nextMenubarProgressKey = newAllProgress.filter((p) => p.menubar.shown)[0]?.key;
+      }
+      return {
+        ...prev,
+        allProgress: newAllProgress,
+        currMenubarProgressKey: nextMenubarProgressKey,
+      };
+    });
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: `"${currentProgress.title}" is ${currentProgress.pinned ? "unpinned" : "pinned"}!`,
-      });
+    await launchCommand({ name: "index", type: LaunchType.UserInitiated });
+  };
 
-      await launchCommand({ name: "index", type: LaunchType.UserInitiated });
-    },
-    [userProgress]
-  );
-
-  const onAddProgress = useCallback(async () => {
+  const onEditProgress = (progress: Progress) => {
     navigation.push(
-      <AddProgressForm
-        onSubmit={async (values: AddProgressFormValue) => {
+      <AddOrEditProgress
+        progress={progress}
+        onSubmit={async (values) => {
+          const latestState = await getLatestState();
+          try {
+            // TODO: handle title change
+            setState((prev) => {
+              const newAllProgress: Progress[] = prev.allProgress.map((progress) => {
+                if (progress.title === values.title) {
+                  return {
+                    key: values.title as string,
+                    title: values.title as string,
+                    type: "user",
+                    pinned: false,
+                    startDate: values.startDate.toDateString(),
+                    endDate: values.endDate.toDateString(),
+                    progressNum: getProgressNumByDate(values.startDate, values.endDate),
+                    menubar: {
+                      shown: values.showInMenubar,
+                      title: values.menubarTitle,
+                    },
+                  };
+                }
+                return progress;
+              });
+              let nextMenubarProgressKey = latestState.currMenubarProgressKey;
+              if (!values.showInMenubar && latestState.currMenubarProgressKey === values.title) {
+                nextMenubarProgressKey = newAllProgress.filter((p) => p.menubar.shown)[0]?.key;
+              }
+              return {
+                ...prev,
+                allProgress: newAllProgress,
+                currMenubarProgressKey: nextMenubarProgressKey,
+              };
+            });
+            navigation.pop();
+            await showToast({
+              style: Toast.Style.Success,
+              title: `"${values.title}" is updated!`,
+            });
+            await launchCommand({ name: "index", type: LaunchType.UserInitiated });
+          } catch (err) {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to update progress :(",
+            });
+          }
+        }}
+      />
+    );
+  };
+
+  const onAddProgress = () => {
+    navigation.push(
+      <AddOrEditProgress
+        onSubmit={async (values) => {
           try {
             const newProgress: Progress = {
-              ...values,
-              key: values.title,
+              key: values.title as string,
+              title: values.title as string,
               type: "user",
-              editable: true,
+              pinned: false,
+              startDate: values.startDate.toDateString(),
+              endDate: values.endDate.toDateString(),
+              progressNum: getProgressNumByDate(values.startDate, values.endDate),
+              menubar: {
+                shown: values.showInMenubar,
+                title: values.menubarTitle,
+              },
             };
-            setUserProgress([...userProgress, newProgress]);
+            setState((prev) => ({ ...prev, allProgress: [...prev.allProgress, newProgress] }));
             navigation.pop();
             await showToast({
               style: Toast.Style.Success,
@@ -134,91 +151,146 @@ export default function XInProgress() {
         }}
       />
     );
+  };
 
+  const onDeleteProgress = async (targetKey: string) => {
+    if (await confirmAlert({ title: "Are you sure?" })) {
+      setState((prev) => {
+        const newAllProgress = prev.allProgress.filter((progress) => progress.key !== targetKey);
+        return {
+          ...prev,
+          allProgress: newAllProgress,
+          currMenubarProgressKey:
+            prev.currMenubarProgressKey === targetKey
+              ? newAllProgress.filter((p) => p.menubar.shown)[0]?.key
+              : prev.currMenubarProgressKey,
+        };
+      });
+      await showToast({
+        style: Toast.Style.Success,
+        title: `${targetKey} is deleted!`,
+      });
+    }
     await launchCommand({ name: "index", type: LaunchType.UserInitiated });
-  }, [userProgress]);
-
-  const onDeleteProgress = useCallback(
-    async (title: string) => {
-      if (await confirmAlert({ title: "Are you sure?" })) {
-        setUserProgress(
-          userProgress
-            .filter((progress) => progress.title !== title)
-            .map((progress, idx) => {
-              if (idx === 0) {
-                return { ...progress, isCurrentMenubarProgress: true };
-              }
-              return progress;
-            })
-        );
-        await showToast({
-          style: Toast.Style.Success,
-          title: `${title} is deleted!`,
-        });
-      }
-
-      await launchCommand({ name: "index", type: LaunchType.UserInitiated });
-    },
-    [userProgress]
-  );
-
-  const renderProgress = useCallback(
-    (progress: Progress) => {
-      const progressNumber = getProgressNumber(progress);
-      const subtitle = getProgressSubtitle(progressNumber);
-      return (
-        <List.Item
-          key={progress.key}
-          title={progress.title}
-          icon={getIcon(progressNumber)}
-          subtitle={subtitle}
-          detail={<ProgressDetail progress={progress} />}
-          actions={
-            <ProgressActionPanel
-              progress={progress}
-              onShowDetails={onShowDetails}
-              onChangeShowFromMenuBar={() => onChangeShowInMenuBar(progress)}
-              onEditProgress={onEditProgress}
-              onAddProgress={onAddProgress}
-              onDeteleProgress={onDeleteProgress}
-              onPinProgress={onPinProgress}
-            />
-          }
-        />
-      );
-    },
-    [
-      getProgressNumber,
-      getProgressSubtitle,
-      getIcon,
-      onShowDetails,
-      onChangeShowInMenuBar,
-      onEditProgress,
-      onAddProgress,
-      onDeleteProgress,
-      onPinProgress,
-    ]
-  );
+  };
 
   return (
-    <List navigationTitle="X In Progress" isShowingDetail={isShowingDetail}>
+    <List isLoading={state.isLoading} navigationTitle="X In Progress" isShowingDetail={isShowingDetail}>
       <List.Section title={`🟢 Pinned Progress`}>
-        {userProgress.filter((p) => p.pinned).map(renderProgress)}
+        {state.allProgress
+          .filter((p) => p.pinned)
+          .map((progress) => (
+            <List.Item
+              key={progress.key}
+              title={progress.title}
+              subtitle={getSubtitle(progress.progressNum)}
+              icon={getIcon(progress.progressNum)}
+              detail={<ProgressDetail progress={progress} />}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action title="Show Details" icon={Icon.AppWindowSidebarLeft} onAction={onShowingDetails} />
+                    <Action
+                      title={progress.pinned ? "Unpin it" : "Pin it"}
+                      icon={Icon.Pin}
+                      onAction={() => {
+                        togglePinProgress(progress);
+                      }}
+                    />
+                    <Action
+                      title={`${progress.menubar.shown ? "Hide From Menu Bar" : "Show In Menu Bar"} `}
+                      icon={progress.menubar.shown ? Icon.EyeDisabled : Icon.Eye}
+                      onAction={async () => {
+                        await toggleShowInMenubar(progress);
+                      }}
+                    />
+                    {progress.type === "user" && (
+                      <Action
+                        title="Edit Progress"
+                        icon={Icon.Pencil}
+                        onAction={() => {
+                          onEditProgress(progress);
+                        }}
+                      />
+                    )}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      title="Add New Progress"
+                      icon={Icon.Plus}
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      onAction={onAddProgress}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
 
       <List.Section title={`🔵 All Progress`}>
-        {userProgress.length == 0 ? (
-          <List.Item
-            icon={Icon.Plus}
-            title="Add New Progress"
-            actions={
-              <ActionPanel>
-                <Action title="Add New Progress" icon={Icon.Plus} onAction={onAddProgress} />
-              </ActionPanel>
-            }
-          />
+        {state.allProgress.length == 0 ? (
+          <List.Item icon={Icon.Plus} title="Add New Progress" actions={<ActionPanel></ActionPanel>} />
         ) : (
-          userProgress.filter((p) => !p.pinned).map(renderProgress)
+          state.allProgress
+            .filter((p) => !p.pinned)
+            .map((progress) => (
+              <List.Item
+                key={progress.key}
+                title={progress.title}
+                subtitle={getSubtitle(progress.progressNum)}
+                icon={getIcon(progress.progressNum)}
+                detail={<ProgressDetail progress={progress} />}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section>
+                      <Action title="Show Details" icon={Icon.AppWindowSidebarLeft} onAction={onShowingDetails} />
+                      <Action
+                        title={progress.pinned ? "Unpin it" : "Pin it"}
+                        icon={Icon.Pin}
+                        onAction={() => {
+                          togglePinProgress(progress);
+                        }}
+                      />
+                      <Action
+                        title={`${progress.menubar.shown ? "Hide From Menu Bar" : "Show In Menu Bar"}`}
+                        icon={progress.menubar.shown ? Icon.EyeDisabled : Icon.Eye}
+                        onAction={async () => {
+                          await toggleShowInMenubar(progress);
+                        }}
+                      />
+                      {progress.type === "user" && (
+                        <Action
+                          title="Edit Progress"
+                          icon={Icon.Pencil}
+                          onAction={() => {
+                            onEditProgress(progress);
+                          }}
+                        />
+                      )}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action
+                        title="Add New Progress"
+                        icon={Icon.Plus}
+                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        onAction={onAddProgress}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action
+                        title="Delete Progress"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        onAction={async () => {
+                          await onDeleteProgress(progress.key);
+                        }}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            ))
         )}
       </List.Section>
     </List>

@@ -1,6 +1,6 @@
 import { Color } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 
-export function getIcon(progressNumber: number) {
-  return getProgressIcon(progressNumber / 100, Color.PrimaryText);
+export function getIcon(progressNum: number) {
+  return getProgressIcon(progressNum / 100, Color.PrimaryText);
 }
