@@ -11,7 +11,7 @@ export default function FileGridItem(props: {
   extraKey?: string;
   desktopApp: Application | undefined;
   onVisit: (file: File) => void;
-  searchkeywords: string;
+  searchkeywords?: string;
 }) {
   const { file, extraKey, desktopApp, onVisit, searchkeywords } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
@@ -21,7 +21,7 @@ export default function FileGridItem(props: {
       id={fileIdentifier}
       title={file.name}
       content={file.thumbnail_url ?? "Missing thumbnail"}
-      keywords={[searchkeywords]}
+      keywords={[searchkeywords ?? ""]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
