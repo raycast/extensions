@@ -18,21 +18,59 @@
     {
       "name": "quick-latex",
       "title": "Quick LaTeX",
+      "subtitle": "Quick LaTeX",
       "description": "Quickly convert LaTeX to image and copy the image to the Clipboard.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "svgWidth",
+          "title": "SVG Width",
+          "description": "Width of the SVG image.",
+          "type": "textfield",
+          "default": "500",
+          "required": false
+        },
+        {
+          "name": "svgHeight",
+          "title": "SVG Height",
+          "description": "Height of the SVG image.",
+          "type": "textfield",
+          "default": "500",
+          "required": false
+        }, 
+        {
+          "name": "svgViewbox",
+          "title": "SVG Viewbox",
+          "description": "Viewbox of the SVG image.",
+          "type": "textfield",
+          "default": "0 0 50 50",
+          "required": false
+        }
+          
+      ],
+      "arguments": [
+        {
+          "name": "latex",
+          "type": "text",
+          "required": false,
+          "placeholder": "LaTeX"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.0",
-    "image-downloader": "^4.3.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.35.2",
+    "node-fetch": "^3.3.2",
+    "svgson": "^5.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^17.0.65",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {

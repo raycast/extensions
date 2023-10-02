@@ -24,7 +24,7 @@ function SearchRepositories() {
       `${searchFilter} ${searchText} fork:${preferences.includeForks} ${
         preferences.includeArchived ? "" : "archived:false"
       }`,
-    [searchText, searchFilter]
+    [searchText, searchFilter],
   );
 
   const {
@@ -38,12 +38,12 @@ function SearchRepositories() {
       return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
     },
     [query],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   const foundRepositories = useMemo(
     () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
-    [data]
+    [data],
   );
 
   return (

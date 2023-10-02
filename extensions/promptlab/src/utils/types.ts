@@ -109,6 +109,7 @@ export type CommandOptions = {
   actionScript?: string;
   showResponse?: boolean;
   useSaliencyAnalysis?: boolean;
+  useHorizonDetection?: boolean;
   scriptKind?: string;
   temperature?: string;
   model?: string;
@@ -258,6 +259,11 @@ export type Command = {
   useSaliencyAnalysis?: boolean;
 
   /**
+   * Whether to include the angle of the horizon in selected images in the data sent to the model.
+   */
+  useHorizonDetection?: boolean;
+
+  /**
    * The name of the author of the command.
    */
   author?: string;
@@ -364,6 +370,7 @@ export type StoreCommand = {
   showResponse?: string;
   description?: string;
   useSaliencyAnalysis?: string;
+  useHorizonDetection?: string;
   exampleOutput?: string;
   author?: string;
   website?: string;
@@ -881,11 +888,6 @@ export type Placeholder = {
   aliases?: string[];
 
   /**
-   * The rules that determine whether or not the placeholder should be replaced. If any of these rules return true, the placeholder will be replaced. If no rules are provided, the placeholder will always be replaced.
-   */
-  rules: ((str: string, context?: { [key: string]: string }) => Promise<boolean>)[];
-
-  /**
    * The function that applies the placeholder to a string.
    * @param str The string to apply the placeholder to.
    * @returns The string with the placeholder applied.
@@ -928,6 +930,11 @@ export type Placeholder = {
    * The demonstration representation of the placeholder, shown as the "name" of the placeholder when the placeholder is detected in a prompt.
    */
   hintRepresentation: string;
+
+  /**
+   * The full name representation of the placeholder, properly spaced.
+   */
+  fullRepresentation: string;
 };
 
 /**
@@ -963,7 +970,7 @@ export type CustomPlaceholder = {
 /**
  * A user-defined variable created via the {{set:...}} placeholder. These variables are stored in the extension's persistent local storage.
  */
-export interface PersistentVariable {
+export type PersistentVariable = {
   /**
    * The name of the variable.
    */
@@ -978,4 +985,89 @@ export interface PersistentVariable {
    * The original value of the variable.
    */
   initialValue: string;
+};
+
+/**
+ * The output of a data provider such as a script or fetch request.
+ */
+export interface DataProviderOutput {
+  /**
+   * The full text of the data provider's output.
+   */
+  stringValue: string;
+}
+
+/**
+ * The output of an image data provider.
+ */
+export interface ImageData extends DataProviderOutput {
+  /**
+   * Text extracted from the image.
+   */
+  imageText: string;
+
+  /**
+   * Coordinates of the image's points of interest.
+   */
+  imagePOI: string;
+
+  /**
+   * Payload values of barcodes and QR codes in the image.
+   */
+  imageBarcodes: string;
+
+  /**
+   * Labels for animals identified in the image.
+   */
+  imageAnimals: string;
+
+  /**
+   * Center coordinates and dimensions of rectangles identified in the image.
+   */
+  imageRectangles: string;
+
+  /**
+   * Labels for objects identified in the image.
+   */
+  imageSubjects: string;
+
+  /**
+   * The number of faces identified in the image.
+   */
+  imageFaces: string;
+
+  /**
+   * The angle of the horizon in the image.
+   */
+  imageHorizon: string;
+
+  /**
+   * The EXIF data of the image in JSON string format.
+   */
+  imageEXIFData?: string;
+}
+
+/**
+ * The output of a PDF data provider.
+ */
+export interface PDFData extends DataProviderOutput {
+  /**
+   * Text extracted from the PDF without using OCR.
+   */
+  pdfRawText: string;
+
+  /**
+   * Text extracted from the PDF using OCR.
+   */
+  pdfOCRText: string;
+}
+
+/**
+ * The output of an audio data provider.
+ */
+export interface AudioData extends DataProviderOutput {
+  /**
+   * Labels for sounds identified in the audio.
+   */
+  soundClassifications: string;
 }

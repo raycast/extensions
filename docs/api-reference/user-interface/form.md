@@ -546,6 +546,35 @@ export default function Command() {
 | focus | <code>() => void</code> | Makes the item request focus.                                              |
 | reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
 
+#### Form.DatePicker.isFullDay
+
+A method that determines if a given date represents a full day or a specific time.
+
+```ts
+import { ActionPanel, Form, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Event" onSubmit={(values) => {
+            if (Form.DatePicker.isFullDay(values.reminderDate)) {
+              // the event is for a full day
+            } else {
+              // the event is at a specific time
+            }
+          }} />
+        </ActionPanel>
+      }
+    >
+      <Form.DatePicker id="eventTitle" title="Title" />
+      <Form.DatePicker id="eventDate" title="Date" />
+    </Form>
+  );
+}
+```
+
 ### Form.Dropdown
 
 A form item with a dropdown menu.

@@ -159,6 +159,14 @@ export default function ExploreThemes() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                 />
 
+                <Action.Open
+                  title="Install Random Theme"
+                  icon={Icon.Stars}
+                  target={getThemeURL(filteredThemes[Math.floor(Math.random() * filteredThemes.length)])}
+                  onOpen={() => closeMainWindow()}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                />
+
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
                     title="Contribute"

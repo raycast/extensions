@@ -1,8 +1,9 @@
 import { environment, List, MenuBarExtra } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { authorize } from "../api/oauth";
+import { authorize, getEmail } from "../api/oauth";
 
 let token: string | null = null;
+let email: string | undefined;
 
 export function withGoogleAuth(component: JSX.Element) {
   const [x, forceRerender] = useState(0);
@@ -12,6 +13,7 @@ export function withGoogleAuth(component: JSX.Element) {
     (async function () {
       try {
         token = await authorize();
+        email = await getEmail();
         forceRerender(x + 1);
       } catch (error) {
         throw new Error(error instanceof Error ? error.message : "Something went wrong while authorizing");
@@ -39,4 +41,12 @@ export function getOAuthToken(): string {
   }
 
   return token;
+}
+
+export function getUserEmail(): string {
+  if (!email) {
+    throw new Error("getUserEmail must be used when authenticated");
+  }
+
+  return email;
 }

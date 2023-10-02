@@ -1,6 +1,6 @@
 import { Action, Icon, ActionPanel, showToast, Toast, confirmAlert, Color, useNavigation } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { IssuePriorityValue, User } from "@linear/sdk";
+import { IssuePriorityValue, ProjectMilestone, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
 import { format } from "date-fns";
 
@@ -25,6 +25,7 @@ import EditIssueForm from "../EditIssueForm";
 import IssueComments from "../IssueComments";
 import IssueCommentForm from "../IssueCommentForm";
 import CreateSubIssues from "../CreateSubIssues";
+import MilestoneSubmenu from "./MilestoneSubmenu";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -462,6 +463,8 @@ export default function IssueActions({
         <CycleSubmenu issue={issue} updateIssue={updateIssue} />
 
         <ProjectSubmenu issue={issue} updateIssue={updateIssue} />
+
+        <MilestoneSubmenu issue={issue} updateIssue={updateIssue} />
 
         <ParentIssueSubmenu issue={issue} updateIssue={updateIssue} />
 

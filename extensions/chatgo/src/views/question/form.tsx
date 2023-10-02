@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { uniqBy } from "lodash";
 import { QuestionFormProps } from "../../type";
 import { useState } from "react";

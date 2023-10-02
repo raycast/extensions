@@ -353,7 +353,9 @@
     "metakirby5",
     "macbookandrew",
     "shaoye",
-    "charlej"
+    "charlej",
+    "emlez",
+    "hendrikbunnick"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

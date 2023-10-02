@@ -17,11 +17,22 @@ async function runTerminal(item: ISSHConnection) {
   if (item.sshKey) {
     identity = `-i ${item.sshKey} `;
   }
-  let customport = "";
+  let customPort = "";
   if (item.port) {
-    customport = `-p ${item.port} `;
+    customPort = `-p ${item.port} `;
   }
-  const command = `ssh ${identity} ${item.user}@${item.address} ${customport}`;
+  let customCommand = "";
+  let interactive = "";
+  if (item.command) {
+    customCommand = `\\"${item.command}\\" `;
+    interactive = "-t";
+  }
+  let address = item.address;
+  if (item.user) {
+    address = `${encodeURIComponent(item.user)}@${address}`;
+  }
+
+  const command = ["ssh", interactive, identity, address, customPort, customCommand].filter(Boolean).join(" ");
 
   const scriptWarp = `
       -- For the latest version:
@@ -267,7 +278,7 @@ function Action({
 }
 
 function getSubtitle(item: ISSHConnection) {
-  return `${item.user}@${item.address}${item.port ? " Port:" + item.port : ""}${
-    item.sshKey ? " SSH Key:" + item.sshKey : ""
-  }`;
+  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${
+    item.sshKey ? " SSH Key: " + item.sshKey : ""
+  } ${item.command ? ' Command: "' + item.command + '"' : ""}`;
 }

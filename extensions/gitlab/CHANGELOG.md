@@ -1,5 +1,13 @@
 # GitLab Changelog
 
+## [Fixed unicode chars in title] - 2023-09-21
+
+- Fixed an error with unicode chars in titles
+
+## [Fixed menubar colors] - 2023-08-08
+
+- Fixes the dynamic color for the GitLab Menu Bar command icons, specifically the Merge Request one.
+
 ## [Optimize Recent Activities] - 2023-07-02
 
 - Add unsupported activity

@@ -1,5 +1,22 @@
 # DocCheck Changelog
 
+## [Version 2.1.1] - 2023-09-04
+- Fixed: removed the option to open an article with just the right arrow key (→) when there is a search query (so you move the cursor again with it)
+- Fixed: changed the shortcut for "Open Article in Browser" to ⇧ + ⏎ (because ⌘ + ⏎ is now reserved by Raycast)
+
+## [Version 2.1] - 2023-07-21
+- NEW: Favourites - pin an article to the main screen, you will see a "★" in front of the navigation title at the bottom if the article is a favourite (shortcut to favourite and unfavourite: ⌘ + F; you can also unfavourite an article in Home)
+- NEW: option to force reload Home with ⌘ + R
+- NEW: option to clear all history or favourites (no shortcut, because there is no second prompt)
+- NEW: show toast while fetching "Top Artikel", searching or loading an article
+- NEW: show toast when you try to favourite an unloaded article
+- Fixed: better support for links to non-existing articles (history and favourites now shows articles not yet written with a plus icon instead of a book in Home; there is no more Invalid last update date and ⏎ will open a browser so you can start writing this missing article; the error toast now shows a correct "Not found" message when opened)
+- Fixed: Home is updated automatically (shows history items immediately, and also new favourites, unfavourites)
+- Fixed: You can now read articles in the "Verbessere" section in raycast, instead of only editing them in the browser
+- Fixed: Images with links are now displayed correctly (without returns, see e.g. article [Enterostoma](https://flexikon.doccheck.com/de/Enterostoma))
+- Fixed: display error when article is not loaded and therefore cannot be favoured
+- Fixed: some under the hood improvements (more unique listkeys in Home, check if item is still loading before you can bookmark it)
+
 ## [Version 2.0] - 2023-06-08
 - NEW: Home - completely redesigned main screen shows the History from the last read articles (see below), "Neu erstellt", "Frisch verbessert", "Schreib über", "Verbessere" in addition to the "Top Artikel" (information from the [main page](https://flexikon.doccheck.com/de/Hauptseite))
 - NEW: Cache - all of the above is now cached (you can change the time for a refresh in settings)

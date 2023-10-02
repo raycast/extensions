@@ -39,13 +39,13 @@ function OpenIssuesMenu() {
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   return (
     <MenuBarRoot
       title={displayTitlePreference() ? `${data?.length}` : undefined}
-      icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+      icon="issue-opened.svg"
       isLoading={isLoading}
       tooltip="GitHub Open Issues"
     >

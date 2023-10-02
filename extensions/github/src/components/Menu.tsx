@@ -98,7 +98,7 @@ export function MenuBarSection(props: {
 }): JSX.Element | null {
   const title = joinNonEmpty(
     [props.title, props.subtitle].filter((e) => e),
-    " "
+    " ",
   );
   const { shown, hidden } = shownElements(props.children, props.maxChildren);
   const empty = shown === undefined || (shown as object[]).length <= 0;
@@ -120,7 +120,7 @@ export function MenuBarSubmenu(props: {
   const title =
     joinNonEmpty(
       [props.title, props.subtitle].filter((e) => e),
-      " "
+      " ",
     ) || "";
   return (
     <MenuBarExtra.Submenu title={title} icon={props.icon}>
