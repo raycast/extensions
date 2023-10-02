@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+
 import { request } from "./request";
 
 export type Filter = {
