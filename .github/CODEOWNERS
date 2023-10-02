@@ -383,7 +383,7 @@
 /extensions/github-status                            @FezVrasta
 /extensions/github-trending                          @mikqi
 /extensions/github-users                             @luisFilipePT
-/extensions/gitignore                                @daniel-stoneuk
+/extensions/gitignore                                @daniel-stoneuk @pernielsentikaer
 /extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss @metakirby5 @macbookandrew @shaoye @charl3j @emlez @HBunnick
 /extensions/gitlab-docs                              @saschaeggi
 /extensions/gitmoji                                  @ricoberger @DannySeidel
@@ -784,7 +784,7 @@
 /extensions/privileges                               @ph00lt0
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc @pernielsentikaer
-/extensions/productlane                              @scopsy @pernielsentikaer
+/extensions/productlane                              @scopsy @pernielsentikaer @DanielHougaard
 /extensions/projects                                 @ajaypremshankar
 /extensions/promptlab                                @SKaplanOfficial
 /extensions/proton-version                           @flavienbonvin @pernielsentikaer
@@ -1078,6 +1078,7 @@
 /extensions/ulid                                     @zephyrpathsofglory
 /extensions/ulysses                                  @praveenjuge
 /extensions/unicode-symbols                          @mmazzarolo @FezVrasta @pernielsentikaer
+/extensions/unifi                                    @tonka3000
 /extensions/unitex                                   @jaymody
 /extensions/universities                             @alewandows
 /extensions/unix-timestamp                           @Destiner
