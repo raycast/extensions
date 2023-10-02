@@ -14,7 +14,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const { data: starredFiles, isLoading: isLoadingStarredFiles } = useCachedPromise(
@@ -25,7 +25,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();

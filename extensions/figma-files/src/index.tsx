@@ -18,7 +18,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const {
@@ -177,8 +177,8 @@ export default function Command() {
             >
               <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
             </Grid.Section>
-          )
-        )
+          ),
+        ),
       )}
     </Grid>
   );
