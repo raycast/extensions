@@ -12,10 +12,11 @@ const ICONS_DIRECTORY = "/tmp/raycast/spanish-tv-guide/icons";
 const Command = () => {
   const [tvSchedule, setTvSchedule] = useState<TVSchedule>([]);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [iconsLoaded, setIconsLoaded] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<string | undefined>();
 
   useEffect(() => void tvScheduleRepository.getAll().then(setTvSchedule), []);
-  useEffect(() => void generateIcons(tvSchedule), [tvSchedule]);
+  useEffect(() => void generateIcons(tvSchedule).then(() => setIconsLoaded(true)), [tvSchedule]);
 
   const selectChannel = (channel: string | null) => {
     const channelSelected = !isNull(channel);
@@ -25,7 +26,7 @@ const Command = () => {
 
   return (
     <List
-      isLoading={isEmpty(tvSchedule)}
+      isLoading={isEmpty(tvSchedule) || !iconsLoaded}
       selectedItemId={selectedChannel}
       isShowingDetail={isShowingDetail}
       onSelectionChange={selectChannel}
