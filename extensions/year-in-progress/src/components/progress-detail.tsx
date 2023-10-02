@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
+import { Progress } from "../types";
 import { formatDate } from "../utils/date";
-import { Progress, getSubtitle } from "../utils/progress";
+import { getSubtitle } from "../utils/progress";
 
 type ProgressDetailProps = {
   progress: Progress;

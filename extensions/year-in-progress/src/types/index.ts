@@ -3,12 +3,11 @@ export type PerferenceValue = {
 };
 
 export type Progress = {
-  key: string;
   title: string;
   type?: "default" | "user";
   pinned?: boolean;
-  startDate: string;
-  endDate: string;
+  startDate: number;
+  endDate: number;
   progressNum: number;
   menubar: {
     shown?: boolean;

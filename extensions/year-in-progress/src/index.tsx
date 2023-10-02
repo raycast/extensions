@@ -1,14 +1,15 @@
 import { MenuBarExtra, openExtensionPreferences } from "@raycast/api";
 import { useLocalStorageProgress } from "./hooks/use-local-storage-progress";
+import { Progress } from "./types";
 import { getIcon } from "./utils/icon";
-import { Progress, getSubtitle } from "./utils/progress";
+import { getSubtitle } from "./utils/progress";
 
-export default function Command() {
+export default function Index() {
   const [state, setState] = useLocalStorageProgress();
-  const currMenubarProgress = state.allProgress.find((p) => p.key === state.currMenubarProgressKey);
+  const currMenubarProgress = state.allProgress.find((p) => p.title === state.currMenubarProgressTitle);
 
   const onUpdateCurrMenubarKey = (progress: Progress) => {
-    setState((prev) => ({ ...prev, currMenubarProgressKey: progress.key }));
+    setState((prev) => ({ ...prev, currMenubarProgressTitle: progress.title }));
   };
 
   return (
@@ -29,8 +30,8 @@ export default function Command() {
               .filter((p) => p.pinned)
               .map((progress) => (
                 <MenuBarExtra.Item
-                  key={progress.key}
-                  title={progress.title}
+                  key={progress.title}
+                  title={progress.menubar.title as string}
                   subtitle={`${getSubtitle(progress.progressNum)}`}
                   icon={getIcon(progress.progressNum)}
                   onAction={() => {
@@ -45,8 +46,9 @@ export default function Command() {
               .filter((p) => !p.pinned)
               .map((progress) => (
                 <MenuBarExtra.Item
-                  key={progress.key}
-                  title={progress.title}
+                  key={progress.title}
+                  title={progress.menubar.title as string}
+                  tooltip={progress.title}
                   subtitle={`${getSubtitle(progress.progressNum)}`}
                   icon={getIcon(progress.progressNum)}
                   onAction={() => {

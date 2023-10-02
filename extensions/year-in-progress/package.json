@@ -26,7 +26,7 @@
       "title": "Show X In Progress In Menu Bar",
       "description": "Display X In Progress In Menu Bar",
       "mode": "menu-bar",
-      "interval": "5m"
+      "interval": "2m"
     },
     {
       "name": "x-in-progress",

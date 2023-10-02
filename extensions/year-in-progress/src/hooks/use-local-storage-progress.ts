@@ -1,16 +1,31 @@
-import { useEffect, useState } from "react";
-import { Progress, defaultProgress } from "../utils/progress";
 import { LocalStorage } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { Progress } from "../types";
+import { defaultProgress, getProgressNumByDate, getQuarterProgressNum, getYearProgressNum } from "../utils/progress";
 
 const STORAGE_KEY = "xProgress";
 
-type State = { isLoading: boolean; allProgress: Progress[]; currMenubarProgressKey: string };
+type State = { isLoading: boolean; allProgress: Progress[]; currMenubarProgressTitle: string };
 
-export function useLocalStorageProgress(): [State, React.Dispatch<React.SetStateAction<State>>, () => Promise<State>] {
+function getLatestProgressNum(progress: Progress) {
+  if (progress.title === "Year In Progress") {
+    return getYearProgressNum();
+  }
+  if (progress.title === "Quarter In Progress") {
+    return getQuarterProgressNum();
+  }
+  return getProgressNumByDate(new Date(progress.startDate), new Date(progress.endDate));
+}
+
+export function useLocalStorageProgress(): [
+  State,
+  React.Dispatch<React.SetStateAction<State>>,
+  () => Promise<Omit<State, "isLoading">>
+] {
   const [state, setState] = useState<State>({
     isLoading: true,
     allProgress: defaultProgress,
-    currMenubarProgressKey: defaultProgress[0].key,
+    currMenubarProgressTitle: defaultProgress[0].title,
   });
 
   useEffect(() => {
@@ -21,7 +36,7 @@ export function useLocalStorageProgress(): [State, React.Dispatch<React.SetState
           ...prev,
           isLoading: false,
           allProgress: defaultProgress,
-          currMenubarProgressKey: defaultProgress[0].key,
+          currMenubarProgressTitle: defaultProgress[0].title,
         }));
         return;
       }
@@ -31,15 +46,19 @@ export function useLocalStorageProgress(): [State, React.Dispatch<React.SetState
         setState((prev) => ({
           ...prev,
           isLoading: false,
-          allProgress: xProgress.allProgress,
-          currMenubarProgressKey: xProgress.currMenubarProgressKey,
+          allProgress: xProgress.allProgress.map((progress) => ({
+            ...progress,
+            // Re-calulate progress when accessing it
+            progressNum: getLatestProgressNum(progress),
+          })),
+          currMenubarProgressTitle: xProgress.currMenubarProgressTitle,
         }));
       } catch (err) {
         setState((prev) => ({
           ...prev,
           isLoading: false,
           allProgress: defaultProgress,
-          currMenubarProgressKey: defaultProgress[0].key,
+          currMenubarProgressTitle: defaultProgress[0].title,
         }));
       }
     })();
@@ -48,17 +67,33 @@ export function useLocalStorageProgress(): [State, React.Dispatch<React.SetState
   useEffect(() => {
     LocalStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ allProgress: state.allProgress, currMenubarProgressKey: state.currMenubarProgressKey })
+      JSON.stringify({ allProgress: state.allProgress, currMenubarProgressTitle: state.currMenubarProgressTitle })
     );
-  }, [state.allProgress, state.currMenubarProgressKey]);
+  }, [state.allProgress, state.currMenubarProgressTitle]);
 
-  const getLatestState = async () => {
+  const getLatestXProgress = async () => {
     const storedAllProgress = await LocalStorage.getItem<string>(STORAGE_KEY);
     if (!storedAllProgress) {
-      return storedAllProgress;
+      return { allProgress: defaultProgress, currMenubarProgressTitle: defaultProgress[0].title };
     }
-    return JSON.parse(storedAllProgress);
+
+    try {
+      const xProgress: Omit<State, "isLoading"> = JSON.parse(storedAllProgress);
+      return {
+        ...xProgress,
+        allProgress: xProgress.allProgress.map((progress) => ({
+          ...progress,
+          // Re-calulate progress when accessing it
+          progressNum: getLatestProgressNum(progress),
+        })),
+      };
+    } catch (err) {
+      return {
+        allProgress: defaultProgress,
+        currMenubarProgressTitle: defaultProgress[0].title,
+      };
+    }
   };
 
-  return [state, setState, getLatestState];
+  return [state, setState, getLatestXProgress];
 }

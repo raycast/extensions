@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { useState } from "react";
-import { Progress } from "../utils/progress";
 import { useLocalStorageProgress } from "../hooks/use-local-storage-progress";
+import { Progress } from "../types";
 
 type FormError = {
   titleError: string | undefined;
@@ -60,34 +60,41 @@ export default function AddOrEditProgress(props: AddOrEditProgressProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Progress Title"
-        placeholder="Enter the progress title"
-        value={formValue.title}
-        onBlur={(event) => {
-          const title = event.target.value;
-          if (!title) {
-            setError({ ...error, titleError: "The field should't be empty!" });
-          } else if (!props.progress && state.allProgress.findIndex((progress) => progress.title === title) > -1) {
-            setError({ ...error, titleError: "The progress already exists!" });
-          } else {
-            setError({ ...error, titleError: undefined });
-          }
-          setFormValue({ ...formValue, title });
-        }}
-        onChange={(title) => {
-          if (!title) {
-            setError({ ...error, titleError: "The field should't be empty!" });
-          } else if (!props.progress && state.allProgress.findIndex((progress) => progress.title === title) > -1) {
-            setError({ ...error, titleError: "The progress already exists!" });
-          } else {
-            setError({ ...error, titleError: undefined });
-          }
-          setFormValue({ ...formValue, title });
-        }}
-        error={error.titleError}
-      />
+      {props.progress ? (
+        // edit mode
+        <Form.Description title="title" text={props.progress?.title as string} />
+      ) : (
+        // creation mode
+        <Form.TextField
+          id="title"
+          title="Progress Title"
+          placeholder="Enter the progress title"
+          value={formValue.title}
+          onBlur={(event) => {
+            const title = event.target.value;
+            if (!title) {
+              setError({ ...error, titleError: "The field should't be empty!" });
+            } else if (!props.progress && state.allProgress.findIndex((progress) => progress.title === title) > -1) {
+              setError({ ...error, titleError: "The progress already exists!" });
+            } else {
+              setError({ ...error, titleError: undefined });
+            }
+            setFormValue({ ...formValue, title });
+          }}
+          onChange={(title) => {
+            if (!title) {
+              setError({ ...error, titleError: "The field should't be empty!" });
+            } else if (!props.progress && state.allProgress.findIndex((progress) => progress.title === title) > -1) {
+              setError({ ...error, titleError: "The progress already exists!" });
+            } else {
+              setError({ ...error, titleError: undefined });
+            }
+            setFormValue({ ...formValue, title });
+          }}
+          error={error.titleError}
+        />
+      )}
+
       <Form.TextField
         id="menubarTitle"
         title="Title In Menu Bar"
