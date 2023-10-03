@@ -5,6 +5,9 @@
   "description": "UrbanDictionary's Word of the Day",
   "icon": "command-icon.png",
   "author": "r0hin",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Fun"
   ],
