@@ -5,6 +5,7 @@ import { BugzillaInstance } from "../interfaces/bugzilla";
 import { Bug } from "../interfaces/bug";
 import { Preferences } from "../interfaces/preferences";
 import { listBugzilla } from "../utils/api/storage";
+import { ManageInstanceEmptyView } from "./manageInstance";
 
 export interface FetchProps {
   bugs?: string[];
@@ -247,15 +248,7 @@ export function QuicksearchBugs() {
       onSearchTextChange={fetch}
       throttle
     >
-      {bugzillaList.length === 0 ? (
-        <List.EmptyView
-          title="No Instances Found"
-          description="Add a Bugzilla instance using `Manage Bugzilla Instances` command"
-          icon="Bugzilla.png"
-        />
-      ) : (
-        <></>
-      )}
+      {bugzillaList.length === 0 ? <ManageInstanceEmptyView /> : <></>}
 
       {selectedBugzilla !== undefined ? <List.EmptyView title="No Bugs Found" icon="Bugzilla.png" /> : <></>}
       {selectedBugzilla !== undefined ? (
@@ -339,15 +332,7 @@ export function FetchBugs(props: FetchProps) {
       isLoading={isLoading}
       searchBarPlaceholder="Filter Bug IDs"
     >
-      {bugzillaList.length === 0 ? (
-        <List.EmptyView
-          title="No Instances Found"
-          description="Add a Bugzilla instance using `Manage Bugzilla Instances` command"
-          icon="Bugzilla.png"
-        />
-      ) : (
-        <></>
-      )}
+      {bugzillaList.length === 0 ? <ManageInstanceEmptyView /> : <></>}
 
       {selectedBugzilla !== undefined ? <List.EmptyView title={"No Bugs Found"} icon="Bugzilla.png" /> : <></>}
       {selectedBugzilla !== undefined ? (
