@@ -43,7 +43,7 @@ const mapToProgram = (program: ProgramResponse, lastProgram: Program | undefined
 
 const channelScheduleWithLiveProgram = ({ schedule, icon, name }: ChannelSchedule): ChannelSchedule => {
   const currentProgram = findLast(schedule, (program) => program.startTime < now());
-  const programs: Program[] = currentProgram ? scheduleWithLiveProgram(schedule, currentProgram) : schedule;
+  const programs = currentProgram ? scheduleWithLiveProgram(schedule, currentProgram) : schedule;
   return { icon, name, schedule: programs };
 };
 
