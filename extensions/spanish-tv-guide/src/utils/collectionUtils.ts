@@ -8,10 +8,10 @@ const replace = <T>(item: T) => {
       with: (newItem: T): T[] => {
         const listWithoutItem = without([item], list);
         return Maybe.fromNull(scan((currentItem: T) => equals(currentItem, item))(list))
-          .map(item => insert(indexOf(item, list), newItem, listWithoutItem))
+          .map((item) => insert(indexOf(item, list), newItem, listWithoutItem))
           .orJust(list);
-      }
-    })
+      },
+    }),
   };
 };
 

@@ -32,7 +32,7 @@ const mapToSchedule = (programs: ProgramResponse[]) => {
     const currentProgram = mapToProgram(program, last(programs));
     return [...programs, currentProgram];
   }, []);
-}
+};
 
 const mapToProgram = (program: ProgramResponse, lastProgram: Program | undefined): Program => {
   const startTime = parseTime(program.HORA_INICIO);
@@ -42,13 +42,15 @@ const mapToProgram = (program: ProgramResponse, lastProgram: Program | undefined
 };
 
 const channelScheduleWithLiveProgram = ({ schedule, icon, name }: ChannelSchedule): ChannelSchedule => {
-  const currentProgram = findLast(schedule, (program => program.startTime < now()));
+  const currentProgram = findLast(schedule, (program) => program.startTime < now());
   const programs: Program[] = currentProgram ? scheduleWithLiveProgram(schedule, currentProgram) : schedule;
   return { icon, name, schedule: programs };
 };
 
 const scheduleWithLiveProgram = (programs: Program[], currentProgram: Program): Program[] => {
-  return replace(currentProgram).in(programs).with({ ...currentProgram, live: true });
+  return replace(currentProgram)
+    .in(programs)
+    .with({ ...currentProgram, live: true });
 };
 
 export const tvScheduleRepository = { getAll };
