@@ -1,4 +1,4 @@
-import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
@@ -106,10 +106,19 @@ export function useSearch() {
   }
 
   async function deleteAllHistory() {
-    await LocalStorage.removeItem(HISTORY_KEY);
-
-    setHistory([]);
-    showToast(Toast.Style.Success, "Cleared search history");
+    await confirmAlert({
+      title: "Clear history",
+      message: "Do you want to clear the history?",
+      primaryAction: {
+        title: "Yes",
+        style: Alert.ActionStyle.Destructive,
+        onAction: async () => {
+          await LocalStorage.removeItem(HISTORY_KEY);
+          setHistory([]);
+          showToast(Toast.Style.Success, "Cleared search history");
+        },
+      },
+    });
   }
 
   async function deleteHistoryItem(result: SearchResult) {

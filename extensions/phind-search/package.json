@@ -5,6 +5,9 @@
   "description": "Search anything with Phind",
   "icon": "command-icon.png",
   "author": "Chuck",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {

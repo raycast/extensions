@@ -1,6 +1,5 @@
 # Phind Search Changelog
 
-
 ## fix: remember context - 2023-04-19
 
 ## feat: support search context - 2023-04-18

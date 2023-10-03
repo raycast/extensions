@@ -8,7 +8,12 @@ export default function Command() {
   const { push } = useNavigation();
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Phind or enter a URL...">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={search}
+      throttle
+      searchBarPlaceholder="Search Phind or enter a URL..."
+    >
       <List.Section title="Results" subtitle={results.length + ""}>
         {results.map((item) => (
           <List.Item
@@ -32,14 +37,18 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy URL to Clipboard"
                     content={item.url}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
-                  <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
+                  <Action.CopyToClipboard
+                    title="Copy Suggestion to Clipboard"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                    content={item.query}
+                  />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="Context">
                   <Action
-                    title="Add any extra code or context"
+                    title="Add Extra Code or Context"
                     onAction={async () => {
                       push(<Context />);
                     }}
@@ -51,12 +60,13 @@ export default function Command() {
                 <ActionPanel.Section title="History">
                   {item.isHistory && (
                     <Action
-                      title="Remove From History"
+                      title="Remove from History"
                       onAction={async () => {
                         await deleteHistoryItem(item);
                       }}
                       icon={{ source: Icon.Trash }}
-                      shortcut={{ modifiers: ["cmd"], key: "d" }}
+                      style={Action.Style.Destructive}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     />
                   )}
 
@@ -65,7 +75,9 @@ export default function Command() {
                     onAction={async () => {
                       await deleteAllHistory();
                     }}
+                    style={Action.Style.Destructive}
                     icon={{ source: Icon.ExclamationMark }}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
