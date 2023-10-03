@@ -85,11 +85,7 @@ const loadEntries = () =>
   );
 
 const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
-  if (
-    data.toString().indexOf("Enter password to unlock") != -1 ||
-    data.toString().indexOf("Maximum depth of replacement has been reached") != -1 ||
-    data.toString().trim().length == 0
-  ) {
+  if (data.toString().indexOf("Enter password to unlock") != -1 || data.toString().trim().length == 0) {
     return;
   }
   reject(new Error(data.toString()));
@@ -141,7 +137,7 @@ const pastePassword = async (entry: string) => {
 const copyPassword = async (entry: string) =>
   getPassword(entry).then((password) => {
     showHUD("Password has been Copied to Clipboard");
-    return protectedCopy(password).then(() => password);
+    return Clipboard.copy(password, { concealed: true }).then(() => password);
   });
 
 const pasteUsername = async (entry: string) => {
@@ -157,10 +153,17 @@ const copyUsername = async (entry: string) =>
     return Clipboard.copy(username).then(() => username);
   });
 
+const pasteTOTP = async (entry: string) => {
+  console.log("paste totp of entry:", entry);
+  return getTOTP(entry).then((otp) => {
+    return Clipboard.paste(otp).then(() => otp);
+  });
+};
+
 const copyTOTP = async (entry: string) =>
   getTOTP(entry).then((otp) => {
     showHUD("TOTP has been Copied to Clipboard");
-    return protectedCopy(otp).then(() => otp);
+    return Clipboard.copy(otp, { concealed: true }).then(() => otp);
   });
 
 const getTOTP = (entry: string) =>
@@ -187,22 +190,4 @@ const getTOTP = (entry: string) =>
     });
   });
 
-async function protectedCopy(concealString: string) {
-  // await closeMainWindow();
-  const script = `
-      use framework "Foundation"
-      set type to current application's NSPasteboardTypeString
-      set pb to current application's NSPasteboard's generalPasteboard()
-      pb's clearContents()
-      pb's setString:"" forType:"org.nspasteboard.ConcealedType"
-      pb's setString:"${concealString}" forType:type
-    `;
-  try {
-    await runAppleScript(script);
-  } catch {
-    // Applescript failed to conceal what is being placed in the pasteboard
-    await showHUD("Protect copy failed...");
-  }
-}
-
-export { loadEntries, pastePassword, getPassword, copyPassword, copyUsername, pasteUsername, copyTOTP };
+export { loadEntries, pastePassword, pasteUsername, pasteTOTP, getPassword, copyPassword, copyUsername, copyTOTP };

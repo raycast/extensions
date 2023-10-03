@@ -1,5 +1,13 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast } from "@raycast/api";
-import { loadEntries, pastePassword, copyPassword, copyUsername, pasteUsername, copyTOTP } from "./utils/keepassLoader";
+import {
+  loadEntries,
+  pastePassword,
+  pasteUsername,
+  pasteTOTP,
+  copyPassword,
+  copyUsername,
+  copyTOTP,
+} from "./utils/keepassLoader";
 import { useState, useEffect } from "react";
 
 const errorHandler = (e: { message: string }) => {
@@ -72,9 +80,19 @@ export default function Command() {
                 }}
               />
               <Action
+                title="Paste TOTP"
+                icon={Icon.BlankDocument}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+                onAction={() => {
+                  pasteTOTP(entry)
+                    .then(() => closeMainWindow())
+                    .catch(errorHandler);
+                }}
+              />
+              <Action
                 title="Copy Password"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                shortcut={{ modifiers: ["cmd"], key: "g" }}
                 onAction={() => {
                   copyPassword(entry)
                     .then(() => closeMainWindow())
@@ -84,7 +102,7 @@ export default function Command() {
               <Action
                 title="Copy Username"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "u" }}
+                shortcut={{ modifiers: ["cmd"], key: "b" }}
                 onAction={() => {
                   copyUsername(entry)
                     .then(() => closeMainWindow())
