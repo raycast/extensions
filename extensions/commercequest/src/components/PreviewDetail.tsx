@@ -3,7 +3,7 @@ import { SearchResult } from "../lib/types";
 import { mapIconCode } from "../lib/utils";
 import html2md from "html-to-md";
 
-export default function Preview(searchResult: SearchResult) {
+export default function PreviewDetail(searchResult: SearchResult) {
   return (
     <Detail
       isLoading={false}
@@ -42,10 +42,14 @@ export default function Preview(searchResult: SearchResult) {
             ))}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          {searchResult.insertUser != null && searchResult.insertUser.name ? (
+          {searchResult.insertUser?.name ? (
             <Detail.Metadata.Label
               title="Author"
-              icon={searchResult.insertUser.photoUrl ? searchResult.insertUser.photoUrl : Icon.Person}
+              icon={
+                searchResult.insertUser.photoUrl && searchResult.insertUser.name != "System"
+                  ? searchResult.insertUser.photoUrl
+                  : Icon.Person
+              }
               text={searchResult.insertUser.name}
             />
           ) : null}
