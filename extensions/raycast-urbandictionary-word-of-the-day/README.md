@@ -1,3 +1,3 @@
 # Word of the Day
 
-UrbanDictionary's Word of the Day
+Urban Dictionary's Word of the Day
