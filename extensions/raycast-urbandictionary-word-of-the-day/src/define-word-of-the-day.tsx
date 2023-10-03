@@ -15,6 +15,7 @@ type DefintionList = {
 
 export default function Command() {
   const [markdown, setMarkdown] = useState(`# Loading...`);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Fetch word of the day from urban dictionary
 
@@ -26,6 +27,7 @@ export default function Command() {
       let subtitle = wordOfTheDay.definition;
       subtitle = subtitle.replaceAll("[", "").replaceAll("]", "");
       setMarkdown(`# ${title}\n\n${subtitle}\n\n\n✅: ${wordOfTheDay.thumbs_up} ❌: ${wordOfTheDay.thumbs_down}`);
+      setIsLoading(false);
     });
 
     return () => {
@@ -33,5 +35,5 @@ export default function Command() {
     };
   }, []);
 
-  return <Detail markdown={markdown} />;
+  return <Detail isLoading={isLoading} markdown={markdown} />;
 }
