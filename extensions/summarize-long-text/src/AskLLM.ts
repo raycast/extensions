@@ -1,5 +1,5 @@
-import { AI, environment } from "@raycast/api";
-import { LLMParams, LLMResponse } from "./interfaces";
+import { AI } from "@raycast/api";
+import { LLMParams, LLMResponse, ModelSizes } from "./interfaces";
 import OpenAI from "openai";
 
 /**
@@ -56,3 +56,21 @@ const AskLLM = async (text: string, LLMParams: LLMParams): Promise<LLMResponse> 
 };
 
 export default AskLLM;
+
+export function getModelMaxTokens(modelName: string) {
+  const modelSizes: ModelSizes = {
+    "raycast-gpt-3.5-turbo": 16000,
+    "OPENAI-gpt-3.5": 8000,
+    "OPENAI-gpt-3.5-turbo-16k": 16000,
+    "OPENAI-gpt-4": 8000,
+  };
+
+  return modelSizes[modelName] || 8000;
+}
+
+export function getModelUsableTokens(modelName: string) {
+  // This is a bit of a hack to get the max usable characters for a model
+  // Get max token context size and substract 1000 for prompt and system and
+  // 1500 tokens for response. Rest is for text to summarize
+  return getModelMaxTokens(modelName) - 2500 || 5500;
+}

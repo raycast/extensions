@@ -11,12 +11,8 @@
       "title": "Choose AI Model",
       "description": "Choose between Raycast AI or GPT models",
       "type": "dropdown",
-      "default": "raycast ai 4",
+      "default": "raycast-gpt-3.5-turbo",
       "data": [
-        {
-          "value": "raycast-text-davinci-003",
-          "title": "Raycast AI 3"
-        },
         {
           "value": "raycast-gpt-3.5-turbo",
           "title": "Raycast AI 3.5"
@@ -89,44 +85,6 @@
       "type": "textfield",
       "default": "english",
       "required": false
-    },
-    {
-      "name": "maxChars",
-      "title": "Maximum Characters",
-      "description": "What is the maximum number of characters for the summary? Higher means more detail, but could exceed token limit for further summarization.",
-      "type": "dropdown",
-      "default": "6000",
-      "data": [
-        {
-          "value": "2000",
-          "title": "very, very Short (~500 tokens)"
-        },
-        {
-          "value": "4000",
-          "title": "Very Short (~1000 tokens)"
-        },
-        {
-          "value": "6000",
-          "title": "Short (~1500 tokens)"
-        },
-        {
-          "value": "8000",
-          "title": "Medium (~2000 tokens, best for Raycast AI)"
-        },
-        {
-          "value": "12000",
-          "title": "Large (~3000 tokens, best for GPT)"
-        },
-        {
-          "value": "20000",
-          "title": "Very large (~5000 tokens, ideal for GPT 16K)"
-        },
-        {
-          "value": "30000",
-          "title": "Maximum (~7500 tokens, only for GPT 16K and larger)"
-        }
-      ],
-      "required": false
     }
   ],
   "categories": [
@@ -148,7 +106,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.58.1",
+    "@raycast/api": "^1.59.0",
     "cohere-ai": "^6.2.2"
   },
   "devDependencies": {

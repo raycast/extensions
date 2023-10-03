@@ -4,6 +4,7 @@ import AskLLM from "./AskLLM";
 import { getBlockSummaryPrompt, getFinalSummaryPrompt } from "./prompts";
 import { encodingForModel } from "js-tiktoken";
 import { LLMParams } from "./interfaces";
+import { getModelUsableTokens } from "./AskLLM";
 
 // Define an interface for the result from the AI
 interface AIResult {
@@ -14,15 +15,20 @@ interface AIResult {
  * Splits a given text into smaller chunks.
  *
  * @param text - The text to be split.
- * @param chunkSize - Maximum size of each chunk.
+ * @param chunkSize - Maximum size of each chunk in tokens.
  * @param chunkOverlap - Number of overlapping characters between chunks.
  * @returns An array of text chunks.
  */
-export const splitText = async (text: string, chunkSize = 1000, chunkOverlap = 0): Promise<string[]> => {
+export const splitText = async (text: string, chunkSize = 4000, chunkOverlap = 50): Promise<string[]> => {
   // Initialize the text splitter
+  // Cannot get TokenTextSplitter to work, so converting to characters
+  const tokensInChars = Math.round((chunkSize * text.length) / getTokens(text));
+  const overlapInChars = Math.round((chunkOverlap * text.length) / getTokens(text));
+  //console.log("TOKENS IN CHARS: ", tokensInChars, "OVERLAP ", overlapInChars);
+
   const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: chunkSize,
-    chunkOverlap: chunkOverlap,
+    chunkSize: tokensInChars,
+    chunkOverlap: overlapInChars,
   });
 
   // Perform the text split operation
@@ -40,13 +46,14 @@ export const splitText = async (text: string, chunkSize = 1000, chunkOverlap = 0
  * @returns A string of concatenated summaries.
  */
 export const getBlockSummaries = async (text: string, LLMParams: LLMParams): Promise<string> => {
-  const splitTexts = await splitText(text, LLMParams.maxChars, 0);
-  console.log("SplitTexts: ", splitTexts.length);
+  // console.log("getBlockSummaries: ", text.length, " tokens: ", getTokens(text), " max usable tokens: ", getModelUsableTokens(LLMParams.modelName));
+  const splitTexts = await splitText(text, getModelUsableTokens(LLMParams.modelName), 50);
+  // console.log("SplitTexts: ", splitTexts.length);
 
   // Generate summaries for each text block
   const temporarySummaries = await Promise.all(
     splitTexts.map(async (summaryBlock, i) => {
-      const prompt = getBlockSummaryPrompt(i, splitTexts.length, summaryBlock, LLMParams.maxChars, LLMParams.language);
+      const prompt = getBlockSummaryPrompt(i, splitTexts.length, summaryBlock, LLMParams.language);
       const aiResult: AIResult = await AskLLM(prompt, LLMParams);
       return aiResult.text;
     })
@@ -63,7 +70,7 @@ export const getBlockSummaries = async (text: string, LLMParams: LLMParams): Pro
  */
 export const getSummary = async (text: string, LLMParams: LLMParams): Promise<string> => {
   // If text is too long, we need to split it in smaller chunks
-  if (text.length > LLMParams.maxChars) {
+  if (getTokens(text) > getModelUsableTokens(LLMParams.modelName)) {
     text = await getBlockSummaries(text, LLMParams);
   }
   const prompt = getFinalSummaryPrompt(text, LLMParams.language);
@@ -72,15 +79,14 @@ export const getSummary = async (text: string, LLMParams: LLMParams): Promise<st
 };
 
 /**
- * Calculates the number of characters and tokens used for a text
+ * Calculates the number tokens used for a text
  *
  * @param text - The text to analyze.
  * @param encoding - Encoding to calculate tokens.
- * @returns Object containing the number of characters and tokens.
+ * @returns number of tokens.
  */
-export const getCharsAndTokens = (text: string): { chars: number; tokens: number } => {
+export const getTokens = (text: string): number => {
   const encoding = encodingForModel("gpt-4");
   const tokens = encoding.encode(text).length; // Assumes getEncoding().encode() is a valid function
-  const chars = text.length;
-  return { chars, tokens }; // Return as an object
+  return tokens;
 };

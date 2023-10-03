@@ -8,8 +8,7 @@ const defaultLanguage = preferences.language || "English";
  * @param index - The current block index (0-based).
  * @param splitTexts - The total number of text blocks.
  * @param summaryBlock - The content of the current text block.
- * @param maxChars - The maximum number of characters for the summary.
- *  @param language - The language in which the summary should be written. Defaults to "English".
+ * @param language - The language in which the summary should be written. Defaults to "English".
 
  * @returns A prompt string for summarizing the block.
  */
@@ -17,7 +16,6 @@ export function getBlockSummaryPrompt(
   index: number,
   splitTexts: number,
   summaryBlock: string,
-  maxChars: number,
   language: string = defaultLanguage
 ): string {
   if (!summaryBlock) {
@@ -34,7 +32,6 @@ Keep these in mind:
  -Use simple words and short sentences so everyone can understand it
 - Use bullet points if possible
 - Write in Axios Smart Brevity style - quick and clear
-- In no case use more than ${Math.round(maxChars / splitTexts)} characters 
 - Summary should be in ${language}
 - Start the summary with the text "\n<Summary of part ${index + 1} of ${splitTexts}>\n
 

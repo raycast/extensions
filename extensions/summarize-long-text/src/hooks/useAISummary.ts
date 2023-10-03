@@ -1,4 +1,16 @@
 /**
+ * Minimum length of text to summarize.
+ * Any text shorter than this will return early from the hook.
+ */
+const MIN_TEXT_LENGTH = 100;
+
+/**
+ * Factor to ensure we don't hit rate limits.
+ * Used to safeguard against firing too many requests and getting a 429 error.
+ */
+const REQUEST_LIMIT_FACTOR = 7;
+
+/**
  * Custom React hook to fetch AI-generated summary based on user preferences.
  *
  * @param text - The text to summarize.
@@ -7,8 +19,9 @@
 
 import { useState, useEffect } from "react";
 import { getPreferenceValues, AI, environment, showToast } from "@raycast/api";
-import { getSummary, getCharsAndTokens, getBlockSummaries } from "../utils";
+import { getSummary, getTokens, getBlockSummaries } from "../utils";
 import { LLMParams } from "../interfaces";
+import { getModelUsableTokens } from "../AskLLM";
 
 import {
   NO_ACCESS_TO_RAYCAST_AI,
@@ -31,7 +44,6 @@ const useAISummary = (text: string | null): { summary: string | null; isLoading:
     modelName: preferences.chosenModel || "raycast-gpt-3.5-turbo",
     openaiApiToken: preferences.openaiApiToken || null,
     creativity: Number(preferences.creativity) || 0.75,
-    maxChars: Number(preferences.maxChars) || 5000,
     language: preferences.language || "English",
   };
 
@@ -42,27 +54,23 @@ const useAISummary = (text: string | null): { summary: string | null; isLoading:
     const fetchSummary = async () => {
       setIsLoading(true);
 
-      // this is mainly to prevent the extension from accidentally firing
-      // while developing
-      if (!text || text.length < 100) {
+      // return early if no text or text is too short
+      if (!text || text.length < MIN_TEXT_LENGTH) {
         setIsLoading(false);
-        console.log("No text, returning early.");
+        // console.log("No text, returning early.");
         return;
       }
 
-      // both openAI and raycast AI have a limit of 10 requests per minute
-      // if text is too long, we run the risk of firing to many requests
-      // and getting a 429 error
-      // use 7 as a factor to account for prompt text and a bit of slack
-      // TODO: maybe use utils.getCharsAndTokens() to calculate promp and text lenght
-      // and be more precise
-      if (text.length > LLMParams.maxChars * 7) {
+      // Calculate token counts to manage API rate limits.
+      const maxUsableTokens = getModelUsableTokens(LLMParams.modelName);
+      const textTokens = getTokens(text);
+
+      // Check if the text length is too long for the 10 per minute rate limit
+      if (textTokens > maxUsableTokens * REQUEST_LIMIT_FACTOR) {
         setIsLoading(false);
-        const prefMessage = `"Text is too long (${
-          text.length
-        } characters). Maximum Characters needs to be > ${Math.round(text.length / 7)} (currently ${
-          LLMParams.maxChars
-        }). Make sure to choose a model that supports this size"`;
+        const prefMessage = `"Text is too long (${text.length} characters and ${getTokens(
+          text
+        )} tokens). Try to select a mode that supports this size"`;
         setPrefMessage(prefMessage);
         showToast(TEXT_TOO_LONG);
         return;
@@ -87,29 +95,31 @@ const useAISummary = (text: string | null): { summary: string | null; isLoading:
       // TODO handle no access to openAI eg wrong API key
 
       try {
-        console.log(`Command name: ${environment.commandName}`);
-        showToast(text.length > LLMParams.maxChars ? LONG_TEXT : SUMMARIZING_TEXT);
+        //  throw new Error("Stopping here for debugging");
+        // console.log(`Command name: ${environment.commandName}`);
+        showToast(textTokens > maxUsableTokens ? LONG_TEXT : SUMMARIZING_TEXT);
 
         let finalSummary = "";
         // if we want final summary or have a short text, we use final summary
-        if (environment.commandName === "summarizeLongText" || text.length < LLMParams.maxChars) {
+        if (environment.commandName === "summarizeLongText" || textTokens < maxUsableTokens) {
+          // console.log("in summarizeLongText");
           // Fetch summary from AI
-          finalSummary = await getSummary(text, LLMParams);
+          finalSummary = await getSummary(text as string, LLMParams);
         }
         // if we want the summaries of chunks without final summarization, we use block summaries
-        if (environment.commandName === "summarizeBlocks") {
-          finalSummary = await getBlockSummaries(text, LLMParams);
+        else if (environment.commandName === "summarizeBlocks") {
+          // console.log("in summarizeBlocks");
+          finalSummary = await getBlockSummaries(text as string, LLMParams);
         }
         setSummary(finalSummary);
+        setIsLoading(false);
 
         showToast({
           ...SUCCESS_SUMMARIZING_TEXT,
-          message: `tokens: ${getCharsAndTokens(finalSummary).tokens}, chars: ${getCharsAndTokens(finalSummary).chars}`,
+          message: `summary tokens: ${getTokens(finalSummary)}`,
         });
       } catch (error: unknown) {
         error instanceof Error && showToast({ ...ERROR_SUMMARIZING_TEXT, message: error.message });
-      } finally {
-        setIsLoading(false);
       }
     };
 

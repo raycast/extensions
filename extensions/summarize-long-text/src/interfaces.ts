@@ -5,14 +5,12 @@
  * @property modelName - The name of the AI model to be used.
  * @property openaiApiToken - API token for OpenAI, null if not applicable.
  * @property creativity - Controls how creative the model's responses will be.
- * @property maxChars - Maximum number of characters for the AI to generate.
  * @property language - Language in which the AI model should interact.
  */
 export interface LLMParams {
   modelName: string;
   openaiApiToken: string | null;
   creativity: number;
-  maxChars: number;
   language: string;
 }
 
@@ -24,4 +22,8 @@ export interface LLMParams {
  */
 export interface LLMResponse {
   text: string;
+}
+
+export interface ModelSizes {
+  [key: string]: number;
 }

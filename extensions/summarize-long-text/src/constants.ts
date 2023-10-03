@@ -9,7 +9,7 @@ export const LONG_TEXT = {
 export const TEXT_TOO_LONG = {
   style: Toast.Style.Failure,
   title: "❗ Text too long",
-  message: "Select larger maxChars or larger model in preferences.",
+  message: "Select a larger model in preferences.",
   primaryAction: {
     title: "Change  Preferences",
     onAction: () => openExtensionPreferences(),
