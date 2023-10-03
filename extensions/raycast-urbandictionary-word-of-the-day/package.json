@@ -13,7 +13,7 @@
     {
       "name": "word-of-the-day",
       "title": "Word of the Day",
-      "subtitle": "via UrbanDictionary",
+      "subtitle": "Urban Dictionary",
       "description": "Fetches the word of the day.",
       "mode": "no-view",
       "interval": "6h"
@@ -21,14 +21,14 @@
     {
       "name": "define-word-of-the-day",
       "title": "Define Word of the Day",
-      "subtitle": "via Urban Dictionary",
+      "subtitle": "Urban Dictionary",
       "description": "Opens the definition for the word of the day.",
       "mode": "view"
     },
     {
       "name": "random-word",
       "title": "Random Word",
-      "subtitle": "via Urban Dictionary",
+      "subtitle": "Urban Dictionary",
       "description": "Fetches a random word from Urban Dictionary.",
       "mode": "view"
     }
