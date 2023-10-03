@@ -1,20 +1,20 @@
 import { LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Progress } from "../types";
-import { defaultProgress, getProgressNumByDate, getQuarterProgressNum, getYearProgressNum } from "../utils/progress";
+import { defaultProgress, getProgressNumByDate } from "../utils/progress";
 
 const STORAGE_KEY = "xProgress";
 
 type State = { isLoading: boolean; allProgress: Progress[]; currMenubarProgressTitle: string };
 
-function getLatestProgressNum(progress: Progress) {
-  if (progress.title === "Year In Progress") {
-    return getYearProgressNum();
-  }
-  if (progress.title === "Quarter In Progress") {
-    return getQuarterProgressNum();
-  }
-  return getProgressNumByDate(new Date(progress.startDate), new Date(progress.endDate));
+function getLatestAllProgress(allProgress: Progress[]) {
+  const userProgress = allProgress
+    .filter((progress) => progress.type === "user")
+    .map((progress) => ({
+      ...progress,
+      progressNum: getProgressNumByDate(new Date(progress.startDate), new Date(progress.endDate)),
+    }));
+  return [...defaultProgress, ...userProgress];
 }
 
 export function useLocalStorageProgress(): [
@@ -46,11 +46,7 @@ export function useLocalStorageProgress(): [
         setState((prev) => ({
           ...prev,
           isLoading: false,
-          allProgress: xProgress.allProgress.map((progress) => ({
-            ...progress,
-            // Re-calulate progress when accessing it
-            progressNum: getLatestProgressNum(progress),
-          })),
+          allProgress: getLatestAllProgress(xProgress.allProgress),
           currMenubarProgressTitle: xProgress.currMenubarProgressTitle,
         }));
       } catch (err) {
@@ -81,11 +77,7 @@ export function useLocalStorageProgress(): [
       const xProgress: Omit<State, "isLoading"> = JSON.parse(storedAllProgress);
       return {
         ...xProgress,
-        allProgress: xProgress.allProgress.map((progress) => ({
-          ...progress,
-          // Re-calulate progress when accessing it
-          progressNum: getLatestProgressNum(progress),
-        })),
+        allProgress: getLatestAllProgress(xProgress.allProgress),
       };
     } catch (err) {
       return {
