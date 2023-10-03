@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Color, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 
 import { ChannelSchedule } from "../modules/tv/domain/tvSchedule";
 import { getTime } from "../utils/dateUtils";
@@ -14,11 +14,9 @@ const ChannelDetails = (channel: ChannelSchedule) => (
         <Item.Detail.Metadata.Separator />
         {channel.schedule.map((program, index) => (
           <Fragment key={index}>
-            <Item.Detail.Metadata.Label
-              title={program.description}
-              text={{ value: getTime(program.startTime), color: Color.SecondaryText }}
-            />
-            <Item.Detail.Metadata.Separator />
+            <Item.Detail.Metadata.Label title={program.description} icon={program.live ? Icon.Livestream : ""}
+              text={{ value: getTime(program.startTime), color: Color.SecondaryText}} />
+            <Item.Detail.Metadata.Separator/>
           </Fragment>
         ))}
       </Item.Detail.Metadata>
