@@ -1,3 +1,3 @@
 # Braid Changelog
 
-## [Initial Version] - 2023-08-28
+## [Initial Version] - 2023-10-03
