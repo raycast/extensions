@@ -5,4 +5,4 @@
 - Improved search
 
 ## [Initial Version] - 2022-12-24
- - Initial version 
+- Initial version 
