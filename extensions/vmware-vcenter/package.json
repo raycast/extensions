@@ -19,6 +19,7 @@
       "description": "vCenter FQDN or IP",
       "type": "textfield",
       "required": true,
+      "placeholder": "vCenter FQDN or IP",
       "title": "vCenter FQDN"
     },
     {
@@ -26,6 +27,7 @@
       "description": "vCenter Username",
       "type": "textfield",
       "required": true,
+      "placeholder": "vCenter Username",
       "title": "vCenter Username"
     },
     {
@@ -33,6 +35,7 @@
       "description": "vCenter Password",
       "type": "password",
       "required": true,
+      "placeholder": "vCenter Password",
       "title": "vCenter Password"
     }
   ],
