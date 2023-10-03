@@ -1,4 +1,5 @@
-type Program = {
+export type Program = {
+  live: boolean;
   startTime: Date;
   description: string;
 };

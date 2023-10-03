@@ -10,17 +10,63 @@ import {
   ErrorOllamaCustomModel,
   ErrorOllamaModelNotInstalled,
   ErrorOllamaNotInstalledOrRunning,
+  ErrorOllamaModelRegistryUnreachable,
   MessageOllamaModelNotInstalled,
 } from "./errors";
 import fetch from "node-fetch";
 import { EventEmitter } from "stream";
+import { getPreferenceValues } from "@raycast/api";
+
+const preferences = getPreferenceValues();
+
+/**
+ * Parse Ollama Host URL from preferences.
+ * @returns {string} Parsed Ollama Host route
+ */
+function parseOllamaHostUrl(): string {
+  let url: string;
+  url = (preferences.ollamaHost as string).replace("localhost", "127.0.0.1");
+  if (url[url.length - 1] !== "/") url += "/";
+  return url;
+}
+
+/**
+ * Get available models on ollama registry.
+ * @returns {Promise<string[]>} List of models.
+ */
+export async function OllamaAvailableModelsOnRegistry(): Promise<string[]> {
+  const url =
+    "https://gist.githubusercontent.com/mchiang0610/942e93fef378e36e6d44edf24756c723/raw/aad73c72a1a8ed3dd24421856a58afa7af56dc4d/ollama_lib_081623";
+
+  const data = await fetch(url)
+    .then((response) => {
+      if (response.ok) {
+        return response.text();
+      }
+      throw Error(response.status.toString());
+    })
+    .then((output): string[] => {
+      const a: string[] = [];
+      output.split("\n").forEach((line) => {
+        a.push(line);
+      });
+      return a;
+    })
+    .catch((err) => {
+      console.error(err);
+      throw ErrorOllamaModelRegistryUnreachable;
+    });
+
+  return data;
+}
 
 /**
  * Get installed model.
  * @returns {Promise<OllamaApiTagsResponse>} List of installed models.
  */
 export async function OllamaApiTags(): Promise<OllamaApiTagsResponse> {
-  const url = "http://127.0.0.1:11434/api/tags";
+  const host = parseOllamaHostUrl();
+  const url = `${host}api/tags`;
 
   const data = await fetch(url)
     .then((response) => response.json())
@@ -40,7 +86,8 @@ export async function OllamaApiTags(): Promise<OllamaApiTagsResponse> {
  * @param {string} model Model name.
  */
 export async function OllamaApiDelete(model: string): Promise<void> {
-  const url = "http://127.0.0.1:11434/api/delete";
+  const host = parseOllamaHostUrl();
+  const url = `${host}api/delete`;
   const body = {
     name: model,
   };
@@ -76,7 +123,8 @@ export async function OllamaApiDelete(model: string): Promise<void> {
  *  - {string} `done` - On download completed.
  */
 export async function OllamaApiPull(model: string): Promise<EventEmitter> {
-  const url = "http://127.0.0.1:11434/api/pull";
+  const host = parseOllamaHostUrl();
+  const url = `${host}api/pull`;
   const body = {
     name: model,
   };
@@ -127,7 +175,8 @@ export async function OllamaApiPull(model: string): Promise<EventEmitter> {
  * @returns {Promise<EventEmitter>} Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiGenerateResponseDone` object contains all metadata of inference.
  */
 export async function OllamaApiGenerate(body: OllamaApiGenerateRequestBody): Promise<EventEmitter> {
-  const url = "http://127.0.0.1:11434/api/generate";
+  const host = parseOllamaHostUrl();
+  const url = `${host}api/generate`;
   let emitter: EventEmitter | undefined;
 
   while (emitter === undefined) {
@@ -185,7 +234,8 @@ export async function OllamaApiGenerate(body: OllamaApiGenerateRequestBody): Pro
  * @returns {Promise<OllamaApiEmbeddingsResponse>} Ollama API embeddings response.
  */
 export async function OllamaApiEmbeddings(prompt: string, model: string): Promise<OllamaApiEmbeddingsResponse> {
-  const url = "http://127.0.0.1:11434/api/embeddings";
+  const host = parseOllamaHostUrl();
+  const url = `${host}api/embeddings`;
   const body: OllamaApiGenerateRequestBody = {
     model: model,
     prompt: prompt,

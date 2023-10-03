@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.10.0
+
+- Add a new [`showFailureToast`](./functions/showFailureToast.md) function.
+
 ### v1.9.1
 
 - Fix an issue where `useForm`'s `reset` function would not reset the value of some fields (which defeats its purpose...)

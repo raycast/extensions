@@ -1,5 +1,14 @@
 # raycast-ollama Changelog
 
+## [Improvement and BugFix] - 2023-09-18
+
+- [Improvement] Moved Model preferences to LocalStorage.
+- [Improvement] Is now possible to modify model on the go throw cmd + m shortcut.
+- [Improvement] Ollama Host is now configurable throw Preferences.
+- [Improvement] Metrics metadata now available on Chat Command. New metrics available: token/s, load_duration, sample_count, sample_duration.
+- [BugFix] Reduced re-rendering on models downloading.
+- Following command no longer available: ollama-ask, ollama-custom-ask, ollama-custom-chat.
+
 ## [Improvement] - 2023-08-15
 
 - New command **Chat with Ollama**: an interactive chat (request / response) with possibility to save multiple conversation and resume them.
