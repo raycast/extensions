@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "better-commit",
+  "title": "Better Commit",
+  "description": "Better Commit is the best way to start a commit with :prefix & Gitmojis",
+  "icon": "icon.png",
+  "author": "Brieuc",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create Commit",
+      "description": "Start a beautiful commit with :prefix & Gitmojis",
+      "mode": "view"
+    },
+    {
+      "name": "copy",
+      "title": "Copy Latest Commit",
+      "description": "Copy the latest commit from the extension",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste",
+      "title": "Paste Latest Commit",
+      "description": "Paste the latest commit from the extension",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "copy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Copy",
+      "data": [
+        {
+          "title": "Prefix + Emoji ✨",
+          "value": "prefix-emoji"
+        },
+        {
+          "title": "Prefix + Emoji ✨ + Description",
+          "value": "prefix-emoji-description"
+        },
+        {
+          "title": "Prefix",
+          "value": "prefix"
+        },
+        {
+          "title": "Emoji ✨",
+          "value": "emoji"
+        }
+      ],
+      "description": "The desired information to copy and/or paste",
+      "default": "prefix-emoji"
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "description": "Primary action of the extension",
+      "default": "paste"
+    },
+    {
+      "name": "closeExtension",
+      "type": "checkbox",
+      "required": false,
+      "title": "Should the extension close after the Primary Action?",
+      "label": "Close after Primary Action",
+      "description": "Primary action of the extension",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "gitmojis": "^3.13.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
