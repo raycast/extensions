@@ -1,10 +1,8 @@
-import { environment, getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
-import { execa, ExecaError } from "execa";
+import { environment } from "@raycast/api";
+import { execa } from "execa";
 import { chmod } from "fs/promises";
 import { join } from "path";
 import { DisplayInfo, Mode } from "./types";
-
-const preferences: Preferences = getPreferenceValues();
 
 export async function listDisplays(): Promise<DisplayInfo[] | undefined> {
   const command = join(environment.assetsPath, "display-modes");
