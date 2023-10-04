@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Detail, List, Action, Icon, showToast, Toast, Clipboard } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import QRCode from "qrcode";
 
@@ -74,7 +74,7 @@ const DetailPassword = ({
 
 export default function Command() {
   const [networks, setNetworks] = useState<Array<string>>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsLoading(true);
@@ -109,6 +109,7 @@ export default function Command() {
             <ActionPanel>
               <Action.Push
                 title="Show Details"
+                icon={Icon.AppWindowSidebarRight}
                 target={<DetailPassword networkName={network} setIsLoading={setIsLoading} />}
               />
             </ActionPanel>
