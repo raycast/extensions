@@ -134,6 +134,12 @@
       ]
     },
     {
+      "name": "search-discussions",
+      "title": "Search Discussions",
+      "description": "Search recent Discussions globally in all repositories",
+      "mode": "view"
+    },
+    {
       "name": "my-discussions",
       "title": "My Discussions",
       "description": "Show your Discussions",
