@@ -1,8 +1,8 @@
-
 import * as changeCase from "change-case";
 import { spongeCase } from "sponge-case";
 import { swapCase } from "swap-case";
 import { titleCase } from "title-case";
+
 export type CaseFunction = (input: string) => string;
 export type CaseFunctions = Record<string, CaseFunction>;
 
@@ -13,7 +13,7 @@ const lowerFirst = (input: string) => {
     return input.toLowerCase();
   }
   return input[0].toLowerCase() + input.slice(1);
-}
+};
 
 const upperCase = (input: string) => input.toUpperCase();
 
@@ -22,7 +22,7 @@ const upperFirst = (input: string) => {
     return input.toUpperCase();
   }
   return input[0].toUpperCase() + input.slice(1);
-}
+};
 
 export const functions: CaseFunctions = {
   "Camel Case": changeCase.camelCase,
