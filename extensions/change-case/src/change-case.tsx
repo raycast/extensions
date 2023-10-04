@@ -18,36 +18,28 @@ import {
   LaunchProps,
   popToRoot,
 } from "@raycast/api";
-import * as changeCase from "change-case-all";
+import * as changeCase from "change-case";
 import { useEffect, useState } from "react";
-const cases = [
-  "Camel Case",
-  "Capital Case",
-  "Constant Case",
-  "Dot Case",
-  "Header Case",
-  "Kebab Case",
-  "Lower Case",
-  "Lower First",
-  "Macro Case",
-  "No Case",
-  "Param Case",
-  "Pascal Case",
-  "Path Case",
-  "Random Case",
-  "Sentence Case",
-  "Slug Case",
-  "Snake Case",
-  "Swap Case",
-  "Title Case",
-  "Upper Case",
-  "Upper First",
-  "Sponge Case",
-] as const;
 
+type CaseFunction = (input: string, options?: object) => string;
+type CaseFunctions = Record<string, CaseFunction>;
+
+const functions: CaseFunctions = {
+  "Camel Case": changeCase.camelCase, // fooBar
+  "Pascal Case": changeCase.pascalCase, // FooBar
+  "Pascal Snake Case": changeCase.pascalSnakeCase, // Foo_Bar
+  "Capital Case": changeCase.capitalCase, // Foo Bar
+  "Constant Case": changeCase.constantCase, // FOO_BAR
+  "Dot Case": changeCase.dotCase, // foo.bar
+  "Kebab Case": changeCase.kebabCase, // foo-bar
+  "Path Case": changeCase.pathCase, // foo/bar
+  "Sentence Case": changeCase.sentenceCase, // Foo bar
+  "Snake Case": changeCase.snakeCase, // foo_bar
+  "Train Case": changeCase.trainCase, // Foo-Bar
+};
+
+const cases = Object.keys(functions);
 type CaseType = (typeof cases)[number];
-type Cases = { [key: string]: (input: string, options?: object) => string };
-type Case = (input: string, options?: object) => string;
 
 class NoTextError extends Error {
   constructor() {
@@ -79,7 +71,7 @@ async function readContent(preferredSource: string) {
   throw new NoTextError();
 }
 
-function modifyCasesWrapper(input: string, case_: Case) {
+function modifyCasesWrapper(input: string, case_: CaseFunction) {
   const modifiedArr: string[] = [];
   const lines = input.split("\n");
   for (const line of lines) {
@@ -106,31 +98,6 @@ const setPinnedCases = (pinned: CaseType[]) => {
 
 const setRecentCases = (recent: CaseType[]) => {
   cache.set("recent", JSON.stringify(recent));
-};
-
-const functions: Cases = {
-  "Camel Case": changeCase.camelCase,
-  "Capital Case": changeCase.capitalCase,
-  "Constant Case": changeCase.constantCase,
-  "Dot Case": changeCase.dotCase,
-  "Header Case": changeCase.headerCase,
-  "Kebab Case": changeCase.paramCase,
-  "Lower Case": changeCase.lowerCase,
-  "Lower First": changeCase.lowerCaseFirst,
-  "Macro Case": changeCase.constantCase,
-  "No Case": changeCase.noCase,
-  "Param Case": changeCase.paramCase,
-  "Pascal Case": changeCase.pascalCase,
-  "Path Case": changeCase.pathCase,
-  "Random Case": changeCase.spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
-  "Slug Case": changeCase.paramCase,
-  "Snake Case": changeCase.snakeCase,
-  "Swap Case": changeCase.swapCase,
-  "Title Case": changeCase.titleCase,
-  "Upper Case": changeCase.upperCase,
-  "Upper First": changeCase.upperCaseFirst,
-  "Sponge Case": changeCase.spongeCase,
 };
 
 export default function Command(props: LaunchProps) {
