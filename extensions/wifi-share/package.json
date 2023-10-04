@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wifi-share",
-  "title": "Wifi_share",
-  "description": "Share the wifi qr code to others to join network",
+  "title": "Wifi Share QR-Code",
+  "description": "Share the wifi QR code to others to join the network",
   "icon": "wifi.png",
   "author": "abul_kalam_robin",
   "categories": [
