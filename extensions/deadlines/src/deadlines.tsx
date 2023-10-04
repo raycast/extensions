@@ -9,171 +9,171 @@ import { calculateProgress, getProgressBar } from "./utils";
 import { useCallback, useEffect, useState } from "react";
 
 export default function Command() {
-    const [deadlines, setDeadlines] = useCachedDeadlines();
-    const [upcomingDeadlines, setUpcomingDeadlines] = useState<Deadline[]>([]);
-    const [otherDeadlines, setOtherDeadlines] = useState<Deadline[]>([]);
+  const [deadlines, setDeadlines] = useCachedDeadlines();
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState<Deadline[]>([]);
+  const [otherDeadlines, setOtherDeadlines] = useState<Deadline[]>([]);
 
-    function handleCreate(deadline: Deadline) {
-        if (deadline.isFav) {
-            for (let i = 0; i < deadlines.length; i++) {
-                if (i !== deadlines.indexOf(deadline)) {
-                    deadlines[i].isFav = false;
-                }
-            }
+  function handleCreate(deadline: Deadline) {
+    if (deadline.isFav) {
+      for (let i = 0; i < deadlines.length; i++) {
+        if (i !== deadlines.indexOf(deadline)) {
+          deadlines[i].isFav = false;
         }
-        const newDeadlines = [...deadlines, deadline];
-        setDeadlines(newDeadlines);
+      }
     }
+    const newDeadlines = [...deadlines, deadline];
+    setDeadlines(newDeadlines);
+  }
 
-    function handleDelete(deadline: Deadline) {
-        const newDeadlines = [...deadlines];
-        const index = newDeadlines.indexOf(deadline);
-        newDeadlines.splice(index, 1);
-        setDeadlines(newDeadlines);
-    }
+  function handleDelete(deadline: Deadline) {
+    const newDeadlines = [...deadlines];
+    const index = newDeadlines.indexOf(deadline);
+    newDeadlines.splice(index, 1);
+    setDeadlines(newDeadlines);
+  }
 
-    function handleFav(deadline: Deadline) {
-        const index = deadlines.findIndex(
-            (d) => d.startDate.getTime() + d.endDate.getTime() === deadline.startDate.getTime() + deadline.endDate.getTime()
-        );
-
-        const newDeadlines = [...deadlines];
-
-        for (let i = 0; i < newDeadlines.length; i++) {
-            if (i !== index) {
-                newDeadlines[i].isFav = false;
-            } else {
-                newDeadlines[i].isFav = !newDeadlines[i].isFav;
-            }
-        }
-        setDeadlines(newDeadlines);
-    }
-
-    function handlePin(deadline: Deadline) {
-        const index = deadlines.findIndex(
-            (d) => d.startDate.getTime() + d.endDate.getTime() === deadline.startDate.getTime() + deadline.endDate.getTime()
-        );
-
-        if (index === -1) {
-            console.log("Error: deadline not found");
-            return;
-        }
-        const newDeadlines = [...deadlines];
-        newDeadlines[index].isPinned = !newDeadlines[index].isPinned;
-        setDeadlines(newDeadlines);
-    }
-
-    function createCommandSubtitile() {
-        const deadline = deadlines.find((deadline) => deadline.isFav);
-
-        if (deadline) {
-            const progressNumber = deadline ? calculateProgress(deadline.startDate, deadline.endDate) : 0;
-            return deadline?.shortTitle + ": " + getProgressBar(progressNumber) + " " + progressNumber + "%";
-        } else {
-            return undefined;
-        }
-    }
-
-    const renderProgress = useCallback(
-        (deadline: Deadline) => {
-            const progressNumber = deadline ? calculateProgress(deadline.startDate, deadline.endDate) : 0;
-            const subtitle = getProgressBar(progressNumber) + " " + progressNumber + "%";
-
-            return (
-                <List.Item
-                    key={deadline.startDate.getTime() + deadline.endDate.getTime()}
-                    title={deadline.title}
-                    icon={getProgressIcon(calculateProgress(deadline.startDate, deadline.endDate) / 100, Color.PrimaryText)}
-                    subtitle={`${getProgressBar(calculateProgress(deadline.startDate, deadline.endDate))} ${calculateProgress(
-                        deadline.startDate,
-                        deadline.endDate
-                    )}%`}
-                    accessories={[
-                        { icon: deadline.isPinned ? Icon.Pin : null },
-                        { icon: deadline.isFav ? Icon.Heart : null },
-                        { text: deadline.shortTitle, icon: Icon.ShortParagraph },
-                        { date: new Date(deadline.endDate), icon: Icon.Calendar },
-                    ]}
-                    actions={
-                        <ActionPanel>
-                            <ActionPanel.Section>
-                                <PinDeadlineAction onPin={() => handlePin(deadline)} />
-                                <FavDeadlineAction onFav={() => handleFav(deadline)} />
-                                <DeleteDeadlineAction onDelete={() => handleDelete(deadline)} />
-                            </ActionPanel.Section>
-                            <ActionPanel.Section>
-                                <CreateDeadlineAction onCreate={handleCreate} />
-                            </ActionPanel.Section>
-                        </ActionPanel>
-                    }
-                />
-            );
-        },
-        [setDeadlines, calculateProgress]
+  function handleFav(deadline: Deadline) {
+    const index = deadlines.findIndex(
+      (d) => d.startDate.getTime() + d.endDate.getTime() === deadline.startDate.getTime() + deadline.endDate.getTime()
     );
 
-    useEffect(() => {
-        updateCommandMetadata({ subtitle: createCommandSubtitile() });
+    const newDeadlines = [...deadlines];
 
-        setUpcomingDeadlines(
-            deadlines.filter(
-                (deadline) => new Date(deadline.endDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && !deadline.isPinned
-            )
-        );
-    }, [deadlines]);
+    for (let i = 0; i < newDeadlines.length; i++) {
+      if (i !== index) {
+        newDeadlines[i].isFav = false;
+      } else {
+        newDeadlines[i].isFav = !newDeadlines[i].isFav;
+      }
+    }
+    setDeadlines(newDeadlines);
+  }
 
-    useEffect(() => {
-        setOtherDeadlines(deadlines.filter((deadline) => upcomingDeadlines.indexOf(deadline) === -1 && !deadline.isPinned));
-    }, [upcomingDeadlines]);
-
-    return (
-        <List
-            actions={
-                <ActionPanel>
-                    <CreateDeadlineAction onCreate={handleCreate} />
-                </ActionPanel>
-            }
-            isLoading={!deadlines}
-        >
-            <List.Section title="Pinned Deadlines">
-                {deadlines.filter((deadline) => deadline.isPinned).map((deadline) => renderProgress(deadline))}
-            </List.Section>
-            <List.Section title="Upcoming Deadlines">
-                {upcomingDeadlines.map((deadline) => renderProgress(deadline))}
-            </List.Section>
-            <List.Section title="All Deadlines">{otherDeadlines.map((deadline) => renderProgress(deadline))}</List.Section>
-        </List>
+  function handlePin(deadline: Deadline) {
+    const index = deadlines.findIndex(
+      (d) => d.startDate.getTime() + d.endDate.getTime() === deadline.startDate.getTime() + deadline.endDate.getTime()
     );
+
+    if (index === -1) {
+      console.log("Error: deadline not found");
+      return;
+    }
+    const newDeadlines = [...deadlines];
+    newDeadlines[index].isPinned = !newDeadlines[index].isPinned;
+    setDeadlines(newDeadlines);
+  }
+
+  function createCommandSubtitile() {
+    const deadline = deadlines.find((deadline) => deadline.isFav);
+
+    if (deadline) {
+      const progressNumber = deadline ? calculateProgress(deadline.startDate, deadline.endDate) : 0;
+      return deadline?.shortTitle + ": " + getProgressBar(progressNumber) + " " + progressNumber + "%";
+    } else {
+      return undefined;
+    }
+  }
+
+  const renderProgress = useCallback(
+    (deadline: Deadline) => {
+      const progressNumber = deadline ? calculateProgress(deadline.startDate, deadline.endDate) : 0;
+      const subtitle = getProgressBar(progressNumber) + " " + progressNumber + "%";
+
+      return (
+        <List.Item
+          key={deadline.startDate.getTime() + deadline.endDate.getTime()}
+          title={deadline.title}
+          icon={getProgressIcon(calculateProgress(deadline.startDate, deadline.endDate) / 100, Color.PrimaryText)}
+          subtitle={`${getProgressBar(calculateProgress(deadline.startDate, deadline.endDate))} ${calculateProgress(
+            deadline.startDate,
+            deadline.endDate
+          )}%`}
+          accessories={[
+            { icon: deadline.isPinned ? Icon.Pin : null },
+            { icon: deadline.isFav ? Icon.Heart : null },
+            { text: deadline.shortTitle, icon: Icon.ShortParagraph },
+            { date: new Date(deadline.endDate), icon: Icon.Calendar },
+          ]}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section>
+                <PinDeadlineAction onPin={() => handlePin(deadline)} />
+                <FavDeadlineAction onFav={() => handleFav(deadline)} />
+                <DeleteDeadlineAction onDelete={() => handleDelete(deadline)} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <CreateDeadlineAction onCreate={handleCreate} />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      );
+    },
+    [setDeadlines, calculateProgress]
+  );
+
+  useEffect(() => {
+    updateCommandMetadata({ subtitle: createCommandSubtitile() });
+
+    setUpcomingDeadlines(
+      deadlines.filter(
+        (deadline) => new Date(deadline.endDate) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && !deadline.isPinned
+      )
+    );
+  }, [deadlines]);
+
+  useEffect(() => {
+    setOtherDeadlines(deadlines.filter((deadline) => upcomingDeadlines.indexOf(deadline) === -1 && !deadline.isPinned));
+  }, [upcomingDeadlines]);
+
+  return (
+    <List
+      actions={
+        <ActionPanel>
+          <CreateDeadlineAction onCreate={handleCreate} />
+        </ActionPanel>
+      }
+      isLoading={!deadlines}
+    >
+      <List.Section title="Pinned Deadlines">
+        {deadlines.filter((deadline) => deadline.isPinned).map((deadline) => renderProgress(deadline))}
+      </List.Section>
+      <List.Section title="Upcoming Deadlines">
+        {upcomingDeadlines.map((deadline) => renderProgress(deadline))}
+      </List.Section>
+      <List.Section title="All Deadlines">{otherDeadlines.map((deadline) => renderProgress(deadline))}</List.Section>
+    </List>
+  );
 }
 
 function FavDeadlineAction(props: { onFav: () => void }) {
-    return (
-        <Action icon={Icon.Star} title="Favorite" shortcut={{ modifiers: ["opt"], key: "f" }} onAction={props.onFav} />
-    );
+  return (
+    <Action icon={Icon.Star} title="Favorite" shortcut={{ modifiers: ["opt"], key: "f" }} onAction={props.onFav} />
+  );
 }
 
 function PinDeadlineAction(props: { onPin: () => void }) {
-    return <Action icon={Icon.Pin} title="Pin" shortcut={{ modifiers: ["opt"], key: "p" }} onAction={props.onPin} />;
+  return <Action icon={Icon.Pin} title="Pin" shortcut={{ modifiers: ["opt"], key: "p" }} onAction={props.onPin} />;
 }
 
 function DeleteDeadlineAction(props: { onDelete: () => void }) {
-    return (
-        <Action
-            icon={Icon.Trash}
-            title="Delete Deadline"
-            shortcut={{ modifiers: ["opt"], key: "x" }}
-            onAction={props.onDelete}
-        />
-    );
+  return (
+    <Action
+      icon={Icon.Trash}
+      title="Delete Deadline"
+      shortcut={{ modifiers: ["opt"], key: "x" }}
+      onAction={props.onDelete}
+    />
+  );
 }
 
 function CreateDeadlineAction(props: { onCreate: (deadline: Deadline) => void }) {
-    return (
-        <Action.Push
-            icon={Icon.Plus}
-            title="New Deadline"
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            target={<CreateDeadlineForm onCreate={props.onCreate} />}
-        />
-    );
+  return (
+    <Action.Push
+      icon={Icon.Plus}
+      title="New Deadline"
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      target={<CreateDeadlineForm onCreate={props.onCreate} />}
+    />
+  );
 }
