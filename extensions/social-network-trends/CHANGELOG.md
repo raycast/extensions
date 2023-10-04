@@ -1,6 +1,6 @@
 # Social Network Trends Changelog
 
-## [Minor Updates] - {PR_MERGE_DATE}
+## [Minor Updates] - 2023-10-04
 
 - Some minor updates to stay consistent with Raycast's latest version
 
