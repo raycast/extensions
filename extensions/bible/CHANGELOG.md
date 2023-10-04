@@ -1,8 +1,8 @@
 # Bible Search Changelog
 
-## [Options for copied text] - {PR_MERGE_DATE}
+## [Options for results and copied text] - {PR_MERGE_DATE}
 
-- Add options to disable references and copyright in the copied results
+- Add options to disable references and copyright in the search results and copied results
 
 ## [Enhancements] - 2022-12-15
 
