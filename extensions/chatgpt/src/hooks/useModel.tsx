@@ -11,6 +11,7 @@ export const DEFAULT_MODEL: Model = {
   prompt: "You are a helpful assistant.",
   option: "gpt-3.5-turbo",
   temperature: "1",
+  max_tokens: "",
   pinned: false,
 };
 

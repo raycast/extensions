@@ -71,6 +71,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         {
           model: model.option,
           temperature: Number(model.temperature),
+          max_tokens: model.max_tokens.length ? Number(model.max_tokens) : undefined,
           messages: [...chatTransfomer(data.reverse(), model.prompt), { role: "user", content: question }],
           stream: useStream,
         },
