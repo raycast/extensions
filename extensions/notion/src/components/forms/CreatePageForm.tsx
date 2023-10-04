@@ -1,5 +1,5 @@
 import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 
 import {
@@ -37,26 +37,19 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
 
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
+  const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
-    let value = defaults?.[id];
-    if (type == "date" && value) value = new Date(value as string);
     const key = "property::" + type + "::" + id;
+    if (type == "title") validation[key] = FormValidation.Required;
+    let value = defaults?.[key];
+    if (type == "date" && value) value = new Date(value as string);
     initialValues[key] = value;
   }
 
   const { itemProps, values, handleSubmit } = useForm<CreatePageFormValues>({
     initialValues,
+    validation,
     async onSubmit(values) {
-      const titleKey = Object.keys(values).find((key) => key.includes("property::title"));
-      if (!titleKey || !values[titleKey]) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Title Required",
-          message: "Please set title value",
-        });
-        return;
-      }
-
       try {
         await showToast({ style: Toast.Style.Animated, title: "Creating page" });
 
@@ -116,8 +109,8 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
     let name: string | undefined;
-    const databseTitle = databases.find((d) => d.id == databaseId)?.title;
-    if (databseTitle) name = "Create new page in " + databseTitle;
+    const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
+    if (databaseTitle) name = "Create new page in " + databaseTitle;
     return { name, link: url + "?launchContext=" + launchContext };
   }
 
