@@ -21,8 +21,10 @@ import { slugify } from "../helpers/string";
 import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
 import CreateIssueForm from "./CreateIssueForm";
+import IssueCommentForm from "./IssueCommentForm";
 import IssueAttachments from "./IssueAttachments";
 import IssueDetail from "./IssueDetail";
+import IssueComments from "./IssueComments";
 
 type IssueActionsProps = {
   issue: Issue | TIssueDetail;
@@ -141,6 +143,19 @@ export default function IssueActions({
         />
 
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
+
+        <Action.Push
+          title="Add comment"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          target={<IssueCommentForm issue={issue} />}
+        />
+        <Action.Push
+          title="Show Comments"
+          icon={Icon.Bubble}
+          target={<IssueComments issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
