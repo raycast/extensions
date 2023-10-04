@@ -117,7 +117,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     const launchContext = encodeURIComponent(JSON.stringify(values));
     let name: string | undefined;
     const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
-    if (databseTitle) name = "Create new page in " + databseTitle;
+    if (databaseTitle) name = "Create new page in " + databaseTitle;
     return { name, link: url + "?launchContext=" + launchContext };
   }
 
