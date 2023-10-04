@@ -1,6 +1,7 @@
 # Notion Changelog
 
 ## [Fixes] - 2023-09-21
+
 - Fix duplicated recent and searched pages sometimes showing
 - Fix last edited time showing as the current time
 - Fix duped recent pages after page title changed

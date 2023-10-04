@@ -1,8 +1,8 @@
 import type { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
+import { Form } from "@raycast/api";
 import { subMinutes } from "date-fns";
 
 import { _supportedPropTypes } from "..";
-import { Form } from "@raycast/api";
 
 type FormatDatabasePropertyParams = {
   [T in DatabaseProperty["type"]]: [type: T, value: FormValueForDatabaseProperty<T>];
