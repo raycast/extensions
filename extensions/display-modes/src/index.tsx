@@ -1,6 +1,6 @@
-import { ActionPanel, List, Action, useNavigation, showHUD, KeyEquivalent } from "@raycast/api";
+import { ActionPanel, List, Action, useNavigation, showHUD, Icon } from "@raycast/api";
 import { ReactNode, useEffect, useState } from "react";
-import { listDisplays, numberToKey, setMode } from "./utils";
+import { listDisplays, setMode } from "./utils";
 import { DisplayInfo, DisplayKind, Mode, areModesEqual } from "./types";
 
 export default function Command() {
@@ -55,7 +55,6 @@ export default function Command() {
     return (
       <List navigationTitle={formatTitle(display)}>
         {modesWithComparison.map((modeInfo, index) => {
-          const key = numberToKey(index + 1);
           return (
             <List.Item
               key={index}
@@ -66,7 +65,7 @@ export default function Command() {
                 <ActionPanel>
                   <Action
                     title="Change Display Mode"
-                    {...(key ? { modifiers: ["opt"], key: key } : {})}
+                    icon={Icon.Monitor}
                     onAction={async () => {
                       const result = await setMode(display.display.id, modeInfo.mode);
 
@@ -91,7 +90,6 @@ export default function Command() {
   return (
     <List isLoading={displays === undefined}>
       {displays?.map((display, index) => {
-        const key = numberToKey(index + 1);
         return (
           <List.Item
             key={index}
@@ -100,11 +98,7 @@ export default function Command() {
             subtitle={formatSubtitle(display)}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Show Display Modes"
-                  target={detail(display)}
-                  {...(key ? { modifiers: ["opt"], key: key } : {})}
-                />
+                <Action.Push title="Show Display Modes" icon={Icon.Monitor} target={detail(display)} />
               </ActionPanel>
             }
           />
