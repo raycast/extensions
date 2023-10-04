@@ -1,8 +1,7 @@
+import markdownToAdf from "md-to-adf";
+
 import { request } from "./request";
 import { User } from "./users";
-import markdownToAdf from "md-to-adf";
-import { getAuthenticatedUri, getBaseUrl } from "../api/request";
-import { replaceAsync } from "../helpers/string";
 
 type CreateCommentResponse = {
   id: string;
@@ -43,28 +42,5 @@ export async function deleteComment(issueIdOrKey: string, commentId: string) {
 export async function getComments(issueIdOrKey: string) {
   const params = { expand: "renderedBody", orderBy: "-created" };
   const data = await request<Comments>(`/issue/${issueIdOrKey}/comment`, { params });
-
-  // const resolvedComments = await Promise.all<Comments>(
-  //   data?.comments.map(async (comment) => {
-  //     if (!comment) {
-  //       return null;
-  //     }
-
-  //     const baseUrl = getBaseUrl();
-  //     const description = comment.renderedBody;
-  //     // Resolve all the image URLs to data URIs in the cached promise for better performance
-  //     // Jira images use partial URLs, so we need to prepend the base URL
-  //     const resolvedDescription = await replaceAsync(description, /src="(.*?)"/g, async (_, uri) => {
-  //       const dataUri = await getAuthenticatedUri(`${baseUrl}${uri}`, "image/jpeg");
-  //       return `src="${dataUri}"`;
-  //     });
-  //     comment.renderedBody = resolvedDescription;
-
-  //     return comment;
-  //   })
-  // );
-
-  // return resolvedComments;
-
   return data?.comments;
 }

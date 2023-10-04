@@ -1,16 +1,14 @@
 import { List, Icon, ActionPanel, Action, confirmAlert, Color, Toast, showToast } from "@raycast/api";
 import { format } from "date-fns";
 
+import { Comment, deleteComment } from "../api/comments";
 import { Issue } from "../api/issues";
 import { getUserAvatar } from "../helpers/avatars";
-import { getIssueDescription } from "../helpers/issues";
-import { Comment, deleteComment } from "../api/comments";
 import { getErrorMessage } from "../helpers/errors";
-
+import { getIssueDescription } from "../helpers/issues";
 import useIssueComments from "../hooks/useIssueComments";
-import IssueCommentForm from "./IssueCommentForm";
 
-//import removeMarkdown from "remove-markdown";
+import IssueCommentForm from "./IssueCommentForm";
 
 type IssueCommentsProps = {
   issue: Issue;
@@ -90,7 +88,7 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Add comment"
+                  title="Add Comment"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
                   target={<IssueCommentForm issue={issue} />}
@@ -118,4 +116,3 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
     </List>
   );
 }
-
