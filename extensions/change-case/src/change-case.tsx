@@ -18,28 +18,8 @@ import {
   LaunchProps,
   popToRoot,
 } from "@raycast/api";
-import * as changeCase from "change-case";
 import { useEffect, useState } from "react";
-
-type CaseFunction = (input: string, options?: object) => string;
-type CaseFunctions = Record<string, CaseFunction>;
-
-const functions: CaseFunctions = {
-  "Camel Case": changeCase.camelCase, // fooBar
-  "Pascal Case": changeCase.pascalCase, // FooBar
-  "Pascal Snake Case": changeCase.pascalSnakeCase, // Foo_Bar
-  "Capital Case": changeCase.capitalCase, // Foo Bar
-  "Constant Case": changeCase.constantCase, // FOO_BAR
-  "Dot Case": changeCase.dotCase, // foo.bar
-  "Kebab Case": changeCase.kebabCase, // foo-bar
-  "Path Case": changeCase.pathCase, // foo/bar
-  "Sentence Case": changeCase.sentenceCase, // Foo bar
-  "Snake Case": changeCase.snakeCase, // foo_bar
-  "Train Case": changeCase.trainCase, // Foo-Bar
-};
-
-const cases = Object.keys(functions);
-type CaseType = (typeof cases)[number];
+import { CaseFunction, CaseType, functions } from "./types.js";
 
 class NoTextError extends Error {
   constructor() {

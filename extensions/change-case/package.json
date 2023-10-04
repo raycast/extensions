@@ -9,7 +9,6 @@
     "Developer Tools",
     "Productivity"
   ],
-  "type": "module",
   "contributors": [
     "pernielsentikaer",
     "nagauta"
@@ -169,6 +168,15 @@
       "required": false
     },
     {
+      "name": "PascalSnakeCase",
+      "type": "checkbox",
+      "title": "",
+      "description": "Enable the \"Pascal_Snake_Case\" Transformation",
+      "label": "Pascal Case",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "PathCase",
       "type": "checkbox",
       "title": "",
@@ -248,11 +256,22 @@
       "label": "Sponge Case",
       "default": true,
       "required": false
+    },
+    {
+      "name": "TrainCase",
+      "type": "checkbox",
+      "title": "",
+      "description": "Enable the \"Train-Case\" Transformation",
+      "label": "Train Case",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.59.0",
-    "change-case": "^5.0.2"
+    "change-case": "^5.0.2",
+    "sponge-case": "^2.0.1",
+    "swap-case": "^3.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
