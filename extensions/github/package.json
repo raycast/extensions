@@ -201,6 +201,14 @@
       "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
+    },
+    {
+      "name": "defaultSearchTerms",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Search Terms",
+      "description": "Default search to be populated when searching issues, pull requests and discussions.",
+      "default": "author:@me"
     }
   ],
   "dependencies": {

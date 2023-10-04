@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import {getPreferenceValues, List} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -9,13 +9,16 @@ import { IssueFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
 import { getGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
+import {trim} from "lodash";
 
 function SearchIssues() {
   const { github } = getGitHubClient();
 
   const viewer = useViewer();
 
-  const [searchText, setSearchText] = useState("");
+  const { defaultSearchTerms } = getPreferenceValues<Preferences>();
+
+  const [searchText, setSearchText] = useState(trim(defaultSearchTerms) + " ");
 
   const {
     data,
@@ -24,8 +27,8 @@ function SearchIssues() {
   } = useCachedPromise(
     async (searchText) => {
       const result = await github.searchIssues({
-        query: `is:issue author:@me archived:false ${searchText}`,
         numberOfItems: 50,
+        query: `is:issue archived:false ${searchText}`,
       });
 
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
@@ -38,6 +41,7 @@ function SearchIssues() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Globally search issues across repositories"
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
     >

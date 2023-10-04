@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import {getPreferenceValues, List} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -9,13 +9,15 @@ import { PullRequestFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
 import { getGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
+import {trim} from "lodash";
 
 function SearchPullRequests() {
   const { github } = getGitHubClient();
 
   const viewer = useViewer();
 
-  const [searchText, setSearchText] = useState("");
+  const { defaultSearchTerms } = getPreferenceValues<Preferences>();
+  const [searchText, setSearchText] = useState(trim(defaultSearchTerms) + " ");
 
   const {
     data,
@@ -24,8 +26,8 @@ function SearchPullRequests() {
   } = useCachedPromise(
     async (searchText) => {
       const result = await github.searchPullRequests({
-        query: `is:pr author:@me archived:false ${searchText}`,
         numberOfItems: 50,
+        query: `is:pr archived:false ${searchText}`,
       });
 
       return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
@@ -38,6 +40,7 @@ function SearchPullRequests() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Globally search pull requests across repositories"
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
     >
