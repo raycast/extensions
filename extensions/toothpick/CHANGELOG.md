@@ -1,5 +1,11 @@
 # Toothpick Changelog
 
+## [QoL Improvements and Device Additions] - 2023-09-28
+
+- Added rudimentary mappings for the following devices:
+  - Bose Noise Cancelling Headphones 700 (custom icon)
+- Made 'Mapped devices' dev menu toggle state via any item.
+
 ## [Blueutil Bluetooth Backend] - 2023-09-01
 
 - Added 'blueutil' as experimental Bluetooth backend

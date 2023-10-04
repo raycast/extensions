@@ -94,6 +94,7 @@
 /extensions/bluesky                                  @dkapila @peduarte
 /extensions/bob                                      @ViGeng
 /extensions/bonk-price                               @AnishDe12020
+/extensions/braid                                    @felixhabib
 /extensions/brasileirao-serie-a                      @willianhf
 /extensions/brave                                    @ron-myers @rgomezcasas @crisboarna
 /extensions/brave-search                             @VishwasShashidhar @Spl0itable
@@ -449,7 +450,7 @@
 /extensions/houdahspot-search                        @blackspike
 /extensions/how-long-to-beat                         @Cronos87 @whitespacecode
 /extensions/http-status-codes                        @AlexVanderbist
-/extensions/hubspot                                  @harisvsulaiman @pernielsentikaer @6farer
+/extensions/hubspot                                  @harisvsulaiman @pernielsentikaer @6farer @scoop
 /extensions/hubspot-portal-launcher                  @chrisoklepke @pernielsentikaer
 /extensions/hue                                      @pindab0ter @thomaspaulmann @robertvanhoesel
 /extensions/huggingcast                              @ragnorc
@@ -485,7 +486,7 @@
 /extensions/iridium                                  @crisboarna
 /extensions/is-it-toxic-to                           @chesterhow @pernielsentikaer
 /extensions/itch-io                                  @Aayush9029
-/extensions/iterm                                    @ron-myers @flops @papey
+/extensions/iterm                                    @ron-myers @flops @papey @jose-elias-alvarez
 /extensions/itranslate                               @404J
 /extensions/iwork                                    @SKaplanOfficial
 /extensions/jellyfin                                 @darmiel
@@ -514,7 +515,7 @@
 /extensions/kagi-search                              @fearoffish
 /extensions/kaomoji-search                           @allexks
 /extensions/karabiner-profile-switcher               @lucaschultz
-/extensions/keepassxc                                @zkytech
+/extensions/keepassxc                                @zkytech @Sulfyderz
 /extensions/key-value                                @NirLevy98 @pernielsentikaer @gkpln3
 /extensions/keyboard-layout-switcher                 @lucaschultz
 /extensions/keyboard-maestro                         @eluce2
@@ -744,6 +745,7 @@
 /extensions/paste-as-plain-text                      @koinzhang @pantajoe
 /extensions/pastebin                                 @vimtor
 /extensions/pera-explorer                            @akgunberk
+/extensions/perchance-generator                      @Visual-Studio-Coder
 /extensions/performance-hud                          @say4n
 /extensions/pestphp-documentation                    @danyelkeddah
 /extensions/pexels                                   @koinzhang
@@ -1089,7 +1091,7 @@
 /extensions/update-clash-subscription                @JakeLaoyu
 /extensions/uplabs                                   @gebeto
 /extensions/uptime                                   @yarnaid
-/extensions/urban-dictionary                         @Sheraff @zhenpewu @pernielsentikaer
+/extensions/urban-dictionary                         @pernielsentikaer @zhenpewu
 /extensions/url-shortener                            @Visual-Studio-Coder
 /extensions/url-tools                                @joshauh46
 /extensions/utm-virtual-machines                     @alaidriel
@@ -1105,6 +1107,7 @@
 /extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very @theherk @TobiasYin @yossizahn
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @cy-98 @immint023 @pernielsentikaer @vimtor @tonka3000 @aka-rabbi-inv @oilbeater @QIanGua @hakob8956
 /extensions/vivaldi                                  @crisboarna
+/extensions/vmware-vcenter                           @MassimilianoPasquini97
 /extensions/vocab-search                             @DATADEER @pernielsentikaer
 /extensions/vuejobs                                  @abusiraj84
 /extensions/vuejs-documentation                      @Dpblandin

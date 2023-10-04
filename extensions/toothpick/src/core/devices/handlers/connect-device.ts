@@ -7,7 +7,7 @@ export async function connectDevice(device: Device) {
   const devicesService = getDevicesService(bluetoothBackend);
 
   await showToast({ style: Toast.Style.Animated, title: "Connecting..." });
-  const result = devicesService.connectDevice(device.macAddress);
+  const result = devicesService?.connectDevice(device.macAddress);
   if (result) {
     await showToast({ style: Toast.Style.Success, title: "Device connected successfully." });
   } else {

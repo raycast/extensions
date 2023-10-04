@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Updated Swift Package Types] - 2023-10-03
+
+- Updated Swift Package types when creating a new Swift Package.
+
 ## [Xcode Project List] - 2023-08-15
 
 - The favorites section will always be shown at first in the "Search Recent Projects" command.
