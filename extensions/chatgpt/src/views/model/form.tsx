@@ -13,6 +13,9 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       if (typeof updatedModel.temperature === "string") {
         updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
       }
+      if (typeof updatedModel.max_tokens === "string" && updatedModel.max_tokens.length) {
+        updatedModel = { ...updatedModel, max_tokens: parseInt(updatedModel.max_tokens).toString() };
+      }
       if (props.model) {
         const toast = await showToast({
           title: "Update your model...",
@@ -54,10 +57,21 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           return FormValidation.Required;
         }
       },
+      max_tokens: (value) => {
+        if (value !== undefined && value !== null) {
+          const numValue = parseInt(value);
+          if (!isNaN(numValue)) {
+            if (numValue < 1) {
+              return "Minimal value is 1";
+            }
+          }
+        }
+      },
     },
     initialValues: {
       name: model?.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
+      max_tokens: model?.max_tokens.toString() ?? "",
       option: model?.option ?? "gpt-3.5-turbo",
       prompt: model?.prompt ?? "",
       pinned: model?.pinned ?? false,
@@ -80,6 +94,11 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         title="Temperature"
         placeholder="Set your sampling temperature (0 - 2)"
         {...itemProps.temperature}
+      />
+      <Form.TextField
+        title="Maximum tokens"
+        placeholder="Optional, set maximum number of tokens (> 1)"
+        {...itemProps.max_tokens}
       />
       <Form.Dropdown title="Model" placeholder="Choose model option" {...itemProps.option}>
         {MODEL_OPTIONS.map((option) => (
