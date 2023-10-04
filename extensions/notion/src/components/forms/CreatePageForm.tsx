@@ -116,7 +116,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
     let name: string | undefined;
-    const databseTitle = databases.find((d) => d.id == databaseId)?.title;
+    const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
     if (databseTitle) name = "Create new page in " + databseTitle;
     return { name, link: url + "?launchContext=" + launchContext };
   }
