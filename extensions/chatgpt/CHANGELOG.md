@@ -1,5 +1,9 @@
 # Changelog
 
+## [FFeatureix] - 2023-10-04
+
+- Specify max tokens parameter in model config
+
 ## [Fix] - 2023-08-23
 
 - Fixed an authentication error when listing models which caused a crash
