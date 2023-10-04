@@ -1,9 +1,5 @@
 # GitHub Changelog
 
-## [Options for copied text] - {PR_MERGE_DATE}
-
-- Add options to disable references and copyright in the copied results
-
 ## [Fix menu bar notifications] - 2023-09-06
 
 - Fixes an issue where marking all notifications as read wouldn't reset the menu bar notifications count.
