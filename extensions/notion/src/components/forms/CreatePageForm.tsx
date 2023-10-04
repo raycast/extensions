@@ -39,10 +39,10 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
-    let value = defaults?.[id];
-    if (type == "date" && value) value = new Date(value as string);
     const key = "property::" + type + "::" + id;
     if (type == "title") validation[key] = FormValidation.Required;
+    let value = defaults?.[key];
+    if (type == "date" && value) value = new Date(value as string);
     initialValues[key] = value;
   }
 
