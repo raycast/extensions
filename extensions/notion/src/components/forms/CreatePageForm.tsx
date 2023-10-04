@@ -1,6 +1,6 @@
 import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
-import { useForm } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useForm, FormValidation } from "@raycast/utils";
+import { useState } from "react";
 
 import {
   useDatabaseProperties,
@@ -37,26 +37,19 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
 
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
+  const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
     let value = defaults?.[id];
     if (type == "date" && value) value = new Date(value as string);
     const key = "property::" + type + "::" + id;
+    if (type == "title") validation[key] = FormValidation.Required;
     initialValues[key] = value;
   }
 
   const { itemProps, values, handleSubmit } = useForm<CreatePageFormValues>({
     initialValues,
+    validation,
     async onSubmit(values) {
-      const titleKey = Object.keys(values).find((key) => key.includes("property::title"));
-      if (!titleKey || !values[titleKey]) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Title Required",
-          message: "Please set title value",
-        });
-        return;
-      }
-
       try {
         await showToast({ style: Toast.Style.Animated, title: "Creating page" });
 
