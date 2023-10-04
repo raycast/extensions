@@ -85,26 +85,20 @@ export default function Command() {
         ) : null
       }
     >
-      {!results || results?.length === 0 ? (
-        <List.EmptyView />
-      ) : (
-        <List.Section title={search ? "Search results for " + search : ""}>
-          {results?.map((article: ArticleItem) => (
-            <List.Item
-              key={article.link}
-              title={{ value: article.title, tooltip: article.created }}
-              detail={
-                <List.Item.Detail
-                  // eslint-disable-next-line no-useless-escape
-                  markdown={`![Illustration](${BASE_URL}${article.imageToUse}) \ 
-              ${article.introtext}`}
-                />
-              }
-              actions={<Actions article={article} />}
-            />
-          ))}
-        </List.Section>
-      )}
+      <List.Section title={search ? "Search results for " + search : "Recent Magazines"}>
+        {results?.map((article: ArticleItem) => (
+          <List.Item
+            key={article.link}
+            title={{ value: article.title, tooltip: article.created }}
+            detail={
+              <List.Item.Detail
+                markdown={`![Illustration](${BASE_URL}${article.imageToUse}) \n\n ${article.introtext}`}
+              />
+            }
+            actions={<Actions article={article} />}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 
