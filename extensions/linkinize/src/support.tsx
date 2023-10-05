@@ -1,4 +1,4 @@
-import { Cache, LaunchType, LocalStorage, Toast, launchCommand, showToast } from "@raycast/api";
+import { Cache, LaunchType, Toast, launchCommand, showToast } from "@raycast/api";
 import { Bookmark, LoginPayload } from "./interfaces";
 import { ACTIVE_ORGANIZATION, BOOKMARKS, CLICKS, LINKINIZE_DOMAIN, TOKEN } from "./constants";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -40,7 +40,7 @@ export async function attemptLogin(values: LoginPayload) {
 }
 
 export async function logout(redirectToCommand = "index") {
-  await showToast({ title: "Authentication Failed", message: "Please Login" });
+  await showToast({ title: "Authentication Failed", message: "Please Login", style: Toast.Style.Failure });
   cache.clear();
   await launchCommand({ name: redirectToCommand, type: LaunchType.UserInitiated });
 }
