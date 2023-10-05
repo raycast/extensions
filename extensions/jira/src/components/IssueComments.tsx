@@ -50,7 +50,7 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
   return (
     <List
       isLoading={isLoadingComments}
-      navigationTitle={`${issue.id} • Comments`}
+      navigationTitle={`${issue.key} • Comments`}
       searchBarPlaceholder="Filter by user or comment content"
       isShowingDetail
     >
@@ -91,7 +91,7 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
                   title="Add Comment"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-                  target={<IssueCommentForm issue={issue} />}
+                  target={<IssueCommentForm issue={issue} mutateComments={mutateComments} />}
                 />
                 <ActionPanel.Section>
                   <Action.Push

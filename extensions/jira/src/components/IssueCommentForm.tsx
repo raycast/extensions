@@ -57,7 +57,7 @@ export default function IssueCommentForm({ comment, issue, mutateComments }: Iss
         </ActionPanel>
       }
     >
-      <Form.TextArea id="comment" title="Comment" placeholder="Leave a comment" value={content} onChange={setContent} />
+      <Form.TextArea id="comment" title="Comment" placeholder="Leave a comment" value={content} onChange={setContent} enableMarkdown />
     </Form>
   );
 }
