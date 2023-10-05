@@ -4,7 +4,6 @@ import { Bookmark } from "./interfaces";
 import { recordInteraction, cache } from "./support";
 
 export function Search() {
-  console.log("here");
   const cached = cache.get(BOOKMARKS);
   const items = cached ? JSON.parse(cached) : [];
 

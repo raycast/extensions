@@ -50,7 +50,5 @@ async function switchContext(organization: Organization, token: string) {
         await launchCommand({ name: "synchronize", type: LaunchType.UserInitiated });
       })
       .catch((error) => handleAPIErrors(error));
-  } else {
-    console.log("User Canceled.");
   }
 }
