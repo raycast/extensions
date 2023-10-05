@@ -1,7 +1,7 @@
 import {getPreferenceValues, List} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-
+import { getBoundedPreferenceNumber } from "./components/Menu";
 import PullRequestListEmptyView from "./components/PullRequestListEmptyView";
 import PullRequestListItem from "./components/PullRequestListItem";
 import View from "./components/View";
@@ -26,7 +26,7 @@ function SearchPullRequests() {
   } = useCachedPromise(
     async (searchText) => {
       const result = await github.searchPullRequests({
-        numberOfItems: 50,
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
         query: `is:pr archived:false ${searchText}`,
       });
 

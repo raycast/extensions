@@ -1,7 +1,7 @@
 import {getPreferenceValues, List} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-
+import { getBoundedPreferenceNumber } from "./components/Menu";
 import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
 import View from "./components/View";
@@ -17,7 +17,6 @@ function SearchIssues() {
   const viewer = useViewer();
 
   const { defaultSearchTerms } = getPreferenceValues<Preferences>();
-
   const [searchText, setSearchText] = useState(trim(defaultSearchTerms) + " ");
 
   const {
@@ -27,7 +26,7 @@ function SearchIssues() {
   } = useCachedPromise(
     async (searchText) => {
       const result = await github.searchIssues({
-        numberOfItems: 50,
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
         query: `is:issue archived:false ${searchText}`,
       });
 

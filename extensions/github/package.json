@@ -215,6 +215,14 @@
       "title": "Default Search Terms",
       "description": "Default search to be populated when searching issues, pull requests and discussions.",
       "default": "author:@me"
+    },
+    {
+      "name": "numberOfResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of search results",
+      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "placeholder": "50"
     }
   ],
   "dependencies": {
