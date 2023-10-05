@@ -3,7 +3,7 @@ import { Bookmark, LoginPayload } from "./interfaces";
 import { ACTIVE_ORGANIZATION, BOOKMARKS, CLICKS, LINKINIZE_DOMAIN, TOKEN } from "./constants";
 import axios, { AxiosError, AxiosResponse } from "axios";
 
-const cache = new Cache();
+export const cache = new Cache();
 
 export function validateLoginPayload(values: LoginPayload) {
   const errors: any = {};
@@ -16,8 +16,9 @@ export function validateLoginPayload(values: LoginPayload) {
   return errors;
 }
 
-export async function isLoggedIn() {
-  return await LocalStorage.getItem<string>(TOKEN);
+export function hasToken() {
+  const token = cache.get(TOKEN);
+  return typeof token !== "undefined";
 }
 
 export async function attemptLogin(values: LoginPayload) {

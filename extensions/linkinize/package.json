@@ -8,19 +8,35 @@
   "categories": [
     "Productivity"
   ],
+  "preferences": [
+    {
+      "name": "email",
+      "description": "Linkinize Account Email Address",
+      "required": true,
+      "type": "textfield",
+      "placeholder": "Email Address"
+    },
+    {
+      "name": "password",
+      "description": "Linkinize Account Password",
+      "required": true,
+      "type": "password",
+      "placeholder": "password"
+    }
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Linkinize",
-      "subtitle": "Search through your Bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Linkinize",
       "description": "Ultimate Bookmark manager made for teams",
       "mode": "view"
     },
     {
       "name": "organizations",
       "title": "Switch Workspace",
-      "subtitle": "Switch Your Workspace",
+      "subtitle": "Switch Linkinize Workspace",
       "description": "Switch Your Linkinize Workspace",
       "mode": "view"
     },

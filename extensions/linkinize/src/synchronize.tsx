@@ -1,16 +1,15 @@
-import { Cache, LaunchType, launchCommand, showToast } from "@raycast/api";
+import { LaunchType, launchCommand } from "@raycast/api";
 import { LINKINIZE_DOMAIN, BOOKMARKS, ORGANIZATIONS, TOKEN, ACTIVE_ORGANIZATION, CLICKS } from "./constants";
-import { getInteractions, logout } from "./support";
+import { getInteractions, logout, cache } from "./support";
 import axios, { AxiosResponse } from "axios";
 
-const cache = new Cache();
 export default async function Command() {
   const token = cache.get(TOKEN);
 
   if (token) {
-    await synchronize(token);
-    await showToast({ title: "Success!", message: "Everything is up to date 🚀" });
-    await launchCommand({ name: "index", type: LaunchType.UserInitiated });
+    await synchronize(token).then(function () {
+      launchCommand({ name: "index", type: LaunchType.UserInitiated });
+    });
   } else {
     logout();
   }
@@ -18,7 +17,7 @@ export default async function Command() {
 
 async function synchronize(token: string) {
   const data = Buffer.from(getInteractions()).toString("base64");
-  axios
+  return axios
     .post(
       `${LINKINIZE_DOMAIN}/api/sync`,
       {
@@ -39,7 +38,6 @@ async function synchronize(token: string) {
       return;
     })
     .catch(async function (error) {
-      console.log("Synchronization Error", error.response);
       logout();
     });
 }

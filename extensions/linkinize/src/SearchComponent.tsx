@@ -1,9 +1,10 @@
 import { List, ActionPanel, Action, Cache } from "@raycast/api";
 import { BOOKMARKS } from "./constants";
 import { Bookmark } from "./interfaces";
-import { recordInteraction } from "./support";
+import { recordInteraction, cache } from "./support";
 
-export function Search(cache: Cache) {
+export function Search() {
+  console.log("here");
   const cached = cache.get(BOOKMARKS);
   const items = cached ? JSON.parse(cached) : [];
 
