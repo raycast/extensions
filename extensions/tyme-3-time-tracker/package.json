@@ -14,14 +14,14 @@
     {
       "name": "start-task-tracking",
       "title": "Start Task",
-      "subtitle": "Start Tracking a Tyme Task",
+      "subtitle": "Tyme 3 Time Tracker",
       "description": "This command will let you search for any uncompleted task or subtask in Tyme 3 and start the time tracker for that task.",
       "mode": "view"
     },
     {
       "name": "stop-task-tracking",
       "title": "Stop Task",
-      "subtitle": "Stop Tracking the Current Tyme Task",
+      "subtitle": "Tyme 3 Time Tracker",
       "description": "This command will let you stop tracking the current task in Tyme",
       "mode": "no-view"
     }

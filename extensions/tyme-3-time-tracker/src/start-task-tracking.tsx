@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow, showHUD } from "@raycast/api";
 import { Task, getTasks, startTrackingTask } from "./tasks";
 import { useCachedPromise, useFrecencySorting } from "@raycast/utils";
 
@@ -18,10 +18,12 @@ function StartTrackerForTask() {
   const { data: sortedTasks, visitItem: visitTask, resetRanking: resetTaskRanking } = useFrecencySorting(tasks);
 
   // Handle start tracking
-  const handleStartTracking = (task: Task) => {
+  const handleStartTracking = async (task: Task) => {
     closeMainWindow({ clearRootSearch: true });
     visitTask(task);
-    startTrackingTask(task.id);
+
+    const successfullyStarted = await startTrackingTask(task.id);
+    showHUD(successfullyStarted ? "Started tracking task" : "Could not start tracking task");
   };
 
   return (
