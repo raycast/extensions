@@ -1,6 +1,6 @@
 # Changelog
 
-## [FFeatureix] - 2023-10-04
+## [Feature] - 2023-10-04
 
 - Specify max tokens parameter in model config
 
