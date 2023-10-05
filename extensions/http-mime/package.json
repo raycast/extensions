@@ -16,8 +16,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "MIME",
-      "description": "Lookup MIME types",
+      "title": "Lookup MIME Types",
+      "description": "Command to Lookup MIME types",
       "mode": "view"
     }
   ],
