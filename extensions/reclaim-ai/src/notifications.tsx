@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useEvent } from "./hooks/useEvent";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
 import { useUser } from "./hooks/useUser";
+import { CalendarAccount } from "./types/account";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
@@ -67,17 +68,33 @@ export default function Command() {
     Accept: "application/json",
   };
 
-  const range = {
-    start: format(startOfDay(new Date()), "yyyy-MM-dd"),
-    end: format(addDays(new Date(), 2), "yyyy-MM-dd"),
-  };
+  const { data: accountData, isLoading: isLoadingAccounts } = useFetch<CalendarAccount[]>(`${apiUrl}/accounts`, {
+    headers: fetchHeaders,
+    keepPreviousData: true,
+  });
 
-  const { data: eventData, isLoading: isLoadingEvents } = useFetch<ApiResponseEvents>(
-    `${apiUrl}/events?sourceDetails=true&start=${range.start}&end=${range.end}`,
+  const { data: eventsResponse, isLoading: isLoadingEvents } = useFetch<ApiResponseEvents>(
+    `${apiUrl}/events?${new URLSearchParams({
+      sourceDetails: "true",
+      start: format(startOfDay(new Date()), "yyyy-MM-dd"),
+      end: format(addDays(new Date(), 2), "yyyy-MM-dd"),
+      ...(accountData && {
+        calendarIds: accountData.flatMap(({ connectedCalendars }) => connectedCalendars.map(({ id }) => id)).join(","),
+      }),
+    }).toString()}`,
     {
+      execute: !!accountData && !isLoadingAccounts,
       headers: fetchHeaders,
       keepPreviousData: true,
     }
+  );
+
+  // Create hashmap for fast lookups if event is synced and part of both calendars
+  const eventHashMap = new Map(eventsResponse?.map((event) => [`${event.eventStart}${event.eventEnd}`, event.eventId]));
+
+  // Filter out events that are synced, managed by Reclaim and part of multiple calendars
+  const eventData = eventsResponse?.filter(
+    (event) => !(event.personalSync && event.reclaimManaged && eventHashMap.has(`${event.eventStart}${event.eventEnd}`))
   );
 
   const { data: eventMoment, isLoading: isLoadingMoment } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {

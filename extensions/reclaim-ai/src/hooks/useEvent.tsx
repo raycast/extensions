@@ -10,6 +10,7 @@ import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useUser } from "./useUser";
 import { useTask } from "./useTask";
 import { NativePreferences } from "../types/preferences";
+import { CalendarAccount } from "../types/account";
 
 const useEvent = () => {
   const { fetcher } = reclaimApi();
@@ -22,18 +23,39 @@ const useEvent = () => {
       const strStart = format(start, "yyyy-MM-dd");
       const strEnd = format(end, "yyyy-MM-dd");
 
+      const [accountsResponse, accountsError] = await axiosPromiseData<CalendarAccount[]>(
+        fetcher("/accounts", {
+          method: "GET",
+        })
+      );
+
+      if (!accountsResponse || accountsError) throw accountsError;
+
       const [eventsResponse, error] = await axiosPromiseData<ApiResponseEvents>(
         fetcher("/events?sourceDetails=true", {
           method: "GET",
           params: {
             start: strStart,
             end: strEnd,
+            calendarIds: accountsResponse
+              .flatMap(({ connectedCalendars }) => connectedCalendars.map(({ id }) => id))
+              .join(","),
           },
         })
       );
 
       if (!eventsResponse || error) throw error;
-      return eventsResponse;
+
+      // Create hashmap for fast lookups if event is synced and part of both calendars
+      const eventHashMap = new Map(
+        eventsResponse.map((event) => [`${event.eventStart}${event.eventEnd}`, event.eventId])
+      );
+
+      // Filter out events that are synced, managed by Reclaim and part of multiple calendars
+      return eventsResponse.filter(
+        (event) =>
+          !(event.personalSync && event.reclaimManaged && eventHashMap.has(`${event.eventStart}${event.eventEnd}`))
+      );
     } catch (error) {
       console.error("Error while fetching events", error);
     }
