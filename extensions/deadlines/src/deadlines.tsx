@@ -6,12 +6,13 @@ import { Deadline } from "./types";
 import { useCachedDeadlines } from "./hooks/cache";
 import { CreateDeadlineForm } from "./create-deadline";
 import { calculateProgress, getProgressBar } from "./utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function Command() {
   const [deadlines, setDeadlines] = useCachedDeadlines();
   const [upcomingDeadlines, setUpcomingDeadlines] = useState<Deadline[]>([]);
   const [otherDeadlines, setOtherDeadlines] = useState<Deadline[]>([]);
+  const [filter, setFilter] = useState<string>("All");
 
   function handleCreate(deadline: Deadline) {
     if (deadline.isFav) {
@@ -26,8 +27,15 @@ export default function Command() {
   }
 
   function handleDelete(deadline: Deadline) {
+    const index = deadlines.findIndex(
+      (d) => d.startDate.getTime() + d.endDate.getTime() === deadline.startDate.getTime() + deadline.endDate.getTime()
+    );
+
+    if (index === -1) {
+      console.log("Error: deadline not found");
+      return;
+    }
     const newDeadlines = [...deadlines];
-    const index = newDeadlines.indexOf(deadline);
     newDeadlines.splice(index, 1);
     setDeadlines(newDeadlines);
   }
@@ -126,6 +134,19 @@ export default function Command() {
     setOtherDeadlines(deadlines.filter((deadline) => upcomingDeadlines.indexOf(deadline) === -1 && !deadline.isPinned));
   }, [upcomingDeadlines]);
 
+  const filteredDeadlines = useMemo(() => {
+    switch (filter) {
+      case "All":
+        return deadlines;
+      case "Upcoming":
+        return upcomingDeadlines;
+      case "Pinned":
+        return deadlines.filter((deadline) => deadline.isPinned);
+      default:
+        return deadlines;
+    }
+  }, [deadlines, upcomingDeadlines, filter]);
+
   return (
     <List
       actions={
@@ -133,15 +154,25 @@ export default function Command() {
           <CreateDeadlineAction onCreate={handleCreate} />
         </ActionPanel>
       }
+      searchBarAccessory={<DeadlineDropdown onDeadlineTypeChange={(newValue) => setFilter(newValue)} />}
       isLoading={!deadlines}
     >
-      <List.Section title="Pinned Deadlines">
-        {deadlines.filter((deadline) => deadline.isPinned).map((deadline) => renderProgress(deadline))}
-      </List.Section>
-      <List.Section title="Upcoming Deadlines">
-        {upcomingDeadlines.map((deadline) => renderProgress(deadline))}
-      </List.Section>
-      <List.Section title="All Deadlines">{otherDeadlines.map((deadline) => renderProgress(deadline))}</List.Section>
+      {filter === "All" ? (
+        <>
+          <List.Section title="Pinned Deadlines">
+            {deadlines.filter((deadline) => deadline.isPinned).map((deadline) => renderProgress(deadline))}
+          </List.Section>
+
+          <List.Section title="Upcoming Deadlines">
+            {upcomingDeadlines.map((deadline) => renderProgress(deadline))}
+          </List.Section>
+          <List.Section title="All Deadlines">
+            {otherDeadlines.map((deadline) => renderProgress(deadline))}
+          </List.Section>
+        </>
+      ) : (
+        filteredDeadlines.map((deadline) => renderProgress(deadline))
+      )}
     </List>
   );
 }
@@ -175,5 +206,25 @@ function CreateDeadlineAction(props: { onCreate: (deadline: Deadline) => void })
       shortcut={{ modifiers: ["cmd"], key: "n" }}
       target={<CreateDeadlineForm onCreate={props.onCreate} />}
     />
+  );
+}
+
+function DeadlineDropdown(props: { onDeadlineTypeChange: (newValue: string) => void }) {
+  const { onDeadlineTypeChange } = props;
+  const deadlineTypes = ["All", "Upcoming", "Pinned"];
+  return (
+    <List.Dropdown
+      tooltip="Select Filtering"
+      storeValue={true}
+      onChange={(newValue) => {
+        onDeadlineTypeChange(newValue);
+      }}
+    >
+      <List.Dropdown.Section title="Filter by">
+        {deadlineTypes.map((deadlineType) => (
+          <List.Dropdown.Item key={deadlineType} title={deadlineType} value={deadlineType} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
   );
 }
