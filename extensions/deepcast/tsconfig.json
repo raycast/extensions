@@ -12,8 +12,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true,
-    "typeRoots": ["."],
-    "types": ["raycast-env"]
+    "resolveJsonModule": true
   }
 }
