@@ -254,6 +254,24 @@
       "type": "password"
     },
     {
+      "name": "source",
+      "type": "dropdown",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
+      "data": [
+        {
+          "title": "Selected",
+          "value": "selected"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        }
+      ],
+      "default": "selected",
+      "required": false
+    },
+    {
       "description": "Action on Translation",
       "name": "onTranslateAction",
       "required": false,
@@ -273,24 +291,6 @@
           "value": "paste"
         }
       ]
-    },
-    {
-      "name": "source",
-      "type": "dropdown",
-      "title": "Preferred Source",
-      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
-      "data": [
-        {
-          "title": "Selected",
-          "value": "selected"
-        },
-        {
-          "title": "Clipboard",
-          "value": "clipboard"
-        }
-      ],
-      "default": "selected",
-      "required": false
     }
   ],
   "dependencies": {
