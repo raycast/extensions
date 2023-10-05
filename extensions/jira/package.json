@@ -106,6 +106,7 @@
     "@types/lodash": "^4.14.191",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
+    "@types/remove-markdown": "^0.3.2",
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.26.0",
     "prettier": "^2.5.1",
