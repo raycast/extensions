@@ -1,5 +1,17 @@
 # KeepassXC Extension Changelog
 
+## [Fixes] - 2023-10-03
+
+- New feature/action "Paste TOTP" so as to be more productive
+- Respecting the KeePassXC shortcut logic as much as possible since cmd + P isn't an available custom shortcut anymore for extensions
+- Giving a tempory solution for the "Copy Password" (why? when the password contains a backslash, that action fails due to AppleScript in the protectedCopy function)
+- Updating the README.md accordingly
+- Using the build in Clipboard.Copy's concealed type 
+
+## [Fix] - 2023-06-20
+
+- Fixed a logic bug
+
 ## [Enhancement] - 2023-05-23
 
 - New feature/action "Paste Username" so as to be more productive;

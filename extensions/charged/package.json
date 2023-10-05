@@ -59,6 +59,14 @@
       "mode": "view",
       "icon": "icon.png",
       "subtitle": "Charged"
+    },
+    {
+      "name": "starknetTransactionBuilderCommand",
+      "title": "Starknet Transaction Builder",
+      "description": "Build and submit transactions",
+      "mode": "view",
+      "icon": "icon.png",
+      "subtitle": "Charged"
     }
   ],
   "dependencies": {
@@ -66,6 +74,7 @@
     "@types/uuid": "^9.0.1",
     "axios": "^1.4.0",
     "bn.js": "^5.2.1",
+    "debounce": "^1.2.1",
     "mixpanel": "^0.17.0",
     "starknet": "^5.10.2",
     "ts-interface-checker": "^1.0.2",
@@ -74,6 +83,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
     "@types/bn.js": "^5.1.1",
+    "@types/debounce": "^1.2.1",
     "@types/mixpanel": "^2.14.4",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",

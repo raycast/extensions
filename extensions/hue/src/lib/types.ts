@@ -9,10 +9,13 @@
 ///////////////////////
 // Non-Hue API types //
 ///////////////////////
+
 export type Id = string | number;
 export type Palette = string[];
-export type GradientUri = string;
-export type GradientUriCache = Map<Id, GradientUri>;
+export type LightIcon = { iconPath: string; color: string };
+export type PngUri = string;
+export type PngUriCache = Map<Id, PngUri>;
+export type PngUriLightIconSet = { on: PngUri; offLight: PngUri; offDark: PngUri };
 
 export type BridgeConfig = {
   ipAddress: string;
@@ -44,9 +47,46 @@ export interface HasId {
 
 export type Method = "GET" | "DELETE" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "PURGE" | "LINK" | "UNLINK";
 
+export type MDnsService = {
+  addresses: string[];
+  subtypes: string[];
+  rawTxt: Buffer[];
+  txt: Record<string, string>;
+  name: string;
+  fqdn: string;
+  host: string;
+  referer: {
+    address: string;
+    family: string;
+    port: number;
+    size: number;
+  };
+  port: number;
+  type: string;
+  protocol: string;
+};
+
+export type HueApiService = {
+  id: string;
+  internalipaddress: string;
+  port: number;
+};
+
 ///////////////////
 // Hue API types //
 ///////////////////
+
+export type LinkResponse = {
+  success?: {
+    username: string;
+    clientkey: string;
+  };
+  error?: {
+    type: number;
+    address: string;
+    description: string;
+  };
+};
 
 type LightArchetype =
   | "unknown_archetype"

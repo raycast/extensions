@@ -101,7 +101,7 @@ export function ChannelItem(props: ChannelItemProps): JSX.Element {
   if (channel.statistics) {
     parts = [
       `${compactNumberFormat(parseInt(channel.statistics.subscriberCount))} subs · ${compactNumberFormat(
-        parseInt(channel.statistics.viewCount)
+        parseInt(channel.statistics.viewCount),
       )} views`,
     ];
   }

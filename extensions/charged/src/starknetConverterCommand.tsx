@@ -7,6 +7,7 @@ import * as analytics from "./utils/analytics";
 enum ELEMENTS {
   RAW_VALUE = "rawValueField",
   FELT_VALUE = "feltValueField",
+  FELT_ARRAY_VALUE = "feltArrayValueField",
   HEX_VALUE = "hexValueField",
   STRING_VALUE = "stringValueField",
   SELECTOR_VALUE = "selectorValueField",
@@ -17,6 +18,7 @@ enum ELEMENTS {
 export default function Command() {
   const [rawValue, setRawValue] = useState<string>("");
   const [feltValue, setFeltValue] = useState<string | undefined>("");
+  const [feltArrayValue, setFeltArrayValue] = useState<string | undefined>("[]");
   const [hexValue, setHexValue] = useState<string>("");
   const [stringValue, setStringValue] = useState<string>("");
   const [selectorValue, setSelectorValue] = useState<string>("");
@@ -32,6 +34,7 @@ export default function Command() {
     setRawValue(value);
 
     setFeltValue(value ? starknetConverter.toBN(value)?.toString() : "");
+    setFeltArrayValue(JSON.stringify(starknetConverter.toBNArray(value, 31)));
 
     const hex = starknetConverter.toHex(value);
     setHexValue(hex);
@@ -80,6 +83,16 @@ export default function Command() {
           }}
           value={feltValue}
           onFocus={() => onElementFocus(ELEMENTS.FELT_VALUE)}
+        />
+        <Form.TextField
+          id={ELEMENTS.FELT_ARRAY_VALUE}
+          title="Felt*"
+          placeholder=""
+          onChange={() => {
+            void 0;
+          }}
+          value={feltArrayValue}
+          onFocus={() => onElementFocus(ELEMENTS.FELT_ARRAY_VALUE)}
         />
         <Form.TextField
           id={ELEMENTS.HEX_VALUE}

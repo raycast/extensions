@@ -1,4 +1,4 @@
-import { LaunchProps, ActionPanel, List, Action } from "@raycast/api";
+import { LaunchProps, ActionPanel, List, Action, closeMainWindow } from "@raycast/api";
 import { useCachedPromise, getFavicon } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { getBookmarks, openInHook, getHookIconPath, ShowHookedSubmenu } from "./utils/hookmark";

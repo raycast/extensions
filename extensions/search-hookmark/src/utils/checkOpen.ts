@@ -1,5 +1,4 @@
-import { showToast, Toast, popToRoot, closeMainWindow } from "@raycast/api";
-import { exec } from "child_process";
+import { showToast, Toast } from "@raycast/api";
 import { launchHookmark } from "./hookmark";
 
 export async function showHookmarkNotOpenToast() {
@@ -8,12 +7,8 @@ export async function showHookmarkNotOpenToast() {
     title: "Hookmark is not running",
     primaryAction: {
       title: "Launch Hookmark and retry to call Search Hookmark command",
-      onAction: (toast) => {
-        // exec(`open -ga Hookmark`);
-        // execSync(`open -ga Hookmark || open -ga /Applications/Setapp/Hookmark.app`);
+      onAction: (toast) => {        
         launchHookmark();
-        // toast.hide();
-        // closeMainWindow();
       },
     },
   };

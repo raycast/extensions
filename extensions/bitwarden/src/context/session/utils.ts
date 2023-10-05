@@ -1,7 +1,6 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { LOCAL_STORAGE_KEY, VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { VAULT_TIMEOUT } from "~/constants/preferences";
-import { Preferences } from "~/types/preferences";
 import { SessionState } from "~/types/session";
 
 export const SessionStorage = {

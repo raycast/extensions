@@ -96,6 +96,8 @@
   "scripts": {
     "copy-binary": "cp node_modules/@spotxyz/macos-audio-devices/audio-devices assets/audio-devices",
     "build": "npm run copy-binary && ray build -e dist",
-    "dev": "npm run copy-binary && ray develop"
+    "dev": "npm run copy-binary && ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

@@ -1,5 +1,14 @@
 # Todo List Changelog
 
+## [Impliment Sorting] - 2023-08-11
+
+- New preference option for choose how tasks are sorted.
+- Adds priority to tasks, allowing the user to take more control of the order of tasks.
+
+## [New Preference Option] - 2023-06-02
+
+- Added preference options for menu-bar's completed tasks (latest, show all, hide all)
+
 ## [New Action] - 2023-06-01
 
 - Added possibility to mark all completed todo items as incomplete

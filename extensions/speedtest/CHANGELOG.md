@@ -1,5 +1,16 @@
 # Speedtest Changelog
 
+## [Optimize] - 2023-08-30
+
+- Catch possible crash in speedtest
+- Upgrade to 1.57
+- Use Raycast Icons instead of custom ones
+- Add Restart Action
+
+## [Spelling] - 2023-06-13
+
+- Corrected naming convention for an action
+
 ## [Update] - 2023-05-10
 
 Added the ability to open the result url in the browser by pressing `opt + enter`.

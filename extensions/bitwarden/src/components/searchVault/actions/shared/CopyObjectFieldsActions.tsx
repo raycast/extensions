@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
 import { capitalize } from "~/utils/strings";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
@@ -6,13 +6,14 @@ import { getTransientCopyPreference } from "~/utils/preferences";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { Item } from "~/types/vault";
 import { captureException } from "~/utils/development";
+import { showCopySuccessMessage } from "~/utils/clipboard";
 
 type Constraint = RecordOfAny;
 
 export type CopyObjectStringFieldsActionsProps<TValue extends Constraint> = {
   selector: (item: Item) => TValue | null | undefined;
   sorter?: (itemA: [string, any], itemB: [string, any]) => number;
-  labelMapper?: (field: keyof TValue) => string; // TODO: figure out why the field is not being inferred as a keyof TValue
+  labelMapper?: (field: keyof TValue) => string;
 };
 
 function CopyObjectStringFieldsActions<TValue extends Constraint>({
@@ -26,14 +27,13 @@ function CopyObjectStringFieldsActions<TValue extends Constraint>({
 
   if (!selectedItemEntries) return null;
 
-  const handleCopyField = (field: string) => async () => {
+  const handleCopyField = (field: string, label: string) => async () => {
     try {
       const value = await getUpdatedVaultItem(selectedItem, (item) => selector(item)?.[field], `Getting ${field}...`);
       if (typeof value !== "string") throw new Error(`Value of ${field} is not a string`);
       if (value) {
         await Clipboard.copy(value, { transient: getTransientCopyPreference("other") });
-        await showHUD("Copied to clipboard");
-        await closeMainWindow();
+        await showCopySuccessMessage(`Copied ${label} to clipboard`);
       }
     } catch (error) {
       await showToast(Toast.Style.Failure, `Failed to copy ${field}`);
@@ -52,7 +52,7 @@ function CopyObjectStringFieldsActions<TValue extends Constraint>({
             key={`${index}-${key}`}
             title={`Copy ${label}`}
             icon={Icon.Clipboard}
-            onAction={handleCopyField(key)}
+            onAction={handleCopyField(key, label)}
             repromptDescription={`Copying the ${label} of <${selectedItem.name}>`}
           />
         );

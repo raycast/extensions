@@ -2,7 +2,7 @@ import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { daysInSeconds, hashRecord, projectIconUrl, showErrorToast } from "../utils";
+import { daysInSeconds, getFirstChar, hashRecord, projectIconUrl, showErrorToast } from "../utils";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
@@ -20,21 +20,21 @@ import {
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
-import { getTextIcon, useImage } from "../icons";
+import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
 import { CacheActionPanelSection } from "./cache_actions";
 
 function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
-  return getTextIcon((project.name ? project.name[0] : "?").toUpperCase());
+  return getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase());
 }
 
-export function ProjectListItem(props: { project: Project }): JSX.Element {
+export function ProjectListItem(props: { project: Project; nameOnly?: boolean }): JSX.Element {
   const project = props.project;
   const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
 
   return (
     <List.Item
-      title={project.name_with_namespace}
+      title={props.nameOnly === true ? project.name : project.name_with_namespace}
       accessories={[
         {
           icon: {
@@ -83,6 +83,10 @@ interface ProjectListProps {
   starred?: boolean;
 }
 
+export function ProjectListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Projects" icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }} />;
+}
+
 export function ProjectList({ membership = true, starred = false }: ProjectListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Project[]>(
@@ -117,14 +121,20 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
 
   return (
     <List
-      searchBarPlaceholder="Filter Projects by name..."
+      searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
     >
-      {data?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+      <List.Section
+        title={searchText && searchText.length > 0 ? "Search Results" : "Projects"}
+        subtitle={`${data?.length}`}
+      >
+        {data?.map((project) => (
+          <ProjectListItem key={project.id} project={project} />
+        ))}
+      </List.Section>
+      <ProjectListEmptyView />
     </List>
   );
 }

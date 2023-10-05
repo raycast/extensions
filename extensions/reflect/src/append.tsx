@@ -11,6 +11,7 @@ interface FormValues {
   prependTimestamp: boolean;
   parentList: string;
   graphId: string;
+  timestampFormat?: string;
 }
 
 export default function Command() {
@@ -23,7 +24,10 @@ export default function Command() {
 
       try {
         const authorizationToken = await authorize();
-        const text = prependTimestampIfSelected(values.note, values);
+        const text = prependTimestampIfSelected(values.note, {
+          prependTimestamp: values.prependTimestamp,
+          timestampFormat: values.timestampFormat as "12" | "24" | undefined,
+        });
 
         await appendToDailyNote(authorizationToken, values.graphId, text, values.parentList);
         await LocalStorage.setItem("graphId", values.graphId);
@@ -62,6 +66,8 @@ export default function Command() {
     fetchData();
   }, []);
 
+  const showTimestampFormat: boolean = itemProps.prependTimestamp.value ?? false;
+
   return (
     <Form
       actions={
@@ -72,6 +78,12 @@ export default function Command() {
     >
       <Form.TextArea {...itemProps.note} title="Note" />
       <Form.Checkbox {...itemProps.prependTimestamp} label="Prepend Timestamp" storeValue={true} />
+      {showTimestampFormat ? (
+        <Form.Dropdown {...itemProps.timestampFormat} storeValue={true}>
+          <Form.Dropdown.Item value="12" title="12 hour" />
+          <Form.Dropdown.Item value="24" title="24 hour" />
+        </Form.Dropdown>
+      ) : null}
       <Form.TextField
         {...itemProps.parentList}
         title="Parent List (Optional)"

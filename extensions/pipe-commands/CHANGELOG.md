@@ -1,5 +1,13 @@
 # Pipe Commands Changelog
 
+## [Added new pipe commands] - 2023-09-07
+
+- Adding extract url from text (extract-urls-from-text)
+
+## [Added new pipe commands] - 2023-08-08
+
+- Adding comma conversion utils (comma-to-newline, newline-to-comma)
+
 ## [Added new pipe command] - 2023-05-31
 
 - Add a pipe text command script to remove duplicate newlines.

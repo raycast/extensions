@@ -1,4 +1,3 @@
-export const API_RATE_LIMIT = 5;
 export const API_URL = "https://hidemail.app/api/v1";
 
 export const getHeaders = (token: string) => {

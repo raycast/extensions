@@ -10,7 +10,7 @@ export function useDiscussions(query: string) {
       const result = await github.searchDiscussions({ query, numberOfOpenItems: 20 });
       return result.openDiscussions;
     },
-    [query]
+    [query],
   );
 
   return { data, isLoading };

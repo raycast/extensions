@@ -33,7 +33,8 @@ jobs:
                   replacement=$(date '+%Y-%m-%d')
                   if grep -q $pattern $changelog; then
                       echo "  pattern found"
-                      sed -i "s/$pattern/$replacement/g" $changelog
+                      sed -i "" "s/$pattern/$replacement/g" $changelog 
+                      # ubuntu: sed -i "s/$pattern/$replacement/g" $changelog
                       echo "  updated to $replacement"
                   else
                       echo "  pattern not found - skipping"
@@ -46,11 +47,14 @@ jobs:
         run: |
           images=$(gh pr view ${{ github.event.inputs.pr_number }} --json files | jq -r '.files[].path | select(endswith("png") or endswith("jpeg") or endswith("jpg"))')
           images_array=()
-          while IFS= read -r image; do
-            images_array+=("$image")
-          done <<< "$images"
+          if [[ -n "$images" ]]; then
+            echo "Images: $images"
+            while IFS= read -r image; do
+              images_array+=("$image")
+            done <<< "$images"
+          fi
           count=${#images_array[@]}
-          echo "Found $count images"
+          echo "Found images: $count"
           if [ $count -gt 0 ]; then
             brew update
             brew install imageoptim
@@ -83,7 +87,7 @@ jobs:
             echo "No changes, skipping sync."
           fi
       - name: Sleep for 30 seconds
-        run: sleep 30s
+        run: sleep 30 # sleep 30s for ubuntu
         shell: bash
       - name: Merge
         run: gh pr merge ${{ github.event.inputs.pr_number }} --squash

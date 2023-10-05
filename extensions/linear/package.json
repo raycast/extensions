@@ -11,7 +11,8 @@
     "mathieudutour",
     "thomas",
     "peduarte",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "mil3na"
   ],
   "categories": [
     "Productivity"
@@ -215,18 +216,18 @@
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^2.3.0",
-    "@raycast/api": "^1.51.0",
-    "@raycast/utils": "^1.6.1",
-    "date-fns": "^2.28.0",
-    "file-type": "^18.2.0",
+    "@linear/sdk": "^8.0.0",
+    "@raycast/api": "^1.57.2",
+    "@raycast/utils": "^1.9.1",
+    "date-fns": "^2.30.0",
+    "file-type": "^18.5.0",
     "lodash": "^4.17.21",
     "nanoid": "^4.0.2",
     "node-emoji": "^1.11.0",
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/lodash": "^4.14.182",
     "@types/node-emoji": "^1.8.1",
     "@types/object-hash": "^2.2.1",

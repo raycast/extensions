@@ -6,7 +6,12 @@
   "icon": "icon.png",
   "author": "thomaslombart",
   "contributors": [
-    "FezVrasta"
+    "FezVrasta",
+    "igor9silva",
+    "jesperorb",
+    "teziovsky",
+    "rifont",
+    "gavinroderick"
   ],
   "owner": "raycast",
   "access": "public",
@@ -55,7 +60,18 @@
       "title": "My Filters",
       "subtitle": "Jira",
       "description": "View and modify issues of your saved filters.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sortByFavourite",
+          "description": "If checked, any filters marked as favourite in Jira will be displayed first in the filter selection dropdown.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Favourite Filters",
+          "default": false,
+          "label": "Show favourite filters ahead of others"
+        }
+      ]
     },
     {
       "name": "recently-updated-issues",
@@ -73,7 +89,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
+    "@raycast/api": "^1.53.3",
     "@raycast/utils": "^1.5.2",
     "date-fns": "^2.29.3",
     "filesize": "^10.0.6",

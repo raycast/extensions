@@ -6,6 +6,11 @@ import { useState, useEffect } from "react";
 import algoliasearch from "algoliasearch/lite";
 import { Toast, showToast } from "@raycast/api";
 
+const DEFUALT_PARAMETERS = {
+  highlightPreTag: "**",
+  highlightPostTag: "**",
+};
+
 export function useAlgolia(query = "", currentAPI: TAlgolia) {
   const searchClient = algoliasearch(currentAPI.appId, currentAPI.apiKey);
   const searchIndex = searchClient.initIndex(currentAPI.indexName);
@@ -17,7 +22,10 @@ export function useAlgolia(query = "", currentAPI: TAlgolia) {
     setIsLoading(true);
 
     searchIndex
-      .search(query, currentAPI.searchParameters)
+      .search(query, {
+        ...DEFUALT_PARAMETERS,
+        ...currentAPI.searchParameters,
+      })
       .then((res: any) => {
         setIsLoading(false);
         formatHitUrl(res, currentAPI.homepage);

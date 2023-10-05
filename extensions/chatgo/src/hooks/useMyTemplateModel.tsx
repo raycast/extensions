@@ -39,13 +39,13 @@ export function useMyTemplateModel(): ModelTemplateHook {
       });
   }, []);
 
-  const add = useCallback(async (model: TemplateModel) => {
+  const add = useCallback(async () => {
     //
   }, []);
-  const update = useCallback(async (model: TemplateModel) => {
+  const update = useCallback(async () => {
     //
   }, []);
-  const remove = useCallback(async (model: TemplateModel) => {
+  const remove = useCallback(async () => {
     //
   }, []);
   const clear = useCallback(async () => {

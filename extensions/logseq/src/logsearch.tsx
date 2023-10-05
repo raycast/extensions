@@ -114,7 +114,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
           finalInitialResult.push({
             name: formatResult(element).replace(fileType, ""),
             description: formatResult(element),
-            url: formatFilePath(element),
+            url: formatFilePath(element).replace(fileType, ""),
           });
         }
       });
@@ -142,7 +142,7 @@ async function performSearch(searchText: string): Promise<SearchResult[]> {
           finalSearchResults.push({
             name: formatResult(element).replace(fileType, ""),
             description: formatResult(element),
-            url: formatFilePath(element),
+            url: formatFilePath(element).replace(fileType, ""),
           });
         }
       });

@@ -3,7 +3,7 @@ export {};
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Bilibili {
-    export interface gennerateQRCodeResponse {
+    export interface GennerateQRCodeResponse {
       code: number;
       data: {
         url: string;
@@ -13,7 +13,7 @@ declare global {
       ttl: number;
     }
 
-    export interface checkQRCodeStatusResponse {
+    export interface CheckQRCodeStatusResponse {
       code: number;
       message: string;
       data: {
@@ -25,7 +25,7 @@ declare global {
       };
     }
 
-    export interface logoutResponse {
+    export interface LogoutResponse {
       code: number;
       status: boolean;
       ts: number;
@@ -35,18 +35,20 @@ declare global {
       };
     }
 
-    export interface dynamicFeedAllResponse {
+    export interface DynamicFeedAllResponse {
       code: number;
       data: {
-        items: dynamicItems;
+        items: DynamicItems;
       };
       message: string;
       ttl: number;
     }
 
-    export type dynamicItems = (dynmamicVideo | dynamicPost | dynamicMusic | dynamicLive)[];
+    export type DynamicItem = DynmamicVideo | DynamicPost | DynamicMusic | DynamicLive;
+    export type DynamicType = DynmamicVideoType | DynamicPostType | DynamicMusicType | DynamicLiveType;
+    export type DynamicItems = DynamicItem[];
 
-    export type dynamicModuleAuthor = {
+    export type DynamicModuleAuthor = {
       face: string;
       jump_url: string;
       mid: number;
@@ -54,7 +56,7 @@ declare global {
       pub_ts: number;
     };
 
-    export type dynamicModuleStat = {
+    export type DynamicModuleStat = {
       comment: {
         count: number;
       };
@@ -66,10 +68,11 @@ declare global {
       };
     };
 
-    export interface dynmamicVideo {
+    type DynmamicVideoType = "DYNAMIC_TYPE_AV";
+    export interface DynmamicVideo {
       id_str: string;
       modules: {
-        module_author: dynamicModuleAuthor;
+        module_author: DynamicModuleAuthor;
         module_dynamic: {
           type: string;
           major: {
@@ -94,27 +97,29 @@ declare global {
           };
         };
       };
-      type: "DYNAMIC_TYPE_AV";
+      type: DynmamicVideoType;
     }
 
-    export interface dynamicPost {
+    type DynamicPostType = "DYNAMIC_TYPE_DRAW" | "DYNAMIC_TYPE_WORD" | "DYNAMIC_TYPE_FORWARD";
+    export interface DynamicPost {
       id_str: string;
       modules: {
-        module_author: dynamicModuleAuthor;
+        module_author: DynamicModuleAuthor;
         module_dynamic: {
           desc: {
             text: string;
           };
         };
-        module_stat: dynamicModuleStat;
+        module_stat: DynamicModuleStat;
       };
-      type: "DYNAMIC_TYPE_DRAW" | "DYNAMIC_TYPE_WORD" | "DYNAMIC_TYPE_FORWARD";
+      type: DynamicPostType;
     }
 
-    export interface dynamicMusic {
+    type DynamicMusicType = "DYNAMIC_TYPE_MUSIC";
+    export interface DynamicMusic {
       id_str: string;
       modules: {
-        module_author: dynamicModuleAuthor;
+        module_author: DynamicModuleAuthor;
         module_dynamic: {
           major: {
             music: {
@@ -128,15 +133,16 @@ declare global {
             text: string;
           };
         };
-        module_stat: dynamicModuleStat;
+        module_stat: DynamicModuleStat;
       };
-      type: "DYNAMIC_TYPE_MUSIC";
+      type: DynamicMusicType;
     }
 
-    export interface dynamicLive {
+    type DynamicLiveType = "DYNAMIC_TYPE_LIVE_RCMD";
+    export interface DynamicLive {
       id_str: string;
       modules: {
-        module_author: dynamicModuleAuthor;
+        module_author: DynamicModuleAuthor;
         module_dynamic: {
           major: {
             live_rcmd: {
@@ -144,28 +150,28 @@ declare global {
             };
           };
         };
-        module_stat: dynamicModuleStat;
+        module_stat: DynamicModuleStat;
       };
-      type: "DYNAMIC_TYPE_LIVE_RCMD";
+      type: DynamicLiveType;
     }
 
-    export interface popularVideosResponse {
+    export interface PopularVideosResponse {
       code: number;
       message: string;
       ttl: number;
       data: {
-        list: video[];
+        list: Video[];
         no_more: boolean;
       };
     }
 
-    export type uploader = {
+    export type Uploader = {
       mid: number;
       name: string;
       face: string;
     };
 
-    export type video = {
+    export type Video = {
       uri: string;
       aid: number;
       bvid: string;
@@ -174,7 +180,8 @@ declare global {
       pubdate: number;
       desc: string;
       duration: number;
-      owner: uploader;
+      owner: Uploader;
+      short_link_v2: string;
       stat: {
         danmaku?: number;
         view?: number;
@@ -187,36 +194,36 @@ declare global {
       short_link: string;
     };
 
-    export interface rcmdVideosResponse {
+    export interface RcmdVideosResponse {
       code: number;
       data: {
-        item: video[];
+        item: Video[];
       };
       message: string;
       ttl: number;
     }
 
-    export interface popularSeriesListResponse {
+    export interface PopularSeriesListResponse {
       code: number;
       data: {
-        list: popularSeries[];
+        list: PopularSeries[];
       };
       message: string;
       ttl: number;
     }
 
-    export type popularSeries = {
+    export type PopularSeries = {
       name: string;
       number: number;
       status: number;
       subject: string;
     };
 
-    export interface popularSeriesVideosResponse {
+    export interface PopularSeriesVideosResponse {
       code: number;
       message: string;
       data: {
-        list: video[];
+        list: Video[];
       };
       ttl: number;
     }
