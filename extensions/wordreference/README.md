@@ -18,6 +18,10 @@ This is an unofficial extension developed independently. All data is provided by
 2. Enter your desired word to translate in the Raycast interface.
 3. Get the translations instantly.
 
+## Settings
+
+- Automatically use the selected word as search
+
 Enjoy a hassle-free translation experience!
 
 ## Contributing

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "looksee",
+  "title": "LookSee - A MAC, OUI, IAB Lookup",
+  "description": "Use www.macvendorlookup.com from Raycast",
+  "icon": "command-icon.png",
+  "author": "olavgjerde",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "System",
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lookup",
+      "title": "Lookup",
+      "subtitle": "LookSee",
+      "description": "Displays vendor information about a MAC address, OUI or IAB",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "address",
+          "placeholder": "MAC, OUI or IAB",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "lookupHistory",
+      "title": "Lookup History",
+      "subtitle": "LookSee",
+      "description": "Displays previous lookups",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.7.1",
+    "@types/react": "^18.2.23",
+    "eslint": "^8.50.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

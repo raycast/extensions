@@ -1,5 +1,8 @@
 # iTerm Changelog
 
+## [Extension improvement] - 2023-10-03
+- Added `Edit in iTerm` and `Open iTerm here` commands
+
 ## [Fix] - 2023-08-28
 - Keep the same desktop focused when creating a new iTerm window
 
