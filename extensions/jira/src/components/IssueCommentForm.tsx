@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Comment, createComment, updateComment } from "../api/comments";
 import { Issue } from "../api/issues";
 import { getErrorMessage } from "../helpers/errors";
-import { getIssueDescription } from "../helpers/issues";
+import { getMarkdownFromHtml } from "../helpers/issues";
 
 type IssueCommentFormProps = {
   issue: Issue;
@@ -16,7 +16,7 @@ type IssueCommentFormProps = {
 export default function IssueCommentForm({ comment, issue, mutateComments }: IssueCommentFormProps) {
   const { pop } = useNavigation();
 
-  const [content, setContent] = useState(comment ? getIssueDescription(comment.renderedBody) : "");
+  const [content, setContent] = useState(comment ? getMarkdownFromHtml(comment.renderedBody) : "");
 
   async function submit() {
     await showToast({ style: Toast.Style.Animated, title: `${comment ? "Updating" : "Adding"} comment` });
@@ -57,7 +57,14 @@ export default function IssueCommentForm({ comment, issue, mutateComments }: Iss
         </ActionPanel>
       }
     >
-      <Form.TextArea id="comment" title="Comment" placeholder="Leave a comment" value={content} onChange={setContent} enableMarkdown />
+      <Form.TextArea
+        id="comment"
+        title="Comment"
+        placeholder="Leave a comment"
+        value={content}
+        onChange={setContent}
+        enableMarkdown
+      />
     </Form>
   );
 }

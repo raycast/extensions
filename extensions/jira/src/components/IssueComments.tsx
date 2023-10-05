@@ -1,11 +1,12 @@
 import { List, Icon, ActionPanel, Action, confirmAlert, Color, Toast, showToast } from "@raycast/api";
 import { format } from "date-fns";
+import removeMarkdown from "remove-markdown";
 
 import { Comment, deleteComment } from "../api/comments";
 import { Issue } from "../api/issues";
 import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
-import { getIssueDescription } from "../helpers/issues";
+import { getMarkdownFromHtml } from "../helpers/issues";
 import useIssueComments from "../hooks/useIssueComments";
 
 import IssueCommentForm from "./IssueCommentForm";
@@ -75,16 +76,16 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
           <List.Item
             key={comment.id}
             title={comment.author.displayName}
-            subtitle={getIssueDescription(comment.renderedBody)}
+            subtitle={removeMarkdown(comment.renderedBody)}
             icon={getUserAvatar(comment.author)}
-            //keywords={removeMarkdown(comment.renderedBody).replace(/\n/g, " ").split(" ")}
+            keywords={removeMarkdown(comment.renderedBody).replace(/\n/g, " ").split(" ")}
             accessories={[
               {
                 date: createdAt,
                 tooltip: `Created: ${format(createdAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
               },
             ]}
-            detail={<List.Item.Detail markdown={getIssueDescription(comment.renderedBody)} />}
+            detail={<List.Item.Detail markdown={getMarkdownFromHtml(comment.renderedBody)} />}
             actions={
               <ActionPanel>
                 <Action.Push
