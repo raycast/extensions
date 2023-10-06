@@ -60,5 +60,8 @@ export function extractSpeedLoadingInfo(str: string) {
   const downlink = downlinkMatch ? downlinkMatch[0] : "";
   const uplink = uplinkMatch ? uplinkMatch[0] : "";
 
+  if (downlink === "" && uplink === "") {
+    return "Takes about 20 seconds";
+  }
   return `${downlink}, ${uplink}`.replaceAll("capacity", "");
 }
