@@ -248,7 +248,7 @@
     {
       "description": "Your DeepL API key",
       "name": "key",
-      "placeholder": "Enter your free DeepL API key",
+      "placeholder": "Enter your DeepL API key",
       "required": true,
       "title": "API key",
       "type": "password"
