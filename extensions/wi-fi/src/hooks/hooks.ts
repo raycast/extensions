@@ -105,20 +105,26 @@ export const useWifiList = (refresh: number) => {
 };
 
 export const useCurWifi = () => {
-  const [curWifi, setCurWifi] = useState<WiFiNetwork[]>([]);
+  const cache = new Cache();
+  const curWifiCache = cache.get(LocalStorageKey.CUR_WIFI);
+  let _curWifiCache: WiFiNetwork | undefined = undefined;
+  if (typeof curWifiCache === "string" && curWifiCache != "") {
+    _curWifiCache = JSON.parse(curWifiCache);
+  }
+  const [curWifi, setCurWifi] = useState<WiFiNetwork | undefined>(_curWifiCache);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const cache = new Cache();
-    const curWifiCache = cache.get(LocalStorageKey.CUR_WIFI);
-    if (typeof curWifiCache === "string") {
-      setCurWifi(JSON.parse(curWifiCache));
-    }
-    const _curWifi = await wifi.getCurrentConnections();
+    const _curWifiList = await wifi.getCurrentConnections();
+    const _curWifi = _curWifiList.length != 0 ? _curWifiList[0] : undefined;
     setCurWifi(_curWifi);
+    if (_curWifi === undefined) {
+      cache.set(LocalStorageKey.CUR_WIFI, "");
+    } else {
+      cache.set(LocalStorageKey.CUR_WIFI, JSON.stringify(_curWifi));
+    }
     setLoading(false);
-    cache.set(LocalStorageKey.CUR_WIFI, JSON.stringify(_curWifi));
   }, []);
 
   useEffect(() => {
@@ -126,7 +132,7 @@ export const useCurWifi = () => {
   }, [fetchData]);
 
   return {
-    curWifi: curWifi.length != 0 ? curWifi[0] : undefined,
+    curWifi: curWifi,
     loading: loading,
   };
 };

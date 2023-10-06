@@ -93,6 +93,9 @@ export const getSignalIconColor = (quality: number | undefined) => {
 };
 
 export const getSignalTitle = (curWifi: WiFiNetwork | undefined) => {
+  if (curWifi === undefined) {
+    return "";
+  }
   const wifiName = showWifiName ? curWifi?.ssid + "" : "";
   const qualityNumber = showQualityNumber ? curWifi?.quality + "" : "";
   return wifiName + " " + qualityNumber;
