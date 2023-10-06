@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Clipboard,
   environment,
+  getPreferenceValues,
   Icon,
   Image,
   LaunchProps,
@@ -15,8 +16,8 @@ import {
 import { useEffect, useState } from "react";
 import { runAppleScript } from "@raycast/utils";
 import { readFile } from "node:fs/promises";
-import { homedir } from "os";
-import { join } from "path";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import {
   GoogleChromeBookmarkFile,
   GoogleChromeBookmarkFolder,
@@ -25,7 +26,6 @@ import {
   GoogleChromeLocalState,
   Profile,
 } from "./util/types";
-import getPrefs from "./util/preferences";
 import { createBookmarkListItem, matchSearchText, isValidUrl, formatAsUrl } from "./util/util";
 
 const ProfileItem = (props: { index: number; profile: Profile }) => {
@@ -212,7 +212,7 @@ function ListBookmarks(props: { profile: Profile }) {
             return createBookmarkListItem(newTabUrlWithQuery(searchText), "Search input text");
           }
         })()
-      : createBookmarkListItem(getPrefs().newBlankTabURL, "Blank"),
+      : createBookmarkListItem(getPreferenceValues<Preferences>().newBlankTabURL, "Blank"),
   ].concat(
     clipboard
       ? [
@@ -264,7 +264,7 @@ function ListBookmarks(props: { profile: Profile }) {
 }
 
 function newTabUrlWithQuery(searchText: string) {
-  return getPrefs().newTabURL.replace("%query%", encodeURIComponent(searchText));
+  return getPreferenceValues<Preferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
 }
 
 function BookmarksActionPanel(props: { profileDirectory: string; url: string }) {
