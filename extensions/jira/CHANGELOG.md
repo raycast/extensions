@@ -1,5 +1,12 @@
 # Jira Changelog
 
+## [Implement Comments on issues] - 2023-10-03
+
+- Add list of comments
+- Add new comment action
+- Add edit comment action
+- Add delete comment action
+
 ## [Render authenticated image URIs] - 2023-09-10
 
 - Now successfully renders images and icons that require authenticated HTTP requests
