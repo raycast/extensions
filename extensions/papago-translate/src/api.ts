@@ -44,7 +44,7 @@ export const getTranslationText = async (text: string) => {
     target = source === "ko" ? "en" : "ko";
   }
 
-  if (source === target) return text;
+  if (source === target) return {status: 200, translatedText: text};
 
   try {
     const response = await axiosInstance.post(PAPAGO_TRANSLATE_API_URL, {
@@ -53,7 +53,7 @@ export const getTranslationText = async (text: string) => {
       text,
     });
 
-    return response.data.message.result.translatedText;
+    return {status: 200, translatedText: response.data.message.result.translatedText};
   } catch (error) {
     if (axios.isAxiosError(error)) {
       showToast({
@@ -61,7 +61,7 @@ export const getTranslationText = async (text: string) => {
         title: "Fail",
         message: ERROR[error?.response?.status as keyof typeof ERROR],
       });
-      return text;
+      return {status: error?.response?.status, translatedText: undefined};
     }
   }
 };

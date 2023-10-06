@@ -35,8 +35,11 @@ const PapagoTranslate = (props: LaunchProps<{ arguments: { initializeText: strin
 
   const setSearchTextInStore = async () => {
     if (searchText !== "") {
-      const translatedText = await fetchData();
-      await LocalStorage.setItem(createRandomKey(), JSON.stringify({ searchText, translatedText }));
+      const result = await fetchData();
+      if (result!.status === 200) {
+        const translatedText = result!.translatedText;
+        await LocalStorage.setItem(createRandomKey(), JSON.stringify({ searchText, translatedText }));
+      }
     }
   };
 
