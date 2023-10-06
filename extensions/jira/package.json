@@ -10,7 +10,8 @@
     "igor9silva",
     "jesperorb",
     "teziovsky",
-    "richardfontein"
+    "rifont",
+    "gavinroderick"
   ],
   "owner": "raycast",
   "access": "public",
@@ -59,7 +60,18 @@
       "title": "My Filters",
       "subtitle": "Jira",
       "description": "View and modify issues of your saved filters.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "sortByFavourite",
+          "description": "If checked, any filters marked as favourite in Jira will be displayed first in the filter selection dropdown.",
+          "type": "checkbox",
+          "required": false,
+          "title": "Favourite Filters",
+          "default": false,
+          "label": "Show favourite filters ahead of others"
+        }
+      ]
     },
     {
       "name": "recently-updated-issues",
