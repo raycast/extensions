@@ -2,7 +2,7 @@
 
 ## [Add project list in Search Issues command] - 2023-10-06
 
-It is now possible to filter issues by projects in the `Search Issues`` command. If a project is selected, you can simply input the ticket number in the search query for faster results.
+It is now possible to filter issues by projects in the `Search Issues` command. If a project is selected, you can simply input the ticket number in the search query for faster results.
 
 ## [Implement Comments on issues] - 2023-10-03
 
