@@ -1,5 +1,9 @@
 # Word Search Changelog
 
+## [Output capitalized word] - 2023-02-28
+
+- Output will be capitalized when search text is capitalized
+
 ## [Added Preference for default action] - 2023-02-28
 
 - Added a new preference option to set the Primary Action on `return` keypress
