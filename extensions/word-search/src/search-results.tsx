@@ -41,7 +41,7 @@ export default function SearchResults(
             key={word.word}
             title={word.word}
             subtitle={word.defs !== undefined ? word.defs[0] : ""}
-            actions={<Actions word={word} defaultAction={defaultAction} />}
+            actions={<Actions {...{ word, search }} defaultAction={defaultAction} />}
           />
         ))
       )}
@@ -49,9 +49,12 @@ export default function SearchResults(
   );
 }
 
-function Actions(props: { word: Word; defaultAction: string }) {
-  const pasteAction = <Action.Paste content={props.word.word} title="Paste Word in Active App" />;
-  const copyAction = <Action.CopyToClipboard content={props.word.word} title="Copy Word to Clipboard" />;
+function Actions(props: { word: Word; search: string; defaultAction: string }) {
+  let content = props.word.word;
+  if (props.search[0] === props.search[0].toUpperCase()) content = content[0].toUpperCase() + content.slice(1);
+
+  const pasteAction = <Action.Paste content={content} title="Paste Word in Active App" />;
+  const copyAction = <Action.CopyToClipboard content={content} title="Copy Word to Clipboard" />;
 
   const [firstAction, secondAction] =
     props.defaultAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction];
