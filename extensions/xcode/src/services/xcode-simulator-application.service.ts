@@ -22,6 +22,17 @@ interface XcodeSimulatorApplicationSandBoxPath {
   sandBoxPath: string;
 }
 
+interface XcodeSimulatorApplicationAppGroupPath {
+  /**
+   * The bundle identifier
+   */
+  bundleIdentifier: string;
+  /**
+   * The appGroup path
+   */
+  appGroupPath: string;
+}
+
 /**
  * XcodeSimulatorApplicationService
  */
@@ -32,6 +43,14 @@ export class XcodeSimulatorApplicationService {
   private static simulatorSandBoxPathsCache = new Map<
     XcodeSimulator,
     Promise<XcodeSimulatorApplicationSandBoxPath[]>
+  >();
+
+  /**
+   * The Simulator AppGroup Paths Map Cache
+   */
+  private static simulatorAppGroupPathsCache = new Map<
+    XcodeSimulator,
+    Promise<XcodeSimulatorApplicationAppGroupPath[]>
   >();
 
   /**
@@ -167,6 +186,8 @@ export class XcodeSimulatorApplicationService {
       // Return no application
       return undefined;
     }
+    // Find appGroup directory path
+    const appGroupPath = await XcodeSimulatorApplicationService.findAppGroupDirectoryPath(simulator, bundleIdentifier);
     // Retrieve version from Info.plist
     const version = infoPlistJSON["CFBundleShortVersionString"];
     // Retrieve build number from Info.plist
@@ -224,6 +245,7 @@ export class XcodeSimulatorApplicationService {
       sandBoxPath: sandBoxDirectoryPath,
       sandBoxDocumentsPath: Path.join(sandBoxDirectoryPath, "Documents"),
       sandBoxCachesPath: Path.join(sandBoxDirectoryPath, "Library", "Caches"),
+      appGroupPath: appGroupPath,
       userDefaultsPlistPath: userDefaultsPlistPath,
     };
   }
@@ -314,5 +336,99 @@ export class XcodeSimulatorApplicationService {
     return (await simulatorSandBoxPathsPromise)?.find(
       (simulatorSandBoxPath) => simulatorSandBoxPath.bundleIdentifier === bundleIdentifier
     )?.sandBoxPath;
+  }
+
+  /**
+   * Find AppGroup directory path for a given XcodeSimulator and bundle identifier
+   * @param simulator The XcodeSimulator
+   * @param bundleIdentifier The bundle identifier
+   * @private
+   */
+  private static async findAppGroupDirectoryPath(
+    simulator: XcodeSimulator,
+    bundleIdentifier: string
+  ): Promise<string | undefined> {
+    // Check if simulator is booted
+    if (simulator.state === XcodeSimulatorState.booted) {
+      try {
+        // Try to retrieve AppGroup directory path via the simctl cli
+        // which is much quicker than the following fallback mechanism
+        const xcrunResult = await (
+          await execAsync(`xcrun simctl get_app_container ${simulator.udid} ${bundleIdentifier} groups`)
+        ).stdout.trim();
+        if (xcrunResult.length > 0) {
+          const groupPathSplit = xcrunResult.split("\t");
+          if (groupPathSplit.length === 2) {
+            return groupPathSplit[1].replaceAll("\n", "");
+          }
+        }
+        // eslint-disable-next-line no-empty
+      } catch {
+        // Ignore error as we continue with the fallback mechanism
+      }
+    }
+    // Initialize simulator AppGroup paths promise by using the cache
+    let simulatorAppGroupPathsPromise = XcodeSimulatorApplicationService.simulatorAppGroupPathsCache.get(simulator);
+    // Check if simulator AppGroup paths promise is unavailable / no cache entry is available
+    if (!simulatorAppGroupPathsPromise) {
+      // Initialize simulator data application directory path
+      const appGroupDirectoryPath = Path.join(simulator.dataPath, "Containers/Shared/AppGroup");
+      // Initialize simulator AppGroup paths promise by:
+      // 1. Reading the data application directory path child directories
+      // 2. Retrieve all bundle identifiers alongside with the AppGroup directory path
+      simulatorAppGroupPathsPromise = execAsync(
+        [
+          // List all child directories in data application directory
+          `ls -l ${appGroupDirectoryPath}`,
+          // Format output in the following format "{Month}-{Day}-{Hour}-{Minute} {Path}"
+          `awk '{print $6 "-" $7 "-" $8 " " $9}'`,
+          // Remove duplicates by first component (separated by whitespace)
+          `awk '!seen[$1]++'`,
+          // Drop first component (separated by whitespace)
+          `awk '{$1=""; print $0}'`,
+        ].join(" | ")
+      )
+        .then((output) =>
+          output.stdout
+            .trim()
+            .split("\n")
+            .map((path) => Path.join(appGroupDirectoryPath, path.trim()))
+        )
+        .then((paths) =>
+          Promise.allSettled(
+            paths.map((path) =>
+              execAsync(
+                [
+                  "defaults",
+                  "read",
+                  Path.join(path, ".com.apple.mobile_container_manager.metadata.plist"),
+                  "MCMMetadataIdentifier",
+                ].join(" ")
+              ).then((output) => {
+                const bundleIdentifier = output.stdout.trim();
+                if (bundleIdentifier) {
+                  return {
+                    bundleIdentifier: bundleIdentifier,
+                    appGroupPath: path,
+                  };
+                } else {
+                  return undefined;
+                }
+              })
+            )
+          ).then(
+            (results) =>
+              results
+                .map((result) => (result.status == "fulfilled" ? result.value : undefined))
+                .filter(Boolean) as XcodeSimulatorApplicationAppGroupPath[]
+          )
+        );
+      // Set simulator AppGroup paths promise so that the AppGroup paths are only read once per simulator
+      XcodeSimulatorApplicationService.simulatorAppGroupPathsCache.set(simulator, simulatorAppGroupPathsPromise);
+    }
+    // Return AppGroup path where the bundle identifier matches
+    return (await simulatorAppGroupPathsPromise)?.find(
+      (simulatorAppGroupxPath) => simulatorAppGroupxPath.bundleIdentifier === `group.${bundleIdentifier}`
+    )?.appGroupPath;
   }
 }
