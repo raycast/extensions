@@ -1,7 +1,10 @@
-import { closeMainWindow, getPreferenceValues, showHUD, open } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, open, showHUD } from "@raycast/api";
+import { addDays, differenceInHours, format, isAfter, startOfDay } from "date-fns";
+import { ApiResponseEvents } from "./hooks/useEvent.types";
+import { ApiResponseUser } from "./hooks/useUser.types";
+import { CalendarAccount } from "./types/account";
 import { NativePreferences } from "./types/preferences";
 import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
-import { ApiResponseMoment } from "./hooks/useEvent.types";
 
 export default async function Command() {
   const { apiUrl } = getPreferenceValues<NativePreferences>();
@@ -9,15 +12,71 @@ export default async function Command() {
   await closeMainWindow();
   await showHUD("Joining meeting...");
 
-  const [eventRequest, error] = await axiosPromiseData<ApiResponseMoment>(fetcher(`${apiUrl}/moment/next`));
+  const [accountsResponse, accountsError] = await axiosPromiseData<CalendarAccount[]>(
+    fetcher(`${apiUrl}/accounts`, {
+      method: "GET",
+    })
+  );
 
-  if (error || !eventRequest) {
-    console.error(error);
+  if (!accountsResponse || accountsError) {
+    console.error(accountsError);
     await showHUD("Error getting the next event");
     return;
   }
 
-  const { event, nextEvent } = eventRequest;
+  const now = new Date();
+
+  const [eventsResponse, eventsError] = await axiosPromiseData<ApiResponseEvents>(
+    fetcher(`${apiUrl}/events?sourceDetails=true`, {
+      method: "GET",
+      params: {
+        start: format(startOfDay(now), "yyyy-MM-dd"),
+        end: format(addDays(now, 1), "yyyy-MM-dd"),
+        calendarIds: accountsResponse
+          .flatMap(({ connectedCalendars }) => connectedCalendars.map(({ id }) => id))
+          .join(","),
+      },
+    })
+  );
+
+  if (eventsError || !eventsResponse) {
+    console.error(eventsResponse);
+    await showHUD("Error getting the next event");
+    return;
+  }
+
+  const [currentUser, userError] = await axiosPromiseData<ApiResponseUser>(fetcher(`${apiUrl}/users/current`));
+
+  if (userError) {
+    console.error(eventsError);
+    await showHUD("Error getting the next event");
+    return;
+  }
+
+  const showDeclinedEvents = !!currentUser?.settings.showDeclinedEvents;
+
+  // Create hashmap for fast lookups if event is synced and part of both calendars
+  const eventHashMap = new Map(eventsResponse.map((event) => [`${event.eventStart}${event.eventEnd}`, event.eventId]));
+
+  // Filter out events that are synced, managed by Reclaim and part of multiple calendars
+  const eventsData = eventsResponse.filter(
+    (event) => !(event.personalSync && event.reclaimManaged && eventHashMap.has(`${event.eventStart}${event.eventEnd}`))
+  );
+
+  const events = eventsData
+    ?.filter((event) => {
+      return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+    })
+    .filter((event) => {
+      return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
+    })
+    .filter((event) => isAfter(new Date(event.eventEnd), now))
+    .filter((event) => {
+      return !(differenceInHours(new Date(event.eventEnd), new Date(event.eventStart)) >= 24);
+    });
+
+  const event = events?.at(0);
+  const nextEvent = events?.at(1);
 
   if (event?.onlineMeetingUrl) {
     await open(event.onlineMeetingUrl);
