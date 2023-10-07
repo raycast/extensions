@@ -6,7 +6,6 @@ import fetch from "node-fetch";
 export type LoadingStatus = "loading" | "success" | "failure";
 
 export default function Command() {
-
   const [status, setStatus] = useState<LoadingStatus>("loading");
   const [hs300, setSh300] = useState(String);
   const [sh001, setSh001] = useState(String);
@@ -88,8 +87,6 @@ export default function Command() {
         const FSSTIDataArry = FSSTIData.split(",");
         const FSSTIIndex = Number(FSSTIDataArry[1]).toFixed(2);
         setB_FSSTI(FSSTIIndex);
-
-
 
         // 获取有知有行数据
         const yzResponse = await fetch("https://youzhiyouxing.cn/data");
