@@ -27,7 +27,7 @@ export default function XInProgress() {
     setIsShowingDetail((prev) => !prev);
   };
 
-  const togglePinProgress = (targetProgress: Progress) => {
+  const togglePinProgress = async (targetProgress: Progress) => {
     setState((prev) => ({
       ...prev,
       allProgress: prev.allProgress.map((progress) => {
@@ -37,6 +37,8 @@ export default function XInProgress() {
         return progress;
       }),
     }));
+
+    await launchCommand({ name: "index", type: LaunchType.UserInitiated });
   };
 
   const toggleShowInMenubar = async (targetProgress: Progress) => {
@@ -252,7 +254,7 @@ export default function XInProgress() {
 function Actions(props: {
   progress: Progress;
   onShowingDetails: () => void;
-  togglePinProgress: (targetProgress: Progress) => void;
+  togglePinProgress: (targetProgress: Progress) => Promise<void>;
   toggleShowInMenubar: (targetProgress: Progress) => Promise<void>;
   onEditProgress: (targetProgress: Progress) => void;
   onAddProgress: () => void;
@@ -274,8 +276,8 @@ function Actions(props: {
         <Action
           title={progress.pinned ? "Unpin it" : "Pin it"}
           icon={Icon.Pin}
-          onAction={() => {
-            togglePinProgress(progress);
+          onAction={async () => {
+            await togglePinProgress(progress);
           }}
         />
         <Action

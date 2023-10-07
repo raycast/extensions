@@ -8,13 +8,26 @@ const STORAGE_KEY = "xProgress";
 type State = { isLoading: boolean; allProgress: Progress[]; currMenubarProgressTitle: string };
 
 function getLatestAllProgress(allProgress: Progress[]) {
+  const latestDefaultProgress = defaultProgress.map((progress) => {
+    const updatedProgress = allProgress
+      .filter((progress) => progress.type === "default")
+      .find((p) => p.title === progress.title);
+    return {
+      ...progress,
+      pinned: updatedProgress?.pinned,
+      menubar: {
+        shown: updatedProgress?.menubar.shown,
+        title: progress.menubar.title,
+      },
+    };
+  });
   const userProgress = allProgress
     .filter((progress) => progress.type === "user")
     .map((progress) => ({
       ...progress,
       progressNum: getProgressNumByDate(new Date(progress.startDate), new Date(progress.endDate)),
     }));
-  return [...defaultProgress, ...userProgress];
+  return [...latestDefaultProgress, ...userProgress];
 }
 
 export function useLocalStorageProgress(): [
