@@ -30,17 +30,6 @@ export type FileDataType = {
   path: string;
 };
 
-export type PreferencesType = {
-  showDots: boolean;
-  directoriesFirst: boolean;
-  caseSensitive: boolean;
-  showFilePermissions: boolean;
-  showFileSize: boolean;
-  startDirectory: string;
-  showDeleteActions: boolean;
-  standardShortcuts: boolean;
-};
-
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
   const options: Alert.Options = {
     title: "Permanently Delete File?",
@@ -89,7 +78,9 @@ export function getFileSize(fileData: FileDataType): string {
 
 export function getStartDirectory(): string {
   let { startDirectory } = getPreferenceValues();
-  startDirectory = startDirectory.replace("~", homedir());
+  if (startDirectory.startsWith("~")) {
+    startDirectory = startDirectory.replace("~", homedir());
+  }
   return resolve(startDirectory);
 }
 
@@ -101,11 +92,11 @@ export function DirectoryItem(props: {
 }) {
   const isSymlink = props.isSymlink ?? false;
   const originalPath = props.originalPath ?? "";
-  const preferences: PreferencesType = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const typeName = `${isSymlink ? "Symlink " : ""}Directory`;
 
-  const context = encodeURIComponent(`{"path":"${filePath}"}`);
+  const context = encodeURIComponent(JSON.stringify({ path: filePath }));
   const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
   return (
@@ -187,7 +178,7 @@ export function FileItem(props: {
 }) {
   const isSymlink = props.isSymlink ?? false;
   const originalPath = props.originalPath ?? "";
-  const preferences: PreferencesType = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const typeName = `${isSymlink ? "Symlink " : ""}File`;
 
@@ -296,7 +287,7 @@ export function createItem(fileData: FileDataType, refresh: () => void) {
 }
 
 export function getDirectoryData(path: string): FileDataType[] {
-  const preferences: PreferencesType = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   let files: string[] = fs.readdirSync(path);
   if (!preferences.showDots) {
     files = files.filter((file) => !file.startsWith("."));
@@ -342,7 +333,7 @@ export function Directory(props: { path: string }) {
     return <Detail markdown={`# Error: \n\nThe directory \`${props.path}\` does not exist. `} />;
   }
   const [directoryData, setDirectoryData] = useState<FileDataType[]>(() => getDirectoryData(props.path));
-  const preferences: PreferencesType = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
 
   if (preferences.directoriesFirst) {
     const directories = directoryData.filter((file) => file.type === "directory");
