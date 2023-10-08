@@ -89,10 +89,10 @@ export function DirectoryItem(props: {
   refresh: () => void;
   isSymlink?: boolean;
   originalPath?: string;
+  preferences: Preferences;
 }) {
   const isSymlink = props.isSymlink ?? false;
   const originalPath = props.originalPath ?? "";
-  const preferences = getPreferenceValues<Preferences>();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const typeName = `${isSymlink ? "Symlink " : ""}Directory`;
 
@@ -103,7 +103,7 @@ export function DirectoryItem(props: {
     <List.Item
       id={filePath}
       title={props.fileData.name}
-      subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
+      subtitle={props.preferences.showFilePermissions ? props.fileData.permissions : ""}
       icon={{ fileIcon: filePath }}
       quickLook={{ path: filePath, name: props.fileData.name }}
       actions={
@@ -142,7 +142,9 @@ export function DirectoryItem(props: {
             <Action.Trash
               title="Move to Trash"
               shortcut={
-                preferences.standardShortcuts ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
+                props.preferences.standardShortcuts
+                  ? { modifiers: ["ctrl"], key: "x" }
+                  : { modifiers: ["cmd"], key: "t" }
               }
               paths={filePath}
               onTrash={() => {
@@ -150,13 +152,13 @@ export function DirectoryItem(props: {
                 props.refresh();
               }}
             />
-            {preferences.showDeleteActions && (
+            {props.preferences.showDeleteActions && (
               <Action
                 title={`Delete ${typeName}`}
                 icon={Icon.Eraser}
                 style={Action.Style.Destructive}
                 shortcut={
-                  preferences.standardShortcuts
+                  props.preferences.standardShortcuts
                     ? { modifiers: ["ctrl", "shift"], key: "x" }
                     : { modifiers: ["cmd"], key: "d" }
                 }
@@ -175,10 +177,10 @@ export function FileItem(props: {
   refresh: () => void;
   isSymlink?: boolean;
   originalPath?: string;
+  preferences: Preferences;
 }) {
   const isSymlink = props.isSymlink ?? false;
   const originalPath = props.originalPath ?? "";
-  const preferences = getPreferenceValues<Preferences>();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const typeName = `${isSymlink ? "Symlink " : ""}File`;
 
@@ -189,9 +191,9 @@ export function FileItem(props: {
       title={props.fileData.name}
       icon={{ fileIcon: filePath }}
       quickLook={{ path: filePath, name: props.fileData.name }}
-      subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
+      subtitle={props.preferences.showFilePermissions ? props.fileData.permissions : ""}
       accessories={
-        preferences.showFileSize
+        props.preferences.showFileSize
           ? [
               {
                 icon: Icon.HardDrive,
@@ -230,7 +232,9 @@ export function FileItem(props: {
             <Action.Trash
               title="Move to Trash"
               shortcut={
-                preferences.standardShortcuts ? { modifiers: ["ctrl"], key: "x" } : { modifiers: ["cmd"], key: "t" }
+                props.preferences.standardShortcuts
+                  ? { modifiers: ["ctrl"], key: "x" }
+                  : { modifiers: ["cmd"], key: "t" }
               }
               paths={filePath}
               onTrash={() => {
@@ -238,13 +242,13 @@ export function FileItem(props: {
                 props.refresh();
               }}
             />
-            {preferences.showDeleteActions && (
+            {props.preferences.showDeleteActions && (
               <Action
                 title={`Delete ${typeName}`}
                 icon={Icon.Eraser}
                 style={Action.Style.Destructive}
                 shortcut={
-                  preferences.standardShortcuts
+                  props.preferences.standardShortcuts
                     ? { modifiers: ["ctrl", "shift"], key: "x" }
                     : { modifiers: ["cmd"], key: "d" }
                 }
@@ -258,29 +262,43 @@ export function FileItem(props: {
   );
 }
 
-export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void }) {
+export function SymlinkItem(props: { fileData: FileDataType; refresh: () => void; preferences: Preferences }) {
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const a = fs.readlinkSync(filePath);
   const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
   const originalFileData = fs.lstatSync(originalPath, { throwIfNoEntry: false });
-
   if (originalFileData?.isDirectory() ?? false) {
     return (
-      <DirectoryItem fileData={props.fileData} refresh={props.refresh} isSymlink={true} originalPath={originalPath} />
+      <DirectoryItem
+        fileData={props.fileData}
+        refresh={props.refresh}
+        isSymlink={true}
+        originalPath={originalPath}
+        preferences={props.preferences}
+      />
     );
   } else {
-    return <FileItem fileData={props.fileData} refresh={props.refresh} isSymlink={true} originalPath={originalPath} />;
+    return (
+      <FileItem
+        fileData={props.fileData}
+        refresh={props.refresh}
+        isSymlink={true}
+        originalPath={originalPath}
+        preferences={props.preferences}
+      />
+    );
   }
 }
 
 export function createItem(fileData: FileDataType, refresh: () => void) {
   const filePath = `${fileData.path}/${fileData.name}`;
+  const preferences = getPreferenceValues<Preferences>();
   if (fileData.type === "directory") {
-    return <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} />;
+    return <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
   } else if (fileData.type === "file") {
-    return <FileItem fileData={fileData} key={filePath} refresh={refresh} />;
+    return <FileItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
   } else if (fileData.type === "symlink") {
-    return <SymlinkItem fileData={fileData} key={filePath} refresh={refresh} />;
+    return <SymlinkItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
   } else {
     showToast(Toast.Style.Failure, "Unsupported file type", `File type: ${fileData.type}`);
   }
