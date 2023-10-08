@@ -78,7 +78,7 @@ export const getDefaultDomain = (paraDomain: string) => {
         setLoading(false);
       }
     }
-  }, []);
+  }, [paraDomain]);
 
   useEffect(() => {
     void fetchData();

@@ -1,5 +1,9 @@
 # Google Maven Repository Changelog
 
+## [Optimize extension] - {PR_MERGE_DATE}
+
+- Optimize Show Google Maven Repository command loading speed
+
 ## [Support arguments for command] - 2022-08-09
 
 - Support arguments for command so that you can enter values right from Root Search before opening the command

@@ -14,10 +14,10 @@ export class XcodeSwiftPackageResolvedService {
    * @param xcodeProject The Xcode Project
    */
   static async getPackageResolved(xcodeProject: XcodeProject): Promise<XcodeSwiftPackageResolved> {
-    // Initialize the parent directory path
-    const parentDirectoryPath = xcodeProject.filePath.substring(0, xcodeProject.filePath.lastIndexOf("/"));
     // Find the path to a package resolved file
-    const packageResolvedPath = await XcodeSwiftPackageResolvedService.findPackageResolvedPath(parentDirectoryPath);
+    const packageResolvedPath = await XcodeSwiftPackageResolvedService.findPackageResolvedPath(
+      xcodeProject.directoryPath
+    );
     // Retrieve the contents of the package resolved and parse it as JSON
     const packageResolved = JSON.parse(await readFileAsync(packageResolvedPath, "utf-8"));
     // Initialize the package resolved pins

@@ -1,35 +1,36 @@
-import { useState } from "react";
-import { formatDistance } from "date-fns";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useMemo } from "react";
+import { compareDesc, formatDistance } from "date-fns";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 
-import { useProjects, useSummary } from "../hooks";
+import { useActivityChange, useProjects, useSummary } from "../hooks";
 import { cumulateSummaryDuration, getDuration } from "../utils";
 
-export const RangeStatsList: React.FC<Omit<SummaryItemProps, "title" | "range">> = (props) => {
-  const summary = useSummary();
+export const RangeStatsList: React.FC<ShowDetailProps> = (props) => {
+  const { data: summary } = useSummary();
 
   return (
     <List.Section title="Stats Summary">
-      {summary.data?.map(([key, range]) => (
+      {summary?.map(([key, { result: range }]) => (
         <RangeStatsItem key={key} title={key} range={range} {...props} />
       ))}
     </List.Section>
   );
 };
 
+const keys = ["categories", "editors", "languages", "projects"] as const;
+
 const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, showDetail, title }) => {
-  const keys = ["categories", "editors", "languages", "projects"] as const;
-  const [md] = useState([
-    `## ${title}`,
-    getDuration(range.cummulative_total.seconds),
-    "---",
-    ...keys
-      .map((key) => [
+  const md = useMemo(() => {
+    return [
+      `## ${title}`,
+      getDuration(range.cumulative_total.seconds),
+      "---",
+      ...keys.flatMap((key) => [
         `### ${key[0].toUpperCase()}${key.slice(1)}`,
         ...cumulateSummaryDuration(range, key).map(([name, seconds]) => `- ${name} (**${getDuration(seconds)}**)`),
-      ])
-      .flat(),
-  ]);
+      ]),
+    ];
+  }, [range, title]);
 
   const props: Partial<List.Item.Props> = showDetail
     ? { detail: <List.Item.Detail markdown={md.join("\n\n")} /> }
@@ -37,7 +38,7 @@ const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, show
         accessories: [
           {
             tooltip: "Cumulative Total",
-            text: getDuration(range.cummulative_total.seconds),
+            text: getDuration(range.cumulative_total.seconds),
           },
         ],
       };
@@ -60,13 +61,14 @@ const RangeStatsItem: React.FC<SummaryItemProps> = ({ range, setShowDetail, show
 };
 
 export const ProjectsStatsList: React.FC = () => {
-  const projects = useProjects();
-  if (projects.isLoading !== false) return null;
+  const { data: { data: projects } = {}, isLoading } = useProjects();
+
+  if (isLoading) return null;
 
   return (
     <List.Section title="Projects">
-      {projects.data?.data
-        ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      {projects
+        ?.sort((a, b) => compareDesc(new Date(a.last_heartbeat_at), new Date(b.last_heartbeat_at)))
         .slice(0, 5)
         .map((project) => (
           <List.Item
@@ -91,9 +93,59 @@ export const ProjectsStatsList: React.FC = () => {
   );
 };
 
-interface SummaryItemProps {
+export const ActivityChange: React.FC<ShowDetailProps> = ({ showDetail, setShowDetail }) => {
+  const { data: activityChange, isLoading, error } = useActivityChange();
+
+  const md = useMemo(() => {
+    if (!activityChange) return [];
+    const { overall, languages } = activityChange;
+
+    return [
+      `## You've done ${overall.quantifier} than you did yesterday!`,
+      `### A ${overall.duration} ${overall.quantifier === "more" ? "increase" : "decrease"}${
+        overall.percent ? ` and ${overall.percent} change` : ""
+      }!!`,
+      `#### Languages`,
+      ...languages.map(
+        ([language, stat]) =>
+          `- ${language} - ${stat.duration} ${stat.percent ? `(${stat.percent} ${stat.quantifier})` : stat.quantifier}`
+      ),
+    ];
+  }, [activityChange]);
+
+  if (error) {
+    showToast(Toast.Style.Failure, "Error in Activity", error.message);
+    return null;
+  }
+
+  if (isLoading) return <List.Item title="Loading Activity Changes" icon={Icon.Heartbeat} />;
+
+  return (
+    <List.Item
+      detail={<List.Item.Detail markdown={md.join("\n\n")} />}
+      title={activityChange?.title ?? "Activity Change"}
+      accessories={showDetail ? null : activityChange?.accessories}
+      actions={
+        <ActionPanel>
+          <Action
+            icon={Icon.Sidebar}
+            onAction={() => setShowDetail(!showDetail)}
+            title={showDetail ? "Hide Details" : "Show Details"}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+};
+
+interface SummaryItemProps extends ShowDetailProps {
   title: string;
   range: WakaTime.Summary;
+  showDetail: boolean;
+  setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface ShowDetailProps {
   showDetail: boolean;
   setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
 }

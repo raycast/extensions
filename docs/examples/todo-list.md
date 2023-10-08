@@ -33,8 +33,8 @@ export default function Command() {
 
   return (
     <List>
-      {todos.map((todo) => (
-        <List.Item title={todo.title} />
+      {todos.map((todo, index) => (
+        <List.Item key={index} title={todo.title} />
       ))}
     </List>
   );
@@ -66,6 +66,17 @@ function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
     >
       <Form.TextField id="title" title="Title" />
     </Form>
+  );
+}
+
+function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
+  return (
+    <Action.Push
+      icon={Icon.Pencil}
+      title="Create Todo"
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      target={<CreateTodoForm onCreate={props.onCreate} />}
+    />
   );
 }
 ```
@@ -133,10 +144,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <ToggleTodoAction
-                  todo={todo}
-                  onToggle={() => handleToggle(index)}
-                />
+                <ToggleTodoAction todo={todo} onToggle={() => handleToggle(index)} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -191,10 +199,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <ToggleTodoAction
-                  todo={todo}
-                  onToggle={() => handleToggle(index)}
-                />
+                <ToggleTodoAction todo={todo} onToggle={() => handleToggle(index)} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <CreateTodoAction onCreate={handleCreate} />
@@ -223,5 +228,123 @@ function DeleteTodoAction(props: { onDelete: () => void }) {
 ```
 
 We also gave the `<DeleteTodoAction>` a keyboard shortcut. This way users can delete todos quicker. Additionally, we also added the `<CreateTodoAction>` to the `<List.Item>`. This makes sure that users can also create new todos when there are some already.
+
+Finally, our command looks like this:
+
+```typescript
+import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { useState } from "react";
+
+interface Todo {
+  title: string;
+  isCompleted: boolean;
+}
+
+export default function Command() {
+  const [todos, setTodos] = useState<Todo[]>([
+    { title: "Write a todo list extension", isCompleted: false },
+    { title: "Explain it to others", isCompleted: false },
+  ]);
+
+  function handleCreate(todo: Todo) {
+    const newTodos = [...todos, todo];
+    setTodos(newTodos);
+  }
+
+  function handleToggle(index: number) {
+    const newTodos = [...todos];
+    newTodos[index].isCompleted = !newTodos[index].isCompleted;
+    setTodos(newTodos);
+  }
+
+  function handleDelete(index: number) {
+    const newTodos = [...todos];
+    newTodos.splice(index, 1);
+    setTodos(newTodos);
+  }
+
+  return (
+    <List
+      actions={
+        <ActionPanel>
+          <CreateTodoAction onCreate={handleCreate} />
+        </ActionPanel>
+      }
+    >
+      {todos.map((todo, index) => (
+        <List.Item
+          key={index}
+          icon={todo.isCompleted ? Icon.Checkmark : Icon.Circle}
+          title={todo.title}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section>
+                <ToggleTodoAction todo={todo} onToggle={() => handleToggle(index)} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <CreateTodoAction onCreate={handleCreate} />
+                <DeleteTodoAction onDelete={() => handleDelete(index)} />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+
+function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
+  const { pop } = useNavigation();
+
+  function handleSubmit(values: { title: string }) {
+    props.onCreate({ title: values.title, isCompleted: false });
+    pop();
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Todo" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" />
+    </Form>
+  );
+}
+
+function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
+  return (
+    <Action.Push
+      icon={Icon.Pencil}
+      title="Create Todo"
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      target={<CreateTodoForm onCreate={props.onCreate} />}
+    />
+  );
+}
+
+function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
+  return (
+    <Action
+      icon={props.todo.isCompleted ? Icon.Circle : Icon.Checkmark}
+      title={props.todo.isCompleted ? "Uncomplete Todo" : "Complete Todo"}
+      onAction={props.onToggle}
+    />
+  );
+}
+
+function DeleteTodoAction(props: { onDelete: () => void }) {
+  return (
+    <Action
+      icon={Icon.Trash}
+      title="Delete Todo"
+      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      onAction={props.onDelete}
+    />
+  );
+}
+```
 
 And that's a wrap. You created a todo list in Raycast, it's that easy. As next steps, you could extract the `<CreateTodoForm>` into a separate command. Then you can create todos also from the root search of Raycast and can even assign a global hotkey to open the form. Also, the todos aren't persisted. If you close the command and reopen it, they are gone. To persist, you can use the [storage](../api-reference/storage.md) or [write it to disc](../api-reference/environment.md#environment).

@@ -1,6 +1,6 @@
 import { WiFiNetwork } from "node-wifi";
 
-export interface WifiPassword {
+export interface WifiPasswordCache {
   ssid: string;
   password: string;
 }

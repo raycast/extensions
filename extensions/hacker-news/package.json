@@ -5,12 +5,13 @@
   "description": "Read the latest stories of Hacker News.",
   "icon": "icon.png",
   "author": "thomas",
-  "categories": [
-    "News"
-  ],
   "contributors": [
     "GastroGeek",
-    "sxn"
+    "sxn",
+    "itsnwa"
+  ],
+  "categories": [
+    "News"
   ],
   "license": "MIT",
   "commands": [
@@ -22,7 +23,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16",
     "lodash": "^4.17.21",
     "rss-parser": "3.12.0"
   },

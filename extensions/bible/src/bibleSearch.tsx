@@ -1,18 +1,21 @@
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import * as React from "react";
-import { Action, ActionPanel, getPreferenceValues, List, Icon, showToast, Toast } from "@raycast/api";
-import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
+import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 
 const DEFAULT_BIBLE_VERSION_ABBR = "NLT";
-const SEARCH_DELAY_MS = 450;
 
-type Preferences = { enterToSearch: boolean; oneVersePerLine: boolean; includeVerseNumbers: boolean };
-const prefs = getPreferenceValues<Preferences>();
+type Preferences = {
+  enterToSearch: boolean;
+  oneVersePerLine: boolean;
+  includeVerseNumbers: boolean;
+  includeCopyright: boolean;
+  includeReferences: boolean;
+};
 
 export default function Command() {
+  const prefs = getPreferenceValues<Preferences>();
   const [query, setQuery] = React.useState({ search: "", version: DEFAULT_BIBLE_VERSION_ABBR });
-  const debounceSearchTimeout = React.useRef<NodeJS.Timeout | null>(null);
-
   const [isLoading, setIsLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
 
@@ -33,19 +36,19 @@ export default function Command() {
     } finally {
       setIsLoading(false);
     }
-  }, [query.search, query.version]);
+  }, [prefs.includeVerseNumbers, query.search, query.version]);
 
   React.useEffect(() => {
     // Don't search when query changes if the user only wants to search when they press enter.
     if (!prefs.enterToSearch) {
       performSearch();
     }
-  }, [performSearch]);
+  }, [performSearch, prefs.enterToSearch]);
 
   const detailContent = React.useMemo(() => {
     if (!searchResult?.passages.length) return null;
-    return { markdown: createMarkdown(searchResult), clipboardText: createClipboardText(searchResult) };
-  }, [searchResult]);
+    return { markdown: createMarkdown(prefs, searchResult), clipboardText: createClipboardText(prefs, searchResult) };
+  }, [prefs, searchResult]);
 
   function getEmptyViewText() {
     if (isLoading) {
@@ -65,6 +68,7 @@ export default function Command() {
       isLoading={isLoading}
       isShowingDetail={searchResult && searchResult.passages.length > 0}
       searchText={query.search}
+      throttle={true}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Bible Version"
@@ -77,18 +81,7 @@ export default function Command() {
           ))}
         </List.Dropdown>
       }
-      onSearchTextChange={(newQuery) => {
-        if (prefs.enterToSearch) {
-          setQuery((old) => ({ ...old, search: newQuery.trim() }));
-        } else {
-          // debounce updating query text. `throttle` prop is too short
-          if (debounceSearchTimeout.current) clearTimeout(debounceSearchTimeout.current);
-          debounceSearchTimeout.current = setTimeout(
-            () => setQuery((old) => ({ ...old, search: newQuery.trim() })),
-            SEARCH_DELAY_MS
-          );
-        }
-      }}
+      onSearchTextChange={(newQuery) => setQuery((old) => ({ ...old, search: newQuery }))}
     >
       {searchResult && searchResult.passages.length > 0 && detailContent ? (
         <List.Item
@@ -121,27 +114,35 @@ export default function Command() {
   );
 }
 
-function createMarkdown(searchResult: ReferenceSearchResult) {
+function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult) {
+  const copyright = prefs.includeCopyright ? `\n\n---\n\n*${searchResult.copyright}*` : "";
+
   return (
     searchResult.passages
       .map((p) => {
         const passageText = p.verses.join(prefs.oneVersePerLine ? "  \n" : " ");
         const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        return `${passageText}  \n${p.reference} (${versionAbbr})`;
+        const reference = prefs.includeReferences ? `  \n${p.reference} (${versionAbbr})` : "";
+
+        return passageText + reference;
       })
-      .join("\n\n") + `\n\n---\n\n*${searchResult.copyright}*`
+      .join("\n\n") + copyright
   );
 }
 
-function createClipboardText(searchResult: ReferenceSearchResult) {
+function createClipboardText(prefs: Preferences, searchResult: ReferenceSearchResult) {
+  const copyright = prefs.includeCopyright ? `\n\n${searchResult.copyright}` : "";
+
   return (
     searchResult.passages
       .map((p) => {
         const passageText = p.verses.join(prefs.oneVersePerLine ? "\n" : " ");
         const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        return `${passageText}\n${p.reference} (${versionAbbr})`;
+        const reference = prefs.includeReferences ? `\n${p.reference} (${versionAbbr})` : "";
+
+        return passageText + reference;
       })
-      .join("\n\n") + `\n\n${searchResult.copyright}`
+      .join("\n\n") + copyright
   );
 }
 

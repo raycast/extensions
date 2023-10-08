@@ -1,66 +1,49 @@
-import { randomId, showToast, ToastStyle } from "@raycast/api";
-import fetch, { AbortError } from "node-fetch";
-import { useState, useEffect, useRef } from "react";
-import { SearchState, SearchResult } from "../types/types";
+import { showToast, Toast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { nanoid } from "nanoid";
+import { useState } from "react";
 
-const useSearch = () => {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
-  const cancelRef = useRef<AbortController | null>(null);
+import { SearchResult } from "../types/types";
 
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
+type Json = Record<string, unknown>;
 
-  async function search(searchText: string) {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-    try {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      const results = await performSearch(searchText, cancelRef.current.signal);
-      setState((oldState) => ({
-        ...oldState,
-        results: results,
-        isLoading: false,
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
+const useSearch = (initialSearchText: string) => {
+  const [searchText, setSearchText] = useState<string>(initialSearchText);
+
+  const { isLoading, data } = useFetch(`https://jisho.org/api/v1/search/words?keyword=${searchText}`, {
+    headers: {
+      "User-Agent": "Raycast Jisho Extension",
+    },
+    parseResponse: parseResponse,
+    initialData: [],
+    keepPreviousData: true,
+    onError: (error) => {
       console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
-    }
-  }
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could not perform search",
+        message: String(error),
+      });
+    },
+  });
 
   return {
-    state: state,
-    search: search,
+    state: {
+      isLoading,
+      results: data,
+    },
+    setSearchText,
+    searchText,
   };
 };
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const response = await fetch(`https://jisho.org/api/v1/search/words?keyword=${searchText}`, {
-    method: "get",
-    signal: signal,
-  });
-
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
-  }
-
-  type Json = Record<string, unknown>;
-
+async function parseResponse(response: Response) {
   const json = (await response.json()) as Json;
   const results = (json?.data as Json[]) ?? [];
 
   return results.map((word) => {
-    return {
-      id: randomId(),
+    return <SearchResult>{
+      id: nanoid(),
       slug: (word?.slug as string) ?? "",
       kanji: ((word?.japanese as Json[])[0]?.word as string) ?? "",
       reading: ((word?.japanese as Json[])[0]?.reading as string) ?? "",

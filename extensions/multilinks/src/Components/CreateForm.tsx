@@ -65,7 +65,15 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
     (async () => {
       const installedApplications = await getApplications();
 
-      const browserIds = ["com.google.Chrome", "com.apple.Safari", "com.brave.Browser"];
+      const browserIds = [
+        "com.google.Chrome",
+        "com.apple.Safari",
+        "com.brave.Browser",
+        "org.mozilla.firefox",
+        "com.microsoft.edgemac",
+        "com.operasoftware.Opera",
+        "org.chromium.Chromium",
+      ];
 
       const browsers = installedApplications.filter((app) => browserIds.includes(String(app.bundleId)));
 

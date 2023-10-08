@@ -7,10 +7,10 @@ export default function GeneralActions({ history }: { history: Storage }) {
       <Action
         title="Clear History"
         shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
         onAction={() => history.clear()}
       />
-      <Action.OpenInBrowser title="Support" icon={{ source: "heart.png" }} url="https://ko-fi.com/slavarazum" />
+      <Action.OpenInBrowser title="Support" icon={{ source: "heart.png" }} url="https://github.com/sponsors/qruto" />
     </ActionPanel.Section>
   );
 }

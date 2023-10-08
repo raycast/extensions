@@ -23,15 +23,13 @@ export function XcodeProjectListSearchBarAccessory(props: {
             ? props.projectTypeFilter(XcodeProjectType[projectType as keyof typeof XcodeProjectType])
             : true
         )
-        .map((projectType) => {
-          return (
-            <List.Dropdown.Item
-              key={projectType}
-              value={projectType}
-              title={XcodeProjectTypeName(XcodeProjectType[projectType as keyof typeof XcodeProjectType])}
-            />
-          );
-        })}
+        .map((projectType) => (
+          <List.Dropdown.Item
+            key={projectType}
+            value={projectType}
+            title={XcodeProjectTypeName(XcodeProjectType[projectType as keyof typeof XcodeProjectType])}
+          />
+        ))}
     </List.Dropdown>
   );
 }

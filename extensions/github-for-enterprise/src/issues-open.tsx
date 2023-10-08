@@ -2,7 +2,7 @@ import IssueTemplate from "@/components/Issue";
 import { GET_OPEN_ISSUES } from "@/queries/issues";
 import { GetIssues } from "@/types";
 import { fetcher, plural } from "@/utils";
-import { List, popToRoot, showToast, ToastStyle } from "@raycast/api";
+import { List, popToRoot, showToast, Toast } from "@raycast/api";
 import Fuse from "fuse.js";
 import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
@@ -20,7 +20,7 @@ export default function Command() {
         ignoreLocation: true,
         keys: ["title", "number", "repository.nameWithOwner"],
       }),
-    [data]
+    [data],
   );
 
   const searchIssues = useCallback(
@@ -35,12 +35,16 @@ export default function Command() {
 
       return fuseIssues.search(str);
     },
-    [data]
+    [data],
   );
 
   if (error) {
     popToRoot();
-    showToast(ToastStyle.Failure, "Could not get issues", error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not get issues",
+      message: error.message,
+    });
   }
 
   return (

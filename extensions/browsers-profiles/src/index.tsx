@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Action } from "@raycast/api";
+import { ActionPanel, List, Icon, Action, closeMainWindow } from "@raycast/api";
 
 import { getFirefoxProfiles } from "./lib/firefox";
 import { getChromiumProfiles } from "./lib/chromium";
@@ -24,8 +24,9 @@ export default function Command() {
                 <ActionPanel>
                   <Action
                     title="Open Browser"
-                    onAction={() => {
+                    onAction={async () => {
                       launchBrowser(profile.type, profile.app, profile.path);
+                      await closeMainWindow({ clearRootSearch: true });
                     }}
                   />
                 </ActionPanel>

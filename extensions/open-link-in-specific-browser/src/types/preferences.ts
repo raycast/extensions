@@ -1,6 +1,9 @@
 export interface Preferences {
+  showBrowser: boolean;
+  showEmail: boolean;
+  showOther: boolean;
   layout: string;
-  itemSize: string;
+  columns: string;
   itemInset: string;
   surfEngine: string;
   sortBy: string;

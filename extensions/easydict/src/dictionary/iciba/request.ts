@@ -11,7 +11,7 @@ import { RequestErrorInfo } from "../../types";
 
 import axios from "axios";
 import { downloadAudio, getWordAudioPath } from "../../audio";
-import { DicionaryType, QueryTypeResult } from "../../types";
+import { DictionaryType, QueryTypeResult } from "../../types";
 import { QueryWordInfo } from "../youdao/types";
 import { IcibaDictionaryResult } from "./interface";
 
@@ -31,16 +31,16 @@ export function icibaDictionary(queryWordInfo: QueryWordInfo): Promise<QueryType
       .get(url, { params })
       .then((response) => {
         const result: QueryTypeResult = {
-          type: DicionaryType.Iciba,
+          type: DictionaryType.Iciba,
           result: response.data,
           translations: [],
-          wordInfo: queryWordInfo,
+          queryWordInfo: queryWordInfo,
         };
         resolve(result);
       })
       .catch((error) => {
         const errorInfo: RequestErrorInfo = {
-          type: DicionaryType.Iciba,
+          type: DictionaryType.Iciba,
           code: error.response?.status,
           message: error.response?.statusText,
         };

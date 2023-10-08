@@ -52,32 +52,29 @@ export function XcodeProjectList(props: {
           onChange={setProjectTypeFilter}
         />
       }
+      filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Favorites">
-        {favoriteXcodeProjects?.map((xcodeProject) => {
-          return (
-            <XcodeProjectListItemContainer
-              key={xcodeProject.filePath}
-              xcodeProject={xcodeProject}
-              isFavorite={true}
-              actions={props.actions}
-              revalidate={favoriteXcodeProjectsState.revalidate}
-            />
-          );
-        })}
+        {favoriteXcodeProjects?.map((xcodeProject) => (
+          <XcodeProjectListItemContainer
+            key={xcodeProject.filePath}
+            xcodeProject={xcodeProject}
+            isFavorite={true}
+            actions={props.actions}
+            revalidate={favoriteXcodeProjectsState.revalidate}
+          />
+        ))}
       </List.Section>
       <List.Section title={favoriteXcodeProjects?.length ? "Recent Projects" : undefined}>
-        {xcodeProjects?.map((xcodeProject) => {
-          return (
-            <XcodeProjectListItemContainer
-              key={xcodeProject.filePath}
-              xcodeProject={xcodeProject}
-              isFavorite={false}
-              actions={props.actions}
-              revalidate={favoriteXcodeProjectsState.revalidate}
-            />
-          );
-        })}
+        {xcodeProjects?.map((xcodeProject) => (
+          <XcodeProjectListItemContainer
+            key={xcodeProject.filePath}
+            xcodeProject={xcodeProject}
+            isFavorite={false}
+            actions={props.actions}
+            revalidate={favoriteXcodeProjectsState.revalidate}
+          />
+        ))}
       </List.Section>
     </List>
   );
@@ -94,7 +91,6 @@ function XcodeProjectListItemContainer(props: {
 }): JSX.Element {
   return (
     <XcodeProjectListItem
-      key={props.xcodeProject.filePath}
       project={props.xcodeProject}
       isFavorite={props.isFavorite}
       actions={props.actions ? props.actions(props.xcodeProject) : undefined}

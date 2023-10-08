@@ -2,18 +2,18 @@
  * @author: tisfeng
  * @createTime: 2022-07-24 17:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 17:08
+ * @lastEditTime: 2023-03-16 16:10
  * @fileName: linguee.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { LocalStorage } from "@raycast/api";
-import axios, { AxiosError, AxiosRequestConfig, AxiosRequestHeaders } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import util from "util";
-import { requestCostTime } from "../../axiosConfig";
+import { httpsAgent, requestCostTime } from "../../axiosConfig";
 import { userAgent } from "../../consts";
-import { DicionaryType, QueryTypeResult } from "../../types";
+import { DictionaryType, QueryTypeResult } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
 import { QueryWordInfo } from "../youdao/types";
 import { getLingueeWebDictionaryURL, parseLingueeHTML } from "./parse";
@@ -26,32 +26,29 @@ export const lingueeRequestTimeKey = "lingueeRequestTimeKey";
  *
  * eg. good: https://www.linguee.com/english-chinese/search?source=auto&query=good
  */
-export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
+export async function requestLingueeDictionary(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.log(`---> start request Linguee`);
 
   const lingueeUrl = getLingueeWebDictionaryURL(queryWordInfo);
   console.log(`---> linguee url: ${lingueeUrl}`);
   if (!lingueeUrl) {
     const result: QueryTypeResult = {
-      type: DicionaryType.Linguee,
+      type: DictionaryType.Linguee,
       result: undefined,
       translations: [],
-      wordInfo: queryWordInfo,
+      queryWordInfo: queryWordInfo,
     };
     return Promise.resolve(result);
   }
 
   return new Promise((resolve, reject) => {
-    // * avoid linguee's anti-spider, otherwise it will reponse very slowly or even error.
-    const headers: AxiosRequestHeaders = {
-      "User-Agent": userAgent,
-      // accept: "*/*",
-      // connection: "keep-alive",
-      // withCredentials: true,
-    };
+    // * avoid linguee's anti-spider, otherwise it will response very slowly or even error.
     const config: AxiosRequestConfig = {
-      headers: headers,
+      headers: {
+        "User-Agent": userAgent,
+      },
       responseType: "arraybuffer", // handle French content-type iso-8859-15
+      httpsAgent, // use proxy, if ip was blocked by linguee, we can change ip.
     };
 
     axios
@@ -80,18 +77,17 @@ export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Pro
             toLanguage: queryWordInfo.toLanguage,
           };
         }
-
         resolve(lingueeTypeResult);
       })
       .catch((error: AxiosError) => {
         if (error.message === "canceled") {
           console.log(`---> linguee canceled`);
-          return;
+          return reject(undefined);
         }
         console.error(`---> linguee error: ${error}`);
         console.error(`---> error response: ${util.inspect(error.response, { depth: null })}`);
 
-        const errorInfo = getTypeErrorInfo(DicionaryType.Linguee, error);
+        const errorInfo = getTypeErrorInfo(DictionaryType.Linguee, error);
         const errorCode = error.response?.status;
         // Request failed with status code 503, this means your ip is banned by linguee for a few hours.
         if (errorCode === 503) {
@@ -104,7 +100,7 @@ export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Pro
 }
 
 /**
- * Record linguee reqeust times.
+ * Record linguee request times.
  */
 async function recordLingueeRequestTime() {
   const lingueeRequestTime = (await LocalStorage.getItem<number>(lingueeRequestTimeKey)) || 1;

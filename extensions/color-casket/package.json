@@ -5,6 +5,11 @@
   "description": "Handy Color Utilities",
   "icon": "command-icon.png",
   "author": "slava.razum",
+  "contributors": [
+    "fe9lix",
+    "pernielsentikaer",
+    "tzfeng"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools",
@@ -28,8 +33,8 @@
     {
       "name": "picker",
       "title": "Pick Color",
-      "icon": "picker-icon.png",
       "description": "Pick color from everywhere",
+      "icon": "picker-icon.png",
       "keywords": [
         "color",
         "pick",
@@ -38,17 +43,11 @@
         "pipette",
         "color casket"
       ],
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "preferences": [
     {
-      "name": "format",
-      "title": "Default Format",
-      "description": "Default format for color picker",
-      "type": "dropdown",
-      "default": "HEX",
-      "required": false,
       "data": [
         {
           "title": "HEX",
@@ -64,13 +63,19 @@
         },
         {
           "title": "Keyword",
-          "value": "KEYWORD"
+          "value": "Keyword"
         }
-      ]
+      ],
+      "default": "HEX",
+      "description": "Default format for color picker",
+      "name": "format",
+      "required": false,
+      "title": "Default Format",
+      "type": "dropdown"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.42.0",
     "color-convert": "^2.0.1",
     "is-valid-css-color": "^2.0.3",
     "javascript-time-ago": "^2.3.13",
@@ -78,7 +83,7 @@
   },
   "devDependencies": {
     "@types/color-convert": "^2.0.0",
-    "@types/node": "~16.10.0",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

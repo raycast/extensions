@@ -5,6 +5,9 @@
   "description": "Custom hidden preferences of Dock.\nBackup, restore and reset Dock state.",
   "icon": "dock-tinker.png",
   "author": "koinzhang",
+  "contributors": [
+    "garrucho"
+  ],
   "categories": [
     "Developer Tools",
     "System"
@@ -54,6 +57,13 @@
       "mode": "no-view"
     },
     {
+      "name": "toggle-contents-immutable",
+      "title": "Toggle Lock Contents",
+      "subtitle": "Dock",
+      "description": "Lock Dock contents, preventing unwanted changes.",
+      "mode": "no-view"
+    },
+    {
       "name": "toggle-dock-orientation",
       "title": "Toggle Dock Orientation",
       "subtitle": "Dock",
@@ -97,7 +107,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.44.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

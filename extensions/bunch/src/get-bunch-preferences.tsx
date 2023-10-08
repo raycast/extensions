@@ -97,6 +97,6 @@ const buildIcon = (value: string) => {
     case "4":
       return { source: Icon.Checkmark, tintColor: Color.Green };
     default:
-      return { source: Icon.Finder, tintColor: Color.Green };
+      return { source: Icon.Folder, tintColor: Color.Green };
   }
 };

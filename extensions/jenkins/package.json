@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jenkins",
+  "title": "Jenkins",
+  "description": "Manage your Jenkins directly from Raycast.",
+  "icon": "icon.png",
+  "author": "k8scat",
+  "contributors": [
+    "vkhitrin"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "jenkins",
+    "job",
+    "search"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "jenkins",
+      "title": "Manage Jenkins",
+      "description": "Manage jenkins and jobs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.2",
+    "node-fetch": "^3.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

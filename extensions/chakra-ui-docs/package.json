@@ -5,19 +5,54 @@
   "description": "Provide quick links to the Chakra UI component documentation.",
   "icon": "chakra.png",
   "author": "pgvr",
+  "contributors": [
+    "Ansub"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Browse Components",
+      "name": "get-started",
+      "title": "Get Started",
       "subtitle": "Chakra UI",
-      "description": "Show all Chakra UI Components",
-      "mode": "view",
-      "icon": "chakra.png"
+      "keywords": [
+        "get started"
+      ],
+      "description": "Get Started with Chakra UI",
+      "mode": "view"
+    },
+    {
+      "name": "styled-system",
+      "title": "Search Styled System",
+      "subtitle": "Chakra UI",
+      "keywords": [
+        "styled system"
+      ],
+      "description": "Styled System of Chakra UI",
+      "mode": "view"
+    },
+    {
+      "name": "components",
+      "title": "Search Components",
+      "subtitle": "Chakra UI",
+      "keywords": [
+        "components"
+      ],
+      "description": "Components of Chakra UI",
+      "mode": "view"
+    },
+    {
+      "name": "hooks",
+      "title": "Search Hooks",
+      "subtitle": "Chakra UI",
+      "keywords": [
+        "hooks"
+      ],
+      "description": "Hooks of Chakra UI",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0"
+    "@raycast/api": "^1.39.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

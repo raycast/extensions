@@ -3,18 +3,13 @@ import { useState } from "react";
 import DashResult from "../components/DashResult";
 import { useDocsets, useDocsetSearch } from "../hooks";
 import SingleDocsetSearch from "./SingleDocsetSearch";
-import { DashArgumentes, Docset } from "../types";
+import { DashArguments, Docset } from "../types";
 import useDashApp from "../hooks/useDashApp";
+import { getFilteredDocsets } from "../utils";
+import OpenInBrowserAction from "../components/OpenInBrowserAction";
 
-const getFilteredDocsets = (docsets: Docset[], searchText: string) =>
-  docsets.filter(
-    (docset) =>
-      docset.docsetName.toLowerCase().includes(searchText.toLowerCase()) ||
-      docset.docsetKeyword.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-export default function MultiDocsetSearch(props: { arguments: DashArgumentes }) {
-  const [searchText, setSearchText] = useState(props.arguments.searchstring);
+export default function MultiDocsetSearch(props: { arguments?: DashArguments }) {
+  const [searchText, setSearchText] = useState(props.arguments?.searchstring || "");
   const [dashApp, isDashAppLoading] = useDashApp();
   const [docsets, isLoadingDocsets] = useDocsets();
   const [searchResults, isLoadingSearchResults] = useDocsetSearch(searchText);
@@ -30,11 +25,7 @@ export default function MultiDocsetSearch(props: { arguments: DashArgumentes }) 
           icon="empty-view-icon.png"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Get Dash"
-                shortcut={{ modifiers: ["cmd"], key: "g" }}
-                url="https://kapeli.com/dash"
-              />
+              <OpenInBrowserAction />
             </ActionPanel>
           }
         />

@@ -30,7 +30,7 @@ https://www.icloud.com/shortcuts/776f8a1d8e43471885e8a505eb9a9deb
 
 ## 开启服务
 
-接下来在 `Easydict` 的偏好设置中，开启苹果 🍎 翻译 `Apple Translate` 选项即可。（注意，苹果翻译仅在翻译文本时启用，单词查询时不会启用）
+接下来在 `Easydict` 的偏好设置中，开启苹果 🍎 翻译 `Apple Translate` 选项即可。
 
 同样，苹果 🍎 语言识别功能 `Apple Language Detect` 也是如此，开启后可提高识别输入文本语言的速度和准确度。
 

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, s
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
 import { humanize, isValidUrl } from "./utils";
-import { copyPassword, pastePassword } from "./index";
+import { copyPassword, pastePassword, copyOTP, pasteOTP } from "./index";
 
 async function copy(key: string, value: string): Promise<void> {
   await Clipboard.copy(value);
@@ -47,25 +47,45 @@ export default function ({ entry }: { entry: string }): JSX.Element {
           />
         )}
 
-        {details.map((item, index) => {
-          const [key, ...values] = item.split(": ");
-          const value = values.join(": ");
+        {details
+          .filter((item) => item.startsWith("otpauth:"))
+          .map((item, index) => {
+            return (
+              <List.Item
+                key={index}
+                title="OTP code"
+                subtitle="XXXXXX"
+                actions={
+                  <ActionPanel>
+                    <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyOTP(entry)} />
+                    <Action title="Paste to Active App" icon={Icon.Document} onAction={() => pasteOTP(entry)} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
 
-          return (
-            <List.Item
-              key={index}
-              title={humanize(key)}
-              subtitle={value}
-              actions={
-                <ActionPanel>
-                  {isValidUrl(value) && <Action.OpenInBrowser url={value} />}
-                  <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copy(key, value)} />
-                  <Action title="Paste to Active App" icon={Icon.Document} onAction={() => paste(key, value)} />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+        {details
+          .filter((item) => !item.startsWith("otpauth:"))
+          .map((item, index) => {
+            const [key, ...values] = item.split(": ");
+            const value = values.join(": ");
+
+            return (
+              <List.Item
+                key={index}
+                title={humanize(key)}
+                subtitle={value}
+                actions={
+                  <ActionPanel>
+                    {isValidUrl(value) && <Action.OpenInBrowser url={value} />}
+                    <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copy(key, value)} />
+                    <Action title="Paste to Active App" icon={Icon.Document} onAction={() => paste(key, value)} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
       </List.Section>
     </List>
   );

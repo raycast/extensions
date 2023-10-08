@@ -40,10 +40,10 @@ jobs:
             git add docs
             git commit -m 'Docs: Update the utils docs'
             git push origin main
-            echo '::set-output name=has_commit::true'
+            echo 'has_commit=true' >> $GITHUB_OUTPUT
           else
             echo 'No changes'
-            echo '::set-output name=has_commit::false'
+            echo 'has_commit=false' >> $GITHUB_OUTPUT
           fi
 
       - name: Notify Failure to Slack
@@ -118,14 +118,14 @@ jobs:
             git add .
             git commit -m 'Utils Docs: Update from the extensions repo'
             git push origin docs-sync-${{ github.sha }}
-            echo '::set-output name=has_commit::true'
+            echo 'has_commit=true' >> $GITHUB_OUTPUT
           else
             echo 'No changes'
-            echo '::set-output name=has_commit::false'
+            echo 'has_commit=false' >> $GITHUB_OUTPUT
           fi
 
       - name: Open PR on the main repo
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         if: steps.commit.outputs.has_commit == 'true'
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}

@@ -1,6 +1,6 @@
 import { Clipboard, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Project } from "./gitlabapi";
-import { GitLabIcons } from "./icons";
+import { getSVGText, GitLabIcons } from "./icons";
 import * as fs from "fs/promises";
 import * as fsSync from "fs";
 import { constants } from "fs";
@@ -26,15 +26,26 @@ export function projectIconUrl(project: Project): string | undefined {
   return result;
 }
 
+export function getFirstChar(text: string): string {
+  const firstChar = text.codePointAt(0);
+
+  return firstChar ? String.fromCodePoint(firstChar) : "";
+}
+
 export function projectIcon(project: Project): Image.ImageLike {
+  const svgSource = () => {
+    return getSVGText(getFirstChar(project.name)) || GitLabIcons.project;
+  };
   let result: string = GitLabIcons.project;
   // TODO check also namespace for icon
   if (project.avatar_url) {
     result = project.avatar_url;
   } else if (project.owner && project.owner.avatar_url) {
     result = project.owner.avatar_url;
+  } else {
+    result = svgSource();
   }
-  return { source: result, mask: Image.Mask.Circle };
+  return { source: result, mask: Image.Mask.Circle, fallback: svgSource() };
 }
 
 export function toDateString(d: string): string {
@@ -42,6 +53,11 @@ export function toDateString(d: string): string {
   const mo = new Intl.DateTimeFormat("en", { month: "short" }).format(date);
   const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
   return `${da}. ${mo}`;
+}
+
+export function toLongDateString(d: string) {
+  const date = new Date(d);
+  return date.toLocaleDateString();
 }
 
 export function getIdFromGqlId(id: string): number {
@@ -170,6 +186,9 @@ export function hashRecord(rec: Record<string, any>, prefix?: string | undefined
 }
 
 export function capitalizeFirstLetter(name: string): string {
+  if (!name || name.length <= 0) {
+    return name;
+  }
   return name.replace(/^./, name[0].toUpperCase());
 }
 
@@ -255,7 +274,14 @@ export function tokenizeQueryText(query: string | undefined, namedKeywords: stri
 }
 
 export function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "unknown error";
+  if (error instanceof Error) {
+    return error.message;
+  } else {
+    if (typeof error === "string") {
+      return error as string;
+    }
+    return "Unknown Error";
+  }
 }
 
 export function formatDate(input: Date | string): string {

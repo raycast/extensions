@@ -1,5 +1,11 @@
 # bibmanager Changelog
 
+## [1.3.3] - 2022-08-29
+Add NASA ADS keywords to metadata for better search and display
+
+## [1.3.2] - 2022-08-29
+Updated logo
+
 ## [1.3.1] - 2022-08-26
 Add option to paste stuff 
 

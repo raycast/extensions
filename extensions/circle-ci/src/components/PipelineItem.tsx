@@ -6,9 +6,9 @@ export const PipelineItem = ({ pipeline, onReload }: { pipeline: Pipeline; onRel
     icon={{ source: Icon.Checkmark }}
     accessoryIcon={pipeline.trigger.actor.avatar_url || "gearshape-16"}
     title={"No status"}
-    subtitle={pipeline.vcs.tag || pipeline.vcs.branch || ""}
+    subtitle={pipeline.vcs?.tag || pipeline.vcs?.branch || ""}
     accessoryTitle={new Date(pipeline.created_at).toLocaleTimeString()}
-    keywords={[pipeline.vcs.branch || pipeline.vcs.tag || ""]}
+    keywords={[pipeline.vcs?.branch || pipeline.vcs?.tag || ""]}
     actions={
       <ActionPanel>
         <OpenInBrowserAction

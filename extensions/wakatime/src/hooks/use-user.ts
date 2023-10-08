@@ -1,36 +1,27 @@
-import { useEffect, useState } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { useCallback } from "react";
+import { useCachedState } from "@raycast/utils";
 
 import { getUser } from "../utils";
+import { useBase } from "./base";
 
 export function useUser() {
-  const [data, setData] = useState<WakaTime.User>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [cachedUser, setCachedUser] = useCachedState<WakaTime.User>("user");
 
-  useEffect(() => {
-    async function getData() {
-      setIsLoading(true);
-      const toast = await showToast(Toast.Style.Animated, "Loading Summary");
+  const result = useBase({
+    handler: useCallback(async () => {
+      const user = await getUser();
+      if (user.ok) setCachedUser(user.result);
+      return user;
+    }, []),
+    toasts: {
+      loading: { title: "Loading..." },
+      success: { title: "Done!!" },
+      error: (err) => ({
+        title: "Failed fetching data!",
+        message: err.message,
+      }),
+    },
+  });
 
-      try {
-        const data = await getUser();
-
-        if (!data.ok) throw new Error(data.error);
-        setData(data);
-
-        toast.style = Toast.Style.Success;
-        toast.title = "Done!";
-      } catch (err) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed Loading Summary";
-        toast.message = (err as Record<string, string>).message;
-      }
-
-      setIsLoading(false);
-    }
-
-    getData();
-  }, []);
-
-  return { ...(data ?? {}), isLoading };
+  return { ...result, data: cachedUser };
 }

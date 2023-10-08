@@ -21,7 +21,7 @@ export default function Countries() {
       <List.EmptyView icon={{ source: "noview.png" }} title="No Results" />
       {(data || []).map((entry) => {
         let phone: string | null = null;
-        const keywords = [entry.cca2];
+        const keywords = [entry.cca2, entry.cca3];
         if (entry.idd.root && entry.idd.suffixes.length) {
           phone = entry.idd.suffixes
             .map((suffix) => {
@@ -33,12 +33,16 @@ export default function Countries() {
 
         const markdownCoat = entry.coatOfArms.png
           ? entry.coatOfArms.png
-          : `file://${environment.assetsPath}/no-image@${environment.theme}.png`;
+          : `file://${environment.assetsPath}/no-image@${environment.appearance}.png`;
 
         if (entry.capital) {
           entry.capital.forEach((capital) => {
             keywords.push(capital);
           });
+        }
+
+        if (entry.tld?.length) {
+          keywords.push(...entry.tld);
         }
 
         return (
@@ -55,6 +59,7 @@ export default function Countries() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Official Name" text={entry.name.official} />
                     <List.Item.Detail.Metadata.Label title="Country Code" text={entry.cca2} />
+                    {entry.cca3 && <List.Item.Detail.Metadata.Label title="Country Alpha3 Code" text={entry.cca3} />}
                     {entry.capital && (
                       <List.Item.Detail.Metadata.Label
                         title={`Capital${entry.capital.length > 1 ? "s" : ""}`}

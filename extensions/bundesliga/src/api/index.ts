@@ -18,7 +18,7 @@ const headers = {
 
 function load(html: string) {
   const $ = cheerio.load(html);
-  const state = $("#my-app-state").html();
+  const state = $("#serverApp-state").html();
 
   let data: any = {};
   if (state) {

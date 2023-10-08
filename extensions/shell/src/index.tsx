@@ -28,6 +28,7 @@ interface ShellArguments {
 }
 interface Preferences {
   arguments_terminal: boolean;
+  arguments_terminal_type: string;
 }
 
 let cachedEnv: null | EnvType = null;
@@ -104,37 +105,37 @@ const runInIterm = (command: string) => {
   const script = `
     -- Set this property to true to open in a new window instead of a new tab
     property open_in_new_window : false
-    
+
     on new_window()
     	tell application "iTerm" to create window with default profile
     end new_window
-    
+
     on new_tab()
     	tell application "iTerm" to tell the first window to create tab with default profile
     end new_tab
-    
+
     on call_forward()
     	tell application "iTerm" to activate
     end call_forward
-    
+
     on is_running()
     	application "iTerm" is running
     end is_running
-    
+
     on is_processing()
     	tell application "iTerm" to tell the first window to tell current session to get is processing
     end is_processing
-    
+
     on has_windows()
     	if not is_running() then return false
     	if windows of application "iTerm" is {} then return false
     	true
     end has_windows
-    
+
     on send_text(custom_text)
     	tell application "iTerm" to tell the first window to tell current session to write text custom_text
     end send_text
-    
+
     -- Main
     if has_windows() then
     	-- Open the command in the current session unless it has a running command, e.g., ssh or top
@@ -154,14 +155,103 @@ const runInIterm = (command: string) => {
     		call_forward()
     	end if
     end if
-    
-    -- Make sure a window exists before we continue, or the write may fail
-    repeat until has_windows()
-    	delay 0.01
-    end repeat
-    
+
+    if is_running() then
+      new_tab()
+    else
+      -- Make sure a window exists before we continue, or the write may fail
+      repeat until has_windows()
+        delay 0.01
+      end repeat
+    end
+
     send_text("${command.replaceAll('"', '\\"')}")
     call_forward()
+  `;
+
+  runAppleScript(script);
+};
+
+const runInWarp = (command: string) => {
+  const script = `
+      -- For the latest version:
+      -- https://github.com/DavidMChan/custom-alfred-warp-scripts
+
+      -- Set this property to true to always open in a new window
+      property open_in_new_window : true
+
+      -- Set this property to true to always open in a new tab
+      property open_in_new_tab : false
+
+      -- Don't change this :)
+      property opened_new_window : false
+
+      -- Handlers
+      on new_window()
+          tell application "System Events" to tell process "Warp"
+              click menu item "New Window" of menu "File" of menu bar 1
+              set frontmost to true
+          end tell
+      end new_window
+
+      on new_tab()
+          tell application "System Events" to tell process "Warp"
+              click menu item "New Tab" of menu "File" of menu bar 1
+              set frontmost to true
+          end tell
+      end new_tab
+
+      on call_forward()
+          tell application "Warp" to activate
+      end call_forward
+
+      on is_running()
+          application "Warp" is running
+      end is_running
+
+      on has_windows()
+          if not is_running() then return false
+          tell application "System Events"
+              if windows of process "Warp" is {} then return false
+          end tell
+          true
+      end has_windows
+
+      on send_text(custom_text)
+          tell application "System Events"
+              keystroke custom_text
+          end tell
+      end send_text
+
+
+      -- Main
+      if not is_running() then
+          call_forward()
+          set opened_new_window to true
+      else
+          call_forward()
+          set opened_new_window to false
+      end if
+
+      if has_windows() then
+          if open_in_new_window and not opened_new_window then
+              new_window()
+          else if open_in_new_tab and not opened_new_window then
+              new_tab()
+          end if
+      else
+          new_window()
+      end if
+
+
+      -- Make sure a window exists before we continue, or the write may fail
+      repeat until has_windows()
+          delay 0.5
+      end repeat
+      delay 0.5
+
+      send_text("${command}")
+      call_forward()
   `;
 
   runAppleScript(script);
@@ -178,11 +268,12 @@ const runInTerminal = (command: string) => {
   runAppleScript(script);
 };
 
-export default function Command(props: { arguments: ShellArguments }) {
+export default function Command(props: { arguments?: ShellArguments }) {
   const [cmd, setCmd] = useState<string>("");
   const [history, setHistory] = useState<string[]>();
   const [recentlyUsed, setRecentlyUsed] = usePersistentState<string[]>("recently-used", []);
   const iTermInstalled = fs.existsSync("/Applications/iTerm.app");
+  const WarpInstalled = fs.existsSync("/Applications/Warp.app");
 
   const addToRecentlyUsed = (command: string) => {
     setRecentlyUsed((list) => (list.find((x) => x === command) ? list : [command, ...list].slice(0, 10)));
@@ -192,21 +283,30 @@ export default function Command(props: { arguments: ShellArguments }) {
     setHistory([...new Set(shellHistory().reverse())] as string[]);
   }, [setHistory]);
 
-  const preferences = getPreferenceValues<Preferences>();
-  if (props.arguments.command.length > 0) {
-    if (preferences.arguments_terminal) {
+  const { arguments_terminal_type: terminalType, arguments_terminal: openInTerminal } =
+    getPreferenceValues<Preferences>();
+
+  useEffect(() => {
+    if (props.arguments?.command && openInTerminal) {
       addToRecentlyUsed(props.arguments.command);
-      showHUD("Ran command in iTerm/Terminal");
+      showHUD("Ran command in " + terminalType);
       popToRoot();
       closeMainWindow();
-      if (iTermInstalled) {
-        return runInIterm(props.arguments.command);
+      if (terminalType == "iTerm") {
+        runInIterm(props.arguments.command);
+      } else if (terminalType == "Warp") {
+        runInWarp(props.arguments.command);
       } else {
-        return runInTerminal(props.arguments.command);
+        runInTerminal(props.arguments.command);
       }
-    } else {
-      return <Result cmd={props.arguments.command} />;
     }
+  }, [props.arguments]);
+
+  if (props.arguments?.command) {
+    if (openInTerminal) {
+      return null;
+    }
+    return <Result cmd={props.arguments.command} />;
   }
 
   const categories = [];
@@ -264,6 +364,18 @@ export default function Command(props: { arguments: ShellArguments }) {
                         popToRoot();
                         addToRecentlyUsed(command);
                         runInIterm(command);
+                      }}
+                    />
+                  ) : null}
+                  {WarpInstalled ? (
+                    <Action
+                      title="Execute in Warp.app"
+                      icon={Icon.Window}
+                      onAction={() => {
+                        closeMainWindow();
+                        popToRoot();
+                        addToRecentlyUsed(command);
+                        runInWarp(command);
                       }}
                     />
                   ) : null}

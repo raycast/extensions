@@ -1,26 +1,25 @@
 import { XcodeRelease } from "../../models/xcode-release/xcode-release.model";
-import { ActionPanel, Action, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { XcodeReleaseListItemDetail } from "./xcode-release-list-item-detail.component";
 
 /**
  * Xcode Release List Item
  */
-export function XcodeReleaseListItem(props: { release: XcodeRelease; index: number }): JSX.Element {
+export function XcodeReleaseListItem(props: { release: XcodeRelease }): JSX.Element {
   return (
     <List.Item
-      key={props.index}
       icon={icon(props.release)}
       title={title(props.release)}
-      subtitle={subtitle(props.release)}
-      accessories={[{ text: accessoryTitle(props.release) }]}
       keywords={keywords(props.release)}
+      detail={<XcodeReleaseListItemDetail release={props.release} />}
       actions={
         <ActionPanel>
           {props.release.downloadLink ? (
-            <Action.OpenInBrowser key="download" title="Download" url={props.release.downloadLink} />
+            <Action.OpenInBrowser icon={Icon.Download} title="Download" url={props.release.downloadLink} />
           ) : null}
           {props.release.releaseNotesLink ? (
             <Action.OpenInBrowser
-              key="view-release-notes"
+              icon={Icon.Document}
               title="View Release Notes"
               url={props.release.releaseNotesLink}
             />
@@ -38,9 +37,14 @@ export function XcodeReleaseListItem(props: { release: XcodeRelease; index: numb
 function icon(xcodeRelease: XcodeRelease): Image {
   // Initialize image source components
   const imageSourceComponents = ["xcode"];
+  // Initialize version number
+  const versionNumber = Number(xcodeRelease.versionNumber.split(".").at(0));
   // Check if version number is greater or equal 13
-  if (Number(xcodeRelease.versionNumber.split(".").at(0)) >= 13) {
-    // Push 13
+  if (versionNumber >= 15) {
+    // Use 15
+    imageSourceComponents.push("15");
+  } else if (versionNumber >= 13) {
+    // Use 13
     imageSourceComponents.push("13");
   } else {
     // Otherwise, always use 12
@@ -85,30 +89,6 @@ function title(xcodeRelease: XcodeRelease): string {
 }
 
 /**
- * Retrieve subtitle from XcodeRelease
- * @param xcodeRelease The XcodeRelease
- */
-function subtitle(xcodeRelease: XcodeRelease): string {
-  // Initialize subtitle components with build number
-  const subtitleComponents = [xcodeRelease.buildNumber];
-  // Check if a Swift version is available
-  if (xcodeRelease.swiftVersion) {
-    // Push Swift version
-    subtitleComponents.push(`(Swift ${xcodeRelease.swiftVersion})`);
-  }
-  // Return joined subtitle components
-  return subtitleComponents.join(" ");
-}
-
-/**
- * Retrieve accessory title from XcodeRelease
- * @param xcodeRelease The XcodeRelease
- */
-function accessoryTitle(xcodeRelease: XcodeRelease): string {
-  return xcodeRelease.sdks.map((sdk) => [sdk.name, sdk.version].join(" ")).join(", ");
-}
-
-/**
  * Retrieve keywords from XcodeRelease
  * @param xcodeRelease The XcodeRelease
  */
@@ -117,5 +97,5 @@ function keywords(xcodeRelease: XcodeRelease): string[] {
   keywords.push(xcodeRelease.versionNumber);
   keywords.push(xcodeRelease.buildNumber);
   keywords.push(...xcodeRelease.sdks.map((sdk) => sdk.version));
-  return keywords.filter((keyword) => !!keyword);
+  return keywords.filter(Boolean);
 }

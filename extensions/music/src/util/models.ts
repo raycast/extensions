@@ -40,3 +40,7 @@ export interface ScriptError extends Error {
 export const ScriptError = {
   is: (error: Error): error is ScriptError => "shortMessaage" in error,
 };
+
+export interface Preferences {
+  volumeSteps: string;
+}

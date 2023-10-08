@@ -1,30 +1,28 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { count } from "./lib/count";
+import { readFromSelection, readFromClipboard } from "./utils";
 
 export default function Command() {
   const [text, setText] = useState("");
-  const [includeWhitespace, setIncludeWhitespace] = useState(false);
+  const [includeWhitespace, setIncludeWhitespace] = useState(true);
   const [result, setResult] = useState<string>("");
 
   useEffect(() => {
     (async () => {
-      const clipboard = await Clipboard.readText();
+      let content = await readFromSelection();
 
-      if (clipboard) {
-        setText(clipboard.trim());
-        showToast({
-          style: Toast.Style.Success,
-          title: `Text loaded from clipboard`,
-          message: `[⌘ + E] to reset`,
-        });
+      if (!content) {
+        content = await readFromClipboard();
       }
+
+      setText(content);
     })();
   }, []);
 
   useEffect(() => {
     const result = count(text, includeWhitespace);
-    const resultStr = `${result.characters} characters · ${result.words} words · ${result.sentences} sentences · ${result.paragraphs} paragraphs`;
+    const resultStr = `${result.characters} characters · ${result.words} words \n${result.sentences} sentences · ${result.paragraphs} paragraphs \n${result.reading_time} minutes to read · ${result.speaking_time} minutes to speak`;
     setResult(resultStr);
   }, [text, includeWhitespace]);
 
@@ -35,7 +33,7 @@ export default function Command() {
         onAction={() => setIncludeWhitespace(!includeWhitespace)}
         shortcut={{
           modifiers: ["cmd"],
-          key: "w",
+          key: "t",
         }}
         icon={Icon.Switch}
       />

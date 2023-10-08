@@ -1,13 +1,52 @@
 # DocSearch Changelog
 
+## [New feature and documentation] - 2023-08-12
+
+- 🌟 Support auto generate entry file and config
+- 📄 Support [taro](https://docs.taro.zone/docs/)
+
+## [Support for new documentation] - 2023-08-11
+
+- 📄 Support [Antd](https://ant.design/)
+- 📄 Support [Antdv](https://antdv.com/components/overview)
+
+## [Fix SearchDocumentation Component] - 2023-05-25
+
+- 🐛 Fix the title of the documentation is not displayed.
+
+## [Supoort Meilisearch] - 2023-05-23
+
+- 🌟 Support Meilisearch
+- 📄 Move RSSHub to use MeiliSearch as an entry point.
+
+## [Fix searchbar text] - 2021-12-31
+
+- 🐛 Fix searchbar text disappearing each time the query is changed by the user.
+- 📄 add algolia keyword to package.json
+
+## [Support for new documentation] - 2022-11-23
+
+- 📄 Support [Flet](https://flet.dev)
+
+## [Support for new documentation] - 2022-11-11
+
+- 📄 Support [Clerk](https://clerk.dev)
+- 📄 Support [Apollo](https://www.apollographql.com/docs/)
+- 📄 Support [Supabase](https://supabase.io/docs)
+- 📄 Support [Slidev](https://sli.dev) (english language)
+
+## [Support other DocSearch result and the new documentation] - 2022-08-22
+
+- 🌟 Support other DocSearch result.
+- 📄 Support [GitBook](https://docs.gitbook.com/).
+- 📄 Support [Raycast](https://developers.raycast.com/).
+
 ## [Support for the new documentation] - 2022-08-22
 
 - 🌟 Add quick search argument for documentation.
 - 📄 Support [Dubbo](https://dubbo.apache.org/)
 - 📄 Support [Nuxt](https://nuxtjs.org/)
 - 📄 Support [Nuxt3](https://v3.nuxtjs.org/)
-- 📄 Support [pnpm](https://pnpm.io/)
-- 📄 Support [pnpm(zh-Hans)](https://pnpm.io/zh/)
 - 📄 Support [React Bootstrap](https://react-bootstrap.github.io/)
 - 📄 Support [Remix](https://remix.run/)
 - 📄 Support [React Native](https://reactnative.dev/)

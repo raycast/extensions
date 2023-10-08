@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brasileirao-serie-a",
+  "title": "Brasileiro Série A",
+  "description": "View the brazilian first division upcoming games, standings and results.",
+  "icon": "icon.png",
+  "author": "willian",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upcoming",
+      "title": "Upcoming",
+      "subtitle": "Brasileiro Série A",
+      "description": "View upcoming games for the season",
+      "mode": "view"
+    },
+    {
+      "name": "results",
+      "title": "Results",
+      "subtitle": "Brasileiro Série A",
+      "description": "View games results for the season",
+      "mode": "view"
+    },
+    {
+      "name": "standings",
+      "title": "Standings",
+      "subtitle": "Brasileiro Série A",
+      "description": "View the league table for the current season",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Football Data API Key",
+      "placeholder": "Enter your Football Data API Key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.2",
+    "@raycast/utils": "^1.3.1",
+    "date-fns": "^2.29.2"
+  },
+  "devDependencies": {
+    "@types/node": "^16.10.3",
+    "@types/react": "^18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

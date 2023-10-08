@@ -23,13 +23,16 @@ export const imgExt = [".svg", ".gif", ".jpg", ".jpeg", ".png"];
 
 export const getGistDetailContent = (gistFile: GistItem, gistFileContent: string) => {
   const gistFileExt = parse(gistFile.filename).ext;
-  if (imgExt.includes(gistFileExt)) {
-    return `![](${gistFile.raw_url})`;
-  }
+
   if (gistFileExt == ".md") {
     return gistFileContent;
   }
-  return "```\n" + gistFileContent + "\n```";
+
+  if (imgExt.includes(gistFileExt)) {
+    return `![](${gistFile.raw_url})`;
+  }
+
+  return "```" + gistFile.language + "\n" + gistFileContent + "\n```";
 };
 
 export const raySo = (title: string, content: string) =>

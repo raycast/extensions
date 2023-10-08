@@ -3,9 +3,9 @@ import { createHmac } from "crypto";
 import { decode } from "hi-base32";
 
 const AllDigits = [6, 7, 8] as const;
-export type Digits = typeof AllDigits[number];
+export type Digits = (typeof AllDigits)[number];
 const Algorithms = ["SHA1", "SHA256", "SHA512"] as const;
-export type Algorithm = typeof Algorithms[number];
+export type Algorithm = (typeof Algorithms)[number];
 
 export interface Options {
   period: number;

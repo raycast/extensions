@@ -1,5 +1,14 @@
 # NotePlan 3 Changelog
 
+## [Fixes] - 2023-03-28
+
+- Added new calendar format
+
+## [Made file extension preference required ] - 2023-03-07
+
+## [Fixes] - 2023-02-16
+- Fix searching when installed NotePlan version is distributed through SetApp (#4816)
+
 ## [Fixes] - 2022-08-03
 - Fix searching where notes have an alternate extension (often md)
 - Fix crash when there are weekly notes

@@ -74,6 +74,14 @@ The Sourcegraph Raycast extension allows you to set a default context for your s
 
 ![search demo](metadata/1-search.png)
 
+### Code Search History
+
+Browse, manage, and run recent [code searches](#search-code). New searches can also easily be launched from the Code Search History command.
+
+Recent searches are persisted [locally through a native Raycast API](https://developers.raycast.com/api-reference/storage).
+
+![search history demo](metadata/2a-search-history.png)
+
 ### Find Search Notebooks
 
 Browse and preview [search notebooks](https://docs.sourcegraph.com/notebooks) straight from Raycast.

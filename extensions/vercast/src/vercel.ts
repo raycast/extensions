@@ -283,10 +283,10 @@ export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
   return imageStr;
 }
 
-export function getDeploymentURL(userOrTeamName: string, projectName: string, deploymentId: Deployment["uid"]) {
+export function getDeploymentURL(userOrTeamSlug: string, projectName: string, deploymentId: Deployment["uid"]) {
   if (deploymentId.startsWith("dpl_")) {
     deploymentId = deploymentId.substring(4);
   }
 
-  return `https://vercel.com/${userOrTeamName}/${projectName}/${deploymentId}`;
+  return `https://vercel.com/${userOrTeamSlug}/${projectName}/${deploymentId}`;
 }

@@ -1,12 +1,13 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { daysInSeconds, hashRecord, projectIconUrl, showErrorToast } from "../utils";
+import { daysInSeconds, getFirstChar, hashRecord, projectIconUrl, showErrorToast } from "../utils";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
   CopyProjectIDToClipboardAction,
+  CopyCloneUrlToClipboardAction,
   OpenProjectBranchesPushAction,
   OpenProjectIssuesPushAction,
   OpenProjectLabelsInBrowserAction,
@@ -15,23 +16,36 @@ import {
   OpenProjectPipelinesPushAction,
   OpenProjectSecurityComplianceInBrowserAction,
   OpenProjectSettingsInBrowserAction,
+  OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
-import { GitLabIcons, useImage } from "../icons";
+import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 
-export function ProjectListItem(props: { project: Project }): JSX.Element {
+function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
+  return getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase());
+}
+
+export function ProjectListItem(props: { project: Project; nameOnly?: boolean }): JSX.Element {
   const project = props.project;
-  const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project), GitLabIcons.project);
+  const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
 
   return (
     <List.Item
-      id={project.id.toString()}
-      title={project.name_with_namespace}
-      subtitle={project.star_count > 0 ? `⭐ ${project.star_count}` : ""}
-      icon={localImageFilepath}
+      title={props.nameOnly === true ? project.name : project.name_with_namespace}
+      accessories={[
+        {
+          icon: {
+            source: Icon.Star,
+            tintColor: project.star_count > 0 ? Color.Yellow : null,
+          },
+          text: `${project.star_count}`,
+          tooltip: `Number of stars: ${project.star_count}`,
+        },
+      ]}
+      icon={localImageFilepath ? { source: localImageFilepath } : getProjectTextIcon(project)}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={project.name_with_namespace}>
@@ -39,11 +53,13 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyProjectIDToClipboardAction project={project} />
+            <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
             <OpenProjectIssuesPushAction project={project} />
             <OpenProjectMergeRequestsPushAction project={project} />
             <OpenProjectBranchesPushAction project={project} />
             <OpenProjectPipelinesPushAction project={project} />
             <OpenProjectMilestonesPushAction project={project} />
+            <OpenProjectWikiInBrowserAction project={project} />
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
@@ -55,9 +71,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
             <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Cache">
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -67,6 +81,10 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
 interface ProjectListProps {
   membership?: boolean;
   starred?: boolean;
+}
+
+export function ProjectListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Projects" icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }} />;
 }
 
 export function ProjectList({ membership = true, starred = false }: ProjectListProps): JSX.Element {
@@ -103,14 +121,20 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
 
   return (
     <List
-      searchBarPlaceholder="Filter Projects by name..."
+      searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
     >
-      {data?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+      <List.Section
+        title={searchText && searchText.length > 0 ? "Search Results" : "Projects"}
+        subtitle={`${data?.length}`}
+      >
+        {data?.map((project) => (
+          <ProjectListItem key={project.id} project={project} />
+        ))}
+      </List.Section>
+      <ProjectListEmptyView />
     </List>
   );
 }
@@ -146,8 +170,14 @@ export function useMyProjects(): { projects: Project[] | undefined; error?: stri
 
 function MyProjectsDropdownItem(props: { project: Project }): JSX.Element {
   const pro = props.project;
-  const { localFilepath } = useImage(projectIconUrl(pro), GitLabIcons.project);
-  return <List.Dropdown.Item title={pro.name_with_namespace} icon={localFilepath} value={`${pro.id}`} />;
+  const { localFilepath } = useImage(projectIconUrl(pro));
+  return (
+    <List.Dropdown.Item
+      title={pro.name_with_namespace}
+      icon={localFilepath ? { source: localFilepath } : getProjectTextIcon(pro)}
+      value={`${pro.id}`}
+    />
+  );
 }
 
 export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): JSX.Element | null {

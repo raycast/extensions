@@ -11,13 +11,15 @@ const modeAlias: Record<NotePublishType, string> = {
   book: "c",
 };
 
-export const getNoteUrl = (note: Note): string => {
+export const getNoteUrl = (note: Note, editMode = false): string => {
   const namePath = note.userPath || note.teamPath;
 
   if (namePath) {
-    return new url.URL(`@${namePath}/${note.permalink || note.shortId}`, instance_url).toString();
+    const noteUrl = new url.URL(`@${namePath}/${note.permalink || note.shortId}`, instance_url).toString();
+
+    return editMode ? `${noteUrl}/edit` : noteUrl;
   } else {
-    const mode = modeAlias[note.publishType];
+    const mode = editMode ? "" : modeAlias[note.publishType];
 
     if (mode) {
       return new url.URL(`${mode}/${note.shortId}`, instance_url).toString();

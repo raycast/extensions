@@ -1,0 +1,2 @@
+## Keyboard Layout Switcher
+The extension allows **switching the keyboard layout**. It uses [keyboardSwitcher](https://github.com/Lutzifer/keyboardSwitcher) by [Wolfgang Lutz](https://github.com/Lutzifer) to _list_ and _switch_ available layouts and depends on the binary.

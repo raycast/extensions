@@ -16,7 +16,8 @@
     "sourcegraph",
     "search",
     "code",
-    "codesearch"
+    "codesearch",
+    "code search"
   ],
   "preferences": [
     {
@@ -62,6 +63,7 @@
         "sourcegraph",
         "search",
         "code",
+        "code search",
         "src"
       ],
       "preferences": [
@@ -86,6 +88,7 @@
         "sourcegraph",
         "search",
         "code",
+        "code search",
         "src"
       ],
       "preferences": [
@@ -97,6 +100,37 @@
           "required": false,
           "type": "textfield"
         }
+      ]
+    },
+    {
+      "name": "searchHistoryDotCom",
+      "title": "Code Search History",
+      "subtitle": "Sourcegraph.com",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
+      ]
+    },
+    {
+      "name": "searchHistoryInstance",
+      "icon": "logo-bw.png",
+      "title": "Code Search History",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
       ]
     },
     {
@@ -145,32 +179,32 @@
     }
   ],
   "dependencies": {
-    "@apollo/client": "^3.6.9",
-    "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.0.7",
+    "@apollo/client": "^3.7.3",
+    "@raycast/api": "^1.45.1",
+    "@raycast/utils": "^1.4.14",
     "cross-fetch": "^3.1.5",
     "eventsource": "^2.0.2",
-    "graphql": "^16.5.0",
-    "luxon": "^3.0.1",
+    "graphql": "^16.6.0",
+    "luxon": "^3.1.1",
     "nanoid": "^4.0.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^2.11.2",
-    "@graphql-codegen/fragment-matcher": "^3.3.0",
-    "@graphql-codegen/introspection": "^2.2.0",
-    "@graphql-codegen/typescript": "^2.7.2",
-    "@graphql-codegen/typescript-operations": "^2.5.2",
-    "@graphql-codegen/typescript-react-apollo": "^3.3.2",
-    "@types/eventsource": "^1.1.9",
-    "@types/luxon": "^3.0.0",
-    "@types/node": "~16.10.0",
-    "@types/react": "^18.0.15",
-    "@typescript-eslint/eslint-plugin": "^5.31.0",
-    "@typescript-eslint/parser": "^5.31.0",
-    "eslint": "^8.20.0",
+    "@graphql-codegen/cli": "^2.16.1",
+    "@graphql-codegen/fragment-matcher": "^3.3.3",
+    "@graphql-codegen/introspection": "^2.2.3",
+    "@graphql-codegen/typescript": "^2.8.5",
+    "@graphql-codegen/typescript-operations": "^2.5.10",
+    "@graphql-codegen/typescript-react-apollo": "^3.3.7",
+    "@types/eventsource": "^1.1.10",
+    "@types/luxon": "^3.1.0",
+    "@types/node": "~18.11.10",
+    "@types/react": "^18.0.26",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "eslint": "^8.30.0",
     "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.7.1",
-    "typescript": "^4.7.4"
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "build": "ray build -e dist",

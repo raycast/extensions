@@ -1,35 +1,23 @@
-import { TodoPage } from '@/types/todo-page'
-import { isNotionClientError } from '@notionhq/client'
-import { getPreferenceValues, showToast, Toast } from '@raycast/api'
+import { loadPreferences } from '@/services/storage'
 import { notion } from '../client'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
 
 export async function updateTodoTag(
   pageId: string,
   labelId: string | null
-): Promise<any> {
-  try {
-    const notionClient = await notion()
-    const labelProperty = getPreferenceValues().property_label
-    const page = await notionClient.pages.update({
-      page_id: pageId,
-      properties: {
-        [labelProperty]: {
-          select: labelId ? { id: labelId } : null,
-        },
-      },
-    })
+): Promise<boolean> {
+  const notionClient = await notion()
+  const preferences = await loadPreferences()
 
-    return mapPageToTodo(page as TodoPage)
-  } catch (err: unknown) {
-    if (isNotionClientError(err)) {
-      showToast(Toast.Style.Failure, err.message)
-    } else {
-      showToast(
-        Toast.Style.Failure,
-        'Error occurred check that you have a Label property'
-      )
-    }
-    return undefined
-  }
+  if (!preferences.properties.tag) return false
+
+  await notionClient.pages.update({
+    page_id: pageId,
+    properties: {
+      [preferences.properties.tag]: {
+        select: labelId ? { id: labelId } : null,
+      },
+    },
+  })
+
+  return true
 }

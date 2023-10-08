@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 
 import { Track } from "./util/models";
 import * as music from "./util/scripts";
-import { handleError } from "./util/utils";
+import { handleTaskEitherError } from "./util/utils";
 
 const ratings = [0, 1, 2, 3, 4, 5];
 
@@ -23,7 +23,10 @@ export default function SetRating() {
   const [track, setTrack] = useState<Readonly<Track> | null>(null);
 
   useEffect(() => {
-    pipe(music.currentTrack.getCurrentTrack(), TE.matchW(handleError, setTrack))();
+    pipe(
+      music.currentTrack.getCurrentTrack(),
+      handleTaskEitherError((error) => error, setTrack)
+    )();
   }, []);
 
   return (
@@ -37,6 +40,7 @@ export default function SetRating() {
 
 function Actions({ value }: { value: number }) {
   const { pop } = useNavigation();
+  const title = "Rate track";
 
   const handleRating = async () => {
     await pipe(
@@ -46,7 +50,7 @@ function Actions({ value }: { value: number }) {
         showToast(Toast.Style.Failure, "Could not rate this track");
       }),
       TE.map(() => {
-        showHUD("⭐".repeat(value));
+        showHUD("Rated " + "⭐".repeat(value));
         closeMainWindow();
       })
     )();
@@ -56,7 +60,7 @@ function Actions({ value }: { value: number }) {
 
   return (
     <ActionPanel>
-      <Action title="Rate" onAction={handleRating} />
+      <Action title={title} onAction={handleRating} icon={Icon.Stars} />
     </ActionPanel>
   );
 }

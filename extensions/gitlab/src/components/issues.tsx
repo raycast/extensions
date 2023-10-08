@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, Color, Detail, Image } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { getGitLabGQL, gitlab } from "../common";
@@ -11,12 +11,13 @@ import {
   optimizeMarkdownText,
   Query,
   showErrorToast,
-  toDateString,
   tokenizeQueryText,
+  toLongDateString,
 } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { userIcon } from "./users";
+import { CacheActionPanelSection } from "./cache_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -41,6 +42,10 @@ const GET_ISSUE_DETAIL = gql`
   }
 `;
 
+export function IssueListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Issues" icon={{ source: "issues.svg", tintColor: Color.PrimaryText }} />;
+}
+
 export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
@@ -60,10 +65,6 @@ interface IssueDetailData {
 
 function stateColor(state: string): Color.ColorLike {
   return state === "closed" ? "red" : "green";
-}
-
-function stateIcon(state: string): Image.ImageLike {
-  return { source: GitLabIcons.branches, tintColor: stateColor(state) };
 }
 
 export function IssueDetail(props: { issue: Issue }): JSX.Element {
@@ -101,7 +102,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
           </Detail.Metadata.TagList>
           {issue.author && (
             <Detail.Metadata.TagList title="Author">
-              <Detail.Metadata.TagList.Item text={issue.author.name} icon={userIcon(issue.author)} />
+              <Detail.Metadata.TagList.Item key={issue.id} text={issue.author.name} icon={userIcon(issue.author)} />
             </Detail.Metadata.TagList>
           )}
           {issue.assignees.length > 0 && (
@@ -114,8 +115,12 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
           {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
           {issue.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">
-              {issue.labels.map((i) => (
-                <Detail.Metadata.TagList.Item text={i.name} color={i.color} />
+              {issue.labels?.map((i) => (
+                <Detail.Metadata.TagList.Item
+                  key={i.id || (i as any)}
+                  text={i.name || (i as any) || "?"}
+                  color={i.color}
+                />
               ))}
             </Detail.Metadata.TagList>
           )}
@@ -194,11 +199,23 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
       id={issue.id.toString()}
       title={issue.title}
       subtitle={"#" + issue.iid}
-      icon={{ source: GitLabIcons.issue, tintColor: tintColor }}
+      icon={{
+        value: {
+          source: GitLabIcons.issue,
+          tintColor: tintColor,
+        },
+        tooltip: `Status: ${capitalizeFirstLetter(issue.state)}`,
+      }}
       accessories={[
-        { text: issue.milestone ? issue.milestone.title : undefined },
-        { text: toDateString(issue.updated_at) },
-        { icon: { source: issue.author?.avatar_url || "", mask: Image.Mask.Circle } },
+        {
+          tag: issue.milestone ? issue.milestone.title : "",
+          tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,
+        },
+        { date: new Date(issue.updated_at), tooltip: `Updated: ${toLongDateString(issue.updated_at)}` },
+        {
+          icon: { source: issue.author?.avatar_url || "", mask: Image.Mask.Circle },
+          tooltip: issue.author ? `Author: ${issue.author?.name}` : undefined,
+        },
       ]}
       actions={
         <ActionPanel>
@@ -213,6 +230,7 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
           <ActionPanel.Section>
             <IssueItemActions issue={issue} onDataChange={props.refreshData} />
           </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -235,7 +253,7 @@ function navTitle(project?: Project, group?: Group): string | undefined {
     return `Group Issues ${group.full_path}`;
   }
   if (project) {
-    return `Issues ${project.fullPath}`;
+    return `${project.name_with_namespace}`;
   }
   return undefined;
 }
@@ -258,7 +276,7 @@ export function IssueList({
 
   return (
     <List
-      searchBarPlaceholder="Search issues by name..."
+      searchBarPlaceholder="Search Issues by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
@@ -270,15 +288,28 @@ export function IssueList({
           <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
+      <IssueListEmptyView />
     </List>
   );
 }
 
-function getIssueQuery(query: string | undefined) {
-  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee"]);
+export function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee", "state"]);
 }
 
-function injectQueryNamedParameters(
+function isValidIssueState(texts: string[] | undefined) {
+  if (!texts) {
+    return false;
+  }
+  for (const v of texts) {
+    if (![IssueState.closed.valueOf(), IssueState.opened.valueOf(), IssueState.all.valueOf()].includes(v)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function injectQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: IssueScope,
@@ -316,6 +347,12 @@ function injectQueryNamedParameters(
             }
           }
           break;
+        case "state": {
+          console.log(extraParamVal);
+          if (isValidIssueState(extraParamVal)) {
+            requestParams[prefixed("state")] = extraParamVal.join(",");
+          }
+        }
       }
     }
   }

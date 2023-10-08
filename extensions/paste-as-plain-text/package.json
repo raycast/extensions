@@ -5,11 +5,49 @@
   "description": "Paste text from the clipboard as plain text.",
   "icon": "paste-icon.png",
   "author": "koinzhang",
+  "contributors": ["pantajoe"],
   "categories": [
     "Productivity",
     "System"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "title": "Format",
+      "label": "Clean line breaks",
+      "name": "cleanLineBreaks",
+      "type": "checkbox",
+      "description": "Replace all line breaks with spaces",
+      "default": false,
+      "required": false
+    },
+    {
+      "title": "Trim",
+      "name": "trim",
+      "type": "dropdown",
+      "description": "Trim leading and trailing spaces",
+      "default": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Leading spaces",
+          "value": "leading"
+        },
+        {
+          "title": "Trailing spaces",
+          "value": "trailing"
+        },
+        {
+          "title": "Both",
+          "value": "both"
+        }
+      ],
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "paste-as-plain-text",
@@ -19,7 +57,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1"
+    "@raycast/api": "^1.44.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

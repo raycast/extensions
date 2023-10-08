@@ -1,5 +1,48 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2023-09-22
+- Properly support VSCodium and Cursor in for commands relating to extensions
+
+## [Update] - 2023-08-25
+
+- Adds support for Cursor as an option in the extension settings.
+
+## [Fix] - 2023-08-09
+
+- Fixed a bug that caused the extension to crash if wrong build was selected
+
+## [Fixes] - 2023-08-02
+
+- Fix some issues with invalid URLs that cause crashes.
+
+## [Update] - 2023-07-12
+
+- Make it possible to open remote workspaces.
+
+## [Update] - 2023-06-29
+
+- Make it possible to open the currently opened Finder folder on vscode
+
+## [Update] - 2023-06-07
+
+- Add `Show Installed Extensions` command
+- Add `Install Extension` command
+- Add `Commands` command
+
+## [Update] - 2023-01-31
+
+- Updated pinned projects logic
+- Cleaned up file structure
+- Restructure components
+
+## [Update] - 2023-01-03
+
+- Adds support for VSCodium as an option in the extension settings.
+
+## [Updates] - 2022-10-13
+
+- Added preference to keep section order. Disabled by default to keep current behavior.
+
 ## [Fixes] - 2022-07-03
 
 - Fixed an issue where some characters will display as percentage encoded format.

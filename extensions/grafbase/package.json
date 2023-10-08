@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grafbase",
+  "title": "Grafbase",
+  "description": "Explore your Grafbase projects, branches, deployments, and commit history.",
+  "icon": "logo.png",
+  "license": "MIT",
+  "author": "mlafeldt",
+  "owner": "grafbase",
+  "access": "public",
+  "contributors": [
+    "notrab"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Explore your Grafbase projects, branches, deployments, and commit history.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Your Grafbase access token that can be found in your account settings.",
+      "placeholder": "Enter your access token",
+      "link": "https://grafbase.com/dashboard/settings/tokens"
+    },
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.grafbase.com/graphql",
+      "title": "API URL",
+      "description": "The URL of the Grafbase API",
+      "placeholder": "Enter a custom URL"
+    },
+    {
+      "name": "webUrl",
+      "type": "textfield",
+      "required": false,
+      "default": "https://grafbase.com",
+      "title": "Website URL",
+      "description": "The URL of the Grafbase website",
+      "placeholder": "Enter a custom URL"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1",
+    "@raycast/utils": "^1.4.16",
+    "date-fns": "^2.29.3",
+    "graphql": "^16.6.0",
+    "swr": "^2.0.3"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^2.16.1",
+    "@graphql-codegen/client-preset": "^2.0.0",
+    "@graphql-codegen/typescript": "^2.8.5",
+    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
+    "@types/node": "18.11.18",
+    "@types/react": "18.0.27",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "node-fetch": "2",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "codegen": "graphql-codegen -r dotenv/config"
+  }
+}

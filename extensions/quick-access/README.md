@@ -1,18 +1,11 @@
 # Quick Access
 
-Pin directories you frequently visit, such as Downloads, Screenshot, Desktop and SaveFile directories.
-Quickly access (copy, open, display) the latest files added to pinned directories.
+Quick copy, open, show the files pinned in Finder.
 
-This extension is equivalent to moving a folder to the Dock bar. Previously you had to use the mouse to access the folder in the Dock bar, now you can use Raycast to quickly access the pinned folder.
+Pin files or folders you frequently visit, such as Downloads, Screenshot, Desktop and SaveFile folders.
 
-For example, if you pin Downloads directory.
-You can use "Search Pinned Directories" command to quickly copy or open the image you downloaded from browser.
+For example, if you pin Downloads folder.
+You can use "Search Pins" command to quickly open/copy/show/paste the image you downloaded from browser.
+Alternatively, you can use the Menu bar command to quickly open/copy/show/paste pinned files or folders in the menu bar.
 
-**Preference**
-
-- Search Pinned Directories:
-  - Auto Copy Latest File: Automatically copy the latest files in the topmost directory. There will be some delay when copying files.
-  - Remember Filter Tag: Remember Filter Tag.
-  - Primary action: Set the primary action in Search Pinned Directories command.
-  - Number of files shown: Number of files displayed per directory.
-  - Directory Sort by: Directory sorting method (default: Rank).
+https://user-images.githubusercontent.com/36128970/195929601-265c21b8-dc8e-4836-aea8-92ebdb27358d.mp4
