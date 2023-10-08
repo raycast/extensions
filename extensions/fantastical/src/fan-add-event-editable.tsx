@@ -1,7 +1,7 @@
 import { Action, ActionPanel, showToast, Toast, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { getName } from "./getName";
-import defaultBrowserId from 'default-browser-id';
+import defaultBrowserId from "default-browser-id";
 
 interface Arguments {
   add: string;
@@ -22,12 +22,11 @@ export default async (props: { arguments: Arguments }) => {
       style: Toast.Style.Failure,
       message: "Please first install Fantastical to use this extension.",
       primaryAction: {
-            title: "Install Fantastical",
-            onAction: () => {
-              open("https://fantastical.app/", defaultBrowser);
-            },
-          },
-
+        title: "Install Fantastical",
+        onAction: () => {
+          open("https://fantastical.app/", defaultBrowser);
+        },
+      },
     });
   }
 };
