@@ -70,7 +70,6 @@ export function getStartDirectory(): string {
   return resolve(startDirectory);
 }
 
-
 export function createItem(fileData: FileDataType, refresh: () => void, preferences: Preferences) {
   const filePath = `${fileData.path}/${fileData.name}`;
   if (fileData.type === "directory") {
@@ -124,7 +123,6 @@ export function getDirectoryData(path: string): FileDataType[] {
   }
   return data;
 }
-
 
 export function RenameForm(props: { filePath: string; refresh: () => void; typeName: string }) {
   const [itemName, setItemName] = useState<string>(basename(props.filePath));

@@ -1,4 +1,3 @@
-
 export type FileType = "directory" | "file" | "symlink" | "other";
 
 export type FileDataType = {

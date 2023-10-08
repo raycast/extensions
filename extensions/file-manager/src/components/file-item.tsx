@@ -25,11 +25,11 @@ export function FileItem(props: {
       accessories={
         props.preferences.showFileSize
           ? [
-            {
-              icon: Icon.HardDrive,
-              text: getFileSize(props.fileData),
-            },
-          ]
+              {
+                icon: Icon.HardDrive,
+                text: getFileSize(props.fileData),
+              },
+            ]
           : []
       }
       actions={

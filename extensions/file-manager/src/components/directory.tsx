@@ -18,17 +18,23 @@ export function Directory(props: { path: string }) {
     return (
       <List searchBarPlaceholder={`Search in ${props.path}/`}>
         <List.Section title="Directories">
-          {directories.map((data) => createItem(data, () => setDirectoryData(getDirectoryData(props.path)), preferences))}
+          {directories.map((data) =>
+            createItem(data, () => setDirectoryData(getDirectoryData(props.path)), preferences),
+          )}
         </List.Section>
         <List.Section title="Files">
-          {nonDirectories.map((data) => createItem(data, () => setDirectoryData(getDirectoryData(props.path)), preferences))}
+          {nonDirectories.map((data) =>
+            createItem(data, () => setDirectoryData(getDirectoryData(props.path)), preferences),
+          )}
         </List.Section>
       </List>
     );
   } else {
     return (
       <List searchBarPlaceholder={`Search in ${props.path}/`}>
-        {directoryData.map((data) => createItem(data, () => setDirectoryData(getDirectoryData(props.path)), preferences))}
+        {directoryData.map((data) =>
+          createItem(data, () => setDirectoryData(getDirectoryData(props.path)), preferences),
+        )}
       </List>
     );
   }
