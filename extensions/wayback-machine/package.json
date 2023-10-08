@@ -41,10 +41,16 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "saveMultiple",
+      "title": "Save Multiple to Wayback Machine",
+      "description": "Save multiple webpages to Wayback Machine",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.1",
+    "@raycast/api": "^1.59.0",
     "cross-fetch": "^3.1.5"
   },
   "devDependencies": {
