@@ -7,14 +7,9 @@ type Values = {
 
 export default function Command() {
   function handleSubmit(values: Values) {
-    console.log(values);
-
-    // split urls by new line
     let urls = values.urls.split("\n");
-
     // remove empty lines
     urls = urls.filter((url) => url !== "");
-
     // validate each url by urlRegex and remove invalid urls
     urls = urls.filter((url) => urlRegex.test(url));
 
@@ -24,9 +19,7 @@ export default function Command() {
       return;
     }
 
-    urls.forEach(async (url) => {
-      await savePage(url);
-    });
+    urls.forEach(async (url) => await savePage(url));
 
     showToast({ title: `${urls.length} URLs saved` });
   }
