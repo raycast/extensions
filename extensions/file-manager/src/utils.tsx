@@ -71,9 +71,8 @@ export function getStartDirectory(): string {
 }
 
 
-export function createItem(fileData: FileDataType, refresh: () => void) {
+export function createItem(fileData: FileDataType, refresh: () => void, preferences: Preferences) {
   const filePath = `${fileData.path}/${fileData.name}`;
-  const preferences = getPreferenceValues<Preferences>();
   if (fileData.type === "directory") {
     return <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
   } else if (fileData.type === "file") {
