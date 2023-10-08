@@ -1,6 +1,8 @@
-import { Color } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 
 export function getIcon(progressNum: number) {
-  return getProgressIcon(progressNum / 100, Color.PrimaryText);
+  return {
+    source: getProgressIcon(progressNum / 100),
+    tintColor: { dark: "#E6E6E6", light: "#262626", adjustContrast: false },
+  };
 }
