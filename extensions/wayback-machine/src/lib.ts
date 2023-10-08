@@ -1,7 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
 import fetch from "cross-fetch";
 
-export const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
+export const urlRegex =
+  /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
 
 export async function savePage(webpageUrl: string) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Saving to Wayback Machine" });
