@@ -1,6 +1,8 @@
 import { showToast, Toast, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { getName } from "./getName";
+import defaultBrowserId from 'default-browser-id';
+
 interface Arguments {
   add: string;
 } //
@@ -12,6 +14,7 @@ interface Arguments {
 export default async (props: { arguments: Arguments }) => {
   const args = props.arguments;
   const name = await getName();
+  const defaultBrowser = await defaultBrowserId();
   console.log(name);
   if (name !== undefined) {
     await runAppleScript(`
@@ -32,7 +35,7 @@ export default async (props: { arguments: Arguments }) => {
       primaryAction: {
         title: "Install Fantastical",
         onAction: () => {
-          open("https://fantastical.app/");
+            open("https://fantastical.app/", defaultBrowser); 
         },
       },
     };
