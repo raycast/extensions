@@ -39,9 +39,9 @@ type PostalCodeRadius = {
   state: string;
   city_en: string;
   state_en: string;
-  distance: number
-}
-export type GetPostalCodesRadiusResponse = {
+  distance: number;
+};
+export type GetPostalCodesWithinRadiusResponse = {
   query: {
     code: string;
     unit: string;
@@ -55,7 +55,7 @@ type PostalCodeDistance = {
   code_1: string;
   code_2: string;
   distance: number;
-}
+};
 export type GetPostalCodesWithinDistanceResponse = {
   query: {
     codes: string[];
@@ -92,8 +92,16 @@ export type GetStatesByCountryResponse = {
 
 export type GetRemainingRequestsResponse = {
   remaining_requests: string;
-}
+};
 
-export type ErrorResponse = {
+type SingleErrorResponse = {
   error: string;
 };
+
+type MultiErrorItem = {
+  [key: string]: string;
+};
+type MultiErrorResponse = {
+  errors: MultiErrorItem[];
+};
+export type ErrorResponse = SingleErrorResponse | MultiErrorResponse;

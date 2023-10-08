@@ -1,53 +1,80 @@
-import { useFetch } from "@raycast/utils";
-import { API_KEY, BASE_URL } from "./utils/constants";
-import { Action, ActionPanel, Icon, LaunchProps, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, List, showToast } from "@raycast/api";
 import { ErrorResponse, GetPostalCodeLocationInformationResponse } from "./utils/types";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import ErrorComponent from "./components/ErrorComponent";
+import { getPostalCodeLocationInformation } from "./utils/api";
 
 export default function GetPostalCodeLocationInformation(
   props: LaunchProps<{ arguments: Arguments.GetPostalCodeLocationInformation }>
 ) {
-  const { push } = useNavigation();
   const { codes, country } = props.arguments;
 
-  const params = new URLSearchParams({ apikey: API_KEY, codes });
-  if (country) params.append("country", country);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<ErrorResponse | GetPostalCodeLocationInformationResponse>();
 
-  const { isLoading, data, revalidate } = useFetch<ErrorResponse | GetPostalCodeLocationInformationResponse>(
-    `${BASE_URL}search?` + params
-  );
+  async function getFromApi() {
+    setIsLoading(true);
+    const response = await getPostalCodeLocationInformation(codes, country);
+    if ("results" in response) {
+      let message = `Fetched ${Object.keys(response.results).length} codes`;
+      if (country) message += ` in ${country}`;
+      showToast({
+        title: "SUCCESS",
+        message: message,
+      });
+    }
+    setData(response);
+    setIsLoading(false);
+  }
 
-  return (data && ("error" in data)) ? push(<ErrorComponent error={data.error} />) : (
+  useEffect(() => {
+    getFromApi();
+  }, []);
+
+  return data && !("results" in data) ? (
+    <ErrorComponent errorResponse={data} />
+  ) : (
     <List isLoading={isLoading} isShowingDetail>
-      {data && !("error" in data) && Object.keys(data.results).length>0 ? <List.Section title={`country: ${country || "null"}`}>
-        {Object.entries(data.results).map(([code, result]) => (
+      {data && Object.keys(data.results).length > 0 ? (
+        <List.Section title={`country: ${country || "null"}`}>
+          {Object.entries(data.results).map(([code, result]) => (
             <List.Item
               key={code}
               title={code}
-              actions={<ActionPanel>
-                <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify(data)} />
-                <ActionPanel.Section>
-                  <Action title="Revalidate" icon={Icon.Redo} onAction={revalidate} />
-                </ActionPanel.Section>
-              </ActionPanel>}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify(data)} />
+                  <ActionPanel.Section>
+                    <Action title="Revalidate" icon={Icon.Redo} onAction={getFromApi} />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
               detail={
                 <List.Item.Detail
                   metadata={
                     <List.Item.Detail.Metadata>
-                      {result.map(item => Object.entries(item).map(([key, val]) => (
-                                <Fragment key={key}>
-                                  <List.Item.Detail.Metadata.Label title={key} text={val ? val : undefined} icon={val ? undefined : Icon.Minus} />
-                                  {key==="province_code" && <List.Item.Detail.Metadata.Separator />}
-                                </Fragment>
-                      )))}
+                      {result.map((item) =>
+                        Object.entries(item).map(([key, val]) => (
+                          <Fragment key={key}>
+                            <List.Item.Detail.Metadata.Label
+                              title={key}
+                              text={val ? val : undefined}
+                              icon={val ? undefined : Icon.Minus}
+                            />
+                            {key === "province_code" && <List.Item.Detail.Metadata.Separator />}
+                          </Fragment>
+                        ))
+                      )}
                     </List.Item.Detail.Metadata>
                   }
                 />
               }
             />
           ))}
-      </List.Section> : <List.EmptyView title="No Results" description={`codes: ${codes} | country: ${country || "null"}`} />}
+        </List.Section>
+      ) : (
+        <List.EmptyView title="No Results" description={`codes: ${codes} | country: ${country || "null"}`} />
+      )}
     </List>
   );
 }

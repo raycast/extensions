@@ -38,7 +38,7 @@
   "commands": [
     {
       "name": "get-postal-code-location-information",
-      "title": "Get Postal Code Location information",
+      "title": "Get Postal Code Location Information",
       "subtitle": "Zipcodebase | Cost: 1 API request per postal code",
       "description": "Receive information for one or multiple given postal codes",
       "mode": "view",
@@ -114,7 +114,7 @@
     {
       "name": "get-postal-codes-within-distance",
       "title": "Get Postal Codes Within Distance",
-      "subtitle": "Zipcodebase",
+      "subtitle": "Zipcodebase | Cost: 1 API request per postal code",
       "description": "List of postal code pairs that are within a given distance to each other",
       "mode": "view",
       "arguments": [
@@ -141,7 +141,7 @@
     {
       "name": "get-postal-codes-by-city",
       "title": "Get Postal Codes By City",
-      "subtitle": "Zipcodebase",
+      "subtitle": "Zipcodebase | Cost: 1 API request per 10 postal codes",
       "description": "List of postal codes based on a city",
       "mode": "view",
       "arguments": [
@@ -168,7 +168,7 @@
     {
       "name": "get-postal-codes-by-state",
       "title": "Get Postal Codes By State",
-      "subtitle": "Zipcodebase",
+      "subtitle": "Zipcodebase | Cost: 1 API request per 10 postal codes",
       "description": "List of postal codes based on a state",
       "mode": "view",
       "arguments": [
@@ -195,7 +195,7 @@
     {
       "name": "get-states-by-country",
       "title": "Get States By Country",
-      "subtitle": "Zipcodebase",
+      "subtitle": "Zipcodebase | Cost: 0",
       "description": "List of provinces / states of a given country",
       "mode": "view",
       "arguments": [
@@ -210,13 +210,13 @@
     {
       "name": "get-remaining-requests",
       "title": "Get Remaining Requests",
-      "subtitle": "Zipcodebase",
-      "description": "List Remaining Requests",
+      "subtitle": "Zipcodebase | Cost: 0",
+      "description": "Get Remaining Requests",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.58.1",
+    "@raycast/api": "^1.59.0",
     "@raycast/utils": "^1.10.0",
     "node-fetch": "^3.3.2"
   },

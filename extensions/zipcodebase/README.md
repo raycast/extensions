@@ -19,14 +19,20 @@ This is a Raycast extension for [Zipcodebase](https://zipcodebase.com/). With th
 ## ⚙️ Preferences
 - You can set the _DEFAULT_UNIT_ as either "km" or "miles".
 
+## 🗒️ NOTES (as of *Initial Version*)
+
+- Currently, if your API Key is _invalid_, you will receive a `403 Error`. If you still have requests in your dashboard, make sure the entered API Key is valid.
+
+
 ## 🔧 Commands
 
 This extension provides the following commands:
 
-- Get Postal Code Location information
+- Get Postal Code Location Information
 - Get Postal Code Distance
 - Get Postal Codes Within Radius
 - Get Postal Codes Within Distance
 - Get Postal Codes By City
 - Get Postal Codes By State
 - Get States By Country
+- Get Remaining Requests
