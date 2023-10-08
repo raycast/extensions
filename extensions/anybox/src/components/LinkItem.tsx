@@ -153,6 +153,7 @@ export default function LinkItem(props: Props) {
                     ))}
                   </Detail.Metadata.TagList>
                 )}
+                {item.folder && <Detail.Metadata.Label title="Folder" text={item.folder?.name} />}
                 {item.comment && <Detail.Metadata.Label title="Comment" text={item.comment} />}
               </Detail.Metadata>
             }

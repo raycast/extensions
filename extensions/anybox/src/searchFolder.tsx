@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import searchRequest, { SearchQuery, Link } from "./utilities/searchRequest";
 import { Preferences } from "./utilities/searchRequest";
 import LinkItem from "./components/LinkItem";
-import { TagProp, fetchSearchEngines } from "./utilities/fetch";
+import { FolderProp, fetchSearchEngines } from "./utilities/fetch";
 
 interface State {
   links: Link[];
@@ -12,16 +12,16 @@ interface State {
 }
 
 interface Props {
-  tag: TagProp;
+  folder: FolderProp;
 }
 
-export default function SearchTag(props: Props) {
+export default function SearchFolder(props: Props) {
   const [state, setState] = useState<State>({
     links: [],
     isLoading: true,
     isSearchEngines: false,
   });
-  const tag = props.tag;
+  const folder = props.folder;
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function SearchTag(props: Props) {
       const query: SearchQuery = {
         q: searchText.trim(),
         limit: 50,
-        tag: tag.id,
+        folder: folder.id,
       };
       let isSearchEngines = false;
       let linksResult = await searchRequest(query);
@@ -66,8 +66,8 @@ export default function SearchTag(props: Props) {
       enableFiltering={false}
       throttle={true}
       onSearchTextChange={setSearchText}
-      navigationTitle={`Search in Tag “${tag.name}”`}
-      searchBarPlaceholder={`Search in tag “${tag.name}”`}
+      navigationTitle={`Search in Folder “${folder.name}”`}
+      searchBarPlaceholder={`Search in folder “${folder.name}”`}
     >
       {state.links.map((item) => {
         return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;
