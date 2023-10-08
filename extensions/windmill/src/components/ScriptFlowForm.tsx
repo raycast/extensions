@@ -1,12 +1,13 @@
-import { ActionPanel, Action, Form, useNavigation, Detail, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, Form, useNavigation, Detail, showToast, Toast, Icon, Keyboard } from "@raycast/api";
 import { FormItemsComponent } from "./FormItemsComponent";
-import { FormResult } from "./FormResult";
+import { FormResult } from "./FormResult/FormResult";
 import { useFetchWmill } from "../hooks/useFetchWmill";
-import { StarAction } from "./StarAction";
+import { StarAction } from "../actions/StarAction";
 import { WorkspaceConfig, Resource, Kind, WindmillItem } from "../types";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { Properties } from "../types";
+import fs from "fs";
 
 export function ScriptFlowForm({
   path,
@@ -68,9 +69,6 @@ export function ScriptFlowForm({
     }
   }, [properties]);
 
-  // console.log("data", data, error)
-  console.log("properties", properties);
-
   if (isLoading) {
     return <Detail isLoading={true} />;
   }
@@ -99,7 +97,6 @@ export function ScriptFlowForm({
             setSubmitting={setSubmitting}
             starred={starred}
             properties={properties}
-            resources={resources}
             workspace={workspace}
           />
         }
@@ -119,7 +116,6 @@ export function ScriptFlowForm({
           setSubmitting={setSubmitting}
           starred={starred}
           properties={properties}
-          resources={resources}
           workspace={workspace}
         />
       }
@@ -143,7 +139,6 @@ function ScriptActionPanel({
   setSubmitting,
   starred,
   properties,
-  resources,
   workspace,
 }: {
   kind: Kind;
@@ -151,14 +146,13 @@ function ScriptActionPanel({
   setSubmitError: React.Dispatch<React.SetStateAction<string | null>>;
   setSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
   starred: boolean;
-  properties: any;
-  resources: Resource[];
+  properties?: Properties;
   workspace: WorkspaceConfig;
 }) {
   const { push } = useNavigation();
-  const openURL = `${workspace.remoteURL}${kind}s/get/${path}`;
-  const editURL = `${workspace.remoteURL}${kind}s/edit/${path}`;
-  const pastRunsURL = `${workspace.remoteURL}runs/${path}`;
+  const openURL = `${workspace.remoteURL}${kind}s/get/${path}?workspace=${workspace.workspaceId}`;
+  const editURL = `${workspace.remoteURL}${kind}s/edit/${path}?workspace=${workspace.workspaceId}`;
+  const pastRunsURL = `${workspace.remoteURL}runs/${path}?workspace=${workspace.workspaceId}`;
 
   return (
     <ActionPanel>
@@ -166,9 +160,8 @@ function ScriptActionPanel({
         title={kind === "script" ? "Submit Script" : "Submit Flow"}
         icon={Icon.ArrowRightCircle}
         onSubmit={async (values) => {
-          console.log("Submitting", path, values);
           setSubmitting(true);
-          SubmitForm(values, path, kind, properties, resources, workspace)
+          SubmitForm(values, path, kind, workspace, properties)
             .then((jobId) => {
               push(<FormResult path={path} jobId={jobId} workspace={workspace} />);
             })
@@ -185,42 +178,59 @@ function ScriptActionPanel({
         }}
       />
 
-      <Action.OpenInBrowser title={kind === "script" ? "Open Script" : "Open Flow"} url={openURL} />
-      <Action.OpenInBrowser title={kind === "script" ? "Edit Script" : "Edit Flow"} url={editURL} />
+      <Action.OpenInBrowser
+        shortcut={Keyboard.Shortcut.Common.Open}
+        title={kind === "script" ? "Open Script" : "Open Flow"}
+        url={openURL}
+      />
+      <Action.OpenInBrowser
+        shortcut={Keyboard.Shortcut.Common.Edit}
+        title={kind === "script" ? "Edit Script" : "Edit Flow"}
+        url={editURL}
+      />
       <StarAction path={path} kind={kind} starred={starred} workspace={workspace} />
       <Action.OpenInBrowser title="Open Past Runs" url={pastRunsURL} />
     </ActionPanel>
   );
 }
 
+interface FormData {
+  [key: string]: unknown;
+}
+
 async function SubmitForm(
-  values: any,
+  values: FormData,
   path: string,
   kind: Kind,
-  properties: any,
-  resources: Resource[],
-  workspace: WorkspaceConfig
+  workspace: WorkspaceConfig,
+  properties?: Properties
 ) {
   const url = `${workspace.remoteURL}api/w/${workspace.workspaceId}/jobs/run/${kind === "flow" ? "f" : "p"}/${path}`;
   for (const key in values) {
-    const property = properties[key];
+    const property = properties ? properties[key] : undefined;
     if (!property) continue;
     switch (property?.type) {
       case "object":
         if (property.format?.startsWith("resource-")) {
-          const resourceValue = await getResourceValue(values[key], workspace);
+          const resourceValue = await getResourceValue(values[key] as string, workspace);
           values[key] = resourceValue;
         } else {
-          values[key] = JSON.parse(values[key]);
+          values[key] = JSON.parse(values[key] as string);
         }
         break;
       case "array":
-        values[key] = JSON.parse(values[key]);
+        values[key] = JSON.parse(values[key] as string);
         break;
       case "string":
         if (property.contentEncoding == "base64") {
-          // TODO: read file and encode as base64
-          console.log(key, values[key]);
+          const file =
+            Array.isArray(values[key]) && (values[key] as string).length > 0 ? (values[key] as string)[0] : undefined;
+
+          if (file && fs.existsSync(file) && fs.lstatSync(file).isFile()) {
+            const fileContents = fs.readFileSync(file);
+            const base64File = fileContents.toString("base64");
+            values[key] = base64File;
+          }
         }
         break;
     }
@@ -229,7 +239,11 @@ async function SubmitForm(
   return jobId;
 }
 
-async function getResourceValue(path: string, workspace: WorkspaceConfig) {
+interface JsonReturnType {
+  [key: string]: unknown;
+}
+
+async function getResourceValue(path: string, workspace: WorkspaceConfig): Promise<JsonReturnType> {
   const url = `${workspace.remoteURL}api/w/${workspace.workspaceId}/resources/get_value/${path}`;
   const response = await fetch(url, {
     headers: {
@@ -237,14 +251,11 @@ async function getResourceValue(path: string, workspace: WorkspaceConfig) {
       "Content-Type": "application/json",
     },
   });
-  const value = await response.json();
-  console.log("resourceValue", path, value);
+  const value = (await response.json()) as JsonReturnType;
   return value;
 }
 
-// @TODO: I think this Properties is wrong here
-async function submitData(url: string, token: string, values: Properties) {
-  console.log("submitting", url, values);
+async function submitData(url: string, token: string, values: FormData) {
   const response = await fetch(url, {
     method: "POST",
     headers: {

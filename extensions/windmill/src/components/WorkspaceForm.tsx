@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, Icon, Keyboard } from "@raycast/api";
 import { saveWorkspace, removeWorkspace, fetchWorkspaces } from "../hooks/useFetchWorkspaces";
 import { WorkspaceConfig } from "../types";
 import { confirmAlert } from "@raycast/api";
@@ -21,7 +21,6 @@ async function validateWorkspace(workspace: WorkspaceConfig): Promise<true | [ke
       return ["remoteURL", "Invalid URL"];
     } else {
       const textResponse = await response.text();
-      console.log("textResponse", textResponse);
       if (textResponse === "true") {
         return true;
       } else {
@@ -55,6 +54,7 @@ export function WorkspaceForm({
   let workspaceName = currentWorkspace?.workspaceName;
   const workspaceToken = currentWorkspace?.workspaceToken;
   const remoteURL = currentWorkspace?.remoteURL || "https://app.windmill.dev/";
+  const disabled = currentWorkspace?.disabled || false;
 
   if (name) {
     const urlFriendlyName = name ? name.toLowerCase().replace(/\s+/g, "-") : "";
@@ -102,6 +102,7 @@ export function WorkspaceForm({
       workspaceId: workspaceId,
       workspaceName: workspaceName,
       workspaceToken: workspaceToken,
+      disabled: disabled,
     },
     validation: {
       remoteURL: (value) => {
@@ -146,7 +147,14 @@ export function WorkspaceForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Workspace" icon={Icon.Pencil} onSubmit={handleSubmit} />
-          {currentWorkspace?.id && <Action title="Delete Workspace" icon={Icon.Trash} onAction={handleDelete} />}
+          {currentWorkspace?.id && (
+            <Action
+              title="Delete Workspace"
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              icon={Icon.Trash}
+              onAction={handleDelete}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -154,6 +162,7 @@ export function WorkspaceForm({
       <Form.TextField title="Workspace Id" {...itemProps.workspaceId} />
       <Form.TextField title="Workspace Remote URL" {...itemProps.remoteURL} />
       <Form.PasswordField title="Workspace Token" {...itemProps.workspaceToken} />
+      <Form.Checkbox label="Disabled" {...itemProps.disabled} />
     </Form>
   );
 }

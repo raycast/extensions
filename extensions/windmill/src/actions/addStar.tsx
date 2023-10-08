@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { WorkspaceConfig } from "./types";
+import { WorkspaceConfig } from "../types";
 
 export async function addStar(path: string, kind: string, workspace: WorkspaceConfig) {
   const response = await fetch(`${workspace.remoteURL}api/w/${workspace.workspaceId}/favorites/star`, {

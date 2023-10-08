@@ -1,5 +1,5 @@
-import { Action, Icon } from "@raycast/api";
-import { addStar, removeStar } from "../addStar";
+import { Action, Icon, Keyboard } from "@raycast/api";
+import { addStar, removeStar } from "./addStar";
 import { WorkspaceConfig } from "../types";
 
 export function StarAction({
@@ -17,6 +17,7 @@ export function StarAction({
 }) {
   return (
     <Action
+      shortcut={Keyboard.Shortcut.Common.Pin}
       title={starred ? "Remove Star" : "Add Star"}
       icon={starred ? Icon.StarDisabled : Icon.Star}
       onAction={async () => {

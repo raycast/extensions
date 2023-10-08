@@ -4,14 +4,14 @@ import { WorkspaceConfig } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import { clearCache } from "../cache";
 
-export function useFetchWorkspaces() {
+export function useFetchWorkspaces(includeDisabled = false) {
   const [workspaces, setWorkspaces] = useState<WorkspaceConfig[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const _fetchWorkspaces = async () => {
     try {
       setIsLoading(true);
-      setWorkspaces(await fetchWorkspaces());
+      setWorkspaces(await fetchWorkspaces(includeDisabled));
     } catch (error) {
       console.error(error);
     } finally {
@@ -42,13 +42,19 @@ export function useFetchWorkspaces() {
   };
 }
 
-export async function fetchWorkspaces(): Promise<WorkspaceConfig[]> {
+export async function fetchWorkspaces(includeDisabled = false): Promise<WorkspaceConfig[]> {
   const storedWorkspaces = await LocalStorage.getItem("workspaces");
+  let workspaces: WorkspaceConfig[] = [];
+
   if (typeof storedWorkspaces === "string") {
-    return JSON.parse(storedWorkspaces);
-  } else {
-    return [];
+    workspaces = JSON.parse(storedWorkspaces);
   }
+
+  if (!includeDisabled) {
+    workspaces = workspaces.filter((workspace) => !workspace.disabled);
+  }
+
+  return workspaces;
 }
 
 export async function removeWorkspace(id: string) {

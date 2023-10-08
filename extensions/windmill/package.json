@@ -34,6 +34,43 @@
       "mode": "view"
     },
     {
+      "name": "viewVariables",
+      "title": "View Variables",
+      "description": "List Windmill Variables for the added workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "viewResources",
+      "title": "View Resources",
+      "description": "List Windmill Resources for the added workspaces",
+      "mode": "view"
+    },
+
+    {
+      "name": "viewSchedules",
+      "title": "View Schedules",
+      "description": "List Windmill Schedules for the added workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "viewFolders",
+      "title": "View Folders",
+      "description": "List Windmill Folders for the added workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "viewGroups",
+      "title": "View Groups",
+      "description": "List Windmill Groups for the added workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "viewUsers",
+      "title": "View Users",
+      "description": "List Windmill Users for the added workspaces",
+      "mode": "view"
+    },
+    {
       "name": "manageWorkspaces",
       "title": "Manage Workspaces",
       "description": "Manage your windmill workspaces",

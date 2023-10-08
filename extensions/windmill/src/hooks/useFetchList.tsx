@@ -1,81 +1,118 @@
 import { LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import fetch from "node-fetch";
 import {
   ExtendedWindmillWorkspacePair,
-  WindmillItem,
-  WindmillListItem,
   WindmillListItemExtended,
   WindmillWorkspacePairArray,
   WorkspaceConfig,
+  WindmillListItem,
+  ScriptListItem,
+  VariableListItem,
+  UserListItem,
+  ScriptListItemExtended,
+  FlowListItemExtended,
+  AppListItemExtended,
+  RawAppListItemExtended,
+  VariableListItemExtended,
+  ResourceListItemExtended,
+  UserListItemExtended,
+  FolderListItemExtended,
+  GroupListItemExtended,
+  ScheduleListItemExtended,
 } from "../types";
 import { getCache, setCache } from "../cache";
 import { Kind } from "../types";
 
-export function useFetchList(kind: Kind, workspaces: WorkspaceConfig[]) {
-  const [items, setItems] = useState([]);
+type KindOutputMap = {
+  script: ScriptListItemExtended;
+  flow: FlowListItemExtended;
+  app: AppListItemExtended;
+  raw_app: RawAppListItemExtended;
+  variable: VariableListItemExtended;
+  resource: ResourceListItemExtended;
+  user: UserListItemExtended;
+  folder: FolderListItemExtended;
+  group: GroupListItemExtended;
+  schedule: ScheduleListItemExtended;
+};
+
+export function useFetchList<K extends keyof KindOutputMap>(kind: K, workspaces: WorkspaceConfig[]) {
+  const [items, setItems] = useState<[KindOutputMap[K], WorkspaceConfig][]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshItems = async () => {
-    try {
-      setIsLoading(true);
-      const items = await getItems(kind, workspaces, true);
-      setItems(items);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const refreshItems = useCallback(
+    async (force_workspaces: WorkspaceConfig[] = []) => {
+      try {
+        setIsLoading(true);
+        for await (const items of getItems(kind, workspaces, force_workspaces)) {
+          setItems(items);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [workspaces]
+  );
 
   useEffect(() => {
-    refreshItems();
+    refreshItems([]);
   }, [workspaces]);
 
   return { items, setItems, refreshItems, isLoading };
 }
 
-async function getItems(kind: Kind, workspaces: WorkspaceConfig[], force = false) {
-  let items = [];
-  const cacheKey = `${kind}:` + workspaces.map((workspace: WorkspaceConfig) => `${workspace.workspaceId}`).join(":");
+async function* getItems<K extends keyof KindOutputMap>(
+  kind: K,
+  workspaces: WorkspaceConfig[],
+  force_workspaces: WorkspaceConfig[] = []
+): AsyncIterable<[KindOutputMap[K], WorkspaceConfig][]> {
+  let items: [KindOutputMap[K], WorkspaceConfig][] = [];
+  const cacheKey = `${kind}s`;
 
-  if (!force) {
-    items = getCache(cacheKey);
-    if (items) {
-      return items;
-    }
+  items = getCache(cacheKey);
+  if (items) {
+    items = items.filter(([_, workspace]) => workspaces.includes(workspace));
+    yield items;
+  } else {
+    items = [];
   }
 
-  const fetches = workspaces.map((workspace: WorkspaceConfig) =>
-    fetch(`${workspace.remoteURL}api/w/${workspace.workspaceId}/${kind}s/list`, {
+  let baseItems = [...items] as WindmillWorkspacePairArray[];
+  for (const workspace of workspaces) {
+    // if we already have an item for this workspace and we're not forcing a refresh for that workspace, skip the workspace
+    if (items.some((item) => item[1].id === workspace.id)) {
+      if (force_workspaces.includes(workspace)) {
+        baseItems = baseItems.filter((item) => item[1].id !== workspace.id);
+      } else {
+        continue;
+      }
+    }
+    const response = await fetch(`${workspace.remoteURL}api/w/${workspace.workspaceId}/${kind}s/list`, {
       headers: {
         Authorization: `Bearer ${workspace.workspaceToken}`,
         "Content-Type": "application/json",
       },
-    })
-      .then((r) => r.json())
-      .then((data) => ({ data, workspace }))
-  );
+    });
+    const data = (await response.json()) as WindmillListItem[];
+    baseItems = [...baseItems, ...(data?.map((item) => [item, workspace] as WindmillWorkspacePairArray) ?? [])];
 
-  const fetchResults = await Promise.all(fetches);
+    const extendedItems = await convertToExtended(baseItems, kind);
 
-  items = fetchResults.flatMap(
-    (fetch) => (fetch.data as WindmillItem[])?.map((item) => [item, fetch.workspace]) ?? []
-  ) as WindmillWorkspacePairArray[];
+    extendedItems.sort((a, b) => {
+      if ("starred" in a[0] && a[0].starred && !("starred" in b[0] && b[0].starred)) return -1;
+      if (!("starred" in a[0] && a[0].starred) && "starred" in b[0] && b[0].starred) return 1;
 
-  const extendedItems = await convertToExtended(items, kind);
+      const aDate = a[0].newest_date ? new Date(a[0].newest_date) : new Date();
+      const bDate = b[0].newest_date ? new Date(b[0].newest_date) : new Date();
+      return bDate.getTime() - aDate.getTime();
+    });
 
-  extendedItems.sort((a, b) => {
-    if (a[0].starred && !b[0].starred) return -1;
-    if (!a[0].starred && b[0].starred) return 1;
-    const aDate = a[0].newest_date ? new Date(a[0].newest_date) : new Date();
-    const bDate = b[0].newest_date ? new Date(b[0].newest_date) : new Date();
-    return bDate.getTime() - aDate.getTime();
-  });
-
-  setCache(cacheKey, extendedItems);
-
-  return extendedItems;
+    yield extendedItems as [KindOutputMap[K], WorkspaceConfig][];
+    setCache(cacheKey, extendedItems);
+  }
 }
 
 async function convertToExtended(
@@ -91,9 +128,19 @@ async function convertToExtended(
 }
 
 async function formatItem(item: WindmillListItem, kind: Kind): Promise<WindmillListItemExtended> {
-  const storage_last_exec_time = (await LocalStorage.getItem(`${kind}:${item.path}:last_exec_time`)) as
-    | string
-    | undefined;
+  let key = "";
+
+  if (kind === "script" || kind === "flow" || kind === "app" || kind === "raw_app") {
+    key = `${kind}:${(item as ScriptListItem).path}`;
+  }
+  if (kind === "variable" || kind === "resource") {
+    key = `${kind}:${(item as VariableListItem).path}`;
+  }
+  if (kind === "user") {
+    key = `${kind}:${(item as UserListItem).username}`;
+  }
+
+  const storage_last_exec_time = (await LocalStorage.getItem(`${key}:last_exec_time`)) as string | undefined;
   let edited_at: Date | undefined;
   let edited_at_locale;
   let newest_date;
@@ -116,6 +163,5 @@ async function formatItem(item: WindmillListItem, kind: Kind): Promise<WindmillL
     newest_date = edited_at as Date;
   }
 
-  const newItem: WindmillListItemExtended = { ...item, kind, edited_at, edited_at_locale, newest_date, last_exec_time };
-  return newItem;
+  return { ...item, kind, edited_at, edited_at_locale, newest_date, last_exec_time } as WindmillListItemExtended;
 }
