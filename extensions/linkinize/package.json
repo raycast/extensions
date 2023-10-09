@@ -11,7 +11,7 @@
   "preferences": [
     {
       "name": "email",
-      "title": "email",
+      "title": "Email",
       "description": "Linkinize Account Email Address",
       "required": true,
       "type": "textfield",
@@ -19,7 +19,7 @@
     },
     {
       "name": "password",
-      "title": "password",
+      "title": "Password",
       "description": "Linkinize Account Password",
       "required": true,
       "type": "password",
