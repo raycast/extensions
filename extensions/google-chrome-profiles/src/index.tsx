@@ -53,7 +53,7 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
             title="Open in Google Chrome"
             icon={Icon.Globe}
             onAction={async () => {
-              await openGoogleChrome(profile.directory, "about:blank", () => showHUD("Opening profile..."));
+              await openGoogleChrome(profile.directory, "", () => showHUD("Opening profile..."));
             }}
           />
           <Action.CreateQuicklink
@@ -70,8 +70,7 @@ export default function Command(props: LaunchProps) {
   const immediatelyOpenProfile = props.launchContext?.index;
   if (immediatelyOpenProfile) {
     const profile = props.launchContext?.directory;
-    const link = "about:blank";
-    openGoogleChrome(profile, link, () => showHUD("Opening profile..."));
+    openGoogleChrome(profile, "", () => showHUD("Opening profile..."));
     popToRoot();
     return;
   }
@@ -115,23 +114,23 @@ export default function Command(props: LaunchProps) {
 
 const extractProfileFromInfoCache =
   (infoCache: GoogleChromeInfoCache) =>
-  (infoCacheKey: string): Profile => {
-    const profile = infoCache[infoCacheKey];
+    (infoCacheKey: string): Profile => {
+      const profile = infoCache[infoCacheKey];
 
-    return {
-      directory: infoCacheKey,
-      name: profile.name,
-      ...(profile.gaia_name &&
-        profile.user_name &&
-        profile.last_downloaded_gaia_picture_url_with_size && {
+      return {
+        directory: infoCacheKey,
+        name: profile.name,
+        ...(profile.gaia_name &&
+          profile.user_name &&
+          profile.last_downloaded_gaia_picture_url_with_size && {
           ga: {
             name: profile.gaia_name,
             email: profile.user_name,
             pictureURL: profile.last_downloaded_gaia_picture_url_with_size,
           },
         }),
+      };
     };
-  };
 
 const sortAlphabetically = (a: Profile, b: Profile) => a.name.localeCompare(b.name);
 
@@ -145,11 +144,18 @@ const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): Goo
     }
   });
 
+/**
+ * Run the script that opens Google Chrome.
+ * 
+ * @param profileDirectory The directory of the profile to open
+ * @param link The URL to open. If falsy, fallback on the value of `newBlankTabURL` in the preference.
+ * @param willOpen Function to run before opening Google Chrome
+ */
 const openGoogleChrome = async (profileDirectory: string, link: string, willOpen: () => Promise<void>) => {
   const script = `
     set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     set theProfile to quoted form of "${profileDirectory}"
-    set theLink to quoted form of "${link}"
+    set theLink to quoted form of "${link || getPreferenceValues<Preferences>().newBlankTabURL}"
     do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
   `;
 
@@ -205,21 +211,21 @@ function ListBookmarks(props: { profile: Profile }) {
   const tabsOnTop = [
     searchText
       ? (function () {
-          const searchTextAsURL = formatAsUrl(searchText);
-          if (searchText.includes(".") && isValidUrl(searchTextAsURL)) {
-            return createBookmarkListItem(searchTextAsURL, "Go to");
-          } else {
-            return createBookmarkListItem(newTabUrlWithQuery(searchText), "Search input text");
-          }
-        })()
+        const searchTextAsURL = formatAsUrl(searchText);
+        if (searchText.includes(".") && isValidUrl(searchTextAsURL)) {
+          return createBookmarkListItem(searchTextAsURL, "Go to");
+        } else {
+          return createBookmarkListItem(newTabUrlWithQuery(searchText), "Search input text");
+        }
+      })()
       : createBookmarkListItem(getPreferenceValues<Preferences>().newBlankTabURL, "Blank"),
   ].concat(
     clipboard
       ? [
-          isValidUrl(clipboard)
-            ? createBookmarkListItem(clipboard, "Go to the URL in the clipboard")
-            : createBookmarkListItem(newTabUrlWithQuery(clipboard), "Search text in the clipboard"),
-        ]
+        isValidUrl(clipboard)
+          ? createBookmarkListItem(clipboard, "Go to the URL in the clipboard")
+          : createBookmarkListItem(newTabUrlWithQuery(clipboard), "Search text in the clipboard"),
+      ]
       : [],
   );
 
