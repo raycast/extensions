@@ -58,8 +58,8 @@ export default function Command() {
         icon={{ source: { light: "menu-bar-icon-light.png", dark: "menu-bar-icon-dark.png" } }}
       >
         {cloneOpenPort.map((openPort) => {
-          let ln = openPort.port.length > 1 ? `(${openPort.port.length})` : "";
-          return (<MenuBarExtra.Submenu key={openPort.name} title={` ${putSpaceOnCapitalLetters(openPort.name)} ${ln}`}>
+          const len = openPort.port.length > 1 ? `(${openPort.port.length})` : "";
+          return (<MenuBarExtra.Submenu key={openPort.name} title={` ${putSpaceOnCapitalLetters(openPort.name)} ${len}`}>
 
             {openPort.port.map((openPort2) => (
               <MenuBarExtra.Item
