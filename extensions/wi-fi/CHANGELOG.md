@@ -1,6 +1,6 @@
 # Wi-Fi Changelog
 
-## [Added Menubar Command] - {PR_MERGE_DATE}
+## [Added Menubar Command] - 2023-10-09
 
 - Wi-Fi Signal: Show Wi-Fi signal strength in the menubar
 
