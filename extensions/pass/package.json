@@ -19,25 +19,25 @@
     }
   ],
   "preferences": [
-      {
-        "name": "path_var",
-        "description": "Set path variables used by pass app",
-        "type": "textfield",
-        "default": "/opt/homebrew/bin:/usr/bin:/bin",
-        "required": true,
-        "title": "Path variable"
-      }, 
-      {
-        "name": "passwords_store_path",
-        "description": "Set path to passwords store",
-        "type": "textfield",
-        "default": "~/.password-store",
-        "required": true,
-        "title": "Password store"
-      }
-    ],
+    {
+      "name": "path_var",
+      "description": "Set path variables used by pass app",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin:/usr/bin:/bin",
+      "required": true,
+      "title": "Path variable"
+    },
+    {
+      "name": "passwords_store_path",
+      "description": "Set path to passwords store",
+      "type": "textfield",
+      "default": "/home/<user>/.password-store",
+      "required": true,
+      "title": "Password store"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
+    "@raycast/api": "^1.59.0",
     "@raycast/utils": "^1.4.16",
     "child_process": "^1.0.2",
     "recursive-readdir": "^2.2.3"
