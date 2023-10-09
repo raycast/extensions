@@ -7,7 +7,7 @@
         "link": "/components/overview-cn",
         "order": 0,
         "frontmatter": {
-          "title": "组件总览",
+          "title": "Components Overview 组件总览",
           "toc": "menu",
           "filename": "components/overview/index.zh-CN.md",
           "lastUpdated": 1670050288000,
@@ -19,7 +19,7 @@
     ]
   },
   {
-    "title": "通用",
+    "title": "General 通用",
     "order": 1,
     "children": [
       {
@@ -100,7 +100,7 @@
     ]
   },
   {
-    "title": "布局",
+    "title": "Layout 布局",
     "order": 2,
     "children": [
       {
@@ -181,7 +181,7 @@
     ]
   },
   {
-    "title": "导航",
+    "title": "Navigation 导航",
     "order": 3,
     "children": [
       {
@@ -300,7 +300,7 @@
     ]
   },
   {
-    "title": "数据录入",
+    "title": "Data Entry 数据录入",
     "order": 4,
     "children": [
       {
@@ -657,7 +657,7 @@
     ]
   },
   {
-    "title": "数据展示",
+    "title": "Data Display 数据展示",
     "order": 5,
     "children": [
       {
@@ -1070,7 +1070,7 @@
     ]
   },
   {
-    "title": "反馈",
+    "title": "Feedback 反馈",
     "order": 6,
     "children": [
       {
@@ -1296,7 +1296,7 @@
     ]
   },
   {
-    "title": "其他",
+    "title": "Other 其他",
     "order": 7,
     "children": [
       {
