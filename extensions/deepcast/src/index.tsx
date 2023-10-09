@@ -13,7 +13,7 @@ interface Values {
 
 function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       icon={Icon.ChevronUp}
       title="Switch Languages"
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -61,7 +61,7 @@ const Command = (props: LaunchProps) => {
       await showToast(
         Toast.Style.Failure,
         "Source language not set",
-        "Please select a source language before switching languages."
+        "Please select a source language before switching languages.",
       );
       return;
     }
@@ -70,7 +70,7 @@ const Command = (props: LaunchProps) => {
     const newSourceValue = targetLanguage.slice(0, 2) as SourceLanguage;
     // Picking the first occurrence of a target language that starts with the source language (always 2 chars)
     const newTargetValue = Object.keys(target_languages).find((key) =>
-      key.startsWith(detectedSourceLanguage || sourceLanguage)
+      key.startsWith(detectedSourceLanguage || sourceLanguage),
     ) as TargetLanguage;
 
     if (newTargetValue != undefined) {
@@ -87,7 +87,7 @@ const Command = (props: LaunchProps) => {
       await showToast(
         Toast.Style.Failure,
         "Something went wrong",
-        `Could not switch between ${sourceLanguage} and ${targetLanguage}`
+        `Could not switch between ${sourceLanguage} and ${targetLanguage}`,
       );
     }
   };
@@ -134,4 +134,5 @@ const Command = (props: LaunchProps) => {
     </Form>
   );
 };
+
 export default Command;
