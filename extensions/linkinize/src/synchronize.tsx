@@ -1,19 +1,17 @@
 import { LaunchType, environment, launchCommand } from "@raycast/api";
 import { LINKINIZE_DOMAIN, BOOKMARKS, ORGANIZATIONS, TOKEN, ACTIVE_ORGANIZATION, CLICKS } from "./constants";
-import { getInteractions, logout, cache } from "./support";
+import { getInteractions, logout, cache, authenticationCheck } from "./support";
 import axios, { AxiosResponse } from "axios";
 
 export default async function Command() {
+  authenticationCheck();
   const token = cache.get(TOKEN);
-
   if (token) {
     await synchronize(token).then(function () {
       if (environment.launchType === LaunchType.UserInitiated) {
         launchCommand({ name: "index", type: LaunchType.UserInitiated });
       }
     });
-  } else {
-    logout();
   }
 }
 

@@ -1,19 +1,16 @@
 import { Action, ActionPanel, Cache, LaunchType, List, confirmAlert, launchCommand, showToast } from "@raycast/api";
 import { LINKINIZE_DOMAIN, ORGANIZATIONS, TOKEN } from "./constants";
 import { Organization } from "./interfaces";
-import got from "got";
-import { handleAPIErrors, logout } from "./support";
+import { authenticationCheck, handleAPIErrors } from "./support";
 import axios, { AxiosResponse } from "axios";
 
 const cache = new Cache();
 export default function Command() {
-  const cached = cache.get(ORGANIZATIONS);
-  const token = cache.get(TOKEN);
+  authenticationCheck();
 
-  if (!token) {
-    logout();
-    return;
-  }
+  const cached = cache.get(ORGANIZATIONS);
+
+  const token = cache.get(TOKEN) ?? '';
 
   const organizations: Organization[] = cached ? JSON.parse(cached) : [];
   return (

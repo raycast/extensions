@@ -1,20 +1,9 @@
-import { Cache, LaunchType, Toast, launchCommand, showToast } from "@raycast/api";
+import { Cache, LaunchType, Toast, getPreferenceValues, launchCommand, showToast } from "@raycast/api";
 import { Bookmark, LoginPayload } from "./interfaces";
 import { ACTIVE_ORGANIZATION, BOOKMARKS, CLICKS, LINKINIZE_DOMAIN, TOKEN } from "./constants";
 import axios, { AxiosError, AxiosResponse } from "axios";
 
 export const cache = new Cache();
-
-export function validateLoginPayload(values: LoginPayload) {
-  const errors: any = {};
-  if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(values.email)) {
-    errors.email = "Invalid Email Address";
-  }
-  if (values.password.length < 1) {
-    errors.password = "Password can't be empty.";
-  }
-  return errors;
-}
 
 export function hasToken() {
   const token = cache.get(TOKEN);
@@ -22,38 +11,32 @@ export function hasToken() {
 }
 
 export async function attemptLogin(values: LoginPayload) {
-  axios
+  return axios
     .post(`${LINKINIZE_DOMAIN}/api/auth/login`, values)
     .then(async function (response: AxiosResponse) {
       cache.set(TOKEN, response.data.access_token);
       await showToast({ title: "Linkinize is Ready", message: "Enjoy lightening fast Bookmarks 🚀" });
       await launchCommand({ name: "synchronize", type: LaunchType.UserInitiated });
+      return true;
     })
     .catch(async function (error) {
-      await showToast({
-        title: "Authentication Failed",
-        message: "Please check your credentials.",
-        style: Toast.Style.Failure,
-      });
-      cache.clear();
+      return false;
     });
 }
 
-export async function logout(redirectToCommand = "index") {
-  await showToast({ title: "Authentication Failed", message: "Please Login", style: Toast.Style.Failure });
+export async function logout() {
+  await showToast({
+    title: "Authentication Failed",
+    message: "Please Check your Credentials in Extension Preferences.",
+    style: Toast.Style.Failure,
+  });
   cache.clear();
-  await launchCommand({ name: redirectToCommand, type: LaunchType.UserInitiated });
 }
 
 export async function handleAPIErrors(error: AxiosError) {
   switch (error.status) {
     case 401:
-      await showToast({
-        title: "Authentication Failed",
-        message: "Please Login with your Linkinize credentials.",
-        style: Toast.Style.Failure,
-      });
-      logout("index");
+      logout();
       break;
     case 500:
       await showToast({ title: "Error", message: "Something went wrong, Please try again in a bit." });
@@ -84,4 +67,12 @@ export function recordInteraction(url: string) {
 export function getInteractions() {
   const cached = cache.get(CLICKS);
   return cached ? cached : JSON.stringify([]);
+}
+
+export async function authenticationCheck() {
+  const isLoggedIn = hasToken();
+  if (!isLoggedIn && !(await attemptLogin(getPreferenceValues<LoginPayload>()))) {
+    logout();
+    return;
+  }
 }
