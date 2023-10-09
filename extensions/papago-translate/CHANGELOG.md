@@ -1,3 +1,3 @@
 # Papago Translate Changelog
 
-## [Initial Version] - 2023-09-17
+## [Initial Version] - 2023-10-09
