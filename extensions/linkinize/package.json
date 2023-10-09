@@ -15,7 +15,7 @@
       "description": "Linkinize Account Email Address",
       "required": true,
       "type": "textfield",
-      "placeholder": "Email Address"
+      "placeholder": "Email Address..."
     },
     {
       "name": "password",
@@ -23,7 +23,7 @@
       "description": "Linkinize Account Password",
       "required": true,
       "type": "password",
-      "placeholder": "password"
+      "placeholder": "Password..."
     }
   ],
   "license": "MIT",
