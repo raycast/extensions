@@ -85,13 +85,15 @@ export default function Command() {
   const renderProgress = useCallback(
     (deadline: Deadline) => {
       const progressNumber = deadline ? calculateProgress(deadline.startDate, deadline.endDate) : 0;
-      const subtitle = getProgressBar(progressNumber) + " " + progressNumber + "%";
 
       return (
         <List.Item
           key={deadline.startDate.getTime() + deadline.endDate.getTime()}
           title={deadline.title}
-          icon={getProgressIcon(calculateProgress(deadline.startDate, deadline.endDate) / 100, Color.PrimaryText)}
+          icon={getProgressIcon(
+            progressNumber / 100,
+            progressNumber > 50 ? (progressNumber > 80 ? Color.Red : Color.Yellow) : Color.SecondaryText
+          )}
           subtitle={`${getProgressBar(calculateProgress(deadline.startDate, deadline.endDate))} ${calculateProgress(
             deadline.startDate,
             deadline.endDate
@@ -105,8 +107,8 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <PinDeadlineAction onPin={() => handlePin(deadline)} />
-                <FavDeadlineAction onFav={() => handleFav(deadline)} />
+                <PinDeadlineAction onPin={() => handlePin(deadline)} isPinned={deadline.isPinned} />
+                <FavDeadlineAction onFav={() => handleFav(deadline)} isFaved={deadline.isFav} />
                 <DeleteDeadlineAction onDelete={() => handleDelete(deadline)} />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -177,14 +179,26 @@ export default function Command() {
   );
 }
 
-function FavDeadlineAction(props: { onFav: () => void }) {
+function FavDeadlineAction(props: { onFav: () => void; isFaved: boolean }) {
   return (
-    <Action icon={Icon.Star} title="Favorite" shortcut={{ modifiers: ["opt"], key: "f" }} onAction={props.onFav} />
+    <Action
+      icon={Icon.Star}
+      title={props.isFaved ? "Unfavorite" : "Favorite"}
+      shortcut={{ modifiers: ["opt"], key: "f" }}
+      onAction={props.onFav}
+    />
   );
 }
 
-function PinDeadlineAction(props: { onPin: () => void }) {
-  return <Action icon={Icon.Pin} title="Pin" shortcut={{ modifiers: ["opt"], key: "p" }} onAction={props.onPin} />;
+function PinDeadlineAction(props: { onPin: () => void; isPinned: boolean }) {
+  return (
+    <Action
+      icon={Icon.Pin}
+      title={props.isPinned ? "Unpin" : "Pin"}
+      shortcut={{ modifiers: ["opt"], key: "p" }}
+      onAction={props.onPin}
+    />
+  );
 }
 
 function DeleteDeadlineAction(props: { onDelete: () => void }) {
