@@ -23,12 +23,75 @@ export default function Command() {
     "port"
   );
 
+  function groupBy<T>(items: T[], callbackFn: (item: T) => string): { [key: string]: T[] } {
+    const groupedItems: { [key: string]: T[] } = {};
+    for (const item of items) {
+      const key = callbackFn(item);
+      if (!groupedItems[key]) groupedItems[key] = [];
+      groupedItems[key].push(item);
+    }
+    return groupedItems;
+  }
+
+  function convertObjectToArray(obj: { [key: string]: { port: string, process: string }[] }): { name: string, port: { port: string, process: string }[] }[] {
+    return Object.entries(obj).map(([name, port]) => ({ name, port }));
+  }
+
+  function sortByName(arr: { name: string, port: string }[]): { name: string, port: string }[] {
+    return arr.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  function putSpaceOnCapitalLetters(name: string) {
+    return name.replace(/([A-Z])/g, ' $1').trim()
+  }
+
+  let cloneOpenPort = Object.assign([], openPorts, []);
+  if (preferences.sortPort) cloneOpenPort = cloneOpenPort.sort((x, y) => parseInt(x.port) - parseInt(y.port));
+  if (preferences.groupByProcess) {
+    cloneOpenPort = groupBy(cloneOpenPort, ({ process: { name } }) => name);
+    cloneOpenPort = convertObjectToArray(cloneOpenPort);
+    cloneOpenPort = sortByName(cloneOpenPort);
+
+    return (
+      <MenuBarExtra
+        isLoading={isLoading}
+        icon={{ source: { light: "menu-bar-icon-light.png", dark: "menu-bar-icon-dark.png" } }}
+      >
+        {cloneOpenPort.map((openPort) => {
+          let ln = openPort.port.length > 1 ? `(${openPort.port.length})` : "";
+          return (<MenuBarExtra.Submenu key={openPort.name} title={` ${putSpaceOnCapitalLetters(openPort.name)} ${ln}`}>
+
+            {openPort.port.map((openPort2) => (
+              <MenuBarExtra.Item
+                key={openPort2.port}
+                title={`Kill (${openPort2.port ?? "Untitled Process"})`}
+                onAction={async () => {
+                  await killProcess(openPort2.process, {
+                    onError() {
+                      showHUD("⚠️ Failed to kill process");
+                    },
+                    onKilled() {
+                      reload();
+                    },
+                    killSignal: preferences.killSignal === "ask" ? KillSignal.TERM : preferences.killSignal,
+                  });
+                }}
+              />
+            ))}
+
+          </MenuBarExtra.Submenu>
+          )
+        })}
+      </MenuBarExtra>
+    );
+  }
+
   return (
     <MenuBarExtra
       isLoading={isLoading}
       icon={{ source: { light: "menu-bar-icon-light.png", dark: "menu-bar-icon-dark.png" } }}
     >
-      {openPorts.map((openPort) => (
+      {cloneOpenPort.map((openPort) => (
         <MenuBarExtra.Submenu key={openPort.port} title={openPort.port}>
           <MenuBarExtra.Section title={openPort.process.name ?? "Untitled Process"}>
             <MenuBarExtra.Item

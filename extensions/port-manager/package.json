@@ -58,6 +58,24 @@
           "value": "9"
         }
       ]
+    },
+    {
+      "name": "sortPort",
+      "type": "checkbox",
+      "required": false,
+      "title": "Sort Port",
+      "description": "Sort ports by number not by insertion",
+      "default": false,
+      "label": "Sort ports by number not by insertion"
+    },
+    {
+      "name": "groupByProcess",
+      "type": "checkbox",
+      "required": false,
+      "title": "Group process",
+      "description": "Group by process",
+      "default": false,
+      "label": "Group by process"
     }
   ],
   "dependencies": {
