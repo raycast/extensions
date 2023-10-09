@@ -10,7 +10,7 @@ export default function Command() {
 
   const cached = cache.get(ORGANIZATIONS);
 
-  const token = cache.get(TOKEN) ?? '';
+  const token = cache.get(TOKEN) ?? "";
 
   const organizations: Organization[] = cached ? JSON.parse(cached) : [];
   return (
