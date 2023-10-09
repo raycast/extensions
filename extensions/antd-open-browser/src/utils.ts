@@ -1,7 +1,6 @@
-const baseUrl = "https://ant-design.antgroup.com";
+const baseUrl = "https://ant-design.com";
 
-export const getComponentUrl = (filename = "") => {
-  const url = `${filename.replace(/(\/index)?((\.zh-cn)|(\.en-us))?\.md$/i, "").toLowerCase()}/`;
-  const href = url.startsWith("http") ? url : `${baseUrl}/${url.replace(/\/$/, "-cn/")}`;
+export const getComponentUrl = (link = "") => {
+  const href = `${baseUrl}/${link}`;
   return href;
 };
