@@ -1,6 +1,6 @@
 export interface BugzillaInstance {
   id: string;
-  login: string;
+  username: string;
   apiKey: string;
   displayName: string;
   url: string;

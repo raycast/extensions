@@ -16,7 +16,7 @@ export class BugzillaAPI {
     const instanceUrl = new URL(this.bugzilla.url);
     this.bugzilla.version = JSON.parse(await this.request(new URL(`${this.bugzilla.url}/rest/version`)))["version"];
     instanceUrl.pathname += "/rest/valid_login";
-    instanceUrl.searchParams.append("login", this.bugzilla.login);
+    instanceUrl.searchParams.append("login", this.bugzilla.username);
     // If custom header is not used, provide API key as part of request
     if (!this.bugzilla.customHeader) {
       instanceUrl.searchParams.append("api_key", this.bugzilla.apiKey);
@@ -85,7 +85,7 @@ export class BugzillaAPI {
     if (this.bugzilla.apiKey) {
       this.bugzilla.authorized = true;
       if (JSON.parse(parsedResponse)["result"] == false) {
-        return Promise.reject(new Error("Provided login is not valid for provided API key"));
+        return Promise.reject(new Error("Provided username is not valid for provided API key"));
       }
     } else {
       this.bugzilla.authorized = false;

@@ -81,6 +81,7 @@ export function BugItem(props: BugDetailsProps): JSX.Element {
           date: props.bug.last_change_date_locale,
         },
       ]}
+      keywords={[props.bug.summary]}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Bug">
@@ -273,10 +274,9 @@ export function FetchBugs(props: FetchProps) {
   async function fetch() {
     if (selectedBugzilla !== undefined) {
       try {
-        setIsLoading(true);
         toast.show();
         const bugzillaAPI = new BugzillaAPI(selectedBugzilla);
-        searchParams.set(props.currentUserSearchParam, selectedBugzilla.login);
+        searchParams.set(props.currentUserSearchParam, selectedBugzilla.username);
         const result = await bugzillaAPI.getBugs(searchParams);
         setBugs(result.filter((bug: Bug) => bug ?? []));
       } catch (err) {
@@ -287,7 +287,6 @@ export function FetchBugs(props: FetchProps) {
         });
       } finally {
         toast.hide();
-        setIsLoading(false);
       }
     }
   }
@@ -307,7 +306,6 @@ export function FetchBugs(props: FetchProps) {
     );
   }
   const [bugs, setBugs] = useState<Bug[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [bugzillaList, setBugzillaList] = useState<BugzillaInstance[]>([]);
   const [selectedBugzilla, setSelectedBugzilla] = useState<BugzillaInstance>();
   const toast = new Toast({ style: Toast.Style.Animated, title: "Executing Query" });
@@ -318,7 +316,7 @@ export function FetchBugs(props: FetchProps) {
 
   useEffect(() => {
     loadInstances();
-    setIsLoading(false);
+    // setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -329,8 +327,8 @@ export function FetchBugs(props: FetchProps) {
     <List
       searchBarAccessory={<BugzillaDropdown instanceList={bugzillaList} />}
       navigationTitle={props.navigationTitle}
-      isLoading={isLoading}
-      searchBarPlaceholder="Filter Bug IDs"
+      isLoading={bugs === undefined}
+      searchBarPlaceholder="Filter Bugs"
     >
       {bugzillaList.length === 0 ? <ManageInstanceEmptyView /> : <></>}
 

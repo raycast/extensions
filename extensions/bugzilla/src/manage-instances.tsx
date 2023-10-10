@@ -93,7 +93,7 @@ function BugzillaItem(props: {
       accessories={[
         {
           tooltip: props.bugzilla.authorized
-            ? `Authenticated with API as user \`${props.bugzilla.login}\``
+            ? `Authenticated with API as user \`${props.bugzilla.username}\``
             : "Not authenticated with API",
           tag: {
             value: props.bugzilla.authorized ? "Logged In" : "Logged Out",
@@ -276,11 +276,11 @@ function AddBugzilla(props: {
         }}
       />
       <Form.TextField
-        title="Login"
-        id="login"
-        defaultValue={props.bugzilla?.login}
-        placeholder="Enter login"
-        info="When using a password for initial validation, ensure the API key is valid for the provided login."
+        title="Username"
+        id="username"
+        defaultValue={props.bugzilla?.username}
+        placeholder="Enter a username"
+        info="When using a password for initial validation, ensure the API key is valid for the provided username."
         error={loginError}
         onChange={dropFieldErrorIfNeeded}
         onBlur={(event) => {
@@ -295,7 +295,7 @@ function AddBugzilla(props: {
         title="API Key"
         id="apiKey"
         defaultValue={props.bugzilla?.apiKey}
-        placeholder="Enter API key"
+        placeholder="Enter an API key"
         error={keyError}
         onChange={dropFieldErrorIfNeeded}
         onBlur={(event) => {
