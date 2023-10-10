@@ -58,7 +58,12 @@ export default function Index() {
               ))}
           </MenuBarExtra.Section>
           <MenuBarExtra.Section>
-            <MenuBarExtra.Item key={"preferences"} title="Preferences..." onAction={openExtensionPreferences} />
+            <MenuBarExtra.Item
+              key={"preferences"}
+              title="Open Preferences"
+              onAction={openExtensionPreferences}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
+            />
           </MenuBarExtra.Section>
         </>
       )}
