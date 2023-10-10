@@ -51,7 +51,7 @@ export default function Command() {
         setGenerationResult(resJson);
         setIsLoading(false);
       } catch (err) {
-        let _err = err instanceof Error ? err.message : "Something went wrong :(";
+        const _err = err instanceof Error ? err.message : "Something went wrong :(";
         setIsLoading(false);
         setError(_err);
         await showToast({ title: getErrorText(_err), style: Toast.Style.Failure });
