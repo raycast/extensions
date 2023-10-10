@@ -11,8 +11,8 @@ import { getThumbnailImgUrl } from "@ts/helpers";
 import { useState } from "react";
 
 export default function Command() {
-  const [query, setQuery] = useState("");
   const { token, isTokenLoading } = useToken();
+  const [query, setQuery] = useState("");
   const { galleryPage, isLoadingGalleryPage, galleryPageError } = useGallery({ search: query, token: token });
 
   if (isTokenLoading) return <LoadingToken />;
