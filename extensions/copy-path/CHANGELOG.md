@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Copy Browser Tab URL] - {PR_MERGE_DATE}
+## [Copy Browser Tab URL] - 2023-10-10
 
 - Added the ability to copy the URL of the current tab of the browser
 
