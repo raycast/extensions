@@ -139,7 +139,7 @@
 /extensions/checksum                                 @Ek2100 @pernielsentikaer
 /extensions/cheetah                                  @RongleCat
 /extensions/chess-com                                @joshfarrant
-/extensions/china-ip-address                         
+/extensions/china-ip-address                         @ErlichLiu
 /extensions/chinese-character                        @koinzhang
 /extensions/chinese-numbers                          @raffeyang
 /extensions/choose-a-license                         @sandypockets @Aayush9029
@@ -668,6 +668,7 @@
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner @jonohewitt @jasonbarry @peduarte
 /extensions/network-diagnostics                      @hmarr @3e9b
+/extensions/network-menubar-monitor                  @yarnaid
 /extensions/network-speed                            @koinzhang
 /extensions/new-relic                                @cirne
 /extensions/new-york-times                           @Antonwy
