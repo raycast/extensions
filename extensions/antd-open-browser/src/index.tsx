@@ -3,9 +3,9 @@ import dataJSON from "./data.json";
 import { getComponentUrl } from "./utils";
 
 type dataType = {
-  type: string;
-  title: string;
-  children: { category: string; title: string; type: string; filename: string; subtitle?: string; cover?: string }[];
+  title?: string;
+  order?: number;
+  children: { title?: string; link?: string; frontmatter: { title?: string; subtitle?: string; cover?: string } }[];
 };
 const list: dataType[] = dataJSON;
 
@@ -13,19 +13,26 @@ export default function Command() {
   return (
     <List isShowingDetail>
       {list.map((item) => (
-        <List.Section key={item.title} title={item.title}>
-          {item.children.map((child) => (
-            <List.Item
-              title={`${child.title} ${child.subtitle || ""}`}
-              key={child.title}
-              detail={child.cover && <List.Item.Detail markdown={`![Illustration](${child.cover})`} />}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={getComponentUrl(child.filename)} />
-                </ActionPanel>
-              }
-            />
-          ))}
+        <List.Section key={item.order} title={item.title}>
+          {item.children.map((child) => {
+            const title = `${child.frontmatter.title} ${child.frontmatter.subtitle || ""}`;
+            return (
+              <List.Item
+                title={title}
+                key={title}
+                detail={
+                  child.frontmatter.cover && (
+                    <List.Item.Detail markdown={`![Illustration](${child.frontmatter.cover})`} />
+                  )
+                }
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser url={getComponentUrl(child.link)} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ))}
     </List>

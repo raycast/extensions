@@ -1,665 +1,1364 @@
 [
   {
-    "type": "type",
-    "title": "组件总览",
+    "order": 0,
     "children": [
       {
-        "category": "Components",
         "title": "组件总览",
-        "type": "组件总览",
-        "filename": "components/overview/index.zh-CN.md"
+        "link": "/components/overview-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Components Overview 组件总览",
+          "toc": "menu",
+          "filename": "components/overview/index.zh-CN.md",
+          "lastUpdated": 1670050288000,
+          "category": "Components",
+          "__autoDescription": true,
+          "description": "antd 为 Web 应用提供了丰富的基础 UI 组件，我们还将持续探索企业级应用的最佳 UI 实践。除了官方组件，我们也提供了社区精选组件作为必要的补充，另外如果您是内网用户，欢迎尝试使用 TechUI。"
+        }
       }
-    ],
-    "order": -1
+    ]
   },
   {
-    "type": "type",
-    "title": "通用",
+    "title": "General 通用",
+    "order": 1,
     "children": [
       {
-        "category": "Components",
-        "subtitle": "排版",
-        "type": "通用",
-        "title": "Typography",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/GOM1KQ24O/Typography.svg",
-        "filename": "components/typography/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "图标",
-        "type": "通用",
-        "title": "Icon",
-        "toc": false,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/rrwbSt3FQ/Icon.svg",
-        "filename": "components/icon/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "通用",
         "title": "Button",
-        "subtitle": "按钮",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/fNUKzY1sk/Button.svg",
-        "filename": "components/button/index.zh-CN.md"
+        "link": "/components/button-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Button",
+          "toc": "menu",
+          "filename": "components/button/index.zh-CN.md",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "按钮",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*BrFMQ5s7AAQAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Lp1kTYmSsgoAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "group": { "title": "通用", "order": 1 },
+          "__autoDescription": true,
+          "description": "按钮用于开始一个即时操作。"
+        }
+      },
+      {
+        "title": "FloatButton",
+        "link": "/components/float-button-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "FloatButton",
+          "toc": "menu",
+          "filename": "components/float-button/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "group": "通用",
+          "subtitle": "悬浮按钮",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*HS-wTIIwu0kAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*a0hwTY_rOSUAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "tag": "New",
+          "__autoDescription": true,
+          "description": "悬浮按钮。自 5.0.0 版本开始提供该组件。"
+        }
+      },
+      {
+        "title": "Icon",
+        "link": "/components/icon-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Icon",
+          "toc": false,
+          "filename": "components/icon/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "图标",
+          "description": "语义化的矢量图形。",
+          "group": "通用",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*PdAYS7anRpoAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*xEDOTJx2DEkAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 }
+        }
+      },
+      {
+        "title": "Typography",
+        "link": "/components/typography-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Typography",
+          "toc": "menu",
+          "filename": "components/typography/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "排版",
+          "group": "通用",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*MLt3R6m9huoAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*LT2jR41Uj2EAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "文本的基本格式。"
+        }
       }
-    ],
-    "order": 0
+    ]
   },
   {
-    "type": "type",
-    "title": "布局",
+    "title": "Layout 布局",
+    "order": 2,
     "children": [
       {
-        "category": "Components",
-        "type": "布局",
-        "subtitle": "间距",
-        "title": "Space",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/wc6%263gJ0Y8/Space.svg",
-        "filename": "components/space/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "布局",
-        "type": "布局",
-        "cols": 1,
-        "title": "Layout",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/hzEndUVEx/Layout.svg",
-        "filename": "components/layout/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "栅格",
-        "type": "布局",
-        "cols": 1,
-        "title": "Grid",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/5rWLU27so/Grid.svg",
-        "filename": "components/grid/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "布局",
         "title": "Divider",
-        "subtitle": "分割线",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/5swjECahe/Divider.svg",
-        "filename": "components/divider/index.zh-CN.md"
+        "link": "/components/divider-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Divider",
+          "toc": "menu",
+          "filename": "components/divider/index.zh-CN.md",
+          "atomId": "divider",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "分割线",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*7sMiTbzvaDoAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*KPSEQ74PLg4AAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "group": { "title": "布局", "order": 2 },
+          "__autoDescription": true,
+          "description": "区隔内容的分割线。"
+        }
+      },
+      {
+        "title": "Grid",
+        "link": "/components/grid-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Grid",
+          "toc": "menu",
+          "filename": "components/grid/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "栅格",
+          "group": "布局",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*mfJeS6cqZrEAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*DLUwQ4B2_zQAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "24 栅格系统。"
+        }
+      },
+      {
+        "title": "Layout",
+        "link": "/components/layout-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Layout",
+          "toc": "menu",
+          "filename": "components/layout/index.zh-CN.md",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "布局",
+          "group": "布局",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*4i58ToAcxaYAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*HdS6Q5vUCDcAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "协助进行页面级整体布局。"
+        }
+      },
+      {
+        "title": "Space",
+        "link": "/components/space-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Space",
+          "toc": "menu",
+          "filename": "components/space/index.zh-CN.md",
+          "atomId": "space",
+          "lastUpdated": 1694403225000,
+          "category": "Components",
+          "group": "布局",
+          "subtitle": "间距",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ZiJ3SbOH9SUAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*37T2R6O9oi0AAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "设置组件之间的间距。"
+        }
       }
-    ],
-    "order": 1
+    ]
   },
   {
-    "type": "type",
-    "title": "导航",
+    "title": "Navigation 导航",
+    "order": 3,
     "children": [
       {
-        "category": "Components",
-        "subtitle": "固钉",
-        "type": "导航",
-        "title": "Affix",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/tX6-md4H6/Affix.svg",
-        "filename": "components/affix/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "步骤条",
-        "type": "导航",
-        "cols": 1,
-        "title": "Steps",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/UZYqMizXHaj/Steps.svg",
-        "filename": "components/steps/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "分页",
-        "type": "导航",
-        "title": "Pagination",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/1vqv2bj68/Pagination.svg",
-        "filename": "components/pagination/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "导航",
-        "title": "PageHeader",
-        "cols": 1,
-        "subtitle": "页头",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/6bKE0Cq0R/PageHeader.svg",
-        "filename": "components/page-header/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "cols": 1,
-        "type": "导航",
-        "title": "Menu",
-        "subtitle": "导航菜单",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/3XZcjGpvK/Menu.svg",
-        "filename": "components/menu/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "下拉菜单",
-        "type": "导航",
-        "title": "Dropdown",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/eedWN59yJ/Dropdown.svg",
-        "filename": "components/dropdown/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "面包屑",
-        "type": "导航",
-        "title": "Breadcrumb",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/9Ltop8JwH/Breadcrumb.svg",
-        "filename": "components/breadcrumb/index.zh-CN.md"
-      }
-    ],
-    "order": 2
-  },
-  {
-    "type": "type",
-    "title": "数据录入",
-    "children": [
-      {
-        "category": "Components",
-        "subtitle": "上传",
-        "type": "数据录入",
-        "title": "Upload",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/QaeBt_ZMg/Upload.svg",
-        "filename": "components/upload/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "树选择",
-        "type": "数据录入",
-        "title": "TreeSelect",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/Ax4DA0njr/TreeSelect.svg",
-        "filename": "components/tree-select/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "穿梭框",
-        "type": "数据录入",
-        "cols": 1,
-        "title": "Transfer",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/QAXskNI4G/Transfer.svg",
-        "filename": "components/transfer/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "时间选择框",
-        "type": "数据录入",
-        "title": "TimePicker",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/h04Zsl98I/TimePicker.svg",
-        "filename": "components/time-picker/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "开关",
-        "type": "数据录入",
-        "title": "Switch",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/zNdJQMhfm/Switch.svg",
-        "filename": "components/switch/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "滑动输入条",
-        "type": "数据录入",
-        "title": "Slider",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/HZ3meFc6W/Silder.svg",
-        "filename": "components/slider/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "选择器",
-        "type": "数据录入",
-        "title": "Select",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/_0XzgOis7/Select.svg",
-        "filename": "components/select/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "评分",
-        "type": "数据录入",
-        "title": "Rate",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/R5uiIWmxe/Rate.svg",
-        "filename": "components/rate/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "单选框",
-        "type": "数据录入",
-        "title": "Radio",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/8cYb5seNB/Radio.svg",
-        "filename": "components/radio/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "提及",
-        "type": "数据录入",
-        "title": "Mentions",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/jPE-itMFM/Mentions.svg",
-        "filename": "components/mentions/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "数字输入框",
-        "type": "数据录入",
-        "title": "InputNumber",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/XOS8qZ0kU/InputNumber.svg",
-        "filename": "components/input-number/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "输入框",
-        "type": "数据录入",
-        "title": "Input",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/xS9YEJhfe/Input.svg",
-        "filename": "components/input/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "表单",
-        "type": "数据录入",
-        "cols": 1,
-        "title": "Form",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/ORmcdeaoO/Form.svg",
-        "filename": "components/form/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "数据录入",
-        "title": "DatePicker",
-        "subtitle": "日期选择框",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/RT_USzA48/DatePicker.svg",
-        "filename": "components/date-picker/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "多选框",
-        "type": "数据录入",
-        "title": "Checkbox",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/8nbVbHEm_/CheckBox.svg",
-        "filename": "components/checkbox/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "数据录入",
-        "title": "Cascader",
-        "subtitle": "级联选择",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/UdS8y8xyZ/Cascader.svg",
-        "filename": "components/cascader/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "自动完成",
-        "type": "数据录入",
-        "cols": 2,
-        "title": "AutoComplete",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/qtJm4yt45/AutoComplete.svg",
-        "filename": "components/auto-complete/index.zh-CN.md"
-      }
-    ],
-    "order": 3
-  },
-  {
-    "type": "type",
-    "title": "数据展示",
-    "children": [
-      {
-        "category": "Components",
-        "type": "数据展示",
-        "title": "Tree",
-        "subtitle": "树形控件",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/Xh-oWqg9k/Tree.svg",
-        "filename": "components/tree/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "文字提示",
-        "type": "数据展示",
-        "title": "Tooltip",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/Vyyeu8jq2/Tooltp.svg",
-        "filename": "components/tooltip/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "时间轴",
-        "type": "数据展示",
-        "title": "Timeline",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/vJmo00mmgR/Timeline.svg",
-        "filename": "components/timeline/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "标签",
-        "type": "数据展示",
-        "title": "Tag",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/cH1BOLfxC/Tag.svg",
-        "filename": "components/tag/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "标签页",
-        "type": "数据展示",
-        "title": "Tabs",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/lkI2hNEDr2V/Tabs.svg",
-        "filename": "components/tabs/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "cols": 1,
-        "type": "数据展示",
-        "title": "Table",
-        "subtitle": "表格",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/f-SbcX2Lx/Table.svg",
-        "filename": "components/table/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "统计数值",
-        "type": "数据展示",
-        "title": "Statistic",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/rcBNhLBrKbE/Statistic.svg",
-        "filename": "components/statistic/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "分段控制器",
-        "type": "数据展示",
-        "title": "Segmented",
-        "cover": "https://gw.alipayobjects.com/zos/bmw-prod/a3ff040f-24ba-43e0-92e9-c845df1612ad.svg",
-        "filename": "components/segmented/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "气泡卡片",
-        "type": "数据展示",
-        "title": "Popover",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/1PNL1p_cO/Popover.svg",
-        "filename": "components/popover/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "数据展示",
-        "title": "List",
-        "subtitle": "列表",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/5FrZKStG_/List.svg",
-        "filename": "components/list/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "图片",
-        "type": "数据展示",
-        "title": "Image",
-        "cols": 2,
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/D1dXz9PZqa/image.svg",
-        "filename": "components/image/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "空状态",
-        "type": "数据展示",
-        "title": "Empty",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/MNbKfLBVb/Empty.svg",
-        "filename": "components/empty/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "描述列表",
-        "type": "数据展示",
-        "title": "Descriptions",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/MjtG9_FOI/Descriptions.svg",
-        "filename": "components/descriptions/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "数据展示",
-        "title": "Comment",
-        "subtitle": "评论",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/ILhxpGzBO/Comment.svg",
-        "filename": "components/comment/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "数据展示",
-        "title": "Collapse",
-        "subtitle": "折叠面板",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/IxH16B9RD/Collapse.svg",
-        "filename": "components/collapse/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "数据展示",
-        "title": "Carousel",
-        "subtitle": "走马灯",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/%24C9tmj978R/Carousel.svg",
-        "filename": "components/carousel/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "数据展示",
-        "title": "Card",
-        "subtitle": "卡片",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/NqXt8DJhky/Card.svg",
-        "filename": "components/card/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "数据展示",
-        "subtitle": "日历",
-        "cols": 1,
-        "title": "Calendar",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/dPQmLq08DI/Calendar.svg",
-        "filename": "components/calendar/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "徽标数",
-        "type": "数据展示",
-        "title": "Badge",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/6%26GF9WHwvY/Badge.svg",
-        "filename": "components/badge/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "头像",
-        "type": "数据展示",
-        "title": "Avatar",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/aBcnbw68hP/Avatar.svg",
-        "filename": "components/avatar/index.zh-CN.md"
-      }
-    ],
-    "order": 4
-  },
-  {
-    "type": "type",
-    "title": "反馈",
-    "children": [
-      {
-        "category": "Components",
-        "type": "反馈",
-        "title": "Spin",
-        "subtitle": "加载中",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/LBcJqCPRv/Spin.svg",
-        "filename": "components/spin/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "骨架屏",
-        "type": "反馈",
-        "title": "Skeleton",
-        "cols": 1,
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/KpcciCJgv/Skeleton.svg",
-        "filename": "components/skeleton/index.zh-CN.md"
-      },
-      {
-        "type": "反馈",
-        "category": "Components",
-        "title": "Result",
-        "cols": 1,
-        "subtitle": "结果",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/9nepwjaLa/Result.svg",
-        "filename": "components/result/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "进度条",
-        "type": "反馈",
-        "title": "Progress",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/xqsDu4ZyR/Progress.svg",
-        "filename": "components/progress/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "气泡确认框",
-        "type": "反馈",
-        "title": "Popconfirm",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/fjMCD9xRq/Popconfirm.svg",
-        "filename": "components/popconfirm/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "反馈",
-        "noinstant": true,
-        "title": "Notification",
-        "subtitle": "通知提醒框",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/Jxm5nw61w/Notification.svg",
-        "filename": "components/notification/index.zh-CN.md"
-      },
-      {
-        "type": "反馈",
-        "category": "Components",
-        "subtitle": "对话框",
-        "title": "Modal",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/3StSdUlSH/Modal.svg",
-        "filename": "components/modal/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "全局提示",
-        "type": "反馈",
-        "noinstant": true,
-        "title": "Message",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/hAkKTIW0K/Message.svg",
-        "filename": "components/message/index.zh-CN.md"
-      },
-      {
-        "type": "反馈",
-        "category": "Components",
-        "subtitle": "抽屉",
-        "title": "Drawer",
-        "cover": "https://img.alicdn.com/imgextra/i4/O1CN019djdZP1OHwXSRGCOW_!!6000000001681-55-tps-161-117.svg",
-        "filename": "components/drawer/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "警告提示",
-        "type": "反馈",
-        "title": "Alert",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/8emPa3fjl/Alert.svg",
-        "filename": "components/alert/index.zh-CN.md"
-      }
-    ],
-    "order": 5
-  },
-  {
-    "type": "type",
-    "title": "其他",
-    "children": [
-      {
-        "category": "Components",
-        "subtitle": "全局化配置",
-        "cols": 1,
-        "type": "其他",
-        "title": "ConfigProvider",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/kegYxl1wj/ConfigProvider.svg",
-        "filename": "components/config-provider/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "type": "其他",
-        "subtitle": "回到顶部",
-        "title": "BackTop",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/tJZ5jbTwX/BackTop.svg",
-        "filename": "components/back-top/index.zh-CN.md"
-      },
-      {
-        "category": "Components",
-        "subtitle": "锚点",
-        "cols": 2,
-        "type": "其他",
         "title": "Anchor",
-        "cover": "https://gw.alipayobjects.com/zos/alicdn/_1-C1JwsC/Anchor.svg",
-        "filename": "components/anchor/index.zh-CN.md"
+        "link": "/components/anchor-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Anchor",
+          "toc": "menu",
+          "filename": "components/anchor/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "锚点",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*TBTSR4PyVmkAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JGb3RIzyOCkAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": null,
+          "group": { "title": "导航", "order": 3 },
+          "__autoDescription": true,
+          "description": "用于跳转到页面指定位置。"
+        }
+      },
+      {
+        "title": "Breadcrumb",
+        "link": "/components/breadcrumb-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Breadcrumb",
+          "toc": "menu",
+          "filename": "components/breadcrumb/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "面包屑",
+          "group": "导航",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*I5a2Tpqs3y0AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Tr90QKrE_LcAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "显示当前页面在系统层级结构中的位置，并能向上返回。"
+        }
+      },
+      {
+        "title": "Dropdown",
+        "link": "/components/dropdown-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Dropdown",
+          "toc": "menu",
+          "filename": "components/dropdown/index.zh-CN.md",
+          "lastUpdated": 1693582796000,
+          "category": "Components",
+          "subtitle": "下拉菜单",
+          "group": "导航",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*mBBcQ6goljkAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*5qm4S4Zgh2QAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "向下弹出的列表。"
+        }
+      },
+      {
+        "title": "Menu",
+        "link": "/components/menu-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Menu",
+          "toc": "menu",
+          "filename": "components/menu/index.zh-CN.md",
+          "atomId": "menu",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "group": "导航",
+          "subtitle": "导航菜单",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*KeyQQL5iKkkAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Vn4XSqJFAxcAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "为页面和功能提供导航的菜单列表。"
+        }
+      },
+      {
+        "title": "Pagination",
+        "link": "/components/pagination-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Pagination",
+          "toc": "menu",
+          "filename": "components/pagination/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "分页",
+          "group": "导航",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*8y_iTJGY_aUAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*WM86SrBC8TsAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "采用分页的形式分隔长列表，每次只加载一个页面。"
+        }
+      },
+      {
+        "title": "Steps",
+        "link": "/components/steps-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Steps",
+          "toc": "menu",
+          "filename": "components/steps/index.zh-CN.md",
+          "atomId": "steps",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "步骤条",
+          "group": "导航",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*677sTqCpE3wAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*cFsBQLA0b7UAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "引导用户按照流程完成任务的导航条。"
+        }
       }
-    ],
-    "order": 6
+    ]
   },
   {
-    "type": "type",
-    "title": "重型组件",
+    "title": "Data Entry 数据录入",
+    "order": 4,
     "children": [
       {
-        "category": "Components",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/4n5H%24UX%24j/bianzu%2525204.svg",
-        "filename": "https://procomponents.ant.design/components/layout",
-        "subtitle": "高级布局",
-        "title": "ProLayout",
-        "type": "重型组件",
-        "tag": "https://gw.alipayobjects.com/zos/antfincdn/OG4ajVYzh/bianzu%2525202.svg"
+        "title": "AutoComplete",
+        "link": "/components/auto-complete-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "AutoComplete",
+          "toc": "menu",
+          "filename": "components/auto-complete/index.zh-CN.md",
+          "atomId": "auto-complete",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "自动完成",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*g8THS4NpV6sAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*WERTQ6qvgEYAAAAAAAAAAAAADrJ8AQ/original",
+          "group": { "title": "数据录入", "order": 4 },
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "输入框自动完成功能。"
+        }
       },
       {
-        "category": "Components",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/mStei5BFC/bianzu%2525207.svg",
-        "filename": "https://procomponents.ant.design/components/form",
-        "subtitle": "高级表单",
-        "title": "ProForm",
-        "type": "重型组件",
-        "tag": "https://gw.alipayobjects.com/zos/antfincdn/OG4ajVYzh/bianzu%2525202.svg"
+        "title": "Cascader",
+        "link": "/components/cascader-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Cascader",
+          "toc": "menu",
+          "filename": "components/cascader/index.zh-CN.md",
+          "atomId": "cascader",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "group": "数据录入",
+          "subtitle": "级联选择",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*tokLTp73TsQAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*5-ArSLl5UBsAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "级联选择框。"
+        }
       },
       {
-        "category": "Components",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/AwU0Cv%26Ju/bianzu%2525208.svg",
-        "filename": "https://procomponents.ant.design/components/table",
-        "subtitle": "高级表格",
-        "title": "ProTable",
-        "type": "重型组件",
-        "tag": "https://gw.alipayobjects.com/zos/antfincdn/OG4ajVYzh/bianzu%2525202.svg"
+        "title": "Checkbox",
+        "link": "/components/checkbox-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Checkbox",
+          "toc": "menu",
+          "filename": "components/checkbox/index.zh-CN.md",
+          "lastUpdated": 1693807839000,
+          "category": "Components",
+          "subtitle": "多选框",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*DzgiRbW3khIAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*G3MjTYXL6AIAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "多选框。"
+        }
       },
       {
-        "category": "Components",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/H0%26LSYYfh/bianzu%2525209.svg",
-        "filename": "https://procomponents.ant.design/components/descriptions",
-        "subtitle": "高级定义列表",
-        "title": "ProDescriptions",
-        "type": "重型组件",
-        "tag": "https://gw.alipayobjects.com/zos/antfincdn/OG4ajVYzh/bianzu%2525202.svg"
+        "title": "ColorPicker",
+        "link": "/components/color-picker-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "ColorPicker",
+          "toc": "menu",
+          "filename": "components/color-picker/index.zh-CN.md",
+          "lastUpdated": 1693910560000,
+          "category": "Components",
+          "subtitle": "颜色选择器",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*PpY4RYNM8UcAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*EHL-QYJofZsAAAAAAAAAAAAADrJ8AQ/original",
+          "tag": "New",
+          "demo": { "cols": 2 },
+          "group": { "title": "数据录入" },
+          "__autoDescription": true,
+          "description": "提供颜色选取的组件，自 5.5.0 版本开始提供该组件。"
+        }
       },
       {
-        "category": "Components",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/uZUmLtne5/bianzu%2525209.svg",
-        "filename": "https://procomponents.ant.design/components/list",
-        "subtitle": "高级列表",
-        "title": "ProList",
-        "type": "重型组件",
-        "tag": "https://gw.alipayobjects.com/zos/antfincdn/OG4ajVYzh/bianzu%2525202.svg"
+        "title": "DatePicker",
+        "link": "/components/date-picker-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "DatePicker",
+          "toc": "menu",
+          "filename": "components/date-picker/index.zh-CN.md",
+          "lastUpdated": 1694080615000,
+          "category": "Components",
+          "group": "数据录入",
+          "subtitle": "日期选择框",
+          "description": "输入或选择日期的控件。",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*xXA9TJ8BTioAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*3OpRQKcygo8AAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 }
+        }
       },
       {
-        "category": "Components",
-        "cover": "https://gw.alipayobjects.com/zos/antfincdn/N3eU432oA/bianzu%2525209.svg",
-        "filename": "https://procomponents.ant.design/components/editable-table",
-        "subtitle": "可编辑表格",
-        "title": "EditableProTable",
-        "type": "重型组件",
-        "tag": "https://gw.alipayobjects.com/zos/antfincdn/OG4ajVYzh/bianzu%2525202.svg"
+        "title": "Form",
+        "link": "/components/form-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Form",
+          "toc": "menu",
+          "filename": "components/form/index.zh-CN.md",
+          "lastUpdated": 1695361296000,
+          "category": "Components",
+          "subtitle": "表单",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-lcdS5Qm1bsAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ylFATY6w-ygAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "高性能表单控件，自带数据域管理。包含数据录入、校验以及对应样式。"
+        }
+      },
+      {
+        "title": "Input",
+        "link": "/components/input-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Input",
+          "toc": "menu",
+          "filename": "components/input/index.zh-CN.md",
+          "lastUpdated": 1695613457000,
+          "category": "Components",
+          "subtitle": "输入框",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Y3R0RowXHlAAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*sBqqTatJ-AkAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "通过鼠标或键盘输入内容，是最基础的表单域的包装。"
+        }
+      },
+      {
+        "title": "InputNumber",
+        "link": "/components/input-number-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "InputNumber",
+          "toc": "menu",
+          "filename": "components/input-number/index.zh-CN.md",
+          "atomId": "input-number",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "数字输入框",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JvWbSYhuNlIAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*1uH-R5kLAMIAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "通过鼠标或键盘，输入范围内的数值。"
+        }
+      },
+      {
+        "title": "Mentions",
+        "link": "/components/mentions-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Mentions",
+          "toc": "menu",
+          "filename": "components/mentions/index.zh-CN.md",
+          "atomId": "mentions",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "提及",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*e4bXT7Uhi9YAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*pxR2S53P_xoAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "提及组件。"
+        }
+      },
+      {
+        "title": "Radio",
+        "link": "/components/radio-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Radio",
+          "toc": "menu",
+          "filename": "components/radio/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "单选框",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*M-YKTJnWM2kAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*a9roS6DHFIcAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "单选框。"
+        }
+      },
+      {
+        "title": "Rate",
+        "link": "/components/rate-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Rate",
+          "toc": "menu",
+          "filename": "components/rate/index.zh-CN.md",
+          "atomId": "rate",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "评分",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*oyOcTrB12_YAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*M7_ER7GJr6wAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "评分组件。"
+        }
+      },
+      {
+        "title": "Select",
+        "link": "/components/select-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Select",
+          "toc": "menu",
+          "filename": "components/select/index.zh-CN.md",
+          "atomId": "select",
+          "lastUpdated": 1695634548000,
+          "category": "Components",
+          "subtitle": "选择器",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*zo76T7KQx2UAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*5oPiTqPxGAUAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "下拉选择器。"
+        }
+      },
+      {
+        "title": "Slider",
+        "link": "/components/slider-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Slider",
+          "toc": "menu",
+          "filename": "components/slider/index.zh-CN.md",
+          "atomId": "slider",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "滑动输入条",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*_4heQaUrFn4AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*XkgXTaudeosAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "滑动型输入器，展示当前值和可选范围。"
+        }
+      },
+      {
+        "title": "Switch",
+        "link": "/components/switch-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Switch",
+          "toc": "menu",
+          "filename": "components/switch/index.zh-CN.md",
+          "atomId": "switch",
+          "lastUpdated": 1693892466000,
+          "category": "Components",
+          "subtitle": "开关",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*rtArRpBNDZcAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*al07RK8SGf4AAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "开关选择器。"
+        }
+      },
+      {
+        "title": "TimePicker",
+        "link": "/components/time-picker-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "TimePicker",
+          "toc": "menu",
+          "filename": "components/time-picker/index.zh-CN.md",
+          "atomId": "time-picker",
+          "lastUpdated": 1695268072000,
+          "category": "Components",
+          "subtitle": "时间选择框",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*kGmGSLk_1fwAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*1hDmQJIDFJQAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "输入或选择时间的控件。"
+        }
+      },
+      {
+        "title": "Transfer",
+        "link": "/components/transfer-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Transfer",
+          "toc": "menu",
+          "filename": "components/transfer/index.zh-CN.md",
+          "atomId": "transfer",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "穿梭框",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*EAApQ5ephigAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*yv12S4sSRAEAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "双栏穿梭选择框。"
+        }
+      },
+      {
+        "title": "TreeSelect",
+        "link": "/components/tree-select-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "TreeSelect",
+          "toc": "menu",
+          "filename": "components/tree-select/index.zh-CN.md",
+          "atomId": "tree-select",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "树选择",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*DfTMRYSDngEAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Y5pcQLplFu4AAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "树型选择控件。"
+        }
+      },
+      {
+        "title": "Upload",
+        "link": "/components/upload-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Upload",
+          "toc": "menu",
+          "filename": "components/upload/index.zh-CN.md",
+          "lastUpdated": 1695632284000,
+          "category": "Components",
+          "subtitle": "上传",
+          "group": "数据录入",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*93ymR4RD4S0AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*l1nlSryXib8AAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "文件选择上传和拖拽上传控件。"
+        }
       }
-    ],
-    "order": 8
+    ]
+  },
+  {
+    "title": "Data Display 数据展示",
+    "order": 5,
+    "children": [
+      {
+        "title": "Avatar",
+        "link": "/components/avatar-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Avatar",
+          "toc": "menu",
+          "filename": "components/avatar/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "头像",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JJBSS5lBG4IAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*YbgyQaRGz-UAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "group": { "title": "数据展示", "order": 5 },
+          "__autoDescription": true,
+          "description": "用来代表用户或事物，支持图片、图标或字符展示。"
+        }
+      },
+      {
+        "title": "Badge",
+        "link": "/components/badge-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Badge",
+          "toc": "menu",
+          "filename": "components/badge/index.zh-CN.md",
+          "atomId": "badge",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "徽标数",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*e0qITYqF394AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*v8EQT7KoGbcAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "group": "数据展示",
+          "__autoDescription": true,
+          "description": "图标右上角的圆形徽标数字。"
+        }
+      },
+      {
+        "title": "Calendar",
+        "link": "/components/calendar-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Calendar",
+          "toc": "menu",
+          "filename": "components/calendar/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "group": "数据展示",
+          "subtitle": "日历",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*nF6_To7pDSAAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-p-wQLik200AAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "按照日历形式展示数据的容器。"
+        }
+      },
+      {
+        "title": "Card",
+        "link": "/components/card-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Card",
+          "toc": "menu",
+          "filename": "components/card/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "group": "数据展示",
+          "subtitle": "卡片",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*VXtCTp93KPAAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*a-8zR6rrupgAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "通用卡片容器。"
+        }
+      },
+      {
+        "title": "Carousel",
+        "link": "/components/carousel-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Carousel",
+          "toc": "menu",
+          "filename": "components/carousel/index.zh-CN.md",
+          "atomId": "carousel",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "group": "数据展示",
+          "subtitle": "走马灯",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*bPMSSqbaTMkAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*a-58QpYnqOsAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "旋转木马，一组轮播的区域。"
+        }
+      },
+      {
+        "title": "Collapse",
+        "link": "/components/collapse-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Collapse",
+          "toc": "menu",
+          "filename": "components/collapse/index.zh-CN.md",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "group": "数据展示",
+          "subtitle": "折叠面板",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*B7HKR5OBe8gAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*sir-TK0HkWcAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "可以折叠/展开的内容区域。"
+        }
+      },
+      {
+        "title": "Descriptions",
+        "link": "/components/descriptions-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Descriptions",
+          "toc": "menu",
+          "filename": "components/descriptions/index.zh-CN.md",
+          "atomId": "descriptions",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "描述列表",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*fHdlTpif6XQAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*d27AQJrowGAAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "成组展示多个只读字段。"
+        }
+      },
+      {
+        "title": "Empty",
+        "link": "/components/empty-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Empty",
+          "toc": "menu",
+          "filename": "components/empty/index.zh-CN.md",
+          "atomId": "empty",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "空状态",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ZdiZSLzEV0wAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*obM7S5lIxeMAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "空状态时的展示占位图。"
+        }
+      },
+      {
+        "title": "Image",
+        "link": "/components/image-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Image",
+          "toc": "menu",
+          "filename": "components/image/index.zh-CN.md",
+          "atomId": "image",
+          "lastUpdated": 1693671754000,
+          "category": "Components",
+          "subtitle": "图片",
+          "group": "数据展示",
+          "cols": 2,
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*FbOCS6aFMeUAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*LVQ3R5JjjJEAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "可预览的图片。"
+        }
+      },
+      {
+        "title": "List",
+        "link": "/components/list-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "List",
+          "toc": "menu",
+          "filename": "components/list/index.zh-CN.md",
+          "atomId": "list",
+          "lastUpdated": 1693582796000,
+          "category": "Components",
+          "group": "数据展示",
+          "subtitle": "列表",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*EYuhSpw1iSwAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*tBzwQ7raKX8AAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "通用列表。"
+        }
+      },
+      {
+        "title": "Popover",
+        "link": "/components/popover-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Popover",
+          "toc": "menu",
+          "filename": "components/popover/index.zh-CN.md",
+          "atomId": "popover",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "气泡卡片",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*XhL3QpRw92kAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*RMP_TrdZ3nsAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "点击/鼠标移入元素，弹出气泡式的卡片浮层。"
+        }
+      },
+      {
+        "title": "QRCode",
+        "link": "/components/qr-code-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "QRCode",
+          "toc": "menu",
+          "filename": "components/qr-code/index.zh-CN.md",
+          "atomId": "qr-code",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "二维码",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*cJopQrf0ncwAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*M4PBTZ_n9OgAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "group": { "title": "数据展示", "order": 5 },
+          "tag": "New",
+          "__autoDescription": true,
+          "description": "能够将文本转换生成二维码的组件，支持自定义配色和 Logo 配置，自 antd@5.1.0 版本开始提供该组件。"
+        }
+      },
+      {
+        "title": "Segmented",
+        "link": "/components/segmented-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Segmented",
+          "toc": "menu",
+          "filename": "components/segmented/index.zh-CN.md",
+          "atomId": "segmented",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "分段控制器",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*papwTpNscPIAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*tz7qSaWpi1kAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "分段控制器。自 antd@4.20.0 版本开始提供该组件。"
+        }
+      },
+      {
+        "title": "Statistic",
+        "link": "/components/statistic-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Statistic",
+          "toc": "menu",
+          "filename": "components/statistic/index.zh-CN.md",
+          "atomId": "statistic",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "统计数值",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*YL7PRYNtH-4AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*BPWDRbSYxJ4AAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "展示统计数值。"
+        }
+      },
+      {
+        "title": "Table",
+        "link": "/components/table-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Table",
+          "toc": "menu",
+          "filename": "components/table/index.zh-CN.md",
+          "lastUpdated": 1696473644000,
+          "category": "Components",
+          "group": "数据展示",
+          "subtitle": "表格",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*3yz3QqMlShYAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Sv8XQ50NB40AAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "展示行列数据。"
+        }
+      },
+      {
+        "title": "Tabs",
+        "link": "/components/tabs-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Tabs",
+          "toc": "menu",
+          "filename": "components/tabs/index.zh-CN.md",
+          "atomId": "tabs",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "标签页",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*72NDQqXkyOEAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*8HMoTZUoSGoAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "选项卡切换组件。"
+        }
+      },
+      {
+        "title": "Tag",
+        "link": "/components/tag-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Tag",
+          "toc": "menu",
+          "filename": "components/tag/index.zh-CN.md",
+          "atomId": "tag",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "标签",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*_SBsSrKLg00AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JPNAQYrVkYkAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "进行标记和分类的小标签。"
+        }
+      },
+      {
+        "title": "Timeline",
+        "link": "/components/timeline-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Timeline",
+          "toc": "menu",
+          "filename": "components/timeline/index.zh-CN.md",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "时间轴",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*FkTySqNt3sYAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*yIl9S4hAIBcAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "垂直展示的时间流信息。"
+        }
+      },
+      {
+        "title": "Tooltip",
+        "link": "/components/tooltip-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Tooltip",
+          "toc": "menu",
+          "filename": "components/tooltip/index.zh-CN.md",
+          "atomId": "tooltip",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "文字提示",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*3u9eSZO_4c0AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*gwrhTozoTC4AAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "简单的文字提示气泡框。"
+        }
+      },
+      {
+        "title": "Tour",
+        "link": "/components/tour-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Tour",
+          "toc": "menu",
+          "filename": "components/tour/index.zh-CN.md",
+          "atomId": "tour",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "漫游式引导",
+          "group": "数据展示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*8CC_Tbe3_e4AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*nF6hQpM0XtEAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "tag": "New",
+          "__autoDescription": true,
+          "description": "用于分步引导用户了解产品功能的气泡组件。自 5.0.0 版本开始提供该组件。"
+        }
+      },
+      {
+        "title": "Tree",
+        "link": "/components/tree-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Tree",
+          "toc": "menu",
+          "filename": "components/tree/index.zh-CN.md",
+          "lastUpdated": 1694596749000,
+          "category": "Components",
+          "group": "数据展示",
+          "subtitle": "树形控件",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Ag9_Q6ArswEAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*1GeUQJPTGUYAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "多层次的结构列表。"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Feedback 反馈",
+    "order": 6,
+    "children": [
+      {
+        "title": "Alert",
+        "link": "/components/alert-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Alert",
+          "toc": "menu",
+          "filename": "components/alert/index.zh-CN.md",
+          "lastUpdated": 1695347878000,
+          "category": "Components",
+          "subtitle": "警告提示",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Ct7bT7rrTTAAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-U3XQqYN7VsAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "group": { "title": "反馈", "order": 6 },
+          "__autoDescription": true,
+          "description": "警告提示，展现需要关注的信息。"
+        }
+      },
+      {
+        "title": "Drawer",
+        "link": "/components/drawer-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Drawer",
+          "toc": "menu",
+          "filename": "components/drawer/index.zh-CN.md",
+          "atomId": "drawer",
+          "lastUpdated": 1693582796000,
+          "group": "反馈",
+          "category": "Components",
+          "subtitle": "抽屉",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*v3TvSq2E0HAAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*4wzwRIBLuqEAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "屏幕边缘滑出的浮层面板。"
+        }
+      },
+      {
+        "title": "Message",
+        "link": "/components/message-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Message",
+          "toc": "menu",
+          "filename": "components/message/index.zh-CN.md",
+          "atomId": "message",
+          "lastUpdated": 1693582796000,
+          "category": "Components",
+          "subtitle": "全局提示",
+          "group": "反馈",
+          "noinstant": true,
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JjZBT6N1MusAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*7qMTRoq3ZGkAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "全局展示操作反馈信息。"
+        }
+      },
+      {
+        "title": "Modal",
+        "link": "/components/modal-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Modal",
+          "toc": "menu",
+          "filename": "components/modal/index.zh-CN.md",
+          "atomId": "modal",
+          "lastUpdated": 1693671754000,
+          "group": "反馈",
+          "category": "Components",
+          "subtitle": "对话框",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*wM3qQ5XrhlcAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*fBrgSJBmavgAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "模态对话框。"
+        }
+      },
+      {
+        "title": "Notification",
+        "link": "/components/notification-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Notification",
+          "toc": "menu",
+          "filename": "components/notification/index.zh-CN.md",
+          "atomId": "notification",
+          "lastUpdated": 1693582796000,
+          "category": "Components",
+          "group": "反馈",
+          "noinstant": true,
+          "subtitle": "通知提醒框",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*6RWNQ78WtvEAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*9hTIToR-3YYAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "全局展示通知提醒信息。"
+        }
+      },
+      {
+        "title": "Popconfirm",
+        "link": "/components/popconfirm-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Popconfirm",
+          "toc": "menu",
+          "filename": "components/popconfirm/index.zh-CN.md",
+          "atomId": "popconfirm",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "气泡确认框",
+          "group": "反馈",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*sAGpRoBtTXcAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*HrFtQ6jJJFQAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "点击元素，弹出气泡式的确认框。"
+        }
+      },
+      {
+        "title": "Progress",
+        "link": "/components/progress-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Progress",
+          "toc": "menu",
+          "filename": "components/progress/index.zh-CN.md",
+          "atomId": "progress",
+          "lastUpdated": 1694428278000,
+          "category": "Components",
+          "subtitle": "进度条",
+          "group": "反馈",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*gK_4S6fDRfgAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*HJH8Tb1lcYAAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "展示操作的当前进度。"
+        }
+      },
+      {
+        "title": "Result",
+        "link": "/components/result-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Result",
+          "toc": "menu",
+          "filename": "components/result/index.zh-CN.md",
+          "atomId": "result",
+          "lastUpdated": 1693407755000,
+          "group": "反馈",
+          "category": "Components",
+          "subtitle": "结果",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-e2IRroDJyEAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-0kxQrbHx2kAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "用于反馈一系列操作任务的处理结果。"
+        }
+      },
+      {
+        "title": "Skeleton",
+        "link": "/components/skeleton-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Skeleton",
+          "toc": "menu",
+          "filename": "components/skeleton/index.zh-CN.md",
+          "atomId": "skeleton",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "骨架屏",
+          "group": "反馈",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*uae3QbkNCm8AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*VcjGQLSrYdcAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "在需要等待加载内容的位置提供一个占位图形组合。"
+        }
+      },
+      {
+        "title": "Spin",
+        "link": "/components/spin-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Spin",
+          "toc": "menu",
+          "filename": "components/spin/index.zh-CN.md",
+          "atomId": "spin",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "group": "反馈",
+          "subtitle": "加载中",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*5mC5TomY4B0AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*i43_ToFrL8YAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "__autoDescription": true,
+          "description": "用于页面和区块的加载中状态。"
+        }
+      },
+      {
+        "title": "Watermark",
+        "link": "/components/watermark-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Watermark",
+          "toc": "menu",
+          "filename": "components/watermark/index.zh-CN.md",
+          "atomId": "watermark",
+          "lastUpdated": 1693497770000,
+          "category": "Components",
+          "subtitle": "水印",
+          "group": "反馈",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*wr1ISY50SyYAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*duAQQbjHlHQAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 1 },
+          "tag": "New",
+          "__autoDescription": true,
+          "description": "给页面的某个区域加上水印。"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Other 其他",
+    "order": 7,
+    "children": [
+      {
+        "title": "Affix",
+        "link": "/components/affix-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "Affix",
+          "toc": "menu",
+          "filename": "components/affix/index.zh-CN.md",
+          "atomId": "affix",
+          "lastUpdated": 1691490468000,
+          "category": "Components",
+          "subtitle": "固钉",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*YSm4RI3iOJ8AAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*03dxS64LxeQAAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "group": { "title": "其他", "order": 7 },
+          "__autoDescription": true,
+          "description": "将页面元素钉在可视范围。"
+        }
+      },
+      {
+        "title": "App",
+        "link": "/components/app-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "App",
+          "toc": "menu",
+          "filename": "components/app/index.zh-CN.md",
+          "atomId": "app",
+          "lastUpdated": 1693407755000,
+          "category": "Components",
+          "subtitle": "包裹组件",
+          "group": "其他",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*HJz8SZos2wgAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*oC92TK44Ex8AAAAAAAAAAAAADrJ8AQ/original",
+          "demo": { "cols": 2 },
+          "tag": "New",
+          "__autoDescription": true,
+          "description": "新的包裹组件，提供重置样式和提供消费上下文的默认环境。"
+        }
+      },
+      {
+        "title": "ConfigProvider",
+        "link": "/components/config-provider-cn",
+        "order": 0,
+        "frontmatter": {
+          "title": "ConfigProvider",
+          "toc": "menu",
+          "filename": "components/config-provider/index.zh-CN.md",
+          "atomId": "config-provider",
+          "lastUpdated": 1696598861000,
+          "category": "Components",
+          "subtitle": "全局化配置",
+          "group": "其他",
+          "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*NVKORa7BCVwAAAAAAAAAAAAADrJ8AQ/original",
+          "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*YC4ERpGAddoAAAAAAAAAAAAADrJ8AQ/original",
+          "__autoDescription": true,
+          "description": "为组件提供统一的全局化配置。"
+        }
+      }
+    ]
   }
 ]
