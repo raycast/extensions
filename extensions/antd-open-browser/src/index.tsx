@@ -7,7 +7,7 @@ type dataType = {
   order?: number;
   children: { title?: string; link?: string; frontmatter: { title?: string; subtitle?: string; cover?: string } }[];
 };
-const list: dataType[] = dataJSON;
+const list = dataJSON as dataType[];
 
 export default function Command() {
   return (
