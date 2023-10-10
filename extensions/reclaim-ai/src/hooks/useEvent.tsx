@@ -11,6 +11,7 @@ import { useUser } from "./useUser";
 import { useTask } from "./useTask";
 import { NativePreferences } from "../types/preferences";
 import { CalendarAccount } from "../types/account";
+import { filterMultipleOutDuplicateEvents } from "../utils/events";
 
 const useEvent = () => {
   const { fetcher } = reclaimApi();
@@ -44,18 +45,12 @@ const useEvent = () => {
         })
       );
 
+      console.log(eventsResponse?.map((event) => `${event.title}-${event.color}`));
+
       if (!eventsResponse || error) throw error;
 
-      // Create hashmap for fast lookups if event is synced and part of both calendars
-      const eventHashMap = new Map(
-        eventsResponse.map((event) => [`${event.eventStart}${event.eventEnd}`, event.eventId])
-      );
-
       // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-      return eventsResponse.filter(
-        (event) =>
-          !(event.personalSync && event.reclaimManaged && eventHashMap.has(`${event.eventStart}${event.eventEnd}`))
-      );
+      return filterMultipleOutDuplicateEvents(eventsResponse);
     } catch (error) {
       console.error("Error while fetching events", error);
     }
