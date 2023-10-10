@@ -118,7 +118,7 @@ export default function Command() {
                   onAction={() => setShowingDetail(!showingDetail)}
                 />
                 <Action.CopyToClipboard
-                  title="Copy As Markdown"
+                  title="Copy as Markdown"
                   content={`[${music.title}(豆瓣)](${music.url})`}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
