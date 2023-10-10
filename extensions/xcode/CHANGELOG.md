@@ -1,5 +1,13 @@
 # Xcode Changelog
 
+## [Updates to Simulator and Recent Builds] - 2023-10-07
+
+- Added restart Simulator
+- Added Rename Simulator
+- Added Push Notifications using a payload
+- Added iCloud Sync
+- Added open AppGroup directory
+  
 ## [Updated Swift Package Types] - 2023-10-03
 
 - Updated Swift Package types when creating a new Swift Package.

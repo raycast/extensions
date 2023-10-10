@@ -8,29 +8,15 @@ import { XcodeSimulatorApplicationGroup } from "../models/xcode-simulator/xcode-
 import { groupBy } from "../shared/group-by";
 import { XcodeSimulatorState } from "../models/xcode-simulator/xcode-simulator-state.model";
 
-/**
- * Xcode Simulator Application Sandbox Path
- */
-interface XcodeSimulatorApplicationSandBoxPath {
+interface XcodeSimulatorApplicationPath {
   /**
    * The bundle identifier
    */
   bundleIdentifier: string;
   /**
-   * The sandbox path
+   * The path (AppGroup | Sandbox)
    */
-  sandBoxPath: string;
-}
-
-interface XcodeSimulatorApplicationAppGroupPath {
-  /**
-   * The bundle identifier
-   */
-  bundleIdentifier: string;
-  /**
-   * The appGroup path
-   */
-  appGroupPath: string;
+  path: string;
 }
 
 /**
@@ -40,18 +26,12 @@ export class XcodeSimulatorApplicationService {
   /**
    * The Simulator SandBox Paths Map Cache
    */
-  private static simulatorSandBoxPathsCache = new Map<
-    XcodeSimulator,
-    Promise<XcodeSimulatorApplicationSandBoxPath[]>
-  >();
+  private static simulatorSandBoxPathsCache = new Map<XcodeSimulator, Promise<XcodeSimulatorApplicationPath[]>>();
 
   /**
    * The Simulator AppGroup Paths Map Cache
    */
-  private static simulatorAppGroupPathsCache = new Map<
-    XcodeSimulator,
-    Promise<XcodeSimulatorApplicationAppGroupPath[]>
-  >();
+  private static simulatorAppGroupPathsCache = new Map<XcodeSimulator, Promise<XcodeSimulatorApplicationPath[]>>();
 
   /**
    * Retrieve all XcodeSimulatorApplicationGroups
@@ -279,63 +259,15 @@ export class XcodeSimulatorApplicationService {
     if (!simulatorSandBoxPathsPromise) {
       // Initialize simulator data application directory path
       const dataApplicationDirectoryPath = Path.join(simulator.dataPath, "Containers/Data/Application");
-      // Initialize simulator sandbox paths promise by:
-      // 1. Reading the data application directory path child directories
-      // 2. Retrieve all bundle identifiers alongside with the sandbox directory path
-      simulatorSandBoxPathsPromise = execAsync(
-        [
-          // List all child directories in data application directory
-          `ls -l ${dataApplicationDirectoryPath}`,
-          // Format output in the following format "{Month}-{Day}-{Hour}-{Minute} {Path}"
-          `awk '{print $6 "-" $7 "-" $8 " " $9}'`,
-          // Remove duplicates by first component (separated by whitespace)
-          `awk '!seen[$1]++'`,
-          // Drop first component (separated by whitespace)
-          `awk '{$1=""; print $0}'`,
-        ].join(" | ")
-      )
-        .then((output) =>
-          output.stdout
-            .trim()
-            .split("\n")
-            .map((path) => Path.join(dataApplicationDirectoryPath, path.trim()))
-        )
-        .then((paths) =>
-          Promise.allSettled(
-            paths.map((path) =>
-              execAsync(
-                [
-                  "defaults",
-                  "read",
-                  Path.join(path, ".com.apple.mobile_container_manager.metadata.plist"),
-                  "MCMMetadataIdentifier",
-                ].join(" ")
-              ).then((output) => {
-                const bundleIdentifier = output.stdout.trim();
-                if (bundleIdentifier) {
-                  return {
-                    bundleIdentifier: bundleIdentifier,
-                    sandBoxPath: path,
-                  };
-                } else {
-                  return undefined;
-                }
-              })
-            )
-          ).then(
-            (results) =>
-              results
-                .map((result) => (result.status == "fulfilled" ? result.value : undefined))
-                .filter(Boolean) as XcodeSimulatorApplicationSandBoxPath[]
-          )
-        );
+      //get sandbox paths from a directory
+      simulatorSandBoxPathsPromise = this.getApplicationPathFromDirectory(dataApplicationDirectoryPath);
       // Set simulator sandbox paths promise so that the sandbox paths are only read once per simulator
       XcodeSimulatorApplicationService.simulatorSandBoxPathsCache.set(simulator, simulatorSandBoxPathsPromise);
     }
     // Return sandbox path where the bundle identifier matches
     return (await simulatorSandBoxPathsPromise)?.find(
       (simulatorSandBoxPath) => simulatorSandBoxPath.bundleIdentifier === bundleIdentifier
-    )?.sandBoxPath;
+    )?.path;
   }
 
   /**
@@ -373,62 +305,73 @@ export class XcodeSimulatorApplicationService {
     if (!simulatorAppGroupPathsPromise) {
       // Initialize simulator data application directory path
       const appGroupDirectoryPath = Path.join(simulator.dataPath, "Containers/Shared/AppGroup");
-      // Initialize simulator AppGroup paths promise by:
-      // 1. Reading the data application directory path child directories
-      // 2. Retrieve all bundle identifiers alongside with the AppGroup directory path
-      simulatorAppGroupPathsPromise = execAsync(
-        [
-          // List all child directories in data application directory
-          `ls -l ${appGroupDirectoryPath}`,
-          // Format output in the following format "{Month}-{Day}-{Hour}-{Minute} {Path}"
-          `awk '{print $6 "-" $7 "-" $8 " " $9}'`,
-          // Remove duplicates by first component (separated by whitespace)
-          `awk '!seen[$1]++'`,
-          // Drop first component (separated by whitespace)
-          `awk '{$1=""; print $0}'`,
-        ].join(" | ")
-      )
-        .then((output) =>
-          output.stdout
-            .trim()
-            .split("\n")
-            .map((path) => Path.join(appGroupDirectoryPath, path.trim()))
-        )
-        .then((paths) =>
-          Promise.allSettled(
-            paths.map((path) =>
-              execAsync(
-                [
-                  "defaults",
-                  "read",
-                  Path.join(path, ".com.apple.mobile_container_manager.metadata.plist"),
-                  "MCMMetadataIdentifier",
-                ].join(" ")
-              ).then((output) => {
-                const bundleIdentifier = output.stdout.trim();
-                if (bundleIdentifier) {
-                  return {
-                    bundleIdentifier: bundleIdentifier,
-                    appGroupPath: path,
-                  };
-                } else {
-                  return undefined;
-                }
-              })
-            )
-          ).then(
-            (results) =>
-              results
-                .map((result) => (result.status == "fulfilled" ? result.value : undefined))
-                .filter(Boolean) as XcodeSimulatorApplicationAppGroupPath[]
-          )
-        );
+      //get AppGroup paths from a directory
+      simulatorAppGroupPathsPromise = this.getApplicationPathFromDirectory(appGroupDirectoryPath);
       // Set simulator AppGroup paths promise so that the AppGroup paths are only read once per simulator
       XcodeSimulatorApplicationService.simulatorAppGroupPathsCache.set(simulator, simulatorAppGroupPathsPromise);
     }
     // Return AppGroup path where the bundle identifier matches
     return (await simulatorAppGroupPathsPromise)?.find(
       (simulatorAppGroupxPath) => simulatorAppGroupxPath.bundleIdentifier === `group.${bundleIdentifier}`
-    )?.appGroupPath;
+    )?.path;
+  }
+
+  /**
+   * Get Application Path from a Directory
+   * @param applicationPath The Application path Inside a Container
+   * @private
+   */
+  private static async getApplicationPathFromDirectory(
+    applicationPath: string
+  ): Promise<XcodeSimulatorApplicationPath[]> {
+    // 1. Reading the data application directory path child directories
+    // 2. Retrieve all bundle identifiers alongside with the directory path (Sandbox | AppGroup)
+    return execAsync(
+      [
+        // List all child directories in data application directory
+        `ls -l ${applicationPath}`,
+        // Format output in the following format "{Month}-{Day}-{Hour}-{Minute} {Path}"
+        `awk '{print $6 "-" $7 "-" $8 " " $9}'`,
+        // Remove duplicates by first component (separated by whitespace)
+        `awk '!seen[$1]++'`,
+        // Drop first component (separated by whitespace)
+        `awk '{$1=""; print $0}'`,
+      ].join(" | ")
+    )
+      .then((output) =>
+        output.stdout
+          .trim()
+          .split("\n")
+          .map((path) => Path.join(applicationPath, path.trim()))
+      )
+      .then((paths) =>
+        Promise.allSettled(
+          paths.map((path) =>
+            execAsync(
+              [
+                "defaults",
+                "read",
+                Path.join(path, ".com.apple.mobile_container_manager.metadata.plist"),
+                "MCMMetadataIdentifier",
+              ].join(" ")
+            ).then((output) => {
+              const bundleIdentifier = output.stdout.trim();
+              if (bundleIdentifier) {
+                return {
+                  bundleIdentifier: bundleIdentifier,
+                  path: path,
+                };
+              } else {
+                return undefined;
+              }
+            })
+          )
+        ).then(
+          (results) =>
+            results
+              .map((result) => (result.status == "fulfilled" ? result.value : undefined))
+              .filter(Boolean) as XcodeSimulatorApplicationPath[]
+        )
+      );
   }
 }
