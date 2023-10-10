@@ -1,4 +1,4 @@
-import { Icon } from "@raycast/api";
+import { Color, Icon } from "@raycast/api";
 import { Category, Section, PrismaCommand } from "../types";
 import { details } from "./details";
 
@@ -6,25 +6,25 @@ export const prismaSections: Section[] = [
   {
     title: "Common",
     category: Category.COMMON,
-    tintColor: "#4757e6",
+    tintColor: Color.Purple,
     icon: Icon.Terminal,
   },
   {
     title: "DB",
     category: Category.DB,
-    tintColor: "#24db67",
+    tintColor: Color.Green,
     icon: Icon.HardDrive,
   },
   {
     title: "Migrate",
     category: Category.MIGRATE,
-    tintColor: "#f3538b",
+    tintColor: Color.Magenta,
     icon: Icon.Cloud,
   },
   {
     title: "Studio",
     category: Category.STUDIO,
-    tintColor: "#0d9aff",
+    tintColor: Color.Blue,
     icon: Icon.AppWindowSidebarLeft,
   },
 ];
