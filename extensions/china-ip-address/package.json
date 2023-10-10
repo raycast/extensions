@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "ip",
-      "title": "IP",
-      "subtitle": "IP Address",
+      "title": "Lookup IP Address",
       "description": "Get your China public network IP Address",
       "mode": "view"
     }
