@@ -1,4 +1,3 @@
-import { authorize } from "@api/oauth";
 import GalleryItemActions from "@components/GalleryItemActions";
 import GridError from "@components/GridError";
 import GridLoading from "@components/GridLoading";
@@ -10,8 +9,10 @@ import { aspectRatioToSize, defaultGridColumnsForImagine, modelNameToId } from "
 import { getErrorText } from "@ts/errors";
 import { TGenerationCreateResult } from "@ts/types";
 import fetch from "node-fetch";
+import { useEffect } from "react";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Imagine }>) {
+  const { token, isTokenLoading } = useToken();
   const { Prompt } = props.arguments;
   const endpoint = "https://api.stablecog.com/v1/image/generation/create";
   const { model, aspect_ratio, num_outputs } = getPreferenceValues<Preferences>();
@@ -24,9 +25,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Imagin
     width: size.width,
     height: size.height,
   };
-  const { isTokenLoading } = useToken();
-  const { data, isLoading, error } = usePromise(async () => {
-    const token = await authorize();
+  const { data, isLoading, error, revalidate } = usePromise(async () => {
+    if (isTokenLoading || token === undefined) return null;
     const res = await fetch(endpoint, {
       method: "POST",
       body: JSON.stringify(generationParams),
@@ -39,6 +39,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Imagin
     if (resJson.error) throw new Error(getErrorText(resJson.error));
     return resJson;
   });
+
+  useEffect(() => {
+    if (isTokenLoading || token === undefined) return;
+    revalidate();
+  }, [Prompt, token, isTokenLoading]);
 
   if (isTokenLoading) return <LoadingToken />;
   if (error) return <GridError error={error.message} />;
