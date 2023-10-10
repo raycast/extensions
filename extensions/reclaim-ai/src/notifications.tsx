@@ -9,7 +9,7 @@ import { CalendarAccount } from "./types/account";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
-import { eventColors, truncateEventSize } from "./utils/events";
+import { eventColors, filterMultipleOutDuplicateEvents, truncateEventSize } from "./utils/events";
 import { parseEmojiField } from "./utils/string";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
@@ -89,13 +89,8 @@ export default function Command() {
     }
   );
 
-  // Create hashmap for fast lookups if event is synced and part of both calendars
-  const eventHashMap = new Map(eventsResponse?.map((event) => [`${event.eventStart}${event.eventEnd}`, event.eventId]));
-
   // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-  const eventData = eventsResponse?.filter(
-    (event) => !(event.personalSync && event.reclaimManaged && eventHashMap.has(`${event.eventStart}${event.eventEnd}`))
-  );
+  const eventData = filterMultipleOutDuplicateEvents(eventsResponse);
 
   const { data: eventMoment, isLoading: isLoadingMoment } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
     headers: fetchHeaders,
