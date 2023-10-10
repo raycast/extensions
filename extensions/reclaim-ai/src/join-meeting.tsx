@@ -5,6 +5,7 @@ import { ApiResponseUser } from "./hooks/useUser.types";
 import { CalendarAccount } from "./types/account";
 import { NativePreferences } from "./types/preferences";
 import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
+import {filterMultipleOutDuplicateEvents} from "./utils/events";
 
 export default async function Command() {
   const { apiUrl } = getPreferenceValues<NativePreferences>();
@@ -55,13 +56,8 @@ export default async function Command() {
 
   const showDeclinedEvents = !!currentUser?.settings.showDeclinedEvents;
 
-  // Create hashmap for fast lookups if event is synced and part of both calendars
-  const eventHashMap = new Map(eventsResponse.map((event) => [`${event.eventStart}${event.eventEnd}`, event.eventId]));
-
   // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-  const eventsData = eventsResponse.filter(
-    (event) => !(event.personalSync && event.reclaimManaged && eventHashMap.has(`${event.eventStart}${event.eventEnd}`))
-  );
+  const eventsData = filterMultipleOutDuplicateEvents(eventsResponse);
 
   const events = eventsData
     ?.filter((event) => {
