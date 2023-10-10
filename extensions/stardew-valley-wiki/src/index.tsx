@@ -65,33 +65,28 @@ export default function Command() {
       inset={Grid.Inset.Small}
       itemSize={Grid.ItemSize.Medium}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Select SV category"
-          storeValue={true}
-          onChange={(newValue) => setCategory(newValue)}
-        >
-        <Grid.Dropdown.Item
-          value={data.categories[0].name}
-          title="All Categories"
-          icon={{
-            source: getImageURL(data.categories[0].symbol),
-            fallback: Icon.Warning,
-            
-          }}
-        />
-        <Grid.Dropdown.Section>
-          {data.categories.slice(1).map((category, index) => (
-            <Grid.Dropdown.Item
-              key={index}
-              value={category.name}
-              title={category.title}
-              icon={{
-                source: getImageURL(category.symbol),
-              }}
-            />
-          ))}
-        </Grid.Dropdown.Section>
-      </Grid.Dropdown>
+        <Grid.Dropdown tooltip="Select SV category" storeValue={true} onChange={(newValue) => setCategory(newValue)}>
+          <Grid.Dropdown.Item
+            value={data.categories[0].name}
+            title="All Categories"
+            icon={{
+              source: getImageURL(data.categories[0].symbol),
+              fallback: Icon.Warning,
+            }}
+          />
+          <Grid.Dropdown.Section>
+            {data.categories.slice(1).map((category, index) => (
+              <Grid.Dropdown.Item
+                key={index}
+                value={category.name}
+                title={category.title}
+                icon={{
+                  source: getImageURL(category.symbol),
+                }}
+              />
+            ))}
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
       {category && (
@@ -146,7 +141,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
       <Action.OpenInBrowser
         key="openLink"
         title="Open Wiki Page"
-        url={"https://stardewvalleywiki.com/"+name}
+        url={"https://stardewvalleywiki.com/" + name}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
         onOpen={() => {
           addRecentSymbol(props.symbol);
@@ -158,7 +153,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
       <Action.CopyToClipboard
         key="copyLink"
         title="Copy Wiki Page Link"
-        content={"https://stardewvalleywiki.com/"+name}
+        content={"https://stardewvalleywiki.com/" + name}
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         onCopy={() => {
           addRecentSymbol(props.symbol);

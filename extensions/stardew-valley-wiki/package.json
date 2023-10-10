@@ -17,7 +17,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search SV characters",
+      "title": "Search SV Characters",
       "description": "Search and open Stardew Valley's characters in the wiki",
       "mode": "view"
     }
