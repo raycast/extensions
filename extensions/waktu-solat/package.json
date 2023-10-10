@@ -290,9 +290,10 @@
     "@raycast/eslint-config": "1.0.6",
     "@types/humanize-duration": "^3.27.1",
     "@types/jsdom": "^21.1.3",
+    "@types/moment": "^2.13.0",
     "@types/node": "20.8.0",
-    "@types/react": "18.2.24",
     "eslint": "^8.50.0",
+    "@types/react": "18.0.9",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
