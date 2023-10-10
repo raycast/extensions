@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-joplin-notes",
   "title": "Search Joplin Notes",
-  "description": "search and view in your joplin notes",
+  "description": "Search and view in your joplin notes",
   "icon": "Joplin_icon.png",
   "author": "wisdom-plus",
   "categories": [
