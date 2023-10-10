@@ -1,16 +1,15 @@
-import { LaunchProps, Grid, getPreferenceValues } from "@raycast/api";
-import { useFetch, usePromise } from "@raycast/utils";
-import { TGenerationCreateResult } from "@ts/types";
-import { aspectRatioToSize, defaultGridColumnsForImagine, loadingGif, modelNameToId } from "@ts/constants";
-import GridSomethingWentWrong from "@components/GridError";
-import { useToken } from "@hooks/useAuthorization";
-import LoadingToken from "@components/LoadingToken";
+import { authorize } from "@api/oauth";
 import GalleryItemActions from "@components/GalleryItemActions";
 import GridError from "@components/GridError";
 import GridLoading from "@components/GridLoading";
-import fetch from "node-fetch";
-import { authorize } from "@api/oauth";
+import LoadingToken from "@components/LoadingToken";
+import { useToken } from "@hooks/useAuthorization";
+import { Grid, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { aspectRatioToSize, defaultGridColumnsForImagine, modelNameToId } from "@ts/constants";
 import { getErrorText } from "@ts/errors";
+import { TGenerationCreateResult } from "@ts/types";
+import fetch from "node-fetch";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.Imagine }>) {
   const { Prompt } = props.arguments;

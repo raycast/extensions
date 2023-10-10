@@ -10,5 +10,3 @@ export function getErrorText(errorCode: string | unknown) {
   if (typeof errorCode === "string") return errorCode;
   return "Something went wrong :(";
 }
-
-//

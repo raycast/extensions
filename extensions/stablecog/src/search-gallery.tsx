@@ -1,15 +1,14 @@
-import { useState } from "react";
-import useGallery from "@hooks/useGallery";
-import GridSearchingPlaceholder from "@components/GridSearchingPlaceholder";
-import GridNoItemsPlaceholder from "@components/GridNoItemsPlaceholder";
-import GridSomethingWentWrong from "@components/GridError";
 import GalleryItemActions from "@components/GalleryItemActions";
-import { getThumbnailImgUrl } from "@ts/helpers";
-import { defaultGridColumns } from "@ts/constants";
-import { Grid } from "@raycast/api";
-import { useToken } from "@hooks/useAuthorization";
-import LoadingToken from "@components/LoadingToken";
 import GridError from "@components/GridError";
+import GridNoItemsPlaceholder from "@components/GridNoItemsPlaceholder";
+import GridSearchingPlaceholder from "@components/GridSearchingPlaceholder";
+import LoadingToken from "@components/LoadingToken";
+import { useToken } from "@hooks/useAuthorization";
+import useGallery from "@hooks/useGallery";
+import { Grid } from "@raycast/api";
+import { defaultGridColumns } from "@ts/constants";
+import { getThumbnailImgUrl } from "@ts/helpers";
+import { useState } from "react";
 
 export default function Command() {
   const [query, setQuery] = useState("");
