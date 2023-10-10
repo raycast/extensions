@@ -230,7 +230,7 @@
 /extensions/debank                                   @Yukaii
 /extensions/decentraland                             @fmiras
 /extensions/deduplicator                             @lryong
-/extensions/deepcast                                 @mooxl @peter-gy @Popalay @MonsterDeveloper @YamenSharaf @EvanZhouDev
+/extensions/deepcast                                 @mooxl @peter-gy @Popalay @MonsterDeveloper @YamenSharaf @EvanZhouDev @erics118
 /extensions/defichain-dobby                          @adrian-schnell
 /extensions/defichain-lottery                        @adrian-schnell @pernielsentikaer
 /extensions/defiscan                                 @adrian-schnell
@@ -733,6 +733,7 @@
 /extensions/pagerduty                                @horimislime
 /extensions/palette-colors                           @douglas-pires
 /extensions/palette-picker                           @juliusmarminge
+/extensions/papago-translate                         @Rita-Mordio
 /extensions/paperless-ngx                            @Padamdam
 /extensions/papermatch                               @marlonjames71 @AndrewMonty
 /extensions/paperspace                               @yuri-becker
@@ -943,7 +944,7 @@
 /extensions/simpread                                 @Kenshin
 /extensions/single-disk-eject                        @johndturn
 /extensions/sip                                      @jamesjlyons
-/extensions/sips                                     @SKaplanOfficial @arronhunt
+/extensions/sips                                     @SKaplanOfficial @arronhunt @nakaakist
 /extensions/sketch                                   @aesign
 /extensions/slack                                    @momme-rtf @Elliot67
 /extensions/slack-status                             @PitNikola @johnhampton
@@ -1117,7 +1118,7 @@
 /extensions/vueuse-functions                         @noopurphalak
 /extensions/wakatime                                 @iammola
 /extensions/waktu-solat                              @sayuthisobri
-/extensions/warp                                     @joetannenbaum @danulqua @theRubberDuckiee
+/extensions/warp                                     @joetannenbaum @danulqua @theRubberDuckiee @hakob8956
 /extensions/wayback-machine                          @pernielsentikaer @andreaselia
 /extensions/weather                                  @tonka3000
 /extensions/web-audit                                @floriandwt
