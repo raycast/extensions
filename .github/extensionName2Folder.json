@@ -910,6 +910,7 @@
   "danyelkeddah/search-composer-packagist": "search-composer-packagist",
   "jordelver/search-hex": "search-hexpm",
   "QIanGua/search-hookmark": "search-hookmark",
+  "wisdom-plus/search-joplin-notes": "search-joplin-notes",
   "krzysztofzuraw/search-mdn": "search-mdn",
   "reckoning-dev/search-notion": "search-notion",
   "mrmartineau/search-npm": "search-npm",
