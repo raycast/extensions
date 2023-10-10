@@ -24,10 +24,18 @@
       "title": "LaTeX OCR",
       "description": "LaTeX OCR by SimpleTex",
       "mode": "no-view"
+    },
+    {
+      "name": "config",
+      "title": "LaTeX OCR Config",
+      "description": "Config for SimpleTex OCR",
+      "mode": "view",
+      "icon": "command-icon.png"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
     "@types/axios": "^0.14.0",
     "axios": "^1.5.0",
     "copy-paste": "^1.5.3",
