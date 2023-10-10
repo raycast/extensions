@@ -16,10 +16,13 @@ export default function Command() {
   const [b_FSSTI, setB_FSSTI] = useState(String);
 
   const [temperature, setTemperature] = useState(String);
+  const [temcomment, setTemcomment] = useState(String);
   const [debtTemperature, setDebtTemperature] = useState(String);
 
   let isTemperature = false;
-  let isDebtTemperature = false;
+  let isDebtTemperatureUp = false;
+  let isDebtTemperatureDown = false;
+  let isthefirst = false;
 
   useEffect(() => {
     async function fetchData() {
@@ -92,6 +95,8 @@ export default function Command() {
         const yzResponse = await fetch("https://youzhiyouxing.cn/data");
         const html = await yzResponse.text();
 
+        let temcomment = "";
+
         // 创建一个新的 HTML 解析器
         const parser = new Parser({
           ontext: (text) => {
@@ -99,13 +104,21 @@ export default function Command() {
             if (isTemperature) {
               const temperature = text.trim();
               setTemperature(temperature);
-              setStatus("success");
+              // setStatus("success");
               isTemperature = false;
-            } else if (isDebtTemperature) {
-              const debtTemperature = text.trim();
+            } else if (isDebtTemperatureUp) {
+              const debtTemperature = text.trim() + " 温度上升";
               setDebtTemperature(debtTemperature);
-              setStatus("success");
-              isDebtTemperature = false;
+              // setStatus("success");
+              isDebtTemperatureUp = false;
+            } else if (isDebtTemperatureDown) {
+              const debtTemperature = text.trim() + " 温度下降";
+              setDebtTemperature(debtTemperature);
+              isDebtTemperatureDown = false;
+            } else if (isthefirst) {
+              temcomment += text.trim() + " ";
+              setTemcomment(temcomment);
+              isthefirst = false;
             }
           },
           onopentag: (name, attributes) => {
@@ -113,7 +126,11 @@ export default function Command() {
             if (name === "div" && attributes.class === "tw-text-[40px] tw-font-semibold") {
               isTemperature = true;
             } else if (name === "span" && attributes.class === "tw-font-semibold trend-gt") {
-              isDebtTemperature = true;
+              isDebtTemperatureUp = true;
+            } else if (name === "span" && attributes.class === "tw-font-semibold trend-lt") {
+              isDebtTemperatureDown = true;
+            } else if (name === "div" && attributes.class === "tw-leading-normal") {
+              isthefirst = true;
             }
           },
           onclosetag: (name) => {
@@ -143,7 +160,7 @@ export default function Command() {
     <List isLoading={status === "loading"}>
       <List.Item
         title="有知有行全市场温度"
-        subtitle={temperature === "" ? "Loading..." : temperature}
+        subtitle={temperature === "" ? "Loading..." : temperature + " " + temcomment}
         actions={
           <ActionPanel title="打开有知有行数据源">
             <Action.OpenInBrowser url="https://youzhiyouxing.cn/data" />
