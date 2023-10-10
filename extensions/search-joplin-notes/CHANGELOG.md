@@ -1,9 +1,9 @@
 # search joplin notes Changelog
 
-## [Add metadata] - 2023-9-18
+## [Add metadata] - 2023-09-18
 
-Add ScrieenShots
+Added metadata
 
-## [New Commands] - 2023-9-17
+## [New Commands] - 2023-09-17
 
-Add support for serarch notes in Joplin
+Add support for searching notes in Joplin
