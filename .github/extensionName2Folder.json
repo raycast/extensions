@@ -975,6 +975,7 @@
   "DinisEsteves/spryker-docs": "spryker-docs",
   "dimagrossman/ssh-manager": "ssh-manager",
   "MinatoHikari/ssh-tunnel-manager": "ssh-tunnel-manager",
+  "stablecog/stablecog": "stablecog",
   "reckoning-dev/stackoverflow": "stackoverflow",
   "andrebreia/statamic-docs": "statamic-docs",
   "aerobless/static-marks": "static-marks-bookmarks",
