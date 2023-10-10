@@ -50,18 +50,18 @@ export function getNetSpeed(testSequentially: boolean, execResult: string) {
   return network;
 }
 
-export function extractSpeedLoadingInfo(str: string) {
-  const downlinkRegex = /Downlink: capacity [\d.]+ Mbps/;
-  const uplinkRegex = /Uplink: capacity [\d.]+ Mbps/;
+export function extractSpeedLoadingInfo(str: string): string {
+  const tempStr = str.replaceAll("responsiveness ", "").replaceAll("capacity ", "");
+  const regex = /Downlink: ([\d.]+ Mbps).*Uplink: ([\d.]+ Mbps)/;
+  const match = tempStr.match(regex);
+  if (match) {
+    const downlink = match[1] || "";
+    const uplink = match[2] || "";
 
-  const downlinkMatch = str.match(downlinkRegex);
-  const uplinkMatch = str.match(uplinkRegex);
-
-  const downlink = downlinkMatch ? downlinkMatch[0] : "";
-  const uplink = uplinkMatch ? uplinkMatch[0] : "";
-
-  if (downlink === "" && uplink === "") {
-    return "Takes about 20 seconds";
+    if (downlink && uplink) {
+      return `Downlink: ${downlink}, Uplink: ${uplink}`;
+    }
   }
-  return `${downlink}, ${uplink}`.replaceAll("capacity", "");
+
+  return "Takes about 20 seconds";
 }
