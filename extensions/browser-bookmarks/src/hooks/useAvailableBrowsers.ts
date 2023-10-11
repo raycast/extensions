@@ -8,6 +8,7 @@ export const BROWSERS_BUNDLE_ID = {
   chrome: "com.google.chrome",
   chromeDev: "com.google.chrome.dev",
   firefox: "org.mozilla.firefox",
+  firefoxDev: "org.mozilla.firefoxdeveloperedition",
   safari: "com.apple.safari",
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",

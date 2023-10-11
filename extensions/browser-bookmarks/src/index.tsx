@@ -103,6 +103,7 @@ export default function Command() {
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
+  const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
 
@@ -114,7 +115,7 @@ export default function Command() {
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
-  const firefox = useFirefoxBookmarks(hasFirefox);
+  const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
   const safari = useSafariBookmarks(hasSafari);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
 
@@ -288,7 +289,7 @@ export default function Command() {
     if (hasEdgeDev) {
       edge.mutate();
     }
-    if (hasFirefox) {
+    if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
     }
     if (hasSafari) {
@@ -469,6 +470,15 @@ export default function Command() {
                     setCurrentProfile={firefox.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.firefoxDev}
+                    name="Firefox Dev"
+                    icon="firefoxDev.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    profiles={firefox.profiles}
+                    currentProfile={firefox.currentProfile}
+                    setCurrentProfile={firefox.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.vivaldi}
                     name="Vivaldi"
                     icon="vivaldi.png"
@@ -546,6 +556,7 @@ function SelectProfileSubmenu({
   const { data: availableBrowsers } = useAvailableBrowsers();
 
   const hasBrowser = availableBrowsers?.map((browser) => browser.bundleId).includes(bundleId);
+  console.log("hasBrowser", hasBrowser);
   if (!hasBrowser || profiles.length <= 1) {
     return null;
   }
