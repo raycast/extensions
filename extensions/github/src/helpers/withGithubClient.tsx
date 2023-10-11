@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { authorize } from "../api/oauth";
 import { getSdk } from "../generated/graphql";
 
+let token: string | null = null;
 let github: ReturnType<typeof getSdk> | null = null;
 let octokit: Octokit | null = null;
 
@@ -17,7 +18,7 @@ export function withGithubClient(component: JSX.Element) {
   useMemo(() => {
     (async function () {
       const { personalAccessToken } = getPreferenceValues<Preferences>();
-      const token = personalAccessToken || (await authorize());
+      token = personalAccessToken || (await authorize());
       const authorization = personalAccessToken ? `token ${token}` : `bearer ${token}`;
       github = getSdk(new GraphQLClient("https://api.github.com/graphql", { headers: { authorization } }));
 
@@ -48,4 +49,12 @@ export function getGitHubClient() {
   }
 
   return { github, octokit };
+}
+
+export function getGitHubToken() {
+  if (!token) {
+    throw new Error("getGitHubToken must be used when authenticated");
+  }
+
+  return token;
 }

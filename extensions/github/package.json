@@ -15,7 +15,8 @@
     "loxygenk",
     "oilbeater",
     "LunaticMuch",
-    "aeorge"
+    "aeorge",
+    "daquinoaldo"
   ],
   "categories": [
     "Developer Tools",
@@ -193,6 +194,22 @@
     }
   ],
   "preferences": [
+    {
+      "name": "application",
+      "type": "appPicker",
+      "required": false,
+      "title": "IDE Application",
+      "description": "Will be used to open the cloned repository.",
+      "placeholder": "/Applications/Visual Studio Code.app"
+    },
+    {
+      "name": "baseClonePath",
+      "type": "directory",
+      "required": false,
+      "title": "Clone Path",
+      "description": "Path in which the repositories will be cloned.",
+      "placeholder": "~/GitHub"
+    },
     {
       "name": "personalAccessToken",
       "type": "password",

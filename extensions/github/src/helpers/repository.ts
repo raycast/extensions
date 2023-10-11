@@ -34,14 +34,60 @@ export const WEB_IDES = [
   },
 ];
 
-import { LocalStorage } from "@raycast/api";
+import { execSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+
+import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
+import { getGitHubToken } from "../helpers/withGithubClient";
+
+import { getErrorMessage } from "./errors";
 
 const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
 const VISITED_REPOSITORIES_LENGTH = 25;
+
+export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
+  const { application, baseClonePath } = getPreferenceValues<Preferences>();
+  const applicationPath = application?.path || "/Applications/Visual Studio Code.app";
+  const clonePath = `${baseClonePath || "~/GitHub"}/${repository.nameWithOwner}`;
+  const openCommand = `open -a ${applicationPath.replaceAll(" ", "\\ ")} ${clonePath}`;
+
+  const toast = await showToast({
+    title: `Opening ${repository.nameWithOwner}`,
+    message: `at ${clonePath}`,
+    style: Toast.Style.Animated,
+  });
+
+  if (!existsSync(clonePath.replace("~", homedir()))) {
+    const gitHubToken = getGitHubToken();
+    const cloneUrl = `https://oauth:${gitHubToken}@github.com/${repository.nameWithOwner}`;
+    const cloneCommand = `git clone ${cloneUrl} ${clonePath}`;
+
+    try {
+      execSync(cloneCommand);
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Error while cloning the repository";
+      toast.message = getErrorMessage(error);
+      console.error(error);
+      return;
+    }
+  }
+
+  try {
+    execSync(openCommand);
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Error while opening the repository";
+    toast.message = getErrorMessage(error);
+    console.error(error);
+    return;
+  }
+}
 
 // History was stored in `LocalStorage` before, after migration it's stored in `Cache`
 async function loadVisitedRepositories() {
@@ -76,7 +122,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   }
 
   // Converting query filter string to regexp:
-  const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
+  const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")} /.*`;
 
   const data = history
     .filter((r) => r.nameWithOwner.toLowerCase().includes(searchText?.toLowerCase() ?? ""))
