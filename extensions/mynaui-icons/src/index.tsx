@@ -27,7 +27,8 @@ export default function Command() {
   return (
     <Grid columns={6} inset={Grid.Inset.Large}>
       <Grid.EmptyView
-        title="Nothing found. Press Enter to request this icon."
+        title="Nothing found"
+        description="Press Enter to request this icon"
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url="https://github.com/praveenjuge/mynaui-icons/issues" title="Open GitHub Issues" />
