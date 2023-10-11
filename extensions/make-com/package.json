@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "make-com",
+  "title": "Make.com - Run Scenarios",
+  "description": "Run Make.com Scenarios on demand",
+  "icon": "icon.png",
+  "author": "kkoscielniak",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-a-scenario",
+      "title": "Run Scenario",
+      "subtitle": "Trigger a Make.com Scenario",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "makeApiKey",
+      "title": "Make.com API key",
+      "description": "Create it at https://make.com/user/api",
+      "type": "password",
+      "required": true,
+      "placeholder": "12345678-9012-3456-7890-123456789012"
+    },
+    {
+      "name": "environmentUrl",
+      "title": "Environment URL",
+      "description": "Environment URL (without trailing-slash)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://eu1.make.com"
+    },
+    {
+      "name": "organizationId",
+      "title": "Organization ID",
+      "description": "Organization ID",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "skipWebhooks",
+      "title": "Skip Webhooks and Mailhooks?",
+      "description": "Skip Scenarios starting with Webhook or Mailhook module",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
