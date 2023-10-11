@@ -14,8 +14,8 @@
     {
       "name": "run-a-scenario",
       "title": "Run Scenario",
-      "subtitle": "Trigger a Make.com Scenario",
-      "description": "",
+      "subtitle": "Make.com",
+      "description": "Trigger a Make.com Scenario",
       "mode": "view"
     }
   ],
@@ -41,15 +41,17 @@
       "title": "Organization ID",
       "description": "Organization ID",
       "type": "textfield",
-      "required": true
+      "required": true,
+      "placeholder": "123456"
     },
     {
       "name": "skipWebhooks",
-      "title": "Skip Webhooks and Mailhooks?",
-      "description": "Skip Scenarios starting with Webhook or Mailhook module",
+      "title": "Skip Webhooks",
+      "description": "Skip Webhooks",
       "type": "checkbox",
       "required": false,
-      "default": true
+      "default": true,
+      "label": "Skip Scenarios starting with Webhook or Mailhook module"
     }
   ],
   "dependencies": {
