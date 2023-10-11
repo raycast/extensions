@@ -285,7 +285,7 @@ export default function Command(props: LaunchProps) {
             ([key, _]) =>
               preferences[key.replace(/ +/g, "")] &&
               !recent.includes(key as CaseType) &&
-              !pinned.includes(key as CaseType)
+              !pinned.includes(key as CaseType),
           )
           .map(([key, func]) => (
             <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(clipboard, func)} />
