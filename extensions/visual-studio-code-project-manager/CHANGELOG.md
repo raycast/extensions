@@ -1,5 +1,9 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Update] - 2023-10-11
+
+- Fixes opening a remote workspace file (#8692)
+
 ## [Update] - 2023-04-24
 
 - Update build identifier for VSCodium. (VSCodium/vscodium#1227)
