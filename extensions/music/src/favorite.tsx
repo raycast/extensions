@@ -4,5 +4,5 @@ import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
 export default async () => {
-  await pipe(music.currentTrack.love, handleTaskEitherError("Failed to love the track", "Loved"))();
+  await pipe(music.currentTrack.favorite, handleTaskEitherError("Failed to favorite the track", "Favorited"))();
 };

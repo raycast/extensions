@@ -5,7 +5,7 @@ import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
 export default pipe(
-  music.currentTrack.love,
+  music.currentTrack.favorite,
   TE.chain(() => pipe(music.currentTrack.addToLibrary)),
-  handleTaskEitherError("Failed to save/love the track", "Loved & added to library")
+  handleTaskEitherError("Failed to save/favorite the track", "Favorited & added to library")
 );
