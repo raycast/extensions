@@ -31,8 +31,8 @@ export default async function convert(sourcePaths: string[], desiredType: string
 
   const resultPaths = [];
   for (const item of sourcePaths) {
-    const pathComponents = item.split(".");
-    let newPath = pathComponents.slice(0, -1).join("") + "." + desiredType.toLowerCase();
+    const originalType = path.extname(item).slice(1);
+    let newPath = path.join(path.dirname(item), path.basename(item, originalType) + desiredType.toLowerCase());
 
     if (preferences.imageResultHandling == ImageResultHandling.SaveToDownloads) {
       newPath = path.join(os.homedir(), "Downloads", path.basename(newPath));
@@ -58,13 +58,13 @@ export default async function convert(sourcePaths: string[], desiredType: string
       // Input Format -> WebP
       execSync(`chmod +x ${environment.assetsPath}/webp/cwebp`);
       execSync(`${environment.assetsPath}/webp/cwebp "${item}" -o "${newPath}"`);
-    } else if (pathComponents.at(-1)?.toLowerCase() == "svg") {
+    } else if (originalType.toLowerCase() == "svg") {
       // SVG -> NSBitmapImageRep -> Desired Format
       convertSVG(desiredType, item, newPath);
     } else if (desiredType == "SVG") {
       const bmpPath = `${environment.supportPath}/tmp.bmp`;
       execSync(`chmod +x ${environment.assetsPath}/potrace/potrace`);
-      if (pathComponents.at(-1)?.toLowerCase() == "webp") {
+      if (originalType.toLowerCase() == "webp") {
         // WebP -> PNG -> BMP -> SVG
         const pngPath = `${environment.supportPath}/tmp.png`;
         execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
@@ -78,11 +78,11 @@ export default async function convert(sourcePaths: string[], desiredType: string
           `sips --setProperty format "bmp" "${item}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"`
         );
       }
-    } else if (pathComponents.at(-1)?.toLowerCase() == "webp") {
+    } else if (originalType.toLowerCase() == "webp") {
       // WebP -> Desired Format
       execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
       execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
-    } else if (pathComponents.at(-1)?.toLowerCase() == "pdf") {
+    } else if (originalType.toLowerCase() == "pdf") {
       // PDF -> Desired Format
       const itemName = path.basename(item);
       const folderName = `${itemName?.substring(0, itemName.lastIndexOf("."))} ${desiredType}`;

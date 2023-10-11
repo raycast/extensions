@@ -8,7 +8,8 @@
   "contributors": [
     "peterdev22",
     "danpalmer",
-    "itsjustxan"
+    "itsjustxan",
+    "Shpigford"
   ],
   "license": "MIT",
   "keywords": [
@@ -104,10 +105,10 @@
       "mode": "no-view"
     },
     {
-      "name": "love",
-      "title": "Love Track",
+      "name": "favorite",
+      "title": "Favorite Track",
       "subtitle": "Apple Music",
-      "description": "Love currently playing track.",
+      "description": "Favorite currently playing track.",
       "mode": "no-view"
     },
     {
@@ -132,10 +133,10 @@
       "mode": "no-view"
     },
     {
-      "name": "love-and-add-to-library",
-      "title": "Love and Add to Library",
+      "name": "favorite-and-add-to-library",
+      "title": "Favorite and Add to Library",
       "subtitle": "Apple Music",
-      "description": "Love and add currently playing track to your library.",
+      "description": "Favorite and add currently playing track to your library.",
       "mode": "no-view"
     },
     {

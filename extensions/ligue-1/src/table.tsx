@@ -83,7 +83,7 @@ export default function GetTables() {
               icon: Icon.Goal,
               text: `${team.goals_for} - ${team.goals_against}`,
               tooltip: "Goals For - Goals Against",
-            }
+            },
           );
         }
 
