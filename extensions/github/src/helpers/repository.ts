@@ -43,7 +43,6 @@ import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
-import { getGitHubToken } from "../helpers/withGithubClient";
 
 import { getErrorMessage } from "./errors";
 
@@ -63,8 +62,7 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
   });
 
   if (!existsSync(clonePath.replace("~", homedir()))) {
-    const gitHubToken = getGitHubToken();
-    const cloneUrl = `https://oauth:${gitHubToken}@github.com/${repository.nameWithOwner}`;
+    const cloneUrl = `https://github.com/${repository.nameWithOwner}`;
     const cloneCommand = `git clone ${cloneUrl} ${clonePath}`;
 
     try {
@@ -122,7 +120,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   }
 
   // Converting query filter string to regexp:
-  const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")} /.*`;
+  const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
 
   const data = history
     .filter((r) => r.nameWithOwner.toLowerCase().includes(searchText?.toLowerCase() ?? ""))
