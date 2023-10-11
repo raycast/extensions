@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import PullRequestListEmptyView from "./components/PullRequestListEmptyView";
+import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import PullRequestListItem from "./components/PullRequestListItem";
 import View from "./components/View";
 import { PullRequestFieldsFragment } from "./generated/graphql";
@@ -18,21 +19,22 @@ function SearchPullRequests() {
 
   const { defaultSearchTerms } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState(trim(defaultSearchTerms) + " ");
+  const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const {
     data,
     isLoading,
     mutate: mutateList,
   } = useCachedPromise(
-    async (searchText) => {
+    async (searchText, searchFilter) => {
       const result = await github.searchPullRequests({
         numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-        query: `is:pr archived:false ${searchText}`,
+        query: `is:pr archived:false ${searchFilter} ${searchText}`,
       });
 
       return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
     },
-    [searchText],
+    [searchText, searchFilter],
     { keepPreviousData: true },
   );
 
@@ -40,6 +42,7 @@ function SearchPullRequests() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Globally search pull requests across repositories"
+      searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
+import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import View from "./components/View";
 import { IssueFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
@@ -18,21 +19,22 @@ function SearchIssues() {
 
   const { defaultSearchTerms } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState(trim(defaultSearchTerms) + " ");
+  const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const {
     data,
     isLoading,
     mutate: mutateList,
   } = useCachedPromise(
-    async (searchText) => {
+    async (searchText, searchFilter) => {
       const result = await github.searchIssues({
         numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-        query: `is:issue archived:false ${searchText}`,
+        query: `is:issue archived:false ${searchFilter} ${searchText}`,
       });
 
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },
-    [searchText],
+    [searchText, searchFilter],
     { keepPreviousData: true },
   );
 
@@ -40,6 +42,7 @@ function SearchIssues() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Globally search issues across repositories"
+      searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
