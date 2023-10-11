@@ -2,11 +2,11 @@
 
 ## [Updates to Simulator and Recent Builds] - 2023-10-07
 
-- Added restart Simulator
+- Added Restart Simulator
 - Added Rename Simulator
 - Added Push Notifications using a payload
 - Added iCloud Sync
-- Added open AppGroup directory
+- Added Open AppGroup directory
   
 ## [Updated Swift Package Types] - 2023-10-03
 
