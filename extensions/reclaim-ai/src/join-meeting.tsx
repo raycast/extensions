@@ -5,7 +5,7 @@ import { ApiResponseUser } from "./hooks/useUser.types";
 import { CalendarAccount } from "./types/account";
 import { NativePreferences } from "./types/preferences";
 import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
-import {filterMultipleOutDuplicateEvents} from "./utils/events";
+import { filterMultipleOutDuplicateEvents } from "./utils/events";
 
 export default async function Command() {
   const { apiUrl } = getPreferenceValues<NativePreferences>();
