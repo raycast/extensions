@@ -6,7 +6,7 @@ import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
-import { TeamFiles } from "./types";
+import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
 
 export default function Command() {
@@ -18,7 +18,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const {
@@ -80,7 +80,6 @@ export default function Command() {
       tooltip={teamID.length > 1 ? "Teams" : "Projects"}
       defaultValue="All"
       onChange={handleDropdownChange}
-      storeValue={false}
     >
       <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" />
       {teamID.length > 1 &&
@@ -177,8 +176,8 @@ export default function Command() {
             >
               <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
             </Grid.Section>
-          ),
-        ),
+          )
+        )
       )}
     </Grid>
   );
