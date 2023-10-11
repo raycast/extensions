@@ -1,7 +1,9 @@
 # Mute microphone Changelog
 
 ## [Improvements] - {PR_MERGE_DATE}
-- Toast implementation 
+
+- Using a Toast instead of a HUD message
+
 ## [Fixes] - 2023-09-04
 
 - Fix issue where the extension may not work on Macs with Intel processors
