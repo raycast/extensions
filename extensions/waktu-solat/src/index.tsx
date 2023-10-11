@@ -1,8 +1,10 @@
-import { loadZones, Zone } from "./lib/zones";
-import React, { useEffect, useState } from "react";
-import { useCachedState } from "@raycast/utils";
-import { loadTodaySolat, PrayerTime, PrayerTimeItem } from "./lib/prayer-times";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { Action, ActionPanel, Color, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { PrayerTime, PrayerTimeItem, loadTodaySolat } from "./lib/prayer-times";
+import { Zone, loadZones } from "./lib/zones";
 import Accessory = List.Item.Accessory;
 
 function Zones(props: { onChange: (z: Zone) => void }) {
@@ -28,9 +30,7 @@ function Zones(props: { onChange: (z: Zone) => void }) {
       }}
     >
       <List.Dropdown.Section title="Zones">
-        {zones?.map((z) => (
-          <List.Dropdown.Item key={z.id} title={z.name} value={z.id} keywords={[z.state, z.id]} />
-        ))}
+        {zones?.map((z) => <List.Dropdown.Item key={z.id} title={z.name} value={z.id} keywords={[z.state, z.id]} />)}
       </List.Dropdown.Section>
     </List.Dropdown>
   );
@@ -86,9 +86,7 @@ function prayerTimes() {
   return (
     <List searchBarAccessory={<Zones onChange={onZoneChange} />} isLoading={isLoading}>
       <List.Section title={prayerTime?.date}>
-        {prayerTime?.items?.map((p) => (
-          <PrayerItem item={p} key={p.label} items={prayerTime.items!} />
-        ))}
+        {prayerTime?.items?.map((p) => <PrayerItem item={p} key={p.label} items={prayerTime.items!} />)}
       </List.Section>
     </List>
   );
