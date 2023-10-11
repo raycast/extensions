@@ -1,28 +1,36 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { savePage, urlRegex } from "./lib";
+import { Form, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
+import { useForm } from "@raycast/utils";
+import { savePage, urlsToArray } from "./lib";
 
 type Values = {
   urls: string;
 };
 
 export default function Command() {
-  function handleSubmit(values: Values) {
-    let urls = values.urls.split("\n");
-    // remove empty lines
-    urls = urls.filter((url) => url !== "");
-    // validate each url by urlRegex and remove invalid urls
-    urls = urls.filter((url) => urlRegex.test(url));
+  const { handleSubmit, itemProps } = useForm<Values>({
+    onSubmit(values) {
+      const urls = urlsToArray(values.urls);
+      urls.forEach(async (url) => {
+        await savePage(url);
+      });
 
-    if (urls.length !== values.urls.split("\n").length) {
-      showToast({ style: Toast.Style.Failure, title: "Some URLs are invalid" });
-
-      return;
-    }
-
-    urls.forEach(async (url) => await savePage(url));
-
-    showToast({ title: `${urls.length} URLs saved` });
-  }
+      showToast({ title: `${urls.length} URLs saved` });
+      popToRoot();
+    },
+    validation: {
+      urls: (value) => {
+        console.log(value);
+        if (value) {
+          const urls = urlsToArray(value);
+          if (urls.length !== value.split("\n").length) {
+            return "Invalid URLs found";
+          }
+        } else {
+          return "This field is required!";
+        }
+      },
+    },
+  });
 
   return (
     <Form
@@ -32,7 +40,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="urls" title="URLs" placeholder="Enter one URL per line" />
+      <Form.TextArea {...itemProps.urls} title="URLs" placeholder="Enter one URL per line" />
     </Form>
   );
 }

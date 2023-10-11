@@ -24,3 +24,14 @@ export async function savePage(webpageUrl: string) {
     toast.title = "Failed to save to Wayback Machine";
   }
 }
+
+export function urlsToArray(urlString: string) {
+  let urls = urlString.split("\n");
+
+  // remove empty lines
+  urls = urls.filter((url) => url !== "");
+  // validate each url by urlRegex and remove invalid urls
+  urls = urls.filter((url) => urlRegex.test(url));
+
+  return urls;
+}
