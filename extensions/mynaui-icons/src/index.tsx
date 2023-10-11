@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Grid } from "@raycast/api";
+import { ActionPanel, Action, Grid, Color } from "@raycast/api";
 import Icons from "../node_modules/@mynaui/icons/meta.json";
 
 // Gets a svg path string and wraps it in an SVG tag
@@ -27,7 +27,7 @@ export default function Command() {
   return (
     <Grid columns={6} inset={Grid.Inset.Large}>
       <Grid.EmptyView
-        title="Nothing found"
+        title="Nothing found."
         description="Press Enter to request this icon"
         actions={
           <ActionPanel>
@@ -40,7 +40,10 @@ export default function Command() {
           key={icon[0]}
           title={icon[0]}
           keywords={icon[1].tags}
-          content={buildDataURL(icon[1].svg)}
+          content={{
+            source: buildDataURL(icon[1].svg),
+            tintColor: Color.PrimaryText,
+          }}
           actions={
             <ActionPanel>
               <Action.Paste content={buildSVG(icon[1].svg)} />
