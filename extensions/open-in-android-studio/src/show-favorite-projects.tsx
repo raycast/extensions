@@ -135,7 +135,6 @@ export default function Main() {
                     }}
                   />
 
-
                   <Action.CreateQuicklink
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
                     quicklink={{ link: getQuickLinkForPath(item.path) }}

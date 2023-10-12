@@ -7,7 +7,6 @@ import {
 } from "./common/util";
 
 export default async ({ launchContext }: { launchContext?: { defaultValue: string } }) => {
-
   const androidStudioApp = await getAndroidStudioApp();
   if (!androidStudioApp) {
     await showAndroidStudioAppNotInstalled();

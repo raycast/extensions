@@ -56,7 +56,6 @@ export const getSelectedFinderWindow = (): Promise<string> => {
   });
 };
 
-
 export function isValidDirectoryPath(directoryPath: string): boolean {
   try {
     // Check if the directory exists and is a directory (not a file or a symlink)
@@ -66,4 +65,3 @@ export function isValidDirectoryPath(directoryPath: string): boolean {
     return false;
   }
 }
-
