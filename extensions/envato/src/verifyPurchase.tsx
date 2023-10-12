@@ -1,10 +1,10 @@
-import { ActionPanel, Action, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, useNavigation, LaunchProps } from "@raycast/api";
 import { verifyPurchaseCode } from "./utils";
 import PurchaseDetails from "./purchaseDetails";
 type Values = {
   pc: string;
 };
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: { purchaseCode: string } }>) {
   const { push } = useNavigation();
 
   async function submit(purchaseCode: string) {
@@ -35,7 +35,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Purchase Code" id="pc" />
+      <Form.TextField title="Purchase Code" id="pc" defaultValue={props.arguments.purchaseCode} />
     </Form>
   );
 }

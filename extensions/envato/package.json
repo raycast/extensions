@@ -30,7 +30,15 @@
       "title": "Verify Purchase",
       "subtitle": "Envato",
       "description": "Verify Purchase on Envato using Purchase Code",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "purchaseCode",
+          "placeholder": "Purchase Code",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
