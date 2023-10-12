@@ -1,3 +1,3 @@
 # IndexQuickView Changelog
 
-## [Initial Version] - 2023-10-05
+## [Initial Version] - 2023-10-12
