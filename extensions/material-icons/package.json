@@ -5,6 +5,9 @@
   "description": "Search and preview Material Icons",
   "icon": "command-icon.png",
   "author": "creasty",
+  "contributors": [
+    "201549BL"
+  ],
   "categories": [
     "Design Tools"
   ],
@@ -12,23 +15,29 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Material Icons",
+      "title": "List View",
       "description": "Search and preview Material Icons",
+      "subtitle": "Material Icons",
+      "mode": "view"
+    },
+    {
+      "name": "grid",
+      "title": "Grid View",
+      "description": "Search and preview Material Icons",
+      "subtitle": "Material Icons",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
     "fzy.js": "^0.4.1",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
