@@ -97,14 +97,17 @@
     "@raycast/utils": "^1.10.0",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^2.30.0",
-    "linkedom": "^0.15.4",
+    "linkedom": "^0.15.6",
     "node-fetch": "^3.3.2",
     "notion-to-md": "^3.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.6",
-    "eslint": "^8.50.0",
-    "prettier": "^3.0.3",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.4",
+    "@types/node-fetch": "^2.6.6",
+    "@types/react": "^18.0.9",
+    "eslint": "^8.51.0",
+    "eslint-plugin-import": "^2.28.1",
     "typescript": "^5.2.2"
   },
   "scripts": {

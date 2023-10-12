@@ -16,7 +16,7 @@ export function formatDatabaseProperty(...[type, value]: FormatDatabasePropertyP
       return formattedProperty(type, [{ text: { content: value } }]);
     case "number":
       return formattedProperty(type, parseFloat(value));
-    case "date":
+    case "date": {
       if (!value) return;
       type DatePropertyTimeZone = Exclude<Extract<PageProperty, { type?: "date" }>["date"], null>["time_zone"];
       const time = subMinutes(new Date(value), new Date().getTimezoneOffset()).toISOString().split("T")[0];
@@ -30,6 +30,7 @@ export function formatDatabaseProperty(...[type, value]: FormatDatabasePropertyP
           time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone as DatePropertyTimeZone,
         });
       }
+    }
     case "select":
     case "status":
       return formattedProperty(type, { id: value });
