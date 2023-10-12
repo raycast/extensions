@@ -1,8 +1,4 @@
-import { Clipboard } from "@raycast/api";
-import { showToast } from "@raycast/api";
-import { showHUD } from "@raycast/api";
-import { closeMainWindow } from "@raycast/api";
-import { setTimeout } from "timers/promises";
+import { Clipboard, showHUD, closeMainWindow } from "@raycast/api";
 
 const commitMessages = [
   "¯\\_(ツ)_/¯",
