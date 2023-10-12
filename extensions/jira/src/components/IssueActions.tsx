@@ -22,6 +22,8 @@ import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
+import IssueCommentForm from "./IssueCommentForm";
+import IssueComments from "./IssueComments";
 import IssueDetail from "./IssueDetail";
 
 type IssueActionsProps = {
@@ -141,6 +143,19 @@ export default function IssueActions({
         />
 
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
+
+        <Action.Push
+          title="Add Comment"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          target={<IssueCommentForm issue={issue} />}
+        />
+        <Action.Push
+          title="Show Comments"
+          icon={Icon.Bubble}
+          target={<IssueComments issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

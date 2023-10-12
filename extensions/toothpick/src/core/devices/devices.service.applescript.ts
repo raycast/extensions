@@ -18,7 +18,7 @@ export default class ApplescriptDevicesService implements DevicesService {
     const formattedMacAddress = mac.toUpperCase().replaceAll(":", "-");
     const script = readFileSync(resolve(__dirname, "assets/scripts/connectDevice.applescript")).toString();
     const getFirstMatchingDeviceScript = readFileSync(
-      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript"),
+      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
     ).toString();
     const exitCode = runAppleScriptSync(
       `
@@ -29,7 +29,7 @@ export default class ApplescriptDevicesService implements DevicesService {
       \n
       ${script}\n
       \n
-      return connectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`,
+      return connectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`
     );
     return exitCode === "0";
   }
@@ -38,7 +38,7 @@ export default class ApplescriptDevicesService implements DevicesService {
     const formattedMacAddress = mac.toUpperCase().replaceAll(":", "-");
     const script = readFileSync(resolve(__dirname, "assets/scripts/disconnectDevice.applescript")).toString();
     const getFirstMatchingDeviceScript = readFileSync(
-      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript"),
+      resolve(__dirname, "assets/scripts/getFirstMatchingDevice.applescript")
     ).toString();
     const exitCode = runAppleScriptSync(
       `
@@ -49,7 +49,7 @@ export default class ApplescriptDevicesService implements DevicesService {
       \n
       ${script}\n
       \n
-      disconnectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`,
+      disconnectDevice(getFirstMatchingDevice("${formattedMacAddress}"))`
     );
     return exitCode === "0";
   }
@@ -64,10 +64,10 @@ export default class ApplescriptDevicesService implements DevicesService {
 
     // Extract useful data for further processing
     const untypedConnectedDevices: RawDeviceData[] = rawData.flatMap((controller) =>
-      controller["device_connected"] ? controller["device_connected"] : [],
+      controller["device_connected"] ? controller["device_connected"] : []
     );
     const untypedDisconnectedDevices: RawDeviceData[] = rawData.flatMap((controller) =>
-      controller["device_not_connected"] ? controller["device_not_connected"] : [],
+      controller["device_not_connected"] ? controller["device_not_connected"] : []
     );
 
     // Inject connection status
@@ -98,7 +98,7 @@ export default class ApplescriptDevicesService implements DevicesService {
     try {
       scriptOutput = execSync(
         "ioreg -c AppleDeviceManagementHIDEventService | grep -e BatteryPercent -e DeviceAddress",
-        { env: { ...process.env, PATH: `${process.env.PATH}:/usr/bin:/usr/sbin:` } },
+        { env: { ...process.env, PATH: `${process.env.PATH}:/usr/bin:/usr/sbin:` } }
       ).toString();
     } catch {
       return;

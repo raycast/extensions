@@ -6,6 +6,8 @@ import { XcodeSimulatorAppPrivacyAction } from "../../models/xcode-simulator/xco
 import { XcodeSimulatorAppPrivacyServiceType } from "../../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { XcodeSimulatorAppPrivacyServiceTypeName } from "../../shared/xcode-simulator-app-privacy-service-type-name";
 import { XcodeCleanupService } from "../../services/xcode-cleanup.service";
+import { XcodeSimulatorApplicationPushNotifications } from "./xcode-simulator-application-list-push-notifications";
+import { XcodeSimulatorState } from "../../models/xcode-simulator/xcode-simulator-state.model";
 
 /**
  * Xcode Simulator Application List Item
@@ -27,18 +29,25 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
               .filter(Boolean)
               .join(" & ")}
           >
-            <Action.ShowInFinder title="Open Documents directory" path={props.application.sandBoxDocumentsPath} />
-            <Action.ShowInFinder title="Open Caches directory" path={props.application.sandBoxCachesPath} />
+            <Action.ShowInFinder title="Open Documents Directory" path={props.application.sandBoxDocumentsPath} />
+            <Action.ShowInFinder title="Open Caches Directory" path={props.application.sandBoxCachesPath} />
             <Action.ShowInFinder
-              title="Open Sandbox directory"
+              title="Open Sandbox Directory"
               path={props.application.sandBoxPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
             />
             <Action.ShowInFinder
-              title="Open Bundle directory"
+              title="Open Bundle Directory"
               path={props.application.bundlePath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
             />
+            {props.application.appGroupPath ? (
+              <Action.ShowInFinder
+                title="Open AppGroup Directory"
+                path={props.application.appGroupPath}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+              />
+            ) : undefined}
             {props.application.userDefaultsPlistPath ? (
               <Action.Open
                 icon={Icon.Document}
@@ -123,6 +132,16 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
               </ActionPanel.Submenu>
             ))}
           </ActionPanel.Section>
+          {props.application.simulator.state === XcodeSimulatorState.booted ? (
+            <ActionPanel.Section title="Notifications">
+              <Action.Push
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                title="Push Notifications"
+                icon={Icon.AlarmRinging}
+                target={<XcodeSimulatorApplicationPushNotifications application={props.application} />}
+              />
+            </ActionPanel.Section>
+          ) : undefined}
         </ActionPanel>
       }
     />
