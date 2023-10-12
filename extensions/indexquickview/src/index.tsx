@@ -107,16 +107,35 @@ export default function Command() {
               // setStatus("success");
               isTemperature = false;
             } else if (isDebtTemperatureUp) {
-              const debtTemperature = text.trim() + " 温度上升";
+              const debtTemperature = text.trim() + ", Up";
               setDebtTemperature(debtTemperature);
               // setStatus("success");
               isDebtTemperatureUp = false;
             } else if (isDebtTemperatureDown) {
-              const debtTemperature = text.trim() + " 温度下降";
+              const debtTemperature = text.trim() + ", Down";
               setDebtTemperature(debtTemperature);
               isDebtTemperatureDown = false;
             } else if (isthefirst) {
-              temcomment += text.trim() + " ";
+              let temp_text = text.trim();
+              if (temp_text == "低估") {
+                temp_text = "Underestimate";
+                temcomment += temp_text + ", ";
+              } else if (temp_text == "高估") {
+                temp_text = "Overestimate";
+                temcomment += temp_text + ", ";
+              } else if (temp_text == "正常") {
+                temp_text = "Normal";
+                temcomment += temp_text + ", ";
+              } else if (temp_text == "温度上升") {
+                temp_text = "Sentiment Up";
+                temcomment += temp_text + " ";
+              } else if (temp_text == "温度下降") {
+                temp_text = "Sentiment Down";
+                temcomment += temp_text + " ";
+              } else if (temp_text == "温度不变") {
+                temp_text = "Sentiment Unchanged";
+                temcomment += temp_text + " ";
+              }
               setTemcomment(temcomment);
               isthefirst = false;
             }
@@ -159,16 +178,16 @@ export default function Command() {
   return (
     <List isLoading={status === "loading"}>
       <List.Item
-        title="有知有行全市场温度"
-        subtitle={temperature === "" ? "Loading..." : temperature + " " + temcomment}
+        title="Whole market sentiment"
+        subtitle={temperature === "" ? "Loading..." : temperature + ", " + temcomment}
         actions={
-          <ActionPanel title="打开有知有行数据源">
+          <ActionPanel title="Open the data source -- 有知有行">
             <Action.OpenInBrowser url="https://youzhiyouxing.cn/data" />
           </ActionPanel>
         }
       />
       <List.Item
-        title="有知有行债市温度"
+        title="Bond market sentiment"
         subtitle={debtTemperature === "" ? "Loading..." : debtTemperature}
         actions={
           <ActionPanel>
@@ -176,13 +195,13 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      <List.Item title="上证指数" subtitle={sh001 === "" ? "Loading..." : sh001} />
-      <List.Item title="深证指数" subtitle={hs300 === "" ? "Loading..." : hs300} />
-      <List.Item title="纳斯达克指数" subtitle={int_nasdaq === "" ? "Loading..." : int_nasdaq} />
-      <List.Item title="标普500指数" subtitle={int_sp500 === "" ? "Loading..." : int_sp500} />
-      <List.Item title="道琼斯指数" subtitle={int_dji === "" ? "Loading..." : int_dji} />
-      <List.Item title="新加坡指数" subtitle={b_FSSTI === "" ? "Loading..." : b_FSSTI} />
-      <List.Item title="日经指数" subtitle={int_nikkei === "" ? "Loading..." : int_nikkei} />
+      <List.Item title="SSE 上证指数" subtitle={sh001 === "" ? "Loading..." : sh001} />
+      <List.Item title="SZSE 深证指数" subtitle={hs300 === "" ? "Loading..." : hs300} />
+      <List.Item title="NASDAQ 纳斯达克指数" subtitle={int_nasdaq === "" ? "Loading..." : int_nasdaq} />
+      <List.Item title="S&P 500 标普500指数" subtitle={int_sp500 === "" ? "Loading..." : int_sp500} />
+      <List.Item title="DJIA 道琼斯指数" subtitle={int_dji === "" ? "Loading..." : int_dji} />
+      <List.Item title="STI 新加坡指数" subtitle={b_FSSTI === "" ? "Loading..." : b_FSSTI} />
+      <List.Item title="Nikkei 225 日经指数" subtitle={int_nikkei === "" ? "Loading..." : int_nikkei} />
     </List>
   );
 }
