@@ -76,12 +76,12 @@ export default function Command() {
     if (!state.searchText) {
       return state.items;
     }
-    return state.items.filter(item =>
-      item.title.toLowerCase().includes(state.searchText.toLowerCase()) ||
-      item.detail.toLowerCase().includes(state.searchText.toLowerCase())
+    return state.items.filter(
+      (item) =>
+        item.title.toLowerCase().includes(state.searchText.toLowerCase()) ||
+        item.detail.toLowerCase().includes(state.searchText.toLowerCase())
     );
   }, [state.items, state.searchText]);
-
 
   return (
     <List
@@ -91,9 +91,7 @@ export default function Command() {
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, searchText: newValue }));
       }}
-      isShowingDetail={
-        getItems().length > 0
-      }
+      isShowingDetail={getItems().length > 0}
     >
       <EmptyView items={getItems()} searchText={state.searchText} onCreate={handleCreate} />
       {getItems().map((items, index) => (

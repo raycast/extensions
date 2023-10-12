@@ -15,7 +15,7 @@ type EditItemActionProps = {
 function EditItemAction({ itemToEdit, onEdit }: EditItemActionProps) {
   const handleSubmit = (id: string | undefined, title: string, detail: string) => {
     if (id === undefined) {
-      throw new Error('ID should not be undefined');
+      throw new Error("ID should not be undefined");
     }
     onEdit(id, title, detail);
   };
@@ -26,7 +26,7 @@ function EditItemAction({ itemToEdit, onEdit }: EditItemActionProps) {
       title="Edit"
       shortcut={{ modifiers: ["cmd"], key: "e" }}
       target={
-        <ItemForm 
+        <ItemForm
           id={itemToEdit.id}
           defaultTitle={itemToEdit.title}
           defaultDetail={itemToEdit.detail}
@@ -36,6 +36,5 @@ function EditItemAction({ itemToEdit, onEdit }: EditItemActionProps) {
     />
   );
 }
-
 
 export default EditItemAction;

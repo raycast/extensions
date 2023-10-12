@@ -1,8 +1,7 @@
+interface Item {
+  id: string;
+  title: string;
+  detail: string;
+}
 
-  interface Item {
-    id: string;
-    title: string;
-    detail: string;
-  }
-  
-  export type { Item };
+export type { Item };

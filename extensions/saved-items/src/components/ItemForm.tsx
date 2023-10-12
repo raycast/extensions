@@ -29,19 +29,20 @@ function ItemForm(props: ItemFormProps) {
     }
   }
 
-  const handleSubmit = useCallback(
-    () => {
-      onSubmit(id, currentTitle, currentDetail);
-      pop();
-    },
-    [onSubmit, pop, id, currentTitle, currentDetail]
-  );
+  const handleSubmit = useCallback(() => {
+    onSubmit(id, currentTitle, currentDetail);
+    pop();
+  }, [onSubmit, pop, id, currentTitle, currentDetail]);
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={id ? "Save Item" : "Create Item"} icon={id ? Icon.NewDocument : Icon.PlusTopRightSquare } onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={id ? "Save Item" : "Create Item"}
+            icon={id ? Icon.NewDocument : Icon.PlusTopRightSquare}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
