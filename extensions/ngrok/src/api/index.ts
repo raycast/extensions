@@ -1,19 +1,12 @@
 import fetch from "node-fetch";
 
-import { config } from "./config";
 import { runAppleScript } from "@raycast/utils";
-import type { NgrokError, ReservedDomain, Tunnel } from "./types";
 
+import { config } from "./config";
+import type { NgrokError, ReservedDomain, Tunnel, TunnelSession } from "./types";
+
+export * from "./agent";
 export * from "./types";
-
-export async function checkIsNgrokReady() {
-  try {
-    const response = await fetch(`${config.localApi}/api/tunnels`);
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
 
 export async function connectNgrok() {
   await runAppleScript(`
@@ -25,31 +18,23 @@ export async function connectNgrok() {
   await new Promise((resolve) => setTimeout(resolve, 2500));
 }
 
-export async function createTunnel(port: number, domain: string | undefined, label: string | undefined) {
-  const response = await fetch(`${config.localApi}/api/tunnels`, {
-    method: "POST",
+export async function fetchTunnelSessions() {
+  const response = await fetch(`${config.baseUrl}/tunnel_sessions`, {
     headers: {
-      "Content-Type": "application/json",
+      Authorization: `Bearer ${config.apiKey}`,
+      "Ngrok-Version": "2",
     },
-    body: JSON.stringify({
-      name: "http",
-      proto: "http",
-      addr: port,
-      domain,
-      metadata: label,
-    }),
   });
 
   if (!response.ok) {
     const err = (await response.json()) as NgrokError;
-    console.log(err);
-    if (err.error_code !== "ERR_NGROK_810") {
-      throw new Error(err.msg);
-    }
+    console.error(err);
+    throw new Error(err.msg);
   }
 
-  const data = (await response.json()) as { public_url: string };
-  return data.public_url;
+  const data = (await response.json()) as { tunnel_sessions: TunnelSession[] };
+
+  return data.tunnel_sessions;
 }
 
 export async function fetchTunnels() {
@@ -62,16 +47,16 @@ export async function fetchTunnels() {
 
   if (!response.ok) {
     const err = (await response.json()) as NgrokError;
-    console.log(err);
+    console.error(err);
     throw new Error(err.msg);
   }
 
   const data = (await response.json()) as { tunnels: Tunnel[] };
 
-  return data;
+  return data.tunnels;
 }
 
-export async function stopTunnel(tunnelSessionId: string) {
+export async function stopTunnelAgent(tunnelSessionId: string) {
   const response = await fetch(`${config.baseUrl}/tunnel_sessions/${tunnelSessionId}/stop`, {
     method: "POST",
     headers: {
@@ -84,14 +69,14 @@ export async function stopTunnel(tunnelSessionId: string) {
 
   if (!response.ok) {
     const err = (await response.json()) as NgrokError;
-    console.log(err);
+    console.error(err);
     if (err.error_code !== "ERR_NGROK_810") {
       throw new Error(err.msg);
     }
   }
 }
 
-export async function fetchDomains() {
+export async function fetchReservedDomains() {
   const response = await fetch(`${config.baseUrl}/reserved_domains`, {
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
@@ -101,7 +86,7 @@ export async function fetchDomains() {
 
   if (!response.ok) {
     const err = (await response.json()) as NgrokError;
-    console.log(err);
+    console.error(err);
     throw new Error(err.msg);
   }
 

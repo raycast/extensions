@@ -1,6 +1,7 @@
 import { Application, Toast, getApplications, open, showToast } from "@raycast/api";
 import { exec } from "child_process";
 import fs from "fs";
+
 const asPackageName = "com.google.android.studio";
 
 export async function getAndroidStudioApp(): Promise<Application | undefined> {
@@ -55,6 +56,7 @@ export const getSelectedFinderWindow = (): Promise<string> => {
   });
 };
 
+
 export function isValidDirectoryPath(directoryPath: string): boolean {
   try {
     // Check if the directory exists and is a directory (not a file or a symlink)
@@ -64,3 +66,4 @@ export function isValidDirectoryPath(directoryPath: string): boolean {
     return false;
   }
 }
+

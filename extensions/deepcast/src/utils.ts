@@ -6,18 +6,10 @@ import {
   getPreferenceValues,
   launchCommand,
   LaunchType,
+  closeMainWindow,
 } from "@raycast/api";
 import got from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
-
-interface Preferences {
-  key: string;
-  onTranslateAction: "clipboard" | "view";
-}
-
-export function getPreferences() {
-  return getPreferenceValues<Preferences>();
-}
 
 function isPro(key: string) {
   return !key.endsWith(":fx");
@@ -45,6 +37,26 @@ function gotErrorToString(error: unknown) {
   return "Unknown error";
 }
 
+async function getSelection() {
+  try {
+    return await getSelectedText();
+  } catch (error) {
+    return "";
+  }
+}
+
+async function readContent(preferredSource: string) {
+  const clipboard = await Clipboard.readText();
+  console.log(clipboard);
+  const selected = await getSelection();
+
+  if (preferredSource === "clipboard") {
+    return clipboard || selected;
+  } else {
+    return selected || clipboard;
+  }
+}
+
 export async function sendTranslateRequest({
   text: initialText,
   sourceLanguage,
@@ -55,9 +67,9 @@ export async function sendTranslateRequest({
   targetLanguage: TargetLanguage;
 }) {
   try {
-    const text = initialText || (await getSelectedText());
+    const { key, onTranslateAction, source } = getPreferenceValues<Preferences>();
 
-    const { key, onTranslateAction } = getPreferences();
+    const text = initialText || (await readContent(source));
 
     showToast(Toast.Style.Animated, "Fetching translation...");
     try {
@@ -90,8 +102,9 @@ export async function sendTranslateRequest({
             },
           });
           break;
-        default:
-          break;
+        case "paste":
+          await closeMainWindow();
+          await Clipboard.paste(translation);
       }
 
       return { translation, detectedSourceLanguage };

@@ -1,5 +1,13 @@
 # Obsidian Changelog
 
+## [Update search starting sort] - 2023-10-12
+
+- Search now shows the most recent notes first
+
+## [Fix] - 2023-09-24
+
+- Filter out vault paths that don't actually exist.
+
 ## [Menubar cache bug fixes] - 2023-09-15
 - Fixes a bug where the cache fallback would crash the extension
 

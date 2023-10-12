@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Update] - 2023-10-11
+
+- Apple recently updated Music and renamed the "love" functionality to "favorite". This updates the necessary commands for that.
+
 ## [Fix `start-playlist`] - 2023-08-31
 
 - Fixed a bug in `start-playlist` where item title could be empty or undefined.
