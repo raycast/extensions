@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fluctuation",
   "title": "Fluctuation",
-  "description": "calculation for fluctuation",
+  "description": "Calculation for fluctuation",
   "icon": "wave.png",
   "author": "zoffyzhang",
   "license": "MIT",
@@ -14,7 +14,7 @@
     {
       "name": "ratio",
       "title": "Fluctuation Ratio",
-      "description": "calculate the fluctuation ratio of two value",
+      "description": "Calculate the fluctuation ratio of two value",
       "mode": "view"
     }
   ],
