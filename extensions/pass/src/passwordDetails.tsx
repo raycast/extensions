@@ -145,7 +145,7 @@ export default function GetPasswordDetails(props: passwords_path_structure) {
   return (
     <ActionPanel>
       <Action.Push
-        title={"Browse metadata"}
+        title={"Browse Metadata"}
         icon={Icon.AppWindowList}
         target={<PasswordMetadata pass_file_path={props.pass_file_path} pass_file_name={props.pass_file_name} />}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
