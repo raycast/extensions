@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, open, Clipboard, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  getPreferenceValues,
+  open,
+  Clipboard,
+  showHUD,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { exec as execCb } from "child_process";
 import { useState } from "react";
@@ -20,7 +31,7 @@ export default function IndexCommand() {
   const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([]);
   const { isLoading, data } = useCachedPromise(async () => {
     const { stdout, stderr } = await exec(
-      `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.title)"' {} \\;`,
+      `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.title)"' {} \\;`
     );
 
     if (stderr) {
@@ -138,8 +149,8 @@ export default function IndexCommand() {
                               installedExtensions,
                               preferenes.format,
                               preferenes.separator,
-                              preferenes.prepend,
-                            ),
+                              preferenes.prepend
+                            )
                           );
                           showHUD("Copied to Clipboard");
                         }}
@@ -148,6 +159,12 @@ export default function IndexCommand() {
                         shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                       />
                     </ActionPanel.Section>
+                    <Action
+                      title="Open Extension Preferences"
+                      onAction={openExtensionPreferences}
+                      icon={Icon.Gear}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                    />
                   </ActionPanel>
                 }
                 accessories={accessories}
