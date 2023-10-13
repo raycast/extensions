@@ -7,6 +7,7 @@ import {
   OpenInBrowserAction,
   RemoveAction,
 } from "./components/Actions";
+import { ErrorPanel } from "./components/ErrorPanel";
 import { GenerationContextProvider, useGenerationContext } from "./contexts/GenerationContext";
 import { Details } from "./details";
 import { useRefetchGenerations } from "./hooks/useRefetchGenerations";
@@ -23,10 +24,11 @@ export default function Main() {
 export function GenerationGrid() {
   const [input, setInput] = useState("");
   const { generations, createGeneration, updateGeneration } = useGenerationContext();
-
-  const onGenerate = () => {
-    createGeneration(input);
+  const [isError, setIsError] = useState(false);
+  const onGenerate = async () => {
     setInput("");
+    const { success } = await createGeneration(input);
+    setIsError(!success);
   };
 
   useRefetchGenerations(generations, (index, message) => {
@@ -36,6 +38,10 @@ export function GenerationGrid() {
   const sortedGenerations = useMemo(() => {
     return generations.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [generations]);
+
+  if (isError) {
+    return <ErrorPanel />;
+  }
 
   return (
     <Grid

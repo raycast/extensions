@@ -8,7 +8,7 @@
 Interact with Midjourney from your command bar
 </h3>
 
-![Detail view](media/midjourney-5.png)
+![Detail view](metadata/midjourney-5.png)
 
 # Features
 
@@ -16,24 +16,24 @@ Interact with Midjourney from your command bar
 
 View and search all previous images you have created with this extension.
 
-![Gallery](media/midjourney-2.png)
+![Gallery](metadata/midjourney-2.png)
 
 ### Generate new images
 
 Quickly generate new Midjourney images from your command bar.
 
-![Imagine](media/midjourney-3.png)
+![Imagine](metadata/midjourney-3.png)
 
 ### Alter images
 
 Upscale, remix, and zoom your images.
 
-![Altering images](media/midjourney-4.png)
+![Altering images](metadata/midjourney-4.png)
 
 ### Export creations
 
 Save your created images to your computer or copy them to your clipboard.
-![Export images](media/midjourney-6.png)
+![Export images](metadata/midjourney-6.png)
 
 # How to use
 
@@ -43,7 +43,7 @@ Once you have this setup, you'll need to add your personal Discord auth token, s
 - [How to find your Discord user token](https://discordhelp.net/discord-token)
 - [How to get your Discord channel/user id](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)
 
-![Initial set-up](media/midjourney-7.png)
+![Initial set-up](metadata/midjourney-7.png)
 
 > **Note:** This extension is not compliant with the Terms of Service of Discord due to using a user token. Use at your own risk.
 
