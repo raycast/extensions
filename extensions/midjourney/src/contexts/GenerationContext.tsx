@@ -9,7 +9,15 @@ export interface GenerationContextType {
   addGeneration: (newGeneration: Generation) => Generation;
   updateGeneration: (gen: Generation, genData: Partial<Generation>) => void;
   removeGeneration: (gen: Generation) => void;
-  createGeneration: (prompt: string, onGenerationCreated?: (gen: Generation) => void) => Promise<{ success: boolean }>;
+  createGeneration: (
+    prompt: string,
+    onGenerationCreated?: ((gen: Generation) => void) | undefined
+  ) => Promise<
+    | false
+    | {
+        success: boolean;
+      }
+  >;
   createVariation: (
     gen: Generation,
     target: 1 | 2 | 3 | 4,
