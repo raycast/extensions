@@ -5,7 +5,7 @@
 <h1 align="center">MidJourney</h1>
 
 <h3 align="center">
-Interact with Midjourney from your command bar
+Interact with Midjourney from your command bar (requires Discord server with the Midjourney bot)
 </h3>
 
 ![Detail view](metadata/midjourney-5.png)
