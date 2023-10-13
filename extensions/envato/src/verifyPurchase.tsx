@@ -7,6 +7,10 @@ type Values = {
 export default function Command(props: LaunchProps<{ arguments: { purchaseCode: string } }>) {
   const { push } = useNavigation();
 
+  if (props.arguments.purchaseCode) {
+    submit(props.arguments.purchaseCode);
+  }
+
   async function submit(purchaseCode: string) {
     if (purchaseCode.length === 0) {
       await showToast({ title: "Purchase code cannot be empty.", style: Toast.Style.Failure });
