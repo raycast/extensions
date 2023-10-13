@@ -28,7 +28,7 @@ export interface FetchResponse<T> {
 export function IsNugetPreviewChannelRequested() {
   const _preference = getPreferenceValues();
   const nugetChannel = _preference["nuget-channel"];
-  
+
   return nugetChannel === "preview";
 }
 
