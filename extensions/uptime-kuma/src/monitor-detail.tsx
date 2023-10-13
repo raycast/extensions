@@ -13,7 +13,6 @@ import utc from "dayjs/plugin/utc";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { useImmer } from "use-immer";
 
-
 dayjs.extend(utc);
 dayjs.extend(localizedFormat);
 
@@ -25,7 +24,7 @@ interface Props {
 export function MonitorDetail(props: Props) {
   // make a copy of paramMonitor
 
-  const [monitor, setMonitor] = useImmer<Monitor>({...props.monitor});
+  const [monitor, setMonitor] = useImmer<Monitor>({ ...props.monitor });
   const { kuma } = props;
 
   const lastCheck = useMemo(() => {
@@ -178,7 +177,7 @@ export function MonitorDetail(props: Props) {
           icon={{ source: Icon.Globe, tintColor: Color.PrimaryText }}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title={"Open target in browser"} url={`${monitor.url}`} />
+              <Action.OpenInBrowser title={"Open Target in Browser"} url={`${monitor.url}`} />
               <Action.CopyToClipboard title={"Copy URL"} content={`${monitor.url}`} />
             </ActionPanel>
           }

@@ -58,6 +58,7 @@ export interface LoginResponse {
   token: string;
   tokenRequired: boolean;
 }
+type Callback = (...args: unknown[]) => unknown;
 
 export class UptimeKuma extends EventEmitter {
   url: string;
@@ -190,11 +191,11 @@ export class UptimeKuma extends EventEmitter {
     );
   }
 
-  pauseMonitor(monitorID: string, CB = () => {}) {
+  pauseMonitor(monitorID: string, CB: Callback) {
     this.socket?.emit("pauseMonitor", parseInt(monitorID), CB);
   }
 
-  resumeMonitor(monitorID: string, CB = () => {}) {
+  resumeMonitor(monitorID: string, CB: Callback) {
     this.socket?.emit("resumeMonitor", parseInt(monitorID), CB);
   }
 

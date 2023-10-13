@@ -1,25 +1,19 @@
-import {Action, ActionPanel, getPreferenceValues, Icon, Color, List} from "@raycast/api";
-import {UptimeKuma, Monitor, Uptime, AvgPing, Heartbeat, HeartbeatList, Tag} from "./modules/UptimeKuma";
-import {useEffect, useState} from "react";
-import {useImmer} from "use-immer";
-import {MonitorDetail} from "./monitor-detail";
-import {
-  getHeartbeatListEmoji,
-  getMonitorStatusColor,
-  getMonitorStatusIcon,
-  getSummaryMessage,
-} from "./utils/display";
-import {showToast, Toast} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, Color, List } from "@raycast/api";
+import { UptimeKuma, Monitor, Uptime, AvgPing, Heartbeat, HeartbeatList } from "./modules/UptimeKuma";
+import { useEffect, useState } from "react";
+import { useImmer } from "use-immer";
+import { MonitorDetail } from "./monitor-detail";
+import { getHeartbeatListEmoji, getMonitorStatusColor, getMonitorStatusIcon, getSummaryMessage } from "./utils/display";
+import { showToast, Toast } from "@raycast/api";
 
 export default function Command() {
-
   const [monitors, setMonitors] = useImmer<Array<Monitor>>([]);
   const [kuma_url, setKumaUrl] = useState<string>("");
   const [monitorListFetched, setMonitorListFetched] = useState<boolean>(false);
   const [kumaInstance, setKumaInstance] = useState<UptimeKuma | null>(null);
 
   useEffect(() => {
-    const {kuma_url, kuma_token} = getPreferenceValues();
+    const { kuma_url, kuma_token } = getPreferenceValues();
 
     setKumaUrl(kuma_url);
 
@@ -35,10 +29,6 @@ export default function Command() {
       kuma.authenticate();
     });
 
-    kuma.on("authenticated", () => {
-
-    });
-
     kuma.on("error", (error) => {
       showToast({
         title: "Error",
@@ -51,11 +41,11 @@ export default function Command() {
 
     kuma.on("monitorList", (newMonitors) => {
       // Convert the received object to an array
-      const updatedMonitors = Object.values(newMonitors);
+      const updatedMonitors = Object.values(newMonitors) as Array<Monitor>;
 
       setMonitors((draft) => {
-        updatedMonitors.forEach((updatedMonitor: any) => {
-          const index = draft.findIndex((m: any) => m.id === updatedMonitor.id);
+        updatedMonitors.forEach((updatedMonitor) => {
+          const index = draft.findIndex((m) => m.id === updatedMonitor.id);
 
           if (index !== -1) {
             // Si le monitor existe déjà, mettez-le à jour
@@ -68,7 +58,7 @@ export default function Command() {
 
         // Supprimez les moniteurs qui n'existent plus dans le nouvel ensemble
         for (let i = draft.length - 1; i >= 0; i--) {
-          if (!updatedMonitors.some((m: any) => m.id === draft[i].id)) {
+          if (!updatedMonitors.some((m) => m.id === draft[i].id)) {
             draft.splice(i, 1);
           }
         }
@@ -113,7 +103,6 @@ export default function Command() {
         const monitor = draft.find((monitor) => monitor.id == payload.monitorID);
         if (monitor) {
           if (payload.period == 720) {
-
             monitor.uptime720 = payload.percent * 100;
           } else if (payload.period == 24) {
             monitor.uptime24 = payload.percent * 100;
@@ -125,9 +114,7 @@ export default function Command() {
     kuma.connect();
   }, []);
 
-
   return (
-
     <List navigationTitle="Monitors" isLoading={!monitorListFetched}>
       {monitors.map((monitor) => (
         <List.Item
@@ -137,8 +124,7 @@ export default function Command() {
           accessoryTitle={monitor.heartbeats ? getHeartbeatListEmoji(monitor.heartbeats, 5) : ""}
           actions={
             <ActionPanel>
-              <Action.Push title="Monitor detail"
-                           target={<MonitorDetail kuma={kumaInstance} monitor={monitor}/>}/>
+              <Action.Push title="Monitor Detail" target={<MonitorDetail kuma={kumaInstance} monitor={monitor} />} />
 
               <Action
                 title={`${monitor.active ? "Pause Monitor" : "Resume Monitor"}`}
@@ -161,21 +147,20 @@ export default function Command() {
                 }}
                 icon={
                   monitor.active
-                    ? {source: Icon.Pause, tintColor: Color.Yellow}
-                    : {source: Icon.Play, tintColor: Color.Green}
+                    ? { source: Icon.Pause, tintColor: Color.Yellow }
+                    : { source: Icon.Play, tintColor: Color.Green }
                 }
               />
 
-              <Action.OpenInBrowser title={"Open in Kuma dashboard"}
-                                    url={`${kuma_url}/dashboard/${monitor.id}`}/>
+              <Action.OpenInBrowser title={"Open in Kuma Dashboard"} url={`${kuma_url}/dashboard/${monitor.id}`} />
               {monitor.type == "http" && (
-                <Action.OpenInBrowser title={"Open target in browser"} url={`${monitor.url}`}/>
+                <Action.OpenInBrowser title={"Open Target in Browser"} url={`${monitor.url}`} />
               )}
             </ActionPanel>
           }
-          icon={{source: getMonitorStatusIcon(monitor), tintColor: getMonitorStatusColor(monitor)}}
+          icon={{ source: getMonitorStatusIcon(monitor), tintColor: getMonitorStatusColor(monitor) }}
         />
-      ))}</List>
-
+      ))}
+    </List>
   );
 }
