@@ -1,9 +1,9 @@
 // The algorithm below is inspired by the one used by Firefox:
-// https://wiki.mozilla.org/User:Jesse/NewFrecency
+// https://wiki.mozilla.org/User:Jesse/NewFrequency
 
-export type BookmarkFrecency = {
+export type BookmarkFrequency = {
   lastVisited: number;
-  frecency: number;
+  Frequency: number;
 };
 
 const HALF_LIFE_DAYS = 10;
@@ -16,18 +16,18 @@ const VISIT_TYPE_POINTS = {
   default: 100,
 };
 
-export function getBookmarkFrecency(bookmark?: BookmarkFrecency) {
+export function getBookmarkFrequency(bookmark?: BookmarkFrequency) {
   const now = new Date().getTime();
   const lastVisited = bookmark ? bookmark.lastVisited : 0;
-  const frecency = bookmark ? bookmark.frecency : 0;
+  const Frequency = bookmark ? bookmark.Frequency : 0;
 
   const visitAgeInDays = (now - lastVisited) / MS_PER_DAY;
   const currentVisitValue = VISIT_TYPE_POINTS.default * Math.exp(-DECAY_RATE_CONSTANT * visitAgeInDays);
-  const totalVisitValue = frecency + currentVisitValue;
+  const totalVisitValue = Frequency + currentVisitValue;
 
   return {
     ...bookmark,
     lastVisited: now,
-    frecency: totalVisitValue,
+    Frequency: totalVisitValue,
   };
 }
