@@ -81,7 +81,7 @@ export function BugItem(props: BugDetailsProps): JSX.Element {
           date: props.bug.last_change_date_locale,
         },
       ]}
-      keywords={[props.bug.summary]}
+      keywords={[...props.bug.summary.split(" ")]}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Bug">
@@ -271,7 +271,7 @@ export function FetchBugs(props: FetchProps) {
     ["resolution", "---"],
     ["limit", bugzillaPreferences.bugs_limit],
   ]);
-  async function fetch() {
+  async function fetchBugs() {
     if (selectedBugzilla !== undefined) {
       try {
         toast.show();
@@ -287,6 +287,7 @@ export function FetchBugs(props: FetchProps) {
         });
       } finally {
         toast.hide();
+        setIsLoading(false);
       }
     }
   }
@@ -305,10 +306,11 @@ export function FetchBugs(props: FetchProps) {
       </List.Dropdown>
     );
   }
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [bugs, setBugs] = useState<Bug[]>([]);
   const [bugzillaList, setBugzillaList] = useState<BugzillaInstance[]>([]);
   const [selectedBugzilla, setSelectedBugzilla] = useState<BugzillaInstance>();
-  const toast = new Toast({ style: Toast.Style.Animated, title: "Executing Query" });
+  const toast = new Toast({ style: Toast.Style.Animated, title: "Fetching Bugs" });
 
   const loadInstances = useCallback(async function fetch() {
     setBugzillaList(await listBugzilla());
@@ -316,18 +318,22 @@ export function FetchBugs(props: FetchProps) {
 
   useEffect(() => {
     loadInstances();
-    // setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    fetch();
+    if (bugzillaList.length === 0) {
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
+    fetchBugs();
   }, [selectedBugzilla]);
 
   return (
     <List
       searchBarAccessory={<BugzillaDropdown instanceList={bugzillaList} />}
       navigationTitle={props.navigationTitle}
-      isLoading={bugs === undefined}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter Bugs"
     >
       {bugzillaList.length === 0 ? <ManageInstanceEmptyView /> : <></>}

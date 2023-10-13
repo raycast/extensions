@@ -46,8 +46,8 @@ export class BugzillaAPI {
     instanceUrl.searchParams.append("id", bugId);
     // Older instances may not expose `description` field via API
     instanceUrl.searchParams.append("include_fields", "description");
-    const comments = JSON.parse(await this.request(instanceUrl))["bugs"][0]["description"];
-    return comments;
+    const description = JSON.parse(await this.request(instanceUrl))["bugs"][0]["description"];
+    return description ? description : "_No description was returned_";
   }
 
   async request(url: URL, init?: RequestInit) {
