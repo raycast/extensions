@@ -1,8 +1,8 @@
 import { ActionPanel, Action, Form, useNavigation, Icon } from "@raycast/api";
-import { postAndCloseMainWindow, fetchTags } from "../utilities/fetch";
+import { postAndCloseMainWindow, fetchFolders } from "../utilities/fetch";
 import { useState, useEffect } from "react";
 
-interface TagProp {
+interface FolderProp {
   id: string;
   name: string;
 }
@@ -12,18 +12,18 @@ interface Props {
   title: string;
 }
 
-export default function TagForm(props: Props) {
+export default function FolderForm(props: Props) {
   const [starred] = useState<boolean>(false);
-  const [tags, setTags] = useState<TagProp[]>([]);
+  const [folders, setFolders] = useState<FolderProp[]>([]);
   const [comment, setComment] = useState<string>();
   const { pop } = useNavigation();
   const command = props.command;
   const title = props.title;
 
   useEffect(() => {
-    fetchTags().then((tags) => {
-      if (Array.isArray(tags)) {
-        setTags(tags);
+    fetchFolders().then((folders) => {
+      if (Array.isArray(folders)) {
+        setFolders(folders);
       }
     });
   }, []);
@@ -37,9 +37,9 @@ export default function TagForm(props: Props) {
             icon={Icon.SaveDocument}
             onSubmit={async (values) => {
               const data = {
-                comment: values.comment,
-                tags: values.tags,
+                folder: values.folder,
                 starred: !!values.starred,
+                comment: values.comment,
               };
               await postAndCloseMainWindow(command, data);
               pop();
@@ -48,11 +48,11 @@ export default function TagForm(props: Props) {
         </ActionPanel>
       }
     >
-      <Form.TagPicker id="tags" title="Tags" defaultValue={[]}>
-        {tags.map((val) => {
-          return <Form.TagPicker.Item value={val.id} title={val.name} key={val.id} />;
+      <Form.Dropdown autoFocus id="folder" title="Folder" defaultValue="">
+        {folders.map((val) => {
+          return <Form.Dropdown.Item value={val.id} title={val.name} key={val.id} />;
         })}
-      </Form.TagPicker>
+      </Form.Dropdown>
       <Form.TextField title="Comment" id="comment" value={comment} onChange={setComment} />
       <Form.Checkbox id="starred" label="Starred" defaultValue={starred} />
     </Form>
