@@ -5,6 +5,10 @@ const devices: Record<string, DeviceDefinition> = {
     name: "Galaxy Buds Live (D701)",
     main: "icons/devices/samsung/galaxy.buds.live.svg",
   },
+  "0xA012": {
+    name: "Galaxy Buds+",
+    main: "icons/devices/samsung/galaxy.buds.plus.svg",
+  },
 };
 
 export default devices;

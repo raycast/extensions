@@ -2,8 +2,9 @@ import { existsSync } from "fs";
 import { execSync } from "child_process";
 import { Device } from "./devices.model";
 import ApplescriptDevicesService from "./devices.service.applescript";
+import { getPreferenceValues } from "@raycast/api";
 
-const brewPaths = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"];
+const standardBrewPaths = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"];
 
 export default class BlueutilDevicesService extends ApplescriptDevicesService {
   envVars = process.env;
@@ -12,7 +13,14 @@ export default class BlueutilDevicesService extends ApplescriptDevicesService {
     super();
 
     let blueutilDiscovered = false;
-    brewPaths.forEach((path) => {
+    let queuedPaths = standardBrewPaths;
+
+    const { blueutilDirectory: enforcedBlueutilDirectory } = getPreferenceValues();
+    if (enforcedBlueutilDirectory) {
+      queuedPaths = [enforcedBlueutilDirectory];
+    }
+
+    queuedPaths.forEach((path) => {
       if (blueutilDiscovered) return;
 
       blueutilDiscovered = blueutilDiscovered || existsSync(`${path}/blueutil`);
