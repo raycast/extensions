@@ -1,6 +1,15 @@
 import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { addDays, differenceInHours, endOfDay, format, formatDistance, isWithinInterval, startOfDay } from "date-fns";
+import {
+  addDays,
+  differenceInHours,
+  endOfDay,
+  format,
+  formatDistance,
+  isAfter,
+  isWithinInterval,
+  startOfDay,
+} from "date-fns";
 import { useMemo } from "react";
 import { useEvent } from "./hooks/useEvent";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
@@ -92,14 +101,29 @@ export default function Command() {
   // Filter out events that are synced, managed by Reclaim and part of multiple calendars
   const eventData = filterMultipleOutDuplicateEvents(eventsResponse);
 
-  const { data: eventMoment, isLoading: isLoadingMoment } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
-    headers: fetchHeaders,
-    keepPreviousData: true,
-  });
-
   const showDeclinedEvents = useMemo(() => {
     return !!currentUser?.settings.showDeclinedEvents;
   }, [currentUser]);
+
+  const eventMoment: ApiResponseMoment = useMemo(() => {
+    const now = new Date();
+    const events = eventData
+      ?.filter((event) => {
+        return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+      })
+      .filter((event) => {
+        return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
+      })
+      .filter((event) => isAfter(new Date(event.eventEnd), now))
+      .filter((event) => {
+        return !(differenceInHours(new Date(event.eventEnd), new Date(event.eventStart)) >= 24);
+      });
+
+    return {
+      event: events?.at(0),
+      nextEvent: events?.at(1),
+    };
+  }, [eventData, showDeclinedEvents]);
 
   const events = useMemo<EventSection[]>(() => {
     if (!eventData) return [];
@@ -204,7 +228,7 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      isLoading={isLoadingEvents || isLoadingMoment}
+      isLoading={isLoadingEvents}
       icon={"command-icon.png"}
       title={titleInfo.minTitle}
       tooltip={titleInfo.fullTitle}

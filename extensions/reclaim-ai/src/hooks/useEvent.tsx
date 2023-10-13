@@ -45,8 +45,6 @@ const useEvent = () => {
         })
       );
 
-      console.log(eventsResponse?.map((event) => `${event.title}-${event.color}`));
-
       if (!eventsResponse || error) throw error;
 
       // Filter out events that are synced, managed by Reclaim and part of multiple calendars
