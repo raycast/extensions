@@ -23,10 +23,24 @@ export default function SearchColors() {
   const [searchText, setSearchText] = useState("");
   const [filteredColors, filterColors] = useState(Object.entries(colors));
   useEffect(() => {
+    // If there's no search text, show all colors
     if (!searchText) {
       filterColors(Object.entries(colors));
       return;
     }
+    // If the search text starts with a number, we assume it's a shade
+    if (searchText.match(/^\d/)) {
+      const filteredShades = Object.entries(colors)
+        .map(([name, shades]) => {
+          const t = Object.entries(shades).filter(([shade]) => shade.includes(searchText));
+          return [name, Object.fromEntries(t)];
+        })
+        .filter(([name, shades]) => Object.keys(shades).length > 0);
+      console.log(filteredShades);
+      filterColors(filteredShades as any);
+      return;
+    }
+    // Otherwise, we assume it's a color name
     filterColors(Object.entries(colors).filter(([name]) => name.includes(searchText)));
   }, [searchText]);
   return (
