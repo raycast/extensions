@@ -119,7 +119,7 @@ export default function Command() {
                 />
                 <Action.CopyToClipboard
                   title="Copy As Markdown"
-                  content={`[${book.title}(豆瓣)](${book.url})`}
+                  content={`[${book.title}](${book.url})`}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
               </ActionPanel>
