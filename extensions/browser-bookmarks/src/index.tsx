@@ -28,7 +28,7 @@ import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
-import { BookmarkFrequency, getBookmarkFrequency } from "./utils/Frequency";
+import { BookmarkFrequency, getBookmarkFrequency } from "./utils/frequency";
 
 type Bookmark = {
   id: string;
@@ -63,6 +63,7 @@ export default function Command() {
         return [browsers[0].bundleId as string];
       }
 
+      // TODO I don't understand why pulling the default is useful here
       const defaultBrowser = await getMacOSDefaultBrowser();
       const browsersItem = await LocalStorage.getItem("browsers");
 
@@ -144,6 +145,7 @@ export default function Command() {
           domain = "";
         }
 
+        // add domain and frequency to bookmarks
         return { ...item, domain, bookmarkFrequency: frecencies[item.id] };
       })
       .sort((a, b) => {
@@ -328,6 +330,11 @@ export default function Command() {
     return <PermissionErrorScreen />;
   }
 
+  // this allows the browser the bookmark was pulled from to be opened
+  function browserBundleToName(bundleId: string) {
+    return availableBrowsers?.find((browser) => browser.bundleId === bundleId)?.name;
+  }
+
   return (
     <List
       isLoading={
@@ -376,7 +383,7 @@ export default function Command() {
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={item.url} onOpen={() => updateFrequency(item)} />
+                <Action.Open title="Open in Browser" application={browserBundleToName(item.browser)} target={item.url} onOpen={() => updateFrequency(item)} />
 
                 <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrequency(item)} />
 
