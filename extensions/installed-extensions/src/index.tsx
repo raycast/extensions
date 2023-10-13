@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, open } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, open, Clipboard, showHUD } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { exec as execCb } from "child_process";
 import { useState } from "react";
 import { promisify } from "util";
 import { dataType, optionType } from "./types";
 import { extensionTypes } from "./constants";
+import { formatItem, formatOutput } from "./utils";
 
 const exec = promisify(execCb);
 
@@ -19,7 +20,7 @@ export default function IndexCommand() {
   const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([]);
   const { isLoading, data } = useCachedPromise(async () => {
     const { stdout, stderr } = await exec(
-      `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name)"' {} \\;`
+      `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.title)"' {} \\;`,
     );
 
     if (stderr) {
@@ -35,9 +36,10 @@ export default function IndexCommand() {
     }
 
     let result = stdout.split("\n").map((item) => {
-      const [path, author, icon, commands, ...nameParts] = item.trim().split(" ");
-      const name = nameParts.join(" ");
+      const [path, author, icon, commands, name, ...titleParts] = item.trim().split(" ");
+      const title = titleParts.join(" ");
       const cleanedPath = path.replace("/package.json:", "");
+      const link = `https://raycast.com/${author}/${name}`;
 
       return {
         path: cleanedPath,
@@ -45,12 +47,14 @@ export default function IndexCommand() {
         author,
         icon,
         commands,
+        title,
+        link,
         isLocalExtension: !!cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
       };
     });
 
-    result = result.filter((item) => item.name !== "" && item.author !== "");
-    result = result.sort((a, b) => a.name.localeCompare(b.name));
+    result = result.filter((item) => item.title !== "" && item.author !== "");
+    result = result.sort((a, b) => a.title.localeCompare(b.title));
 
     setInstalledExtensions(result);
 
@@ -113,20 +117,37 @@ export default function IndexCommand() {
               <List.Item
                 key={index}
                 icon={`${item.path}/assets/${item.icon}`}
-                title={item.name}
+                title={item.title}
                 keywords={[item.author]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Extension">
-                      <Action.CopyToClipboard title="Copy Name to Clipboard" content={item.name} />
-                      <Action.CopyToClipboard title="Copy Author to Clipboard" content={item.author} />
+                      <Action
+                        onAction={() => {
+                          Clipboard.copy(formatItem(item, preferenes.format));
+                          showHUD("Copied to Clipboard");
+                        }}
+                        title="Copy Item to Clipboard"
+                        icon={Icon.Clipboard}
+                        shortcut={{ modifiers: ["cmd"], key: "." }}
+                      />
+                      <Action
+                        onAction={() => {
+                          Clipboard.copy(
+                            formatOutput(
+                              installedExtensions,
+                              preferenes.format,
+                              preferenes.separator,
+                              preferenes.prepend,
+                            ),
+                          );
+                          showHUD("Copied to Clipboard");
+                        }}
+                        title="Copy Extension List to Clipboard"
+                        icon={Icon.Clipboard}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                      />
                     </ActionPanel.Section>
-                    <Action.CopyToClipboard
-                      title="Copy Extension List to Clipboard"
-                      content={`${installedExtensions.length} installed extensions: ${installedExtensions
-                        .map((item) => item.name)
-                        .join(", ")}`}
-                    />
                   </ActionPanel>
                 }
                 accessories={accessories}

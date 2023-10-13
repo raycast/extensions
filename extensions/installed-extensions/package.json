@@ -23,6 +23,41 @@
           "required": false,
           "title": "Path to jq",
           "placeholder": "/opt/homebrew/bin/jq"
+        },
+        {
+          "name": "separator",
+          "description": "Select output format",
+          "type": "dropdown",
+          "required": false,
+          "default": "newline",
+          "title": "Select Output Format",
+          "data": [
+            {
+              "title": "Comma-separated list",
+              "value": "comma"
+            },
+            {
+              "title": "New line separated list",
+              "value": "newline"
+            }
+          ]
+        },
+        {
+          "name": "format",
+          "description": "Item format, supports {title} {link} {author}",
+          "type": "textfield",
+          "required": false,
+          "title": "Item Format",
+          "placeholder": "{title} ({link})",
+          "default": "{title} ({link})"
+        },
+        {
+          "name": "prepend",
+          "description": "The prepended text, supports {count}",
+          "type": "textfield",
+          "required": false,
+          "title": "The Prepended Text When Copying all Items",
+          "default": "{count} installed extensions"
         }
       ]
     }
@@ -36,7 +71,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.3",
     "typescript": "^4.4.3"
   },
   "scripts": {
