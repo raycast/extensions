@@ -12,12 +12,9 @@ export interface GenerationContextType {
   createGeneration: (
     prompt: string,
     onGenerationCreated?: ((gen: Generation) => void) | undefined
-  ) => Promise<
-    | false
-    | {
-        success: boolean;
-      }
-  >;
+  ) => Promise<{
+    success: boolean;
+  }>;
   createVariation: (
     gen: Generation,
     target: 1 | 2 | 3 | 4,
@@ -155,7 +152,7 @@ export function GenerationContextProvider({ children }: { children: React.ReactN
   };
 
   const createGeneration = async (prompt: string, onGenerationCreated?: (gen: Generation) => void) => {
-    if (!prompt || prompt.length === 0) return false;
+    if (!prompt || prompt.length === 0) return { success: false };
 
     const newGen = addGeneration({ prompt, type: "image", command: "imagine" });
     onGenerationCreated?.(newGen);
