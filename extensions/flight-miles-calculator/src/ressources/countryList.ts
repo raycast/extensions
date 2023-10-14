@@ -727,6 +727,11 @@ export const countryList: countryListType = {
         flag: "🇲🇪",
         timeAndDateName: "montenegro",
     },
+    YU: {
+        name: "Montenegro",
+        flag: "🇲🇪",
+        timeAndDateName: "montenegro",
+    },
     MF: {
         name: "St. Martin",
         flag: "🇲🇫",
