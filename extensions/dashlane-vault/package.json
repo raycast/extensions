@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dashlane-vault",
+  "title": "Dashlane Vault",
+  "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
+  "icon": "dashlane-512.png",
+  "author": "tm.wrnr",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Passwords",
+      "subtitle": "Dashlane",
+      "description": "Search all passwords in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Search Notes",
+      "subtitle": "Dashlane",
+      "description": "Search all notes in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "sync",
+      "title": "Sync Vault",
+      "subtitle": "Dashlane",
+      "description": "Sync your Dashlane vault",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.0",
+    "cross-fetch": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.18.6",
+    "@types/react": "18.2.31",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
