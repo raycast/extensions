@@ -43,7 +43,7 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
             />
             {props.application.appGroupPath ? (
               <Action.ShowInFinder
-                title="Open AppGroup Directory"
+                title="Open App Group Directory"
                 path={props.application.appGroupPath}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
               />
