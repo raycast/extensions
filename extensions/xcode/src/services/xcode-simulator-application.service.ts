@@ -285,7 +285,7 @@ export class XcodeSimulatorApplicationService {
       try {
         // Try to retrieve AppGroup directory path via the simctl cli
         // which is much quicker than the following fallback mechanism
-        const xcrunResult = await (
+        const xcrunResult = (
           await execAsync(`xcrun simctl get_app_container ${simulator.udid} ${bundleIdentifier} groups`)
         ).stdout.trim();
         if (xcrunResult.length > 0) {
