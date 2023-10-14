@@ -69,7 +69,7 @@ export default function Command() {
 
       return browsersItem ? (JSON.parse(browsersItem.toString()) as string[]) : [defaultBrowser];
     },
-    [availableBrowsers]
+    [availableBrowsers],
   );
 
   async function setBrowsers(browsers: string[]) {
@@ -309,7 +309,7 @@ export default function Command() {
       JSON.stringify({
         ...frecencies,
         [item.id]: getBookmarkFrequency(Frequency),
-      })
+      }),
     );
 
     mutateFrecencies();
@@ -383,11 +383,20 @@ export default function Command() {
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>
-                <Action.Open title="Open in Browser" application={browserBundleToName(item.browser)} target={item.url} onOpen={() => updateFrequency(item)} />
+                <Action.Open
+                  title="Open in Browser"
+                  application={browserBundleToName(item.browser)}
+                  target={item.url}
+                  onOpen={() => updateFrequency(item)}
+                />
 
                 <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrequency(item)} />
 
-                <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => removeFrequency(item)} />
+                <Action
+                  title="Reset Ranking"
+                  icon={Icon.ArrowCounterClockwise}
+                  onAction={() => removeFrequency(item)}
+                />
 
                 <ActionPanel.Section>
                   {availableBrowsers && availableBrowsers.length > 1 ? (

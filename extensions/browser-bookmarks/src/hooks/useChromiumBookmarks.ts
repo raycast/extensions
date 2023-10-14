@@ -107,7 +107,7 @@ type UseChromiumBookmarksParams = {
 
 export default function useChromiumBookmarks(
   enabled: boolean,
-  { path, browserIcon, browserName, browserBundleId }: UseChromiumBookmarksParams
+  { path, browserIcon, browserName, browserBundleId }: UseChromiumBookmarksParams,
 ) {
   const [currentProfile, setCurrentProfile] = useCachedState(`${browserName}-profile`, "");
 
@@ -126,7 +126,7 @@ export default function useChromiumBookmarks(
 
       return profiles;
     },
-    [enabled, path]
+    [enabled, path],
   );
 
   const { data, isLoading, mutate } = useCachedPromise(
@@ -138,7 +138,7 @@ export default function useChromiumBookmarks(
       const file = await read(`${path}/${profile}/Bookmarks`);
       return JSON.parse(file.toString()) as BookmarksRoot;
     },
-    [currentProfile, enabled, path]
+    [currentProfile, enabled, path],
   );
 
   const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
