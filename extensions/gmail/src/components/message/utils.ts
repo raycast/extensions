@@ -1,5 +1,5 @@
 import { gmail_v1 } from "@googleapis/gmail";
-import { Icon, Image } from "@raycast/api";
+import { Icon, Image, LaunchType, launchCommand } from "@raycast/api";
 
 export function getAddressParts(text: string | undefined | null):
   | {
@@ -251,4 +251,17 @@ export function getLabelIcon(label: gmail_v1.Schema$Label): Image.ImageLike | un
     return { source: Icon.Book, tintColor: label.color?.backgroundColor };
   }
   return { source: Icon.Tag, tintColor: label.color?.backgroundColor };
+}
+
+/**
+ * Launch Menu Commands in Background. Exception are handled and not propagated.
+ */
+export async function sendUpdateRequestToMenus(options?: { silent: true }) {
+  try {
+    await launchCommand({ name: "unreadmailsmenu", type: LaunchType.Background });
+  } catch (error) {
+    if (options && !options.silent) {
+      throw error;
+    }
+  }
 }

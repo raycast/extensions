@@ -17,11 +17,7 @@ export default function Command() {
     },
   );
 
-  const {
-    data: starredFiles,
-    isLoading: isLoadingStarredFiles,
-    error: starredFilesError,
-  } = useCachedPromise(
+  const { data: starredFiles, isLoading: isLoadingStarredFiles } = useCachedPromise(
     async () => {
       const results = await loadStarredFiles();
       return results;

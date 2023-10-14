@@ -12,7 +12,7 @@ export default function SupportedDevicesView() {
         icon={{ source: Icon.Power, tintColor: Color.PrimaryText }}
         title={"Toggle mocked connection state"}
         actions={
-          <ActionPanel title="Yeet">
+          <ActionPanel>
             <Action title={"Toggle"} onAction={() => setMockConnectionStatus(!mockConnectionStatus)} />
           </ActionPanel>
         }
@@ -25,6 +25,11 @@ export default function SupportedDevicesView() {
             key={id}
             icon={iconPath ? { source: iconPath } : undefined}
             title={metadata.name ?? "Missing name"}
+            actions={
+              <ActionPanel>
+                <Action title={"Toggle"} onAction={() => setMockConnectionStatus(!mockConnectionStatus)} />
+              </ActionPanel>
+            }
           />
         );
       })}

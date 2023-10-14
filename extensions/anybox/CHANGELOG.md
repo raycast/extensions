@@ -1,6 +1,11 @@
 # Anybox Changelog
 
-## [Feature Improvement] - 2023-09-11
+## [New Commands] - 2023-10-10
+
+- Support folders.
+- Support setting comment on saving.
+
+## [Feature Improvement] - 2023-09-15
 
 - Rename “Collection” to “Tag”.
 - Support nested tags.

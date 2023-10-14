@@ -13,8 +13,10 @@ interface SidebarItemProps {
 function itemSubtitle(item: SidebarItemProps) {
   if (item.type === "filter") {
     return "Smart List";
-  } else if (item.type == "tag") {
+  } else if (item.type === "tag") {
     return "Tag";
+  } else if (item.type === "folder") {
+    return "Folder";
   } else {
     return "Preset";
   }
@@ -30,7 +32,7 @@ function itemSubtitle(item: SidebarItemProps) {
 // case Trash = "/show/trash"
 // Case Filter = "/show/filter/:identifier"
 // Case Tag = "/show/tag/:identifier"
-// Case Heading = "/show/heading/:identifier"
+// Case Folder = "/show/folder/:identifier"
 
 export default function Sidebar() {
   const [isLoading, setIsLoading] = useState(true);
@@ -70,10 +72,12 @@ export default function Sidebar() {
                     tintColor: item.color || Color.Purple,
                   }}
                   onAction={() => {
-                    if (item.type == "filter") {
+                    if (item.type === "filter") {
                       getAndCloseMainWindow(`show/filter/${item.id}`);
-                    } else if (item.type == "tag") {
+                    } else if (item.type === "tag") {
                       getAndCloseMainWindow(`show/tag/${item.id}`);
+                    } else if (item.type === "folder") {
+                      getAndCloseMainWindow(`show/folder/${item.id}`);
                     } else {
                       getAndCloseMainWindow(`show/${item.id}`);
                     }

@@ -19,6 +19,7 @@ import {
   getLabelName,
   isMailDraft,
   isMailUnread,
+  sendUpdateRequestToMenus,
 } from "./utils";
 import path from "path";
 import * as fs from "fs";
@@ -86,6 +87,7 @@ export function MessageMarkAsReadAction(props: {
             if (props.onRevalidate) {
               props.onRevalidate();
             }
+            sendUpdateRequestToMenus();
           },
           title: "Marking Mail as Read",
           finishTitle: "Marked Mail as Read",
@@ -120,6 +122,7 @@ export function MessageMarkAllAsReadAction(props: {
           await markMessagesAsRead(props.messages);
           toast.style = Toast.Style.Success;
           toast.title = `Marked ${props.messages.length} Mails as Read`;
+          sendUpdateRequestToMenus();
 
           if (props.onRevalidate) {
             props.onRevalidate();
@@ -167,6 +170,7 @@ export function MessageMarkAsUnreadAction(props: {
             if (props.onRevalidate) {
               props.onRevalidate();
             }
+            sendUpdateRequestToMenus();
           },
           title: "Marking Mail as Unread",
           finishTitle: "Marked Mail as Unread",
@@ -209,6 +213,7 @@ export function MessageDeleteAction(props: {
         await moveMessageToTrash(props.message);
         toast.style = Toast.Style.Success;
         toast.title = "Moved Mail to Trash";
+        sendUpdateRequestToMenus();
       }
 
       if (props.onRevalidate) {
@@ -291,6 +296,26 @@ export function MessageOpenInBrowserAction(props: { message: gmail_v1.Schema$Mes
     }
   };
   return <Action.OpenInBrowser url={url} onOpen={handle} />;
+}
+
+export function MessageCopyWebUrlAction(props: { message: gmail_v1.Schema$Message; onOpen?: () => void }) {
+  const m = props.message;
+  if (m.id === undefined) {
+    return null;
+  }
+  const { gmail } = getGMailClient();
+  const { profile } = useCurrentProfile(gmail);
+  const url = isMailDraft(m) ? messageDraftEditUrl(profile, m) : messageThreadUrl(profile, m);
+  if (!url) {
+    return null;
+  }
+  return (
+    <Action.CopyToClipboard
+      content={url}
+      title="Copy Web URL to Clipboard"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+    />
+  );
 }
 
 export function MessageShowDetailsAction(props: { detailsShown: boolean; onAction?: (newValue: boolean) => void }) {
