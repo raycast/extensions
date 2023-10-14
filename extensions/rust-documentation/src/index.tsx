@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action } from "@raycast/api";
 import got from "got";
-import { useState, React, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { parse } from "node-html-parser";
 
 const INPUT_DELAY_MS = 500;
