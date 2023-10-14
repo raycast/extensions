@@ -1,5 +1,6 @@
 import { Application, Toast, getApplications, open, showToast } from "@raycast/api";
 import { exec } from "child_process";
+import fs from "fs";
 
 const asPackageName = "com.google.android.studio";
 
@@ -54,3 +55,13 @@ export const getSelectedFinderWindow = (): Promise<string> => {
     });
   });
 };
+
+export function isValidDirectoryPath(directoryPath: string): boolean {
+  try {
+    // Check if the directory exists and is a directory (not a file or a symlink)
+    return fs.existsSync(directoryPath) && fs.statSync(directoryPath).isDirectory();
+  } catch (error) {
+    // Handle any potential errors (e.g., permission issues, invalid paths)
+    return false;
+  }
+}

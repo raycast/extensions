@@ -12,6 +12,7 @@ import {
   XcodeSimulatorOpenUrlErrorReason,
 } from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
 import { XcodeSimulatorStateFilter } from "../models/xcode-simulator/xcode-simulator-state-filter.model";
+import { XcodeSimulatorApplication } from "../models/xcode-simulator/xcode-simulator-application.model";
 
 /**
  * XcodeSimulatorService
@@ -112,6 +113,15 @@ export class XcodeSimulatorService {
   }
 
   /**
+   * Restart XcodeSimulator
+   * @param xcodeSimulator The XcodeSimulator to restart
+   */
+  static async restart(xcodeSimulator: XcodeSimulator): Promise<void> {
+    await XcodeSimulatorService.shutdown(xcodeSimulator);
+    await XcodeSimulatorService.boot(xcodeSimulator);
+  }
+
+  /**
    * Perform a XcodeSimulator AppAction
    * @param action The XcodeSimulatorAppAction
    * @param bundleIdentifier The bundle identifier of the application
@@ -194,5 +204,33 @@ export class XcodeSimulatorService {
       // Silently launch Simulator application
       XcodeSimulatorService.launchSimulatorApplication();
     });
+  }
+
+  /**
+   * Send Push Notification to Xcode Simulator
+   * @param filePath  Notification Payload file
+   * @param application Application choosen to send notification to
+   */
+  static async pushNotifications(filePath: string, application: XcodeSimulatorApplication): Promise<void> {
+    return execAsync(
+      `xcrun simctl push ${application.simulator.udid} ${application.bundleIdentifier} ${filePath}`
+    ).then();
+  }
+
+  /**
+   * Rename XcodeSimulator
+   * @param xcodeSimulator The Xcode Simulator to rename
+   * @param name The new simulator name
+   */
+  static async rename(xcodeSimulator: XcodeSimulator, name: string): Promise<void> {
+    return execAsync(`xcrun simctl rename ${xcodeSimulator.udid} '${name}' `).then();
+  }
+
+  /**
+   * Rename XcodeSimulator
+   * @param xcodeSimulator The Xcode Simulator to trigger iCloud Sync to
+   */
+  static async triggerIcloudSync(xcodeSimulator: XcodeSimulator): Promise<void> {
+    return execAsync(`xcrun simctl icloud_sync ${xcodeSimulator.udid}`).then();
   }
 }

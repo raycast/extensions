@@ -1,8 +1,7 @@
 import { Action } from "@raycast/api";
 
-import { getPageName } from "../../utils/notion";
+import { getPageName, Page } from "../../utils/notion";
 import { openIn } from "../../utils/openPage";
-import { Page } from "../../utils/types";
 
 export default function ActionCreateQuicklink({ page }: { page: Page }) {
   if (!page.url) return null;

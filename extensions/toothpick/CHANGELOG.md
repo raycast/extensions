@@ -1,5 +1,9 @@
 # Toothpick Changelog
 
+## [QoL Improvement] - 2023-10-05
+
+- Make bluetooth backend preference an optional preference.
+
 ## [QoL Improvements and Device Additions] - 2023-09-28
 
 - Added rudimentary mappings for the following devices:
