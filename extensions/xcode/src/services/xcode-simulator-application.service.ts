@@ -306,7 +306,8 @@ export class XcodeSimulatorApplicationService {
       // Initialize simulator data application directory path
       const appGroupDirectoryPath = Path.join(simulator.dataPath, "Containers/Shared/AppGroup");
       //get AppGroup paths from a directory
-      simulatorAppGroupPathsPromise = this.getApplicationPathFromDirectory(appGroupDirectoryPath);
+      simulatorAppGroupPathsPromise =
+        XcodeSimulatorApplicationService.getApplicationPathFromDirectory(appGroupDirectoryPath);
       // Set simulator AppGroup paths promise so that the AppGroup paths are only read once per simulator
       XcodeSimulatorApplicationService.simulatorAppGroupPathsCache.set(simulator, simulatorAppGroupPathsPromise);
     }
