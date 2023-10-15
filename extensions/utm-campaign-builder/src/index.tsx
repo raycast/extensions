@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showHUD, Clipboard, Icon } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, popToRoot, PopToRootType, showHUD } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { URL } from "url";
 
@@ -34,7 +34,8 @@ export default function Command() {
     async onSubmit(values) {
       const url = createCampaignUrl(values);
       await Clipboard.copy(url);
-      showHUD("Copied to Clipboard");
+      await showHUD("Copied to Clipboard");
+      await popToRoot();
     },
     validation: {
       url: (value) => {
