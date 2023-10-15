@@ -66,7 +66,7 @@ export async function sendTranslateRequest({
   text?: string;
   sourceLanguage?: SourceLanguage;
   targetLanguage: TargetLanguage;
-  onTranslateAction?: typeof Preferences.onTranslateAction | "none";
+  onTranslateAction?: Preferences["onTranslateAction"] | "none";
 }) {
   try {
     const prefs = getPreferenceValues<Preferences>();
