@@ -43,6 +43,4 @@ The following prefixes are available:
 - Chore
 - Revert
 
-
-
 Something missing? Raise an issue in the repo [here](https://github.com/niemtec/conventional-commits/issues)!
