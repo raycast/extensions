@@ -54,7 +54,7 @@ export function MenuBarItem(props: {
 }): JSX.Element {
   return (
     <MenuBarExtra.Item
-      title={clipText(props.title)}
+      title={props.title ? clipText(props.title) : "?"}
       icon={props.icon}
       subtitle={props.subtitle}
       shortcut={props.shortcut}
