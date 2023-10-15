@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { SourceLanguage, TargetLanguage, sendTranslateRequest, source_languages, target_languages } from "./utils";
 import TranslationView from "./components/TranslationView";
@@ -27,12 +27,12 @@ const Command = (props: LaunchProps) => {
   if (props?.launchContext?.translation) {
     return <TranslationView {...props} />;
   }
-
+  const { defaultTargetLanguage } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
   const [sourceText, setSourceText] = useState("");
   const [translation, setTranslation] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
-  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>("EN-US");
+  const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
 
   const submit = async (values: Values) => {
@@ -43,6 +43,7 @@ const Command = (props: LaunchProps) => {
       text: values.text,
       targetLanguage: values.to,
       sourceLanguage: values.from && values.from.length > 0 ? values.from : undefined,
+      onTranslateAction: "none"
     });
 
     setLoading(false);
@@ -50,9 +51,11 @@ const Command = (props: LaunchProps) => {
     if (!response) return;
 
     const { translation, detectedSourceLanguage } = response;
-
+    console.log('translation:', translation);
     setTranslation(translation);
+    console.log('set translation')
     setDetectedSourceLanguage(detectedSourceLanguage);
+    console.log('set detected source language')
   };
 
   const switchLanguages = async () => {
@@ -103,34 +106,32 @@ const Command = (props: LaunchProps) => {
       }
       isLoading={loading}
     >
-      <>
-        <Form.TextArea id="text" placeholder="Enter or paste text here" value={sourceText} onChange={setSourceText} />
-        <Form.Dropdown
-          id="from"
-          value={sourceLanguage}
-          onChange={(value) => setSourceLanguage(value as SourceLanguage)}
-          storeValue={true}
-          title="From"
-        >
-          <Form.Dropdown.Item value="" title="Detect" />
-          {Object.entries(source_languages).map(([value, title]) => (
-            <Form.Dropdown.Item value={value} title={title} key={value} />
-          ))}
-        </Form.Dropdown>
-        <Form.Separator />
-        <Form.Dropdown
-          id="to"
-          value={targetLanguage}
-          onChange={(value) => setTargetLanguage(value as TargetLanguage)}
-          storeValue={true}
-          title="To"
-        >
-          {Object.entries(target_languages).map(([value, title]) => (
-            <Form.Dropdown.Item value={value} title={title} key={value} />
-          ))}
-        </Form.Dropdown>
-        <Form.TextArea id="translation" value={translation} />
-      </>
+      <Form.TextArea id="text" placeholder="Enter or paste text here" value={sourceText} onChange={setSourceText} />
+      <Form.Dropdown
+        id="from"
+        value={sourceLanguage}
+        onChange={(value) => setSourceLanguage(value as SourceLanguage)}
+        storeValue={true}
+        title="From"
+      >
+        <Form.Dropdown.Item value="" title="Detect" />
+        {Object.entries(source_languages).map(([value, title]) => (
+          <Form.Dropdown.Item value={value} title={title} key={value} />
+        ))}
+      </Form.Dropdown>
+      <Form.Separator />
+      <Form.Dropdown
+        id="to"
+        value={targetLanguage}
+        onChange={(value) => setTargetLanguage(value as TargetLanguage)}
+        storeValue={true}
+        title="To"
+      >
+        {Object.entries(target_languages).map(([value, title]) => (
+          <Form.Dropdown.Item value={value} title={title} key={value} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextArea id="translation" value={translation} />
     </Form>
   );
 };

@@ -18,6 +18,7 @@ function isPro(key: string) {
 const DEEPL_QUOTA_EXCEEDED = 456;
 
 function gotErrorToString(error: unknown) {
+  console.log(error);
   // response received
   if (error instanceof got.HTTPError) {
     const { statusCode } = error.response;
@@ -31,9 +32,9 @@ function gotErrorToString(error: unknown) {
   }
 
   // request failed
-  if (error instanceof got.RequestError)
+  if (error instanceof got.RequestError) {
     return `Something went wrong when sending a request to the DeepL API. If you’re having issues, open an issue on GitHub and include following text: ${error.code} ${error.message}`;
-
+  }
   return "Unknown error";
 }
 
@@ -61,13 +62,18 @@ export async function sendTranslateRequest({
   text: initialText,
   sourceLanguage,
   targetLanguage,
+  onTranslateAction
 }: {
   text?: string;
   sourceLanguage?: SourceLanguage;
-  targetLanguage: TargetLanguage;
+    targetLanguage: TargetLanguage;
+    onTranslateAction?: (typeof Preferences.onTranslateAction) | "none";
 }) {
   try {
-    const { key, onTranslateAction, source } = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues<Preferences>();
+    const { key, source } = prefs;
+    console.log(targetLanguage)
+    onTranslateAction = onTranslateAction ?? prefs.onTranslateAction;
 
     const text = initialText || (await readContent(source));
 
@@ -105,8 +111,10 @@ export async function sendTranslateRequest({
         case "paste":
           await closeMainWindow();
           await Clipboard.paste(translation);
+        default:
+          break;
       }
-
+      console.log('translation2', translation)
       return { translation, detectedSourceLanguage };
     } catch (error) {
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
