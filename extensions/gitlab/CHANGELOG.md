@@ -2,7 +2,10 @@
 
 ## [Fix] - 2023-10-15
 
-- Fix possible crashes
+- Fix possible crashes in menubar items
+- Fix possible crashes in label lists
+- Catch error if launchCommand fails
+- Fix menubar icon color on dark theme
 
 ## [Fixed unicode chars in title] - 2023-09-21
 
