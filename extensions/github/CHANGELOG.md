@@ -1,8 +1,8 @@
 # GitHub Changelog
 
-## [Add clone and code] - 2023-10-11
+## [Add Clone and Open command] - 2023-10-11
 
-- Add a command in to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh repository results.
+- Add a command to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh repository results.
 
 ## [Fix menu colors] - 2023-09-30
 
