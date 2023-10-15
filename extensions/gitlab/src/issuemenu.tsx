@@ -9,9 +9,14 @@ import {
 import { useMyIssues } from "./components/issues_my";
 import { IssueScope, IssueState } from "./components/issues";
 import { GitLabIcons } from "./icons";
+import { showErrorToast, getErrorMessage } from "./utils";
 
 async function launchMyIssues(): Promise<void> {
-  return launchCommand({ name: "issue_my", type: LaunchType.UserInitiated });
+  try {
+    return launchCommand({ name: "issue_my", type: LaunchType.UserInitiated });
+  } catch (error) {
+    showErrorToast(getErrorMessage(error), "Could not open My Issues Command");
+  }
 }
 
 function getMaxIssuesPreference(): number {

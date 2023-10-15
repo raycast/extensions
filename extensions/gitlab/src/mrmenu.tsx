@@ -12,13 +12,22 @@ import {
   getBoundedPreferenceNumber,
 } from "./components/menu";
 import { GitLabIcons } from "./icons";
+import { getErrorMessage, showErrorToast } from "./utils";
 
 async function launchReviewsCommand(): Promise<void> {
-  return launchCommand({ name: "reviews", type: LaunchType.UserInitiated });
+  try {
+    return await launchCommand({ name: "reviews", type: LaunchType.UserInitiated });
+  } catch (error) {
+    showErrorToast(getErrorMessage(error), "Could not open Reviews Command");
+  }
 }
 
 async function launchAssignedMergeRequests(): Promise<void> {
-  return launchCommand({ name: "mr_my", type: LaunchType.UserInitiated });
+  try {
+    return launchCommand({ name: "mr_my", type: LaunchType.UserInitiated });
+  } catch (error) {
+    showErrorToast(getErrorMessage(error), "Could not open My Merge Requests Command");
+  }
 }
 
 function getMaxMergeRequestsPreference(): number {
