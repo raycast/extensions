@@ -48,7 +48,6 @@ async function getSelection() {
 
 async function readContent(preferredSource: string) {
   const clipboard = await Clipboard.readText();
-  console.log(clipboard);
   const selected = await getSelection();
 
   if (preferredSource === "clipboard") {
@@ -72,12 +71,11 @@ export async function sendTranslateRequest({
   try {
     const prefs = getPreferenceValues<Preferences>();
     const { key, source } = prefs;
-    console.log(targetLanguage)
     onTranslateAction = onTranslateAction ?? prefs.onTranslateAction;
 
     const text = initialText || (await readContent(source));
 
-    showToast(Toast.Style.Animated, "Fetching translation...");
+    const toast = await showToast(Toast.Style.Animated, "Fetching translation...");
     try {
       const {
         translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
@@ -112,9 +110,9 @@ export async function sendTranslateRequest({
           await closeMainWindow();
           await Clipboard.paste(translation);
         default:
+          toast.hide();
           break;
       }
-      console.log('translation2', translation)
       return { translation, detectedSourceLanguage };
     } catch (error) {
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));

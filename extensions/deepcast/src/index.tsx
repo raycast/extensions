@@ -51,11 +51,8 @@ const Command = (props: LaunchProps) => {
     if (!response) return;
 
     const { translation, detectedSourceLanguage } = response;
-    console.log('translation:', translation);
     setTranslation(translation);
-    console.log('set translation')
     setDetectedSourceLanguage(detectedSourceLanguage);
-    console.log('set detected source language')
   };
 
   const switchLanguages = async () => {
