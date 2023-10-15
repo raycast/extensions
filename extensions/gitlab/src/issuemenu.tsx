@@ -56,7 +56,10 @@ export default function MenuCommand(): JSX.Element {
         >
           {issues?.map((m) => (
             <MenuBarItem
-              icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+              icon={{
+                source: GitLabIcons.merge_request,
+                tintColor: { light: "#000", dark: "#FFF", adjustContrast: false },
+              }}
               title={`#${m.iid} ${m.title}`}
               tooltip={m.reference_full}
               onAction={() => open(m.web_url)}
