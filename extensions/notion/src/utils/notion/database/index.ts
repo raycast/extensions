@@ -167,6 +167,7 @@ export async function createDatabasePage(values: Form.Values) {
       if (!type) return;
       const propId = formId.match(new RegExp("(?<=property::" + type + "::).*", "g"))?.[0];
       const value = values[formId];
+      if (value == "_select_null_") return;
       if (!propId || !value) return;
 
       const formatted = formatDatabaseProperty(type, value);
