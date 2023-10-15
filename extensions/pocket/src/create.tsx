@@ -14,6 +14,7 @@ interface CreateBookmarkValues {
 
 export default function Create() {
   const tags = useTags();
+
   const { handleSubmit, setValue, itemProps } = useForm<CreateBookmarkValues>({
     async onSubmit(values) {
       const toast = new Toast({
@@ -73,8 +74,8 @@ export default function Create() {
       <Form.TextField
         id="title"
         title="Title"
-        placeholder="Raycast Website"
-        info="Pocket will set it automatically if you leave this empty"
+        placeholder="Raycast"
+        info="If Pocket detects a title from the content of the page, this value will be ignored."
         {...itemProps.title}
       />
       <Form.TagPicker title="Tags" {...itemProps.tags}>
