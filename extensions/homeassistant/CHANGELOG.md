@@ -1,5 +1,28 @@
 # Home Assistant Changelog
 
+## [Weather Menu Bar] - 2022-11-28
+- Add weather entity menubar command
+
+## [Fix Script Edit Action] - 2022-11-19
+- Fix wrong entity id when edit a script
+
+## [Timestamps] - 2022-11-14
+- Add `last_updated` and `last_changed` states as tooltip as well as to the attributes list
+- Add HACS pending updates to `Updates` command if HACS is installed
+
+## [Video Stream Actions] - 2022-11-01
+- Add action to open a camera video stream in VLC, IINA and the Browser
+
+## [Zones] - 2022-10-31
+- Add Grid View support for cameras
+- Add QuickLook support for cameras in Grid View
+- Add sections for `Update`, `Motions` and `Windows` commands
+- Add `Zones` command
+- Persons will now show the avatar if available
+- Add icon support for `device_tracker` entities
+- Add `Copy Key to Clipboard` action to attribute list items
+- Add `Open in Google Maps` action for persons
+
 ## [Window Support] - 2022-08-09
 - Add icon and state support for window device class
 - Add actions to `Edit` or `Debug` scripts or automations in the browser

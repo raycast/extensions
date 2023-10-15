@@ -133,6 +133,48 @@
       "subtitle": "GitLab",
       "description": "Managed My Recent Commits",
       "mode": "view"
+    },
+    {
+      "name": "todomenubar",
+      "title": "Todos Menu Bar",
+      "description": "Show your todos directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxtodos",
+          "description": "Maximum Todos shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Todos",
+          "placeholder": "10"
+        },
+        {
+          "name": "alwaysshow",
+          "description": "Show Todos always in the Menubar regardless if you have todos or not",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Always",
+          "title": "Appearance",
+          "default": true
+        },
+        {
+          "name": "showtext",
+          "description": "Show Todo Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Todo Count",
+          "default": true
+        },
+        {
+          "name": "grayicon",
+          "description": "Show Grayscale icon",
+          "type": "checkbox",
+          "required": false,
+          "label": "Grayscale Icon",
+          "default": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -221,6 +263,14 @@
       "placeholder": "/my/cert.pem",
       "required": false,
       "description": "Set Custom Certificate"
+    },
+    {
+      "name": "excludeTodoAuthorUsernames",
+      "type": "textfield",
+      "required": false,
+      "title": "Exclude Todo Authors",
+      "description": "Hide Todos Created By Someone",
+      "placeholder": "e.g. bot1,bot2"
     }
   ],
   "categories": [
@@ -230,11 +280,12 @@
     "Loskir",
     "immint023",
     "duboiss",
-    "metakirby5"
+    "metakirby5",
+    "macbookandrew"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.45.0",
     "@raycast/utils": "^1.0.6",
     "apollo-link-context": "^1.0.20",
     "fuse.js": "^6.4.6",
@@ -246,6 +297,7 @@
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
+    "@types/node": "^18.8.3",
     "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",

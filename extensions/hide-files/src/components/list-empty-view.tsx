@@ -7,7 +7,7 @@ export function ListEmptyView() {
     <List.EmptyView
       key={`empty-localDirectory`}
       title={"No Hidden Files"}
-      icon={{ source: { light: "empty-view-icon.svg", dark: "empty-view-icon@dark.svg" } }}
+      icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
       description={`You can hide files via the "Hide Files" command`}
       actions={
         <ActionPanel>

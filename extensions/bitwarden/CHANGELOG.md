@@ -1,5 +1,19 @@
 # Bitwarden Changelog
 
+## [Enhancements] - 2023-01-17
+
+- Added master password re-prompt feature.
+- Cleans up the clipboard password copy code
+- Added re-prompt feature and a setting for temporarily disabling re-prompt dialogs for a specified period of time after entering the master password.
+
+## [Copy Enhancement] - 2022-11-02
+
+- Copy passwords in a way that asks clipboard managers to not save it 
+
+## [UI Enhancement] - 2022-09-21
+
+- Add so it's possible to see folder of items
+
 ## [Fixes] - 2022-07-01
 
 - Fixes an existing bug that prevented users from writing on the password generator inputs, getting stuck while writing.

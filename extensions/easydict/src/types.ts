@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 11:13
+ * @lastEditTime: 2022-10-11 21:15
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -15,8 +15,15 @@ import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/
 import { LanguageDetectType } from "./detectLanauge/types";
 import { IcibaDictionaryResult } from "./dictionary/iciba/interface";
 import { LingueeDictionaryResult, LingueeListItemType } from "./dictionary/linguee/types";
-import { QueryWordInfo, YoudaoDictionaryFormatResult, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
+import {
+  QueryWordInfo,
+  YoudaoDictionaryFormatResult,
+  YoudaoDictionaryListItemType,
+  YoudaoWebTranslateResult,
+} from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
+import { BingTranslateResult } from "./translation/microsoft/types";
+import { VolcanoDetectResult, VolcanoTranslateResult } from "./translation/volcano/types";
 
 export interface ActionListPanelProps {
   displayItem: ListDisplayItem;
@@ -33,6 +40,8 @@ export enum TranslationType {
   Apple = "Apple Translate",
   DeepL = "DeepL Translate",
   Google = "Google Translate",
+  Bing = "Bing Translate",
+  Volcano = "Volcano Translate",
 }
 
 export enum DicionaryType {
@@ -47,7 +56,7 @@ export type RequestType = TranslationType | DicionaryType | LanguageDetectType;
 
 export interface QueryTypeResult {
   type: QueryType;
-  wordInfo: QueryWordInfo; // dictionary type must has own word info.
+  queryWordInfo: QueryWordInfo; // dictionary type must has own word info.
   result?: QueryResponse; // when language is not supported, result is undefined.
   translations: string[]; // each translation is a paragraph.
   oneLineTranslation?: string; // one line translation. will automatically give value when updating if type is TranslationType.
@@ -56,13 +65,18 @@ export interface QueryTypeResult {
 
 export type QueryResponse =
   | YoudaoDictionaryFormatResult
+  | YoudaoWebTranslateResult
+  | BingTranslateResult
   | BaiduTranslateResult
+  | BaiduWebLanguageDetect
   | TencentTranslateResult
   | CaiyunTranslateResult
   | DeepLTranslateResult
   | IcibaDictionaryResult
   | LingueeDictionaryResult
   | AppleTranslateResult
+  | VolcanoTranslateResult
+  | VolcanoDetectResult
   | GoogleTranslateResult;
 
 export interface RequestErrorInfo {
@@ -83,12 +97,21 @@ export interface BaiduTranslateItem {
   dst: string;
 }
 
-export type TencentTranslateResult = TextTranslateResponse;
+export interface BaiduWebLanguageDetect {
+  error?: number; // 0
+  msg?: string; // "success"
+  lan?: string; // "en"
+}
 
-// export interface TencentTranslateResult {
-//   Response: TencentTranslateResponse;
-// }
-// export type TencentTranslateResponse = TextTranslateResponse;
+export interface TencentTranslateResult extends TextTranslateResponse {
+  Error: TencentError;
+}
+
+// {"Code":"InvalidParameterValue","Message":"不支持的语种：ar_to_zh"}
+export interface TencentError {
+  Code: string;
+  Message: string;
+}
 
 export interface CaiyunTranslateResult {
   rc: string;
@@ -119,7 +142,7 @@ export interface QueryResult {
   type: QueryType;
   sourceResult: QueryTypeResult;
   displaySections?: DisplaySection[]; // if sourceResult.result is not null, displaySections is not null.
-  disableDisplay?: boolean; // this value comes from preferences. if true, set displaySections to null.
+  hideDisplay?: boolean; // this value comes from preferences. if true, set displaySections to null.
 }
 
 export interface DisplaySection {
@@ -132,13 +155,14 @@ export interface ListDisplayItem {
   queryWordInfo: QueryWordInfo;
   key: string;
   title: string;
+  subtitle?: string;
   displayType: ListItemDisplayType; // LingueeListItemType.Example
   queryType: QueryType; // LingueeListItemType
   copyText: string;
   tooltip?: string;
-  subtitle?: string;
   speech?: string;
-  translationMarkdown?: string;
+  detailsMarkdown?: string;
+  sourceData?: QueryResponse;
 
   // accessory item
   accessoryItem?: ListAccessoryItem;

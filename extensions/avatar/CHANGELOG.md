@@ -1,5 +1,9 @@
 # Avatar Changelog
 
+## [Update Raycast API] - 2022-12-01
+
+- Update Raycast API version to 1.44.0
+
 ## [Add new avatar layout options] - 2022-06-09
 
 - Add new avatar layout options: List or Grid.

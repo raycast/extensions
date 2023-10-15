@@ -1,6 +1,6 @@
 import { Detail } from '@raycast/api'
+import { useCachedPromise } from '@raycast/utils'
 import { fetchReadme } from 'fetch-readme'
-import { useState, useEffect } from 'react'
 
 interface ReadmeProps {
   user: string
@@ -8,10 +8,7 @@ interface ReadmeProps {
 }
 
 export const Readme = ({ user, repo }: ReadmeProps): JSX.Element => {
-  const [readme, setReadme] = useState<string>('')
-  useEffect(() => {
-    fetchReadme(user, repo).then((response: string) => setReadme(response))
-  }, [])
+  const { data, isLoading } = useCachedPromise(fetchReadme, [user, repo])
 
-  return <Detail markdown={readme} />
+  return <Detail markdown={data} isLoading={isLoading} />
 }

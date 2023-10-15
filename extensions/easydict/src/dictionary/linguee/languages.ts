@@ -8,7 +8,7 @@
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { getLanguageTitle } from "../../language/languages";
+import { getLanguageEnglishName } from "../../language/languages";
 
 /**
  * This is the list of general languages supported by Linguee dictionary, they can query each other at will.
@@ -45,8 +45,8 @@ const validLanguagePairKeys = ["english-chinese", "english-japanese", "english-r
  * Get valid language pair keys.
  */
 export function getValidLingueeLanguagePair(fromLanguage: string, toLanguage: string): string | undefined {
-  let fromLanguageTitle = getLanguageTitle(fromLanguage);
-  let targetLanguageTitle = getLanguageTitle(toLanguage);
+  let fromLanguageTitle = getLanguageEnglishName(fromLanguage);
+  let targetLanguageTitle = getLanguageEnglishName(toLanguage);
   const ChineseLanguageTitle = "Chinese";
   if (fromLanguageTitle.startsWith(ChineseLanguageTitle)) {
     fromLanguageTitle = ChineseLanguageTitle;

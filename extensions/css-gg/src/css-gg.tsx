@@ -1,13 +1,5 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  randomId,
-  ImageMask,
-} from "@raycast/api";
+import { ActionPanel, Action, showToast, Toast, Image, Grid } from "@raycast/api";
+import { ListOrGrid, ListOrGridSection, ListOrGridItem } from "./list-or-grid";
 
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
@@ -46,11 +38,16 @@ export default function iconList() {
   }, []);
 
   return (
-    <List isLoading={state.results.length === 0} searchBarPlaceholder="Search CSS.GG icons...">
-      <List.Section key={randomId()} title="CSS.GG" subtitle="704 Pure CSS and SVG icons">
-        {state.results.map((result) => (
+    <ListOrGrid
+      isLoading={state.results.length === 0}
+      searchBarPlaceholder={"Search CSS.GG icons..."}
+      inset={Grid.Inset.Medium}
+      columns={8}
+    >
+      <ListOrGridSection title="CSS.GG" subtitle="704 Pure CSS and SVG icons">
+        {state.results.map((result, index) => (
           <IconListItem
-            key={randomId()}
+            key={index}
             name={`${result.name ?? "<no name>"}`}
             svg_path={`${result.svg_path ?? "<no name>"}`}
             tsx={`${result.tsx ?? "<no name>"}`}
@@ -59,8 +56,8 @@ export default function iconList() {
             `}
           />
         ))}
-      </List.Section>
-    </List>
+      </ListOrGridSection>
+    </ListOrGrid>
   );
 }
 
@@ -73,11 +70,16 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
   const nameFormatted = name.replace(/-/g, " ").replace(/(^\w{1})|(\s{1}\w{1})/g, (match) => match.toUpperCase());
 
   return (
-    <List.Item
+    <ListOrGridItem
       id={name}
-      key={randomId()}
       title={nameFormatted}
       icon={{
+        source: {
+          light: apiPathLight + name + ".png",
+          dark: apiPathDark + name + ".png",
+        },
+      }}
+      content={{
         source: {
           light: apiPathLight + name + ".png",
           dark: apiPathDark + name + ".png",
@@ -93,7 +95,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Copy or Open">
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title={"Copy to Clipboard"}
               content={svg_path}
               icon={{
@@ -103,7 +105,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
                 },
               }}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title={"Open in Browser"}
               url={"https://css.gg/" + name}
               icon={{
@@ -115,7 +117,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy as Inline">
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="CSS"
               icon={{
                 source: {
@@ -126,7 +128,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               shortcut={{ modifiers: ["opt"], key: "1" }}
               content={css}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="TSX"
               icon={{
                 source: {
@@ -139,7 +141,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy Markup">
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy CSS Version Markup"
               icon={{
                 source: {
@@ -150,7 +152,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               content={'<i class="gg-' + name + '"></i>'}
               shortcut={{ modifiers: ["opt"], key: "c" }}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy SVG Sprite Markup"
               icon={{
                 source: {
@@ -163,7 +165,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Include">
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               icon={{
                 source: {
                   light: apiPathLight + "bowl.png",
@@ -173,7 +175,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title="Stylesheet"
               content={'<link href="https://css.gg/' + name + '.css" rel="stylesheet">'}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               icon={{
                 source: {
                   light: apiPathLight + "import.png",
@@ -183,7 +185,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title="CSS @import"
               content={'@import url("https://css.gg/' + name + '.css");'}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               icon={{
                 source: {
                   light: apiPathLight + "code.png",
@@ -193,7 +195,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title="JSON"
               content={"https://css.gg/json?=" + name}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               icon={{
                 source: {
                   light: apiPathLight + "format-separator.png",
@@ -205,7 +207,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Download">
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "software-download.png",
@@ -215,7 +217,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title={"Download " + nameFormatted + " as .CSS"}
               url={"https://css.gg/" + name + ".css"}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "software-download.png",
@@ -225,7 +227,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title={"Download " + nameFormatted + " as .SVG"}
               url={"https://css.gg/" + name + ".svg"}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "software-download.png",
@@ -235,7 +237,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title={"Download " + nameFormatted + " as .SCSS"}
               url={"https://unpkg.com/css.gg@2.0.0/icons/scss/" + name + ".scss"}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "software-download.png",
@@ -245,7 +247,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title={"Download " + nameFormatted + " as White .PNG"}
               url={apiPathDark + name + ".png"}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "software-download.png",
@@ -257,7 +259,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Tools">
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open in Figma"
               icon={{
                 source: {
@@ -267,7 +269,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               }}
               url="https://css.gg/fig"
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open in Adobe XD"
               icon={{
                 source: {
@@ -279,7 +281,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Download all 704 icons as Package">
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "box.png",
@@ -289,7 +291,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title={"Download as SVG Sprite"}
               url={"https://css.gg/all.svg"}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "box.png",
@@ -299,7 +301,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title={"Download as .JSON"}
               url={"https://css.gg/all.json"}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "box.png",
@@ -309,7 +311,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title={"Download as .CSS"}
               url={"https://css.gg/all.css"}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               icon={{
                 source: {
                   light: apiPathLight + "box.png",
@@ -321,7 +323,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="NPM">
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               icon={{
                 source: {
                   light: apiPathLight + "npm.png",
@@ -333,7 +335,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Links">
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Documentation"
               icon={{
                 source: {
@@ -343,7 +345,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               }}
               url="https://github.com/astrit/css.gg"
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Donate"
               icon={{
                 source: {
@@ -353,7 +355,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               }}
               url="https://github.com/sponsors/astrit"
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Repository"
               icon={{
                 source: {
@@ -363,9 +365,9 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               }}
               url="https://github.com/astrit/css.gg"
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Author"
-              icon={{ source: "https://github.com/astrit.png", mask: ImageMask.Circle }}
+              icon={{ source: "https://github.com/astrit.png", mask: Image.Mask.Circle }}
               url="https://a.st/yt"
             />
           </ActionPanel.Section>
@@ -394,7 +396,7 @@ async function fetchIcons(): Promise<Result[]> {
     return objects;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load icons");
+    showToast(Toast.Style.Failure, "Could not load icons");
     return Promise.resolve([]);
   }
 }

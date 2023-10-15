@@ -10,6 +10,7 @@ export const IssueFragment = `
   priority
   priorityLabel
   estimate
+  dueDate
   updatedAt
   url
   number
@@ -78,6 +79,7 @@ export type IssueResult = Pick<
   | "priorityLabel"
   | "updatedAt"
   | "estimate"
+  | "dueDate"
   | "number"
 > & {
   assignee?: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
@@ -319,7 +321,6 @@ export async function getIssueDetail(issueId: string) {
         issue(id: $issueId) {
           ${IssueFragment}
           description
-          dueDate
         }
       }
     `,

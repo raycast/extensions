@@ -1,11 +1,14 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues, Color } from "@raycast/api";
 import plist from "plist";
 import fs from "fs";
 import { homedir } from "os";
+import path from "node:path";
+import os from "node:os";
 import expandTidle from "expand-tilde";
 import { useEffect, useState } from "react";
 import { Connection, Group, tintColors, Preferences } from "./interfaces";
 
+const homeDirectory = os.homedir();
 const EmptyGroupID = "__EMPTY__";
 const preferences: Preferences = getPreferenceValues();
 const appendPath = fs.existsSync(`${homedir()}/Library/Application Support/com.tinyapp.TablePlus-setapp/Data/`)
@@ -94,6 +97,33 @@ export default function DatabaseList() {
     </List>
   );
 
+  function tildify(absolutePath: string) {
+    const normalizedPath = path.normalize(absolutePath) + path.sep;
+
+    return (
+      normalizedPath.startsWith(homeDirectory)
+        ? normalizedPath.replace(homeDirectory + path.sep, `~${path.sep}`)
+        : normalizedPath
+    ).slice(0, -1);
+  }
+
+  function getAccessories(connection: Connection) {
+    const accessories = [];
+
+    if (preferences.showConnectionDriver) {
+      accessories.push({ tag: connection.Driver.toString() });
+    }
+
+    accessories.push({
+      tag: {
+        color: tintColors[connection.Environment],
+        value: connection.Environment.charAt(0).toUpperCase() + connection.Environment.slice(1),
+      },
+    });
+
+    return accessories;
+  }
+
   function renderPluralIfNeeded(itemsLength: number) {
     return `item${itemsLength > 1 ? "s" : ""}`;
   }
@@ -120,12 +150,12 @@ export default function DatabaseList() {
         id={connection.id}
         key={connection.id}
         title={connection.name}
-        subtitle={subtitle}
-        accessories={[{ text: connection.Driver }, { icon: groupIcon }]}
-        icon={{ source: Icon.Dot, tintColor: tintColors[connection.Environment] }}
+        subtitle={tildify(subtitle)}
+        accessories={getAccessories(connection)}
+        icon={groupIcon}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open Database" url={`tableplus://?id=${connection.id}`} />
+            <Action.OpenInBrowser title="Open Database" icon={Icon.Coin} url={`tableplus://?id=${connection.id}`} />
           </ActionPanel>
         }
       />

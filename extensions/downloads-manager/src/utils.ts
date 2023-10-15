@@ -15,3 +15,12 @@ export function getDownloads() {
     })
     .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
 }
+
+export async function getLatestDownload() {
+  const downloads = getDownloads();
+  if (downloads.length < 1) {
+    return undefined;
+  }
+
+  return downloads[0];
+}

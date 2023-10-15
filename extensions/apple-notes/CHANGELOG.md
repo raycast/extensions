@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Fix] - 2022-12-11
+
+- Correct issue where searching for notes with quotes in titles failed
+
 ## [Warp Speed] - 2022-07-08
 
 - Fetching the Notes for the iCloud account will now be really fast

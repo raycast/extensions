@@ -1,5 +1,14 @@
 # Search npm Changelog
 
+## [Fixed Yarn install command] - 2022-11-11
+
+- Fixed yarn install command since it's different than npm/pnpm
+
+## [Added a bunch of new feedback] - 2022-09-05
+
+- Added a cache for faster results
+- Switch back to the result of npm instead of npms.io which provided some outdated results
+
 ## [Added a bunch of new feedback] - 2022-05-04
 
 - updated to the latest `@raycast/api` package version and refactored based on any new APIs and deprecations

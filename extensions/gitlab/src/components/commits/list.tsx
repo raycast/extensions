@@ -5,7 +5,7 @@ import { useCache } from "../../cache";
 import { gitlab } from "../../common";
 import { Project, User } from "../../gitlabapi";
 import { GitLabIcons } from "../../icons";
-import { showErrorToast } from "../../utils";
+import { capitalizeFirstLetter, showErrorToast } from "../../utils";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
 import { getCIJobStatusIcon, PipelineJobsListByCommit } from "../jobs";
@@ -64,7 +64,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
       title={title}
       subtitle={ref || commit}
       accessories={[{ text: project?.name_with_namespace }]}
-      icon={icon}
+      icon={{ value: icon, tooltip: status?.status ? `Status: ${capitalizeFirstLetter(status.status)}` : "" }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -143,7 +143,11 @@ async function getProjectCommits(projectID: number, refName?: string): Promise<C
   return commits;
 }
 
-export function ProjectCommitList(props: { projectID: number; refName?: string }): JSX.Element {
+export function ProjectCommitList(props: {
+  projectID: number;
+  refName?: string;
+  navigationTitle?: string;
+}): JSX.Element {
   const projectID = props.projectID;
   const refName = props.refName;
   let cacheKey = `project_commits_${projectID}`;
@@ -164,7 +168,7 @@ export function ProjectCommitList(props: { projectID: number; refName?: string }
     showErrorToast(error, "Could not fetch commits from Project");
   }
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle={props.navigationTitle}>
       {data?.map((e) => (
         <CommitListItem key={e.id} commit={e} projectID={projectID} />
       ))}

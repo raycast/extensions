@@ -13,6 +13,8 @@ import {
 
 function PinnedNotesList(props: { vault: Vault; key: string }) {
   const pinnedNotes = getPinnedNotes(props.vault).sort(sortNoteByAlphabet);
+  const { vault } = props;
+  const [withPlugin, _] = vaultPluginCheck([vault], "obsidian-advanced-uri");
   return (
     <MenuBarExtra.Submenu title="Pinned Notes" key={"Pinned Notes"}>
       {pinnedNotes.map((note) => (
@@ -23,11 +25,27 @@ function PinnedNotesList(props: { vault: Vault; key: string }) {
         >
           <MenuBarExtra.Item
             title="Open in Obsidian"
-            icon={Icon.AppWindow}
+            icon={ObsidianIconDynamicBold}
             tooltip="Opens this note in Obsidian"
             onAction={() => open(getOpenPathInObsidianTarget(note.path))}
             key={"open"}
           />
+          {withPlugin.length == 1 ? (
+            <MenuBarExtra.Item
+              title="Open in new Pane"
+              icon={ObsidianIconDynamicBold}
+              tooltip="Opens this note in a new pane"
+              onAction={() =>
+                open(
+                  "obsidian://advanced-uri?vault=" +
+                    encodeURIComponent(vault.name) +
+                    "&filepath=" +
+                    encodeURIComponent(note.path.replace(vault.path, "")) +
+                    "&newpane=true"
+                )
+              }
+            />
+          ) : null}
           <MenuBarExtra.Item
             title="Copy Content"
             icon={Icon.CopyClipboard}
@@ -46,7 +64,7 @@ function PinnedNotesList(props: { vault: Vault; key: string }) {
             title="Unpin Note"
             icon={Icon.PinDisabled}
             tooltip="Unpins this note"
-            onAction={() => unpinNote(note, props.vault)}
+            onAction={() => unpinNote(note, vault)}
             key={"unpin"}
           />
         </MenuBarExtra.Submenu>

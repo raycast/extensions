@@ -1,7 +1,7 @@
 import { jiraFetchObject, jiraUrl } from "./jira"
 import { jiraImage } from "./image"
 import { ResultItem, SearchCommand } from "./command"
-import { Color, ColorLike, Icon, Image, ImageSource } from "@raycast/api"
+import { Color, Icon, Image } from "@raycast/api"
 import { ErrorText } from "./exception"
 
 interface IssueType {
@@ -31,10 +31,12 @@ interface Issues {
   issues?: Issue[]
 }
 
+type IssueFilter = "allIssues" | "issuesInOpenSprints" | "myIssues" | "myIssuesInOpenSprints"
+
 const fields = "summary,issuetype,status"
 
 function statusIcon(status: IssueStatus): Image {
-  const icon = (source: ImageSource, tintColor?: ColorLike) => ({ source, tintColor })
+  const icon = (source: Image.Source, tintColor?: Color.ColorLike) => ({ source, tintColor })
   switch (status.statusCategory.key) {
     case "done":
       return icon(Icon.Checkmark, Color.Green)
@@ -60,6 +62,7 @@ function buildJql(query: string): string {
       .map((term) => term.substring(prefix.length))
   const projects = collectPrefixed("@", terms)
   const issueTypes = collectPrefixed("#", terms)
+  const assignees = collectPrefixed("~", terms)
   const unwantedTextTermChars = /[-+!*&]/
   const textTerms = terms
     .filter((term) => !"@#".includes(term[0]))
@@ -79,13 +82,35 @@ function buildJql(query: string): string {
   return jql + " order by lastViewed desc"
 }
 
-function jqlFor(query: string): string {
-  return isIssueKey(query) ? `key=${query}` : buildJql(query)
+function jqlForFilter(filter: IssueFilter) {
+  switch (filter) {
+    case "allIssues":
+      return ""
+    case "issuesInOpenSprints":
+      return "sprint in openSprints()"
+    case "myIssues":
+      return "assignee=currentUser()"
+    case "myIssuesInOpenSprints":
+      return "assignee=currentUser() AND sprint in openSprints()"
+  }
 }
 
-export async function searchIssues(query: string): Promise<ResultItem[]> {
-  const jql = jqlFor(query)
+function jqlFor(query: string, filter?: IssueFilter): string {
+  const jql = isIssueKey(query) ? `key=${query}` : buildJql(query)
+
+  if (!filter) return jql
+  const extraJqlForFilter = jqlForFilter(filter)
+
+  const extraOperator = query ? "AND" : ""
+
+  return `${extraJqlForFilter} ${extraOperator} ${jql}`
+}
+
+export async function searchIssues(query: string, filter?: IssueFilter): Promise<ResultItem[]> {
+  const jql = jqlFor(query, filter)
+
   console.debug(jql)
+
   const result = await jiraFetchObject<Issues>(
     "/rest/api/3/search",
     { jql, fields },
@@ -105,5 +130,13 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
 }
 
 export default function SearchIssueCommand() {
-  return SearchCommand(searchIssues, "Search issues by text, @project and #issueType")
+  return SearchCommand(searchIssues, "Search issues by text, @project and #issueType", {
+    tooltip: "Filters",
+    values: [
+      { name: "All Issues", value: "allIssues" },
+      { name: "Issues in Open sprints", value: "issuesInOpenSprints" },
+      { name: "Assigned to Me", value: "myIssues" },
+      { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
+    ],
+  })
 }

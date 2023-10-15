@@ -1,11 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export interface Preferences {
-  basePixel?: number;
+  basePixel?: string;
 }
 
 const loadBasePixelsFromPreferences = () => {
-  const basePixel = Number(getPreferenceValues<Preferences>().basePixel);
+  const basePixel =
+    getPreferenceValues<Preferences>().basePixel === "" ? 16 : Number(getPreferenceValues<Preferences>().basePixel);
   if (isNaN(basePixel)) {
     return 16;
   }
@@ -51,18 +52,59 @@ export const HEXtoRGBA = (hex: string): number[] => {
 };
 
 export const HEXtoHSL = (hex: string): number[] => {
-  const rgb = HEXtoRGB(hex);
-  const r = (rgb[0] /= 255);
-  const g = (rgb[1] /= 255);
-  const b = (rgb[2] /= 255);
-  const l = Math.max(r, g, b);
-  const s = l - Math.min(r, g, b);
-  const h = s ? (l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s) : 0;
-  return [
-    Math.round(60 * h < 0 ? 60 * h + 360 : 60 * h),
-    Math.round(100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0)),
-    Math.round((100 * (2 * l - s)) / 2),
-  ];
+  // Check if the input is a shorthand hex string
+  if (hex.length === 4) {
+    // Expand the shorthand string to a full hex string
+    hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+  }
+
+  const match = hex.match(/\w\w/g);
+  if (!match) return [];
+
+  // Convert the hex string to an RGB array
+  let [r, g, b] = match.map((x) => parseInt(x, 16));
+
+  // Normalize the RGB values
+  r /= 255;
+  g /= 255;
+  b /= 255;
+
+  // Find the minimum and maximum RGB values
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+
+  // Initialize the HSL values
+  let h = 0;
+  let s = 0;
+  let l = (max + min) / 2;
+
+  // Calculate the HSL values
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+
+    h /= 6;
+  }
+
+  // Format the HSL values to CSS syntax
+  h = Number(Math.round((h * 360) % 360));
+  s = Number(Math.round(s * 100));
+  l = Number(Math.round(l * 100));
+
+  // Return the HSL values as a number array
+  return [h, s, l];
 };
 
 export const HEXtoHSLA = (hex: string): number[] => {
@@ -83,18 +125,56 @@ export const HEXtoHSLA = (hex: string): number[] => {
 
 export const RGBtoHEX = (rgb: number[]): string => `#${rgb.map((x) => x.toString(16).padStart(2, "0")).join("")}`;
 
+// export const RGBtoHSL = (rgb: number[]): number[] => {
+//   const r = (rgb[0] /= 255);
+//   const g = (rgb[1] /= 255);
+//   const b = (rgb[2] /= 255);
+//   const l = Math.max(r, g, b);
+//   const s = l - Math.min(r, g, b);
+//   const h = s ? (l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s) : 0;
+//   return [
+//     Math.round(60 * h < 0 ? 60 * h + 360 : 60 * h),
+//     Math.round(100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0)),
+//     Math.round((100 * (2 * l - s)) / 2),
+//   ];
+// };
+
 export const RGBtoHSL = (rgb: number[]): number[] => {
   const r = (rgb[0] /= 255);
   const g = (rgb[1] /= 255);
   const b = (rgb[2] /= 255);
-  const l = Math.max(r, g, b);
-  const s = l - Math.min(r, g, b);
-  const h = s ? (l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s) : 0;
-  return [
-    Math.round(60 * h < 0 ? 60 * h + 360 : 60 * h),
-    Math.round(100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0)),
-    Math.round((100 * (2 * l - s)) / 2),
-  ];
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  let l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+
+    h /= 6;
+  }
+
+  // Format the HSL values to CSS syntax
+  h = Number(Math.round((h * 360) % 360));
+  s = Number(Math.round(s * 100));
+  l = Number(Math.round(l * 100));
+
+  return [h, s, l];
 };
 
 export const RGBtoHEXA = (rgb: number[]): string =>

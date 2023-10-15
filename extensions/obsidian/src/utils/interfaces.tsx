@@ -1,11 +1,13 @@
 import { Image } from "@raycast/api";
+import { NoteAction } from "./constants";
 
-export interface FormValue {
-  path: string;
-  name: string;
-  content: string;
-  tags: string[];
-}
+//--------------------------------------------------------------------------------
+// All interfaces for all commands should be defined here.
+//--------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------
+// Preference interfaces
+//--------------------------------------------------------------------------------
 
 export interface GlobalPreferences {
   vaultPath: string;
@@ -47,6 +49,10 @@ export interface SearchMediaPreferences extends GlobalPreferences {
   excludedFolders: string;
 }
 
+//--------------------------------------------------------------------------------
+// Other interfaces
+//--------------------------------------------------------------------------------
+
 export interface Vault {
   name: string;
   key: string;
@@ -60,6 +66,17 @@ export interface Note {
   content: string;
 }
 
+export interface CodeBlock {
+  language: string;
+  code: string;
+}
+
+export interface FormValue {
+  path: string;
+  name: string;
+  content: string;
+  tags: string[];
+}
 interface ObsidianVaultJSON {
   path: string;
   ts: number;
@@ -99,4 +116,17 @@ export interface MediaState {
 export interface MediaSearchArguments {
   searchArgument: string;
   typeArgument: string;
+}
+
+export interface NoteListProps {
+  title?: string;
+  vault: Vault;
+  notes: Note[] | undefined;
+  allNotes?: Note[];
+  setNotes?: (notes: Note[]) => void;
+  isLoading?: boolean;
+  searchArguments: SearchArguments;
+  action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
+  onDelete?: (note: Note, vault: Vault) => void;
+  onSearchChange?: (search: string) => void;
 }

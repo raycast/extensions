@@ -1,72 +1,83 @@
-import { getPreferenceValues, showToast, Toast } from '@raycast/api'
-import { isNotionClientError } from '@notionhq/client'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
-import { storeTodos } from '@/services/storage'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
+import { loadPreferences } from '@/services/storage'
+import { normalizeTodo } from '../utils/normalize-todo'
+import { Filter } from '@/types/filter'
 
-export async function getTodos(
-  databaseId: string,
-  localTodos: Todo[]
-): Promise<Todo[]> {
-  try {
-    const notionClient = await notion()
-    const preferences = getPreferenceValues()
-    const response = await notionClient.databases.query({
-      database_id: databaseId,
-      filter: {
-        and: [
+export async function getTodos({
+  databaseId,
+  filter,
+}: {
+  databaseId: string
+  filter: Filter
+}): Promise<Todo[]> {
+  const notionClient = await notion()
+  const preferences = await loadPreferences()
+  const status = preferences.properties.status
+
+  const donePropertyQuery =
+    status.type === 'status' && status.doneName
+      ? { status: { does_not_equal: status.doneName } }
+      : { checkbox: { equals: false } }
+
+  const dynamicFiltersQuery = [
+    ...(filter?.projectId && preferences.properties.project
+      ? [
           {
-            property: preferences.property_done,
-            checkbox: {
-              equals: false,
-            },
+            property: preferences.properties.project,
+            relation: { contains: filter.projectId },
           },
+        ]
+      : []),
+    ...(filter?.user?.id && preferences.properties.assignee
+      ? [
           {
-            or: [
-              {
-                property: preferences.property_date,
-                date: {
-                  before: new Date().toISOString(),
-                },
-              },
-            ],
+            property: preferences.properties.assignee,
+            people: { contains: filter.user.id },
           },
-        ],
-      },
-      sorts: [
+        ]
+      : []),
+    ...(filter?.tag?.id && preferences.properties.tag
+      ? [
+          {
+            property: preferences.properties.tag,
+            select: { equals: filter.tag.name },
+          },
+        ]
+      : []),
+  ]
+
+  const response = await notionClient.databases.query({
+    database_id: databaseId,
+    filter: {
+      and: [
         {
-          timestamp: 'created_time',
-          direction: 'ascending',
+          property: status.name,
+          ...donePropertyQuery,
         },
+        ...dynamicFiltersQuery,
       ],
+    },
+    sorts: [
+      { property: status.name, direction: 'descending' },
+      {
+        property: preferences.properties.date,
+        direction: 'ascending',
+      },
+      {
+        timestamp: 'created_time',
+        direction: 'descending',
+      },
+    ],
+  })
+
+  const todos = response.results.map((page) =>
+    normalizeTodo({
+      page,
+      preferences: preferences.properties,
+      inProgressId: status.inProgressId,
     })
+  )
 
-    const todos = response.results.map(mapPageToTodo)
-
-    const sortedTodos = todos
-      .map((todo: any) => {
-        const localTodoIndex = localTodos.findIndex((t) => t.id === todo.id)
-
-        if (localTodoIndex !== -1) {
-          todo.position = localTodoIndex
-        } else {
-          todo.position = 0
-        }
-
-        return todo
-      })
-      .sort((a, b) => a.position - b.position)
-
-    await storeTodos(sortedTodos)
-
-    return sortedTodos
-  } catch (err: unknown) {
-    if (isNotionClientError(err)) {
-      showToast(Toast.Style.Failure, err.message)
-    } else {
-      showToast(Toast.Style.Failure, 'Error occurred')
-    }
-    return []
-  }
+  return todos
 }

@@ -134,12 +134,14 @@ export interface Team {
 }
 
 interface MemberResponse {
+  email: string;
   id: string;
   full_name: string;
   role: string;
 }
 
 export interface Member {
+  email: string;
   id: string;
   name: string;
   role: string;
@@ -255,6 +257,7 @@ class Service {
 
     return response.data.map((item) => {
       return {
+        email: item.email,
         id: item.id,
         name: item.full_name,
         role: item.role,

@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Fix] - 2022-10-24
+
+Fix query parameter encoding in `Action.OpenInBrowser` url
+
 ## [Fix] - 2022-09-01
 
 🇹🇭 → 🇹🇷

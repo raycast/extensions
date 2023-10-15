@@ -1,11 +1,16 @@
-import { commandSync } from "execa";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
 
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 
 import { HistoryItem, Tab } from "./types";
+
+type Preferences = {
+  safariAppIdentifier: string;
+};
+
+export const { safariAppIdentifier }: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
@@ -78,15 +83,6 @@ export const search = (collection: object[], keys: string[], searchText: string)
   _.filter(collection, (item) =>
     _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText)))
   );
-
-export const getCurrentDeviceName = (): string => {
-  try {
-    return commandSync("/usr/sbin/scutil --get ComputerName").stdout;
-  } catch (err) {
-    console.error(err);
-    return "";
-  }
-};
 
 const dtf = new Intl.DateTimeFormat(undefined, {
   weekday: "long",

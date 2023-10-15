@@ -6,6 +6,9 @@ import operations from "./operations";
 export function newApolloClient(connect: { instance: string; token?: string }) {
   const httpLink = createHttpLink({
     uri: `${connect.instance}/.api/graphql`,
+    headers: {
+      "X-Requested-With": "Raycast-Sourcegraph",
+    },
     fetch,
   });
 

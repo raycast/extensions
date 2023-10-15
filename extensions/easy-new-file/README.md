@@ -5,7 +5,7 @@ Quickly create file in the current Finder window or on the desktop.
 **Build-in File Type**
 
 - Document: Plain Text, RFT, Markdown, Word, PowerPoint, Excel
-- Code: Java, JavaScript, TypeScript, Json, XML, CSS, Html
+- Code: Java, JavaScript, TypeScript, JSON, XML, CSS, Html, SVG
 - Script: Apple, Perl, Python, Ruby, Shell
 
 **Tips**:

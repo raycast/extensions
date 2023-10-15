@@ -244,6 +244,7 @@ export default function Command({
                 const code = project.project.code;
                 return (
                   <Form.Dropdown.Item
+                    keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
                     title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
                     key={project.id}
@@ -283,7 +284,7 @@ export default function Command({
         title="Date"
         type={Form.DatePicker.Type.Date}
         value={spentDate}
-        onChange={setSpentDate}
+        onChange={(newValue) => newValue && setSpentDate(newValue)}
       />
     </Form>
   );

@@ -1,6 +1,5 @@
-import { Action, ActionPanel, Form, Icon, Toast, useNavigation } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
-import { useState, useRef } from "react";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 
 import { ProjectResult } from "../api/getProjects";
 
@@ -13,6 +12,7 @@ import { getTeamIcon } from "../helpers/teams";
 import { getUserIcon } from "../helpers/users";
 import { projectStatuses, projectStatusIcon, projectStatusText } from "../helpers/projects";
 import { getErrorMessage } from "../helpers/errors";
+import { CreateProjectValues } from "./CreateProjectForm";
 
 type EditProjectProps = {
   project: ProjectResult;
@@ -24,105 +24,68 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   const { pop } = useNavigation();
 
-  const teamsField = useRef<Form.TextField>(null);
-
   const { teams, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
   const { milestones, isLoadingMilestones } = useMilestones();
 
-  const [teamIds, setTeamsIds] = useState<string[]>(project.teams.nodes.map((p) => p.id) || []);
-  const [name, setName] = useState(project.name);
-  const [description, setDescription] = useState(project.description);
-  const [state, setState] = useState(project.state);
-  const [leadId, setLeadId] = useState(project.lead?.id);
-  const [memberIds, setMemberIds] = useState<string[]>(project.members.nodes.map((p) => p.id) || []);
-  const [milestoneId, setMilestoneId] = useState(project.milestone?.id);
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    project.startDate ? new Date(project.startDate) : undefined
-  );
-  const [targetDate, setTargetDate] = useState<Date | undefined>(
-    project.targetDate ? new Date(project.targetDate) : undefined
-  );
+  const { handleSubmit, itemProps } = useForm<CreateProjectValues>({
+    async onSubmit(values) {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Editing project" });
 
-  const [teamError, setTeamError] = useState<string | undefined>();
-  const [nameError, setNameError] = useState<string | undefined>();
+      try {
+        const { success } = await linearClient.projectUpdate(project.id, {
+          teamIds: values.teamIds,
+          name: values.name,
+          description: values.description,
+          state: values.state,
+          memberIds: values.memberIds,
+          ...(values.leadId ? { leadId: values.leadId } : {}),
+          ...(values.milestoneId ? { milestoneId: values.milestoneId } : {}),
+          ...(values.startDate ? { startDate: values.startDate } : {}),
+          ...(values.targetDate ? { targetDate: values.targetDate } : {}),
+        });
 
-  async function editProject() {
-    if (!name || teamIds.length === 0) {
-      return;
-    }
+        if (success) {
+          toast.style = Toast.Style.Success;
+          toast.title = `Edited Project`;
 
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Editing project" });
-    await toast.show();
+          pop();
 
-    try {
-      const { success } = await linearClient.projectUpdate(project.id, {
-        teamIds,
-        name,
-        description,
-        state,
-        ...(leadId ? { leadId } : {}),
-        memberIds,
-        ...(milestoneId ? { milestoneId } : {}),
-        ...(startDate ? { startDate } : {}),
-        ...(targetDate ? { targetDate } : {}),
-      });
-
-      if (success) {
-        toast.style = Toast.Style.Success;
-        toast.title = `Edited Project`;
-
-        pop();
-
-        mutateProjects();
+          mutateProjects();
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to edit project";
+        toast.message = getErrorMessage(error);
       }
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to edit project";
-      toast.message = getErrorMessage(error);
-    }
-  }
-
-  function dropTeamErrorIfNeeded() {
-    if (teamError && teamError.length > 0) {
-      setTeamError(undefined);
-    }
-  }
-
-  function dropNameErrorIfNeeded() {
-    if (nameError && nameError.length > 0) {
-      setNameError(undefined);
-    }
-  }
+    },
+    validation: {
+      teamIds: FormValidation.Required,
+      name: FormValidation.Required,
+    },
+    initialValues: {
+      teamIds: project.teams.nodes.map((p) => p.id) || [],
+      name: project.name,
+      description: project.description,
+      state: project.state,
+      leadId: project.lead?.id,
+      memberIds: project.members.nodes.map((p) => p.id) || [],
+      milestoneId: project.milestone?.id,
+      startDate: project.startDate ? new Date(project.startDate) : null,
+      targetDate: project.targetDate ? new Date(project.targetDate) : null,
+    },
+  });
 
   return (
     <Form
       isLoading={isLoadingTeams || isLoadingUsers || isLoadingMilestones}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit Project" onSubmit={editProject} />
+          <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TagPicker
-        id="teamIds"
-        title="Team(s)"
-        ref={teamsField}
-        value={teamIds}
-        error={teamError}
-        onChange={(teamIds) => {
-          setTeamsIds(teamIds);
-          dropNameErrorIfNeeded();
-        }}
-        placeholder="Add team"
-        onBlur={(event) => {
-          if (event.target.value?.length === 0) {
-            setTeamError("A project must belong to at least one team");
-          } else {
-            dropTeamErrorIfNeeded();
-          }
-        }}
-      >
+      <Form.TagPicker title="Team(s)" placeholder="Add team" {...itemProps.teamIds}>
         {teams?.map((team) => (
           <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
         ))}
@@ -130,36 +93,17 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
       <Form.Separator />
 
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Project name"
-        value={name}
-        error={nameError}
-        onChange={(title) => {
-          setName(title);
-          dropNameErrorIfNeeded();
-        }}
-        onBlur={(event) => {
-          if (event.target.value?.length === 0) {
-            setNameError("The name is required");
-          } else {
-            dropNameErrorIfNeeded();
-          }
-        }}
-      />
+      <Form.TextField title="Name" placeholder="Project name" {...itemProps.name} />
 
       <Form.TextArea
-        id="description"
         title="Description"
         placeholder="Add some details (supports Markdown, e.g. **bold**)"
-        value={description}
-        onChange={setDescription}
+        {...itemProps.description}
       />
 
       <Form.Separator />
 
-      <Form.Dropdown id="state" title="Status" value={state} onChange={setState} storeValue>
+      <Form.Dropdown title="Status" {...itemProps.state}>
         {projectStatuses.map((status) => (
           <Form.Dropdown.Item
             key={status}
@@ -171,7 +115,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
       </Form.Dropdown>
 
       {users && users.length > 0 ? (
-        <Form.Dropdown id="leadId" title="Lead" value={leadId} onChange={setLeadId} storeValue>
+        <Form.Dropdown title="Lead" {...itemProps.leadId}>
           <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
           {users?.map((user) => {
@@ -181,13 +125,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
       ) : null}
 
       {users && users.length > 0 ? (
-        <Form.TagPicker
-          id="memberIds"
-          title="Members"
-          value={memberIds}
-          onChange={setMemberIds}
-          placeholder="Add members"
-        >
+        <Form.TagPicker title="Members" placeholder="Add members" {...itemProps.memberIds}>
           {users?.map((user) => (
             <Form.TagPicker.Item key={user.id} value={user.id} title={user.name} icon={getUserIcon(user)} />
           ))}
@@ -195,7 +133,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
       ) : null}
 
       {milestones && milestones.length > 0 ? (
-        <Form.Dropdown id="milestoneId" title="Milestone" value={milestoneId} onChange={setMilestoneId} storeValue>
+        <Form.Dropdown title="Milestone" {...itemProps.milestoneId}>
           <Form.Dropdown.Item title="Upcoming" value="" icon={Icon.Map} />
 
           {milestones?.map((milestone) => {
@@ -206,21 +144,9 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
         </Form.Dropdown>
       ) : null}
 
-      <Form.DatePicker
-        id="startDate"
-        title="Start Date"
-        value={startDate}
-        onChange={setStartDate}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.startDate} />
 
-      <Form.DatePicker
-        id="targetDate"
-        title="Target Date"
-        value={targetDate}
-        onChange={setTargetDate}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker title="Target Date" type={Form.DatePicker.Type.Date} {...itemProps.targetDate} />
     </Form>
   );
 }

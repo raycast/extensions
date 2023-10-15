@@ -7,6 +7,10 @@ export interface Preferences {
    */
   showRecentProjectsInMenuBar_projectsLimit: string;
   /**
+   * [show-recent-projects-in-menu-bar.command] - Show Favorites
+   */
+  showRecentProjectsInMenuBar_showFavorites: boolean;
+  /**
    * [show-recent-projects-in-menu-bar.command] - Show Xcode Projects
    */
   showRecentProjectsInMenuBar_showXcodeProjects: boolean;

@@ -1,5 +1,11 @@
 # Readymetrics Changelog
 
+## [Updated Ready extension images] - 2022-11-10
+Updates for Ready.app extension check-in images.
+
+## [Updated branding] - 2022-10-28
+Updates for Ready.app branding and new website.
+
 ## [Updated README] - 2022-08-31
 Updated the README to remove the Readymetrics logo.
 

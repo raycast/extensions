@@ -1,18 +1,59 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { useEffect } from "react";
+import { getPreferenceValues, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import BookmarkItem from "./components/BookmarkItem";
-import { useLatestBookmarks } from "./utils";
-import { Bookmark } from "./types";
+import CollectionsDropdown from "./components/CollectionsDropdown";
+import { Bookmark, Preferences } from "./types";
+import { useRequest } from "./hooks/useRequest";
+import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
 
 export default function LatestBookmarks() {
-  const { response, error, isLoading } = useLatestBookmarks();
+  const preferences: Preferences = getPreferenceValues();
+  const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>(
+    "last-used-collection",
+    "0"
+  );
 
-  if (error) {
-    showToast(Toast.Style.Failure, "Cannot search bookmark", error);
-  }
+  const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } =
+    useLastUsedCollection();
+
+  useEffect(() => {
+    const fetchLastUsedCollection = async () => {
+      const luc = await getLastUsedCollection();
+      setLastUsedCollection(luc || "0");
+    };
+    fetchLastUsedCollection();
+  }, []);
+
+  const defaultCollection = preferences.useLastCollection ? lastUsedCollection : "0";
+  const [collection, setCollection] = useCachedState<string>(
+    "selected-collection",
+    defaultCollection
+  );
+
+  const { isLoading, bookmarks, collections } = useRequest({ collection });
+
+  const onCollectionChange = (value: string) => {
+    if (collection !== value) {
+      setCollection(value);
+      setNextCollectionToUse(value);
+    }
+  };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter bookmarks by title...">
-      {response?.items?.map((bookmark: Bookmark) => (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter bookmarks by title..."
+      searchBarAccessory={
+        <CollectionsDropdown
+          isLoading={isLoading}
+          handleChange={onCollectionChange}
+          collections={collections}
+          defaultValue={collection}
+        />
+      }
+    >
+      {bookmarks?.items?.map((bookmark: Bookmark) => (
         <BookmarkItem key={bookmark._id} bookmark={bookmark} />
       ))}
     </List>

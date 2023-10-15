@@ -177,7 +177,7 @@ export default function CreateGist(props: {
             setIsPublic(newValue == "true");
           }}
         >
-          <Form.Dropdown.Item key={"secret"} icon={Icon.EyeSlash} title={"Secret"} value={"false"} />
+          <Form.Dropdown.Item key={"secret"} icon={Icon.EyeDisabled} title={"Secret"} value={"false"} />
           <Form.Dropdown.Item key={"public"} icon={Icon.Eye} title={"Public"} value={"true"} />
         </Form.Dropdown>
       )}

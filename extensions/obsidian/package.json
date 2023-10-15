@@ -7,6 +7,9 @@
   "categories": [
     "Productivity"
   ],
+  "contributes": [
+    "iancanderson"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -141,6 +144,44 @@
       "subtitle": "Obsidian",
       "description": "Open a vault in Obsidian.",
       "mode": "view"
+    },
+    {
+      "name": "dailyNoteAppendCommand",
+      "title": "Append to Daily Note",
+      "subtitle": "Obsidian",
+      "description": "Append text to your daily note",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Take out the trash",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "appendTemplate",
+          "type": "textfield",
+          "title": "Template for Daily Note Append action",
+          "required": false,
+          "description": "Specify a template for Daily Note Append action (e.g. '- {content}')"
+        },
+        {
+          "name": "vaultName",
+          "type": "textfield",
+          "title": "Name of Obsidian vault where note is",
+          "required": false,
+          "description": "Name of Obsidian vault where note is"
+        },
+        {
+          "name": "heading",
+          "type": "textfield",
+          "title": "Name of heading in note in which to append",
+          "required": false,
+          "description": "If no heading is set, text will be appended to the end of the daily note"
+        }
+      ]
     },
     {
       "name": "dailyNoteCommand",
@@ -473,14 +514,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.44.0",
     "@types/uuid": "^8.3.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.47",
+    "@types/react": "^17.0.52",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

@@ -17,12 +17,15 @@ export const suggestApps = [
   { path: "/Applications/Vivaldi.app", type: AppType.BROWSER, rank: 6 },
   { path: "/Applications/Brave Browser.app", type: AppType.BROWSER, rank: 7 },
   { path: "/Applications/Orion.app", type: AppType.BROWSER, rank: 8 },
-  { path: "/Applications/SigmaOS.app", type: AppType.BROWSER, rank: 9 },
-  { path: "/Applications/Slidepad.app", type: AppType.BROWSER, rank: 10 },
-  { path: "/Applications/Min.app", type: AppType.BROWSER, rank: 11 },
+  { path: "/Applications/Arc.app", type: AppType.BROWSER, rank: 9 },
+  { path: "/Applications/DuckDuckGo.app", type: AppType.BROWSER, rank: 10 },
+  { path: "/Applications/MenubarX.app", type: AppType.BROWSER, rank: 11 },
+  { path: "/Applications/SigmaOS.app", type: AppType.BROWSER, rank: 12 },
+  { path: "/Applications/Slidepad.app", type: AppType.BROWSER, rank: 13 },
+  { path: "/Applications/Min.app", type: AppType.BROWSER, rank: 14 },
 
   { path: "/System/Applications/Mail.app", type: AppType.EMAIL_CLIENT, rank: 101 },
-  { path: '/Applications/Spark.app"', type: AppType.EMAIL_CLIENT, rank: 102 },
+  { path: "/Applications/Spark.app", type: AppType.EMAIL_CLIENT, rank: 102 },
   { path: "/Applications/Microsoft Outlook.app", type: AppType.EMAIL_CLIENT, rank: 103 },
   { path: "/Applications/Airmail.app", type: AppType.EMAIL_CLIENT, rank: 104 },
   { path: "/Applications/Mimestream.app", type: AppType.EMAIL_CLIENT, rank: 105 },
@@ -34,3 +37,7 @@ export const suggestApps = [
   { path: "/Applications/Motrix.app", type: AppType.OTHER, rank: 204 },
   { path: "/Applications/Thunder.app", type: AppType.OTHER, rank: 205 },
 ];
+
+export enum CacheKey {
+  PREFERRED_APP = "Preferred App",
+}

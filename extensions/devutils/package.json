@@ -1,0 +1,358 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devutils",
+  "title": "DevUtils",
+  "description": "Navigate DevUtils faster with this All-in-one Toolbox for Developers",
+  "icon": "devutils.png",
+  "author": "vietanhlehuu",
+  "owner": "devutils",
+  "access": "public",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "backslash",
+      "title": "Backslash Escape/Unescape",
+      "subtitle": "DevUtils.com",
+      "description": "Escape (or unescape) backslashes in your current clipboard string",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "base64encode",
+      "title": "Base64 String Encode/Decode",
+      "subtitle": "DevUtils.com",
+      "description": "Decode the Base64 string in clipboard (if it’s decodable)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "base64image",
+      "title": "Base64 Image Encode/Decode",
+      "subtitle": "DevUtils.com",
+      "description": "Decode the Base64 string in clipboard to an image (if it’s decodable)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "colortools",
+      "title": "Color Converter",
+      "subtitle": "DevUtils.com",
+      "description": "Pick and convert colors (hex, rgb, hsv, hsv, cymk, etc.)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "cronparser",
+      "title": "Cron Job Parser",
+      "subtitle": "DevUtils.com",
+      "description": "Parse the cron job expression in clipboard (if it’s a valid cron expression)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "cssformatter",
+      "title": "CSS Beautify/Minify",
+      "subtitle": "DevUtils.com",
+      "description": "Beautify or minify your current clipboard as CSS",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "csv2json",
+      "title": "CSV to JSON",
+      "subtitle": "DevUtils.com",
+      "description": "Convert your current clipboard from CSV to JSON",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "erbformatter",
+      "title": "ERB Beautify/Minify",
+      "subtitle": "DevUtils.com",
+      "description": "Beautify or minify your current clipboard as ERB",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "hashing",
+      "title": "Hash Generator",
+      "subtitle": "DevUtils.com",
+      "description": "Calculate the hash of your current clipboard string",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "html2jsx",
+      "title": "HTML to JSX",
+      "subtitle": "DevUtils.com",
+      "description": "Convert the HTML string in clipboard to JSX",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "htmlencode",
+      "title": "HTML Entity Encode/Decode",
+      "subtitle": "DevUtils.com",
+      "description": "Escape (or unescape) the HTML entities your current clipboard string",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "htmlformatter",
+      "title": "HTML Beautify/Minify",
+      "subtitle": "DevUtils.com",
+      "description": "Beautify or minify your current clipboard as HTML",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "htmlpreview",
+      "title": "HTML Preview",
+      "subtitle": "DevUtils.com",
+      "description": "Show a HTML preview of your current clipboard string",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "jsformatter",
+      "title": "JS Beautify/Minify",
+      "subtitle": "DevUtils.com",
+      "description": "Beautify or minify your current clipboard as JavaScript",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "json2csv",
+      "title": "JSON to CSV",
+      "subtitle": "DevUtils.com",
+      "description": "Convert your current clipboard from JSON to CSV",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "json2php",
+      "title": "JSON to PHP",
+      "subtitle": "DevUtils.com",
+      "description": "Convert a JSON string in your clipboard to PHP object/array",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "json2yaml",
+      "title": "JSON to YAML",
+      "subtitle": "DevUtils.com",
+      "description": "Convert your current clipboard from JSON to YAML",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "jsonformatter",
+      "title": "JSON Format/Validate",
+      "subtitle": "DevUtils.com",
+      "description": "Format the JSON string currently in your clipboard (if it’s a valid JSON)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "jwt",
+      "title": "JWT Debugger",
+      "subtitle": "DevUtils.com",
+      "description": "Decode and verify the current JWT token in your clipboard",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "lessformatter",
+      "title": "LESS Beautify/Minify",
+      "subtitle": "DevUtils.com",
+      "description": "Beautify or minify your current clipboard as LESS",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "loremipsum",
+      "title": "Lorem Ipsum Generator",
+      "subtitle": "DevUtils.com",
+      "description": "Get some randomly generated lorem ipsum strings",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "markdownpreview",
+      "title": "Markdown Preview",
+      "subtitle": "DevUtils.com",
+      "description": "Preview the markdown string currently in your clipboard",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "numberbase",
+      "title": "Number Base Converter",
+      "subtitle": "DevUtils.com",
+      "description": "Convert numbers between bases (oct, hex, binary, etc.)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "php2json",
+      "title": "PHP to JSON",
+      "subtitle": "DevUtils.com",
+      "description": "Convert a PHP object/array in your clipboard to JSON",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "phpserializer",
+      "title": "PHP Serializer",
+      "subtitle": "DevUtils.com",
+      "description": "Serialize the PHP object/array in your clipboard",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "phpunserializer",
+      "title": "PHP Unserializer",
+      "subtitle": "DevUtils.com",
+      "description": "Unserialize the string in your clipboard to a PHP object/array",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "qrcode",
+      "title": "QR Code Reader/Generator",
+      "subtitle": "DevUtils.com",
+      "description": "Generate a QR code from your current clipboard string",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "querystringparser",
+      "title": "URL Parser",
+      "subtitle": "DevUtils.com",
+      "description": "Parse the URL string currently in your clipboard",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "randomstringgenerator",
+      "title": "Random String Generator",
+      "subtitle": "DevUtils.com",
+      "description": "Generate password or random string with symbols, digits, words, etc.",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "regextester",
+      "title": "RegExp Tester",
+      "subtitle": "DevUtils.com",
+      "description": "Test your regular expression with a string and inspect matches, groups, etc.",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "scssformatter",
+      "title": "SCSS Beautify/Minify",
+      "subtitle": "DevUtils.com",
+      "description": "Beautify or minify your current clipboard as SCSS",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "sqlformatter",
+      "title": "SQL Formatter",
+      "subtitle": "DevUtils.com",
+      "description": "Format the SQL string currently in your clipboard",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "stringcaseconverter",
+      "title": "String Case Converter",
+      "subtitle": "DevUtils.com",
+      "description": "Convert a string in clipboard into various naming conventions",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "stringinspect",
+      "title": "String Inspector",
+      "subtitle": "DevUtils.com",
+      "description": "Inspect your current clipboard string (length, words count, unicode, etc.)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "textdiff",
+      "title": "Text Diff Checker",
+      "subtitle": "DevUtils.com",
+      "description": "Compare two texts and find diff (per characters, words, lines, etc.)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "unixtime",
+      "title": "Unix Time Converter",
+      "subtitle": "DevUtils.com",
+      "description": "Parse and display UNIX the timestamp string currently in your clipboard",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "urlencode",
+      "title": "URL Encode/Decode",
+      "subtitle": "DevUtils.com",
+      "description": "Decode the current URL string in your clipboard (if any)",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "uuidtool",
+      "title": "UUID/ULID Generate/Decode",
+      "subtitle": "DevUtils.com",
+      "description": "Decode the UUID in your clipboard (if any), or generate UUIDs",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "xmlformatter",
+      "title": "XML Beautify/Minify",
+      "subtitle": "DevUtils.com",
+      "description": "Beautify or minify your current clipboard as XML",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "yaml2json",
+      "title": "YAML to JSON",
+      "subtitle": "DevUtils.com",
+      "description": "Convert your current clipboard from YAML to JSON",
+      "icon": "devutils.png",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

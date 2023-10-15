@@ -10,7 +10,7 @@ export enum ColorType {
   HEX = "HEX",
   RGB = "RGB",
   HSL = "HSL",
-  KEYWORD = "KEYWORD",
+  KEYWORD = "Keyword",
 }
 
 export default abstract class Color<T> {

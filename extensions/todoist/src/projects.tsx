@@ -1,13 +1,14 @@
-import { getColor, Project as TProject } from "@doist/todoist-api-typescript";
+import { getColorByKey, Project as TProject } from "@doist/todoist-api-typescript";
 import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color } from "@raycast/api";
-import useSWR, { mutate } from "swr";
+import { useCachedPromise } from "@raycast/utils";
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
 import ProjectForm from "./components/ProjectForm";
-import { SWRKeys } from "./types";
+import View from "./components/View";
+import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
 
-export default function Projects() {
-  const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+function Projects() {
+  const { data, error, isLoading, mutate } = useCachedPromise(() => todoist.getProjects());
 
   if (error) {
     handleError({ error, title: "Unable to get projects" });
@@ -18,63 +19,90 @@ export default function Projects() {
   async function toggleFavorite(project: TProject) {
     await showToast({
       style: Toast.Style.Animated,
-      title: project.favorite ? "Removing from favorites" : "Adding to favorites",
+      title: project.isFavorite ? "Removing from favorites" : "Adding to favorites",
     });
 
     try {
-      await todoist.updateProject(project.id, { name: project.name, favorite: !project.favorite });
+      await todoist.updateProject(project.id, { name: project.name, isFavorite: !project.isFavorite });
       await showToast({
         style: Toast.Style.Success,
-        title: project.favorite ? "Removed from favorites" : "Added to favorites",
+        title: project.isFavorite ? "Removed from favorites" : "Added to favorites",
       });
-      mutate(SWRKeys.projects);
+
+      mutate();
     } catch (error) {
-      console.log(error);
       handleError({
         error,
-        title: project.favorite ? "Unable to remove from favorites" : "Unable to add to favorites",
+        title: project.isFavorite ? "Unable to remove from favorites" : "Unable to add to favorites",
       });
     }
   }
 
-  async function deleteProject(id: number) {
-    if (await confirmAlert({ title: "Are you sure you want to delete this project?" })) {
+  async function deleteProject(id: string) {
+    if (
+      await confirmAlert({
+        title: "Delete Project",
+        message: "Are you sure you want to delete this project?",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
+      })
+    ) {
       await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
 
       try {
         await todoist.deleteProject(id);
         await showToast({ style: Toast.Style.Success, title: "Project deleted" });
-        mutate(SWRKeys.projects);
+        mutate();
       } catch (error) {
         handleError({ error, title: "Unable to delete project" });
       }
-      mutate(SWRKeys.projects);
     }
   }
 
   return (
-    <List searchBarPlaceholder="Filter projects by name..." isLoading={!data && !error}>
+    <List searchBarPlaceholder="Filter projects by name..." isLoading={isLoading}>
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={project.inboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColor(project.color).value }}
+          icon={
+            project.isInboxProject
+              ? Icon.Envelope
+              : {
+                  source: project.viewStyle === "list" ? Icon.List : Icon.BarChart,
+                  tintColor: getColorByKey(project.color).hexValue,
+                }
+          }
           title={project.name}
-          {...(project.favorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
+          {...(project.isFavorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
           actions={
-            <ActionPanel>
-              <Action.Push icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
+            <ActionPanel title={project.name}>
+              <Action.Push icon={Icon.BlankDocument} title="Show Details" target={<Project project={project} />} />
 
-              {!project.inboxProject ? (
+              {isTodoistInstalled ? (
+                <Action.Open
+                  title="Open Project in Todoist"
+                  target={`todoist://project?id=${project.id}`}
+                  icon="todoist.png"
+                  application="Todoist"
+                />
+              ) : (
+                <Action.OpenInBrowser
+                  title="Open Task in Browser"
+                  url={project.url}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+              )}
+
+              {!project.isInboxProject ? (
                 <ActionPanel.Section>
                   <Action.Push
                     title="Edit Project"
                     icon={Icon.Pencil}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<ProjectForm project={project} />}
+                    target={<ProjectForm project={project} mutate={mutate} />}
                   />
 
                   <Action
-                    title={project.favorite ? "Remove from Favorites" : "Add to Favorites"}
+                    title={project.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                     icon={Icon.Star}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     onAction={() => toggleFavorite(project)}
@@ -83,6 +111,7 @@ export default function Projects() {
                   <Action
                     title="Delete Project"
                     icon={Icon.Trash}
+                    style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     onAction={() => deleteProject(project.id)}
                   />
@@ -90,12 +119,16 @@ export default function Projects() {
               ) : null}
 
               <ActionPanel.Section>
-                <Action.OpenInBrowser url={project.url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
-
                 <Action.CopyToClipboard
                   title="Copy Project URL"
                   content={project.url}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                />
+
+                <Action.CopyToClipboard
+                  title="Copy Project Title"
+                  content={project.name}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -103,5 +136,13 @@ export default function Projects() {
         />
       ))}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Projects />
+    </View>
   );
 }

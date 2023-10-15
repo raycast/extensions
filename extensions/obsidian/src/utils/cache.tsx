@@ -5,11 +5,16 @@ import { NoteLoader } from "./loader";
 
 //--------------------------------------------------------------------------------
 // This cache is shared accross all commands.
-// Use updateNoteInCache to update one specific note without having to reload all notes.
 //--------------------------------------------------------------------------------
 
 const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
 
+/**
+ * Cache all notes for a given vault.
+ *
+ * @param vault - Vault to cache notes for
+ * @returns The cached notes for the vault
+ */
 function cacheNotesFor(vault: Vault) {
   const nl = new NoteLoader(vault);
   const notes = nl.loadNotes();
@@ -17,11 +22,22 @@ function cacheNotesFor(vault: Vault) {
   return notes;
 }
 
+/**
+ * Renews the cache for a given vault by reloading all notes from disk.
+ *
+ * @param vault - Vault to renew the cache for
+ */
 export function renewCache(vault: Vault) {
   console.log("Renew Cache");
   cacheNotesFor(vault);
 }
 
+/**
+ * Test if cache exists for a given vault.
+ *
+ * @param vault - Vault to test if cache exists for
+ * @returns true if cache exists for vault
+ */
 function cacheExistForVault(vault: Vault) {
   if (cache.has(vault.name)) {
     return true;
@@ -29,6 +45,13 @@ function cacheExistForVault(vault: Vault) {
     console.log("Cache does not exist for vault: " + vault.name);
   }
 }
+
+/**
+ * Updates a note that has already been cached.
+ *
+ * @param vault - The Vault to update the note in
+ * @param note - The updated note
+ */
 
 export function updateNoteInCache(vault: Vault, note: Note) {
   if (cacheExistForVault(vault)) {
@@ -38,6 +61,12 @@ export function updateNoteInCache(vault: Vault, note: Note) {
   }
 }
 
+/**
+ * Deletes a note from the cache.
+ *
+ * @param vault - The Vault to delete the note from
+ * @param note - The note to delete from the cache
+ */
 export function deleteNoteFromCache(vault: Vault, note: Note) {
   if (cacheExistForVault(vault)) {
     const data = JSON.parse(cache.get(vault.name) ?? "");
@@ -46,12 +75,17 @@ export function deleteNoteFromCache(vault: Vault, note: Note) {
   }
 }
 
-export function useNotes(vault: Vault) {
-  console.log(vault.name);
+/**
+ * The preferred way of loading notes inside the extension
+ *
+ * @param vault - The Vault to get the notes from
+ * @returns All notes in the cache for the vault
+ */
+export function useNotes(vault: Vault): Note[] {
   if (cacheExistForVault(vault)) {
     const data = JSON.parse(cache.get(vault.name) ?? "");
     if (data.lastCached > Date.now() - 1000 * 60 * 5) {
-      console.log("Cache still valid");
+      console.log("Cache still valid for vault: " + vault.name);
       return data.notes;
     }
   }

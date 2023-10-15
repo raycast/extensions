@@ -1,5 +1,10 @@
 # NBA Game Viewer Changelog
 
+## [Fixes] - 2023-01-08
+
+- Fix data (wins, losses, rank) in "View Standings" command
+- Fix display of weekday in "View Upcoming Games" command
+
 ## [Improvements] - 2022-08-15
 
 - Added Cache APIs to speed up the commands.

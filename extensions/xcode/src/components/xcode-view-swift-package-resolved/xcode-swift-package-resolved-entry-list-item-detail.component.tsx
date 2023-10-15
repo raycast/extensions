@@ -11,12 +11,10 @@ export function XcodeSwiftPackageResolvedEntryListItemDetail(props: {
   entry: XcodeSwiftPackageResolvedEntry;
 }): JSX.Element {
   const imageUrl = usePromise(() => fetchOpenGraphImageUrl(props.entry.location), [], {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onError: () => {},
+    onError: () => Promise.resolve(),
   });
   const latestVersion = usePromise(() => XcodeSwiftPackageResolvedService.getLatestVersion(props.entry), [], {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onError: () => {},
+    onError: () => Promise.resolve(),
   });
   return (
     <List.Item.Detail

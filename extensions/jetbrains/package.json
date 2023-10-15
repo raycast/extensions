@@ -17,6 +17,13 @@
       "subtitle": "JetBrains Toolbox",
       "description": "Search and open JetBrains Toolbox projects",
       "mode": "view"
+    },
+    {
+      "name": "recentMenu",
+      "title": "Open Recent Projects",
+      "subtitle": "JetBrains Toolbox",
+      "description": "Open JetBrains Toolbox projects",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
@@ -72,7 +79,7 @@
     "GoLand"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.38.1",
     "fast-glob": "^3.2.7",
     "raycast-hooks": "^1.0.4",
     "which": "^2.0.2",
@@ -80,8 +87,6 @@
   },
   "devDependencies": {
     "@types/glob": "^7.1.4",
-    "@types/node": "^16.4.3",
-    "@types/react": "^17.0.15",
     "@types/which": "^2.0.1",
     "@types/xml2js": "^0.4.9",
     "@typescript-eslint/eslint-plugin": "^4.28.5",

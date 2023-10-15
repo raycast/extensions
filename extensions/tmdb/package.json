@@ -51,11 +51,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.1",
+    "@raycast/api": "^1.42.0",
     "moviedb-promise": "^3.1.15"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

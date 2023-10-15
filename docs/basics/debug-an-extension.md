@@ -14,7 +14,7 @@ Use the `console` for simple debugging such as logging variables, function calls
 console.log("Hello World"); // Prints: Hello World
 
 const name = "Thomas";
-console.debug(`Hello ${name}`)'; // Prints: Hello Thomas
+console.debug(`Hello ${name}`); // Prints: Hello Thomas
 
 const error = new Error("Boom 💥");
 console.error(error); // Prints: Boom 💥

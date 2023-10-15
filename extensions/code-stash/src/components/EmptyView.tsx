@@ -5,7 +5,7 @@ import CreateAction from "./CreateAction";
 function EmptyView(props: {
   codeStashes: CodeStash[];
   searchText: string;
-  onCreate: (title: string, code: string, language: string) => void;
+  onCreate: (title: string, code: string, language: string, id: string) => void;
 }) {
   if (props.codeStashes.length > 0) {
     return (

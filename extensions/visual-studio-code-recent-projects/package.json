@@ -10,7 +10,11 @@
     "macbookandrew",
     "cy-98",
     "immint023",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "elijahs"
+  ],
+  "keywords": [
+    "vscode"
   ],
   "license": "MIT",
   "commands": [
@@ -38,13 +42,46 @@
         {
           "value": "Code - Insiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
         }
       ]
+    },
+    {
+      "name": "layout",
+      "title": "View Layout",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "description": "Select the layout of the view",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    },
+    {
+      "name": "keepSectionOrder",
+      "type": "checkbox",
+      "title": "Advanced",
+      "required": false,
+      "label": "Keep Section Order",
+      "default": false,
+      "description": "Keep the order of the sections while searching folders, files, etc."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.35.0",
+    "@raycast/utils": "^1.4.0",
     "lodash.get": "^4.4.2",
+    "prettier": "^2.8.1",
     "sql.js": "^1.6.2",
     "tildify": "^3.0.0"
   },

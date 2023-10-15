@@ -3,8 +3,8 @@ import { List } from "@raycast/api";
 import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
 import { SearchArguments, Vault } from "./utils/interfaces";
-import { NoteListPinned } from "./components/NoteListPinned";
-import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { NoteListPinned } from "./components/NoteList/NoteListPinned";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 
 export default function Command(props: { arguments: SearchArguments }) {

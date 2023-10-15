@@ -30,8 +30,10 @@ export default function Command() {
 
   return (
     <Grid
+      aspectRatio="9/16"
+      fit={Grid.Fit.Fill}
       isLoading={isLoading}
-      itemSize={Grid.ItemSize.Medium}
+      columns={6}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Page Number"

@@ -15,9 +15,9 @@ const useStandings = () => {
           name: data.team.displayName,
           logo: data.team.logos[0].href,
           link: data.team.links[0].href,
-          rank: data.stats[0].value,
-          wins: data.stats[1].value,
-          losses: data.stats[2].value,
+          rank: data.stats[7].value,
+          wins: data.stats[10].value,
+          losses: data.stats[6].value,
         };
       })
       .sort((a: Team, b: Team) => {
@@ -32,9 +32,9 @@ const useStandings = () => {
           name: data.team.displayName,
           logo: data.team.logos[0].href,
           link: data.team.links[0].href,
-          rank: data.stats[0].value,
-          wins: data.stats[1].value,
-          losses: data.stats[2].value,
+          rank: data.stats[7].value,
+          wins: data.stats[10].value,
+          losses: data.stats[6].value,
         };
       })
       .sort((a: Team, b: Team) => {

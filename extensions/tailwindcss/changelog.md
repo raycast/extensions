@@ -1,5 +1,13 @@
 # Tailwind CSS Changelog
 
+## [Updated CSS classes] - 2022-11-29
+
+## [Generate all CSS classes] - 2022-11-27
+- Generate all CSS classes for the `Search Classes` command
+
+## [Fixed typo] - 2022-09-12
+- Renamed grid-col- to grid-cols
+
 ## [Search Colors and Components command] - 2022-06-27
 - Add `Search Colors` command
 - Add `Search Components` command

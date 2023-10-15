@@ -18,6 +18,7 @@ export type File = {
   size?: string;
   modifiedTime: string;
   starred: boolean;
+  parents?: string[];
   capabilities?: {
     canTrash: boolean;
   };
@@ -40,7 +41,7 @@ function getParams(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
 
   params.append(
     "fields",
-    "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash))"
+    "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents)"
   );
 
   if (scope === ScopeTypes.allDrives) {

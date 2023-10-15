@@ -4,7 +4,7 @@ import { CreateNoteForm } from "./components/CreateNoteForm";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault } from "./utils/interfaces";
 import { useObsidianVaults } from "./utils/utils";
-import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 
 export default function Command() {

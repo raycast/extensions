@@ -38,11 +38,11 @@ export const uploadImage = async (
   const formData = new FormData();
   let imageStream;
   if (isEmpty(imagePath)) {
-    setImagePathError("The field should't be empty!");
+    setImagePathError("Please select an image file!");
     return;
   }
   if (!fse.existsSync(imagePath) && !isUrl(imagePath)) {
-    setImagePathError("Invalid image path!");
+    setImagePathError("Please input an valid image url!");
     return;
   }
 

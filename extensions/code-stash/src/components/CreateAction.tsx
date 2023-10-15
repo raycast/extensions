@@ -1,16 +1,16 @@
 import { Action, Icon } from "@raycast/api";
-import CreateForm from "./CreateForm";
+import Form from "./Form";
 
 function CreateAction(props: {
   defaultTitle?: string;
-  onCreate: (title: string, code: string, language: string) => void;
+  onCreate: (title: string, code: string, language: string, id: string) => void;
 }) {
   return (
     <Action.Push
-      icon={Icon.Pencil}
-      title="Create"
+      icon={Icon.Plus}
+      title="New"
       shortcut={{ modifiers: ["cmd"], key: "n" }}
-      target={<CreateForm defaultTitle={props.defaultTitle} onCreate={props.onCreate} />}
+      target={<Form defaultTitle={props.defaultTitle} onSave={props.onCreate} />}
     />
   );
 }

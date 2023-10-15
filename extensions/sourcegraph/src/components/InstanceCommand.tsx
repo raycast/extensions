@@ -1,15 +1,29 @@
-import { ActionPanel, Detail, Action, Icon, openExtensionPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  Action,
+  Icon,
+  openExtensionPreferences,
+  updateCommandMetadata,
+  LaunchProps,
+} from "@raycast/api";
 import { useEffect } from "react";
 
 import checkAuthEffect from "../hooks/checkAuthEffect";
 import { bold } from "../markdown";
-import { sourcegraphInstance, Sourcegraph } from "../sourcegraph";
+import { sourcegraphInstance, Sourcegraph, instanceName } from "../sourcegraph";
 
 /**
  * InstanceCommand wraps the given command with the configuration for a specific
  * Sourcegraph instance.
  */
-export default function InstanceCommand({ Command }: { Command: React.FunctionComponent<{ src: Sourcegraph }> }) {
+export default function InstanceCommand({
+  Command,
+  props,
+}: {
+  Command: React.FunctionComponent<{ src: Sourcegraph; props?: LaunchProps }>;
+  props?: LaunchProps;
+}) {
   const tryCloudMessage = "Alternatively, you can try the Sourcegraph.com version of this command first.";
 
   const setupGuideAction = (
@@ -26,6 +40,7 @@ export default function InstanceCommand({ Command }: { Command: React.FunctionCo
 
   const src = sourcegraphInstance();
   if (!src) {
+    updateCommandMetadata({ subtitle: null });
     return (
       <Detail
         navigationTitle="No Sourcegraph Self-Hosted instance configured"
@@ -44,6 +59,7 @@ export default function InstanceCommand({ Command }: { Command: React.FunctionCo
   try {
     new URL(src.instance);
   } catch (e) {
+    updateCommandMetadata({ subtitle: null });
     return (
       <Detail
         navigationTitle="Invalid Sourcegraph Self-Hosted URL"
@@ -59,6 +75,12 @@ export default function InstanceCommand({ Command }: { Command: React.FunctionCo
       />
     );
   }
+
+  updateCommandMetadata({
+    // We've already checked this URL is valid, so we can reliably use it here.
+    subtitle: instanceName(src),
+  });
+
   if (!src.token) {
     return (
       <Detail
@@ -78,5 +100,5 @@ export default function InstanceCommand({ Command }: { Command: React.FunctionCo
 
   useEffect(checkAuthEffect(src));
 
-  return <Command src={src} />;
+  return <Command src={src} props={props} />;
 }

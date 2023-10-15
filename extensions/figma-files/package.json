@@ -5,7 +5,10 @@
   "description": "Lists Figma files allowing you to search and navigate to them.",
   "icon": "command-icon.png",
   "author": "michaelschultz",
-  "version": "1.1.0",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "version": "1.2.0",
   "license": "MIT",
   "commands": [
     {
@@ -13,29 +16,36 @@
       "title": "Search Files",
       "subtitle": "Figma",
       "description": "Lists Figma files allowing you to search and navigate to them.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "PERSONAL_ACCESS_TOKEN",
-          "type": "password",
-          "required": true,
-          "title": "Personal Access Token",
-          "description": "Log in to Figma and click settings to setup a token"
-        },
-        {
-          "name": "TEAM_ID",
-          "type": "password",
-          "required": true,
-          "title": "Team ID",
-          "description": "Find this in the url after navigating to your team page"
-        }
-      ]
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Quicklook",
+      "subtitle": "Figma",
+      "description": "See your Figma most recent files at a glance",
+      "mode": "menu-bar",
+      "interval": "2h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "PERSONAL_ACCESS_TOKEN",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Log in to Figma and click settings to setup a token"
+    },
+    {
+      "name": "TEAM_ID",
+      "type": "password",
+      "required": true,
+      "title": "Team ID",
+      "description": "Find this in the url after navigating to your team page"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "javascript-time-ago": "^2.3.9",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.39.1",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -49,6 +59,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "eslint src --fix"
   }
 }

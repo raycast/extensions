@@ -21,3 +21,13 @@ export function InstallableFilterDropdown(props: { onSelect: (value: Installable
     </List.Dropdown>
   );
 }
+
+export function placeholder(filter: InstallableFilterType): string {
+  return `Search ${
+    filter === InstallableFilterType.all
+      ? "formulae or casks"
+      : filter === InstallableFilterType.casks
+      ? "casks"
+      : "formulae"
+  } by name${String.ellipsis}`;
+}

@@ -1,0 +1,169 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "append-clipboard",
+  "title": "Append Clipboard",
+  "description": "Append or prepend selected text to your clipboard with different separators",
+  "icon": "extension-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "append-text-to-clipboard",
+      "title": "Append Text to Clipboard",
+      "icon": "append-clipboard.png",
+      "description": "Append selected text to your clipboard with different separators",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "appendSeparator",
+          "type": "dropdown",
+          "required": true,
+          "title": "Append Separator",
+          "description": "Separator between text when appending text",
+          "default": "",
+          "data": [
+            {
+              "title": "No Separator",
+              "value": ""
+            },
+            {
+              "title": "⏎",
+              "value": "\n"
+            },
+            {
+              "title": "␣",
+              "value": " "
+            },
+            {
+              "title": ",",
+              "value": ","
+            },
+            {
+              "title": ".",
+              "value": "."
+            },
+            {
+              "title": ";",
+              "value": ";"
+            },
+            {
+              "title": ":",
+              "value": ":"
+            },
+            {
+              "title": "/",
+              "value": "/"
+            },
+            {
+              "title": "|",
+              "value": "|"
+            },
+            {
+              "title": "+",
+              "value": "+"
+            },
+            {
+              "title": "-",
+              "value": "-"
+            },
+            {
+              "title": "=",
+              "value": "="
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prepend-text-to-clipboard",
+      "title": "Prepend Text to Clipboard",
+      "icon": "prepend-clipboard.png",
+      "description": "Prepend selected text to your clipboard with different separators",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "appendSeparator",
+          "type": "dropdown",
+          "required": true,
+          "title": "Prepend Separator",
+          "description": "Separator between text when prepending text",
+          "default": "",
+          "data": [
+            {
+              "title": "No Separator",
+              "value": ""
+            },
+            {
+              "title": "⏎",
+              "value": "\n"
+            },
+            {
+              "title": "␣",
+              "value": " "
+            },
+            {
+              "title": ",",
+              "value": ","
+            },
+            {
+              "title": ".",
+              "value": "."
+            },
+            {
+              "title": ";",
+              "value": ";"
+            },
+            {
+              "title": ":",
+              "value": ":"
+            },
+            {
+              "title": "/",
+              "value": "/"
+            },
+            {
+              "title": "|",
+              "value": "|"
+            },
+            {
+              "title": "+",
+              "value": "+"
+            },
+            {
+              "title": "-",
+              "value": "-"
+            },
+            {
+              "title": "=",
+              "value": "="
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.41.1"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

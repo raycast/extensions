@@ -19,10 +19,11 @@ export default function ParentIssueSubmenus({
   const [load, setLoad] = useState(false);
   const { issues, isLoadingIssues } = useIssues(getLastCreatedIssues, [], { execute: load });
 
-  const hasParentIssue = !!issue.parent?.id;
+  const currentParent = issue.parent;
+  const parentIssueId = currentParent?.id;
+  const hasParentIssue = Boolean(parentIssueId);
 
   async function setParentIssue(parentIssue: IssueResult | null) {
-    const currentParent = issue.parent;
     updateIssue({
       animatedTitle: "Setting parent issue",
       payload: { parentId: parentIssue ? parentIssue.id : null },
@@ -57,14 +58,17 @@ export default function ParentIssueSubmenus({
         {!issues && isLoadingIssues ? (
           <Action title="Loading..." />
         ) : (
-          (issues || []).map((issue) => (
-            <Action
-              key={issue.id}
-              title={`${issue.identifier} - ${issue.title}`}
-              icon={{ source: statusIcons[issue.state.type], tintColor: issue.state.color }}
-              onAction={() => setParentIssue(issue)}
-            />
-          ))
+          (issues || []).map((issue) => {
+            return (
+              <Action
+                key={issue.id}
+                autoFocus={issue.id === parentIssueId}
+                title={`${issue.identifier} - ${issue.title}`}
+                icon={{ source: statusIcons[issue.state.type], tintColor: issue.state.color }}
+                onAction={() => setParentIssue(issue)}
+              />
+            );
+          })
         )}
         {}
       </ActionPanel.Submenu>

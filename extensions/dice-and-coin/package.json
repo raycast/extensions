@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dice-and-coin",
+  "title": "Dice & Coin",
+  "description": "Quickly and easily make random decisions or generate a random number",
+  "icon": "dice.png",
+  "author": "yonbergman",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toss-coin",
+      "title": "Toss Coin",
+      "description": "Toss a coin and get a random result",
+      "mode": "no-view",
+      "icon": "toss.png"
+    },
+    {
+      "name": "throw-dice",
+      "title": "Throw Dice",
+      "description": "Throw a six sided die and get a random result",
+      "mode": "no-view",
+      "icon": "dice.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

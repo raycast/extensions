@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tim",
+  "title": "Tim",
+  "version": "1.0.0",
+  "description": "Manage your timers for Tim from Raycast",
+  "icon": "tim-icon.png",
+  "author": "tm.wrnr",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "openTaskManager",
+      "title": "Open Task Manager",
+      "subtitle": "Tim",
+      "description": "Open task manager window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleTimer",
+      "title": "Toggle Timer",
+      "subtitle": "Tim",
+      "description": "Toggle current active timer.",
+      "mode": "no-view"
+    },
+    {
+      "name": "openNewTask",
+      "title": "New Task",
+      "subtitle": "Tim",
+      "description": "Open new Task prompt.",
+      "mode": "no-view"
+    },
+    {
+      "name": "openNavigator",
+      "title": "Open Navigator",
+      "subtitle": "Tim",
+      "description": "Open Navigator menu.",
+      "mode": "no-view"
+    },
+    {
+      "name": "openActiveRecord",
+      "title": "Open Active Record",
+      "subtitle": "Tim",
+      "description": "Open active record editor.",
+      "mode": "no-view"
+    },
+    {
+      "name": "export",
+      "title": "Export",
+      "subtitle": "Tim",
+      "description": "Export all application data.",
+      "mode": "view"
+    },
+    {
+      "name": "import",
+      "title": "Import",
+      "subtitle": "Tim",
+      "description": "Import data.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "dayjs": "^1.11.5",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/prettier": "^2.7.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

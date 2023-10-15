@@ -1,8 +1,9 @@
-import { Action, ActionPanel, closeMainWindow, Detail, List, open, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, open, popToRoot } from "@raycast/api";
 
-import { Vault } from "./utils/interfaces";
 import { getDailyNoteTarget, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
-import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
+import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
+import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();
@@ -16,18 +17,10 @@ export default function Command() {
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
 
   if (vaultsWithoutPlugin.length > 0) {
-    showToast({
-      title: "Vaults without Daily Note plugin:",
-      message: vaultsWithoutPlugin.map((vault: Vault) => vault.name).join(", "),
-      style: Toast.Style.Failure,
-    });
+    vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin);
   }
-
   if (vaultsWithPlugin.length == 0) {
-    const text =
-      "# Advanced URI plugin not installed.\nThis command requires the [Advanced URI plugin](https://obsidian.md/plugins?id=obsidian-advanced-uri) for Obsidian.  \n  \n Install it through the community plugins list.";
-
-    return <Detail navigationTitle="Advanced URI plugin not installed" markdown={text} />;
+    return <AdvancedURIPluginNotInstalled />;
   }
 
   if (vaultsWithPlugin.length == 1) {

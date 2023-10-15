@@ -5,6 +5,9 @@
   "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
   "icon": "command-icon.png",
   "author": "es183923",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -212,10 +215,19 @@
       "label": "Upper First",
       "default": true,
       "required": false
+    },
+    {
+      "name": "SpongeCase",
+      "type": "checkbox",
+      "title": "",
+      "description": "Enable the \"SPonGE CasE\" Transformation",
+      "label": "Sponge Case",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "1.44.0",
     "change-case-all": "^1.0.14",
     "execa": "^6.1.0"
   },

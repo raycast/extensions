@@ -1,3 +1,5 @@
+export const HISTORY_KEY = "history";
+
 export interface SearchResult {
   id: string;
   description?: string;
@@ -7,4 +9,6 @@ export interface SearchResult {
   isHistory?: boolean;
 }
 
-export const HISTORY_KEY = "history";
+export interface Preferences {
+  rememberSearchHistory: boolean;
+}

@@ -73,3 +73,14 @@ export async function getStorage(): Promise<StorageValues> {
     timeEntries: await storage.timeEntries.get(),
   };
 }
+
+export async function refreshStorage(): Promise<void> {
+  await Promise.all([
+    storage.projects.refresh(),
+    storage.workspaces.refresh(),
+    storage.clients.refresh(),
+    storage.tags.refresh(),
+    storage.runningTimeEntry.refresh(),
+    storage.timeEntries.refresh(),
+  ]);
+}

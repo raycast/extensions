@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Icon, List, Action, ActionPanel, getPreferenceValues, Toast, showToast, LocalStorage } from "@raycast/api";
 import fetch, { Response, AbortError } from "node-fetch";
-import { currencyCode2Name, currencyCode2Country } from "./currency";
+import { currencyCode2Name, currencyCode2CountryAndRegion } from "./currency";
 
 const STORAGE_KEY_FROM_CURRENCY_CODE = "fromCurrencyCode";
 const STORAGE_KEY_PINNED_CURRENCY_CODE = "pinnedCurrencyCode";
@@ -44,10 +44,10 @@ export default function Command() {
             setState((previous) => ({ ...previous, fromCurrencyCode: newValue }));
           }}
         >
-          {Object.keys(currencyCode2Country).map((currencyCode: string) => (
+          {Object.keys(currencyCode2CountryAndRegion).map((currencyCode: string) => (
             <List.Dropdown.Item
               key={`from-${currencyCode}`}
-              title={`${currencyCode} - ${currencyCode2Country[currencyCode]}`}
+              title={`${currencyCode} - ${currencyCode2CountryAndRegion[currencyCode]}`}
               value={currencyCode}
               icon={getFlagEmoji(currencyCode.substring(0, 2))}
             />
@@ -226,7 +226,6 @@ function useExchange() {
         isLoading: true,
       }));
       try {
-        console.log("country:", state.fromCurrencyCode);
         const result = await performExchange(
           amount,
           state.fromCurrencyCode,
@@ -290,7 +289,7 @@ async function performExchange(
       .then((content) => {
         if (content) {
           const cachedData = JSON.parse(content) as CurrencyResult;
-          //console.log(cachedData);
+          // console.log(cachedData);
           if (Math.round(Date.now() / 1000) - cachedData.time_next_update_unix < 0) {
             // cache valid
             return cachedData;
@@ -358,9 +357,11 @@ function enrichExchangeData(
     .filter(
       (it) =>
         (!pinned || pinned.indexOf(it) < 0) &&
+        currencyCode2CountryAndRegion[it] !== undefined &&
+        currencyCode2Name[it] !== undefined &&
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
-          currencyCode2Country[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
+          currencyCode2CountryAndRegion[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0)
     )
     .map<ConversionRate>((key: string) => ({
@@ -371,9 +372,11 @@ function enrichExchangeData(
   currencyData.conversion_rate_pin_exchanged = pinned
     ?.filter(
       (it) =>
+        currencyCode2CountryAndRegion[it] !== undefined &&
+        currencyCode2Name[it] !== undefined &&
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
-          currencyCode2Country[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
+          currencyCode2CountryAndRegion[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0)
     )
     .map<ConversionRate>((key: string) => ({
@@ -384,14 +387,13 @@ function enrichExchangeData(
   return currencyData as CurrencyResult;
 }
 
-function getFlagEmoji(countryCode: string): string {
-  const codePoints = countryCode
+function getFlagEmoji(countryAndRegionCode: string): string {
+  const codePoints = countryAndRegionCode
     .toUpperCase()
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
-  let v = countryCode.startsWith("X") ? "🇺🇳" : String.fromCodePoint(...codePoints) || "🇺🇳";
-  v = countryCode === "TW" ? "🇨🇳" : v;
-  v = countryCode === "AN" ? "🇺🇳" : v;
+  let v = countryAndRegionCode.startsWith("X") ? "🇺🇳" : String.fromCodePoint(...codePoints) || "🇺🇳";
+  v = countryAndRegionCode === "AN" ? "🇺🇳" : v;
   return v;
 }
 

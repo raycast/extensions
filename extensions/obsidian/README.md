@@ -17,6 +17,7 @@ This is a raycast extension with commands for the note taking and knowledge mana
 - [Open Vault](https://github.com/marcjulianschwarz/obsidian-raycast#open-vault)
 - [Create Note](https://github.com/marcjulianschwarz/obsidian-raycast#create-note)
 - [Daily Note](https://github.com/marcjulianschwarz/obsidian-raycast#daily-note)
+- [Append to Daily Note](https://github.com/marcjulianschwarz/obsidian-raycast#append-to-daily-note)
 - [Pinned Note](https://github.com/marcjulianschwarz/obsidian-raycast#pinned-notes)
 - [Obsidian Menu Bar Item](https://github.com/marcjulianschwarz/obsidian-raycast#obsidian-menu-bar-item)
 
@@ -125,6 +126,12 @@ Both the note name and note content support these templates:
 This command will open the daily note from the selected vault. If a daily note doesn't exist it will create one and open it.
 It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
 
+## Append to Daily Note
+
+This command will append text to the daily note from the selected vault. If a daily note doesn't exist it will create one and open it. To append as efficiently as possible, the text is provided as a parameter to the command, so there's no form to fill out.
+
+It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
+
 ## Pinned Notes
 
 This command will open a list of your pinned notes. All actions and preferences from the `Search Note` command are available.
@@ -171,6 +178,12 @@ Clicking it will reveal a list of your vaults. You can view your pinned notes, p
 - default note content
 - fill form with default values
 - list of folders that will create actions for creating notes inside of the specified folders
+
+### Append to Daily Note
+
+- template for the appended text (e.g. could set to `- [ ] ` to create a checklist item)
+- vault in which the Daily Note will be appended (if not set, you will be prompted to select a vault when the command is run)
+- heading in which the appended text will be placed (if not set, the text will be appended to the end of the note)
 
 ### Pinned Notes
 

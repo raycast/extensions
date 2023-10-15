@@ -1,8 +1,8 @@
 import { Form, ActionPanel, Action, showToast, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import got from "got";
-
-import Preferences from "./interfaces/preferences";
+import { Preferences } from "./interfaces/preferences";
+import { useForm } from "@raycast/utils";
 
 type Values = {
   content: string;
@@ -12,6 +12,7 @@ type Values = {
 };
 
 const Command = () => {
+  const textAreaRef = useRef<Form.TextArea>(null);
   const preferences = getPreferenceValues<Preferences>();
   const [shareOptions, setShareOptions] = useState<string>();
 
@@ -44,6 +45,7 @@ const Command = () => {
       showToast({ title: "Whoops!", message: "Something went wrong while submitting to Typefully." });
     }
 
+    textAreaRef.current?.reset();
     showToast({ title: "Submitted to Typefully", message: "Your draft made it to Typefully! 🥳" });
   }
 
@@ -56,11 +58,11 @@ const Command = () => {
       }
     >
       <Form.TextArea
+        ref={textAreaRef}
         id="content"
         title="Draft 🪶"
         autoFocus={true}
         placeholder="Craft your next communication"
-        storeValue
       />
       <Form.Separator />
       <Form.Dropdown id="share_options" title="Schedule" onChange={setShareOptions}>
@@ -68,12 +70,7 @@ const Command = () => {
         <Form.Dropdown.Item value="schedule-share" title="Schedule" />
         <Form.Dropdown.Item value="schedule-next-free-slot" title="Schedule to next free slot" />
       </Form.Dropdown>
-      <Form.Checkbox
-        id="threadify"
-        title="Threadify?"
-        label="Automatically split long threads into multiple tweets?"
-        storeValue
-      />
+      <Form.Checkbox id="threadify" title="Threadify?" label="Automatically split long threads into multiple tweets?" />
       {shareOptions == "schedule-share" && (
         <Form.DatePicker type={Form.DatePicker.Type.DateTime} id="schedule_date" title="Date picker" />
       )}

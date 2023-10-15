@@ -24,9 +24,9 @@ const useSchedule = () => {
 
     const scheduledGames: Array<Day> = Object.keys(data).map((key) => {
       return {
-        date: `${
-          weekdays[new Date(data[key].games[0]?.date.toLocaleString("en-US")).getUTCDay() - 1]
-        }  —  ${convertDate(key)}`,
+        date: `${weekdays[new Date(data[key].games[0]?.date.toLocaleString("en-US")).getDay()]}  —  ${convertDate(
+          key
+        )}`,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         games: data[key].games.map((game: any): Game => {
           return {

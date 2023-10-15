@@ -125,7 +125,7 @@ jobs:
           fi
 
       - name: Open PR on the main repo
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         if: steps.commit.outputs.has_commit == 'true'
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}

@@ -1,5 +1,5 @@
 import { List, Icon, Color } from "@raycast/api";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 import ServicesContext from "./components/ServicesContext";
 import ColorListItem from "./components/ColorListItem";
@@ -10,6 +10,9 @@ import { FavoritesStorage } from "./hooks/useFavorites";
 
 import useTimeAgo from "./hooks/useTimeAgo";
 import ColorPickers from "./components/ColorPickers";
+import TypeFilter from "./TypeFilter";
+import { ColorType } from "./colors/Color";
+import { SavedColor } from "./hooks/colorSaver";
 
 export interface Services {
   renderer: RenderColor;
@@ -28,12 +31,27 @@ export default function Extension({
 }) {
   const timeAgo = useTimeAgo();
 
+  const [filterType, setFilterType] = useState("All");
+
+  const onColorTypeChange = (type: ColorType) => {
+    setFilterType(type);
+  };
+
+  const filterCallback = (color: SavedColor) => {
+    if (filterType === "All") {
+      return true;
+    }
+
+    return color.instance.type === filterType;
+  };
+
   return (
     <ServicesContext.Provider value={{ renderer, history, favorites }}>
       <List
         isLoading={renderer.state.isLoading || history.isLoading || favorites.isLoading}
         onSearchTextChange={renderer.render}
         searchBarPlaceholder="#000000, rbg(0, 0, 0), hsl(0, 0, 0), black..."
+        searchBarAccessory={<TypeFilter onColorTypeChange={onColorTypeChange} />}
         throttle
       >
         {renderer.state.isLoading && (
@@ -45,13 +63,15 @@ export default function Extension({
 
         {renderer.state.colors?.length === 0 && !renderer.state.isLoading && <ColorPickers />}
 
-        {renderer.state.colors?.map((color, index) => (
-          <ColorListItem key={index} color={color} />
-        ))}
+        {renderer.state.colors
+          ?.filter((color) => filterType === "All" || color.type === filterType)
+          .map((color, index) => (
+            <ColorListItem key={index} color={color} />
+          ))}
         {renderer.state.colors?.length === 0 && (
           <Fragment>
             <List.Section title="Favorites">
-              {favorites.state.collection.map((color, index) => (
+              {favorites.state.collection.filter(filterCallback).map((color, index) => (
                 <ColorListItem
                   key={index}
                   color={color.instance}
@@ -61,7 +81,7 @@ export default function Extension({
               ))}
             </List.Section>
             <List.Section title="History">
-              {history.state.collection.map((color, index) => (
+              {history.state.collection.filter(filterCallback).map((color, index) => (
                 <ColorListItem
                   key={index}
                   color={color.instance}

@@ -31,7 +31,7 @@ export const GenerateFindOutIcons = (
 
 export const startGame = (allCountDownTime: number) => {
   const [leftTime, setLeftTime] = useState<number>(allCountDownTime);
-  const [showScore, setShowScore] = useState<boolean>(false);
+  const [showScore, setShowScore] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
   const [isGaming, setIsGaming] = useState<boolean>(false);
 
@@ -42,7 +42,7 @@ export const startGame = (allCountDownTime: number) => {
         countDown -= 1;
         setLeftTime(countDown);
         if (countDown === 0) {
-          setShowScore(!showScore);
+          setShowScore(Date.now());
           setLeftTime(allCountDownTime);
           setIsGaming(false);
           clearInterval(interval);

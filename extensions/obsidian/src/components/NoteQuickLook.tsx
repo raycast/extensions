@@ -10,10 +10,11 @@ import { filterContent, getNoteFileContent } from "../utils/utils";
 export function NoteQuickLook(props: {
   showTitle: boolean;
   note: Note | undefined;
+  notes: Note[];
   vault: Vault;
   actionCallback?: (action: NoteAction) => void;
 }) {
-  const { note, showTitle, vault, actionCallback } = props;
+  const { note, notes, showTitle, vault, actionCallback } = props;
   const { pop } = useNavigation();
 
   let noteContent = note?.content;
@@ -59,8 +60,8 @@ export function NoteQuickLook(props: {
       actions={
         note ? (
           <ActionPanel>
-            <OpenNoteActions note={note} vault={vault} actionCallback={quickLookActionCallback} />
-            <NoteActions note={note} vault={vault} actionCallback={quickLookActionCallback} />
+            <OpenNoteActions note={note} notes={notes} vault={vault} actionCallback={quickLookActionCallback} />
+            <NoteActions note={note} notes={notes} vault={vault} actionCallback={quickLookActionCallback} />
           </ActionPanel>
         ) : null
       }

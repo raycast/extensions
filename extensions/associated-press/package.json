@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "associated-press",
+  "title": "Associated Press",
+  "description": "Bringing you breaking news from the Associated Press and hundreds of trusted local sources, AP News is your trusted source for real-time news coverage anytime and anywhere.",
+  "icon": "command-icon.png",
+  "author": "Dammmien",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Associated Press",
+      "description": "Read Associated Press news",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.2",
+    "node-fetch": "3.2.10",
+    "sanitize-html": "2.7.3"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/sanitize-html": "2.6.2",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

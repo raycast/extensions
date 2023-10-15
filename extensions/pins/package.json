@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pins",
+  "title": "Pins",
+  "description": "Create pins for paths and URLs and display them in the menu bar",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Pins",
+      "description": "Show pinned items in the menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "new-pin",
+      "title": "New Pin",
+      "description": "Pin a path or URL",
+      "mode": "view"
+    },
+    {
+      "name": "new-group",
+      "title": "New Pin Group",
+      "description": "Create a new group for pins",
+      "mode": "view"
+    },
+    {
+      "name": "view-pins",
+      "title": "View Pins",
+      "description": "View and modify pins",
+      "mode": "view"
+    },
+    {
+      "name": "view-groups",
+      "title": "View Pin Groups",
+      "description": "View and modify groups for pins",
+      "mode": "view"
+    },
+    {
+      "name": "copy-pins",
+      "title": "Copy Pin Data",
+      "description": "Copy all pins and groups in JSON format",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-data",
+      "title": "Import Pin Data",
+      "description": "Import groups and pins from a JSON string or file",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showCategories",
+      "type": "checkbox",
+      "title": "General Settings",
+      "label": "Show categories (i.e. Pins, Groups)",
+      "description": "Whether to show high-level categories in the menu dropdown.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showOpenAll",
+      "type": "checkbox",
+      "label": "Show \"Open All\" button in groups",
+      "description": "Whether to show an \"Open All\" item in group submenus.",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.1",
+    "@raycast/utils": "^1.4.8",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

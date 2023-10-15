@@ -5,6 +5,8 @@
   "description": "View and manage your ploi.io servers and sites",
   "icon": "ploi-icon.png",
   "author": "ploi-deploy",
+  "owner": "ploi",
+  "access": "public",
   "categories": [
     "Developer Tools"
   ],

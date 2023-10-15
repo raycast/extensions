@@ -19,59 +19,76 @@ export type ProjectResult = Pick<
   teams: { nodes: { id: string }[] };
 };
 
-export async function getProjects(teamId?: string) {
-  if (!teamId) {
-    return [];
+const projectFragment = `
+  id
+  name
+  description
+  icon
+  color
+  state
+  progress
+  url
+  lead {
+    id
+    displayName
+    avatarUrl
+    email
   }
+  milestone {
+    id
+    name
+    sortOrder
+  }
+  startDate
+  targetDate
+  members {
+    nodes {
+      id
+    }
+  }
+  teams {
+    nodes {
+      id
+    }
+  }
+`;
 
+export async function getProjects(teamId?: string) {
   const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<
-    { team: { projects: { nodes: ProjectResult[] } } },
-    Record<string, unknown>
-  >(
-    `
-      query($teamId: String!) {
-        team(id: $teamId) {
+
+  if (!teamId) {
+    const { data } = await graphQLClient.rawRequest<{ projects: { nodes: ProjectResult[] } }, Record<string, unknown>>(
+      `
+        query {
           projects {
             nodes {
-              id
-              name
-              description
-              icon
-              color
-              state
-              progress
-              url
-              lead {
-                id
-                displayName
-                avatarUrl
-                email
-              }
-              milestone {
-                id
-                name
-                sortOrder
-              }
-              startDate
-              targetDate
-              members {
-                nodes {
-                  id
-                }
-              }
-              teams {
-                nodes {
-                  id
-                }
+              ${projectFragment}
+            }
+          }
+        }
+      `
+    );
+
+    return data?.projects.nodes;
+  } else {
+    const { data } = await graphQLClient.rawRequest<
+      { team: { projects: { nodes: ProjectResult[] } } },
+      Record<string, unknown>
+    >(
+      `
+        query($teamId: String!) {
+          team(id: $teamId) {
+            projects {
+              nodes {
+                ${projectFragment}
               }
             }
           }
         }
-      }
-    `,
-    { teamId }
-  );
+      `,
+      { teamId }
+    );
 
-  return data?.team.projects.nodes;
+    return data?.team.projects.nodes;
+  }
 }

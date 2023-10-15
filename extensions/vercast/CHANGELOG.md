@@ -1,5 +1,9 @@
 # Vercast Changelog
 
+## [2.2] - 2022-09-08
+
+- Added a new command: `Search Components` for quickly searching and accessing the Vercel design library 
+
 ## [2.1] - 2022-08-17
 
 - Added branch name to entries

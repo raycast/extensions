@@ -31,6 +31,34 @@ export async function pastePassword(entry: string): Promise<void> {
   }
 }
 
+export async function copyOTP(entry: string): Promise<void> {
+  try {
+    const toast = await showToast({ title: "Copying OTP", style: Toast.Style.Animated });
+    const otp = await gopass.otp(entry);
+    await Clipboard.copy(otp);
+    await toast.hide();
+    await closeMainWindow();
+    await showHUD("OTP copied");
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not copy OTP code", style: Toast.Style.Failure });
+  }
+}
+
+export async function pasteOTP(entry: string): Promise<void> {
+  try {
+    const toast = await showToast({ title: "Pasting OTP", style: Toast.Style.Animated });
+    const otp = await gopass.otp(entry);
+    await Clipboard.paste(otp);
+    await toast.hide();
+    await closeMainWindow();
+    await showHUD("OTP pasted");
+  } catch (error) {
+    console.error(error);
+    await showToast({ title: "Could not paste OTP code", style: Toast.Style.Failure });
+  }
+}
+
 const passwordActions = (entry: string) => (
   <>
     <Action title="Copy Password to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
@@ -39,6 +67,18 @@ const passwordActions = (entry: string) => (
       icon={Icon.Document}
       onAction={() => pastePassword(entry)}
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+    />
+    <Action
+      title="Copy OTP Code to Clipboard"
+      icon={Icon.Clipboard}
+      onAction={() => copyOTP(entry)}
+      shortcut={{ modifiers: ["cmd"], key: "o" }}
+    />
+    <Action
+      title="Paste OTP Code to Active App"
+      icon={Icon.Document}
+      onAction={() => pasteOTP(entry)}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
     />
   </>
 );

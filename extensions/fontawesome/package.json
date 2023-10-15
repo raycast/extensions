@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "font-awesome",
+  "title": "Font Awesome",
+  "description": "Search Font Awesome icons",
+  "icon": "command-icon.png",
+  "author": "dutzi",
+  "contributors": [
+    "danielferguson"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Font Awesome",
+      "description": "Search Font Awesome icons",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "iconStyle",
+      "title": "Icon Style",
+      "description": "Which icon style to copy when running \"Copy SVG\"",
+      "default": "regular",
+      "required": false,
+      "data": [
+        {
+          "title": "Duotone",
+          "value": "duotone"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Regular",
+          "value": "regular"
+        },
+        {
+          "title": "Solid",
+          "value": "solid"
+        },
+        {
+          "title": "Thin",
+          "value": "thin"
+        }
+      ],
+      "type": "dropdown"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.3",
+    "@raycast/utils": "^1.4.8",
+    "find-free-port": "^2.0.0",
+    "node-fetch": "^3.2.10",
+    "patch-package": "^6.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "change-case": "^4.1.2",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "svg-to-png": "^4.0.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

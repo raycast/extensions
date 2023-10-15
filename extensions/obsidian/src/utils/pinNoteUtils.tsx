@@ -7,6 +7,11 @@ import { noteAlreadyPinnedToast, notePinnedToast, noteUnpinnedToast } from "../c
 import { CURRENT_EXTENSION_VERSION } from "./constants";
 import { tagsForString } from "./yaml";
 
+/**
+ *
+ * @param vault - The vault to get the pinned notes for
+ * @returns - The pinned notes, vault and parsed data from the data.json file
+ */
 export function getInfoFor(vault: Vault): { pinnedNotes: string[]; vault: Vault; data: PinnedNotesJSON[] } {
   if (!fs.existsSync(environment.supportPath + "/data.json")) {
     fs.writeFileSync(environment.supportPath + "/data.json", "[]");
@@ -26,6 +31,9 @@ export function getInfoFor(vault: Vault): { pinnedNotes: string[]; vault: Vault;
   }
 }
 
+/**
+ * Migrates old pinned notes to the new format
+ */
 export function migratePinnedNotes() {
   const version = getCurrentPinnedVersion();
 
@@ -48,6 +56,11 @@ export function migratePinnedNotes() {
   }
 }
 
+/**
+ *
+ * @param vault - The vault to get the pinned notes for
+ * @returns - The pinned notes for the vault
+ */
 export function getPinnedNotes(vault: Vault) {
   const { pinnedNotes } = getInfoFor(vault);
   const pinnedNoteObjects = pinnedNotes
@@ -77,6 +90,12 @@ export function getPinnedNotes(vault: Vault) {
   return pinnedNoteObjects;
 }
 
+/**
+ *
+ * @param path - The path of the note to unpin
+ * @param vault - The vault to unpin the note from
+ * @returns - The notes without the pinned notes
+ */
 function unpinNotePath(path: string, vault: Vault) {
   const info = getInfoFor(vault);
   let pinnedNotes = info.pinnedNotes;
@@ -125,6 +144,11 @@ export function pinNote(note: Note, vault: Vault) {
   notePinnedToast(note);
 }
 
+/**
+ *
+ * @param vault - The vault to reset the pinned notes for
+ * @returns - True if the pinned notes were reset successfully
+ */
 export async function resetPinnedNotes(vault: Vault) {
   const info = getInfoFor(vault);
   let pinnedNotes = info.pinnedNotes;

@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
- * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 11:36
+ * @lastEditor: Tisfeng
+ * @lastEditTime: 2022-12-16 17:59
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,6 @@
 import { LocalStorage } from "@raycast/api";
 import axios from "axios";
 import { requestCostTime } from "../axiosConfig";
-import { releaseNote } from "./releaseNote";
 
 const versionInfoKey = "EasydictVersionInfoKey";
 const githubUrl = "https://github.com";
@@ -26,14 +25,28 @@ export class Easydict {
   static author = "tisfeng";
   static repo = "Raycast-Easydict";
 
-  // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.0.0";
-  buildNumber = 8;
-  versionDate = "2022-08-20";
+  version = "2.7.2";
+  buildNumber = 21;
+  versionDate = "2023-01-17";
   isNeedPrompt = true;
-  hasPrompted = false; // always default false, only show once, then should be set to true.
-  releaseMarkdown = releaseNote;
+  hasPrompted = false; // * always default false, only show once, then should be set to true.
+
+  releaseMarkdown = `
+## [v${this.version}] - ${this.versionDate}
+
+### 🐞 修复
+
+- 修复了 Bing 翻译失败问题。
+
+#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
+
+---
+
+### 🐞 Fixes
+
+- Fixed Bing translation failed.
+`;
 
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;
@@ -108,7 +121,7 @@ export class Easydict {
     const currentEasydictInfo = await this.getVersionInfo(currentVersionKey);
     if (currentEasydictInfo) {
       // console.log(`get current easydict cost time: ${Date.now() - startTime} ms`);
-      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 2)}`);
+      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 4)}`);
       return Promise.resolve(currentEasydictInfo);
     } else {
       const startStoredTime = Date.now();
@@ -126,7 +139,7 @@ export class Easydict {
    */
   public async fetchReleaseMarkdown(): Promise<string> {
     try {
-      console.log("fetch release markdown from github");
+      console.log(`fetch release markdown from github: ${this.getReleaseApiUrl()}`);
       const releaseInfo = await this.fetchReleaseInfo(this.getReleaseApiUrl());
       const releaseMarkdown = releaseInfo.body;
       console.log("fetch release markdown from github success");

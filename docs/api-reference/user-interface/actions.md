@@ -397,6 +397,35 @@ export default function Command() {
 
 <PropsTableFromJSDoc component="Action.ToggleQuickLook" />
 
+### Action.PickDate
+
+Action to pick a date.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Todo"
+        actions={
+          <ActionPanel>
+            <Action.PickDate title="Set Due Date…" />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.PickDate" />
+
 ## Types
 
 ### Snippet

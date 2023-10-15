@@ -1,5 +1,9 @@
 # pass Changelog
 
+## [New Additions / Fix] - 2022-09-05
+
+- Add OTP code support.
+
 ## [New Additions / Fix] - 2022-07-30
 
 - Fix an issue with clearing clipboard after password copy.

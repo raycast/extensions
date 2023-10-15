@@ -1,6 +1,7 @@
 import React from "react";
 import { Action, Icon, LocalStorage } from "@raycast/api";
-import { LocalStorageKey, OpenLinkApplication } from "../types/types";
+import { OpenLinkApplication } from "../types/types";
+import { CacheKey } from "../utils/constants";
 
 export function ActionAddOpenLinkApp(props: {
   curApp: OpenLinkApplication;
@@ -10,11 +11,11 @@ export function ActionAddOpenLinkApp(props: {
 
   return (
     <Action
-      title="Add Application"
-      icon={Icon.Plus}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      title="Add to Preferred"
+      icon={Icon.Star}
+      shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
       onAction={async () => {
-        const localBrowsers = await LocalStorage.getItem<string>(LocalStorageKey.CUSTOM_APPS);
+        const localBrowsers = await LocalStorage.getItem<string>(CacheKey.PREFERRED_APP);
         const _customApps: OpenLinkApplication[] = typeof localBrowsers == "string" ? JSON.parse(localBrowsers) : [];
 
         _customApps.push({
@@ -25,7 +26,7 @@ export function ActionAddOpenLinkApp(props: {
           rankURL: 1,
           rankEmail: 1,
         });
-        await LocalStorage.setItem(LocalStorageKey.CUSTOM_APPS, JSON.stringify(_customApps));
+        await LocalStorage.setItem(CacheKey.PREFERRED_APP, JSON.stringify(_customApps));
         setRefresh(Date.now());
       }}
     />

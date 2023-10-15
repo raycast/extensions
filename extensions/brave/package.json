@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brave",
   "title": "Brave",
-  "description": "Create new tabs, search open tabs and history in Brave.",
+  "description": "Search open tabs, bookmarks and history in Brave.",
   "icon": "brave-icon.png",
   "author": "ron-myers",
   "contributors": [
-    "Codely"
+    "Codely",
+    "crisboarna"
   ],
   "categories": [
     "Applications",
@@ -15,50 +16,65 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "brave-go-to-tab",
+      "name": "new-tab",
+      "title": "New Brave Tab",
+      "subtitle": "Brave",
+      "description": "Open a new Brave tab.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tab",
       "title": "Search Brave Tabs",
       "subtitle": "Brave",
       "description": "List all tabs and go to the selected.",
       "mode": "view"
     },
     {
-      "name": "brave-search-history",
+      "name": "search-history",
       "title": "Search Brave History",
       "subtitle": "Brave",
       "description": "Search browser history.",
       "mode": "view"
     },
     {
-      "name": "brave-new-tab",
-      "title": "New Brave Tab",
+      "name": "search-bookmarks",
+      "title": "Search Brave Bookmarks",
       "subtitle": "Brave",
-      "description": "Open a new Brave tab.",
+      "description": "Search browser bookmarks.",
       "mode": "view"
     }
   ],
-  "preferences": [],
+  "preferences": [
+    {
+      "name": "useOriginalFavicon",
+      "title": "Fav icon",
+      "label": "Extract the favicon from every open tab",
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Brave profile.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "@raycast/utils": "^1.1.0",
-    "react-async": "^10.0.1",
-    "run-applescript": "^6.0.0",
-    "sql.js": "^1.6.2"
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sql.js": "^1.4.3",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "prettier": "^2.5.1",
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
+    "publish": "ray publish"
   }
 }

@@ -12,21 +12,24 @@ export default function GetStandings() {
         return (
           <List.Item
             key={table.position}
-            title={`${table.position}. ${table.team.name}`}
+            title={table.position.toString()}
+            subtitle={table.team.name}
             icon={{
               source: `${table.team.crest}`,
               mask: Image.Mask.Circle,
               fallback: "default.png",
             }}
-            subtitle={`${table.team.tla}`}
-            accessories={[{ text: `Points: ${table.points}` }]}
+            accessories={[{ text: table.points.toString() }]}
             detail={
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Details" />
-                    <List.Item.Detail.Metadata.Label title="Played Games" text={table.playedGames.toString()} />
-                    <List.Item.Detail.Metadata.Label title="Form" text={table.form} />
+                    <List.Item.Detail.Metadata.Label title="Games Played" text={table.playedGames.toString()} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Form"
+                      text={table.form.toString().split("").reverse().join("")}
+                    />
                     <List.Item.Detail.Metadata.Label title="Won" text={table.won.toString()} />
                     <List.Item.Detail.Metadata.Label title="Drawn" text={table.draw.toString()} />
                     <List.Item.Detail.Metadata.Label title="Lost" text={table.lost.toString()} />

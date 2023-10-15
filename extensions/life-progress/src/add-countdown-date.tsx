@@ -103,6 +103,9 @@ export default function AddCountdownDate(props: {
         error={dateError}
         type={Form.DatePicker.Type.Date}
         onChange={(newValue) => {
+          if (newValue === null) {
+            return;
+          }
           setDate(newValue);
           if (newValue !== undefined) {
             setDateError(undefined);

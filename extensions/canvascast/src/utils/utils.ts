@@ -1,22 +1,30 @@
-import { Icon, Color } from "@raycast/api";
+import { Icon, Color, LocalStorage } from "@raycast/api";
+import { NodeHtmlMarkdown } from "node-html-markdown";
+import { course } from "./types";
 
 export const Colors = [Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Blue, Color.Purple];
 
 export const Icons = {
   Announcement: Icon.Megaphone,
-  Assignment: "../assets/assignment.png",
+  // Assignment: "../assets/assignment.png",
+  Assignment: Icon.Clipboard,
   Code: Icon.Code,
   Course: "../assets/books-stack.png",
   ExternalUrl: Icon.Link,
   File: Icon.Document,
   Home: Icon.House,
-  HomePage: "../assets/home-page.png",
-  InvalidAPIKey: "../assets/invalid-api-key.png",
-  InvalidDomain: "../assets/invalid-domain.png",
+  HomePage: "../assets/home-page.svg",
+  InvalidAPIKey: "../assets/invalid-api-key.svg",
+  InvalidDomain: "../assets/invalid-domain.svg",
   Modules: Icon.BulletPoints,
   Page: "../assets/page.png",
   Passcode: Icon.LockUnlocked,
-  Quiz: "../assets/quiz.png",
+  // Quiz: "../assets/quiz.png",
+  Quiz: Icon.Rocket,
+  ToDo: Icon.Tray,
+  Completed: Icon.Checkmark,
+  Missing: Icon.Warning,
+  OpenGoogleCopyLink: Icon.SaveDocument,
 };
 
 export enum Error {
@@ -88,4 +96,44 @@ export const formatModuleItemTitle = (title: string) => {
 
 export const formatModuleItemPasscode = (passcode: string) => {
   return passcode.match(/Passcode: \S{9,10}/g)?.[0].substring(10);
+};
+
+export const getFormattedDate = (date: string | Date | number) => {
+  return new Date(date).toString().split(" ").slice(0, 4).join(" ");
+};
+
+export const getFormattedFriendlyDate = (date: string | Date | number) => {
+  return new Date(date).toLocaleDateString("en-us", { weekday: "long", month: "long", day: "numeric" });
+};
+
+export const getFormattedTime = (date: string | Date | number) => {
+  return new Date(date).toLocaleTimeString([], { timeStyle: "short" });
+};
+
+export const convertHTMLToMD = (html: string) => {
+  if (html) {
+    html = NodeHtmlMarkdown.translate(html);
+  }
+  return html;
+};
+
+export const getCourseColors = async (courses: course[]) => {
+  const ids = courses.map((course) => course.id);
+  const colors = {};
+
+  for (let i = 0; i < ids.length; i++) {
+    colors[ids[i]] = Colors[i % Colors.length];
+  }
+
+  try {
+    const cache = JSON.parse((await LocalStorage.getItem("colors")) as string);
+
+    for (const item in cache) {
+      colors[item] = cache[item];
+    }
+  } catch (err) {
+    ("This block isn't empty anymore ESLint");
+  }
+
+  return colors;
 };

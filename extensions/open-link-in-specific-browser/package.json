@@ -21,9 +21,9 @@
         {
           "name": "layout",
           "type": "dropdown",
-          "description": "Set the layout of the surfboard items.",
+          "description": "Set the layout of the app items.",
           "required": true,
-          "title": "Surfboard Layout",
+          "title": "App Layout",
           "default": "Grid",
           "data": [
             {
@@ -37,33 +37,53 @@
           ]
         },
         {
-          "name": "itemSize",
+          "name": "columns",
           "type": "dropdown",
-          "description": "Set the size of the surfboard items. (Only works with Grid layout)",
+          "description": "Set the number of columns of the app items. (Only works with Grid layout)",
           "required": false,
-          "title": "Surfboard Item Size",
-          "default": "small",
+          "title": "App Item Coloums",
+          "default": "8",
           "data": [
             {
-              "title": "Small",
-              "value": "small"
+              "title": "1",
+              "value": "1"
             },
             {
-              "title": "Medium",
-              "value": "medium"
+              "title": "2",
+              "value": "2"
             },
             {
-              "title": "Large",
-              "value": "large"
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
             }
           ]
         },
         {
           "name": "itemInset",
           "type": "dropdown",
-          "description": "Set the inset of the surfboard items. (Only works with Grid layout)",
+          "description": "Set the inset of the app items. (Only works with Grid layout)",
           "required": false,
-          "title": "Surfboard Item Inset",
+          "title": "App Item Inset",
           "default": "sm",
           "data": [
             {
@@ -88,7 +108,68 @@
           "name": "surfEngine",
           "type": "dropdown",
           "required": false,
-          "title": "Surf Engine",
+          "title": "Search Engine",
+          "description": "Search Engine for SelectedText (default: Google).",
+          "default": "Google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "Google"
+            },
+            {
+              "title": "Bing",
+              "value": "Bing"
+            },
+            {
+              "title": "Baidu",
+              "value": "Baidu"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "DuckDuckGo"
+            }
+          ]
+        },
+        {
+          "name": "sortBy",
+          "type": "dropdown",
+          "required": false,
+          "title": "Sort by",
+          "description": "Surfboard sorting method (default: Rank).",
+          "default": "Rank",
+          "data": [
+            {
+              "title": "Rank",
+              "value": "Rank"
+            },
+            {
+              "title": "Name ↑",
+              "value": "Name+"
+            },
+            {
+              "title": "Name ↓",
+              "value": "Name-"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "open-link-in-specific-browser-menu-bar",
+      "title": "Open Link in Specific Browser",
+      "icon": "open-link-menu-bar.png",
+      "description": "Open link or search text in specific browsers, email clients, App Store or others.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "surfEngine",
+          "type": "dropdown",
+          "required": false,
+          "title": "Search Engine",
           "description": "Search Engine for SelectedText (default: Google).",
           "default": "Google",
           "data": [
@@ -140,7 +221,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0"
+    "@raycast/api": "^1.41.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

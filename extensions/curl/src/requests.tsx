@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   confirmAlert,
   Icon,
   List,
@@ -13,11 +14,13 @@ import {
 } from "@raycast/api";
 import axios from "axios";
 import ResultView from "./views/Result";
+import RequestDetails from "./views/RequestDetails";
+import { methodColors } from "../utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const curlString = require("curl-string");
 
-interface Values {
+export interface Values {
   key: string;
   value: string;
 }
@@ -28,16 +31,27 @@ interface RequestArg {
 }
 
 export default function Requests() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState("");
   const [requests, setRequests] = useState<Values[]>();
   const { push } = useNavigation();
 
   useEffect(() => {
-    getRequests().then((result) => setRequests(result.filter((req) => req.key.includes(searchText))));
+    getRequests().then((result) => {
+      setRequests(
+        result.filter((req) => {
+          const parsedValue = JSON.parse(req.value);
+          return (
+            req.key.includes(searchText) || parsedValue?.meta?.title.toLowerCase().includes(searchText.toLowerCase())
+          );
+        })
+      );
+      setIsLoading(false);
+    });
 
     async function getRequests() {
       const values = await LocalStorage.allItems();
+
       return Object.entries(values).map((request) => ({ key: request[0], value: request[1] }));
     }
   }, [searchText]);
@@ -48,16 +62,18 @@ export default function Requests() {
     const curlOptions = {
       method: payload.method,
       headers: payload.headers,
-      ...(payload.method !== "GET" && {
-        data: {
-          ...JSON.parse(payload.body.replace("```\n\b\b", "")),
-        },
-      }),
+      ...(payload.method !== "GET" &&
+        payload.method !== "DELETE" && {
+          data: {
+            ...JSON.parse(JSON.stringify(payload.data).replace("```\n\b\b", "")),
+          },
+        }),
     };
 
     const generatedCurl = curlString(request.url, curlOptions);
 
-    axios({ ...payload })
+    const { meta, ...payloadWithoutMeta } = payload;
+    axios({ ...payloadWithoutMeta })
       .then(async (res) => {
         response = res;
         const result = { method: payload.method, response };
@@ -100,11 +116,12 @@ export default function Requests() {
     const curlOptions = {
       method: payload.method,
       headers: payload.headers,
-      ...(payload.method !== "GET" && {
-        data: {
-          ...JSON.parse(payload.body.replace("```\n\b\b", "")),
-        },
-      }),
+      ...(payload.method !== "GET" &&
+        payload.method !== "DELETE" && {
+          data: {
+            ...JSON.parse(JSON.stringify(payload.data).replace("```\n\b\b", "")),
+          },
+        }),
     };
 
     const generatedCurl = curlString(request.url, curlOptions);
@@ -112,42 +129,54 @@ export default function Requests() {
   };
 
   return (
-    <List
-      isLoading={isLoading}
-      enableFiltering={false}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search URL"
-    >
+    <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText} searchBarPlaceholder="Search URL">
       {requests?.map((req: Values) => {
         const value = JSON.parse(req.value);
+        const methodColor = (methodColors as { [index: string]: Color })[value.method];
         return (
           <List.Item
             key={req.key}
-            title={`${value.method} ${req.key}`}
-            accessories={[{ text: "Copy cURL", icon: Icon.CopyClipboard }]}
+            title={value?.meta?.title ? value?.meta?.title : `${value.url}`}
+            accessories={[
+              { text: "Copy cURL", icon: Icon.CopyClipboard },
+              { tag: { color: methodColor, value: value.method } },
+            ]}
+            subtitle={value?.meta?.description ? value?.meta?.description : ""}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy cURL"
-                  content={generateCurl({ url: req.key, payload: req.value })}
-                />
-                <Action
-                  title="Run"
-                  icon={Icon.Rocket}
-                  onAction={() => handleRunRequest({ url: req.key, payload: req.value })}
-                />
-                <Action
-                  title="Delete From History"
-                  icon={Icon.Trash}
-                  onAction={() => handleDeleteItem(req.key)}
-                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
-                />
-                <Action
-                  title="Delete All History"
-                  icon={Icon.Trash}
-                  onAction={handleDeleteAll}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
-                />
+                <ActionPanel.Section title="Actions">
+                  <Action.CopyToClipboard
+                    title="Copy cURL"
+                    content={generateCurl({ url: req.key, payload: req.value })}
+                  />
+                  <Action
+                    title="Run"
+                    icon={Icon.Rocket}
+                    onAction={() => handleRunRequest({ url: req.key, payload: req.value })}
+                  />
+                  <Action.Push
+                    title="Add Metadata"
+                    target={<RequestDetails req={req} />}
+                    icon={Icon.AppWindowList}
+                    shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Delete">
+                  <Action
+                    title="Delete From History"
+                    icon={Icon.Trash}
+                    onAction={() => handleDeleteItem(req.key)}
+                    shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                    style={Action.Style.Destructive}
+                  />
+                  <Action
+                    title="Delete All History"
+                    icon={Icon.Trash}
+                    onAction={handleDeleteAll}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
+                    style={Action.Style.Destructive}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

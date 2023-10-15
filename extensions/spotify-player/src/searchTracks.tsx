@@ -1,11 +1,11 @@
 import { List, showToast, Toast } from "@raycast/api";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { SpotifyProvider } from "./utils/context";
 import TrackListItem from "./components/TrackListItem";
 import { useTrackSearch } from "./spotify/client";
-import { isSpotifyInstalled } from "./utils";
 
-export default function SearchTracks() {
+function SearchTracks() {
   const [searchText, setSearchText] = useState<string>();
   const response = useTrackSearch(searchText);
 
@@ -28,17 +28,6 @@ export function TracksList(props: {
   searchCallback?: (text: string) => void;
   includeDetails?: boolean;
 }) {
-  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean>(false);
-  useEffect(() => {
-    async function checkForSpotify() {
-      const spotifyIsInstalled = await isSpotifyInstalled();
-
-      setSpotifyInstalled(spotifyIsInstalled);
-    }
-
-    checkForSpotify();
-  }, []);
-
   return (
     <List
       navigationTitle="Search Tracks"
@@ -51,9 +40,13 @@ export function TracksList(props: {
       {props.tracks &&
         props.tracks
           .sort((t) => t.popularity)
-          .map((t: SpotifyApi.TrackObjectFull) => (
-            <TrackListItem key={t.id} track={t} album={t.album} spotifyInstalled={spotifyInstalled} />
-          ))}
+          .map((t: SpotifyApi.TrackObjectFull) => <TrackListItem key={t.id} track={t} album={t.album} />)}
     </List>
   );
 }
+
+export default () => (
+  <SpotifyProvider>
+    <SearchTracks />
+  </SpotifyProvider>
+);

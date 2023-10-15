@@ -3,7 +3,8 @@ import OSS from "ali-oss";
 import path from "node:path";
 import fsSync from "node:fs/promises";
 import fs from "node:fs";
-import { ACL, AudioExts, CodeExts, FileType, ImgExts, MdExt, PlainTextExts, VideoExts } from "./const";
+import crypto from "node:crypto";
+import { ACL, AudioExts, CodeExts, FileType, ImgExts, MdExt, PlainTextExts, RenameType, VideoExts } from "./const";
 import { homedir } from "os";
 import got from "got";
 
@@ -98,12 +99,46 @@ export async function renameObject(source: string, newName: string) {
   await ossClient.delete(source);
 }
 
-export async function uploadObject(filePath: string, targetFolder: string) {
+export async function uploadObject(filePath: string, targetFolder: string): Promise<string> {
   if (!targetFolder.endsWith("/")) {
     targetFolder += "/";
   }
-  const ossPath = `${targetFolder}${path.basename(filePath)}`;
+  const preferences: IPreferences = getPreferenceValues<IPreferences>();
+  let name;
+  switch (preferences.renameFileAs) {
+    case RenameType.Original:
+      name = path.basename(filePath);
+      break;
+    case RenameType.WithDate:
+      name = nameWithDate(filePath);
+      break;
+    case RenameType.MD5:
+      name = nameByMD5(filePath);
+      break;
+    default:
+      name = path.basename(filePath);
+      break;
+  }
+  const ossPath = `${targetFolder}${name}`;
   await ossClient.put(ossPath, path.normalize(filePath));
+  return ossPath;
+}
+
+function nameWithDate(filePath: string): string {
+  const original = path.basename(filePath);
+  const date = new Date();
+  const ext = path.extname(filePath);
+  const year = date.getFullYear();
+  const month = date.getMonth() >= 9 ? date.getMonth() + 1 : `0${date.getMonth() + 1}`;
+  const dat = date.getDate() >= 10 ? date.getDate() : `0${date.getDate()}`;
+  const name = `${original.substring(0, original.lastIndexOf(ext))}_${year}-${month}-${dat}${ext}`;
+  return name;
+}
+
+function nameByMD5(filePath: string): string {
+  const content = fs.readFileSync(filePath);
+  const md5 = crypto.createHash("md5");
+  return `${md5.update(content).digest("hex")}${path.extname(filePath)}`;
 }
 
 export async function createFolder(name: string, targetFolder: string) {
@@ -216,18 +251,18 @@ export function filterBookmark(key: string): boolean {
   return key.indexOf(`${currentBucket}_`) === 0;
 }
 
-export async function getObjUrl(file: IObject): Promise<IObjectURLAndACL> {
-  const objACL = await ossClient.getACL(file.name);
+export async function getObjUrl(ossKey: string): Promise<IObjectURLAndACL> {
+  const objACL = await ossClient.getACL(ossKey);
   let bucketACL = "";
   if (objACL.acl == ACL.Private) {
-    return { url: ossClient.signatureUrl(file.name), acl: objACL.acl };
+    return { url: ossClient.signatureUrl(ossKey), acl: objACL.acl };
   }
   if (`${objACL.acl}` == ACL.Default) {
     const bACL = await ossClient.getBucketACL(currentBucket);
     bucketACL = bACL.acl;
     if (bucketACL == ACL.Private) {
-      return { url: ossClient.signatureUrl(file.name), acl: objACL.acl, bucketAcl: bucketACL };
+      return { url: ossClient.signatureUrl(ossKey), acl: objACL.acl, bucketAcl: bucketACL };
     }
   }
-  return { url: file.url, acl: objACL.acl, bucketAcl: bucketACL };
+  return { url: ossClient.generateObjectUrl(ossKey), acl: objACL.acl, bucketAcl: bucketACL };
 }

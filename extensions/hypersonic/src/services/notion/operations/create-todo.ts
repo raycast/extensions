@@ -1,52 +1,67 @@
-import { CreatePageParameters } from '@notionhq/client/build/src/api-endpoints'
-import { loadDatabase } from '@/services/storage'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
-import { TodoPage } from '@/types/todo-page'
-import { isNotionClientError } from '@notionhq/client'
-import { getPreferenceValues, showToast, Toast } from '@raycast/api'
+import { loadPreferences } from '@/services/storage'
+import { normalizeTodo } from '../utils/normalize-todo'
 
-export async function createTodo(props: any): Promise<Todo> {
-  try {
-    const database = await loadDatabase()
-    const preferences = getPreferenceValues()
+export async function createTodo(
+  todo: Todo,
+  databaseId: string
+): Promise<Todo> {
+  const notionClient = await notion()
+  const preferences = await loadPreferences()
 
-    const arg: CreatePageParameters = {
-      parent: { database_id: database.databaseId },
-      properties: {
-        [preferences.property_title]: {
-          title: [
-            {
-              text: {
-                content: props.title,
-              },
+  const data = await notionClient.pages.create({
+    parent: { database_id: databaseId },
+    properties: {
+      [preferences.properties.title]: {
+        title: [
+          {
+            text: {
+              content: todo.title,
             },
-          ],
-        },
-        [preferences.property_label]: {
-          select: props.tagId ? { id: props.tagId } : null,
-        },
-        [preferences.property_date]: {
-          date: props.date
-            ? {
-                start: props.date,
-              }
-            : { start: new Date().toISOString().split('T')[0] },
-        },
+          },
+        ],
       },
-    }
+      [preferences.properties.date]: {
+        date: todo?.dateValue ? { start: todo.dateValue } : null,
+      },
+      ...(preferences.properties.tag
+        ? {
+            [preferences.properties.tag]: {
+              select: todo?.tag?.id ? { id: todo?.tag?.id } : null,
+            },
+          }
+        : {}),
+      ...(preferences.properties.project
+        ? {
+            [preferences.properties.project]: {
+              relation: todo?.projectId ? [{ id: todo.projectId }] : [],
+            },
+          }
+        : {}),
+      ...(preferences.properties.assignee
+        ? {
+            [preferences.properties.assignee]: {
+              people: todo?.user?.id ? [{ id: todo?.user?.id }] : [],
+            },
+          }
+        : {}),
 
-    const notionClient = await notion()
-    const page = await notionClient.pages.create(arg)
+      ...(preferences.properties.url
+        ? {
+            [preferences.properties.url]: {
+              url: todo?.contentUrl ? todo.contentUrl : null,
+            },
+          }
+        : {}),
+    },
+  })
 
-    return mapPageToTodo(page as TodoPage)
-  } catch (err: any) {
-    if (isNotionClientError(err)) {
-      showToast(Toast.Style.Failure, err.message)
-    } else {
-      showToast(Toast.Style.Failure, 'Error occurred')
-    }
-    throw new Error(err.message)
-  }
+  const normalizedTodo = normalizeTodo({
+    page: data,
+    preferences: preferences.properties,
+    inProgressId: preferences.properties.status.inProgressId,
+  })
+
+  return normalizedTodo
 }

@@ -1,4 +1,4 @@
-import { closeMainWindow, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import wifi, { WiFiNetwork } from "node-wifi";
 import Style = Toast.Style;
 import { Dispatch, SetStateAction } from "react";
@@ -75,4 +75,8 @@ export const uniqueWifiNetWork = (arr: WiFiNetwork[]) => {
   }
   const res = new Map();
   return arr.filter((item) => !res.has(item.ssid) && res.set(item.ssid, 1));
+};
+
+export const getSignalIcon = (quality: number) => {
+  return quality < 40 ? Icon.Signal1 : quality < 70 ? Icon.Signal2 : quality < 90 ? Icon.Signal3 : Icon.FullSignal;
 };

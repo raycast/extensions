@@ -4,6 +4,7 @@ import { Duration } from "luxon";
 
 import { Sourcegraph } from "../sourcegraph";
 import { PatternType, performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
+import { SearchHistory } from "../searchHistory";
 
 import ExpandableToast from "../components/ExpandableToast";
 
@@ -78,6 +79,9 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
 
+      // Update search history
+      await SearchHistory.addSearch(src, searchText);
+
       // Do the search
       await performSearch(cancelRef.current.signal, src, searchText, pattern, {
         onResults: (results) => {
@@ -104,8 +108,10 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
         },
         onAlert: (alert) => {
           const toast = ExpandableToast(push, "Alert", alert.title, alert.description || "");
-          if (alert.kind === "lucky-search-queries") {
-            toast.style = Toast.Style.Success;
+          switch (alert.kind) {
+            case "smart-search-additional-results":
+            case "smart-search-pure-results":
+              toast.style = Toast.Style.Success;
           }
           toast.show();
         },
