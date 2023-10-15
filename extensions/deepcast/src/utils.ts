@@ -61,12 +61,12 @@ export async function sendTranslateRequest({
   text: initialText,
   sourceLanguage,
   targetLanguage,
-  onTranslateAction
+  onTranslateAction,
 }: {
   text?: string;
   sourceLanguage?: SourceLanguage;
-    targetLanguage: TargetLanguage;
-    onTranslateAction?: (typeof Preferences.onTranslateAction) | "none";
+  targetLanguage: TargetLanguage;
+  onTranslateAction?: typeof Preferences.onTranslateAction | "none";
 }) {
   try {
     const prefs = getPreferenceValues<Preferences>();
@@ -109,6 +109,7 @@ export async function sendTranslateRequest({
         case "paste":
           await closeMainWindow();
           await Clipboard.paste(translation);
+          break;
         default:
           toast.hide();
           break;
