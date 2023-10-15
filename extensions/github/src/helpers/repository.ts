@@ -50,10 +50,10 @@ const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
 const VISITED_REPOSITORIES_LENGTH = 25;
 
 export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
-  const { application, baseClonePath } = getPreferenceValues<Preferences>();
-  const applicationPath = application?.path || "/Applications/Visual Studio Code.app";
-  const clonePath = `${baseClonePath || "~/GitHub"}/${repository.nameWithOwner}`;
-  const openCommand = `open -a ${applicationPath.replaceAll(" ", "\\ ")} ${clonePath}`;
+  const { application, baseClonePath } = getPreferenceValues<Preferences.SearchRepositories>();
+  const applicationPath = application.path.replaceAll(" ", "\\ ");
+  const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
+  const openCommand = `open -a ${applicationPath} ${clonePath}`;
 
   const toast = await showToast({
     title: `Opening ${repository.nameWithOwner}`,
