@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Fix] - 2023-10-15
+
+- Fix possible crashes
+
 ## [Fixed unicode chars in title] - 2023-09-21
 
 - Fixed an error with unicode chars in titles
