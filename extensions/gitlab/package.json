@@ -366,6 +366,7 @@
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
     "javascript-time-ago": "^2.3.10",
+    "node-fetch": "2.5",
     "open": "^8.2.1",
     "url-join": "^4.0.1",
     "use-interval": "^1.4.0"
@@ -374,6 +375,7 @@
     "@raycast/eslint-config": "^1.0.5",
     "@types/node": "^18.8.3",
     "@types/node-emoji": "^1.8.1",
+    "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
     "@types/url-join": "^4.0.1",
     "eslint": "^7.31.0",
