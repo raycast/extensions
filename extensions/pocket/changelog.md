@@ -1,6 +1,6 @@
 # Pocket Changelog
 
-## [UX, Performance & Commands] - 2022-09-05
+## [UX, Performance & Commands] - 2023-10-15
 - Cache results for faster search
 - Use native Pocket search to avoid rate-limits
 - Add `Menu Bookmarks` command for quick access to the latest bookmarks
