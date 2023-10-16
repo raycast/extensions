@@ -3,7 +3,7 @@
   "name": "markdown-tools",
   "title": "markdown-tools",
   "description": "A Raycast Extension that helps with formatting text to markdown",
-  "icon": "assMarkdownTable.png",
+  "icon": "MarkdownTable.png",
   "author": "uxkjaer",
   "categories": [
     "Developer Tools",
