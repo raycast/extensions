@@ -21,10 +21,10 @@ export async function toggleSystemAudioInputLevel(currentAudioInputLevel: number
   execFileSync(scriptPath, ["set", newLevel.toString()]);
 
   if (newLevel == 0) {
-    toast.title = "Mic muted";
+    toast.title = "Audio input muted";
     toast.style = Toast.Style.Failure;
   } else {
-    toast.title = "Mic unmuted";
+    toast.title = "Audio input unmuted";
     toast.style = Toast.Style.Success;
   }
 
