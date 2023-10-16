@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "TabNews",
+      "title": "Read TabNews",
       "description": "Get the coolest TabNews content",
       "mode": "view"
     }
