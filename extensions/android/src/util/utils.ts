@@ -1,7 +1,9 @@
 import { getApplications, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
-const { spawn } = require("child_process");
-const { exec } = require("child_process");
+import { spawn } from "child_process";
+import { exec } from "child_process";
+import expandTilde from "expand-tilde";
+import path from "path";
 
 export async function isAndroidStudioInstalled() {
   return (await getApplications()).find((app) => {
@@ -13,15 +15,14 @@ export async function listDirectories(folder: string) {
   return fs.promises.readdir(folder, { withFileTypes: true });
 }
 
-export function emulatorPath(): string {
-  return `${androidSDK()}/emulator/emulator`;
-}
+export const emulatorPath = `${androidSDK()}/emulator/emulator`;
 
 export function androidSDK() {
-  const expandTilde = require("expand-tilde");
   const sdk = getPreferenceValues().androidSDK;
   return sdk.replace("~", expandTilde("~"));
 }
+
+export const adbPath = path.join(androidSDK(), "platform-tools", "adb");
 
 export function isValidDirectory(path: string) {
   try {
@@ -45,18 +46,41 @@ export function hasReadPermission(path: string) {
 
 export function runCommand(
   cmd: string,
-  output: (out: string) => void,
-  error: (error: string) => void
+  output: ((out: string) => void) | undefined,
+  error: ((error: string) => void) | undefined
 ) {
   const childProcess = spawn(cmd, [], { shell: true });
 
   childProcess.stdout.on("data", function (data: string) {
-    output(data.toString());
+    if (output) {
+      output(data.toString());
+    }
     console.log("stdout: " + data);
   });
 
   childProcess.stderr.on("data", function (data: string) {
     console.log("stderr: " + data);
-    error(data.toString());
+    if (error) {
+      error(data.toString());
+    }
   });
+}
+
+export async function executeAsync(cmd: string): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    exec(cmd, (err: any, stdout: string) => {
+      if (err != null) {
+        reject(err);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+export async function setTmeoutAsync(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+export function isNumber(value?: string | number): boolean {
+  return value != null && value !== "" && !isNaN(Number(value.toString()));
 }
