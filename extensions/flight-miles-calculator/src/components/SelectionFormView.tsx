@@ -33,7 +33,12 @@ export const SelectionFormView = () => {
 
             <Form.Separator />
 
-            <Form.Dropdown id="miles" title="Miles Percentage" defaultValue="1">
+            <Form.Dropdown
+                id="miles"
+                title="Miles Percentage"
+                info="Percentage of miles earned depending on the airline and selected fare class."
+                defaultValue="1"
+            >
                 {milesValues.map((value) => (
                     <Form.Dropdown.Item key={value} value={value.toString()} title={`${value * 100}%`} />
                 ))}
