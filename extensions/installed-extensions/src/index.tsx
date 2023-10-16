@@ -31,7 +31,7 @@ export default function IndexCommand() {
   const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([]);
   const { isLoading, data } = useCachedPromise(async () => {
     const { stdout, stderr } = await exec(
-      `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.title)"' {} \\;`,
+      `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.owner) \\(.title)"' {} \\;`,
     );
 
     if (stderr) {
@@ -47,10 +47,10 @@ export default function IndexCommand() {
     }
 
     let result = stdout.split("\n").map((item) => {
-      const [path, author, icon, commands, name, ...titleParts] = item.trim().split(" ");
+      const [path, author, icon, commands, name, owner, ...titleParts] = item.trim().split(" ");
       const title = titleParts.join(" ");
       const cleanedPath = path.replace("/package.json:", "");
-      const link = `https://raycast.com/${author}/${name}`;
+      const link = `https://raycast.com/${owner == "null" ? author : owner}/${name}`;
 
       return {
         path: cleanedPath,
@@ -58,8 +58,10 @@ export default function IndexCommand() {
         author,
         icon,
         commands,
+        owner,
         title,
         link,
+        isOrganization: owner !== "null",
         isLocalExtension: !!cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
       };
     });
@@ -121,7 +123,12 @@ export default function IndexCommand() {
               });
             }
 
-            accessories.push({ tag: item.author, icon: Icon.Person, tooltip: "Author" });
+            if (item.isOrganization) {
+              accessories.push({ tag: item.owner, icon: Icon.Crown, tooltip: "Organization" });
+            } else {
+              accessories.push({ tag: item.author, icon: Icon.Person, tooltip: "Author" });
+            }
+
             accessories.push({ tag: `${item.commands}`, icon: Icon.ComputerChip, tooltip: "Commands" });
 
             return (

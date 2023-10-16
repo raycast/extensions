@@ -14,7 +14,7 @@ export function formatItem(item: dataType, format: string) {
 
 export function formatOutput(installedExtensions: dataType[], format: string, separator: string, prepend: string) {
   const joinChar = separator === "newline" ? "\n" : ", ";
-  const prependText = prepend.length ? "" : `${prepend}\n`;
+  const prependText = prepend.length ? `${prepend}\n` : "";
 
   return `${prependText.replaceAll("{count}", installedExtensions.length.toString())}${installedExtensions
     .map((item) => {

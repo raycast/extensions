@@ -5,8 +5,10 @@ export type dataType = {
   icon: string;
   title: string;
   author: string;
+  owner: string;
   commands: string;
   isLocalExtension: boolean;
+  isOrganization: boolean;
   link: string;
 };
 
