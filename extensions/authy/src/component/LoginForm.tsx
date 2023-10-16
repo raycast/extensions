@@ -142,16 +142,8 @@ export default function LoginForm(props: { setLogin: (step: boolean) => void }) 
       markdown={`${message}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Checkmark}
-            title="Agree"
-            onSubmit={() => checkForApproval(props.setLogin)}
-          />
-          <Action
-            icon={Icon.ExclamationMark}
-            title={"Start From Scratch"}
-            onAction={resetRegistration}
-          />
+          <Action.SubmitForm icon={Icon.Checkmark} title="Agree" onSubmit={() => checkForApproval(props.setLogin)} />
+          <Action icon={Icon.ExclamationMark} title={"Start From Scratch"} onAction={resetRegistration} />
         </ActionPanel>
       }
     />
