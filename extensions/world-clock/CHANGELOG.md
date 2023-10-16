@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Update Memo Icon] - {PR_MERGE_DATE}
+## [Update Memo Icon] - 2023-10-16
 
 - Now the Grid view will show the memo icon
 
