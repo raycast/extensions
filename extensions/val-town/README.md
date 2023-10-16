@@ -2,6 +2,8 @@
 
 View and run Vals from Raycast.
 
+https://www.val.town
+
 ## Features
 
 - View all your Vals
