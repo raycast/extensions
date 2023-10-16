@@ -1,5 +1,8 @@
 # Deepcast Changelog
 
+## [Default Target Language] - 2023-10-16
+- Added preferences to set the default target language
+
 ## [More Input/Output Options] - 2023-10-05
 
 - Added preferences to prefer clipboard or selected text over the other as input
