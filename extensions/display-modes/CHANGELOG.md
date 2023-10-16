@@ -1,3 +1,3 @@
 # Display Modes Changelog
 
-## [Initial Version] - 2023-09-24
+## [Initial Version] - 2023-10-16
