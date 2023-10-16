@@ -7,4 +7,5 @@
 - Added Emit Text
 - Added Power Control (Batter Percentage and Charging State)
 - Added Network Speed Control
+
 ## [Initial Version] - 2022-08-29
