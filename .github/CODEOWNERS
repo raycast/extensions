@@ -398,7 +398,7 @@
 /extensions/goodreads                                @shettypuneeth
 /extensions/google-books                             @Ali-Parandeh
 /extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta
-/extensions/google-chrome-profiles                   @frouo
+/extensions/google-chrome-profiles                   @frouo @erics118
 /extensions/google-cloud-platform-search             @klaa97
 /extensions/google-drive                             @vishaltelangre @nametake @daniel-stoneuk
 /extensions/google-fonts                             @GastroGeek
@@ -846,6 +846,7 @@
 /extensions/raycast-ollama                           @MassimilianoPasquini97
 /extensions/raycast-svg64                            @EvanZhouDev
 /extensions/raycast-translate-ge                     @giokaxo
+/extensions/raycast-urbandictionary-word-of-the-day  @r0hin @pernielsentikaer
 /extensions/raycast-wallpaper                        @koinzhang
 /extensions/raycast-wca                              @EvanZhouDev @Visual-Studio-Coder
 /extensions/raycast-wemo                             @IAmNatch
