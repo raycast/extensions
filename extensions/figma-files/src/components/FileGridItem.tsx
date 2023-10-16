@@ -14,8 +14,9 @@ export default function FileGridItem(props: {
   starredFiles: File[];
   starredFilesCount: number;
   onVisit: (file: File) => void;
+  searchkeywords?: string;
 }) {
-  const { file, extraKey, desktopApp, onVisit, revalidate } = props;
+  const { file, extraKey, desktopApp, onVisit, revalidate, searchkeywords } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
   const isStarred = props.starredFiles.some((item) => item.name === file.name);
 
@@ -27,6 +28,7 @@ export default function FileGridItem(props: {
     <Grid.Item
       id={fileIdentifier}
       title={file.name}
+      keywords={[searchkeywords ?? ""]}
       content={{ tooltip: file.name, value: file.thumbnail_url ?? "Missing thumbnail" }}
       accessory={file.branches && accessory}
       actions={

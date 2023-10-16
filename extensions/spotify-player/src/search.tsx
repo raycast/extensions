@@ -1,5 +1,5 @@
 import { useState, useEffect, ComponentProps } from "react";
-import { Action, ActionPanel, Grid, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, LaunchProps, List, LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useSearch } from "./hooks/useSearch";
 import { View } from "./components/View";
@@ -23,13 +23,14 @@ const filters = {
 
 type FilterValue = keyof typeof filters;
 
-function SearchCommand() {
+function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
   const {
     data: recentSearchesData,
     isLoading: recentSearchIsLoading,
     revalidate: recentSearchRevalidate,
   } = useCachedPromise(() => LocalStorage.getItem<string>("recent-searches"));
-  const [searchText, setSearchText] = useState("");
+
+  const [searchText, setSearchText] = useState(initialSearchText || "");
   const [searchFilter, setSearchFilter] = useState<FilterValue>("all");
   const { searchData, searchIsLoading } = useSearch({
     query: searchText,
@@ -153,10 +154,10 @@ function SearchCommand() {
   );
 }
 
-export default function Command() {
+export default function Command({ launchContext }: LaunchProps<{ launchContext: { query: string } }>) {
   return (
     <View>
-      <SearchCommand />
+      <SearchCommand initialSearchText={launchContext?.query} />
     </View>
   );
 }

@@ -10,7 +10,7 @@
   ],
   "author": "koinzhang",
   "contributors": [
-    "loishy"
+    "louishuyng"
   ],
   "categories": [
     "System"
@@ -30,10 +30,44 @@
       "subtitle": "Wi-Fi",
       "description": "Toggle Wi-Fi on and off.",
       "mode": "no-view"
+    },
+    {
+      "name": "wi-fi-signal",
+      "title": "Wi-Fi Signal",
+      "subtitle": "Wi-Fi",
+      "description": "Show wifi signal strength in menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "showColorfulSignal",
+          "type": "checkbox",
+          "label": "Show Colorful Signal",
+          "required": false,
+          "default": true,
+          "description": "Show colorful signal in menu bar"
+        },
+        {
+          "name": "showWifiName",
+          "type": "checkbox",
+          "label": "Show Wi-Fi Name",
+          "required": false,
+          "default": false,
+          "description": "Show wifi name in menu bar"
+        },
+        {
+          "name": "showQualityNumber",
+          "type": "checkbox",
+          "label": "Show Quality Number",
+          "required": false,
+          "default": true,
+          "description": "Show quality number in menu bar"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.3",
+    "@raycast/api": "^1.59.0",
     "node-wifi": "^2.0.16",
     "shell-env": "^4.0.1"
   },

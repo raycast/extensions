@@ -1,6 +1,9 @@
 # CommerceQuest.space Changelog
 
-## [Filter Searchresults by Type] - 2023-09-23
+## [Group Search-results by date] - 2023-09-24
+- Search-results are now grouped by `today`, `yesterday`, `last week` and `older`
+
+## [Filter Search-results by Type] - 2023-09-23
 - Added a Dropdown to filter Search-results by Type  
 
 ## [Detail View] - 2023-09-18

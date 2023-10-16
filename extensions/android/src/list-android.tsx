@@ -14,8 +14,7 @@ import {
   isValidDirectory,
   listDirectories,
   runCommand,
-} from "./Utils";
-const { exec } = require("child_process");
+} from "./util/utils";
 
 export default function Command() {
   const [items, setItems] = useState<string[]>(() => []);
