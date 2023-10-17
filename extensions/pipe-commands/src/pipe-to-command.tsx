@@ -107,8 +107,8 @@ async function getInput(inputType: InputType) {
       } catch (e: any) {
         const selectionErrors = [
           "Unable to get selected text from frontmost application",
-          "Cannot copy selected text from frontmost application."
-        ]
+          "Cannot copy selected text from frontmost application.",
+        ];
 
         // if there was an error copying text, let's pull from clipboard instead
         // most likely no text was selected!
