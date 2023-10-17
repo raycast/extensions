@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api"
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api"
 import { milesValues } from "../ressources/milesValues"
 import { AirportDropDownView } from "./AirportDropDownView"
 import { ResultView } from "./ResultView"
@@ -24,7 +24,7 @@ export const SelectionFormView = () => {
         <Form
             actions={
                 <ActionPanel>
-                    <Action.SubmitForm onSubmit={handleFormSubmit} />
+                    <Action.SubmitForm icon={Icon.Airplane} onSubmit={handleFormSubmit} />
                 </ActionPanel>
             }
         >
