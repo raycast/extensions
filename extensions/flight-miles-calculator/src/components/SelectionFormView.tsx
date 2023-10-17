@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api"
+import { showFailureToast } from "@raycast/utils"
 import { milesValues } from "../ressources/milesValues"
 import { AirportDropDownView } from "./AirportDropDownView"
 import { ResultView } from "./ResultView"
@@ -13,6 +14,11 @@ export const SelectionFormView = () => {
     const { push } = useNavigation()
 
     function handleFormSubmit(values: submitValues) {
+        if (values.origin === null || values.destination === null) {
+            showFailureToast("Please select airports")
+            return
+        }
+
         const origin = JSON.parse(values.origin)
         const destination = JSON.parse(values.destination)
         const milesPercentage = parseFloat(values.miles)
@@ -24,7 +30,7 @@ export const SelectionFormView = () => {
         <Form
             actions={
                 <ActionPanel>
-                    <Action.SubmitForm icon={Icon.Airplane} onSubmit={handleFormSubmit} />
+                    <Action.SubmitForm title="Calculate" icon={Icon.Airplane} onSubmit={handleFormSubmit} />
                 </ActionPanel>
             }
         >
