@@ -1,5 +1,9 @@
 # Pipe Commands Changelog
 
+## [Added new pipe commands] - 2023-10-17
+
+- Added new command to convert tab to newline
+
 ## [Added new pipe commands] - 2023-09-07
 
 - Adding extract url from text (extract-urls-from-text)
