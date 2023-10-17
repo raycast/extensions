@@ -6,9 +6,10 @@
   "icon": "command-icon.png",
   "author": "RenderCoder",
   "contributors": [
-    "blekmus"
+    "blekmus",
+    "truls_aagedal"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "categories": [
     "Media",
     "Developer Tools",
