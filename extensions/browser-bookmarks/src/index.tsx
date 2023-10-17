@@ -64,7 +64,7 @@ export default function Command() {
         return [browsers[0].bundleId as string];
       }
 
-      // TODO I don't understand why pulling the default is useful here
+      // We pull the default browser to enable it to eliminate the need for the user to select this on first run
       const defaultBrowser = await getMacOSDefaultBrowser();
       const browsersItem = await LocalStorage.getItem("browsers");
 
