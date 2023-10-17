@@ -1,5 +1,5 @@
-# FFmpeg VideoLoop Converter
+# FFmpeg
 
-Fast media analysis and manipulation a fork of the original FFMPEG RayCast extension.
+Fast media analysis and manipulation using FFmpeg.
 
 ![ffmpeg](./metadata/ffmpeg-1.png)

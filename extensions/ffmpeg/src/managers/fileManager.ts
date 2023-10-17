@@ -164,10 +164,10 @@ class FileManager {
         const extName = path.extname(filePath);
         const basePath = path.dirname(filePath);
         let additionalIndex = 0;
-        let targetFilePath = path.join(basePath, `${baseNameNoExt}.rotate_${rotate}${extName}`);
+        let targetFilePath = path.join(basePath, `${baseNameNoExt}_rotate_${rotate}${extName}`);
         while (fs.existsSync(targetFilePath)) {
           additionalIndex += 1;
-          targetFilePath = path.join(basePath, `${baseNameNoExt}.rotate_${rotate}.${additionalIndex}${extName}`);
+          targetFilePath = path.join(basePath, `${baseNameNoExt}_rotate_${rotate}.${additionalIndex}${extName}`);
         }
 
         let rotateForFFmpeg = "PI";
@@ -203,7 +203,7 @@ class FileManager {
             }
           },
         });
-        this.state$.process.set(1);
+        this.state$.process.set(100);
         showHUD("Rotate file finished!");
       } catch (e) {
         const error = (e as Error).toString();
@@ -215,7 +215,7 @@ class FileManager {
     }
   };
 
-  private makeVideoLoop = async (actionType: ActionType) => {
+    private makeVideoLoop = async (actionType: ActionType) => {
 
     console.log("Starting Making VideoLoop")
     const filePath = this.state$.selectedFilePath.get();
@@ -303,7 +303,6 @@ convert = {
       this.makeVideoLoop(ActionType.convertVideoLoop)
   },
   };
-
 
   modify = {
     rotate: {

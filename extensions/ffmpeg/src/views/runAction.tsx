@@ -15,11 +15,11 @@ interface Option {
 }
 
 const options: { title: string; list: Option[] }[] = [
-  {
+    {
     title: "Convert to VideoLoop",
     list: [
       {
-        icon: Icon.Clipboard,
+        icon: Icon.FilmStrip,
         key: ActionType.convertVideoLoop,
         title: "Convert VideoLoop",
         execute: fileManager.convert.videoloopmp4,

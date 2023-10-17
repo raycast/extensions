@@ -1,12 +1,11 @@
 # FFmpeg Changelog
 
+## [Added conversion option and percentage progress] - 2023-10-17
 
-## [Added a VideoLoop Converter] – 2023–10.17
-
-- Added a videoloop converter. Essentially converting an input file to an .mp4-file intended for GIF-replacement.
-- Changed progress view to percentage rather than a value between 0 and 1.
-- Fixed a problem with spaces in input file name.
-
+- I added a new video file conversion option, called VideoLoop Converter. This uses FFMPEG to create a h.264 .mp4 file without sound, at a bitrate of 4000kbps. This is intended to be used as a replacement for GIFs on certain websites.
+- Changed the progress view so that the feedback is in percentage, rather than a float between 0 and 1.
+- Fixed an issue that prevented processing (rotation/conversion) of files that has spaces in the path.
+- Changed version number to 1.1.0, from 1.0.0
 
 ## [Add support for MKV files] - 2023-09-09
 
@@ -20,5 +19,3 @@
 -  Add capability to display video preview images.
 -  Add functionality to copy file information to the clipboard.
 -  Add enhanced file type filtering accuracy by searching audio and video streams.
-
-
