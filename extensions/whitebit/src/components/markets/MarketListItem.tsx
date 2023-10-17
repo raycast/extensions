@@ -41,7 +41,9 @@ export function MarketListItem({ market, accessories, activity }: Props) {
       accessories={accessories}
       detail={
         <List.Item.Detail
-          markdown={`![Market](https://bff.whitebit.com/v1/canvas/raycast/trade/${market.name}.png?t=${(new Date).getTime()})`}
+          markdown={`![Market](https://bff.whitebit.com/v1/canvas/raycast/trade/${
+            market.name
+          }.png?t=${new Date().getTime()})`}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Volume" text={String(formatNumber(activity?.base_volume))} />

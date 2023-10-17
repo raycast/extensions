@@ -76,27 +76,32 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Transf
   const balanceRequester = new BalanceRequester(httpClient);
 
   useEffect(() => {
-    balanceRequester.main().then((result) => {
-      setMainBalances(result);
+    balanceRequester
+      .main()
+      .then((result) => {
+        setMainBalances(result);
 
-      balanceRequester
-        .trade()
-        .then((result) => {
-          setTradeBalances(result);
+        balanceRequester
+          .trade()
+          .then((result) => {
+            setTradeBalances(result);
 
-          balanceRequester
-            .collateral()
-            .then((result) => {
-              setCollateralBalances(result);
-            })
-            .catch(async (err) => {
-              await showToast(Style.Failure, err.message);
-            });
-        })
-        .catch(async (err) => {
-          await showToast(Style.Failure, err.message);
-        });
-    });
+            balanceRequester
+              .collateral()
+              .then((result) => {
+                setCollateralBalances(result);
+              })
+              .catch(async (err) => {
+                await showToast(Style.Failure, err.message);
+              });
+          })
+          .catch(async (err) => {
+            await showToast(Style.Failure, err.message);
+          });
+      })
+      .catch(async (err) => {
+        await showToast(Style.Failure, err.message);
+      });
   }, []);
 
   useEffect(() => {

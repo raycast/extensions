@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useHttpClient } from "./hooks/use-http-client";
 import { HistoryRequester } from "./api/history";
 import { formatNumber } from "./utils/numbers";
+import Style = Toast.Style;
 
 export default function Command() {
   const httpClient = useHttpClient();
@@ -12,7 +13,12 @@ export default function Command() {
   const [history, setHistory] = useState<Array<HistoryItem>>([]);
 
   useEffect(() => {
-    historyRequester.list().then((result) => setHistory(result.records));
+    historyRequester
+      .list()
+      .then((result) => setHistory(result.records))
+      .catch(async (err) => {
+        await showToast(Style.Failure, err.message);
+      });
   }, []);
 
   function prepareKeywords(historyItem: HistoryItem) {
