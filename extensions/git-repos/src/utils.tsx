@@ -181,7 +181,9 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
 
 async function findSubmodules(path: string): Promise<string[]> {
   const { stdout } = await execp(
-    `grep "\\[submodule"  ${path + "/.gitmodules"} | sed "s%\\[submodule \\"%\${1%/.git}/%g" | sed "s/\\"]//g"`
+    `grep "\\[submodule"  ${
+      path.replace(/(\s+)/g, "\\$1") + "/.gitmodules"
+    } | sed "s%\\[submodule \\"%\${1%/.git}/%g" | sed "s/\\"]//g"`
   );
   const paths = stdout.split("\n").filter((e) => e);
   const submodulePaths = paths.map((subPath) => {
