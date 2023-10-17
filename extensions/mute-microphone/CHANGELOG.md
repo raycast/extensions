@@ -1,6 +1,6 @@
 # Mute microphone Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2023-10-17
 
 - Using a Toast instead of a HUD message
 
