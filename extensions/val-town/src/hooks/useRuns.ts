@@ -10,6 +10,8 @@ type RunsResponse = {
 };
 
 export const useRuns = (valId?: Val["id"]) => {
+  //! Temporarily disable recent runs until API is updated
+  return { isloading: false, vals: undefined, links: undefined };
   const endpoint = valId ? `${API_URL}/vals/${valId}/runs` : `${API_URL}/me/runs`;
   const { isLoading, data, error } = useFetch<RunsResponse>(endpoint, {
     keepPreviousData: true,

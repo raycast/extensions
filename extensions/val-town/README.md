@@ -8,7 +8,6 @@ https://www.val.town
 
 - View all your Vals
 - Search other Vals
-- View recent runs
 - Run a Val
 - Pass in arguments
 - Run arbitrary JS/TS (coming soon)
