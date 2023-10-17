@@ -208,7 +208,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
-      const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type d`;
+      const findCmd = `find -L ${path.replace(/(\s+)/g, "\\$1")} -maxdepth ${maxDepth} -name .git -type d`;
       const { stdout, stderr } = await execp(findCmd);
       if (stderr) {
         showToast(Toast.Style.Failure, "Find Failed", stderr);
