@@ -15,17 +15,29 @@
   "commands": [
     {
       "name": "index",
-      "title": "List View",
+      "title": "Search Material Icons",
       "description": "Search and preview Material Icons",
-      "subtitle": "Material Icons",
       "mode": "view"
-    },
+    }
+  ],
+  "preferences": [
     {
-      "name": "grid",
-      "title": "Grid View",
-      "description": "Search and preview Material Icons",
-      "subtitle": "Material Icons",
-      "mode": "view"
+      "name": "view",
+      "title": "Preferred view",
+      "description": "Select the preferred view",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "grid"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ],
+      "default": "grid",
+      "required": false
     }
   ],
   "dependencies": {

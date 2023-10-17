@@ -25,7 +25,7 @@ interface IconAsset {
   url: string;
 }
 
-export default function Command() {
+export default function GridView() {
   const [materialIconStyle, setMaterialIconStyle] = useCachedState<MaterialIconStyle>(
     "materialIconStyle",
     MaterialIconStyle.Filled
