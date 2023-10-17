@@ -28,7 +28,8 @@ import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
-import { BookmarkFrequency, getBookmarkFrequency } from "./utils/frequency";
+// NOTE frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
+import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
 type Bookmark = {
   id: string;
@@ -37,7 +38,7 @@ type Bookmark = {
   url: string;
   folder: string;
   domain: string;
-  bookmarkFrequency?: BookmarkFrequency;
+  bookmarkFrecency?: BookmarkFrecency;
 };
 
 type Folder = {
@@ -85,7 +86,7 @@ export default function Command() {
     const frecenciesItem = await LocalStorage.getItem("frecencies");
 
     return frecenciesItem
-      ? (JSON.parse(frecenciesItem.toString()) as Record<string, BookmarkFrequency | undefined>)
+      ? (JSON.parse(frecenciesItem.toString()) as Record<string, BookmarkFrecency | undefined>)
       : {};
   });
 
@@ -146,22 +147,22 @@ export default function Command() {
         }
 
         // add domain and frequency to bookmarks
-        return { ...item, domain, bookmarkFrequency: frecencies[item.id] };
+        return { ...item, domain, bookmarkFrecency: frecencies[item.id] };
       })
       .sort((a, b) => {
-        // If a has a Frequency, but b doesn't, a should come first
-        if (a.bookmarkFrequency && !b.bookmarkFrequency) {
+        // If a has a frecency, but b doesn't, a should come first
+        if (a.bookmarkFrecency && !b.bookmarkFrecency) {
           return -1;
         }
 
-        // If b has a Frequency, but a doesn't, b should come first
-        if (!a.bookmarkFrequency && b.bookmarkFrequency) {
+        // If b has a frecency, but a doesn't, b should come first
+        if (!a.bookmarkFrecency && b.bookmarkFrecency) {
           return 1;
         }
 
-        // If both frecencies are defined,put the one with the higher Frequency first
-        if (a.bookmarkFrequency && b.bookmarkFrequency) {
-          return b.bookmarkFrequency.Frequency - a.bookmarkFrequency.Frequency;
+        // If both frecencies are defined,put the one with the higher frecency first
+        if (a.bookmarkFrecency && b.bookmarkFrecency) {
+          return b.bookmarkFrecency.frecency - a.bookmarkFrecency.frecency;
         }
 
         // If both frecencies are undefined, sort by title
@@ -301,21 +302,21 @@ export default function Command() {
     }
   }
 
-  async function updateFrequency(item: { id: string; title: string; url: string; folder: string }) {
-    const Frequency = frecencies[item.id];
+  async function updateFrecency(item: { id: string; title: string; url: string; folder: string }) {
+    const frecency = frecencies[item.id];
 
     await LocalStorage.setItem(
       "frecencies",
       JSON.stringify({
         ...frecencies,
-        [item.id]: getBookmarkFrequency(Frequency),
-      }),
+        [item.id]: getBookmarkFrecency(frecency),
+      })
     );
 
     mutateFrecencies();
   }
 
-  async function removeFrequency(item: { id: string; title: string; url: string; folder: string }) {
+  async function removeFrecency(item: { id: string; title: string; url: string; folder: string }) {
     try {
       delete frecencies[item.id];
       await LocalStorage.setItem("frecencies", JSON.stringify(frecencies));
@@ -387,15 +388,15 @@ export default function Command() {
                   title="Open in Browser"
                   application={browserBundleToName(item.browser)}
                   target={item.url}
-                  onOpen={() => updateFrequency(item)}
+                  onOpen={() => updateFrecency(item)}
                 />
 
-                <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrequency(item)} />
+                <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrecency(item)} />
 
                 <Action
                   title="Reset Ranking"
                   icon={Icon.ArrowCounterClockwise}
-                  onAction={() => removeFrequency(item)}
+                  onAction={() => removeFrecency(item)}
                 />
 
                 <ActionPanel.Section>
