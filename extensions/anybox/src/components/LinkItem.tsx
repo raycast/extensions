@@ -146,13 +146,14 @@ export default function LinkItem(props: Props) {
                   title="Starred"
                   icon={{ source: item.isStarred ? "star.fill.png" : "star.png" }}
                 />
-                {item.collections.length && (
-                  <Detail.Metadata.TagList title="Collections">
-                    {item.collections.map((tag, index) => (
-                      <Detail.Metadata.TagList.Item key={index} text={tag.name} color={tag.color} />
+                {item.tags.length && (
+                  <Detail.Metadata.TagList title="Tags">
+                    {item.tags.map((tag, index) => (
+                      <Detail.Metadata.TagList.Item key={index} text={tag.originalName} color={tag.color} />
                     ))}
                   </Detail.Metadata.TagList>
                 )}
+                {item.folder && <Detail.Metadata.Label title="Folder" text={item.folder?.name} />}
                 {item.comment && <Detail.Metadata.Label title="Comment" text={item.comment} />}
               </Detail.Metadata>
             }

@@ -1,11 +1,7 @@
-import ResultView from "./api/main";
-import { GetPrompt } from "./api/prompt";
-import { getPreferenceValues } from "@raycast/api";
-
-const preferences = getPreferenceValues();
+import { ResultView } from "./api/main";
 
 export default function Command(): JSX.Element {
-  const prompt = GetPrompt(preferences.ollamaCodeExplain, "ollama-code-explain", "");
-
-  return ResultView(preferences.ollamaCodeExplain, prompt.prompt, prompt.tagEnd, true);
+  const systemPrompt =
+    "Act as a developer. Explain the following code block step by step.\n\nOutput only with the commented code.\n";
+  return ResultView("codeexplain", systemPrompt);
 }

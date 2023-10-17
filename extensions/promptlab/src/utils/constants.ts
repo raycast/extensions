@@ -3,13 +3,13 @@ import { Color, Icon } from "@raycast/api";
 /**
  * The base URL for the PromptLab Store API.
  */
-export const STORE_ENDPOINT = "https://v1.slashapi.com/promptlab/google-sheets/LMFCs9cU5Y/sheet1";
+export const STORE_ENDPOINT = "https://v1.slashapi.com/promptlab/google-sheets/Rk5NJmgsBa/sheet1";
 
 /**
  * The API key for the PromptLab Store API.
  * This key only permits reading and writing commands, not deleting or otherwise modifying them.
  */
-export const STORE_KEY = "SCH4kmgzqxxFuCWDWayRV07OqHmLXfxmlMxu0G0Y";
+export const STORE_KEY = "efjOsWeZLz7Z9lV0P9cPI7BaBmsEvpGUkOyyj5M9";
 
 /**
  * The base URL for the PromptLab QuickLinks.

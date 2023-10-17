@@ -1,5 +1,21 @@
 # Anybox Changelog
 
+## [New Commands] - 2023-10-10
+
+- Support folders.
+- Support setting comment on saving.
+
+## [Feature Improvement] - 2023-09-15
+
+- Rename “Collection” to “Tag”.
+- Support nested tags.
+- Update APIs to match Anybox 2.0.
+
+## [Bug Fixes] - 2023-08-31
+
+- Fix “Save and Open in Anybox” not adding comment.
+- Fix error “MISSING API KEY OR INCORRECT API KEY” when searching for links.
+
 ## [Feature Improvement and Bug Fixes] - 2023-08-07
 
 - Show search engines if no links were found.

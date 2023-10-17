@@ -1,7 +1,14 @@
 import { Color, Icon } from "@raycast/api";
 
 export const defaultAdvancedSettings = {
-  settingsVersion: 1.1,
+  /**
+   * The version of the settings. This is used to determine if the settings need to be migrated.
+   */
+  settingsVersion: 1.12,
+
+  /**
+   * Default values for newly created commands.
+   */
   commandDefaults: {
     name: "",
     prompt: "",
@@ -11,16 +18,17 @@ export const defaultAdvancedSettings = {
     useMetadata: false,
     acceptedFileExtensions: "",
     useAudioDetails: false,
-    useSoundClassification: true,
-    useSubjectClassification: true,
+    useSoundClassification: false,
+    useSubjectClassification: false,
     useRectangleDetection: false,
-    useBarcodeDetection: true,
+    useBarcodeDetection: false,
     useFaceDetection: false,
     outputKind: "detail",
     actionScript: "",
     showResponse: true,
     description: "",
-    useSaliencyAnalysis: true,
+    useSaliencyAnalysis: false,
+    useHorizonDetection: false,
     author: "",
     website: "",
     version: "1.0.0",
@@ -34,6 +42,10 @@ export const defaultAdvancedSettings = {
     speakResponse: false,
     showInMenuBar: true,
   },
+
+  /**
+   * Default settings for newly added models.
+   */
   modelDefaults: {
     name: "",
     description: "",
@@ -51,6 +63,10 @@ export const defaultAdvancedSettings = {
     isDefault: false,
     temperature: "1.0",
   },
+
+  /**
+   * Default settings for newly created chats.
+   */
   chatDefaults: {
     icon: Icon.Message,
     iconColor: Color.Red,
@@ -62,12 +78,50 @@ export const defaultAdvancedSettings = {
     useConversationContext: true,
     allowAutonomy: false,
   },
+
+  /**
+   * Settings for the Placeholders System and for specific placeholders.
+   */
   placeholderSettings: {
+    /**
+     * Whether to process placeholders at all.
+     */
     processPlaceholders: true,
+
+    /**
+     * Whether to allow custom placeholders.
+     */
     allowCustomPlaceholders: true,
+
+    /**
+     * Whether to allow custom placeholders sourced from custom paths.
+     */
     allowCustomPlaceholderPaths: true,
+
+    /**
+     * Whether to use the user's shell environment when processing `{{shell:...}}` placeholders.
+     */
     useUserShellEnvironment: true,
   },
+
+  /**
+   * Settings for analyzing selected files.
+   */
+  fileAnalysisSettings: {
+    /**
+     * The number of sample frames to use when analyzing video files.
+     */
+    videoSampleCount: 15,
+
+    /**
+     * Whether to use the preview image when analyzing Keynote files vs. analyzing the image of each slide.
+     */
+    singlePreviewForKeynote: false,
+  },
+
+  /**
+   * Settings for actions throughout the extension.
+   */
   actionSettings: {
     RunCommandAction: {
       enabled: ["search-commands"],

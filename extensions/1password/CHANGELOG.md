@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Concealed copy of the password] - 2023-10-02
+
+- Copying a password will be faster while avoiding being recorded in the Clipboard History.
+
 ## [Raycast window closes after copying (opt-out option)] - 2023-06-06
 
 - NEW: Raycast window now closes itself after copying a username or password (you can turn this off in settings)

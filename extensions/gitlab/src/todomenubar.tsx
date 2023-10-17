@@ -9,9 +9,14 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/menu";
+import { showErrorToast, getErrorMessage } from "./utils";
 
 function launchTodosCommand() {
-  launchCommand({ name: "todos", type: LaunchType.UserInitiated });
+  try {
+    launchCommand({ name: "todos", type: LaunchType.UserInitiated });
+  } catch (error) {
+    showErrorToast(getErrorMessage(error), "Could not open Todos Command");
+  }
 }
 
 function getMaxTodosPreference(): number {

@@ -5,6 +5,9 @@
   "description": "Quickly look up HTTP status codes",
   "icon": "command-icon.png",
   "author": "Alex_",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -14,19 +17,18 @@
       "mode": "view"
     }
   ],
-  "categories": ["Developer Tools", "Data"],
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.30.2"
+    "@raycast/api": "^1.59.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "prettier": "^3.0.3",
     "typescript": "^4.4.3"
   },
   "scripts": {

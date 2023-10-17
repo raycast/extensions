@@ -44,7 +44,7 @@ export default function Requests() {
           return (
             req.key.includes(searchText) || parsedValue?.meta?.title.toLowerCase().includes(searchText.toLowerCase())
           );
-        })
+        }),
       );
       setIsLoading(false);
     });

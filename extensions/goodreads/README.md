@@ -1,3 +1,3 @@
 # Goodreads
 
-Search Books and Authors on Goodreads
+Search books and authors on Goodreads

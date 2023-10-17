@@ -5,6 +5,10 @@
   "description": "Extension to mute/unmute audio input (microphone)",
   "icon": "mute-command-icon.png",
   "author": "Quentin23Soleil",
+  "contributors": [
+    "danulqua",
+    "iamyeizi"
+  ],
   "categories": [
     "Communication",
     "System",
@@ -40,6 +44,9 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "script:run": "cd script && swift run script",
+    "script:build": "cd script && swift build -c release --arch arm64 --arch x86_64 && npm run script:move",
+    "script:move": "cd script && cp .build/apple/Products/Release/script ../assets/scripts/input-volume",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"

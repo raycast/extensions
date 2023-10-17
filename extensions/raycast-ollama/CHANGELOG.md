@@ -1,5 +1,31 @@
 # raycast-ollama Changelog
 
+## [Improvement and BugFix] - 2023-09-18
+
+- [Improvement] Moved Model preferences to LocalStorage.
+- [Improvement] Is now possible to modify model on the go throw cmd + m shortcut.
+- [Improvement] Ollama Host is now configurable throw Preferences.
+- [Improvement] Metrics metadata now available on Chat Command. New metrics available: token/s, load_duration, sample_count, sample_duration.
+- [BugFix] Reduced re-rendering on models downloading.
+- Following command no longer available: ollama-ask, ollama-custom-ask, ollama-custom-chat.
+
+## [Improvement] - 2023-08-15
+
+- New command **Chat with Ollama**: an interactive chat (request / response) with possibility to save multiple conversation and resume them.
+- New command **Create Custom Command**: an easy way for create custom commands with quicklinks.
+- New command **Manage Models**: where you can view installed models, delete them and install new ones.
+
+## [Improvement and BugFix] - 2023-08-12
+
+- No longer needed custom MODFILEs.
+- Model no longer restricted to orca and llama. Now can be selected all available Ollama model.
+- Initial implementation of embeddings on code.
+- Resolved bug causing Metadata not showing up.
+
+## [Improvement] - 2023-08-11
+
+- Added llama2:70b model. Thanks to [suhaildawood](https://github.com/suhaildawood).
+
 ## [Improvement and BugFix] - 2023-08-7
 
 - Updated README.md with more information.
