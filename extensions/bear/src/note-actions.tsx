@@ -40,7 +40,7 @@ function NotePreviewAction({ note }: { note: Note }) {
   );
 }
 
-export default function NoteActions({ isNotePreview, note }: { isNotePreview: boolean; note: Note }) {
+export default function NoteActions({ isNotePreview, note, selectedTag }: { isNotePreview: boolean; note: Note, selectedTag: string | null }) {
   const { focusCursorAtEnd } = getPreferenceValues();
   const edit = focusCursorAtEnd ? "yes" : "no";
   return (
@@ -58,6 +58,15 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
             icon={Icon.Window}
           />
         )}
+        <Action.Open
+          title="Open note in Bear (tag-filtered)"
+          target={`bear://x-callback-url/open-tag?name=${selectedTag}`}
+          icon={Icon.Sidebar}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          onOpen={(target: string) => {
+            open(`bear://x-callback-url/open-note?id=${note.id}&edit=yes`, { background: false });
+          }}
+        />
       </ActionPanel.Section>
       {note.encrypted ? null : (
         <ActionPanel.Section title="Edit">

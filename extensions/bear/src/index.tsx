@@ -46,16 +46,16 @@ export default function SearchNotes(props: LaunchProps<{ arguments: SearchNotesA
           subtitle={showDetail ? undefined : note.formattedTags}
           icon={{ source: "command-icon.png" }}
           keywords={[note.id]}
-          actions={<NoteActions isNotePreview={false} note={note} />}
+          actions={<NoteActions isNotePreview={false} note={note} selectedTag={selectedTag} />}
           accessories={
             showDetail
               ? undefined
               : [
-                  {
-                    date: note.modifiedAt,
-                    tooltip: `Last modified ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`,
-                  },
-                ]
+                {
+                  date: note.modifiedAt,
+                  tooltip: `Last modified ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`,
+                },
+              ]
           }
           detail={
             <List.Item.Detail
