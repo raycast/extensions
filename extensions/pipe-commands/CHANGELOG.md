@@ -1,5 +1,9 @@
 # Pipe Commands Changelog
 
+## [Pipe to text] - 2023-10-17
+
+- Fallback to clipboard when text selection fails (new error type)
+
 ## [Added new pipe commands] - 2023-09-07
 
 - Adding extract url from text (extract-urls-from-text)
