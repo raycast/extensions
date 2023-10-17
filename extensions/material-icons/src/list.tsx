@@ -1,7 +1,9 @@
-import { ActionPanel, Action, List, showToast, Toast, Color } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Color, Icon as RcIcon } from "@raycast/api";
 import { useState, useEffect, useMemo, memo } from "react";
 import fetch, { AbortError } from "node-fetch";
 import * as fzy from "fzy.js";
+import DownloadForm from "./download-form";
+import { Icon, IconAsset } from "./types";
 
 export default function ListView() {
   const { icons, search, isLoading } = useSearch();
@@ -28,12 +30,20 @@ const SearchListItem: React.VFC<{ icon: Icon }> = memo(({ icon }) => {
       ]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
+          <ActionPanel.Section title="Copy to Clipboard">
             <Action.CopyToClipboard title="Copy Name" content={icon.name} shortcut={{ modifiers: ["cmd"], key: "c" }} />
             <Action.CopyToClipboard
               title="Copy Codepoint"
               content={icon.codepoint}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Download">
+            <Action.Push
+              icon={RcIcon.Download}
+              target={<DownloadForm icon={icon} />}
+              title="Download"
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -89,19 +99,6 @@ function useSearch() {
   };
 }
 
-type Icon = {
-  categories: string;
-  codepoint: string;
-  name: string;
-  tags: string[];
-  assets: IconAsset[];
-};
-
-type IconAsset = {
-  family: string;
-  url: string;
-};
-
 async function fetchIcons(signal: AbortSignal): Promise<Icon[]> {
   type Response = {
     host: string;
@@ -142,6 +139,7 @@ async function fetchIcons(signal: AbortSignal): Promise<Icon[]> {
       codepoint: icon.codepoint.toString(16),
       name: icon.name,
       tags: icon.tags,
+      version: icon.version,
       assets,
     };
   });

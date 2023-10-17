@@ -11,3 +11,11 @@ export type IconAsset = {
   family: string;
   url: string;
 };
+
+export enum MaterialIconStyle {
+  Filled,
+  Outlined,
+  Rounded,
+  Sharp,
+  "Two Tone",
+}

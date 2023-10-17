@@ -1,29 +1,10 @@
-import { ActionPanel, Action, Color, Grid, showHUD, Icon as RaycastIcon } from "@raycast/api";
+import { ActionPanel, Action, Color, Grid, showHUD, Icon as RcIcon } from "@raycast/api";
 import { useCachedState, useFetch, useFrecencySorting } from "@raycast/utils";
 import { memo } from "react";
 import fetch from "node-fetch";
 import { Clipboard } from "@raycast/api";
-
-enum MaterialIconStyle {
-  Filled,
-  Outlined,
-  Rounded,
-  Sharp,
-  "Two Tone",
-}
-
-interface Icon {
-  categories: string;
-  codepoint: string;
-  name: string;
-  tags: string[];
-  assets: IconAsset[];
-}
-
-interface IconAsset {
-  family: string;
-  url: string;
-}
+import { Icon, IconAsset, MaterialIconStyle } from "./types";
+import DownloadForm from "./download-form";
 
 export default function GridView() {
   const [materialIconStyle, setMaterialIconStyle] = useCachedState<MaterialIconStyle>(
@@ -104,7 +85,7 @@ const SearchGridItem: React.VFC<{
             />
             <Action
               title="Copy SVG"
-              icon={RaycastIcon.CopyClipboard}
+              icon={RcIcon.CopyClipboard}
               onAction={async () => {
                 await fetchSvg(icon, materialIconStyle);
                 await showHUD("SVG copied to clipboard");
@@ -113,30 +94,38 @@ const SearchGridItem: React.VFC<{
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
           </ActionPanel.Section>
+          <ActionPanel.Section title="Download">
+            <Action.Push
+              icon={RcIcon.Download}
+              target={<DownloadForm icon={icon} />}
+              title="Download"
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+            />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Preferences">
-            <ActionPanel.Submenu title="Set Icon Style" icon={RaycastIcon.Brush}>
+            <ActionPanel.Submenu title="Set Icon Style" icon={RcIcon.Brush}>
               <Action
-                icon={{ source: RaycastIcon.Brush }}
+                icon={{ source: RcIcon.Brush }}
                 title="Filled"
                 onAction={() => setMaterialIconStyle(MaterialIconStyle.Filled)}
               />
               <Action
-                icon={{ source: RaycastIcon.Brush }}
+                icon={{ source: RcIcon.Brush }}
                 title="Outlined"
                 onAction={() => setMaterialIconStyle(MaterialIconStyle.Outlined)}
               />
               <Action
-                icon={{ source: RaycastIcon.Brush }}
+                icon={{ source: RcIcon.Brush }}
                 title="Rounded"
                 onAction={() => setMaterialIconStyle(MaterialIconStyle.Rounded)}
               />
               <Action
-                icon={{ source: RaycastIcon.Brush }}
+                icon={{ source: RcIcon.Brush }}
                 title="Sharp"
                 onAction={() => setMaterialIconStyle(MaterialIconStyle.Sharp)}
               />
               <Action
-                icon={{ source: RaycastIcon.Brush }}
+                icon={{ source: RcIcon.Brush }}
                 title="Two Tone"
                 onAction={() => setMaterialIconStyle(MaterialIconStyle["Two Tone"])}
               />
@@ -184,6 +173,7 @@ async function parseIcons(response: Response) {
       codepoint: icon.codepoint.toString(16),
       name: icon.name,
       tags: icon.tags,
+      version: icon.version,
       assets,
     };
   });
