@@ -2,8 +2,14 @@ import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast } from "@r
 import { formatDistanceToNow } from "date-fns";
 
 import { useUsers } from "../../hooks";
-import { getPropertyIcon, notionColorToTintColor, patchPage } from "../../utils/notion";
-import { DatabaseProperty, DatabasePropertyOption, PagePropertyType } from "../../utils/types";
+import {
+  getPropertyIcon,
+  notionColorToTintColor,
+  patchPage,
+  PagePropertyType,
+  DatabaseProperty,
+  DatabasePropertyOption,
+} from "../../utils/notion";
 
 export function ActionEditPageProperty(props: {
   databaseProperty: DatabaseProperty;

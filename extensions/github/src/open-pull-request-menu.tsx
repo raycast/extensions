@@ -64,7 +64,7 @@ function OpenPullRequestMenu() {
   return (
     <MenuBarRoot
       title={displayTitlePreference() ? `${data?.length}` : undefined}
-      icon="pull-request.svg"
+      icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip="GitHub My Open Pull Requests"
     >

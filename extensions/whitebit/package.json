@@ -109,7 +109,7 @@
     },
     {
       "name": "secret",
-      "title": "Sercey Key",
+      "title": "Sercet Key",
       "description": "Your API secret key.",
       "type": "password",
       "required": true

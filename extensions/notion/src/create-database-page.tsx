@@ -1,10 +1,12 @@
-import { CreateDatabaseForm } from "./components";
-import { View } from "./components";
+import type { LaunchProps } from "@raycast/api";
 
-export default function Command() {
+import { View } from "./components";
+import { CreatePageForm, type CreatePageFormValues } from "./components/forms/CreatePageForm";
+
+export default function Command(props: LaunchProps<{ launchContext?: CreatePageFormValues }>) {
   return (
     <View>
-      <CreateDatabaseForm />
+      <CreatePageForm defaults={props.launchContext} />
     </View>
   );
 }

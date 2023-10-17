@@ -10,7 +10,7 @@ import { STAR_VALUE } from "../costants";
 import { ScriptError, Track } from "../models";
 
 export const reveal = tell("Music", "reveal current track");
-export const love = tell("Music", "set loved of current track to true");
+export const favorite = tell("Music", "set favorited of current track to true");
 export const dislike = tell("Music", "set disliked of current track to true");
 export const addToLibrary = pipe(
   tell("Music", `duplicate current track to source 1`),

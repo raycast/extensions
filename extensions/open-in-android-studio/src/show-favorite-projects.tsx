@@ -104,6 +104,13 @@ export default function Main() {
       });
     }
   }
+
+  function getQuickLinkForPath(path: string): string {
+    const context = `{"defaultValue":"${path}"}`;
+    const encodedContext = encodeURIComponent(context);
+    return `raycast://extensions/3llomi/open-in-android-studio/index?context=${encodedContext}`;
+  }
+
   return (
     <List isLoading={isLoading}>
       {projects.map((item) => {
@@ -126,6 +133,11 @@ export default function Main() {
                     onAction={async () => {
                       await openInFinder(item);
                     }}
+                  />
+
+                  <Action.CreateQuicklink
+                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    quicklink={{ link: getQuickLinkForPath(item.path) }}
                   />
 
                   <Action
