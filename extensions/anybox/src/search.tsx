@@ -3,11 +3,13 @@ import { useState, useEffect } from "react";
 import searchRequest, { SearchQuery, Link, Preferences } from "./utilities/searchRequest";
 import LinkItem from "./components/LinkItem";
 import TagItem from "./components/TagItem";
-import { TagProp, fetchTags as fetchTags, fetchSearchEngines } from "./utilities/fetch";
+import { TagProp, fetchTags as fetchTags, fetchSearchEngines, FolderProp, fetchFolders } from "./utilities/fetch";
+import FolderItem from "./components/FolderItem";
 
 interface State {
   links: Link[];
   tags: TagProp[];
+  folders: FolderProp[];
   isLoading: boolean;
   isSearchEngines: boolean;
 }
@@ -29,14 +31,19 @@ function looseMatch(query: string, content: string): boolean {
 }
 
 let tagsResult: TagProp[];
+let foldersResult: FolderProp[];
 fetchTags().then((res) => {
   tagsResult = res;
+});
+fetchFolders().then((res) => {
+  foldersResult = res;
 });
 
 export default function SearchResult() {
   const [state, setState] = useState<State>({
     links: [],
     tags: [],
+    folders: [],
     isLoading: true,
     isSearchEngines: false,
   });
@@ -48,13 +55,18 @@ export default function SearchResult() {
       const query: SearchQuery = {
         q: searchText.trim(),
         limit: 50,
-        pinyin: preferences.usePinyin ? "yes" : "no",
       };
+      let limit = 5;
       let isSearchEngines = false;
       let linksResult = await searchRequest(query);
 
+      if (preferences.searchFolders && preferences.searchFolders) {
+        limit = 3;
+      }
+
       if (Array.isArray(linksResult)) {
         let filteredTags: TagProp[];
+        let filteredFolders: FolderProp[];
 
         if (!linksResult.length) {
           const searchEngines = await fetchSearchEngines(preferences.api_key);
@@ -69,14 +81,25 @@ export default function SearchResult() {
             .filter((val) => {
               return looseMatch(searchText, val.name);
             })
-            .slice(0, 5);
+            .slice(0, limit);
         } else {
           filteredTags = [];
+        }
+
+        if (preferences.searchFolders) {
+          filteredFolders = foldersResult
+            .filter((val) => {
+              return looseMatch(searchText, val.name);
+            })
+            .slice(0, limit);
+        } else {
+          filteredFolders = [];
         }
 
         setState({
           links: linksResult,
           tags: filteredTags,
+          folders: filteredFolders,
           isLoading: false,
           isSearchEngines,
         });
@@ -84,6 +107,7 @@ export default function SearchResult() {
         setState({
           links: [],
           tags: [],
+          folders: [],
           isLoading: false,
           isSearchEngines: false,
         });
@@ -96,7 +120,13 @@ export default function SearchResult() {
   let navigationTitle: string;
   let searchBarPlaceholder: string;
 
-  if (preferences.searchTags) {
+  if (preferences.searchFolders && preferences.searchTags) {
+    navigationTitle = "Search for Links, Tags and Folders";
+    searchBarPlaceholder = "Search for links, tags and folders in Anybox";
+  } else if (preferences.searchFolders) {
+    navigationTitle = "Search for Links and Folders";
+    searchBarPlaceholder = "Search for links and folders in Anybox";
+  } else if (preferences.searchTags) {
     navigationTitle = "Search for Links and Tags";
     searchBarPlaceholder = "Search for links and tags in Anybox";
   } else {
@@ -115,6 +145,9 @@ export default function SearchResult() {
     >
       {state.tags.map((item) => {
         return <TagItem item={item} key={item.id} />;
+      })}
+      {state.folders.map((item) => {
+        return <FolderItem item={item} key={item.id} />;
       })}
       {state.links.map((item) => {
         return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;

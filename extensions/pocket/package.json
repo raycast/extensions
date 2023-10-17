@@ -42,26 +42,11 @@
       ]
     },
     {
-      "name": "defaultFilter",
-      "title": "Default Filter",
-      "type": "dropdown",
-      "required": false,
-      "default": "all",
-      "description": "Default filter for the list of bookmarks",
-      "data": [
-        {
-          "title": "All Bookmarks",
-          "value": "all"
-        },
-        {
-          "title": "Unread",
-          "value": "unread"
-        },
-        {
-          "title": "Archived",
-          "value": "archive"
-        }
-      ]
+      "name": "browserApp",
+      "title": "Browser App",
+      "type": "appPicker",
+      "description": "What browser should the 'Save Current Tab' use?",
+      "required": false
     }
   ],
   "categories": [
@@ -74,36 +59,72 @@
       "title": "Search Bookmarks",
       "subtitle": "Pocket",
       "description": "Search Pocket unread bookmarks",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "title",
+          "placeholder": "Title",
+          "required": false
+        }
+      ]
     },
     {
       "name": "random",
-      "title": "Open Random Bookmark",
+      "title": "Random Bookmark",
       "subtitle": "Pocket",
       "description": "Opens a random unread bookmark",
       "mode": "no-view"
     },
     {
       "name": "latest",
-      "title": "Open Latest Bookmark",
+      "title": "Latest Bookmark",
       "subtitle": "Pocket",
       "description": "Opens the latest added unread bookmark",
       "mode": "no-view"
     },
     {
+      "name": "create",
+      "title": "Create Bookmark",
+      "subtitle": "Pocket",
+      "description": "Create bookmark manually",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bookmarks",
+      "title": "Menu Bookmarks",
+      "subtitle": "Pocket",
+      "description": "See your latest bookmarks at a glance",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
       "name": "clipboard",
-      "title": "Create Bookmark from Clipboard",
+      "title": "Save Clipboard",
       "subtitle": "Pocket",
       "description": "Create bookmark from clipboard contents",
+      "mode": "no-view"
+    },
+    {
+      "name": "browser-tab",
+      "title": "Save Current Tab",
+      "subtitle": "Pocket",
+      "description": "Create bookmark from active browser tab",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.39.2",
+    "@raycast/utils": "^1.4.1",
+    "run-applescript": "^6.0.0",
+    "lodash": "^4.17.21",
+    "is-url": "^1.2.4"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.185",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/is-url": "^1.2.30",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -111,7 +132,6 @@
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3",
-    "swr": "^1.2.0",
     "got": "^12.0.1"
   },
   "scripts": {

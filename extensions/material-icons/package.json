@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "creasty",
   "contributors": [
-    "201549BL"
+    "201549BL",
+    "3llomi"
   ],
   "categories": [
     "Design Tools"
@@ -58,6 +59,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

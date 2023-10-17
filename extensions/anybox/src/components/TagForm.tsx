@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 interface TagProp {
   id: string;
   name: string;
-  heading?: string;
 }
 
 interface Props {
@@ -13,14 +12,10 @@ interface Props {
   title: string;
 }
 
-interface TagProp {
-  id: string;
-  name: string;
-}
-
 export default function TagForm(props: Props) {
   const [starred] = useState<boolean>(false);
   const [tags, setTags] = useState<TagProp[]>([]);
+  const [comment, setComment] = useState<string>();
   const { pop } = useNavigation();
   const command = props.command;
   const title = props.title;
@@ -42,6 +37,7 @@ export default function TagForm(props: Props) {
             icon={Icon.SaveDocument}
             onSubmit={async (values) => {
               const data = {
+                comment: values.comment,
                 tags: values.tags,
                 starred: !!values.starred,
               };
@@ -57,6 +53,7 @@ export default function TagForm(props: Props) {
           return <Form.TagPicker.Item value={val.id} title={val.name} key={val.id} />;
         })}
       </Form.TagPicker>
+      <Form.TextField title="Comment" id="comment" value={comment} onChange={setComment} />
       <Form.Checkbox id="starred" label="Starred" defaultValue={starred} />
     </Form>
   );
