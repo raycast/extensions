@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useTask } from "./hooks/useTask";
 import { Task, TaskStatus } from "./types/task";
-import { TIME_BLOCK_IN_MINUTES, formatStrDuration } from "./utils/dates";
+import {TIME_BLOCK_IN_MINUTES, formatStrDuration, formatPriority, formatPriorityIcon} from "./utils/dates";
+import {addDays, addMinutes} from "date-fns";
+import {useUser} from "./hooks/useUser";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -47,6 +49,15 @@ function TaskList() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const { currentUser } = useUser();
+  const defaults = useMemo(
+      () => ({
+        schedulerVersion: (currentUser?.features.scheduler || 14),
+      }),
+      [currentUser]
+  );
+
+
 
   const { getAllTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
 
@@ -66,6 +77,22 @@ function TaskList() {
 
     void getTasks();
   }, []);
+
+  const handleUpdatePriority = async (task: Task, priority: string) => {
+    await showToast(Toast.Style.Animated, "Updating priority...");
+    try {
+      task.priority = priority;
+      const updatedPriority = await updateTask(task);
+      if (updatedPriority) {
+        showToast(Toast.Style.Success, `Updated priority successfully!`);
+      } else {
+        throw new Error("Update task priority failed.");
+      }
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error while updating priority", message: String(error) });
+    }
+  };
+
 
   // Add time to task function
   const handleAddTime = async (task: Task, time: number) => {
@@ -156,6 +183,39 @@ function TaskList() {
   const getListAccessories = (task: Task) => {
     const list = [];
 
+    if (defaults.schedulerVersion > 14) {
+      if (task.onDeck) {
+        list.push({
+          tag: {
+            value: '',
+            color: Color.Green,
+          },
+          tooltip:
+              "Remove from Up Next",
+          icon: Icon.ArrowNe,
+        });
+      } else {
+        list.push({
+          tag: {
+            value: '',
+            color: Color.SecondaryText,
+          },
+          tooltip:
+              "Send to Up Next",
+          icon: Icon.ArrowNe,
+        });
+      }
+      list.push({
+        tag: {
+          value: '',
+          color: Color.PrimaryText,
+        },
+        tooltip:
+            "Priority: " + formatPriority(task.priority),
+        icon: formatPriorityIcon(task.priority),
+      });
+    }
+
     if (task.status !== "ARCHIVED" && task.snoozeUntil) {
       list.push({
         tag: {
@@ -213,7 +273,7 @@ function TaskList() {
   };
 
   return (
-    <List
+  <List
       isLoading={isLoading}
       navigationTitle="Search Tasks"
       searchBarPlaceholder="Search tasks"
@@ -251,6 +311,48 @@ function TaskList() {
                     <ActionPanel>
                       {task.status !== "ARCHIVED" && (
                         <>
+                          {defaults.schedulerVersion > 14 && (
+                              <ActionPanel.Submenu
+                                  title="Change Priority"
+                                  icon={{ source: Icon.Signal1 }}
+                                  shortcut={{ modifiers: ["cmd"], key: "i" }}
+                              >
+                                <Action
+                                    icon={{ source: Icon.FullSignal }}
+                                    title="Critical"
+                                    onAction={() => {
+                                      const priority = "P1"
+                                      handleUpdatePriority(task, priority);
+                                    }}
+                                />
+
+                                <Action
+                                    icon={{ source: Icon.Signal3 }}
+                                    title="High priority"
+                                    onAction={() => {
+                                      const priority = "P2"
+                                      handleUpdatePriority(task, priority);
+                                    }}
+                                />
+
+                                <Action
+                                    icon={{ source: Icon.Signal2 }}
+                                    title="Medium priority"
+                                    onAction={() => {
+                                      const priority = "P3"
+                                      handleUpdatePriority(task, priority);
+                                    }}
+                                />
+                                <Action
+                                    icon={{ source: Icon.Signal1 }}
+                                    title="Low priority"
+                                    onAction={() => {
+                                      const priority = "P1"
+                                      handleUpdatePriority(task, priority);
+                                    }}
+                                />
+                              </ActionPanel.Submenu>
+                          )}
                           <ActionPanel.Submenu
                             title="Add Time"
                             icon={{ source: Icon.Stopwatch }}
