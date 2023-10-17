@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "conventional-commits",
   "title": "Conventional Commits",
-  "description": "Provides a list of conventional commits prefixes and descriptions that can be inserted into your active window",
+  "description": "Provides a list of conventional commits prefixes and descriptions that can be inserted into your active window as well as example of how messages should be structured",
   "icon": "command-icon.png",
   "author": "niemtec",
   "contributors": [
@@ -23,7 +23,7 @@
     {
       "name": "commit-message-structure",
       "title": "View Conventional Commit Message Structure",
-      "description": "Display the Conventional Commit Message Structure",
+      "description": "Display details of how a conventional commit message is structured",
       "mode": "view"
     }
   ],
@@ -35,7 +35,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
+    "prettier": "2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {

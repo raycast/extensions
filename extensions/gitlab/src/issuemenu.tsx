@@ -9,9 +9,14 @@ import {
 import { useMyIssues } from "./components/issues_my";
 import { IssueScope, IssueState } from "./components/issues";
 import { GitLabIcons } from "./icons";
+import { showErrorToast, getErrorMessage } from "./utils";
 
 async function launchMyIssues(): Promise<void> {
-  return launchCommand({ name: "issue_my", type: LaunchType.UserInitiated });
+  try {
+    return launchCommand({ name: "issue_my", type: LaunchType.UserInitiated });
+  } catch (error) {
+    showErrorToast(getErrorMessage(error), "Could not open My Issues Command");
+  }
 }
 
 function getMaxIssuesPreference(): number {
@@ -51,7 +56,10 @@ export default function MenuCommand(): JSX.Element {
         >
           {issues?.map((m) => (
             <MenuBarItem
-              icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+              icon={{
+                source: GitLabIcons.merge_request,
+                tintColor: { light: "#000", dark: "#FFF", adjustContrast: false },
+              }}
               title={`#${m.iid} ${m.title}`}
               tooltip={m.reference_full}
               onAction={() => open(m.web_url)}

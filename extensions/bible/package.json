@@ -34,6 +34,22 @@
           "default": false
         },
         {
+          "name": "includeCopyright",
+          "label": "Include copyright",
+          "description": "Add copyright to the results.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "includeReferences",
+          "label": "Include references",
+          "description": "Add passage references to the results.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
           "name": "oneVersePerLine",
           "label": "Show one verse per line",
           "description": "Display each verse on a separate line. Might separate verses into multiple lines, for ex. see Psalm 1 (ESV)",

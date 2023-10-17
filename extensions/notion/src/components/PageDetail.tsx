@@ -4,9 +4,8 @@ import { useCachedPromise } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 
-import { fetchPageContent, getPageName, notionColorToTintColor } from "../utils/notion";
+import { fetchPageContent, getPageName, notionColorToTintColor, PagePropertyType, Page, User } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
-import { Page, PagePropertyType, User } from "../utils/types";
 
 import { AppendToPageForm } from "./forms";
 
