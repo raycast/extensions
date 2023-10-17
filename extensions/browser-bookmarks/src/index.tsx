@@ -310,7 +310,7 @@ export default function Command() {
       JSON.stringify({
         ...frecencies,
         [item.id]: getBookmarkFrecency(frecency),
-      })
+      }),
     );
 
     mutateFrecencies();
@@ -393,11 +393,7 @@ export default function Command() {
 
                 <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrecency(item)} />
 
-                <Action
-                  title="Reset Ranking"
-                  icon={Icon.ArrowCounterClockwise}
-                  onAction={() => removeFrecency(item)}
-                />
+                <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => removeFrecency(item)} />
 
                 <ActionPanel.Section>
                   {availableBrowsers && availableBrowsers.length > 1 ? (
