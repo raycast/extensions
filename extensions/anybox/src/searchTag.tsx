@@ -31,7 +31,6 @@ export default function SearchTag(props: Props) {
         q: searchText.trim(),
         limit: 50,
         tag: tag.id,
-        pinyin: preferences.usePinyin ? "yes" : "no",
       };
       let isSearchEngines = false;
       let linksResult = await searchRequest(query);

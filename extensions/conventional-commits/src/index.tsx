@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
 
 class CommitItem {
   prefix: string;
@@ -92,6 +92,8 @@ export default function Command() {
           icon={item.icon}
           title={item.title}
           subtitle={item.subtitle}
+          accessories={[{ tag: { value: `${item.prefix}`, color: Color.Green } }]}
+          keywords={[item.prefix]}
           actions={
             <ActionPanel>
               <Action.Paste content={item.prefix} />
