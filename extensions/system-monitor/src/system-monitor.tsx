@@ -4,19 +4,15 @@ import MemoryMonitor from "./Memory/MemoryMonitor";
 import NetworkMonitor from "./Network/NetworkMonitor";
 import PowerMonitor from "./Power/PowerMonitor";
 
+const defaultView = getPreferenceValues<ExtensionPreferences>().defaultview;
+
 export default function SystemMonitor() {
-  const render = () => {
-    const defaultView = getPreferenceValues<ExtensionPreferences>().defaultview;
-
-    return (
-      <List isShowingDetail selectedItemId={defaultView}>
-        <CpuMonitor />
-        <MemoryMonitor />
-        <PowerMonitor />
-        <NetworkMonitor />
-      </List>
-    );
-  };
-
-  return <>{render()}</>;
+  return (
+    <List isShowingDetail selectedItemId={defaultView}>
+      <CpuMonitor />
+      <MemoryMonitor />
+      <PowerMonitor />
+      <NetworkMonitor />
+    </List>
+  );
 }

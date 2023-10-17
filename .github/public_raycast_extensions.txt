@@ -30,3 +30,4 @@ getsound
 reclaim-ai
 posthog
 notion
+stablecog

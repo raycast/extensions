@@ -6,8 +6,9 @@
   "icon": "command-icon.png",
   "author": "webergnr",
   "contributors": [
-      "ilian"
-    ],
+    "ilian",
+    "shkreios"
+  ],
   "owner": "reclaim-ai",
   "access": "public",
   "categories": [
