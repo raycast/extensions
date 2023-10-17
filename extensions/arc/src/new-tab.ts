@@ -27,11 +27,10 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
   const newTabUrl = url || fallbackText || newTabPreferences.url || DEFAULT_PAGE;
 
   if (newTabUrl.includes(",")) {
-    const multileTabs = newTabUrl.split(',').map(url => handleOpenNewTab(url.trim()));
+    const multileTabs = newTabUrl.split(",").map((url) => handleOpenNewTab(url.trim()));
 
     return Promise.all(multileTabs);
   } else {
-   
-    return await handleOpenNewTab(newTabUrl)
+    return await handleOpenNewTab(newTabUrl);
   }
 }
