@@ -238,6 +238,7 @@ export default function Command() {
         { name: "folder", weight: 0.5 },
       ],
       threshold: 0.4,
+      includeScore: true,
     });
   }, [folderBookmarks]);
 
@@ -250,7 +251,27 @@ export default function Command() {
 
     const searchResults = fuse.search(query);
 
-    return searchResults.map((result) => result.item);
+    return searchResults
+      .sort((a, b) => {
+        // If a has a frecency, but b doesn't, a should come first
+        if (a.item.bookmarkFrecency && !b.item.bookmarkFrecency) {
+          return -1;
+        }
+
+        // If b has a frecency, but a doesn't, b should come first
+        if (!a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
+          return 1;
+        }
+
+        // If both frecencies are defined,put the one with the higher frecency first
+        if (a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
+          return b.item.bookmarkFrecency.frecency - a.item.bookmarkFrecency.frecency;
+        }
+
+        // If both frecencies are undefined, sort by their score
+        return (a.score || 1) - (a.score || 1);
+      })
+      .map((result) => result.item);
   }, [folderBookmarks, fuse, query]);
 
   const filteredFolders = useMemo(() => {
