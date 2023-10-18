@@ -1,102 +1,58 @@
-import { Action, ActionPanel, List, openExtensionPreferences } from "@raycast/api";
-import { ReactElement, useState } from "react";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { useState } from "react";
 import { URL } from "url";
 import { documentationListV3 as docsList } from "./data/docs";
-import { searchIncludes } from "./utils";
 
-export default function UserSearchRoot(): ReactElement {
+export default function UserSearchRoot() {
   const [search, setSearch] = useState<string>();
   return (
-    <List searchText={search} onSearchTextChange={setSearch} searchBarPlaceholder="Search the Astro Documentation">
-      <ListItemSearch search={search} />
+    <List searchBarPlaceholder="Search the Astro Documentation" onSearchTextChange={setSearch} filtering={true}>
+      <List.EmptyView
+        title="No Results"
+        description={`Search '${search}' in the Astro Documentation`}
+        actions={
+          <ActionPanel>
+            <OpenSearchInBrowserAction search={search ?? ""} />
+          </ActionPanel>
+        }
+      />
+      {docsList.map((docsItem) => (
+        <List.Item
+          keywords={docsItem.keywords}
+          key={docsItem.title}
+          title={`${docsItem.title}`}
+          icon={docsItem.icon ?? "astro-search-icon.png"}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open the Astro Documentation"
+                url={docsItem.url ? docsItem.url : `http://a.stro.cc/${docsItem.title}`}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+      <List.Item
+        key={"preferences"}
+        keywords={["settings", "language"]}
+        icon={Icon.Gear}
+        title={"Open extension preferences"}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Open Extension Preferences"
+              onAction={openExtensionPreferences}
+              icon={Icon.Gear}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }
 
-function ListItemSearch(props: { search: string | undefined }): ReactElement | null {
-  const s = props.search;
-  return (
-    <>
-      {(!s || s.length <= 0) && (
-        <>
-          <List.Item
-            title={`Open the Astro Documentation`}
-            icon="astro-search-icon.png"
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open the Astro Documentation"
-                  icon="astro-search-icon.png"
-                  url="https://docs.astro.build/"
-                />
-              </ActionPanel>
-            }
-          />
-          {docsList.map((docsItem) => (
-            <List.Item
-              keywords={docsItem.keywords}
-              key={docsItem.title}
-              title={`${docsItem.title}`}
-              icon={docsItem.icon ?? "astro-search-icon.png"}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open the Astro Documentation"
-                    url={docsItem.url ? docsItem.url : `http://a.stro.cc/${docsItem.title}`}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </>
-      )}
-      {s && s.length > 0 && (
-        <>
-          {docsList.map(
-            (docsItem) =>
-              searchIncludes(docsItem, s) && (
-                <List.Item
-                  keywords={docsItem.keywords}
-                  key={docsItem.title}
-                  title={`${docsItem.title}`}
-                  icon={docsItem.icon ?? "astro-search-icon.png"}
-                  actions={
-                    <ActionPanel>
-                      <Action.OpenInBrowser
-                        title="Open the Astro Documentation"
-                        url={docsItem.url ? docsItem.url : `http://a.stro.cc/${docsItem.title}`}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              )
-          )}
-          <List.Item
-            title={`Search '${s}' in the Astro Documentation`}
-            icon="astro-search-icon.png"
-            actions={
-              <ActionPanel>
-                <OpenSearchInBrowserAction search={s} />
-              </ActionPanel>
-            }
-          />
-        </>
-      )}
-      <List.Item
-        title={`Open Extension Preferences`}
-        key={"preferences"}
-        keywords={["preferences", "settings"]}
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      />
-    </>
-  );
-}
-
-function OpenSearchInBrowserAction(props: { search: string }): ReactElement {
+function OpenSearchInBrowserAction(props: { search: string }) {
   const url = new URL(`https://a.stro.cc/${props.search}`);
   return <Action.OpenInBrowser title="Search on Astro Documentation" icon="astro-search-icon.png" url={url.href} />;
 }
