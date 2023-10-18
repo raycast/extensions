@@ -9,6 +9,7 @@ export default function UserSearchRoot() {
     <List searchBarPlaceholder="Search the Astro Documentation" onSearchTextChange={setSearch} filtering={true}>
       <List.EmptyView
         title="No Results"
+        icon="noview.png"
         description={`Search '${search}' in the Astro Documentation`}
         actions={
           <ActionPanel>
