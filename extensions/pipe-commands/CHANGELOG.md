@@ -1,8 +1,12 @@
 # Pipe Commands Changelog
 
-## [Pipe to text] - 2023-10-17
+## [Pipe to text enhancement] - {PR_MERGE_DATE}
 
 - Fallback to clipboard when text selection fails (new error type)
+
+## [Added new pipe commands] - 2023-10-17
+
+- Added new command to convert tab to newline
 
 ## [Added new pipe commands] - 2023-09-07
 

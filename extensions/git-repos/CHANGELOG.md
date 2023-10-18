@@ -1,10 +1,16 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2023-10-17
+
+- Resolved issue when the scan path contains a space.
+- Update to the latest Raycast API.
+
 ## [Enhancement] - 2022-04-20
 
 - Added a new action for the List Repos command to mark repos as favorites that will be displayed at the top.
 - Replaced custom caching logic with useCachedPromise.
 - Update to the latest Raycast API.
+
 ## [Enhancement] - 2022-11-25
 
 - Added a new action for List Repos command to open in all assigned applications at once.
