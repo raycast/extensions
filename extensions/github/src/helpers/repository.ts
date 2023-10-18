@@ -85,6 +85,9 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
     console.error(error);
     return;
   }
+
+  toast.title = "Code editor launched!";
+  toast.style = Toast.Style.Success;
 }
 
 // History was stored in `LocalStorage` before, after migration it's stored in `Cache`
