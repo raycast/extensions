@@ -1,4 +1,4 @@
-import { environment, LaunchType, showToast, Toast, updateCommandMetadata } from "@raycast/api";
+import { environment, LaunchType, showToast, Toast, updateCommandMetadata, Clipboard } from "@raycast/api";
 import { Progress } from "./types";
 import { defaultProgress, getSubtitle } from "./utils/progress";
 
@@ -9,6 +9,7 @@ export default async function command() {
   updateCommandMetadata({ subtitle: `${progressBar}` });
 
   if (environment.launchType === LaunchType.UserInitiated) {
+    Clipboard.copy(progressBar);
     await showToast({
       style: Toast.Style.Success,
       title: "Refreshed progress",
