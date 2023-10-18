@@ -31,10 +31,12 @@ jobs:
   extensions_build_publish:
     if: github.repository == 'raycast/extensions'
     name: "${{ github.event_name == 'push' && 'Publish' || (github.event_name == 'pull_request' && 'Check' || github.event_name == 'workflow_dispatch' && inputs.command || github.event_name ) }}"
-    runs-on: ubuntu-latest
+    runs-on: macos-13
     steps:
       - name: Checkout
         uses: raycast/github-actions/git-checkout@v1.13.0
+      - name: Setup Xcode
+        uses: raycast/github-actions/setup-xcode@xcode-15.0.x
       # This makes sure that the problems found while validating the extensions are shown in the PR diff
       - name: Register Problem Matcher for Ray CLI
         run: echo "##[add-matcher].github/ray.matcher.json"
