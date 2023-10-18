@@ -8,7 +8,7 @@ interface SidebarItemProp {
   color: string; // HEX color
   icon: string; // SF Symbol Name
   count: number; // Number of links in the list.
-  type: "filter" | "tag" | "preset";
+  type: "filter" | "tag" | "preset" | "folder";
 }
 
 interface PresetProp extends SidebarItemProp {
@@ -21,6 +21,10 @@ interface FilterProp extends SidebarItemProp {
 
 export interface TagProp extends SidebarItemProp {
   type: "tag";
+}
+
+export interface FolderProp extends SidebarItemProp {
+  type: "folder";
 }
 
 export interface AnydockProfile {
@@ -130,6 +134,10 @@ export async function fetchTags() {
   return GET("tags") as Promise<[TagProp]>;
 }
 
+export async function fetchFolders() {
+  return GET("folders") as Promise<[FolderProp]>;
+}
+
 export async function fetchProfiles() {
   return GET("anydock-profiles") as Promise<[AnydockProfile]>;
 }
@@ -150,8 +158,9 @@ export async function fetchSidebar() {
   const presets = fetchPresetSidebarItems();
   const filters = fetchFilters();
   const tags = fetchTags();
-  return Promise.all([presets, filters, tags]).then(([presets, filters, tags]) => {
-    const result = [...presets, ...filters, ...tags];
+  const folders = fetchFolders();
+  return Promise.all([presets, filters, tags, folders]).then(([presets, filters, tags, folders]) => {
+    const result = [...presets, ...filters, ...tags, ...folders];
     return result;
   });
 }

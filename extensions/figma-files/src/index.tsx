@@ -6,6 +6,7 @@ import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
+import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
 
 export default function Command() {
@@ -55,8 +56,18 @@ export default function Command() {
       if (value === "All") {
         setFilteredFiles(data);
         setIsFiltered(false);
+      } else if (value.includes("team=")) {
+        setFilteredFiles(data.filter((team) => team.name === value.split("=")[1]));
+        setIsFiltered(true);
       } else {
-        setFilteredFiles(data.filter((team) => team.name === value));
+        setFilteredFiles([
+          {
+            name: value.split("&$%")[0],
+            files: data
+              .filter((team) => team.name === value.split("&$%")[0])[0]
+              .files.filter((project) => project.name === value.split("&$%")[1]),
+          } as TeamFiles,
+        ]);
         setIsFiltered(true);
       }
     }
@@ -69,18 +80,25 @@ export default function Command() {
       tooltip={teamID.length > 1 ? "Teams" : "Projects"}
       defaultValue="All"
       onChange={handleDropdownChange}
-      storeValue
     >
       <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" />
-      {teamID.length > 1
-        ? data?.map((team) => (
-            <Grid.Dropdown.Item key={team.name} title={team.name} value={team.name} icon="team.svg" />
-          ))
-        : data?.map((team) =>
-            team.files.map((project) => (
-              <Grid.Dropdown.Item key={project.name} title={project.name} value={project.name} icon="project.svg" />
-            )),
-          )}
+      {teamID.length > 1 &&
+        data?.map((team) => (
+          <Grid.Dropdown.Item key={team.name} title={team.name} value={`team=${team.name}`} icon="team.svg" />
+        ))}
+
+      {data?.map((team) => (
+        <Grid.Dropdown.Section title={team.name} key={team.name}>
+          {team.files.map((project) => (
+            <Grid.Dropdown.Item
+              key={project.name}
+              title={project.name}
+              value={`${team.name}&$%${project.name}`}
+              icon="project.svg"
+            />
+          ))}
+        </Grid.Dropdown.Section>
+      ))}
     </Grid.Dropdown>
   );
 
@@ -139,6 +157,7 @@ export default function Command() {
               {project.files?.map((file) => (
                 <FileGridItem
                   key={file.key + "-file"}
+                  searchkeywords={project.name}
                   revalidate={revalidateStarredFiles}
                   file={file}
                   desktopApp={desktopApp}

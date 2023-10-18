@@ -5,7 +5,9 @@
   "description": "Manage Bluetooth connections in Raycast.",
   "author": "VladCuciureanu",
   "contributors": [
-    "briankosw"
+    "briankosw",
+    "oranja",
+    "sxn"
   ],
   "repository": {
     "type": "git",
@@ -111,27 +113,9 @@
       "name": "fuzzyRatio",
       "type": "textfield",
       "required": false,
-      "title": "Fuzzy Ratio",
+      "title": "Device Name Fuzzy Ratio",
       "description": "Minimum difference ratio for matching a device name.",
       "default": "98"
-    },
-    {
-      "name": "bluetoothBackend",
-      "type": "dropdown",
-      "required": true,
-      "title": "Bluetooth Backend",
-      "description": "What tool Toothpick will use for Bluetooth related actions.",
-      "default": "Applescript",
-      "data": [
-        {
-          "title": "AppleScript",
-          "value": "applescript"
-        },
-        {
-          "title": "blueutil (Experimental)",
-          "value": "blueutil"
-        }
-      ]
     },
     {
       "name": "favoriteDevice1",
@@ -161,6 +145,31 @@
       "title": "Options",
       "label": "Close window after successful connection.",
       "description": "If checked, Raycast will close after successfully connecting to a device."
+    },
+    {
+      "name": "bluetoothBackend",
+      "type": "dropdown",
+      "required": false,
+      "title": "Bluetooth Backend",
+      "description": "What tool Toothpick will use for Bluetooth related actions.",
+      "default": "applescript",
+      "data": [
+        {
+          "title": "AppleScript",
+          "value": "applescript"
+        },
+        {
+          "title": "blueutil (Experimental)",
+          "value": "blueutil"
+        }
+      ]
+    },
+    {
+      "name": "blueutilDirectory",
+      "type": "textfield",
+      "required": false,
+      "title": "Override Blueutil Directory",
+      "description": "Set a custom 'blueutil' location for Toothpick to use."
     }
   ],
   "categories": [

@@ -5,10 +5,16 @@ import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 
 const DEFAULT_BIBLE_VERSION_ABBR = "NLT";
 
-type Preferences = { enterToSearch: boolean; oneVersePerLine: boolean; includeVerseNumbers: boolean };
-const prefs = getPreferenceValues<Preferences>();
+type Preferences = {
+  enterToSearch: boolean;
+  oneVersePerLine: boolean;
+  includeVerseNumbers: boolean;
+  includeCopyright: boolean;
+  includeReferences: boolean;
+};
 
 export default function Command() {
+  const prefs = getPreferenceValues<Preferences>();
   const [query, setQuery] = React.useState({ search: "", version: DEFAULT_BIBLE_VERSION_ABBR });
   const [isLoading, setIsLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
@@ -30,19 +36,19 @@ export default function Command() {
     } finally {
       setIsLoading(false);
     }
-  }, [query.search, query.version]);
+  }, [prefs.includeVerseNumbers, query.search, query.version]);
 
   React.useEffect(() => {
     // Don't search when query changes if the user only wants to search when they press enter.
     if (!prefs.enterToSearch) {
       performSearch();
     }
-  }, [performSearch]);
+  }, [performSearch, prefs.enterToSearch]);
 
   const detailContent = React.useMemo(() => {
     if (!searchResult?.passages.length) return null;
-    return { markdown: createMarkdown(searchResult), clipboardText: createClipboardText(searchResult) };
-  }, [searchResult]);
+    return { markdown: createMarkdown(prefs, searchResult), clipboardText: createClipboardText(prefs, searchResult) };
+  }, [prefs, searchResult]);
 
   function getEmptyViewText() {
     if (isLoading) {
@@ -108,27 +114,35 @@ export default function Command() {
   );
 }
 
-function createMarkdown(searchResult: ReferenceSearchResult) {
+function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult) {
+  const copyright = prefs.includeCopyright ? `\n\n---\n\n*${searchResult.copyright}*` : "";
+
   return (
     searchResult.passages
       .map((p) => {
         const passageText = p.verses.join(prefs.oneVersePerLine ? "  \n" : " ");
         const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        return `${passageText}  \n${p.reference} (${versionAbbr})`;
+        const reference = prefs.includeReferences ? `  \n${p.reference} (${versionAbbr})` : "";
+
+        return passageText + reference;
       })
-      .join("\n\n") + `\n\n---\n\n*${searchResult.copyright}*`
+      .join("\n\n") + copyright
   );
 }
 
-function createClipboardText(searchResult: ReferenceSearchResult) {
+function createClipboardText(prefs: Preferences, searchResult: ReferenceSearchResult) {
+  const copyright = prefs.includeCopyright ? `\n\n${searchResult.copyright}` : "";
+
   return (
     searchResult.passages
       .map((p) => {
         const passageText = p.verses.join(prefs.oneVersePerLine ? "\n" : " ");
         const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        return `${passageText}\n${p.reference} (${versionAbbr})`;
+        const reference = prefs.includeReferences ? `\n${p.reference} (${versionAbbr})` : "";
+
+        return passageText + reference;
       })
-      .join("\n\n") + `\n\n${searchResult.copyright}`
+      .join("\n\n") + copyright
   );
 }
 
