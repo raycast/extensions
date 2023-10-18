@@ -3,8 +3,11 @@
   "name": "zoom-meeting-control",
   "title": "Zoom Meeting Control",
   "description": "Control current Zoom meeting",
-  "icon": "command-zoom-control.png",
+  "icon": "zoom-control.png",
   "author": "prashantv",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Communication"
   ],
@@ -13,32 +16,28 @@
     {
       "icon": "zoom-mute.png",
       "name": "mute",
-      "title": "Mute Meeting",
-      "subtitle": "Zoom",
+      "title": "Zoom - Mute Meeting",
       "description": "Mutes current Zoom meeting",
       "mode": "no-view"
     },
     {
       "icon": "zoom-unmute.png",
       "name": "unmute",
-      "title": "Unmute Meeting",
-      "subtitle": "Zoom",
+      "title": "Zoom - Unmute Meeting",
       "description": "Unmutes current Zoom meeting",
       "mode": "no-view"
     },
     {
       "icon": "zoom-video-on.png",
       "name": "video-on",
-      "title": "Start Video",
-      "subtitle": "Zoom",
+      "title": "Zoom - Start Video",
       "description": "Starts video in current Zoom meeting",
       "mode": "no-view"
     },
     {
       "icon": "zoom-video-off.png",
       "name": "video-off",
-      "title": "Stop Video",
-      "subtitle": "Zoom",
+      "title": "Zoom - Stop Video",
       "description": "Stops video in current Zoom meeting",
       "mode": "no-view"
     }
@@ -52,7 +51,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.3",
     "typescript": "^4.4.3"
   },
   "scripts": {
