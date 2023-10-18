@@ -29,7 +29,7 @@ export default function IndexCommand() {
   }
 
   const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([]);
-  const { isLoading, data } = useCachedPromise(async () => {
+  const { isLoading, data, error } = useCachedPromise(async () => {
     const { stdout, stderr } = await exec(
       `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.owner) \\(.title)"' {} \\;`,
     );
@@ -43,7 +43,8 @@ export default function IndexCommand() {
           },
         },
       });
-      return [];
+
+      throw new Error("Correct the path to jq or dowbload jq");
     }
 
     let result = stdout.split("\n").map((item) => {
@@ -112,6 +113,18 @@ export default function IndexCommand() {
         <ExtensionTypeDropdown ExtensionTypes={extensionTypes} onExtensionTypeChange={onExtensionTypeChange} />
       }
     >
+      <List.EmptyView
+        title={error ? "Correct the path to jq or download jq" : "No Results"}
+        icon={error ? { source: Icon.Warning, tintColor: Color.Red } : "noview.png"}
+        actions={
+          error ? (
+            <ActionPanel>
+              <Action.OpenInBrowser url="https://jqlang.github.io/jq/download/" title="Download Jq" />
+            </ActionPanel>
+          ) : null
+        }
+      />
+
       <List.Section title="Installed Extensions" subtitle={`${installedExtensions?.length}`}>
         {installedExtensions &&
           installedExtensions.map((item, index) => {
