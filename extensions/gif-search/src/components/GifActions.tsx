@@ -4,7 +4,7 @@ import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard, showIn
 
 import { getDefaultAction, ServiceName } from "../preferences";
 
-import AppContext, {AppStateAction} from "./AppContext";
+import AppContext, { AppStateAction } from "./AppContext";
 import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
@@ -30,7 +30,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, loadM
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   const actionIds = new Map([[service as ServiceName, new Set([id.toString()])]]);
 
