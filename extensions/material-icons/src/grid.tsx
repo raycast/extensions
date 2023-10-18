@@ -67,7 +67,7 @@ const SearchGridItem: React.VFC<{
       title={icon.name}
       subtitle={icon.codepoint}
       keywords={icon.tags}
-      content={{ source: icon.assets[materialIconStyle].url, tintColor: Color.PrimaryText }}
+      content={{ source: icon.assets[materialIconStyle].url, tintColor: { light: "black", dark: "white" } }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Copy to Clipboard">

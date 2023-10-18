@@ -4,7 +4,7 @@
 
 - Added a Download option to download Icons to Downloads folder. It can download icons for Web, Android, and IOS.
 
-## [Added grid view] - 2023-10-12
+## [Update] - 2023-10-12
 
 - Added Grid view
 - Updated raycast dependencies

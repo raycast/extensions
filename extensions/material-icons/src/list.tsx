@@ -26,7 +26,9 @@ const SearchListItem: React.VFC<{ icon: Icon }> = memo(({ icon }) => {
       subtitle={icon.codepoint}
       accessories={[
         { text: icon.categories },
-        ...icon.assets.slice(1).map((asset) => ({ icon: { source: asset.url, tintColor: Color.Blue } })),
+        ...icon.assets
+          .slice(1)
+          .map((asset) => ({ icon: { source: asset.url, tintColor: { light: "black", dark: "white" } } })),
       ]}
       actions={
         <ActionPanel>
@@ -48,7 +50,7 @@ const SearchListItem: React.VFC<{ icon: Icon }> = memo(({ icon }) => {
           </ActionPanel.Section>
         </ActionPanel>
       }
-      icon={{ source: icon.assets[0].url, tintColor: Color.Blue }}
+      icon={{ source: icon.assets[0].url, tintColor: { light: "black", dark: "white" } }}
     />
   );
 });
