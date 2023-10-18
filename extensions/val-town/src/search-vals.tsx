@@ -8,12 +8,14 @@ import { SearchedVals } from "./components/SearchedVals";
 import { MyLikedVals } from "./components/MyLikedVals";
 import { MyReferencedVals } from "./components/MyReferencedVals";
 import { Run } from "./types";
+import { useProfile } from "./hooks/useProfile";
 
 export default function ValTown() {
   const [searchText, setSearchText] = useState("");
   const { vals: searchedVals, isLoading: isSearching } = useSearchVals(searchText);
   const [showDetail, setShowDetail] = useState(false);
-  const { isLoading, runs, error } = useRuns();
+  const { profile, error } = useProfile();
+  const { isLoading, runs } = useRuns(profile?.id);
   const runsFiltered = (runs || [])
     .filter((v) => v.val)
     // TODO: if the api adds output or better info, then dont filter duplicates
@@ -54,7 +56,7 @@ const MainList = ({
   if (error)
     return (
       <List.EmptyView
-        icon={Icon.Footprints}
+        icon={Icon.Warning}
         title="Error"
         actions={
           <ActionPanel>

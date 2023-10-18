@@ -15,12 +15,12 @@ type ValsResponse = {
 
 export const useUserVals = (userId?: Profile["id"]) => {
   // TODO: Add pagination
-  const { isLoading, data } = useFetch<ValsResponse>(`${API_URL}/users/${userId}/vals?limit=100`, {
+  const { isLoading, data, error } = useFetch<ValsResponse>(`${API_URL}/users/${userId}/vals?limit=100`, {
     execute: !!userId,
     headers: {
       Authorization: `Bearer ${apiToken}`,
     },
   });
   const { data: vals, links } = data || { data: undefined, links: undefined };
-  return { isLoading, vals, links };
+  return { isLoading, vals, links, error };
 };

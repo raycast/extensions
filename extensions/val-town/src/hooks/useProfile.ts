@@ -7,11 +7,15 @@ const { apiToken } = getPreferenceValues();
 
 export const useProfile = (userId?: Profile["id"]) => {
   const endpoint = userId ? `${API_URL}/users/${userId}` : `${API_URL}/me`;
-  const { isLoading, data: profile } = useFetch<Profile>(endpoint, {
+  const {
+    isLoading,
+    data: profile,
+    error,
+  } = useFetch<Profile>(endpoint, {
     keepPreviousData: true,
     headers: {
       Authorization: `Bearer ${apiToken}`,
     },
   });
-  return { isLoading, profile };
+  return { isLoading, profile, error };
 };
