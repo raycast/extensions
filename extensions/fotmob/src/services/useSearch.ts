@@ -8,7 +8,7 @@ import fetch from "cross-fetch";
 
 export function useSearch(searchText: string) {
   const abortable = useRef<AbortController>();
-  const { data, error, isLoading } = useCachedPromise(
+  const { data, error, isLoading, revalidate } = useCachedPromise(
     async (query: string): Promise<SearchResultSection[]> => {
       const url = `https://apigw.fotmob.com/searchapi/suggest?term=${query}&lang=en`;
       const searchResponse = await fetch(url, {
@@ -117,7 +117,6 @@ export function useSearch(searchText: string) {
     },
     [searchText],
     {
-      initialData: [] as SearchResultSection[],
       abortable,
     }
   );
@@ -126,5 +125,6 @@ export function useSearch(searchText: string) {
     result: data,
     error,
     isLoading,
+    revalidate,
   };
 }

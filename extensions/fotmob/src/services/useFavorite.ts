@@ -79,6 +79,7 @@ export function useFavorite() {
       leagues,
       addItems,
       removeItems,
+      reloadData,
     }),
     [teams, players, leagues]
   );

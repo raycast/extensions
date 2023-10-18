@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { useState } from "react";
 import { useFavorite } from "../../services/useFavorite";
 import { useSearch } from "../../services/useSearch";
@@ -11,6 +11,11 @@ export default function SearchView() {
 
   const searchState = useSearch(searchText);
 
+  const isFavorite = (teamId: string) => {
+    const favoritedTeams = favoriteService.teams;
+    return favoritedTeams.some((team) => team.id === teamId);
+  };
+
   return (
     <List
       searchBarPlaceholder="Search for Clubs, Leagues, and Players"
@@ -18,10 +23,10 @@ export default function SearchView() {
       navigationTitle="Search"
       onSearchTextChange={setSearchText}
       throttle={true}
+      isLoading={searchState.isLoading}
     >
-      {searchText.length === 0 && <FavoriteView />}
-      {searchState.result.length !== 0 &&
-        searchState.result.map((section) => {
+      {((searchState.result ?? []).length > 0 &&
+        searchState.result?.map((section) => {
           return (
             <List.Section title={section.title} key={section.title}>
               {section.items.map((item) => (
@@ -30,11 +35,20 @@ export default function SearchView() {
                   icon={item.iamgeUrl}
                   title={item.title}
                   subtitle={item.subtitle}
-                  accessories={item.accessories}
+                  accessories={
+                    isFavorite(item.payload.id)
+                      ? [
+                          {
+                            icon: Icon.Star,
+                          },
+                        ]
+                      : []
+                  }
                   actions={
                     <ActionPanel>
                       {/* <Action.Push title="Show Details" target={<Detail markdown={JSON.stringify(item.raw)} />} /> */}
                       <Action
+                        icon={Icon.AppWindowSidebarRight}
                         title="Show Details"
                         onAction={() => {
                           launchTeamCommand(item.payload.id);
@@ -42,8 +56,17 @@ export default function SearchView() {
                       />
                       {item.type === "team" && (
                         <Action
-                          title="Add to Favorites"
+                          icon={isFavorite(item.payload.id) ? Icon.StarDisabled : Icon.Star}
+                          title={isFavorite(item.payload.id) ? "Remove From Favorites" : "Add To Favorites"}
                           onAction={async () => {
+                            if (isFavorite(item.payload.id)) {
+                              await favoriteService.removeItems("team", item.payload.id);
+                              showToast({
+                                style: Toast.Style.Success,
+                                title: "Removed from Favorites",
+                              });
+                              return;
+                            }
                             await favoriteService.addItems({
                               type: "team",
                               value: {
@@ -65,7 +88,7 @@ export default function SearchView() {
               ))}
             </List.Section>
           );
-        })}
+        })) || <FavoriteView />}
     </List>
   );
 }

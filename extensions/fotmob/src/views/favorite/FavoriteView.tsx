@@ -1,6 +1,12 @@
-import { ActionPanel, Detail, List, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useFavorite } from "../../services/useFavorite";
-import { buildLeagueLogoUrl, buildPlayerImageUrl, buildTeamLogoUrl } from "../../utils/url-builder";
+import {
+  buildLeagueDetailUrl,
+  buildLeagueLogoUrl,
+  buildPlayerDetailUrl,
+  buildPlayerImageUrl,
+  buildTeamLogoUrl,
+} from "../../utils/url-builder";
 import { launchTeamCommand } from "../../utils/launcher/launchTeamDetailCommand";
 
 export default function FavoriteView() {
@@ -23,12 +29,14 @@ export default function FavoriteView() {
             actions={
               <ActionPanel>
                 <Action
+                  icon={Icon.AppWindowSidebarRight}
                   title="Show Details"
                   onAction={() => {
                     launchTeamCommand(team.id);
                   }}
                 />
                 <Action
+                  icon={Icon.StarDisabled}
                   title="Remove From Favorite"
                   onAction={async () => {
                     await favoriteService.removeItems("team", team.id);
@@ -52,8 +60,13 @@ export default function FavoriteView() {
             subtitle={`ID: ${league.id}`}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
+                <Action.OpenInBrowser
+                  icon={Icon.Globe}
+                  title="Show Detail In Browser"
+                  url={buildLeagueDetailUrl(league.id)}
+                />
                 <Action
+                  icon={Icon.StarDisabled}
                   title="Remove From Favorite"
                   onAction={() => favoriteService.removeItems("league", league.id)}
                 />
@@ -71,8 +84,13 @@ export default function FavoriteView() {
             subtitle={`ID: ${player.id}`}
             actions={
               <ActionPanel>
-                <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
+                <Action.OpenInBrowser
+                  icon={Icon.Globe}
+                  title="Show Detail In Browser"
+                  url={buildPlayerDetailUrl(player.id)}
+                />
                 <Action
+                  icon={Icon.StarDisabled}
                   title="Remove From Favorite"
                   onAction={() => favoriteService.removeItems("player", player.id)}
                 />
