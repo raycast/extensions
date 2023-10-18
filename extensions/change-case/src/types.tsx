@@ -1,7 +1,7 @@
-const changeCase = require("../packages/change-case");
-const spongeCase = require("../packages/sponge-case");
-const swapCase = require("../packages/swap-case");
-const titleCase = require("../packages/title-case");
+import * as changeCase from "change-case";
+import { spongeCase } from "sponge-case";
+import { swapCase } from "swap-case";
+import { titleCase } from "title-case";
 
 export type CaseFunction = (input: string) => string;
 export type CaseFunctions = Record<string, CaseFunction>;
@@ -39,14 +39,14 @@ export const functions: CaseFunctions = {
   "Pascal Case": changeCase.pascalCase,
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
-  "Random Case": spongeCase.spongeCase,
+  "Random Case": spongeCase,
   "Sentence Case": changeCase.sentenceCase,
   "Snake Case": changeCase.snakeCase,
-  "Swap Case": swapCase.swapCase,
-  "Title Case": titleCase.titleCase,
+  "Swap Case": swapCase,
+  "Title Case": titleCase,
   "Upper Case": upperCase,
   "Upper First": upperFirst,
-  "Sponge Case": spongeCase.spongeCase, // see Random Case
+  "Sponge Case": spongeCase, // see Random Case
   "Train Case": changeCase.trainCase,
 };
 
