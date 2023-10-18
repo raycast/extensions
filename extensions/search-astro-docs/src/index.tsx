@@ -6,7 +6,7 @@ import { documentationListV3 as docsList } from "./data/docs";
 export default function UserSearchRoot() {
   const [search, setSearch] = useState<string>();
   return (
-    <List searchBarPlaceholder="Search the Astro Documentation" onSearchTextChange={setSearch} filtering={true}>
+    <List searchBarPlaceholder="Search the Astro Documentation" onSearchTextChange={setSearch} filtering throttle>
       {docsList.map((docsItem) => (
         <List.Item
           keywords={docsItem.keywords}
@@ -19,6 +19,7 @@ export default function UserSearchRoot() {
                 title="Open the Astro Documentation"
                 url={docsItem.url ? docsItem.url : `http://a.stro.cc/${docsItem.title}`}
               />
+              <Action onAction={openExtensionPreferences} title="Open Extension Preferences" icon={Icon.Gear} />
             </ActionPanel>
           }
         />
@@ -39,22 +40,6 @@ export default function UserSearchRoot() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open the Astro Documentation" url={"http://docs.astro.build/"} />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        key={"preferences"}
-        keywords={["settings", "language"]}
-        icon={Icon.Gear}
-        title={"Open extension preferences"}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Open Extension Preferences"
-              onAction={openExtensionPreferences}
-              icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-            />
           </ActionPanel>
         }
       />
