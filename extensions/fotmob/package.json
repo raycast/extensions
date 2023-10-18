@@ -15,18 +15,21 @@
     {
       "name": "matchday",
       "title": "Match Day",
+      "subtitle": "Fotmob",
       "description": "View matchday schedule, result",
       "mode": "view"
     },
     {
       "name": "favorite",
       "title": "Favorite",
+      "subtitle": "Fotmob",
       "description": "List favorite teams, players, leagues",
       "mode": "view"
     },
     {
       "name": "team",
       "title": "Team Detail",
+      "subtitle": "Fotmob",
       "description": "View detail of a team by team's id",
       "mode": "view",
       "arguments": [
