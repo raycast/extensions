@@ -1,5 +1,8 @@
 # GIF Search Changelog
 
+## [Catch error when returning to Gif Details after Copy GIF]
+- Catches `TypeError: dispatch is not a function` error that was displayed to the user
+
 ## [GIF Search Improvements]
 
 - Remove the list layout to simplify both the extension's user experience and developer experience.
