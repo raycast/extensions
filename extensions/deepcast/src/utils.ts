@@ -123,8 +123,8 @@ export async function sendTranslateRequest({
   }
 }
 
-export async function translate(target: TargetLanguage) {
-  await sendTranslateRequest({ targetLanguage: target });
+export async function translate(target: TargetLanguage, text?: string) {
+  await sendTranslateRequest({ targetLanguage: target, text: text });
 }
 
 export const source_languages = {

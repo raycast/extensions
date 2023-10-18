@@ -25,7 +25,9 @@ function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
 const Command = (props: LaunchProps) => {
   // Check whether component is called with an existing value for translation
   if (props?.launchContext?.translation) {
-    return <TranslationView {...props} />;
+    const translation = props?.launchContext?.translation;
+    const sourceLanguage = props?.launchContext?.sourceLanguage;
+    return <TranslationView translation={translation} sourceLanguage={sourceLanguage} />;
   }
   const { defaultTargetLanguage } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
