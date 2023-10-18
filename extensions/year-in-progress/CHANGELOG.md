@@ -1,8 +1,8 @@
 # Year in Progress Changelog
 
-## [Improvements] - 2023-10-18
+## [Improvement] - 2023-10-18
 
-- feat: x-in-progress add copy to clipboard action [#8849](https://github.com/raycast/extensions/pull/8849)
+- Added Copy to Clipboard action in the listview
 
 ## [Bugfix] - 2023-10-02
 
