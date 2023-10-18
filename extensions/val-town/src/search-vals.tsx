@@ -56,14 +56,14 @@ const MainList = ({
   if (error)
     return (
       <List.EmptyView
-        icon={Icon.Warning}
-        title="Error"
+        icon={Icon.MagnifyingGlass}
+        title="Search Only Mode"
         actions={
           <ActionPanel>
             <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
-        description={error.message === "Unauthorized" ? "Bad API Token" : error.message}
+        description={error.message === "Unauthorized" ? "The token came back as unauthorized" : error.message}
       />
     );
 
