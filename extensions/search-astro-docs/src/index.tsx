@@ -7,16 +7,6 @@ export default function UserSearchRoot() {
   const [search, setSearch] = useState<string>();
   return (
     <List searchBarPlaceholder="Search the Astro Documentation" onSearchTextChange={setSearch} filtering={true}>
-      <List.EmptyView
-        title="No Results"
-        icon="noview.png"
-        description={`Search '${search}' in the Astro Documentation`}
-        actions={
-          <ActionPanel>
-            <OpenSearchInBrowserAction search={search ?? ""} />
-          </ActionPanel>
-        }
-      />
       {docsList.map((docsItem) => (
         <List.Item
           keywords={docsItem.keywords}
@@ -33,6 +23,25 @@ export default function UserSearchRoot() {
           }
         />
       ))}
+      <List.Item
+        icon={"astro-search-icon.png"}
+        title={`Search '${search}' in the Astro Documentation`}
+        actions={
+          <ActionPanel>
+            <OpenSearchInBrowserAction search={search ?? ""} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        key={"open Astro documentation"}
+        title={"Open the Astro Documentation"}
+        icon={"astro-search-icon.png"}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open the Astro Documentation" url={"http://docs.astro.build/"} />
+          </ActionPanel>
+        }
+      />
       <List.Item
         key={"preferences"}
         keywords={["settings", "language"]}

@@ -1,6 +1,7 @@
+import { getPreferenceValues } from "@raycast/api";
 import { DocumentationEntry } from "../types/types";
-import { preferences } from "../utils";
 
+const preferences = getPreferenceValues();
 const lang = preferences.language ?? "en";
 
 export const documentationListV3: DocumentationEntry[] = [
