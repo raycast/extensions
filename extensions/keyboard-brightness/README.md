@@ -2,7 +2,7 @@
 
 # Mac Keyboard Brightness
 
-Easily Control Keyboard Brightness on your Apple Silicon MacBook
+Easily Control Keyboard Brightness on your MacBook
 
 
 ![keyboard-brightness-1](https://github.com/neo773/mac-keyboard-brightness/assets/62795688/e68b03a4-cb34-4a53-9997-e52fc264f030)
