@@ -1,6 +1,9 @@
 # GIF Search Changelog
 
-## [GIF Search Improvements]
+## [Catch error when returning to Gif Details after Copy GIF] - 2023-10-18
+- Catches `TypeError: dispatch is not a function` error that was displayed to the user
+
+## [GIF Search Improvements] - 2023-10-02
 
 - Remove the list layout to simplify both the extension's user experience and developer experience.
 - Add "frecency" sorting to recents and favorites so that often-used GIFs come first.

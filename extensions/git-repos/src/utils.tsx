@@ -181,7 +181,9 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
 
 async function findSubmodules(path: string): Promise<string[]> {
   const { stdout } = await execp(
-    `grep "\\[submodule"  ${path + "/.gitmodules"} | sed "s%\\[submodule \\"%\${1%/.git}/%g" | sed "s/\\"]//g"`
+    `grep "\\[submodule"  ${
+      path.replace(/(\s+)/g, "\\$1") + "/.gitmodules"
+    } | sed "s%\\[submodule \\"%\${1%/.git}/%g" | sed "s/\\"]//g"`
   );
   const paths = stdout.split("\n").filter((e) => e);
   const submodulePaths = paths.map((subPath) => {
@@ -208,7 +210,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
-      const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type d`;
+      const findCmd = `find -L ${path.replace(/(\s+)/g, "\\$1")} -maxdepth ${maxDepth} -name .git -type d`;
       const { stdout, stderr } = await execp(findCmd);
       if (stderr) {
         showToast(Toast.Style.Failure, "Find Failed", stderr);
