@@ -61,6 +61,85 @@ export const docList: DocType[] = [
   },
   {
     section: {
+      sectionTitle: "Filters",
+      items: [
+        {
+          title: "Array",
+          url: "https://shopify.dev/docs/api/liquid/filters/array-filters",
+        },
+        {
+          title: "Cart",
+          url: "https://shopify.dev/docs/api/liquid/filters/cart-filters",
+        },
+        {
+          title: "Collection",
+          url: "https://shopify.dev/docs/api/liquid/filters/collection-filters",
+        },
+        {
+          title: "Color",
+          url: "https://shopify.dev/docs/api/liquid/filters/color-filters",
+        },
+        {
+          title: "Customer",
+          url: "https://shopify.dev/docs/api/liquid/filters/customer-filters",
+        },
+        {
+          title: "Default",
+          url: "https://shopify.dev/docs/api/liquid/filters/default-filters",
+        },
+        {
+          title: "Font",
+          url: "https://shopify.dev/docs/api/liquid/filters/font-filters",
+        },
+        {
+          title: "Format",
+          url: "https://shopify.dev/docs/api/liquid/tags/variable-tags",
+        },
+        {
+          title: "HTML",
+          url: "https://shopify.dev/docs/api/liquid/filters/html-filters",
+        },
+        {
+          title: "Hosted Files",
+          url: "https://shopify.dev/docs/api/liquid/filters/hosted_file-filters",
+        },
+        {
+          title: "Localization",
+          url: "https://shopify.dev/docs/api/liquid/filters/localization-filters",
+        },
+        {
+          title: "Math",
+          url: "https://shopify.dev/docs/api/liquid/filters/math-filters",
+        },
+        {
+          title: "Media",
+          url: "https://shopify.dev/docs/api/liquid/filters/media-filters",
+        },
+        {
+          title: "Metafield",
+          url: "https://shopify.dev/docs/api/liquid/filters/metafield-filters",
+        },
+        {
+          title: "Money",
+          url: "https://shopify.dev/docs/api/liquid/filters/money-filters",
+        },
+        {
+          title: "Payment",
+          url: "https://shopify.dev/docs/api/liquid/filters/payment-filters",
+        },
+        {
+          title: "String",
+          url: "https://shopify.dev/docs/api/liquid/filters/string-filters",
+        },
+        {
+          title: "Tag",
+          url: "https://shopify.dev/docs/api/liquid/filters/tag-filters",
+        },
+      ],
+    },
+  },
+  {
+    section: {
       sectionTitle: "Objects",
       items: [
         {
@@ -566,85 +645,6 @@ export const docList: DocType[] = [
         {
           title: "video_source",
           url: "https://shopify.dev/docs/api/liquid/objects/video",
-        },
-      ],
-    },
-  },
-  {
-    section: {
-      sectionTitle: "Filters",
-      items: [
-        {
-          title: "Array",
-          url: "https://shopify.dev/docs/api/liquid/filters/array-filters",
-        },
-        {
-          title: "Cart",
-          url: "https://shopify.dev/docs/api/liquid/filters/cart-filters",
-        },
-        {
-          title: "Collection",
-          url: "https://shopify.dev/docs/api/liquid/filters/collection-filters",
-        },
-        {
-          title: "Color",
-          url: "https://shopify.dev/docs/api/liquid/filters/color-filters",
-        },
-        {
-          title: "Customer",
-          url: "https://shopify.dev/docs/api/liquid/filters/customer-filters",
-        },
-        {
-          title: "Default",
-          url: "https://shopify.dev/docs/api/liquid/filters/default-filters",
-        },
-        {
-          title: "Font",
-          url: "https://shopify.dev/docs/api/liquid/filters/font-filters",
-        },
-        {
-          title: "Format",
-          url: "https://shopify.dev/docs/api/liquid/tags/variable-tags",
-        },
-        {
-          title: "HTML",
-          url: "https://shopify.dev/docs/api/liquid/filters/html-filters",
-        },
-        {
-          title: "Hosted Files",
-          url: "https://shopify.dev/docs/api/liquid/filters/hosted_file-filters",
-        },
-        {
-          title: "Localization",
-          url: "https://shopify.dev/docs/api/liquid/filters/localization-filters",
-        },
-        {
-          title: "Math",
-          url: "https://shopify.dev/docs/api/liquid/filters/math-filters",
-        },
-        {
-          title: "Media",
-          url: "https://shopify.dev/docs/api/liquid/filters/media-filters",
-        },
-        {
-          title: "Metafield",
-          url: "https://shopify.dev/docs/api/liquid/filters/metafield-filters",
-        },
-        {
-          title: "Money",
-          url: "https://shopify.dev/docs/api/liquid/filters/money-filters",
-        },
-        {
-          title: "Payment",
-          url: "https://shopify.dev/docs/api/liquid/filters/payment-filters",
-        },
-        {
-          title: "String",
-          url: "https://shopify.dev/docs/api/liquid/filters/string-filters",
-        },
-        {
-          title: "Tag",
-          url: "https://shopify.dev/docs/api/liquid/filters/tag-filters",
         },
       ],
     },
