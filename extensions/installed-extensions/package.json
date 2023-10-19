@@ -22,7 +22,7 @@
           "type": "textfield",
           "required": false,
           "title": "Path to jq",
-          "placeholder": "/opt/homebrew/bin/jq"
+          "placeholder": "Leave blank for default homebrew path"
         },
         {
           "name": "separator",

@@ -23,7 +23,7 @@ const exec = promisify(execCb);
 export default function IndexCommand() {
   const preferenes = getPreferenceValues<Preferences.Index>();
 
-  let jqPath = "/opt/homebrew/bin/jq";
+  let jqPath = process.arch == "arm64" ? "/opt/homebrew/bin/jq" : "/usr/local/homebrew/bin/jq";
   if (preferenes.jqPath || preferenes.jqPath?.trim()) {
     jqPath = preferenes.jqPath;
   }
