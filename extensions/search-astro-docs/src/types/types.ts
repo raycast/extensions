@@ -4,3 +4,7 @@ export interface DocumentationEntry {
   keywords?: string[];
   icon?: string;
 }
+
+export interface Preferences {
+  lang?: string;
+}
