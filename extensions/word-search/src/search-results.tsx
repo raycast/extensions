@@ -38,7 +38,7 @@ export default function SearchResults(
         />
       ) : (
         words.map((word) => {
-          const wordString = searchIsCapitalized ? word.word[0] + word.word.slice(1) : word.word;
+          const wordString = searchIsCapitalized ? word.word.charAt(0).toUpperCase() + word.word.slice(1) : word.word;
           return (
             <List.Item
               icon={"command-icon.png"}
