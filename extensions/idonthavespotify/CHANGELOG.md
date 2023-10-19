@@ -1,8 +1,12 @@
 # I Don't Have Spotify Changelog
 
+## [API Schema updates] - 2023-10-19
+
+- Upgrade to API v1.3
+
 ## [Deezer link] - 2023-04-10
 
-- Upgrade to API v2
+- Upgrade to API v1.2
 - Deezer link
 - No available links validation
 
