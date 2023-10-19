@@ -1,5 +1,11 @@
 # Crates Search
 
+## [Added] - 2023-10-19
+
+- Can now search for symbols in crates
+- Added Cache to symbols to speed up search
+- Added Shortcuts
+
 ## [Added] - 2023-06-12
 
 ### Updated
