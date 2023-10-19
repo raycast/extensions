@@ -154,6 +154,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           message: reminder.title,
         });
       } catch (error) {
+        console.log(error);
         await showToast({
           style: Toast.Style.Failure,
           title: "Unable to delete reminder",

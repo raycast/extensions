@@ -34,5 +34,5 @@ export async function setReminderDueDate(reminderId: string, dueDate: string | n
 }
 
 export async function deleteReminder(reminderId: string) {
-  return await reminders.delete<{ status: string }>(reminderId);
+  return await reminders.deleteReminder<{ status: string }>(reminderId);
 }
