@@ -14,8 +14,9 @@ export default function ValTown() {
   const [searchText, setSearchText] = useState("");
   const { vals: searchedVals, isLoading: isSearching } = useSearchVals(searchText);
   const [showDetail, setShowDetail] = useState(false);
-  const { profile, error } = useProfile();
+  const { profile, error, isLoading: isProfileLoading } = useProfile();
   const { isLoading, runs } = useRuns(profile?.id);
+
   const runsFiltered = (runs || [])
     .filter((v) => v.val)
     // TODO: if the api adds output or better info, then dont filter duplicates
@@ -25,7 +26,7 @@ export default function ValTown() {
     <List
       searchBarPlaceholder="Search public vals"
       navigationTitle={searchText ? "Search Results" : "Recent Runs"}
-      isLoading={isSearching || isLoading}
+      isLoading={isSearching || isLoading || isProfileLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       isShowingDetail={showDetail}
@@ -36,7 +37,13 @@ export default function ValTown() {
       {searchText && searchedVals ? (
         <SearchedVals vals={searchedVals} isShowingDetail={showDetail} setShowDetail={setShowDetail} />
       ) : (
-        <MainList runs={runsFiltered} error={error} isShowingDetail={showDetail} setShowingDetail={setShowDetail} />
+        <MainList
+          runs={runsFiltered}
+          isLoading={profile === undefined}
+          error={error}
+          isShowingDetail={showDetail}
+          setShowingDetail={setShowDetail}
+        />
       )}
     </List>
   );
@@ -47,12 +54,15 @@ const MainList = ({
   isShowingDetail,
   setShowingDetail,
   error,
+  isLoading,
 }: {
   runs: Run[];
   isShowingDetail: boolean;
   setShowingDetail: React.Dispatch<React.SetStateAction<boolean>>;
   error: Error | undefined;
+  isLoading: boolean;
 }) => {
+  if (isLoading) return null;
   if (error)
     return (
       <List.EmptyView

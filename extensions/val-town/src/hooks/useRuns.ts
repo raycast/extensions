@@ -8,7 +8,6 @@ import { useUserVals } from "./useUserVals";
 // Check commit history for the old implementation
 export const useRuns = (userId?: Profile["id"]) => {
   const { vals, isLoading } = useUserVals(userId);
-
   const runs: Run[] = (vals ?? [])
     ?.map((val) => ({
       id: val.id,
