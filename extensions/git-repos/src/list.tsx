@@ -11,8 +11,10 @@ import {
   open,
 } from "@raycast/api";
 
+import path from "path";
+import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { GitRepo, Preferences, tildifyPath, GitRepoService } from "./utils";
+import { GitRepo, Preferences, tildifyPath, GitRepoService, GitRepoType } from "./utils";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -23,31 +25,44 @@ export default function Command() {
     favoriteGitReposState.data?.includes(gitRepo.fullPath)
   );
 
+  const repoTypes = Object.keys(GitRepoType)
+    .filter((key) => isNaN(Number(key)) && (preferences.includeSubmodules || key !== GitRepoType.Submodule))
+    .map((repoType) => repoType as GitRepoType);
+  const [currentRepoType, onRepoTypeChange] = useState(GitRepoType.All);
+
   const gitRepos = gitReposState.data?.filter((gitRepo) => !favoriteGitReposState.data?.includes(gitRepo.fullPath));
 
   return (
-    <List isLoading={gitReposState.isLoading} filtering={{ keepSectionOrder: true }}>
+    <List
+      isLoading={gitReposState.isLoading}
+      filtering={{ keepSectionOrder: true }}
+      searchBarAccessory={<GitRepoPropertyDropdown repoTypes={repoTypes} onRepoTypeChange={onRepoTypeChange} />}
+    >
       <List.Section title="Favorites">
-        {favoriteGitRepos?.map((repo) => (
-          <GitRepoListItem
-            key={repo.fullPath}
-            preferences={preferences}
-            repo={repo}
-            isFavorite={true}
-            revalidate={favoriteGitReposState.revalidate}
-          />
-        ))}
+        {favoriteGitRepos
+          ?.filter((repo) => currentRepoType === GitRepoType.All || currentRepoType === repo.repoType)
+          .map((repo) => (
+            <GitRepoListItem
+              key={repo.fullPath}
+              preferences={preferences}
+              repo={repo}
+              isFavorite={true}
+              revalidate={favoriteGitReposState.revalidate}
+            />
+          ))}
       </List.Section>
       <List.Section title={favoriteGitRepos?.length ? "Repos" : undefined}>
-        {gitRepos?.map((repo) => (
-          <GitRepoListItem
-            key={repo.fullPath}
-            preferences={preferences}
-            repo={repo}
-            isFavorite={false}
-            revalidate={favoriteGitReposState.revalidate}
-          />
-        ))}
+        {gitRepos
+          ?.filter((repo) => currentRepoType === GitRepoType.All || currentRepoType === repo.repoType)
+          .map((repo) => (
+            <GitRepoListItem
+              key={repo.fullPath}
+              preferences={preferences}
+              repo={repo}
+              isFavorite={false}
+              revalidate={favoriteGitReposState.revalidate}
+            />
+          ))}
       </List.Section>
     </List>
   );
@@ -62,6 +77,16 @@ function GitRepoListItem(props: {
   const preferences = props.preferences;
   const repo = props.repo;
   const isFavorite = props.isFavorite;
+  const tildifiedPath = tildifyPath(repo.fullPath);
+  const keywords = (() => {
+    switch (preferences.searchKeys) {
+      default:
+      case "name":
+        return [repo.name];
+      case "fullPath":
+        return tildifiedPath.split(path.sep);
+    }
+  })();
 
   function getTarget(repo: GitRepo, bundleId = ""): string {
     // Should it return the repo fullPath or url?
@@ -78,8 +103,8 @@ function GitRepoListItem(props: {
     <List.Item
       title={repo.name}
       icon={repo.icon}
-      accessories={[{ text: tildifyPath(repo.fullPath) }]}
-      keywords={[repo.name]}
+      accessories={[{ text: tildifiedPath }]}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -245,5 +270,27 @@ function GitRepoListItem(props: {
         </ActionPanel>
       }
     />
+  );
+}
+
+function GitRepoPropertyDropdown(props: {
+  repoTypes: GitRepoType[];
+  onRepoTypeChange: (newValue: GitRepoType) => void;
+}): JSX.Element {
+  const { repoTypes, onRepoTypeChange } = props;
+  return (
+    <List.Dropdown
+      tooltip="Filter repo type"
+      storeValue={true}
+      onChange={(newValue) => {
+        onRepoTypeChange(newValue as GitRepoType);
+      }}
+    >
+      {repoTypes
+        .map((repoType) => GitRepoType[repoType])
+        .map((repoType) => (
+          <List.Dropdown.Item key={repoType} title={repoType} value={repoType} />
+        ))}
+    </List.Dropdown>
   );
 }
