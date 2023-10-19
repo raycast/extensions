@@ -3,6 +3,8 @@
 ## [API Schema updates] - 2023-10-19
 
 - Upgrade to API v1.3
+- Mobile links support
+- Fix spotify link validations
 
 ## [Deezer link] - 2023-04-10
 

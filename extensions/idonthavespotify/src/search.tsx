@@ -37,14 +37,23 @@ export default function Command() {
     async (spotifyLink: string) => {
       setSearchText(spotifyLink);
 
-      if (!spotifyLink) {
+      if (!SPOTIFY_LINK_REGEX.test(spotifyLink)) {
         return;
       }
 
       setIsLoading(true);
 
       try {
-        const request = await fetch(`${API_URL}&spotifyLink=${spotifyLink}`);
+        const request = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            spotifyLink,
+          }),
+        });
+
         const spotifyContent = (await request.json()) as SpotifyContent & ApiError;
 
         if (request.status !== 200) {
