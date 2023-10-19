@@ -62,7 +62,6 @@ const MainList = ({
   error: Error | undefined;
   isLoading: boolean;
 }) => {
-  if (isLoading) return null;
   if (error)
     return (
       <List.EmptyView
@@ -76,7 +75,7 @@ const MainList = ({
         description={error.message === "Unauthorized" ? "The token came back as unauthorized" : error.message}
       />
     );
-
+  if (isLoading) return null;
   return (
     <>
       <MyVals />
