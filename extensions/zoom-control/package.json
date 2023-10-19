@@ -16,28 +16,32 @@
     {
       "icon": "zoom-mute.png",
       "name": "mute",
-      "title": "Zoom - Mute Meeting",
+      "title": "Mute Meeting",
+      "subtitle": "Zoom",
       "description": "Mutes current Zoom meeting",
       "mode": "no-view"
     },
     {
       "icon": "zoom-unmute.png",
       "name": "unmute",
-      "title": "Zoom - Unmute Meeting",
+      "title": "Unmute Meeting",
+      "subtitle": "Zoom",
       "description": "Unmutes current Zoom meeting",
       "mode": "no-view"
     },
     {
       "icon": "zoom-video-on.png",
       "name": "video-on",
-      "title": "Zoom - Start Video",
+      "title": "Start Video",
+      "subtitle": "Zoom",
       "description": "Starts video in current Zoom meeting",
       "mode": "no-view"
     },
     {
       "icon": "zoom-video-off.png",
       "name": "video-off",
-      "title": "Zoom - Stop Video",
+      "title": "Stop Video",
+      "subtitle": "Zoom",
       "description": "Stops video in current Zoom meeting",
       "mode": "no-view"
     }
