@@ -9,49 +9,63 @@ import {
   Clipboard,
   showHUD,
   openExtensionPreferences,
-} from "@raycast/api";
-import { useCachedPromise, showFailureToast } from "@raycast/utils";
-import { exec as execCb } from "child_process";
-import { useState } from "react";
-import { promisify } from "util";
-import { dataType, optionType } from "./types";
-import { extensionTypes } from "./constants";
-import { formatItem, formatOutput } from "./utils";
+} from "@raycast/api"
+import { useCachedPromise, showFailureToast } from "@raycast/utils"
+import { exec as execCb } from "child_process"
+import { useState } from "react"
+import { promisify } from "util"
+import { dataType, optionType } from "./types"
+import { extensionTypes } from "./constants"
+import { formatItem, formatOutput } from "./utils"
+import fs from "fs"
 
-const exec = promisify(execCb);
+const exec = promisify(execCb)
+const jqPathApple = "/opt/homebrew/bin/jq"
+const jqPathIntel = "/usr/local/bin/jq"
 
 export default function IndexCommand() {
-  const preferenes = getPreferenceValues<Preferences.Index>();
+  const preferenes = getPreferenceValues<Preferences.Index>()
 
-  let jqPath = "/opt/homebrew/bin/jq";
-  if (preferenes.jqPath || preferenes.jqPath?.trim()) {
-    jqPath = preferenes.jqPath;
+  let jqPath = ""
+
+  if (fs.existsSync(jqPathApple)) {
+    jqPath = jqPathApple
+  } else if (fs.existsSync(jqPathIntel)) {
+    jqPath = jqPathIntel
+  } else if (preferenes.jqPath?.trim()) {
+    jqPath = preferenes.jqPath
+  } else {
+    // 抛出错误，或者进行一些其他处理
   }
 
-  const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([]);
+  if (preferenes.jqPath || preferenes.jqPath?.trim()) {
+    jqPath = preferenes.jqPath
+  }
+
+  const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([])
   const { isLoading, data, error } = useCachedPromise(async () => {
     const { stdout, stderr } = await exec(
       `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.owner) \\(.title)"' {} \\;`,
-    );
+    )
 
     if (stderr) {
       showFailureToast("Correct the path to jq or dowbload jq", {
         primaryAction: {
           title: "Download jq",
           onAction: () => {
-            open("https://jqlang.github.io/jq/download/");
+            open("https://jqlang.github.io/jq/download/")
           },
         },
-      });
+      })
 
-      throw new Error("Correct the path to jq or dowbload jq");
+      throw new Error("Correct the path to jq or dowbload jq")
     }
 
     let result = stdout.split("\n").map((item) => {
-      const [path, author, icon, commands, name, owner, ...titleParts] = item.trim().split(" ");
-      const title = titleParts.join(" ");
-      const cleanedPath = path.replace("/package.json:", "");
-      const link = `https://raycast.com/${owner == "null" ? author : owner}/${name}`;
+      const [path, author, icon, commands, name, owner, ...titleParts] = item.trim().split(" ")
+      const title = titleParts.join(" ")
+      const cleanedPath = path.replace("/package.json:", "")
+      const link = `https://raycast.com/${owner == "null" ? author : owner}/${name}`
 
       return {
         path: cleanedPath,
@@ -64,28 +78,28 @@ export default function IndexCommand() {
         link,
         isOrganization: owner !== "null",
         isLocalExtension: !!cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
-      };
-    });
+      }
+    })
 
-    result = result.filter((item) => item.title !== "" && item.author !== "");
-    result = result.sort((a, b) => a.title.localeCompare(b.title));
+    result = result.filter((item) => item.title !== "" && item.author !== "")
+    result = result.sort((a, b) => a.title.localeCompare(b.title))
 
-    setInstalledExtensions(result);
+    setInstalledExtensions(result)
 
-    return result;
-  });
+    return result
+  })
 
   function ExtensionTypeDropdown(props: {
-    ExtensionTypes: optionType[];
-    onExtensionTypeChange: (newValue: string) => void;
+    ExtensionTypes: optionType[]
+    onExtensionTypeChange: (newValue: string) => void
   }) {
-    const { ExtensionTypes, onExtensionTypeChange } = props;
+    const { ExtensionTypes, onExtensionTypeChange } = props
     return (
       <List.Dropdown
         tooltip="Select Extension Type"
         storeValue={false}
         onChange={(newValue) => {
-          onExtensionTypeChange(newValue);
+          onExtensionTypeChange(newValue)
         }}
       >
         <List.Dropdown.Section title="Extension Type">
@@ -94,17 +108,17 @@ export default function IndexCommand() {
           ))}
         </List.Dropdown.Section>
       </List.Dropdown>
-    );
+    )
   }
 
   const onExtensionTypeChange = (newValue: string) => {
     const filteredExtensions: dataType[] =
       data?.filter((item) => {
-        return newValue === "local" ? item.isLocalExtension : newValue === "store" ? !item.isLocalExtension : true;
-      }) || [];
+        return newValue === "local" ? item.isLocalExtension : newValue === "store" ? !item.isLocalExtension : true
+      }) || []
 
-    setInstalledExtensions(filteredExtensions);
-  };
+    setInstalledExtensions(filteredExtensions)
+  }
 
   return (
     <List
@@ -128,21 +142,21 @@ export default function IndexCommand() {
       <List.Section title="Installed Extensions" subtitle={`${installedExtensions?.length}`}>
         {installedExtensions &&
           installedExtensions.map((item, index) => {
-            const accessories = [];
+            const accessories = []
             if (item.isLocalExtension) {
               accessories.push({
                 tag: { color: Color.Green, value: "Local extension" },
                 icon: Icon.HardDrive,
-              });
+              })
             }
 
             if (item.isOrganization) {
-              accessories.push({ tag: item.owner, icon: Icon.Crown, tooltip: "Organization" });
+              accessories.push({ tag: item.owner, icon: Icon.Crown, tooltip: "Organization" })
             } else {
-              accessories.push({ tag: item.author, icon: Icon.Person, tooltip: "Author" });
+              accessories.push({ tag: item.author, icon: Icon.Person, tooltip: "Author" })
             }
 
-            accessories.push({ tag: `${item.commands}`, icon: Icon.ComputerChip, tooltip: "Commands" });
+            accessories.push({ tag: `${item.commands}`, icon: Icon.ComputerChip, tooltip: "Commands" })
 
             return (
               <List.Item
@@ -155,8 +169,8 @@ export default function IndexCommand() {
                     <ActionPanel.Section title="Extension">
                       <Action
                         onAction={() => {
-                          Clipboard.copy(formatItem(item, preferenes.format));
-                          showHUD("Copied to Clipboard");
+                          Clipboard.copy(formatItem(item, preferenes.format))
+                          showHUD("Copied to Clipboard")
                         }}
                         title="Copy Item to Clipboard"
                         icon={Icon.Clipboard}
@@ -171,8 +185,8 @@ export default function IndexCommand() {
                               preferenes.separator,
                               preferenes.prepend,
                             ),
-                          );
-                          showHUD("Copied to Clipboard");
+                          )
+                          showHUD("Copied to Clipboard")
                         }}
                         title="Copy Extension List to Clipboard"
                         icon={Icon.Clipboard}
@@ -189,9 +203,9 @@ export default function IndexCommand() {
                 }
                 accessories={accessories}
               />
-            );
+            )
           })}
       </List.Section>
     </List>
-  );
+  )
 }
