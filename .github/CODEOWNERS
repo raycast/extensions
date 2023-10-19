@@ -356,6 +356,7 @@
 /extensions/fontawesome                              @dutzi @DanielFerguson
 /extensions/fork-repositories                        @sxn
 /extensions/format-graphql                           @tngranados
+/extensions/fotmob                                   @sonla58
 /extensions/foundry-cast-cli                         @merklefruit
 /extensions/frankerfacez                             @davidchalifoux
 /extensions/french-verb-conjugation                  @J0
@@ -485,6 +486,7 @@
 /extensions/inpost-parcel-lockers                    @timrogers
 /extensions/input-source-switcher                    @danulqua
 /extensions/inspire-search                           @errepuntopenco
+/extensions/installed-extensions                     @pernielsentikaer
 /extensions/internet-radio                           @SKaplanOfficial @pernielsentikaer @jonasmerlin
 /extensions/ios-hig                                  @eliperkins
 /extensions/ip-geolocation                           @koinzhang
@@ -840,6 +842,7 @@
 /extensions/random-password-generator                @textnav
 /extensions/random-text-picker                       @ezzylan @pernielsentikaer
 /extensions/random-us-phone-number                   @yug2005
+/extensions/ratio-calculator                         @Justiniscoding
 /extensions/ray-so                                   @gt-codes @RSO @dgrzedzielski
 /extensions/raycast-arcade                           @EvanZhouDev
 /extensions/raycast-bard-ai                          @EvanZhouDev @Visual-Studio-Coder
@@ -918,6 +921,7 @@
 /extensions/screenshot                               @Aayush9029 @nirtamir2
 /extensions/script-commands                          @unnamedd
 /extensions/script-kit                               @pomdtr
+/extensions/search-astro-docs                        @ElianCodes
 /extensions/search-chatwork                          @nagauta
 /extensions/search-composer-packagist                @danyelkeddah @macbookandrew
 /extensions/search-hexpm                             @jordelver
@@ -1115,6 +1119,7 @@
 /extensions/urban-dictionary                         @pernielsentikaer @zhenpewu
 /extensions/url-shortener                            @Visual-Studio-Coder
 /extensions/url-tools                                @joshauh46
+/extensions/utm-campaign-builder                     @vimtor
 /extensions/utm-virtual-machines                     @alaidriel
 /extensions/uuid-generator                           @jmaeso @GastroGeek @pernielsentikaer @LunaticMuch @hmarr
 /extensions/v2ex                                     @mopig
@@ -1145,7 +1150,7 @@
 /extensions/websocket-debugging                      @RhysLees
 /extensions/wechat                                   @raffeyang
 /extensions/whatsapp                                 @vimtor
-/extensions/whois                                    @zavbala @snilan
+/extensions/whois                                    @zavbala @snilan @solid-pixel
 /extensions/whosampled                               @ajtruex @pernielsentikaer
 /extensions/wi-fi                                    @koinzhang @louishuyng
 /extensions/wifi-password-reveal                     @louishuyng
@@ -1193,6 +1198,7 @@
 /extensions/zen-mode                                 @pradeepb28
 /extensions/zendesk                                  @cpenned
 /extensions/zeplin-project-search                    @dorukgunes
+/extensions/zipcodebase                              @xmok
 /extensions/znotch                                   @zkondor
 /extensions/zoom                                     @thomaslombart @Visual-Studio-Coder
 /extensions/zotero                                   @sadanand-singh @lazarjov
