@@ -1,16 +1,23 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, Color, List } from "@raycast/api";
 import { UptimeKuma, Monitor, Uptime, AvgPing, Heartbeat, HeartbeatList } from "./modules/UptimeKuma";
 import { useEffect, useState } from "react";
-import { useImmer } from "use-immer";
 import { MonitorDetail } from "./monitor-detail";
 import { getHeartbeatListEmoji, getMonitorStatusColor, getMonitorStatusIcon, getSummaryMessage } from "./utils/display";
 import { showToast, Toast } from "@raycast/api";
+import { useAppStore } from "./utils/store";
 
 export default function Command() {
-  const [monitors, setMonitors] = useImmer<Array<Monitor>>([]);
   const [kuma_url, setKumaUrl] = useState<string>("");
   const [monitorListFetched, setMonitorListFetched] = useState<boolean>(false);
   const [kumaInstance, setKumaInstance] = useState<UptimeKuma | null>(null);
+  const {
+    monitors,
+    setMonitors,
+    updateMonitorHeartbeat,
+    updateMonitorUptime,
+    updateMonitorAvgPing,
+    updateMonitorHeartbeatList,
+  } = useAppStore();
 
   useEffect(() => {
     const { kuma_url, kuma_token } = getPreferenceValues();
@@ -43,72 +50,25 @@ export default function Command() {
       // Convert the received object to an array
       const updatedMonitors = Object.values(newMonitors) as Array<Monitor>;
 
-      setMonitors((draft) => {
-        updatedMonitors.forEach((updatedMonitor) => {
-          const index = draft.findIndex((m) => m.id === updatedMonitor.id);
-
-          if (index !== -1) {
-            // Si le monitor existe déjà, mettez-le à jour
-            Object.assign(draft[index], updatedMonitor);
-          } else {
-            // Sinon, ajoutez le nouveau monitor
-            draft.push(updatedMonitor);
-          }
-        });
-
-        // Supprimez les moniteurs qui n'existent plus dans le nouvel ensemble
-        for (let i = draft.length - 1; i >= 0; i--) {
-          if (!updatedMonitors.some((m) => m.id === draft[i].id)) {
-            draft.splice(i, 1);
-          }
-        }
-      });
+      setMonitors(updatedMonitors);
 
       setMonitorListFetched(true);
     });
 
     kuma.on("heartbeatList", (payload: HeartbeatList) => {
-      setMonitors((draft) => {
-        const monitor = draft.find((monitor) => monitor.id == payload.monitorID);
-        if (monitor) {
-          monitor.heartbeats = payload.heartbeatList;
-
-          if (payload.heartbeatList.length > 0) {
-            monitor.heartbeat = payload.heartbeatList.at(-1);
-          }
-        }
-      });
+      updateMonitorHeartbeatList(payload);
     });
 
     kuma.on("heartbeat", (hearbeat: Heartbeat) => {
-      setMonitors((draft) => {
-        const monitor = draft.find((monitor) => monitor.id == hearbeat.monitorID);
-        if (monitor) {
-          monitor.heartbeat = hearbeat;
-        }
-      });
+      updateMonitorHeartbeat(hearbeat);
     });
 
     kuma.on("avgPing", (avgPing: AvgPing) => {
-      setMonitors((draft) => {
-        const monitor = draft.find((monitor) => monitor.id == avgPing.monitorID);
-        if (monitor) {
-          monitor.avgPing = avgPing.avgPing;
-        }
-      });
+      updateMonitorAvgPing(avgPing);
     });
 
     kuma.on("uptime", (payload: Uptime) => {
-      setMonitors((draft) => {
-        const monitor = draft.find((monitor) => monitor.id == payload.monitorID);
-        if (monitor) {
-          if (payload.period == 720) {
-            monitor.uptime720 = payload.percent * 100;
-          } else if (payload.period == 24) {
-            monitor.uptime24 = payload.percent * 100;
-          }
-        }
-      });
+      updateMonitorUptime(payload);
     });
 
     kuma.connect();
@@ -124,7 +84,7 @@ export default function Command() {
           accessoryTitle={monitor.heartbeats ? getHeartbeatListEmoji(monitor.heartbeats, 5) : ""}
           actions={
             <ActionPanel>
-              <Action.Push title="Monitor Detail" target={<MonitorDetail kuma={kumaInstance} monitor={monitor} />} />
+              <Action.Push title="Monitor Detail" target={<MonitorDetail monitorId={monitor.id} />} />
 
               <Action
                 title={`${monitor.active ? "Pause Monitor" : "Resume Monitor"}`}

@@ -20,7 +20,7 @@ export interface Uptime {
 }
 
 export interface Monitor {
-  id: string;
+  id: number;
   name: string;
   url: string;
   uptime24: number | undefined;
@@ -191,12 +191,12 @@ export class UptimeKuma extends EventEmitter {
     );
   }
 
-  pauseMonitor(monitorID: string, CB: Callback) {
-    this.socket?.emit("pauseMonitor", parseInt(monitorID), CB);
+  pauseMonitor(monitorID: number, CB: Callback) {
+    this.socket?.emit("pauseMonitor", monitorID, CB);
   }
 
-  resumeMonitor(monitorID: string, CB: Callback) {
-    this.socket?.emit("resumeMonitor", parseInt(monitorID), CB);
+  resumeMonitor(monitorID: number, CB: Callback) {
+    this.socket?.emit("resumeMonitor", monitorID, CB);
   }
 
   requestMonitorList() {
