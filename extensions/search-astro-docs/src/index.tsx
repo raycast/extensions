@@ -2,13 +2,13 @@ import { Action, ActionPanel, Icon, List, openExtensionPreferences, getPreferenc
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { URL } from "url";
-import { DocumentationEntry, Preferences } from "./types/types";
+import { DocumentationEntry } from "./types/types";
 
 export default function UserSearchRoot() {
-  const { lang } = getPreferenceValues<Preferences>();
+  const { language } = getPreferenceValues<Preferences.Index>();
   const [search, setSearch] = useState<string>("");
   const { isLoading, data, revalidate, error } = useFetch<DocumentationEntry[]>(
-    `https://raycast.elian.codes/api/${lang ?? "en"}`
+    `https://raycast.elian.codes/api/${language}`
   );
 
   return (
