@@ -9,6 +9,12 @@
     "Productivity",
     "Documentation"
   ],
+  "keywords": [
+    "checklist",
+    "todo",
+    "task",
+    "list"
+  ],
   "license": "MIT",
   "commands": [
     {
