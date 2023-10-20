@@ -5,6 +5,9 @@
   "description": "Search the Astro Documentation right from Raycast",
   "icon": "astro-search-icon.png",
   "author": "ElianCodes",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Documentation",
     "Developer Tools"
