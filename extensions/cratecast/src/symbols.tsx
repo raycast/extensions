@@ -68,6 +68,6 @@ function SymbolItemComponent({ symbol }: { symbol: SymbolItem }): JSX.Element {
 
 function filteredCategories(symbolsGroupedByCategory: { [category: string]: SymbolItem[] }, filter: string) {
   return Object.entries(symbolsGroupedByCategory).filter(
-    ([category]) => filter === "All Symbols" || category === filter
+    ([category]) => filter === "All Symbols" || category === filter,
   );
 }
