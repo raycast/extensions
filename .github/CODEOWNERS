@@ -44,6 +44,7 @@
 /extensions/apple-devices                            @madza91
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince
+/extensions/apple-reminders                          @thomaslombart
 /extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @hugivar @danulqua @rgrunberg @Visual-Studio-Coder
 /extensions/archiver                                 @404J
 /extensions/arxiv                                    @koayon @pernielsentikaer
@@ -375,7 +376,7 @@
 /extensions/git-branch-name-generator                @michaelbonner
 /extensions/git-co-authors                           @nickradford @pernielsentikaer
 /extensions/git-commands                             @manumorante
-/extensions/git-repos                                @moored
+/extensions/git-repos                                @moored @nitishpdmn
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @azlekov
 /extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge
@@ -1119,6 +1120,7 @@
 /extensions/urban-dictionary                         @pernielsentikaer @zhenpewu
 /extensions/url-shortener                            @Visual-Studio-Coder
 /extensions/url-tools                                @joshauh46
+/extensions/utm-campaign-builder                     @vimtor
 /extensions/utm-virtual-machines                     @alaidriel
 /extensions/uuid-generator                           @jmaeso @GastroGeek @pernielsentikaer @LunaticMuch @hmarr
 /extensions/v2ex                                     @mopig
