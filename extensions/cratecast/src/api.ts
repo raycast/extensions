@@ -49,6 +49,8 @@ export async function getCrates(search: string): Promise<Crate[]> {
   return crates;
 }
 
+const snakeCase = (id: string) => (id.includes("-") ? id.replace(/-/g, "_") : id);
+
 export function useCrateSymbols(crate: Crate): [Symbols | null, boolean, Error | null] {
   const [symbols, setSymbols] = useState<Symbols | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -65,7 +67,7 @@ export function useCrateSymbols(crate: Crate): [Symbols | null, boolean, Error |
           setSymbols(JSON.parse(cachedSymbols));
           return;
         }
-        const url = new URL(`https://docs.rs/${id}/${version}/${id}/all.html`);
+        const url = new URL(`https://docs.rs/${id}/${version}/${snakeCase(id)}/all.html`);
 
         const response = await fetch(url.toString());
         const root = parse(await response.text());
