@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, environment, AI } from "@raycast/api";
 import { startCase } from "lodash";
 import { getStories } from "./hackernews";
 import { Topic } from "./types";
@@ -11,7 +11,15 @@ import { getAccessToken } from "./utils/preferences";
 
 const openAIKey = getAccessToken();
 
-const openAI = openAIKey ? new OpenAIModule(openAIKey) : null;
+const isValidKey = openAIKey || environment.canAccess(AI);
+if (!isValidKey) {
+  showToast({
+    style: Toast.Style.Failure,
+    title: "Cannot execute command",
+    message: String("You don't have Raycast Pro subscrition you need to provide openAI key"),
+  });
+}
+const openAI = new OpenAIModule(openAIKey);
 
 export default function Command() {
   const [topic, setTopic] = useState<Topic | null>(null);
