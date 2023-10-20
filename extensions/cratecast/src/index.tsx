@@ -53,7 +53,7 @@ export default function Command() {
               />
             )}
             <Action.Push
-              title="View Info"
+              title="View Symbols"
               target={<Symbols crate={crate} />}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
               icon={Icon.Info}
