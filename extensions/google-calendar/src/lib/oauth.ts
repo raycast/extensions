@@ -23,7 +23,13 @@ export async function authorize(): Promise<void> {
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+      try {
+        const newTokens = await refreshTokens(tokenSet.refreshToken);
+        await client.setTokens(newTokens);
+      } catch (error) {
+        // refresh failed, remove tokens to force re-login from user
+        await client.removeTokens();
+      }
     }
     return;
   }
