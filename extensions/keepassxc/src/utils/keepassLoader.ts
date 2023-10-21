@@ -1,7 +1,6 @@
-import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showHUD, LocalStorage } from "@raycast/api";
 import path from "path";
 import child_process from "child_process";
-import { runAppleScript } from "run-applescript";
 const spawn = child_process.spawn;
 
 interface Preference {
@@ -63,26 +62,45 @@ const entryFilter = (entryStr: string) => {
  * load entries from database with keepassxc-cli
  * @returns all entries in keepass database
  */
-const loadEntries = () =>
-  getSearchEntryCommand().then(
-    (cmd) =>
-      new Promise<string[]>((resolve, reject) => {
-        const search_keywrod = cmd === "search" ? "" : "/";
-        const cli = spawn(`${keepassxcCli}`, [cmd, ...keyFileOption, "-q", `${database}`, search_keywrod]);
-        cli.stdin.write(`${dbPassword}\n`);
-        cli.stdin.end();
-        cli.on("error", reject);
-        cli.stderr.on("data", cliStdOnErr(reject));
-        const chuncks: Buffer[] = [];
-        cli.stdout.on("data", (chunck) => {
-          chuncks.push(chunck);
-        });
-        // finish when all chunck has been collected
-        cli.stdout.on("end", () => {
-          resolve(entryFilter(chuncks.join("").toString()));
-        });
-      })
-  );
+const loadEntriesCache = async () => {
+  return LocalStorage.getItem("entries").then((entries) => {
+    if (entries == undefined) {
+      return [];
+    } else {
+      return entryFilter(entries.toString());
+    }
+  });
+};
+
+/**
+ * refresh entries in cache
+ * @returns
+ */
+const refreshEntriesCache = async () =>
+  getSearchEntryCommand()
+    .then(
+      (cmd) =>
+        new Promise<string>((resolve, reject) => {
+          const search_keywrod = cmd === "search" ? "" : "/";
+          const cli = spawn(`${keepassxcCli}`, [cmd, ...keyFileOption, "-q", `${database}`, search_keywrod]);
+          cli.stdin.write(`${dbPassword}\n`);
+          cli.stdin.end();
+          cli.on("error", reject);
+          cli.stderr.on("data", cliStdOnErr(reject));
+          const chuncks: Buffer[] = [];
+          cli.stdout.on("data", (chunck) => {
+            chuncks.push(chunck);
+          });
+          // finish when all chunck has been collected
+          cli.stdout.on("end", () => {
+            resolve(chuncks.join("").toString());
+          });
+        })
+    )
+    .then((entries) => {
+      LocalStorage.setItem("entries", entries);
+      return entryFilter(entries);
+    });
 
 const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
   if (data.toString().indexOf("Enter password to unlock") != -1 || data.toString().trim().length == 0) {
@@ -190,4 +208,40 @@ const getTOTP = (entry: string) =>
     });
   });
 
-export { loadEntries, pastePassword, pasteUsername, pasteTOTP, getPassword, copyPassword, copyUsername, copyTOTP };
+const getURL = (entry: string) =>
+  new Promise<string>((resolve, reject) => {
+    const cli = spawn(`${keepassxcCli}`, [
+      "show",
+      ...cliOptions.filter((x) => x != "-a"),
+      "-a",
+      "URL",
+      `${database}`,
+      `${entry}`,
+    ]);
+    cli.stdin.write(`${dbPassword}\n`);
+    cli.stdin.end();
+    cli.on("error", reject);
+    cli.stderr.on("data", cliStdOnErr(reject));
+    const chuncks: Buffer[] = [];
+    cli.stdout.on("data", (chunck) => {
+      chuncks.push(chunck);
+    });
+    cli.stdout.on("end", () => {
+      const otp = chuncks.join("").toString();
+      // remove \n in the end
+      resolve(otp.slice(0, otp.length - 1));
+    });
+  });
+
+export {
+  loadEntriesCache,
+  refreshEntriesCache,
+  pastePassword,
+  pasteUsername,
+  pasteTOTP,
+  getPassword,
+  getURL,
+  copyPassword,
+  copyUsername,
+  copyTOTP,
+};
