@@ -125,7 +125,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
   return (
     <List.Item
       id={todo.id.toString()}
-      title={todo.title}
+      title={todo.title ? todo.title : "?"}
       subtitle={subtitle}
       accessories={[
         { tag: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },
