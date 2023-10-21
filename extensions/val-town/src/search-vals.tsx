@@ -69,7 +69,7 @@ const MainList = ({
         title="Search Only Mode"
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
           </ActionPanel>
         }
         description={error.message === "Unauthorized" ? "The token came back as unauthorized" : error.message}
