@@ -1,11 +1,12 @@
-import {environment, showHUD} from "@raycast/api";
-import util from 'util';
+import { environment } from "@raycast/api";
+import util from "util";
+import { exec } from "child_process";
 
-const exec = util.promisify(require('child_process').exec);
+const execPromise = util.promisify(exec);
 
 const filePath = environment.assetsPath + "/" + Date.now() + ".png";
-const command = "/usr/sbin/screencapture -i " + filePath
+const command = "/usr/sbin/screencapture -i " + filePath;
 export default async function takeScreenshot() {
-    await exec(command);
-    return filePath;
+  await execPromise(command);
+  return filePath;
 }
