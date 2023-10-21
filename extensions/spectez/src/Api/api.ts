@@ -1,13 +1,5 @@
 import fetch from "node-fetch";
-import {
-  AccountData,
-  ContractData,
-  DomainData,
-  Entrypoint,
-  Network,
-  OperationData,
-  TokenData,
-} from "../Types/types";
+import { AccountData, ContractData, DomainData, Entrypoint, Network, OperationData, TokenData } from "../Types/types";
 
 async function fetchAccountData(account: string, apiUrl: string) {
   const response = await fetch(`https://${apiUrl}/v1/accounts/${account}`);
@@ -45,25 +37,19 @@ async function fetchTokenData(account: string, apiUrl: string) {
           "token.metadata.artifactUri",
           "token.metadata.thumbnailUri",
         ].join(","),
-      }),
+      })
   );
   if (!tokenResponse.ok) {
-    throw new Error(
-      `Token API request failed with status ${tokenResponse.status}`,
-    );
+    throw new Error(`Token API request failed with status ${tokenResponse.status}`);
   }
   const tokens = (await tokenResponse.json()) as TokenData[];
   return tokens;
 }
 
 async function fetchDomainData(account: string, apiUrl: string) {
-  const domainResponse = await fetch(
-    `https://${apiUrl}/v1/domains?owner=${account}`,
-  );
+  const domainResponse = await fetch(`https://${apiUrl}/v1/domains?owner=${account}`);
   if (!domainResponse.ok) {
-    throw new Error(
-      `Domain API request failed with status ${domainResponse.status}`,
-    );
+    throw new Error(`Domain API request failed with status ${domainResponse.status}`);
   }
   const domains = (await domainResponse.json()) as DomainData[];
   const domain = domains.length > 0 ? domains[0].name : null; // Using the first domain name
@@ -75,13 +61,11 @@ async function fetchAccountOperations(account: string, apiUrl: string) {
     `https://${apiUrl}/v1/accounts/${account}/operations?` +
       new URLSearchParams({
         limit: "15",
-      }),
+      })
   );
 
   if (!operationsResponse.ok) {
-    throw new Error(
-      `Operations API request failed with status ${operationsResponse.status}`,
-    );
+    throw new Error(`Operations API request failed with status ${operationsResponse.status}`);
   }
 
   const operations = (await operationsResponse.json()) as OperationData[];
@@ -95,24 +79,16 @@ async function fetchAccountOperations(account: string, apiUrl: string) {
 }
 
 async function fetchContractData(account: string, apiUrl: string) {
-  const contractResponse = await fetch(
-    `https://${apiUrl}/v1/contracts/${account}`,
-  );
+  const contractResponse = await fetch(`https://${apiUrl}/v1/contracts/${account}`);
   if (!contractResponse.ok) {
-    throw new Error(
-      `Contract API request failed with status ${contractResponse.status}`,
-    );
+    throw new Error(`Contract API request failed with status ${contractResponse.status}`);
   }
   const data = (await contractResponse.json()) as ContractData;
 
   // Fetching entrypoints
-  const entrypointsResponse = await fetch(
-    `https://${apiUrl}/v1/contracts/${account}/entrypoints`,
-  );
+  const entrypointsResponse = await fetch(`https://${apiUrl}/v1/contracts/${account}/entrypoints`);
   if (!entrypointsResponse.ok) {
-    throw new Error(
-      `Entrypoints API request failed with status ${entrypointsResponse.status}`,
-    );
+    throw new Error(`Entrypoints API request failed with status ${entrypointsResponse.status}`);
   }
 
   const entrypointsData = (await entrypointsResponse.json()) as Entrypoint[];
@@ -131,25 +107,24 @@ async function fetchContractData(account: string, apiUrl: string) {
 
 export async function fetchBalanceAndTokens(
   account: string,
-  network: Network,
+  network: Network
 ): Promise<{
   balance: string | null;
   lastActivityTime: string | null;
   firstActivityTime: string | null;
   tokens: TokenData[] | null;
   domain: string | null;
-  operations: {
-    timestamp: string;
-    targetAlias: string;
-    targetAddress: string;
-  }[] | null;
+  operations:
+    | {
+        timestamp: string;
+        targetAlias: string;
+        targetAddress: string;
+      }[]
+    | null;
 }> {
-  const apiUrl = network === Network.Ghostnet
-    ? "api.ghostnet.tzkt.io"
-    : "api.tzkt.io";
+  const apiUrl = network === Network.Ghostnet ? "api.ghostnet.tzkt.io" : "api.tzkt.io";
   try {
-    const { balance, lastActivityTime, firstActivityTime } =
-      await fetchAccountData(account, apiUrl);
+    const { balance, lastActivityTime, firstActivityTime } = await fetchAccountData(account, apiUrl);
     const tokens = await fetchTokenData(account, apiUrl);
     const domain = await fetchDomainData(account, apiUrl);
     const operations = await fetchAccountOperations(account, apiUrl);
@@ -177,7 +152,7 @@ export async function fetchBalanceAndTokens(
 
 export async function fetchContractDataDetails(
   account: string,
-  network: Network,
+  network: Network
 ): Promise<{
   contract: {
     contractAddress: string;
@@ -189,9 +164,7 @@ export async function fetchContractDataDetails(
     entrypoints: string[];
   } | null;
 }> {
-  const apiUrl = network === Network.Ghostnet
-    ? "api.ghostnet.tzkt.io"
-    : "api.tzkt.io";
+  const apiUrl = network === Network.Ghostnet ? "api.ghostnet.tzkt.io" : "api.tzkt.io";
   try {
     const contract = await fetchContractData(account, apiUrl);
 

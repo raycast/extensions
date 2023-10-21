@@ -114,12 +114,30 @@ export default function SearchAccount() {
                         <List.Item.Detail
                           metadata={
                             <List.Item.Detail.Metadata>
-                              <List.Item.Detail.Metadata.Label title="Contract Address:" text={state.contract.address} />
-                              <List.Item.Detail.Metadata.Label title="Creator Address:" text={state.contract.creator.address} />
-                              <List.Item.Detail.Metadata.Label title="Total minted tokens:" text={`${state.contract.tokensCount}`} />
-                              <List.Item.Detail.Metadata.Label title="Token Balances Count:" text={`${state.contract.tokenBalancesCount}`} />
-                              <List.Item.Detail.Metadata.Label title="First Activity:" text={state.contract.firstActivityTime || "N/A"} />
-                              <List.Item.Detail.Metadata.Label title="Last Active:" text={state.contract.lastActivityTime || "N/A"} />
+                              <List.Item.Detail.Metadata.Label
+                                title="Contract Address:"
+                                text={state.contract.address}
+                              />
+                              <List.Item.Detail.Metadata.Label
+                                title="Creator Address:"
+                                text={state.contract.creator.address}
+                              />
+                              <List.Item.Detail.Metadata.Label
+                                title="Total minted tokens:"
+                                text={`${state.contract.tokensCount}`}
+                              />
+                              <List.Item.Detail.Metadata.Label
+                                title="Token Balances Count:"
+                                text={`${state.contract.tokenBalancesCount}`}
+                              />
+                              <List.Item.Detail.Metadata.Label
+                                title="First Activity:"
+                                text={state.contract.firstActivityTime || "N/A"}
+                              />
+                              <List.Item.Detail.Metadata.Label
+                                title="Last Active:"
+                                text={state.contract.lastActivityTime || "N/A"}
+                              />
                             </List.Item.Detail.Metadata>
                           }
                         />
@@ -133,7 +151,11 @@ export default function SearchAccount() {
                           metadata={
                             <List.Item.Detail.Metadata>
                               {state.contract.entrypoints.map((entrypoint, index) => (
-                                <List.Item.Detail.Metadata.Label key={index} title={`Entrypoint ${index + 1}:`} text={entrypoint} />
+                                <List.Item.Detail.Metadata.Label
+                                  key={index}
+                                  title={`Entrypoint ${index + 1}:`}
+                                  text={entrypoint}
+                                />
                               ))}
                             </List.Item.Detail.Metadata>
                           }
