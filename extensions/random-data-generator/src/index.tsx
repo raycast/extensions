@@ -109,6 +109,7 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
                 JSON.stringify({
                   section: item.section,
                   id: item.id,
+                  locale: faker.locale,
                   mode: 'copy',
                 }),
               )}`,
@@ -122,6 +123,7 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
                 JSON.stringify({
                   section: item.section,
                   id: item.id,
+                  locale: faker.locale,
                   mode: 'paste',
                 }),
               )}`,

@@ -1,13 +1,14 @@
 import _ from 'lodash';
 import { Clipboard, showHUD, showToast, Toast } from '@raycast/api';
 import faker from './faker';
+import {UsableLocale} from "@faker-js/faker";
 
 export default async function openQuicklink(options: {
-  arguments: { id?: string; section?: string; mode?: 'copy' | 'paste' };
+  arguments: { id?: string; section?: string; mode?: 'copy' | 'paste'; locale?: UsableLocale; };
 }) {
-  const { id, section, mode } = options.arguments;
+  const { id, section, mode, locale } = options.arguments;
 
-  if (!id || !section || !mode) {
+  if (!id || !section || !mode || !locale) {
     showToast({
       title: 'Missing Arguments',
       message: 'This command is not meant to be run directly. Instead, create a quicklink from the generate command.',
@@ -16,6 +17,7 @@ export default async function openQuicklink(options: {
     return;
   }
 
+  faker.locale = locale;
   const value = _.get(faker, `${section}.${id}`)();
 
   if (mode === 'copy') {
