@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "easy-ocr",
+  "title": "Easy OCR",
+  "description": "Use Tesseract or Google Cloud Vision OCR to extract text from screenshot",
+  "icon": "command-icon.png",
+  "author": "Rafo94",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Area OCR",
+      "description": "Select screen area which you want to extract the text",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ocrEngine",
+      "type": "dropdown",
+      "required": true,
+      "title": "OCR Engine",
+      "description": "Select your OCR engine",
+      "placeholder": "Select your OCR engine",
+      "data": [
+        {
+          "title": "Tesseract",
+          "value": "tesseractOcr"
+        },
+        {
+          "title": "Google Cloud Vision",
+          "value": "googleCloudVision"
+        }
+      ]
+    },
+    {
+      "name": "newLine",
+      "type": "dropdown",
+      "required": true,
+      "title": "How to treat new lines (\\n)?",
+      "description": "OCR engines can read new lines and they interpret them as \\n, this option gives you ability to swap them out",
+      "data": [
+        {
+          "title": "Replace with empty space",
+          "value": "replaceSpace"
+        },
+        {
+          "title": "Don't change anything",
+          "value": "keep"
+        },
+        {
+          "title": "Replace with <br>",
+          "value": "replaceBreak"
+        }
+      ],
+      "default": "replaceSpace"
+    },
+    {
+      "name": "private_key",
+      "type": "password",
+      "required": false,
+      "title": "Google Private Key",
+      "description": "Google Cloud Private key - required if using Google Cloud Vision as your OCR engine",
+      "placeholder": "Google Private Key"
+    },
+    {
+      "name": "client_email",
+      "type": "textfield",
+      "required": false,
+      "title": "Google Cloud Vision client email",
+      "description": "Google Cloud Vision client email - required if using Google Cloud Vision as your OCR engine",
+      "placeholder": "Google Cloud Vision client email"
+    },
+    {
+      "name": "tesseract_path",
+      "type": "textfield",
+      "required": false,
+      "title": "Tesseract binary path",
+      "description": "Absolute path to your tesseract binary - check documentation if default path is not correct - required only if using tesseract",
+      "placeholder": "Tesseract binary path",
+      "default": "/opt/homebrew/bin/tesseract"
+    }
+  ],
+  "dependencies": {
+    "@google-cloud/vision": "^4.0.2",
+    "@raycast/api": "^1.56.1",
+    "@raycast/utils": "^1.10.0",
+    "node-tesseract-ocr": "^2.2.1",
+    "run-applescript": "^6.1.0",
+    "which": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
