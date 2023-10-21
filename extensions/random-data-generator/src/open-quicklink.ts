@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import { Clipboard, showHUD, showToast, Toast } from '@raycast/api';
 import faker from './faker';
-import {UsableLocale} from "@faker-js/faker";
+import { UsableLocale } from '@faker-js/faker';
 
 export default async function openQuicklink(options: {
-  arguments: { id?: string; section?: string; mode?: 'copy' | 'paste'; locale?: UsableLocale; };
+  arguments: { id?: string; section?: string; mode?: 'copy' | 'paste'; locale?: UsableLocale };
 }) {
   const { id, section, mode, locale } = options.arguments;
 
