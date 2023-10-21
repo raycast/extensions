@@ -1,8 +1,9 @@
-import { ActionPanel, Icon, List, Action, LocalStorage } from '@raycast/api';
-import { faker, UsableLocale } from '@faker-js/faker';
+import {ActionPanel, Icon, List, Action, LocalStorage} from '@raycast/api';
+import {UsableLocale} from '@faker-js/faker';
 import _ from 'lodash';
 import isUrl from 'is-url';
-import { useCallback, useEffect, useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
+import faker from './faker';
 
 type LocalStorageValues = {
   pinnedItemIds: string;
@@ -44,23 +45,25 @@ const buildItems = (path: string) => {
           const value = func();
           return value ? value.toString() : '';
         };
-        acc.push({ section: path, id: key, value: getValue(), getValue });
+        acc.push({section: path, id: key, value: getValue(), getValue});
       } else if (_.isObject(func)) {
         acc.push(...buildItems(path ? `${path}.${key}` : key));
       }
 
       return acc;
     },
-    []
+    [],
   );
 };
 
 function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
-  const { item, pin, unpin } = props;
+  const {item, pin, unpin} = props;
   const [value, setValue] = useState(item.value);
+
   const updateValue = async () => {
     setValue(item.getValue());
   };
+
   useEffect(() => {
     updateValue();
   }, [item]);
@@ -70,17 +73,17 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
       title={_.startCase(item.id)}
       icon={Icon.Dot}
       keywords={[item.section]}
-      detail={<List.Item.Detail markdown={value} />}
+      detail={<List.Item.Detail markdown={value}/>}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy to Clipboard" content={value} onCopy={updateValue} />
-          <Action.Paste title="Paste in Active App" content={value} onPaste={updateValue} />
-          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={{ modifiers: ['cmd'], key: 'o' }} />}
+          <Action.CopyToClipboard title="Copy to Clipboard" content={value} onCopy={updateValue}/>
+          <Action.Paste title="Paste in Active App" content={value} onPaste={updateValue}/>
+          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={{modifiers: ['cmd'], key: 'o'}}/>}
           {pin && (
             <Action
               title="Pin Entry"
               icon={Icon.Pin}
-              shortcut={{ modifiers: ['shift', 'cmd'], key: 'p' }}
+              shortcut={{modifiers: ['shift', 'cmd'], key: 'p'}}
               onAction={() => pin(item)}
             />
           )}
@@ -88,15 +91,41 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
             <Action
               title="Unpin Entry"
               icon={Icon.XMarkCircle}
-              shortcut={{ modifiers: ['shift', 'cmd'], key: 'p' }}
+              shortcut={{modifiers: ['shift', 'cmd'], key: 'p'}}
               onAction={() => unpin(item)}
             />
           )}
           <Action
             title="Refresh Value"
             icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ['ctrl'], key: 'r' }}
+            shortcut={{modifiers: ['ctrl'], key: 'r'}}
             onAction={updateValue}
+          />
+          <Action.CreateQuicklink
+            title="Create Copy Quicklink"
+            quicklink={{
+              name: `Copy Random ${_.startCase(item.id)}`,
+              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+                JSON.stringify({
+                  section: item.section,
+                  id: item.id,
+                  mode: 'copy',
+                }),
+              )}`,
+            }}
+          />
+          <Action.CreateQuicklink
+            title="Create Paste Quicklink"
+            quicklink={{
+              name: `Paste Random ${_.startCase(item.id)}`,
+              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+                JSON.stringify({
+                  section: item.section,
+                  id: item.id,
+                  mode: 'paste',
+                }),
+              )}`,
+            }}
           />
         </ActionPanel>
       }
@@ -105,7 +134,7 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
 }
 
 function Locales(props: { onChange: () => void }) {
-  const { onChange } = props;
+  const {onChange} = props;
 
   return (
     <List.Dropdown
@@ -120,7 +149,7 @@ function Locales(props: { onChange: () => void }) {
       {Object.entries(faker.locales).map(([localeKey, locale]) => {
         if (!locale) return null;
 
-        return <List.Dropdown.Item key={localeKey} title={locale.title} value={localeKey} />;
+        return <List.Dropdown.Item key={localeKey} title={locale.title} value={localeKey}/>;
       })}
     </List.Dropdown>
   );
@@ -159,7 +188,7 @@ export default function FakerList() {
 
   const handlePinnedItemsChange = (nextPinnedItems: Item[]) => {
     setPinnedItems(nextPinnedItems);
-    const nextPinnedItemIds = _.map(nextPinnedItems, ({ section, id }) => ({
+    const nextPinnedItemIds = _.map(nextPinnedItems, ({section, id}) => ({
       section,
       id,
     }));
@@ -185,19 +214,19 @@ export default function FakerList() {
     <List
       isLoading={isLoading}
       isShowingDetail
-      searchBarAccessory={isLoading ? null : <Locales onChange={generateItems} />}
+      searchBarAccessory={isLoading ? null : <Locales onChange={generateItems}/>}
     >
       {pinnedItems.length > 0 && (
         <List.Section key="pinned" title="Pinned">
           {_.map(pinnedItems, (item) => (
-            <FakerListItem key={item.id} item={item} unpin={unpin} />
+            <FakerListItem key={item.id} item={item} unpin={unpin}/>
           ))}
         </List.Section>
       )}
       {_.map(groupedItems, (items, section) => (
         <List.Section key={section} title={_.startCase(section)}>
           {_.map(items, (item) => (
-            <FakerListItem key={item.id} item={item} pin={pin} />
+            <FakerListItem key={item.id} item={item} pin={pin}/>
           ))}
         </List.Section>
       ))}
