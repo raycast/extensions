@@ -58,9 +58,35 @@ const entryFilter = (entryStr: string) => {
     )
     .sort();
 };
+
 /**
- * load entries from database with keepassxc-cli
- * @returns all entries in keepass database
+ * execute command with keepassxc-cli
+ * @param command The command to run.
+ * @param options List of string arguments.
+ * @returns
+ */
+const execKeepassXCCli = async (options: string[]) =>
+  new Promise<string>((resolve, reject) => {
+    const cli = spawn(`${keepassxcCli}`, options);
+    cli.stdin.write(`${dbPassword}\n`);
+    cli.stdin.end();
+    cli.on("error", reject);
+    cli.stderr.on("data", cliStdOnErr(reject));
+    const chuncks: Buffer[] = [];
+    cli.stdout.on("data", (chunck) => {
+      chuncks.push(chunck);
+    });
+    // finish when all chunck has been collected
+    cli.stdout.on("end", () => {
+      const result = chuncks.join("").toString();
+      // remove \n in the end
+      resolve(result.slice(0, result.length - 1));
+    });
+  });
+
+/**
+ * load entries from cache
+ * @returns all entries in LocalStorage
  */
 const loadEntriesCache = async () => {
   return LocalStorage.getItem("entries").then((entries) => {
@@ -73,30 +99,15 @@ const loadEntriesCache = async () => {
 };
 
 /**
- * refresh entries in cache
- * @returns
+ * refresh entries cache
+ * @returns all entries in database file
  */
 const refreshEntriesCache = async () =>
   getSearchEntryCommand()
-    .then(
-      (cmd) =>
-        new Promise<string>((resolve, reject) => {
-          const search_keywrod = cmd === "search" ? "" : "/";
-          const cli = spawn(`${keepassxcCli}`, [cmd, ...keyFileOption, "-q", `${database}`, search_keywrod]);
-          cli.stdin.write(`${dbPassword}\n`);
-          cli.stdin.end();
-          cli.on("error", reject);
-          cli.stderr.on("data", cliStdOnErr(reject));
-          const chuncks: Buffer[] = [];
-          cli.stdout.on("data", (chunck) => {
-            chuncks.push(chunck);
-          });
-          // finish when all chunck has been collected
-          cli.stdout.on("end", () => {
-            resolve(chuncks.join("").toString());
-          });
-        })
-    )
+    .then((cmd) => {
+      const search_keywrod = cmd === "search" ? "" : "/";
+      return execKeepassXCCli([cmd, ...keyFileOption, "-q", `${database}`, search_keywrod]);
+    })
     .then((entries) => {
       LocalStorage.setItem("entries", entries);
       return entryFilter(entries);
@@ -109,41 +120,9 @@ const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
   reject(new Error(data.toString()));
 };
 
-const getPassword = (entry: string) =>
-  new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Password", `${database}`, `${entry}`]);
-    cli.stdin.write(`${dbPassword}\n`);
-    cli.stdin.end();
-    cli.on("error", reject);
-    cli.stderr.on("data", cliStdOnErr(reject));
-    const chuncks: Buffer[] = [];
-    cli.stdout.on("data", (chunck) => {
-      chuncks.push(chunck);
-    });
-    cli.stdout.on("end", () => {
-      const password = chuncks.join("").toString();
-      // remove \n in the end
-      resolve(password.slice(0, password.length - 1));
-    });
-  });
+const getPassword = (entry: string) => execKeepassXCCli(["show", ...cliOptions, "Password", `${database}`, `${entry}`]);
 
-const getUsername = (entry: string) =>
-  new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Username", `${database}`, `${entry}`]);
-    cli.stdin.write(`${dbPassword}\n`);
-    cli.stdin.end();
-    cli.on("error", reject);
-    cli.stderr.on("data", cliStdOnErr(reject));
-    const chuncks: Buffer[] = [];
-    cli.stdout.on("data", (chunck) => {
-      chuncks.push(chunck);
-    });
-    cli.stdout.on("end", () => {
-      const username = chuncks.join("").toString();
-      // remove \n in the end
-      resolve(username.slice(0, username.length - 1));
-    });
-  });
+const getUsername = (entry: string) => execKeepassXCCli(["show", ...cliOptions, "Username", `${database}`, `${entry}`]);
 
 const pastePassword = async (entry: string) => {
   console.log("paste password of entry:", entry);
@@ -185,53 +164,10 @@ const copyTOTP = async (entry: string) =>
   });
 
 const getTOTP = (entry: string) =>
-  new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, [
-      "show",
-      ...cliOptions.filter((x) => x != "-a"),
-      "-t",
-      `${database}`,
-      `${entry}`,
-    ]);
-    cli.stdin.write(`${dbPassword}\n`);
-    cli.stdin.end();
-    cli.on("error", reject);
-    cli.stderr.on("data", cliStdOnErr(reject));
-    const chuncks: Buffer[] = [];
-    cli.stdout.on("data", (chunck) => {
-      chuncks.push(chunck);
-    });
-    cli.stdout.on("end", () => {
-      const otp = chuncks.join("").toString();
-      // remove \n in the end
-      resolve(otp.slice(0, otp.length - 1));
-    });
-  });
+  execKeepassXCCli(["show", ...cliOptions.filter((x) => x != "-a"), "-t", `${database}`, `${entry}`]);
 
 const getURL = (entry: string) =>
-  new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, [
-      "show",
-      ...cliOptions.filter((x) => x != "-a"),
-      "-a",
-      "URL",
-      `${database}`,
-      `${entry}`,
-    ]);
-    cli.stdin.write(`${dbPassword}\n`);
-    cli.stdin.end();
-    cli.on("error", reject);
-    cli.stderr.on("data", cliStdOnErr(reject));
-    const chuncks: Buffer[] = [];
-    cli.stdout.on("data", (chunck) => {
-      chuncks.push(chunck);
-    });
-    cli.stdout.on("end", () => {
-      const otp = chuncks.join("").toString();
-      // remove \n in the end
-      resolve(otp.slice(0, otp.length - 1));
-    });
-  });
+  execKeepassXCCli(["show", ...cliOptions.filter((x) => x != "-a"), "-a", "URL", `${database}`, `${entry}`]);
 
 export {
   loadEntriesCache,
