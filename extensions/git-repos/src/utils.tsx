@@ -272,10 +272,14 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
     }
     return 0;
   });
-  const defaultBrowser = await getDefaultBrowser();
-  foundRepos.map((repo) => {
-    repo.defaultBrowserId = defaultBrowser.id;
-  });
+  try {
+    const defaultBrowser = await getDefaultBrowser();
+    foundRepos.map((repo) => {
+      repo.defaultBrowserId = defaultBrowser.id;
+    });
+  } catch (e) {
+    // ignore, repo.defaultBrowserId will stay as ""
+  }
 
   return foundRepos;
 }
