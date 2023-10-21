@@ -3,11 +3,10 @@ import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabasesView } from "../hooks";
-import { queryDatabase, getPageName } from "../utils/notion";
-import { Page, User } from "../utils/types";
+import { queryDatabase, getPageName, Page, User } from "../utils/notion";
 
 import { DatabaseView } from "./DatabaseView";
-import { CreateDatabaseForm } from "./forms";
+import { CreatePageForm } from "./forms";
 
 type DatabaseListProps = {
   databasePage: Page;
@@ -84,7 +83,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
               title="Create New Page"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={<CreateDatabaseForm databaseId={databaseId} mutate={mutate} />}
+              target={<CreatePageForm defaults={{ database: databaseId }} mutate={mutate} />}
             />
           </ActionPanel>
         }

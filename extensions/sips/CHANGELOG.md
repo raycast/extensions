@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Bug Fix] - 2023-10-05
+
+- Fixed a bug where the "Convert Images" command failed for image paths containing dots. (#8549)
+
 ## [Create Images, In-Clipboard Modification] - 2023-07-06
 
 - Added settings to individually show/hide image formats from the list of conversion formats (#7023)

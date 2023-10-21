@@ -1,5 +1,10 @@
 # reclaim Changelog
 
+## [Update] - 2023-10-11
+
+- Show All Connected Calendar Events: Updated the system to display events from all calendars connected via Reclaim.
+- Duplicate Event Filtering: Noticed that using the Reclaim calendar sync across multiple calendars sometimes results in duplicate events. Implemented a simple filter logic to weed out these duplicates and ensure a cleaner event display.
+
 ## [Update] - 2023-09-02
 
 **My Calendar**

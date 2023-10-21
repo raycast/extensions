@@ -29,7 +29,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
   async function refresh(): Promise<void> {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Authy",
+      title: "Twilio’s Authy",
       message: "Refreshing",
     });
     await toast.show();
@@ -48,7 +48,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       if (error instanceof Error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Authy",
+          title: "Twilio’s Authy",
           message: error.message,
         });
         return;
@@ -60,7 +60,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
     await toast.hide();
     await showToast({
       style: Toast.Style.Success,
-      title: "Authy",
+      title: "Twilio’s Authy",
       message: "Data has been synced",
     });
   }
@@ -120,7 +120,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       if (error instanceof Error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Authy",
+          title: "Twilio’s Authy",
           message: error.message,
         });
       } else {

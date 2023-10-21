@@ -5,16 +5,16 @@ export function PreferenceActions() {
     <ActionPanel.Section>
       <Action
         icon={Icon.Gear}
-        title={"Open Command Preference"}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
+        title={"Configure Command"}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
         onAction={() => {
           openCommandPreferences().then();
         }}
       />
       <Action
         icon={Icon.Gear}
-        title={"Open Extension Preference"}
-        shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+        title={"Configure Extension"}
+        shortcut={{ modifiers: ["ctrl", "cmd"], key: "," }}
         onAction={() => {
           openExtensionPreferences().then();
         }}

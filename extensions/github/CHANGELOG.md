@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix menu colors] - 2023-09-30
+
+- Fix menu colors for issues and pr menus.
+
 ## [Fix menu bar notifications] - 2023-09-06
 
 - Fixes an issue where marking all notifications as read wouldn't reset the menu bar notifications count.

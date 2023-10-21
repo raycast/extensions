@@ -28,7 +28,7 @@
           "name": "group",
           "placeholder": "Accents",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }

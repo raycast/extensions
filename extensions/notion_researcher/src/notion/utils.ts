@@ -1,3 +1,5 @@
+import { ParsedPage } from "./types";
+
 type SplitResult = { type: "text"; text: { content: string } } | { type: "equation"; equation: { expression: string } };
 
 export function splitTextAndEquations(inputString: string): SplitResult[] {
@@ -11,4 +13,24 @@ export function splitTextAndEquations(inputString: string): SplitResult[] {
     }
     return acc;
   }, []);
+}
+
+function getTitle(pageProperties: any) {
+  if (Object.keys(pageProperties).includes("title")) {
+    return pageProperties.title.title[0].plain_text;
+  } else {
+    return pageProperties.Title.title[0].plain_text;
+  }
+}
+
+export function parsePage(page: any): ParsedPage {
+  try {
+    return {
+      id: page.id,
+      title: getTitle(page.properties),
+      icon: page.icon?.type === "emoji" ? page.icon.emoji : "",
+    };
+  } catch (e: any) {
+    throw new Error("Page must have a title");
+  }
 }

@@ -1,8 +1,16 @@
 import { LocalStorage, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { fetchDatabaseProperties, fetchUsers, fetchDatabases, queryDatabase, search } from "../utils/notion";
-import { DatabaseProperty, DatabaseView, Page } from "../utils/types";
+import {
+  fetchDatabaseProperties,
+  fetchUsers,
+  fetchDatabases,
+  queryDatabase,
+  search,
+  type Page,
+  type DatabaseProperty,
+} from "../utils/notion";
+import { DatabaseView } from "../utils/types";
 
 export function useUsers() {
   const value = useCachedPromise(() => fetchUsers());

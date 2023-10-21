@@ -1,3 +1,5 @@
+import { ApiResponseEvents } from "../hooks/useEvent.types";
+
 export const eventColors = {
   NONE: "#AAA",
   LAVENDER: "#6E7BC4",
@@ -12,6 +14,21 @@ export const eventColors = {
   BASIL: "#0E753B",
   TOMATO: "#CF0003",
 } as const;
+/**
+ * Filter out events that are synced, managed by Reclaim and part of multiple calendars
+ * @param events
+ * @returns
+ */
+export const filterMultipleOutDuplicateEvents = <Events extends ApiResponseEvents | undefined>(events: Events) => {
+  if (!events) return events;
+  const seenEvents = new Set<string>();
+  return events.filter((event) => {
+    const eventKey = `${event.eventStart}-${event.eventEnd}`;
+    if (seenEvents.has(eventKey)) return false;
+    seenEvents.add(eventKey);
+    return !(event.personalSync && event.reclaimManaged);
+  });
+};
 
 export const truncateEventSize = (eventTitle: string) => {
   const TRUNCATE_LENGTH = 18;

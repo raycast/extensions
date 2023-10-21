@@ -1,6 +1,14 @@
 # Browser Bookmarks Changelog
 
-## [Extension Icon] - {PR_MERGE_DATE}
+## [Improvements] - 2023-10-18
+
+- Always sort the bookmarks by their frecency
+
+## [Support for Arc] - 2023-09-22
+
+- Add support for `Arc` browser
+
+## [Extension Icon] - 2023-09-18
 
 - Update extension icon to match Raycast icons style and avoid any mismatch with "Day One" app
 

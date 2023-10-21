@@ -18,35 +18,8 @@ import {
   LaunchProps,
   popToRoot,
 } from "@raycast/api";
-import * as changeCase from "change-case-all";
 import { useEffect, useState } from "react";
-const cases = [
-  "Camel Case",
-  "Capital Case",
-  "Constant Case",
-  "Dot Case",
-  "Header Case",
-  "Kebab Case",
-  "Lower Case",
-  "Lower First",
-  "Macro Case",
-  "No Case",
-  "Param Case",
-  "Pascal Case",
-  "Path Case",
-  "Random Case",
-  "Sentence Case",
-  "Slug Case",
-  "Snake Case",
-  "Swap Case",
-  "Title Case",
-  "Upper Case",
-  "Upper First",
-  "Sponge Case",
-] as const;
-
-type CaseType = (typeof cases)[number];
-type Cases = { [key: string]: (input: string, options?: object) => string };
+import { CaseFunction, CaseType, functions } from "./types.js";
 
 class NoTextError extends Error {
   constructor() {
@@ -78,6 +51,15 @@ async function readContent(preferredSource: string) {
   throw new NoTextError();
 }
 
+function modifyCasesWrapper(input: string, case_: CaseFunction) {
+  const modifiedArr: string[] = [];
+  const lines = input.split("\n");
+  for (const line of lines) {
+    modifiedArr.push(case_(line));
+  }
+  return modifiedArr.join("\n");
+}
+
 const cache = new Cache();
 
 const getPinnedCases = (): CaseType[] => {
@@ -96,31 +78,6 @@ const setPinnedCases = (pinned: CaseType[]) => {
 
 const setRecentCases = (recent: CaseType[]) => {
   cache.set("recent", JSON.stringify(recent));
-};
-
-const functions: Cases = {
-  "Camel Case": changeCase.camelCase,
-  "Capital Case": changeCase.capitalCase,
-  "Constant Case": changeCase.constantCase,
-  "Dot Case": changeCase.dotCase,
-  "Header Case": changeCase.headerCase,
-  "Kebab Case": changeCase.paramCase,
-  "Lower Case": changeCase.lowerCase,
-  "Lower First": changeCase.lowerCaseFirst,
-  "Macro Case": changeCase.constantCase,
-  "No Case": changeCase.noCase,
-  "Param Case": changeCase.paramCase,
-  "Pascal Case": changeCase.pascalCase,
-  "Path Case": changeCase.pathCase,
-  "Random Case": changeCase.spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
-  "Slug Case": changeCase.paramCase,
-  "Snake Case": changeCase.snakeCase,
-  "Swap Case": changeCase.swapCase,
-  "Title Case": changeCase.titleCase,
-  "Upper Case": changeCase.upperCase,
-  "Upper First": changeCase.upperCaseFirst,
-  "Sponge Case": changeCase.spongeCase,
 };
 
 export default function Command(props: LaunchProps) {
@@ -241,7 +198,7 @@ export default function Command(props: LaunchProps) {
                 <Action
                   title="Pin Case"
                   icon={Icon.Pin}
-                  shortcut={{ key: "p", modifiers: ["cmd"] }}
+                  shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
                   onAction={() => {
                     setPinned([props.case, ...pinned]);
                     if (props.recent) {
@@ -304,12 +261,22 @@ export default function Command(props: LaunchProps) {
     <List isShowingDetail={true}>
       <List.Section title="Pinned">
         {pinned?.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} pinned={true} />
+          <CaseItem
+            key={key}
+            case={key as CaseType}
+            modified={modifyCasesWrapper(clipboard, functions[key])}
+            pinned={true}
+          />
         ))}
       </List.Section>
       <List.Section title="Recent">
         {recent.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} recent={true} />
+          <CaseItem
+            key={key}
+            case={key as CaseType}
+            modified={modifyCasesWrapper(clipboard, functions[key])}
+            recent={true}
+          />
         ))}
       </List.Section>
       <List.Section title="All Cases">
@@ -318,10 +285,10 @@ export default function Command(props: LaunchProps) {
             ([key, _]) =>
               preferences[key.replace(/ +/g, "")] &&
               !recent.includes(key as CaseType) &&
-              !pinned.includes(key as CaseType)
+              !pinned.includes(key as CaseType),
           )
           .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={func(clipboard)} />
+            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(clipboard, func)} />
           ))}
       </List.Section>
     </List>

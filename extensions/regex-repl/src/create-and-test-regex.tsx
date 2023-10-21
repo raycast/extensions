@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Detail, useNavigation, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Detail, useNavigation, Toast, List, Clipboard } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import findAndProcessMatches from "./utils/find-and-process-matches";
 
@@ -42,7 +42,7 @@ export default function Command() {
     }
   }, [pattern, flags, text]);
 
-  const handleSubmit = (values: Values) => {
+  const validateThenShowDetails = (values: Values) => {
     let submitAction: (() => void) | undefined;
     if (error) {
       submitAction = undefined;
@@ -60,9 +60,10 @@ export default function Command() {
   return (
     <Form
       actions={
-        !error &&
-        text &&
-        pattern && <ActionPanel>{<Action.SubmitForm onSubmit={handleSubmit} title="Show Details" />}</ActionPanel>
+        <ActionPanel>
+          <Action.Push target={<QuickReference />} title="Show Quick Reference" />
+          {!error && text && pattern && <Action.SubmitForm onSubmit={validateThenShowDetails} title="Show Details" />}
+        </ActionPanel>
       }
     >
       <Form.TextField id="pattern" title="Expression" placeholder="Enter RegEx" value={pattern} onChange={setPattern} />
@@ -109,7 +110,7 @@ const Details: React.FC<Values> = ({ text, pattern, flags }) => {
       navigationTitle="Result Details"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Go Back" onSubmit={pop} />
+          <Action title="Go Back" onAction={pop} />
         </ActionPanel>
       }
       metadata={
@@ -126,5 +127,168 @@ const Details: React.FC<Values> = ({ text, pattern, flags }) => {
         </Detail.Metadata>
       }
     />
+  );
+};
+
+const QuickReference = () => {
+  const { pop } = useNavigation();
+  const references = [
+    {
+      regex: "[abc]",
+      description: "A single character of: a, b, or c",
+      keywords: ["character"],
+    },
+    {
+      regex: "[^abc]",
+      description: "Any single character except: a, b, or c",
+      keywords: ["character", "except", "not", "exclud"],
+    },
+    {
+      regex: "[a-z]",
+      description: "Any single character in the range a-z",
+      keywords: ["character", "range", "between"],
+    },
+    {
+      regex: "[a-zA-Z]",
+      description: "Any single character in the range a-z or A-Z",
+      keywords: ["character", "range", "between"],
+    },
+    {
+      regex: "^",
+      description: "Start of line",
+      keywords: ["start", "line", "beginning"],
+    },
+    {
+      regex: "$",
+      description: "End of line",
+      keywords: ["end", "line"],
+    },
+    {
+      regex: "\\A",
+      description: "Start of string",
+      keywords: ["start", "string"],
+    },
+    {
+      regex: "\\z",
+      description: "End of string",
+      keywords: ["end", "string"],
+    },
+
+    {
+      regex: ".",
+      description: "Any single character",
+      keywords: ["any", "character", "everything"],
+    },
+    {
+      regex: "\\s",
+      description: "Any whitespace character",
+      keywords: ["any", "whitespace", "character"],
+    },
+    {
+      regex: "\\S",
+      description: "Any non-whitespace character",
+      keywords: ["any", "whitespace", "character"],
+    },
+    {
+      regex: "\\d",
+      description: "Any digit",
+      keywords: ["any", "digit", "number"],
+    },
+    {
+      regex: "\\D",
+      description: "Any non-digit",
+      keywords: ["any", "digit", "number"],
+    },
+    {
+      regex: "\\w",
+      description: "Any word character (letter, number, underscore)",
+      keywords: ["word", "any"],
+    },
+    {
+      regex: "\\W",
+      description: "Any non-word character",
+      keywords: ["word", "any"],
+    },
+    {
+      regex: "\\b",
+      description: "	Any word boundary",
+      keywords: ["any", "word", "boundary"],
+    },
+    {
+      regex: "(...)",
+      description: "Capture everything enclosed",
+      keywords: ["capture", "everything", "enclosed"],
+    },
+    {
+      regex: "(a|b)",
+      description: "a or b",
+      keywords: ["or"],
+    },
+    {
+      regex: "a?",
+      description: "Zero or one of a",
+      keywords: ["zero", "one", "0"],
+    },
+    {
+      regex: "a*",
+      description: "Zero or more of a",
+      keywords: ["zero", "more", "0", "any"],
+    },
+    {
+      regex: "a+",
+      description: "One or more of a",
+      keywords: ["one", "more", "least"],
+    },
+    {
+      regex: "a{3}",
+      description: "Exactly 3 of a",
+      keywords: ["exactly", "times"],
+    },
+    {
+      regex: "a{3,}",
+      description: "3 or more of a",
+      keywords: ["or", "more", "times", "least"],
+    },
+    {
+      regex: "a{3,6}",
+      description: "Between 3 and 6 of a",
+      keywords: ["between"],
+    },
+  ];
+
+  return (
+    <List navigationTitle="Quick reference">
+      {references.map((reference) => {
+        return (
+          <List.Item
+            key={reference.regex}
+            title={reference.regex}
+            subtitle={reference.description}
+            keywords={reference.keywords}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Copy to Clipboard"
+                  onAction={async () => {
+                    try {
+                      await Clipboard.copy(reference.regex);
+                      await showToast({
+                        title: "Copied to clipboard",
+                      });
+                      pop();
+                    } catch {
+                      showToast({
+                        title: "Failed to copy",
+                        style: Toast.Style.Failure,
+                      });
+                    }
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
   );
 };
