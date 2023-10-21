@@ -197,8 +197,8 @@ class FileManager {
             const timeMatch = data.match(/time=([\d:.]+)/);
             if (timeMatch && timeMatch[1] && totalDuration) {
               const currentTime = getTimeInSeconds(timeMatch[1]);
-              const percentage = currentTime / totalDuration * 100
-              const percentageRounded = Math.round(percentage * 100) / 100
+              const percentage = (currentTime / totalDuration) * 100;
+              const percentageRounded = Math.round(percentage * 100) / 100;
               this.state$.process.set(percentageRounded);
             }
           },
@@ -215,57 +215,54 @@ class FileManager {
     }
   };
 
-    private makeVideoLoop = async (actionType: ActionType) => {
-
-    console.log("Starting Making VideoLoop")
+  private makeVideoLoop = async (actionType: ActionType) => {
+    console.log("Starting Making VideoLoop");
     const filePath = this.state$.selectedFilePath.get();
-    console.log("Filepath is: ", filePath)
+    console.log("Filepath is: ", filePath);
 
     if (filePath) {
       let totalDuration = 0; // total video duration
       try {
         this.state$.batch(() => {
-          console.log("Setting states.")
+          console.log("Setting states.");
           this.state$.process.set(0);
-          console.log("processing set to true.")
+          console.log("processing set to true.");
           this.state$.processing.set(true);
-          console.log("Now setting ActionType")
+          console.log("Now setting ActionType");
           this.state$.latestAction?.set(actionType);
         });
 
-        console.log("Done setting states.")
+        console.log("Done setting states.");
 
         //const filename = path.basename(filePath);
         const baseNameNoExt = path.parse(filePath).name;
-        console.log("Basename is: ", baseNameNoExt)
+        console.log("Basename is: ", baseNameNoExt);
 
         //const extName = path.extname(filePath);
-        const extName = ".mp4"
-        const suffix = "_videoloop"
+        const extName = ".mp4";
+        const suffix = "_videoloop";
         const basePath = path.dirname(filePath);
-        console.log("Base path is: ", basePath)
+        console.log("Base path is: ", basePath);
 
         let additionalIndex = 0;
         let targetFilePath = path.join(basePath, `${baseNameNoExt}${suffix}${extName}`);
 
-        const scaleFilter = `"scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=w='if(lte(iw,ih),1080,-2)':h='if(lte(iw,ih),-2,1080)'"`
+        const scaleFilter = `"scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=w='if(lte(iw,ih),1080,-2)':h='if(lte(iw,ih),-2,1080)'"`;
 
-
-        const ffmpegArguments = `-vcodec libx264 -preset veryslow -b:v 4000k -profile:v main -level:v 4.0 -pix_fmt yuv420p -vf "scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=w='if(lte(iw,ih),1080,-2)':h='if(lte(iw,ih),-2,1080)'" -bsf:v 'filter_units=remove_types=6' -fflags +bitexact -write_tmcd 0 -an -color_trc bt709 -movflags +faststart`
-        console.log("FFMPEG arguments are: ", ffmpegArguments)
+        const ffmpegArguments = `-vcodec libx264 -preset veryslow -b:v 4000k -profile:v main -level:v 4.0 -pix_fmt yuv420p -vf "scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=w='if(lte(iw,ih),1080,-2)':h='if(lte(iw,ih),-2,1080)'" -bsf:v 'filter_units=remove_types=6' -fflags +bitexact -write_tmcd 0 -an -color_trc bt709 -movflags +faststart`;
+        console.log("FFMPEG arguments are: ", ffmpegArguments);
 
         while (fs.existsSync(targetFilePath)) {
-          console.log("File exists. Changing name with index.")
+          console.log("File exists. Changing name with index.");
           additionalIndex += 1;
           targetFilePath = path.join(basePath, `${baseNameNoExt}${additionalIndex}${extName}`);
         }
 
-        const fullFFMPEGCommand = `-i '${filePath}' ${ffmpegArguments} '${targetFilePath}'`
-        console.log("Full command: ", fullFFMPEGCommand)
+        const fullFFMPEGCommand = `-i '${filePath}' ${ffmpegArguments} '${targetFilePath}'`;
+        console.log("Full command: ", fullFFMPEGCommand);
 
-        console.log("Starting FFMPEG process async after this:")
+        console.log("Starting FFMPEG process async after this:");
         await executeFFmpegCommandAsync({
-
           command: `${fullFFMPEGCommand}`,
           onContent: (data) => {
             console.log("onContent:", data);
@@ -278,13 +275,13 @@ class FileManager {
             const timeMatch = data.match(/time=([\d:.]+)/);
             if (timeMatch && timeMatch[1] && totalDuration) {
               const currentTime = getTimeInSeconds(timeMatch[1]);
-              const percentage = currentTime / totalDuration * 100
-              const percentageRounded = Math.round(percentage * 100) / 100
+              const percentage = (currentTime / totalDuration) * 100;
+              const percentageRounded = Math.round(percentage * 100) / 100;
               this.state$.process.set(percentageRounded);
             }
           },
         });
-        console.log("FFMPEG process is done.")
+        console.log("FFMPEG process is done.");
         this.state$.process.set(100);
         showHUD("Conversion file finished!");
       } catch (e) {
@@ -297,11 +294,10 @@ class FileManager {
     }
   };
 
-convert = {
-    videoloopmp4: async () => 
-    {
-      this.makeVideoLoop(ActionType.convertVideoLoop)
-  },
+  convert = {
+    videoloopmp4: async () => {
+      this.makeVideoLoop(ActionType.convertVideoLoop);
+    },
   };
 
   modify = {

@@ -15,7 +15,7 @@ interface Option {
 }
 
 const options: { title: string; list: Option[] }[] = [
-    {
+  {
     title: "Convert to VideoLoop",
     list: [
       {
