@@ -77,6 +77,7 @@ async function getChromiumProfiles(path: string) {
   const file = await read(`${path}/Local State`, "utf-8");
   const localState = JSON.parse(file);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const profileInfoCache: Record<string, any> = localState.profile.info_cache;
 
   const profiles = Object.entries(profileInfoCache)
