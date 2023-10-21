@@ -131,7 +131,7 @@ export default function Command() {
                 }}
               />
               <Action
-                title="Open In Browser"
+                title="Open URL"
                 icon={Icon.Link}
                 shortcut={{ modifiers: ["shift", "cmd"], key: "u" }}
                 onAction={() => {
