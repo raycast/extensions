@@ -71,7 +71,8 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
       ed = await response.text();
     }
     console.error("refresh tokens error:", ed);
-    throw new Error(`${response.statusText}: ${ed}`);
+    const detail = response.statusText !== ed ? ` - ${ed}` : "";
+    throw new Error(`Refresh Token: ${response.statusText} ${detail}`);
   }
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
