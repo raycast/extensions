@@ -58,17 +58,18 @@
   ],
   "dependencies": {
     "@googleapis/calendar": "^9.3.1",
-    "@raycast/api": "^1.59.0",
+    "@raycast/api": "^1.60.0",
     "@raycast/utils": "^1.10.0",
     "cross-fetch": "^4.0.0",
     "googleapis": "^126.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^18.8.4",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
