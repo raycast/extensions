@@ -7,7 +7,8 @@
   "author": "thomaslombart",
   "owner": "raycast",
   "contributors": [
-    "Vaibhav-Satishkumar"
+    "Vaibhav-Satishkumar",
+    "dlvhdr"
   ],
   "access": "public",
   "categories": [
@@ -54,11 +55,26 @@
       "mode": "menu-bar",
       "icon": "zoom.png",
       "interval": "15m"
+    },
+    {
+      "name": "toggle-mic",
+      "title": "Toggle Zoom Microphone",
+      "description": "Toggle the microphone on/off",
+      "icon": "zoom.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "mute-indicator",
+      "title": "Zoom Mute Indicator",
+      "description": "Shows the zoom microphone status",
+      "mode": "menu-bar",
+      "icon": "zoom.png",
+      "interval": "10s"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.53.3",
-    "@raycast/utils": "^1.4.1",
+    "@raycast/utils": "^1.10.0",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.8"
