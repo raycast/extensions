@@ -1,15 +1,17 @@
-import { Action, ActionPanel, Application, Detail, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Application, Color, Detail, Icon, Image, List } from "@raycast/api";
 
 import { getFavicon } from "@raycast/utils";
 import { useTotp } from "../hooks/useTotp";
 import { VaultCredential } from "../types/dcli";
+import { SyncAction } from "./actions/SyncActions";
 
 type Props = {
   item: VaultCredential;
   currentApplication?: Application;
+  onSync: () => void;
 };
 
-export const ListItemPassword = ({ item, currentApplication }: Props) => {
+export const ListItemPassword = ({ item, currentApplication, onSync }: Props) => {
   const { hasTotp, copyTotp, pasteTotp } = useTotp(item);
   const icon = getItemIcon(item);
 
@@ -79,6 +81,8 @@ export const ListItemPassword = ({ item, currentApplication }: Props) => {
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
           )}
+
+          <SyncAction onSync={onSync} />
         </ActionPanel>
       }
     />
