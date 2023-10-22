@@ -20,6 +20,15 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
   return JSON.parse(historyString);
 }
 
+function isValidURL(url: string) {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function getStaticResult(searchText: string): SearchResult[] {
   if (!searchText) {
     return [];
@@ -33,6 +42,11 @@ export function getStaticResult(searchText: string): SearchResult[] {
       url: `https://search.brave.com/search?q=${encodeURIComponent(searchText)}&source=raycast`,
     },
   ];
+
+  if (isValidURL(searchText) && getPreferenceValues()["enableSearchForURLs"]) {
+    result[0].description = `Open ${new URL(searchText).host}`;
+    result[0].url = searchText;
+  }
 
   return result;
 }

@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "VishwasShashidhar",
   "contributors": [
-    "0xChain"
+    "0xChain",
+    "justiniscoding"
   ],
   "categories": [
     "Web"
@@ -29,6 +30,14 @@
       "default": true,
       "label": "Remember Search History",
       "description": "Enable this checkbox to locally store Brave search history."
+    },
+    {
+      "name": "enableSearchForURLs",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable URL search",
+      "description": "When enabled, typing a url into the search bar will search the url. However, when disabled, typing the url in the search bar will instead open it, instead of searching for it with brave search."
     }
   ],
   "dependencies": {
