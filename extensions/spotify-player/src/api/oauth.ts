@@ -86,6 +86,7 @@ export async function refreshTokens(refreshToken: string): Promise<OAuth.TokenRe
   });
 
   if (!response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const error: any = await response.json();
     if (error.error === "invalid_grant") {
       oauthClient.removeTokens();

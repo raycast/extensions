@@ -20,6 +20,7 @@ export function withSpotifyClient(component: JSX.Element) {
       };
 
       // Use this instead of the global fetch
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       api.defaults.fetch = nodeFetch as any;
 
       spotifyClient = api;
@@ -62,6 +63,7 @@ export async function setSpotifyClient() {
   };
 
   // Use this instead of the global fetch
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   api.defaults.fetch = nodeFetch as any;
 
   spotifyClient = api;
