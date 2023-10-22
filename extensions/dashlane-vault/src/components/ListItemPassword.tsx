@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Application, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Application, Detail, Icon, Image, List } from "@raycast/api";
 
-import { useItemIcon } from "../hooks/useItemIcon";
+import { getFavicon } from "@raycast/utils";
 import { useTotp } from "../hooks/useTotp";
 import { VaultCredential } from "../types/dcli";
 
@@ -11,7 +11,7 @@ type Props = {
 
 export const ListItemPassword = ({ item, currentApplication }: Props) => {
   const { hasTotp, copyTotp, pasteTotp } = useTotp(item);
-  const icon = useItemIcon(item);
+  const icon = getItemIcon(item);
 
   const title = item.title ?? item.url;
   const subtitle = item.email ?? item.login ?? item.secondaryLogin;
@@ -94,4 +94,24 @@ function DetailNote({ name, note }: { name: string; note: string }) {
   `;
 
   return <Detail navigationTitle={`Note for ${name}`} markdown={markdown} />;
+}
+
+function isValidURL(url?: string) {
+  if (!url) return false;
+
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function getItemIcon(item: VaultCredential): Image.ImageLike {
+  return isValidURL(item.url)
+    ? getFavicon(item.url, { mask: Image.Mask.RoundedRectangle })
+    : {
+        source: Icon.Link,
+        tintColor: Color.SecondaryText,
+      };
 }
