@@ -22,7 +22,12 @@ interface Preferences {
 export function GridView(props: Props): JSX.Element {
   
   function getImagePath(baseDir: string, filename: string) {
-    return baseDir + filename.replaceAll('/', '_').replaceAll(' ', '_') + '.webp';
+    const safeFilename = filename
+      .replace(/[\/\s+]/g, '_')
+      .replace(/[\\:\*\?"<>()\|\.]/g, '')
+      .replace(/[^\w_\u00C0-\u017F]/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return baseDir + safeFilename + '.webp';
   }
 
   const columnPreference = parseInt(getPreferenceValues<Preferences>().itemSize ?? '3');
