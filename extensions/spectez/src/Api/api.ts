@@ -37,7 +37,7 @@ async function fetchTokenData(account: string, apiUrl: string) {
           "token.metadata.artifactUri",
           "token.metadata.thumbnailUri",
         ].join(","),
-      })
+      }),
   );
   if (!tokenResponse.ok) {
     throw new Error(`Token API request failed with status ${tokenResponse.status}`);
@@ -61,7 +61,7 @@ async function fetchAccountOperations(account: string, apiUrl: string) {
     `https://${apiUrl}/v1/accounts/${account}/operations?` +
       new URLSearchParams({
         limit: "15",
-      })
+      }),
   );
 
   if (!operationsResponse.ok) {
@@ -107,7 +107,7 @@ async function fetchContractData(account: string, apiUrl: string) {
 
 export async function fetchBalanceAndTokens(
   account: string,
-  network: Network
+  network: Network,
 ): Promise<{
   balance: string | null;
   lastActivityTime: string | null;
@@ -152,7 +152,7 @@ export async function fetchBalanceAndTokens(
 
 export async function fetchContractDataDetails(
   account: string,
-  network: Network
+  network: Network,
 ): Promise<{
   contract: {
     contractAddress: string;
