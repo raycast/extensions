@@ -21,11 +21,12 @@ export const eventColors = {
  */
 export const filterMultipleOutDuplicateEvents = <Events extends ApiResponseEvents | undefined>(events: Events) => {
   if (!events) return events;
-  const seenEvents = new Set<string>();
+  // const seenEvents = new Set<string>();
   return events.filter((event) => {
     const eventKey = `${event.eventStart}-${event.eventEnd}`;
-    if (seenEvents.has(eventKey)) return false;
-    seenEvents.add(eventKey);
+    // lots of customers have different events that have the same start / end, don't filter these out
+    // if (seenEvents.has(eventKey)) return false;
+    // seenEvents.add(eventKey);
     return !(event.personalSync && event.reclaimManaged);
   });
 };
