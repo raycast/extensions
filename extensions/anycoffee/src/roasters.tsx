@@ -8,7 +8,7 @@ import { getPreferenceValues } from "@raycast/api";
 export default function Command() {
   const [query, setQuery] = useState<null | string>(null);
   const [roastersByCountry, setRoastersByCountry] = useState<{ [key: string]: Roaster[] }>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [countryCode, setCountryCode] = useState<string>("all");
   const preferences = getPreferenceValues<Preferences>();
 
