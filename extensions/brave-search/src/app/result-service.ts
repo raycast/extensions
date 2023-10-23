@@ -60,7 +60,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
