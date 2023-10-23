@@ -1,6 +1,6 @@
 # Gmail Changelog
 
-## [Fix] -2023-10-21
+## [Fix] - 2023-10-21
 
 - Logout if OAuth token refresh fail. This enable re-login
 - Catch exception if authorize fails
