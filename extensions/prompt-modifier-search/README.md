@@ -1,0 +1,3 @@
+# Prompt Modifier Search
+
+Documented [Artists styles](https://docs.google.com/spreadsheets/d/1NcG4WLkwXzQ3lDlI58kPaJXjwA65F2dF-pwmPyX68yY/edit?usp=sharing), [photographers](https://docs.google.com/spreadsheets/d/1fFgHH_kUhu-TTR8aRxnzJScDaUA8WYbRejLjD19NhM0/edit?usp=sharing), and [photography terms](https://docs.google.com/spreadsheets/d/1fFgHH_kUhu-TTR8aRxnzJScDaUA8WYbRejLjD19NhM0/edit?usp=sharing) modifiers from Midjourney community, with visual reference.

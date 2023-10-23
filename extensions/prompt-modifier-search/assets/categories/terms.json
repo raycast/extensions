@@ -1,0 +1,664 @@
+{
+  "Lens and Settings": [
+    {
+      "name": "100mm",
+      "keywords": [
+        "Telephoto lens",
+        "Portrait photography",
+        "Narrow field of view"
+      ]
+    },
+    {
+      "name": "400mm",
+      "keywords": [
+        "Super telephoto lens",
+        "Wildlife photography",
+        "Long-distance subjects"
+      ]
+    },
+    {
+      "name": "50mm",
+      "keywords": [
+        "Standard lens",
+        "Versatile focal length",
+        "Natural perspective"
+      ]
+    },
+    {
+      "name": "f/1.2",
+      "keywords": [
+        "Wide aperture",
+        "Shallow depth of field",
+        "Bokeh effect"
+      ]
+    },
+    {
+      "name": "f/16",
+      "keywords": [
+        "Small aperture",
+        "Deep depth of field",
+        "Landscape photography"
+      ]
+    },
+    {
+      "name": "f/8",
+      "keywords": [
+        "Mid-range aperture",
+        "Balanced depth of field",
+        "General photography"
+      ]
+    },
+    {
+      "name": "Fisheye lens",
+      "keywords": [
+        "Ultra-wide-angle",
+        "Distorted perspective",
+        "Creative effects"
+      ]
+    },
+    {
+      "name": "High iso?",
+      "keywords": [
+        "High sensitivity",
+        "Low-light photography",
+        "Reduced image quality"
+      ]
+    },
+    {
+      "name": "Leica",
+      "keywords": [
+        "High-quality optics",
+        "Precision engineering",
+        "Timeless design"
+      ]
+    },
+    {
+      "name": "Lens flare",
+      "keywords": [
+        "Flare effect",
+        "Sunlight artifacts",
+        "Artistic enhancement"
+      ]
+    },
+    {
+      "name": "Lensbaby lens",
+      "keywords": [
+        "Selective focus",
+        "Creative distortion",
+        "Unique effects"
+      ]
+    },
+    {
+      "name": "Macro",
+      "keywords": [
+        "Extreme close-up",
+        "Small details",
+        "Insects and flowers"
+      ]
+    },
+    {
+      "name": "medium format photography",
+      "keywords": [
+        "Larger film/sensor size",
+        "High image quality",
+        "Studio work"
+      ]
+    },
+    {
+      "name": "shallow depth of field",
+      "keywords": [
+        "Subject isolation",
+        "Background blur",
+        "Emphasis on foreground"
+      ]
+    },
+    {
+      "name": "Tilt shift",
+      "keywords": [
+        "Perspective control",
+        "Miniature effect",
+        "Architectural photography"
+      ]
+    }
+  ],
+  "Photography Techniques": [
+    {
+      "name": "360 degree photograph",
+      "keywords": [
+        "Immersive photography",
+        "360-degree view",
+        "Virtual reality"
+      ]
+    },
+    {
+      "name": "3D photograph",
+      "keywords": [
+        "Stereoscopic effect",
+        "Depth perception",
+        "3D glasses"
+      ]
+    },
+    {
+      "name": "double exposure",
+      "keywords": [
+        "Layered imagery",
+        "Blend of two images",
+        "Dreamlike quality"
+      ]
+    },
+    {
+      "name": "Femto photograph",
+      "keywords": [
+        "Ultra-fast exposure",
+        "Femtosecond laser",
+        "Scientific research"
+      ]
+    },
+    {
+      "name": "Forced Perspective",
+      "keywords": [
+        "Optical illusion",
+        "Size manipulation",
+        "Creative storytelling"
+      ]
+    },
+    {
+      "name": "intentional motion blur – intentional camera movement",
+      "keywords": [
+        "Abstract effects",
+        "Dynamic energy",
+        "Artistic blur"
+      ]
+    },
+    {
+      "name": "light painting with burning spinning steel wool",
+      "keywords": [
+        "Long exposure",
+        "Fiery trails",
+        "Surreal light effects"
+      ]
+    },
+    {
+      "name": "light trail",
+      "keywords": [
+        "Car trails",
+        "Nighttime photography",
+        "Urban landscapes"
+      ]
+    },
+    {
+      "name": "long exposure",
+      "keywords": [
+        "Time flow",
+        "Smooth water",
+        "Night photography"
+      ]
+    },
+    {
+      "name": "low key",
+      "keywords": [
+        "Dark and moody",
+        "High contrast",
+        "Dramatic lighting"
+      ]
+    },
+    {
+      "name": "low vantage point",
+      "keywords": [
+        "Ground-level perspective",
+        "Unique angles",
+        "Empowering subjects"
+      ]
+    },
+    {
+      "name": "panning",
+      "keywords": [
+        "Motion blur background",
+        "Subject in focus",
+        "Dynamic action shots"
+      ]
+    },
+    {
+      "name": "Panorama",
+      "keywords": [
+        "Wide view",
+        "Stitched images",
+        "Scenic landscapes"
+      ]
+    },
+    {
+      "name": "photo montage",
+      "keywords": [
+        "Collage of images",
+        "Artistic composition",
+        "Visual storytelling"
+      ]
+    },
+    {
+      "name": "photo mosaic",
+      "keywords": [
+        "Tiled images",
+        "Complex patterns",
+        "Detailed compositions"
+      ]
+    },
+    {
+      "name": "Polar Coordinates",
+      "keywords": [
+        "Circular distortion",
+        "Abstract shapes",
+        "Polar effect"
+      ]
+    },
+    {
+      "name": "reflecting ball",
+      "keywords": [
+        "Sphere reflection",
+        "Distorted world",
+        "Creative photography"
+      ]
+    },
+    {
+      "name": "rule of thirds",
+      "keywords": [
+        "Composition guideline",
+        "Balance and harmony",
+        "Visual interest"
+      ]
+    },
+    {
+      "name": "selective color",
+      "keywords": [
+        "Isolated color",
+        "Emphasis on subject",
+        "Dramatic impact"
+      ]
+    },
+    {
+      "name": "Short lighting",
+      "keywords": [
+        "Dramatic shadows",
+        "Modeling effect",
+        "Character definition"
+      ]
+    },
+    {
+      "name": "Silhouette",
+      "keywords": [
+        "Backlit subject",
+        "Defined outline",
+        "Mystery and drama"
+      ]
+    },
+    {
+      "name": "Split lighting",
+      "keywords": [
+        "Divided light",
+        "Strong shadows",
+        "Contrast and dimension"
+      ]
+    },
+    {
+      "name": "star trails",
+      "keywords": [
+        "Celestial movement",
+        "Starry nights",
+        "Long exposure astrophotography"
+      ]
+    },
+    {
+      "name": "timelapse",
+      "keywords": [
+        "Time compression",
+        "Changing landscapes",
+        "Continuous movement"
+      ]
+    },
+    {
+      "name": "Tiny planet effect",
+      "keywords": [
+        "Spherical distortion",
+        "Miniature world",
+        "Fantasy landscapes"
+      ]
+    },
+    {
+      "name": "water drop photography",
+      "keywords": [
+        "High-speed capture",
+        "Liquid sculpture",
+        "Macro details"
+      ]
+    },
+    {
+      "name": "Zoom blur",
+      "keywords": [
+        "Dynamic zoom",
+        "Radial blur",
+        "Energetic motion"
+      ]
+    }
+  ],
+  "Photography Types": [
+    {
+      "name": "Ambrotype",
+      "keywords": [
+        "Wet plate process",
+        "Vintage look",
+        "One-of-a-kind images"
+      ]
+    },
+    {
+      "name": "astrophotography",
+      "keywords": [
+        "Night sky photography",
+        "Starry galaxies",
+        "Cosmic wonders"
+      ]
+    },
+    {
+      "name": "conceptual photography",
+      "keywords": [
+        "Abstract ideas",
+        "Artistic expression",
+        "Visual storytelling"
+      ]
+    },
+    {
+      "name": "CYANOTYPE",
+      "keywords": [
+        "Blue-toned prints",
+        "Sun-printing process",
+        "Historical photography"
+      ]
+    },
+    {
+      "name": "Daguerreotype",
+      "keywords": [
+        "Early photography",
+        "Metal plates",
+        "Sharp and detailed images"
+      ]
+    },
+    {
+      "name": "fashion",
+      "keywords": [
+        "Editorial photography",
+        "Clothing and style",
+        "Creative concepts"
+      ]
+    },
+    {
+      "name": "fine art photography",
+      "keywords": [
+        "Artistic expression",
+        "Emotional impact",
+        "Gallery-worthy images"
+      ]
+    },
+    {
+      "name": "food photography",
+      "keywords": [
+        "Gourmet cuisine",
+        "Appetizing visuals",
+        "Culinary artistry"
+      ]
+    },
+    {
+      "name": "infrared photography",
+      "keywords": [
+        "Invisible light",
+        "Surreal landscapes",
+        "Unique colors"
+      ]
+    },
+    {
+      "name": "Kirilian Photography",
+      "keywords": [
+        "Aura photography",
+        "Energy fields",
+        "Pseudoscientific imagery"
+      ]
+    },
+    {
+      "name": "Photojournalism",
+      "keywords": [
+        "Documentary photography",
+        "News reporting",
+        "Social issues"
+      ]
+    },
+    {
+      "name": "street photograph",
+      "keywords": [
+        "Urban scenes",
+        "Candid moments",
+        "Everyday life"
+      ]
+    },
+    {
+      "name": "Tintype",
+      "keywords": [
+        "Collodion process",
+        "Tin plate images",
+        "Vintage aesthetics"
+      ]
+    },
+    {
+      "name": "urbanex",
+      "keywords": [
+        "Urban exploration",
+        "Abandoned places",
+        "Decay and nostalgia"
+      ]
+    },
+    {
+      "name": "wetplate",
+      "keywords": [
+        "Collodion process",
+        "Wet plate negatives",
+        "Historical photography"
+      ]
+    }
+  ],
+  "Image Composition and Quality": [
+    {
+      "name": "barrel distortion",
+      "keywords": [
+        "Lens distortion",
+        "Curved lines",
+        "Creative effect"
+      ]
+    },
+    {
+      "name": "bokeh",
+      "keywords": [
+        "Background blur",
+        "Smooth out-of-focus areas",
+        "Dreamy atmosphere"
+      ]
+    },
+    {
+      "name": "framing",
+      "keywords": [
+        "Composition technique",
+        "Visual boundaries",
+        "Focus on subject"
+      ]
+    },
+    {
+      "name": "hdr",
+      "keywords": [
+        "High dynamic range",
+        "Multiple exposures",
+        "Dramatic tonal range"
+      ]
+    },
+    {
+      "name": "leading line",
+      "keywords": [
+        "Guiding the viewer",
+        "Visual path",
+        "Composition element"
+      ]
+    },
+    {
+      "name": "monochrome",
+      "keywords": [
+        "Black and white",
+        "Timeless appeal",
+        "Emphasis on form"
+      ]
+    },
+    {
+      "name": "negative space – probably",
+      "keywords": [
+        "Empty areas",
+        "Balance and simplicity",
+        "Visual breathing room"
+      ]
+    },
+    {
+      "name": "symmetrical",
+      "keywords": [
+        "Perfect balance",
+        "Mirror image",
+        "Harmony in composition"
+      ]
+    },
+    {
+      "name": "vignette",
+      "keywords": [
+        "Gradual darkening",
+        "Focus on center",
+        "Vintage look"
+      ]
+    }
+  ],
+  "Lighting": [
+    {
+      "name": "Blue Hour",
+      "keywords": [
+        "Twilight photography",
+        "Soft blue tones",
+        "Transitional light"
+      ]
+    },
+    {
+      "name": "butterfly lighting",
+      "keywords": [
+        "Portrait lighting",
+        "Even and flattering",
+        "Butterfly-shaped shadow"
+      ]
+    },
+    {
+      "name": "Chiaroscuro",
+      "keywords": [
+        "Contrasting light and shadow",
+        "Dramatic effect",
+        "Painterly quality"
+      ]
+    },
+    {
+      "name": "External flash",
+      "keywords": [
+        "Off-camera flash",
+        "Creative lighting",
+        "Reducing harsh shadows"
+      ]
+    },
+    {
+      "name": "golden hour",
+      "keywords": [
+        "Magic hour",
+        "Warm and soft light",
+        "Ideal for photography"
+      ]
+    },
+    {
+      "name": "high key",
+      "keywords": [
+        "Bright and minimal shadows",
+        "High-key portraits",
+        "Clean and cheerful"
+      ]
+    },
+    {
+      "name": "natural lighting",
+      "keywords": [
+        "Available light",
+        "Soft and flattering",
+        "Authentic atmosphere"
+      ]
+    },
+    {
+      "name": "rembrandt lighting",
+      "keywords": [
+        "Portrait lighting",
+        "Classic and artistic",
+        "Triangle of light"
+      ]
+    }
+  ],
+  "Equipment": [
+    {
+      "name": "Drone",
+      "keywords": [
+        "Aerial photography",
+        "Unique perspectives",
+        "Scenic landscapes"
+      ]
+    },
+    {
+      "name": "Fuji Velvia 50 film",
+      "keywords": [
+        "Color transparency film",
+        "Vivid and saturated colors",
+        "Landscape photography"
+      ]
+    },
+    {
+      "name": "polaroid",
+      "keywords": [
+        "Instant photography",
+        "Retro appeal",
+        "Immediate results"
+      ]
+    },
+    {
+      "name": "Sepia photograph",
+      "keywords": [
+        "Warm and nostalgic tones",
+        "Antique look",
+        "Vintage photography"
+      ]
+    }
+  ],
+  "Uncategorized": [
+    {
+      "name": "foreground, midground, background",
+      "keywords": [
+        "Depth in photography",
+        "Visual layers",
+        "Composition technique"
+      ]
+    },
+    {
+      "name": "high speed photography,",
+      "keywords": [
+        "Fast action capture",
+        "Freezing motion",
+        "Microsecond timing"
+      ]
+    },
+    {
+      "name": "orton effect - porbably",
+      "keywords": [
+        "Dreamy and soft focus",
+        "Artistic enhancement",
+        "Fantasy-like quality"
+      ]
+    }
+  ]
+}
