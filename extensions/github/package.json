@@ -16,7 +16,8 @@
     "oilbeater",
     "LunaticMuch",
     "aeorge",
-    "daquinoaldo"
+    "daquinoaldo",
+    "ppy"
   ],
   "categories": [
     "Developer Tools",
@@ -153,6 +154,12 @@
       ]
     },
     {
+      "name": "search-discussions",
+      "title": "Search Discussions",
+      "description": "Search recent Discussions globally in all repositories",
+      "mode": "view"
+    },
+    {
       "name": "my-discussions",
       "title": "My Discussions",
       "description": "Show your Discussions",
@@ -220,6 +227,22 @@
       "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
+    },
+    {
+      "name": "defaultSearchTerms",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Search Terms",
+      "description": "Default search to be populated when searching issues, pull requests and discussions.",
+      "default": "author:@me"
+    },
+    {
+      "name": "numberOfResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of search results",
+      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "placeholder": "50"
     }
   ],
   "dependencies": {
