@@ -20,7 +20,7 @@ const useTask = () => {
         notes: task.notes,
         alwaysPrivate: true,
         priority: task.priority,
-        onDeck: task.onDeck
+        onDeck: task.onDeck,
       };
 
       const [createdTask, error] = await axiosPromiseData<Task>(

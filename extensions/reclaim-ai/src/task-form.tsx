@@ -42,7 +42,7 @@ export default (props: Props) => {
       minDuration: (currentUser?.features.taskSettings.defaults.minChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
       maxDuration: (currentUser?.features.taskSettings.defaults.maxChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
       duration: (currentUser?.features.taskSettings.defaults.timeChunksRequired || 1) * TIME_BLOCK_IN_MINUTES,
-      schedulerVersion: (currentUser?.features.scheduler || 14),
+      schedulerVersion: currentUser?.features.scheduler || 14,
     }),
     [currentUser]
   );
@@ -72,8 +72,8 @@ export default (props: Props) => {
 
   const handleSubmit = async (formValues: FormValues) => {
     await showToast(Toast.Style.Animated, "Creating Task...");
-    const { timeNeeded, durationMin, durationMax, snoozeUntil, due,
-      notes, title, timePolicy, priority, onDeck } = formValues;
+    const { timeNeeded, durationMin, durationMax, snoozeUntil, due, notes, title, timePolicy, priority, onDeck } =
+      formValues;
 
     const _timeNeeded = parseDurationToMinutes(timeNeeded) / TIME_BLOCK_IN_MINUTES;
     const _durationMin = parseDurationToMinutes(durationMin) / TIME_BLOCK_IN_MINUTES;
@@ -97,7 +97,7 @@ export default (props: Props) => {
       due,
       notes,
       priority,
-      onDeck
+      onDeck,
     });
 
     if (created) {
@@ -149,10 +149,10 @@ export default (props: Props) => {
       <Form.Separator />
       {defaults.schedulerVersion > 14 && (
         <Form.Dropdown id="priority" title="Priority" defaultValue="P2">
-        <Form.Dropdown.Item title="Critical" value="P1" />
-        <Form.Dropdown.Item title="High priority" value="P2" />
-        <Form.Dropdown.Item title="Medium priority" value="P3" />
-        <Form.Dropdown.Item title="Low priority" value="P4" />
+          <Form.Dropdown.Item title="Critical" value="P1" />
+          <Form.Dropdown.Item title="High priority" value="P2" />
+          <Form.Dropdown.Item title="Medium priority" value="P3" />
+          <Form.Dropdown.Item title="Low priority" value="P4" />
         </Form.Dropdown>
       )}
       <Form.TextField
