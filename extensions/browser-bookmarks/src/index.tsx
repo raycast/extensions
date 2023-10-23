@@ -28,6 +28,7 @@ import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
+// NOTE frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
 type Bookmark = {
@@ -63,12 +64,13 @@ export default function Command() {
         return [browsers[0].bundleId as string];
       }
 
+      // We pull the default browser to enable it to eliminate the need for the user to select this on first run
       const defaultBrowser = await getMacOSDefaultBrowser();
       const browsersItem = await LocalStorage.getItem("browsers");
 
       return browsersItem ? (JSON.parse(browsersItem.toString()) as string[]) : [defaultBrowser];
     },
-    [availableBrowsers]
+    [availableBrowsers],
   );
 
   async function setBrowsers(browsers: string[]) {
@@ -144,6 +146,7 @@ export default function Command() {
           domain = "";
         }
 
+        // add domain and frequency to bookmarks
         return { ...item, domain, bookmarkFrecency: frecencies[item.id] };
       })
       .sort((a, b) => {
@@ -238,6 +241,7 @@ export default function Command() {
         { name: "folder", weight: 0.5 },
       ],
       threshold: 0.4,
+      includeScore: true,
     });
   }, [folderBookmarks]);
 
@@ -250,7 +254,27 @@ export default function Command() {
 
     const searchResults = fuse.search(query);
 
-    return searchResults.map((result) => result.item);
+    return searchResults
+      .sort((a, b) => {
+        // If a has a frecency, but b doesn't, a should come first
+        if (a.item.bookmarkFrecency && !b.item.bookmarkFrecency) {
+          return -1;
+        }
+
+        // If b has a frecency, but a doesn't, b should come first
+        if (!a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
+          return 1;
+        }
+
+        // If both frecencies are defined,put the one with the higher frecency first
+        if (a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
+          return b.item.bookmarkFrecency.frecency - a.item.bookmarkFrecency.frecency;
+        }
+
+        // If both frecencies are undefined, sort by their score
+        return (a.score || 1) - (a.score || 1);
+      })
+      .map((result) => result.item);
   }, [folderBookmarks, fuse, query]);
 
   const filteredFolders = useMemo(() => {
@@ -307,7 +331,7 @@ export default function Command() {
       JSON.stringify({
         ...frecencies,
         [item.id]: getBookmarkFrecency(frecency),
-      })
+      }),
     );
 
     mutateFrecencies();
@@ -326,6 +350,11 @@ export default function Command() {
 
   if (safari.error?.message.includes("operation not permitted")) {
     return <PermissionErrorScreen />;
+  }
+
+  // this allows the browser the bookmark was pulled from to be opened
+  function browserBundleToName(bundleId: string) {
+    return availableBrowsers?.find((browser) => browser.bundleId === bundleId)?.name;
   }
 
   return (
@@ -376,7 +405,12 @@ export default function Command() {
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={item.url} onOpen={() => updateFrecency(item)} />
+                <Action.Open
+                  title="Open in Browser"
+                  application={browserBundleToName(item.browser)}
+                  target={item.url}
+                  onOpen={() => updateFrecency(item)}
+                />
 
                 <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrecency(item)} />
 

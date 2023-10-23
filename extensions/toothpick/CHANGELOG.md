@@ -1,8 +1,14 @@
 # Toothpick Changelog
 
+## [QoL Improvements and Device Additions] - 2023-10-13
+
+- Added rudimentary mappings for the following devices:
+  - Samsung Galaxy Buds+ (custom icon)
+- Added the option to provide a custom 'blueutil' directory
+
 ## [QoL Improvement] - 2023-10-05
 
-- Make bluetooth backend preference an optional preference.
+- Made bluetooth backend preference an optional preference.
 
 ## [QoL Improvements and Device Additions] - 2023-09-28
 

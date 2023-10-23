@@ -16,6 +16,7 @@
     "oilbeater",
     "LunaticMuch",
     "aeorge",
+    "daquinoaldo",
     "peppy"
   ],
   "categories": [
@@ -78,6 +79,24 @@
       "description": "Search in your public or private repositories by name.",
       "mode": "view",
       "preferences": [
+        {
+          "name": "application",
+          "type": "appPicker",
+          "required": false,
+          "title": "IDE Application",
+          "default": "/Applications/Visual Studio Code.app",
+          "placeholder": "/Applications/Visual Studio Code.app",
+          "description": "Will be used to open the cloned repository."
+        },
+        {
+          "name": "baseClonePath",
+          "type": "directory",
+          "required": false,
+          "title": "Clone Path",
+          "default": "~/GitHub",
+          "placeholder": "~/GitHub",
+          "description": "Path in which the repositories will be cloned."
+        },
         {
           "name": "includeForks",
           "type": "checkbox",

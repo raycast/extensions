@@ -2,7 +2,6 @@ import { Action, ActionPanel, Color, Icon, Image, List, LocalStorage } from "@ra
 import { useEffect, useState } from "react";
 import { searchMedias } from "./api";
 import { Country, JustWatchMedia, JustWatchMediaOffers, MediaType } from "./types";
-import crypto from "crypto";
 import React from "react";
 
 export default function SearchJustwatch() {
@@ -74,12 +73,16 @@ export default function SearchJustwatch() {
       >
         {medias.length > 0 && searchText.length > 0 ? (
           medias.map((media) => (
-            <List.Section key={media.id} title={`${media.name} (${media.year})`} subtitle={`${media.type}`}>
+            <List.Section
+              key={media.id}
+              title={`${media.name} (${media.year})`}
+              subtitle={`${media.type.toLowerCase()}`}
+            >
               {media.offers.length > 0 ? (
                 media.offers.map((offer) => (
                   <List.Item
                     title={offer.name || "-"}
-                    key={offer.url + offer.presentation_type + offer.price_amount + media.id}
+                    key={offer.url + offer.presentationType + offer.priceAmount + media.id}
                     icon={{ source: offer.icon, mask: Image.Mask.RoundedRectangle }}
                     accessories={[
                       offer.type == MediaType.free
@@ -91,15 +94,15 @@ export default function SearchJustwatch() {
                           }
                         : {},
 
-                      media.is_movie && (offer.type == MediaType.buy || offer.type == MediaType.rent)
+                      media.isMovie && (offer.type == MediaType.buy || offer.type == MediaType.rent)
                         ? {
                             tag: {
                               value:
-                                getParsedCurrency(offer.price_amount, offer.currency) + ` (${offer.presentation_type})`,
+                                getParsedCurrency(offer.priceAmount, offer.currency) + ` (${offer.presentationType})`,
                               color: getColor(offer.type),
                             },
                           }
-                        : !media.is_movie
+                        : !media.isMovie
                         ? {
                             tag: {
                               value: `${offer.seasons}`,
@@ -121,7 +124,7 @@ export default function SearchJustwatch() {
                   detail={<DetailNoOffers media={media} />}
                   actions={
                     <ActionPanel>
-                      <Action.OpenInBrowser url={media.jw_url} title={`Open in JustWatch.com`} />
+                      <Action.OpenInBrowser url={media.jwUrl} title={`Open in JustWatch.com`} />
                     </ActionPanel>
                   }
                 />
@@ -157,7 +160,7 @@ export default function SearchJustwatch() {
                   color={getColor(props.offer.type)}
                   icon={{ source: props.offer.icon, mask: Image.Mask.RoundedRectangle }}
                 />
-                <List.Item.Detail.Metadata.TagList.Item text={props.offer.presentation_type} color={Color.Red} />
+                <List.Item.Detail.Metadata.TagList.Item text={props.offer.presentationType} color={Color.Red} />
               </List.Item.Detail.Metadata.TagList>
             ) : (
               <></>
@@ -169,24 +172,24 @@ export default function SearchJustwatch() {
                   <List.Item.Detail.Metadata.TagList.Item
                     text={
                       `${props.offer.type_parsed} for ` +
-                      getParsedCurrency(props.offer.price_amount, props.offer.currency) +
-                      ` (${props.offer.presentation_type})`
+                      getParsedCurrency(props.offer.priceAmount, props.offer.currency) +
+                      ` (${props.offer.presentationType})`
                     }
                     color={getColor(props.offer.type)}
                     icon={{ source: props.offer.icon, mask: Image.Mask.RoundedRectangle }}
                   />
                 </List.Item.Detail.Metadata.TagList>
 
-                {props.offer.other_prices && props.offer.other_prices.length > 0 ? (
+                {props.offer.otherPrices && props.offer.otherPrices.length > 0 ? (
                   <List.Item.Detail.Metadata.TagList title={"Other Prices"}>
-                    {props.offer.other_prices.map((other_price) => (
+                    {props.offer.otherPrices.map((other_price) => (
                       <React.Fragment
-                        key={`${props.offer.name}-${other_price.presentation_type}-${other_price.currency}-${other_price.price_amount}-${props.media.id}`}
+                        key={`${props.offer.name}-${other_price.presentationType}-${other_price.currency}-${other_price.priceAmount}-${props.media.id}`}
                       >
                         <List.Item.Detail.Metadata.TagList.Item
                           text={
-                            getParsedCurrency(other_price.price_amount, other_price.currency) +
-                            ` (${other_price.presentation_type})`
+                            getParsedCurrency(other_price.priceAmount, other_price.currency) +
+                            ` (${other_price.presentationType})`
                           }
                           color={Color.SecondaryText}
                           icon={{ source: props.offer.icon, mask: Image.Mask.RoundedRectangle }}
@@ -214,7 +217,7 @@ export default function SearchJustwatch() {
               <></>
             )}
 
-            {!props.media.is_movie ? (
+            {!props.media.isMovie ? (
               <List.Item.Detail.Metadata.Label title={""} text={props.offer.seasons}></List.Item.Detail.Metadata.Label>
             ) : (
               <></>
@@ -239,7 +242,7 @@ export default function SearchJustwatch() {
             <List.Item.Detail.Metadata.Link
               title={""}
               text={"View on JustWatch.com"}
-              target={props.media.jw_url}
+              target={props.media.jwUrl}
             ></List.Item.Detail.Metadata.Link>
           </List.Item.Detail.Metadata>
         }
@@ -264,7 +267,7 @@ Try changing the country or updating your selection of services in preferences.
     return (
       <ActionPanel>
         <Action.OpenInBrowser url={props.offer.url} title={`Open in Browser`} />
-        <Action.OpenInBrowser url={props.media.jw_url} title={`Open in JustWatch.com`} />
+        <Action.OpenInBrowser url={props.media.jwUrl} title={`Open in JustWatch.com`} />
         <Action.CopyToClipboard
           shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
           content={props.offer.url}
@@ -285,11 +288,11 @@ Try changing the country or updating your selection of services in preferences.
 
   function getImdbRating(media: JustWatchMedia) {
     let rating, votes;
-    if (media.imdb_score) {
-      rating = `${media.imdb_score.toString()}★`;
+    if (media.imdbScore) {
+      rating = `${media.imdbScore.toString()}★`;
     }
-    if (media.imdb_votes) {
-      votes = `${media.imdb_votes.toLocaleString(countryCode.replace("_", "-"))} votes`;
+    if (media.imdbVotes) {
+      votes = `${media.imdbVotes.toLocaleString(countryCode.replace("_", "-"))} votes`;
     }
 
     if (rating && votes) {
