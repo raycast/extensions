@@ -25,4 +25,5 @@ export enum WordType {
 
 export interface Preferences {
   defaultAction: string;
+  capitalizeResults: boolean;
 }
