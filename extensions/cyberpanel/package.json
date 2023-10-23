@@ -47,6 +47,26 @@
       "title": "List Users",
       "description": "List Users in CyberPanel",
       "mode": "view"
+    },
+    {
+      "name": "list-packages",
+      "title": "List Packages",
+      "description": "List Packages in CyberPanel",
+      "mode": "view"
+    },
+    {
+      "name": "list-ftp-accounts-in-domain",
+      "title": "List FTP Accounts in Domain",
+      "description": "List FTP Accounts in a Domain in CyberPanel",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "selectedDomain",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
