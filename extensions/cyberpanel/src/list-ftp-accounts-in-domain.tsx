@@ -50,6 +50,7 @@ export default function ListFTPAccountsInDomain(props: LaunchProps<{ arguments: 
       }    
 
     return error ? <ErrorComponent errorMessage={error} /> : <List isLoading={isLoading}>
+        <List.Section title={`domain: ${selectedDomain}`}>
         {ftpAccounts && ftpAccounts.map(ftpAccount => <List.Item key={ftpAccount.user} title={ftpAccount.id + " - " + ftpAccount.user} icon={Icon.PersonCircle} subtitle={`dir: ${ftpAccount.dir}`} accessories={[
             { tag: `quota: ${ftpAccount.quotasize}` }
         ]}
@@ -58,6 +59,7 @@ export default function ListFTPAccountsInDomain(props: LaunchProps<{ arguments: 
                 <Action title="Delete FTP Account" icon={Icon.RemovePerson} onAction={() => confirmAndDelete(ftpAccount.user)} style={Action.Style.Destructive} />
             </ActionPanel.Section>
         </ActionPanel>} />)}
+        </List.Section>
         {!isLoading && <List.Section title="Actions">
             <List.Item title="Create FTP Account" icon={Icon.AddPerson} actions={<ActionPanel>
                 <Action title="Create FTP Account" icon={Icon.AddPerson} onAction={() => push(<CreateFTPAccount onFTPAccountCreated={getFromApi} />)} />

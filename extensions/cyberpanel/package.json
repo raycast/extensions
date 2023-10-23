@@ -13,7 +13,7 @@
     {
       "name": "panelUrl",
       "title": "Panel URL",
-      "description": "Full URL of CyberPanel Instance with Port and trailing slash",
+      "description": "Full URL of CyberPanel Instance with Port",
       "type": "textfield",
       "placeholder": "https://cyberpanel.local:8090/",
       "required": true
@@ -67,6 +67,74 @@
           "type": "text"
         }
       ]
+    },
+    {
+      "name": "list-email-accounts-in-domain",
+      "title": "List Email Accounts in Domain",
+      "description": "List Email Accounts in a Domain in CyberPanel",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "list-databases-in-domain",
+      "title": "List Databases in Domain",
+      "description": "List Databases in a Domain in CyberPanel",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "databaseWebsite",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "list-dns-records-in-domain",
+      "title": "List DNS Records in Domain",
+      "description": "List DNS Records in a Domain in CyberPanel",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "selectedZone",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        },
+        {
+          "name": "currentSelection",
+          "placeholder": "RECORD_TYPE",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "create-backup",
+      "title": "Create Backup",
+      "description": "Create Backup in CyberPanel",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "websiteToBeBacked",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "list-websites",
+      "title": "List Websites",
+      "description": "List Websites in CyberPanel",
+      "mode": "view"
     }
   ],
   "dependencies": {
