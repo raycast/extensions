@@ -43,6 +43,13 @@
       "mode": "view"
     },
     {
+      "name": "blockStorage",
+      "title": "Block Storage",
+      "icon": "blockStorage.webp",
+      "description": "Block Storage",
+      "mode": "view"
+    },
+    {
       "name": "containers",
       "title": "Containers",
       "description": "Get information about containers",

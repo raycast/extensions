@@ -4,7 +4,6 @@
 // it's was remove inside raycast https://developers.raycast.com/changelog#1.46.0-2023-01-18
 import 'cross-fetch/polyfill'
 import {
-  Account,
   AppleSilicon,
   BareMetal,
   Block,
