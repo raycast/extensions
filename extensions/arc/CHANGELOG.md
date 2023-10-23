@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - 2023-10-16
+
+- Allow multiple, comma separated tabs to be opened
+  
 ## [Improvements] - 2023-09-12
 
 - Added a new `Open New Blank Window` command that opens a blank window in Arc

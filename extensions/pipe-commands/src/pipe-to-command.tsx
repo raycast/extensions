@@ -48,8 +48,19 @@ export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
     refreshCommands();
   }, []);
 
+  function generatePlaceholder(inputType: string | undefined) {
+    switch (inputType) {
+      case "text":
+        return "Pipe selected text or clipboard contents to";
+      case "url":
+        return "Pipe active browser tab URL to";
+      default:
+        return `Pipe ${inputType} to`;
+    }
+  }
+
   return (
-    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={`Pipe ${props.inputType} to`}>
+    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={generatePlaceholder(props.inputType)}>
       <List.Section title="Commands">
         {state?.commands.map((command) => (
           <PipeCommand key={command.path} command={command} inputFrom={props.inputType} onTrash={refreshCommands} />
