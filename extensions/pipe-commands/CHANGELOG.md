@@ -1,5 +1,9 @@
 # Pipe Commands Changelog
 
+## [Added new pipe commands] - 2023-10-22
+
+- Improved placeholder UX to make it clear what different commands pull from
+
 ## [Added new pipe commands] - 2023-10-17
 
 - Added new command to convert tab to newline
