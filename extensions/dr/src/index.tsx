@@ -35,42 +35,42 @@ function FeedDropDown({ feedTypes, onFeedChange }: FeedDropDownProps) {
 
 export default function Command() {
   const feedTypes: FeedType[] = [
-    { name: "Seneste nyt (Latest News)", url: "https://www.dr.dk/nyheder/service/feeds/senestenyt" },
-    { name: "Indland (Domestic)", url: "https://www.dr.dk/nyheder/service/feeds/indland" },
-    { name: "Udland (Foreign)", url: "https://www.dr.dk/nyheder/service/feeds/udland" },
-    { name: "Penge (Money)", url: "https://www.dr.dk/nyheder/service/feeds/penge" },
-    { name: "Politik (Politics)", url: "https://www.dr.dk/nyheder/service/feeds/politik" },
-    { name: "Sporten (Sports)", url: "https://www.dr.dk/nyheder/service/feeds/sporten" },
-    { name: "Seneste sport (Latest Sports)", url: "https://www.dr.dk/nyheder/service/feeds/senestesport" },
-    { name: "Viden (Knowledge)", url: "https://www.dr.dk/nyheder/service/feeds/viden" },
-    { name: "Kultur (Culture)", url: "https://www.dr.dk/nyheder/service/feeds/kultur" },
-    { name: "Musik (Music)", url: "https://www.dr.dk/nyheder/service/feeds/musik" },
-    { name: "Mit Liv (My Life)", url: "https://www.dr.dk/nyheder/service/feeds/mitliv" },
-    { name: "Mad (Food)", url: "https://www.dr.dk/nyheder/service/feeds/mad" },
-    { name: "Vejret (Weather)", url: "https://www.dr.dk/nyheder/service/feeds/vejret" },
-    { name: "Regionale (Regional)", url: "https://www.dr.dk/nyheder/service/feeds/regionale" },
-    { name: "DR Hovedstadsområdet (DR Capital Region)", url: "https://www.dr.dk/nyheder/service/feeds/regionale/kbh" },
-    { name: "DR Bornholm (DR Bornholm Island)", url: "https://www.dr.dk/nyheder/service/feeds/regionale/bornholm" },
+    { name: "Latest News", url: "https://www.dr.dk/nyheder/service/feeds/senestenyt" },
+    { name: "Domestic", url: "https://www.dr.dk/nyheder/service/feeds/indland" },
+    { name: "Foreign", url: "https://www.dr.dk/nyheder/service/feeds/udland" },
+    { name: "Money", url: "https://www.dr.dk/nyheder/service/feeds/penge" },
+    { name: "Politics", url: "https://www.dr.dk/nyheder/service/feeds/politik" },
+    { name: "Sports", url: "https://www.dr.dk/nyheder/service/feeds/sporten" },
+    { name: "Latest Sports", url: "https://www.dr.dk/nyheder/service/feeds/senestesport" },
+    { name: "Knowledge", url: "https://www.dr.dk/nyheder/service/feeds/viden" },
+    { name: "Culture", url: "https://www.dr.dk/nyheder/service/feeds/kultur" },
+    { name: "Music", url: "https://www.dr.dk/nyheder/service/feeds/musik" },
+    { name: "My Life", url: "https://www.dr.dk/nyheder/service/feeds/mitliv" },
+    { name: "Food", url: "https://www.dr.dk/nyheder/service/feeds/mad" },
+    { name: "Weather", url: "https://www.dr.dk/nyheder/service/feeds/vejret" },
+    { name: "Regional", url: "https://www.dr.dk/nyheder/service/feeds/regionale" },
+    { name: "DR Capital Region", url: "https://www.dr.dk/nyheder/service/feeds/regionale/kbh" },
+    { name: "DR Bornholm Island", url: "https://www.dr.dk/nyheder/service/feeds/regionale/bornholm" },
     {
-      name: "DR Syd og Sønderjylland (DR South & South Jutland)",
+      name: "DR South & South Jutland",
       url: "https://www.dr.dk/nyheder/service/feeds/regionale/syd",
     },
-    { name: "DR Fyn (DR Funen)", url: "https://www.dr.dk/nyheder/service/feeds/regionale/fyn" },
+    { name: "DR Funen", url: "https://www.dr.dk/nyheder/service/feeds/regionale/fyn" },
     {
-      name: "DR Midt- og Vestjylland (DR Central & West Jutland)",
+      name: "DR Central & West Jutland",
       url: "https://www.dr.dk/nyheder/service/feeds/regionale/vest",
     },
-    { name: "DR Nordjylland (DR North Jutland)", url: "https://www.dr.dk/nyheder/service/feeds/regionale/nord" },
+    { name: "DR North Jutland", url: "https://www.dr.dk/nyheder/service/feeds/regionale/nord" },
     {
-      name: "DR Trekantområdet (DR Triangle Area)",
+      name: "DR Triangle Area",
       url: "https://www.dr.dk/nyheder/service/feeds/regionale/trekanten",
     },
-    { name: "DR Sjælland (DR Zealand)", url: "https://www.dr.dk/nyheder/service/feeds/regionale/sjaelland" },
-    { name: "DR Østjylland (DR East Jutland)", url: "https://www.dr.dk/nyheder/service/feeds/regionale/oestjylland" },
+    { name: "DR Zealand", url: "https://www.dr.dk/nyheder/service/feeds/regionale/sjaelland" },
+    { name: "DR East Jutland", url: "https://www.dr.dk/nyheder/service/feeds/regionale/oestjylland" },
   ];
 
   const [feed, setFeed] = useState("https://www.dr.dk/nyheder/service/feeds/senestenyt");
-  const { data, isLoading, error } = useFetch(feed, {
+  const { data, isLoading } = useFetch(feed, {
     async parseResponse(response) {
       if (!response.ok) {
         throw new Error(`Failed to fetch feed: ${response.statusText}`);
@@ -82,20 +82,6 @@ export default function Command() {
     },
   });
 
-  useEffect(() => {
-    if (isLoading) {
-      showToast({ title: "Loading", message: "Fetching the feed..." });
-    } else if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: `Failed to fetch feed: ${error.message}`,
-      });
-    } else {
-      showToast({ title: "Success", message: "Feed fetched successfully!" });
-    }
-  }, [isLoading, error]);
-
   return (
     <List
       isLoading={isLoading}
@@ -103,19 +89,23 @@ export default function Command() {
       searchBarAccessory={<FeedDropDown feedTypes={feedTypes} onFeedChange={setFeed} />}
     >
       {data &&
-        data.map((item) => (
-          <List.Item
-            icon="list-icon.png"
-            title={item.title ?? "No Title"}
-            accessoryTitle={item.pubDate}
-            key={item.link}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={item.link ?? "https://dr.dk/"} />
-              </ActionPanel>
-            }
-          />
-        ))}
+        data.map((item) => {
+          const pubDate = new Date(item.pubDate as string);
+          return (
+            <List.Item
+              icon="list-icon.png"
+              title={item.title ?? "No Title"}
+              accessories={[{ date: pubDate, tooltip: pubDate.toLocaleString() }]}
+              key={item.link}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={item.link ?? "https://dr.dk/"} />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 }
+
