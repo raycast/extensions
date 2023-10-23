@@ -30,6 +30,10 @@ export async function searchWords(wordToSearch: string, type: SearchType): Promi
       return;
     }
 
+    if (wordToSearch[0] === wordToSearch[0].toUpperCase()) {
+      word.word = word.word[0].toUpperCase() + word.word.slice(1);
+    }
+
     for (let i = 0; i < word.defs.length; i++) {
       let definition: string = word.defs[i];
       definition = word.defs[i].replace(/\t/g, "~");
