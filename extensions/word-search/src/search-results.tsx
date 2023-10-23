@@ -13,8 +13,6 @@ export default function SearchResults(
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState<string>("");
 
-  const searchIsCapitalized = useMemo(() => search.length > 0 && search[0] == search[0].toUpperCase(), [search]);
-
   const onSearch = useCallback((search: string) => {
     setLoading(true);
     searchWords(search, type).then((words) => {
@@ -37,26 +35,26 @@ export default function SearchResults(
           description={search !== "" ? "No Results Found" : helperDescription}
         />
       ) : (
-        words.map((word) => {
-          const wordString = searchIsCapitalized ? word.word[0] + word.word.slice(1) : word.word;
-          return (
-            <List.Item
-              icon={"command-icon.png"}
-              key={wordString}
-              title={wordString}
-              subtitle={word.defs !== undefined ? word.defs[0] : ""}
-              actions={<Actions wordString={wordString} defaultAction={defaultAction} />}
-            />
-          );
-        })
+        words.map((word) => (
+          <List.Item
+            icon={"command-icon.png"}
+            key={word.word}
+            title={word.word}
+            subtitle={word.defs !== undefined ? word.defs[0] : ""}
+            actions={<Actions {...{ word, search }} defaultAction={defaultAction} />}
+          />
+        ))
       )}
     </List>
   );
 }
 
-function Actions(props: { wordString: string; defaultAction: string }) {
-  const pasteAction = <Action.Paste content={props.wordString} title="Paste Word in Active App" />;
-  const copyAction = <Action.CopyToClipboard content={props.wordString} title="Copy Word to Clipboard" />;
+function Actions(props: { word: Word; search: string; defaultAction: string }) {
+  let content = props.word.word;
+  if (props.search[0] === props.search[0].toUpperCase()) content = content[0].toUpperCase() + content.slice(1);
+
+  const pasteAction = <Action.Paste content={content} title="Paste Word in Active App" />;
+  const copyAction = <Action.CopyToClipboard content={content} title="Copy Word to Clipboard" />;
 
   const [firstAction, secondAction] =
     props.defaultAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction];
