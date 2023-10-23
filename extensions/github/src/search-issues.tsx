@@ -1,16 +1,17 @@
-import {getPreferenceValues, List} from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { trim } from "lodash";
 import { useState } from "react";
-import { getBoundedPreferenceNumber } from "./components/Menu";
+
 import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
+import { getBoundedPreferenceNumber } from "./components/Menu";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import View from "./components/View";
 import { IssueFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
 import { getGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
-import {trim} from "lodash";
 
 function SearchIssues() {
   const { github } = getGitHubClient();

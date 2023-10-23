@@ -1,4 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
+
 import { getBoundedPreferenceNumber } from "../components/Menu";
 import { getGitHubClient } from "../helpers/withGithubClient";
 

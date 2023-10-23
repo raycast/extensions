@@ -1,12 +1,12 @@
-import {getPreferenceValues, List} from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
+import { trim } from "lodash";
 import { useState } from "react";
-import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 
 import { DiscussionListItem } from "./components/DiscussionListItem";
+import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import View from "./components/View";
 import { DiscussionFieldsFragment } from "./generated/graphql";
 import { useDiscussions } from "./hooks/useDiscussions";
-import {trim} from "lodash";
 
 function DiscussionList(): JSX.Element {
   const { defaultSearchTerms } = getPreferenceValues<Preferences>();
@@ -15,27 +15,27 @@ function DiscussionList(): JSX.Element {
   const { data, isLoading } = useDiscussions(`${searchFilter} ${searchText}`);
   const discussions = data?.nodes as DiscussionFieldsFragment[] | null | undefined;
   return (
-      <List
-          isLoading={isLoading}
-          onSearchTextChange={setSearchText}
-          searchText={searchText}
-          searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
-          throttle
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchText={searchText}
+      searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
+      throttle
+    >
+      <List.Section
+        title={searchText.length > 0 ? "Found Discussions" : "Recent Discussions"}
+        subtitle={`${discussions?.length}`}
       >
-        <List.Section
-            title={searchText.length > 0 ? "Found Discussions" : "Recent Discussions"}
-            subtitle={`${discussions?.length}`}
-        >
-          {discussions?.map((d) => <DiscussionListItem key={d.id} discussion={d} />)}
-        </List.Section>
-      </List>
+        {discussions?.map((d) => <DiscussionListItem key={d.id} discussion={d} />)}
+      </List.Section>
+    </List>
   );
 }
 
 export default function Command() {
   return (
-      <View>
-        <DiscussionList />
-      </View>
+    <View>
+      <DiscussionList />
+    </View>
   );
 }
