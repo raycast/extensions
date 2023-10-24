@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dr",
+  "name": "dr-news",
   "title": "DR News",
   "description": "Showcases news updates from DR, Denmark's premier broadcaster, categorized by various topics.",
   "icon": "icon.png",
