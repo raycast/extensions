@@ -10,7 +10,7 @@ function CreateItemAction(props: { defaultTitle?: string; onCreate: (title: stri
     <Action.Push
       icon={Icon.NewFolder}
       title="Create New Item"
-      shortcut={{ modifiers: ["cmd"], key: "+" }}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
       target={<ItemForm defaultTitle={props.defaultTitle} onSubmit={handleSubmit} />}
     />
   );

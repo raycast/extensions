@@ -1,8 +1,25 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, Alert, confirmAlert } from "@raycast/api";
 
 function DeleteItemAction(props: { onDelete: () => void }) {
   return (
-    <Action icon={Icon.Trash} title="Delete" shortcut={{ modifiers: ["cmd"], key: "-" }} onAction={props.onDelete} />
+    <Action
+      icon={Icon.Trash}
+      title="Delete"
+      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      onAction={async () => {
+        if (
+          await confirmAlert({
+            title: "Are you sure?",
+            primaryAction: {
+              title: "Delete",
+              style: Alert.ActionStyle.Destructive,
+            },
+          })
+        ) {
+          props.onDelete();
+        }
+      }}
+    />
   );
 }
 
