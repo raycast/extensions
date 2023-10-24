@@ -5,6 +5,9 @@
   "description": "Showcases news updates from DR, Denmark's premier broadcaster, categorized by various topics.",
   "icon": "icon.png",
   "author": "kenanbendz",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "News"
   ],
@@ -31,8 +34,8 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
