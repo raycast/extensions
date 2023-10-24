@@ -26,7 +26,7 @@ export default function ListInboxsView({ inboxId }: ListInboxsViewProps) {
           accessories={[{ icon: Icon.Eye, text: `${inbox.emails_unread_count} / ${inbox.emails_count}` }]}
           actions={
             <ActionPanel>
-              <Action.Push title="Open Inbox" target={<ListEmailsView inboxId={inbox.id} />} />
+              <Action.Push icon={Icon.Tray} title="Open Inbox" target={<ListEmailsView inboxId={inbox.id} />} />
               <Action.CopyToClipboard title="Copy ID" content={inbox.id} />
               <Action
                 title="Refresh"
