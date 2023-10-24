@@ -1,5 +1,5 @@
 import { Heartbeat, Monitor } from "../modules/UptimeKuma";
-import { Color, Icon } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 
 export const getMonitorStatus = (monitor: Monitor): string => {
   if (monitor.active === false) {
@@ -56,6 +56,13 @@ export const getMonitorStatusIcon = (monitor: Monitor) => {
   }
 
   return Icon.QuestionMarkCircle;
+};
+
+export const getAvgPing = (monitor: Monitor) => {
+  if (monitor.avgPing) {
+    return monitor.avgPing + "ms";
+  }
+  return "-- ms";
 };
 
 export const getAvgPingMessage = (monitor: Monitor) => {
@@ -141,4 +148,77 @@ export function getHeartbeatListEmoji(heartbeats: Array<Heartbeat>, count = 20) 
     .join("");
 
   return heartbeatsLine;
+}
+
+function isNumber(value: any): value is number {
+  return typeof value === "number";
+}
+
+export function getAccessories(monitor: Monitor): Array<List.Item.Accessory> {
+  const accessories: Array<List.Item.Accessory> = [];
+
+  const avgPingText = isNumber(monitor.avgPing) ? `${monitor.avgPing}ms (avg)` : "";
+  const heartbeatPingText = isNumber(monitor.heartbeat?.ping) ? `${monitor.heartbeat?.ping}ms (last)` : "";
+
+  if (avgPingText || heartbeatPingText) {
+    const text = [avgPingText, heartbeatPingText].filter((t) => t).join(" / ");
+
+    accessories.push({
+      icon: {
+        source: Icon.Heartbeat,
+        tintColor: Color.PrimaryText,
+      },
+      text: text,
+      tooltip: `${getPingTitle(monitor.type)}: ${text}`,
+    });
+  }
+
+  const uptime24Text = isNumber(monitor.uptime24) ? `${monitor.uptime24.toFixed(2)}% (24h)` : "";
+  const uptime720Text = isNumber(monitor.uptime720) ? `${monitor.uptime720.toFixed(2)}% (30d)` : "";
+
+  if (uptime24Text || uptime720Text) {
+    const text = [uptime24Text, uptime720Text].filter((t) => t).join(" / ");
+
+    accessories.push({
+      icon: {
+        source: Icon.Plug,
+        tintColor: Color.PrimaryText,
+      },
+      text: `${text}`,
+      tooltip: `Uptime: ${text}`,
+    });
+  }
+
+  if (monitor.heartbeats) {
+    accessories.push({
+      icon: {
+        source: Icon.Heart,
+        tintColor: Color.PrimaryText,
+      },
+      text: `${getHeartbeatListEmoji(monitor.heartbeats, 5)}`,
+      tooltip: `Heartbeat: ${getHeartbeatListEmoji(monitor.heartbeats, 5)}`,
+    });
+  }
+
+  return accessories;
+}
+
+export function getPingColor(ping: number) {
+  if (ping < 300) {
+    return Color.Green;
+  } else if (ping < 600) {
+    return Color.Yellow;
+  } else {
+    return Color.Red;
+  }
+}
+
+export function getUptimeColor(uptime: number) {
+  if (uptime > 99.8) {
+    return Color.Green;
+  } else if (uptime > 99.5) {
+    return Color.Yellow;
+  } else {
+    return Color.Red;
+  }
 }

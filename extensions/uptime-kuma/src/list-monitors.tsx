@@ -1,14 +1,26 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, Color, List } from "@raycast/api";
-import { UptimeKuma, Monitor, Uptime, AvgPing, Heartbeat, HeartbeatList } from "./modules/UptimeKuma";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { AvgPing, Heartbeat, HeartbeatList, Monitor, Uptime, UptimeKuma } from "./modules/UptimeKuma";
 import { useEffect, useState } from "react";
 import { MonitorDetail } from "./monitor-detail";
-import { getHeartbeatListEmoji, getMonitorStatusColor, getMonitorStatusIcon, getSummaryMessage } from "./utils/display";
-import { showToast, Toast } from "@raycast/api";
+import { getMonitorStatusColor, getMonitorStatusIcon, getAccessories } from "./utils/display";
 import { useAppStore } from "./utils/store";
+import { AuthForm } from "./auth-form";
+import { ErrorScreen } from "./error-screen";
 
 export default function Command() {
   const [kuma_url, setKumaUrl] = useState<string>("");
-  const [monitorListFetched, setMonitorListFetched] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [kumaInstance, setKumaInstance] = useState<UptimeKuma | null>(null);
   const {
     monitors,
@@ -19,8 +31,26 @@ export default function Command() {
     updateMonitorHeartbeatList,
   } = useAppStore();
 
-  useEffect(() => {
-    const { kuma_url, kuma_token } = getPreferenceValues();
+  const { push } = useNavigation();
+
+  function logout() {
+    LocalStorage.removeItem("kuma_url");
+    LocalStorage.removeItem("kuma_token");
+    setMonitors([]);
+    push(<AuthForm />);
+  }
+
+  async function initCommand() {
+    const kuma_url: string | undefined = await LocalStorage.getItem("kuma_url");
+    const kuma_token: string | undefined = await LocalStorage.getItem("kuma_token");
+
+    if (!kuma_url || !kuma_token) {
+      push(<AuthForm />);
+
+      return;
+    }
+
+    setIsLoading(true);
 
     setKumaUrl(kuma_url);
 
@@ -43,7 +73,16 @@ export default function Command() {
         style: Toast.Style.Failure,
       });
 
-      setMonitorListFetched(true);
+      setIsLoading(false);
+      kuma.disconnect();
+
+      const errorMessage = `
+**Error**: ${error}
+
+If you think your connection settings are wrong, press Enter to run the Login Action and enter your new settings.
+`;
+
+      push(<ErrorScreen title={"Socket error"} message={errorMessage} />);
     });
 
     kuma.on("monitorList", (newMonitors) => {
@@ -52,7 +91,7 @@ export default function Command() {
 
       setMonitors(updatedMonitors);
 
-      setMonitorListFetched(true);
+      setIsLoading(false);
     });
 
     kuma.on("heartbeatList", (payload: HeartbeatList) => {
@@ -72,20 +111,30 @@ export default function Command() {
     });
 
     kuma.connect();
+  }
+
+  useEffect(() => {
+    initCommand();
   }, []);
 
   return (
-    <List navigationTitle="Monitors" isLoading={!monitorListFetched}>
+    <List
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.Push title="Login" icon={Icon.Power} target={<AuthForm />} />
+        </ActionPanel>
+      }
+    >
       {monitors.map((monitor) => (
         <List.Item
+          id={monitor.id.toString()}
           key={monitor.id}
           title={monitor.name}
-          subtitle={`${getSummaryMessage(monitor)}`}
-          accessoryTitle={monitor.heartbeats ? getHeartbeatListEmoji(monitor.heartbeats, 5) : ""}
+          accessories={getAccessories(monitor)}
           actions={
             <ActionPanel>
-              <Action.Push title="Monitor Detail" target={<MonitorDetail monitorId={monitor.id} />} />
-
+              <Action.Push title="Monitor Detail" icon={Icon.Info} target={<MonitorDetail monitorId={monitor.id} />} />
               <Action
                 title={`${monitor.active ? "Pause Monitor" : "Resume Monitor"}`}
                 onAction={() => {
@@ -112,10 +161,22 @@ export default function Command() {
                 }
               />
 
-              <Action.OpenInBrowser title={"Open in Kuma Dashboard"} url={`${kuma_url}/dashboard/${monitor.id}`} />
+              <Action.OpenInBrowser
+                title={"Open Monitor In Kuma Dashboard"}
+                url={`${kuma_url}/dashboard/${monitor.id}`}
+              />
               {monitor.type == "http" && (
-                <Action.OpenInBrowser title={"Open Target in Browser"} url={`${monitor.url}`} />
+                <Action.OpenInBrowser title={"Open Target In Browser"} url={`${monitor.url}`} />
               )}
+
+              <Action
+                title={"Logout"}
+                icon={{
+                  source: Icon.Power,
+                  tintColor: Color.Red,
+                }}
+                onAction={logout}
+              />
             </ActionPanel>
           }
           icon={{ source: getMonitorStatusIcon(monitor), tintColor: getMonitorStatusColor(monitor) }}

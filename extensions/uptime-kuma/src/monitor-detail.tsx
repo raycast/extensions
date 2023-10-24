@@ -39,32 +39,54 @@ export function MonitorDetail(props: Props) {
     return "";
   }, [monitor?.heartbeat?.time]);
 
+  const accessories = useMemo(() => {
+    return monitor?.tags.map((t) => {
+      return {
+        icon: Icon.Tag,
+        tag: t.name,
+      };
+    });
+  }, [monitor]);
+
   return (
     <>
       {monitor && (
         <List>
           <List.Item
             title={"Name"}
-            subtitle={monitor.name}
+            accessories={[
+              {
+                text: monitor.name,
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title={"Copy Name"} content={monitor.name} />
               </ActionPanel>
             }
           />
-          <List.Item
-            title={"Tags"}
-            subtitle={monitor.tags.map((t) => t.name).join(", ")}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard title={"Copy Tags"} content={monitor.tags.map((t) => t.name).join(", ")} />
-              </ActionPanel>
-            }
-          />
+          {monitor.tags?.length > 0 && (
+            <List.Item
+              title={"Tags"}
+              accessories={accessories}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard title={"Copy Tags"} content={monitor.tags.map((t) => t.name).join(", ")} />
+                </ActionPanel>
+              }
+            />
+          )}
           <List.Item
             title={"Status"}
-            subtitle={getMonitorStatus(monitor)}
-            icon={{ source: getMonitorStatusIcon(monitor), tintColor: getMonitorStatusColor(monitor) }}
+            accessories={[
+              {
+                text: getMonitorStatus(monitor),
+                icon: {
+                  source: getMonitorStatusIcon(monitor),
+                  tintColor: getMonitorStatusColor(monitor),
+                },
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title={"Copy Status"} content={getMonitorStatus(monitor)} />
@@ -75,7 +97,12 @@ export function MonitorDetail(props: Props) {
           {monitor.heartbeats && monitor.heartbeats?.length > 0 && (
             <List.Item
               title={"Heartbeats"}
-              subtitle={getHeartbeatListEmoji(monitor.heartbeats, 30) + " Now"}
+              accessories={[
+                {
+                  text: getHeartbeatListEmoji(monitor.heartbeats, 30) + " Now",
+                  icon: Icon.Heart,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard
@@ -90,7 +117,12 @@ export function MonitorDetail(props: Props) {
           {monitor.avgPing && (
             <List.Item
               title={getPingTitle(monitor.type, true)}
-              subtitle={`${monitor.avgPing}ms`}
+              accessories={[
+                {
+                  text: `${getPingTitle(monitor.type, true)}: ${monitor.avgPing}ms`,
+                  icon: Icon.Heartbeat,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title={"Copy Ping"} content={`${monitor.avgPing}ms`} />
@@ -101,7 +133,12 @@ export function MonitorDetail(props: Props) {
           {monitor.heartbeat?.ping && (
             <List.Item
               title={getPingTitle(monitor.type, false)}
-              subtitle={`${monitor.heartbeat.ping}ms`}
+              accessories={[
+                {
+                  text: `${getPingTitle(monitor.type)}: ${monitor.heartbeat.ping}ms`,
+                  icon: Icon.Heartbeat,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title={"Copy Ping"} content={`${monitor.heartbeat.ping}ms`} />
@@ -113,7 +150,12 @@ export function MonitorDetail(props: Props) {
           {monitor.uptime24 !== undefined && !isNaN(monitor.uptime24) && (
             <List.Item
               title={"Uptime 24h"}
-              subtitle={`${monitor.uptime24.toFixed(2)}%`}
+              accessories={[
+                {
+                  text: `${monitor.uptime24.toFixed(2)}%`,
+                  icon: Icon.Plug,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title={"Copy Uptime"} content={`${monitor.uptime24.toFixed(2)}%`} />
@@ -124,7 +166,12 @@ export function MonitorDetail(props: Props) {
           {monitor.uptime720 !== undefined && !isNaN(monitor.uptime720) && (
             <List.Item
               title={"Uptime 30d"}
-              subtitle={`${monitor.uptime720.toFixed(2)}%`}
+              accessories={[
+                {
+                  text: `${monitor.uptime720.toFixed(2)}%`,
+                  icon: Icon.Plug,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title={"Copy Uptime"} content={`${monitor.uptime720.toFixed(2)}%`} />
@@ -135,7 +182,11 @@ export function MonitorDetail(props: Props) {
 
           <List.Item
             title={"Monitor Type"}
-            subtitle={monitor.type}
+            accessories={[
+              {
+                tag: `${monitor.type}`,
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title={"Copy Type"} content={`${monitor.type}`} />
@@ -145,8 +196,13 @@ export function MonitorDetail(props: Props) {
           {monitor.type == "http" && (
             <List.Item
               title={"URL"}
-              subtitle={monitor.url}
               icon={{ source: Icon.Globe, tintColor: Color.PrimaryText }}
+              accessories={[
+                {
+                  text: `${monitor.url}`,
+                  icon: Icon.Globe,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser title={"Open Target in Browser"} url={`${monitor.url}`} />
@@ -159,7 +215,11 @@ export function MonitorDetail(props: Props) {
           {monitor.heartbeat?.msg && (
             <List.Item
               title={"Message"}
-              subtitle={monitor.heartbeat.msg}
+              accessories={[
+                {
+                  text: `${monitor.heartbeat.msg}`,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title={"Copy URL"} content={`${monitor.heartbeat.msg}`} />
@@ -171,7 +231,12 @@ export function MonitorDetail(props: Props) {
           {monitor.heartbeat?.time && (
             <List.Item
               title={"Last check"}
-              subtitle={lastCheck}
+              accessories={[
+                {
+                  text: `${lastCheck}`,
+                  icon: Icon.Clock,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title={"Copy Time"} content={lastCheck} />

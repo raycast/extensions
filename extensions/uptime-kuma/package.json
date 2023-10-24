@@ -19,22 +19,8 @@
     }
   ],
   "preferences": [
-    {
-      "name": "kuma_url",
-      "type": "textfield",
-      "required": true,
-      "description": "Add your self hosted Kuma URL here",
-      "title": "Uptime Kuma URL",
-      "placeholder": "https://uptime.example.com"
-    },
-    {
-      "name": "kuma_token",
-      "type": "textfield",
-      "required": true,
-      "title": "Kuma Auth Token",
-      "description": "Go to the kuma dashboard, open JS console and type `localStorage.getItem('token')`, copy the token and paste it here",
-      "placeholder": "See the tooltip for more info (or README)"
-    }
+
+
   ],
   "dependencies": {
     "@raycast/api": "^1.59.0",
