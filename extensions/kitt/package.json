@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kitt",
+  "title": "Kitt",
+  "description": "Kitt Extension",
+  "icon": "cmd.png",
+  "author": "theomjones",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "label": "Auth Token",
+      "description": "The auth token for the Kitt platform",
+      "type": "textfield",
+      "name": "authToken",
+      "required": true,
+      "title": "Auth Token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "users",
+      "title": "Users",
+      "subtitle": "Find users",
+      "description": "Find users in the Kitt platform",
+      "mode": "view"
+    },
+    {
+      "name": "login",
+      "title": "Login",
+      "subtitle": "Login to Kitt",
+      "description": "Login to Kitt",
+      "mode": "view"
+    },
+    {
+      "name": "requests",
+      "title": "Requests",
+      "subtitle": "Requests platform",
+      "description": "Manage requests within the kitt platform",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "drizzle-orm": "^0.28.6",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
+    "knex": "^3.0.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.6.2"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-graphql-request": "^6.0.0",
+    "@graphql-codegen/typescript-operations": "^4.0.1",
+    "@parcel/watcher": "^2.3.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "graphql": "graphql-codegen --config codegen.ts",
+    "graphql:watch": "graphql-codegen --config codegen.ts --watch"
+  }
+}

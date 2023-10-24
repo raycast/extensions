@@ -1,0 +1,53 @@
+fragment User on User {
+    email: Email
+    isLeadTenant
+    isKitt
+    createdAt {
+        ISOString
+    }
+    company {
+        id
+        name
+        activeTenancy {
+            startDate {
+                ISOString
+            }
+        }
+        whiteLabelLogo {
+            src
+        }
+    }
+
+    profile {
+        photo {
+            src
+        }
+        jobTitle
+        birthday {
+            day
+            month
+            year
+        }
+        name
+    }
+}
+fragment SearchUser on SearchUser {
+    id
+    user {
+        ...User
+    }
+}
+
+query getUser($id: String!, $token: String!) {
+    usersvc_GetUser(id: $id, cookie: $token, verificationToken: "") {
+        ...User
+    }
+}
+
+query searchUsers($email: String!) {
+    searchsvc_GetUsers(query: $email) {
+        users {
+            ...SearchUser
+        }
+    }
+}

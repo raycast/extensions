@@ -1,0 +1,5 @@
+mutation loginUser($email: String!, $password: String!) {
+    usersvc_LoginCommand(email: $email, password: $password, rememberMe: true) {
+        token
+    }
+}
