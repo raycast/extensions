@@ -63,7 +63,7 @@ export default function IndexCommand() {
         title,
         link,
         isOrganization: owner !== "null",
-        isLocalExtension: !!cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
+        isLocalExtension: !cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
       };
     });
 
