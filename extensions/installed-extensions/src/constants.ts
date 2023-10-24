@@ -1,4 +1,4 @@
-import { optionType } from "./types";
+import { OptionType } from "./types";
 
 export const extensionTypes: OptionType[] = [
   { id: "all", name: "All" },
