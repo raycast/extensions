@@ -6,3 +6,7 @@
 - Set your miles percentage earned for the flight
 - See an overview of the flight and the distance between the airports
 - See how many miles you earn for the flight
+
+## [v1.1.0] - 2023-10-24
+
+- Copy the result to your clipboard

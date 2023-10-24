@@ -14,7 +14,7 @@ export const SelectionFormView = () => {
     const { push } = useNavigation()
 
     function handleFormSubmit(values: submitValues) {
-        if (values.origin === null || values.destination === null) {
+        if (!values.origin || !values.destination) {
             showFailureToast("Please select airports")
             return
         }

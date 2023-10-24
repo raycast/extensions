@@ -13,3 +13,4 @@ Calculate how many miles you earn for a flight.
 
 - See an overview of the flight and the distance between the airports
 - See how many miles you earn for the flight
+- Copy the result to your clipboard
