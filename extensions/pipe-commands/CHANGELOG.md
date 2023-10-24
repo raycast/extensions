@@ -1,6 +1,6 @@
 # Pipe Commands Changelog
 
-## [Pipe to text enhancement] - {PR_MERGE_DATE}
+## [Pipe to text enhancement] - 2023-10-24
 
 - Fallback to clipboard when text selection fails (new error type)
 
