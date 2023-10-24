@@ -14,7 +14,7 @@ import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { exec as execCb } from "child_process";
 import { useState } from "react";
 import { promisify } from "util";
-import { DataType, optionType } from "./types";
+import { DataType, OptionType } from "./types";
 import { extensionTypes } from "./constants";
 import { formatItem, formatOutput } from "./utils";
 
@@ -76,7 +76,7 @@ export default function IndexCommand() {
   });
 
   function ExtensionTypeDropdown(props: {
-    ExtensionTypes: optionType[];
+    ExtensionTypes: OptionType[];
     onExtensionTypeChange: (newValue: string) => void;
   }) {
     const { ExtensionTypes, onExtensionTypeChange } = props;

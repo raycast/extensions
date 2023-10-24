@@ -12,4 +12,4 @@ export type DataType = {
   link: string;
 };
 
-export type optionType = { id: string; name: string };
+export type OptionType = { id: string; name: string };
