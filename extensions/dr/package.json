@@ -20,6 +20,7 @@
     {
       "name": "index",
       "title": "Get Latest News",
+      "subtitle": "DR",
       "description": "Get the latest news from DR.dk",
       "mode": "view"
     }
