@@ -14,28 +14,28 @@ import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { exec as execCb } from "child_process";
 import { useState } from "react";
 import { promisify } from "util";
-import { dataType, optionType } from "./types";
+import { DataType, optionType } from "./types";
 import { extensionTypes } from "./constants";
 import { formatItem, formatOutput } from "./utils";
 
 const exec = promisify(execCb);
 
 export default function IndexCommand() {
-  const preferenes = getPreferenceValues<Preferences.Index>();
+  const preferences = getPreferenceValues<Preferences.Index>();
 
   let jqPath = "/opt/homebrew/bin/jq";
-  if (preferenes.jqPath || preferenes.jqPath?.trim()) {
-    jqPath = preferenes.jqPath;
+  if (preferences.jqPath || preferences.jqPath?.trim()) {
+    jqPath = preferences.jqPath;
   }
 
-  const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([]);
+  const [installedExtensions, setInstalledExtensions] = useState<DataType[]>([]);
   const { isLoading, data, error } = useCachedPromise(async () => {
     const { stdout, stderr } = await exec(
       `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.owner) \\(.title)"' {} \\;`,
     );
 
     if (stderr) {
-      showFailureToast("Correct the path to jq or dowbload jq", {
+      showFailureToast("Correct the path to jq or download jq", {
         primaryAction: {
           title: "Download jq",
           onAction: () => {
@@ -44,7 +44,7 @@ export default function IndexCommand() {
         },
       });
 
-      throw new Error("Correct the path to jq or dowbload jq");
+      throw new Error("Correct the path to jq or download jq");
     }
 
     let result = stdout.split("\n").map((item) => {
@@ -98,7 +98,7 @@ export default function IndexCommand() {
   }
 
   const onExtensionTypeChange = (newValue: string) => {
-    const filteredExtensions: dataType[] =
+    const filteredExtensions: DataType[] =
       data?.filter((item) => {
         return newValue === "local" ? item.isLocalExtension : newValue === "store" ? !item.isLocalExtension : true;
       }) || [];
@@ -155,7 +155,7 @@ export default function IndexCommand() {
                     <ActionPanel.Section title="Extension">
                       <Action
                         onAction={() => {
-                          Clipboard.copy(formatItem(item, preferenes.format));
+                          Clipboard.copy(formatItem(item, preferences.format));
                           showHUD("Copied to Clipboard");
                         }}
                         title="Copy Item to Clipboard"
@@ -167,9 +167,9 @@ export default function IndexCommand() {
                           Clipboard.copy(
                             formatOutput(
                               installedExtensions,
-                              preferenes.format,
-                              preferenes.separator,
-                              preferenes.prepend,
+                              preferences.format,
+                              preferences.separator,
+                              preferences.prepend,
                             ),
                           );
                           showHUD("Copied to Clipboard");

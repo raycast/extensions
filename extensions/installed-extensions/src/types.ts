@@ -1,4 +1,4 @@
-export type dataType = {
+export type DataType = {
   [key: string]: any;
   path: string;
   name: string;
