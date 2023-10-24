@@ -94,19 +94,19 @@ const EventActionsList = ({ event }: { event: Event }) => {
             }}
           />
           <Action
-            title="1 day"
+            title="1 Day"
             onAction={() => {
               rescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
             }}
           />
           <Action
-            title="2 days"
+            title="2 Days"
             onAction={() => {
               rescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
             }}
           />
           <Action
-            title="1 week"
+            title="1 Week"
             onAction={() => {
               rescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
             }}
