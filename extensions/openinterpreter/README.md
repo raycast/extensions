@@ -2,6 +2,7 @@
 
 Run Open Interpreter from the comfort of Raycast! The last Raycast command you'll ever need - do anything you can imagine on your computer!
 
+
 ![Screenshot of OpenInterpreter](./metadata/openinterperter-1.png)
 
 ## Instalation Instructions
