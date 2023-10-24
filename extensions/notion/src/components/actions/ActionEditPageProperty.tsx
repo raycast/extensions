@@ -90,6 +90,35 @@ export function ActionEditPageProperty(props: {
       );
     }
 
+    case "status": {
+      const value = pageProperty && "status" in pageProperty ? pageProperty.status?.id : null;
+      return (
+        <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
+          {(options as DatabasePropertyOption[])?.map((opt) => (
+            <Action
+              key={opt.id}
+              icon={
+                (opt.icon ? opt.icon : opt.id !== "_select_null_")
+                  ? {
+                      source: opt.icon ? opt.icon : value === opt.id ? Icon.Checkmark : Icon.Circle,
+                      tintColor: notionColorToTintColor(opt.color),
+                    }
+                  : undefined
+              }
+              title={(opt.name ? opt.name : "Untitled") + (opt.icon && value === opt.id ? "  ✓" : "")}
+              onAction={() => {
+                if (opt.id && opt.id !== "_select_null_") {
+                  setPageProperty({ [databaseProperty.id]: { status: { id: opt.id } } });
+                } else {
+                  setPageProperty({ [databaseProperty.id]: { status: null } });
+                }
+              }}
+            />
+          ))}
+        </ActionPanel.Submenu>
+      );
+    }
+
     case "date": {
       const value = pageProperty && "date" in pageProperty ? pageProperty.date : null;
       return (
