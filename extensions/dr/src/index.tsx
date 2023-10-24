@@ -2,6 +2,7 @@ import { ActionPanel, List, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import Parser from "rss-parser";
+import { getIcon } from "./utils";
 
 const parser = new Parser();
 
@@ -89,16 +90,16 @@ export default function Command() {
       searchBarAccessory={<FeedDropDown feedTypes={feedTypes} onFeedChange={setFeed} />}
     >
       {data &&
-        data.map((item) => {
+        data.map((item, index) => {
           const pubDate = new Date(item.pubDate as string);
           return (
             <List.Item
-              icon="list-icon.png"
+              icon={getIcon(index + 1)}
               title={item.title ?? "No Title"}
               accessories={[{ date: pubDate, tooltip: pubDate.toLocaleString() }]}
               key={item.link}
               actions={
-                <ActionPanel>
+                <ActionPanel> 
                   <Action.OpenInBrowser url={item.link ?? "https://dr.dk/"} />
                 </ActionPanel>
               }
