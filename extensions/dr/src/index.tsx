@@ -1,6 +1,6 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Parser from "rss-parser";
 
 const parser = new Parser();
@@ -18,7 +18,7 @@ interface FeedDropDownProps {
 function FeedDropDown({ feedTypes, onFeedChange }: FeedDropDownProps) {
   return (
     <List.Dropdown
-      tooltip="Select feed"
+      tooltip="Select Feed"
       storeValue={true}
       onChange={(selected) => {
         onFeedChange(selected);
@@ -108,4 +108,3 @@ export default function Command() {
     </List>
   );
 }
-
