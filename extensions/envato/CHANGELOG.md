@@ -1,6 +1,6 @@
 # Envato Changelog
 
-## [Verify Purchase] - {PR_MERGE_DATE}
+## [Verify Purchase] - 2023-10-24
 
 - Added Verify Purchase using Purchase Code
 
