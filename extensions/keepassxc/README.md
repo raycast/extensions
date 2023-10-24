@@ -28,6 +28,7 @@ There are 3 parameters required for this extension to work:
 - `Cmd`+`G` : Copy Password
 - `Cmd`+`B` : Copy Username
 - `Cmd`+`T` : Copy TOTP
+- `Shift` + `Cmd` + `U` : Open URL in Browser
 
 ## Password Security Note
 

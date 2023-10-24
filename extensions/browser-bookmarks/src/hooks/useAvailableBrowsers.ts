@@ -17,7 +17,7 @@ export const BROWSERS_BUNDLE_ID = {
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);
 
-export default function useBrowsers() {
+export default function useAvailableBrowsers() {
   return useCachedPromise(async () => {
     const apps = await getApplications();
 

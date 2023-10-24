@@ -2,6 +2,7 @@ import { List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
 
+import { getBoundedPreferenceNumber } from "./components/Menu";
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
@@ -33,7 +34,10 @@ function SearchRepositories() {
     mutate: mutateList,
   } = useCachedPromise(
     async (query) => {
-      const result = await github.searchRepositories({ query, numberOfItems: 20 });
+      const result = await github.searchRepositories({
+        query,
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+      });
 
       return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
     },

@@ -81,7 +81,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
         {todos?.map((t) => (
           <MenuBarItem
             key={t.id}
-            title={t.title}
+            title={t.title ? t.title : "?"}
             subtitle={getPrettyTodoActionName(t)}
             icon={getTodoIcon(t, { light: "#000000", dark: "FFFFFF", adjustContrast: false })}
             tooltip={t.project_with_namespace}

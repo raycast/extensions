@@ -4,10 +4,10 @@ export interface DatabaseView {
   sort_by?: Record<string, any>;
   type?: "kanban" | "list";
   name?: string | null;
-  kanban?: KabanView;
+  kanban?: KanbanView;
 }
 
-export interface KabanView {
+export interface KanbanView {
   property_id: string;
   backlog_ids: string[];
   not_started_ids: string[];
