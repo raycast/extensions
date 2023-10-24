@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openinterpreter",
+  "title": "Open Interpreter - Any Command, On The Spot",
+  "description": "Run Open Interpreter from the comfort of Raycast! Enables AI code execution to do anything you need, on your local machine-.",
+  "icon": "command-icon.png",
+  "author": "Cobular",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Run Open Interpreter",
+      "subtitle": "OpenInterpreter",
+      "description": "Starts an open interpreter session",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.0",
+    "@raycast/utils": "^1.10.0",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "pythonia": "^1.0.4",
+    "react-async": "^10.0.1",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "name": "openinterpreter-api-key",
+      "title": "API Key",
+      "description": "Your API Key for the Company You've Selected",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "title": "Model",
+      "name": "openinterpreter-model",
+      "description": "The model to use for OpenAI",
+      "required": true,
+      "default": "gpt-4",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "GPT 4",
+          "value": "gpt-4"
+        },
+        {
+          "title": "GPT 4 32K",
+          "value": "gpt-4-32k"
+        },
+        {
+          "title": "GPT 3.5",
+          "value": "gpt-3.5-turbo"
+        },
+        {
+          "title": "GPT 3.5 16k",
+          "value": "gpt-3.5-turbo-16k"
+        },
+        {
+          "title": "Claude Instant 1",
+          "value": "claude-instant-1"
+        },
+        {
+          "title": "Claude Instant 1.2",
+          "value": "claude-instant-1.2"
+        },
+        {
+          "title": "Claude Instant 2",
+          "value": "claude-instant-2"
+        }
+      ]
+    },
+    {
+      "title": "Base URL",
+      "name": "openinterpreter-base-url",
+      "description": "The base URL variable to inject. Doesn't always do something, depends on the company. Optional.",
+      "required": false,
+      "type": "textfield"
+    },
+    {
+      "title": "Budget",
+      "name": "openinterpreter-budget",
+      "description": "The budget (in USD) of a single session. Optional.",
+      "required": false,
+      "type": "textfield",
+      "placeholder": "1.50"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "build:py": ". ./venv/bin/activate && pyinstaller --distpath assets ./py_src/main.spec"
+  }
+}

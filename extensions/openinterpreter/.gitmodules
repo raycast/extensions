@@ -1,0 +1,3 @@
+[submodule "deps/open-interpreter"]
+	path = deps/open-interpreter
+	url = git@github.com:Cobular/open-interpreter.git
