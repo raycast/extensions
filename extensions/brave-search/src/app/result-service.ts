@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
 import { nanoid } from "nanoid";
-import { BraveResult, Preferences, SearchResult } from "./models";
+import { BraveResult, SearchResult } from "./models";
 import fetch from "node-fetch";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
-  const { rememberSearchHistory } = getPreferenceValues<Preferences>();
+  const { rememberSearchHistory } = getPreferenceValues<ExtensionPreferences>();
 
   if (!rememberSearchHistory) {
     return [];
