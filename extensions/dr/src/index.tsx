@@ -99,7 +99,7 @@ export default function Command() {
               accessories={[{ date: pubDate, tooltip: pubDate.toLocaleString() }]}
               key={item.link}
               actions={
-                <ActionPanel> 
+                <ActionPanel>
                   <Action.OpenInBrowser url={item.link ?? "https://dr.dk/"} />
                 </ActionPanel>
               }
