@@ -15,7 +15,7 @@ export default function Metadata() {
   const client = useHttpClient();
 
   const [finished, setFinished] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(true);
   const balance = new BalanceRequester(client);
 
   const { assets } = useAssets(client);
@@ -39,6 +39,7 @@ export default function Metadata() {
         .trade()
         .then((result) => {
           setTradeBalances(result);
+          setIsLoading(false);
         })
         .catch(async (err) => {
           await showToast(Style.Failure, err.message);
@@ -245,7 +246,7 @@ export default function Metadata() {
   }
 
   return (
-    <List isShowingDetail>
+    <List isShowingDetail isLoading={isLoading}>
       <List.Section title="Favorite">
         {favoriteTickers.map((ticker) => (
           <BalanceListItem key={ticker} ticker={ticker}></BalanceListItem>

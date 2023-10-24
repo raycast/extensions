@@ -43,12 +43,13 @@ export default function Command() {
   const [lastActivityUpdate, setLastActivityUpdate] = useState(new Date());
 
   const [list, setList] = useState<Array<Market>>([]);
-
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(function () {
     fetchMarkets()
       .then((items) => {
         if (items) {
           setList(items);
+          setIsLoading(false);
         }
       })
       .catch((e) => console.log(e));
@@ -125,7 +126,7 @@ export default function Command() {
   }
 
   return (
-    <List navigationTitle="Markets" searchBarPlaceholder="Search markets..." isShowingDetail={showingDetail}>
+    <List searchBarPlaceholder="Search markets..." isShowingDetail={showingDetail} isLoading={isLoading}>
       <List.Item
         icon={Icon.Repeat}
         title="Auto refresh"

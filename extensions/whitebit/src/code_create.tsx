@@ -103,7 +103,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.CodeCr
           <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
-      navigationTitle="WhiteBIT Code Creation"
     >
       <Form.Dropdown
         id="ticker"

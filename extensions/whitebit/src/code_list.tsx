@@ -9,6 +9,8 @@ export default function Command() {
   const client = useHttpClient();
   const codes = new CodesRequester(client);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   async function fetchCodes() {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -39,6 +41,7 @@ export default function Command() {
     fetchCodes().then((items) => {
       if (items?.data) {
         setList(items.data);
+        setIsLoading(false);
       }
     });
   }, []);
@@ -68,10 +71,7 @@ export default function Command() {
   }
 
   return (
-    <List
-      navigationTitle="WhiteBIT Codes"
-      searchBarPlaceholder="Search your WhiteBIT code by code, amount or ticker..."
-    >
+    <List searchBarPlaceholder="Search your WhiteBIT code by code, amount or ticker..." isLoading={isLoading}>
       <WrappedList />
     </List>
   );

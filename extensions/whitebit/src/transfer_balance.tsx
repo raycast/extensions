@@ -123,7 +123,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Transf
           <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
-      navigationTitle="Transfer Between Balances"
     >
       <Form.Dropdown id="from" title="From" value={fromBalance} onChange={(balance) => setFromBalance(balance)}>
         {balances.map((balance) => (

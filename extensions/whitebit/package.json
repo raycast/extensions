@@ -32,7 +32,7 @@
       "name": "code_apply",
       "title": "Apply Code",
       "description": "Apply WhiteBIT code",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "code",

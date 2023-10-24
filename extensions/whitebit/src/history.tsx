@@ -8,6 +8,8 @@ import Style = Toast.Style;
 export default function Command() {
   const httpClient = useHttpClient();
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const historyRequester = new HistoryRequester(httpClient);
 
   const [history, setHistory] = useState<Array<HistoryItem>>([]);
@@ -15,7 +17,10 @@ export default function Command() {
   useEffect(() => {
     historyRequester
       .list()
-      .then((result) => setHistory(result.records))
+      .then((result) => {
+        setHistory(result.records);
+        setIsLoading(false);
+      })
       .catch(async (err) => {
         await showToast(Style.Failure, err.message);
       });
@@ -26,7 +31,7 @@ export default function Command() {
   }
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       {history.map((historyItem) => (
         <List.Item
           keywords={prepareKeywords(historyItem)}
