@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dr",
-  "title": "DR",
+  "title": "DR News",
   "description": "Showcases news updates from DR, Denmark's premier broadcaster, categorized by various topics.",
   "icon": "icon.png",
   "author": "kenanbendz",
@@ -20,7 +20,7 @@
     {
       "name": "index",
       "title": "Get Latest News",
-      "subtitle": "DR",
+      "subtitle": "DR News",
       "description": "Get the latest news from DR.dk",
       "mode": "view"
     }
