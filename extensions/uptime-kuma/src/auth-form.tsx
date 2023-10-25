@@ -1,4 +1,16 @@
-import { Form, ActionPanel, Action, Icon, Toast, showToast, LocalStorage, useNavigation } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  Toast,
+  showToast,
+  LocalStorage,
+  useNavigation,
+  popToRoot,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { UptimeKuma } from "./modules/UptimeKuma";
 import { useState } from "react";
 import ListMonitors from "./list-monitors";
@@ -46,14 +58,11 @@ export function AuthForm() {
     await LocalStorage.setItem("kuma_url", values.kuma_url);
     await LocalStorage.setItem("kuma_token", token);
 
-    showToast({
+    await popToRoot();
+    await showToast({
       title: "Login Successful",
-      style: Toast.Style.Success,
+      message: "Please open the command again",
     });
-
-    setLoading(false);
-
-    push(<ListMonitors />);
   }
 
   function getToken(url: string, username: string, password: string, code: string): Promise<string> {
@@ -165,3 +174,4 @@ export function AuthForm() {
 }
 
 export default AuthForm;
+
