@@ -8,6 +8,7 @@ import { PagePropertyType } from "./page";
 
 export * from "./database";
 export * from "./page";
+
 export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
 export const _supportedPropTypes = [
@@ -32,18 +33,19 @@ export * from "./user";
 
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
   // ordered by appearance in option configuration
-  // colors obtained by using color picker on notion app
+  // colors obtained by inspecting the notion app
+  // default for light mode is a RGBA, but the background is #FFFFFF, so color was manually converted to RGB
   const colorMapper: Record<string, Color.ColorLike> = {
-    default: { light: "#E3E2E0", dark: "#373737" }, // AKA "light gray in an option"
+    default: { light: "#F1F0F0", dark: "#373737" }, // AKA "light gray in an option"
     gray: { light: "#E3E2E0", dark: "#5A5A5A" },
-    brown: { light: "#EEE0DB", dark: "#603B2D" },
-    orange: { light: "#D6BEAC", dark: "#844C1D" },
-    yellow: { light: "#FEECC7", dark: "#89632A" },
+    brown: { light: "#EEE0DA", dark: "#603B2C" },
+    orange: { light: "#FADEC9", dark: "#854C1D" },
+    yellow: { light: "#FDECC8", dark: "#89632A" },
     green: { light: "#DBEDDB", dark: "#2B593F" },
-    blue: { light: "#D4E4EE", dark: "#29456C" },
-    purple: { light: "#E8DEED", dark: "#493064" },
-    pink: { light: "#F4E0E9", dark: "#69314C" },
-    red: { light: "#FFE2DE", dark: "#6E362F" },
+    blue: { light: "#D3E5EF", dark: "#28456C" },
+    purple: { light: "#E8DEEE", dark: "#492F64" },
+    pink: { light: "#F5E0E9", dark: "#69314C" },
+    red: { light: "#FFE2DD", dark: "#6E3630" },
   };
 
   return notionColor ? colorMapper[notionColor] : colorMapper["default"];

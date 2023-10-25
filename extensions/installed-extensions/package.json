@@ -56,7 +56,7 @@
           "description": "The prepended text, supports {count}",
           "type": "textfield",
           "required": false,
-          "title": "The Prepended Text When Copying all Items",
+          "title": "The Prepended Text When Copying All Items",
           "default": "{count} installed extensions"
         }
       ]

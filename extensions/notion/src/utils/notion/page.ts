@@ -10,6 +10,19 @@ import { handleError, pageMapper } from "./global";
 
 import { NotionObject } from ".";
 
+export async function fetchPage(pageId: string) {
+  try {
+    await authorize();
+    const page = await notion.pages.retrieve({
+      page_id: pageId,
+    });
+
+    return pageMapper(page);
+  } catch (err) {
+    return handleError(err, "Failed to fetch page", undefined);
+  }
+}
+
 export async function deletePage(pageId: string) {
   try {
     await authorize();

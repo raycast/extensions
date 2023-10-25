@@ -76,7 +76,9 @@ function getTopAppsContainerId(container: Container, currentProfile: string) {
   const index = containerIds?.findIndex(
     (item) =>
       typeof item !== "string" &&
-      (currentProfile === "Default" ? item.default !== undefined : item.custom?._0.directoryBasename === currentProfile)
+      (currentProfile === "Default"
+        ? item.default !== undefined
+        : item.custom?._0.directoryBasename === currentProfile),
   );
 
   return index != null ? (containerIds?.[index + 1] as string) : undefined;
@@ -88,7 +90,7 @@ function getContainerIds(container: Container, currentProfile: string): string[]
     .filter((space) =>
       currentProfile === "Default"
         ? space.profile.default !== undefined
-        : space.profile.custom?._0.directoryBasename === currentProfile
+        : space.profile.custom?._0.directoryBasename === currentProfile,
     )
     .map((space) => {
       const pinnedIndex = space.containerIDs.findIndex((id) => id === "pinned");
@@ -199,7 +201,7 @@ export default function useArcBookmarks(enabled: boolean) {
 
       return profiles;
     },
-    [enabled]
+    [enabled],
   );
 
   const { data, isLoading, mutate } = useCachedPromise(
@@ -211,7 +213,7 @@ export default function useArcBookmarks(enabled: boolean) {
       const file = await read(`${ARC_BOOKMARKS_PATH}/StorableSidebar.json`);
       return JSON.parse(file.toString()) as SidebarRoot;
     },
-    [currentProfile, enabled]
+    [currentProfile, enabled],
   );
 
   const container = data?.sidebar.containers.find((container) => container.items);

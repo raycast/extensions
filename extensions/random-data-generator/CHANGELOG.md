@@ -1,5 +1,10 @@
 # Random Data Generator Changelog
 
- ## [Fix] - 2023-05-07
+## [Quicklinks & CUID]
 
- - Removed science random data generator
+- Added CUIDs as a possible data type to generate
+- Add the ability to create quicklinks for copy-pasting specific random data
+
+## [Fix] - 2023-05-07
+
+- Removed science random data generator
