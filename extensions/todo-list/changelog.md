@@ -1,5 +1,7 @@
 # Todo List Changelog
 
+## [Fixed spelling] - 2023-10-25
+
 ## [Impliment Sorting] - 2023-08-11
 
 - New preference option for choose how tasks are sorted.

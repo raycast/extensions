@@ -108,19 +108,19 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
             >
               <Action title="none" onAction={() => setPriority(undefined)} />
               <Action
-                title="low"
+                title="Low"
                 icon={priorityIcons[1]}
                 onAction={() => setPriority(1)}
                 autoFocus={item.priority === 1 ? true : false}
               />
               <Action
-                title="meduim"
+                title="Medium"
                 icon={priorityIcons[2]}
                 onAction={() => setPriority(2)}
                 autoFocus={item.priority === 2 ? true : false}
               />
               <Action
-                title="high"
+                title="High"
                 icon={priorityIcons[3]}
                 onAction={() => setPriority(3)}
                 autoFocus={item.priority === 3 ? true : false}
