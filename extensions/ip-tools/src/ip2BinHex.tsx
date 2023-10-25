@@ -1,3 +1,4 @@
+import JSON from "json-bigint";
 import { IPv4, IPv6 } from "ip-toolkit";
 import { useState } from "react";
 import { List, Icon, Action, ActionPanel } from "@raycast/api";
@@ -10,9 +11,13 @@ export default function Command(props: { arguments: { keywork: string } }) {
 
   const isEmpty = searchText.trim() === "";
   const isValid = isEmpty ? false : version === "IPv4" ? IPv4.isValidIP(searchText) : IPv6.isValidIP(searchText);
-  const convertResult = isValid
-    ? (version === "IPv4" ? IPv4.ip2long(searchText) : IPv6.ip2long(searchText)).toString()
-    : "";
+  const convertResult = isValid ? (version === "IPv4" ? IPv4.ip2long(searchText) : IPv6.ip2long(searchText)) : 0;
+
+  const _convertResult = {
+    decimal: convertResult,
+    hex: `0x${convertResult.toString(16)}`,
+    binary: convertResult.toString(2),
+  };
 
   return (
     <List
@@ -27,16 +32,27 @@ export default function Command(props: { arguments: { keywork: string } }) {
       ) : !isValid ? (
         <List.EmptyView icon={Icon.Warning} title="Please enter a valid IP address！" />
       ) : (
-        <List.Item
-          icon={Icon.Clipboard}
-          title={convertResult}
-          subtitle={searchText}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={convertResult} />
-            </ActionPanel>
+        Object.entries(_convertResult).map(([key, value], index) => {
+          if (value !== "") {
+            return (
+              <List.Item
+                key={index}
+                icon={Icon.Clipboard}
+                title={key}
+                subtitle={`${value}`}
+                actions={
+                  <ActionPanel>
+                    <Action.CopyToClipboard title="Copy to Clipboard" content={`${value}`} />
+                    <Action.CopyToClipboard
+                      title="Copy All to Clipboard"
+                      content={JSON.stringify(convertResult, null, 2)}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
           }
-        />
+        })
       )}
     </List>
   );

@@ -1,6 +1,6 @@
 import { IPv4, IPv6 } from "ip-toolkit";
 import { useState } from "react";
-import { List, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { drinkTypes, DrinkDropdown } from "./components/dropdown";
 
 export default function Command(props: { arguments: { keywork: string } }) {
@@ -10,33 +10,21 @@ export default function Command(props: { arguments: { keywork: string } }) {
 
   const isEmpty = searchText.trim() === "";
   const isValid = isEmpty ? false : version === "IPv4" ? IPv4.isValidIP(searchText) : IPv6.isValidIP(searchText);
-  const convertResult = isValid
-    ? (version === "IPv4" ? IPv4.ip2long(searchText) : IPv6.ip2long(searchText)).toString()
-    : "";
+  const title = isValid ? `This ${version} address is valid！` : `This ${version} address is invalid！`;
+  const icon = isValid ? Icon.CheckCircle : Icon.XMarkCircle;
 
   return (
     <List
       throttle={true}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Input IP address that needs to be converted！"
+      searchBarPlaceholder={`Input ${version} address that needs to be validate！`}
       searchBarAccessory={<DrinkDropdown drinkTypes={drinkTypes} onDrinkTypeChange={setVersion} />}
     >
-      {isEmpty ? (
-        <List.EmptyView icon={Icon.Info} title="Please enter the IP address that needs to be converted！" />
-      ) : !isValid ? (
-        <List.EmptyView icon={Icon.Warning} title="Please enter a valid IP address！" />
+      {!isEmpty ? (
+        <List.EmptyView icon={icon} title={title} />
       ) : (
-        <List.Item
-          icon={Icon.Clipboard}
-          title={convertResult}
-          subtitle={searchText}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={convertResult} />
-            </ActionPanel>
-          }
-        />
+        <List.EmptyView icon={Icon.Info} title={`Please enter the ${version} address you want to validate！`} />
       )}
     </List>
   );
