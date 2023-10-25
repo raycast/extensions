@@ -1,1 +1,3 @@
-# The Matrix of Destiny# thematrixofdestiny.com-raycast
+# The Matrix of Destiny
+
+Quickly go to a date on the Matrix of Destiny
