@@ -98,7 +98,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
                 title="Pin Todo"
                 icon={{ source: Icon.Pin, tintColor: Color.Blue }}
                 onAction={() => pin()}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
               />
             )}
             <ActionPanel.Submenu
