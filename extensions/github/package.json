@@ -17,7 +17,8 @@
     "LunaticMuch",
     "aeorge",
     "daquinoaldo",
-    "ppy"
+    "ppy",
+    "lin"
   ],
   "categories": [
     "Developer Tools",
@@ -123,6 +124,12 @@
           "description": "Display owner name alongside repository name in search results"
         }
       ]
+    },
+    {
+      "name": "my-latest-repositories",
+      "title": "My Latest Repositories",
+      "description": "List your repositories by latest updated",
+      "mode": "view"
     },
     {
       "name": "workflow-runs",
