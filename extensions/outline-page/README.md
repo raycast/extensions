@@ -2,7 +2,7 @@
 
 Check for CSS bugs by outlining all the elements in your web page.
 
-![Screencast of Outline Page Extention](./metadata/screencast.gif)
+![Screencast of Outline Page Extention](./assets/screencast.gif)
 
 Works on Safari and Chromium based browsers.
 
