@@ -4,7 +4,13 @@ import { addDays, format, isThisYear, isBefore, isSameDay, parseISO, startOfDay 
 import { Priority } from "./hooks/useData";
 
 export function isOverdue(date: string) {
-  return isBefore(parseISO(date), new Date());
+  const parsedDate = parseISO(date);
+
+  if (parsedDate.getHours() === 0 && parsedDate.getMinutes() === 0) {
+    return isBefore(startOfDay(parsedDate), startOfDay(new Date()));
+  } else {
+    return isBefore(parsedDate, new Date());
+  }
 }
 
 export function displayDueDate(dateString: string) {
