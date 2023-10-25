@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Icon,
   LaunchType,
   List,
@@ -273,6 +274,7 @@ function Actions(props: {
     <ActionPanel>
       <ActionPanel.Section>
         <Action title="Show Details" icon={Icon.AppWindowSidebarLeft} onAction={onShowingDetails} />
+        <Action.CopyToClipboard title="Copy" icon={Icon.CopyClipboard} content={getSubtitle(progress.progressNum)} />
         <Action
           title={progress.pinned ? "Unpin it" : "Pin it"}
           icon={Icon.Pin}

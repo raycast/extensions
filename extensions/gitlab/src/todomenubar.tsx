@@ -9,9 +9,14 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/menu";
+import { showErrorToast, getErrorMessage } from "./utils";
 
 function launchTodosCommand() {
-  launchCommand({ name: "todos", type: LaunchType.UserInitiated });
+  try {
+    launchCommand({ name: "todos", type: LaunchType.UserInitiated });
+  } catch (error) {
+    showErrorToast(getErrorMessage(error), "Could not open Todos Command");
+  }
 }
 
 function getMaxTodosPreference(): number {
@@ -76,7 +81,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
         {todos?.map((t) => (
           <MenuBarItem
             key={t.id}
-            title={t.title}
+            title={t.title ? t.title : "?"}
             subtitle={getPrettyTodoActionName(t)}
             icon={getTodoIcon(t, { light: "#000000", dark: "FFFFFF", adjustContrast: false })}
             tooltip={t.project_with_namespace}

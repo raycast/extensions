@@ -4,7 +4,7 @@ import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard, showIn
 
 import { getDefaultAction, ServiceName } from "../preferences";
 
-import AppContext from "./AppContext";
+import AppContext, { AppStateAction } from "./AppContext";
 import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
@@ -24,17 +24,24 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, loadM
   const { id, url, gif_url } = item;
   const { state, dispatch } = useContext(AppContext);
   const { favIds, recentIds } = state;
+  const safeDispatch = (action: AppStateAction) => {
+    try {
+      dispatch(action);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const actionIds = new Map([[service as ServiceName, new Set([id.toString()])]]);
 
   const trackUsage = () => {
-    dispatch({ type: "add", save: true, recentIds: actionIds, service });
+    safeDispatch({ type: "add", save: true, recentIds: actionIds, service });
     visitGifItem?.(item);
   };
-  const removeFromRecents = () => dispatch({ type: "remove", save: true, recentIds: actionIds, service });
-  const addToFav = () => dispatch({ type: "add", save: true, favIds: actionIds, service });
+  const removeFromRecents = () => safeDispatch({ type: "remove", save: true, recentIds: actionIds, service });
+  const addToFav = () => safeDispatch({ type: "add", save: true, favIds: actionIds, service });
 
-  const removeFav = () => dispatch({ type: "remove", save: true, favIds: actionIds, service });
+  const removeFav = () => safeDispatch({ type: "remove", save: true, favIds: actionIds, service });
 
   const copyFileAction = () =>
     showToast({

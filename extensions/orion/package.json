@@ -5,6 +5,9 @@
   "description": "Manage your Orion Bookmarks, History, Tabs, and Reading list",
   "icon": "orion-icon.png",
   "author": "plonq",
+  "contributors": [
+      "erics118"
+  ],
   "categories": [
     "Web"
   ],

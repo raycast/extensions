@@ -31,3 +31,5 @@ reclaim-ai
 posthog
 notion
 stablecog
+apple-reminders
+whitebit

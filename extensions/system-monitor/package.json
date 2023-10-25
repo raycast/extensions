@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.52.0",
+    "@raycast/utils": "^1.10.0",
     "os-utils": "0.0.14",
     "usehooks-ts": "^2.6.0"
   },
