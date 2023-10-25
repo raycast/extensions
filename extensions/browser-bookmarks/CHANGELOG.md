@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Open browser bookmark preference] - 2023-10-25
+
+- Added a preference to open the browser from which the bookmark originated, instead of your default browser.
+
 ## [Improvements] - 2023-10-18
 
 - Always sort the bookmarks by their frecency
