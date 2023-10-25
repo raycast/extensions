@@ -43,7 +43,7 @@ export function getStaticResult(searchText: string): SearchResult[] {
     },
   ];
 
-  if (isValidURL(searchText) && getPreferenceValues()["enableSearchForURLs"]) {
+  if (isValidURL(searchText) && !getPreferenceValues()["enableSearchForURLs"]) {
     result[0].description = `Open ${new URL(searchText).host}`;
     result[0].url = searchText;
   }
