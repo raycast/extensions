@@ -6,6 +6,7 @@ import {
   Icon,
   List,
   LocalStorage,
+  popToRoot,
   showToast,
   Toast,
   useNavigation,
