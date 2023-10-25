@@ -83,6 +83,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
             <Action
               title="Delete Todo"
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
+              style={Action.Style.Destructive}
               onAction={() => deleteTodo()}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
