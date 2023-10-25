@@ -21,7 +21,12 @@ const getConferenceStandings = (conferenceStanding: ConferenceStanding): Team[] 
 
 const useStandings = () => {
   const fetchTeamStandings = useCallback(async () => {
-    const data = await getStandings({ year: new Date().getUTCFullYear().toString(), group: "conference" });
+    const date = new Date();
+    const seasonOpeningMonth = 10;
+    const data = await getStandings({
+      year: (date.getUTCMonth() >= seasonOpeningMonth ? date.getUTCFullYear() + 1 : date.getUTCFullYear()).toString(),
+      group: "conference",
+    });
 
     const easternConference = data?.children?.find(
       (conference) => conference?.name === `${Conference.Eastern} Conference`
