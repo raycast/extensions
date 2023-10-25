@@ -8,6 +8,8 @@
   "icon": "command-icon.png",
   "author": "marco-whitebit",
   "license": "MIT",
+  "owner": "whitebit-exchange",
+  "access": "public",
   "commands": [
     {
       "name": "my_balance",
