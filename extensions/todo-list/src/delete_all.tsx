@@ -10,24 +10,22 @@ const DeleteAllAction = () => {
     <Action
       title="Delete All Todos"
       onAction={async () => {
-
         await confirmAlert({
           title: "Delete All Todos",
-          icon: Icon.Trash,
+          icon: { source: Icon.Trash, tintColor: Color.Red },
           message: "Are you sure you want to delete all todos?",
           primaryAction: {
             style: Alert.ActionStyle.Destructive,
             title: "Delete all",
             onAction: () => {
-              setTodoItems(_.cloneDeep(DEFAULT_SECTIONS))
-              showToast({title: "Success", message: "Successfully deleted all todos"})
+              setTodoItems(_.cloneDeep(DEFAULT_SECTIONS));
+              showToast({ title: "Success", message: "Successfully deleted all todos" });
             },
           },
         });
-
-        
       }}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      style={Action.Style.Destructive}
       icon={{ source: Icon.Trash, tintColor: Color.Red }}
     />
   );
