@@ -50,6 +50,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     initialValues,
     validation,
     async onSubmit(values) {
+      console.log(values);
       try {
         await showToast({ style: Toast.Style.Animated, title: "Creating page" });
 
