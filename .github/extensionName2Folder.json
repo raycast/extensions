@@ -37,6 +37,7 @@
   "crazyair/antd-open-browser": "antd-open-browser",
   "bert/any-website-search": "any-website-search",
   "anybox/anybox": "anybox",
+  "aymericio/anycoffee": "anycoffee",
   "koinzhang/append-clipboard": "append-clipboard",
   "vimtor/apple-books": "apple-books",
   "cali/apple-developer-docs": "apple-developer-docs",
@@ -281,6 +282,7 @@
   "crazyczy/douban": "douban",
   "gaoyang/doutu": "doutu",
   "thomas/downloads-manager": "downloads-manager",
+  "kenanbendz/dr-news": "dr-news",
   "FlohGro/drafts": "drafts",
   "gebeto/dribbble": "dribbble",
   "chyroc/dropbox": "dropbox",
@@ -491,6 +493,7 @@
   "HelloImSteven/internet-radio": "internet-radio",
   "eliperkins/raycast-ios-hig": "ios-hig",
   "koinzhang/ip-geolocation": "ip-geolocation",
+  "meguoe/ip-tools": "ip-tools",
   "Aayush9029/iptv": "iptv",
   "crisboarna/iridium": "iridium",
   "chesterhow/is-it-toxic-to": "is-it-toxic-to",
@@ -1203,5 +1206,6 @@
   "xmok/zipcodebase": "zipcodebase",
   "zkondor/znotch": "znotch",
   "raycast/zoom": "zoom",
+  "prashantv/zoom-meeting-control": "zoom-control",
   "reckoning-dev/zotero": "zotero"
 }

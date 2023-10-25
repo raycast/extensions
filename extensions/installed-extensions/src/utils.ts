@@ -1,6 +1,6 @@
-import { dataType } from "./types";
+import { DataType } from "./types";
 
-export function formatItem(item: dataType, format: string) {
+export function formatItem(item: DataType, format: string) {
   let formatPattern = format.length ? format : "{title} ({link})";
   for (const key in item) {
     const value = item[key];
@@ -12,7 +12,7 @@ export function formatItem(item: dataType, format: string) {
   return formatPattern;
 }
 
-export function formatOutput(installedExtensions: dataType[], format: string, separator: string, prepend: string) {
+export function formatOutput(installedExtensions: DataType[], format: string, separator: string, prepend: string) {
   const joinChar = separator === "newline" ? "\n" : ", ";
   const prependText = prepend.length ? `${prepend}\n` : "";
 

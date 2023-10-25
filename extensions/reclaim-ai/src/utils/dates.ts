@@ -1,4 +1,5 @@
 import { Duration, format, formatDuration as fnsFormatDuration } from "date-fns";
+import { Icon } from "@raycast/api";
 
 export const formatDisplayEventHours = ({
   start,
@@ -67,6 +68,38 @@ const formatHMString = (hstr: string, mstr: string) => {
   const hasMinutes = m != 0 ? ` ${m}m` : "";
   const hasHours = h != 0 ? `${h}h` : "";
   return `${hasHours}${hasMinutes}`.trim();
+};
+
+export const formatPriority = (priority: string): string => {
+  switch (priority) {
+    case "P1":
+      return "Critical";
+      break;
+    case "P2":
+      return "High";
+      break;
+    case "P3":
+      return "Medium";
+      break;
+    default:
+      return "Low";
+  }
+};
+
+export const formatPriorityIcon = (priority: string): Icon => {
+  switch (priority) {
+    case "P1":
+      return Icon.FullSignal;
+      break;
+    case "P2":
+      return Icon.Signal3;
+      break;
+    case "P3":
+      return Icon.Signal2;
+      break;
+    default:
+      return Icon.Signal1;
+  }
 };
 
 export const formatStrDuration = (str: string): string => {

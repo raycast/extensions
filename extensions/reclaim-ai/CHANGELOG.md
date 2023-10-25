@@ -1,5 +1,11 @@
 # reclaim Changelog
 
+## [Update] - 2023-10-24
+
+- Revert filter logic
+- New prioritization features
+- Bug fixes
+
 ## [Update] - 2023-10-11
 
 - Show All Connected Calendar Events: Updated the system to display events from all calendars connected via Reclaim.

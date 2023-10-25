@@ -1,5 +1,9 @@
 # Pipe Commands Changelog
 
+## [Pipe to text enhancement] - 2023-10-24
+
+- Fallback to clipboard when text selection fails (new error type)
+
 ## [Added new pipe commands] - 2023-10-22
 
 - Improved placeholder UX to make it clear what different commands pull from

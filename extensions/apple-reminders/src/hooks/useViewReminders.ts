@@ -1,10 +1,12 @@
 import { Icon, Image } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { isBefore, isThisWeek, isToday, isTomorrow, parseISO, startOfDay } from "date-fns";
+import { isBefore, parseISO } from "date-fns";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import { useMemo } from "react";
 import React from "react";
+
+import { displayDueDate, isOverdue } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
 
@@ -89,43 +91,40 @@ export const groupByOptions: GroupByOptions = [
 ];
 
 export function groupByDueDates(reminders: Reminder[]) {
-  const overdue: Reminder[] = [];
-  const today: Reminder[] = [];
-  const tomorrow: Reminder[] = [];
-  const upcoming: Reminder[] = [];
-  const other: Reminder[] = [];
+  const [dated, notDated] = partition(reminders, (reminder: Reminder) => reminder.dueDate !== null);
+  const [overdue, upcoming] = partition(dated, (reminder: Reminder) => reminder.dueDate && isOverdue(reminder.dueDate));
 
-  reminders.forEach((reminder) => {
-    if (!reminder.dueDate) {
-      other.push(reminder);
-    } else {
-      const dueDate = parseISO(reminder.dueDate);
+  const allDueDates = [
+    ...new Set(upcoming.map((reminder) => parseISO(reminder.dueDate as string).toISOString())),
+  ] as string[];
+  allDueDates.sort();
 
-      if (isBefore(dueDate, startOfDay(new Date()))) {
-        overdue.push(reminder);
-      } else if (isToday(dueDate)) {
-        today.push(reminder);
-      } else if (isTomorrow(dueDate)) {
-        tomorrow.push(reminder);
-      } else if (isThisWeek(dueDate, { weekStartsOn: 1 })) {
-        upcoming.push(reminder);
-      } else {
-        other.push(reminder);
-      }
-    }
+  const sections = allDueDates.map((date) => {
+    const remindersOnDate = upcoming.filter((reminder) => {
+      const reminderDate = parseISO(reminder.dueDate as string).toISOString();
+      return reminderDate === date;
+    });
+    return {
+      title: displayDueDate(date),
+      reminders: remindersOnDate,
+    };
   });
 
-  const sections = [
-    { title: "Overdue", reminders: overdue },
-    { title: "Today", reminders: today },
-    { title: "Tomorrow", reminders: tomorrow },
-    { title: "Upcoming", reminders: upcoming },
-    { title: "Other", reminders: other },
-  ];
+  if (overdue.length > 0) {
+    sections.unshift({
+      title: "Overdue",
+      reminders: overdue,
+    });
+  }
+  if (notDated.length > 0) {
+    sections.push({
+      title: "No due date",
+      reminders: notDated,
+    });
+  }
 
   return sections;
 }
-
 export function groupByPriorities(reminders: Reminder[]) {
   const priorities: { name: string; value: Priority }[] = [
     { name: "High", value: "high" },
