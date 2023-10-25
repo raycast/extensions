@@ -104,13 +104,13 @@ export default function Command() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.Paste
-                  title="Paste To Current App"
+                  title="Paste to Current App"
                   icon={Icon.SaveDocument}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                   content={items.detail}
                 />
                 <Action.CopyToClipboard
-                  title="Copy To Clipboard"
+                  title="Copy to Clipboard"
                   icon={Icon.CopyClipboard}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   content={items.detail}
