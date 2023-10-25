@@ -11,14 +11,13 @@ import {
   showToast,
   Toast,
   popToRoot,
-  Detail,
-  openExtensionPreferences,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 import { deleteDomain, getDomains } from "./utils/api";
 import { Domain, Response } from "./utils/types";
+import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
   domains?: Domain[];
@@ -137,14 +136,7 @@ export default function ListDomains() {
   };
 
   return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
+    <ErrorComponent error={state.error} />
   ) : (
     <List
       isLoading={state.domains === undefined || state.isLoading}

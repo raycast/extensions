@@ -1,6 +1,6 @@
 # <img src="./assets/purelymail.png" width="20" height="20" /> Purelymail Raycast Extension
 
-This is a Raycast extension for [Purelymail](https://purelymail.com/). With this extension, you can quickly add or delete domains from your Purelymail account, create or delete users for your domains, and create or delete Routing Rules.
+This is a Raycast extension for [Purelymail](https://purelymail.com/). With this extension, you can quickly add or delete domains from your Purelymail account, create or delete users for your domains, create or delete Routing Rules, create or delete app passwords and Check Account Credit.
 
 ## 🚀 Getting Started
 
@@ -28,12 +28,6 @@ This extension provides the following commands:
 - List Domains
 - List Routing Rules
 - Update Domain Settings
-
-## 🛠️ Installation
-
-To install this extension from the source code, follow these steps:
-
-1.  Clone this repository.
-2.  Run `npm install` to install the dependencies.
-3.  Run `npm run build` to build the extension.
-4.  Run `npm run publish` to publish the extension to Raycast store.
+- Check Account Credit
+- Create App Password
+- Delete App Password

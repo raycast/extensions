@@ -1,18 +1,9 @@
-import {
-  ActionPanel,
-  Form,
-  Action,
-  Toast,
-  popToRoot,
-  showToast,
-  Detail,
-  openExtensionPreferences,
-  Icon,
-} from "@raycast/api";
+import { ActionPanel, Form, Action, Toast, popToRoot, showToast, Icon } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 import { Response } from "./utils/types";
 import { addDomain } from "./utils/api";
+import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
   isLoading?: boolean;
@@ -74,14 +65,7 @@ export default function AddDomain() {
   };
 
   return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
+    <ErrorComponent error={state.error} />
   ) : (
     <Form
       isLoading={state.isLoading}

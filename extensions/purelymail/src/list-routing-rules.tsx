@@ -12,12 +12,12 @@ import {
   Toast,
   popToRoot,
   Detail,
-  openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getRoutingRules, deleteRoutingRule } from "./utils/api";
 import { Response, Rule } from "./utils/types";
 import { getFavicon } from "@raycast/utils";
+import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
   rules?: Rule[];
@@ -127,14 +127,7 @@ export default function ListRoutingRules() {
   };
 
   return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
+    <ErrorComponent error={state.error} />
   ) : (
     <List
       isLoading={state.rules === undefined || state.isLoading}
