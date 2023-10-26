@@ -1,0 +1,44 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "name": "Debug contacts (extensions/messages/swift/contacts)",
+      "program": "${workspaceFolder:extensions}/extensions/messages/swift/contacts/.build/debug/contacts",
+      "args": [],
+      "cwd": "${workspaceFolder:extensions}/extensions/messages/swift/contacts",
+      "preLaunchTask": "swift: Build Debug contacts (extensions/messages/swift/contacts)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "name": "Release contacts (extensions/messages/swift/contacts)",
+      "program": "${workspaceFolder:extensions}/extensions/messages/swift/contacts/.build/release/contacts",
+      "args": [],
+      "cwd": "${workspaceFolder:extensions}/extensions/messages/swift/contacts",
+      "preLaunchTask": "swift: Build Release contacts (extensions/messages/swift/contacts)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "name": "Debug MyExecutable (extensions/messages/swift/contacts)",
+      "program": "${workspaceFolder:extensions}/extensions/messages/swift/contacts/.build/debug/MyExecutable",
+      "args": [],
+      "cwd": "${workspaceFolder:extensions}/extensions/messages/swift/contacts",
+      "preLaunchTask": "swift: Build Debug MyExecutable (extensions/messages/swift/contacts)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "name": "Release MyExecutable (extensions/messages/swift/contacts)",
+      "program": "${workspaceFolder:extensions}/extensions/messages/swift/contacts/.build/release/MyExecutable",
+      "args": [],
+      "cwd": "${workspaceFolder:extensions}/extensions/messages/swift/contacts",
+      "preLaunchTask": "swift: Build Release MyExecutable (extensions/messages/swift/contacts)"
+    }
+  ]
+}
