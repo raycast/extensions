@@ -1,6 +1,6 @@
 import { Icon, Image } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { isBefore, parseISO } from "date-fns";
+import { format, isBefore, parseISO } from "date-fns";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import { useMemo } from "react";
@@ -95,13 +95,13 @@ export function groupByDueDates(reminders: Reminder[]) {
   const [overdue, upcoming] = partition(dated, (reminder: Reminder) => reminder.dueDate && isOverdue(reminder.dueDate));
 
   const allDueDates = [
-    ...new Set(upcoming.map((reminder) => parseISO(reminder.dueDate as string).toISOString())),
+    ...new Set(upcoming.map((reminder) => format(parseISO(reminder.dueDate as string), "yyyy-MM-dd"))),
   ] as string[];
   allDueDates.sort();
 
   const sections = allDueDates.map((date) => {
     const remindersOnDate = upcoming.filter((reminder) => {
-      const reminderDate = parseISO(reminder.dueDate as string).toISOString();
+      const reminderDate = format(parseISO(reminder.dueDate as string), "yyyy-MM-dd");
       return reminderDate === date;
     });
     return {
@@ -116,6 +116,7 @@ export function groupByDueDates(reminders: Reminder[]) {
       reminders: overdue,
     });
   }
+
   if (notDated.length > 0) {
     sections.push({
       title: "No due date",

@@ -49,8 +49,8 @@ export default function ReminderListItem({
   if (reminder.dueDate) {
     const dueDate = new Date(reminder.dueDate);
     accessories.push({
-      icon: { source: Icon.Calendar, tintColor: overdue ? Color.Red : undefined },
-      date: { value: dueDate, color: overdue ? Color.Red : undefined },
+      icon: { source: Icon.Calendar, tintColor: !reminder.isCompleted && overdue ? Color.Red : undefined },
+      date: { value: dueDate, color: !reminder.isCompleted && overdue ? Color.Red : undefined },
       tooltip: `Due date: ${format(dueDate, "EEEE dd MMMM yyyy 'at' HH:mm")}`,
     });
 
