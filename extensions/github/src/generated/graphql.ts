@@ -32362,6 +32362,7 @@ export type ExtendedRepositoryFieldsFragment = {
   squashMergeAllowed: boolean;
   rebaseMergeAllowed: boolean;
   updatedAt: any;
+  pushedAt?: any | null;
   stargazerCount: number;
   viewerHasStarred: boolean;
   hasIssuesEnabled: boolean;
@@ -32401,6 +32402,7 @@ export type SearchRepositoriesQuery = {
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
           updatedAt: any;
+          pushedAt?: any | null;
           stargazerCount: number;
           viewerHasStarred: boolean;
           hasIssuesEnabled: boolean;
@@ -32439,6 +32441,7 @@ export type MyLatestRepositoriesQuery = {
         squashMergeAllowed: boolean;
         rebaseMergeAllowed: boolean;
         updatedAt: any;
+        pushedAt?: any | null;
         stargazerCount: number;
         viewerHasStarred: boolean;
         hasIssuesEnabled: boolean;
@@ -33163,6 +33166,7 @@ export const ExtendedRepositoryFieldsFragmentDoc = gql`
     squashMergeAllowed
     rebaseMergeAllowed
     updatedAt
+    pushedAt
     stargazerCount
     viewerHasStarred
     primaryLanguage {
@@ -33693,7 +33697,7 @@ export const SearchRepositoriesDocument = gql`
 export const MyLatestRepositoriesDocument = gql`
   query myLatestRepositories($numberOfItems: Int!) {
     viewer {
-      repositories(first: $numberOfItems, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      repositories(first: $numberOfItems, orderBy: { field: PUSHED_AT, direction: DESC }) {
         nodes {
           ...ExtendedRepositoryFields
         }
