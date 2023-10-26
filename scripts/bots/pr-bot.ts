@@ -19,7 +19,7 @@ module.exports = async ({ github, context }: API) => {
       .filter((x) => x.startsWith("extensions"))
       .map((x) => {
         const parts = x.split("/");
-        return `/extensions/${parts[1]}`;
+        return parts[1];
       })
   );
 
@@ -50,7 +50,7 @@ module.exports = async ({ github, context }: API) => {
   const isFirstContribution = issues.every((issue) => issue.number === context.issue.number || !issue.pull_request);
 
   for (const extensionFolder of touchedExtensions) {
-    const owners = codeowners[extensionFolder];
+    const owners = codeowners[`/extensions/${extensionFolder}`];
 
     if (!owners) {
       // it's a new extension

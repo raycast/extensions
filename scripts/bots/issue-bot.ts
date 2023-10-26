@@ -17,9 +17,9 @@ type API = {
 
 const newMatch = /### Extension\s*https:\/\/(?:www\.)?raycast\.com\/([^\/]+)\/([^\/\s]+)/;
 const newMatchGitHub =
-  /### Extension\s*https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*(extensions\/[^\/\s]+)/;
+  /### Extension\s*https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
 const oldMatchGithub =
-  /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*(extensions\/[^\/\s]+)\/\)/;
+  /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
 const closeIssueMatch = /@raycastbot close this issue/;
 const reopenIssueMatch = /@raycastbot reopen this issue/;
@@ -55,7 +55,7 @@ module.exports = async ({ github, context }: API) => {
     const [, extensionFolder] =
       newMatchGitHub.exec(context.payload.issue.body) || oldMatchGithub.exec(context.payload.issue.body) || [];
 
-    extension = Object.values(extensionName2Folder).find(([name, folder]) => folder === `/${extensionFolder}`)?.[1];
+    extension = Object.values(extensionName2Folder).find(([_, folder]) => folder === extensionFolder)?.[0];
 
     if (!extension) {
       console.log(`could not find the extension in the body`);
@@ -73,7 +73,7 @@ module.exports = async ({ github, context }: API) => {
       return;
     }
 
-    owners = codeowners[`/${extensionFolder}`];
+    owners = codeowners[`/extensions/${extensionFolder}`];
   }
 
   if (!owners) {
