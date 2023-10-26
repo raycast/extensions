@@ -69,10 +69,12 @@ function setTitle(title: string, topic: Topic) {
   return title;
 }
 
-function getWindowContent(title: string, topic: Topic) {
+function getWindowContent(title: string, topic: Topic, isLoading: boolean) {
   const _title = setTitle(title, topic);
   const _informationContent = "To summarize the article, please press *'Cmd(⌘) + ['*.";
-  return "# " + _title + "  \n" + _informationContent;
+  const _isLoading = "Loading...";
+  if (isLoading) return "# " + _title + "  \n" + _isLoading;
+  else return "# " + _title + "  \n" + _informationContent;
 }
 
 function StoryListItem(props: {
@@ -86,7 +88,7 @@ function StoryListItem(props: {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchSummary = async () => {
-    if (!openAI) {
+    if (!isValidKey) {
       throw new Error("openAI is not initialized");
     }
     if (props.item.link) {
@@ -107,9 +109,7 @@ function StoryListItem(props: {
       detail={
         <List.Item.Detail
           markdown={
-            isLoading
-              ? "*Loading...*"
-              : summary || getWindowContent(props.item.title || "No Title", props.topic || Topic.FrontPage)
+            summary || getWindowContent(props.item.title || "No Title", props.topic || Topic.FrontPage, isLoading)
           }
         />
       }
@@ -156,7 +156,7 @@ function Actions(props: {
           title="Toggle Summarize Window"
           shortcut={{ modifiers: ["cmd"], key: "]" }}
           onAction={async () => {
-            if (openAI != null) props.setIsShowingDetail((prev) => !prev);
+            if (openAI != null || !isValidKey) props.setIsShowingDetail((prev) => !prev);
             else
               await showToast({
                 style: Toast.Style.Failure,
@@ -169,7 +169,15 @@ function Actions(props: {
           <Action
             title="Summarize Article"
             onAction={async () => {
-              props.fetchSummary();
+              if (!isValidKey) {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Cannot execute command",
+                  message: String("You don't have Raycast Pro subscrition you need to provide openAI key"),
+                });
+              } else {
+                props.fetchSummary();
+              }
             }}
             shortcut={{ modifiers: ["cmd"], key: "[" }}
           />
