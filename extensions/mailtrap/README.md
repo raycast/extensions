@@ -1,5 +1,9 @@
 # Mailtrap
 
+This extension currently only supports copying text from the subject line of emails in your mailtrap inboxes with plans to expand the available commands over time.
+
+Any suggestions for additional commands or contributions would be greatly appreciated ☺️.
+
 ## 🔐 How to get API Key and Account ID from Mailtrap
 
 1. Go to [Mailtrap](https://mailtrap.io/home)

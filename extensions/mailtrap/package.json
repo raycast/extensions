@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "mailtrap-subject-copier",
-  "title": "Mailtrap Subject Copier",
-  "description": "Copy content out of Mailtrap subject lines",
+  "name": "mailtrap",
+  "title": "Mailtrap",
+  "description": "Interact with the Mailtrap via. it's API",
   "icon": "extension_icon.png",
   "author": "samjwillis97",
   "license": "MIT",
