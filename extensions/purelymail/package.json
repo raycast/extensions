@@ -88,7 +88,8 @@
       "title": "Check Account Credit",
       "subtitle": "Purelymail",
       "description": "Returns current account credit as a BigDecimal string with precision 64",
-      "mode": "no-view"
+      "mode": "no-view",
+      "interval": "1h"
     },
     {
       "name": "create-app-password",

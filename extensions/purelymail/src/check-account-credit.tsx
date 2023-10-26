@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { Clipboard, showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import { getAccountCredit } from "./utils/api";
 import { Response } from "./utils/types";
 import { showFailureToast } from "@raycast/utils";
@@ -9,6 +9,9 @@ export default async function CheckAccountCredit() {
   if (response.type === "error") {
     await showFailureToast(response.message, { title: response.code });
   } else {
-    await showToast(Toast.Style.Success, "SUCCESS", `Credit: ${response.result.credit}`);
+    const { credit } = response.result;
+    await Clipboard.copy(credit as string);
+    await showToast(Toast.Style.Success, "Copied to Clipboard", credit);
+    await updateCommandMetadata({ subtitle: `Purelymail | Account Credit: ${credit}` });
   }
 }
