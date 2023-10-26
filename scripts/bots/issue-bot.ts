@@ -247,7 +247,7 @@ function extensionLabel(extension: string, extensionName2Folder: { [key: string]
   const names = Object.keys(extensionName2Folder).map((x) => x.split("/")[1]);
   const multipleExtensionsWithTheSameName = names.filter((x) => x === extension).length > 1;
 
-  const label = `extension: ${multipleExtensionsWithTheSameName ? extension : extension.split("/")[1]}}`;
+  const label = `extension: ${multipleExtensionsWithTheSameName ? extension : extension.split("/")[1]}`;
 
   return label.length > 50 ? label.substring(0, 49) + "…" : label;
 }

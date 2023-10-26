@@ -171,12 +171,17 @@ async function comment({ github, context, comment }: Pick<API, "github" | "conte
 async function extensionLabel(extensionFolder: string, api: Pick<API, "github" | "context">) {
   const extensionName2Folder = await getExtensionName2Folder(api);
 
-  const extension = Object.values(extensionName2Folder).find(([name, folder]) => folder === extensionFolder)?.[1];
+  const extension = Object.values(extensionName2Folder).find(([name, folder]) => folder === extensionFolder)?.[0];
 
-  const names = Object.keys(extensionName2Folder).map((x) => x.split("/")[1]);
-  const multipleExtensionsWithTheSameName = names.filter((x) => x === extension).length > 1;
+  let label;
 
-  const label = `extension: ${multipleExtensionsWithTheSameName ? extension : extension?.split("/")[1]}}`;
+  if (extension) {
+    const names = Object.keys(extensionName2Folder).map((x) => x.split("/")[1]);
+    const multipleExtensionsWithTheSameName = names.filter((x) => x === extension).length > 1;
+    label = `extension: ${multipleExtensionsWithTheSameName ? extension : extension?.split("/")[1]}`;
+  } else {
+    label = `extension: ${extensionFolder}`;
+  }
 
   return label.length > 50 ? label.substring(0, 49) + "…" : label;
 }
