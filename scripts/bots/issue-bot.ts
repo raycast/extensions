@@ -17,9 +17,9 @@ type API = {
 
 const newMatch = /### Extension\s*https:\/\/(?:www\.)?raycast\.com\/([^\/]+)\/([^\/\s]+)/;
 const newMatchGitHub =
-  /### Extension\s*https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
+  /### Extension\s*https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*(extensions\/[^\/\s]+)/;
 const oldMatchGithub =
-  /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
+  /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*(extensions\/[^\/\s]+)\/\)/;
 
 const closeIssueMatch = /@raycastbot close this issue/;
 const reopenIssueMatch = /@raycastbot reopen this issue/;
@@ -41,18 +41,23 @@ module.exports = async ({ github, context }: API) => {
   let owners;
   let extension;
 
+  const [codeowners, extensionName2Folder] = await Promise.all([
+    getCodeOwners({ github, context }),
+    getExtensionName2Folder({ github, context }),
+  ]);
+
   if (newMatch.test(context.payload.issue.body)) {
     const [, owner, ext] = newMatch.exec(context.payload.issue.body) || [];
-    extension = ext;
 
-    const codeowners = await getCodeOwners({ github, context });
-    owners = codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[`${owner}/${ext}`]}`];
+    extension = `${owner}/${ext}`;
+    owners = codeowners[`/extensions/${extensionName2Folder[`${owner}/${ext}`]}`];
   } else {
-    const [, ext] =
+    const [, extensionFolder] =
       newMatchGitHub.exec(context.payload.issue.body) || oldMatchGithub.exec(context.payload.issue.body) || [];
-    extension = ext;
 
-    if (!ext) {
+    extension = Object.values(extensionName2Folder).find(([name, folder]) => folder === `/${extensionFolder}`)?.[1];
+
+    if (!extension) {
       console.log(`could not find the extension in the body`);
       await comment({
         github,
@@ -68,8 +73,7 @@ module.exports = async ({ github, context }: API) => {
       return;
     }
 
-    const codeowners = await getCodeOwners({ github, context });
-    owners = codeowners[`/extensions/${ext}`];
+    owners = codeowners[`/${extensionFolder}`];
   }
 
   if (!owners) {
@@ -136,7 +140,7 @@ module.exports = async ({ github, context }: API) => {
     issue_number: context.payload.issue.number,
     owner: context.repo.owner,
     repo: context.repo.repo,
-    labels: [limitLabelLength(`extension: ${extension}`)],
+    labels: [extensionLabel(extension, extensionName2Folder)],
   });
 
   try {
@@ -239,6 +243,11 @@ async function comment({ github, context, comment }: Pick<API, "github" | "conte
   }
 }
 
-function limitLabelLength(label: string) {
+function extensionLabel(extension: string, extensionName2Folder: { [key: string]: string }) {
+  const names = Object.keys(extensionName2Folder).map((x) => x.split("/")[1]);
+  const multipleExtensionsWithTheSameName = names.filter((x) => x === extension).length > 1;
+
+  const label = `extension: ${multipleExtensionsWithTheSameName ? extension : extension.split("/")[1]}}`;
+
   return label.length > 50 ? label.substring(0, 49) + "…" : label;
 }
