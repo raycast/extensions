@@ -1,6 +1,6 @@
 import { IPv4, IPv6 } from "ip-toolkit";
 import { useState } from "react";
-import { List, Icon } from "@raycast/api";
+import { List, Icon, Color } from "@raycast/api";
 import { drinkTypes, DrinkDropdown } from "./components/dropdown";
 
 export default function Command(props: { arguments: { keywork: string } }) {
@@ -10,7 +10,6 @@ export default function Command(props: { arguments: { keywork: string } }) {
 
   const isEmpty = searchText.trim() === "";
   const isValid = isEmpty ? false : version === "IPv4" ? IPv4.isValidIP(searchText) : IPv6.isValidIP(searchText);
-  const title = isValid ? `This ${version} address is valid！` : `This ${version} address is invalid！`;
   const icon = isValid ? Icon.CheckCircle : Icon.XMarkCircle;
 
   return (
@@ -22,9 +21,15 @@ export default function Command(props: { arguments: { keywork: string } }) {
       searchBarAccessory={<DrinkDropdown drinkTypes={drinkTypes} onDrinkTypeChange={setVersion} />}
     >
       {!isEmpty ? (
-        <List.EmptyView icon={icon} title={title} />
+        <List.EmptyView
+          icon={{ source: icon, tintColor: isValid ? Color.Green : Color.Red }}
+          title={`This ${version} address is ${isValid ? "valid" : "invalid"}！`}
+        />
       ) : (
-        <List.EmptyView icon={Icon.Info} title={`Please enter the ${version} address you want to validate！`} />
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title={`Please enter the ${version} address you want to validate！`}
+        />
       )}
     </List>
   );

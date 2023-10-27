@@ -1,6 +1,6 @@
 import { IPv6 } from "ip-toolkit";
 import { useState } from "react";
-import { List, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, Icon, Action, Color, ActionPanel } from "@raycast/api";
 import { formatTypes, DrinkDropdown } from "./components/dropdown";
 
 export default function Command(props: { arguments: { keywork: string } }) {
@@ -23,9 +23,15 @@ export default function Command(props: { arguments: { keywork: string } }) {
       searchBarAccessory={<DrinkDropdown drinkTypes={formatTypes} onDrinkTypeChange={setFormat} />}
     >
       {isEmpty ? (
-        <List.EmptyView icon={Icon.Info} title="Please enter the IPv6 address that needs to be converted！" />
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="Please enter the IPv6 address that needs to be converted！"
+        />
       ) : !isValid ? (
-        <List.EmptyView icon={Icon.Warning} title="Please enter a valid IPv6 address！" />
+        <List.EmptyView
+          icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+          title="Please enter a valid IPv6 address！"
+        />
       ) : (
         <List.Item
           icon={Icon.Clipboard}
