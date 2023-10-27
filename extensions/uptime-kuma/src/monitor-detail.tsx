@@ -1,5 +1,4 @@
-import { AvgPing, Heartbeat, Monitor, Uptime, UptimeKuma } from "./modules/UptimeKuma";
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import { Action, ActionPanel, Icon, Color, List } from "@raycast/api";
 import {
   getHeartbeatListEmoji,

@@ -1,109 +1,59 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  Icon,
-  Toast,
-  showToast,
-  LocalStorage,
-  useNavigation,
-  popToRoot,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
-import { UptimeKuma } from "./modules/UptimeKuma";
+import { Form, ActionPanel, Action, Icon, Toast, showToast, LocalStorage } from "@raycast/api";
 import { useState } from "react";
-import ListMonitors from "./list-monitors";
+import { useForm, FormValidation } from "@raycast/utils";
+import { checkUrl, getToken } from "./utils/functions";
 
-export function AuthForm() {
-  const [urlError, setUrlError] = useState<string>("");
-  const [usernameError, setUsernameError] = useState<string>("");
-  const [passwordError, setPasswordError] = useState<string>("");
-  const [codeError, setCodeError] = useState<string>("");
+export function AuthForm(props: { onSave: (url: string) => void }) {
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { push } = useNavigation();
-
-  async function handleSubmit(values: {
+  interface submitValues {
     kuma_url: string;
     kuma_username: string;
     kuma_password: string;
     kuna_2fa: string;
-  }) {
-    setLoading(true);
-
-    try {
-      await checkUrl(values.kuma_url);
-    } catch (error) {
-      showToast({
-        title: "Unable to connect to socket, check your url",
-        style: Toast.Style.Failure,
-      });
-      setLoading(false);
-      return;
-    }
-
-    let token = "";
-    try {
-      token = await getToken(values.kuma_url, values.kuma_username, values.kuma_password, values.kuna_2fa);
-    } catch (error) {
-      showToast({
-        title: "Unable to get token, please check your credentials",
-        style: Toast.Style.Failure,
-      });
-      setLoading(false);
-      return;
-    }
-
-    await LocalStorage.setItem("kuma_url", values.kuma_url);
-    await LocalStorage.setItem("kuma_token", token);
-
-    await popToRoot();
-    await showToast({
-      title: "Login Successful",
-      message: "Please open the command again",
-    });
   }
 
-  function getToken(url: string, username: string, password: string, code: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const kuma = new UptimeKuma(url);
+  const { handleSubmit, itemProps, setValidationError } = useForm<submitValues>({
+    async onSubmit(values) {
+      setLoading(true);
 
-      kuma.on("connected", () => {
-        kuma.getToken(username, password, code);
-      });
+      try {
+        await checkUrl(values.kuma_url);
+      } catch (error) {
+        showToast({
+          title: "Unable to connect to socket, check your url",
+          style: Toast.Style.Failure,
+        });
+        setValidationError("kuma_url", "Check URL");
+        setLoading(false);
+        return;
+      }
 
-      kuma.on("token", (token) => {
-        kuma.disconnect();
-        resolve(token);
-      });
+      try {
+        const token = await getToken(values.kuma_url, values.kuma_username, values.kuma_password, values.kuna_2fa);
+        await LocalStorage.setItem("kuma_token", token);
+      } catch (error) {
+        showToast({
+          title: "Unable to get token, please check your credentials",
+          style: Toast.Style.Failure,
+        });
+        setValidationError("kuma_username", "Check Username");
+        setValidationError("kuma_password", "Check Password");
 
-      kuma.on("error", (error) => {
-        kuma.disconnect();
-        reject(error);
-      });
+        setLoading(false);
+        return;
+      }
 
-      kuma.connect();
-    });
-  }
+      await showToast({ title: "Login Successful" });
 
-  function checkUrl(url: string) {
-    return new Promise((resolve, reject) => {
-      const checker = new UptimeKuma(url);
-
-      checker.on("connected", () => {
-        resolve(true);
-        checker.disconnect();
-      });
-
-      checker.on("error", (error) => {
-        reject(error);
-        checker.disconnect();
-      });
-
-      checker.connect();
-    });
-  }
+      return props.onSave(values.kuma_url);
+    },
+    validation: {
+      kuma_url: FormValidation.Required,
+      kuma_username: FormValidation.Required,
+      kuma_password: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -114,60 +64,13 @@ export function AuthForm() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        placeholder={"https://uptime.example.com"}
-        id="kuma_url"
-        title="Kuma url"
-        error={urlError}
-        defaultValue=""
-        onBlur={(event) => {
-          if (event.target.value) {
-            checkUrl(event.target.value)
-              .then(() => {
-                setUrlError("");
-              })
-              .catch((error) => {
-                setUrlError(error);
-              });
-          } else {
-            setUrlError("Please enter a valid url");
-          }
-        }}
-      />
-      <Form.TextField
-        placeholder={"Your kuma username"}
-        error={usernameError}
-        id="kuma_username"
-        title="Kuma Username"
-        defaultValue=""
-        onBlur={(event) => {
-          if (event.target.value) {
-            setUsernameError("");
-          } else {
-            setUsernameError("Please enter a username");
-          }
-        }}
-      />
-      <Form.PasswordField
-        placeholder={"Your kuma password"}
-        error={passwordError}
-        id="kuma_password"
-        title="Kuma Password"
-        defaultValue=""
-        onBlur={(event) => {
-          if (event.target.value) {
-            setPasswordError("");
-          } else {
-            setPasswordError("Please enter a password");
-          }
-        }}
-      />
+      <Form.TextField placeholder={"https://uptime.example.com"} title="Kuma url" {...itemProps.kuma_url} />
+      <Form.TextField placeholder={"Your kuma username"} title="Kuma Username" {...itemProps.kuma_username} />
+      <Form.PasswordField placeholder={"Your kuma password"} title="Kuma Password" {...itemProps.kuma_password} />
       <Form.TextField
         placeholder={"Code from your authenticator app (if 2FA enabled)"}
-        error={codeError}
-        id="kuna_2fa"
         title="2FA Code"
-        defaultValue=""
+        {...itemProps.kuna_2fa}
       />
     </Form>
   );

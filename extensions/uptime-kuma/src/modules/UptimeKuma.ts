@@ -3,7 +3,6 @@
 
 import { io, Socket } from "socket.io-client";
 import { EventEmitter } from "events";
-import AuthForm from "../auth-form";
 
 export interface Heartbeat {
   monitorID: string;

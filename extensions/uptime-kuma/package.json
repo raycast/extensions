@@ -5,6 +5,9 @@
   "description": "View all your Uptime Kuma monitors and their status",
   "icon": "extension_icon.png",
   "author": "MarlburroW",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "System"
   ],
@@ -18,12 +21,9 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-
-
-  ],
   "dependencies": {
     "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
     "dayjs": "^1.11.10",
     "events": "^3.3.0",
     "socket.io-client": "^4.7.2",
