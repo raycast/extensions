@@ -13,7 +13,7 @@ import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { exec as execCb } from "child_process";
 import { useState } from "react";
 import { promisify } from "util";
-import { dataType, optionType } from "./types";
+import { DataType, OptionType } from "./types";
 import { extensionTypes } from "./constants";
 import { formatItem, formatOutput } from "./utils";
 import fs from "fs/promises";
@@ -23,7 +23,7 @@ const exec = promisify(execCb);
 export default function IndexCommand() {
   const preferences = getPreferenceValues<Preferences.Index>();
 
-  const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([]);
+  const [installedExtensions, setInstalledExtensions] = useState<DataType[]>([]);
   const { isLoading, data, error } = useCachedPromise(async () => {
     const { stdout, stderr } = await exec(
       `find ~/.config/raycast/extensions/ -name "package.json" -exec echo -n "{}: " \\;`,
@@ -71,7 +71,7 @@ export default function IndexCommand() {
   });
 
   function ExtensionTypeDropdown(props: {
-    ExtensionTypes: optionType[];
+    ExtensionTypes: OptionType[];
     onExtensionTypeChange: (newValue: string) => void;
   }) {
     const { ExtensionTypes, onExtensionTypeChange } = props;
@@ -93,7 +93,7 @@ export default function IndexCommand() {
   }
 
   const onExtensionTypeChange = (newValue: string) => {
-    const filteredExtensions: dataType[] =
+    const filteredExtensions: DataType[] =
       data?.filter((item) => {
         return newValue === "local" ? item.isLocalExtension : newValue === "store" ? !item.isLocalExtension : true;
       }) || [];
