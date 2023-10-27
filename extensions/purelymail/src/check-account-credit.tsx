@@ -10,8 +10,9 @@ export default async function CheckAccountCredit() {
     await showFailureToast(response.message, { title: response.code });
   } else {
     const { credit } = response.result;
-    await Clipboard.copy(credit as string);
-    await showToast(Toast.Style.Success, "Copied to Clipboard", credit);
-    await updateCommandMetadata({ subtitle: `Purelymail | Account Credit: ${credit}` });
+    const roundedCredit = parseFloat(credit as string).toFixed(2);
+    await Clipboard.copy(roundedCredit);
+    await showToast(Toast.Style.Success, "Copied to Clipboard", roundedCredit);
+    await updateCommandMetadata({ subtitle: `Purelymail | Account Credit: ${roundedCredit}` });
   }
 }
