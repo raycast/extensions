@@ -21,7 +21,7 @@ import fs from "fs/promises";
 const exec = promisify(execCb);
 
 export default function IndexCommand() {
-  const preferenes = getPreferenceValues<Preferences.Index>();
+  const preferences = getPreferenceValues<Preferences.Index>();
 
   const [installedExtensions, setInstalledExtensions] = useState<dataType[]>([]);
   const { isLoading, data, error } = useCachedPromise(async () => {
@@ -143,7 +143,7 @@ export default function IndexCommand() {
                     <ActionPanel.Section title="Extension">
                       <Action
                         onAction={() => {
-                          Clipboard.copy(formatItem(item, preferenes.format));
+                          Clipboard.copy(formatItem(item, preferences.format));
                           showHUD("Copied to Clipboard");
                         }}
                         title="Copy Item to Clipboard"
@@ -155,9 +155,9 @@ export default function IndexCommand() {
                           Clipboard.copy(
                             formatOutput(
                               installedExtensions,
-                              preferenes.format,
-                              preferenes.separator,
-                              preferenes.prepend,
+                              preferences.format,
+                              preferences.separator,
+                              preferences.prepend,
                             ),
                           );
                           showHUD("Copied to Clipboard");
