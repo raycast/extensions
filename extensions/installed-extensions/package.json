@@ -17,14 +17,6 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "jqPath",
-          "description": "The path to jq, leave blank for default brew path",
-          "type": "textfield",
-          "required": false,
-          "title": "Path to jq",
-          "placeholder": "Leave blank for default homebrew path"
-        },
-        {
           "name": "separator",
           "description": "Select output format",
           "type": "dropdown",
