@@ -109,7 +109,7 @@ export const useAppStore = create<AppState>()(
           return m;
         });
       }),
-  }))
+  })),
 );
 
 export default useAppStore;

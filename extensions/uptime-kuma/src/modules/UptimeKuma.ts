@@ -187,7 +187,7 @@ export class UptimeKuma extends EventEmitter {
             this.emit("error", "Authentication failed");
           }
         }
-      }
+      },
     );
   }
 

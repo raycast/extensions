@@ -51,7 +51,7 @@ export function ListComponent() {
       kuma.disconnect();
 
       setKumaError(
-        "If you think your connection settings are wrong, press Enter to run the Login Action and enter your new settings."
+        "If you think your connection settings are wrong, press Enter to run the Login Action and enter your new settings.",
       );
     });
 
