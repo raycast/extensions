@@ -9,69 +9,119 @@ import ChangeWebsitePHPVersion from "../websites/ChangeWebsitePHPVersionComponen
 import CreateWebsite from "../websites/CreateWebsiteComponent";
 
 type ListChildDomainsProps = {
-    masterDomain: string;
-}
+  masterDomain: string;
+};
 export default function ListChildDomains({ masterDomain }: ListChildDomainsProps) {
-    const { push } = useNavigation();
+  const { push } = useNavigation();
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [childDomains, setChildDomains] = useState<ChildDomain[]>();
-    const [error, setError] = useState("");
-    
-    async function getFromApi() {
-        const response = await getChildDomains({ masterDomain });
-        if (response.error_message==="None") {
-            const successResponse = response as ListChildDomainsResponse;
-            const data = (typeof successResponse.data === "string") ? JSON.parse(successResponse.data) : successResponse.data;
-            
-            await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${data.length} Child Domains`);
-            setChildDomains(data);
-        } else {
-            setError(response.error_message);
-        }
-        setIsLoading(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [childDomains, setChildDomains] = useState<ChildDomain[]>();
+  const [error, setError] = useState("");
+
+  async function getFromApi() {
+    const response = await getChildDomains({ masterDomain });
+    if (response.error_message === "None") {
+      const successResponse = response as ListChildDomainsResponse;
+      const data = typeof successResponse.data === "string" ? JSON.parse(successResponse.data) : successResponse.data;
+
+      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${data.length} Child Domains`);
+      setChildDomains(data);
+    } else {
+      setError(response.error_message);
     }
+    setIsLoading(false);
+  }
 
-    useEffect(() => {
-        getFromApi();
-    }, [])
+  useEffect(() => {
+    getFromApi();
+  }, []);
 
-    async function confirmAndDelete(websiteName: string) {
-        if (
-          await confirmAlert({
-            title: `Delete child domain '${websiteName}'?`,
-            message: "This action cannot be undone.",
-            primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
-          })
-        ) {
-          setIsLoading(true);
-          const response = await deleteChildDomain({ websiteName });
-          if (response.error_message==="None") {
-            await showToast(Toast.Style.Success, "SUCCESS", `Deleted ${websiteName} successfully`);
-            await getFromApi();
-          }
-        }
-      }    
+  async function confirmAndDelete(websiteName: string) {
+    if (
+      await confirmAlert({
+        title: `Delete child domain '${websiteName}'?`,
+        message: "This action cannot be undone.",
+        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+      })
+    ) {
+      setIsLoading(true);
+      const response = await deleteChildDomain({ websiteName });
+      if (response.error_message === "None") {
+        await showToast(Toast.Style.Success, "SUCCESS", `Deleted ${websiteName} successfully`);
+        await getFromApi();
+      }
+    }
+  }
 
-    return error ? <ErrorComponent errorMessage={error} /> : <List isLoading={isLoading}>
-        {childDomains && childDomains.map(childDomain => <List.Item key={childDomain.childDomain} title={childDomain.childDomain} subtitle={`path: ${childDomain.path}`} icon={getFavicon(`https://${childDomain.childDomain}`, { fallback: Icon.Globe })}
-        actions={<ActionPanel>
-            <Action.OpenInBrowser title="Open in CyberPanel" url={PANEL_URL + childDomain.childLunch} />
-            <Action title="Change PHP Version" icon={Icon.WrenchScrewdriver} onAction={() => push(<ChangeWebsitePHPVersion childDomain={childDomain.childDomain} onWebsitePHPVersionChanged={getFromApi} />)} />
-            <ActionPanel.Section>
-                <Action title="Delete Child Domain" icon={Icon.DeleteDocument} onAction={() => confirmAndDelete(childDomain.childDomain)} style={Action.Style.Destructive} />
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-                <Action title="Reload Child Domains" icon={Icon.Redo} onAction={getFromApi} />
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-                <Action title="Create Child Domain" icon={Icon.Plus} onAction={() => push(<CreateWebsite masterDomain={masterDomain} onWebsiteCreated={getFromApi} />)} shortcut={{ modifiers: ["cmd"], key: "n" }} />
-            </ActionPanel.Section>
-        </ActionPanel>} />)}
-        {!isLoading && <List.Section title="Actions">
-            <List.Item title="Create Child Domain" icon={Icon.Plus} actions={<ActionPanel>
-                <Action title="Create Child Domain" icon={Icon.Plus} onAction={() => push(<CreateWebsite masterDomain={masterDomain} onWebsiteCreated={getFromApi} />)} />
-            </ActionPanel>} />
-        </List.Section>}
+  return error ? (
+    <ErrorComponent errorMessage={error} />
+  ) : (
+    <List isLoading={isLoading} navigationTitle="List Child Domains">
+      {childDomains &&
+        childDomains.map((childDomain) => (
+          <List.Item
+            key={childDomain.childDomain}
+            title={childDomain.childDomain}
+            subtitle={`path: ${childDomain.path}`}
+            icon={getFavicon(`https://${childDomain.childDomain}`, { fallback: Icon.Globe })}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open in CyberPanel" url={PANEL_URL + childDomain.childLunch} />
+                <Action
+                  title="Change PHP Version"
+                  icon={Icon.WrenchScrewdriver}
+                  onAction={() =>
+                    push(
+                      <ChangeWebsitePHPVersion
+                        childDomain={childDomain.childDomain}
+                        onWebsitePHPVersionChanged={getFromApi}
+                      />,
+                    )
+                  }
+                />
+                <ActionPanel.Section>
+                  <Action
+                    title="Delete Child Domain"
+                    icon={Icon.DeleteDocument}
+                    onAction={() => confirmAndDelete(childDomain.childDomain)}
+                    style={Action.Style.Destructive}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action title="Reload Child Domains" icon={Icon.Redo} onAction={getFromApi} />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Create Child Domain"
+                    icon={Icon.Plus}
+                    onAction={() => push(<CreateWebsite masterDomain={masterDomain} onWebsiteCreated={getFromApi} />)}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      {!isLoading && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Create Child Domain"
+            icon={Icon.Plus}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Create Child Domain"
+                  icon={Icon.Plus}
+                  onAction={() => push(<CreateWebsite masterDomain={masterDomain} onWebsiteCreated={getFromApi} />)}
+                />
+                <ActionPanel.Section>
+                  <Action title="Reload Child Domains" icon={Icon.Redo} onAction={getFromApi} />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
+  );
 }

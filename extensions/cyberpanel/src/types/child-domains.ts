@@ -1,41 +1,40 @@
 import { CreateWebsiteFormValues, CreateWebsiteRequest, CreateWebsiteResponse } from "./websites";
 
 export type ChildDomain = {
-    childDomain: string;
-    path: string;
-    childLunch: string;
-}
+  childDomain: string;
+  path: string;
+  childLunch: string;
+};
 export type ListChildDomainsRequest = {
-    masterDomain: string;
-}
+  masterDomain: string;
+};
 export type ListChildDomainsResponse = {
-    status: 1;
-    fetchStatus: 1;
-    error_message: "None";
-    data: ChildDomain[] | string;
-}
+  status: 1;
+  fetchStatus: 1;
+  error_message: "None";
+  data: ChildDomain[] | string;
+};
 
 export type CreateChildDomainFormValues = CreateWebsiteFormValues;
 export type CreateChildDomainRequest = {
-    masterDomain: string;
-    path: string;
+  masterDomain: string;
+  path: string;
 } & CreateWebsiteRequest;
 export type CreateChildDomainResponse = {
-    tempStatusPath?: string;
+  tempStatusPath?: string;
 } & CreateWebsiteResponse;
 
 export type DeleteChildDomainRequest = {
-    websiteName: string;
-}
+  websiteName: string;
+};
 export type DeleteChildDomainResponse = {
-    status: 1;
-    websiteDeleteStatus: 1;
-    error_message: "None";
-}
+  status: 1;
+  websiteDeleteStatus: 1;
+  error_message: "None";
+};
 
-export type ChildDomainRequestBody = ListChildDomainsRequest
-| CreateChildDomainRequest
-| DeleteChildDomainRequest;
-export type ChildDomainSuccessResponse = ListChildDomainsResponse
-| CreateChildDomainResponse
-| DeleteChildDomainResponse;
+export type ChildDomainRequestBody = ListChildDomainsRequest | CreateChildDomainRequest | DeleteChildDomainRequest;
+export type ChildDomainSuccessResponse =
+  | ListChildDomainsResponse
+  | CreateChildDomainResponse
+  | DeleteChildDomainResponse;

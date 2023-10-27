@@ -4,30 +4,30 @@ import { modifyPackage } from "../../utils/api";
 import { ModifyPackageFormValues, Package } from "../../types/packages";
 
 type ModifyPackageProps = {
-    package: Package;
-    onPackageModified: () => void;
-}
+  package: Package;
+  onPackageModified: () => void;
+};
 export default function ModifyPackage({ package: packageItem, onPackageModified }: ModifyPackageProps) {
-    const { pop } = useNavigation();
+  const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<ModifyPackageFormValues>({
     async onSubmit(values) {
-        const formattedValues = {
-          diskSpace: Number(values.diskSpace),
-          bandwidth: Number(values.bandwidth),
-          dataBases: Number(values.dataBases),
-          ftpAccounts: Number(values.ftpAccounts),
-          emails: Number(values.emails),
-          allowedDomains: Number(values.allowedDomains),
-          api: Number(values.api),
-          allowFullDomain: Number(values.allowFullDomain),
-        }
-        const response = await modifyPackage({ ...formattedValues });
-        if (response.error_message==="None") {
-          await showToast(Toast.Style.Success, "SUCCESS", `Modified ${packageItem.packageName} successfully`);
-          onPackageModified();
-          pop();
-        }
+      const formattedValues = {
+        diskSpace: Number(values.diskSpace),
+        bandwidth: Number(values.bandwidth),
+        dataBases: Number(values.dataBases),
+        ftpAccounts: Number(values.ftpAccounts),
+        emails: Number(values.emails),
+        allowedDomains: Number(values.allowedDomains),
+        api: Number(values.api),
+        allowFullDomain: Number(values.allowFullDomain),
+      };
+      const response = await modifyPackage({ ...formattedValues, packageName: packageItem.packageName });
+      if (response.error_message === "None") {
+        await showToast(Toast.Style.Success, "SUCCESS", `Modified ${packageItem.packageName} successfully`);
+        onPackageModified();
+        pop();
+      }
     },
     initialValues: {
       diskSpace: packageItem.diskSpace.toString(),
@@ -35,49 +35,38 @@ export default function ModifyPackage({ package: packageItem, onPackageModified 
       dataBases: packageItem.dataBases.toString(),
       ftpAccounts: packageItem.ftpAccounts.toString(),
       emails: packageItem.emailAccounts.toString(),
-      allowedDomains: packageItem.allowedDomains.toString()
+      allowedDomains: packageItem.allowedDomains.toString(),
     },
     validation: {
       diskSpace(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value) && value!=="0")
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       bandwidth(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value) && value!=="0")
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       dataBases(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value) && value!=="0")
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       ftpAccounts(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value) && value!=="0")
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       emails(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value) && value!=="0")
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       allowedDomains(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value) && value!=="0")
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
     },
   });
   return (
-    <Form navigationTitle={`Modify ${packageItem.packageName}`}
+    <Form
+      navigationTitle={`Modify ${packageItem.packageName}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} icon={Icon.Check} />

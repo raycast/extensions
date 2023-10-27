@@ -38,24 +38,28 @@
   "commands": [
     {
       "name": "verify-login",
+      "subtitle": "CyberPanel",
       "title": "Verify Login",
       "description": "Verify User Can Access API",
       "mode": "no-view"
     },
     {
       "name": "list-users",
+      "subtitle": "CyberPanel",
       "title": "List Users",
       "description": "List Users in CyberPanel",
       "mode": "view"
     },
     {
       "name": "list-packages",
+      "subtitle": "CyberPanel",
       "title": "List Packages",
       "description": "List Packages in CyberPanel",
       "mode": "view"
     },
     {
       "name": "list-ftp-accounts-in-domain",
+      "subtitle": "CyberPanel",
       "title": "List FTP Accounts in Domain",
       "description": "List FTP Accounts in a Domain in CyberPanel",
       "mode": "view",
@@ -70,6 +74,7 @@
     },
     {
       "name": "list-email-accounts-in-domain",
+      "subtitle": "CyberPanel",
       "title": "List Email Accounts in Domain",
       "description": "List Email Accounts in a Domain in CyberPanel",
       "mode": "view",
@@ -84,6 +89,7 @@
     },
     {
       "name": "list-databases-in-domain",
+      "subtitle": "CyberPanel",
       "title": "List Databases in Domain",
       "description": "List Databases in a Domain in CyberPanel",
       "mode": "view",
@@ -98,6 +104,7 @@
     },
     {
       "name": "list-dns-records-in-domain",
+      "subtitle": "CyberPanel",
       "title": "List DNS Records in Domain",
       "description": "List DNS Records in a Domain in CyberPanel",
       "mode": "view",
@@ -118,6 +125,7 @@
     },
     {
       "name": "create-backup",
+      "subtitle": "CyberPanel",
       "title": "Create Backup",
       "description": "Create Backup in CyberPanel",
       "mode": "no-view",
@@ -132,6 +140,7 @@
     },
     {
       "name": "list-websites",
+      "subtitle": "CyberPanel",
       "title": "List Websites",
       "description": "List Websites in CyberPanel",
       "mode": "view"

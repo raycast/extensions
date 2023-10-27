@@ -5,61 +5,54 @@ import { CreatePackageFormValues } from "../../types/packages";
 
 type CreatePackageProps = {
   onPackageCreated: () => void;
-}
+};
 export default function CreatePackage({ onPackageCreated }: CreatePackageProps) {
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<CreatePackageFormValues>({
     async onSubmit(values) {
-        const response = await createPackage({ ...values, api: values.api ? "1" : "0", allowFullDomain: values.allowFullDomain ? "1" : "0" });
-        if (response.error_message==="None") {
-          await showToast(Toast.Style.Success, "SUCCESS", `Created ${values.packageName} successfully`);
-          onPackageCreated();
-          pop();
-        }
+      const response = await createPackage({
+        ...values,
+        api: values.api ? "1" : "0",
+        allowFullDomain: values.allowFullDomain ? "1" : "0",
+      });
+      if (response.error_message === "None") {
+        await showToast(Toast.Style.Success, "SUCCESS", `Created ${values.packageName} successfully`);
+        onPackageCreated();
+        pop();
+      }
     },
     validation: {
       packageName: FormValidation.Required,
       diskSpace(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value))
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value)) return "The item must be a number";
       },
       bandwidth(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value))
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value)) return "The item must be a number";
       },
       dataBases(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value))
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value)) return "The item must be a number";
       },
       ftpAccounts(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value))
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value)) return "The item must be a number";
       },
       emails(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value))
-            return "The item must be a number";
+        if (!value) return "The item is required";
+        else if (!Number(value)) return "The item must be a number";
       },
       allowedDomains(value) {
-          if (!value)
-            return "The item is required";
-          else if (!Number(value))
-            return "The item must be a number";
-      }
+        if (!value) return "The item is required";
+        else if (!Number(value)) return "The item must be a number";
+      },
     },
   });
   return (
-    <Form navigationTitle="Create Package"
+    <Form
+      navigationTitle="Create Package"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} icon={Icon.Check} />
