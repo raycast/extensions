@@ -10,7 +10,7 @@ export function AuthForm(props: { onSave: (url: string) => void }) {
     kuma_url: string;
     kuma_username: string;
     kuma_password: string;
-    kuna_2fa: string;
+    kuma_2fa: string;
   }
 
   const { handleSubmit, itemProps, setValidationError } = useForm<submitValues>({
@@ -30,12 +30,12 @@ export function AuthForm(props: { onSave: (url: string) => void }) {
       }
 
       try {
-        const token = await getToken(values.kuma_url, values.kuma_username, values.kuma_password, values.kuna_2fa);
+        const token = await getToken(values.kuma_url, values.kuma_username, values.kuma_password, values.kuma_2fa);
         await LocalStorage.setItem("kuma_token", token);
       } catch (error) {
         showToast({
-          title: "Unable to get token, please check your credentials",
           style: Toast.Style.Failure,
+          title: "Unable to get token, please check your credentials",
         });
         setValidationError("kuma_username", "Check Username");
         setValidationError("kuma_password", "Check Password");
@@ -70,7 +70,7 @@ export function AuthForm(props: { onSave: (url: string) => void }) {
       <Form.TextField
         placeholder={"Code from your authenticator app (if 2FA enabled)"}
         title="2FA Code"
-        {...itemProps.kuna_2fa}
+        {...itemProps.kuma_2fa}
       />
     </Form>
   );

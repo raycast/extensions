@@ -14,7 +14,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "list-monitors",
+      "name": "index",
       "title": "Show Monitors",
       "description": "Show a list of all your monitors with some basic data",
       "subtitle": "Uptime Kuma",
@@ -26,6 +26,7 @@
     "@raycast/utils": "^1.10.0",
     "dayjs": "^1.11.10",
     "events": "^3.3.0",
+    "immer": "^10.0.3",
     "socket.io-client": "^4.7.2",
     "zustand": "^4.4.3"
   },
