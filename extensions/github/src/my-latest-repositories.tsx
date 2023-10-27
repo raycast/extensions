@@ -51,14 +51,13 @@ function MyLatestRepositories() {
       {myLatestRepositories ? (
         <List.Section title="My Latest Repositories" subtitle={`${myLatestRepositories.length}`}>
           {myLatestRepositories.map((repository) => {
-            repository.updatedAt = repository.pushedAt;
-
             return (
               <RepositoryListItem
                 key={repository.id}
                 repository={repository}
                 mutateList={mutateList}
                 onVisit={visitRepository}
+                isPushedAt
               />
             );
           })}

@@ -11,14 +11,20 @@ type RepositoryListItemProps = {
   repository: ExtendedRepositoryFieldsFragment;
   onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
   mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
+  isPushedAt?: boolean;
 };
 
-export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
+export default function RepositoryListItem({
+  repository,
+  mutateList,
+  onVisit,
+  isPushedAt = false,
+}: RepositoryListItemProps) {
   const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const owner = getGitHubUser(repository.owner);
   const numberOfStars = repository.stargazerCount;
-  const updatedAt = new Date(repository.updatedAt);
+  const updatedAt = isPushedAt ? new Date(repository.pushedAt || 0) : new Date(repository.updatedAt);
 
   const accessories: List.Item.Accessory[] = [
     {
