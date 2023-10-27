@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AvgPing, Heartbeat, HeartbeatList, Monitor, Uptime, UptimeKuma } from "./modules/UptimeKuma";
 import { useCachedState } from "@raycast/utils";
@@ -21,9 +32,21 @@ export function ListMonitors() {
   } = useAppStore();
 
   async function logout() {
-    setMonitors([]);
-    setKumaUrl("");
-    await LocalStorage.removeItem("kuma_token");
+    await confirmAlert({
+      title: "Logout",
+      icon: { source: Icon.Power, tintColor: Color.Red },
+      message: "Are you sure you want to logout?",
+      primaryAction: {
+        title: "Log out",
+        style: Alert.ActionStyle.Destructive,
+        onAction: async () => {
+          setMonitors([]);
+          setKumaUrl("");
+          await LocalStorage.removeItem("kuma_token");
+          await showToast({ title: "Success", message: "Successfully logged out" });
+        },
+      },
+    });
   }
 
   async function initCommand() {
