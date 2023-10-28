@@ -23,7 +23,7 @@ export default function DownloadVideo() {
   const [error, setError] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  const { handleSubmit, values, itemProps, setValue } = useForm<DownloadOptions>({
+  const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     onSubmit: async (values) => {
       setLoading(true);
 
@@ -68,12 +68,17 @@ export default function DownloadVideo() {
   useEffect(() => {
     if (values.url && ytdl.validateURL(values.url)) {
       setLoading(true);
-      ytdl.getInfo(values.url).then((info) => {
-        setLoading(false);
-        setDuration(parseInt(info.videoDetails.lengthSeconds));
-        setTitle(info.videoDetails.title);
-        setFormats(info.formats);
-      });
+      ytdl
+        .getInfo(values.url)
+        .then((info) => {
+          setLoading(false);
+          setDuration(parseInt(info.videoDetails.lengthSeconds));
+          setTitle(info.videoDetails.title);
+          setFormats(info.formats);
+        })
+        .catch(() => {
+          setValidationError("url", "Video not found");
+        });
     }
   }, [values.url]);
 
