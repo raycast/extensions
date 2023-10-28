@@ -36,7 +36,7 @@ export async function createTunnel(port: number, domain: string | undefined, lab
     return data.public_url;
   } catch (error) {
     if (error instanceof FetchError && error.code === "ECONNREFUSED") {
-      throw new Error("ngrok not found on port 4044");
+      throw new Error("Interface not found on port 4040");
     }
     throw new Error((error as Error).message);
   }
