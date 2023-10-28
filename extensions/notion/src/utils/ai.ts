@@ -48,7 +48,9 @@ export function createPrompt(properties: DatabaseProperty[], conditions: string)
   const date = "2023-10-28";
 
   // only include certain properties for AI to generate
-  let databaseProperties = properties.filter((property) => ["title", "date", "select", "multi_select", "status"].includes(property.type));
+  const databaseProperties = properties.filter((property) =>
+    ["title", "date", "select", "multi_select", "status"].includes(property.type),
+  );
 
   const ids =
     "{\n" +
@@ -75,7 +77,7 @@ export async function getValues(databaseId: string | undefined, conditions: stri
 
   const prompt = createPrompt(databaseProperties, conditions);
 
-  toast.title = "asking ai";
+  toast.title = "Asking AI";
 
   const data = await AI.ask(prompt, {
     creativity: "none",
@@ -83,18 +85,18 @@ export async function getValues(databaseId: string | undefined, conditions: stri
     // model: "text-davinci-003",
   });
 
-  toast.title = "parsing json";
+  toast.title = "Parsing JSON";
 
-  let json = tryParseJSON(data);
+  const json = tryParseJSON(data);
 
   if (!json) {
     throw new Error("Unable to parse AI response");
   }
-  console.log('json', json);
-  
+  console.log("json", json);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const res: Record<string, any> = {};
-  toast.title = "cleaning up props";
+  const values: Record<string, any> = {};
+  toast.title = "Cleaning up props";
 
   for (const [id, value] of Object.entries(json)) {
     const property = databaseProperties.find((property) => property.id === id);
@@ -103,22 +105,22 @@ export async function getValues(databaseId: string | undefined, conditions: stri
     }
     switch (property.type) {
       case "title": {
-        res["property::" + property.type + "::" + id] = value;
+        values["property::" + property.type + "::" + id] = value;
         break;
       }
       case "date": {
         const date = new Date("2023-10-29T16:00:00.001Z"); // TODO: use a real date
-        res["property::" + property.type + "::" + id] = date;
+        values["property::" + property.type + "::" + id] = date;
         break;
       }
       case "select": {
         // check if value is a valid option
         const option = property.options.find((option) => option.id === value);
-        console.log(value)
+        console.log(value);
         if (!option && value !== "_select_null_") {
           throw new Error("Unable to find option");
         }
-        res["property::" + property.type + "::" + id] = value;
+        values["property::" + property.type + "::" + id] = value;
         break;
       }
       case "multi_select": {
@@ -127,18 +129,18 @@ export async function getValues(databaseId: string | undefined, conditions: stri
         if (options.length !== value.length) {
           throw new Error("Unable to find option");
         }
-        res["property::" + property.type + "::" + id] = value;
+        values["property::" + property.type + "::" + id] = value;
         break;
       }
       default: {
-        res["property::" + property.type + "::" + id] = value;
+        values["property::" + property.type + "::" + id] = value;
         break;
       }
     }
   }
 
-  res["database"] = databaseId;
-  return {res, toast};
+  values["database"] = databaseId;
+  return { values, toast };
 }
 
 /*
