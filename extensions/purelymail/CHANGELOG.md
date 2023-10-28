@@ -4,8 +4,8 @@
 
 ### Enhancements
 
-- Added Toasts to show Processing, Success and Error states
-- Changed DeleteUser from ```view``` to ```no-view```
+- Added Toasts to show Processing, Success, and Error states
+- Changed DeleteUser from `view` to `no-view`
 
 ### New Endpoints
 
