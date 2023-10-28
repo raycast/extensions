@@ -79,7 +79,7 @@ export default function TunnelsList() {
                               <AddTunnel
                                 revalidate={revalidateSessions}
                                 domains={dataDomains?.reserved_domains || []}
-                              />
+                              />,
                             )
                           }
                           reload={reload}
