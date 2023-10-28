@@ -11,5 +11,5 @@ Post to [Twos](https://twosapp.com) from [Raycast](https://www.raycast.com)
 
 ## More information
 
-- [Official Discord](https://discord.gg/eGf7E2P8AR)
+- [Official Twos Discord](https://discord.gg/eGf7E2P8AR)
 - [Unofficial guide to Twos API](https://www.twosapp.com/640c7f5bb61a830a4b982e80)
