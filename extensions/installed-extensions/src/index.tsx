@@ -5,7 +5,6 @@ import {
   Icon,
   List,
   getPreferenceValues,
-  open,
   Clipboard,
   showHUD,
   openExtensionPreferences,
@@ -17,55 +16,51 @@ import { promisify } from "util";
 import { DataType, OptionType } from "./types";
 import { extensionTypes } from "./constants";
 import { formatItem, formatOutput } from "./utils";
+import fs from "fs/promises";
 
 const exec = promisify(execCb);
 
 export default function IndexCommand() {
   const preferences = getPreferenceValues<Preferences.Index>();
 
-  let jqPath = process.arch == "arm64" ? "/opt/homebrew/bin/jq" : "/usr/local/homebrew/bin/jq";
-  if (preferences.jqPath || preferences.jqPath?.trim()) {
-    jqPath = preferences.jqPath;
-  }
-
   const [installedExtensions, setInstalledExtensions] = useState<DataType[]>([]);
   const { isLoading, data, error } = useCachedPromise(async () => {
     const { stdout, stderr } = await exec(
-      `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.owner) \\(.title)"' {} \\;`,
+      `find ~/.config/raycast/extensions/ -name "package.json" -exec echo -n "{}: " \\;`,
     );
 
     if (stderr) {
-      showFailureToast("Correct the path to jq or download jq", {
-        primaryAction: {
-          title: "Download jq",
-          onAction: () => {
-            open("https://jqlang.github.io/jq/download/");
-          },
-        },
-      });
-
-      throw new Error("Correct the path to jq or download jq");
+      showFailureToast(stderr);
+      throw new Error(stderr);
     }
 
-    let result = stdout.split("\n").map((item) => {
-      const [path, author, icon, commands, name, owner, ...titleParts] = item.trim().split(" ");
-      const title = titleParts.join(" ");
-      const cleanedPath = path.replace("/package.json:", "");
-      const link = `https://raycast.com/${owner == "null" ? author : owner}/${name}`;
+    const files = stdout.split(": ").filter((file) => file.trim() !== "");
 
-      return {
-        path: cleanedPath,
-        name,
-        author,
-        icon,
-        commands,
-        owner,
-        title,
-        link,
-        isOrganization: owner !== "null",
-        isLocalExtension: !cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
-      };
-    });
+    let result = await Promise.all(
+      files.map(async (file) => {
+        const content = await fs.readFile(file, "utf-8");
+        const json = await JSON.parse(content);
+
+        const author = await json.author;
+        const owner = (await json.owner) || null;
+        const name = await json.name;
+        const link = `https://raycast.com/${owner == "null" ? author : owner}/${name}`;
+        const cleanedPath = file.replace("/package.json", "");
+
+        return {
+          path: cleanedPath,
+          name,
+          author: author,
+          icon: await json.icon,
+          commands: await json.commands.length,
+          owner,
+          title: await json.title,
+          link,
+          isOrganization: owner !== null,
+          isLocalExtension: !!cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
+        };
+      }),
+    );
 
     result = result.filter((item) => item.title !== "" && item.author !== "");
     result = result.sort((a, b) => a.title.localeCompare(b.title));
@@ -114,15 +109,8 @@ export default function IndexCommand() {
       }
     >
       <List.EmptyView
-        title={error ? "Correct the path to jq or download jq" : "No Results"}
+        title={error ? "An Error Occurred" : "No Results"}
         icon={error ? { source: Icon.Warning, tintColor: Color.Red } : "noview.png"}
-        actions={
-          error ? (
-            <ActionPanel>
-              <Action.OpenInBrowser url="https://jqlang.github.io/jq/download/" title="Download Jq" />
-            </ActionPanel>
-          ) : null
-        }
       />
 
       <List.Section title="Installed Extensions" subtitle={`${installedExtensions?.length}`}>

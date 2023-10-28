@@ -1,7 +1,7 @@
 import JSON from "json-bigint";
 import { useState } from "react";
 import { IPv4, IPv6 } from "ip-toolkit";
-import { List, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
 import { drinkTypes, DrinkDropdown } from "./components/dropdown";
 
 export default function Command(props: { arguments: { keywork: string } }) {
@@ -22,9 +22,12 @@ export default function Command(props: { arguments: { keywork: string } }) {
       searchBarAccessory={<DrinkDropdown drinkTypes={drinkTypes} onDrinkTypeChange={setVersion} />}
     >
       {isEmpty ? (
-        <List.EmptyView icon={Icon.Info} title="Please enter the CIDR that needs to be converted！" />
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="Please enter the CIDR that needs to be converted！"
+        />
       ) : !isValid ? (
-        <List.EmptyView icon={Icon.Warning} title="Please enter a valid CIDR！" />
+        <List.EmptyView icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} title="Please enter a valid CIDR！" />
       ) : (
         Object.entries(convertResult).map(([key, value], index) => {
           if (value !== "") {
