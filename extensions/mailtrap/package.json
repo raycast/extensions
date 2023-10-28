@@ -11,7 +11,7 @@
       "name": "apiKey",
       "title": "API Key",
       "description": "Your Mailtrap API key",
-      "type": "textfield",
+      "type": "password",
       "required": true
     },
     {
