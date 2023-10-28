@@ -1,6 +1,6 @@
 # <img src="./assets/cyberpanel.png" width="20" height="20" /> CyberPanel Raycast Extension
 
-This is a Raycast extension for [Cyberpanel](https://cyberpanel.net/). With this extension you can lookup postal codes, calculate distances and much more using CyberPanel Cloud API ([documentation link](https://documenter.getpostman.com/view/2s8Yt1s9Pf?version=latest)).
+This is a Raycast extension for [CyberPanel](https://cyberpanel.net/). With this extension you can manage Users, Packages, Websites, Child Domains, Backups, Databases, Email Accounts, DNS Records and FTP Accounts in CyberPanel using CyberPanel Cloud API ([documentation link](https://documenter.getpostman.com/view/2s8Yt1s9Pf?version=latest)).
 
 ## 🚀 Getting Started
 
@@ -13,6 +13,10 @@ This is a Raycast extension for [Cyberpanel](https://cyberpanel.net/). With this
     b. Admin Username
 
     c. Admin Password
+
+## 🗒️ Note
+
+Extension has been tested to work with `CyberPanel Version 2.3 Build 4`.
 
 ## 🔧 Commands
 
