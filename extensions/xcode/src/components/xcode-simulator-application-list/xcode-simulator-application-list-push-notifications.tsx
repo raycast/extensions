@@ -5,22 +5,23 @@ import { operationWithUserFeedback } from "../../shared/operation-with-user-feed
 import fs from "fs";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 
+/**
+ * The Values
+ */
 type Values = {
   files: string[];
 };
 
+/**
+ * Xcode Simulator Application Push Notifications
+ */
 export function XcodeSimulatorApplicationPushNotifications(props: {
   application: XcodeSimulatorApplication;
 }): JSX.Element {
   const [currentFile, setCurrentFile] = useState<string[]>([]);
-
   function isFileValid(file: string) {
-    if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
-      return false;
-    }
-    return true;
+    return !(!fs.existsSync(file) || !fs.lstatSync(file).isFile());
   }
-
   //attempt to get the current selected file in Finder if any.
   useEffect(() => {
     (async () => {
@@ -34,31 +35,34 @@ export function XcodeSimulatorApplicationPushNotifications(props: {
         ) {
           setCurrentFile([selectedFinderItems[0].path]);
         }
-      } catch (error: any) {
-        //no op
+      } catch {
+        // Simply ignore any error
       }
     })();
   }, []);
-
   async function submit(values: Values) {
     const file = values.files[0];
     if (!isFileValid(file)) {
       await showToast({ title: "Invalid File", style: Toast.Style.Failure });
       return;
     }
-
     await operationWithUserFeedback(
       "Pushing Notification..",
       `Successfully Pushed Notification to ${props.application.simulator.name}`,
       `An error occurred while trying to push notifications to ${props.application.simulator.name}`,
-      () => XcodeSimulatorService.pushNotifications(file, props.application)
+      () =>
+        XcodeSimulatorService.sendPushNotification(
+          props.application.simulator,
+          props.application.bundleIdentifier,
+          file
+        )
     ).then();
   }
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Send" onSubmit={(values: Values) => submit(values)} />
+          <Action.SubmitForm title="Send" onSubmit={submit} />
         </ActionPanel>
       }
     >

@@ -61,7 +61,7 @@ export class XcodeSimulatorApplicationService {
    * Find all XcodeSimulatorApplications of a given XcodeSimulator
    * @param simulator The XcodeSimulator
    */
-  private static async findXcodeSimulatorApplications(simulator: XcodeSimulator): Promise<XcodeSimulatorApplication[]> {
+  static async findXcodeSimulatorApplications(simulator: XcodeSimulator): Promise<XcodeSimulatorApplication[]> {
     // The container application directory path
     const containerApplicationDirectoryPath = Path.join(simulator.dataPath, "Containers/Bundle/Application");
     // Declare Application Directory Paths

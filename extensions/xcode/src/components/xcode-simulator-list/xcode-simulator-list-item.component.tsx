@@ -6,6 +6,7 @@ import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 import { XcodeSimulatorOpenUrlForm } from "./xcode-simulator-open-url-form.component";
 import { XcodeSimulatorRenameForm } from "./xcode-simulator-rename-form.component";
 import { XcodeSimulatorApplicationList } from "../xcode-simulator-application-list/xcode-simulator-application-list.component";
+import { XcodeSimulatorSendPushNotificationForm } from "./xcode-simulator-send-push-notification-form.component";
 
 /**
  * Xcode Simulator List Item
@@ -79,6 +80,12 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
                 title="Open URL"
                 target={<XcodeSimulatorOpenUrlForm simulator={props.simulator} />}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
+              />
+              <Action.Push
+                icon={Icon.AlarmRinging}
+                title="Send Push Notification"
+                target={<XcodeSimulatorSendPushNotificationForm simulator={props.simulator} />}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
               <Action
                 icon={Icon.Cloud}

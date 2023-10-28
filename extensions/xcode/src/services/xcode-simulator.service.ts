@@ -207,14 +207,17 @@ export class XcodeSimulatorService {
   }
 
   /**
-   * Send Push Notification to Xcode Simulator
-   * @param filePath  Notification Payload file
-   * @param application Application choosen to send notification to
+   * Sends a push notification to a Xcode Simulator
+   * @param xcodeSimulator The Xcode Simulator
+   * @param bundleIdentifier The bundle identifier of the app
+   * @param payloadPath The path of the push notification payload
    */
-  static async pushNotifications(filePath: string, application: XcodeSimulatorApplication): Promise<void> {
-    return execAsync(
-      `xcrun simctl push ${application.simulator.udid} ${application.bundleIdentifier} ${filePath}`
-    ).then();
+  static async sendPushNotification(
+    xcodeSimulator: XcodeSimulator,
+    bundleIdentifier: string,
+    payloadPath: string
+  ): Promise<void> {
+    return execAsync(`xcrun simctl push ${xcodeSimulator.udid} ${bundleIdentifier} ${payloadPath}`).then();
   }
 
   /**
