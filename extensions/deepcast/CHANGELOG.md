@@ -1,5 +1,8 @@
 # Deepcast Changelog
 
+## [Arguments] - 2023-10-28
+- Added support for inputting text to translate as an argument
+
 ## [Default Target Language and Fallback] - 2023-10-16
 - Added preferences to set the default target language
 - Support commands being a fallback command
