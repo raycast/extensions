@@ -59,15 +59,21 @@ func get() throws -> [String : Any] {
 }
 
 #exportFunction(create)
-func create(_ values: [String: String]) throws -> [String : Any] {
+func create(_ values: [String: Any]) throws -> [String: Any] {
   let eventStore = EKEventStore()
   let reminder = EKReminder(eventStore: eventStore)
 
-  guard let title = values["title"] else {
-    throw "Title is missing or not a string"
+  if let title = values["title"] as? String {
+      reminder.title = title
+  } else {
+      throw "Title is missing or not a string"
   }
 
-  if let listId = values["listId"] {
+  if let notes = values["notes"] as? String {
+      reminder.notes = notes
+  }
+
+  if let listId = values["listId"] as? String {
     let calendars = eventStore.calendars(for: .reminder)
     guard let calendar = (calendars.first { $0.calendarIdentifier == listId }) else {
       throw "Calendar with id \(listId) not found"
@@ -77,10 +83,7 @@ func create(_ values: [String: String]) throws -> [String : Any] {
     reminder.calendar = eventStore.defaultCalendarForNewReminders()
   }
 
-  reminder.title = title
-  reminder.notes = values["notes"]
-
-  if let dueDateString = values["dueDate"] {
+  if let dueDateString = values["dueDate"] as? String {
     if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
       reminder.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day, .hour, .minute, .second],
@@ -94,7 +97,50 @@ func create(_ values: [String: String]) throws -> [String : Any] {
     }
   }
 
-  if let priorityString = values["priority"] {
+  if let recurrenceDict = values["recurrence"] as? [String: Any] {
+    if let frequency = recurrenceDict["frequency"] as? String,
+      let interval = recurrenceDict["interval"] as? Int
+    {
+
+      var recurrenceEnd: EKRecurrenceEnd? = nil
+      if let endDateString = recurrenceDict["endDate"] as? String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        if let endDate = dateFormatter.date(from: endDateString) {
+          recurrenceEnd = EKRecurrenceEnd(end: endDate)
+        } else {
+          throw "Invalid end date format"
+        }
+      }
+
+      var recurrenceFrequency: EKRecurrenceFrequency
+      switch frequency {
+        case "daily":
+          recurrenceFrequency = .daily
+        case "weekly":
+          recurrenceFrequency = .weekly
+        case "monthly":
+          recurrenceFrequency = .monthly
+        case "yearly":
+          recurrenceFrequency = .yearly
+        default:
+          throw "Invalid recurrence frequency"
+      }
+
+      let recurrenceRule = EKRecurrenceRule(
+        recurrenceWith: recurrenceFrequency,
+        interval: interval,
+        end: recurrenceEnd
+      )
+      reminder.addRecurrenceRule(recurrenceRule)
+    } else {
+      throw "Recurrence object missing required values"
+    }
+  }
+
+
+
+  if let priorityString = values["priority"] as? String {
     switch priorityString {
     case "high":
       reminder.priority = Int(EKReminderPriority.high.rawValue)

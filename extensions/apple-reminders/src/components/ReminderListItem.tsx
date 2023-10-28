@@ -1,8 +1,8 @@
 import { Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { format, isBefore, startOfDay } from "date-fns";
+import { format } from "date-fns";
 
-import { getPriorityIcon } from "../helpers";
+import { getPriorityIcon, isOverdue } from "../helpers";
 import { Reminder, List as TList } from "../hooks/useData";
 import { ViewProps } from "../hooks/useViewReminders";
 
@@ -26,7 +26,7 @@ export default function ReminderListItem({
   const keywords = [reminder.title];
   const accessories: List.Item.Accessory[] = [];
 
-  const isOverdue = reminder.dueDate ? isBefore(new Date(reminder.dueDate), startOfDay(new Date())) : false;
+  const overdue = reminder.dueDate ? isOverdue(reminder.dueDate) : false;
 
   if (displayCompletionDate && reminder.completionDate) {
     const completionDate = new Date(reminder.completionDate);
@@ -49,8 +49,8 @@ export default function ReminderListItem({
   if (reminder.dueDate) {
     const dueDate = new Date(reminder.dueDate);
     accessories.push({
-      icon: { source: Icon.Calendar, tintColor: isOverdue ? Color.Red : undefined },
-      date: { value: dueDate, color: isOverdue ? Color.Red : undefined },
+      icon: { source: Icon.Calendar, tintColor: !reminder.isCompleted && overdue ? Color.Red : undefined },
+      date: { value: dueDate, color: !reminder.isCompleted && overdue ? Color.Red : undefined },
       tooltip: `Due date: ${format(dueDate, "EEEE dd MMMM yyyy 'at' HH:mm")}`,
     });
 

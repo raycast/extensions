@@ -1,5 +1,9 @@
 # KeepassXC Extension Changelog
 
+## [Fix] - 2023-10-23
+
+- Fixed a logic bug
+
 ## [Enhancement] - 2023-10-21
 
 - Added Open URL action

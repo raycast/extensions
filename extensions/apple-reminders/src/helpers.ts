@@ -1,6 +1,46 @@
 import { Color, Icon } from "@raycast/api";
+import { addDays, format, isThisYear, isBefore, isSameDay, parseISO, startOfDay } from "date-fns";
 
 import { Priority } from "./hooks/useData";
+
+export function isOverdue(date: string) {
+  const parsedDate = parseISO(date);
+
+  if (parsedDate.getHours() === 0 && parsedDate.getMinutes() === 0) {
+    return isBefore(startOfDay(parsedDate), startOfDay(new Date()));
+  } else {
+    return isBefore(parsedDate, new Date());
+  }
+}
+
+export function displayDueDate(dateString: string) {
+  const date = new Date(dateString);
+  if (isOverdue(dateString)) {
+    return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
+  }
+
+  const today = startOfDay(new Date());
+
+  if (isSameDay(date, today)) {
+    return "Today";
+  }
+
+  if (isSameDay(date, addDays(today, 1))) {
+    return "Tomorrow";
+  }
+
+  const nextWeek = addDays(today, 7);
+
+  if (isBefore(date, nextWeek)) {
+    return format(date, "eeee");
+  }
+
+  if (isThisYear(date)) {
+    return format(date, "dd MMMM");
+  }
+
+  return format(date, "dd MMMM yyy");
+}
 
 export function getPriorityIcon(priority: Priority) {
   if (priority === "high") {
