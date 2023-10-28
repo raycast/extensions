@@ -85,7 +85,7 @@ export default function Command() {
   };
 
   const handleSubmit = async (values: FormPayload) => {
-    if (formState !== "AVAILABLE") return; // Prevent multiple submit while sending
+    if (formState === "SENDING") return; // Prevent multiple submit while sending
 
     const { type, text, datepicker } = values;
     const validText = validateText(text);
