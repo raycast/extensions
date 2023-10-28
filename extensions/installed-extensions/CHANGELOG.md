@@ -1,5 +1,9 @@
 # Installed Extensions Changelog
 
+## [Enhancement] - 2023-10-27
+
+- Removed `jq` as dependency
+
 ## [Improvements] - 2023-10-24
 
 - Fixed typos
