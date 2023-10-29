@@ -32,6 +32,7 @@ interface Arguments {
 interface Preferences {
   displayShortcuts: boolean;
   displayTriggers: boolean;
+  displayIcon: boolean;
   filterPattern: string;
   useRegex: boolean;
 }
@@ -134,6 +135,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
               <List.Item
                 key={macro.uid}
                 title={macro?.name ?? ""}
+                icon={preferences.displayIcon ? "kmicon_32.png" : undefined}
                 accessories={triggers}
                 actions={
                   <ActionPanel>

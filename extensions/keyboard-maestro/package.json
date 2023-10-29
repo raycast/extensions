@@ -45,6 +45,14 @@
       "default": false
     },
     {
+      "name": "displayIcon",
+      "description": "Do you want to display icons?",
+      "type": "checkbox",
+      "required": false,
+      "label": "Icons",
+      "default": false
+    },
+    {
       "name": "filterPattern",
       "description": "Enter a group name to filter. Use double quotes for an exact match; otherwise, it will be treated as a partial name.",
       "type": "textfield",
