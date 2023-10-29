@@ -27,8 +27,10 @@ declare global {
       };
     }
 
-    export interface LogoutResponse extends Omit<BaseResponse, "data"> {
-      redirect: string;
+    export interface LogoutResponse extends Omit<BaseResponse & { status: boolean }, "data"> {
+      data: {
+        redirect: string;
+      };
     }
 
     export interface DynamicFeedAllResponse extends Omit<BaseResponse, "data"> {
