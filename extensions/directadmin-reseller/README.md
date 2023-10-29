@@ -1,0 +1,7 @@
+# DirectAdmin
+
+...
+
+ADMIN ENPOINTS NOT COVERED
+
+- CMD_API_ACCOUNT_ADMIN
