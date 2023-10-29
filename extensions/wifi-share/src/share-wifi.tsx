@@ -65,7 +65,6 @@ const DetailPassword = ({
             <Detail.Metadata.TagList.Item text={password} color={"#eed535"} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Scanned text" text={`WIFI:S:${networkName};T:WPA;P:${password.trim()};;`} />
         </Detail.Metadata>
       }
     />
