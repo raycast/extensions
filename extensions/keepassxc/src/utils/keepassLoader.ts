@@ -1,7 +1,6 @@
-import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showHUD, LocalStorage } from "@raycast/api";
 import path from "path";
 import child_process from "child_process";
-import { runAppleScript } from "run-applescript";
 const spawn = child_process.spawn;
 
 interface Preference {
@@ -44,7 +43,7 @@ const keepassxcCli = path.join(preferences.keepassxcRootPath.path, "Contents/Mac
 const getSearchEntryCommand = async () => ((await getKeepassXCVersion()) >= 2.7 ? "search" : "locate");
 const keyFileOption = keyFile != "" && keyFile != null ? ["-k", `${keyFile}`] : [];
 // cli options
-const cliOptions = [...keyFileOption, "-q", "-a"];
+const cliOptions = [...keyFileOption, "-q"];
 const entryFilter = (entryStr: string) => {
   return entryStr
     .split("\n")
@@ -59,73 +58,77 @@ const entryFilter = (entryStr: string) => {
     )
     .sort();
 };
+
 /**
- * load entries from database with keepassxc-cli
- * @returns all entries in keepass database
+ * execute command with keepassxc-cli
+ * @param command The command to run.
+ * @param options List of string arguments.
+ * @returns
  */
-const loadEntries = () =>
-  getSearchEntryCommand().then(
-    (cmd) =>
-      new Promise<string[]>((resolve, reject) => {
-        const search_keywrod = cmd === "search" ? "" : "/";
-        const cli = spawn(`${keepassxcCli}`, [cmd, ...keyFileOption, "-q", `${database}`, search_keywrod]);
-        cli.stdin.write(`${dbPassword}\n`);
-        cli.stdin.end();
-        cli.on("error", reject);
-        cli.stderr.on("data", cliStdOnErr(reject));
-        const chuncks: Buffer[] = [];
-        cli.stdout.on("data", (chunck) => {
-          chuncks.push(chunck);
-        });
-        // finish when all chunck has been collected
-        cli.stdout.on("end", () => {
-          resolve(entryFilter(chuncks.join("").toString()));
-        });
-      })
-  );
+const execKeepassXCCli = async (options: string[]) =>
+  new Promise<string>((resolve, reject) => {
+    const cli = spawn(`${keepassxcCli}`, options);
+    cli.stdin.write(`${dbPassword}\n`);
+    cli.stdin.end();
+    cli.on("error", reject);
+    cli.stderr.on("data", cliStdOnErr(reject));
+    const chuncks: Buffer[] = [];
+    cli.stdout.on("data", (chunck) => {
+      chuncks.push(chunck);
+    });
+    // finish when all chunck has been collected
+    cli.stdout.on("end", () => {
+      const result = chuncks.join("").toString();
+      // remove \n in the end
+      resolve(result.slice(0, result.length - 1));
+    });
+  });
+
+/**
+ * load entries from cache
+ * @returns all entries in LocalStorage
+ */
+const loadEntriesCache = async () => {
+  return LocalStorage.getItem("entries").then((entries) => {
+    if (entries == undefined) {
+      return [];
+    } else {
+      return entryFilter(entries.toString());
+    }
+  });
+};
+
+/**
+ * refresh entries cache
+ * @returns all entries in database file
+ */
+const refreshEntriesCache = async () =>
+  getSearchEntryCommand()
+    .then((cmd) => {
+      const search_keywrod = cmd === "search" ? "" : "/";
+      return execKeepassXCCli([cmd, ...keyFileOption, "-q", `${database}`, search_keywrod]);
+    })
+    .then((entries) => {
+      LocalStorage.setItem("entries", entries);
+      return entryFilter(entries);
+    });
 
 const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
-  if (data.toString().indexOf("Enter password to unlock") != -1 || data.toString().trim().length == 0) {
+  if (
+    data.toString().indexOf("Enter password to unlock") != -1 ||
+    data.toString().indexOf("Maximum depth of replacement has been reached") != -1 ||
+    data.toString().trim().length == 0
+  ) {
     return;
   }
   reject(new Error(data.toString()));
 };
 
 const getPassword = (entry: string) =>
-  new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Password", `${database}`, `${entry}`]);
-    cli.stdin.write(`${dbPassword}\n`);
-    cli.stdin.end();
-    cli.on("error", reject);
-    cli.stderr.on("data", cliStdOnErr(reject));
-    const chuncks: Buffer[] = [];
-    cli.stdout.on("data", (chunck) => {
-      chuncks.push(chunck);
-    });
-    cli.stdout.on("end", () => {
-      const password = chuncks.join("").toString();
-      // remove \n in the end
-      resolve(password.slice(0, password.length - 1));
-    });
-  });
+  execKeepassXCCli(["show", ...cliOptions, "-a", "Password", `${database}`, `${entry}`]);
 
 const getUsername = (entry: string) =>
-  new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Username", `${database}`, `${entry}`]);
-    cli.stdin.write(`${dbPassword}\n`);
-    cli.stdin.end();
-    cli.on("error", reject);
-    cli.stderr.on("data", cliStdOnErr(reject));
-    const chuncks: Buffer[] = [];
-    cli.stdout.on("data", (chunck) => {
-      chuncks.push(chunck);
-    });
-    cli.stdout.on("end", () => {
-      const username = chuncks.join("").toString();
-      // remove \n in the end
-      resolve(username.slice(0, username.length - 1));
-    });
-  });
+  execKeepassXCCli(["show", ...cliOptions, "-a", "Username", `${database}`, `${entry}`]);
 
 const pastePassword = async (entry: string) => {
   console.log("paste password of entry:", entry);
@@ -137,7 +140,7 @@ const pastePassword = async (entry: string) => {
 const copyPassword = async (entry: string) =>
   getPassword(entry).then((password) => {
     showHUD("Password has been Copied to Clipboard");
-    return protectedCopy(password).then(() => password);
+    return Clipboard.copy(password, { concealed: true }).then(() => password);
   });
 
 const pasteUsername = async (entry: string) => {
@@ -153,52 +156,32 @@ const copyUsername = async (entry: string) =>
     return Clipboard.copy(username).then(() => username);
   });
 
+const pasteTOTP = async (entry: string) => {
+  console.log("paste totp of entry:", entry);
+  return getTOTP(entry).then((otp) => {
+    return Clipboard.paste(otp).then(() => otp);
+  });
+};
+
 const copyTOTP = async (entry: string) =>
   getTOTP(entry).then((otp) => {
     showHUD("TOTP has been Copied to Clipboard");
-    return protectedCopy(otp).then(() => otp);
+    return Clipboard.copy(otp, { concealed: true }).then(() => otp);
   });
 
-const getTOTP = (entry: string) =>
-  new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, [
-      "show",
-      ...cliOptions.filter((x) => x != "-a"),
-      "-t",
-      `${database}`,
-      `${entry}`,
-    ]);
-    cli.stdin.write(`${dbPassword}\n`);
-    cli.stdin.end();
-    cli.on("error", reject);
-    cli.stderr.on("data", cliStdOnErr(reject));
-    const chuncks: Buffer[] = [];
-    cli.stdout.on("data", (chunck) => {
-      chuncks.push(chunck);
-    });
-    cli.stdout.on("end", () => {
-      const otp = chuncks.join("").toString();
-      // remove \n in the end
-      resolve(otp.slice(0, otp.length - 1));
-    });
-  });
+const getTOTP = (entry: string) => execKeepassXCCli(["show", ...cliOptions, "-t", `${database}`, `${entry}`]);
 
-async function protectedCopy(concealString: string) {
-  // await closeMainWindow();
-  const script = `
-      use framework "Foundation"
-      set type to current application's NSPasteboardTypeString
-      set pb to current application's NSPasteboard's generalPasteboard()
-      pb's clearContents()
-      pb's setString:"" forType:"org.nspasteboard.ConcealedType"
-      pb's setString:"${concealString}" forType:type
-    `;
-  try {
-    await runAppleScript(script);
-  } catch {
-    // Applescript failed to conceal what is being placed in the pasteboard
-    await showHUD("Protect copy failed...");
-  }
-}
+const getURL = (entry: string) => execKeepassXCCli(["show", ...cliOptions, "-a", "URL", `${database}`, `${entry}`]);
 
-export { loadEntries, pastePassword, getPassword, copyPassword, copyUsername, pasteUsername, copyTOTP };
+export {
+  loadEntriesCache,
+  refreshEntriesCache,
+  pastePassword,
+  pasteUsername,
+  pasteTOTP,
+  getPassword,
+  getURL,
+  copyPassword,
+  copyUsername,
+  copyTOTP,
+};

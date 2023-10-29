@@ -87,6 +87,10 @@ interface RaceResultItem {
   Constructor: Constructor;
   grid: number;
   status: string;
+  FastestLap?: {
+    rank: string;
+    lap: string;
+  };
 }
 
 interface RaceResult extends Race {

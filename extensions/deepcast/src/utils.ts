@@ -1,37 +1,126 @@
-import { getSelectedText, Clipboard, Toast, showToast, getPreferenceValues } from "@raycast/api";
+import {
+  getSelectedText,
+  Clipboard,
+  Toast,
+  showToast,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  closeMainWindow,
+} from "@raycast/api";
 import got from "got";
+import { StatusCodes, getReasonPhrase } from "http-status-codes";
 
-interface Preferences {
-  key: string;
-  pro: boolean;
+function isPro(key: string) {
+  return !key.endsWith(":fx");
 }
-const translate = async (target: string) => {
-  const preferences: Preferences = getPreferenceValues();
-  const key = preferences.key;
-  const pro = preferences.pro;
+
+const DEEPL_QUOTA_EXCEEDED = 456;
+
+function gotErrorToString(error: unknown) {
+  // response received
+  if (error instanceof got.HTTPError) {
+    const { statusCode } = error.response;
+    if (statusCode === StatusCodes.FORBIDDEN) return "Invalid DeepL API key";
+    if (statusCode === StatusCodes.TOO_MANY_REQUESTS) return "Too many requests to DeepL API";
+    if (statusCode === DEEPL_QUOTA_EXCEEDED)
+      return "DeepL API quota exceeded. The translation limit of your account has been reached. Consider upgrading your subscription.";
+    if (statusCode.toString().startsWith("5")) return "DeepL API is temporary unavailable. Please try again later.";
+
+    return `DeepL API returned ${statusCode} ${getReasonPhrase(statusCode)}`;
+  }
+
+  // request failed
+  if (error instanceof got.RequestError)
+    return `Something went wrong when sending a request to the DeepL API. If you’re having issues, open an issue on GitHub and include following text: ${error.code} ${error.message}`;
+
+  return "Unknown error";
+}
+
+async function getSelection() {
   try {
-    const text = await getSelectedText();
+    return await getSelectedText();
+  } catch (error) {
+    return "";
+  }
+}
+
+async function readContent(preferredSource: string) {
+  const clipboard = await Clipboard.readText();
+  console.log(clipboard);
+  const selected = await getSelection();
+
+  if (preferredSource === "clipboard") {
+    return clipboard || selected;
+  } else {
+    return selected || clipboard;
+  }
+}
+
+export async function sendTranslateRequest({
+  text: initialText,
+  sourceLanguage,
+  targetLanguage,
+}: {
+  text?: string;
+  sourceLanguage?: SourceLanguage;
+  targetLanguage: TargetLanguage;
+}) {
+  try {
+    const { key, onTranslateAction, source } = getPreferenceValues<Preferences>();
+
+    const text = initialText || (await readContent(source));
+
+    showToast(Toast.Style.Animated, "Fetching translation...");
     try {
-      const response = await got(
-        `https://api${pro ? "" : "-free"}.deepl.com/v2/translate?auth_key=${key}&text=${text}&target_lang=${target}`
-      );
-      const translation = JSON.parse(response.body).translations[0].text;
-      await Clipboard.copy(translation);
-      await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
-    } catch (e) {
-      console.log(e);
-      await showToast(
-        Toast.Style.Failure,
-        "Something went wrong",
-        "Check your internet connection, API key, or you've maxed out the API."
-      );
+      const {
+        translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
+      } = await got
+        .post(`https://api${isPro(key) ? "" : "-free"}.deepl.com/v2/translate`, {
+          headers: {
+            Authorization: `DeepL-Auth-Key ${key}`,
+          },
+          json: {
+            text: [text],
+            source_lang: sourceLanguage,
+            target_lang: targetLanguage,
+          },
+        })
+        .json<{ translations: { text: string; detected_source_language: SourceLanguage }[] }>();
+      switch (onTranslateAction) {
+        case "clipboard":
+          await Clipboard.copy(translation);
+          await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
+          break;
+        case "view":
+          await launchCommand({
+            name: "index",
+            type: LaunchType.UserInitiated,
+            context: {
+              translation,
+              sourceLanguage: detectedSourceLanguage,
+            },
+          });
+          break;
+        case "paste":
+          await closeMainWindow();
+          await Clipboard.paste(translation);
+      }
+
+      return { translation, detectedSourceLanguage };
+    } catch (error) {
+      await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
     }
   } catch (error) {
     await showToast(Toast.Style.Failure, "Please select the text to be translated");
   }
-};
+}
 
-const source_languages = {
+export async function translate(target: TargetLanguage) {
+  await sendTranslateRequest({ targetLanguage: target });
+}
+
+export const source_languages = {
   BG: "Bulgarian",
   ZH: "Chinese",
   CS: "Czech",
@@ -57,9 +146,14 @@ const source_languages = {
   ES: "Spanish",
   SV: "Swedish",
   UK: "Ukrainian",
+  ID: "Indonesian",
+  KO: "Korean",
+  NB: "Norwegian (Bokmål)",
+  TR: "Turkish",
 };
+export type SourceLanguage = keyof typeof source_languages;
 
-const target_languages = {
+export const target_languages = {
   BG: "Bulgarian",
   ZH: "Chinese",
   CS: "Czech",
@@ -87,6 +181,9 @@ const target_languages = {
   ES: "Spanish",
   SV: "Swedish",
   UK: "Ukrainian",
+  ID: "Indonesian",
+  KO: "Korean",
+  NB: "Norwegian (Bokmål)",
+  TR: "Turkish",
 };
-
-export { source_languages, target_languages, translate };
+export type TargetLanguage = keyof typeof target_languages;

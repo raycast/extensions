@@ -4,6 +4,7 @@ import Highlight from './highlight'
 import React from 'react'
 import Handlebars from 'handlebars'
 import { cleanTitle, formatDate } from './utils'
+import { ifeq } from './helpers'
 
 type BookProps = {
   id: string
@@ -48,19 +49,28 @@ export default function Book({ id, template }: BookProps) {
   }
 
   const h = Handlebars.compile(template)
-  const allHighlights = h({
-    ...book,
-    highlights: highlights.map((highlight) => ({
-      ...highlight,
-      updated: formatDate(highlight.updated),
-      highlighted_at: formatDate(highlight.highlighted_at),
-      note: (highlight.note ?? '')
-        .split('\n')
-        .filter((note) => note)
-        .map((note) => `\n      - ${note}`)
-        .join('\n'),
-    })),
-  })
+  const allHighlights = h(
+    {
+      ...book,
+      title: cleanTitle(book.title),
+      highlights: highlights.map((highlight) => ({
+        ...highlight,
+        text: highlight.text
+          .split('\n')
+          .filter((text) => text)
+          .join(' '),
+        updated: formatDate(highlight.updated),
+        highlighted_at: formatDate(highlight.highlighted_at),
+        note: (highlight.note ?? '').split('\n').filter((note) => note),
+        tags: highlight.tags.map(({ name }) => name).join(', '),
+      })),
+    },
+    {
+      helpers: {
+        ifeq,
+      },
+    }
+  )
 
   const handleCopyAll = async () => {
     const currentTime = new Date().toISOString()
@@ -93,6 +103,16 @@ export default function Book({ id, template }: BookProps) {
     setLastSynced(currentTime)
   }
 
+  const clearSyncHistory = async () => {
+    const ids = highlights.map(({ id }) => id)
+
+    for (const id of ids) {
+      await LocalStorage.removeItem(id.toString())
+    }
+
+    setSyncedItems({})
+  }
+
   return (
     <List
       navigationTitle={cleanTitle(book.title)}
@@ -108,6 +128,7 @@ export default function Book({ id, template }: BookProps) {
             key={highlight.id}
             allHighlights={allHighlights}
             allUnsyncedHighlights={allUnsyncedHighlights}
+            clearSyncHistory={clearSyncHistory}
             highlight={highlight}
             handleCopyAll={handleCopyAll}
             handleCopyUnsynced={handleCopyUnsynced}

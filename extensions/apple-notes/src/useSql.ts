@@ -81,7 +81,8 @@ const notesQuery = `
         folderTitle AS folder,
         datetime(modDate + 978307200, 'unixepoch') AS modifiedAt,
         snippet,
-        accountName AS account
+        accountName AS account,
+        UUID as UUID
     FROM (
         SELECT
             c.ztitle1 AS noteTitle,
@@ -90,7 +91,7 @@ const notesQuery = `
             c.z_pk AS xcoredataID,
             c.zaccount4 AS noteAccountID,
             c.zsnippet AS snippet,
-            c.zidentifier AS identifier
+            c.zidentifier AS UUID
         FROM
             ziccloudsyncingobject AS c
         WHERE
@@ -107,7 +108,6 @@ const notesQuery = `
         FROM ziccloudsyncingobject
         WHERE
             folderTitle IS NOT NULL AND
-            isRecentlyDeletedFolder != 1 AND
             zmarkedfordeletion != 1
     ) AS folders ON noteFolderID = folderID
     LEFT JOIN (

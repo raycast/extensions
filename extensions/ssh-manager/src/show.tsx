@@ -6,30 +6,43 @@ import { getConnections, saveConnections } from "./storage.api";
 
 interface Preferences {
   terminal: string;
+  openin: string;
 }
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
+export const openIn = preferences["openin"];
 
 async function runTerminal(item: ISSHConnection) {
   let identity = "";
   if (item.sshKey) {
     identity = `-i ${item.sshKey} `;
   }
-  let customport = "";
+  let customPort = "";
   if (item.port) {
-    customport = `-p ${item.port} `;
+    customPort = `-p ${item.port} `;
   }
-  const command = `ssh ${identity} ${item.user}@${item.address} ${customport}`;
+  let customCommand = "";
+  let interactive = "";
+  if (item.command) {
+    customCommand = `\\"${item.command}\\" `;
+    interactive = "-t";
+  }
+  let address = item.address;
+  if (item.user) {
+    address = `${encodeURIComponent(item.user)}@${address}`;
+  }
+
+  const command = ["ssh", interactive, identity, address, customPort, customCommand].filter(Boolean).join(" ");
 
   const scriptWarp = `
       -- For the latest version:
       -- https://github.com/DavidMChan/custom-alfred-warp-scripts
       
       -- Set this property to true to always open in a new window
-      property open_in_new_window : true
+      property open_in_new_window : ${openIn == "newWindow"}
       
       -- Set this property to true to always open in a new tab
-      property open_in_new_tab : false
+      property open_in_new_tab : ${openIn == "newTab"}
       
       -- Don't change this :)
       property opened_new_window : false
@@ -40,6 +53,7 @@ async function runTerminal(item: ISSHConnection) {
               click menu item "New Window" of menu "File" of menu bar 1
               set frontmost to true
           end tell
+          delay 0.5
       end new_window
       
       on new_tab()
@@ -117,7 +131,7 @@ async function runTerminal(item: ISSHConnection) {
   `;
   const scriptIterm = `
     -- Set this property to true to open in a new window instead of a new tab
-    property open_in_new_window : false
+    property open_in_new_window : ${openIn == "newWindow"}
     
     on new_window()
     	tell application "iTerm" to create window with default profile
@@ -151,14 +165,11 @@ async function runTerminal(item: ISSHConnection) {
     
     -- Main
     if has_windows() then
-    	-- Open the command in the current session unless it has a running command, e.g., ssh or top
-    	if is_processing() then
-    		if open_in_new_window then
-    			new_window()
-    		else
-    			new_tab()
-    		end if
-    	end if
+      if open_in_new_window then
+        new_window()
+      else
+        new_tab()
+      end if
     else
     	-- If iTerm is not running and we tell it to create a new window, we get two
     	-- One from opening the application, and the other from the command
@@ -267,7 +278,7 @@ function Action({
 }
 
 function getSubtitle(item: ISSHConnection) {
-  return `${item.user}@${item.address}${item.port ? " Port:" + item.port : ""}${
-    item.sshKey ? " SSH Key:" + item.sshKey : ""
-  }`;
+  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${
+    item.sshKey ? " SSH Key: " + item.sshKey : ""
+  } ${item.command ? ' Command: "' + item.command + '"' : ""}`;
 }

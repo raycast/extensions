@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { DB_FILE_PATH } from "../constants";
-import { copyImage } from "../utils/helpers";
+import { copyImage, saveImage } from "../utils/helpers";
 import { dbEntry } from "../types";
 
 type Props = {

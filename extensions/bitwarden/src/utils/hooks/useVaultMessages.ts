@@ -9,9 +9,12 @@ function useVaultMessages() {
   const [vaultState, setVaultState] = useState<VaultState | null>(null);
 
   useEffect(() => {
-    bitwarden.status().then((vaultState) => {
-      setVaultState(vaultState);
-    });
+    void bitwarden
+      .status()
+      .then((vaultState) => setVaultState(vaultState))
+      .catch(() => {
+        /* ignore */
+      });
   }, []);
 
   const shouldShowServer = !!getServerUrlPreference();
@@ -21,12 +24,12 @@ function useVaultMessages() {
 
   if (vaultState) {
     const { status, userEmail, serverUrl } = vaultState;
-    userMessage = status == "unauthenticated" ? "Logged out" : `Locked (${userEmail})`;
+    userMessage = status == "unauthenticated" ? "❌ Logged out" : `🔒 Locked (${userEmail})`;
     if (serverUrl) {
       serverMessage = serverUrl || "";
     } else if ((!serverUrl && shouldShowServer) || (serverUrl && !shouldShowServer)) {
       // Hosted state not in sync with CLI (we don't check for equality)
-      confirmAlert({
+      void confirmAlert({
         icon: Icon.ExclamationMark,
         title: "Restart Required",
         message: "Bitwarden server URL preference has been changed since the extension was opened.",
@@ -39,9 +42,9 @@ function useVaultMessages() {
         },
       }).then((closeExtension) => {
         if (closeExtension) {
-          popToRoot();
+          void popToRoot();
         } else {
-          closeMainWindow();
+          void closeMainWindow();
         }
       });
     }

@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Alert,
   confirmAlert,
+  getPreferenceValues,
   Grid,
   Icon,
   launchCommand,
@@ -10,8 +11,9 @@ import {
   showToast,
 } from "@raycast/api";
 import { useHistory } from "./history";
-import { organizeColorsCommandPreferences } from "./preferences";
 import { getFormattedColor } from "./utils";
+
+const preferences: Preferences.OrganizeColors = getPreferenceValues();
 
 export default function Command() {
   const { history, remove, clear } = useHistory();
@@ -43,7 +45,7 @@ export default function Command() {
         return (
           <Grid.Item
             key={formattedColor}
-            content={{ color: formattedColor }}
+            content={{ color: { light: formattedColor, dark: formattedColor, adjustContrast: false } }}
             title={formattedColor}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
               dateStyle: "medium",
@@ -52,7 +54,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  {organizeColorsCommandPreferences.primaryAction === "copy" ? (
+                  {preferences.primaryAction === "copy" ? (
                     <>
                       <Action.CopyToClipboard content={formattedColor} />
                       <Action.Paste content={formattedColor} />

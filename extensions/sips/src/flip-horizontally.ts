@@ -1,6 +1,18 @@
+/**
+ * @file flip-horizontally.ts
+ *
+ * @summary Raycast command to flip selected images horizontally.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-07-06 14:54:33
+ * Last modified  : 2023-07-06 15:47:56
+ */
+
 import { showToast, Toast } from "@raycast/api";
-import { execSync } from "child_process";
-import { getSelectedImages } from "./utils";
+
+import flip from "./operations/flipOperation";
+import { Direction } from "./utilities/enums";
+import { cleanup, getSelectedImages, showErrorToast } from "./utilities/utils";
 
 export default async function Command() {
   const selectedImages = await getSelectedImages();
@@ -10,17 +22,15 @@ export default async function Command() {
     return;
   }
 
-  if (selectedImages) {
-    const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-    try {
-      const pathStrings = '"' + selectedImages.join('" "') + '"';
-      execSync(`sips --flip horizontal ${pathStrings}`);
-      await showToast({ title: `Flipped ${selectedImages.length.toString()} ${pluralized} horizontally` });
-    } catch {
-      await showToast({
-        title: `Failed to flip ${selectedImages.length.toString()} ${pluralized}`,
-        style: Toast.Style.Failure,
-      });
-    }
+  const toast = await showToast({ title: "Flipping in progress...", style: Toast.Style.Animated });
+
+  const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
+  try {
+    await flip(selectedImages, Direction.HORIZONTAL);
+    toast.style = Toast.Style.Success;
+  } catch (error) {
+    await showErrorToast(`Failed to flip ${selectedImages.length.toString()} ${pluralized}`, error as Error, toast);
+  } finally {
+    await cleanup();
   }
 }

@@ -76,9 +76,7 @@ export default function Command() {
         <Grid.Item
           key={color}
           title={color}
-          content={{
-            color,
-          }}
+          content={{ color: { light: color, dark: color, adjustContrast: false } }}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={color} />

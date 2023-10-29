@@ -5,8 +5,30 @@
   "description": "Quickly connect and manage multiple SSH connections",
   "icon": "command-icon.png",
   "author": "dimagrossman",
+  "contributors": [
+    "LenoxFro",
+    "otatoPotato",
+    "SolidPixel"
+  ],
   "license": "MIT",
   "preferences": [
+    {
+      "name": "sshConfig",
+      "type": "dropdown",
+      "required": true,
+      "title": "Select Config Source",
+      "description": "Where should it look for the hosts config",
+      "data": [{
+        "title": "localStorage",
+        "value": "localStorage"
+      },
+      {
+        "title": "~/.ssh/config",
+        "value": "~/.ssh/config"
+      }
+    ],
+    "default": "localStorage"
+    },
     {
     "name": "terminal",
     "type": "dropdown",
@@ -27,6 +49,24 @@
       }
     ],
     "default": "Terminal"
+    },
+    {
+    "name": "openin",
+    "type": "dropdown",
+    "required": false,
+    "title": "Decide how to open our SSH-Connection",
+    "description": "Choose wether to open in new Window or new Tab",
+    "data": [
+      {
+        "title": "New Window",
+        "value": "newWindow"
+      },
+      {
+        "title": "New Tab",
+        "value": "newTab"
+      }
+    ],
+    "default": "newWindow"
     }
 
   ],

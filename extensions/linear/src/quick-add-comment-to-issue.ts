@@ -2,16 +2,7 @@ import { LinearClient } from "@linear/sdk";
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, showHUD } from "@raycast/api";
 import { authorize, oauthClient } from "./api/oauth";
 
-type Arguments = {
-  comment: string;
-  issueId: string;
-};
-
-type Preferences = {
-  shouldCloseMainWindow: boolean;
-};
-
-const command = async (props: { arguments: Arguments }) => {
+const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) => {
   const { issueId, comment } = props.arguments;
 
   const toast = await showToast({
@@ -19,7 +10,7 @@ const command = async (props: { arguments: Arguments }) => {
     title: `Adding comment to ${issueId}`,
   });
 
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.QuickAddCommentToIssue>();
 
   try {
     const tokens = await oauthClient.getTokens();

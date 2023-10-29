@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Improve Search command UX] - 2023-04-16
+
+- Automatically close Slack right sidebar after navigating to a user chat
+
 ## [Fix] - 2022-11-01
 
 - Fix fetching of conversations and users when hitting the Slack API limit of 1k

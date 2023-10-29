@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, openCommandPreferences } from "@raycast/api";
+import { MenuBarExtra, Icon, openCommandPreferences, launchCommand, LaunchType } from "@raycast/api";
 import { getItemInput, getOpenLinkApp } from "./hooks/hooks";
 import React from "react";
 import { ItemInput } from "./utils/input-utils";
@@ -21,7 +21,7 @@ export default function OpenLinkInSpecificBrowser() {
       }}
     >
       {customApps.length !== 0 && (
-        <MenuBarExtra.Section title="Preferred">
+        <MenuBarExtra.Section title="Favorites">
           {customApps.map((browser) => (
             <OpenLinkAppMenuBarItem
               key={browser.path}
@@ -33,26 +33,43 @@ export default function OpenLinkInSpecificBrowser() {
           ))}
         </MenuBarExtra.Section>
       )}
-      <MenuBarExtra.Section title="Recommended">
-        {buildInApps.map((browser) => (
-          <OpenLinkAppMenuBarItem
-            key={browser.path}
-            openLinkApplication={browser}
-            openLinkApplications={customApps}
-            itemInput={itemInput}
-            isCustom={false}
-          />
-        ))}
+      {buildInApps.length !== 0 && (
+        <MenuBarExtra.Section title="Recommended">
+          {buildInApps.map((browser) => (
+            <OpenLinkAppMenuBarItem
+              key={browser.path}
+              openLinkApplication={browser}
+              openLinkApplications={customApps}
+              itemInput={itemInput}
+              isCustom={false}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      )}
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={"Add Favorite App"}
+          icon={Icon.Star}
+          onAction={() => {
+            launchCommand({
+              name: "open-link-in-specific-browser",
+              type: LaunchType.UserInitiated,
+              context: { foo: "bar" },
+            }).then();
+          }}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+        />
       </MenuBarExtra.Section>
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        title={"Preferences"}
-        icon={Icon.Gear}
-        onAction={() => {
-          openCommandPreferences().then();
-        }}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
-      />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={"Preferences"}
+          icon={Icon.Gear}
+          onAction={() => {
+            openCommandPreferences().then();
+          }}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

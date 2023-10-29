@@ -93,7 +93,7 @@ export async function initQRCode(): Promise<
   try {
     const { body, headers: initHeaders } = await client.post<QRCodeAPIWrapper<InitQRCodeResponse>>(
       'accounts/qrlogin/init',
-      { json: { biz_type: null, redirect_uri: GENERAL_DOMAIN } }
+      { json: { biz_type: null, redirect_uri: GENERAL_DOMAIN } },
     );
 
     const token = body.data.step_info.token;
@@ -106,13 +106,13 @@ export async function initQRCode(): Promise<
           {
             json: { biz_type: null },
             headers: { 'x-flow-key': initHeaders['x-flow-key'] },
-          }
+          },
         );
         return { ...body.data.step_info, next_step: body.data.next_step, cookie: headers['set-cookie'] };
       },
     };
   } catch (error) {
-    let errorMessage = 'Could not load recent documents';
+    let errorMessage = 'Load QR Code failed';
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }

@@ -143,7 +143,7 @@ export default function main() {
 
   return (
     <List
-      throttle={true}
+      throttle={false}
       isLoading={isLoading}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
       searchBarAccessory={<VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />}

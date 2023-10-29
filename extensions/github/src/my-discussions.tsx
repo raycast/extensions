@@ -16,9 +16,7 @@ function DiscussionList(): JSX.Element {
         title={searchText.length > 0 ? "Found Discussions" : "Your Discussions"}
         subtitle={`${discussions?.length}`}
       >
-        {discussions?.map((d) => (
-          <DiscussionListItem key={d.id} discussion={d} />
-        ))}
+        {discussions?.map((d) => <DiscussionListItem key={d.id} discussion={d} />)}
       </List.Section>
     </List>
   );

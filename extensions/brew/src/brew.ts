@@ -100,7 +100,9 @@ export interface OutdatedResults {
 
 /// Paths
 
-export const brewPrefix: string = (() => {
+export const brewPrefix = (() => {
+  if (preferences.customBrewPath && preferences.customBrewPath.length > 0)
+    return path_join(preferences.customBrewPath, "..", "..");
   try {
     return execSync("brew --prefix", { encoding: "utf8" }).trim();
   } catch {
@@ -108,17 +110,8 @@ export const brewPrefix: string = (() => {
   }
 })();
 
-export function brewPath(suffix: string): string {
-  return path_join(brewPrefix, suffix);
-}
-
-export function brewExecutable(): string {
-  if (preferences.customBrewPath && preferences.customBrewPath.length > 0) {
-    return preferences.customBrewPath;
-  } else {
-    return path_join(brewPrefix, "bin/brew");
-  }
-}
+export const brewPath = (suffix: string) => path_join(brewPrefix, suffix);
+export const brewExecutable = () => brewPath("bin/brew");
 
 /// Fetching
 
@@ -284,7 +277,7 @@ export async function brewInstall(installable: Cask | Formula, cancel?: AbortCon
 
 export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execBrew(`rm ${brewCaskOption(installable)} ${identifier}`, cancel);
+  await execBrew(`rm ${brewCaskOption(installable, true)} ${identifier}`, cancel);
 }
 
 export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortController): Promise<void> {
@@ -337,7 +330,7 @@ export function brewInstallCommand(installable: Cask | Formula | Nameable): stri
 
 export function brewUninstallCommand(installable: Cask | Formula | Nameable): string {
   const identifier = brewIdentifier(installable);
-  return `${brewExecutable()} uninstall ${brewCaskOption(installable)} ${identifier}`.replace(/ +/g, " ");
+  return `${brewExecutable()} uninstall ${brewCaskOption(installable, true)} ${identifier}`.replace(/ +/g, " ");
 }
 
 export function brewUpgradeCommand(upgradable: Cask | Formula | Nameable): string {
@@ -450,8 +443,8 @@ function brewIdentifier(item: Cask | Nameable): string {
   return isCask(item) ? item.token : item.name;
 }
 
-function brewCaskOption(maybeCask: Cask | Nameable): string {
-  return isCask(maybeCask) ? "--cask" : "";
+function brewCaskOption(maybeCask: Cask | Nameable, zappable = false): string {
+  return isCask(maybeCask) ? "--cask" + (zappable && preferences.zapCask ? " --zap" : "") : "";
 }
 
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {

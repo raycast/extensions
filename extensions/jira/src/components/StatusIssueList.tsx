@@ -36,6 +36,10 @@ export default function StatusIssueList({ issues, isLoading, mutate, searchBarAc
         return (
           <List.Section key={section.key} title={section.title} subtitle={section.subtitle}>
             {section.issues.map((issue) => {
+              if (!issue.fields.summary) {
+                return null;
+              }
+
               return <IssueListItem key={issue.id} issue={issue} mutate={mutate} />;
             })}
           </List.Section>

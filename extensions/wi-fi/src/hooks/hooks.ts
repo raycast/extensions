@@ -3,13 +3,13 @@ import wifi, { WiFiNetwork } from "node-wifi";
 import { LocalStorageKey } from "../utils/constants";
 import { WifiNetworkWithPassword, WifiPasswordCache } from "../types/types";
 import { getCurWifiStatus, uniqueWifiNetWork } from "../utils/common-utils";
-import { LocalStorage } from "@raycast/api";
+import { Cache, LocalStorage } from "@raycast/api";
 
 wifi.init({
   iface: null,
 });
 
-export const getWifiList = (refresh: number) => {
+export const useWifiList = (refresh: number) => {
   const [wifiPasswordCaches, setWifiPasswordCaches] = useState<WifiPasswordCache[]>([]);
   const [publicWifi, setPublicWifi] = useState<WiFiNetwork[]>([]);
   const [wifiWithPasswordList, setWifiWithPasswordList] = useState<WifiNetworkWithPassword[]>([]);
@@ -44,6 +44,7 @@ export const getWifiList = (refresh: number) => {
     const _wifiListWithPassword: WifiNetworkWithPassword[] = [];
     allWifiList
       .filter((wifiItem) => wifiItem.security !== "NONE")
+      .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
       .forEach((value1) => {
         const includeWifi = passwordCaches.filter((value2) => value1.ssid === value2.ssid);
         if (includeWifi.length > 0) {
@@ -54,7 +55,11 @@ export const getWifiList = (refresh: number) => {
       });
     setWifiWithPasswordList(_wifiListWithPassword);
     setWifiList(_wifiList);
-    setPublicWifi(allWifiList.filter((wifiItem) => wifiItem.security === "NONE"));
+    setPublicWifi(
+      allWifiList
+        .filter((wifiItem) => wifiItem.security === "NONE")
+        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
+    );
 
     const __allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
     const _allWifiList = uniqueWifiNetWork(__allWifiList);
@@ -63,6 +68,7 @@ export const getWifiList = (refresh: number) => {
     const __wifiListWithPassword: WifiNetworkWithPassword[] = [];
     _allWifiList
       .filter((wifiItem) => wifiItem.security !== "NONE")
+      .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
       .forEach((value1) => {
         const includeWifi = passwordCaches.filter((value2) => value1.ssid === value2.ssid);
         if (includeWifi.length > 0) {
@@ -73,7 +79,11 @@ export const getWifiList = (refresh: number) => {
       });
     setWifiWithPasswordList(__wifiListWithPassword);
     setWifiList(__wifiList);
-    setPublicWifi(_allWifiList.filter((wifiItem) => wifiItem.security === "NONE"));
+    setPublicWifi(
+      _allWifiList
+        .filter((wifiItem) => wifiItem.security === "NONE")
+        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
+    );
     setLoading(false);
     if (_allWifiList.length > 0) {
       await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(_allWifiList));
@@ -94,7 +104,40 @@ export const getWifiList = (refresh: number) => {
   };
 };
 
-export const getWifiStatus = () => {
+export const useCurWifi = () => {
+  const cache = new Cache();
+  const curWifiCache = cache.get(LocalStorageKey.CUR_WIFI);
+  let _curWifiCache: WiFiNetwork | undefined = undefined;
+  if (typeof curWifiCache === "string" && curWifiCache != "") {
+    _curWifiCache = JSON.parse(curWifiCache);
+  }
+  const [curWifi, setCurWifi] = useState<WiFiNetwork | undefined>(_curWifiCache);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const _curWifiList = await wifi.getCurrentConnections();
+    const _curWifi = _curWifiList.length != 0 ? _curWifiList[0] : undefined;
+    setCurWifi(_curWifi);
+    if (_curWifi === undefined) {
+      cache.set(LocalStorageKey.CUR_WIFI, "");
+    } else {
+      cache.set(LocalStorageKey.CUR_WIFI, JSON.stringify(_curWifi));
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return {
+    curWifi: curWifi,
+    loading: loading,
+  };
+};
+
+export const useWifiStatus = () => {
   const [wifiStatus, setWifiStatus] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {

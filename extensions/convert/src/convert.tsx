@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { findClosestColor } from "./colors";
 
@@ -22,6 +22,11 @@ import {
   HSLtoRGB,
   HSLtoRGBA,
 } from "./conversions";
+import { PXtoTailwindSpacing, REMtoTailwindSpacing } from "./spacings";
+
+function disableAdjustContrast(rawColor: string): Color.Dynamic {
+  return { light: rawColor, dark: rawColor, adjustContrast: false };
+}
 
 export default function Command() {
   const [rem, setREM] = useState<number | null>(null);
@@ -33,6 +38,7 @@ export default function Command() {
   const [rgba, setRGBA] = useState<number[] | null>(null);
   const [hsl, setHSL] = useState<number[] | null>(null);
   const [hsla, setHSLA] = useState<number[] | null>(null);
+  const [tailwind, setTailwind] = useState<string | null>(null);
   const [closestColor, setClosestColor] = useState<{ name: string; hex: string } | null>(null);
   const [input, setInput] = useState("");
 
@@ -47,6 +53,7 @@ export default function Command() {
     setHSL(null);
     setHSLA(null);
     setClosestColor(null);
+    setTailwind(null);
     if (value === "") return;
     setInput(value);
     // check what input is
@@ -57,6 +64,7 @@ export default function Command() {
       console.log("its a rem");
       setPX(REMtoPX(Number(remMatch[1])));
       setPT(REMtoPT(Number(remMatch[1])));
+      setTailwind(REMtoTailwindSpacing(Number(remMatch[1])));
     }
 
     // check if input is px
@@ -65,6 +73,7 @@ export default function Command() {
       console.log("its a px");
       setREM(PXtoREM(Number(pxMatch[1])));
       setPT(PXtoPT(Number(pxMatch[1])));
+      setTailwind(PXtoTailwindSpacing(Number(pxMatch[1])));
     }
 
     // check if input is pt
@@ -176,7 +185,7 @@ export default function Command() {
         {hex && (
           <List.Item
             title={hex}
-            icon={{ source: Icon.CircleFilled, tintColor: hex }}
+            icon={{ source: Icon.CircleFilled, tintColor: disableAdjustContrast(hex) }}
             accessories={[{ text: "to hex" }]}
             actions={
               <ActionPanel title="Copy">
@@ -188,7 +197,7 @@ export default function Command() {
         {hexa && (
           <List.Item
             title={hexa}
-            icon={{ source: Icon.CircleFilled, tintColor: hexa }}
+            icon={{ source: Icon.CircleFilled, tintColor: disableAdjustContrast(hexa) }}
             accessories={[{ text: "to hexa" }]}
             actions={
               <ActionPanel title="Copy">
@@ -200,7 +209,7 @@ export default function Command() {
         {rgb && (
           <List.Item
             title={`rgb(${rgb.join(", ")})`}
-            icon={{ source: Icon.CircleFilled, tintColor: `rgb(${rgb.join(", ")})` }}
+            icon={{ source: Icon.CircleFilled, tintColor: disableAdjustContrast(`rgb(${rgb.join(", ")})`) }}
             accessories={[{ text: "to rgb" }]}
             actions={
               <ActionPanel title="Copy">
@@ -212,7 +221,7 @@ export default function Command() {
         {rgba && (
           <List.Item
             title={`rgba(${rgba.join(", ")})`}
-            icon={{ source: Icon.CircleFilled, tintColor: `rgba(${rgba.join(", ")})` }}
+            icon={{ source: Icon.CircleFilled, tintColor: disableAdjustContrast(`rgba(${rgba.join(", ")})`) }}
             accessories={[{ text: "to rgba" }]}
             actions={
               <ActionPanel title="Copy">
@@ -224,7 +233,10 @@ export default function Command() {
         {hsl && (
           <List.Item
             title={`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`}
-            icon={{ source: Icon.CircleFilled, tintColor: `hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)` }}
+            icon={{
+              source: Icon.CircleFilled,
+              tintColor: disableAdjustContrast(`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`),
+            }}
             accessories={[{ text: "to hsl" }]}
             actions={
               <ActionPanel title="Copy">
@@ -236,7 +248,10 @@ export default function Command() {
         {hsla && (
           <List.Item
             title={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`}
-            icon={{ source: Icon.CircleFilled, tintColor: `hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})` }}
+            icon={{
+              source: Icon.CircleFilled,
+              tintColor: disableAdjustContrast(`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`),
+            }}
             accessories={[{ text: "to hsla" }]}
             actions={
               <ActionPanel title="Copy">
@@ -249,7 +264,7 @@ export default function Command() {
           <List.Item
             title={input !== closestColor.hex && hex !== closestColor.hex ? closestColor.hex : closestColor.name}
             subtitle={input !== closestColor.hex && hex !== closestColor.hex ? closestColor.name : ""}
-            icon={{ source: Icon.CircleFilled, tintColor: closestColor.hex }}
+            icon={{ source: Icon.CircleFilled, tintColor: disableAdjustContrast(closestColor.hex) }}
             accessories={[
               {
                 text:
@@ -259,6 +274,17 @@ export default function Command() {
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={input !== closestColor.hex ? closestColor.hex : closestColor.name} />
+              </ActionPanel>
+            }
+          />
+        )}
+        {tailwind && (
+          <List.Item
+            title={tailwind}
+            accessories={[{ text: tailwind.includes("]") ? "to Tailwind Arbitrary Value" : "to Tailwind Spacing" }]}
+            actions={
+              <ActionPanel title="Copy">
+                <Action.CopyToClipboard content={tailwind} />
               </ActionPanel>
             }
           />

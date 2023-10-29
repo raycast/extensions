@@ -3,17 +3,23 @@
   "name": "change-case",
   "title": "Change Case",
   "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
+  "type": "module",
   "icon": "command-icon.png",
-  "author": "es183923",
+  "author": "erics118",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "nagauta"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "change-case",
       "title": "Change Case",
-      "description": "Change the text in the clipboard",
+      "description": "Change the case of the selected text or text in the clipboard",
       "mode": "view"
     }
   ],
@@ -21,8 +27,8 @@
     {
       "name": "source",
       "type": "dropdown",
-      "title": "Preferred source",
-      "description": "Choose a preferred text source. If not available, both are tried.",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
       "data": [
         {
           "title": "Selected",
@@ -34,6 +40,24 @@
         }
       ],
       "default": "selected",
+      "required": false
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Choose whether the primary action should copy or paste the output.",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "default": "paste",
       "required": false
     },
     {
@@ -145,6 +169,15 @@
       "required": false
     },
     {
+      "name": "PascalSnakeCase",
+      "type": "checkbox",
+      "title": "",
+      "description": "Enable the \"Pascal_Snake_Case\" Transformation",
+      "label": "Pascal Case",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "PathCase",
       "type": "checkbox",
       "title": "",
@@ -224,27 +257,37 @@
       "label": "Sponge Case",
       "default": true,
       "required": false
+    },
+    {
+      "name": "TrainCase",
+      "type": "checkbox",
+      "title": "",
+      "description": "Enable the \"Train-Case\" Transformation",
+      "label": "Train Case",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.44.0",
-    "change-case-all": "^1.0.14",
-    "execa": "^6.1.0"
+    "@raycast/api": "^1.60.1",
+    "change-case": "^5.0.2",
+    "sponge-case": "^2.0.1",
+    "swap-case": "^3.0.1",
+    "title-case": "^4.1.0"
   },
   "devDependencies": {
-    "@types/node": "~18.6.4",
-    "@types/react": "^18.0.15",
-    "@typescript-eslint/eslint-plugin": "^5.32.0",
-    "@typescript-eslint/parser": "^5.32.0",
-    "eslint": "^8.21.0",
-    "eslint-config-prettier": "^8.5.0",
-    "react-devtools": "^4.25.0",
-    "typescript": "^4.7.4"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

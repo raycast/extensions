@@ -2,7 +2,22 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pins",
   "title": "Pins",
+  "version": "1.4.0",
   "description": "Create pins for paths and URLs and display them in the menu bar",
+  "keywords": [
+    "pin",
+    "menubar",
+    "shortcut",
+    "pinned",
+    "fast",
+    "quick",
+    "access",
+    "link",
+    "url",
+    "placeholders",
+    "bookmark",
+    "save"
+  ],
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -10,7 +25,8 @@
   ],
   "categories": [
     "Productivity",
-    "Web"
+    "Web",
+    "System"
   ],
   "license": "MIT",
   "commands": [
@@ -18,7 +34,100 @@
       "name": "index",
       "title": "Show Pins",
       "description": "Show pinned items in the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "iconColor",
+          "type": "textfield",
+          "title": "Main Icon Color",
+          "description": "The color of the main Pin icon in the menu bar. Most color names and hex codes are supported, e.g. \"red\", \"#ff0000\", and \"rgb(255, 0, 0)\" all work.",
+          "default": "system",
+          "required": false
+        },
+        {
+          "name": "showCategories",
+          "type": "checkbox",
+          "title": "General Settings",
+          "label": "Show Section Labels (i.e. Pins, Groups)",
+          "description": "Whether to show high-level categories in the menu dropdown.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showOpenAll",
+          "type": "checkbox",
+          "label": "Show \"Open All\" Button in Groups",
+          "description": "Whether to show an \"Open All\" item in group submenus.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showPinShortcut",
+          "type": "checkbox",
+          "label": "Show \"Quick Pins\" Section",
+          "description": "Whether to show the \"Quick Pins\" section in the menu dropdown. Quick Pins enable one-click creation of pins for active tabs, documents, folders, and more.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCreateNewPin",
+          "type": "checkbox",
+          "label": "Show \"Create New Pin\" Item",
+          "description": "Whether to show a \"Create New Pin\" item in the menu dropdown.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCopyPinData",
+          "type": "checkbox",
+          "label": "Show \"Copy Pin Data\" Item",
+          "description": "Whether to show a \"Copy Pin Data\" item in the menu dropdown that copies all pins and groups in JSON format.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showOpenPlaceholdersGuide",
+          "type": "checkbox",
+          "label": "Show \"Open Placeholders Guide\" Item",
+          "description": "Whether to show an \"Open Placeholders Guide\" item in the menu dropdown that opens a guide to using placeholders in Pins.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showPreferences",
+          "type": "checkbox",
+          "label": "Show \"Preferences...\" Item",
+          "description": "Whether to show a \"Preferences...\" item in the menu dropdown. This is a useful shortcut for opening the extension preferences window, but you might prefer a more streamlined menu.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showInapplicablePins",
+          "type": "checkbox",
+          "label": "Show Inapplicable Pins",
+          "description": "Whether to show pins that are not applicable to the current context (e.g. a pin using the {{selectedText}} placeholder when no text is selected).",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "rightClickAction",
+          "type": "dropdown",
+          "title": "Right Click Action",
+          "description": "Specifies the action to take when right-clicking a pin. \"Open\" will open the pin's target. \"Edit\" will open the pin's edit window. \"Delete\" will delete the pin.",
+          "default": "delete",
+          "required": false,
+          "data": [
+            {
+              "title": "Open",
+              "value": "open"
+            },
+            {
+              "title": "Delete",
+              "value": "delete"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "new-pin",
@@ -36,50 +145,256 @@
       "name": "view-pins",
       "title": "View Pins",
       "description": "View and modify pins",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showGroups",
+          "type": "checkbox",
+          "title": "General Settings",
+          "label": "Sort By Group",
+          "description": "Whether to sort pins into group sections.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showSubtitles",
+          "type": "checkbox",
+          "label": "Show Subtitles",
+          "description": "Whether to pin targets (e.g. URLs) as subtitles in the list view.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showApplication",
+          "type": "checkbox",
+          "label": "Show Application Icon",
+          "description": "Whether to show the icon for the application that a pin opens with.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCreationDate",
+          "type": "checkbox",
+          "label": "Show Creation Date",
+          "description": "Whether to show the creation date of each pin.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showExpiration",
+          "type": "checkbox",
+          "label": "Show Expiration Date",
+          "description": "Whether to show the expiration date for pins that have one.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showExecutionVisibility",
+          "type": "checkbox",
+          "label": "Show Execution Visibility",
+          "description": "Whether to show the execution visibility for Terminal command pins",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showFragment",
+          "type": "checkbox",
+          "label": "Show Text Fragment Icon",
+          "description": "Whether to show the icon for text fragment pins",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showFrequency",
+          "type": "checkbox",
+          "label": "Show Frequency",
+          "description": "Whether to show the number of times each pin has been opened",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showLastOpened",
+          "type": "checkbox",
+          "label": "Show Last Opened",
+          "description": "Whether to an indicator on the most recently opened pin",
+          "default": true,
+          "required": false
+        }
+      ]
     },
     {
       "name": "view-groups",
       "title": "View Pin Groups",
       "description": "View and modify groups for pins",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showIDs",
+          "type": "checkbox",
+          "title": "General Settings",
+          "label": "Show IDs",
+          "description": "Whether to show the ID for each group.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showSortStrategy",
+          "type": "checkbox",
+          "label": "Show Sort Method",
+          "description": "Whether to show the sort method for each group.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showParentGroup",
+          "type": "checkbox",
+          "label": "Show Parent Group",
+          "description": "Whether to show a label for the parent group of each group, if applicable.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "copy-pins",
-      "title": "Copy Pin Data",
-      "description": "Copy all pins and groups in JSON format",
-      "mode": "no-view"
+      "title": "Export Pin Data",
+      "description": "Export pins and groups in JSON, CSV, TOML, YAML, or XML format",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "exportLocation",
+          "type": "directory",
+          "title": "Export Location",
+          "description": "The optional location to export Pins data to. If not specified, the data will be copied to the clipboard.",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "exportFormat",
+          "type": "dropdown",
+          "title": "Export Format",
+          "description": "The format to export Pins data in. JSON is the default format, but CSV, TOML, YAML, and XML are also supported.",
+          "default": "json",
+          "required": false,
+          "data": [
+            {
+              "title": "JSON",
+              "value": "json"
+            },
+            {
+              "title": "CSV",
+              "value": "csv"
+            },
+            {
+              "title": "TOML",
+              "value": "toml"
+            },
+            {
+              "title": "YAML",
+              "value": "yaml"
+            },
+            {
+              "title": "XML",
+              "value": "xml"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "import-data",
       "title": "Import Pin Data",
       "description": "Import groups and pins from a JSON string or file",
       "mode": "view"
+    },
+    {
+      "name": "check-expirations",
+      "title": "Check For Expirations",
+      "description": "Check for expired pins and remove them",
+      "mode": "no-view",
+      "interval": "1m"
     }
   ],
   "preferences": [
     {
-      "name": "showCategories",
+      "name": "showRecentApplications",
       "type": "checkbox",
-      "title": "General Settings",
-      "label": "Show categories (i.e. Pins, Groups)",
-      "description": "Whether to show high-level categories in the menu dropdown.",
-      "default": true,
+      "label": "Show \"Recent Applications\" Group",
+      "description": "Whether to show a \"Recent Applications\" group in the menu dropdown.",
+      "default": false,
       "required": false
     },
     {
-      "name": "showOpenAll",
-      "type": "checkbox",
-      "label": "Show \"Open All\" button in groups",
-      "description": "Whether to show an \"Open All\" item in group submenus.",
-      "default": true,
+      "name": "topSection",
+      "type": "dropdown",
+      "title": "Section Order",
+      "description": "Specifies which section to display first in lists. \"Pins First\" will show ungrouped pins first, followed by groups. \"Groups First\" will show groups first, followed by ungrouped pins.",
+      "default": "pins",
+      "required": false,
+      "data": [
+        {
+          "title": "Pins First",
+          "value": "pins"
+        },
+        {
+          "title": "Groups First",
+          "value": "groups"
+        },
+        {
+          "title": "Quick Pins First",
+          "value": "quickPins"
+        }
+      ]
+    },
+    {
+      "name": "defaultSortStrategy",
+      "type": "dropdown",
+      "title": "Default Sort Method",
+      "description": "Specifies the default sort method for pins outside of groups.",
+      "default": "manual",
+      "required": false,
+      "data": [
+        {
+          "title": "Manual",
+          "value": "manual"
+        },
+        {
+          "title": "Alphabetical",
+          "value": "alphabetical"
+        },
+        {
+          "title": "Most Recently Opened",
+          "value": "recency"
+        },
+        {
+          "title": "Most Frequently Opened",
+          "value": "frequency"
+        },
+        {
+          "title": "Date Created",
+          "value": "dateCreated"
+        }
+      ]
+    },
+    {
+      "name": "preferredBrowser",
+      "title": "Preferred Browser",
+      "type": "appPicker",
+      "label": "Preferred Browser",
+      "description": "The browser to use when opening URLs.",
+      "default": "Safari",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
-    "@raycast/utils": "^1.4.8",
-    "run-applescript": "^6.0.0"
+    "@iarna/toml": "^2.2.5",
+    "@raycast/api": "^1.57.2",
+    "@raycast/utils": "^1.9.1",
+    "@types/papaparse": "^5.3.8",
+    "@types/xml-js": "^1.0.0",
+    "papaparse": "^5.4.1",
+    "xml-js": "^1.6.11",
+    "yaml": "^2.3.2"
   },
   "devDependencies": {
     "@types/node": "16.10.3",

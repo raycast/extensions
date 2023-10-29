@@ -1,9 +1,12 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { trim } from "lodash";
 import { useState } from "react";
 
 import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
+import { getBoundedPreferenceNumber } from "./components/Menu";
+import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import View from "./components/View";
 import { IssueFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
@@ -15,29 +18,33 @@ function SearchIssues() {
 
   const viewer = useViewer();
 
-  const [searchText, setSearchText] = useState("");
+  const { defaultSearchTerms } = getPreferenceValues<Preferences>();
+  const [searchText, setSearchText] = useState(trim(defaultSearchTerms) + " ");
+  const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const {
     data,
     isLoading,
     mutate: mutateList,
   } = useCachedPromise(
-    async (searchText) => {
+    async (searchText, searchFilter) => {
       const result = await github.searchIssues({
-        query: `is:issue author:@me archived:false ${searchText}`,
-        numberOfItems: 50,
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+        query: `is:issue archived:false ${searchFilter} ${searchText}`,
       });
 
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },
-    [searchText],
-    { keepPreviousData: true }
+    [searchText, searchFilter],
+    { keepPreviousData: true },
   );
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Globally search issues across repositories"
+      searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
     >

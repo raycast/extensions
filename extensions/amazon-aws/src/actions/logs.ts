@@ -7,26 +7,27 @@ import {
 } from "@aws-sdk/client-cloudwatch-logs";
 import { AWS_URL_BASE } from "../constants";
 import { LogStartTimes } from "../interfaces";
+import { isReadyToFetch } from "../util";
 
 const cloudWatchLogsClient = new CloudWatchLogsClient({});
 export async function fetchLogs(
   logGroupName: string,
   startTime: LogStartTimes,
   logStreamNamePrefix?: string,
-  logStreamNames?: string[]
+  logStreamNames?: string[],
 ): Promise<FilteredLogEvent[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   return await fetchAllLogs(logGroupName, startTime, logStreamNamePrefix, logStreamNames);
 }
 
 export async function fetchLogStreams(
   logGroupName: string,
   token?: string,
-  accEvents?: LogStream[]
+  accEvents?: LogStream[],
 ): Promise<LogStream[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { logStreams, nextToken } = await cloudWatchLogsClient.send(
-    new DescribeLogStreamsCommand({ logGroupName, nextToken: token })
+    new DescribeLogStreamsCommand({ logGroupName, nextToken: token }),
   );
 
   const combinedEvents = [...(accEvents || []), ...(logStreams || [])];
@@ -48,7 +49,7 @@ async function fetchAllLogs(
   logStreamNamePrefix?: string,
   logStreamNames?: string[],
   token?: string,
-  accEvents?: FilteredLogEvent[]
+  accEvents?: FilteredLogEvent[],
 ): Promise<FilteredLogEvent[]> {
   const secondsSinceEpoch = getMiliSecondsSinceEpoch(startTime);
 
@@ -59,7 +60,7 @@ async function fetchAllLogs(
       logStreamNames,
       nextToken: token,
       startTime: secondsSinceEpoch,
-    })
+    }),
   );
   const combinedEvents = [...(accEvents || []), ...(events || [])];
 

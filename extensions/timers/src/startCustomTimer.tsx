@@ -1,14 +1,16 @@
 import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, Toast } from "@raycast/api";
 import { useState } from "react";
-import { createCustomTimer, ensureCTFileExists, startTimer } from "./timerUtils";
-import { CTInlineArgs, InputField, RayFormEvent, Values } from "./types";
 import { soundData } from "./soundData";
+import { checkForOverlyLoudAlert, createCustomTimer, ensureCTFileExists, startTimer } from "./timerUtils";
+import { CTInlineArgs, InputField, RayFormEvent, Values } from "./types";
 
 export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
   const hasArgs = Object.values(props.arguments).some((x) => x !== "");
   const [hourErr, setHourErr] = useState<string | undefined>();
   const [minErr, setMinErr] = useState<string | undefined>();
   const [secErr, setSecErr] = useState<string | undefined>();
+
+  const prefs = getPreferenceValues();
 
   const handleSubmit = (values: Values) => {
     ensureCTFileExists();
@@ -22,6 +24,7 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
     } else if (isNaN(Number(values.seconds))) {
       setSecErr("Seconds must be a number!");
     } else {
+      if (!checkForOverlyLoudAlert()) return;
       closeMainWindow();
       const timerName = values.name ? values.name : "Untitled";
       const timeInSeconds = 3600 * Number(values.hours) + 60 * Number(values.minutes) + Number(values.seconds);
@@ -102,7 +105,7 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
       validator: secValidator,
     },
   ];
-  const sortOrder = getPreferenceValues().newTimerInputOrder;
+  const sortOrder = prefs.newTimerInputOrder;
   sortOrder !== "hhmmss" ? inputFields.reverse() : inputFields;
 
   return (
@@ -128,7 +131,12 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
       <Form.Dropdown id="selectedSound" defaultValue="default" title="Sound">
         <Form.Dropdown.Item value="default" title="Default" />
         {soundData.map((item, index) => (
-          <Form.Dropdown.Item key={index} title={item.title} value={item.value} icon={item.icon} />
+          <Form.Dropdown.Item
+            key={index}
+            title={item.value === prefs.selectedSound ? `${item.title} (currently selected)` : item.title}
+            value={item.value}
+            icon={item.icon}
+          />
         ))}
       </Form.Dropdown>
       <Form.TextField id="name" title="Name" placeholder="Pour Tea" autoFocus={hasArgs} />

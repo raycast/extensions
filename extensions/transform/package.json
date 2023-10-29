@@ -8,6 +8,10 @@
   "categories": [
     "Developer Tools"
   ],
+  "contributors": [
+    "robertrosman",
+    "Francois"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -81,6 +85,13 @@
       "mode": "view"
     },
     {
+      "name": "json-to-js-object",
+      "title": "JSON to JS Object",
+      "subtitle": "Transform",
+      "description": "Transform JSON to JS Object",
+      "mode": "view"
+    },
+    {
       "name": "json-to-jsdoc",
       "title": "JSON to JSDoc",
       "subtitle": "Transform",
@@ -130,6 +141,13 @@
       "mode": "view"
     },
     {
+      "name": "json-to-string",
+      "title": "JSON to String",
+      "subtitle": "Transform",
+      "description": "Transform JSON to String",
+      "mode": "view"
+    },
+    {
       "name": "markdown-to-html",
       "title": "Markdown to HTML",
       "subtitle": "Transform",
@@ -162,6 +180,13 @@
       "title": "String to Regex",
       "subtitle": "Transform",
       "description": "Transform String to Regex",
+      "mode": "view"
+    },
+    {
+      "name": "string-to-json",
+      "title": "String to JSON",
+      "subtitle": "Transform",
+      "description": "Transform String to JSON",
       "mode": "view"
     },
     {
@@ -213,6 +238,7 @@
     "json-to-go": "github:Idered/json-to-go",
     "json-to-jsdoc": "github:Idered/json-to-jsdoc",
     "json-wasm": "github:Idered/json-wasm",
+    "json5": "^2.2.3",
     "markdown-it": "13.0.1",
     "node-html-markdown": "1.2.0",
     "postcss": "^8.4.16",

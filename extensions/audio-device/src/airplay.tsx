@@ -40,6 +40,7 @@ export function AirPlaySelector() {
           actions={
             <ActionPanel>
               <Action
+                title={`Select ${item.name}`}
                 onAction={async () => {
                   await setOutputDevice(item.name);
                   closeMainWindow({ clearRootSearch: true });
@@ -47,7 +48,6 @@ export function AirPlaySelector() {
                   showHUD(`Active output audio device set to ${item.name}`);
                   setActive(item.name);
                 }}
-                title={`Select ${item.name}`}
               />
               <Action
                 title={`Copy Device Name to Clipboard`}

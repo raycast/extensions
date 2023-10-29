@@ -1,4 +1,23 @@
 # Google Chrome Changelog
+## [New shortcut] - 2023-09-18
+
+- Add shortcut for make quick quicklinks when searching tabs.
+
+## [New shortcut] - 2023-08-21
+
+- Changed shortcut for Close Tab in the Search Tab command.
+
+## [Added better debug] - 2023-04-25
+
+- Increase exception message to diagnose issues
+
+## [Search url] - 2023-04-01
+
+- Added support to match url in bookmark and history search
+
+## [New Window] - 2023-03-22
+
+- Add the ability to create new window
 
 ## [Tab closing] - 2023-03-10
 

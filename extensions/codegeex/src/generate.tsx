@@ -1,59 +1,79 @@
-import { getPreferenceValues, List, ActionPanel, Action } from "@raycast/api";
-import { codeGenerateApi } from "./api";
-import { useSearch, onCopy } from "./hooks";
+import { ActionPanel, Action, Form, showToast, Toast, getPreferenceValues, getSelectedText } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { codeGenerateFormApi } from "./api";
+import { onCopy } from "./hooks";
 
-const languageCommentMap = {
-  "C++": "//",
-  C: "//",
-  "C#": "//",
-  Java: "//",
-  Python: "#",
-  HTML: ["<!--", "-->"],
-  PHP: "//",
-  Javascript: "//",
-  TypeScript: "//",
-  Go: "//",
-  Rust: "//",
-  SQL: "--",
-  Kotlin: "//",
-  Fortran: "!",
-  R: "#",
-};
-type PerType = keyof typeof languageCommentMap;
-function generatePrompt(e: string) {
-  const { language } = getPreferenceValues<{ language: PerType }>();
-  const prefix = languageCommentMap[language];
-  if (typeof prefix === "string") {
-    return `${prefix}${e}\n`;
-  } else {
-    return `${prefix[0]}${e}${prefix[1]}\n`;
-  }
-}
+const languageList = [
+  "C++",
+  "C",
+  "C#",
+  "Java",
+  "Python",
+  "HTML",
+  "PHP",
+  "Javascript",
+  "TypeScript",
+  "Go",
+  "Rust",
+  "SQL",
+  "Kotlin",
+  "Fortran",
+  "R",
+];
 
 export default function Command() {
-  const { rawCode, onSearchTextChange, code } = useSearch({
-    api: codeGenerateApi,
-    generatePrompt,
-  });
-  const copy = () => onCopy({ rawCode });
+  const [code, setCode] = useState<string>();
+  const onSubmit = async ({ prompt, lang }: any) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Loading...",
+    });
+    try {
+      const res = await codeGenerateFormApi({ prompt, lang });
+      if (res.data.status === 0) {
+        toast.style = Toast.Style.Success;
+        toast.title = "Success";
+        setCode(`${code}${res.data.result.output.code.join("")}`);
+      } else {
+        toast.style = Toast.Style.Failure;
+        toast.title = res.data.message;
+      }
+    } catch (error: any) {
+      toast.style = Toast.Style.Failure;
+      toast.title = error.message || "Something went wrong, please try again";
+    }
+  };
+  const copy = () => onCopy({ rawCode: code || "" });
+  const { language } = getPreferenceValues();
+  const fetchSelectedText = async () => {
+    const res = await getSelectedText();
+    setCode(res || "");
+  };
+  useEffect(() => {
+    fetchSelectedText();
+  }, []);
+
   return (
-    <List
-      throttle
-      isShowingDetail
-      onSearchTextChange={onSearchTextChange}
-      searchBarPlaceholder="Enter your description of the code"
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit" onSubmit={onSubmit} />
+          <Action title="Copy" onAction={copy} />
+        </ActionPanel>
+      }
     >
-      {code && (
-        <List.Item
-          title="First Result"
-          detail={<List.Item.Detail markdown={code} />}
-          actions={
-            <ActionPanel>
-              <Action title="Copy" onAction={copy} />
-            </ActionPanel>
-          }
-        />
-      )}
-    </List>
+      <Form.Dropdown id="lang" title="Language" defaultValue={language}>
+        {languageList.map((v) => (
+          <Form.Dropdown.Item value={v} title={v} key={v} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextArea
+        id="prompt"
+        title="Code"
+        placeholder="Enter comments/code to allow the CodeGeex to continue"
+        value={code}
+        onChange={(e) => setCode(e)}
+      />
+    </Form>
   );
 }

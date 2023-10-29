@@ -11,6 +11,8 @@ import {
   XcodeSimulatorOpenUrlError,
   XcodeSimulatorOpenUrlErrorReason,
 } from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
+import { XcodeSimulatorStateFilter } from "../models/xcode-simulator/xcode-simulator-state-filter.model";
+import { XcodeSimulatorApplication } from "../models/xcode-simulator/xcode-simulator-application.model";
 
 /**
  * XcodeSimulatorService
@@ -25,10 +27,18 @@ export class XcodeSimulatorService {
 
   /**
    * Retrieve all XcodeSimulatorGroups
+   *
+   * @param filter The XcodeSimulatorStateFilter to filter the XcodeSimulatorGroups
    */
-  static async xcodeSimulatorGroups(): Promise<XcodeSimulatorGroup[]> {
+  static async xcodeSimulatorGroups(filter: XcodeSimulatorStateFilter): Promise<XcodeSimulatorGroup[]> {
     const simulators = await XcodeSimulatorService.xcodeSimulators();
-    return groupBy(simulators, (simulator) => simulator.runtime)
+    return groupBy(
+      simulators.filter(
+        (value) =>
+          filter === XcodeSimulatorStateFilter.all || value.state === (filter as unknown as XcodeSimulatorState)
+      ),
+      (simulator) => simulator.runtime
+    )
       .map((group) => {
         return { runtime: group.key, simulators: group.values };
       })
@@ -100,6 +110,15 @@ export class XcodeSimulatorService {
       case XcodeSimulatorState.shutdown:
         return XcodeSimulatorService.boot(xcodeSimulator);
     }
+  }
+
+  /**
+   * Restart XcodeSimulator
+   * @param xcodeSimulator The XcodeSimulator to restart
+   */
+  static async restart(xcodeSimulator: XcodeSimulator): Promise<void> {
+    await XcodeSimulatorService.shutdown(xcodeSimulator);
+    await XcodeSimulatorService.boot(xcodeSimulator);
   }
 
   /**
@@ -185,5 +204,33 @@ export class XcodeSimulatorService {
       // Silently launch Simulator application
       XcodeSimulatorService.launchSimulatorApplication();
     });
+  }
+
+  /**
+   * Send Push Notification to Xcode Simulator
+   * @param filePath  Notification Payload file
+   * @param application Application choosen to send notification to
+   */
+  static async pushNotifications(filePath: string, application: XcodeSimulatorApplication): Promise<void> {
+    return execAsync(
+      `xcrun simctl push ${application.simulator.udid} ${application.bundleIdentifier} ${filePath}`
+    ).then();
+  }
+
+  /**
+   * Rename XcodeSimulator
+   * @param xcodeSimulator The Xcode Simulator to rename
+   * @param name The new simulator name
+   */
+  static async rename(xcodeSimulator: XcodeSimulator, name: string): Promise<void> {
+    return execAsync(`xcrun simctl rename ${xcodeSimulator.udid} '${name}' `).then();
+  }
+
+  /**
+   * Rename XcodeSimulator
+   * @param xcodeSimulator The Xcode Simulator to trigger iCloud Sync to
+   */
+  static async triggerIcloudSync(xcodeSimulator: XcodeSimulator): Promise<void> {
+    return execAsync(`xcrun simctl icloud_sync ${xcodeSimulator.udid}`).then();
   }
 }

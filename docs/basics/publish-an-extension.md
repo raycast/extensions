@@ -22,11 +22,13 @@ To share your extension with others, navigate to your extension directory, and r
 If someone contributes to your extension, running `npm run publish` will fail until you run
 
 ```bash
-npx ray pull-contributions
+npx @raycast/api@latest pull-contributions
 ```
 
 in your git repository. This will merge the contributions with your code, asking you to fix the conflicts if any.
 {% endhint %}
+
+Once the pull request is opened, you can continue pushing more commits to it by running `npm run publish` again.
 
 #### Alternative way
 

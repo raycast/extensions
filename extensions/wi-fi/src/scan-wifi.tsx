@@ -1,23 +1,45 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
-import { getWifiList, getWifiStatus } from "./hooks/hooks";
+import { useWifiList, useWifiStatus } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
 import EnterPassword from "./enter-password";
 import { WifiPasswordCache } from "./types/types";
 import { LocalStorageKey } from "./utils/constants";
 import { PrimaryActions } from "./components/primary-actions";
-import { getSignalIcon } from "./utils/common-utils";
+import { getSignalIcon, getSignalIconColor } from "./utils/common-utils";
 import { RefreshWifi } from "./components/refresh-wifi";
 
 export default function ScanWifi() {
   const { push } = useNavigation();
   const [refresh, setRefresh] = useState<number>(0);
-  const { wifiPasswordCaches, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = getWifiList(refresh);
-  const { wifiStatus } = getWifiStatus();
+  const { wifiPasswordCaches, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = useWifiList(refresh);
+  const { wifiStatus } = useWifiStatus();
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search Wi-Fi"}>
       <EmptyView title={"No Wi-Fi"} description={wifiStatus ? " " : "Wi-Fi is turned off"} />
+
+      {curWifi.length > 0 && curWifi[0].ssid && (
+        <List.Section title={"Connected"}>
+          <List.Item
+            icon={{
+              source: Icon.Wifi,
+              tintColor: Color.Green,
+            }}
+            title={curWifi[0].ssid}
+            subtitle={{ value: curWifi[0].security, tooltip: curWifi[0].security_flags.join(", ") }}
+            accessories={[
+              {
+                icon: {
+                  source: getSignalIcon(curWifi[0].quality),
+                  tintColor: getSignalIconColor(curWifi[0].quality),
+                },
+                tooltip: curWifi[0].quality + "%",
+              },
+            ]}
+          />
+        </List.Section>
+      )}
 
       <List.Section title={"Preferred"}>
         {wifiWithPasswordList.map((value, index) => {

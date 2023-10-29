@@ -1,5 +1,14 @@
 # Authy Extension Changelog
 
+## [Updated extension name] - 2023-10-16
+
+## [Updated Contributors] - 2023-06-14
+
+## [Bug fix] - 2023-03-30
+
+- Update deps
+- [#4485](https://github.com/raycast/extensions/issues/4485) Don't fail all OTPs in case extension couldn't decrypt some OTPs  
+
 ## [Sort OTP by usage] - 2022-04-04
 
 - Add metadata for store

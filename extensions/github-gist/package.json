@@ -5,6 +5,11 @@
   "description": "Create, search and display GitHub gists.",
   "icon": "github.png",
   "author": "koinzhang",
+  "contributors": [
+    "Aayush9029",
+    "LunaticMuch",
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -81,17 +86,16 @@
     }
   ],
   "dependencies": {
-    "@octokit/core": "^4.0.5",
-    "@raycast/api": "^1.40.1"
+    "@octokit/core": "^4.2.0",
+    "@raycast/api": "^1.55.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "eslint": "^8.39.0",
+    "prettier": "^3.0.0",
+    "react-devtools": "^4.27.6",
+    "typescript": "^5.0.4"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -13,7 +13,7 @@ import {
   GetBucketLocationCommand,
 } from "@aws-sdk/client-s3";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function S3() {
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
@@ -76,7 +76,7 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
 
                     try {
                       const data = await new S3Client({}).send(
-                        new GetObjectCommand({ Bucket: bucket.Name, Key: object.Key || "" })
+                        new GetObjectCommand({ Bucket: bucket.Name, Key: object.Key || "" }),
                       );
                       if (data.Body instanceof Readable) {
                         data.Body.pipe(fs.createWriteStream(`${homedir()}/Downloads/${object.Key?.split("/").pop()}`));
@@ -103,7 +103,7 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
 }
 
 async function fetchBuckets() {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { Buckets } = await new S3Client({}).send(new ListBucketsCommand({}));
 
   return Buckets;
@@ -113,12 +113,12 @@ async function fetchBucketObjects(
   bucket: string,
   _region?: string,
   nextMarker?: string,
-  objects: _Object[] = []
+  objects: _Object[] = [],
 ): Promise<_Object[]> {
   const region =
     _region || (await new S3Client({}).send(new GetBucketLocationCommand({ Bucket: bucket }))).LocationConstraint;
   const { Contents, NextMarker } = await new S3Client({ region }).send(
-    new ListObjectsCommand({ Bucket: bucket, Marker: nextMarker })
+    new ListObjectsCommand({ Bucket: bucket, Marker: nextMarker }),
   );
 
   const combinedObjects = [...objects, ...(Contents || [])];

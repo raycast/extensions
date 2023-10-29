@@ -24,7 +24,7 @@ export function Post(props: {
   cover?: string;
   pubdate: number;
   url: string;
-  uploader: Bilibili.uploader;
+  uploader: Bilibili.Uploader;
   stat: {
     comment: number;
     forward: number;

@@ -1,4 +1,4 @@
-import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { confirmAlert, getPreferenceValues, List, open, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   addToCache,
@@ -21,13 +21,15 @@ import OtpListItems from "./OtpListItems";
 
 const { preferCustomName } = getPreferenceValues<{ preferCustomName: boolean }>();
 
+export const CORRUPTED = "corrupted";
+
 export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login: boolean) => void }) {
   const [otpList, setOtpList] = useState<Otp[]>([]);
 
   async function refresh(): Promise<void> {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Authy",
+      title: "Twilio’s Authy",
       message: "Refreshing",
     });
     await toast.show();
@@ -46,7 +48,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       if (error instanceof Error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Authy",
+          title: "Twilio’s Authy",
           message: error.message,
         });
         return;
@@ -58,7 +60,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
     await toast.hide();
     await showToast({
       style: Toast.Style.Success,
-      title: "Authy",
+      title: "Twilio’s Authy",
       message: "Data has been synced",
     });
   }
@@ -77,6 +79,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       } = getPreferenceValues<{ authyPassword: string; excludeNames: string; recentlyUsedOrder: boolean }>();
       const services: Otp[] = servicesResponse.authenticator_tokens.map((i) => {
         const seed = decryptSeed(i.encrypted_seed, i.salt, authyPassword);
+
         return {
           id: i.unique_id,
           type: "service",
@@ -85,7 +88,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
           issuer: i.issuer,
           logo: i.logo,
           digits: i.digits,
-          generate: () => generateTOTP(seed, { digits: i.digits, period: 30 }),
+          generate: () => (seed ? generateTOTP(seed, { digits: i.digits, period: 30 }) : CORRUPTED),
         };
       });
       const apps: Otp[] = appsResponse.apps.map((i) => {
@@ -117,7 +120,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       if (error instanceof Error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Authy",
+          title: "Twilio’s Authy",
           message: error.message,
         });
       } else {
@@ -129,6 +132,36 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
   useEffect(() => {
     loadData();
   }, [props.isLogin]);
+
+  // error checking
+  useEffect(() => {
+    if (otpList.length === 0) return;
+    // filter out all the corrupted otp
+    const all = otpList.filter((otp) => otp.generate() !== "corrupted");
+    // if none of the otp are valid assume there is a problem with the password
+    if (all.length === 0) {
+      confirmAlert({
+        title: "No valid OTP",
+        message: "Check your Authy Backup Password in settings",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => openCommandPreferences(),
+        },
+        dismissAction: {
+          title: "Cancel",
+          onAction: () =>
+            confirmAlert({
+              title: "No valid OTP",
+              message: "Check Q&A in store",
+              primaryAction: {
+                title: "Open Store Page",
+                onAction: () => open("https://www.raycast.com/guga4ka/authy"),
+              },
+            }),
+        },
+      });
+    }
+  }, [otpList]);
 
   const isLoading = otpList.length === 0;
 

@@ -11,6 +11,8 @@ function getBundleIdentifier() {
       return "com.microsoft.VSCodeInsiders";
     case VSCodeBuild.VSCodium:
       return "VSCodium";
+    case VSCodeBuild.Cursor:
+      return "Cursor";
   }
 }
 
@@ -18,3 +20,4 @@ export const build = preferences.build;
 export const bundleIdentifier = getBundleIdentifier();
 export const layout = preferences.layout;
 export const keepSectionOrder = preferences.keepSectionOrder;
+export const closeOtherWindows = preferences.closeOtherWindows;

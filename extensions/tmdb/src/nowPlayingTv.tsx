@@ -57,7 +57,9 @@ export default function Command() {
             key={tv.poster_path}
             content={`https://image.tmdb.org/t/p/w500/${tv.poster_path}`}
             title={tv.name ?? "No title"}
-            subtitle={`${tv.vote_average ?? 0.0} ${STAR.repeat(Math.round((tv.vote_average ?? 0) / 2))}`}
+            subtitle={
+              tv.vote_average ? `${tv.vote_average} ${STAR.repeat(Math.round(tv.vote_average / 2))}` : "Not Rated"
+            }
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://www.themoviedb.org/tv/${tv.id}`} />

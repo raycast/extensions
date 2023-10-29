@@ -1,5 +1,22 @@
 # Readwise to Tana Changelog
 
+## [Update default template and supertags on notes] - 2023-05-31
+
+- Update default template with title and notes
+- Add the ability to set supertags on nested notes
+
+## [Add supertags depending on source category, highlight tags, reset sync of one source] - 2023-04-12
+
+- Add the ability to set different supertags for articles, books, podcasts, supplementals, and tweets
+- Display and export highlight tags
+- Reset synchronization history of a specific source
+
+- Fix: Handle unparsed apostrophes in titles when copying, for example "What&#39;s" -> "What's"
+- Fix: Multiline notes should be handled better and remove the unnecessary extra "Note:" child
+- Fix: We only fetched the first 100 highlights, so if you had more, they weren't included in the copy. To ensure all highlights are captured, fetch up to 1000 (Readwise's max page size)
+
+- **Important:** Re-save your current template to include the new template features
+
 ## [Add URL mapping for highlights] - 2023-03-15
 
 - Add field mapping for highlight URLs

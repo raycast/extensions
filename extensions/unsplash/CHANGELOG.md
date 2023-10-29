@@ -1,5 +1,24 @@
 # Unsplash Changelog
 
+## [Fix] - 2023-09-22
+
+- Better handling of key and token
+
+## [Fix] - 2023-04-28
+
+- Fixed background updates not working.
+
+## [Breaking Changes] - 2023-03-03
+
+- Implement OAuth to access more data.
+- Like/unlike an image feature.
+- New UI for image item and collection details.
+- Separate action to set wallpaper on every desktop.
+- Random image will be set on every desktop now.
+- Remove the orientation setting and use a Grid.Dropdown instead.
+- Update screenshots.
+- Overall UX and code improvements.
+
 ## [Fix] - 2022-11-28
 
 - Updated API key URL

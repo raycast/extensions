@@ -6,7 +6,9 @@
   "icon": "iMessage-icon.png",
   "author": "yuercl",
   "contributors": [
-    "thomas"
+    "thomas",
+    "arronhunt",
+    "ronaldheft"
   ],
   "categories": [
     "Productivity"
@@ -21,8 +23,18 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "default": "1",
+      "description": "For searching iMessage from N days ago and now",
+      "name": "lookBackDays",
+      "required": false,
+      "title": "Search last days for 2FA",
+      "type": "textfield"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.40.3",
+    "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.4.9",
     "@use-it/interval": "^1.0.0"
   },
@@ -42,15 +54,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  },
-  "preferences": [
-    {
-      "title": "Search last days for 2FA",
-      "name": "lookBackDays",
-      "type": "textfield",
-      "required": false,
-      "description": "For searching iMessage from N days ago and now",
-      "default": "1"
-    }
-  ]
+  }
 }

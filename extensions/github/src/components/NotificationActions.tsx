@@ -44,7 +44,8 @@ export default function NotificationActions({ notification, userId, mutateList }
   async function openNotificationAndMarkAsRead() {
     try {
       await open(url);
-      await markNotificationAsRead();
+      await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+      await mutateList();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -139,7 +140,7 @@ export default function NotificationActions({ notification, userId, mutateList }
 
         <Action.CopyToClipboard
           content={notification.subject.title}
-          title={`Copy ${notification.subject.type} Title`}
+          title={`Copy ${getNotificationTypeTitle(notification)} Title`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>

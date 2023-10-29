@@ -23,9 +23,9 @@ export default function ProjectList(): JSX.Element {
     prefActions,
   } = useAppHistory();
 
-  if (isLoading) {
+  if (isLoading && toolboxApp !== false) {
     return <List searchBarPlaceholder={`Search recent projects…`} isLoading={true} />;
-  } else if (toolboxApp === undefined) {
+  } else if (toolboxApp === false || toolboxApp === undefined) {
     const message = [
       "# Unable to find JetBrains Toolbox",
       `Please check that you have installed [JetBrains Toolbox](${tbUrl})`,
@@ -66,7 +66,7 @@ export default function ProjectList(): JSX.Element {
   const defaultActions = (
     <>
       {appHistory.map((tool) => (
-        <OpenInJetBrainsApp key={tool.title} tool={tool} recent={null} />
+        <OpenInJetBrainsApp key={tool.title} tool={tool} recent={null} toolboxApp={toolboxApp} />
       ))}
       <OpenJetBrainsToolbox app={toolboxApp} />
     </>
@@ -105,9 +105,9 @@ export default function ProjectList(): JSX.Element {
         .filter((app) => filter === "" || filter === app.title)
         .map((app, id) => (
           <List.Section
-            title={app.title}
+            title={app.name}
             key={app.title}
-            subtitle={screenshotMode ? "⌘+F to add to favorites – ⌃+S to change application order" : undefined}
+            subtitle={screenshotMode ? "⌘+F to add to favorites – ⌃+S to change application order" : app.version}
           >
             {(app.entries ?? [])
               .filter((entry) => filter !== "" || (histories[id] ?? []).includes(entry.path))

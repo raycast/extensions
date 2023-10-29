@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { editingAtom, newTodoTextAtom, searchModeAtom, TodoItem, TodoSections } from "./atoms";
 import { useAtom } from "jotai";
-import { SECTIONS_DATA } from "./config";
+import { SECTIONS_DATA, priorityDescriptions, priorityIcons } from "./config";
 import _ from "lodash";
 import DeleteAllAction from "./delete_all";
 import SearchModeAction from "./search_mode_action";
@@ -12,9 +12,10 @@ import ListActions from "./list_actions";
 import { useMemo } from "react";
 import urlRegexSafe from "url-regex-safe";
 import { useTodo } from "./hooks/useTodo";
+import MarkAllIncompleteAction from "./mark_all_incomplete";
 
 const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number; sectionKey: keyof TodoSections }) => {
-  const { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin } = useTodo({ item, idx, sectionKey });
+  const { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin, setPriority } = useTodo({ item, idx, sectionKey });
   const [newTodoText] = useAtom(newTodoTextAtom);
   const [editing] = useAtom(editingAtom);
   const [searchMode, setSearchMode] = useAtom(searchModeAtom);
@@ -28,6 +29,22 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   const nowDatePart = dayjs(Date.now()).format("MMM D");
   const timePart = dayjs(item.timeAdded).format("h:mm A");
   const time = datePart === nowDatePart ? `at ${timePart}` : `on ${datePart}`;
+
+  const accessories = useMemo(() => {
+    const list: List.Item.Props["accessories"] = [];
+    if (item.priority !== undefined) {
+      list.push({
+        tooltip: "priority: " + priorityDescriptions[item.priority],
+        icon: priorityIcons[item.priority],
+      });
+    }
+    if (SECTIONS_DATA[sectionKey].accessoryIcon) {
+      const { accessoryIcon, name } = SECTIONS_DATA[sectionKey];
+      list.push({ tooltip: name, icon: accessoryIcon });
+    }
+    return list;
+  }, [item.priority]);
+
   return (
     <List.Item
       title={item.title}
@@ -37,7 +54,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
           ? { source: Icon.Checkmark, tintColor: Color.Green }
           : { source: Icon.Circle, tintColor: Color.Red }
       }
-      accessoryIcon={SECTIONS_DATA[sectionKey].accessoryIcon}
+      accessories={accessories}
       actions={
         searchMode || (newTodoText.length === 0 && !editing) ? (
           <ActionPanel>
@@ -66,6 +83,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
             <Action
               title="Delete Todo"
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
+              style={Action.Style.Destructive}
               onAction={() => deleteTodo()}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
@@ -81,9 +99,34 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
                 title="Pin Todo"
                 icon={{ source: Icon.Pin, tintColor: Color.Blue }}
                 onAction={() => pin()}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
               />
             )}
+            <ActionPanel.Submenu
+              title="Set Priority"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              icon={Icon.Exclamationmark}
+            >
+              <Action title="none" onAction={() => setPriority(undefined)} />
+              <Action
+                title="Low"
+                icon={priorityIcons[1]}
+                onAction={() => setPriority(1)}
+                autoFocus={item.priority === 1 ? true : false}
+              />
+              <Action
+                title="Medium"
+                icon={priorityIcons[2]}
+                onAction={() => setPriority(2)}
+                autoFocus={item.priority === 2 ? true : false}
+              />
+              <Action
+                title="High"
+                icon={priorityIcons[3]}
+                onAction={() => setPriority(3)}
+                autoFocus={item.priority === 3 ? true : false}
+              />
+            </ActionPanel.Submenu>
             {urls &&
               urls.length > 0 &&
               (urls.length === 1 ? (
@@ -110,6 +153,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
                 </ActionPanel.Submenu>
               ))}
             <DeleteAllAction />
+            <MarkAllIncompleteAction />
             <SearchModeAction />
           </ActionPanel>
         ) : (

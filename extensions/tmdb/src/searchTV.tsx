@@ -57,7 +57,11 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label title="Release Date" text={tv.first_air_date ?? "Unknwon"} />
                     <List.Item.Detail.Metadata.Label
                       title="Rating"
-                      text={`${STAR.repeat(Math.round((tv.vote_average ?? 0) / 2))}`}
+                      text={
+                        tv.vote_average
+                          ? `${tv.vote_average} ${STAR.repeat(Math.round(tv.vote_average / 2))}`
+                          : "Not Rated"
+                      }
                     />
                     <List.Item.Detail.Metadata.Label title="Vote Average" text={`${tv.vote_average ?? 0.0}`} />
                     <List.Item.Detail.Metadata.Label title="Vote Count" text={`${tv.vote_count ?? 0}`} />
