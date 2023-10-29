@@ -33,15 +33,7 @@
       "title": "AI Create Database Page",
       "subtitle": "Notion",
       "description": "Create a page in a Notion database using AI to generate the page fields.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "conditions",
-          "placeholder": "Page Info",
-          "required": true,
-          "type": "text"
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "search-page",

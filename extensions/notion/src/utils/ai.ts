@@ -1,5 +1,7 @@
 import { AI, Toast } from "@raycast/api";
 
+import { CreatePageFormValues } from "../components/forms";
+
 import { DatabaseProperty, fetchDatabaseProperties } from "./notion";
 
 const template = `
@@ -69,15 +71,10 @@ export function createPrompt(properties: DatabaseProperty[], conditions: string)
   return prompt;
 }
 
-export async function getValues(databaseId: string | undefined, conditions: string) {
-  databaseId = "8256750b-81a2-4c88-8df8-6a02ffb2a409";
-  const toast = new Toast({ title: "fetching db props", style: Toast.Style.Animated });
-  await toast.show();
-  const databaseProperties = await fetchDatabaseProperties(databaseId);
+export async function getValuesFromAI(databaseProperties: DatabaseProperty[], databaseId: string | undefined, conditions: string) {
+  // databaseId = "8256750b-81a2-4c88-8df8-6a02ffb2a409";
 
   const prompt = createPrompt(databaseProperties, conditions);
-
-  toast.title = "Asking AI";
 
   const data = await AI.ask(prompt, {
     creativity: "none",
@@ -85,18 +82,15 @@ export async function getValues(databaseId: string | undefined, conditions: stri
     // model: "text-davinci-003",
   });
 
-  toast.title = "Parsing JSON";
-
   const json = tryParseJSON(data);
 
   if (!json) {
     throw new Error("Unable to parse AI response");
   }
-  console.log("json", json);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const values: Record<string, any> = {};
-  toast.title = "Cleaning up props";
+  console.log("json", json)
+
+  const values: CreatePageFormValues = { database: databaseId };
 
   for (const [id, value] of Object.entries(json)) {
     const property = databaseProperties.find((property) => property.id === id);
@@ -109,14 +103,19 @@ export async function getValues(databaseId: string | undefined, conditions: stri
         break;
       }
       case "date": {
-        const date = new Date("2023-10-29T16:00:00.001Z"); // TODO: use a real date
+        let dt = value;
+        console.log(dt)
+        // if value is in the format YYYY-MM-DD, turn it into YYYY-DD-MMT00:00:00.001Z
+        if (dt.length === 10) {
+          dt = dt + "T00:00:00.001Z";
+        }
+        const date = new Date(dt); // TODO: use a real date
         values["property::" + property.type + "::" + id] = date;
         break;
       }
       case "select": {
         // check if value is a valid option
         const option = property.options.find((option) => option.id === value);
-        console.log(value);
         if (!option && value !== "_select_null_") {
           throw new Error("Unable to find option");
         }
@@ -139,18 +138,5 @@ export async function getValues(databaseId: string | undefined, conditions: stri
     }
   }
 
-  values["database"] = databaseId;
-  return { values, toast };
+  return values;
 }
-
-/*
-
-{
-  title: 'Calc HW Pages 2-7 #8-29',
-  'is%5E~': '2023-10-27',
-  '%60Vgo': '91e0f08b-a0ae-46d0-b92e-12f1e38b8714',
-  'Z%7CEM': 'e6bc5074-0e76-42b4-9a6c-c1a81dc4d3b9',
-  TnTz: '4dda6886-8596-4869-9d4b-53ee0aa3dc2e'
-}
-
-*/

@@ -71,12 +71,12 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
             },
             secondaryAction: page.url
               ? {
-                  title: "Copy URL",
-                  shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-                  onAction: () => {
-                    Clipboard.copy(page.url as string);
-                  },
-                }
+                title: "Copy URL",
+                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                onAction: () => {
+                  Clipboard.copy(page.url as string);
+                },
+              }
               : undefined,
           });
 
@@ -94,6 +94,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   function filterProperties(dp: DatabaseProperty) {
     return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
   }
+
   function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
     if (a.type == "title") return -1;
     if (b.type == "title") return 1;
@@ -105,13 +106,28 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     return 0;
   }
 
-  type Quicklink = Action.CreateQuicklink.Props["quicklink"];
-  function getQuicklink(): Quicklink {
+  function getQuicklink() {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
     let name: string | undefined;
     const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
     if (databaseTitle) name = "Create new page in " + databaseTitle;
+    return { name, link: url + "?launchContext=" + launchContext };
+  }
+
+  function getAIQuicklink() {
+    const url = "raycast://extensions/HenriChabrand/notion/ai-create-database-page";
+    const data = values;
+
+    // weird stuff here so {Query} doesn't get URL-encoded
+    // will break if someone uses this exact string in their as some property
+    data["conditions"] = "CONDITIONS";
+    let launchContext = encodeURIComponent(JSON.stringify(values));
+    launchContext = launchContext.replace("CONDITIONS", "{Conditions}");
+    
+    let name: string | undefined;
+    const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
+    if (databaseTitle) name = `Create new page in ${databaseTitle} with AI`;
     return { name, link: url + "?launchContext=" + launchContext };
   }
 
@@ -144,8 +160,13 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
           <ActionPanel.Section>
             <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} />
             <Action.CreateQuicklink
-              title="Create Deeplink to Command as Configured"
+              title="Create Quicklink to Command as Configured"
               quicklink={getQuicklink()}
+              icon={Icon.Link}
+            />
+            <Action.CreateQuicklink
+              title="Create AI Quicklink"
+              quicklink={getAIQuicklink()}
               icon={Icon.Link}
             />
           </ActionPanel.Section>
@@ -194,10 +215,10 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
                     d.icon_emoji
                       ? d.icon_emoji
                       : d.icon_file
-                      ? d.icon_file
-                      : d.icon_external
-                      ? d.icon_external
-                      : Icon.List
+                        ? d.icon_file
+                        : d.icon_external
+                          ? d.icon_external
+                          : Icon.List
                   }
                 />
               );
