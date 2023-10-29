@@ -48,35 +48,37 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
           end tell`);
       const data = plist.parse(scriptResult) as TypeMacroGroup[];
 
-      // Filtering groups with filter pattern and enabled groups      
+      // Filtering groups with filter pattern and enabled groups
       const filterPattern = preferences.filterPattern.trim();
-      let hasFilter = filterPattern !== '';
+      const hasFilter = filterPattern !== "";
       let matchFunction: (groupName: string) => boolean;
 
       if (hasFilter) {
-          if (filterPattern.startsWith('"') && filterPattern.endsWith('"')) {
-              const exactMatch = filterPattern.slice(1, -1).toLowerCase();
-              matchFunction = (groupName) => groupName.toLowerCase() === exactMatch;
-          } else if (preferences.useRegex) {
-              let regexPattern: RegExp;
-              try { regexPattern = new RegExp(filterPattern, 'i') } catch (e) {
-                  showToast({ style: Toast.Style.Failure, title: "Error", message: "Invalid regular expression" });
-                  return;
-              }
-              matchFunction = (groupName) => regexPattern.test(groupName);
-          } else {
-              const partialMatch = filterPattern.toLowerCase();
-              matchFunction = (groupName) => groupName.toLowerCase().includes(partialMatch);
+        if (filterPattern.startsWith('"') && filterPattern.endsWith('"')) {
+          const exactMatch = filterPattern.slice(1, -1).toLowerCase();
+          matchFunction = (groupName) => groupName.toLowerCase() === exactMatch;
+        } else if (preferences.useRegex) {
+          let regexPattern: RegExp;
+          try {
+            regexPattern = new RegExp(filterPattern, "i");
+          } catch (e) {
+            showToast({ style: Toast.Style.Failure, title: "Error", message: "Invalid regular expression" });
+            return;
           }
+          matchFunction = (groupName) => regexPattern.test(groupName);
+        } else {
+          const partialMatch = filterPattern.toLowerCase();
+          matchFunction = (groupName) => groupName.toLowerCase().includes(partialMatch);
+        }
       } else {
-          matchFunction = () => true;
+        matchFunction = () => true;
       }
 
       // Filtering groups with enabled macros
       const filteredData = data
-        .filter(group => group.enabled && group.name && matchFunction(group.name))
-        .map(group => {
-          const macros = group.macros?.filter(macro => macro.enabled);
+        .filter((group) => group.enabled && group.name && matchFunction(group.name))
+        .map((group) => {
+          const macros = group.macros?.filter((macro) => macro.enabled);
           return { ...group, macros };
         });
       setData(filteredData);
@@ -122,37 +124,35 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText}>
-      {filteredList
-        ?.map((group) => (
-          <List.Section key={group.uid} title={`${group.name}`} subtitle={`${group.macros?.length}`}>
-            {group.macros
-              ?.map((macro) => {
-                const triggers = macro.triggers
-                  ?.filter((trigger) => trigger.type && displayTypes.includes(trigger.type))
-                  .map((trigger) => ({ tag: { value: trigger.short } }));
-                return (
-                  <List.Item
-                    key={macro.uid}
-                    title={macro?.name ?? ""}
-                    accessories={ triggers }
-                    actions={
-                      <ActionPanel>
-                        <Action.Open title="Run Macro" target={`kmtrigger://macro=${macro.uid}`} icon={Icon.Terminal} />
-                        <Action
-                          title="Edit Macro"
-                          onAction={() => {
-                            editMacro(macro);
-                          }}
-                          icon={Icon.Pencil}
-                          shortcut={{ key: "e", modifiers: ["cmd"] }}
-                        />
-                      </ActionPanel>
-                    }
-                  />
-                )
-              })}
-          </List.Section>
-        ))}
+      {filteredList?.map((group) => (
+        <List.Section key={group.uid} title={`${group.name}`} subtitle={`${group.macros?.length}`}>
+          {group.macros?.map((macro) => {
+            const triggers = macro.triggers
+              ?.filter((trigger) => trigger.type && displayTypes.includes(trigger.type))
+              .map((trigger) => ({ tag: { value: trigger.short } }));
+            return (
+              <List.Item
+                key={macro.uid}
+                title={macro?.name ?? ""}
+                accessories={triggers}
+                actions={
+                  <ActionPanel>
+                    <Action.Open title="Run Macro" target={`kmtrigger://macro=${macro.uid}`} icon={Icon.Terminal} />
+                    <Action
+                      title="Edit Macro"
+                      onAction={() => {
+                        editMacro(macro);
+                      }}
+                      icon={Icon.Pencil}
+                      shortcut={{ key: "e", modifiers: ["cmd"] }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      ))}
     </List>
   );
 }
