@@ -13,7 +13,6 @@
     {
       "name": "share-wifi",
       "title": "Share Wifi QR-Code",
-      "subtitle": "QR Code Generator",
       "description": "Select wifi to share the qr code with others",
       "mode": "view"
     }
