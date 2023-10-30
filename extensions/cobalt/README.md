@@ -4,10 +4,13 @@
     <p>
         A Raycast extension that allows you to easily download videos & audio from popular social media platforms, powered by <a href="https://github.com/wukko/cobalt">cobalt</a>'s API. A list of supported services can be found <a href="https://github.com/wukko/cobalt#supported-services">here</a>.
     </p>
+    <a title="Install Cobalt Raycast Extension" href="https://www.raycast.com/aelew/cobalt">
+      <img src="https://www.raycast.com/aelew/cobalt/install_button@2x.png?v=1.0" height="64" style="height: 64px;" alt="">
+    </a>
 </div>
 
 > **Note**  
-> This extension is not created by nor affiliated with [cobalt](https://github.com/wukko/cobalt).
+> This extension is neither created by nor affiliated with [cobalt](https://github.com/wukko/cobalt).
 
 ## Features
 
@@ -27,25 +30,25 @@
 Clone the project
 
 ```bash
-  git clone https://github.com/aelew/raycast-cobalt.git
+git clone https://github.com/aelew/raycast-cobalt.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd raycast-cobalt
+cd raycast-cobalt
 ```
 
 Install dependencies
 
 ```bash
-  npm install
+npm install
 ```
 
 Connect to Raycast
 
 ```bash
-  npm run dev
+npm run dev
 ```
 
 ## License
