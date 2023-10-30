@@ -1,6 +1,7 @@
 # Deepcast Changelog
 
-## [Default Target Language and Fallback] - 2023-10-16
+## [Default Target Language and Fallback] - 2023-10-30
+
 - Added preferences to set the default target language
 - Support commands being a fallback command
 
