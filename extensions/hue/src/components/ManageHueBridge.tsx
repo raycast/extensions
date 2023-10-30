@@ -80,7 +80,7 @@ You can remove your saved Hue Bridge by using the ‘Unlink Hue Bridge’ action
  */
 export default function ManageHueBridge(
   hueBridgeState: HueBridgeState,
-  sendHueMessage: SendHueMessage
+  sendHueMessage: SendHueMessage,
 ): JSX.Element | null {
   const unlinkSavedBridge = async () => {
     await confirmAlert({

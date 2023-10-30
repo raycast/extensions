@@ -1,59 +1,55 @@
-import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
-import { useAtomValue } from "jotai";
-import { search } from "./utils/notion";
-import { Page } from "./utils/types";
-import { recentlyOpenedPagesAtom } from "./utils/state";
-import { PageListItem } from "./components";
+import React, { useState } from "react";
 
-export default function SearchList(): JSX.Element {
-  const { value: recentlyOpenedPages } = useAtomValue(recentlyOpenedPagesAtom);
-  const [pages, setPages] = useState<Page[]>([]);
+import { PageListItem, View } from "./components";
+import { useRecentPages, useSearchPages, useUsers } from "./hooks";
+
+function Search() {
+  const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
   const [searchText, setSearchText] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: searchPages, isLoading, mutate } = useSearchPages(searchText);
+  const { data: users } = useUsers();
 
-  // Search pages
-  useEffect(() => {
-    const searchNotionPages = async () => {
-      setIsLoading(true);
-
-      const searchedPages = await search(searchText);
-      if (searchedPages.length) {
-        setPages(searchedPages);
-      }
-      setIsLoading(false);
-    };
-    searchNotionPages();
-  }, [searchText]);
+  const sections = [
+    { title: "Recent", pages: recentPages ?? [] },
+    { title: "Search", pages: searchPages?.filter((p) => !recentPages?.some((q) => p.id == q.id)) ?? [] },
+  ];
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search pages" onSearchTextChange={setSearchText} throttle={true}>
-      <List.Section title="Recent">
-        {recentlyOpenedPages
-          .filter((p) => (p.title ? p.title : "Untitled").toLowerCase().includes(searchText.toLowerCase()))
-          .map((p) => (
-            <PageListItem
-              key={`recently-open-page-${p.id}`}
-              page={p}
-              databaseView={undefined}
-              databaseProperties={undefined}
-              onPageCreated={(page) => setPages((state) => state.concat([page]))}
-              onPageUpdated={(page) => setPages((state) => state.map((x) => (x.id === page.id ? page : x)))}
-            />
-          ))}
-      </List.Section>
-      <List.Section title="Search">
-        {pages?.map((p) => (
-          <PageListItem
-            key={`search-result-page-${p.id}`}
-            page={p}
-            databaseView={undefined}
-            databaseProperties={undefined}
-            onPageCreated={(page) => setPages((state) => state.concat([page]))}
-            onPageUpdated={(page) => setPages((state) => state.map((x) => (x.id === page.id ? page : x)))}
-          />
-        ))}
-      </List.Section>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search pages"
+      onSearchTextChange={setSearchText}
+      throttle
+      filtering
+    >
+      {sections.map((section) => {
+        return (
+          <List.Section title={section.title} key={section.title}>
+            {section.pages.map((p) => {
+              return (
+                <PageListItem
+                  key={`${section.title}-${p.id}`}
+                  page={p}
+                  users={users}
+                  mutate={mutate}
+                  setRecentPage={setRecentPage}
+                  removeRecentPage={removeRecentPage}
+                />
+              );
+            })}
+          </List.Section>
+        );
+      })}
+      <List.EmptyView title="No pages found" />
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Search />
+    </View>
   );
 }

@@ -1,14 +1,25 @@
 import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { addDays, differenceInHours, endOfDay, format, formatDistance, isWithinInterval, startOfDay } from "date-fns";
+import {
+  addDays,
+  differenceInHours,
+  endOfDay,
+  format,
+  formatDistance,
+  isAfter,
+  isWithinInterval,
+  startOfDay,
+} from "date-fns";
 import { useMemo } from "react";
 import { useEvent } from "./hooks/useEvent";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
+import { useUser } from "./hooks/useUser";
+import { CalendarAccount } from "./types/account";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
+import { miniDuration } from "./utils/dates";
 import { eventColors, truncateEventSize } from "./utils/events";
 import { parseEmojiField } from "./utils/string";
-import { miniDuration } from "./utils/dates";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
@@ -56,6 +67,8 @@ const EventsSection = ({ events, sectionTitle }: { events: Event[]; sectionTitle
 export default function Command() {
   const { apiToken, apiUrl, upcomingEventsCount } = getPreferenceValues<NativePreferences>();
 
+  const { currentUser } = useUser();
+
   const NUMBER_OF_EVENTS = Number(upcomingEventsCount) || 5;
 
   const fetchHeaders = {
@@ -64,23 +77,52 @@ export default function Command() {
     Accept: "application/json",
   };
 
-  const range = {
-    start: format(startOfDay(new Date()), "yyyy-MM-dd"),
-    end: format(addDays(new Date(), 2), "yyyy-MM-dd"),
-  };
+  const { data: accountData, isLoading: isLoadingAccounts } = useFetch<CalendarAccount[]>(`${apiUrl}/accounts`, {
+    headers: fetchHeaders,
+    keepPreviousData: true,
+  });
 
-  const { data: eventData, isLoading: isLoadingEvents } = useFetch<ApiResponseEvents>(
-    `${apiUrl}/events?sourceDetails=true&start=${range.start}&end=${range.end}`,
+  const { data: eventsResponse, isLoading: isLoadingEvents } = useFetch<ApiResponseEvents>(
+    `${apiUrl}/events?${new URLSearchParams({
+      sourceDetails: "true",
+      start: format(startOfDay(new Date()), "yyyy-MM-dd"),
+      end: format(addDays(new Date(), 2), "yyyy-MM-dd"),
+      ...(accountData && {
+        calendarIds: accountData.flatMap(({ connectedCalendars }) => connectedCalendars.map(({ id }) => id)).join(","),
+      }),
+    }).toString()}`,
     {
+      execute: !!accountData && !isLoadingAccounts,
       headers: fetchHeaders,
       keepPreviousData: true,
     }
   );
 
-  const { data: eventMoment, isLoading: isLoadingMoment } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
-    headers: fetchHeaders,
-    keepPreviousData: true,
-  });
+  const eventData = eventsResponse;
+
+  const showDeclinedEvents = useMemo(() => {
+    return !!currentUser?.settings.showDeclinedEvents;
+  }, [currentUser]);
+
+  const eventMoment: ApiResponseMoment = useMemo(() => {
+    const now = new Date();
+    const events = eventData
+      ?.filter((event) => {
+        return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+      })
+      .filter((event) => {
+        return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
+      })
+      .filter((event) => isAfter(new Date(event.eventEnd), now))
+      .filter((event) => {
+        return !(differenceInHours(new Date(event.eventEnd), new Date(event.eventStart)) >= 24);
+      });
+
+    return {
+      event: events?.at(0),
+      nextEvent: events?.at(1),
+    };
+  }, [eventData, showDeclinedEvents]);
 
   const events = useMemo<EventSection[]>(() => {
     if (!eventData) return [];
@@ -93,6 +135,9 @@ export default function Command() {
         section: "NOW",
         sectionTitle: "Now",
         events: eventData
+          .filter((event) => {
+            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+          })
           .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
@@ -110,6 +155,9 @@ export default function Command() {
         sectionTitle: "Upcoming events",
         events: eventData
           .filter((event) => {
+            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+          })
+          .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
           .filter((event) => {
@@ -124,7 +172,7 @@ export default function Command() {
     ];
 
     return events.filter((event) => event.events.length > 0);
-  }, [eventData]);
+  }, [eventData, showDeclinedEvents]);
 
   const handleOpenReclaim = () => {
     open("https://app.reclaim.ai");
@@ -179,7 +227,7 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      isLoading={isLoadingEvents || isLoadingMoment}
+      isLoading={isLoadingEvents}
       icon={"command-icon.png"}
       title={titleInfo.minTitle}
       tooltip={titleInfo.fullTitle}

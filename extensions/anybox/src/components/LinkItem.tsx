@@ -37,8 +37,8 @@ function relativeDate(dateString: string): string {
   const result = date.calendar(null, {
     sameDay: "[Today at] HH:mm",
     lastDay: "[Yesterday at] HH:mm",
-    lastWeek: "MMM M, YYYY [at] HH:mm",
-    sameElse: "MMM M, YYYY",
+    lastWeek: "[Last] dddd",
+    sameElse: "MMM D, YYYY",
   });
   return result;
 }
@@ -56,8 +56,8 @@ function fullDate(dateString: string): string {
   const result = date.calendar(null, {
     sameDay: "[Today at] HH:mm",
     lastDay: "[Yesterday at] HH:mm",
-    lastWeek: "MMM M, YYYY [at] HH:mm",
-    sameElse: "MMM M, YYYY [at] HH:mm",
+    lastWeek: "MMM D, YYYY [at] HH:mm",
+    sameElse: "MMM D, YYYY [at] HH:mm",
   });
   return result;
 }
@@ -69,16 +69,20 @@ function formatDomain(host: string): string {
 
 interface Props {
   item: Link;
+  isSearchEngine: boolean;
+  searchText: string;
 }
 
 export default function LinkItem(props: Props) {
   const { pop } = useNavigation();
 
   const onFinished = () => {
-    pop();
     closeMainWindow({ clearRootSearch: true });
+    pop();
   };
   const item = props.item;
+  const isSearchEngine = props.isSearchEngine;
+  const searchText = props.searchText;
 
   const iconLink = (identifier: string) => {
     return `http://127.0.0.1:6391/images/${identifier}/icon`;
@@ -104,15 +108,63 @@ export default function LinkItem(props: Props) {
 
   const DefaultAction = (props: Props) => {
     const item = props.item;
+    const isSearchEngine = props.isSearchEngine;
     return (
       <Action
-        title="Open in Browser"
-        icon={Icon.Globe}
+        title={isSearchEngine ? "Continue to Search in Browser" : "Open in Browser"}
+        icon={isSearchEngine ? Icon.MagnifyingGlass : Icon.Globe}
         onAction={() => {
-          open(item.url, item.preferredBrowser);
-          updateDateLastOpened(item.id);
+          if (isSearchEngine) {
+            const newURL = item.url.replace("_keyword_", encodeURIComponent(searchText));
+            open(newURL, item.preferredBrowser);
+          } else {
+            open(item.url, item.preferredBrowser);
+            updateDateLastOpened(item.id);
+          }
           onFinished();
         }}
+      />
+    );
+  };
+
+  const ShowDetailAction = (props: Props) => {
+    const item = props.item;
+    return (
+      <Action.Push
+        title="Show Details"
+        icon={Icon.Sidebar}
+        target={
+          <Detail
+            markdown={getDetail(item)}
+            navigationTitle={item.title}
+            metadata={
+              <Detail.Metadata>
+                <Detail.Metadata.Label title="Last Opened" text={fullDate(item.dateLastOpened)} />
+                <Detail.Metadata.Label title="Added" text={fullDate(item.dateAdded)} />
+                <Detail.Metadata.Link title="Domain" target={item.url} text={formatDomain(item.host)} />
+                <Detail.Metadata.Label
+                  title="Starred"
+                  icon={{ source: item.isStarred ? "star.fill.png" : "star.png" }}
+                />
+                {item.tags.length && (
+                  <Detail.Metadata.TagList title="Tags">
+                    {item.tags.map((tag, index) => (
+                      <Detail.Metadata.TagList.Item key={index} text={tag.originalName} color={tag.color} />
+                    ))}
+                  </Detail.Metadata.TagList>
+                )}
+                {item.folder && <Detail.Metadata.Label title="Folder" text={item.folder?.name} />}
+                {item.comment && <Detail.Metadata.Label title="Comment" text={item.comment} />}
+              </Detail.Metadata>
+            }
+            actions={
+              <ActionPanel>
+                <DefaultAction {...props} />
+                <Actions {...props} />
+              </ActionPanel>
+            }
+          />
+        }
       />
     );
   };
@@ -154,8 +206,8 @@ export default function LinkItem(props: Props) {
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           icon="anybox-icon-small.png"
           onAction={() => {
-            pop();
             getAndCloseMainWindow(`document/${item.id}`);
+            pop();
           }}
         />
       </>
@@ -171,48 +223,14 @@ export default function LinkItem(props: Props) {
         fallback: Icon.Globe,
         mask: Image.Mask.RoundedRectangle,
       }}
-      accessoryTitle={relativeDate(item.dateLastOpened)}
+      accessories={[{ text: isSearchEngine ? "" : relativeDate(item.dateLastOpened) }]}
       key={item.id}
       id={item.id}
       actions={
         <ActionPanel title={item.title}>
-          <DefaultAction item={item} />
-          <Action.Push
-            title="Show Details"
-            icon={Icon.Sidebar}
-            target={
-              <Detail
-                markdown={getDetail(item)}
-                navigationTitle={item.title}
-                metadata={
-                  <Detail.Metadata>
-                    <Detail.Metadata.Label title="Last Opened" text={fullDate(item.dateLastOpened)} />
-                    <Detail.Metadata.Label title="Added" text={fullDate(item.dateAdded)} />
-                    <Detail.Metadata.Link title="Domain" target={item.url} text={formatDomain(item.host)} />
-                    <Detail.Metadata.Label
-                      title="Starred"
-                      icon={{ source: item.isStarred ? "star.fill.png" : "star.png" }}
-                    />
-                    {item.collections.length && (
-                      <Detail.Metadata.TagList title="Collections">
-                        {item.collections.map((tag, index) => (
-                          <Detail.Metadata.TagList.Item key={index} text={tag.name} color={tag.color} />
-                        ))}
-                      </Detail.Metadata.TagList>
-                    )}
-                    {item.comment && <Detail.Metadata.Label title="Comment" text={item.comment} />}
-                  </Detail.Metadata>
-                }
-                actions={
-                  <ActionPanel>
-                    <DefaultAction item={item} />
-                    <Actions item={item} />
-                  </ActionPanel>
-                }
-              />
-            }
-          />
-          <Actions item={item} />
+          <DefaultAction {...props} />
+          {!isSearchEngine && <ShowDetailAction {...props} />}
+          {!isSearchEngine && <Actions {...props} />}
         </ActionPanel>
       }
     />

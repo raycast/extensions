@@ -11,11 +11,13 @@
     "cy-98",
     "immint023",
     "pernielsentikaer",
-    "elijahs",
     "vimtor",
     "tonka3000",
     "fazle_rabbi",
-    "oilbeater"
+    "oilbeater",
+    "QIanGua",
+    "hakob_nersesian",
+    "erics118"
   ],
   "keywords": [
     "vscode"
@@ -76,6 +78,10 @@
         {
           "value": "VSCodium",
           "title": "VSCodium"
+        },
+        {
+          "value": "Cursor",
+          "title": "Cursor"
         }
       ]
     },
@@ -118,7 +124,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.53.0",
-    "@raycast/utils": "^1.4.0",
+    "@raycast/utils": "^1.10.0",
     "lodash.get": "^4.4.2",
     "prettier": "^2.8.1",
     "run-applescript": "^6.1.0",

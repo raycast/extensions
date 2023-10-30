@@ -72,7 +72,7 @@ export default function Search(props: { searchType: SearchTypeEnum }) {
                     title="Pull Image"
                     onAction={() => pullImage(item.slug)}
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd"], key: "p" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                   />
                 </ActionPanel.Section>
               ) : null}

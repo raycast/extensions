@@ -1,5 +1,18 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2023-08-31
+
+ - Added pronunciation for Translate and Translate Form
+
+## [Fix] - 2023-08-16
+
+ - Fixed case when autodetect language name is not found in our supported languages list
+
+## [Fix] - 2023-08-09
+
+- Fixed auto language detect when detected language is not in the available list
+- Added Latin
+
 ## [Fix] - 2023-06-21
 
 - Supplementary change for zh-TW info to match Google Translate

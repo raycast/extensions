@@ -66,6 +66,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -77,12 +78,28 @@
   },
   "preferences": [
     {
+      "name": "host",
+      "description": "Your memo website domain.",
+      "placeholder": "https://demo.usememos.com",
+      "type": "textfield",
+      "required": false,
+      "title": "Host (memo >= 0.15.0)"
+    },
+    {
+      "name": "token",
+      "description": "Your token can be found in memo settings.",
+      "placeholder": "eyJh*******ZNTU",
+      "type": "textfield",
+      "required": false,
+      "title": "Token (memo >= 0.15.0)"
+    },
+    {
       "name": "openApi",
       "description": "Your Open API URL can be found in memo settings.",
       "placeholder": "https://demo.usememos.com/api/memo?openId=",
       "type": "textfield",
-      "required": true,
-      "title": "Open Api"
+      "required": false,
+      "title": "Open Api (memo < 0.15.0)"
     }
   ]
 }

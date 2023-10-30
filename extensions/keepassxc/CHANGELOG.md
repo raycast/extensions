@@ -1,5 +1,22 @@
 # KeepassXC Extension Changelog
 
+## [Fix] - 2023-10-23
+
+- Fixed a logic bug
+
+## [Enhancement] - 2023-10-21
+
+- Added Open URL action
+- Optimize performance: Using LocalStorage to cache entries and load entries from cache to improve load speed
+
+## [Fixes] - 2023-10-03
+
+- New feature/action "Paste TOTP" so as to be more productive
+- Respecting the KeePassXC shortcut logic as much as possible since cmd + P isn't an available custom shortcut anymore for extensions
+- Giving a tempory solution for the "Copy Password" (why? when the password contains a backslash, that action fails due to AppleScript in the protectedCopy function)
+- Updating the README.md accordingly
+- Using the build in Clipboard.Copy's concealed type 
+
 ## [Fix] - 2023-06-20
 
 - Fixed a logic bug

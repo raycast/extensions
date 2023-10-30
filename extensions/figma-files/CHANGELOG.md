@@ -1,5 +1,16 @@
 # Figma Files Changelog
 
+## [Improved search and filter options] - 2023-10-02
+
+- You can now search for projects.
+- The dropdown filter now lists all projects inside a team even when multiple teams are configured.
+
+## [Support for starring files, Grid UX improvements] - 2023-08-31
+
+- Added support for starring frequently accessed figma files. Max starred files limit is 10.
+- Added accessory icon in grid to identify files with branches.
+- Added tooltip on hover to view entire file names.
+
 ## [Support for opening file branches and improvements] - 2023-06-07
 
 - Added support for opening a specific branch of a file through the CMD+K menu.

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reminders",
+  "title": "Apple Reminders Beta",
+  "description": "Manage Apple Reminders.",
+  "icon": "icon.png",
+  "author": "thomaslombart",
+  "owner": "raycast",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "my-reminders",
+      "title": "My Reminders",
+      "subtitle": "Apple Reminders Beta",
+      "description": "View and complete your reminders.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "displayCompletionDate",
+          "type": "checkbox",
+          "required": false,
+          "label": "Display Completion Date",
+          "description": "When enabled, the completion date will be displayed as a list item accessory.",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "create-reminder",
+      "title": "Create Reminder",
+      "subtitle": "Apple Reminders Beta",
+      "description": "Create and prioritize new reminders.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Reminders",
+      "icon": "icon.png",
+      "subtitle": "Apple Reminders Beta",
+      "description": "Manage your reminders in the menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "displayMenuBarCount",
+          "type": "checkbox",
+          "title": "Count",
+          "label": "Display menu bar count",
+          "description": "When enabled, the number of reminders in the menu bar will be displayed",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "View",
+          "description": "Indicates which view you want to see in your menu bar."
+        }
+      ],
+      "interval": "10m"
+    },
+    {
+      "name": "quick-add-reminder",
+      "title": "Quick Add Reminder",
+      "subtitle": "Apple Reminders Beta",
+      "description": "Quickly add a reminder in Reminders.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": true,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Reminder",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "notes",
+          "placeholder": "Notes",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.0",
+    "date-fns": "^2.30.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.14.200",
+    "@types/node": "^20.8.7",
+    "@types/react": "^18.2.29",
+    "eslint": "^8.51.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

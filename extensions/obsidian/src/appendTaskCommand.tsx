@@ -12,13 +12,14 @@ import {
   useObsidianVaults,
   vaultPluginCheck,
 } from "./utils/utils";
+import { clearCache } from "./utils/data/cache";
 
 interface appendTaskArgs {
   text: string;
   dueDate: string;
 }
 
-export default function appendTask(props: { arguments: appendTaskArgs }) {
+export default function AppendTask(props: { arguments: appendTaskArgs }) {
   const { vaults, ready } = useObsidianVaults();
   const { text } = props.arguments;
   const { dueDate } = props.arguments;
@@ -27,33 +28,41 @@ export default function appendTask(props: { arguments: appendTaskArgs }) {
   const { appendTemplate, heading, notePath, noteTag, vaultName, silent } =
     getPreferenceValues<appendTaskPreferences>();
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState<string | null>(null);
+
   useEffect(() => {
     async function getContent() {
       const withTemplate = appendTemplate ? appendTemplate + text : text;
       const content = await applyTemplates(withTemplate);
       setContent(content);
     }
-    getContent();
-  }, []);
 
-  if (!ready || !content) {
-    return <List isLoading={true}></List>;
-  } else if (vaults.length === 0) {
+    getContent();
+  }, [appendTemplate, text]);
+
+  if (!ready || content === null) {
+    return <List isLoading={true} />;
+  }
+
+  if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   }
+
   if (vaultsWithoutPlugin.length > 0) {
     vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin);
   }
-  if (vaultsWithPlugin.length == 0) {
+
+  if (vaultsWithPlugin.length === 0) {
     return <AdvancedURIPluginNotInstalled />;
   }
+
   if (vaultName) {
     // Fail if selected vault doesn't have plugin
     if (!vaultsWithPlugin.some((v) => v.name === vaultName)) {
       return <AdvancedURIPluginNotInstalled vaultName={vaultName} />;
     }
   }
+
   if (!notePath) {
     // Fail if selected vault doesn't have plugin
     return <NoPathProvided />;
@@ -62,29 +71,41 @@ export default function appendTask(props: { arguments: appendTaskArgs }) {
   const tag = noteTag ? noteTag + " " : "";
 
   const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
-  // If there's a configured vault, or only one vault, use that
-  if (selectedVault || vaultsWithPlugin.length == 1) {
+  // If there's a configured vault or only one vault, use that
+  if (selectedVault || vaultsWithPlugin.length === 1) {
     const vaultToUse = selectedVault || vaultsWithPlugin[0];
-    const target = getObsidianTarget({
-      type: ObsidianTargetType.AppendTask,
-      path: notePath,
-      vault: vaultToUse,
-      text: "- [ ] " + tag + content + dateContent,
-      heading: heading,
-      silent: silent,
-    });
-    open(target);
-    popToRoot();
-    closeMainWindow();
+    const openObsidian = async () => {
+      const notePathExpanded = await applyTemplates(notePath);
+      const target = getObsidianTarget({
+        type: ObsidianTargetType.AppendTask,
+        path: notePathExpanded,
+        vault: vaultToUse,
+        text: "- [ ] " + tag + content + dateContent,
+        heading: heading,
+        silent: silent,
+      });
+      open(target);
+      clearCache();
+      popToRoot();
+      closeMainWindow();
+    };
+
+    // Render a loading state while the user selects a vault
+    if (vaults.length > 1 && !selectedVault) {
+      return <List isLoading={true} />;
+    }
+
+    // Call the function to open Obsidian when ready
+    openObsidian();
   }
 
-  // Otherwise let the user select a vault
+  // Otherwise, let the user select a vault
   return (
-    <List isLoading={vaultsWithPlugin === undefined}>
-      {vaultsWithPlugin?.map((vault) => (
+    <List isLoading={false}>
+      {vaultsWithPlugin.map((vault) => (
         <List.Item
-          title={vault.name}
           key={vault.key}
+          title={vault.name}
           actions={
             <ActionPanel>
               <Action.Open

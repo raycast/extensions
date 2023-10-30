@@ -1,7 +1,21 @@
 # Obsidian Changelog
 
+## [Update search starting sort] - 2023-10-12
+
+- Search now shows the most recent notes first
+
+## [Fix] - 2023-09-24
+
+- Filter out vault paths that don't actually exist.
+
+## [Menubar cache bug fixes] - 2023-09-15
+- Fixes a bug where the cache fallback would crash the extension
+
+## [Apply templates on task file name] - 2023-08-5
+- The Append Task command will now apply template placeholders to file name for dynamic file names
+
 ## [Bug fixes] - 2023-07-20
-- Fixes and issue where tags as objects woudl crash the plugin
+- Fixes and issue where tags as objects would crash the plugin
 
 ## [Add week placeholder] - 2023-07-14
 

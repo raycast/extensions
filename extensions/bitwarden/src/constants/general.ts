@@ -33,7 +33,6 @@ export const SHORTCUT_KEY_SEQUENCE: Keyboard.Shortcut["key"][] = [
   "7",
   "8",
   "9",
-  "a",
   "b",
   "c",
   "d",
