@@ -18,7 +18,7 @@ import { CalendarAccount } from "./types/account";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
-import { eventColors, filterMultipleOutDuplicateEvents, truncateEventSize } from "./utils/events";
+import { eventColors, truncateEventSize } from "./utils/events";
 import { parseEmojiField } from "./utils/string";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
@@ -98,8 +98,7 @@ export default function Command() {
     }
   );
 
-  // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-  const eventData = filterMultipleOutDuplicateEvents(eventsResponse);
+  const eventData = eventsResponse;
 
   const showDeclinedEvents = useMemo(() => {
     return !!currentUser?.settings.showDeclinedEvents;

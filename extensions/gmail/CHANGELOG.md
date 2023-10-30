@@ -1,5 +1,10 @@
 # Gmail Changelog
 
+## [Fix] - 2023-10-21
+
+- Logout if OAuth token refresh fail. This enable re-login
+- Catch exception if authorize fails
+
 ## [Menu] - 2023-09-16
 
 - Unread Menu Command: Mark clicked mails as read immediately to have a more intuitive counter in the menubar

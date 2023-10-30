@@ -30,7 +30,7 @@ const getPageDetail = async (url: string) => {
     const content = parsedDocument?.textContent;
     return { title: document.title, content: content ?? "" };
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 

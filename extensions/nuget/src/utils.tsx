@@ -25,6 +25,13 @@ export interface FetchResponse<T> {
   data: T;
 }
 
+export function IsNugetPreviewChannelRequested() {
+  const _preference = getPreferenceValues();
+  const nugetChannel = _preference["nuget-channel"];
+
+  return nugetChannel === "preview";
+}
+
 export function GetCommandForCli(_package: NugetPackage) {
   const _preference = getPreferenceValues();
   switch (_preference["command-to-copy"]) {

@@ -95,7 +95,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "Title/info (today 5pm p2)",
+          "placeholder": "Text (today 5pm p2)",
           "type": "text",
           "required": true
         },
