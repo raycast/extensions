@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
-import { SearchType, Word } from "./types";
-import { showToast, Toast } from "@raycast/api";
+import { SearchType, Word, Preferences } from "./types";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { URL, URLSearchParams } from "url";
 
 export async function searchWords(wordToSearch: string, type: SearchType): Promise<Word[]> {
@@ -10,6 +10,8 @@ export async function searchWords(wordToSearch: string, type: SearchType): Promi
     max: "50",
     [type]: wordToSearch,
   });
+
+  const { capitalizeResults } = getPreferenceValues<Preferences>();
 
   const url = new URL(`/words?${searchParams}`, "https://api.datamuse.com/words").toString();
 
@@ -28,6 +30,10 @@ export async function searchWords(wordToSearch: string, type: SearchType): Promi
   words.forEach((word) => {
     if (word.defs == undefined || !word.defs.length) {
       return;
+    }
+
+    if (capitalizeResults && wordToSearch[0] === wordToSearch[0].toUpperCase()) {
+      word.word = word.word[0].toUpperCase() + word.word.slice(1);
     }
 
     for (let i = 0; i < word.defs.length; i++) {

@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "rishabswift",
   "contributors": [
-    "thomas"
+    "thomas",
+    "bkeys818"
   ],
   "license": "MIT",
   "categories": [
@@ -24,6 +25,15 @@
         {"title": "Paste Word in Active App", "value": "paste"},
         {"title": "Copy Word to Clipboard", "value": "copy"}
       ]
+    },
+    {
+      "name": "capitalizeResults",
+      "description": "Whether or not a capitalized search will cause the results to be capitalized.",
+      "required": false,
+      "title": "Search Results",
+      "label": "Capitalize results when search is capitalized.",
+      "type": "checkbox",
+      "default": false
     }
   ],
   "commands": [
