@@ -1,3 +1,3 @@
 # Wifi Share QR-Code Changelog
 
-## [Initial Version] - 2023-09-21
+## [Initial Version] - 2023-10-30
