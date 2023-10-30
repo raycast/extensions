@@ -12,6 +12,7 @@ import {
 } from "../../hooks";
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
+import { CustomizeProperties } from "../CustomizeProperties";
 import { ActionSetVisibleProperties } from "../actions";
 
 import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
@@ -104,8 +105,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     return 0;
   }
 
-  type Quicklink = Action.CreateQuicklink.Props["quicklink"];
-  function getQuicklink(): Quicklink {
+  function getQuicklink() {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
     let name: string | undefined;
@@ -146,6 +146,12 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
               title="Create Deeplink to Command as Configured"
               quicklink={getQuicklink()}
               icon={Icon.Link}
+            />
+            <Action.Push
+              title="Customize Properties"
+              icon={Icon.BulletPoints}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              target={<CustomizeProperties />}
             />
           </ActionPanel.Section>
           {databaseView && setDatabaseView ? (

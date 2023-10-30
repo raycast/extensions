@@ -102,12 +102,12 @@
     "notion-to-md": "^3.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "eslint-plugin-import": "^2.29.0",
-    "prettier": "^3.0.3",
+    "@types/react": "18.2.33",
+    "eslint": "^8.52.0",
+      "eslint-plugin-import": "^2.29.0",
+      "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "scripts": {
