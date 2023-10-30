@@ -35,7 +35,12 @@ export default function Command() {
       setLoading(true);
 
       const url = values.url.trim();
-      const payload: Record<string, unknown> = { url, aFormat: values.aFormat, dubLang: false };
+      const payload: Record<string, unknown> = {
+        url,
+        aFormat: values.aFormat,
+        filenamePattern: preferences.filenamePattern,
+        dubLang: false,
+      };
 
       if (preferences.vimeoDownloadType === "dash") {
         payload.vimeoDash = true;
@@ -55,7 +60,7 @@ export default function Command() {
         }
       }
 
-      fetch(`${preferences.apiInstanceUrl}/api/json`, {
+      fetch(preferences.apiInstanceUrl + "/api/json", {
         headers: { "user-agent": "raycast-cobalt", "content-type": "application/json", accept: "application/json" },
         body: JSON.stringify(payload),
         method: "POST",
@@ -77,6 +82,10 @@ export default function Command() {
               setLoading(false);
               break;
           }
+        })
+        .catch((error) => {
+          showToast(Toast.Style.Failure, "An unexpected error occurred", error.toString());
+          setLoading(false);
         });
     },
     validation: {
