@@ -1,6 +1,6 @@
 # Uptime Kuma Changelog
 
-## [Enhacement] - 2023-10-30
+## [Enhancements] - 2023-10-30
 
 - Updated the README
 
