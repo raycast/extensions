@@ -15,13 +15,13 @@ interface GridItemProps {
   index: number;
   type: "tints" | "shades";
   apiResponse: ApiResponse;
-};
+}
 
 const CustomGridItem: React.FC<GridItemProps> = ({ colorKey, shade, hexCode, index, type, apiResponse }) => {
   let titleSuffix;
   let subtitle;
-  const gridTitle= hexCode.toUpperCase();
-  
+  const gridTitle = hexCode.toUpperCase();
+
   if (type === "tints") {
     titleSuffix = (10 - index) * 10;
     subtitle = `+${titleSuffix}%`;
@@ -54,16 +54,14 @@ const CustomGridItem: React.FC<GridItemProps> = ({ colorKey, shade, hexCode, ind
   );
 };
 
-
-
 export default function Command() {
   const [showForm, setShowForm] = useState<boolean>(true);
   const [apiResponse, setApiResponse] = useState<ApiResponse>({});
 
   async function handleSubmit({ name, hex }: { name: string; hex: string }) {
     const cleanedName = name.trim();
-    let cleanedHex = hex.trim().replace(/\s+/g, '').replace(/#/g, "");
-    
+    let cleanedHex = hex.trim().replace(/\s+/g, "").replace(/#/g, "");
+
     if (!cleanedName || !cleanedHex) {
       showToast({
         style: Toast.Style.Failure,
@@ -74,9 +72,8 @@ export default function Command() {
     if (cleanedHex.length > 6) {
       cleanedHex = cleanedHex.substring(0, 6);
     } else if (cleanedHex.length < 6) {
-      cleanedHex = cleanedHex.padEnd(6, 'f');
+      cleanedHex = cleanedHex.padEnd(6, "f");
     }
-
 
     try {
       const colorObject = generateTintsAndShades(cleanedHex);
@@ -196,14 +193,14 @@ const generateTintsAndShades = (colorHex: string): ColorObject | null => {
   const colorObject: ColorObject = { tints: {}, shades: {} };
   for (let i = 0; i <= 10; i++) {
     const factor = i / 10;
-    
-    colorObject.tints[`${(10-i) * 10}`] = rgbToHex(
+
+    colorObject.tints[`${(10 - i) * 10}`] = rgbToHex(
       getTint(color.r, factor),
       getTint(color.g, factor),
       getTint(color.b, factor)
     );
 
-    colorObject.shades[`${(10-i) * 10}`] = rgbToHex(
+    colorObject.shades[`${(10 - i) * 10}`] = rgbToHex(
       getShade(color.r, factor),
       getShade(color.g, factor),
       getShade(color.b, factor)
