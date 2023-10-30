@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vat-calculator",
+  "title": "VAT Calculator",
+  "description": "Quickly calculates the VAT of a given value. By default, uses 16%, but the percentage can be adjusted. You can input either a number or an equation",
+  "icon": "extensionicon.png",
+  "author": "justiniscoding",
+  "categories": [
+    "Productivity",
+    "Data",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "vat",
+      "title": "Calculate VAT",
+      "description": "Calculates the VAT of the given number",
+      "mode": "view"
+    }
+  ],
+  "preferences":[
+    {
+        "name":"vat",
+        "description":"The percentage to use for VAT in the calculator",
+        "type":"textfield",
+        "required":true,
+        "title":"VAT Percentage",
+        "default":"16"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
