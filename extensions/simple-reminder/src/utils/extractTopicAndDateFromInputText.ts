@@ -10,7 +10,7 @@ export function extractTopicAndDateFromInputText(inputText: string) {
   });
   const { text: timeText } = chrono.parse(inputText, new Date())[0];
   const dateTimeRelatedTokens = tokenizer.tokenize(timeText);
-  const inputTextTokens = tokenizer.tokenize(inputText.replace(EXCLUDED_INITIAL_TOKENS_REGEX, ''));
+  const inputTextTokens = tokenizer.tokenize(inputText.replace(EXCLUDED_INITIAL_TOKENS_REGEX, ""));
 
   const tokensToRemoveForTopic = [...dateTimeRelatedTokens];
   const extractedTopicTokens = inputTextTokens.filter((token) => !tokensToRemoveForTopic.includes(token));
