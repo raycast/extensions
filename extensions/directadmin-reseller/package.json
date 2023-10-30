@@ -63,6 +63,13 @@
       "subtitle": "DirectAdmin Reseller",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "databases",
+      "title": "Databases",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {

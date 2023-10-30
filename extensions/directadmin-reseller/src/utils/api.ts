@@ -1,6 +1,10 @@
 import { Toast, showToast } from "@raycast/api";
 import {
+  CreateDatabaseRequest,
   CreateNewDomainRequest,
+  CreateSubdomainRequest,
+  DeleteDatabaseRequest,
+  DeleteSubdomainRequest,
   ErrorResponse
 } from "../types";
 import fetch, { Response } from "node-fetch";
@@ -110,4 +114,21 @@ export async function createDomain(body: CreateNewDomainRequest) {
 }
 export async function getSubdomains(domain: string) {
   return await callApi("SUBDOMAINS", "Fetching Subdomains", { domain });
+}
+export async function createSubdomain(body: CreateSubdomainRequest) {
+  return await callApi("SUBDOMAINS", "Creating Subdomain", body);
+}
+export async function deleteSubdomain(body: DeleteSubdomainRequest) {
+  return await callApi("SUBDOMAINS", "Deleting Subdomain", body);
+}
+
+// Databases
+export async function getDatabases() {
+  return await callApi("DATABASES", "Fetching Databases");
+}
+export async function createDatabase(body: CreateDatabaseRequest) {
+  return await callApi("DATABASES", "Creating Databases", body);
+}
+export async function deleteDatabase(body: DeleteDatabaseRequest) {
+  return await callApi("DATABASES", "Deleting Database", body);
 }

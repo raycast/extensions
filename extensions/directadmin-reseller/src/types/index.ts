@@ -164,6 +164,34 @@ export type CreateNewDomainRequest = {
     cgi: "ON" | "OFF";
     php: "ON" | "OFF";
 }
+export type CreateSubdomainFormValues = {
+    subdomain: string;
+}
+export type CreateSubdomainRequest = {
+    action: "create";
+    domain: string;
+    subdomain: string;
+}
+export type DeleteSubdomainRequest = {
+    action: "delete";
+    domain: string;
+    select0: string;
+    contents: "yes" | "no";
+}
+
+// DATABASES
+export type GetDatabasesResponse = ListResponse;
+export type CreateDatabaseRequest = {
+    action: "create";
+    name: string;
+    user: string;
+    passwd: string;
+    passwd2: string;
+}
+export type DeleteDatabaseRequest = {
+    action: "delete";
+    select0: string;
+}
 
 export type SuccessResponse = {
     error: "0";

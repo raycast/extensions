@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import {  createDomain, getDomains, getSubdomains } from "./utils/api";
-import { CreateNewDomainFormValues, GetDomainsResponse, GetUserPackageInformationResponse, GetUserPackagesResponse, ListResponse, SuccessResponse } from "./types";
-import { Action, ActionPanel, Color, Detail, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import {  createDomain, createSubdomain, deleteSubdomain, getDomains, getSubdomains } from "./utils/api";
+import { CreateNewDomainFormValues, CreateSubdomainFormValues, GetDomainsResponse, SuccessResponse } from "./types";
+import { Action, ActionPanel, Alert, Color, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 
 export default function Domains() {
@@ -99,6 +99,8 @@ type GetSubdomainsProps = {
     domain: string;
 }
 function GetSubdomains({ domain }: GetSubdomainsProps) {
+    const { push } = useNavigation();
+    
     const [isLoading, setIsLoading] = useState(true);
     const [subdomains, setSubdomains] = useState<string[]>();
 
@@ -119,7 +121,78 @@ function GetSubdomains({ domain }: GetSubdomainsProps) {
         getFromApi();
     }, [])
 
+    async function confirmAndDeleteSubdomain(subdomain: string) {
+        if (
+            await confirmAlert({
+                title: `Delete subdomain '${subdomain}'?`,
+                message: "This action cannot be undone.",
+                icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
+                primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive }
+            })
+        ) {
+            let removeContents = false;
+            if (
+                await confirmAlert({
+                    title: "Remove directory and contents?",
+                    icon: Icon.QuestionMark,
+                    primaryAction: { title: "Yes" },
+                    dismissAction: { title: "No" }
+                })
+            ) removeContents = true;
+
+            const response = await deleteSubdomain({ action: "delete", domain, select0: subdomain, contents: removeContents ? "yes" : "no" })
+            if (response.error==="0") {
+                const data = response as SuccessResponse;
+                await showToast(Toast.Style.Success, data.text, data.details);
+                await getFromApi();
+            }
+        }
+    }
+
     return <List navigationTitle="Get Subdomains" isLoading={isLoading}>
-        {subdomains && subdomains.map(subdomain => <List.Item key={subdomain} title={subdomain} subtitle={`.${domain}`} icon={getFavicon(`https://${subdomain}.${domain}`, { fallback: Icon.Globe })} />)}
+        {subdomains && subdomains.map(subdomain => <List.Item key={subdomain} title={subdomain} subtitle={`.${domain}`} icon={getFavicon(`https://${subdomain}.${domain}`, { fallback: Icon.Globe })} actions={<ActionPanel>
+            <Action title="Delete Subdomain" icon={Icon.DeleteDocument} style={Action.Style.Destructive} onAction={() => confirmAndDeleteSubdomain(subdomain)} />
+            <ActionPanel.Section>
+                <Action title="Create Subdomain" icon={Icon.Plus} onAction={() => push(<CreateSubdomain domain={domain} onSubdomainCreated={getFromApi} />)} />
+            </ActionPanel.Section>
+        </ActionPanel>} />)}
+        {!isLoading && <List.Section title="Actions">
+            <List.Item title="Create New Subdomain" icon={Icon.Plus} actions={<ActionPanel>
+                <Action title="Create New Subdomain" icon={Icon.Plus} onAction={() => push(<CreateSubdomain domain={domain} onSubdomainCreated={getFromApi} />)} />
+            </ActionPanel>} />
+        </List.Section>}
     </List>
+}
+
+type CreateSubdomainProps = {
+    domain: string;
+    onSubdomainCreated: () => void;
+}
+function CreateSubdomain({ domain, onSubdomainCreated }: CreateSubdomainProps) {
+    const { pop } = useNavigation();
+
+    const { handleSubmit, itemProps } = useForm<CreateSubdomainFormValues>({
+        async onSubmit(values) {
+            const { subdomain } = values;
+            const response = await createSubdomain({ subdomain, domain, action: "create" });
+
+            if (response.error==="0") {
+                const data = response as SuccessResponse;
+                await showToast(Toast.Style.Success, data.text, data.details);
+                onSubdomainCreated();
+                pop();
+            }
+        },
+        validation: {
+          subdomain: FormValidation.Required
+        },
+      });
+
+    return <Form navigationTitle="Create Subdomain" actions={<ActionPanel>
+        <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
+    </ActionPanel>}>
+        <Form.Description title="Domain" text={domain} />
+        <Form.TextField title="Subdomain" placeholder="dash" {...itemProps.subdomain} />
+        <Form.Description text={`${itemProps.subdomain.value}.${domain}`} />
+    </Form>
 }
