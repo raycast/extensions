@@ -38,7 +38,6 @@ export default function Command() {
     { id: "1", name: "Unwatched Videos" },
     { id: "2", name: "Watched Videos" },
     { id: "3", name: "Videos" },
-
   ];
 
   const filterMap = {
