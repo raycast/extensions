@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, getSelectedText } from "@raycast/api";
+import { Action, ActionPanel, Detail, Toast, getSelectedText, popToRoot, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import UAParser from "ua-parser-js";
 
@@ -34,7 +34,7 @@ function renderMarkdown(parserResult: UAParser.IResult) {
     hasContent(browser) && section("Browser", bold(filteredWords(browser.name, browser.version))),
     hasContent(engine) && section("Browser Engine", bold(filteredWords(engine.name, engine.version))),
     hasContent(cpu) && section("CPU Architecture", bold(filteredWords(cpu.architecture))),
-    section("User Agent", "`" + ua + "`"),
+    section("From Selected Text", "`" + ua + "`"),
     isEmpty && "Empty user agent",
   );
 }
@@ -44,11 +44,13 @@ export default function CheckUserAgent() {
 
   useEffect(() => {
     (async () => {
-      const data =
-        process.env.NODE_ENV === "development"
-          ? "Mozilla/5.0 (Linux; Android 11; Pixel 4a Build/RP1A.200720.005; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/84.0.4147.111 Mobile Safari/537.36"
-          : await getSelectedText();
-      setInput(data);
+      try {
+        const data = await getSelectedText();
+        setInput(data);
+      } catch {
+        showToast(Toast.Style.Failure, "Unable to get selected text");
+        popToRoot();
+      }
     })();
   }, []);
 
@@ -60,7 +62,7 @@ export default function CheckUserAgent() {
   return (
     <Detail
       isLoading={input === undefined}
-      markdown={markdown}
+      markdown={input === undefined ? "" : markdown}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy as JSON" content={JSON.stringify(parserResults, null, 2)} />
@@ -69,3 +71,5 @@ export default function CheckUserAgent() {
     />
   );
 }
+
+// Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8 rv:3.0; ET) AppleWebKit/537.0.0 (KHTML, like Gecko) Version/5.1.6 Safari/537.0.0
