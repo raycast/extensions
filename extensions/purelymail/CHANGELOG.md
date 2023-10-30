@@ -1,6 +1,6 @@
 # Purelymail Changelog
 
-## [Added Billing and App Password Endpoints] - {PR_MERGE_DATE}
+## [Added Billing and App Password Endpoints] - 2023-10-30
 
 ### Enhancements
 
