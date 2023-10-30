@@ -73,12 +73,12 @@ export default function ModifyPackage({ package: packageItem, onPackageModified 
         </ActionPanel>
       }
     >
-      <Form.TextField title="Disk Space" placeholder="1000" {...itemProps.diskSpace} />
-      <Form.TextField title="Bandwidth" placeholder="1000" {...itemProps.bandwidth} />
+      <Form.TextField title="Disk Space (MB)" placeholder="0 = Unlimited" {...itemProps.diskSpace} />
+      <Form.TextField title="Bandwidth (MB)" placeholder="0 = Unlimited" {...itemProps.bandwidth} />
       <Form.TextField title="Databases" placeholder="1" {...itemProps.dataBases} />
       <Form.TextField title="FTP Accounts" placeholder="1" {...itemProps.ftpAccounts} />
       <Form.TextField title="Email Accounts" placeholder="1" {...itemProps.emails} />
-      <Form.TextField title="Allowed Domains" placeholder="1" {...itemProps.allowedDomains} />
+      <Form.TextField title="Allowed Domains" placeholder="0 = Unlimited" {...itemProps.allowedDomains} />
       <Form.Checkbox label="API Access" {...itemProps.api} />
       <Form.Checkbox label="Allow Full Domain" {...itemProps.allowFullDomain} />
     </Form>

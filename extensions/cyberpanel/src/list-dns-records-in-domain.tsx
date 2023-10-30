@@ -92,6 +92,7 @@ export default function ListDNSRecordsInDomain(props: LaunchProps<{ arguments: A
               }
               actions={
                 <ActionPanel>
+                  <Action.CopyToClipboard title="Copy as JSON" content={JSON.stringify(dnsRecord)} />
                   <ActionPanel.Section>
                     <Action
                       title="Delete DNS Record"

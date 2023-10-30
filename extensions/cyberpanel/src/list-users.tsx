@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { deleteUser, listUsers } from "./utils/api";
 import { useEffect, useState } from "react";
 import { ListUsersResponse, User } from "./types/users";
@@ -78,6 +89,7 @@ export default function ListUsers() {
             }
             actions={
               <ActionPanel>
+                <Action.CopyToClipboard title="Copy as JSON" icon={Icon.Clipboard} content={JSON.stringify(user)} />
                 <Action
                   title="Modify User"
                   icon={Icon.Pencil}

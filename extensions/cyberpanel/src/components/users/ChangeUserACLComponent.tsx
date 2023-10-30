@@ -34,7 +34,12 @@ export default function ChangeUserACL({ user, onACLChanged }: ChangeUserACLProps
       }
     >
       <Form.Description title="Username" text={user.userName} />
-      <Form.TextField title="New ACL" placeholder="admin" {...itemProps.selectedACL} />
+      <Form.TextField
+        title="New ACL"
+        placeholder="user | admin | custom"
+        info="Access Control Level"
+        {...itemProps.selectedACL}
+      />
     </Form>
   );
 }

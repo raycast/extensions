@@ -46,7 +46,12 @@ export default function CreateUser({ onUserCreated }: CreateUserProps) {
       <Form.TextField title="Username" placeholder="raycast" {...itemProps.userName} />
       <Form.PasswordField title="Password" placeholder="hunter2" {...itemProps.password} />
       <Form.TextField title="Websites Limit" placeholder="50" {...itemProps.websitesLimit} />
-      <Form.TextField title="Selected ACL" placeholder="User" {...itemProps.selectedACL} />
+      <Form.TextField
+        title="Selected ACL"
+        placeholder="user | admin | custom"
+        info="Access Control Level"
+        {...itemProps.selectedACL}
+      />
     </Form>
   );
 }

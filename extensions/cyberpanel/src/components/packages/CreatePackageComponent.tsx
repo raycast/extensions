@@ -26,27 +26,27 @@ export default function CreatePackage({ onPackageCreated }: CreatePackageProps) 
       packageName: FormValidation.Required,
       diskSpace(value) {
         if (!value) return "The item is required";
-        else if (!Number(value)) return "The item must be a number";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       bandwidth(value) {
         if (!value) return "The item is required";
-        else if (!Number(value)) return "The item must be a number";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       dataBases(value) {
         if (!value) return "The item is required";
-        else if (!Number(value)) return "The item must be a number";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       ftpAccounts(value) {
         if (!value) return "The item is required";
-        else if (!Number(value)) return "The item must be a number";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       emails(value) {
         if (!value) return "The item is required";
-        else if (!Number(value)) return "The item must be a number";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
       allowedDomains(value) {
         if (!value) return "The item is required";
-        else if (!Number(value)) return "The item must be a number";
+        else if (!Number(value) && value !== "0") return "The item must be a number";
       },
     },
   });
@@ -60,12 +60,12 @@ export default function CreatePackage({ onPackageCreated }: CreatePackageProps) 
       }
     >
       <Form.TextField title="Package Name" placeholder="SingleWebsite" {...itemProps.packageName} />
-      <Form.TextField title="Disk Space" placeholder="1000" {...itemProps.diskSpace} />
-      <Form.TextField title="Bandwidth" placeholder="1000" {...itemProps.bandwidth} />
+      <Form.TextField title="Disk Space (MB)" placeholder="0 = Unlimited" {...itemProps.diskSpace} />
+      <Form.TextField title="Bandwidth (MB)" placeholder="0 = Unlimited" {...itemProps.bandwidth} />
       <Form.TextField title="Databases" placeholder="1" {...itemProps.dataBases} />
       <Form.TextField title="FTP Accounts" placeholder="1" {...itemProps.ftpAccounts} />
       <Form.TextField title="Email Accounts" placeholder="1" {...itemProps.emails} />
-      <Form.TextField title="Allowed Domains" placeholder="1" {...itemProps.allowedDomains} />
+      <Form.TextField title="Allowed Domains" placeholder="0 = Unlimited" {...itemProps.allowedDomains} />
       <Form.Checkbox label="API Access" {...itemProps.api} />
       <Form.Checkbox label="Allow Full Domain" {...itemProps.allowFullDomain} />
     </Form>

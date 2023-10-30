@@ -78,10 +78,20 @@ export default function ListPackages() {
                     <List.Item.Detail.Metadata.Label title="Package Name" text={packageItem.packageName} />
                     <List.Item.Detail.Metadata.Label
                       title="Allowed Domains"
-                      text={packageItem.allowedDomains.toString()}
+                      text={
+                        packageItem.allowedDomains.toString() === "0"
+                          ? "Unlimited"
+                          : packageItem.allowedDomains.toString()
+                      }
                     />
-                    <List.Item.Detail.Metadata.Label title="Bandwidth" text={packageItem.bandwidth.toString()} />
-                    <List.Item.Detail.Metadata.Label title="Disk Space" text={packageItem.diskSpace.toString()} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Bandwidth"
+                      text={packageItem.bandwidth.toString() === "0" ? "Unlimited" : packageItem.bandwidth.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Disk Space"
+                      text={packageItem.diskSpace.toString() === "0" ? "Unlimited" : packageItem.diskSpace.toString()}
+                    />
                     <List.Item.Detail.Metadata.Label
                       title="Email Accounts"
                       text={packageItem.emailAccounts.toString()}
