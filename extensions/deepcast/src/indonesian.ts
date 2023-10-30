@@ -1,7 +1,6 @@
+import { LaunchProps } from "@raycast/api";
 import { translate } from "./utils";
 
-const Indonesian = async () => {
-  await translate("ID");
-  return null;
-};
-export default Indonesian;
+export default async function Indonesian(props: LaunchProps) {
+  await translate("ID", props.fallbackText);
+}

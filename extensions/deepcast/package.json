@@ -254,6 +254,140 @@
       "type": "password"
     },
     {
+      "name": "defaultTargetLanguage",
+      "type": "dropdown",
+      "title": "Default Target Language",
+      "description": "Choose a default target language.",
+      "required": true,
+      "data": [
+        {
+          "title": "Bulgarian",
+          "value": "BG"
+        },
+        {
+          "title": "Chinese",
+          "value": "ZH"
+        },
+        {
+          "title": "Czech",
+          "value": "CS"
+        },
+        {
+          "title": "Danish",
+          "value": "DA"
+        },
+        {
+          "title": "Dutch",
+          "value": "NL"
+        },
+        {
+          "title": "English (UK)",
+          "value": "EN-GB"
+        },
+        {
+          "title": "English (US)",
+          "value": "EN-US"
+        },
+        {
+          "title": "Estonian",
+          "value": "ET"
+        },
+        {
+          "title": "Finnish",
+          "value": "FI"
+        },
+        {
+          "title": "French",
+          "value": "FR"
+        },
+        {
+          "title": "German",
+          "value": "DE"
+        },
+        {
+          "title": "Greek",
+          "value": "EL"
+        },
+        {
+          "title": "Hungarian",
+          "value": "HU"
+        },
+        {
+          "title": "Italian",
+          "value": "IT"
+        },
+        {
+          "title": "Japanese",
+          "value": "JA"
+        },
+        {
+          "title": "Latvian",
+          "value": "LV"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "LT"
+        },
+        {
+          "title": "Polish",
+          "value": "PL"
+        },
+        {
+          "title": "Portuguese",
+          "value": "PT-PT"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "PT-BR"
+        },
+        {
+          "title": "Romanian",
+          "value": "RO"
+        },
+        {
+          "title": "Russian",
+          "value": "RU"
+        },
+        {
+          "title": "Slovak",
+          "value": "SK"
+        },
+        {
+          "title": "Slovenian",
+          "value": "SL"
+        },
+        {
+          "title": "Spanish",
+          "value": "ES"
+        },
+        {
+          "title": "Swedish",
+          "value": "SV"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "UK"
+        },
+        {
+          "title": "Indonesian",
+          "value": "ID"
+        },
+        {
+          "title": "Korean",
+          "value": "KO"
+        },
+        {
+          "title": "Norwegian (Bokmål)",
+          "value": "NB"
+        },
+        {
+          "title": "Turkish",
+          "value": "TR"
+        }
+      ],
+      "default": "EN-US"
+    },
+    {
       "name": "source",
       "type": "dropdown",
       "title": "Preferred Source",
@@ -294,14 +428,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
+    "@raycast/api": "^1.60.1",
     "@types/got": "^9.6.12",
     "got": "^11.8.2",
     "http-status-codes": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.6",
-    "eslint": "^8.50.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^4.7.4"
   },
