@@ -1234,5 +1234,131 @@
     "command": "git whatchanged -p --abbrev-commit --pretty=medium",
     "description": "Shows the changes made in each commit along with their summaries.",
     "type": "show"
+  },
+  {
+    "name": "ggpnp",
+    "command": "ggl && ggp",
+    "description": "Pull changes from the remote repository for the current branch and push your changes to the remote repository.",
+    "type": "default"
+  },
+  {
+    "name": "ggpur",
+    "command": "git pull --rebase origin $(current_branch)",
+    "description": "Pull changes from the remote repository for the current branch and rebase your changes on top of it.",
+    "type": "default"
+  },
+  {
+    "name": "gbsn",
+    "command": "git bisect new",
+    "description": "Start a git bisect session to find the commit that introduced a bug",
+    "type": "default"
+  },
+  {
+    "name": "gbso",
+    "command": "git bisect old",
+    "description": "Mark a commit as not containing the bug being bisected",
+    "type": "default"
+  },
+  {
+    "name": "gbm",
+    "command": "git branch --move",
+    "description": "Rename a git branch",
+    "type": "default"
+  },
+  {
+    "name": "gccd",
+    "command": "git clone --recurse-submodules \"$@\" && cd \"$(basename $_ .git)\"",
+    "description": "Clone a Git repository recursively and change to the new directory",
+    "type": "default"
+  },
+  {
+    "name": "gdv",
+    "command": "git diff -w \"$@\" | view -",
+    "description": "Show diff output for files in the working tree through an external pager",
+    "type": "show"
+  },
+  {
+    "name": "gdnolock",
+    "command": "git diff $@ \":(exclude)package-lock.json\" \":(exclude)\\*.lock\"",
+    "description": "Show diff output excluding package-lock.json and other lock files",
+    "type": "show"
+  },
+  {
+    "name": "gprv",
+    "command": "git pull --rebase -v",
+    "description": "Pull with rebase from the remote repository verbosely",
+    "type": "default"
+  },
+  {
+    "name": "gpra",
+    "command": "git pull --rebase --autostash",
+    "description": "Pull with rebase from the remote repository, stashing local changes",
+    "type": "default"
+  },
+  {
+    "name": "gprav",
+    "command": "git pull --rebase --autostash -v",
+    "description": "Pull with rebase from remote verbosely, stashing local changes",
+    "type": "default"
+  },
+  {
+    "name": "gprom",
+    "command": "git pull --rebase origin $(git_main_branch)",
+    "description": "Pull main branch from origin with rebase",
+    "type": "default"
+  },
+  {
+    "name": "gpromi",
+    "command": "git pull --rebase=interactive origin $(git_main_branch)",
+    "description": "Interactively rebase main branch from origin",
+    "type": "default"
+  },
+  {
+    "name": "ggl",
+    "command": "git pull origin $(current_branch)",
+    "description": "Pull the current branch from origin",
+    "type": "default"
+  },
+  {
+    "name": "ggf",
+    "command": "git push --force origin $(current_branch)",
+    "description": "Force push the current branch to origin",
+    "type": "default"
+  },
+  {
+    "name": "ggfl",
+    "command": "git push --force-with-lease origin $(current_branch)",
+    "description": "Force push the current branch to origin if you have the latest changes",
+    "type": "default"
+  },
+  {
+    "name": "ggp",
+    "command": "git push origin $(current_branch)",
+    "description": "Push the current branch to origin",
+    "type": "default"
+  },
+  {
+    "name": "grhk",
+    "command": "git reset --keep",
+    "description": "Reset the index preserving working tree changes",
+    "type": "default"
+  },
+  {
+    "name": "grhs",
+    "command": "git reset --soft",
+    "description": "Soft reset the index to a commit, keeping changes",
+    "type": "default"
+  },
+  {
+    "name": "gstu",
+    "command": "git stash --include-untracked",
+    "description": "Stash including untracked files",
+    "type": "default"
+  },
+  {
+    "name": "gta",
+    "command": "git tag --annotate",
+    "description": "Annotate a tag with the tagger name, email, date, and message",
+    "type": "show"
   }
 ]
