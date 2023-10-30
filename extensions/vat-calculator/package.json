@@ -3,7 +3,7 @@
   "name": "vat-calculator",
   "title": "VAT Calculator",
   "description": "Quickly calculates the VAT of a given value. By default, uses 16%, but the percentage can be adjusted. You can input either a number or an equation",
-  "icon": "extensionicon.png",
+  "icon": "vaticon.png",
   "author": "justiniscoding",
   "categories": [
     "Productivity",
