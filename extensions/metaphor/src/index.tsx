@@ -4,14 +4,14 @@ import { getFavicon } from "@raycast/utils";
 import Metaphor from "metaphor-node";
 import { Preferences, Result } from "./type";
 
-const apikey = getPreferenceValues<Preferences>().MetaphorAPIKey;
-// console.log(apikey)
-const metaphor = new Metaphor(apikey);
+const prefs = getPreferenceValues<Preferences>();
+const metaphor = new Metaphor(prefs.MetaphorAPIKey);
+// console.log(prefs.MetaphorAPIKey);
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<Result[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (timerRef.current) {
@@ -23,7 +23,7 @@ export default function Command() {
     }, 800);
 
     const searchArticles = async () => {
-      setLoading(true); //
+      setLoading(false); //
       try {
         const response = await metaphor.search(searchText, {
           numResults: 10,

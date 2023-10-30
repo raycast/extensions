@@ -9,13 +9,13 @@ Feel easy to contribute to this project.
 
 Open Raycast window and call "Search Metaphor".
 
-![Search Metaphor](./metadate/../metadata/metaphor-1.png)
+![Search Metaphor](./metadata/metaphor-1.png)
 
 ## Search Similar
 
 Open the Raycast window and trigger "Search Similar". Paste the URL link.
 
-![Search Metaphor](./metadate/../metadata/metaphor-2.png)
+![Search Metaphor](./metadata/metaphor-2.png)
 
 ## Install Manully
 
