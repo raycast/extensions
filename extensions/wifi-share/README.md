@@ -1,4 +1,4 @@
-# wifi_share
+# Wifi Share QR-Code
 
 Share the wifi qr code to others to join network
 
