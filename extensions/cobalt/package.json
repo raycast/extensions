@@ -24,7 +24,7 @@
   "preferences": [
     {
       "name": "downloadDirectory",
-      "title": "Download directory",
+      "title": "Download Directory",
       "description": "Where Cobalt should save downloaded files.",
       "default": "~/Downloads",
       "type": "directory",
@@ -41,7 +41,7 @@
     },
     {
       "name": "filenamePattern",
-      "title": "File name style",
+      "title": "File Name Style",
       "description": "How downloaded files should be named.\n\nClassic: Default file name pattern.\nBasic: Title and basic info in brackets.\nPretty: Title and info in brackets.\nNerdy: Title and all info in brackets.\n\nSome services don't support rich file names and will always use the classic style.",
       "type": "dropdown",
       "required": false,
@@ -67,7 +67,7 @@
     },
     {
       "name": "vimeoDownloadType",
-      "title": "Vimeo download type",
+      "title": "Vimeo Download Type",
       "description": "Progressive: Direct file link to Vimeo's CDN. Max quality is 1080p.\nDash: Video and audio are merged into one file. Max quality is 4K.\n\nPick progressive if you want the best editor/player/social media compatibility.\nIf progressive download isn't available, dash is used instead.",
       "type": "dropdown",
       "required": false,
@@ -85,7 +85,7 @@
     },
     {
       "name": "notifyOnDownload",
-      "label": "Notify on successful download",
+      "label": "Notify on Successful Download",
       "description": "Sends you a notification when your download is complete.",
       "type": "checkbox",
       "required": false,
@@ -93,21 +93,21 @@
     },
     {
       "name": "removeTikTokWatermark",
-      "label": "Remove TikTok and Douyin watermarks",
+      "label": "Remove TikTok and Douyin Watermarks",
       "description": "Whether downloaded TikTok & Douyin videos should have watermarks removed.",
       "type": "checkbox",
       "required": false
     },
     {
       "name": "downloadOriginalTikTokSound",
-      "label": "Use original TikTok audio",
+      "label": "Use Original TikTok Audio",
       "description": "Downloads the original sound used in the TikTok video without any additional changes by the post's author.",
       "type": "checkbox",
       "required": false
     },
     {
       "name": "muteVideoAudio",
-      "label": "Mute video audio",
+      "label": "Mute Video Audio",
       "description": "Disable the audio track in video downloads.",
       "type": "checkbox",
       "required": false
