@@ -7,4 +7,4 @@ Quick Interact with FSNotes from Raycast.
 
 Search and Preview markdown files
 
-![Search FSNotes](./metadate/../metadata/fsnotes-1.png)
+![Search FSNotes](./metadata/fsnotes-1.png)
