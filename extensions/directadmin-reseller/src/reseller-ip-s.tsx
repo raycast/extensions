@@ -12,7 +12,7 @@ export default function ResellerIPs() {
     async function getFromApi() {
         setIsLoading(true)
         const response = await getResellerIPs();
-        if (!("error" in response)) {
+        if (response.error==="0") {
             const data = response as GetResellerIPsResponse;
             const { list } = data;
             setResellerIPs(list);
@@ -42,7 +42,7 @@ function GetResellerIPInformation({ ip }: GetResellerIPInformationProps) {
     async function getFromApi() {
         setIsLoading(true)
         const response = await getResellerIPInformation(ip);
-        if (!("error" in response)) {
+        if (response.error==="0") {
             const data = response as GetResellerIPInformationResponse;
             setResellerIPInfo(data);
 

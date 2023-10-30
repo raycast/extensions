@@ -110,7 +110,66 @@ export type GetResellerIPInformationResponse = {
 
 export type GetResellerUserAccountsResponse = ListResponse;
 
-// export type SuccessResponse = GetResellerIPResponse | GetResellerIPsResponse;
+// PACKAGES
+export type GetUserPackagesResponse = ListResponse;
+export type GetUserPackageInformationResponse = {
+    aftp: "OFF" | "ON";
+    bandwidth: "OFF" | "ON";
+    catchall: "OFF" | "ON";
+    cgi: string;
+    cron: string;
+    dnscontrol: string;
+    domainptr: string;
+    ftp: string;
+    inode: string;
+    language: string;
+    login_keys: string;
+    mysql: string;
+    nemailf: string;
+    nemailml: string;
+    nemailr: string;
+    nemails: string;
+    nsubdomains: string;
+    php: string;
+    quota: string;
+    skin: string;
+    spam: string;
+    ssh: string;
+    ssl: string;
+    suspend_at_limit: string;
+    sysinfo: string;
+    vdomains: string;
+}
+
+// DOMAINS
+export type GetDomainsResponse = ListResponse;
+export type CreateNewDomainFormValues = {
+    domain: string;
+    bandwidth?: string;
+    ubandwidth?: boolean;
+    quota?: string;
+    uquota?: boolean;
+    ssl: boolean;
+    cgi: boolean;
+    php: boolean;
+}
+export type CreateNewDomainRequest = {
+    action: "create";
+    domain: string;
+    bandwidth?: string;
+    ubandwidth?: boolean;
+    quota?: string;
+    uquota?: boolean;
+    ssl: "ON" | "OFF";
+    cgi: "ON" | "OFF";
+    php: "ON" | "OFF";
+}
+
+export type SuccessResponse = {
+    error: "0";
+    text: string;
+    details: string;
+};
 export type ErrorResponse = {
     error: "1";
     text: string;

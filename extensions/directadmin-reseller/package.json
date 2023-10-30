@@ -49,6 +49,20 @@
       "subtitle": "DirectAdmin Reseller",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "user-packages",
+      "title": "User Packages",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {

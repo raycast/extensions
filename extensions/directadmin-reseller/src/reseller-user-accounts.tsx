@@ -14,7 +14,7 @@ export default function GetAccounts() {
     async function getFromApi() {
         setIsLoading(true);
         const response = await getResellerUserAccounts(RESELLER_USERNAME);
-        if (!("error" in response)) {
+        if (response.error==="0") {
             const data = response as GetResellerUserAccountsResponse;
             const { list } = data;
             setUsers(list);
@@ -46,7 +46,7 @@ function GetUserUsage({ user }: GetUserUsageProps) {
     async function getFromApi() {
         setIsLoading(true)
         const response = await getUserUsage(user);
-        if (!("error" in response)) {
+        if (response.error==="0") {
             const data = response as GetUserUsageResponse;
             setUsage(data);
 
@@ -92,7 +92,7 @@ function GetUserConfig({ user }: GetUserConfigProps) {
     async function getFromApi() {
         setIsLoading(true)
         const response = await getUserConfig(user);
-        if (!("error" in response)) {
+        if (response.error==="0") {
             const data = response as GetUserConfigResponse;
             setConfig(data);
             await showToast(Toast.Style.Success, "SUCCESS", "Fetched User Config");
@@ -119,7 +119,7 @@ function GetUserDomains({ user }: GetUserDomainsProps) {
     async function getFromApi() {
         setIsLoading(true)
         const response = await getUserDomains(user);
-        if (!("error" in response)) {
+        if (response.error==="0") {
             const data: GetUserDomainsResponse = {};
             Object.entries(response).map(([key, val]) => {
                 const vals = val as string;
