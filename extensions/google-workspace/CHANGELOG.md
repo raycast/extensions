@@ -1,5 +1,9 @@
 # Google Workspace Changelog
 
+## [Fix opening link from Search Google Drive Files command]
+
+Previously, there was a problem where links would open under the incorrect Google account. This issue has been resolved, ensuring that links now open with the correct Google account.
+
 ## [Fix Google Spreadsheets creation command] - 2023-03-12
 
 Fix the `Create Google Spreadsheet` command to use the authenticated user.

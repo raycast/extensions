@@ -25,9 +25,9 @@ export function useCommands() {
     for (const command of commandObjs) {
       const newCommand = { ...command };
       if (!command.id || (command.id && command.id.trim().length == 0)) {
-        let newID = crypto.randomUUID();
+        let newID = `CM${crypto.randomUUID()}`;
         while (existingIDs.includes(newID)) {
-          newID = crypto.randomUUID();
+          newID = `CM${crypto.randomUUID()}`;
         }
         newCommand.id = newID;
       }
@@ -65,7 +65,7 @@ export function useCommands() {
 
   const dummyCommand = (): Command => {
     return {
-      id: crypto.randomUUID(),
+      id: `CM${crypto.randomUUID()}`,
       name: "",
       description: "",
       icon: Icon.Gear,
@@ -82,6 +82,7 @@ export function useCommands() {
       useRectangleDetection: false,
       useBarcodeDetection: false,
       useFaceDetection: false,
+      useHorizonDetection: false,
       useSaliencyAnalysis: false,
       outputKind: "detail",
       showResponse: true,
@@ -117,7 +118,7 @@ export function useCommands() {
 
     // Create the command object
     const newCommand: Command = {
-      id: crypto.randomUUID(),
+      id: `CM${crypto.randomUUID()}`,
       name: newData.name,
       description: newData.description || "",
       icon: newData.icon || Icon.Gear,
@@ -134,6 +135,7 @@ export function useCommands() {
       useRectangleDetection: newData.useRectangleDetection || false,
       useBarcodeDetection: newData.useBarcodeDetection || false,
       useFaceDetection: newData.useFaceDetection || false,
+      useHorizonDetection: newData.useHorizonDetection || false,
       useSaliencyAnalysis: newData.useSaliencyAnalysis || false,
       outputKind: newData.outputKind || "detail",
       showResponse: newData.showResponse || true,

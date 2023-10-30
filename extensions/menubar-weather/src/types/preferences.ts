@@ -1,4 +1,5 @@
 export interface Preferences {
+  iconStyle: string;
   cityName: string;
   longitude: string;
   latitude: string;

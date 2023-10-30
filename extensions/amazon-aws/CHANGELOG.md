@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Fix Broken Secrets Manager Link] - 2023-08-14
+
+- Fix broken region-routing for secrets manager links.
+
 ## [Fix Broken Authentication] - 2023-05-06
 
 - Fix regression from AWS Vault changes that affected all non-aws-vault users.

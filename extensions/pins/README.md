@@ -12,12 +12,12 @@ A Raycast extension for pinning anything with a path or URL to the menu bar, wit
 - Pin any kind of URL, using any kind of URL scheme
 - Pin current browser tab or Finder selection with a single click
 - Customize pin icons
-- Create groups to organize pins into
+- Create groups and subgroups to organize pins into
 - Customize group icons
 - Edit pins and groups as desired
 - Move/rearrange pins and groups as desired
 - View pins and groups in the menu bar or within Raycast
-- Import/Export JSON data
+- Import/Export JSON data in several formats
 - Utilize placeholders to dynamically insert data into your pins
 - Highly configurable
 
@@ -28,7 +28,7 @@ A Raycast extension for pinning anything with a path or URL to the menu bar, wit
 - View Groups - Lists all groups, allows you to edit existing groups
 - New Pin - Creates a new pin with a given name, URL/path, icon, and group assignment
 - New Group - Creates a new group with a given name and icon
-- Copy Pins - Copies a JSON representation of your pins and groups to the clipboard
+- Export Pin Data - Copies a JSON representation of your pins and groups to the clipboard
 - Import Data - Imports a JSON string containing pins and groups
 
 ## Resources:

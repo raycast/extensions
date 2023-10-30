@@ -73,7 +73,7 @@ export function getOpenedUrlForFirefox(browserName: string) {
         keystroke "l" using {command down}
         delay 0.2
         keystroke "c" using {command down}
-        delay 0.2
+        delay 0.5
         key code 53
       end tell
     end tell
@@ -111,4 +111,4 @@ export const getOpenedBrowserScript = `
     return frontmostBrowser
 `;
 
-export type SupportedBrowsers = typeof supportedBrowsers[number];
+export type SupportedBrowsers = (typeof supportedBrowsers)[number];

@@ -1,10 +1,13 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
 import { downloadPicture, setWallpaper } from "./utils/common-utils";
-import { RaycastWallpaper } from "./types/types";
+import { RaycastWallpaperWithInfo } from "./types/types";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 
-export default function PreviewRaycastWallpaper(props: { index: number; raycastWallpapers: RaycastWallpaper[] }) {
+export default function PreviewRaycastWallpaper(props: {
+  index: number;
+  raycastWallpapers: RaycastWallpaperWithInfo[];
+}) {
   const { index, raycastWallpapers } = props;
   const imagesLength = raycastWallpapers.length;
   const [pageIndex, setPageIndex] = useState<number>(index);

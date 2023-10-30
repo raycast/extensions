@@ -157,6 +157,7 @@ export function parseVaults(): Vault[] {
   return vaultString
     .split(",")
     .filter((vaultPath) => vaultPath.trim() !== "")
+    .filter((vaultPath) => fs.existsSync(vaultPath))
     .map((vault) => ({ name: getVaultNameFromPath(vault.trim()), key: vault.trim(), path: vault.trim() }));
 }
 

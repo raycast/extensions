@@ -1,2 +1,3 @@
 node_modules
 test_data.json
+raycast-env.d.ts

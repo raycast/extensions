@@ -1,5 +1,4 @@
 import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
-import React from "react";
 import http from "http";
 
 type Code = {
@@ -16,7 +15,7 @@ export default function Command() {
 
       return groups;
     },
-    {}
+    {},
   );
 
   return (

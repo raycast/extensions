@@ -1,4 +1,14 @@
-import { Comment, Cycle, Issue, IssueRelation, Project, Team, User, WorkflowState } from "@linear/sdk";
+import {
+  Comment,
+  Cycle,
+  Issue,
+  IssueRelation,
+  Project,
+  ProjectMilestone,
+  Team,
+  User,
+  WorkflowState,
+} from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
 import { getLinearClient } from "../helpers/withLinearClient";
@@ -77,6 +87,10 @@ export const IssueFragment = `
     icon
     color
   }
+  projectMilestone {
+    id
+    name
+  }
 `;
 
 export type IssueState = Pick<WorkflowState, "id" | "type" | "name" | "color">;
@@ -112,6 +126,8 @@ export type IssueResult = Pick<
   parent?: Pick<Issue, "id" | "title" | "number"> & { state: Pick<WorkflowState, "type" | "color"> };
 } & {
   project?: Pick<Project, "id" | "name" | "icon" | "color">;
+} & {
+  projectMilestone?: Pick<ProjectMilestone, "id" | "name" | "targetDate">;
 };
 
 export async function getLastUpdatedIssues() {
@@ -264,6 +280,24 @@ export async function getProjectIssues(projectId: string) {
       }
     `,
     { projectId }
+  );
+
+  return data?.issues.nodes;
+}
+
+export async function getProjectMilestoneIssues(milestoneId: string) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
+    `
+      query($milestoneId: ID) {
+        issues(filter: { projectMilestone: { id: { eq: $milestoneId } } }) {
+          nodes {
+            ${IssueFragment}
+          }
+        }
+      }
+    `,
+    { milestoneId }
   );
 
   return data?.issues.nodes;

@@ -1,5 +1,11 @@
 # Heroicons Changelog
 
+## [v.1.2.0] - 2023-08-15
+
+- Added a few new actions: paste or copy import declarations for React/Vue libraries. Heroicons supports two npm packages that simplify using icons in React/Vue components. However, it can be really annoying to write an import declaration for icons (you need to copy an icon name, then transform it to UpperCamelCase + Icon suffix, and then the path may be different in your project).
+
+These new actions help you to copy or paste an import declaration for the selected icon. The import template can be customized in the extension preferences (by default, it matches the example from the Heroicons README).
+
 ## [v1.1.0] - 2022-08-31
 
 - Added option to customize primary and secondary action (feature request by @teziovsky #2736)

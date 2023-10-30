@@ -1,20 +1,18 @@
-import { List } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 import CpuMonitor from "./Cpu/CpuMonitor";
 import MemoryMonitor from "./Memory/MemoryMonitor";
 import NetworkMonitor from "./Network/NetworkMonitor";
 import PowerMonitor from "./Power/PowerMonitor";
 
-export default function SystemMonitor() {
-  const render = () => {
-    return (
-      <List isShowingDetail>
-        <CpuMonitor />
-        <MemoryMonitor />
-        <PowerMonitor />
-        <NetworkMonitor />
-      </List>
-    );
-  };
+const defaultView = getPreferenceValues<ExtensionPreferences>().defaultview;
 
-  return <>{render()}</>;
+export default function SystemMonitor() {
+  return (
+    <List isShowingDetail selectedItemId={defaultView}>
+      <CpuMonitor />
+      <MemoryMonitor />
+      <PowerMonitor />
+      <NetworkMonitor />
+    </List>
+  );
 }

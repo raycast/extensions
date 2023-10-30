@@ -42,12 +42,28 @@
           "value": "pasteSVG"
         },
         {
+          "title": "Paste React import",
+          "value": "pasteReactImport"
+        },
+        {
+          "title": "Paste Vue import",
+          "value": "pasteVueImport"
+        },
+        {
           "title": "Copy JSX",
           "value": "copyJSX"
         },
         {
           "title": "Copy SVG",
           "value": "copySVG"
+        },
+        {
+          "title": "Copy React import",
+          "value": "copyReactImport"
+        },
+        {
+          "title": "Copy Vue import",
+          "value": "copyVueImport"
         },
         {
           "title": "Copy Name",
@@ -72,6 +88,14 @@
           "value": "pasteJSX"
         },
         {
+          "title": "Paste React import",
+          "value": "pasteReactImport"
+        },
+        {
+          "title": "Paste Vue import",
+          "value": "pasteVueImport"
+        },
+        {
           "title": "Copy JSX",
           "value": "copyJSX"
         },
@@ -80,25 +104,39 @@
           "value": "copySVG"
         },
         {
+          "title": "Copy React import",
+          "value": "copyReactImport"
+        },
+        {
+          "title": "Copy Vue import",
+          "value": "copyVueImport"
+        },
+        {
           "title": "Copy Name",
           "value": "copyName"
         }
       ]
+    },
+    {
+      "name": "importTemplate",
+      "description": "Set the template for import declaration",
+      "type": "textfield",
+      "required": true,
+      "title": "Import declaration template",
+      "default": "import { %icon_name% } from '@heroicons/%library%/%icon_path%'"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
+    "@raycast/api": "^1.57.0",
     "got": "^12.3.1",
     "title": "^3.5.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.28",
     "@types/title": "^3.4.1",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

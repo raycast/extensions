@@ -738,7 +738,7 @@ function EntryActions(
             icon={Icon.Globe}
             title="Open Article in Browser"
             target={url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
           <Action.Open
             icon={Icon.Uppercase}
@@ -815,13 +815,12 @@ function EntryActions(
             target={
               <DocCheckPage url={url} navigationItems={""} query={query} onDetailViewPop={getHistoryAndFavourites} />
             }
-            shortcut={{ modifiers: [], key: "arrowRight" }}
           />
           <Action.Open
             icon={Icon.Globe}
             title="Open Article in Browser"
             target={url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
           <Action.Open
             icon={Icon.Globe}
@@ -859,7 +858,7 @@ function EntryActions(
             icon={Icon.Globe}
             title="Open Article in Browser"
             target={url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
           <Action.Open
             icon={Icon.Uppercase}

@@ -1,15 +1,24 @@
-import { Application, getFrontmostApplication, getPreferenceValues } from "@raycast/api";
+/**
+ * @module lib/LocalData.ts A collection of functions for getting contextual information about the user's system. This includes the frontmost application, the current Finder directory, the selected Finder items, the selected text, the current document in document-based apps, etc.
+ *
+ * @summary Local data and context utilities.
+ * @author Stephen Kaplan <skaplanofficial@gmail.com>
+ *
+ * Created at     : 2023-09-04 17:36:31
+ * Last modified  : 2023-09-04 17:37:04
+ */
+
+import { Application, getFrontmostApplication, getPreferenceValues, getSelectedText } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SupportedBrowsers, getCurrentTabs, getCurrentURL } from "./browser-utils";
-import { useCachedState } from "@raycast/utils";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript, useCachedState } from "@raycast/utils";
 import { ExtensionPreferences, getStorage, runCommand, setStorage } from "./utils";
 import { StorageKey } from "./constants";
 
 /**
  * Local data object that stores various contextual information for use in placeholders, recent apps list, etc.
  */
-interface LocalDataObject {
+export interface LocalDataObject {
   /**
    * The current frontmost application. The application is represented as an object with a name, path, and bundle ID.
    */
@@ -46,6 +55,11 @@ interface LocalDataObject {
   selectedNotes: { name: string; id: string }[];
 
   /**
+   * The currently selected text in the frontmost application.
+   */
+  selectedText: string;
+
+  /**
    * The name and path of the current document in the frontmost application. The application must be a document-based application such as iWork apps, Office apps, etc.
    */
   currentDocument: { name: string; path: string };
@@ -64,6 +78,7 @@ const dummyData = (): LocalDataObject => {
     currentDirectory: { name: "", path: "" },
     selectedFiles: [] as { name: string; path: string }[],
     selectedNotes: [] as { name: string; id: string }[],
+    selectedText: "",
     currentDocument: { name: "", path: "" },
   };
 };
@@ -73,14 +88,16 @@ const dummyData = (): LocalDataObject => {
  * @returns A promise resolving to the path of the current directory as a string.
  */
 const getCurrentDirectory = async (): Promise<{ name: string; path: string }> => {
-  const data = await runAppleScript(`tell application "Finder"
-    set oldDelims to AppleScript's text item delimiters
-    set AppleScript's text item delimiters to "\`\`\`"
-    set theData to {name, POSIX path} of (insertion location as alias)
-    set theData to theData as string
-    set AppleScript's text item delimiters to oldDelims
-    return theData
-  end tell`);
+  const data = await runAppleScript(`try
+    tell application "Finder"
+      set oldDelims to AppleScript's text item delimiters
+      set AppleScript's text item delimiters to "\`\`\`"
+      set theData to {name, POSIX path} of (insertion location as alias)
+      set theData to theData as string
+      set AppleScript's text item delimiters to oldDelims
+      return theData
+    end tell
+  end try`);
   const entries = data.split("```");
   if (entries.length == 2) {
     return { name: entries[0], path: entries[1] };
@@ -94,14 +111,16 @@ const getCurrentDirectory = async (): Promise<{ name: string; path: string }> =>
  */
 export const getFinderSelection = async (): Promise<{ name: string; path: string }[]> => {
   const data = await runAppleScript(
-    `tell application "Finder"
-    set theSelection to selection
-    set thePath to {}
-    repeat with i in theSelection
-      set end of thePath to {name, POSIX path} of (i as alias)
-    end repeat
-    return thePath
-  end tell`,
+    `try
+    tell application "Finder"
+      set theSelection to selection
+      set thePath to {}
+      repeat with i in theSelection
+        set end of thePath to {name, POSIX path} of (i as alias)
+      end repeat
+      return thePath
+    end tell
+  end try`,
     { humanReadableOutput: true }
   );
 
@@ -328,6 +347,20 @@ export const useRecentApplications = () => {
   return { recentApplications: recentApplications, loadingRecentApplications: loadingRecentApplications };
 };
 
+export const getTextSelection = async (): Promise<string> => {
+  const oldVolume = await runAppleScript(`set oldVolume to output volume of (get volume settings)
+    set volume output volume 0
+    return oldVolume`);
+  let text = "";
+  try {
+    text = await getSelectedText();
+  } catch (error) {
+    console.error(error);
+  }
+  runAppleScript(`set volume output volume ${oldVolume}`);
+  return text;
+};
+
 /**
  * Hook to get the local data object, see {@link LocalDataObject}.
  * @returns An object containing the local data object and a boolean indicating whether the object is still loading.
@@ -350,6 +383,8 @@ export const useLocalData = () => {
 
       const app = newData.recentApplications[0];
       newData.currentApplication = { name: app.name, path: app.path, bundleId: app.bundleId || "" };
+
+      newData.selectedText = await getTextSelection();
 
       if (app.name == "Finder") {
         newData.currentDirectory = await getCurrentDirectory();

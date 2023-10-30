@@ -20,7 +20,7 @@ export function ActionOnStarredTimezone(props: {
   const { timeInfo, index, starTimezones, timezone, setRefresh, showDetail, setRefreshDetail } = props;
   return (
     <ActionPanel>
-      <ActionTimeInfo timeInfo={timeInfo} />
+      {timeInfo !== ({} as TimeInfo) && timeInfo.timezone === timezone && <ActionTimeInfo timeInfo={timeInfo} />}
       <Action
         icon={Icon.StarDisabled}
         title={"Unstar Timezone"}

@@ -4,7 +4,7 @@
 
 # Obsidian for Raycast
 
-This is a raycast extension with commands for the note taking and knowledge management app Obsidian. To use it, install the extension from the [Raycast Store](https://www.raycast.com/KevinBatdorf/obsidian), open Raycast Search and type one of the following commands.
+This is a raycast extension with commands for the note taking and knowledge management app [Obsidian]( https://obsidian.md/). To use it, install the extension from the [Raycast Store](https://www.raycast.com/KevinBatdorf/obsidian), open Raycast Search and type one of the following commands.
 
 ## Overview
 
@@ -111,6 +111,7 @@ Both the note name and note content support these templates:
 - `{time}`
 - `{year}`
 - `{month}`
+- `{week}`
 - `{day}`
 - `{hour}`
 - `{minute}`

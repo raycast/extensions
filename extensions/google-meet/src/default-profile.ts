@@ -1,6 +1,6 @@
-import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
-
 import { showHUD, Clipboard, showToast, Toast } from "@raycast/api";
+
+import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
 
 export default async function main() {
   try {

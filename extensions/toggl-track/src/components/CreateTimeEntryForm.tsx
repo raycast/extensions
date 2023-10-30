@@ -1,15 +1,16 @@
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
 import toggl from "../toggl";
 import { storage } from "../storage";
-import { Me, Project } from "../toggl/types";
+import { Project, Task } from "../toggl/types";
 import { useAppContext } from "../context";
 import { useMemo, useState } from "react";
 
 function CreateTimeEntryForm({ project, description }: { project?: Project; description?: string }) {
   const navigation = useNavigation();
-  const { projects, tags, isLoading, projectGroups, me } = useAppContext();
+  const { projects, tags, tasks, isLoading, projectGroups, me } = useAppContext();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [billable, setBillable] = useState<boolean>(false);
 
   async function handleSubmit(values: { description: string }) {
@@ -26,6 +27,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         workspaceId,
         description: values.description,
         tags: selectedTags,
+        taskId: selectedTask?.id,
         billable,
       });
       await showToast(Toast.Style.Animated, "Starting time entry...");
@@ -41,16 +43,21 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   const projectTags = useMemo(() => {
     return tags.filter((tag) => tag.workspace_id === selectedProject?.workspace_id);
   }, [tags, selectedProject]);
+  const projectTasks = useMemo<Task[]>(
+    () => tasks.filter((task) => task.project_id == selectedProject?.id),
+    [tasks, selectedProject],
+  );
 
   const onProjectChange = (projectId: string) => {
     const project = projects.find((project) => project.id === parseInt(projectId));
-    if (project) {
-      setSelectedProject(project);
-    }
+    if (project) setSelectedProject(project);
   };
-
   const onTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
+  };
+  const onTaskChange = (taskId: string) => {
+    const task = tasks.find((task) => task.id == parseInt(taskId));
+    setSelectedTask(task);
   };
 
   return (
@@ -85,6 +92,19 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
           </Form.Dropdown.Section>
         ))}
       </Form.Dropdown>
+      {selectedProject && projectTasks.length > 0 && (
+        <Form.Dropdown id="task" title="Task" defaultValue="-1" onChange={onTaskChange}>
+          <Form.Dropdown.Item value={"-1"} title={"No task"} icon={{ source: Icon.Circle }} />
+          {projectTasks.map((task) => (
+            <Form.Dropdown.Item
+              key={task.id}
+              value={task.id.toString()}
+              title={task.name}
+              icon={{ source: Icon.Circle, tintColor: selectedProject.color }}
+            />
+          ))}
+        </Form.Dropdown>
+      )}
       <Form.TagPicker id="tags" title="Tags" onChange={onTagsChange}>
         {projectTags.map((tag) => (
           <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />

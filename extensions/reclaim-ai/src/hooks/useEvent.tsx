@@ -10,6 +10,7 @@ import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useUser } from "./useUser";
 import { useTask } from "./useTask";
 import { NativePreferences } from "../types/preferences";
+import { CalendarAccount } from "../types/account";
 
 const useEvent = () => {
   const { fetcher } = reclaimApi();
@@ -22,17 +23,30 @@ const useEvent = () => {
       const strStart = format(start, "yyyy-MM-dd");
       const strEnd = format(end, "yyyy-MM-dd");
 
+      const [accountsResponse, accountsError] = await axiosPromiseData<CalendarAccount[]>(
+        fetcher("/accounts", {
+          method: "GET",
+        })
+      );
+
+      if (!accountsResponse || accountsError) throw accountsError;
+
       const [eventsResponse, error] = await axiosPromiseData<ApiResponseEvents>(
         fetcher("/events?sourceDetails=true", {
           method: "GET",
           params: {
             start: strStart,
             end: strEnd,
+            calendarIds: accountsResponse
+              .flatMap(({ connectedCalendars }) => connectedCalendars.map(({ id }) => id))
+              .join(","),
           },
         })
       );
 
       if (!eventsResponse || error) throw error;
+
+      // Filter out events that are synced, managed by Reclaim and part of multiple calendars
       return eventsResponse;
     } catch (error) {
       console.error("Error while fetching events", error);
@@ -174,10 +188,25 @@ const useEvent = () => {
     return eventActions;
   }, []);
 
+  const handleRescheduleTask = async (calendarID: string, eventID: string, rescheduleCommand: string) => {
+    try {
+      const [task, error] = await axiosPromiseData(
+        fetcher(`/planner/task/${calendarID}/${eventID}/reschedule?snoozeOption=${rescheduleCommand}`, {
+          method: "POST",
+        })
+      );
+      if (!task || error) throw error;
+      return task;
+    } catch (error) {
+      console.error("Error while rescheduling event", error);
+    }
+  };
+
   return {
     fetchEvents,
     getEventActions,
     showFormattedEventTitle,
+    handleRescheduleTask,
   };
 };
 

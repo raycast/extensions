@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Added a shortcut] - 2023-08-20
+
+- Added a shortcut to open the package's npm page
+
 ## [Favorites and history] - 2023-03-29
 
 - Added ability to favorite packages and display them in a new view

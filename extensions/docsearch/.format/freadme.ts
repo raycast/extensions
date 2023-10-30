@@ -4,7 +4,7 @@ import fs from "fs";
 
 function formatSupportedDocsTable() {
   var times = 0;
-  var supportedDocsTable = `### Supported Documentations
+  var supportedDocsTable = `### Supported Documentations (${data.length})
 
 | Documentations |   |   |
 | :------------: |:-:|:-:|

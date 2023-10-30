@@ -1,5 +1,6 @@
 import { Icon } from "@raycast/api";
 import path from "path";
+import { statSync } from "fs";
 
 import { AUDIO_FILE_EXTENSIONS, VIDEO_FILE_EXTENSIONS } from "../constants";
 import { Note, Vault, Media } from "../interfaces";
@@ -46,6 +47,7 @@ export class NoteLoader {
       const note: Note = {
         title: name,
         path: f,
+        lastModified: statSync(f).mtime,
         tags: tagsForString(noteContent),
         content: noteContent,
         bookmarked: bookmarked.includes(f.split(this.vault.path)[1].slice(1)),
@@ -55,7 +57,7 @@ export class NoteLoader {
     }
     console.log("Finished loading " + notes.length + " notes");
 
-    return notes;
+    return [...notes].sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
   }
 
   /**

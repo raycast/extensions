@@ -85,7 +85,7 @@ function CloudFormationStackResources({ stackName }: { stackName: string }) {
 async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> {
   if (!isReadyToFetch()) return [];
   const { NextToken, StackSummaries } = await new CloudFormationClient({}).send(
-    new ListStacksCommand({ NextToken: token })
+    new ListStacksCommand({ NextToken: token }),
   );
 
   const combinedStacks = [...(stacks || []), ...(StackSummaries || [])];
@@ -100,10 +100,10 @@ async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<Sta
 async function fetchStackResources(
   stackName: string,
   token?: string,
-  stacks?: StackResourceSummary[]
+  stacks?: StackResourceSummary[],
 ): Promise<StackResourceSummary[]> {
   const { StackResourceSummaries, NextToken } = await new CloudFormationClient({}).send(
-    new ListStackResourcesCommand({ StackName: stackName, NextToken: token })
+    new ListStackResourcesCommand({ StackName: stackName, NextToken: token }),
   );
 
   if (NextToken) {

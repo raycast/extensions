@@ -193,7 +193,7 @@
     {
       "name": "volumeSetting",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Timer Alert Volume",
       "description": "Volume of the alert sound. Decimal between 0 and 1.",
       "default": "1"
@@ -201,16 +201,16 @@
     {
       "name": "ringContinuously",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "title": "Timer Alert Type",
       "description": "Whether or not to play the timer alert sound continuously until dismissed.",
       "label": "Ring Continuously",
-      "default": false
+      "default": true
     },
     {
       "name": "showMenuBarItemWhen",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Show Menu Bar Item When",
       "description": "When to show icon in menubar.",
       "default": "Always",
@@ -232,7 +232,7 @@
     {
       "name": "showTitleInMenuBar",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "title": "Show Title in Menu Bar",
       "description": "Whether or not to show the timer or stopwatch title in the menu bar.",
       "label": "Show title",
@@ -241,7 +241,7 @@
     {
       "name": "copyOnSwStop",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "title": "Copy on Stopwatch Stop",
       "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
       "label": "Copy elapsed time",
@@ -250,7 +250,7 @@
     {
       "name": "newTimerInputOrder",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "New Timer Input Order",
       "description": "Order for input fields in new timer form.",
       "default": "Hours , Minutes, Seconds",

@@ -1,10 +1,10 @@
 import { environment, LaunchType, showToast, Toast, updateCommandMetadata } from "@raycast/api";
-import { getDefaultProgress, getProgressNumber, getProgressSubtitle } from "./utils/progress";
+import { Progress } from "./types";
+import { defaultProgress, getSubtitle } from "./utils/progress";
 
 export default async function command() {
-  const yearInProgress = getDefaultProgress()[0];
-  const progressNumber = getProgressNumber(yearInProgress);
-  const progressBar = getProgressSubtitle(progressNumber);
+  const yearProgress = defaultProgress.find((p) => p.title === "Year In Progress") as Progress;
+  const progressBar = getSubtitle(yearProgress.progressNum);
 
   updateCommandMetadata({ subtitle: `${progressBar}` });
 

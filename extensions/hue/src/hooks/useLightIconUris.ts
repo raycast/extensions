@@ -38,7 +38,7 @@ export default function useLightIconUris(lights: Light[], width: number, height:
             on: onIcon,
             offLight: offLightIcon,
             offDark: offDarkIcon,
-          })
+          }),
         );
       });
     });

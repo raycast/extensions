@@ -1,6 +1,9 @@
 import { Color, Icon } from "@raycast/api";
 import { Model } from "../utils/types";
 
+/**
+ * Default models included with the extension.
+ */
 export const defaultModels: { [key: string]: Model } = {
   "--model-GPT-3.5-Turbo via Raycast AI": {
     name: "GPT-3.5-Turbo via Raycast AI",

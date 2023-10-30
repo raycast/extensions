@@ -1,5 +1,5 @@
 import { AbortError, FetchError } from "node-fetch";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ServiceName, GIF_SERVICE } from "../preferences";
 import giphy from "../models/giphy";
@@ -20,6 +20,8 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
   switch (service) {
     case GIF_SERVICE.GIPHY:
       return await giphy(force);
+    case GIF_SERVICE.GIPHY_CLIPS:
+      return await giphy(force, "videos");
     case GIF_SERVICE.TENOR:
       return await tenor(force);
     case GIF_SERVICE.FINER_GIFS:
@@ -32,34 +34,53 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
   throw new Error(`Unable to find API for service "${service}"`);
 }
 
-export default function useSearchAPI({ offset = 0, limit }: { offset?: number; limit?: number }) {
+export default function useSearchAPI({
+  term,
+  service,
+  limit = 10,
+}: {
+  term: string;
+  service?: ServiceName;
+  offset?: number;
+  limit?: number;
+}) {
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<FetchState>();
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [offset, setOffset] = useState(0);
+  const prevServiceRef = useRef(service);
+  const prevTermRef = useRef(term);
   const cancelRef = useRef<AbortController | null>(null);
 
   const search = useCallback(
-    async function search(term: string, service: ServiceName) {
+    async (searchTerm: string, searchService: ServiceName) => {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
       setIsLoading(true);
 
       let items: IGif[];
       try {
-        const api = await getAPIByServiceName(service);
+        const api = await getAPIByServiceName(searchService);
         if (api === null) {
           setResults({ items: [] });
           setIsLoading(false);
           return;
         }
 
-        if (term) {
-          items = dedupe(await api.search(term, { offset, limit }));
+        if (searchTerm) {
+          items = dedupe(await api.search(searchTerm, { offset, limit }));
         } else {
           items = dedupe(await api.trending({ offset, limit }));
         }
 
-        setResults({ items, term });
+        if (searchService === prevServiceRef.current && searchTerm === prevTermRef.current) {
+          // If neither the service nor the term have changed, append the items
+          setResults({ items: [...(results?.items ?? []), ...items], term: searchTerm });
+        } else {
+          // If either the service or the term have changed, replace the items
+          setResults({ items, term: searchTerm });
+          prevServiceRef.current = searchService;
+          prevTermRef.current = searchTerm;
+        }
       } catch (e) {
         console.error(e);
         const error = e as FetchError;
@@ -67,7 +88,7 @@ export default function useSearchAPI({ offset = 0, limit }: { offset?: number; l
           return;
         } else if (error.message.toLowerCase().includes("invalid authentication credentials")) {
           error.message = "Invalid credentials, please try again.";
-          await getAPIByServiceName(service, true);
+          await getAPIByServiceName(searchService, true);
         }
         setResults({ error });
       } finally {
@@ -78,8 +99,18 @@ export default function useSearchAPI({ offset = 0, limit }: { offset?: number; l
         cancelRef.current?.abort();
       };
     },
-    [cancelRef, setIsLoading, setResults, searchTerm, results]
+    [cancelRef, setIsLoading, setResults, term, results, offset]
   );
 
-  return [results, isLoading, setSearchTerm, searchTerm, search] as const;
+  const loadMore = () => setOffset(offset + limit);
+
+  useEffect(() => {
+    if (!service) {
+      return;
+    }
+
+    search(term, service);
+  }, [offset, term, service]);
+
+  return [results, isLoading, loadMore] as const;
 }

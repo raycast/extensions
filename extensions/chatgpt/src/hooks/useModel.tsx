@@ -23,10 +23,31 @@ export function useModel(): ModelHook {
 
   useEffect(() => {
     if (!useAzure) {
-      gpt.listModels().then((res) => {
-        const models = res.data.data;
-        setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
-      });
+      gpt
+        .listModels()
+        .then((res) => {
+          const models = res.data.data;
+          setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
+        })
+        .catch(async (err) => {
+          console.error(err);
+          if (!(err instanceof Error || err.message)) {
+            return;
+          }
+          await showToast(
+            err.message.includes("401")
+              ? {
+                  title: "Could not authenticate to API",
+                  message: "Please ensure that your API token is valid",
+                  style: Toast.Style.Failure,
+                }
+              : {
+                  title: "Error",
+                  message: err.message,
+                  style: Toast.Style.Failure,
+                }
+          );
+        });
     }
   }, [gpt]);
 

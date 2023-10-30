@@ -1,4 +1,4 @@
-import { open } from "@raycast/api";
+import { getPreferenceValues, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import {
   getOpenedBrowserScript,
@@ -11,8 +11,20 @@ import type { SupportedBrowsers } from "./utils/scripts";
 
 const openMeetTabUrl = "https://meet.google.com/new";
 
+type Preferences = {
+  preferredBrowser?: {
+    name: SupportedBrowsers;
+    path: string;
+    bundleId: string;
+  };
+};
+
+function getPreferredBrowser() {
+  return getPreferenceValues<Preferences>().preferredBrowser;
+}
+
 async function getOpenTabs(): Promise<string> {
-  const browserName = await getDefaultOpenBrowser();
+  const browserName = await getOpenedBrowser();
 
   if (browserName === "Arc") {
     return await runAppleScript(getOpenedUrlForArc());
@@ -25,7 +37,13 @@ async function getOpenTabs(): Promise<string> {
   return await runAppleScript(getOpenedUrlsScript(browserName));
 }
 
-export async function getDefaultOpenBrowser() {
+export async function getOpenedBrowser() {
+  const preferredBrowser = getPreferredBrowser();
+
+  if (preferredBrowser?.name) {
+    return preferredBrowser.name;
+  }
+
   return (await runAppleScript(getOpenedBrowserScript)) as SupportedBrowsers;
 }
 
@@ -33,7 +51,7 @@ export async function getDefaultOpenBrowser() {
  * This needs be a recursive function because at first meet URL is not generated
  * but it depends on the browser to generate the correct URL, since it would not
  * be optimal to time it (setTimeout or something like that) because it's not possible
- * to guesse if it would take a long time or not to generate the correct URL, being
+ * to guess if it would take a long time or not to generate the correct URL, being
  * recursive works pretty ok, since it's not a big workload to process.
  */
 export async function getMeetTab(): Promise<string> {
@@ -48,9 +66,13 @@ export async function getMeetTab(): Promise<string> {
 }
 
 export async function openMeetTabDefaultProfile(): Promise<void> {
-  await open(openMeetTabUrl);
+  const preferredBrowser = getPreferredBrowser();
+
+  await open(openMeetTabUrl, preferredBrowser?.name);
 }
 
 export async function openMeetTabSelectedProfile(profile: string): Promise<void> {
-  await open(`${openMeetTabUrl}?authuser=${profile}`);
+  const preferredBrowser = getPreferredBrowser();
+
+  await open(`${openMeetTabUrl}?authuser=${profile}`, preferredBrowser?.name);
 }

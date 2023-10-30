@@ -3,7 +3,7 @@ import { getIcon } from "./naver/resultUtils";
 import { useSearch } from "./naver/useSearch";
 
 export default function Command() {
-  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
+  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch("GENERAL");
 
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Naver or enter a URL...">

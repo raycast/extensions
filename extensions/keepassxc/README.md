@@ -24,9 +24,11 @@ There are 3 parameters required for this extension to work:
 
 - `Enter` : Paste Password
 - `Shift`+`Enter` : Paste Username
-- `Cmd`+`P` : Copy Password
-- `Cmd`+`U` : Copy Username
+- `Option`+`Enter` : Paste TOTP
+- `Cmd`+`G` : Copy Password
+- `Cmd`+`B` : Copy Username
 - `Cmd`+`T` : Copy TOTP
+- `Shift` + `Cmd` + `U` : Open URL in Browser
 
 ## Password Security Note
 

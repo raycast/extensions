@@ -3,6 +3,8 @@ import { nanoid } from "nanoid";
 import { autoCompleteItem, Preferences, SearchResult } from "./types";
 import fetch from "node-fetch";
 import iconv from "iconv-lite";
+import { SearchTypeDict } from "./types";
+import { resultsParser, descriptionParser } from "./parser";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
@@ -21,36 +23,42 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
   return items;
 }
 
-export function getStaticResult(searchText: string): SearchResult[] {
+export function getStaticResult(searchText: string, searchType: string): SearchResult[] {
   if (!searchText) {
     return [];
   }
+  const searchTypeObj = SearchTypeDict[searchType];
+  const baseURL = searchTypeObj.baseURL;
+  const searchName = searchTypeObj.name;
 
   const result: SearchResult[] = [
     {
       id: nanoid(),
       query: searchText,
-      description: `Search Naver for '${searchText}'`,
-      url: `https://search.naver.com/search.naver?query=${encodeURIComponent(searchText)}`,
+      description: `Search ${searchName} for '${searchText}'`,
+      url: `${baseURL}${encodeURIComponent(searchText)}`,
     },
   ];
 
   return result;
 }
 
-export async function getAutoSearchResults(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const response = await fetch(
-    `https://ac.search.naver.com/nx/ac?q=${encodeURIComponent(
-      searchText
-    )}&con=1&frm=nv&ans=2&r_format=json&r_enc=UTF-8&r_unicode=0&t_koreng=1&run=2&rev=4&q_enc=UTF-8&st=100`,
-    {
-      method: "get",
-      signal: signal,
-      headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-      },
-    }
-  );
+export async function getAutoSearchResults(
+  searchText: string,
+  searchType: string,
+  signal: AbortSignal
+): Promise<SearchResult[]> {
+  const searchTypeObj = SearchTypeDict[searchType];
+  const searchURL = searchTypeObj.searchURL;
+  const baseURL = searchTypeObj.baseURL;
+  const searchName = searchTypeObj.name;
+  const response = await fetch(`${searchURL}${encodeURIComponent(searchText)}`, {
+    method: "get",
+    signal: signal,
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+  });
 
   if (!response.ok) {
     return Promise.reject(response.statusText);
@@ -59,16 +67,16 @@ export async function getAutoSearchResults(searchText: string, signal: AbortSign
   const buffer = await response.arrayBuffer();
   const text = iconv.decode(Buffer.from(buffer), "utf-8");
   const json = JSON.parse(text);
+  const res = resultsParser[searchType](json);
 
   const results: SearchResult[] = [];
-
-  json["items"][0].map((item: autoCompleteItem, _i: number) => {
-    const query: string = item[0];
+  res.map((item: autoCompleteItem, _i: number) => {
+    const { query, description } = descriptionParser[searchType](item);
     results.push({
       id: nanoid(),
       query: query,
-      description: `Search Naver for '${query}'`,
-      url: `https://search.naver.com/search.naver?query=${encodeURIComponent(query)}`,
+      description: description,
+      url: `${baseURL}${encodeURIComponent(query)}`,
     });
   });
 

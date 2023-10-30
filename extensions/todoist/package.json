@@ -95,7 +95,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "Title/info (today 5pm p2)",
+          "placeholder": "Text (today 5pm p2)",
           "type": "text",
           "required": true
         },
@@ -224,7 +224,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0",
+    "@raycast/api": "^1.58.1",
     "@raycast/utils": "^1.8.0",
     "axios": "^1.4.0",
     "date-fns": "^2.30.0",

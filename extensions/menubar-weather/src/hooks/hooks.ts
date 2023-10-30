@@ -23,21 +23,21 @@ export const getCurrentWeather = () => {
         const menuItems: string[] = getMenuItem(oldWeather);
         updateCommandMetadata({ subtitle: menuItems.join(" | ") });
       } catch (e) {
-        console.debug(`Could not parse cached weather: ${cacheWeather}`, e);
+        console.error(`Could not parse cached weather: ${cacheWeather}`, e);
       }
     }
     if (typeof cacheLocation === "string" && !isEmpty(cacheLocation)) {
       try {
         setLocation(JSON.parse(cacheLocation) as GeoLocation);
       } catch (e) {
-        console.debug(`Could not parse cached location: ${cacheLocation}`, e);
+        console.error(`Could not parse cached location: ${cacheLocation}`, e);
       }
     }
     if (typeof cacheTime === "string" && !isEmpty(cacheTime)) {
       try {
         oldRefreshTime = JSON.parse(cacheTime) as number;
       } catch (e) {
-        console.debug(`Could not parse cached time: ${cacheTime}`, e);
+        console.error(`Could not parse cached time: ${cacheTime}`, e);
       }
     }
     const newRefreshTime = Date.now();

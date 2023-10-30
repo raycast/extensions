@@ -12,28 +12,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js
-        uses: raycast/github-actions/setup-node@master
+        uses: actions/checkout@v3
 
       - name: Get changed files
         id: changed-files
-        uses: Ana06/get-changed-files@v2.1.0
+        uses: Ana06/get-changed-files@v2.2.0
         with:
           format: "json"
 
-      - uses: actions/github-script@v6
+      - uses: oven-sh/setup-bun@v1
         with:
-          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
-          script: |
-            const script = require('./scripts/pr-bot')
-            await script({
-              github,
-              context,
-              core,
-              changedFiles: ${{ steps.changed-files.outputs.all }}
-            })
+          bun-version: latest
+      - name: Setup Bot
+        run: bun create github.com/raycast/github-action-bot
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+      - name: Run bot
+        run: |
+          cd github-action-bot
+          bun run index.ts
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          SCRIPT: "scripts/bots/pr-bot.ts"
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all }}
 
       - name: Notify Failure to Slack
         if: failure()

@@ -1,10 +1,12 @@
+export type TaskStatus = "NEW" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETE" | "CANCELLED" | "ARCHIVED";
+
 export interface Task {
   id: number;
   title: string;
   notes: string;
   eventCategory: string;
   eventSubType: string;
-  status: string;
+  status: TaskStatus;
   timeChunksRequired: number;
   timeChunksSpent: number;
   timeChunksRemaining: number;
@@ -20,6 +22,8 @@ export interface Task {
   snoozeUntil: string;
   adjusted: boolean;
   atRisk: boolean;
+  priority: string;
+  onDeck: boolean;
   instances: Array<{
     taskId: number;
     eventId: string;

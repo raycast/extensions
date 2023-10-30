@@ -37,7 +37,11 @@ function UnreadNotifications() {
 
   async function markAllNotificationsAsRead() {
     try {
-      await mutate(octokit.rest.activity.markNotificationsAsRead());
+      await mutate(octokit.rest.activity.markNotificationsAsRead(), {
+        optimisticUpdate() {
+          return [];
+        },
+      });
       showHUD("All have been marked as Read");
     } catch {
       showHUD("❌ Could not mark all as read");
