@@ -153,6 +153,19 @@ export default function Command() {
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
+              icon={{ source: Icon.Check, tintColor: iconColor }}
+              title={batt.latest.health.toFixed(2) + "%"}
+              subtitle={"Battery health"}
+              onAction={openBatterySettings}
+            />
+            <MenuBarExtra.Item
+              icon={{ source: Icon.RotateAntiClockwise, tintColor: iconColor }}
+              title={batt.latest.cycles.toFixed(0)}
+              subtitle={"Battery cycles"}
+              onAction={openBatterySettings}
+            />
+
+            <MenuBarExtra.Item
               icon={{
                 source: Icon.Bolt,
                 tintColor: powerColor,
@@ -161,6 +174,7 @@ export default function Command() {
               subtitle={batt.latest.charging ? "Power input (~1 min)" : "Power draw (~1 min)"}
               onAction={openBatterySettings}
             />
+
             {!batt.latest.charging && wattDiff ? (
               <MenuBarExtra.Item
                 icon={{
