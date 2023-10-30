@@ -1,5 +1,9 @@
 # NBA Game Viewer Changelog
 
+## [Fix] - 2023-10-30
+
+- Add a rule to set the year according to the start of the new NBA season, traditionally in October.
+
 ## [Fix] - 2023-03-12
 
 - Fix data (wins, losses, seed) in "View Standings" command. More robustly find stats by name instead of index.
