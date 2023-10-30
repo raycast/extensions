@@ -61,7 +61,7 @@ export class XcodeSimulatorApplicationService {
    * Find all XcodeSimulatorApplications of a given XcodeSimulator
    * @param simulator The XcodeSimulator
    */
-  private static async findXcodeSimulatorApplications(simulator: XcodeSimulator): Promise<XcodeSimulatorApplication[]> {
+  static async findXcodeSimulatorApplications(simulator: XcodeSimulator): Promise<XcodeSimulatorApplication[]> {
     // The container application directory path
     const containerApplicationDirectoryPath = Path.join(simulator.dataPath, "Containers/Bundle/Application");
     // Declare Application Directory Paths
@@ -285,7 +285,7 @@ export class XcodeSimulatorApplicationService {
       try {
         // Try to retrieve AppGroup directory path via the simctl cli
         // which is much quicker than the following fallback mechanism
-        const xcrunResult = await (
+        const xcrunResult = (
           await execAsync(`xcrun simctl get_app_container ${simulator.udid} ${bundleIdentifier} groups`)
         ).stdout.trim();
         if (xcrunResult.length > 0) {
@@ -306,7 +306,8 @@ export class XcodeSimulatorApplicationService {
       // Initialize simulator data application directory path
       const appGroupDirectoryPath = Path.join(simulator.dataPath, "Containers/Shared/AppGroup");
       //get AppGroup paths from a directory
-      simulatorAppGroupPathsPromise = this.getApplicationPathFromDirectory(appGroupDirectoryPath);
+      simulatorAppGroupPathsPromise =
+        XcodeSimulatorApplicationService.getApplicationPathFromDirectory(appGroupDirectoryPath);
       // Set simulator AppGroup paths promise so that the AppGroup paths are only read once per simulator
       XcodeSimulatorApplicationService.simulatorAppGroupPathsCache.set(simulator, simulatorAppGroupPathsPromise);
     }
