@@ -1,12 +1,12 @@
 import { Icon, Image } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { format, isBefore, parseISO } from "date-fns";
+import { isBefore, parseISO } from "date-fns";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import { useMemo } from "react";
 import React from "react";
 
-import { displayDueDate, isOverdue } from "../helpers";
+import { displayDueDate, isOverdue, parseDay } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
 
@@ -93,17 +93,11 @@ export const groupByOptions: GroupByOptions = [
 export function groupByDueDates(reminders: Reminder[]) {
   const [dated, notDated] = partition(reminders, (reminder: Reminder) => reminder.dueDate !== null);
   const [overdue, upcoming] = partition(dated, (reminder: Reminder) => reminder.dueDate && isOverdue(reminder.dueDate));
-
-  const allDueDates = [
-    ...new Set(upcoming.map((reminder) => format(parseISO(reminder.dueDate as string), "yyyy-MM-dd"))),
-  ] as string[];
+  const allDueDates = [...new Set(upcoming.map((reminder) => parseDay(reminder.dueDate).toISOString()))];
   allDueDates.sort();
 
   const sections = allDueDates.map((date) => {
-    const remindersOnDate = upcoming.filter((reminder) => {
-      const reminderDate = format(parseISO(reminder.dueDate as string), "yyyy-MM-dd");
-      return reminderDate === date;
-    });
+    const remindersOnDate = upcoming.filter((reminder) => parseDay(reminder.dueDate).toISOString() === date);
     return {
       title: displayDueDate(date),
       reminders: remindersOnDate,
