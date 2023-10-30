@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import { deleteUser, listUsers } from "./utils/api";
 import { useEffect, useState } from "react";
 import { ListUsersResponse, User } from "./types/users";
@@ -38,6 +38,7 @@ export default function ListUsers() {
       await confirmAlert({
         title: `Delete user '${user.userName}'?`,
         message: "This action cannot be undone.",
+        icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {

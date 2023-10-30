@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   Icon,
   LaunchType,
   List,
@@ -52,6 +53,7 @@ export default function ListWebsites() {
       await confirmAlert({
         title: `Delete website '${websiteName}'?`,
         message: "This action cannot be undone.",
+        icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {

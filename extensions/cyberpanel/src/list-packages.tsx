@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { deletePackage, listPackages } from "./utils/api";
 import { useEffect, useState } from "react";
 import ErrorComponent from "./components/ErrorComponent";
@@ -37,6 +48,7 @@ export default function ListPackages() {
       await confirmAlert({
         title: `Delete package '${packageName}'?`,
         message: "This action cannot be undone.",
+        icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {

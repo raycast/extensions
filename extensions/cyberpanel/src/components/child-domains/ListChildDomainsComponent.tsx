@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getFavicon } from "@raycast/utils";
 import { ChildDomain, ListChildDomainsResponse } from "../../types/child-domains";
@@ -41,6 +52,7 @@ export default function ListChildDomains({ masterDomain }: ListChildDomainsProps
       await confirmAlert({
         title: `Delete child domain '${websiteName}'?`,
         message: "This action cannot be undone.",
+        icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {

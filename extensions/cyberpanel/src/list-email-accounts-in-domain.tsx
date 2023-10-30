@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   Icon,
   LaunchProps,
   List,
@@ -55,6 +56,7 @@ export default function ListEmailAccountsInDomain(
       await confirmAlert({
         title: `Delete Email Account '${email}'?`,
         message: "This action cannot be undone.",
+        icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {

@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   Icon,
   LaunchProps,
   List,
@@ -51,6 +52,7 @@ export default function ListDNSRecordsInDomain(props: LaunchProps<{ arguments: A
       await confirmAlert({
         title: `Delete DNS Record with id '${id}'?`,
         message: "This action cannot be undone.",
+        icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {

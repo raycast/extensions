@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Color,
   Icon,
   LaunchProps,
   List,
@@ -48,6 +49,7 @@ export default function ListDatabasesInDomain(props: LaunchProps<{ arguments: Ar
       await confirmAlert({
         title: `Delete Database '${dbName}'?`,
         message: "This action cannot be undone.",
+        icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
