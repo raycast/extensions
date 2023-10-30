@@ -4,9 +4,6 @@
     <p>
         A Raycast extension that allows you to easily download videos & audio from popular social media platforms, powered by <a href="https://github.com/wukko/cobalt">cobalt</a>'s API. A list of supported services can be found <a href="https://github.com/wukko/cobalt#supported-services">here</a>.
     </p>
-    <a title="Install Cobalt Raycast Extension" href="https://www.raycast.com/aelew/cobalt">
-      <img src="https://www.raycast.com/aelew/cobalt/install_button@2x.png?v=1.0" height="64" style="height: 64px;" alt="">
-    </a>
 </div>
 
 > **Note**  
