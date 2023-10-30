@@ -1,4 +1,4 @@
-const BASE_PASSPORT_URL = "http://passport.bilibili.com";
+const BASE_PASSPORT_URL = "https://passport.bilibili.com";
 const BASE_API_URL = "https://api.bilibili.com";
 
 export const API = {

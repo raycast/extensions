@@ -34,10 +34,11 @@ export default function Command() {
   const videoTypes = ["DYNAMIC_TYPE_LIVE_RCMD", "DYNAMIC_TYPE_AV"];
 
   const kindTypes: KindType[] = [
-    { id: "0", name: "全部" },
-    { id: "1", name: "未看过的视频" },
-    { id: "2", name: "看过的视频" },
-    { id: "3", name: "视频" },
+    { id: "0", name: "All" },
+    { id: "1", name: "Unwatched Videos" },
+    { id: "2", name: "Watched Videos" },
+    { id: "3", name: "Videos" },
+
   ];
 
   const filterMap = {
