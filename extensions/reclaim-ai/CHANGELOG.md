@@ -1,5 +1,10 @@
 # reclaim Changelog
 
+## [Update] - 2023-10-31
+
+- Refactor of Event Fetching Process
+- Bug Fix in the Menu Bar Component
+
 ## [Update] - 2023-10-24
 
 - Revert filter logic
