@@ -13,7 +13,6 @@
     {
       "name": "index",
       "title": "Post to Twos",
-      "subtitle": "Twos",
       "description": "Add 'thing' to Twos (today or selected date)",
       "mode": "view"
     }
