@@ -10,40 +10,54 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
-import { exec as execCb } from "child_process";
 import { useState } from "react";
-import { promisify } from "util";
-import { DataType, OptionType } from "./types";
+import { ExtensionMetadata, Option } from "./types";
 import { extensionTypes } from "./constants";
 import { formatItem, formatOutput } from "./utils";
 import fs from "fs/promises";
+import os from "os";
+import path from "path";
 
-const exec = promisify(execCb);
+async function getPackageJsonFiles() {
+  try {
+    const extensionsDir = path.join(os.homedir(), ".config", "raycast", "extensions");
+    const extensions = await fs.readdir(extensionsDir);
+    const packageJsonFiles = await Promise.all(
+      extensions.map(async (extension) => {
+        const packageJsonPath = path.join(extensionsDir, extension, "package.json");
+        try {
+          await fs.access(packageJsonPath, fs.constants.F_OK);
+          return packageJsonPath;
+        } catch (e) {
+          return null;
+        }
+      }),
+    );
+    return packageJsonFiles.filter((file) => file !== null) as string[];
+  } catch (e) {
+    if (e instanceof Error) {
+      showFailureToast(e.message);
+      throw new Error(e.message);
+    }
+    throw new Error("An unknown error occurred");
+  }
+}
 
 export default function IndexCommand() {
   const preferences = getPreferenceValues<Preferences.Index>();
 
-  const [installedExtensions, setInstalledExtensions] = useState<DataType[]>([]);
+  const [installedExtensions, setInstalledExtensions] = useState<ExtensionMetadata[]>([]);
   const { isLoading, data, error } = useCachedPromise(async () => {
-    const { stdout, stderr } = await exec(
-      `find ~/.config/raycast/extensions/ -name "package.json" -exec echo -n "{}: " \\;`,
-    );
-
-    if (stderr) {
-      showFailureToast(stderr);
-      throw new Error(stderr);
-    }
-
-    const files = stdout.split(": ").filter((file) => file.trim() !== "");
-
+    const files = await getPackageJsonFiles();
     let result = await Promise.all(
       files.map(async (file) => {
         const content = await fs.readFile(file, "utf-8");
         const json = await JSON.parse(content);
 
-        const author = await json.author;
-        const owner = (await json.owner) || null;
-        const name = await json.name;
+        const author: string = json.author;
+        const owner: string | undefined = json?.owner;
+        const name: string = json.name;
+
         const link = `https://raycast.com/${owner == "null" ? author : owner}/${name}`;
         const cleanedPath = file.replace("/package.json", "");
 
@@ -51,12 +65,11 @@ export default function IndexCommand() {
           path: cleanedPath,
           name,
           author: author,
-          icon: await json.icon,
-          commands: await json.commands.length,
+          icon: json.icon,
+          commandCount: json.commands.length.toString(),
           owner,
-          title: await json.title,
+          title: json.title,
           link,
-          isOrganization: owner !== null,
           isLocalExtension: !!cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
         };
       }),
@@ -71,7 +84,7 @@ export default function IndexCommand() {
   });
 
   function ExtensionTypeDropdown(props: {
-    ExtensionTypes: OptionType[];
+    ExtensionTypes: Option[];
     onExtensionTypeChange: (newValue: string) => void;
   }) {
     const { ExtensionTypes, onExtensionTypeChange } = props;
@@ -93,7 +106,7 @@ export default function IndexCommand() {
   }
 
   const onExtensionTypeChange = (newValue: string) => {
-    const filteredExtensions: DataType[] =
+    const filteredExtensions: ExtensionMetadata[] =
       data?.filter((item) => {
         return newValue === "local" ? item.isLocalExtension : newValue === "store" ? !item.isLocalExtension : true;
       }) || [];
@@ -124,13 +137,13 @@ export default function IndexCommand() {
               });
             }
 
-            if (item.isOrganization) {
+            if (item.owner) {
               accessories.push({ tag: item.owner, icon: Icon.Crown, tooltip: "Organization" });
             } else {
               accessories.push({ tag: item.author, icon: Icon.Person, tooltip: "Author" });
             }
 
-            accessories.push({ tag: `${item.commands}`, icon: Icon.ComputerChip, tooltip: "Commands" });
+            accessories.push({ tag: item.commandCount, icon: Icon.ComputerChip, tooltip: "Commands" });
 
             return (
               <List.Item
