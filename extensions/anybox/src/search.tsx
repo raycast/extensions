@@ -1,4 +1,4 @@
-import { List, getPreferenceValues } from "@raycast/api";
+import { List, Grid, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import searchRequest, { SearchQuery, Link, Preferences } from "./utilities/searchRequest";
 import LinkItem from "./components/LinkItem";
@@ -30,8 +30,8 @@ function looseMatch(query: string, content: string): boolean {
   return true;
 }
 
-let tagsResult: TagProp[];
-let foldersResult: FolderProp[];
+let tagsResult: TagProp[] = [];
+let foldersResult: FolderProp[] = [];
 fetchTags().then((res) => {
   tagsResult = res;
 });
@@ -60,8 +60,12 @@ export default function SearchResult() {
       let isSearchEngines = false;
       let linksResult = await searchRequest(query);
 
-      if (preferences.searchFolders && preferences.searchFolders) {
+      if (preferences.searchTags && preferences.searchFolders) {
         limit = 3;
+      }
+
+      if (preferences.asIcons) {
+        limit = 5;
       }
 
       if (Array.isArray(linksResult)) {
@@ -134,24 +138,77 @@ export default function SearchResult() {
     searchBarPlaceholder = "Search for links in Anybox";
   }
 
-  return (
-    <List
-      isLoading={state.isLoading}
-      enableFiltering={false}
-      throttle={true}
-      onSearchTextChange={setSearchText}
-      navigationTitle={navigationTitle}
-      searchBarPlaceholder={searchBarPlaceholder}
-    >
-      {state.tags.map((item) => {
-        return <TagItem item={item} key={item.id} />;
-      })}
-      {state.folders.map((item) => {
-        return <FolderItem item={item} key={item.id} />;
-      })}
-      {state.links.map((item) => {
-        return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;
-      })}
-    </List>
-  );
+  let linksSection = null;
+
+  if (!preferences.searchFolders && !preferences.searchTags) {
+    linksSection = (
+      <>
+        {state.links.map((item) => {
+          return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;
+        })}
+      </>
+    );
+  } else {
+    linksSection = (
+      <List.Section title="Links">
+        {state.links.map((item) => {
+          return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;
+        })}
+      </List.Section>
+    );
+  }
+
+  if (preferences.asIcons) {
+    return (
+      <Grid
+        isLoading={state.isLoading}
+        enableFiltering={false}
+        throttle={true}
+        onSearchTextChange={setSearchText}
+        navigationTitle={navigationTitle}
+        searchBarPlaceholder={searchBarPlaceholder}
+      >
+        <Grid.Section title="Tags">
+          {state.tags.map((item) => {
+            return <TagItem item={item} key={item.id} />;
+          })}
+        </Grid.Section>
+        <Grid.Section title="Folders">
+          {state.folders.map((item) => {
+            return <FolderItem item={item} key={item.id} />;
+          })}
+        </Grid.Section>
+        <Grid.Section title="Links">
+          {state.links.map((item) => {
+            return (
+              <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />
+            );
+          })}
+        </Grid.Section>
+      </Grid>
+    );
+  } else {
+    return (
+      <List
+        isLoading={state.isLoading}
+        enableFiltering={false}
+        throttle={true}
+        onSearchTextChange={setSearchText}
+        navigationTitle={navigationTitle}
+        searchBarPlaceholder={searchBarPlaceholder}
+      >
+        <List.Section title="Tags">
+          {state.tags.map((item) => {
+            return <TagItem item={item} key={item.id} />;
+          })}
+        </List.Section>
+        <List.Section title="Folders">
+          {state.folders.map((item) => {
+            return <FolderItem item={item} key={item.id} />;
+          })}
+        </List.Section>
+        {linksSection}
+      </List>
+    );
+  }
 }
