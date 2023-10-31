@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import PullRequestDetail from "./components/PullRequestDetail";
 import View from "./components/View";
@@ -29,7 +29,8 @@ type PullRequestFormProps = {
 
 export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const { push } = useNavigation();
-  const { data: repositories } = useMyRepositories();
+  const [searchText, setSearchText] = useState("");
+  const { data: repositories, isLoading: isLoadingRepositories } = useMyRepositories(searchText);
   const { github } = getGitHubClient();
 
   const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<PullRequestFormValues>({
@@ -187,7 +188,14 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       enableDrafts
       isLoading={isLoading}
     >
-      <Form.Dropdown {...itemProps.repository} title="Repository" storeValue>
+      <Form.Dropdown
+        {...itemProps.repository}
+        title="Repository"
+        storeValue
+        onSearchTextChange={setSearchText}
+        isLoading={isLoadingRepositories}
+        throttle
+      >
         {repositories?.map((repository) => {
           return (
             <Form.Dropdown.Item
