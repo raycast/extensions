@@ -70,7 +70,7 @@ export default function IndexCommand() {
           owner,
           title: json.title,
           link,
-          isLocalExtension: !!cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
+          isLocalExtension: !cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
         };
       }),
     );
