@@ -56,6 +56,8 @@ export interface Preferences {
   api_key: string;
   searchTags: boolean;
   searchFolders: boolean;
+  asIcons: boolean;
+  preferLinkIcons: boolean;
 }
 
 export default async function searchRequest(query: SearchQuery): Promise<[Link]> {

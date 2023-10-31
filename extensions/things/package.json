@@ -70,6 +70,15 @@
       "interval": "5m",
       "preferences": [
         {
+          "name": "displayTodo",
+          "type": "checkbox",
+          "title": "Count",
+          "label": "Display To-Do",
+          "description": "When enabled, the first Things to-do wil be displayed in the menu bar.",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "shouldShowShortcuts",
           "type": "checkbox",
           "label": "Show Lists Shortcuts",
