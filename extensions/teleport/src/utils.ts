@@ -1,30 +1,40 @@
-import { exec } from "child_process";
+import { spawnSync } from "child_process";
 import { environment } from "@raycast/api";
-import { promisify } from "util";
+
+export function login(username: string, password: string, proxy: string, otp: string) {
+  return spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-login.sh`, username, password, proxy, otp], {
+    env: getEnv(),
+  });
+}
+
+export function logout() {
+  return spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-logout.sh`], { env: getEnv() });
+}
 
 export async function getServersList() {
-  const execp = promisify(exec);
-  const output = await execp(`sh ${environment.assetsPath}/scripts/teleport-server-list.sh`, { env: getEnv() });
-  return JSON.parse(output.stdout);
+  const result = spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-server-list.sh`], { env: getEnv() });
+
+  return JSON.parse(result.stdout.toString());
 }
 
 export async function getDatabasesList() {
-  const execp = promisify(exec);
-  const output = await execp(`sh ${environment.assetsPath}/scripts/teleport-database-list.sh`, { env: getEnv() });
-  return JSON.parse(output.stdout);
+  const result = spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-database-list.sh`], { env: getEnv() });
+
+  return JSON.parse(result.stdout.toString());
 }
 
-export async function getServerCommand(server: string, username: string) {
+export function getServerCommand(server: string, username: string) {
   return `tsh ssh ${username}@${server}`;
 }
 
 export async function connectToDatabase(connection: string, username: string, protocol: string, database: string) {
-  const execp = promisify(exec);
-  const output = await execp(
-    `sh ${environment.assetsPath}/scripts/teleport-database-connect.sh ${connection} ${username} ${protocol} ${database}`,
+  const result = spawnSync(
+    "sh",
+    [`${environment.assetsPath}/scripts/teleport-database-connect.sh`, connection, username, protocol, database],
     { env: getEnv() }
   );
-  return output.stdout;
+
+  return result.stdout.toString();
 }
 
 export function getEnv() {

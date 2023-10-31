@@ -1,7 +1,5 @@
-import { environment, showToast, Toast, getPreferenceValues, LaunchProps } from "@raycast/api";
-import { promisify } from "util";
-import { exec } from "child_process";
-import { getEnv } from "./utils";
+import { showToast, Toast, getPreferenceValues, LaunchProps } from "@raycast/api";
+import { login } from "./utils";
 
 export default async function Command(props: LaunchProps<{ arguments: { otp: string } }>) {
   const args = props.arguments;
@@ -12,23 +10,18 @@ export default async function Command(props: LaunchProps<{ arguments: { otp: str
     title: "Logging in...",
   });
 
-  const env = getEnv();
-
-  const execp = promisify(exec);
-
   try {
-    const output = await execp(
-      `sh ${environment.assetsPath}/scripts/teleport-login.sh ${prefs.username} ${prefs.password} ${prefs.proxy} ${args.otp}`,
-      { env }
-    );
+    const result = login(prefs.username, prefs.password, prefs.proxy, args.otp);
 
-    if (output.stdout.includes("ERROR")) {
-      throw new Error(output.stdout);
+    const output = result.output.toString();
+
+    if (output.includes("ERROR")) {
+      throw new Error(output);
     }
 
     toast.style = Toast.Style.Success;
     toast.title = "Logged in !";
-    toast.message = output.stdout;
+    toast.message = output;
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to login !";
