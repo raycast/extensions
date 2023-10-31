@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twos",
   "title": "Twos Post",
-  "description": "Add new 'thing' to Twos <twosapp.com>",
+  "description": "Add new 'thing' to Twos",
   "icon": "twos-icon.png",
   "author": "ekafyi",
   "categories": [
