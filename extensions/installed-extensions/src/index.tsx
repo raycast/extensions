@@ -66,7 +66,7 @@ export default function IndexCommand() {
           name,
           author: author,
           icon: json.icon,
-          commandCount: json.commands.length.toString(),
+          commandCount: json.commands.length,
           owner,
           title: json.title,
           link,
@@ -143,7 +143,7 @@ export default function IndexCommand() {
               accessories.push({ tag: item.author, icon: Icon.Person, tooltip: "Author" });
             }
 
-            accessories.push({ tag: item.commandCount, icon: Icon.ComputerChip, tooltip: "Commands" });
+            accessories.push({ tag: `${item.commandCount}`, icon: Icon.ComputerChip, tooltip: "Commands" });
 
             return (
               <List.Item
