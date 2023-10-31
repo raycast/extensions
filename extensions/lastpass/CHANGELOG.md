@@ -1,5 +1,9 @@
 # LastPass Changelog
 
+## [Enhancement] - 2023-10-18
+
+- Fix wrong action name
+
 ## [Enhancement] - 2023-09-06
 
 - Add guard for cases when user password includes special characters like `"` or `'`

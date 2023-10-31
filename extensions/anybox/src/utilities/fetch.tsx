@@ -36,7 +36,7 @@ export interface AnydockProfile {
 async function isAnyboxInstalled() {
   const applications = await getApplications();
   return applications.some(
-    ({ bundleId }) => bundleId === "cc.anybox.Anybox" || bundleId === "ltd.anybox.Anybox-setapp"
+    ({ bundleId }) => bundleId === "cc.anybox.Anybox" || bundleId === "ltd.anybox.Anybox-setapp",
   );
 }
 
@@ -59,6 +59,7 @@ export async function checkForAnyboxInstallation() {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function request(path: string, method: string, body?: any, closeWindow = false, headers = {}) {
   const combinedHeaders = { ...headers, "Content-Type": "application/json" };
   return fetch(`http://127.0.0.1:6391/${path}`, {

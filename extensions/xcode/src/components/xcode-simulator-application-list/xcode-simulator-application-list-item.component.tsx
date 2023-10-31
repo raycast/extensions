@@ -6,8 +6,8 @@ import { XcodeSimulatorAppPrivacyAction } from "../../models/xcode-simulator/xco
 import { XcodeSimulatorAppPrivacyServiceType } from "../../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { XcodeSimulatorAppPrivacyServiceTypeName } from "../../shared/xcode-simulator-app-privacy-service-type-name";
 import { XcodeCleanupService } from "../../services/xcode-cleanup.service";
-import { XcodeSimulatorApplicationPushNotifications } from "./xcode-simulator-application-list-push-notifications";
 import { XcodeSimulatorState } from "../../models/xcode-simulator/xcode-simulator-state.model";
+import { XcodeSimulatorSendPushNotificationForm } from "../xcode-simulator-list/xcode-simulator-send-push-notification-form.component";
 
 /**
  * Xcode Simulator Application List Item
@@ -43,7 +43,7 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
             />
             {props.application.appGroupPath ? (
               <Action.ShowInFinder
-                title="Open AppGroup Directory"
+                title="Open App Group Directory"
                 path={props.application.appGroupPath}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
               />
@@ -133,12 +133,17 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
             ))}
           </ActionPanel.Section>
           {props.application.simulator.state === XcodeSimulatorState.booted ? (
-            <ActionPanel.Section title="Notifications">
+            <ActionPanel.Section title="Push Notification">
               <Action.Push
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-                title="Push Notifications"
                 icon={Icon.AlarmRinging}
-                target={<XcodeSimulatorApplicationPushNotifications application={props.application} />}
+                title="Send Push Notification"
+                target={
+                  <XcodeSimulatorSendPushNotificationForm
+                    simulator={props.application.simulator}
+                    preferredBundleIdentifier={props.application.bundleIdentifier}
+                  />
+                }
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
             </ActionPanel.Section>
           ) : undefined}

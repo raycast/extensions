@@ -12,6 +12,8 @@ export const getBatteryState = async () => {
   const validPowerDirection = connected ? amperage > 0 : amperage < 0;
   const timeRemaining = validPowerDirection && batt.TimeRemaining < 65535 ? batt.TimeRemaining : null;
   const capacity = batt.CurrentCapacity / 100;
+  const cycles = batt.CycleCount;
+  const health = (batt.AppleRawMaxCapacity / batt.DesignCapacity) * 100;
   // if there's no time remaining, then probably we switched from battery to AC power
   const watts = timeRemaining != null && voltage && amperage ? (voltage / 1000) * (amperage / 1000) : null;
   const temperature = batt.Temperature;
@@ -28,6 +30,8 @@ export const getBatteryState = async () => {
     temperature,
     connected,
     charging: connected,
+    cycles,
+    health,
   };
   return state;
 };

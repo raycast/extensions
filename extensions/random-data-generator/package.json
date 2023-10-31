@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random",
   "title": "Random Data Generator",
   "description": "Generate random data using Faker library",
@@ -6,7 +7,8 @@
   "author": "loris",
   "contributors": [
     "Calvein",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "vimtor"
   ],
   "license": "MIT",
   "categories": [
@@ -22,15 +24,23 @@
       "title": "Generate Random Data",
       "description": "Generate random data using Faker library",
       "mode": "view"
+    },
+    {
+      "name": "open-quicklink",
+      "title": "Open Quicklink",
+      "description": "Used internally to run quicklinks from the generate command.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
+    "@bugsnag/cuid": "^3.0.2",
     "@faker-js/faker": "^7.6.0",
-    "@raycast/api": "^1.41.1",
+    "@raycast/api": "^1.60.1",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/bugsnag__cuid": "^3.0.1",
     "@types/is-url": "^1.2.30",
     "@types/lodash": "^4.14.186",
     "@types/node": "^18.11.0",
@@ -45,6 +55,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   }
 }

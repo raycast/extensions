@@ -19,7 +19,7 @@ module.exports = async ({ github, context }: API) => {
       .filter((x) => x.startsWith("extensions"))
       .map((x) => {
         const parts = x.split("/");
-        return `/extensions/${parts[1]}`;
+        return parts[1];
       })
   );
 
@@ -49,12 +49,12 @@ module.exports = async ({ github, context }: API) => {
 
   const isFirstContribution = issues.every((issue) => issue.number === context.issue.number || !issue.pull_request);
 
-  for (const ext of touchedExtensions) {
-    const owners = codeowners[ext];
+  for (const extensionFolder of touchedExtensions) {
+    const owners = codeowners[`/extensions/${extensionFolder}`];
 
     if (!owners) {
       // it's a new extension
-      console.log(`cannot find existing extension ${ext}`);
+      console.log(`cannot find existing extension ${extensionFolder}`);
       await github.rest.issues.addLabels({
         issue_number: context.issue.number,
         owner: context.repo.owner,
@@ -73,10 +73,7 @@ module.exports = async ({ github, context }: API) => {
       issue_number: context.issue.number,
       owner: context.repo.owner,
       repo: context.repo.repo,
-      labels: [
-        "extension fix / improvement",
-        limitLabelLength(`extension: ${await findExtensionName(ext, { github, context })}`),
-      ],
+      labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
 
     if (owners[0] === sender) {
@@ -171,16 +168,20 @@ async function comment({ github, context, comment }: Pick<API, "github" | "conte
   }
 }
 
-function limitLabelLength(label: string) {
+async function extensionLabel(extensionFolder: string, api: Pick<API, "github" | "context">) {
+  const extensionName2Folder = await getExtensionName2Folder(api);
+
+  const extension = Object.values(extensionName2Folder).find(([name, folder]) => folder === extensionFolder)?.[0];
+
+  let label;
+
+  if (extension) {
+    const names = Object.keys(extensionName2Folder).map((x) => x.split("/")[1]);
+    const multipleExtensionsWithTheSameName = names.filter((x) => x === extension).length > 1;
+    label = `extension: ${multipleExtensionsWithTheSameName ? extension : extension?.split("/")[1]}`;
+  } else {
+    label = `extension: ${extensionFolder}`;
+  }
+
   return label.length > 50 ? label.substring(0, 49) + "…" : label;
-}
-
-async function findExtensionName(ext: string, api: Pick<API, "github" | "context">) {
-  const map = await getExtensionName2Folder(api);
-
-  const folder = ext.replace("/extensions/", "");
-
-  const foundExtension = Object.entries(map).find(([name, _folder]) => _folder === folder);
-
-  return foundExtension ? foundExtension[0] : undefined;
 }

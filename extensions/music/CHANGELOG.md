@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Update] - 2023-10-12
+
+- Added macos version check in the "favorite" command in order to make it compatible with version older than Sonoma.
+
 ## [Update] - 2023-10-11
 
 - Apple recently updated Music and renamed the "love" functionality to "favorite". This updates the necessary commands for that.
