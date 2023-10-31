@@ -17,16 +17,38 @@
       "title": "Calculate VAT",
       "description": "Calculates the VAT of the given number",
       "mode": "view"
+    },
+    {
+      "name": "noview",
+      "title": "Quick Calculate VAT",
+      "description": "Quickly calculates the VAT of the given number",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "number",
+          "placeholder": "number",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
-  "preferences":[
+  "preferences": [
     {
-        "name":"vat",
-        "description":"The percentage to use for VAT in the calculator",
-        "type":"textfield",
-        "required":true,
-        "title":"VAT Percentage",
-        "default":"16"
+      "name": "vat",
+      "description": "The percentage to use for VAT in the calculator",
+      "type": "textfield",
+      "required": true,
+      "title": "VAT Percentage",
+      "default": "16"
+    },
+    {
+      "name": "autopaste",
+      "description": "Paste to the active app instead of copying to clipboard when using the quick calculate vat command",
+      "type": "checkbox",
+      "required": false,
+      "title": "Paste to Active App",
+      "default": false
     }
   ],
   "dependencies": {

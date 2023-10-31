@@ -1,8 +1,8 @@
-import { List, getPreferenceValues, Action, ActionPanel } from "@raycast/api";
+import { List, Action, ActionPanel } from "@raycast/api";
+import { getVAT,  numberWithVAT} from "./lib/vat";
 import { useState } from "react";
 
 export default function calculateVAT() {
-  const VAT = Number(getPreferenceValues().vat);
   const [number, setNumber] = useState(null);
 
   return (
@@ -10,41 +10,14 @@ export default function calculateVAT() {
       {number && (
         <List.Section title="Results">
           <List.Item
-            title={"Number with VAT: " + numberWithVAT(number, VAT)}
-            actions={resultActions(numberWithVAT(number, VAT))}
+            title={"Number with VAT: " + numberWithVAT(number)}
+            actions={resultActions(numberWithVAT(number))}
           />
-          <List.Item title={"VAT: " + getVAT(number, VAT)} actions={resultActions(getVAT(number, VAT))} />
+          <List.Item title={"VAT: " + getVAT(number)} actions={resultActions(getVAT(number))} />
         </List.Section>
       )}
     </List>
   );
-}
-
-function equationToNumber(equation) {
-  try {
-    if (equation.match(/[a-zA-Z]/g) != null) {
-      return 0;
-    }
-    return safeEval(equation);
-  } catch {
-    return 0;
-  }
-}
-
-function getVAT(number, vat, keepAsNumber) {
-  number = equationToNumber(number);
-  if (keepAsNumber) {
-    return (vat / 100) * number;
-  }
-  return ((vat / 100) * number).toFixed(2);
-}
-
-function safeEval(code) {
-  return Function(`return ${code}`)();
-}
-
-function numberWithVAT(number, vat) {
-  return (getVAT(number, vat, true) + equationToNumber(number)).toFixed(2);
 }
 
 function resultActions(result) {
