@@ -1,7 +1,8 @@
 import { ExtensionMetadata } from "./types";
 
 export function formatItem(item: ExtensionMetadata, format?: string) {
-  const formatPattern = format ?? "{title} ({link})";
+  const formatPattern = format || "{title} ({link})";
+
   return formatPattern
     .replaceAll("{title}", item.title)
     .replaceAll("{link}", item.link)
