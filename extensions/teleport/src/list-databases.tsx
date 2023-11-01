@@ -58,7 +58,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action title="Open" onAction={() => open(name, protocol, "")} />
-                <Action.Push title="Open with database" target={<DatabaseForm name={name} protocol={protocol} />} />
+                <Action.Push title="Open With Database" target={<DatabaseForm name={name} protocol={protocol} />} />
               </ActionPanel>
             }
           />
