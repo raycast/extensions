@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "apis": [
+    {
+      "identifier": "pscale",
+      "source": "@pscale/v1.0#13i03n3alnukthz6",
+      "integrity": "sha512-r/rZ5rdFz8c0wb1TagffHCmEyhJtzrI68akRmXVU4130a5xtlVCwculD0fdU4gADfnMffrDvl8VaWXuz2FIVVQ==",
+      "installerVersion": "6.1.1"
+    }
+  ]
+}
