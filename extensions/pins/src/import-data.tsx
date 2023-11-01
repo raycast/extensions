@@ -8,8 +8,8 @@ import YAML from "yaml";
 import * as TOML from "@iarna/toml";
 import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 
-import { StorageKey } from "./lib/constants";
-import { Group, SortStrategy } from "./lib/Groups";
+import { StorageKey, SORT_STRATEGY } from "./lib/constants";
+import { Group } from "./lib/Groups";
 import { Pin } from "./lib/Pins";
 import { getStorage, setStorage } from "./lib/utils";
 
@@ -34,7 +34,7 @@ const reassignIDs = async (newItems: { id: number }[]) => {
  */
 const mergeRemovingDuplicates = async (
   dataItems: { name: string; id: number }[],
-  oldItems: { name: string; id: number }[]
+  oldItems: { name: string; id: number }[],
 ) => {
   // Merges lists of items, removing repeat entries
   const newItems = [...oldItems];
@@ -165,7 +165,7 @@ const importCSVData = async (data: string[][], importMethod: string) => {
         name: row[nameIndex],
         icon: row[iconIndex],
         iconColor: iconColorIndex == -1 ? undefined : row[iconColorIndex],
-        sortStrategy: sortStrategyIndex == -1 ? undefined : (row[sortStrategyIndex] as SortStrategy),
+        sortStrategy: sortStrategyIndex == -1 ? undefined : (row[sortStrategyIndex] as keyof typeof SORT_STRATEGY),
         id: parseInt(row[idIndex]),
       };
     });
@@ -180,7 +180,7 @@ const importCSVData = async (data: string[][], importMethod: string) => {
  */
 const importXMLData = async (
   data: { groups?: XML.ElementCompact[]; pins?: XML.ElementCompact[] },
-  importMethod: string
+  importMethod: string,
 ) => {
   // Convert XML elements to JSON-serializable objects (extract text from _text property of each element)
   const dataWrapper = {
@@ -189,16 +189,16 @@ const importXMLData = async (
         Object.fromEntries(
           Object.entries(pin).map(([key, value]) => {
             return [key, value._text];
-          })
-        ) as Pin
+          }),
+        ) as Pin,
     ),
     groups: data.groups?.map(
       (group) =>
         Object.fromEntries(
           Object.entries(group).map(([key, value]) => {
             return [key, value._text];
-          })
-        ) as Group
+          }),
+        ) as Group,
     ),
   };
   await importJSONData(dataWrapper, importMethod);
