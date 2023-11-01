@@ -3,8 +3,8 @@
 ------------------------
 
 Author: Stephen Kaplan _(HelloImSteven)_ <br />
-Last Updated: 2023-09-05 <br />
-Pins Version: 1.4.0
+Last Updated: 2023-11-01 <br />
+Pins Version: 1.5.0
 
 ------------------------
 
@@ -27,8 +27,8 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | Placeholder | Replaced With |
 | ----- | ----- |
 | `{{AI:...}}` or <br /> `{{AI:...}}` or <br /> `{{askAI:...}}` | The response to a Raycast AI query. Requires Raycast Pro. You can specify the model and creativity using `{{AI model="..." creativity=[decimal]}}`. The default model is `gpt-3.5-turbo` and the default creativity is `1.0`. The model must be either `gpt-3.5-turbo` or `text-davinci-003`. Creativity must be between `0.0` and `1.0`. |
-| `{{alert:...}}` | Displays an alert with the specified text. Specify an optional message and timeout using `{{alert timeout=[number]:Title,Message}}`. The default timeout is 10 seconds. |
-| `{{dialog:...}}` | Displays a dialog with the specified text. Specify an optional title and timeout using `{{dialog timeout=[number]:Message,Title}}`. The default timeout is 30 seconds. You can accept input by providing `input=true` before the timeout, e.g. `{{dialog input=true timeout=5:Enter a number}}`. |
+| `{{alert:...}}` | Displays an alert with the specified text. Specify an optional message and timeout using `{{alert timeout=[number] title="...":...}}`. The default timeout is 10 seconds. |
+| `{{dialog:...}}` | Displays a dialog with the specified text. Specify an optional title and timeout using `{{dialog timeout=[number] title="...":Message}}`. The default timeout is 30 seconds. You can accept input by providing `input=true` before the timeout, e.g. `{{dialog input=true timeout=5:Enter a number}}`. |
 | `{{as:...}}` or <br /> `{{AS:..}}` | The return value of an AppleScript script. |
 | `{{clipboardText}}` or <br /> `{{clipboard}}` | The current text content of the clipboard. |
 | `{{copy:...}}` | Copies the specified text to the clipboard. |
@@ -71,7 +71,8 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{statistics}}` or <br /> `{{stats}}` or <br /> `{{pinStats}}` or <br /> `{{pinStatistics}}` | Statistics for all pins in tabular format. Specify a sort strategy using `{{statistics sort="[strategy]"}}`. The available strategies are "alpha", "alphabetical", "freq", "frequency", "recency", and "dateCreated". The default strategy is "frequency". You can also specify an amount of pins to randomly select using `{{statistics amount=[number]}}`. |
 | `{{systemLanguage}}` or <br /> `{{language}}` | The configured language for the system. |
 | `{{time}}` or <br /> `{{currentTime}}` | The current time. Use `{{time format="..."}}` to specify a custom time format. Defaults to `HH:mm:s a`. |
-| `{{toast:...}}` or <br /> `{{hud:...}}` | Displays a toast/HUD notification with the specified text. Specify an optional style and detailed text using `{{toast style="[success/failure/fail]":Title,Message}}`. The default style is `success`. If the Raycast window is open when the pin is executed, the notification will display as a toast; otherwise, it will display as a HUD. |
+| `{{timezone}}` | The long name of the current timezone. |
+| `{{toast:...}}` or <br /> `{{hud:...}}` | Displays a toast/HUD notification with the specified text. Specify an optional style and detailed text using `{{toast style="[success/failure/fail]" message="...":Title}}`. The default style is `success`. If the Raycast window is open when the pin is executed, the notification will display as a toast; otherwise, it will display as a HUD. |
 | `{{type:...}}` | Types the specified text into the frontmost application. |
 | `{{url:...}}` or <br /> `{{URL:...}}` | The visible text content at the specified URL. Example: `{{url:https://google.com}}`. |
 | `{{usedUUIDs}}` | The list of UUIDs previously used by the `{{uuid}}` placeholder since Pins' LocalStorage was last reset. |
@@ -109,6 +110,7 @@ Placeholders are evaluated in the following order, from first to last:
 | Information | `{{date}}` |
 | Information | `{{day}}` |
 | Information | `{{time}}` |
+| Information | `{{timezone}}` |
 | Information | `{{systemLanguage}}` |
 | Information | `{{previousApp}}` |
 | Information | `{{uuid}}` |
