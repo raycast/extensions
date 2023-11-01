@@ -84,7 +84,7 @@ function getCodeGroupDescription(firstDigit: string): string {
 }
 
 function getCodeDocsUrl(code: string): string {
-  const codesWithoutDocs = ['102', '207', '208', '226', '305', '421', '423', '424', '509'];
+  const codesWithoutDocs = ['305', '509'];
 
   if (codesWithoutDocs.includes(code)) {
     return 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status';
