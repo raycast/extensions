@@ -1,5 +1,9 @@
 # Installed Extensions Changelog
 
+## [Enhancement] - 2023-10-31
+- Remove using `exec` calling `find`
+- Fix broken types
+
 ## [Enhancement] - 2023-10-27
 
 - Removed `jq` as dependency

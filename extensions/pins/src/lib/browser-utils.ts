@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-04 17:30:30
- * Last modified  : 2023-09-04 17:31:35
+ * Last modified  : 2023-11-01 00:44:23
  */
 
 import { runAppleScript } from "@raycast/utils";
@@ -365,7 +365,7 @@ export const getTextOfWebpage = async (URL: string): Promise<string> => {
     .replaceAll(/(<br ?\/?>|[\n\r]+)/g, "\n")
     .replaceAll(
       /(<script[\s\S\n\r]+?<\/script>|<style[\s\S\n\r]+?<\/style>|<nav[\s\S\n\r]+?<\/nav>|<link[\s\S\n\r]+?<\/link>|<form[\s\S\n\r]+?<\/form>|<button[\s\S\n\r]+?<\/button>|<!--[\s\S\n\r]+?-->|<select[\s\S\n\r]+?<\/select>|<[\s\n\r\S]+?>)/g,
-      "\n"
+      "\n",
     )
     .replaceAll(/[\n\r]{2,}/g, "\r")
     .replaceAll(/(\([^A-Za-z0-9\n]*\)|(?<=[,.!?%*])[,.!?%*]*?\s*[,.!?%*])/g, " ");

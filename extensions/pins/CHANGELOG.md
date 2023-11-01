@@ -1,5 +1,18 @@
 # Pins Changelog
 
+## [Bug fixes & Quality of Life Improvements] - 2023-11-01
+
+- Added group statistics, viewable when editing a group.
+- Added action to create a subgroup of the selected group
+- Added actions for deleting all pins or groups at once
+- Added ability to install example groups separately from example pins
+- Added ability to install example groups or pins while there are already pins/groups present. Existing items will be preserved.
+- Added `{{timezone}}` placeholder for getting the name of the user's timezone.
+- Adjusted `{{alert}}`, `{{dialog}}`, and `{{toast}}` placeholders to accept a `title` argument (e.g. `{{alert title="Example":Message text}}`).
+- Fixed bug where editing a pin could cause its ID to be nullified, effectively deleting the pin.
+- Fixed bug where inputting web URLs in the target field would prevent the list of 'Open With' applications from properly updating and leaving only a "None" option.
+- Fixed bug where empty groups would still get displayed in the menu bar dropdown.
+
 ## [Subgroups, Sorting, Settings, Bug Fixes, and More] - 2023-09-05
 
 - Added ability to create subgroups
