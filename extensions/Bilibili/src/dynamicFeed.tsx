@@ -10,13 +10,13 @@ function DrinkDropdown(props: { kindTypes: KindType[]; onKindTypeChange: (newVal
   const { kindTypes, onKindTypeChange } = props;
   return (
     <List.Dropdown
-      tooltip="Select Drink Type"
+      tooltip="Select Filter Options"
       storeValue={true}
       onChange={(newValue) => {
         onKindTypeChange(newValue);
       }}
     >
-      <List.Dropdown.Section title="Alcoholic Beverages">
+      <List.Dropdown.Section title="Filter Options">
         {kindTypes.map((kindType) => (
           <List.Dropdown.Item key={kindType.id} title={kindType.name} value={kindType.id} />
         ))}
