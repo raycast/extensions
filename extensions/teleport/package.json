@@ -11,6 +11,7 @@
     {
       "name": "login",
       "title": "Login",
+      "subtitle": "Teleport",
       "description": "Login to teleport",
       "mode": "no-view",
       "arguments": [
@@ -25,18 +26,21 @@
     {
       "name": "logout",
       "title": "Logout",
+      "subtitle": "Teleport",
       "description": "Logout of teleport",
       "mode": "no-view"
     },
     {
       "name": "list-databases",
       "title": "List Database Connections",
+      "subtitle": "Teleport",
       "description": "List all database connections available in teleport",
       "mode": "view"
     },
     {
       "name": "list-servers",
       "title": "List Server Connections",
+      "subtitle": "Teleport",
       "description": "List all server connections available in teleport",
       "mode": "view"
     }
