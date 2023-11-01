@@ -2,14 +2,14 @@ import { Icon, getPreferenceValues, open } from "@raycast/api";
 import { format, isWithinInterval } from "date-fns";
 import { useCallback } from "react";
 import { Event } from "../types/event";
+import { NativePreferences } from "../types/preferences";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
 import { parseEmojiField } from "../utils/string";
 import reclaimApi from "./useApi";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
-import { useUser } from "./useUser";
 import { useTask } from "./useTask";
-import { NativePreferences } from "../types/preferences";
+import { useUser } from "./useUser";
 
 const useEvent = () => {
   const { fetcher } = reclaimApi();
@@ -28,11 +28,14 @@ const useEvent = () => {
           params: {
             start: strStart,
             end: strEnd,
+            allConnected: true,
           },
         })
       );
 
       if (!eventsResponse || error) throw error;
+
+      // Filter out events that are synced, managed by Reclaim and part of multiple calendars
       return eventsResponse;
     } catch (error) {
       console.error("Error while fetching events", error);

@@ -12,6 +12,7 @@ import {
   useObsidianVaults,
   vaultPluginCheck,
 } from "./utils/utils";
+import { clearCache } from "./utils/data/cache";
 
 interface appendTaskArgs {
   text: string;
@@ -84,6 +85,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
         silent: silent,
       });
       open(target);
+      clearCache();
       popToRoot();
       closeMainWindow();
     };

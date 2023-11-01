@@ -2,15 +2,24 @@ import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/ap
 import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues, Color } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
-import { deletePage, notionColorToTintColor, getPageIcon, deleteDatabase } from "../utils/notion";
+import {
+  deletePage,
+  notionColorToTintColor,
+  getPageIcon,
+  deleteDatabase,
+  Page,
+  PagePropertyType,
+  DatabaseProperty,
+  User,
+} from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
-import { DatabaseView, Page, DatabaseProperty, User, PagePropertyType } from "../utils/types";
+import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";
 import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
-import { CreateDatabaseForm, DatabaseViewForm, AppendToPageForm } from "./forms";
+import { CreatePageForm, DatabaseViewForm, AppendToPageForm } from "./forms";
 
 function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -62,7 +71,6 @@ export function PageListItem({
   }
 
   const lastEditedUser = users?.find((u) => u.id === page.last_edited_user);
-
   if (page.last_edited_time) {
     const date = new Date(page.last_edited_time);
     accessories.push({
@@ -75,7 +83,7 @@ export function PageListItem({
   }
 
   const quickEditProperties = databaseProperties?.filter((property) =>
-    ["checkbox", "select", "multi_select", "status", "people"].includes(property.type),
+    ["checkbox", "status", "select", "multi_select", "status", "people"].includes(property.type),
   );
 
   const visiblePropertiesIds: string[] =
@@ -123,7 +131,7 @@ export function PageListItem({
   return (
     <List.Item
       title={title}
-      icon={{ value: icon, tooltip: page.object === "database" ? "Database" : "Page" }}
+      icon={{ value: icon, tooltip: pageWord }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
@@ -162,7 +170,7 @@ export function PageListItem({
                 title="Create New Page"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<CreateDatabaseForm databaseId={page.id} mutate={mutate} />}
+                target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} />}
               />
             )}
 

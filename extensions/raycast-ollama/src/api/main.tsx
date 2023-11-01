@@ -3,11 +3,17 @@ import {
   OllamaApiGenerateResponseDone,
   OllamaApiGenerateResponseMetadata,
 } from "./types";
-import { ErrorOllamaCustomModel, ErrorOllamaModelNotInstalled, ErrorRaycastApiNoTextSelected } from "./errors";
+import {
+  ErrorOllamaCustomModel,
+  ErrorOllamaModelNotInstalled,
+  ErrorRaycastApiNoTextSelectedOrCopied,
+  ErrorRaycastApiNoTextSelected,
+  ErrorRaycastApiNoTextCopied,
+} from "./errors";
 import { OllamaApiGenerate, OllamaApiTags } from "./ollama";
 import * as React from "react";
 import { Action, ActionPanel, Detail, Form, Icon, List, LocalStorage, Toast, showToast } from "@raycast/api";
-import { getSelectedText, getPreferenceValues } from "@raycast/api";
+import { getSelectedText, Clipboard, getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues();
 
@@ -89,15 +95,58 @@ export function ResultView(
   }
   React.useEffect(() => {
     if (modelGenerate)
-      getSelectedText()
-        .then((text) => {
-          query.current = text;
-          Inference();
-        })
-        .catch(async (err) => {
-          await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextSelected.message });
-          console.error(err);
-        });
+      switch (preferences.ollamaResultViewInput) {
+        case "SelectedText":
+          getSelectedText()
+            .then((text) => {
+              query.current = text;
+              Inference();
+            })
+            .catch(async () => {
+              if (preferences.ollamaResultViewInputFallback) {
+                Clipboard.readText()
+                  .then((text) => {
+                    if (text === undefined) throw "Empty Clipboard";
+                    query.current = text;
+                    Inference();
+                  })
+                  .catch(async () => {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: ErrorRaycastApiNoTextSelectedOrCopied.message,
+                    });
+                  });
+              } else {
+                await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextSelected.message });
+              }
+            });
+          break;
+        case "Clipboard":
+          Clipboard.readText()
+            .then((text) => {
+              if (text === undefined) throw "Empty Clipboard";
+              query.current = text;
+              Inference();
+            })
+            .catch(async () => {
+              if (preferences.ollamaResultViewInputFallback) {
+                getSelectedText()
+                  .then((text) => {
+                    query.current = text;
+                    Inference();
+                  })
+                  .catch(async () => {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: ErrorRaycastApiNoTextSelectedOrCopied.message,
+                    });
+                  });
+              } else {
+                await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextCopied.message });
+              }
+            });
+          break;
+      }
   }, [modelGenerate]);
   React.useEffect(() => {
     if (model) {
@@ -218,7 +267,6 @@ export function ResultView(
 export function ListView(): JSX.Element {
   // Main
   const modelGenerate: React.MutableRefObject<string | undefined> = React.useRef();
-  const modelEmbedding: React.MutableRefObject<string | undefined> = React.useRef();
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const [query, setQuery]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [chatName, setChatName]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("Current");
@@ -326,10 +374,8 @@ export function ListView(): JSX.Element {
   }
   async function GetModels(): Promise<void> {
     const generate = await LocalStorage.getItem("chat_model_generate");
-    const embedding = await LocalStorage.getItem("chat_model_embedding");
-    if (generate && embedding) {
+    if (generate) {
       modelGenerate.current = generate as string;
-      modelEmbedding.current = embedding as string;
     } else {
       setShowSelectModelForm(true);
     }
@@ -456,22 +502,11 @@ export function ListView(): JSX.Element {
   // Form: Select Model
   const [showSelectModelForm, setShowSelectModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
-  const [showSelectModelFormEmbedding, setShowSelectModelFormEmbedding]: [
-    boolean,
-    React.Dispatch<React.SetStateAction<boolean>>
-  ] = React.useState(false);
   const [installedModels, setInstalledModels]: [string[], React.Dispatch<React.SetStateAction<string[]>>] =
     React.useState([] as string[]);
-  async function setLocalStorageModels(generate: string, embedding: string) {
+  async function setLocalStorageModels(generate: string) {
     LocalStorage.setItem(`chat_model_generate`, generate);
     modelGenerate.current = generate;
-    if (showSelectModelFormEmbedding && embedding) {
-      LocalStorage.setItem(`chat_model_embedding`, embedding);
-      modelEmbedding.current = embedding;
-    } else {
-      LocalStorage.setItem(`chat_model_embedding`, generate);
-      modelEmbedding.current = generate;
-    }
     setShowSelectModelForm(false);
   }
   async function getInstalledModels() {
@@ -497,10 +532,7 @@ export function ListView(): JSX.Element {
       actions={
         <ActionPanel>
           {installedModels.length > 0 && (
-            <Action.SubmitForm
-              title="Submit"
-              onSubmit={(values) => setLocalStorageModels(values.modelGenerate, values.modelEmbedding)}
-            />
+            <Action.SubmitForm title="Submit" onSubmit={(values) => setLocalStorageModels(values.modelGenerate)} />
           )}
           <Action.Open
             title="Manage Models"
@@ -516,19 +548,6 @@ export function ListView(): JSX.Element {
           return <Form.Dropdown.Item value={model} title={model} key={model} />;
         })}
       </Form.Dropdown>
-      <Form.Checkbox
-        id="showEmbeddingsModels"
-        label="Use Different Model for Embedding"
-        storeValue={true}
-        onChange={(values) => setShowSelectModelFormEmbedding(values)}
-      />
-      {showSelectModelFormEmbedding && (
-        <Form.Dropdown id="modelEmbedding" title="Model" defaultValue={modelEmbedding.current}>
-          {installedModels.map((model) => {
-            return <Form.Dropdown.Item value={model} title={model} key={model} />;
-          })}
-        </Form.Dropdown>
-      )}
     </Form>
   );
 

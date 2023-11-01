@@ -1,3 +1,5 @@
+import { ApiResponseEvents } from "../hooks/useEvent.types";
+
 export const eventColors = {
   NONE: "#AAA",
   LAVENDER: "#6E7BC4",

@@ -3,6 +3,7 @@ import { getCurrentAudioInputLevel, toggleSystemAudioInputLevel } from "./shared
 
 export default async function toggleMute() {
   const currentAudioInputLevel = getCurrentAudioInputLevel();
+  await closeMainWindow();
   await toggleSystemAudioInputLevel(currentAudioInputLevel);
 
   try {
@@ -10,6 +11,4 @@ export default async function toggleMute() {
   } catch {
     console.log("mute-menu-bar command is not active");
   }
-
-  await closeMainWindow();
 }

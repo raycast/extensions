@@ -1,5 +1,14 @@
 # KeepassXC Extension Changelog
 
+## [Fix] - 2023-10-23
+
+- Fixed a logic bug
+
+## [Enhancement] - 2023-10-21
+
+- Added Open URL action
+- Optimize performance: Using LocalStorage to cache entries and load entries from cache to improve load speed
+
 ## [Fixes] - 2023-10-03
 
 - New feature/action "Paste TOTP" so as to be more productive

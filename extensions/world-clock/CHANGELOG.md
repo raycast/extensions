@@ -1,5 +1,9 @@
 # World Clock Changelog
 
+## [Update Memo Icon] - 2023-10-16
+
+- Now the Grid view will show the memo icon
+
 ## [Sort Time Zones] - 2023-05-30
 
 - Starred time zones support sorting
