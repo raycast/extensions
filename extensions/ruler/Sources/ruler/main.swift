@@ -148,11 +148,15 @@ class RulerWindow: NSWindow {
       self.contentView?.removeTrackingArea(trackingArea)
     }
 
-    let options: NSTrackingArea.Options = [.activeAlways, .mouseMoved, .inVisibleRect]
+    let options: NSTrackingArea.Options = [.activeAlways, .mouseMoved, .inVisibleRect, .cursorUpdate]
     let trackingArea = NSTrackingArea(
       rect: self.contentView?.bounds ?? NSZeroRect, options: options, owner: self, userInfo: nil)
     self.contentView?.addTrackingArea(trackingArea)
     self.trackingArea = trackingArea
+  }
+
+  override func cursorUpdate(with event: NSEvent) {
+    NSCursor.crosshair.set()
   }
 }
 

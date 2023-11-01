@@ -64,7 +64,7 @@
 /extensions/bark                                     @koinzhang
 /extensions/base64                                   @DanielSinclair @sammarks
 /extensions/battery-health                           @o1y
-/extensions/battery-menubar                          @panrafal
+/extensions/battery-menubar                          @panrafal @yarnaid
 /extensions/bazinga-tools                            @luin
 /extensions/beancount-mate                           @iwfan
 /extensions/bear                                     @hmarr @lucaschultz @diokhan @ron-myers @juanbanchero
@@ -601,6 +601,7 @@
 /extensions/mail                                     @yug2005 @ikupenov @pernielsentikaer @fengtianze
 /extensions/mailboxlayer                             @xmok
 /extensions/mailsy                                   @BalliAsghar
+/extensions/mailtrap                                 @samjwillis97
 /extensions/mailwip                                  @xmok
 /extensions/man-pages                                @SKaplanOfficial
 /extensions/manga-calendar                           @MrOlivo
@@ -630,6 +631,7 @@
 /extensions/memos                                    @JakeLaoyu
 /extensions/mempool                                  @dillionverma
 /extensions/menubar-weather                          @koinzhang @koinzhang @fuksman
+/extensions/metaphor                                 @QIanGua
 /extensions/metronome                                @Visual-Studio-Coder
 /extensions/microsoft-azure                          @crisboarna
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko @crisboarna
@@ -704,7 +706,7 @@
 /extensions/novu                                     @djabarovgeorge
 /extensions/nsis-reference                           @idleberg
 /extensions/nts-radio                                @arjanski
-/extensions/nuget                                    @hexpl0it
+/extensions/nuget                                    @hexpl0it @MoienTajik
 /extensions/numi                                     @AndresMorelos @pernielsentikaer @viandwi24
 /extensions/numpad                                   @paulovictor237
 /extensions/obs-clippings                            @trevware
@@ -912,6 +914,7 @@
 /extensions/salesforce-search                        @svenwiegand
 /extensions/sanity                                   @marcusforsberg
 /extensions/sat-scorer                               @EvanZhouDev
+/extensions/saved-items                              @sunny0826
 /extensions/savvycal                                 @keturiosakys @pernielsentikaer @derrickreimer @vimtor
 /extensions/scaleway                                 @philibea @flozdra
 /extensions/schoology                                @Visual-Studio-Coder
@@ -925,7 +928,7 @@
 /extensions/screenshot                               @Aayush9029 @nirtamir2
 /extensions/script-commands                          @unnamedd
 /extensions/script-kit                               @pomdtr
-/extensions/search-astro-docs                        @ElianCodes
+/extensions/search-astro-docs                        @ElianCodes @pernielsentikaer
 /extensions/search-chatwork                          @nagauta
 /extensions/search-composer-packagist                @danyelkeddah @macbookandrew
 /extensions/search-hexpm                             @jordelver
@@ -979,7 +982,7 @@
 /extensions/solana-explorer                          @TrGiLong @AnishDe12020
 /extensions/sonarr                                   @Aayush9029
 /extensions/sort-mentions                            @YamenSharaf
-/extensions/soundboard                               @pernielsentikaer @andreaselia
+/extensions/soundboard                               @pernielsentikaer @andreaselia @FrankreedX
 /extensions/sourcegraph                              @bobheadxi
 /extensions/sourcetree                               @i906
 /extensions/spaces                                   @pradeepb28
@@ -1097,6 +1100,7 @@
 /extensions/twitter-trendscast                       @pradeepb28
 /extensions/twitter-video-downloader                 @kaanrkaraman
 /extensions/two-factor-authentication-code-generator @cjdenio
+/extensions/twos                                     @ekafyi
 /extensions/tyme-3-time-tracker                      @melkstam
 /extensions/tynyfy                                   @kusthi
 /extensions/type-snob                                @sawyerh
@@ -1121,9 +1125,11 @@
 /extensions/update-clash-subscription                @JakeLaoyu
 /extensions/uplabs                                   @gebeto
 /extensions/uptime                                   @yarnaid
+/extensions/uptime-kuma                              @MarlBurroW @pernielsentikaer
 /extensions/urban-dictionary                         @pernielsentikaer @zhenpewu
 /extensions/url-shortener                            @Visual-Studio-Coder
 /extensions/url-tools                                @joshauh46
+/extensions/user-agent                               @third774
 /extensions/utm-campaign-builder                     @vimtor
 /extensions/utm-virtual-machines                     @alaidriel
 /extensions/uuid-generator                           @jmaeso @GastroGeek @pernielsentikaer @LunaticMuch @hmarr
@@ -1156,10 +1162,12 @@
 /extensions/websocket-debugging                      @RhysLees
 /extensions/wechat                                   @raffeyang
 /extensions/whatsapp                                 @vimtor
+/extensions/whitebit                                 @marco-whitebit
 /extensions/whois                                    @zavbala @snilan @solid-pixel
 /extensions/whosampled                               @ajtruex @pernielsentikaer
 /extensions/wi-fi                                    @koinzhang @louishuyng
 /extensions/wifi-password-reveal                     @louishuyng
+/extensions/wifi-share                               @robinsrk
 /extensions/wiggle-text                              @PineappleRind
 /extensions/wikipedia                                @vimtor @shubzkothekar @JonathanWbn @NikosEfthias @menahishayan @pernielsentikaer @igor9silva @Ek2100
 /extensions/windmill                                 @emiliobool
@@ -1168,7 +1176,7 @@
 /extensions/wistia                                   @ddoria921
 /extensions/wolfram-alpha                            @mathieudutour
 /extensions/word-count                               @itsmingjie @koayon @danulqua
-/extensions/word-search                              @RishabSwift @thomaspaulmann
+/extensions/word-search                              @RishabSwift @thomaspaulmann @bkeys818
 /extensions/wordle                                   @chrisalxlng
 /extensions/wordpress-docs                           @tillkruss @KevinBatdorf
 /extensions/wordpress-plugins                        @edmundcwm

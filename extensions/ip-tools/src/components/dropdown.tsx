@@ -7,6 +7,11 @@ export const drinkTypes: DrinkType[] = [
   { id: "IPv6", name: "IPv6" },
 ];
 
+export const formatTypes: DrinkType[] = [
+  { id: "expanded", name: "expanded" },
+  { id: "compressed", name: "compressed" },
+];
+
 export function DrinkDropdown(props: { drinkTypes: DrinkType[]; onDrinkTypeChange: (newValue: string) => void }) {
   const { drinkTypes, onDrinkTypeChange } = props;
   return (

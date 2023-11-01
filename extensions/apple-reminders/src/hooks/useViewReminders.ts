@@ -6,7 +6,7 @@ import { partition } from "lodash";
 import { useMemo } from "react";
 import React from "react";
 
-import { displayDueDate, isOverdue } from "../helpers";
+import { displayDueDate, isOverdue, parseDay } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
 
@@ -93,17 +93,11 @@ export const groupByOptions: GroupByOptions = [
 export function groupByDueDates(reminders: Reminder[]) {
   const [dated, notDated] = partition(reminders, (reminder: Reminder) => reminder.dueDate !== null);
   const [overdue, upcoming] = partition(dated, (reminder: Reminder) => reminder.dueDate && isOverdue(reminder.dueDate));
-
-  const allDueDates = [
-    ...new Set(upcoming.map((reminder) => parseISO(reminder.dueDate as string).toISOString())),
-  ] as string[];
+  const allDueDates = [...new Set(upcoming.map((reminder) => parseDay(reminder.dueDate).toISOString()))];
   allDueDates.sort();
 
   const sections = allDueDates.map((date) => {
-    const remindersOnDate = upcoming.filter((reminder) => {
-      const reminderDate = parseISO(reminder.dueDate as string).toISOString();
-      return reminderDate === date;
-    });
+    const remindersOnDate = upcoming.filter((reminder) => parseDay(reminder.dueDate).toISOString() === date);
     return {
       title: displayDueDate(date),
       reminders: remindersOnDate,
@@ -116,6 +110,7 @@ export function groupByDueDates(reminders: Reminder[]) {
       reminders: overdue,
     });
   }
+
   if (notDated.length > 0) {
     sections.push({
       title: "No due date",

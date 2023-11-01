@@ -24,6 +24,14 @@
       "description": "When enabled, the domain of the bookmark will be displayed as a subtitle.",
       "default": true,
       "required": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Open Bookmark's Browser",
+      "name": "openBookmarkBrowser",
+      "description": "When enabled, the extension will open the browser from which the bookmark originated, instead of your default browser.",
+      "default": true,
+      "required": false
     }
   ],
   "commands": [

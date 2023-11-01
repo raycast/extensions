@@ -28,7 +28,7 @@ import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
-// NOTE frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
+// Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
 type Bookmark = {
@@ -51,7 +51,7 @@ type Folder = {
 export default function Command() {
   const { data: availableBrowsers } = useAvailableBrowsers();
 
-  const { showDomain } = getPreferenceValues<Preferences>();
+  const { showDomain, openBookmarkBrowser } = getPreferenceValues<Preferences>();
 
   const {
     data: storedBrowsers,
@@ -137,6 +137,7 @@ export default function Command() {
       ...safari.bookmarks,
       ...vivaldi.bookmarks,
     ]
+      .filter((item) => item.title)
       .map((item) => {
         let domain;
         try {
@@ -146,7 +147,6 @@ export default function Command() {
           domain = "";
         }
 
-        // add domain and frequency to bookmarks
         return { ...item, domain, bookmarkFrecency: frecencies[item.id] };
       })
       .sort((a, b) => {
@@ -352,7 +352,7 @@ export default function Command() {
     return <PermissionErrorScreen />;
   }
 
-  // this allows the browser the bookmark was pulled from to be opened
+  // Get the browser name from the bundle ID to open the bookmark's in its associated browser
   function browserBundleToName(bundleId: string) {
     return availableBrowsers?.find((browser) => browser.bundleId === bundleId)?.name;
   }
@@ -405,12 +405,16 @@ export default function Command() {
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>
-                <Action.Open
-                  title="Open in Browser"
-                  application={browserBundleToName(item.browser)}
-                  target={item.url}
-                  onOpen={() => updateFrecency(item)}
-                />
+                {openBookmarkBrowser ? (
+                  <Action.Open
+                    title="Open in Browser"
+                    application={openBookmarkBrowser ? browserBundleToName(item.browser) : undefined}
+                    target={item.url}
+                    onOpen={() => updateFrecency(item)}
+                  />
+                ) : (
+                  <Action.OpenInBrowser url={item.url} onOpen={() => updateFrecency(item)} />
+                )}
 
                 <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrecency(item)} />
 

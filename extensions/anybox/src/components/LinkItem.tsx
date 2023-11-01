@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Action,
   List,
+  Grid,
   useNavigation,
   closeMainWindow,
   Icon,
@@ -92,6 +93,10 @@ export default function LinkItem(props: Props) {
     return `http://127.0.0.1:6391/images/${identifier}/image`;
   };
 
+  const previewLink = (identifier: string) => {
+    return `http://127.0.0.1:6391/images/${identifier}/preview`;
+  };
+
   const getDetail = (link: Link) => {
     let md = `## ${link.title}\n`;
 
@@ -178,7 +183,7 @@ export default function LinkItem(props: Props) {
           title="Copy Link"
           onCopy={onFinished}
           icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
         />
         <Action.CopyToClipboard
           content={`[${item.title}](${item.url})`}
@@ -213,26 +218,50 @@ export default function LinkItem(props: Props) {
       </>
     );
   };
-
-  return (
-    <List.Item
-      title={item.title}
-      subtitle={formatSubtitle(item)}
-      icon={{
-        source: iconLink(item.id),
-        fallback: Icon.Globe,
-        mask: Image.Mask.RoundedRectangle,
-      }}
-      accessories={[{ text: isSearchEngine ? "" : relativeDate(item.dateLastOpened) }]}
-      key={item.id}
-      id={item.id}
-      actions={
-        <ActionPanel title={item.title}>
-          <DefaultAction {...props} />
-          {!isSearchEngine && <ShowDetailAction {...props} />}
-          {!isSearchEngine && <Actions {...props} />}
-        </ActionPanel>
-      }
-    />
-  );
+  if (preferences.asIcons) {
+    return (
+      <Grid.Item
+        title={item.title}
+        subtitle={formatSubtitle(item)}
+        content={{
+          source: preferences.preferLinkIcons ? iconLink(item.id) : previewLink(item.id),
+          fallback: Icon.Globe,
+          mask: Image.Mask.RoundedRectangle,
+        }}
+        key={item.id}
+        id={item.id}
+        actions={
+          <ActionPanel title={item.title}>
+            <DefaultAction {...props} />
+            {!isSearchEngine && <ShowDetailAction {...props} />}
+            {!isSearchEngine && <Actions {...props} />}
+          </ActionPanel>
+        }
+      />
+    );
+  } else {
+    const accessories: List.Item.Accessory[] = [];
+    accessories.push({ text: isSearchEngine ? "" : relativeDate(item.dateLastOpened) });
+    return (
+      <List.Item
+        title={item.title}
+        subtitle={formatSubtitle(item)}
+        icon={{
+          source: iconLink(item.id),
+          fallback: Icon.Globe,
+          mask: Image.Mask.RoundedRectangle,
+        }}
+        accessories={accessories}
+        key={item.id}
+        id={item.id}
+        actions={
+          <ActionPanel title={item.title}>
+            <DefaultAction {...props} />
+            {!isSearchEngine && <ShowDetailAction {...props} />}
+            {!isSearchEngine && <Actions {...props} />}
+          </ActionPanel>
+        }
+      />
+    );
+  }
 }
