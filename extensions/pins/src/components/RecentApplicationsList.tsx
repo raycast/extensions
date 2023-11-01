@@ -3,7 +3,7 @@ import { Action, ActionPanel, environment, getPreferenceValues, Icon, List, Menu
 import { getIcon } from "../lib/icons";
 import { useRecentApplications } from "../lib/LocalData";
 import { openPin } from "../lib/Pins";
-import { ExtensionPreferences } from "../lib/utils";
+import { ExtensionPreferences } from "../lib/preferences";
 import OpenAllMenuItem from "./OpenAllMenuItem";
 
 /**

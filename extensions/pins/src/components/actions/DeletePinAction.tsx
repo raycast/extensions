@@ -1,4 +1,4 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, Keyboard } from "@raycast/api";
 import { Pin, deletePin } from "../../lib/Pins";
 
 /**
@@ -19,7 +19,7 @@ export default function DeletePinAction(props: {
       title="Delete Pin"
       icon={Icon.Trash}
       style={Action.Style.Destructive}
-      shortcut={{ modifiers: ["cmd"], key: "d" }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       onAction={async () => {
         await deletePin(pin, setPins);
         pop?.();
