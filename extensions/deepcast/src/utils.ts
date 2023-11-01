@@ -18,6 +18,7 @@ function isPro(key: string) {
 const DEEPL_QUOTA_EXCEEDED = 456;
 
 function gotErrorToString(error: unknown) {
+  console.log(error);
   // response received
   if (error instanceof got.HTTPError) {
     const { statusCode } = error.response;
@@ -31,9 +32,9 @@ function gotErrorToString(error: unknown) {
   }
 
   // request failed
-  if (error instanceof got.RequestError)
+  if (error instanceof got.RequestError) {
     return `Something went wrong when sending a request to the DeepL API. If you’re having issues, open an issue on GitHub and include following text: ${error.code} ${error.message}`;
-
+  }
   return "Unknown error";
 }
 
@@ -47,7 +48,6 @@ async function getSelection() {
 
 async function readContent(preferredSource: string) {
   const clipboard = await Clipboard.readText();
-  console.log(clipboard);
   const selected = await getSelection();
 
   if (preferredSource === "clipboard") {
@@ -61,17 +61,21 @@ export async function sendTranslateRequest({
   text: initialText,
   sourceLanguage,
   targetLanguage,
+  onTranslateAction,
 }: {
   text?: string;
   sourceLanguage?: SourceLanguage;
   targetLanguage: TargetLanguage;
+  onTranslateAction?: Preferences["onTranslateAction"] | "none";
 }) {
   try {
-    const { key, onTranslateAction, source } = getPreferenceValues<Preferences>();
+    const prefs = getPreferenceValues<Preferences>();
+    const { key, source } = prefs;
+    onTranslateAction = onTranslateAction ?? prefs.onTranslateAction;
 
     const text = initialText || (await readContent(source));
 
-    showToast(Toast.Style.Animated, "Fetching translation...");
+    const toast = await showToast(Toast.Style.Animated, "Fetching translation...");
     try {
       const {
         translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
@@ -105,8 +109,11 @@ export async function sendTranslateRequest({
         case "paste":
           await closeMainWindow();
           await Clipboard.paste(translation);
+          break;
+        default:
+          toast.hide();
+          break;
       }
-
       return { translation, detectedSourceLanguage };
     } catch (error) {
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
@@ -116,8 +123,8 @@ export async function sendTranslateRequest({
   }
 }
 
-export async function translate(target: TargetLanguage) {
-  await sendTranslateRequest({ targetLanguage: target });
+export async function translate(target: TargetLanguage, text?: string) {
+  await sendTranslateRequest({ targetLanguage: target, text: text });
 }
 
 export const source_languages = {

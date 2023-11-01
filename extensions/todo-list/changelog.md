@@ -1,5 +1,12 @@
 # Todo List Changelog
 
+## [Enhancements] - 2023-10-25
+
+- Fixed typos
+- Added confirm dialog to delete all action
+
+
+
 ## [Impliment Sorting] - 2023-08-11
 
 - New preference option for choose how tasks are sorted.

@@ -2,10 +2,10 @@ import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/ap
 import { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 import { getAutoSearchResults, getSearchHistory, getStaticResult } from "./result-service";
-import { SearchResult, HISTORY_KEY, Preferences } from "./models";
+import { SearchResult, HISTORY_KEY } from "./models";
 
 export function useSearch() {
-  const { rememberSearchHistory } = getPreferenceValues<Preferences>();
+  const { rememberSearchHistory } = getPreferenceValues<ExtensionPreferences>();
   const [isLoading, setIsLoading] = useState(true);
   const [history, setHistory] = useState<SearchResult[]>([]);
   const [staticResults, setStaticResults] = useState<SearchResult[]>([]);
@@ -67,7 +67,7 @@ export function useSearch() {
   // Combine all results
   useEffect(() => {
     const combinedResults = [...staticResults, ...historyResults, ...autoResults].filter(
-      (value, index, self) => index === self.findIndex((t) => t.id === value.id)
+      (value, index, self) => index === self.findIndex((t) => t.id === value.id),
     );
 
     setResults(combinedResults);

@@ -4,7 +4,10 @@
   "title": "Heroicons",
   "description": "Search and preview Heroicons",
   "icon": "command-icon.png",
-  "author": "haack",
+  "author": "johndoe123789",
+  "contributors": [
+    "mil3na"
+  ],
   "categories": [
     "Developer Tools",
     "Documentation",

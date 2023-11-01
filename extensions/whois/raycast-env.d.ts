@@ -20,8 +20,8 @@ declare namespace Preferences {
 declare namespace Arguments {
   /** Arguments passed to the `whois` command */
   export type Whois = {
-  /** raycast.com */
-  "domain": string
+  /** raycast.com, 1.1.1.1 */
+  "input": string
 }
 }
 

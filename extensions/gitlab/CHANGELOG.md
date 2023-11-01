@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Fix] - 2023-10-21
+
+- Fix possible crash in todo commands if the title is empty
+
 ## [Fix] - 2023-10-15
 
 - Fix possible crashes in menubar items
