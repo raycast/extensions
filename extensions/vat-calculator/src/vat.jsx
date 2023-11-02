@@ -1,5 +1,5 @@
 import { List, Action, ActionPanel } from "@raycast/api";
-import { getVAT,  numberWithVAT} from "./lib/vat";
+import { getVAT, numberWithVAT } from "./lib/vat";
 import { useState } from "react";
 
 export default function calculateVAT() {
