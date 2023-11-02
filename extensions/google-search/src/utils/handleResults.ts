@@ -38,7 +38,7 @@ export function getStaticResult(searchText: string): SearchResult[] {
   return result;
 }
 
-export async function getAutoSearchResults(searchText: string, signal: any): Promise<SearchResult[]> {
+export async function getAutoSearchResults(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const response = await fetch(
     `https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=${encodeURIComponent(searchText)}`,
     {
@@ -47,7 +47,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
       headers: {
         "Content-Type": "text/plain; charset=UTF-8",
       },
-    }
+    },
   );
 
   if (!response.ok) {
