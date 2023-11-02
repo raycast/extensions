@@ -2,7 +2,7 @@
 
 ## [Update] - 2023-11-01
 
-- Introduce new functionality to filter out synchronized events managed by Reclaim that are part of multiple calendars. Events are grouped based on start and end times, and then irrelevant events are filtered using specific criteria such as event titles like "Personal Commitment", "Work Commitment", or "Travel Commitment" and events that are both synchronized and managed by Reclaim.
+- Introduce new functionality to filter out synchronized events managed by Reclaim that are part of multiple calendars.
 
 ## [Update] - 2023-10-31
 
