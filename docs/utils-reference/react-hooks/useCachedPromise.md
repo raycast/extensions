@@ -66,7 +66,6 @@ import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);

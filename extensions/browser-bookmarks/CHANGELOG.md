@@ -1,6 +1,18 @@
 # Browser Bookmarks Changelog
 
-## [Support for Arc] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2023-10-25
+
+- Fixed an issue where Arc bookmarks could break the extension.
+
+## [Open browser bookmark preference] - 2023-10-25
+
+- Added a preference to open the browser from which the bookmark originated, instead of your default browser.
+
+## [Improvements] - 2023-10-18
+
+- Always sort the bookmarks by their frecency
+
+## [Support for Arc] - 2023-09-22
 
 - Add support for `Arc` browser
 

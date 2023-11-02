@@ -2830,6 +2830,17 @@ export type ConnectedEvent = Node & {
   subject: ReferencedSubject;
 };
 
+/** The Contributing Guidelines for a repository. */
+export type ContributingGuidelines = {
+  __typename?: "ContributingGuidelines";
+  /** The body of the Contributing Guidelines. */
+  body?: Maybe<Scalars["String"]>;
+  /** The HTTP path for the Contributing Guidelines. */
+  resourcePath?: Maybe<Scalars["URI"]>;
+  /** The HTTP URL for the Contributing Guidelines. */
+  url?: Maybe<Scalars["URI"]>;
+};
+
 /** Represents a contribution a user made on GitHub, such as opening an issue. */
 export type Contribution = {
   /**
@@ -3545,6 +3556,8 @@ export type CreateLinkedBranchPayload = {
   __typename?: "CreateLinkedBranchPayload";
   /** A unique identifier for the client performing the mutation. */
   clientMutationId?: Maybe<Scalars["String"]>;
+  /** The issue that was linked to. */
+  issue?: Maybe<Issue>;
   /** The new branch issue reference. */
   linkedBranch?: Maybe<LinkedBranch>;
 };
@@ -4903,6 +4916,8 @@ export type DeploymentProtectionRule = {
   __typename?: "DeploymentProtectionRule";
   /** Identifies the primary key from the database. */
   databaseId?: Maybe<Scalars["Int"]>;
+  /** Whether deployments to this environment can be approved by the user who created the deployment. */
+  preventSelfReview?: Maybe<Scalars["Boolean"]>;
   /** The teams or users that can review the deployment */
   reviewers: DeploymentReviewerConnection;
   /** The timeout in minutes for this protection rule. */
@@ -5273,6 +5288,8 @@ export type Discussion = Closable &
     id: Scalars["ID"];
     /** Check if this comment was edited and includes an edit with the creation data */
     includesCreatedEdit: Scalars["Boolean"];
+    /** Only return answered/unanswered discussions */
+    isAnswered?: Maybe<Scalars["Boolean"]>;
     /** A list of labels associated with the object. */
     labels?: Maybe<LabelConnection>;
     /** The moment the editor made the last edit */
@@ -6079,6 +6096,19 @@ export type EnterpriseBillingInfo = {
   totalLicenses: Scalars["Int"];
 };
 
+/** The connection type for Enterprise. */
+export type EnterpriseConnection = {
+  __typename?: "EnterpriseConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<EnterpriseEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<Enterprise>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
 /** The possible values for the enterprise base repository permission setting. */
 export enum EnterpriseDefaultRepositoryPermissionSettingValue {
   /** Organization members will be able to clone, pull, push, and add new collaborators to all organization repositories. */
@@ -6092,6 +6122,15 @@ export enum EnterpriseDefaultRepositoryPermissionSettingValue {
   /** Organization members will be able to clone, pull, and push all organization repositories. */
   Write = "WRITE",
 }
+
+/** An edge in a connection. */
+export type EnterpriseEdge = {
+  __typename?: "EnterpriseEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<Enterprise>;
+};
 
 /** The possible values for an enabled/disabled enterprise setting. */
 export enum EnterpriseEnabledDisabledSettingValue {
@@ -6229,6 +6268,32 @@ export enum EnterpriseMembersCanMakePurchasesSettingValue {
   Disabled = "DISABLED",
   /** The setting is enabled for organizations in the enterprise. */
   Enabled = "ENABLED",
+}
+
+/** The possible values we have for filtering Platform::Objects::User#enterprises. */
+export enum EnterpriseMembershipType {
+  /** Returns all enterprises in which the user is an admin. */
+  Admin = "ADMIN",
+  /** Returns all enterprises in which the user is a member, admin, or billing manager. */
+  All = "ALL",
+  /** Returns all enterprises in which the user is a billing manager. */
+  BillingManager = "BILLING_MANAGER",
+  /** Returns all enterprises in which the user is a member of an org that is owned by the enterprise. */
+  OrgMembership = "ORG_MEMBERSHIP",
+}
+
+/** Ordering options for enterprises. */
+export type EnterpriseOrder = {
+  /** The ordering direction. */
+  direction: OrderDirection;
+  /** The field to order enterprises by. */
+  field: EnterpriseOrderField;
+};
+
+/** Properties by which enterprise connections can be ordered. */
+export enum EnterpriseOrderField {
+  /** Order enterprises by name */
+  Name = "NAME",
 }
 
 /** The connection type for Organization. */
@@ -13413,6 +13478,8 @@ export type Organization = Actor &
     announcementUserDismissible?: Maybe<Scalars["Boolean"]>;
     /** Determine if this repository owner has any items that can be pinned to their profile. */
     anyPinnableItems: Scalars["Boolean"];
+    /** Identifies the date and time when the organization was archived. */
+    archivedAt?: Maybe<Scalars["DateTime"]>;
     /** Audit log entries of the organization */
     auditLog: OrganizationAuditEntryConnection;
     /** A URL pointing to the organization's public avatar. */
@@ -20304,6 +20371,8 @@ export type Repository = Node &
     commitComments: CommitCommentConnection;
     /** Returns a list of contact links associated to the repository */
     contactLinks?: Maybe<Array<RepositoryContactLink>>;
+    /** Returns the contributing guidelines for this repository. */
+    contributingGuidelines?: Maybe<ContributingGuidelines>;
     /** Identifies the date and time when the object was created. */
     createdAt: Scalars["DateTime"];
     /** Identifies the primary key from the database. */
@@ -20626,6 +20695,7 @@ export type RepositoryDiscussionCategoryArgs = {
 /** A repository contains the content for a project. */
 export type RepositoryDiscussionsArgs = {
   after?: InputMaybe<Scalars["String"]>;
+  answered?: InputMaybe<Scalars["Boolean"]>;
   before?: InputMaybe<Scalars["String"]>;
   categoryId?: InputMaybe<Scalars["ID"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -21281,6 +21351,8 @@ export enum RepositoryLockReason {
   Rename = "RENAME",
   /** The repository is locked due to a trade controls related reason. */
   TradeRestriction = "TRADE_RESTRICTION",
+  /** The repository is locked due to an ownership transfer. */
+  TransferringOwnership = "TRANSFERRING_OWNERSHIP",
 }
 
 /** A GitHub Enterprise Importer (GEI) repository migration. */
@@ -21475,6 +21547,8 @@ export type RepositoryRule = Node & {
   id: Scalars["ID"];
   /** The parameters for this rule. */
   parameters?: Maybe<RuleParameters>;
+  /** The repository ruleset associated with this rule configuration */
+  repositoryRuleset?: Maybe<RepositoryRuleset>;
   /** The type of rule. */
   type: RepositoryRuleType;
 };
@@ -21534,6 +21608,8 @@ export type RepositoryRuleInput = {
 
 /** The rule types supported in rulesets */
 export enum RepositoryRuleType {
+  /** Authorization */
+  Authorization = "AUTHORIZATION",
   /** Branch name pattern */
   BranchNamePattern = "BRANCH_NAME_PATTERN",
   /** Committer email pattern */
@@ -21546,22 +21622,46 @@ export enum RepositoryRuleType {
   Creation = "CREATION",
   /** Only allow users with bypass permissions to delete matching refs. */
   Deletion = "DELETION",
-  /** Prevent users with push access from force pushing to branches. */
+  /** File path pattern */
+  FilePathPattern = "FILE_PATH_PATTERN",
+  /** Branch is read-only. Users cannot push to the branch. */
+  LockBranch = "LOCK_BRANCH",
+  /** Max ref updates */
+  MaxRefUpdates = "MAX_REF_UPDATES",
+  /** Merges must be performed via a merge queue. */
+  MergeQueue = "MERGE_QUEUE",
+  /** Merge queue locked ref */
+  MergeQueueLockedRef = "MERGE_QUEUE_LOCKED_REF",
+  /** Prevent users with push access from force pushing to refs. */
   NonFastForward = "NON_FAST_FORWARD",
   /** Require all commits be made to a non-target branch and submitted via a pull request before they can be merged. */
   PullRequest = "PULL_REQUEST",
-  /** Choose which environments must be successfully deployed to before branches can be merged into a branch that matches this rule. */
+  /** Choose which environments must be successfully deployed to before refs can be merged into a branch that matches this rule. */
   RequiredDeployments = "REQUIRED_DEPLOYMENTS",
-  /** Prevent merge commits from being pushed to matching branches. */
+  /** Prevent merge commits from being pushed to matching refs. */
   RequiredLinearHistory = "REQUIRED_LINEAR_HISTORY",
-  /** Commits pushed to matching branches must have verified signatures. */
+  /** When enabled, all conversations on code must be resolved before a pull request can be merged into a branch that matches this rule. */
+  RequiredReviewThreadResolution = "REQUIRED_REVIEW_THREAD_RESOLUTION",
+  /** Commits pushed to matching refs must have verified signatures. */
   RequiredSignatures = "REQUIRED_SIGNATURES",
-  /** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a branch that matches this rule after status checks have passed. */
+  /** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a ref that matches this rule after status checks have passed. */
   RequiredStatusChecks = "REQUIRED_STATUS_CHECKS",
+  /** Require all commits be made to a non-target branch and submitted via a pull request and required workflow checks to pass before they can be merged. */
+  RequiredWorkflowStatusChecks = "REQUIRED_WORKFLOW_STATUS_CHECKS",
+  /** Commits pushed to matching refs must have verified signatures. */
+  RulesetRequiredSignatures = "RULESET_REQUIRED_SIGNATURES",
+  /** Secret scanning */
+  SecretScanning = "SECRET_SCANNING",
+  /** Tag */
+  Tag = "TAG",
   /** Tag name pattern */
   TagNamePattern = "TAG_NAME_PATTERN",
   /** Only allow users with bypass permission to update matching refs. */
   Update = "UPDATE",
+  /** Require all changes made to a targeted branch to pass the specified workflows before they can be merged. */
+  Workflows = "WORKFLOWS",
+  /** Workflow files cannot be modified. */
+  WorkflowUpdates = "WORKFLOW_UPDATES",
 }
 
 /** A repository ruleset. */
@@ -22001,14 +22101,14 @@ export type RequirableByPullRequestIsRequiredArgs = {
   pullRequestNumber?: InputMaybe<Scalars["Int"]>;
 };
 
-/** Choose which environments must be successfully deployed to before branches can be merged into a branch that matches this rule. */
+/** Choose which environments must be successfully deployed to before refs can be merged into a branch that matches this rule. */
 export type RequiredDeploymentsParameters = {
   __typename?: "RequiredDeploymentsParameters";
   /** The environments that must be successfully deployed to before branches can be merged. */
   requiredDeploymentEnvironments: Array<Scalars["String"]>;
 };
 
-/** Choose which environments must be successfully deployed to before branches can be merged into a branch that matches this rule. */
+/** Choose which environments must be successfully deployed to before refs can be merged into a branch that matches this rule. */
 export type RequiredDeploymentsParametersInput = {
   /** The environments that must be successfully deployed to before branches can be merged. */
   requiredDeploymentEnvironments: Array<Scalars["String"]>;
@@ -22031,7 +22131,7 @@ export type RequiredStatusCheckInput = {
   context: Scalars["String"];
 };
 
-/** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a branch that matches this rule after status checks have passed. */
+/** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a ref that matches this rule after status checks have passed. */
 export type RequiredStatusChecksParameters = {
   __typename?: "RequiredStatusChecksParameters";
   /** Status checks that are required. */
@@ -22040,7 +22140,7 @@ export type RequiredStatusChecksParameters = {
   strictRequiredStatusChecksPolicy: Scalars["Boolean"];
 };
 
-/** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a branch that matches this rule after status checks have passed. */
+/** Choose which status checks must pass before branches can be merged into a branch that matches this rule. When enabled, commits must first be pushed to another branch, then merged or pushed directly to a ref that matches this rule after status checks have passed. */
 export type RequiredStatusChecksParametersInput = {
   /** Status checks that are required. */
   requiredStatusChecks: Array<StatusCheckConfigurationInput>;
@@ -22370,7 +22470,8 @@ export type RuleParameters =
   | RequiredDeploymentsParameters
   | RequiredStatusChecksParameters
   | TagNamePatternParameters
-  | UpdateParameters;
+  | UpdateParameters
+  | WorkflowsParameters;
 
 /** Specifies the parameters for a `RepositoryRule` object. Only one of the fields should be specified. */
 export type RuleParametersInput = {
@@ -22392,6 +22493,8 @@ export type RuleParametersInput = {
   tagNamePattern?: InputMaybe<TagNamePatternParametersInput>;
   /** Parameters used for the `update` rule type */
   update?: InputMaybe<UpdateParametersInput>;
+  /** Parameters used for the `workflows` rule type */
+  workflows?: InputMaybe<WorkflowsParametersInput>;
 };
 
 /** Types which can have `RepositoryRule` objects. */
@@ -22943,6 +23046,8 @@ export enum SocialAccountProvider {
   Linkedin = "LINKEDIN",
   /** Open-source federated microblogging service. */
   Mastodon = "MASTODON",
+  /** JavaScript package registry. */
+  Npm = "NPM",
   /** Social news aggregation and discussion website. */
   Reddit = "REDDIT",
   /** Live-streaming service. */
@@ -23688,7 +23793,7 @@ export enum SponsorsCountryOrRegionCode {
   Tn = "TN",
   /** Tonga */
   To = "TO",
-  /** Turkey */
+  /** Türkiye */
   Tr = "TR",
   /** Trinidad and Tobago */
   Tt = "TT",
@@ -26777,6 +26882,8 @@ export type UpdateEnvironmentInput = {
   clientMutationId?: InputMaybe<Scalars["String"]>;
   /** The node ID of the environment. */
   environmentId: Scalars["ID"];
+  /** Whether deployments to this environment can be approved by the user who created the deployment. */
+  preventSelfReview?: InputMaybe<Scalars["Boolean"]>;
   /** The ids of users or teams that can approve deployments to this environment */
   reviewers?: InputMaybe<Array<Scalars["ID"]>>;
   /** The wait timer in minutes. */
@@ -27551,6 +27658,8 @@ export type User = Actor &
     databaseId?: Maybe<Scalars["Int"]>;
     /** The user's publicly visible profile email. */
     email: Scalars["String"];
+    /** A list of enterprises that the user belongs to. */
+    enterprises?: Maybe<EnterpriseConnection>;
     /** The estimated next GitHub Sponsors payout for this user/organization in cents (USD). */
     estimatedNextSponsorsPayoutInCents: Scalars["Int"];
     /** A list of users the given user is followed by. */
@@ -27737,6 +27846,16 @@ export type UserContributionsCollectionArgs = {
   from?: InputMaybe<Scalars["DateTime"]>;
   organizationID?: InputMaybe<Scalars["ID"]>;
   to?: InputMaybe<Scalars["DateTime"]>;
+};
+
+/** A user is an individual's account on GitHub that owns repositories and can make new content. */
+export type UserEnterprisesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  membershipType?: InputMaybe<EnterpriseMembershipType>;
+  orderBy?: InputMaybe<EnterpriseOrder>;
 };
 
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
@@ -28417,6 +28536,31 @@ export type WorkflowRunsArgs = {
   orderBy?: InputMaybe<WorkflowRunOrder>;
 };
 
+/** A workflow that must run for this rule to pass */
+export type WorkflowFileReference = {
+  __typename?: "WorkflowFileReference";
+  /** The path to the workflow file */
+  path: Scalars["String"];
+  /** The ref (branch or tag) of the workflow file to use */
+  ref?: Maybe<Scalars["String"]>;
+  /** The ID of the repository where the workflow is defined */
+  repositoryId: Scalars["Int"];
+  /** The commit SHA of the workflow file to use */
+  sha?: Maybe<Scalars["String"]>;
+};
+
+/** A workflow that must run for this rule to pass */
+export type WorkflowFileReferenceInput = {
+  /** The path to the workflow file */
+  path: Scalars["String"];
+  /** The ref (branch or tag) of the workflow file to use */
+  ref?: InputMaybe<Scalars["String"]>;
+  /** The ID of the repository where the workflow is defined */
+  repositoryId: Scalars["Int"];
+  /** The commit SHA of the workflow file to use */
+  sha?: InputMaybe<Scalars["String"]>;
+};
+
 /** A workflow run. */
 export type WorkflowRun = Node &
   UniformResourceLocatable & {
@@ -28536,6 +28680,19 @@ export enum WorkflowState {
   /** The workflow was disabled manually. */
   DisabledManually = "DISABLED_MANUALLY",
 }
+
+/** Require all changes made to a targeted branch to pass the specified workflows before they can be merged. */
+export type WorkflowsParameters = {
+  __typename?: "WorkflowsParameters";
+  /** Workflows that must pass for this rule to pass. */
+  workflows: Array<WorkflowFileReference>;
+};
+
+/** Require all changes made to a targeted branch to pass the specified workflows before they can be merged. */
+export type WorkflowsParametersInput = {
+  /** Workflows that must pass for this rule to pass. */
+  workflows: Array<WorkflowFileReferenceInput>;
+};
 
 export type CreateLinkedBranchMutationVariables = Exact<{
   input: CreateLinkedBranchInput;

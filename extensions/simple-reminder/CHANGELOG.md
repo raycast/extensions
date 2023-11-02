@@ -1,5 +1,11 @@
 # Simple Reminder Changelog
 
+## [Improved input parsing] - 2023-10-30
+
+- Improve the input parsing by the user
+- No longer removes certain words from the user input
+- No longer removes certain special characters like "?" or "!"
+
 ## [Mobile notifications with ntfy] - 2023-05-02
 
 - Add preferences to let the user be notified in their mobile device through ntfy
