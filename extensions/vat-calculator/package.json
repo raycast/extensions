@@ -47,6 +47,7 @@
       "description": "Paste to the active app instead of copying to clipboard when using the quick calculate vat command",
       "type": "checkbox",
       "required": false,
+      "label": "Yes, Paste Automatic",
       "title": "Paste to Active App",
       "default": false
     }
