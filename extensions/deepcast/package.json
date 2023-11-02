@@ -676,7 +676,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
+    "@raycast/api": "^1.61.0",
     "@types/got": "^9.6.12",
     "got": "^11.8.2",
     "http-status-codes": "^2.3.0"
@@ -684,7 +684,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "18.18.4",
-    "@types/react": "18.2.33",
+    "@types/react": "18.2.34",
     "eslint": "^8.52.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
