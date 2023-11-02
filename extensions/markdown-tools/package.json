@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "markdown-tools",
-  "title": "markdown-tools",
+  "title": "Markdown-tools",
   "description": "A Raycast Extension that helps with formatting text to markdown",
   "icon": "MarkdownTable.png",
   "author": "uxkjaer",
