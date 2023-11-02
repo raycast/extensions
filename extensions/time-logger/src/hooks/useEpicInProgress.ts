@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { loadSavedData } from "../utils";
 import { Alert, LocalStorage, confirmAlert } from "@raycast/api";
-import { t } from "i18next";
 
 import type { InProgressEpicData } from "../types";
 import { CURRENT_EPIC_STORAGE_KEY } from "../consts";
@@ -37,14 +36,14 @@ export const useEpicInProgress = (updateLastUsedTimestamp: (epicName: string) =>
     const discardAndStartWork = () => _startWorkingOnEpic(epicName);
     const showDiscardConfirmation = () =>
       confirmAlert({
-        title: t("Discard ongoing work?"),
+        title: "Discard ongoing work?",
         primaryAction: {
-          title: t("Discard"),
+          title: "Discard",
           style: Alert.ActionStyle.Destructive,
           onAction: discardAndStartWork,
         },
         dismissAction: {
-          title: t("Cancel"),
+          title: "Cancel",
         },
       });
 

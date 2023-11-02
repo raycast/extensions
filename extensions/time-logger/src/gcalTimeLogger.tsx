@@ -1,34 +1,22 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues, Detail } from "@raycast/api";
-import { useEffect, useState } from "react";
-import "./i18n";
-import { useTranslation } from "react-i18next";
-
-import type { Preferences } from "./types";
+import { Action, ActionPanel, Icon, List, Detail } from "@raycast/api";
+import { useState } from "react";
 import { useEpics } from "./hooks/useEpics";
 import { useEpicInProgress } from "./hooks/useEpicInProgress";
 import { useMigrationManager } from "./hooks/useMigrationManager";
 import { useEpicFilter } from "./hooks/useEpicFilter";
 import { TimeLogAction } from "./components/TimeLogAction";
 
-const preferences = getPreferenceValues<Preferences>();
-
 export default function gcalTimeLogger() {
-  const { t, i18n } = useTranslation();
-
   const [inputEpicName, setInputEpicName] = useState("");
   const { epics, deleteEpic, addEpic, updateLastUsedTimestamp, updateEpic } = useEpics();
   const { workingOnEpicData, setWorkingOnEpicData, startWork, workStartedAt } =
     useEpicInProgress(updateLastUsedTimestamp);
   const isMigrationNeeded = useMigrationManager();
 
-  useEffect(() => {
-    i18n.changeLanguage(preferences.locale || "en");
-  }, [preferences.locale]);
-
   const sortedEpics = useEpicFilter(epics, workingOnEpicData?.name, inputEpicName);
 
   if (isMigrationNeeded === true) {
-    return <Detail isLoading={isMigrationNeeded === undefined} markdown={`# ${t("Setting up...")}`} />;
+    return <Detail isLoading={isMigrationNeeded === undefined} markdown={`# Setting up...`} />;
   }
 
   const createEpicFromQuery = () => {
@@ -60,30 +48,28 @@ export default function gcalTimeLogger() {
                   ? [
                       {
                         icon: Icon.PlayFilled,
-                        text: t("Work started at", {
-                          workStartedAt: `${String(workStartedAt.getHours()).padStart(2, "0")}:${String(
-                            workStartedAt.getMinutes(),
-                          ).padStart(2, "0")}`,
-                        }),
+                        text: `Work started at ${String(workStartedAt.getHours()).padStart(2, "0")}:${String(
+                          workStartedAt.getMinutes(),
+                        ).padStart(2, "0")}`,
                       },
                     ]
                   : []
               }
               actions={
-                <ActionPanel title={t("Epic")}>
+                <ActionPanel title="Epic">
                   {workingOnEpicData?.name !== epic.name ? (
                     <>
                       <Action
                         key="start-work"
                         icon={Icon.PlayFilled}
-                        title={t("Start Working")}
+                        title="Start Working"
                         onAction={() => startWork(epic.name)}
                         shortcut={{ modifiers: ["cmd"], key: "g" }}
                       />
                       <Action
                         key="delete-epic"
                         icon={Icon.XMarkCircle}
-                        title={t("Delete This Epic")}
+                        title="Delete This Epic"
                         shortcut={{ modifiers: ["ctrl"], key: "d" }}
                         onAction={() => deleteEpic(epic.name)}
                       />
@@ -94,7 +80,7 @@ export default function gcalTimeLogger() {
                       <Action
                         key="discard-work"
                         icon={Icon.DeleteDocument}
-                        title={t("Finish Work (Discard Work)")}
+                        title="Finish Work (Discard Work)"
                         onAction={() => setWorkingOnEpicData(null)}
                         shortcut={{ modifiers: ["cmd"], key: "d" }}
                       />
@@ -103,14 +89,14 @@ export default function gcalTimeLogger() {
                   <Action
                     key="create-epic-from-query"
                     icon={Icon.PlusCircle}
-                    title={t("Create Epic From Search Query")}
+                    title="Create Epic From Search Query"
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                     onAction={createEpicFromQuery}
                   />
                   <Action
                     key="edit-epic-description"
                     icon={Icon.Redo}
-                    title={t("Edit Description")}
+                    title="Edit Description"
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={() => updateEpic(epic.name, inputEpicName)}
                   />
@@ -121,13 +107,13 @@ export default function gcalTimeLogger() {
         ) : (
           <List.EmptyView
             icon={Icon.PlusSquare}
-            title={t("Create New Epic From Action Menu")}
+            title="Create New Epic From Action Menu"
             actions={
-              <ActionPanel title={t("Epic")}>
+              <ActionPanel title="Epic">
                 <Action
                   key="create-epic-from-query-list"
                   icon={Icon.PlusCircle}
-                  title={t("Create Epic From Search Query")}
+                  title="Create Epic From Search Query"
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={createEpicFromQuery}
                 />

@@ -12,7 +12,6 @@ export interface EpicData {
 
 export interface Preferences {
   templateEventUrl: string;
-  locale: "en" | "ja";
   epicSortMethod: "addedTime" | "lastUsedTime" | "nameAsc" | "nameDesc";
   bringActiveEpicToTop: boolean;
 }

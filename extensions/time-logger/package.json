@@ -8,24 +8,6 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "locale",
-      "type": "dropdown",
-      "title": "Locale",
-      "description": "Select your locale",
-      "required": false,
-      "default": "en",
-      "data": [
-        {
-          "value": "en",
-          "title": "English"
-        },
-        {
-          "value": "ja",
-          "title": "Japanese"
-        }
-      ]
-    },
-    {
       "name": "templateEventUrl",
       "title": "Template event",
       "description": "Here’s how to create a Google Calendar event template:\n\n1. Start by opening Google Calendar on the web and create a new event.\n2. Fill in the necessary details like Availability or Label, and save the event.\n3. Once the event is saved, click on it, and then pick the three dots in the upper-right corner. Choose the \"Publish event\" option.\n4. Copy the link and paste it here.",
@@ -72,16 +54,14 @@
   "commands": [
     {
       "name": "gcalTimeLogger",
-      "title": "Log your work",
+      "title": "Log Your Work",
       "description": "Manage your epics and log your work to Google Calendar",
       "mode": "view",
       "subtitle": "gcal (Google Calendar)"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
-    "i18next": "^23.6.0",
-    "react-i18next": "^13.3.1"
+    "@raycast/api": "^1.60.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

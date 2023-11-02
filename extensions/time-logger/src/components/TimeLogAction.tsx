@@ -1,6 +1,5 @@
 import { Action, Icon, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
 import { generateCalendarURL } from "../utils";
-import { t } from "i18next";
 
 import type { Preferences, InProgressEpicData } from "../types";
 
@@ -23,12 +22,12 @@ export const TimeLogAction: React.FC<Props> = ({ workingOnEpic, setWorkingOnEpic
     templateEventUrl: preferences.templateEventUrl,
   });
 
-  const showWorkingTime = async () => showHUD(t("WorkingTime", { durationInMinutes }));
+  const showWorkingTime = async () => showHUD(`You have worked for ${durationInMinutes} minutes`);
 
   const saveWork = async () => {
     if (!workingOnEpic?.workStartedTimestamp) {
       showToast({
-        title: t("Failed to record time"),
+        title: "Failed to record time",
         style: Toast.Style.Failure,
       });
       return null;
@@ -45,7 +44,7 @@ export const TimeLogAction: React.FC<Props> = ({ workingOnEpic, setWorkingOnEpic
         key="log-time"
         onAction={saveWork}
         icon={Icon.StopFilled}
-        title={t("Finish working (record time)")}
+        title="Finish Working (Record Time)"
         shortcut={{ modifiers: ["cmd"], key: "s" }}
       />
     </>

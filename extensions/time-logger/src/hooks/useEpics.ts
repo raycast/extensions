@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { LocalStorage, Toast, showToast } from "@raycast/api";
-import { t } from "i18next";
 import { loadSavedData } from "../utils";
 
 import type { EpicData } from "../types";
@@ -28,7 +27,7 @@ export const useEpics = () => {
 
     if (epics.find((epic) => epic.name === name)) {
       showToast({
-        title: t("Epic with this name already exists"),
+        title: "Epic with this name already exists",
         style: Toast.Style.Failure,
       });
       return;
@@ -36,7 +35,7 @@ export const useEpics = () => {
 
     if (!name) {
       showToast({
-        title: t("Empty epic name"),
+        title: "Empty epic name",
         style: Toast.Style.Failure,
       });
       return;
