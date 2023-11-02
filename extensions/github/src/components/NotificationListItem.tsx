@@ -6,6 +6,7 @@ import {
   getNotificationSubtitle,
   getNotificationTooltip,
   getNotificationTypeTitle,
+  getNotificationReason
 } from "../helpers/notifications";
 import { NotificationsResponse } from "../notifications";
 
@@ -20,9 +21,9 @@ type NotificationListItemProps = {
 };
 
 export default function NotificationListItem({ notification, userId, mutateList }: NotificationListItemProps) {
-  const updatedAt = new Date(notification.updated_at);
-
   const icon = getNotificationIcon(notification);
+  const reason = getNotificationReason(notification);
+  const updatedAt = new Date(notification.updated_at);
 
   return (
     <List.Item
@@ -30,9 +31,13 @@ export default function NotificationListItem({ notification, userId, mutateList 
         value: { source: icon.value, tintColor: Color.PrimaryText },
         tooltip: getNotificationTypeTitle(notification),
       }}
-      title={notification.subject.title}
-      subtitle={getNotificationSubtitle(notification)}
+      title={getNotificationSubtitle(notification)}
+      subtitle={notification.subject.title}
       accessories={[
+        {
+          text: reason,
+          tooltip: reason
+        },
         {
           date: updatedAt,
           tooltip: getNotificationTooltip(updatedAt),
