@@ -1,5 +1,5 @@
 import { type Domain, DomainRecord, useDomainRecords, useDomains } from "./client";
-import { ActionPanel, Action, Detail, List } from "@raycast/api";
+import { ActionPanel, Action, Detail, List, Icon } from "@raycast/api";
 import { useMemo } from "react";
 import DomainRecordDetail from "./details/DomainRecordDetail";
 import DomainRecordForm from "./forms/DomainRecordForm";
@@ -21,14 +21,31 @@ export default function Command() {
             <ActionPanel>
               <Action.Push title="View Records" target={<DomainRecords domain={domain} />} />
               <Action.OpenInBrowser url={`https://cloud.digitalocean.com/networking/domains/${domain.name}`} />
-              <Action.Push title="Create A Record" target={<DomainRecordForm domain={domain.name} type="A" />} />
               <Action.Push
+                icon={Icon.Plus}
+                title="Create A Record"
+                target={<DomainRecordForm domain={domain.name} type="A" />}
+              />
+              <Action.Push
+                icon={Icon.Plus}
                 title="Create CNAME Record"
                 target={<DomainRecordForm domain={domain.name} type="CNAME" />}
               />
-              <Action.Push title="Create MX Record" target={<DomainRecordForm domain={domain.name} type="MX" />} />
-              <Action.Push title="Create TXT Record" target={<DomainRecordForm domain={domain.name} type="TXT" />} />
-              <Action.Push title="Create SRV Record" target={<DomainRecordForm domain={domain.name} type="SRV" />} />
+              <Action.Push
+                icon={Icon.Plus}
+                title="Create MX Record"
+                target={<DomainRecordForm domain={domain.name} type="MX" />}
+              />
+              <Action.Push
+                icon={Icon.Plus}
+                title="Create TXT Record"
+                target={<DomainRecordForm domain={domain.name} type="TXT" />}
+              />
+              <Action.Push
+                icon={Icon.Plus}
+                title="Create SRV Record"
+                target={<DomainRecordForm domain={domain.name} type="SRV" />}
+              />
             </ActionPanel>
           }
         />
