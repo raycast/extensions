@@ -121,7 +121,7 @@ export default function gcalTimeLogger() {
         ) : (
           <List.EmptyView
             icon={Icon.PlusSquare}
-            title="Create New Epic From Action Menu"
+            title={t("Create New Epic From Action Menu")}
             actions={
               <ActionPanel title={t("Epic")}>
                 <Action
