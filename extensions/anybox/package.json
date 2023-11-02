@@ -35,24 +35,32 @@
           "type": "checkbox",
           "required": false,
           "default": true,
-          "label": "Show Tags in Search Result",
-          "description": "Enable to also search tags and limit search scope to one specific tag."
+          "label": "Show Tags in Search Results",
+          "description": "Search tags and limit search scope to one specific tag."
         },
         {
-          "name": "searchLinkDescriptions",
+          "name": "searchFolders",
           "type": "checkbox",
           "required": false,
           "default": false,
-          "label": "Search Link Descriptions",
-          "description": "Also search link descriptions when searching for links."
+          "label": "Show Folders in Search Results",
+          "description": "Search folders and limit search scope to one specific folder."
         },
         {
-          "name": "usePinyin",
+          "name": "asIcons",
           "type": "checkbox",
           "required": false,
           "default": false,
-          "label": "Search by Pinyin",
-          "description": "Enable to also search link title by pinyin. Keep it disabled if you don’t know what it is."
+          "label": "As Icons",
+          "description": "Show search results as icons."
+        },
+        {
+          "name": "preferLinkIcons",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Prefer Link Icons in Icons view",
+          "description": "Show favicons instead of Open Graph images in Icons view if possible."
         }
       ]
     },
@@ -78,6 +86,13 @@
       "mode": "view"
     },
     {
+      "name": "saveCurrentTabWithFolder",
+      "title": "Save Current Tab With Folder",
+      "subtitle": "Anybox",
+      "description": "Save URL of current tab to Anybox with optional folder.",
+      "mode": "view"
+    },
+    {
       "name": "paste",
       "title": "Save Clipboard",
       "subtitle": "Anybox",
@@ -89,6 +104,13 @@
       "title": "Save Clipboard With Tags",
       "subtitle": "Anybox",
       "description": "Save clipboard to Anybox with optional tags.",
+      "mode": "view"
+    },
+    {
+      "name": "pasteWithFolder",
+      "title": "Save Clipboard With Folder",
+      "subtitle": "Anybox",
+      "description": "Save clipboard to Anybox with optional Folder.",
       "mode": "view"
     },
     {
@@ -152,26 +174,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "dayjs": "^1.11.5",
+    "@raycast/api": "^1.60.1",
+    "dayjs": "^1.11.10",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "license": "MIT"
 }

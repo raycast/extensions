@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "reminders",
+  "name": "apple-reminders",
   "title": "Apple Reminders Beta",
   "description": "Manage Apple Reminders.",
   "icon": "icon.png",
