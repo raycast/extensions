@@ -34,5 +34,3 @@ and you will get output similar to (depends on how you installed Tesseract):
 `/opt/homebrew/bin/tesseract`
 
 Copy that value and go to *Raycast settings -> Extensions -> Paste copied value under "Tesseract binary path"*
-
-If you have any feature requests or find any bugs [PM me](https://raycastcommunity.slack.com/app_redirect?channel=@U061RQMECP9) on Raycasts Slack channel.
