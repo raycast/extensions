@@ -1,5 +1,8 @@
 # Google Search Changelog
 
+## [Search Descriptions Config] - 2023-11-01
+- Allow users to configure whether to show search descriptions or not
+
 ## [Update] - 2022-12-10
 
 - Fixes an issue that caused the extension to crash
