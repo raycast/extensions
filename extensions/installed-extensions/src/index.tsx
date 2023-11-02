@@ -150,7 +150,7 @@ export default function IndexCommand() {
               accessories.push({
                 tag: { color: Color.Red, value: "Private" },
                 icon: Icon.EyeDisabled,
-                tooltip: "Private Extensions",
+                tooltip: "Private Extension",
               });
             }
 
