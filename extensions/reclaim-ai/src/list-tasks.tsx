@@ -275,7 +275,7 @@ function TaskList() {
     >
       {Object.entries(groupedTasks)
         .sort(([statusA], [statusB]) => {
-          const statusOrder: TaskStatus[] = ["NEW", "IN_PROGRESS", "SCHEDULED", "COMPLETE", "CANCELLED", "ARCHIVED"];
+          const statusOrder: TaskStatus[] = ["IN_PROGRESS", "SCHEDULED", "NEW", "COMPLETE", "CANCELLED", "ARCHIVED"];
           return statusOrder.indexOf(statusA as TaskStatus) - statusOrder.indexOf(statusB as TaskStatus);
         })
         .map(([status, tasks]) => {
