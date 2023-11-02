@@ -11,7 +11,7 @@ export function useMyRepositories() {
 
   return useCachedPromise(async () => {
     const result = await github.searchRepositories({
-      query: `user:@me ${viewer?.organizations?.nodes?.map((org) => `org:${org?.login}`).join(" ")}`,
+      query: `user:@me fork:true ${viewer?.organizations?.nodes?.map((org) => `org:${org?.login}`).join(" ")} sort:updated-desc`,
       numberOfItems: 100,
     });
 
