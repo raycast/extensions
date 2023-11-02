@@ -53,7 +53,7 @@ export default function IndexCommand() {
       files.map(async (file) => {
         const content = await fs.readFile(file, "utf-8");
         const stats = await fs.stat(file);
-        const json = await JSON.parse(content);
+        const json = JSON.parse(content);
 
         const author: string = json.author;
         const owner: string | undefined = json?.owner;
