@@ -31,7 +31,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "label": "Show Search Description",
+      "label": "Show Search Descriptions",
       "description": "Show search suggestion descriptions."
     }
   ],
