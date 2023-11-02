@@ -4,13 +4,13 @@
 - Added support for inputting text to translate as an argument
 
 ## [Default Target Language and Fallback] - 2023-10-16
-- Added preferences to set the default target language
+- Added preferences to set the default target language for `Translate Into ...` commands
 - Support commands being a fallback command
 
 ## [More Input/Output Options] - 2023-10-05
 
-- Added preferences to prefer clipboard or selected text over the other as input
-- Added option to copy the translated text to the clipboard
+- Added preferences to prefer clipboard or selected text over the other as input for `Translate Into ...` commands
+- Added option to copy the translated text to the clipboard for `Translate Into ...` commands
 
 ## [New Additions] - 2023-07-04
 
