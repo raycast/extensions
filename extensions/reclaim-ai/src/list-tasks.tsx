@@ -158,9 +158,9 @@ function TaskList() {
   // Filter tasks by status
   const filteredTasks = useMemo(() => {
     if (selectedStatus === "DONE") {
-      return tasks.filter((task) => task.status === "ARCHIVED" || task.status === "COMPLETE");
+      return tasks.filter((task) => task.status === "ARCHIVED");
     }
-    return tasks.filter((task) => task.status !== "ARCHIVED" && task.status !== "COMPLETE");
+    return tasks.filter((task) => task.status !== "ARCHIVED");
   }, [tasks, selectedStatus]);
 
   // Group tasks by status
