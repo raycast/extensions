@@ -5,12 +5,22 @@ import { format } from "date-fns";
 type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
 
 // from https://github.com/manosim/gitify/blob/c3683dcfd84afc74fd391b2b17ae7b36dfe779a7/src/utils/helpers.ts#L19-L27
-function generateNotificationReferrerId(notificationId: string, userId: string) {
-  const buffer = Buffer.from(`018:NotificationThread${notificationId}:${userId}`);
+function generateNotificationReferrerId(
+  notificationId: string,
+  userId: string
+) {
+  const buffer = Buffer.from(
+    `018:NotificationThread${notificationId}:${userId}`
+  );
   return `notification_referrer_id=${buffer.toString("base64")}`;
 }
 
-export function generateGitHubUrl(url: string, notificationId: string, userId?: string, comment = "") {
+export function generateGitHubUrl(
+  url: string,
+  notificationId: string,
+  userId?: string,
+  comment = ""
+) {
   let newUrl: string = url.replace("api.github.com/repos", "github.com");
 
   if (newUrl.indexOf("/pulls/") !== -1) {
@@ -23,7 +33,10 @@ export function generateGitHubUrl(url: string, notificationId: string, userId?: 
   }
 
   if (userId) {
-    const notificationReferrerId = generateNotificationReferrerId(notificationId, userId);
+    const notificationReferrerId = generateNotificationReferrerId(
+      notificationId,
+      userId
+    );
 
     return `${newUrl}?${notificationReferrerId}${comment}`;
   }
@@ -31,21 +44,32 @@ export function generateGitHubUrl(url: string, notificationId: string, userId?: 
   return newUrl;
 }
 
-const getCommentId = (url?: string) => (url ? /comments\/(?<id>\d+)/g.exec(url)?.groups?.id : undefined);
+const getCommentId = (url?: string) =>
+  url ? /comments\/(?<id>\d+)/g.exec(url)?.groups?.id : undefined;
 
 export function getGitHubURL(notification: Notification, userId?: string) {
   if (notification.subject.url) {
-    const latestCommentId = getCommentId(notification.subject.latest_comment_url);
+    const latestCommentId = getCommentId(
+      notification.subject.latest_comment_url
+    );
     return generateGitHubUrl(
       notification.subject.url,
       notification.id,
       userId,
-      latestCommentId ? "#issuecomment-" + latestCommentId : undefined,
+      latestCommentId ? "#issuecomment-" + latestCommentId : undefined
     );
   } else if (notification.subject.type === "CheckSuite") {
-    return generateGitHubUrl(`${notification.repository.html_url}/actions`, notification.id, userId);
+    return generateGitHubUrl(
+      `${notification.repository.html_url}/actions`,
+      notification.id,
+      userId
+    );
   } else if (notification.subject.type === "Discussion") {
-    return generateGitHubUrl(`${notification.repository.html_url}/discussions`, notification.id, userId);
+    return generateGitHubUrl(
+      `${notification.repository.html_url}/discussions`,
+      notification.id,
+      userId
+    );
   }
 
   return notification.url;
@@ -143,7 +167,11 @@ export function getNotificationReason(notification: Notification) {
 }
 
 export function getIssueOrPrNumberTag(notification: Notification) {
-  if (notification.subject.type !== "Issue" && notification.subject.type !== "PullRequest") return;
+  if (
+    notification.subject.type !== "Issue" &&
+    notification.subject.type !== "PullRequest"
+  )
+    return;
 
   const id = notification.subject.url?.split("/").at(-1);
   return id ? `#${id}` : undefined;
@@ -157,6 +185,8 @@ export function getGitHubIcon(tinted = false) {
   const overrideTintColor = tinted ? Color.Orange : undefined;
   return {
     source: "github.svg",
-    tintColor: overrideTintColor ? overrideTintColor : { light: "#000000", dark: "#FFFFFF", adjustContrast: false },
+    tintColor: overrideTintColor
+      ? overrideTintColor
+      : { light: "#000000", dark: "#FFFFFF", adjustContrast: false },
   };
 }

@@ -6,7 +6,7 @@ import {
   getNotificationSubtitle,
   getNotificationTooltip,
   getNotificationTypeTitle,
-  getNotificationReason
+  getNotificationReason,
 } from "../helpers/notifications";
 import { NotificationsResponse } from "../notifications";
 
@@ -20,7 +20,11 @@ type NotificationListItemProps = {
   mutateList: MutatePromise<Notification[] | undefined>;
 };
 
-export default function NotificationListItem({ notification, userId, mutateList }: NotificationListItemProps) {
+export default function NotificationListItem({
+  notification,
+  userId,
+  mutateList,
+}: NotificationListItemProps) {
   const icon = getNotificationIcon(notification);
   const reason = getNotificationReason(notification);
   const updatedAt = new Date(notification.updated_at);
@@ -36,14 +40,20 @@ export default function NotificationListItem({ notification, userId, mutateList 
       accessories={[
         {
           text: reason,
-          tooltip: reason
+          tooltip: reason,
         },
         {
           date: updatedAt,
           tooltip: getNotificationTooltip(updatedAt),
         },
       ]}
-      actions={<NotificationActions notification={notification} userId={userId} mutateList={mutateList} />}
+      actions={
+        <NotificationActions
+          notification={notification}
+          userId={userId}
+          mutateList={mutateList}
+        />
+      }
     />
   );
 }
