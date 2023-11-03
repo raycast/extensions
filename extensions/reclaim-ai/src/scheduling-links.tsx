@@ -5,8 +5,6 @@ import { useUser } from "./hooks/useUser";
 import { SchedulingLink, SchedulingLinkGroup } from "./types/scheduling-link";
 import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
 import { resolveTimePolicy } from "./utils/time-policy";
-import { TIME_BLOCK_IN_MINUTES } from "./utils/dates";
-import { addDays, addMinutes } from "date-fns";
 
 const SLActions = ({ link }: { link: SchedulingLink }) => {
   const url = `https://app.reclaim.ai/m/${link.pageSlug}/${link.slug}`;
