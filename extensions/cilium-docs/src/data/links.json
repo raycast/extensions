@@ -1,0 +1,12 @@
+[
+  {
+    "key": "1",
+    "title": "Introduction to Cilium & Hubble",
+    "link": "https://docs.cilium.io/en/stable/overview/intro/"
+  },
+  {
+    "key": "2",
+    "title": "Component Overview",
+    "link": "https://docs.cilium.io/en/stable/overview/component-overview/"
+  }
+]
