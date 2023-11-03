@@ -2,23 +2,31 @@ import { spawnSync } from "child_process";
 import { environment } from "@raycast/api";
 
 export function login(username: string, password: string, proxy: string, otp: string) {
-  return spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-login.sh`, username, password, proxy, otp], {
-    env: getEnv(),
-  });
+  return spawnSync(
+    "sh",
+    [`${environment.assetsPath}/scripts/teleport-login.sh`, username, password, proxy, otp],
+    getOptions()
+  );
 }
 
 export function logout() {
-  return spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-logout.sh`], { env: getEnv() });
+  return spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-logout.sh`], getOptions());
 }
 
 export async function getServersList() {
-  const result = spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-server-list.sh`], { env: getEnv() });
+  const result = spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-server-list.sh`], getOptions());
 
   return JSON.parse(result.stdout.toString());
 }
 
 export async function getDatabasesList() {
-  const result = spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-database-list.sh`], { env: getEnv() });
+  const result = spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-database-list.sh`], getOptions());
+
+  return JSON.parse(result.stdout.toString());
+}
+
+export async function getApplicationsList() {
+  const result = spawnSync("sh", [`${environment.assetsPath}/scripts/teleport-application-list.sh`], getOptions());
 
   return JSON.parse(result.stdout.toString());
 }
@@ -31,13 +39,23 @@ export async function connectToDatabase(connection: string, username: string, pr
   const result = spawnSync(
     "sh",
     [`${environment.assetsPath}/scripts/teleport-database-connect.sh`, connection, username, protocol, database],
-    { env: getEnv() }
+    getOptions()
   );
 
   return result.stdout.toString();
 }
 
-export function getEnv() {
+export async function connectToApplication(application: string) {
+  const result = spawnSync(
+    "sh",
+    [`${environment.assetsPath}/scripts/teleport-application-connect.sh`, application],
+    getOptions()
+  );
+
+  return result.stdout.toString();
+}
+
+export function getOptions() {
   const path = "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:";
-  return { ...process.env, ...{ PATH: path } };
+  return { env: { ...process.env, ...{ PATH: path } }, timeout: 15000 };
 }

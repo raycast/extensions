@@ -32,16 +32,23 @@
     },
     {
       "name": "list-databases",
-      "title": "List Database Connections",
+      "title": "List Databases",
       "subtitle": "Teleport",
-      "description": "List all database connections available in teleport",
+      "description": "List all databases available in teleport",
       "mode": "view"
     },
     {
       "name": "list-servers",
-      "title": "List Server Connections",
+      "title": "List Servers",
       "subtitle": "Teleport",
-      "description": "List all server connections available in teleport",
+      "description": "List all servers available in teleport",
+      "mode": "view"
+    },
+    {
+      "name": "list-applications",
+      "title": "List Applications",
+      "subtitle": "Teleport",
+      "description": "List all applications available in teleport",
       "mode": "view"
     }
   ],
