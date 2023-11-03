@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Hide All Apps] - {PR_MERGE_DATE}
+## [Hide All Apps] - 2023-11-03
 
 - Add setting item, you can choose to hide all apps
 
