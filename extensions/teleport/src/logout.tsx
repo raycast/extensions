@@ -8,16 +8,11 @@ export default async function Command() {
   });
 
   try {
-    const result = logout();
-
+    logout();
     toast.style = Toast.Style.Success;
     toast.title = "Logged out !";
-    toast.message = result.stdout.toString();
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to logout !";
-    if (err instanceof Error) {
-      toast.message = err.message;
-    }
   }
 }

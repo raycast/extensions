@@ -17,9 +17,6 @@ async function open(name: string, protocol: string, database: string) {
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failure !";
-    if (err instanceof Error) {
-      toast.message = err.message;
-    }
   }
 }
 
