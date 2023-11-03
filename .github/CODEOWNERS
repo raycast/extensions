@@ -257,6 +257,7 @@
 /extensions/dictionary                               @DrChai
 /extensions/diff-checker                             @Destiner
 /extensions/dig                                      @danielbahl @pernielsentikaer
+/extensions/digitalocean                             @ShukantPal
 /extensions/directus                                 @bryantgillespie
 /extensions/discord                                  @Aayush9029
 /extensions/discord-timestamps                       @thewilloftheshadow @feyli
@@ -878,7 +879,7 @@
 /extensions/real-debrid-manager                      @YamenSharaf
 /extensions/rebrandly                                @grikomsn
 /extensions/recents                                  @GastroGeek @kgrhartlage
-/extensions/reclaim-ai                               @webergnr @maximilianzuern @shkreios @webergnr
+/extensions/reclaim-ai                               @lightbody @maximilianzuern @shkreios @webergnr
 /extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
 /extensions/redis                                    @k8scat
