@@ -50,37 +50,27 @@ export default function Command() {
 }
 
 function statusCodeToColor(status: string): Color {
-  switch (status[0]) {
-    case '1':
-      return Color.Blue;
-    case '2':
-      return Color.Green;
-    case '3':
-      return Color.Yellow;
-    case '4':
-      return Color.Orange;
-    case '5':
-      return Color.Red;
-    default:
-      return Color.Magenta;
-  }
+  return (
+    {
+      1: Color.Blue,
+      2: Color.Green,
+      3: Color.Yellow,
+      4: Color.Orange,
+      5: Color.Red,
+    }[status[0]] || Color.Magenta
+  );
 }
 
 function getCodeGroupDescription(firstDigit: string): string {
-  switch (firstDigit) {
-    case '1':
-      return 'Informational response – the request was received, continuing process';
-    case '2':
-      return 'Successful – the request was successfully received, understood, and accepted';
-    case '3':
-      return 'Redirection – further action needs to be taken in order to complete the request';
-    case '4':
-      return 'Client error – the request contains bad syntax or cannot be fulfilled';
-    case '5':
-      return 'Server error – the server failed to fulfil an apparently valid request';
-    default:
-      return '';
-  }
+  return (
+    {
+      1: 'Informational response - the request was received, continuing process',
+      2: 'Successful - the request was successfully received, understood, and accepted',
+      3: 'Redirection - further action needs to be taken in order to complete the request',
+      4: 'Client error - the request contains bad syntax or cannot be fulfilled',
+      5: 'Server error - the server failed to fulfil an apparently valid request',
+    }[firstDigit] || ''
+  );
 }
 
 function getCodeDocsUrl(code: string): string {
