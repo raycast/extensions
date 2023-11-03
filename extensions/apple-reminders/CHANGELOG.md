@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Today and Scheduled views] - 2023-11-03
+
+- Add support for today and scheduled views, similar to those in the native Reminders app.
+
 ## [Recurring remidners and better group by dates] - 2023-10-24
 
 - Add support for basic recurring reminders in `Create Reminder` and `Quick Add Reminder`
