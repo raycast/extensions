@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raypass",
+  "title": "RayPass - Local Password Manager",
+  "description": "Manage passwords through Raycast that just you and your laptop know.",
+  "icon": "raypass-icon.png",
+  "author": "paul-bokelman",
+  "contributors": [
+    "GastroGeek"
+  ],
+  "categories": [
+    "Security",
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "raypass",
+      "title": "Open RayPass",
+      "description": "Manage passwords through Raycast that just you and your laptop know.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "Generate a strong password using nanoid",
+      "description": "Generate a secure password using nanoid",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.1",
+    "@raycast/utils": "^1.4.8",
+    "nanoid": "^4.0.0",
+    "totp-generator": "^0.0.13",
+    "yup": "^0.32.11",
+    "zustand": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@types/totp-generator": "^0.0.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
