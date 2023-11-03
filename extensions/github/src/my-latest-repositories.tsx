@@ -57,7 +57,6 @@ function MyLatestRepositories() {
                 repository={repository}
                 mutateList={mutateList}
                 onVisit={visitRepository}
-                isPushedAt
               />
             );
           })}

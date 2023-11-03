@@ -1,5 +1,13 @@
 # GitHub Changelog
 
+## [Search Repositories improvements + Fixes] - 2023-11-06
+
+- Add "Archived" and "Fork" tag accessories in the "Search Repositories" results.
+- Hide archived repositories in the different create commands.
+- Sort repositories by last updated.
+- Fix the updated date to use the latest commit push.
+- Fix Open Pull Request menu bar command following GitHub's outage
+
 ## [Add My Latest Repositories command] - 2023-11-06
 
 - Add a command to show my latest repositories in descending order.
