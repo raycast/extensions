@@ -1,13 +1,21 @@
 import { Action, ActionPanel, Icon, List, Toast, open, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 import { useSchedulingLinks } from "./hooks/useSchedulingLinks";
 import { useUser } from "./hooks/useUser";
 import { SchedulingLink, SchedulingLinkGroup } from "./types/scheduling-link";
 import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
 import { resolveTimePolicy } from "./utils/time-policy";
+import {TIME_BLOCK_IN_MINUTES} from "./utils/dates";
+import {addDays, addMinutes} from "date-fns";
 
 const SLActions = ({ link }: { link: SchedulingLink }) => {
   const url = `https://app.reclaim.ai/m/${link.pageSlug}/${link.slug}`;
+  const { currentUser } = useUser();
+
+  const shareTimesEnabled = useMemo(() => {
+    return !!currentUser?.features.schedulingLinks.shareTimesEnabled;
+  }, [currentUser]);
+
 
   const createOneOffLink = async () => {
     const [oneOff, error] = await axiosPromiseData<SchedulingLink>(
@@ -29,10 +37,19 @@ const SLActions = ({ link }: { link: SchedulingLink }) => {
     }
   };
 
+  const createShareLink = async () => {
+    open(`https://app.reclaim.ai/quick-forms/scheduling-links/${link.id}/available-times`);
+  };
+
   return (
     <ActionPanel>
       <Action.CopyToClipboard title="Copy Link to Clipboard" content={url} />
-      <Action icon={Icon.AddPerson} title="Create One Off Link" onAction={createOneOffLink} />
+      {shareTimesEnabled && (
+        <Action icon={Icon.AddPerson} title="Personalize and Share" onAction={createShareLink} />
+      )}
+      {!shareTimesEnabled && (
+          <Action icon={Icon.AddPerson} title="Create One Off Link" onAction={createOneOffLink} />
+      )}
       <Action.Open title="Open in Browser" target={url} />
     </ActionPanel>
   );
