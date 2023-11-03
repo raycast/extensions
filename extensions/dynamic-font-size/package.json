@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Generate font-size using clamp",
+      "title": "Generate Font-size Using Clamp",
       "description": "Copy the generated 'clamp' function to your clipboard",
       "mode": "view"
     }

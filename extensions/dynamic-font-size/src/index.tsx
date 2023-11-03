@@ -1,75 +1,56 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Clipboard
-} from "@raycast/api"
-import {
-  useState,
-  useMemo,
-  useCallback
-} from 'react'
+import { Form, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
+import { useState, useMemo, useCallback } from "react";
 
 // Components
-import Input from "./components/Input"
+import Input from "./components/Input";
 
 // Lib
-import generateClamp from "./lib/generateClamp"
-import { convertValue } from "./lib/utils"
+import generateClamp from "./lib/generateClamp";
+import { convertValue } from "./lib/utils";
 
 export default function Command() {
-  const [unitType, setUnitType] = useState<TUnit>('px')
-  const [minViewportWidth, setMinViewportWidth] = useState('500')
-  const [maxViewportWidth, setMaxViewportWidth] = useState('1200')
-  const [minFontSize, setMinFontSize] = useState('16')
-  const [maxFontSize, setMaxFontSize] = useState('48')
-  const [clampValue, setClampValue] = useState('')
+  const [unitType, setUnitType] = useState<TUnit>("px");
+  const [minViewportWidth, setMinViewportWidth] = useState("500");
+  const [maxViewportWidth, setMaxViewportWidth] = useState("1200");
+  const [minFontSize, setMinFontSize] = useState("16");
+  const [maxFontSize, setMaxFontSize] = useState("48");
+  const [clampValue, setClampValue] = useState("");
 
-  const handleUnitChange = useCallback((value: string) => {
-    if (value) {
-      const typedValue = value as TUnit
+  const handleUnitChange = useCallback(
+    (value: string) => {
+      if (value) {
+        const typedValue = value as TUnit;
 
-      setUnitType(typedValue)
-      setMinViewportWidth(`${convertValue(minViewportWidth, typedValue)}`)
-      setMaxViewportWidth(`${convertValue(maxViewportWidth, typedValue)}`)
-      setMinFontSize(`${convertValue(minFontSize, typedValue)}`)
-      setMaxFontSize(`${convertValue(maxFontSize, typedValue)}`)
-    }
-  }, [
-    minViewportWidth,
-    maxViewportWidth,
-    minFontSize,
-    maxFontSize
-  ])
+        setUnitType(typedValue);
+        setMinViewportWidth(`${convertValue(minViewportWidth, typedValue)}`);
+        setMaxViewportWidth(`${convertValue(maxViewportWidth, typedValue)}`);
+        setMinFontSize(`${convertValue(minFontSize, typedValue)}`);
+        setMaxFontSize(`${convertValue(maxFontSize, typedValue)}`);
+      }
+    },
+    [minViewportWidth, maxViewportWidth, minFontSize, maxFontSize],
+  );
 
   useMemo(() => {
     const clampFunc = generateClamp({
       minViewportWidth,
-	    maxViewportWidth,
-	    minFontSize,
-	    maxFontSize,
-      unit: unitType
-    })
+      maxViewportWidth,
+      minFontSize,
+      maxFontSize,
+      unit: unitType,
+    });
 
-    setClampValue(clampFunc)
-  }, [
-    minViewportWidth,
-    maxViewportWidth,
-    minFontSize,
-	  maxFontSize,
-    unitType
-  ])
+    setClampValue(clampFunc);
+  }, [minViewportWidth, maxViewportWidth, minFontSize, maxFontSize, unitType]);
 
   async function handleSubmit() {
-    await Clipboard.copy(clampValue)
+    await Clipboard.copy(clampValue);
 
     await showToast({
       style: Toast.Style.Success,
       title: "Generated ✅",
-      message: "Copied font-size to clipboard"
-    })
+      message: "Copied font-size to clipboard",
+    });
   }
 
   return (
@@ -81,12 +62,7 @@ export default function Command() {
       }
     >
       <Form.Description text="Create dynamic font sizes using the 'clamp' CSS function." />
-      <Form.Dropdown
-        id="unit"
-        title="Measurement unit"
-        value={unitType}
-        onChange={handleUnitChange}
-      >
+      <Form.Dropdown id="unit" title="Measurement unit" value={unitType} onChange={handleUnitChange}>
         <Form.Dropdown.Item value="px" title="Pixels" />
         <Form.Dropdown.Item value="rem" title="REM" />
       </Form.Dropdown>
@@ -119,5 +95,5 @@ export default function Command() {
         onChange={setMaxFontSize}
       />
     </Form>
-  )
+  );
 }

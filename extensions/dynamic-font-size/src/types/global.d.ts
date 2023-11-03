@@ -1,5 +1,5 @@
-export {}
+export {};
 
 declare global {
-  type TUnit = 'px' | 'rem'
+  type TUnit = "px" | "rem";
 }
