@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import type { ValidationErrors } from "../utils";
 import { useState } from "react";
 import { Action, ActionPanel, Form, useNavigation, Icon, showToast, Toast } from "@raycast/api";
@@ -15,7 +14,7 @@ interface EncryptedPasswordData {
   password: string;
 }
 
-export const EncryptedPasswordForm: FC<Props> = ({ documentName }) => {
+export const EncryptedPasswordForm: React.FC<Props> = ({ documentName }) => {
   const { push } = useNavigation();
 
   const [errors, setErrors] = useState<ValidationErrors<EncryptedPasswordData>>({

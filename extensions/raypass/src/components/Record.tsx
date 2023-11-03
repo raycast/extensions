@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import type { Record as RecordType, RevalidateRecords } from "../types";
 import { ActionPanel, Icon, List, Image } from "@raycast/api";
 import {
@@ -16,14 +15,23 @@ import {
   ExitRayPassAction,
   ShowDocument,
 } from "../actions";
-
 import totp from "totp-generator";
 
 interface Props extends RecordType {
   revalidateRecords: RevalidateRecords;
 }
 
-export const Record: FC<Props> = ({ id, name, url, username, password, secret, email, notes, revalidateRecords }) => {
+export const Record: React.FC<Props> = ({
+  id,
+  name,
+  url,
+  username,
+  password,
+  secret,
+  email,
+  notes,
+  revalidateRecords,
+}) => {
   const md = `
   ${url ? `## [${name}](${url})` : `## ${name}`}
   ${notes ? notes : ""}

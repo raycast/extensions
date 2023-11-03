@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import type { Record, RevalidateRecords } from "../../types";
 import { Action, Icon } from "@raycast/api";
 import { EditRecordForm } from "../../views";
@@ -9,7 +8,7 @@ interface Props {
   revalidateRecords: RevalidateRecords;
 }
 
-export const EditRecordAction: FC<Props> = ({ id, record, revalidateRecords }) => {
+export const EditRecordAction: React.FC<Props> = ({ id, record, revalidateRecords }) => {
   return (
     <Action.Push
       title="Edit Record"

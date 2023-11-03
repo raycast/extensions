@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import { Action, Icon } from "@raycast/api";
 import { misc } from "../../utils";
 
@@ -6,7 +5,7 @@ interface Props {
   name: string;
 }
 
-export const ShowDocument: FC<Props> = ({ name }) => (
+export const ShowDocument: React.FC<Props> = ({ name }) => (
   <Action.ShowInFinder
     title="Reveal Document"
     path={misc.getDocLocation(name)}

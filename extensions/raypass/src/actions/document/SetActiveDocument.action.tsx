@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import { Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
 import { docs } from "../../utils";
 import { Records } from "../../views";
@@ -7,7 +6,7 @@ interface Props {
   doc: { name: string; isActive: boolean };
 }
 
-export const SetActiveDocument: FC<Props> = ({ doc }) => {
+export const SetActiveDocument: React.FC<Props> = ({ doc }) => {
   const { push } = useNavigation();
   // reval
 

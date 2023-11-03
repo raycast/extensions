@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import type { RecordData, RevalidateRecords } from "../types";
 import type { ValidationErrors } from "../utils";
 import { useState } from "react";
@@ -13,7 +12,7 @@ interface Props {
   revalidateRecords: RevalidateRecords;
 }
 
-export const EditRecordForm: FC<Props> = ({ id, initialValues, revalidateRecords }) => {
+export const EditRecordForm: React.FC<Props> = ({ id, initialValues, revalidateRecords }) => {
   const { pop } = useNavigation();
   const { ref, password } = documentStore.getState();
   const [errors, setErrors] = useState<ValidationErrors<RecordData>>({

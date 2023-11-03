@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import type { ValidationErrors } from "../utils";
 import type { NewDocumentData, RevalidateDocuments } from "../types";
 import { useState } from "react";
@@ -15,7 +14,7 @@ interface Props {
   revalidateDocuments: RevalidateDocuments;
 }
 
-export const NewDocumentForm: FC<Props> = ({ revalidateDocuments }) => {
+export const NewDocumentForm: React.FC<Props> = ({ revalidateDocuments }) => {
   const { pop } = useNavigation();
   const [errors, setErrors] = useState<ValidationErrors<NewDocumentData>>({
     name: undefined,

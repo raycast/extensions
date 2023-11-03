@@ -1,8 +1,7 @@
-import type { FC } from "react";
 import { Action, Icon } from "@raycast/api";
 import { Documents } from "../../views";
 
-export const ManageDocumentsAction: FC = () => (
+export const ManageDocumentsAction: React.FC = () => (
   <Action.Push
     icon={Icon.List}
     shortcut={{ modifiers: ["cmd"], key: "o" }}

@@ -1,5 +1,4 @@
-import type { FC } from "react";
-import type { Record, RevalidateRecords } from "../../types";
+import type { RevalidateRecords } from "../../types";
 import { Action, confirmAlert, Alert, showToast, Toast, Icon, Color } from "@raycast/api";
 import { records } from "../../utils";
 import { documentStore } from "../../context";
@@ -9,7 +8,7 @@ interface Props {
   revalidateRecords: RevalidateRecords;
 }
 
-export const DeleteRecordAction: FC<Props> = ({ id, revalidateRecords }) => {
+export const DeleteRecordAction: React.FC<Props> = ({ id, revalidateRecords }) => {
   const { ref, password } = documentStore.getState();
 
   const handleDeleteRecord = async () => {

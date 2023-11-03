@@ -30,7 +30,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.1",
+    "@raycast/api": "^1.61.1",
     "@raycast/utils": "^1.4.8",
     "nanoid": "^4.0.0",
     "totp-generator": "^0.0.13",
@@ -38,15 +38,14 @@
     "zustand": "^4.1.1"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
     "@types/totp-generator": "^0.0.4",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.51.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "prettier": "^2.8.8",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

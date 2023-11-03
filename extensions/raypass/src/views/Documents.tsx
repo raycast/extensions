@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import { List, ActionPanel, Icon, Color } from "@raycast/api";
 import { useDocuments } from "../hooks";
 import {
@@ -11,7 +10,7 @@ import {
 } from "../actions";
 import { NoDocuments } from "../components";
 
-export const Documents: FC = () => {
+export const Documents: React.FC = () => {
   const { data: documents, isLoading, revalidate } = useDocuments();
 
   return (

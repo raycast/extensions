@@ -1,9 +1,8 @@
-import type { FC } from "react";
 import { List } from "@raycast/api";
 import { useRecords } from "../hooks";
 import { Record, NoRecords } from "../components";
 
-export const Records: FC = () => {
+export const Records: React.FC = () => {
   const { data, isLoading, revalidate } = useRecords();
   if (!data) return <List isLoading={true} />;
 

@@ -1,4 +1,3 @@
-import type { FC } from "react";
 import type { RevalidateDocuments } from "../types";
 import { List, ActionPanel, Icon } from "@raycast/api";
 import { NewDocumentAction, RefreshLocalReferencesActions, ExitRayPassAction } from "../actions";
@@ -7,7 +6,7 @@ interface Props {
   revalidateDocuments: RevalidateDocuments;
 }
 
-export const NoDocuments: FC<Props> = ({ revalidateDocuments }) => (
+export const NoDocuments: React.FC<Props> = ({ revalidateDocuments }) => (
   <List.EmptyView
     icon={Icon.BlankDocument}
     actions={
