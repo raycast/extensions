@@ -114,7 +114,7 @@ function getBookmarks(foldres: Folder[], bookmark: BookmarkItem): Bookmark[] {
   const bookmarks = [];
 
   if (isBookmarkURL(bookmark)) {
-    const bookmarkTitle = bookmark.title || bookmark.data.tab.savedTitle;
+    const bookmarkTitle = bookmark.title || bookmark.data.tab.savedTitle || "";
     const hierarchy = foldres.find((folder) => folder.childrenIds.includes(bookmark.id))?.title ?? "";
 
     bookmarks.push({
