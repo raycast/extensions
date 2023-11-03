@@ -31,18 +31,20 @@ const Command = (props: LaunchProps<{ arguments?: Arguments.Index }>) => {
   }
   const { defaultTargetLanguage } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
-  const [sourceText, setSourceText] = useState("");
+  const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
 
+  // set the source text to the selected text if no fallback text is provided
+  // if there is no selected text, then just leave the source text empty
   useEffect(() => {
+    if (props.fallbackText) return;
     getSelectedText().then(content => {
       setSourceText(content ?? "");
     });
   }, []);
-
 
   const submit = async (values: Values) => {
     if (!values.text || !values.to) return;

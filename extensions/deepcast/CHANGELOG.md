@@ -3,6 +3,7 @@
 ## [Enhancement] - 2023-11-03
 - Added support for using selected text for the `Translate` command
 - Added a shortcut to copy the translation to the clipboard in the `Translate` command
+- Support fallback text for the `Translate` command
 
 ## [Arguments] - 2023-10-28
 - Added support for inputting text to translate as an argument
