@@ -22,7 +22,7 @@ function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   );
 }
 
-const Command = (props: LaunchProps) => {
+const Command = (props: LaunchProps<{ arguments?: Arguments.Index }>) => {
   // Check whether component is called with an existing value for translation
   if (props?.launchContext?.translation) {
     const translation = props?.launchContext?.translation;
@@ -101,6 +101,11 @@ const Command = (props: LaunchProps) => {
           <Action.SubmitForm title="Translate" onSubmit={submit} />
           <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
           <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
+          <Action.CopyToClipboard
+            title="Copy Translation"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+            content={translation}
+          />
         </ActionPanel>
       }
       isLoading={loading}
