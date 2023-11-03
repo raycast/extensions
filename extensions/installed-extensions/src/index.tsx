@@ -5,67 +5,78 @@ import {
   Icon,
   List,
   getPreferenceValues,
-  open,
   Clipboard,
   showHUD,
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
-import { exec as execCb } from "child_process";
 import { useState } from "react";
-import { promisify } from "util";
-import { DataType, OptionType } from "./types";
+import { ExtensionMetadata, Option } from "./types";
 import { extensionTypes } from "./constants";
 import { formatItem, formatOutput } from "./utils";
+import fs from "fs/promises";
+import os from "os";
+import path from "path";
 
-const exec = promisify(execCb);
+async function getPackageJsonFiles() {
+  try {
+    const extensionsDir = path.join(os.homedir(), ".config", "raycast", "extensions");
+    const extensions = await fs.readdir(extensionsDir);
+    const packageJsonFiles = await Promise.all(
+      extensions.map(async (extension) => {
+        const packageJsonPath = path.join(extensionsDir, extension, "package.json");
+        try {
+          await fs.access(packageJsonPath, fs.constants.F_OK);
+          return packageJsonPath;
+        } catch (e) {
+          return null;
+        }
+      }),
+    );
+    return packageJsonFiles.filter((file) => file !== null) as string[];
+  } catch (e) {
+    if (e instanceof Error) {
+      showFailureToast(e.message);
+      throw new Error(e.message);
+    }
+    throw new Error("An unknown error occurred");
+  }
+}
 
 export default function IndexCommand() {
   const preferences = getPreferenceValues<Preferences.Index>();
 
-  let jqPath = process.arch == "arm64" ? "/opt/homebrew/bin/jq" : "/usr/local/homebrew/bin/jq";
-  if (preferences.jqPath || preferences.jqPath?.trim()) {
-    jqPath = preferences.jqPath;
-  }
-
-  const [installedExtensions, setInstalledExtensions] = useState<DataType[]>([]);
+  const [installedExtensions, setInstalledExtensions] = useState<ExtensionMetadata[]>([]);
   const { isLoading, data, error } = useCachedPromise(async () => {
-    const { stdout, stderr } = await exec(
-      `find ~/.config/raycast/extensions/**/package.json -exec echo -n "{}: " \\; -exec ${jqPath} -r '. | "\\(.author) \\(.icon) \\(.commands | length) \\(.name) \\(.owner) \\(.title)"' {} \\;`,
+    const files = await getPackageJsonFiles();
+    let result = await Promise.all(
+      files.map(async (file) => {
+        const content = await fs.readFile(file, "utf-8");
+        const stats = await fs.stat(file);
+        const json = JSON.parse(content);
+
+        const author: string = json.author;
+        const owner: string | undefined = json?.owner;
+        const access: string | undefined = json?.access;
+        const name: string = json.name;
+        const link = `https://raycast.com/${owner ?? author}/${name}`;
+        const cleanedPath = file.replace("/package.json", "");
+
+        return {
+          path: cleanedPath,
+          name,
+          author: author,
+          icon: json.icon,
+          commandCount: json.commands.length,
+          owner,
+          access,
+          title: json.title,
+          link,
+          created: stats.ctime,
+          isLocalExtension: !cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
+        };
+      }),
     );
-
-    if (stderr) {
-      showFailureToast("Correct the path to jq or download jq", {
-        primaryAction: {
-          title: "Download jq",
-          onAction: () => {
-            open("https://jqlang.github.io/jq/download/");
-          },
-        },
-      });
-
-      throw new Error("Correct the path to jq or download jq");
-    }
-
-    let result = stdout.split("\n").map((item) => {
-      const [path, author, icon, commands, name, owner, ...titleParts] = item.trim().split(" ");
-      const title = titleParts.join(" ");
-      const cleanedPath = path.replace("/package.json:", "");
-      const link = `https://raycast.com/${owner == "null" ? author : owner}/${name}`;
-
-      return {
-        path: cleanedPath,
-        name,
-        author,
-        icon,
-        commands,
-        owner,
-        title,
-        link,
-        isOrganization: owner !== "null",
-        isLocalExtension: !cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
-      };
-    });
 
     result = result.filter((item) => item.title !== "" && item.author !== "");
     result = result.sort((a, b) => a.title.localeCompare(b.title));
@@ -76,7 +87,7 @@ export default function IndexCommand() {
   });
 
   function ExtensionTypeDropdown(props: {
-    ExtensionTypes: OptionType[];
+    ExtensionTypes: Option[];
     onExtensionTypeChange: (newValue: string) => void;
   }) {
     const { ExtensionTypes, onExtensionTypeChange } = props;
@@ -98,7 +109,7 @@ export default function IndexCommand() {
   }
 
   const onExtensionTypeChange = (newValue: string) => {
-    const filteredExtensions: DataType[] =
+    const filteredExtensions: ExtensionMetadata[] =
       data?.filter((item) => {
         return newValue === "local" ? item.isLocalExtension : newValue === "store" ? !item.isLocalExtension : true;
       }) || [];
@@ -114,15 +125,8 @@ export default function IndexCommand() {
       }
     >
       <List.EmptyView
-        title={error ? "Correct the path to jq or download jq" : "No Results"}
+        title={error ? "An Error Occurred" : "No Results"}
         icon={error ? { source: Icon.Warning, tintColor: Color.Red } : "noview.png"}
-        actions={
-          error ? (
-            <ActionPanel>
-              <Action.OpenInBrowser url="https://jqlang.github.io/jq/download/" title="Download Jq" />
-            </ActionPanel>
-          ) : null
-        }
       />
 
       <List.Section title="Installed Extensions" subtitle={`${installedExtensions?.length}`}>
@@ -136,13 +140,24 @@ export default function IndexCommand() {
               });
             }
 
-            if (item.isOrganization) {
+            if (item.owner) {
               accessories.push({ tag: item.owner, icon: Icon.Crown, tooltip: "Organization" });
             } else {
               accessories.push({ tag: item.author, icon: Icon.Person, tooltip: "Author" });
             }
 
-            accessories.push({ tag: `${item.commands}`, icon: Icon.ComputerChip, tooltip: "Commands" });
+            if (item.owner && item.access === undefined) {
+              accessories.push({
+                tag: { color: Color.Red, value: "Private" },
+                icon: Icon.EyeDisabled,
+                tooltip: "Private Extension",
+              });
+            }
+
+            const date = new Date(item.created);
+
+            accessories.push({ tag: `${item.commandCount}`, icon: Icon.ComputerChip, tooltip: "Commands" });
+            accessories.push({ date: date, tooltip: `Last updated: ${date.toLocaleString()}` });
 
             return (
               <List.Item
@@ -153,6 +168,7 @@ export default function IndexCommand() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Extension">
+                      <Action.OpenInBrowser url={item.link} />
                       <Action
                         onAction={() => {
                           Clipboard.copy(formatItem(item, preferences.format));

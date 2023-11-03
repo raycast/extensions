@@ -48,6 +48,13 @@ export function XcodeSimulatorApplicationsMenuBarItem(props: { application: Xcod
         title="Application Bundle (.app)"
         onAction={(event) => openOrCopyToClipboard(props.application.bundlePath, event.type)}
       />
+      {props.application.appGroupPath ? (
+        <MenuBarExtra.Item
+          icon={{ source: Icon.Folder, tintColor: Color.Blue }}
+          title="App Group"
+          onAction={(event) => openOrCopyToClipboard(props.application.appGroupPath as string, event.type)}
+        />
+      ) : undefined}
       <MenuBarExtra.Item
         icon={{ source: Icon.Folder, tintColor: Color.Blue }}
         title="Sandbox User Data"

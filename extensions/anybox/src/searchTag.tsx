@@ -1,4 +1,4 @@
-import { List, getPreferenceValues } from "@raycast/api";
+import { List, Grid, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import searchRequest, { SearchQuery, Link } from "./utilities/searchRequest";
 import { Preferences } from "./utilities/searchRequest";
@@ -23,10 +23,10 @@ export default function SearchTag(props: Props) {
   });
   const tag = props.tag;
   const [searchText, setSearchText] = useState("");
+  const preferences: Preferences = getPreferenceValues();
 
   useEffect(() => {
     const searchLinks = async () => {
-      const preferences: Preferences = getPreferenceValues();
       const query: SearchQuery = {
         q: searchText.trim(),
         limit: 50,
@@ -60,18 +60,35 @@ export default function SearchTag(props: Props) {
     searchLinks();
   }, [searchText]);
 
-  return (
-    <List
-      isLoading={state.isLoading}
-      enableFiltering={false}
-      throttle={true}
-      onSearchTextChange={setSearchText}
-      navigationTitle={`Search in Tag “${tag.name}”`}
-      searchBarPlaceholder={`Search in tag “${tag.name}”`}
-    >
-      {state.links.map((item) => {
-        return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;
-      })}
-    </List>
-  );
+  if (preferences.asIcons) {
+    return (
+      <Grid
+        isLoading={state.isLoading}
+        enableFiltering={false}
+        throttle={true}
+        onSearchTextChange={setSearchText}
+        navigationTitle={`Search in Tag “${tag.name}”`}
+        searchBarPlaceholder={`Search in tag “${tag.name}”`}
+      >
+        {state.links.map((item) => {
+          return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;
+        })}
+      </Grid>
+    );
+  } else {
+    return (
+      <List
+        isLoading={state.isLoading}
+        enableFiltering={false}
+        throttle={true}
+        onSearchTextChange={setSearchText}
+        navigationTitle={`Search in Tag “${tag.name}”`}
+        searchBarPlaceholder={`Search in tag “${tag.name}”`}
+      >
+        {state.links.map((item) => {
+          return <LinkItem searchText={searchText} isSearchEngine={state.isSearchEngines} item={item} key={item.id} />;
+        })}
+      </List>
+    );
+  }
 }

@@ -1,5 +1,10 @@
 # ip-tools Changelog
 
+## [Fixes and Enhancements] - 2023-10-27
+
+- Updated convert number to IP address
+- Add a new prompt icon color to display according to different states
+
 ## [New Features ] - 2023-10-25
 
 - Adds a new command to verify if the IPv4 or IPv6 CIDR valid

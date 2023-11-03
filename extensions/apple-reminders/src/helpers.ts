@@ -3,6 +3,14 @@ import { addDays, format, isThisYear, isBefore, isSameDay, parseISO, startOfDay 
 
 import { Priority } from "./hooks/useData";
 
+export function parseDay(date?: string | null): Date {
+  if (!date) {
+    // Default to today in local time.
+    return new Date(new Date().toDateString());
+  }
+  return new Date(parseISO(date).toDateString());
+}
+
 export function isOverdue(date: string) {
   const parsedDate = parseISO(date);
 

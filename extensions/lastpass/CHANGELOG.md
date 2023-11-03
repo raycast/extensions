@@ -1,5 +1,9 @@
 # LastPass Changelog
 
+## [Enhancements] - 2023-11-01
+
+- Fixed a bug that caused the extension to crash when using special chars
+
 ## [Enhancement] - 2023-10-18
 
 - Fix wrong action name

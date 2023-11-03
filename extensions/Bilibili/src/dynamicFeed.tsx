@@ -1,24 +1,66 @@
 import { useDynamicFeed } from "./hooks";
 import { checkLogin, formatUrl } from "./utils";
-import { NoLoginView, Video, Post } from "./components";
-import { List, getPreferenceValues } from "@raycast/api";
+import { NoLoginView, Post, Video } from "./components";
+import { List } from "@raycast/api";
+import { useState } from "react";
 
-interface Preferences {
-  justShowVideos: boolean;
+type KindType = { id: string; name: string };
+
+function DrinkDropdown(props: { kindTypes: KindType[]; onKindTypeChange: (newValue: string) => void }) {
+  const { kindTypes, onKindTypeChange } = props;
+  return (
+    <List.Dropdown
+      tooltip="Select Filter Options"
+      storeValue={true}
+      onChange={(newValue) => {
+        onKindTypeChange(newValue);
+      }}
+    >
+      <List.Dropdown.Section title="Filter Options">
+        {kindTypes.map((kindType) => (
+          <List.Dropdown.Item key={kindType.id} title={kindType.name} value={kindType.id} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
 }
 
 export default function Command() {
   if (!checkLogin()) return <NoLoginView />;
-  const preference = getPreferenceValues<Preferences>();
 
+  const [filterType, setFilterType] = useState("");
   const { dynamicItems, isLoading } = useDynamicFeed();
 
   const videoTypes = ["DYNAMIC_TYPE_LIVE_RCMD", "DYNAMIC_TYPE_AV"];
 
+  const kindTypes: KindType[] = [
+    { id: "0", name: "All" },
+    { id: "1", name: "Unwatched Videos" },
+    { id: "2", name: "Watched Videos" },
+    { id: "3", name: "Videos" },
+  ];
+
+  const filterMap = {
+    "0": (_item: Bilibili.DynamicItem) => true,
+    "1": (item: Bilibili.DynamicItem) =>
+      item.type === "DYNAMIC_TYPE_AV" ? item.modules.module_dynamic.major.archive.last_play_time === 0 : false,
+    "2": (item: Bilibili.DynamicItem) =>
+      item.type === "DYNAMIC_TYPE_AV" ? item.modules.module_dynamic.major.archive.last_play_time !== 0 : false,
+    "3": (item: Bilibili.DynamicItem) => videoTypes.includes(item.type),
+  };
+  const onKindTypeChange = (newValue: string) => {
+    setFilterType(newValue);
+  };
+
   return (
-    <List filtering={false} isLoading={isLoading} isShowingDetail={true}>
+    <List
+      filtering={false}
+      isLoading={isLoading}
+      isShowingDetail={true}
+      searchBarAccessory={<DrinkDropdown kindTypes={kindTypes} onKindTypeChange={onKindTypeChange} />}
+    >
       {dynamicItems
-        ?.filter((item) => (preference.justShowVideos ? videoTypes.includes(item.type) : true))
+        ?.filter((item: Bilibili.DynamicItem) => filterMap[filterType as keyof typeof filterMap](item))
         .map((item) => {
           switch (item.type) {
             case "DYNAMIC_TYPE_AV":

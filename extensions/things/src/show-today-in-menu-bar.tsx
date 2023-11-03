@@ -17,12 +17,16 @@ import { listItems } from './helpers';
 const TASK_NAME_LENGTH_LIMIT = 30;
 
 export default function ShowTodayInMenuBar() {
-  const { shouldShowShortcuts } = getPreferenceValues<Preferences.ShowTodayInMenuBar>();
+  const { shouldShowShortcuts, displayTodo } = getPreferenceValues<Preferences.ShowTodayInMenuBar>();
   const { data: todos, isLoading, mutate } = useCachedPromise(() => getListTodos('today'));
   const { data: lists } = useCachedPromise(() => getLists());
 
   const tooltip = todos && todos.length > 0 ? todos[0].name : '';
-  const title = tooltip.length > TASK_NAME_LENGTH_LIMIT ? tooltip.substring(0, TASK_NAME_LENGTH_LIMIT) + '…' : tooltip;
+
+  let title = '';
+  if (displayTodo) {
+    title = tooltip.length > TASK_NAME_LENGTH_LIMIT ? tooltip.substring(0, TASK_NAME_LENGTH_LIMIT) + '…' : tooltip;
+  }
 
   async function completeTodo(todo: Todo) {
     await mutate(setTodoProperty(todo.id, 'status', 'completed'), {
@@ -48,10 +52,12 @@ export default function ShowTodayInMenuBar() {
   }
 
   return (
-    <MenuBarExtra icon="things-icon.png" title={title} tooltip={tooltip} isLoading={isLoading}>
+    <MenuBarExtra icon="things-flat.png" title={title} tooltip={tooltip} isLoading={isLoading}>
       {todos && todos.length > 0 ? (
         <>
-          <MenuBarExtra.Item title="Complete" icon={Icon.CheckCircle} onAction={() => completeTodo(todos[0])} />
+          {displayTodo ? (
+            <MenuBarExtra.Item title="Complete" icon={Icon.CheckCircle} onAction={() => completeTodo(todos[0])} />
+          ) : null}
           <MenuBarExtra.Section>
             <MenuBarExtra.Item title="Today" />
             {todos.map((todo) => (
@@ -60,7 +66,7 @@ export default function ShowTodayInMenuBar() {
 
                 <MenuBarExtra.Item
                   title="Show in Things"
-                  icon="things-icon.png"
+                  icon="things-flat.png"
                   onAction={() => {
                     open(`things:///show?id=${todo.id}`);
                   }}

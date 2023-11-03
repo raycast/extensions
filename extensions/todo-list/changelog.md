@@ -1,6 +1,11 @@
 # Todo List Changelog
 
-## [Fixed spelling] - 2023-10-25
+## [Enhancements] - 2023-10-25
+
+- Fixed typos
+- Added confirm dialog to delete all action
+
+
 
 ## [Impliment Sorting] - 2023-08-11
 

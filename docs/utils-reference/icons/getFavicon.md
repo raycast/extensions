@@ -19,7 +19,7 @@ function getFavicon(
 ): Image.ImageLike;
 ```
 
-- `url` is the website address. It can be a string or a [URL object](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL).
+- `name` is a string of the subject's name.
 - `options.fallback` is a [Image.Fallback](../../api-reference/user-interface/icons-and-images.md#image.fallback) icon in case the Favicon is not found. By default, the fallback will be `Icon.Link`.
 - `options.size` is the size of the returned favicon. By default, it is 64 pixels.
 - `options.mask` is the size of the [Image.Mask](../../api-reference/user-interface/icons-and-images.md#image.mask) to apply to the favicon.
