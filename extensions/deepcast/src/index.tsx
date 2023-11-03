@@ -1,5 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues, getSelectedText } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { SourceLanguage, TargetLanguage, sendTranslateRequest, source_languages, target_languages } from "./utils";
 import TranslationView from "./components/TranslationView";
 
@@ -36,6 +36,13 @@ const Command = (props: LaunchProps<{ arguments?: Arguments.Index }>) => {
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
+
+  useEffect(() => {
+    getSelectedText().then(content => {
+      setSourceText(content ?? "");
+    });
+  }, []);
+
 
   const submit = async (values: Values) => {
     if (!values.text || !values.to) return;
