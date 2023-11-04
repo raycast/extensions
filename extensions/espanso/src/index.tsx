@@ -1,12 +1,17 @@
 import { Action, ActionPanel, Application, Clipboard, Detail, List, getFrontmostApplication } from "@raycast/api";
+import { homedir } from "os";
+import path from "path";
 import { useEffect, useState } from "react";
-import { $, ProcessOutput } from "zx";
+import { ProcessOutput } from "zx";
 import { commandNotFoundMd, noContentMd } from "./messages";
-import { EspansoMatch } from "./types";
+import { FormattedEspansoMatch } from "./types";
+import { getMatches } from "./utils";
+
+const matchFilesDirectory: string = path.join(homedir(), "Library/Application Support/espanso/match");
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [items, setItems] = useState<EspansoMatch[]>([]);
+  const [items, setItems] = useState<FormattedEspansoMatch[]>([]);
   const [error, setError] = useState<ProcessOutput | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
 
@@ -21,9 +26,19 @@ export default function Command() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const { stdout: result } = await $`espanso match list -j`;
-        let matches: EspansoMatch[] = JSON.parse(result);
-        matches = matches.sort((a, b) => a.triggers[0].localeCompare(b.triggers[0]));
+        const matches: FormattedEspansoMatch[] = getMatches(matchFilesDirectory);
+        matches.sort((a, b) => {
+          if (a.label && b.label) {
+            return a.label.localeCompare(b.label);
+          } else if (a.label) {
+            return -1; // a has label, b does not
+          } else if (b.label) {
+            return 1; // b has label, a does not
+          } else {
+            return a.triggers[0].localeCompare(b.triggers[0]);
+          }
+        });
+
         setItems(matches);
         setIsLoading(false);
       } catch (err) {
@@ -47,10 +62,11 @@ export default function Command() {
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {items.map(({ triggers, replace }, index) => (
+      {items.map(({ triggers, replace, label }, index) => (
         <List.Item
           key={index}
-          title={triggers.join(", ")}
+          title={label || triggers.join(", ")}
+          subtitle={!label ? "" : triggers.join(", ")}
           detail={<List.Item.Detail markdown={replace} />}
           actions={
             <ActionPanel>
