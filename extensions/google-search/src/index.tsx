@@ -28,8 +28,17 @@ export default function Command() {
                     icon={{ source: Icon.ArrowRight }}
                   />
 
-                  <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
-                  <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
+                  <Action.CopyToClipboard
+                    title="Copy URL to Clipboard"
+                    content={item.url}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Suggestion to Clipboard"
+                    content={item.query}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+
+                  />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">
