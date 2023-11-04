@@ -1,104 +1,53 @@
-import { Action, ActionPanel, Application, Color, Detail, Icon, Image, List } from "@raycast/api";
-
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { useTotp } from "../hooks/useTotp";
-import { VaultCredential } from "../types/dcli";
-import { SyncAction } from "./actions/SyncActions";
+
+import { usePasswordContext } from "@/context/passwords";
+import { VaultCredential } from "@/types/dcli";
+import PasswordActions from "./actions/password/PasswordActions";
+import ShowNoteAction from "./actions/password/ShowNoteAction";
+import SyncAction from "./actions/password/SyncAction";
+import TotpActions from "./actions/password/TotpActions";
 
 type Props = {
   item: VaultCredential;
-  currentApplication?: Application;
-  onSync: () => void;
 };
 
-export const ListItemPassword = ({ item, currentApplication, onSync }: Props) => {
-  const { hasTotp, copyTotp, pasteTotp } = useTotp(item);
-  const icon = getItemIcon(item);
-
-  const title = item.title ?? item.url;
-  const subtitle = item.email ?? item.login ?? item.secondaryLogin;
+export const ListItemPassword = ({ item }: Props) => {
+  const { isInitialLoaded } = usePasswordContext();
+  const itemName = item.title ?? item.url;
+  const username = isInitialLoaded ? item.email ?? item.login ?? item.secondaryLogin : undefined;
 
   return (
     <List.Item
       key={item.id}
-      title={title}
-      subtitle={subtitle}
-      icon={icon}
-      accessories={[
-        {
-          icon: hasTotp ? Icon.Key : undefined,
-          tooltip: hasTotp ? "TOTP" : undefined,
-        },
-        {
-          icon: item.note ? Icon.Paragraph : undefined,
-          tooltip: item.note ? "Note" : undefined,
-        },
-      ]}
+      title={itemName}
+      subtitle={username}
+      icon={getItemIcon(item)}
+      accessories={getAccessories(item)}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Password" content={item.password} icon={Icon.Key} concealed />
-          <Action.Paste
-            title={currentApplication ? `Paste Password into ${currentApplication.name}` : "Paste Password"}
-            content={item.password}
-            icon={Icon.Window}
-          />
+          <ActionPanel.Section>
+            <PasswordActions item={item} />
+            <TotpActions item={item} />
+          </ActionPanel.Section>
 
-          {hasTotp && (
-            <>
-              <Action
-                title="Copy TOTP"
-                onAction={copyTotp}
-                icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
-              />
-              <Action
-                title={currentApplication ? `Paste TOTP into ${currentApplication.name}` : "Paste TOTP"}
-                onAction={pasteTotp}
-                icon={Icon.Window}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-              />
-            </>
-          )}
-
-          {(item.login !== undefined || item.email !== undefined) && (
+          {username && (
             <Action.CopyToClipboard
               title="Copy Username"
-              content={item.login ?? item.email ?? ""}
+              content={username}
               icon={Icon.Person}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
             />
           )}
 
-          {item.url !== undefined && (
-            <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-          )}
-
-          {item.note !== undefined && (
-            <Action.Push
-              title="Show Note"
-              target={<DetailNote name={title} note={item.note} />}
-              icon={Icon.Paragraph}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-            />
-          )}
-
-          <SyncAction onSync={onSync} />
+          <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          <ShowNoteAction item={item} />
+          <SyncAction />
         </ActionPanel>
       }
     />
   );
 };
-
-function DetailNote({ name, note }: { name: string; note: string }) {
-  const markdown = `# 📄 ${name}
-  &nbsp;
-  \`\`\`
-  ${note}
-  \`\`\`
-  `;
-
-  return <Detail navigationTitle={`Note for ${name}`} markdown={markdown} />;
-}
 
 function isValidURL(url?: string) {
   if (!url) return false;
@@ -118,4 +67,24 @@ function getItemIcon(item: VaultCredential): Image.ImageLike {
         source: Icon.Link,
         tintColor: Color.SecondaryText,
       };
+}
+
+function getAccessories(item: VaultCredential) {
+  const accessories: List.Item.Accessory[] = [];
+
+  if (item.otpSecret) {
+    accessories.push({
+      icon: Icon.Key,
+      tooltip: "TOTP",
+    });
+  }
+
+  if (item.note) {
+    accessories.push({
+      icon: Icon.Paragraph,
+      tooltip: "Note",
+    });
+  }
+
+  return accessories;
 }

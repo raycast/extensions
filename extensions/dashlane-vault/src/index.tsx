@@ -1,45 +1,25 @@
-import { ActionPanel, List, Toast, getFrontmostApplication, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { ActionPanel, List } from "@raycast/api";
 
-import { ListItemPassword } from "./components/ListItemPassword";
-import { SyncAction } from "./components/actions/SyncActions";
-import { getVaultCredentials, sync } from "./lib/dcli";
+import { ListItemPassword } from "@/components/ListItemPassword";
+import SyncAction from "@/components/actions/password/SyncAction";
+import { CurrentApplicationProvider } from "@/context/current-application";
+import { PasswordsProvider, usePasswordContext } from "@/context/passwords";
 
-export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(getVaultCredentials);
-  const { data: currentApplication } = usePromise(getFrontmostApplication);
+const PasswordCommand = () => (
+  <PasswordsProvider>
+    <CurrentApplicationProvider>
+      <PasswordsComponent />
+    </CurrentApplicationProvider>
+  </PasswordsProvider>
+);
 
-  const isEmpty = !isLoading && data && data.length === 0;
-
-  async function handleSync() {
-    try {
-      const toast = await showToast({
-        title: "Syncing with Dashlane...",
-        style: Toast.Style.Animated,
-      });
-
-      await sync();
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Sync with Dashlane succeeded";
-
-      await revalidate();
-
-      toast.hide();
-    } catch (error) {
-      showToast({
-        title: "Dashlane sync failed",
-        style: Toast.Style.Failure,
-      });
-    }
-  }
+function PasswordsComponent() {
+  const { passwords, isLoading } = usePasswordContext();
+  const isEmpty = !isLoading && passwords && passwords.length === 0;
 
   return (
     <List isLoading={isLoading} navigationTitle="Search Passwords" searchBarPlaceholder="Search your passwords">
-      {data &&
-        data.map((item) => (
-          <ListItemPassword key={item.id} item={item} currentApplication={currentApplication} onSync={handleSync} />
-        ))}
+      {passwords && passwords.map((item) => <ListItemPassword key={item.id} item={item} />)}
       {isLoading ? (
         <List.EmptyView title="Loading..." description="Please wait." />
       ) : (
@@ -54,7 +34,7 @@ export default function Command() {
           actions={
             !isLoading && (
               <ActionPanel>
-                <SyncAction onSync={handleSync} />
+                <SyncAction />
               </ActionPanel>
             )
           }
@@ -63,3 +43,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default PasswordCommand;

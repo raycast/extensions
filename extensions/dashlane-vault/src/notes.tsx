@@ -1,8 +1,8 @@
 import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
-import { ListItemNote } from "./components/ListItemNote";
-import { getNotes } from "./lib/dcli";
+import { ListItemNote } from "@/components/ListItemNote";
+import { getNotes } from "@/lib/dcli";
 
 export default function Command() {
   const { data, isLoading } = usePromise(getNotes);

@@ -1,7 +1,7 @@
-import { execPromise } from "../helper/exec";
-import { VaultCredential, VaultCredentialDto, VaultNote, VaultNotesDto } from "../types/dcli";
+import { execPromise } from "@/helper/exec";
+import { VaultCredential, VaultCredentialDto, VaultNote, VaultNotesDto } from "@/types/dcli";
 
-export async function sync() {
+export async function syncVault() {
   await execPromise("dcli sync");
 }
 
@@ -21,6 +21,11 @@ export async function getNotes() {
   } catch (error) {
     return [];
   }
+}
+
+export async function getPassword(id: string) {
+  const { stdout } = await execPromise(`dcli password id=${id} -o password`);
+  return stdout.trim();
 }
 
 export async function getOtpSecret(id: string) {

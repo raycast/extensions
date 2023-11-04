@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
-import { checkIfCliIsInstalled } from "../lib/dcli";
+
+import { checkIfCliIsInstalled } from "@/lib/dcli";
 
 export async function checkIfInstalled<T extends () => void>(cb: T) {
   const isAvailable = await checkIfCliIsInstalled();

@@ -1,6 +1,6 @@
 import { Icon, List } from "@raycast/api";
 
-import { VaultNote } from "../types/dcli";
+import { VaultNote } from "@/types/dcli";
 
 type Props = {
   note: VaultNote;
