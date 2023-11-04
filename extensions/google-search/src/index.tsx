@@ -44,7 +44,6 @@ export default function Command() {
                     title="Copy Suggestion to Clipboard"
                     content={item.query}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-
                   />
                 </ActionPanel.Section>
 
