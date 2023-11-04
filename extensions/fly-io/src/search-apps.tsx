@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { OrganizationConnection, fetchOrganizations, flyioBaseUrl } from "./flyio";
 
@@ -17,6 +17,12 @@ export default function Command() {
     const organizations = await fetchOrganizations(preferences.flyioApiKey ?? "");
     if (organizations) {
       setOrganizations(organizations);
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "something went wrong",
+        message: "Please check your api key is correct",
+      });
     }
   }
 
