@@ -1,4 +1,3 @@
-
 export type SingleTrigger = {
   trigger: string;
 };
