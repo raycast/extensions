@@ -39,7 +39,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
+    "@raycast/api": "^1.61.1",
     "iconv-lite": "^0.6.3",
     "nanoid": "^4.0.0",
     "node-fetch": "^3.3.2"
@@ -48,7 +48,7 @@
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "18.18.4",
     "@types/react": "18.2.34",
-    "eslint": "^8.52.0",
+    "eslint": "^8.53.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
