@@ -1,5 +1,5 @@
 import fse from "fs-extra";
-import path, { join } from "path";
+import path from "path";
 import { EspansoMatch, MultiTrigger, Replacement, FormattedEspansoMatch } from "./types";
 import YAML from "yaml";
 
@@ -14,7 +14,7 @@ export function getAndSortTargetFiles(espansoMatchDir: string): { file: string; 
     .filter((dirent: fse.Dirent) => dirent.isFile() && path.extname(dirent.name).toLowerCase() === ".yml");
 
   const matchFilesTimes = targetFiles.map((targetFile) => {
-    return { file: targetFile.name, mtime: lastUpdatedDate(join(espansoMatchDir, targetFile.name)) };
+    return { file: targetFile.name, mtime: lastUpdatedDate(path.join(espansoMatchDir, targetFile.name)) };
   });
 
   return matchFilesTimes.sort((a, b) => b.mtime - a.mtime);
