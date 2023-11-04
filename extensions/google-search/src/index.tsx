@@ -3,11 +3,17 @@ import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
 
 export default function Command() {
-  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
+  const { isLoading, results, search, searchText, setSearchText, addHistory, deleteAllHistory, deleteHistoryItem } =
+    useSearch();
   const preferences = getPreferenceValues<Preferences>();
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Google or enter a URL...">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={search}
+      searchText={searchText}
+      searchBarPlaceholder="Search Google or enter a URL..."
+    >
       <List.Section title="Results" subtitle={results.length.toString()}>
         {results.map((item) => (
           <List.Item
@@ -27,6 +33,7 @@ export default function Command() {
                     }}
                     icon={{ source: Icon.ArrowRight }}
                   />
+                  <Action title="Autocomplete" onAction={() => setSearchText(item.query)} />
 
                   <Action.CopyToClipboard
                     title="Copy URL to Clipboard"

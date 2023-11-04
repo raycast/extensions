@@ -129,6 +129,7 @@ export function useSearch() {
     isLoading,
     results,
     searchText,
+    setSearchText,
     search,
     history,
     addHistory,
