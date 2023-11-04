@@ -3,6 +3,7 @@ import { getFavicon } from "@raycast/utils";
 
 import { usePasswordContext } from "@/context/passwords";
 import { VaultCredential } from "@/types/dcli";
+import FavoriteActions from "./actions/password/FavoriteActions";
 import PasswordActions from "./actions/password/PasswordActions";
 import ShowNoteAction from "./actions/password/ShowNoteAction";
 import SyncAction from "./actions/password/SyncAction";
@@ -42,6 +43,9 @@ export const ListItemPassword = ({ item }: Props) => {
 
           <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           <ShowNoteAction item={item} />
+          <ActionPanel.Section title="Item Actions">
+            <FavoriteActions item={item} />
+          </ActionPanel.Section>
           <SyncAction />
         </ActionPanel>
       }
