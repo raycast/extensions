@@ -4,7 +4,7 @@ This is a Raycast extension for [CyberPanel](https://cyberpanel.net/). With this
 
 ## 🚀 Getting Started
 
-1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/cyberpanel)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/cyberpanel)
 
 2. **Enter your Panel Details**: The first time you use the extension, you'll need to enter the following in Preferences OR at first prompt:
 

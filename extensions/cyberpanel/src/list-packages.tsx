@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { deletePackage, listPackages } from "./utils/api";
 import { useEffect, useState } from "react";
 import ErrorComponent from "./components/ErrorComponent";
@@ -18,8 +7,6 @@ import CreatePackage from "./components/packages/CreatePackageComponent";
 import ModifyPackage from "./components/packages/ModifyPackageComponent";
 
 export default function ListPackages() {
-  const { push } = useNavigation();
-
   const [isLoading, setIsLoading] = useState(true);
   const [packages, setPackages] = useState<Package[]>();
   const [error, setError] = useState("");
@@ -104,10 +91,10 @@ export default function ListPackages() {
             }
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Modify Package"
                   icon={Icon.Pencil}
-                  onAction={() => push(<ModifyPackage package={packageItem} onPackageModified={getFromApi} />)}
+                  target={<ModifyPackage package={packageItem} onPackageModified={getFromApi} />}
                 />
                 <ActionPanel.Section>
                   <Action
@@ -128,10 +115,10 @@ export default function ListPackages() {
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create Package"
                   icon={Icon.Plus}
-                  onAction={() => push(<CreatePackage onPackageCreated={getFromApi} />)}
+                  target={<CreatePackage onPackageCreated={getFromApi} />}
                 />
               </ActionPanel>
             }

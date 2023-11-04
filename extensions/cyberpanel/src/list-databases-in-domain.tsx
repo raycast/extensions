@@ -9,7 +9,6 @@ import {
   Toast,
   confirmAlert,
   showToast,
-  useNavigation,
 } from "@raycast/api";
 import { deleteDatabase, listDatabasesInDomain } from "./utils/api";
 import { useEffect, useState } from "react";
@@ -18,8 +17,6 @@ import ErrorComponent from "./components/ErrorComponent";
 import CreateDatabase from "./components/databases/CreateDatabaseComponent";
 
 export default function ListDatabasesInDomain(props: LaunchProps<{ arguments: Arguments.ListDatabasesInDomain }>) {
-  const { push } = useNavigation();
-
   const { databaseWebsite } = props.arguments;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -94,12 +91,10 @@ export default function ListDatabasesInDomain(props: LaunchProps<{ arguments: Ar
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create Database"
                   icon={Icon.Plus}
-                  onAction={() =>
-                    push(<CreateDatabase initialDatabaseWebsite={databaseWebsite} onDatabaseCreated={getFromApi} />)
-                  }
+                  target={<CreateDatabase initialDatabaseWebsite={databaseWebsite} onDatabaseCreated={getFromApi} />}
                 />
               </ActionPanel>
             }

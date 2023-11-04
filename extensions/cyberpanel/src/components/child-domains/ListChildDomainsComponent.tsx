@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getFavicon } from "@raycast/utils";
 import { ChildDomain, ListChildDomainsResponse } from "../../types/child-domains";
@@ -23,8 +12,6 @@ type ListChildDomainsProps = {
   masterDomain: string;
 };
 export default function ListChildDomains({ masterDomain }: ListChildDomainsProps) {
-  const { push } = useNavigation();
-
   const [isLoading, setIsLoading] = useState(true);
   const [childDomains, setChildDomains] = useState<ChildDomain[]>();
   const [error, setError] = useState("");
@@ -79,16 +66,14 @@ export default function ListChildDomains({ masterDomain }: ListChildDomainsProps
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser title="Open in CyberPanel" url={PANEL_URL + childDomain.childLunch} />
-                <Action
+                <Action.Push
                   title="Change PHP Version"
                   icon={Icon.WrenchScrewdriver}
-                  onAction={() =>
-                    push(
-                      <ChangeWebsitePHPVersion
-                        childDomain={childDomain.childDomain}
-                        onWebsitePHPVersionChanged={getFromApi}
-                      />,
-                    )
+                  target={
+                    <ChangeWebsitePHPVersion
+                      childDomain={childDomain.childDomain}
+                      onWebsitePHPVersionChanged={getFromApi}
+                    />
                   }
                 />
                 <ActionPanel.Section>
@@ -103,10 +88,10 @@ export default function ListChildDomains({ masterDomain }: ListChildDomainsProps
                   <Action title="Reload Child Domains" icon={Icon.Redo} onAction={getFromApi} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action
+                  <Action.Push
                     title="Create Child Domain"
                     icon={Icon.Plus}
-                    onAction={() => push(<CreateWebsite masterDomain={masterDomain} onWebsiteCreated={getFromApi} />)}
+                    target={<CreateWebsite masterDomain={masterDomain} onWebsiteCreated={getFromApi} />}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
                 </ActionPanel.Section>
@@ -121,10 +106,10 @@ export default function ListChildDomains({ masterDomain }: ListChildDomainsProps
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create Child Domain"
                   icon={Icon.Plus}
-                  onAction={() => push(<CreateWebsite masterDomain={masterDomain} onWebsiteCreated={getFromApi} />)}
+                  target={<CreateWebsite masterDomain={masterDomain} onWebsiteCreated={getFromApi} />}
                 />
                 <ActionPanel.Section>
                   <Action title="Reload Child Domains" icon={Icon.Redo} onAction={getFromApi} />

@@ -9,7 +9,6 @@ import {
   Toast,
   confirmAlert,
   showToast,
-  useNavigation,
 } from "@raycast/api";
 import { deleteDNSRecord, listDNSRecordsInDomain } from "./utils/api";
 import { useEffect, useState } from "react";
@@ -18,8 +17,6 @@ import { DNSRecord, ListDNSRecordsInDomainResponse } from "./types/dns-records";
 import CreateDNSRecord from "./components/dns-records/CreateDNSRecordComponent";
 
 export default function ListDNSRecordsInDomain(props: LaunchProps<{ arguments: Arguments.ListDnsRecordsInDomain }>) {
-  const { push } = useNavigation();
-
   const { selectedZone, currentSelection } = props.arguments;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -113,12 +110,10 @@ export default function ListDNSRecordsInDomain(props: LaunchProps<{ arguments: A
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create DNS Record"
                   icon={Icon.Plus}
-                  onAction={() =>
-                    push(<CreateDNSRecord initialSelectedZone={selectedZone} onDNSRecordCreated={getFromApi} />)
-                  }
+                  target={<CreateDNSRecord initialSelectedZone={selectedZone} onDNSRecordCreated={getFromApi} />}
                 />
               </ActionPanel>
             }

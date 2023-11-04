@@ -9,7 +9,6 @@ import {
   Toast,
   confirmAlert,
   showToast,
-  useNavigation,
 } from "@raycast/api";
 import { deleteEmailAccount, listEmailAccountsInDomain } from "./utils/api";
 import { useEffect, useState } from "react";
@@ -20,8 +19,6 @@ import ErrorComponent from "./components/ErrorComponent";
 export default function ListEmailAccountsInDomain(
   props: LaunchProps<{ arguments: Arguments.ListEmailAccountsInDomain }>,
 ) {
-  const { push } = useNavigation();
-
   const { domain } = props.arguments;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -101,12 +98,10 @@ export default function ListEmailAccountsInDomain(
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create Email Account"
                   icon={Icon.Plus}
-                  onAction={() =>
-                    push(<CreateEmailAccount initialDomain={domain} onEmailAccountCreated={getFromApi} />)
-                  }
+                  target={<CreateEmailAccount initialDomain={domain} onEmailAccountCreated={getFromApi} />}
                 />
               </ActionPanel>
             }

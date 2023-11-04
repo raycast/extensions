@@ -10,7 +10,6 @@ import {
   confirmAlert,
   launchCommand,
   showToast,
-  useNavigation,
 } from "@raycast/api";
 import { deleteWebsite, listWebsites } from "./utils/api";
 import { useEffect, useState } from "react";
@@ -24,8 +23,6 @@ import ChangeWebsiteLinuxUserPassword from "./components/websites/ChangeWebsiteL
 import ListChildDomains from "./components/child-domains/ListChildDomainsComponent";
 
 export default function ListWebsites() {
-  const { push } = useNavigation();
-
   const [isLoading, setIsLoading] = useState(true);
   const [websites, setWebsites] = useState<Website[]>();
   const [error, setError] = useState("");
@@ -101,30 +98,23 @@ export default function ListWebsites() {
             }
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="List Child Domains"
                   icon={Icon.CircleEllipsis}
-                  onAction={() => push(<ListChildDomains masterDomain={website.domain} />)}
+                  target={<ListChildDomains masterDomain={website.domain} />}
                 />
-                <Action
+                <Action.Push
                   title="Change PHP Version"
                   icon={Icon.WrenchScrewdriver}
-                  onAction={() =>
-                    push(
-                      <ChangeWebsitePHPVersion childDomain={website.domain} onWebsitePHPVersionChanged={getFromApi} />,
-                    )
+                  target={
+                    <ChangeWebsitePHPVersion childDomain={website.domain} onWebsitePHPVersionChanged={getFromApi} />
                   }
                 />
-                <Action
+                <Action.Push
                   title="Change Linux User Password"
                   icon={Icon.Key}
-                  onAction={() =>
-                    push(
-                      <ChangeWebsiteLinuxUserPassword
-                        domain={website.domain}
-                        onLinuxUserPasswordChanged={getFromApi}
-                      />,
-                    )
+                  target={
+                    <ChangeWebsiteLinuxUserPassword domain={website.domain} onLinuxUserPasswordChanged={getFromApi} />
                   }
                 />
                 <ActionPanel.Submenu title="Go To" icon={Icon.ArrowRight}>
@@ -174,10 +164,10 @@ export default function ListWebsites() {
                   <Action title="Reload Websites" icon={Icon.Redo} onAction={getFromApi} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action
+                  <Action.Push
                     title="Create Website"
                     icon={Icon.Plus}
-                    onAction={() => push(<CreateWebsite onWebsiteCreated={getFromApi} />)}
+                    target={<CreateWebsite onWebsiteCreated={getFromApi} />}
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
                   />
                 </ActionPanel.Section>
@@ -192,10 +182,10 @@ export default function ListWebsites() {
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create Website"
                   icon={Icon.Plus}
-                  onAction={() => push(<CreateWebsite onWebsiteCreated={getFromApi} />)}
+                  target={<CreateWebsite onWebsiteCreated={getFromApi} />}
                 />
               </ActionPanel>
             }

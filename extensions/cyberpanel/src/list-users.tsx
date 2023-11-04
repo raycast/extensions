@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { deleteUser, listUsers } from "./utils/api";
 import { useEffect, useState } from "react";
 import { ListUsersResponse, User } from "./types/users";
@@ -19,8 +8,6 @@ import ModifyUser from "./components/users/ModifyUserComponent";
 import ChangeUserACL from "./components/users/ChangeUserACLComponent";
 
 export default function ListUsers() {
-  const { push } = useNavigation();
-
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<User[]>();
   const [error, setError] = useState("");
@@ -90,15 +77,15 @@ export default function ListUsers() {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy as JSON" icon={Icon.Clipboard} content={JSON.stringify(user)} />
-                <Action
+                <Action.Push
                   title="Modify User"
                   icon={Icon.Pencil}
-                  onAction={() => push(<ModifyUser user={user} onUserModified={getFromApi} />)}
+                  target={<ModifyUser user={user} onUserModified={getFromApi} />}
                 />
-                <Action
+                <Action.Push
                   title="Change User ACL"
                   icon={Icon.Lock}
-                  onAction={() => push(<ChangeUserACL user={user} onACLChanged={getFromApi} />)}
+                  target={<ChangeUserACL user={user} onACLChanged={getFromApi} />}
                 />
                 <ActionPanel.Section>
                   <Action
@@ -119,10 +106,10 @@ export default function ListUsers() {
             icon={Icon.AddPerson}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create User"
                   icon={Icon.AddPerson}
-                  onAction={() => push(<CreateUser onUserCreated={getFromApi} />)}
+                  target={<CreateUser onUserCreated={getFromApi} />}
                 />
               </ActionPanel>
             }

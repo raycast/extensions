@@ -9,7 +9,6 @@ import {
   Toast,
   confirmAlert,
   showToast,
-  useNavigation,
 } from "@raycast/api";
 import { deleteFTPAccount, listFTPAccountsInDomain } from "./utils/api";
 import { useEffect, useState } from "react";
@@ -18,8 +17,6 @@ import { FTPAccount, ListFTPAccountsInDomainResponse } from "./types/ftp-account
 import CreateFTPAccount from "./components/ftp-accounts/CreateFTPAccountComponent";
 
 export default function ListFTPAccountsInDomain(props: LaunchProps<{ arguments: Arguments.ListFtpAccountsInDomain }>) {
-  const { push } = useNavigation();
-
   const { selectedDomain } = props.arguments;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -97,12 +94,10 @@ export default function ListFTPAccountsInDomain(props: LaunchProps<{ arguments: 
             icon={Icon.AddPerson}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Create FTP Account"
                   icon={Icon.AddPerson}
-                  onAction={() =>
-                    push(<CreateFTPAccount initialFTPDomain={selectedDomain} onFTPAccountCreated={getFromApi} />)
-                  }
+                  target={<CreateFTPAccount initialFTPDomain={selectedDomain} onFTPAccountCreated={getFromApi} />}
                 />
               </ActionPanel>
             }
