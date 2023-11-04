@@ -5,6 +5,9 @@
   "description": "Append or prepend selected text to your clipboard with different separators",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "CyrusN"
+  ],
   "categories": [
     "Developer Tools",
     "System"
@@ -63,7 +66,7 @@
       "mode": "no-view",
       "preferences": [
         {
-          "name": "appendSeparator",
+          "name": "prependSeparator",
           "type": "textfield",
           "required": false,
           "title": "Prepend Separator",
