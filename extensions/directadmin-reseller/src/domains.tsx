@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import {  createDomain, createSubdomain, deleteSubdomain, getDomains, getSubdomains } from "./utils/api";
-import { CreateNewDomainFormValues, CreateSubdomainFormValues, GetDomainsResponse, SuccessResponse } from "./types";
+import {  changeEmailAccountPassword, createDomain, createEmailAccount, createSubdomain, deleteEmailAccount, deleteSubdomain, getDomains, getEmailAccounts, getSubdomains } from "./utils/api";
+import { ChangeEmailAccountPasswordRequest, CreateEmailAccountFormValues, CreateEmailAccountRequest, CreateNewDomainFormValues, CreateSubdomainFormValues, GetDomainsResponse, GetEmailAccountsResponse, SuccessResponse } from "./types";
 import { Action, ActionPanel, Alert, Color, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 
@@ -30,13 +30,14 @@ getFromApi();
     return <List isLoading={isLoading}>
         {domains && domains.map(domain => <List.Item key={domain} title={domain} icon={getFavicon(`https://${domain}`, { fallback: Icon.Globe })} actions={<ActionPanel>
             <Action title="Get Subdomains" icon={Icon.Globe} onAction={() => push(<GetSubdomains domain={domain} />)} />
+            <Action.Push title="Get Email Accounts" icon={Icon.AtSymbol} target={<GetEmailAccounts domain={domain} />} />
             <ActionPanel.Section>
-                <Action title="Create New Domain" icon={Icon.Plus} onAction={() => push(<CreateNewDomain onDomainCreated={getFromApi} />)} />
+                <Action title="Create Domain" icon={Icon.Plus} onAction={() => push(<CreateNewDomain onDomainCreated={getFromApi} />)} />
             </ActionPanel.Section>
         </ActionPanel>} />)}
         {!isLoading && <List.Section title="Actions">
-            <List.Item title="Create New Domain" icon={Icon.Plus} actions={<ActionPanel>
-                <Action title="Create New Domain" icon={Icon.Plus} onAction={() => push(<CreateNewDomain onDomainCreated={getFromApi} />)} />
+            <List.Item title="Create Domain" icon={Icon.Plus} actions={<ActionPanel>
+                <Action title="Create Domain" icon={Icon.Plus} onAction={() => push(<CreateNewDomain onDomainCreated={getFromApi} />)} />
             </ActionPanel>} />
         </List.Section>}
     </List>
@@ -157,8 +158,8 @@ function GetSubdomains({ domain }: GetSubdomainsProps) {
             </ActionPanel.Section>
         </ActionPanel>} />)}
         {!isLoading && <List.Section title="Actions">
-            <List.Item title="Create New Subdomain" icon={Icon.Plus} actions={<ActionPanel>
-                <Action title="Create New Subdomain" icon={Icon.Plus} onAction={() => push(<CreateSubdomain domain={domain} onSubdomainCreated={getFromApi} />)} />
+            <List.Item title="Create Subdomain" icon={Icon.Plus} actions={<ActionPanel>
+                <Action title="Create Subdomain" icon={Icon.Plus} onAction={() => push(<CreateSubdomain domain={domain} onSubdomainCreated={getFromApi} />)} />
             </ActionPanel>} />
         </List.Section>}
     </List>
@@ -194,5 +195,177 @@ function CreateSubdomain({ domain, onSubdomainCreated }: CreateSubdomainProps) {
         <Form.Description title="Domain" text={domain} />
         <Form.TextField title="Subdomain" placeholder="dash" {...itemProps.subdomain} />
         <Form.Description text={`${itemProps.subdomain.value}.${domain}`} />
+    </Form>
+}
+
+type GetEmailAccountsProps = {
+    domain: string;
+}
+export function GetEmailAccounts({ domain }: GetEmailAccountsProps) {
+    const [isLoading, setIsLoading] = useState(true);
+    const [emailAccounts, setEmailAccounts] = useState<string[]>();
+
+    async function getFromApi() {
+        setIsLoading(true);
+        const response = await getEmailAccounts({ domain, action: "list" });
+        if (response.error==="0") {
+            const data = response as GetEmailAccountsResponse;
+            const list = data?.list || [];
+            setEmailAccounts(list);
+            await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Email Accounts`);
+        }
+        setIsLoading(false);
+    }
+
+    useEffect(() => {
+        getFromApi();
+    }, [])
+
+    async function confirmAndDeleteEmailAccount(email: string) {
+        if (
+            await confirmAlert({
+                title: `Delete email account '${email}@${domain}'?`,
+                message: "This action cannot be undone.",
+                icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
+                primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive }
+            })
+        ) {
+            const response = await deleteEmailAccount({ action: "delete", domain, user: email })
+            if (response.error==="0") {
+                const data = response as SuccessResponse;
+                await showToast(Toast.Style.Success, data.text, data.details);
+                await getFromApi();
+            }
+        }
+    }
+
+    return <List isLoading={isLoading} searchBarPlaceholder="Search Email Accounts">
+        {emailAccounts && (emailAccounts.length===0 ? <List.EmptyView actions={<ActionPanel>
+            <Action.Push title="Create Email Account" icon={Icon.Plus} target={<CreateEmailAccount domain={domain} onEmailAccountCreated={getFromApi} />} />
+        </ActionPanel>} /> : emailAccounts.map(email => <List.Item key={email} title={email} icon={Icon.AtSymbol} actions={<ActionPanel>
+                <Action.Push title="Change Password" icon={Icon.Key} target={<ChangeEmailAccountPassword email={email} onEmailAccountPasswordChanged={getFromApi} />} />
+                <Action title="Delete Email Account" style={Action.Style.Destructive} icon={Icon.DeleteDocument} onAction={() => confirmAndDeleteEmailAccount(email)} />
+            <ActionPanel.Section>
+                <Action.Push title="Create Email Account" icon={Icon.Plus} target={<CreateEmailAccount domain={domain} onEmailAccountCreated={getFromApi} />} />
+            </ActionPanel.Section>
+        </ActionPanel>} />))}
+        {/* {emailAccounts && emailAccounts.map(email => <List.Item key={email} title={email} icon={Icon.AtSymbol} actions={<ActionPanel>
+            <ActionPanel.Section>
+                <Action.Push title="Create Email Account" icon={Icon.Plus} target={<CreateEmailAccount domain={domain} onEmailAccountCreated={getFromApi} />} />
+                <Action.Push title="Set Password" icon={Icon.Key} target={<ChangeEmailAccountPassword domain={domain} onEmailAccountPasswordChanged={getFromApi} />} />
+            </ActionPanel.Section>
+        </ActionPanel>} />)} */}
+    </List>
+}
+
+type ChangeEmailAccountPasswordProps = {
+    email: string;
+    onEmailAccountPasswordChanged: () => void;
+}
+function ChangeEmailAccountPassword({ email, onEmailAccountPasswordChanged }: ChangeEmailAccountPasswordProps) {
+    const { pop } = useNavigation();
+
+    const { handleSubmit, itemProps } = useForm<ChangeEmailAccountPasswordRequest>({
+        async onSubmit(values) {
+            const response = await changeEmailAccountPassword({ ...values, email });
+
+            if (response.error==="0") {
+                const data = response as SuccessResponse;
+                await showToast(Toast.Style.Success, data.text, data.details);
+                onEmailAccountPasswordChanged();
+                pop();
+            }
+        },
+        validation: {
+          oldpassword: FormValidation.Required,
+          password1(value) {
+            if (!value)
+                return "The item is required";
+            else if (itemProps.password2.value && itemProps.password2.value!==value)
+                return "Passwords do not match";
+          },
+          password2(value) {
+            if (!value)
+                return "The item is required";
+            else if (itemProps.password1.value && itemProps.password1.value!==value)
+                return "Passwords do not match";
+          }
+        },
+      });
+
+    return <Form navigationTitle="Change Email Account Password" actions={<ActionPanel>
+        <Action.SubmitForm title="Submit" icon={Icon.Check} onSubmit={handleSubmit} />
+    </ActionPanel>}>
+        <Form.Description title="Email" text={email} />
+        <Form.PasswordField title="Old Password" placeholder="hunter1" {...itemProps.oldpassword} />
+        <Form.PasswordField title="New Password" placeholder="hunter2" {...itemProps.password1} />
+        <Form.PasswordField title="Repeat New Password" placeholder="hunter2" {...itemProps.password2} />
+    </Form>
+}
+
+type CreateEmailAccountProps = {
+    domain: string;
+    onEmailAccountCreated: () => void;
+}
+function CreateEmailAccount({ domain, onEmailAccountCreated }: CreateEmailAccountProps) {
+    const { pop } = useNavigation();
+
+    const { handleSubmit, itemProps } = useForm<CreateEmailAccountFormValues>({
+        async onSubmit(values) {
+            const body = {
+                ...values,
+                quota: Number(values.quota),
+                limit: Number(values.limit),
+                action: "create",
+                domain
+            } as CreateEmailAccountRequest;
+            if (!values.limit) delete body.limit;
+
+            const response = await createEmailAccount(body);
+
+            if (response.error==="0") {
+                const data = response as SuccessResponse;
+                await showToast(Toast.Style.Success, data.text, data.details);
+                onEmailAccountCreated();
+                pop();
+            }
+        },
+        validation: {
+          user: FormValidation.Required,
+          passwd(value) {
+            if (!value)
+                return "The item is required";
+            else if (itemProps.passwd2.value && itemProps.passwd2.value!==value)
+                return "Passwords do not match";
+          },
+          passwd2(value) {
+            if (!value)
+                return "The item is required";
+            else if (itemProps.passwd.value && itemProps.passwd.value!==value)
+                return "Passwords do not match";
+          },
+          quota(value) {
+              if (!value)
+                return "The item is required";
+            else if (!Number(value) || Number(value)<0)
+                return "The item must be a number > -1";
+          },
+          limit(value) {
+              if (value)
+                if (!Number(value) || Number(value)<0)
+                    return "The item must be a number > -1";
+          },
+        },
+      });
+
+    return <Form navigationTitle="Create Email Account" actions={<ActionPanel>
+        <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
+    </ActionPanel>}>
+        <Form.Description title="Domain" text={domain} />
+        <Form.TextField title="User" placeholder="user" {...itemProps.user} />
+        <Form.PasswordField title="Password" placeholder="hunter2" {...itemProps.passwd} />
+        <Form.PasswordField title="Repeat Password" placeholder="hunter2" {...itemProps.passwd2} />
+        <Form.TextField title="Quota (MB)" placeholder="0 = Unlimited" {...itemProps.quota} />
+        <Form.TextField title="Limit" placeholder="0 = Unlimited | Blank for Default" {...itemProps.limit} />
     </Form>
 }

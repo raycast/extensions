@@ -70,6 +70,27 @@
       "subtitle": "DirectAdmin Reseller",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "session",
+      "title": "Session",
+      "subtitle": "DirectAdmin Reseller",
+      "description": "",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ip",
+          "placeholder": "IP",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "session_id",
+          "placeholder": "SESSION_ID",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {

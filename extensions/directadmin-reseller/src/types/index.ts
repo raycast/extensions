@@ -96,6 +96,113 @@ export type GetUserDomainsResponse = {
     };
 }
 
+export type CreateUserFormValues = {
+    username: string;
+    email: string;
+    passwd: string;
+    passwd2: string;
+    domain: string;
+    package: string;
+    ip: string;
+    notify: boolean;
+}
+export type CreateUserRequest = {
+    action: "create";
+    add: "Submit";
+    username: string;
+    email: string;
+    passwd: string;
+    passwd2: string;
+    domain: string;
+    package: string;
+    ip: string;
+    notify: "yes" | "no";
+}
+export type DeleteUserRequest = {
+    confirmed: "Confirm";
+    delete: "yes";
+    select0: string;
+}
+export type SuspendOrUnsuspendUserRequest = {
+    dosuspend?: any;
+    dounsuspend?: any;
+    select0: string;
+}
+export type ModifyUserFormValues = {
+    bandwidth: string;
+    ubandwidth: boolean;
+    quota: string;
+    uquota: boolean;
+    vdomains: string;
+    uvdomains: boolean;
+    nsubdomains: string;
+    unsubdomains: boolean;
+    nemails: string;
+    unemails: boolean;
+    nemailf: string;
+    unemailf: boolean;
+    nemailml: string;
+    unemailml: boolean;
+    nemailr: string;
+    unemailr: boolean;
+    mysql: string;
+    umysql: boolean;
+    domainptr: string;
+    udomainptr: boolean;
+    ftp: string;
+    uftp: boolean;
+    aftp: boolean;
+    cgi: boolean;
+    php: boolean;
+    spam: boolean;
+    cron: boolean;
+    ssl: boolean;
+    sysinfo: boolean;
+    ssh: boolean;
+    dnscontrol: boolean;
+    skin: string;
+    ns1: string;
+    ns2: string;
+}
+export type ModifyUserRequest = {
+    action: "customize";
+    user: string;
+    bandwidth: number;
+    ubandwidth: "ON" | "OFF";
+    quota: number;
+    uquota: "ON" | "OFF";
+    vdomains: number;
+    uvdomains: "ON" | "OFF";
+    nsubdomains: number;
+    unsubdomains: "ON" | "OFF";
+    nemails: number;
+    unemails: "ON" | "OFF";
+    nemailf: number;
+    unemailf: "ON" | "OFF";
+    nemailml: number;
+    unemailml: "ON" | "OFF";
+    nemailr: number;
+    unemailr: "ON" | "OFF";
+    mysql: number;
+    umysql: "ON" | "OFF";
+    domainptr: number;
+    udomainptr: "ON" | "OFF";
+    ftp: number;
+    uftp: "ON" | "OFF";
+    aftp: "ON" | "OFF";
+    cgi: "ON" | "OFF";
+    php: "ON" | "OFF";
+    spam: "ON" | "OFF";
+    cron: "ON" | "OFF";
+    ssl: "ON" | "OFF";
+    sysinfo: "ON" | "OFF";
+    ssh: "ON" | "OFF";
+    dnscontrol: "ON" | "OFF";
+    skin: string;
+    ns1: string;
+    ns2: string;
+}
+
 // 
 export type GetResellerIPsResponse = ListResponse;
 export type GetResellerIPInformationResponse = {
@@ -191,6 +298,54 @@ export type CreateDatabaseRequest = {
 export type DeleteDatabaseRequest = {
     action: "delete";
     select0: string;
+}
+
+// SESSION
+export type GetSessionRequest = {
+    ip: string;
+    session_id: string;
+}
+export type GetSessionResponse = {
+    error: "0";
+    password: string;
+    username: string;
+    usertype: "user" | "reseller" | "admin";
+}
+
+// EMAILS
+export type GetEmailAccountsRequest  = {
+    action: "list";
+    domain: string;
+}
+export type GetEmailAccountsResponse = ListResponse;
+export type ChangeEmailAccountPasswordRequest = {
+    email: string;
+    oldpassword: string;
+    password1: string;
+    password2: string;
+    api: any;
+}
+export type CreateEmailAccountFormValues = {
+    domain: string;
+    user: string;
+    passwd: string;
+    passwd2: string;
+    quota: string;
+    limit: string;
+}
+export type CreateEmailAccountRequest = {
+    action: "create";
+    domain: string;
+    user: string;
+    passwd: string;
+    passwd2: string;
+    quota: number;
+    limit?: number;
+}
+export type DeleteEmailAccountRequest = {
+    action: "delete";
+    domain: string;
+    user: string;
 }
 
 export type SuccessResponse = {

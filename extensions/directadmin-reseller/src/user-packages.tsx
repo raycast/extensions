@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import {  getUserPackageInformation, getUserPackages } from "./utils/api";
-import { TITLES_FOR_KEYS } from "./utils/constants";
 import { GetUserPackageInformationResponse, GetUserPackagesResponse } from "./types";
 import { Action, ActionPanel, Color, Detail, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { getTitleFromKey } from "./utils/functions";
 
 export default function UserPackages() {
     const { push } = useNavigation();
@@ -58,7 +58,7 @@ function GetPackageInformation({ packageName }: GetPackageInformationProps) {
 
     return <Detail navigationTitle="User Package Information" isLoading={isLoading} markdown={`## Package: ${packageName}`} metadata={!information ? undefined : <Detail.Metadata>
         {Object.entries(information).map(([key, val]) => {
-            const title = TITLES_FOR_KEYS[key as keyof typeof TITLES_FOR_KEYS] || key;
+            const title = getTitleFromKey(key);
             if (val==="ON")
                 return <Detail.Metadata.Label key={key} title={title} text={undefined} icon={{ source: Icon.Check, tintColor: Color.Green }} />
             else if (val==="OFF")

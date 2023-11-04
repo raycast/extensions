@@ -1,9 +1,3 @@
-# DirectAdmin
+# <img src="./assets/directadmin.png" width="20" height="20" /> DirectAdmin Reseller Raycast Extension
 
-...
-
-ADMIN ENPOINTS NOT COVERED
-
-- CMD_API_ACCOUNT_ADMIN
-- CMD_API_GET_SESSION
-- Email accounts and password changing
+This is a Raycast extension for [DirectAdmin](https://www.directadmin.com/).

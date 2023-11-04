@@ -1,11 +1,20 @@
 import { Toast, showToast } from "@raycast/api";
 import {
+  ChangeEmailAccountPasswordRequest,
   CreateDatabaseRequest,
+  CreateEmailAccountRequest,
   CreateNewDomainRequest,
   CreateSubdomainRequest,
+  CreateUserRequest,
   DeleteDatabaseRequest,
+  DeleteEmailAccountRequest,
   DeleteSubdomainRequest,
-  ErrorResponse
+  DeleteUserRequest,
+  ErrorResponse,
+  GetEmailAccountsRequest,
+  GetSessionRequest,
+  ModifyUserRequest,
+  SuspendOrUnsuspendUserRequest
 } from "../types";
 import fetch, { Response } from "node-fetch";
 import { API_HEADERS, API_URL } from "./constants";
@@ -86,6 +95,19 @@ export async function getUserDomains(user: string) {
   const params = new URLSearchParams({ user });
   return await callApi(`SHOW_USER_DOMAINS?${params}`, "Fetching User Domains");
 }
+export async function createUser(body: CreateUserRequest) {
+  return await callApi("ACCOUNT_USER", "Creating User", body);
+}
+export async function deleteUser(body: DeleteUserRequest) {
+  return await callApi("SELECT_USERS", "Deleting User", body);
+}
+export async function suspendOrUnsuspendUser(body: SuspendOrUnsuspendUserRequest) {
+  const message = ("dosuspend" in body) ? "Suspending User" : "Unsuspending User";
+  return await callApi("SELECT_USERS", message, body);
+}
+export async function modifyUser(body: ModifyUserRequest) {
+  return await callApi("MODIFY_USER", "Modifying User", body);
+}
 
 // 
 export async function getResellerIPs() {
@@ -110,7 +132,7 @@ export async function getDomains() {
   return await callApi("SHOW_DOMAINS", "Fetching Domains");
 }
 export async function createDomain(body: CreateNewDomainRequest) {
-  return await callApi("SHOW_DOMAINS", "Creating Domain", body);
+  return await callApi("DOMAIN", "Creating Domain", body);
 }
 export async function getSubdomains(domain: string) {
   return await callApi("SUBDOMAINS", "Fetching Subdomains", { domain });
@@ -131,4 +153,23 @@ export async function createDatabase(body: CreateDatabaseRequest) {
 }
 export async function deleteDatabase(body: DeleteDatabaseRequest) {
   return await callApi("DATABASES", "Deleting Database", body);
+}
+
+// Session
+export async function getSession(body: GetSessionRequest) {
+  return await callApi("GET_SESSION", "Fetching Session", body);
+}
+
+// Emails
+export async function getEmailAccounts(body: GetEmailAccountsRequest) {
+  return await callApi("POP", "Fetching Email Accounts", body);
+}
+export async function changeEmailAccountPassword(body: ChangeEmailAccountPasswordRequest) {
+  return await callApi("CHANGE_EMAIL_PASSWORD", "Changing Email Account Password", body);
+}
+export async function createEmailAccount(body: CreateEmailAccountRequest) {
+  return await callApi("POP", "Creating Email Account", body);
+}
+export async function deleteEmailAccount(body: DeleteEmailAccountRequest) {
+  return await callApi("POP", "Deleting Email Account", body);
 }
