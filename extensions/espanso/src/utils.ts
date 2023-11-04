@@ -21,7 +21,6 @@ export function getAndSortTargetFiles(espansoMatchDir: string): { file: string; 
 }
 
 export function formatMatch(espansoMatch: MultiTrigger & Replacement) {
-
   const triggerList = espansoMatch.triggers.map((trigger) => `"${trigger}"`).join(", ");
   return `
   - triggers: [${triggerList}]
@@ -63,10 +62,9 @@ export function getMatches(espansoMatchDir: string): FormattedEspansoMatch[] {
         } else {
           return [];
         }
-      })
+      }),
     );
   }
 
   return finalMatches;
 }
-
