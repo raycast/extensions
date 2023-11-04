@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues, getSelectedText } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  Icon,
+  LaunchProps,
+  getPreferenceValues,
+  getSelectedText,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SourceLanguage, TargetLanguage, sendTranslateRequest, source_languages, target_languages } from "./utils";
 import TranslationView from "./components/TranslationView";
@@ -41,7 +51,7 @@ const Command = (props: LaunchProps<{ arguments?: Arguments.Index }>) => {
   // if there is no selected text, then just leave the source text empty
   useEffect(() => {
     if (props.fallbackText) return;
-    getSelectedText().then(content => {
+    getSelectedText().then((content) => {
       setSourceText(content ?? "");
     });
   }, []);
