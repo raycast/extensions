@@ -14,15 +14,23 @@
       "name": "toggle-keyboard-brightness",
       "title": "Toggle Keyboard Brightness",
       "subtitle": "Toggle Keyboard Brightness",
-      "description": "Template for showing a static list and a detail view",
+      "description": "Toggle Keyboard Brightness",
       "mode": "no-view"
     },
     {
       "name": "adjust-keyboard-brightness",
       "title": "Adjust Keyboard Brightness",
       "subtitle": "Adjust Keyboard Brightness",
-      "description": "Template for showing a static list and a detail view",
+      "description": "Adjust Keyboard Brightness",
       "mode": "view"
+    },
+    {
+      "name": "sync-keyboard-brightness",
+      "title": "Sync Keyboard Brightness",
+      "subtitle": "Sync Keyboard Brightness",
+      "description": "Sync Keyboard Brightness",
+      "mode": "no-view",
+      "interval": "15m"
     }
   ],
   "dependencies": {

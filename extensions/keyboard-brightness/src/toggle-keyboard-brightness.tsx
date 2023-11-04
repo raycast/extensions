@@ -1,10 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { closeMainWindow, showHUD } from "@raycast/api";
 import executeCommand from "./utils";
-
-interface GetBrightness {
-  brightness: number;
-}
+import { GetBrightness } from "./types";
 
 export default async function command() {
   await closeMainWindow();
