@@ -25,7 +25,7 @@
       "name": "flyioApiKey",
       "type": "password",
       "title": "Flyio API Key",
-      "required": false,
+      "required": true,
       "description": "type your Flyio api key for auth",
       "placeholder": "xxxxxxxxxx",
       "label": "Flyio api key"
