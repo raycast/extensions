@@ -1,5 +1,10 @@
 # Quit Applications Changelog
 
+## [Deeplinks Support] - 2023-10-21
+
+- Added Deeplink Support
+- Added Actions for Creating Quicklinks Directly
+
 ## [Bug fix - Quit-Applications crashing] - 2023-04-26
 
 - Fix the case where some of the apps (e.g. MasOS Stocks app) were causing the quit applications to crash

@@ -33,7 +33,7 @@ Or press ⌘ + ⏎ to start this process from scratch
 async function requestLoginIfNeeded() {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Authy",
+    title: "Twilio’s Authy",
     message: "Waiting for Approval",
   });
   try {
@@ -48,7 +48,7 @@ async function requestLoginIfNeeded() {
       await toast.hide();
       await showToast({
         style: Toast.Style.Failure,
-        title: "Authy",
+        title: "Twilio’s Authy",
         message: error.message,
       });
     } else {
@@ -72,7 +72,7 @@ async function checkForApproval(setLogin: (step: boolean) => void) {
         await toast.hide();
         await showToast({
           style: Toast.Style.Failure,
-          title: "Authy",
+          title: "Twilio’s Authy",
           message: "Seems like you rejected registration request",
         });
         await removeFromCache(REQUEST_ID);
@@ -82,7 +82,7 @@ async function checkForApproval(setLogin: (step: boolean) => void) {
         await toast.hide();
         await showToast({
           style: Toast.Style.Failure,
-          title: "Authy",
+          title: "Twilio’s Authy",
           message: "Seems like you didn't approve registration request",
         });
         return Promise.resolve();
@@ -104,7 +104,7 @@ async function checkForApproval(setLogin: (step: boolean) => void) {
     await toast.hide();
     await showToast({
       style: Toast.Style.Success,
-      title: "Authy",
+      title: "Twilio’s Authy",
       message: "Success Login",
     });
     return Promise.resolve();
@@ -114,7 +114,7 @@ async function checkForApproval(setLogin: (step: boolean) => void) {
       await toast.hide();
       await showToast({
         style: Toast.Style.Failure,
-        title: "Authy",
+        title: "Twilio’s Authy",
         message: error.message,
       });
     } else {
@@ -142,18 +142,8 @@ export default function LoginForm(props: { setLogin: (step: boolean) => void }) 
       markdown={`${message}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Checkmark}
-            title="Agree"
-            onSubmit={() => checkForApproval(props.setLogin)}
-            shortcut={{ key: "enter", modifiers: [] }}
-          />
-          <Action
-            icon={Icon.ExclamationMark}
-            title={"Start From Scratch"}
-            onAction={resetRegistration}
-            shortcut={{ key: "enter", modifiers: ["cmd"] }}
-          />
+          <Action.SubmitForm icon={Icon.Checkmark} title="Agree" onSubmit={() => checkForApproval(props.setLogin)} />
+          <Action icon={Icon.ExclamationMark} title={"Start From Scratch"} onAction={resetRegistration} />
         </ActionPanel>
       }
     />

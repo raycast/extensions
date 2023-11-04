@@ -13,7 +13,11 @@
     "khasbilegt",
     "pernielsentikaer",
     "loxygenk",
-    "oilbeater"
+    "oilbeater",
+    "LunaticMuch",
+    "aeorge",
+    "daquinoaldo",
+    "ppy"
   ],
   "categories": [
     "Developer Tools",
@@ -76,6 +80,24 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "application",
+          "type": "appPicker",
+          "required": false,
+          "title": "IDE Application",
+          "default": "/Applications/Visual Studio Code.app",
+          "placeholder": "/Applications/Visual Studio Code.app",
+          "description": "Will be used to open the cloned repository."
+        },
+        {
+          "name": "baseClonePath",
+          "type": "directory",
+          "required": false,
+          "title": "Clone Path",
+          "default": "~/GitHub",
+          "placeholder": "~/GitHub",
+          "description": "Path in which the repositories will be cloned."
+        },
+        {
           "name": "includeForks",
           "type": "checkbox",
           "required": false,
@@ -130,6 +152,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "search-discussions",
+      "title": "Search Discussions",
+      "description": "Search recent Discussions globally in all repositories",
+      "mode": "view"
     },
     {
       "name": "my-discussions",
@@ -199,31 +227,47 @@
       "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
+    },
+    {
+      "name": "defaultSearchTerms",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Search Terms",
+      "description": "Default search to be populated when searching issues, pull requests and discussions.",
+      "default": "author:@me"
+    },
+    {
+      "name": "numberOfResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of search results",
+      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "placeholder": "50"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.3",
-    "@raycast/utils": "^1.5.2",
-    "date-fns": "^2.29.3",
+    "@raycast/api": "^1.56.3",
+    "@raycast/utils": "^1.9.0",
+    "date-fns": "^2.30.0",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.1",
-    "octokit": "^2.0.14"
+    "node-fetch": "^3.3.2",
+    "octokit": "^2.1.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.2.2",
     "@graphql-codegen/typescript": "^3.0.2",
     "@graphql-codegen/typescript-graphql-request": "^4.5.9",
     "@graphql-codegen/typescript-operations": "^3.0.2",
-    "@raycast/eslint-config": "^1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.15.11",
-    "concurrently": "^8.0.1",
+    "concurrently": "^8.2.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.37.0",
     "eslint-plugin-import": "^2.27.5",
     "graphql": "^16.6.0",
-    "prettier": "^2.8.7",
+    "prettier": "^3.0.0",
     "typescript": "^5.0.3"
   },
   "scripts": {

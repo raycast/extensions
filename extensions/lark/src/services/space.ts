@@ -1,7 +1,10 @@
-import { Toast, showToast, LocalStorage } from '@raycast/api';
+import { LocalStorage, Toast, showToast } from '@raycast/api';
 import got from 'got';
+import { getDefaultStore } from 'jotai';
+import { isAuthenticatedAtom } from '../hooks/atoms';
+import { GENERAL_DOMAIN } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
-import { cookieJar, getTenantPrefixUrl, isAbortError } from './shared';
+import { cookieJar, isAbortError } from './shared';
 
 export type UserID = string;
 export type NodeID = string;
@@ -130,7 +133,7 @@ const client = got.extend({
   hooks: {
     beforeRequest: [
       (options) => {
-        options.headers.referer = getTenantPrefixUrl();
+        options.headers.referer = GENERAL_DOMAIN;
         // remove `_csrf_token`
         options.headers.cookie = String(options.headers.cookie)
           .split('; ')
@@ -140,21 +143,20 @@ const client = got.extend({
     ],
     afterResponse: [
       (response) => {
-        try {
-          const data = response.body as Record<string, unknown>;
-          if (data.code !== 0) {
-            if (data.code === 5) {
-              // Login Required
-              LocalStorage.clear();
+        const data = response.body as Record<string, unknown>;
+        if (data.code !== 0) {
+          if (data.code === 5) {
+            // Login Required
+            LocalStorage.clear();
+            getDefaultStore().set(isAuthenticatedAtom, false);
+            setTimeout(() => {
               showToast(Toast.Style.Failure, 'Session expired, please login again');
-            }
-            throw Error();
+            });
           }
-          response.body = data.data;
-          return response;
-        } catch {
-          return response;
+          throw Error();
         }
+        response.body = data.data;
+        return response;
       },
     ],
   },
@@ -165,7 +167,7 @@ export function isNodeEntity(entity: NodeEntity | ObjEntity): entity is NodeEnti
 }
 
 function prependUrl(url: string) {
-  return `${getTenantPrefixUrl()}/space/api/${url}`;
+  return `${GENERAL_DOMAIN}/space/api/${url}`;
 }
 
 export async function fetchRecentList(length: number, signal?: AbortSignal): Promise<RecentListResponse> {

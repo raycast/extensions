@@ -89,7 +89,10 @@ async function getRepoWorktrees(repoDir: string): Promise<Worktree[]> {
 // Determine the default branch of a repo
 export async function getBranches(repoDir: string): Promise<string[]> {
   const { stdout } = await exec(`git -C '${repoDir}' branch --format='%(refname:short)'`);
-  return stdout.trim().split("\n");
+  return stdout
+    .trim()
+    .split("\n")
+    .filter((branch) => !branch.startsWith("heads/"));
 }
 
 // Add a new git worktree

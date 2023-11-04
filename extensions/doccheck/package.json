@@ -126,7 +126,7 @@
     },
     {
       "name": "open-page",
-      "title": "Open Page",
+      "title": "Open Article",
       "subtitle": "DocCheck",
       "description": "Open DocCheck page in Raycast",
       "mode": "view",

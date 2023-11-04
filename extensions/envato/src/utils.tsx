@@ -80,3 +80,8 @@ export const useFetch = () => {
 
   return state;
 };
+
+export async function verifyPurchaseCode(purchaseCode: string): Promise<Envato.ISaleResponse | undefined> {
+  const client = new Envato.Client(token);
+  return client.private.getSale(purchaseCode);
+}

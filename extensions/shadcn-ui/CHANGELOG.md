@@ -1,5 +1,15 @@
 # shadcn/ui Changelog
 
+## [Update to shadcn/ui August 2023 version] - 2023-08-19
+
+- Update README.md - updated header and add badges
+- Update documentation - New Dark Mode section and components.json page
+
+## [Update to shadcn/ui July 2023 version] - 2023-07-24
+
+- Update README.md - new author personal site link
+- Update documentation - New Installation section
+
 ## [Update to shadcn/ui June 2023 version] - 2023-06-22
 
 - Update Icon

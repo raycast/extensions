@@ -11,6 +11,7 @@ const PROVIDER_LABEL: Record<string, string> = {
 };
 
 export interface DetailViewProps {
+  showMetadata: boolean;
   text: string;
   original: string;
   from: string;
@@ -22,19 +23,21 @@ export interface DetailViewProps {
 }
 
 export const DetailView = (props: DetailViewProps) => {
-  const { text, original, from, to, mode, created_at, ocrImg, provider } = props;
+  const { showMetadata, text, original, from, to, mode, created_at, ocrImg, provider } = props;
   const imgMd = ocrImg ? `\n![](${ocrImg})` : "";
   return (
     <List.Item.Detail
       markdown={`${text}\n${imgMd}\n\`\`\`\n${original}\n\`\`\`\n`}
       metadata={
-        <Detail.Metadata>
-          {mode != "what" ? <Detail.Metadata.Label title="From" text={`${langMap.get(from) || "Auto"}`} /> : null}
-          <Detail.Metadata.Label title="To" text={`${langMap.get(to)}`} />
-          <Detail.Metadata.Label title="Mode" text={capitalize(mode)} />
-          {created_at && <Detail.Metadata.Label title="Created At" text={`${created_at}`} />}
-          {provider && <Detail.Metadata.Label title="Provider" text={`${PROVIDER_LABEL[provider]}`} />}
-        </Detail.Metadata>
+        showMetadata ? (
+          <Detail.Metadata>
+            {mode != "what" ? <Detail.Metadata.Label title="From" text={`${langMap.get(from) || "Auto"}`} /> : null}
+            <Detail.Metadata.Label title="To" text={`${langMap.get(to)}`} />
+            <Detail.Metadata.Label title="Mode" text={capitalize(mode)} />
+            {created_at && <Detail.Metadata.Label title="Created At" text={`${created_at}`} />}
+            {provider && <Detail.Metadata.Label title="Provider" text={`${PROVIDER_LABEL[provider]}`} />}
+          </Detail.Metadata>
+        ) : null
       }
     />
   );

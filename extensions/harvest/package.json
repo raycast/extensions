@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "harvest",
   "title": "Harvest",
   "description": "Access Harvest Time Entries",
@@ -78,6 +79,15 @@
       "interval": "1m",
       "disabledByDefault": true,
       "preferences": [
+        {
+          "name": "showTimerInMenuBar",
+          "label": "Show Timer in Menu Bar",
+          "title": "Options",
+          "description": "Show your running timer in the menu bar",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
         {
           "name": "callbackURLStart",
           "title": "Callback URL - Timer Started",

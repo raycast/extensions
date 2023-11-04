@@ -2,7 +2,7 @@ import { Action, Icon } from "@raycast/api";
 import ModelForm from "../ModelForm";
 import { Model, ModelManager } from "../../../utils/types";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 
 /**
  * Action to edit a model.
@@ -26,7 +26,7 @@ export default function EditModelAction(props: {
     <Action.Push
       title="Edit Model"
       icon={Icon.Pencil}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      shortcut={getActionShortcut("EditModelAction", settings)}
       target={<ModelForm models={models} currentModel={model} />}
     />
   );

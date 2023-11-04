@@ -8,7 +8,7 @@ import fetch from "node-fetch";
  * @param prompt The full prompt to send to the endpoint.
  * @returns The string output received from the model endpoint.
  */
-export default async function runModel(basePrompt: string, prompt: string, input: string) {
+export default async function runModel(basePrompt: string, prompt: string, input: string, temperature = "1.0") {
   const preferences = getPreferenceValues<ExtensionPreferences>();
 
   // We can be a little forgiving of how users specify Raycast AI
@@ -31,7 +31,7 @@ export default async function runModel(basePrompt: string, prompt: string, input
     outputKeyPath: "",
     outputTiming: "async",
     lengthLimit: "2500",
-    temperature: "1.0",
+    temperature: temperature,
     name: "Text-Davinci-003 Via Raycast AI",
     description: "",
     favorited: false,
@@ -50,7 +50,7 @@ export default async function runModel(basePrompt: string, prompt: string, input
     outputKeyPath: preferences.outputKeyPath,
     outputTiming: preferences.outputTiming,
     lengthLimit: preferences.lengthLimit,
-    temperature: "1.0",
+    temperature: temperature,
     name: "",
     description: "",
     favorited: false,
@@ -60,6 +60,12 @@ export default async function runModel(basePrompt: string, prompt: string, input
     notes: "",
     isDefault: false,
   };
+
+  const temp = preferences.includeTemperature
+    ? parseFloat(temperature) == undefined
+      ? 1.0
+      : parseFloat(temperature)
+    : 1.0;
 
   return Promise.resolve(LocalStorage.allItems()).then(async (items) => {
     const models: Model[] = Object.entries(items)
@@ -106,12 +112,14 @@ export default async function runModel(basePrompt: string, prompt: string, input
     };
 
     // Add the authentication header if necessary
-    if (targetModel.authType == "apiKey") {
-      headers["Authorization"] = `Api-Key ${targetModel.apiKey.trim()}`;
-    } else if (targetModel.authType == "bearerToken") {
-      headers["Authorization"] = `Bearer ${targetModel.apiKey.trim()}`;
-    } else if (targetModel.authType == "x-api-key") {
-      headers["X-API-Key"] = `${targetModel.apiKey.trim()}`;
+    if (targetModel.apiKey.length != 0) {
+      if (targetModel.authType == "apiKey") {
+        headers["Authorization"] = `Api-Key ${targetModel.apiKey.trim()}`;
+      } else if (targetModel.authType == "bearerToken") {
+        headers["Authorization"] = `Bearer ${targetModel.apiKey.trim()}`;
+      } else if (targetModel.authType == "x-api-key") {
+        headers["X-API-Key"] = `${targetModel.apiKey.trim()}`;
+      }
     }
 
     const modelSchema = raycastModel
@@ -136,13 +144,17 @@ export default async function runModel(basePrompt: string, prompt: string, input
             )
         );
 
+    if (preferences.includeTemperature) {
+      modelSchema["temperature"] = temp;
+    }
+
     if (raycastModel) {
       // If the endpoint is Raycast AI, use the AI hook
       if (!environment.canAccess(AI)) {
         return "Raycast AI is not available in this environment.";
       }
 
-      return await AI.ask(preferences.promptPrefix + prompt + preferences.promptSuffix);
+      return await AI.ask(preferences.promptPrefix + prompt + preferences.promptSuffix, { creativity: temp });
     } else {
       const fetchResponse = await fetch(targetModel.endpoint, {
         method: "POST",

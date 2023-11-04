@@ -1,9 +1,10 @@
-import { ActionPanel, Action, Grid, Icon, showToast, open } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
+import { getBuildScheme } from "./lib/vscode";
 import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows } from "./preferences";
 import { EntryLike, EntryType, RemoteEntry, PinMethods, RemoteWorkspaceEntry } from "./types";
 import {
@@ -22,15 +23,33 @@ import {
   ListOrGridDropdownItem,
   ListOrGridSection,
   ListOrGridItem,
+  ListOrGridEmptyView,
 } from "./grid-or-list";
 import { usePinnedEntries } from "./pinned";
 import { runAppleScriptSync } from "run-applescript";
-import { getBuildScheme } from "./lib/vscode";
 
 export default function Command() {
-  const { data, isLoading } = useRecentEntries();
+  const { data, isLoading, error } = useRecentEntries();
   const [type, setType] = useState<EntryType | null>(null);
   const { pinnedEntries, ...pinnedMethods } = usePinnedEntries();
+
+  if (error) {
+    showToast(Toast.Style.Failure, "Failed to load recent projects");
+    return (
+      <ListOrGrid
+        actions={
+          <ActionPanel>
+            <Action title="Change Build" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      >
+        <ListOrGridEmptyView
+          title="Failed to load recent projects"
+          description="Press enter to change build"
+        ></ListOrGridEmptyView>
+      </ListOrGrid>
+    );
+  }
 
   return (
     <ListOrGrid

@@ -1,7 +1,7 @@
 import { Action, Icon } from "@raycast/api";
 import ModelForm from "../ModelForm";
 import { ModelManager } from "../../../utils/types";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 
 /**
@@ -21,7 +21,7 @@ export default function AddNewModelAction(props: { models: ModelManager; setting
     <Action.Push
       title="Add New Model"
       icon={Icon.PlusCircle}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={getActionShortcut("AddNewModelAction", settings)}
       target={<ModelForm models={models} />}
     />
   );

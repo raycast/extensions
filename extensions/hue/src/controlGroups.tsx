@@ -38,7 +38,7 @@ export default function ControlGroups() {
           .map((light) => getColorFromLight(light))
           .sort((a, b) => chroma.hex(b).get("hsl.h") - chroma.hex(a).get("hsl.h"));
         return [group.id, groupColors];
-      })
+      }),
     );
 
     setPalettes(palettes);
@@ -55,11 +55,11 @@ export default function ControlGroups() {
             .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
             .map((room: Room) => {
               const groupLights = getLightsFromGroup(lights, room).sort((a, b) =>
-                a.metadata.name.localeCompare(b.metadata.name)
+                a.metadata.name.localeCompare(b.metadata.name),
               );
               const groupedLight = groupedLights.find(
                 (groupedLight) =>
-                  groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid
+                  groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid,
               );
 
               return (
@@ -84,7 +84,7 @@ export default function ControlGroups() {
               const groupLights = getLightsFromGroup(lights, zone);
               const groupedLight = groupedLights.find(
                 (groupedLight) =>
-                  groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid
+                  groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid,
               );
 
               return (
@@ -160,7 +160,7 @@ function Group(props: {
                     props.groupLights,
                     props.groupedLight,
                     props.group,
-                    brightness
+                    brightness,
                   )
                 }
               />
@@ -168,28 +168,14 @@ function Group(props: {
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onIncrease={() =>
-                  handleBrightnessChange(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    props.groupedLight,
-                    props.group,
-                    "increase"
-                  )
+                  handleBrightnessChange(props.useHue, props.rateLimiter, props.groupedLight, props.group, "increase")
                 }
               />
               <DecreaseBrightnessAction
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onDecrease={() =>
-                  handleBrightnessChange(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    props.groupedLight,
-                    props.group,
-                    "decrease"
-                  )
+                  handleBrightnessChange(props.useHue, props.rateLimiter, props.groupedLight, props.group, "decrease")
                 }
               />
             </ActionPanel.Section>
@@ -286,7 +272,7 @@ async function handleToggle(
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   groupLights: Light[],
   groupedLight: GroupedLight | undefined,
-  group: Group
+  group: Group,
 ) {
   const toast = new Toast({ title: "" });
 
@@ -297,10 +283,8 @@ async function handleToggle(
 
     const changes = {
       on: { on: !groupedLight.on?.on },
-      dynamics: { duration: getTransitionTimeInMs() },
-      ...(!groupedLight.on?.on && groupedLight.dimming
-        ? { dimming: { brightness: groupedLight.dimming?.brightness } }
-        : {}),
+      // No dynamics when toggling groups, as that causes the brightness to the set to the lowest possible level,
+      //   even when only applied to toggling off.
     };
 
     const changesToGroupedLights = new Map(
@@ -308,18 +292,18 @@ async function handleToggle(
         // Find zones that contain affected lights
         .filter((zone) =>
           zone.children.some((child) =>
-            groupLights.some((light) => light.id === child.rid || light.owner.rid === child.rid)
-          )
+            groupLights.some((light) => light.id === child.rid || light.owner.rid === child.rid),
+          ),
         )
         // Get the grouped lights that belong to those zones
         .map((zone) =>
           groupedLights.find((zoneGroupedLight) =>
-            zone.services.some((zoneService) => zoneService.rid === zoneGroupedLight.id)
-          )
+            zone.services.some((zoneService) => zoneService.rid === zoneGroupedLight.id),
+          ),
         )
         // Filter out undefined grouped lights
         .filter((zoneGroupedLight): zoneGroupedLight is GroupedLight => zoneGroupedLight !== undefined)
-        .map((zoneGroupedLight) => [zoneGroupedLight.id, changes])
+        .map((zoneGroupedLight) => [zoneGroupedLight.id, changes]),
     )
       // Add the grouped light that triggered the action
       .set(groupedLight.id, changes);
@@ -351,7 +335,7 @@ async function handleSetBrightness(
   groupLights: Light[],
   groupedLight: GroupedLight | undefined,
   group: Group,
-  brightness: number
+  brightness: number,
 ) {
   const toast = new Toast({ title: "" });
 
@@ -389,10 +373,9 @@ async function handleSetBrightness(
 async function handleBrightnessChange(
   { hueBridgeState, lights, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  groupLights: Light[],
   groupedLight: GroupedLight | undefined,
   group: Group,
-  direction: "increase" | "decrease"
+  direction: "increase" | "decrease",
 ) {
   const toast = new Toast({ title: "" });
 

@@ -6,7 +6,7 @@ import {
 } from "../../utils/constants";
 import path from "path";
 import { defaultAdvancedSettings } from "../../data/default-advanced-settings";
-import { isActionEnabled } from "../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../utils/action-utils";
 
 /**
  * Action to open the placeholders guide in the default markdown text editor.
@@ -27,7 +27,7 @@ export function OpenPlaceholdersGuideAction(props: { settings: typeof defaultAdv
       title="Open Placeholders Guide"
       target={placeholdersGuidePath}
       application={targetApp == "default" ? undefined : targetApp}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+      shortcut={getActionShortcut("OpenPlaceholdersGuideAction", settings)}
     />
   );
 }
@@ -52,7 +52,7 @@ export function EditCustomPlaceholdersAction(props: { settings: typeof defaultAd
       target={customPlaceholdersPath}
       application={targetApp == "default" ? undefined : targetApp}
       icon={Icon.Underline}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      shortcut={getActionShortcut("EditCustomPlaceholdersAction", settings)}
     />
   );
 }
@@ -76,7 +76,7 @@ export function OpenAdvancedSettingsAction(props: { settings: typeof defaultAdva
       title="Open Advanced Settings"
       target={advancedSettingsPath}
       icon={Icon.Cog}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      shortcut={getActionShortcut("OpenAdvancedSettingsAction", settings)}
       application={targetApp == "default" ? undefined : targetApp}
     />
   );

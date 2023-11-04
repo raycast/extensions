@@ -1,5 +1,9 @@
 # Reflect Changelog
 
+## [OAuth] - 2023-07-20
+
+- Use the native Reflect OAuth PKCE API
+
 ## [Time format] - 2023-07-10
 
 ### Added

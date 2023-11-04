@@ -10,8 +10,6 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { launchCommand, LaunchType } from "@raycast/api";
-
 import fetch from "node-fetch";
 globalThis.fetch = fetch;
 
@@ -143,7 +141,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           <Detail.Metadata.Label title="Command Title" text={title} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Model" text={`PaLM 2`} />
-          <Detail.Metadata.Label title="Version" text="2023.06.07" />
+          <Detail.Metadata.Label title="Version" text="2023.07.13" />
         </Detail.Metadata>
       }
     />

@@ -1,5 +1,7 @@
 import { Action, Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { Chat, ChatManager } from "../../../utils/types";
+import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
+import { getActionShortcut } from "../../../utils/action-utils";
 
 /**
  * Action to delete a chat.
@@ -12,14 +14,15 @@ export const DeleteChatAction = (props: {
   chat: Chat;
   chats: ChatManager;
   setCurrentChat: (value: React.SetStateAction<Chat | undefined>) => void;
+  settings: typeof defaultAdvancedSettings;
 }) => {
-  const { chat, chats, setCurrentChat } = props;
+  const { chat, chats, setCurrentChat, settings } = props;
   return (
     <Action
       title="Delete Chat"
       icon={Icon.Trash}
       style={Action.Style.Destructive}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      shortcut={getActionShortcut("DeleteChatAction", settings)}
       onAction={async () => {
         if (
           await confirmAlert({
@@ -47,14 +50,15 @@ export const DeleteChatAction = (props: {
 export const DeleteAllChatsAction = (props: {
   chats: ChatManager;
   setCurrentChat: (value: React.SetStateAction<Chat | undefined>) => void;
+  settings: typeof defaultAdvancedSettings;
 }) => {
-  const { chats, setCurrentChat } = props;
+  const { chats, setCurrentChat, settings } = props;
   return (
     <Action
       title="Delete All Chats"
       icon={Icon.Trash}
       style={Action.Style.Destructive}
-      shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "d" }}
+      shortcut={getActionShortcut("DeleteAllChatsAction", settings)}
       onAction={async () => {
         if (
           await confirmAlert({

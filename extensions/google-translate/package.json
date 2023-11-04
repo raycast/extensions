@@ -13,7 +13,8 @@
     "FezVrasta",
     "metakirby5",
     "AlanHuang",
-    "nirtamir2"
+    "nirtamir2",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -702,6 +703,10 @@
           "value": "lv"
         },
         {
+          "title": "🏛 Latin",
+          "value": "la"
+        },
+        {
           "title": "🇱🇹 Lithuanian",
           "value": "lt"
         },
@@ -933,6 +938,7 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
+    "prettier": "^3.0.1",
     "eslint-config-prettier": "^8.3.0",
     "typescript": "^4.4.3"
   },

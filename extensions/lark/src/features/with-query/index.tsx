@@ -8,9 +8,8 @@ const QueryGuard = ({ children }: { children: React.ReactElement }) => {
 
 export const withQuery =
   <T extends Record<string, unknown>>(Component: React.ComponentType<T>): React.FC<T> =>
-  (props: T) =>
-    (
-      <QueryGuard>
-        <Component {...props} />
-      </QueryGuard>
-    );
+  (props: T) => (
+    <QueryGuard>
+      <Component {...props} />
+    </QueryGuard>
+  );

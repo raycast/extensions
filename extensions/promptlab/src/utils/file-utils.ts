@@ -1,7 +1,7 @@
 import { LocalStorage, environment } from "@raycast/api";
 import * as fs from "fs";
 import { defaultCommands } from "../data/default-commands";
-import { CommandOptions, Extension, ExtensionCommand } from "./types";
+import { AudioData, CommandOptions, Extension, ExtensionCommand, ImageData } from "./types";
 import { defaultModels } from "../data/default-models";
 import { randomUUID } from "crypto";
 import path from "path";
@@ -11,6 +11,8 @@ import { ScriptRunner } from "./scripts";
 import exifr from "exifr";
 import { filterString } from "./context-utils";
 import { defaultAdvancedSettings } from "../data/default-advanced-settings";
+import { exec } from "child_process";
+import * as os from "os";
 
 /**
  * Installs the default prompts if they haven't been installed yet and the user hasn't input their own command set.
@@ -70,36 +72,24 @@ export const getFileExifData = async (filePath: string) => {
  * @param options A {@link CommandOptions} object describing the types of information to include in the output.
  * @returns The image description as a string.
  */
-export const getImageDetails = async (
-  filePath: string,
-  options: CommandOptions
-): Promise<{
-  output: string;
-  imageText: string;
-  imagePOI: string;
-  imageBarcodes: string;
-  imageAnimals: string;
-  imageRectangles: string;
-  imageSubjects: string;
-  imageFaces: string;
-  imageEXIFData: string;
-}> => {
+export const getImageDetails = async (filePath: string, options: CommandOptions): Promise<ImageData> => {
   const imageDetails = await ScriptRunner.ImageFeatureExtractor(
     filePath,
     options.useSubjectClassification || false,
     options.useBarcodeDetection || false,
     options.useFaceDetection || false,
     options.useRectangleDetection || false,
-    options.useSaliencyAnalysis || false
+    options.useSaliencyAnalysis || false,
+    options.useHorizonDetection || false
   );
-  const imageVisionInstructions = filterString(imageDetails.output);
+  const imageVisionInstructions = filterString(imageDetails.stringValue);
   const exifData =
     options.useMetadata && !filePath.endsWith(".svg") ? filterString(await getFileExifData(filePath)) : ``;
   const exifInstruction = options.useMetadata ? `<EXIF data: ###${exifData}###>` : ``;
   return {
     ...imageDetails,
     imageEXIFData: exifInstruction,
-    output: `${imageVisionInstructions}${exifInstruction}`,
+    stringValue: `${imageVisionInstructions}${exifInstruction}`,
   };
 };
 
@@ -111,16 +101,11 @@ export const getImageDetails = async (
  *
  * @returns The metadata and sound classifications as a single string.
  */
-export const getAudioDetails = async (
-  filePath: string
-): Promise<{
-  contents: string;
-  soundClassifications: string;
-}> => {
+export const getAudioDetails = async (filePath: string): Promise<AudioData> => {
   const soundClassifications = filterString((await ScriptRunner.SoundClassifier(filePath)).replace("_", " ")).trim();
   const classificationInstructions = `<Sound classifications: "${soundClassifications}".>`;
   return {
-    contents: `${soundClassifications ? `\n${classificationInstructions}` : ""}`,
+    stringValue: `${soundClassifications ? `\n${classificationInstructions}` : ""}`,
     soundClassifications: soundClassifications,
   };
 };
@@ -208,4 +193,40 @@ export const getExtensions = async (): Promise<Extension[]> => {
       resolve(extensions);
     });
   });
+};
+
+/**
+ * Unzips a compressed file to a temporary directory.
+ * @param zipPath The path of the compressed file.
+ * @returns The path of the temporary directory.
+ */
+export const unzipToTemp = async (zipPath: string) => {
+  const dirPath = path.join(os.tmpdir(), `${path.basename(zipPath, ".zip")}`);
+  if (fs.existsSync(dirPath)) {
+    await fs.promises.rm(dirPath, { recursive: true });
+  }
+
+  try {
+    // Unzip the file
+    await new Promise((resolve) => {
+      exec(`unzip "${zipPath}" -d "${dirPath}"`, (err) => {
+        if (err) console.error(err);
+      }).on("exit", async () => {
+        resolve(true);
+      });
+    });
+
+    // Remove the zip file
+    await new Promise((resolve) => {
+      exec(`rm "${zipPath}"`, (err) => {
+        if (err) console.error(err);
+      }).on("exit", async () => {
+        resolve(true);
+      });
+    });
+    return dirPath;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 };

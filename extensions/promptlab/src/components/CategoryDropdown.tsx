@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { commandCategories } from "../utils/constants";
+import { COMMAND_CATEGORIES } from "../utils/constants";
 export default function CategoryDropdown(props: { onSelection: (newValue: string) => void }) {
   const { onSelection } = props;
   return (
@@ -11,7 +11,7 @@ export default function CategoryDropdown(props: { onSelection: (newValue: string
       }}
     >
       <List.Dropdown.Item key="All" title="All" value="All" />
-      {commandCategories.map((category) => (
+      {COMMAND_CATEGORIES.map((category) => (
         <List.Dropdown.Item
           key={category.name}
           title={category.name}

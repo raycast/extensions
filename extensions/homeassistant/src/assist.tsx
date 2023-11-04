@@ -1,12 +1,14 @@
 import { Action, ActionPanel, List, Toast, showToast, Icon, Color, Image } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getHAWSConnection, ha } from "./common";
-import { useState } from "react";
-import { getErrorMessage } from "./utils";
+import { getHAWSConnection, ha } from "@lib/common";
+import { useState, useEffect } from "react";
+import { getErrorMessage } from "@lib/utils";
 import { clearSearchBar } from "@raycast/api";
+import { getTranslation } from "@lib/translation";
 
 interface PlainSpeech {
   speech: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   extra_data?: any;
 }
 
@@ -61,6 +63,24 @@ interface HAUser {
   isOwner: boolean;
 }
 
+interface HAAssistPipeline {
+  id: string;
+  conversation_engine: string;
+  conversation_language: string;
+  language: string;
+  name: string;
+  stt_engine?: string | null;
+  stt_language?: string | null;
+  tts_engine?: string | null;
+  tts_language?: string | null;
+  tts_voice?: string | null;
+}
+
+interface HAAssistPipelines {
+  pipelines?: HAAssistPipeline[] | null;
+  preferred_pipeline: string;
+}
+
 async function getHAWSCurrentUser(): Promise<HAUser | undefined> {
   const con = await getHAWSConnection();
   const currentUser: HAWSUser | undefined = await con.sendMessagePromise({
@@ -83,14 +103,49 @@ async function getHAWSCurrentUser(): Promise<HAUser | undefined> {
   return r;
 }
 
-function getInitalConversations(): ConversationContent[] {
-  return [{ text: "How can I help you?", author: Author.Assist, date: new Date() }];
+function getInitialConversations(language: string): ConversationContent[] {
+  const ts = getTranslation({
+    language: language,
+    id: "ui.dialogs.voice_command.how_can_i_help",
+    fallback: "How can I assist",
+  });
+  return [{ text: ts, author: Author.Assist, date: new Date() }];
+}
+
+function PipelinesDropdownList(props: {
+  pipelines: HAAssistPipelines | undefined;
+  onChange?: (newValue: HAAssistPipeline | undefined) => void;
+}): JSX.Element | null {
+  const p = props.pipelines;
+  if (!p) {
+    return null;
+  }
+  const onAction = (newValue: string) => {
+    if (!props.onChange) {
+      return;
+    }
+    props.onChange(p.pipelines?.find((p) => p.id === newValue));
+  };
+  return (
+    <List.Dropdown tooltip="Assist" onChange={onAction}>
+      {p?.pipelines?.map((a) => (
+        <List.Dropdown.Item key={a.id} title={`${a.name} (${a.conversation_language})`} value={a.id} />
+      ))}
+    </List.Dropdown>
+  );
 }
 
 export default function AssistCommand(): JSX.Element {
   const [searchText, setSearchText] = useState<string>("");
-  const [conversations, setConversations] = useState<ConversationContent[]>(getInitalConversations());
+  const { pipelines, isLoading: isLoadingPipeline, error } = useAssistPipelines();
+  const [conversations, setConversations] = useState<ConversationContent[]>();
   const { data: currentUser } = useCachedPromise(getHAWSCurrentUser);
+  const [selectedPipeline, setSelectedPipeline] = useState<HAAssistPipeline>();
+
+  if (error) {
+    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
+  }
+
   const process = async () => {
     try {
       if (searchText.length <= 0) {
@@ -100,21 +155,24 @@ export default function AssistCommand(): JSX.Element {
         });
         return;
       }
-      const con = await getHAWSConnection();
-      const r: ConversationAnswer = await con.sendMessagePromise({
+      const connection = await getHAWSConnection();
+      const r: ConversationAnswer = await connection.sendMessagePromise({
         type: "conversation/process",
         text: searchText,
+        agent_id: selectedPipeline?.conversation_engine,
+        language: selectedPipeline?.language,
       });
       clearSearchBar();
+      const convs = conversations || [];
       const assistAnswer = r.response?.speech?.plain?.speech;
       if (assistAnswer) {
         setConversations([
           { text: assistAnswer, author: Author.Assist, date: new Date() },
           { text: searchText, author: Author.Me, date: new Date() },
-          ...conversations,
+          ...convs,
         ]);
       } else {
-        setConversations([{ text: searchText, author: Author.Me, date: new Date() }, ...conversations]);
+        setConversations([{ text: searchText, author: Author.Me, date: new Date() }, ...convs]);
       }
     } catch (error) {
       showToast({
@@ -132,36 +190,102 @@ export default function AssistCommand(): JSX.Element {
     }
     return { source: "person.png", tintColor: Color.PrimaryText, mask: Image.Mask.Circle };
   };
+  const isLoading = !error ? isLoadingPipeline || !conversations : false;
   return (
-    <List searchBarPlaceholder="Type your Request and Press Enter" onSearchTextChange={setSearchText}>
-      <List.Section title="Conversation">
-        {conversations.map((c, i) => (
-          <List.Item
-            key={i.toString()}
-            title={c.text}
-            icon={{
-              value: c.author === Author.Assist ? "home-assistant.png" : userPicture(),
-              tooltip: c.author === Author.Assist ? "Assist" : currentUser?.name ?? "",
-            }}
-            accessories={[{ date: c.date }]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action onAction={() => process()} title="Send" icon={Icon.Terminal} />
-                  <Action.CopyToClipboard title="Copy Text to Clipboard" content={c.text} />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action
-                    title="Clear Conversation"
-                    icon={Icon.DeleteDocument}
-                    onAction={() => setConversations(getInitalConversations())}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+    <List
+      searchBarPlaceholder="Type your Request and Press Enter"
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <PipelinesDropdownList
+          pipelines={pipelines}
+          onChange={(newLanguage: HAAssistPipeline | undefined) => {
+            setSelectedPipeline(newLanguage);
+            setConversations(newLanguage ? getInitialConversations(newLanguage.conversation_language) : []);
+          }}
+        />
+      }
+    >
+      {selectedPipeline && (
+        <List.Section title="Conversation">
+          {conversations?.map((c, i) => (
+            <List.Item
+              key={i.toString()}
+              title={c.text}
+              icon={{
+                value: c.author === Author.Assist ? "home-assistant.png" : userPicture(),
+                tooltip: c.author === Author.Assist ? "Assist" : currentUser?.name ?? "",
+              }}
+              accessories={[{ date: c.date }]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action onAction={() => process()} title="Send" icon={Icon.Terminal} />
+                    <Action.CopyToClipboard title="Copy Text to Clipboard" content={c.text} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      title="Clear Conversation"
+                      icon={Icon.DeleteDocument}
+                      shortcut={{ modifiers: ["opt"], key: "x" }}
+                      onAction={() => setConversations(getInitialConversations(selectedPipeline.conversation_language))}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
+}
+
+function useAssistPipelines(): {
+  error?: string;
+  isLoading: boolean;
+  pipelines?: HAAssistPipelines;
+} {
+  const [pipelines, setPipelines] = useState<HAAssistPipelines>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let didUnmount = false;
+
+    async function fetchData() {
+      if (didUnmount) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const con = await getHAWSConnection();
+        const data: HAAssistPipelines | undefined = await con.sendMessagePromise({
+          type: "assist_pipeline/pipeline/list",
+        });
+        if (!didUnmount) {
+          setPipelines(data);
+        }
+      } catch (error) {
+        if (!didUnmount) {
+          setError(getErrorMessage(error));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      didUnmount = true;
+    };
+  }, []);
+
+  return { error, isLoading, pipelines };
 }

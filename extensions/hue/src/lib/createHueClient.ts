@@ -15,7 +15,7 @@ export default async function createHueClient(
   setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
   setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
   setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
-  setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
+  setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>,
 ) {
   const http2Session = await new Promise<ClientHttp2Session>((resolve, reject) => {
     let certificate: Buffer | undefined;
@@ -38,17 +38,17 @@ export default async function createHueClient(
       checkServerIdentity: (hostname, cert) => {
         if (cert.subject.CN !== bridgeConfig.id) {
           throw new Error(
-            "Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID."
+            "Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.",
           );
         }
         if (bridgeConfig.certificateType === "signed-by-hue-bridge-root-ca" && cert.issuer.CN !== "root-bridge") {
           throw new Error(
-            "Server identity check failed. Certificate issuer’s Common Name does not match the expected value."
+            "Server identity check failed. Certificate issuer’s Common Name does not match the expected value.",
           );
         }
         if (bridgeConfig.certificateType === "self-signed" && cert.issuer.CN !== bridgeConfig.id) {
           throw new Error(
-            "Server identity check failed. Certificate issuer’s Common Name does not match the Bridge ID."
+            "Server identity check failed. Certificate issuer’s Common Name does not match the Bridge ID.",
           );
         }
 

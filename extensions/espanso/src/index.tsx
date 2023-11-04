@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Application, Clipboard, Detail, List, getFrontmostApplication } from "@raycast/api";
+
 import { homedir } from "os";
 import path from "path";
 import { useEffect, useState } from "react";

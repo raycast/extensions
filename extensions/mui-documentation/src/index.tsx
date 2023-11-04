@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useCachedState, usePromise } from '@raycast/utils';
-
 import { List, Toast, showToast } from '@raycast/api';
+import { useCachedState, usePromise } from '@raycast/utils';
+import { useEffect, useState } from 'react';
 
-import { algoliaIndex, prepareFilters, prepareResults } from './utils';
-import { Hit } from './types';
 import ProductDropDown from './ProductDropDown';
 import Results from './Results';
+import { Hit } from './types';
+import { algoliaIndex, prepareFilters, prepareResults } from './utils';
 
 const Command = () => {
   const [searchText, setSearchText] = useState<string>('');
   const [dropdown, setDropdown] = useCachedState<string>('libs', 'preferences');
   const productFilters = prepareFilters(dropdown);
-  const { isLoading, data, error } = usePromise(
+  const { data, error, isLoading } = usePromise(
     async (filters, query = '') => {
       const results = await algoliaIndex
         .search<Hit>(query, { filters })
@@ -20,7 +19,7 @@ const Command = () => {
 
       return results;
     },
-    [productFilters, searchText]
+    [productFilters, searchText],
   );
 
   useEffect(() => {
@@ -29,13 +28,13 @@ const Command = () => {
 
   return (
     <List
-      throttle
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
       searchBarAccessory={<ProductDropDown onChange={setDropdown} />}
+      throttle
     >
       {searchText === '' && (
-        <List.EmptyView title="Type to get started" icon="command-small.png" />
+        <List.EmptyView icon="command-small.png" title="Type to get started" />
       )}
       {searchText && data && <Results data={data} />}
     </List>

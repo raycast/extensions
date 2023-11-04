@@ -29,7 +29,7 @@ export default function Command() {
                       <List.Item.Detail.Metadata.Label title="Title" text={hs_call_title} />
                       <List.Item.Detail.Metadata.Label title="Status" text={hs_call_status} />
                       <List.Item.Detail.Metadata.Label title="Created" text={new Date(createdate).toLocaleString()} />
-                      <List.Item.Detail.Metadata.Label title="To Number" text={hs_call_to_number} />
+                      <List.Item.Detail.Metadata.Label title="To Number" text={hs_call_to_number || ""} />
                     </List.Item.Detail.Metadata>
                   }
                 />

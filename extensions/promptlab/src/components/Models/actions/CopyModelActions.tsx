@@ -1,7 +1,7 @@
 import { Action } from "@raycast/api";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import { Model, ModelManager } from "../../../utils/types";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 
 /**
  * Action to copy a model's JSON representation to the clipboard.
@@ -24,7 +24,7 @@ export const CopyModelJSONAction = (props: { model: Model; settings: typeof defa
         value[key] = { ...model, id: "", apiKey: "" };
         return JSON.stringify(value);
       })()}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+      shortcut={getActionShortcut("CopyModelJSONAction", settings)}
     />
   );
 };
@@ -53,7 +53,7 @@ export const CopyAllModelsJSONAction = (props: { models: ModelManager; settings:
         }
         return JSON.stringify(value);
       })()}
-      shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "j" }}
+      shortcut={getActionShortcut("CopyAllModelsJSONAction", settings)}
     />
   );
 };

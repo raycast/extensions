@@ -22,7 +22,7 @@ type SubIssue = {
 
 export default function CreateSubIssues({ issue: initialIssue }: CreateSubIssues) {
   const { pop } = useNavigation();
-  const { states } = useStates();
+  const { states } = useStates(initialIssue.team.id);
 
   const firstUnstartedState = useMemo(() => {
     const unstartedStates = states.filter((state) => state.type === StateType.unstarted);

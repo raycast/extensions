@@ -3,13 +3,13 @@ import { Color, Icon } from "@raycast/api";
 /**
  * The base URL for the PromptLab Store API.
  */
-export const STORE_ENDPOINT = "https://v1.slashapi.com/promptlab/google-sheets/LMFCs9cU5Y/sheet1";
+export const STORE_ENDPOINT = "https://v1.slashapi.com/promptlab/google-sheets/Rk5NJmgsBa/sheet1";
 
 /**
  * The API key for the PromptLab Store API.
  * This key only permits reading and writing commands, not deleting or otherwise modifying them.
  */
-export const STORE_KEY = "SCH4kmgzqxxFuCWDWayRV07OqHmLXfxmlMxu0G0Y";
+export const STORE_KEY = "efjOsWeZLz7Z9lV0P9cPI7BaBmsEvpGUkOyyj5M9";
 
 /**
  * The base URL for the PromptLab QuickLinks.
@@ -32,7 +32,7 @@ export const CUSTOM_PLACEHOLDERS_FILENAME = "custom_placeholders.json";
  */
 export const ADVANCED_SETTINGS_FILENAME = "advanced_settings.json";
 
-export const StorageKeys = {
+export const STORAGE_KEYS = {
   /**
    * Key for the list of persistent variables as JSON objects containing the variable's name,  value, and initial (default) value.
    */
@@ -47,7 +47,22 @@ export const StorageKeys = {
 /**
  * Command categories and their icons/icon colors.
  */
-export const commandCategories = [
+export const COMMAND_CATEGORIES: {
+  /**
+   * The name of the category as it appears in the command editor.
+   */
+  name: string;
+
+  /**
+   * The Raycast icon to use for the category.
+   */
+  icon: Icon;
+
+  /**
+   * The color of the icon.
+   */
+  color: Color;
+}[] = [
   {
     name: "Other",
     icon: Icon.Circle,

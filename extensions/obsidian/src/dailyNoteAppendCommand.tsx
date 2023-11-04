@@ -11,6 +11,7 @@ import {
   useObsidianVaults,
   vaultPluginCheck,
 } from "./utils/utils";
+import { clearCache } from "./utils/data/cache";
 
 interface DailyNoteAppendArgs {
   text: string;
@@ -62,6 +63,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
       silent: silent,
     });
     open(target);
+    clearCache();
     popToRoot();
     closeMainWindow();
   }

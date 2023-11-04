@@ -22,7 +22,7 @@ import {
 import { Fragment, useEffect, useState } from "react";
 import * as crypto from "crypto";
 import { useRef } from "react";
-import { checkForPlaceholders } from "../../utils/placeholders";
+import { Placeholders, checkForPlaceholders } from "../../utils/placeholders";
 import {
   EditCustomPlaceholdersAction,
   OpenAdvancedSettingsAction,
@@ -31,7 +31,7 @@ import {
 import { updateCommand } from "../../utils/command-utils";
 import * as fs from "fs";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME, commandCategories } from "../../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../utils/constants";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
 import { isActionEnabled } from "../../utils/action-utils";
 
@@ -49,6 +49,7 @@ interface CommandFormValues {
   useRectangleDetection?: boolean;
   useBarcodeDetection?: boolean;
   useFaceDetection?: boolean;
+  useHorizonDetection?: boolean;
   outputKind?: string;
   actionScript?: string;
   showResponse?: boolean;
@@ -80,6 +81,8 @@ export default function CommandForm(props: {
   const { advancedSettings } = useAdvancedSettings();
   const [promptInfo, setPromptInfo] = useState<string>(defaultPromptInfo);
   const [scriptInfo, setScriptInfo] = useState<string>("");
+  const [showAddPlaceholderAction, setShowAddPlaceholderAction] = useState<boolean>(false);
+  const [prompt, setPrompt] = useState<string>(oldData != undefined ? oldData.prompt : "");
   const [showResponse, setShowResponse] = useState<boolean>(
     oldData != undefined && oldData.showResponse != undefined ? oldData.showResponse : true
   );
@@ -95,7 +98,7 @@ export default function CommandForm(props: {
       info: string;
     }[]
   >([]);
-  const [enableSetupEditing, setEnableSetupEditing] = useState<boolean>(oldData != undefined && !oldData.setupLocked);
+  const [enableSetupEditing, setEnableSetupEditing] = useState<boolean>(oldData == undefined || !oldData.setupLocked);
   const lastAddedFieldRef = useRef<Form.TextField>(null);
   const [currentFieldFocus, setCurrentFieldFocus] = useState<number>(-1);
   let lastFieldContext = "";
@@ -134,16 +137,17 @@ export default function CommandForm(props: {
       useMetadata: false,
       acceptedFileExtensions: "",
       useAudioDetails: false,
-      useSoundClassification: true,
-      useSubjectClassification: true,
+      useSoundClassification: false,
+      useSubjectClassification: false,
       useRectangleDetection: false,
-      useBarcodeDetection: true,
+      useBarcodeDetection: false,
       useFaceDetection: false,
+      useHorizonDetection: false,
       outputKind: "detail",
       actionScript: "",
       showResponse: true,
       description: "",
-      useSaliencyAnalysis: true,
+      useSaliencyAnalysis: false,
       author: "",
       website: "",
       version: "1.0.0",
@@ -327,6 +331,7 @@ export default function CommandForm(props: {
         useRectangleDetection: values.useRectangleDetection,
         useBarcodeDetection: values.useBarcodeDetection,
         useFaceDetection: values.useFaceDetection,
+        useHorizonDetection: values.useHorizonDetection,
         outputKind: values.outputKind,
         actionScript: values.actionScript,
         showResponse: values.showResponse,
@@ -345,6 +350,7 @@ export default function CommandForm(props: {
         speakResponse: values.speakResponse,
         showInMenuBar: values.showInMenuBar,
         favorited: values.favorited,
+        model: values.model,
       };
 
       if (setupFields.length > 0) {
@@ -465,6 +471,28 @@ export default function CommandForm(props: {
             title={oldData && !duplicate ? "Save Command" : "Create Command"}
             onSubmit={handleSubmit}
           />
+          {showAddPlaceholderAction ? (
+            <ActionPanel.Submenu title="Add Placeholder..." icon={Icon.Plus}>
+              {Object.values(Placeholders.allPlaceholders)
+                .filter(
+                  (placeholder) =>
+                    !placeholder.name.startsWith("textfile:") &&
+                    !placeholder.name.startsWith("video:") &&
+                    !placeholder.name.startsWith("audio:") &&
+                    !placeholder.name.startsWith("image:")
+                )
+                .sort((a, b) => (a.fullRepresentation > b.fullRepresentation ? 1 : -1))
+                .map((placeholder) => (
+                  <Action
+                    title={placeholder.fullRepresentation || "empty"}
+                    onAction={() => {
+                      setPrompt(prompt + placeholder.hintRepresentation);
+                    }}
+                  />
+                ))}
+            </ActionPanel.Submenu>
+          ) : null}
+
           <OpenPlaceholdersGuideAction settings={advancedSettings} />
           <EditCustomPlaceholdersAction settings={advancedSettings} />
           {isActionEnabled("ToggleSetupFieldsAction", advancedSettings) ? (
@@ -689,9 +717,14 @@ export default function CommandForm(props: {
     >
       <Form.Description title="Name & Icon" text="Give your command a memorable name and an icon to match." />
 
-      <Form.TextField title="Command Name" placeholder="Name of PromptLab Command" {...itemProps.name} />
+      <Form.TextField
+        title="Command Name"
+        placeholder="Name of PromptLab Command"
+        {...itemProps.name}
+        onFocus={() => setShowAddPlaceholderAction(false)}
+      />
 
-      <Form.Dropdown title="Icon" {...itemProps.icon}>
+      <Form.Dropdown title="Icon" {...itemProps.icon} onFocus={() => setShowAddPlaceholderAction(false)}>
         {Object.keys(Icon).map((iconName, index) => (
           <Form.Dropdown.Item
             title={iconName}
@@ -702,14 +735,15 @@ export default function CommandForm(props: {
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown title="Icon Color" {...itemProps.iconColor}>
+      <Form.Dropdown title="Icon Color" {...itemProps.iconColor} onFocus={() => setShowAddPlaceholderAction(false)}>
         <Form.Dropdown.Item
           title="Default For Category"
           value="defaultForCategory"
           icon={{
             source: Icon.Circle,
             tintColor:
-              commandCategories.find((category) => category.name == values.categories?.[0])?.color || Color.PrimaryText,
+              COMMAND_CATEGORIES.find((category) => category.name == values.categories?.[0])?.color ||
+              Color.PrimaryText,
           }}
         />
         <Form.Dropdown.Item
@@ -754,12 +788,14 @@ export default function CommandForm(props: {
         label="Show In Menu Bar"
         {...itemProps.showInMenuBar}
         info="If checked, the command will appear in PromptLab's menu bar menu, if enabled."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Favorite"
         {...itemProps.favorited}
         info="Mark this command as a favorite. Favorited commands will appear at the top of the command list."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Separator />
@@ -769,8 +805,10 @@ export default function CommandForm(props: {
         placeholder="Instructions for AI to follow"
         info={promptInfo}
         {...itemProps.prompt}
+        value={prompt}
         onChange={async (value) => {
           itemProps.prompt.onChange?.(value);
+          setPrompt(value);
           const includedPlaceholders = await checkForPlaceholders(value);
           let newPromptInfo = defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
           includedPlaceholders.forEach((placeholder) => {
@@ -782,6 +820,7 @@ export default function CommandForm(props: {
           });
           setPromptInfo(newPromptInfo);
         }}
+        onFocus={() => setShowAddPlaceholderAction(true)}
       />
 
       <Form.TextArea
@@ -805,9 +844,15 @@ export default function CommandForm(props: {
           });
           setScriptInfo(newScriptInfo);
         }}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
-      <Form.Dropdown title="Script Kind" info="The type of script used in the Script field." {...itemProps.scriptKind}>
+      <Form.Dropdown
+        title="Script Kind"
+        info="The type of script used in the Script field."
+        {...itemProps.scriptKind}
+        onFocus={() => setShowAddPlaceholderAction(false)}
+      >
         <Form.Dropdown.Item title="AppleScript" value="applescript" icon={Icon.Paragraph} />
         <Form.Dropdown.Item title="Shell (ZSH)" value="zsh" icon={Icon.Terminal} />
       </Form.Dropdown>
@@ -821,11 +866,13 @@ export default function CommandForm(props: {
           title="Output View"
           info="The view in which the command's output will be rendered. Detail is the most likely to work for any given command, but PromptLab will do its best to give you usable output no matter what."
           {...itemProps.outputKind}
+          onFocus={() => setShowAddPlaceholderAction(false)}
         >
           <Form.Dropdown.Item title="Detail" value="detail" icon={Icon.AppWindow} />
           <Form.Dropdown.Item title="List" value="list" icon={Icon.List} />
           <Form.Dropdown.Item title="Grid" value="grid" icon={Icon.Message} />
           <Form.Dropdown.Item title="Chat" value="chat" icon={Icon.Message} />
+          <Form.Dropdown.Item title="Dialog Window" value="dialogWindow" icon={Icon.List} />
         </Form.Dropdown>
       ) : null}
 
@@ -835,6 +882,7 @@ export default function CommandForm(props: {
         value={showResponse}
         onChange={setShowResponse}
         info="If checked, the AI's output will be displayed in Raycast. Disabling this is only useful if you provide an action script."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
@@ -842,12 +890,14 @@ export default function CommandForm(props: {
         label="Speak Response"
         {...itemProps.speakResponse}
         info="If checked, the output of the command will be spoken aloud by your computer using the system's text-to-speech engine. An action to stop speech will be added to the command's action panel."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Speak Input"
         {...itemProps.useSpeech}
         info="If checked, the command will accept speech input from the user prior to running the prompt. The speech input can be accessed using the {{input}} placeholder."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.TextField
@@ -855,6 +905,7 @@ export default function CommandForm(props: {
         placeholder="Minimum number of files required"
         info="The minimum number of files that must be selected for the command to be run."
         {...itemProps.minNumFiles}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.TextArea
@@ -862,6 +913,7 @@ export default function CommandForm(props: {
         placeholder="Comma-separated list of file extensions, e.g. txt, csv, html"
         info="A list of file extensions that will be accepted by the command. If left blank, all files will be accepted."
         {...itemProps.acceptedFileExtensions}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       {preferences.includeTemperature ? (
@@ -870,14 +922,21 @@ export default function CommandForm(props: {
           placeholder="Value between 0.0 and 2.0"
           info="A measure of the level of the randomness and creativity in the model's output. Higher values will result in more creative output, but may be less relevant to the prompt. Value must be between 0.0 and 2.0."
           {...itemProps.temperature}
+          onFocus={() => setShowAddPlaceholderAction(false)}
         />
       ) : null}
 
-      <Form.Dropdown title="Model" info="The model to use for this command." {...itemProps.model}>
+      <Form.Dropdown
+        title="Model"
+        info="The model to use for this command."
+        {...itemProps.model}
+        onFocus={() => setShowAddPlaceholderAction(false)}
+      >
         {models.models.some((model) => model.favorited) ? (
           <Form.Dropdown.Section title="Favorites">
             {models.models
               .filter((model) => model.favorited)
+              .sort((model) => (model.isDefault ? -1 : 1))
               .map((model) => (
                 <Form.Dropdown.Item
                   title={model.name}
@@ -890,6 +949,7 @@ export default function CommandForm(props: {
         ) : null}
         {models.models
           .filter((model) => !model.favorited)
+          .sort((model) => (model.isDefault ? -1 : 1))
           .map((model) => (
             <Form.Dropdown.Item
               title={model.name}
@@ -905,48 +965,63 @@ export default function CommandForm(props: {
         label="Use File Metadata"
         {...itemProps.useMetadata}
         info="If checked, metadata of selected files will be included in the text provided to the AI, and additional EXIF data will be included for image files."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Use Subject Classifications"
         {...itemProps.useSubjectClassification}
         info="If checked, subject classification labels will be included in the text provided to the AI when acting on image files."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Use Sound Classifications"
         {...itemProps.useSoundClassification}
         info="If checked, sound classification labels will be included in the text provided to the AI when acting on audio files."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Use Transcribed Audio"
         {...itemProps.useAudioDetails}
         info="If checked, transcribed text will be provided to the AI when acting on audio files."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Use Barcode Detection"
         {...itemProps.useBarcodeDetection}
         info="If checked, the payload text of any barcodes and QR codes in images will be included in the text provided to the AI."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Use Rectangle Detection"
         {...itemProps.useRectangleDetection}
         info="If checked, the size and position of rectangles in image files with be included in the text provided to the AI."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Use Face Detection"
         {...itemProps.useFaceDetection}
         info="If checked, the number of faces in image files will be included in the text provided to the AI."
+        onFocus={() => setShowAddPlaceholderAction(false)}
+      />
+
+      <Form.Checkbox
+        label="Use Horizon Detection"
+        {...itemProps.useHorizonDetection}
+        info="If checked, the angle of the horizon in image files will be included in the text provided to the AI."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Checkbox
         label="Use Saliency Analysis"
         {...itemProps.useSaliencyAnalysis}
         info="If checked, the areas of an image most likely to draw attention will be included in the text provided to the AI."
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
       <Form.Separator />
@@ -960,37 +1035,43 @@ export default function CommandForm(props: {
         placeholder="Your name or username"
         info="An optional name or username that others can attribute the command to. If you upload the command to the store, this will be displayed on the command's page."
         {...itemProps.author}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
       <Form.TextField
         title="Website"
         placeholder="Your website"
         info="An optional website URL that others can visit to learn more about the command. If you upload the command to the store, this will be displayed on the command's page."
         {...itemProps.website}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
       <Form.TextField
         title="Command Version"
         placeholder="The version of the command"
         info="An optional version number for the command. If you upload the command to the store, this will be displayed on the command's page."
         {...itemProps.version}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
       <Form.TextArea
         title="Description"
         placeholder="Description of what this command does"
         info="A description of what this command does. Useful if you plan to share the command with others."
         {...itemProps.description}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
       <Form.TextArea
         title="Requirements"
         placeholder="Any requirements for the command"
         info="A list or paragraph explaining any requirements for this script, e.g. other commands, command-line utilities, etc."
         {...itemProps.requirements}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       />
       <Form.TagPicker
         title="Categories"
         info="A comma-separated list of categories for the command. This will be used to help users find your command in the store and in their prompt library."
         {...itemProps.categories}
+        onFocus={() => setShowAddPlaceholderAction(false)}
       >
-        {commandCategories.map((category) => (
+        {COMMAND_CATEGORIES.map((category) => (
           <Form.TagPicker.Item
             key={category.name}
             title={category.name}
@@ -1040,6 +1121,7 @@ export default function CommandForm(props: {
                     fields[index].value = value;
                     setSetupFields(fields);
                   }}
+                  onFocus={() => setShowAddPlaceholderAction(false)}
                 />
               ) : (
                 <Form.TextField
@@ -1054,6 +1136,7 @@ export default function CommandForm(props: {
                     fields[index].value = value;
                     setSetupFields(fields);
                   }}
+                  onFocus={() => setShowAddPlaceholderAction(false)}
                 />
               )}
             </Fragment>
@@ -1076,6 +1159,7 @@ export default function CommandForm(props: {
                   fields[index].value = value;
                   setSetupFields(fields);
                 }}
+                onFocus={() => setShowAddPlaceholderAction(false)}
               />
             </Fragment>
           );
@@ -1096,6 +1180,7 @@ export default function CommandForm(props: {
                   fields[index].value = value;
                   setSetupFields(fields);
                 }}
+                onFocus={() => setShowAddPlaceholderAction(false)}
               />
             </Fragment>
           );

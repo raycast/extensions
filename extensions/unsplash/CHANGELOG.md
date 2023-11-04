@@ -1,5 +1,9 @@
 # Unsplash Changelog
 
+## [Fix] - 2023-09-22
+
+- Better handling of key and token
+
 ## [Fix] - 2023-04-28
 
 - Fixed background updates not working.

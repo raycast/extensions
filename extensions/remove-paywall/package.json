@@ -5,6 +5,9 @@
   "description": "Remove the paywall from the specified URL.",
   "icon": "command-icon.png",
   "author": "tegola",
+  "contributors": [
+    "Whitespace"
+  ],
   "categories": [
     "Web"
   ],
@@ -22,6 +25,12 @@
           "placeholder": "URL (or selected text)"
         }
       ]
+    },
+    {
+      "name": "remove-paywall-using",
+      "title": "Remove Paywall Using...",
+      "description": "Remove the paywall with the specified URL using an alternative service.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -31,11 +40,14 @@
       "description": "The service to use to remove the paywall.",
       "type": "dropdown",
       "required": true,
-      "default": "12ft",
       "data": [
         {
           "title": "12ft.io",
           "value": "https://12ft.io"
+        },
+        {
+          "title": "Archive (archive.is)",
+          "value": "https://archive.is"
         },
         {
           "title": "RemovePaywall (removepaywall.com)",

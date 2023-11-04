@@ -1,5 +1,33 @@
 # GitHub Changelog
 
+## [Add Clone and Open command] - 2023-10-11
+
+- Add a command to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh repository results.
+
+## [Fix menu colors] - 2023-09-30
+
+- Fix menu colors for issues and pr menus.
+
+## [Fix menu bar notifications] - 2023-09-06
+
+- Fixes an issue where marking all notifications as read wouldn't reset the menu bar notifications count.
+
+## [Pull request templates] - 2023-08-08
+
+- Support all pull request templates when creating pull requests.
+
+## [Bug fix] - 2023-08-07
+
+- Fixed a bug (`Cannot read properties of null (reading 'name')`) which caused the extension to crash.
+
+## [Added missing value] - 2023-08-04
+
+- Fix missing repo name for non numberTag cases
+
+## [Menu Commands] - 2023-07-18
+
+- Add repo name to `Unread Notifications` Menu
+
 ## [Menu Commands] - 2023-07-10
 
 - Add Issues Menu Command

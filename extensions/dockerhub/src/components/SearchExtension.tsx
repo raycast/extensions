@@ -29,7 +29,7 @@ export default function SearchExtensions() {
       fn();
       return () => abortCtrl.abort();
     },
-    [setExtensions, setLoading]
+    [setExtensions, setLoading],
   );
 
   useEffect(() => {

@@ -23,7 +23,7 @@ export default function Command() {
           name: repository?.name,
           owner: repository?.owner.login,
         },
-      })
+      }),
   );
 
   const templates = useMemo(
@@ -38,7 +38,7 @@ export default function Command() {
           content,
         };
       }) || [],
-    [issueTemplates]
+    [issueTemplates],
   );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -63,7 +63,7 @@ export default function Command() {
                 ...a,
                 [k]: values[k],
               }),
-              {}
+              {},
             ),
         },
       });

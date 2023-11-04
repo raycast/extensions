@@ -10,6 +10,17 @@ export enum ReclaimEventTypeEnum {
   UNKNOWN = "UNKNOWN",
 }
 
+export enum EventResponseStatusEnum {
+  None = "None",
+  Organizer = "Organizer",
+  Accepted = "Accepted",
+  Declined = "Declined",
+  TentativelyAccepted = "TentativelyAccepted",
+  NotResponded = "NotResponded",
+}
+
+export type EventResponseStatusType = `${EventResponseStatusEnum}`;
+
 export type ReclaimEventType = `${ReclaimEventTypeEnum}`;
 
 export enum AssistType {
@@ -131,7 +142,7 @@ export interface Event {
   recurringException: boolean;
   recurringInstance: boolean;
   requiresTravel: boolean;
-  rsvpStatus: string;
+  rsvpStatus: EventResponseStatusType;
   scoredType: string;
   status: string;
   subType: string;

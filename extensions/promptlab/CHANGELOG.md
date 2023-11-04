@@ -1,6 +1,27 @@
 # PromptLab Changelog
 
-## [PromptLab 1.1.0] - 2023-06-30
+## [PromptLab 1.2.0] - 2023-08-15
+
+- Added support for several new browsers
+- Added support for models that don't use the "data: ..." format (e.g. on-device Ollama models)
+- Added placeholders for getting HTML/text content of elements in the active browser tab, i.e.: `{{elementText:...}}`, `{{elementHTML:...}}`, and `{{focusedElement}}`
+- Added `{{currentAppBundleID}}` placeholder
+- Added `{{screenContent}}` and `{{windowContent}}` placeholders
+- Added support for `target` parameter to `{{js:...}}` placeholders
+- Added horizon detection support for images, as well as `{{imageHorizon}}` placeholder
+- Fixed per-command model setting not saving
+- Fixed YouTube transcript placeholders not working
+- Fixed 'No such file' error when running a command that reads metadata when Finder is inactive
+
+## [Bug Fixes, Custom Action Keybindings] - 2023-07-24
+
+- Added ability to modify action keybindings in the advanced settings
+- Added Dialog Window command response view
+- Fixed bug where list and grid output views would fail to display any content due to condensing of symbols
+- Fixed bug where command-specific temperature settings would not be applied
+- Fixed bug where old-style URL placeholders using HTTP instead of HTTPS would not be processed correctly
+
+## [PromptLab 1.1.0] - 2023-07-16
 
 - Added "PromptLab Menu Item" command for easy access to commands
 - Added "Manage Models" command for straightforward switching between multiple models

@@ -4,7 +4,7 @@ import { Identity } from "~/types/vault";
 
 export function getIdentityDetailsMarkdown(itemName: string, identity: Identity) {
   return `# 🪪 ${itemName}
-<br></br>
+&nbsp;
 | ⌘\t**Field** | **Value** |
 | --- | --- |
 ${Object.entries(identity)
@@ -15,6 +15,7 @@ ${Object.entries(identity)
 
     return `| ${shortcutKey ? `${shortcutKey}.` : "&nbsp;"}\t**${label}** | ${value} |`;
   })
+  .filter(Boolean)
   .join("\n")}
 `;
 }

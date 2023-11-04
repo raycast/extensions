@@ -22,18 +22,16 @@ import title from "title";
 interface Preferences {
   primaryAction: string;
   secondaryAction: string;
+  importTemplate: string;
 }
 
 const cache = new Cache();
 
 export default function IconsCommand() {
   const [isLoading, setLoading] = useState(true);
-  const [tags, setTags] = useState<{ [key: string]: string[] }>(
-    cache.get("heroicons-tags") === undefined ? {} : JSON.parse(cache.get("heroicons-tags") as string)
-  );
   const [iconNames, setIconNames] = useState<string[]>(cache.get("heroicons-icons")?.split(",") || []);
   const [variant, setVariant] = useState<string>("all");
-  const [preferences, _] = useState(getPreferenceValues<Preferences>());
+  const [preferences] = useState(getPreferenceValues<Preferences>());
 
   const variantDescriptions = {
     outline: "[24x24, 1.5px stroke] For primary navigation and marketing sections, with an outlined appearance.",
@@ -76,6 +74,40 @@ export default function IconsCommand() {
         icon={Icon.NewDocument}
       />
     ),
+    pasteReactImport: (variant: "outline" | "solid" | "mini", icon: string) => (
+      <Action
+        title="Paste React Import"
+        key={`pasteReactImport-${icon}`}
+        onAction={async () => {
+          const iconPath = variant === "mini" ? "20/solid" : `24/${variant}`;
+          const template = preferences.importTemplate
+            .replace("%icon_name%", `${toUpperCamelCase(icon)}Icon`)
+            .replace("%library%", "react")
+            .replace("%icon_path%", iconPath);
+
+          await Clipboard.paste(template);
+          await showHUD(`✏️ Pasted "${icon}" (${variant}) to your frontmost application.`);
+        }}
+        icon={Icon.CodeBlock}
+      />
+    ),
+    pasteVueImport: (variant: "outline" | "solid" | "mini", icon: string) => (
+      <Action
+        title="Paste Vue Import"
+        key={`pasteVuImport-${icon}`}
+        onAction={async () => {
+          const iconPath = variant === "mini" ? "20/solid" : `24/${variant}`;
+          const template = preferences.importTemplate
+            .replace("%icon_name%", `${toUpperCamelCase(icon)}Icon`)
+            .replace("%library%", "vue")
+            .replace("%icon_path%", iconPath);
+
+          await Clipboard.paste(template);
+          await showHUD(`✏️ Pasted "${icon}" (${variant}) to your frontmost application.`);
+        }}
+        icon={Icon.CodeBlock}
+      />
+    ),
     copyJSX: (variant: "outline" | "solid" | "mini", icon: string) => (
       <Action
         title="Copy JSX"
@@ -110,6 +142,38 @@ export default function IconsCommand() {
         icon={Icon.EditShape}
       />
     ),
+    copyReactImport: (variant: "outline" | "solid" | "mini", icon: string) => {
+      const iconPath = variant === "mini" ? "20/solid" : `24/${variant}`;
+      const template = preferences.importTemplate
+        .replace("%icon_name%", `${toUpperCamelCase(icon)}Icon`)
+        .replace("%library%", "react")
+        .replace("%icon_path%", iconPath);
+
+      return (
+        <Action.CopyToClipboard
+          key={`copyReactImport-${icon}`}
+          title="Copy React Import"
+          content={template}
+          icon={Icon.Code}
+        />
+      );
+    },
+    copyVueImport: (variant: "outline" | "solid" | "mini", icon: string) => {
+      const iconPath = variant === "mini" ? "20/solid" : `24/${variant}`;
+      const template = preferences.importTemplate
+        .replace("%icon_name%", `${toUpperCamelCase(icon)}Icon`)
+        .replace("%library%", "vue")
+        .replace("%icon_path%", iconPath);
+
+      return (
+        <Action.CopyToClipboard
+          key={`copyVueImport-${icon}`}
+          title="Copy Vue Import"
+          content={template}
+          icon={Icon.Code}
+        />
+      );
+    },
     copyName: (_: "outline" | "solid" | "mini", icon: string) => (
       <Action.CopyToClipboard key={`copyname-${icon}`} title="Copy Name" content={icon} icon={Icon.Tag} />
     ),
@@ -123,23 +187,11 @@ export default function IconsCommand() {
         style: Toast.Style.Failure,
       });
     }
-    if (tags || iconNames) {
-      Promise.all([got(Heroicons.tags()), got(Heroicons.icons())])
-        .then(([tagsRes, iconsRes]) => {
-          if (!tagsRes.body.startsWith("export const tags = ")) {
-            showHUD("❌ An error occured.");
-            throw new Error("Security vulnerability, content may be altered.");
-          }
-
+    if (iconNames) {
+      Promise.all([got(Heroicons.icons())])
+        .then(([iconsRes]) => {
           setIconNames(iconsRes.body.split("\n").map((x) => x.replace(".svg", "")));
           cache.set("heroicons-icons", iconNames.join(","));
-
-          writeFileSync(join(environment.assetsPath, "tags.mjs"), tagsRes.body);
-          import(join(environment.assetsPath, "tags.mjs")).then((mod) => {
-            setTags(mod.tags);
-            cache.set("heroicons-tags", JSON.stringify(mod.tags));
-            setLoading(false);
-          });
         })
         .catch(() => {
           showHUD("❌ An error occured. Try again later.");
@@ -164,7 +216,6 @@ export default function IconsCommand() {
           return (
             <Grid.Item
               key={icon}
-              keywords={tags[icon]?.concat(icon.replaceAll("-", " "))}
               title={title(icon)}
               subtitle={title(variant)}
               content={{
@@ -195,6 +246,12 @@ export default function IconsCommand() {
     );
   }
 
+  function toUpperCamelCase(string: string) {
+    const camelCaseString = string.replace(/[-_]\w/gi, (match) => match[1].toUpperCase());
+
+    return camelCaseString.charAt(0).toUpperCase() + camelCaseString.slice(1);
+  }
+
   return (
     <Grid
       isLoading={isLoading}
@@ -210,7 +267,7 @@ export default function IconsCommand() {
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
-      itemSize={Grid.ItemSize.Small}
+      columns={8}
       inset={Grid.Inset.Small}
     >
       {variant == "all" ? (

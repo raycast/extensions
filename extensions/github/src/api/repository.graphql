@@ -115,17 +115,8 @@ query dataForRepository($owner: String!, $name: String!) {
         title
       }
     }
-    pullRequestTemplateLowercase: object(expression: "main:.github/pull_request_template.md") {
-      ... on Blob {
-        isTruncated
-        text
-      }
-    }
-    pullRequestTemplateUppercase: object(expression: "main:.github/PULL_REQUEST_TEMPLATE.md") {
-      ... on Blob {
-        isTruncated
-        text
-      }
+    pullRequestTemplates {
+      body
     }
     issueTemplates {
       name

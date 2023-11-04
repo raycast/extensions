@@ -14,6 +14,7 @@ export type UpdateIssuePayload = {
   assigneeId?: string;
   cycleId?: string;
   projectId?: string;
+  projectMilestoneId?: string;
   parentId?: string;
 };
 
@@ -34,6 +35,7 @@ export async function updateIssue(issueId: Issue["id"], payload: UpdateIssuePayl
   issueUpdateInput += `, dueDate: ${payload.dueDate ? `"${payload.dueDate.toISOString()}"` : null}`;
   issueUpdateInput += `, cycleId: ${payload.cycleId ? `"${payload.cycleId}"` : null}`;
   issueUpdateInput += `, projectId: ${payload.projectId ? `"${payload.projectId}"` : null}`;
+  issueUpdateInput += `, projectMilestoneId: ${payload.projectMilestoneId ? `"${payload.projectMilestoneId}"` : null}`;
   issueUpdateInput += `, parentId: ${payload.parentId ? `"${payload.parentId}"` : null}`;
 
   const { data } = await graphQLClient.rawRequest<{ issueUpdate: { success: boolean } }, Record<string, unknown>>(

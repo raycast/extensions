@@ -58,7 +58,7 @@ function OpenPullRequestMenu() {
       return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   return (

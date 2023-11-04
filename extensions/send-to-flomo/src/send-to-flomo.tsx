@@ -17,7 +17,7 @@ export default function Command() {
 
     if (content !== "") {
       if (tags) {
-        content += ` ${values.tags}`;
+        content += `\n${values.tags}`;
       }
       showToast({
         style: Toast.Style.Animated,

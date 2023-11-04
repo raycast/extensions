@@ -11,6 +11,8 @@ function getBundleIdentifier() {
       return "com.microsoft.VSCodeInsiders";
     case VSCodeBuild.VSCodium:
       return "VSCodium";
+    case VSCodeBuild.Cursor:
+      return "Cursor";
   }
 }
 

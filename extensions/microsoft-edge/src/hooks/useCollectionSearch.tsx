@@ -1,14 +1,15 @@
 import * as fs from "fs";
 import { useSQL } from "@raycast/utils";
-import { HistoryEntry, SearchResult } from "../interfaces";
-import { getCollectionsDbPath } from "../util";
+import { HistoryEntry, SearchResult } from "../types/interfaces";
+import { getCollectionsDbPath } from "../utils/pathUtils";
 import { NoCollectionsError } from "../components/error/NoCollectionsError";
+import { useIsAppInstalled } from "./useIsAppInstalled";
 
 const whereClauses = (tableTitle: string, terms: string[]) => {
   return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
 };
 
-const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
+const getCollectionQuery = (table: string, date_field: string, terms: string[]) =>
   `SELECT id,
             source as url,
             title,
@@ -17,10 +18,15 @@ const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
      WHERE ${whereClauses(table, terms)}
      ORDER BY ${date_field} DESC LIMIT 30;`;
 
-const searchCollection = (profile: string, query?: string): SearchResult<HistoryEntry> => {
+export function useCollectionSearch(profile: string, query?: string): SearchResult<HistoryEntry> {
   const terms = query ? query.trim().split(" ") : [""];
-  const queries = getHistoryQuery("items", "date_modified", terms);
+  const queries = getCollectionQuery("items", "date_modified", terms);
   const dbPath = getCollectionsDbPath(profile);
+  const { errorView } = useIsAppInstalled();
+
+  if (errorView) {
+    return { isLoading: false, data: [], errorView };
+  }
 
   if (!fs.existsSync(dbPath)) {
     return { isLoading: false, data: [], errorView: <NoCollectionsError /> };
@@ -33,8 +39,4 @@ const searchCollection = (profile: string, query?: string): SearchResult<History
     errorView: permissionView,
     revalidate,
   };
-};
-
-export function useCollectionSearch(profile: string, query?: string): SearchResult<HistoryEntry> {
-  return searchCollection(profile, query);
 }

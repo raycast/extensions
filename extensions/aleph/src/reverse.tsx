@@ -11,7 +11,7 @@ export default async () => {
     showHUD("Reversed text");
   } catch (e) {
     if (typeof e === "string") {
-      await showToast(ToastStyle.Failure, "Encode failed", e);
+      await showToast(ToastStyle.Failure, "Accessibility permission denied.", e);
     }
   }
 };

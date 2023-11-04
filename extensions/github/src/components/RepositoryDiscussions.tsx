@@ -36,7 +36,7 @@ export function RepositoryDiscussionList(props: { repository: string }) {
       });
       return result.searchDiscussions.nodes?.map((d) => d as DiscussionFieldsFragment);
     },
-    [searchText, filterText]
+    [searchText, filterText],
   );
 
   return (
@@ -48,9 +48,7 @@ export function RepositoryDiscussionList(props: { repository: string }) {
       searchBarAccessory={<DiscussionFilterDropdown onChange={setFilter} />}
     >
       <List.Section title="Discussions" subtitle={`${data?.length}`}>
-        {data?.map((d) => (
-          <DiscussionListItem key={d.id} discussion={d} />
-        ))}
+        {data?.map((d) => <DiscussionListItem key={d.id} discussion={d} />)}
       </List.Section>
     </List>
   );

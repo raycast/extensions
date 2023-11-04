@@ -10,9 +10,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { Clipboard } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import {
-  SupportedBrowsers,
   filterString,
   getComputerName,
   getCurrentTrack,
@@ -22,6 +20,7 @@ import {
   getLastEmail,
   getLastNote,
   getMatchingYouTubeVideoID,
+  getMenubarOwningApplication,
   getSafariBookmarks,
   getSafariTabText,
   getSafariTopSites,
@@ -31,13 +30,14 @@ import {
   getWeatherData,
   getYouTubeVideoTranscriptById,
   getYouTubeVideoTranscriptByURL,
+  runJSInActiveTab,
 } from "./context-utils";
 import * as fs from "fs";
 import * as os from "os";
 import * as crypto from "crypto";
 import * as vm from "vm";
 import { execSync } from "child_process";
-import { CUSTOM_PLACEHOLDERS_FILENAME, StorageKeys } from "./constants";
+import { CUSTOM_PLACEHOLDERS_FILENAME, STORAGE_KEYS } from "./constants";
 import { getStorage, loadAdvancedSettingsSync, setStorage } from "./storage-utils";
 import { ScriptRunner, addFileToSelection, getRunningApplications, searchNearbyLocations } from "./scripts";
 import { getExtensions } from "./file-utils";
@@ -58,6 +58,7 @@ import {
   Placeholder,
   PlaceholderList,
 } from "./types";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Placeholder specification.
@@ -68,7 +69,6 @@ const placeholders: PlaceholderList = {
    */
   "{{reset [a-zA-Z0-9_]+}}": {
     name: "reset",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const matches = str.match(/{{reset ([a-zA-Z0-9_]+)}}/);
       if (matches) {
@@ -85,6 +85,7 @@ const placeholders: PlaceholderList = {
     description:
       "Resets the value of a persistent variable to its initial value. If the variable does not exist, nothing will happen. Replaced with an empty string.",
     hintRepresentation: "{{reset x}}",
+    fullRepresentation: "Reset Persistent Variable",
   },
 
   /**
@@ -92,7 +93,6 @@ const placeholders: PlaceholderList = {
    */
   "{{get [a-zA-Z0-9_]+}}": {
     name: "get",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const matches = str.match(/{{get ([a-zA-Z0-9_]+)}}/);
       if (matches) {
@@ -108,6 +108,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the value of a persistent variable. If the variable has not been set, the placeholder will be replaced with an empty string.",
     hintRepresentation: "{{get x}}",
+    fullRepresentation: "Value of Persistent Variable",
   },
 
   /**
@@ -115,7 +116,6 @@ const placeholders: PlaceholderList = {
    */
   "{{delete [a-zA-Z0-9_]+}}": {
     name: "delete",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const matches = str.match(/{{delete ([a-zA-Z0-9_]+)}}/);
       if (matches) {
@@ -131,13 +131,13 @@ const placeholders: PlaceholderList = {
     description:
       "Deletes a persistent variable. If the variable does not exist, nothing will happen. Replaced with an empty string.",
     hintRepresentation: "{{delete x}",
+    fullRepresentation: "Delete Persistent Variable",
   },
 
   "{{vars}}": {
     name: "vars",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
-      const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+      const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
       if (Array.isArray(vars)) {
         const varNames = vars.map((v) => v.name);
         return { result: varNames.join(", "), vars: varNames.join(", ") };
@@ -151,6 +151,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a comma-separated list of all persistent variables. If no persistent variables have been set, the placeholder will be replaced with an empty string.",
     hintRepresentation: "{{vars}}",
+    fullRepresentation: "List of Persistent Variables",
   },
 
   /**
@@ -158,7 +159,6 @@ const placeholders: PlaceholderList = {
    */
   "{{input}}": {
     name: "input",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       let input = context && "input" in context ? context["input"] : "";
       try {
@@ -175,6 +175,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the current input to the command. Depending on the circumstances of the command's invocation, this could be the selected text, the parameter of a QuickLink, or direct input via method call.",
     hintRepresentation: "{{input}}",
+    fullRepresentation: "Query Input",
   },
 
   /**
@@ -183,15 +184,6 @@ const placeholders: PlaceholderList = {
   "{{clipboardText}}": {
     name: "clipboardText",
     aliases: ["{{clipboard}}"],
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          return (await Clipboard.readText()) !== "";
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const text = (await Clipboard.readText()) || "";
@@ -207,6 +199,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the text currently stored in the clipboard. If the clipboard is empty, this will be replaced with an empty string. Most clipboard content supplies a string format, such as file names when copying files in Finder.",
     hintRepresentation: "{{clipboardText}}",
+    fullRepresentation: "Clipboard Text",
   },
 
   /**
@@ -214,16 +207,6 @@ const placeholders: PlaceholderList = {
    */
   "{{selectedText}}": {
     name: "selectedText",
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          const text = await getSelectedText();
-          return text !== "";
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const text = await getSelectedText();
@@ -239,6 +222,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the currently selected text. If no text is selected, this will be replaced with an empty string.",
     hintRepresentation: "{{selectedText}}",
+    fullRepresentation: "Selected Text",
   },
 
   /**
@@ -247,16 +231,6 @@ const placeholders: PlaceholderList = {
   "{{selectedFiles}}": {
     name: "selectedFiles",
     aliases: ["{{selectedFile}}", "{{files}}"],
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          const data = await ScriptRunner.SelectedFiles();
-          return data.paths.length > 0;
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (!context || !("selectedFiles" in context)) return { result: "", selectedFiles: "" };
       try {
@@ -274,6 +248,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the paths of the currently selected files in Finder as a comma-separated list. If no files are selected, this will be replaced with an empty string.",
     hintRepresentation: "{{selectedFiles}}",
+    fullRepresentation: "Selected File Paths",
   },
 
   /**
@@ -281,16 +256,6 @@ const placeholders: PlaceholderList = {
    */
   "{{fileNames}}": {
     name: "fileNames",
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          const data = await ScriptRunner.SelectedFiles();
-          return data.paths.length > 0;
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const files =
         context && "selectedFiles" in context ? context["selectedFiles"] : (await ScriptRunner.SelectedFiles()).csv;
@@ -308,6 +273,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the names of the currently selected files in Finder as a comma-separated list. If no files are selected, this will be replaced with an empty string.",
     hintRepresentation: "{{fileNames}}",
+    fullRepresentation: "Selected File Names",
   },
 
   /**
@@ -315,16 +281,6 @@ const placeholders: PlaceholderList = {
    */
   "{{metadata}}": {
     name: "metadata",
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          const data = await ScriptRunner.SelectedFiles();
-          return data.paths.length > 0;
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const files = (
         context && "selectedFiles" in context ? context["selectedFiles"] : (await ScriptRunner.SelectedFiles()).csv
@@ -349,6 +305,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with metadata of the currently selected files in Finder as a comma-separated list. If no files are selected, this will be replaced with an empty string.",
     hintRepresentation: "{{metadata}}",
+    fullRepresentation: "Selected File Metadata",
   },
 
   /**
@@ -356,7 +313,6 @@ const placeholders: PlaceholderList = {
    */
   "{{imageText}}": {
     name: "imageText",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const imageText = context && "imageText" in context ? context["imageText"] : "";
       return { result: imageText, imageText: imageText };
@@ -369,6 +325,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with all text extracted from selected images in Finder. If no images are selected, or if no text can be extracted from the selected images, this will be replaced with an empty string.",
     hintRepresentation: "{{imageText}}",
+    fullRepresentation: "Text in Selected Images",
   },
 
   /**
@@ -376,7 +333,6 @@ const placeholders: PlaceholderList = {
    */
   "{{imageFaces}}": {
     name: "imageFaces",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const imageFaces = context && "imageFaces" in context ? context["imageFaces"] : "";
       return { result: imageFaces, imageFaces: imageFaces };
@@ -387,6 +343,25 @@ const placeholders: PlaceholderList = {
     example: "Is {{imageFaces}} a lot of faces?",
     description: "Replaced with the number of faces detected in selected images in Finder.",
     hintRepresentation: "{{imageFaces}}",
+    fullRepresentation: "Number of Faces in Selected Images",
+  },
+
+  /**
+   * Placeholder for the angle of the horizon detected in selected images in Finder.
+   */
+  "{{imageHorizon}}": {
+    name: "imageHorizon",
+    apply: async (str: string, context?: { [key: string]: string }) => {
+      const imageHorizon = context && "imageHorizon" in context ? context["imageHorizon"] : "";
+      return { result: imageHorizon, imageFaces: imageHorizon };
+    },
+    result_keys: ["imageHorizon"],
+    constant: true,
+    fn: async () => (await Placeholders.allPlaceholders["{{imageHorizon}}"].apply("{{imageHorizon}}")).result,
+    example: "With a horizon angle of {{imageHorizon}}, is this image likely taken from a drone?",
+    description: "Replaced with the angle of the horizon detected in selected images in Finder.",
+    hintRepresentation: "{{imageHorizon}}",
+    fullRepresentation: "Horizon Angle of Selected Images",
   },
 
   /**
@@ -394,7 +369,6 @@ const placeholders: PlaceholderList = {
    */
   "{{imageAnimals}}": {
     name: "imageAnimals",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const imageAnimals = context && "imageAnimals" in context ? context["imageAnimals"] : "";
       return { result: imageAnimals, imageAnimals: imageAnimals };
@@ -405,6 +379,7 @@ const placeholders: PlaceholderList = {
     example: "Explain how these animals are similar: {{imageAnimals}}",
     description: "Replaced with a comma-separated list of animals detected in selected images in Finder.",
     hintRepresentation: "{{imageAnimals}}",
+    fullRepresentation: "Animals in Selected Images",
   },
 
   /**
@@ -412,7 +387,6 @@ const placeholders: PlaceholderList = {
    */
   "{{imageSubjects}}": {
     name: "imageSubjects",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const imageSubjects = context && "imageSubjects" in context ? context["imageSubjects"] : "";
       return { result: imageSubjects, imageSubjects: imageSubjects };
@@ -423,6 +397,7 @@ const placeholders: PlaceholderList = {
     example: "What is the common theme among these objects? {{imageSubjects}}",
     description: "Replaced with a comma-separated list of objects detected in selected images in Finder.",
     hintRepresentation: "{{imageSubjects}}",
+    fullRepresentation: "Subjects/Objects in Selected Images",
   },
 
   /**
@@ -430,7 +405,6 @@ const placeholders: PlaceholderList = {
    */
   "{{imagePOI}}": {
     name: "imagePOI",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const imagePOI = context && "imagePOI" in context ? context["imagePOI"] : "";
       return { result: imagePOI, imagePOI: imagePOI };
@@ -442,6 +416,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a comma-separated list of normalized points of interest detected in selected images in Finder.",
     hintRepresentation: "{{imagePOI}}",
+    fullRepresentation: "Points of Interest in Selected Images",
   },
 
   /**
@@ -449,7 +424,6 @@ const placeholders: PlaceholderList = {
    */
   "{{imageBarcodes}}": {
     name: "imageBarcodes",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const imageBarcodes = context && "imageBarcodes" in context ? context["imageBarcodes"] : "";
       return { result: imageBarcodes, imageBarcodes: imageBarcodes };
@@ -460,6 +434,7 @@ const placeholders: PlaceholderList = {
     example: "Identify the common theme among these barcode values: {{imageBarcodes}}",
     description: "Replaced with a comma-separated list of decoded barcodes detected in selected images in Finder.",
     hintRepresentation: "{{imageBarcodes}}",
+    fullRepresentation: "Barcode Payloads in Selected Images",
   },
 
   /**
@@ -467,7 +442,6 @@ const placeholders: PlaceholderList = {
    */
   "{{imageRectangles}}": {
     name: "imageRectangles",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const imageRectangles = context && "imageRectangles" in context ? context["imageRectangles"] : "";
       return { result: imageRectangles, imageRectangles: imageRectangles };
@@ -479,6 +453,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a comma-separated list of rectangles detected in selected images in Finder. The rectangles are defined in the format <Rectangle #1: midPoint=(centerX, centerY) dimensions=WidthxHeight>.",
     hintRepresentation: "{{imageRectangles}}",
+    fullRepresentation: "Rectangles in Selected Images",
   },
 
   /**
@@ -486,7 +461,6 @@ const placeholders: PlaceholderList = {
    */
   "{{pdfRawText}}": {
     name: "pdfRawText",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const pdfRawText = context && "pdfRawText" in context ? context["pdfRawText"] : "";
       return { result: pdfRawText, pdfRawText: pdfRawText };
@@ -497,6 +471,7 @@ const placeholders: PlaceholderList = {
     example: "Summarize this: {{pdfRawText}}",
     description: "Replaced with the raw text extracted from selected PDFs in Finder. Does not use OCR.",
     hintRepresentation: "{{pdfRawText}}",
+    fullRepresentation: "PDF Text (Without OCR)",
   },
 
   /**
@@ -504,7 +479,6 @@ const placeholders: PlaceholderList = {
    */
   "{{pdfOCRText}}": {
     name: "pdfOCRText",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const pdfOCRText = context && "pdfOCRText" in context ? context["pdfOCRText"] : "";
       return { result: pdfOCRText, pdfOCRText: pdfOCRText };
@@ -515,6 +489,7 @@ const placeholders: PlaceholderList = {
     example: "Summarize this: {{pdfOCRText}}",
     description: "Replaced with the text extracted from selected PDFs in Finder using OCR.",
     hintRepresentation: "{{pdfOCRText}}",
+    fullRepresentation: "PDF Text (With OCR)",
   },
 
   /**
@@ -531,17 +506,6 @@ const placeholders: PlaceholderList = {
       "{{selectedFilesText}}",
       "{{contents}}",
     ],
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          const data = await ScriptRunner.SelectedFiles();
-          const files = data.paths;
-          return files.length > 0;
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const contents = context && "contents" in context ? context["contents"] : "";
       return { result: contents, contents: contents };
@@ -553,6 +517,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the extracted contents of the currently selected files in Finder. Clarifying text is added to identify each type of information.",
     hintRepresentation: "{{contents}}",
+    fullRepresentation: "Selected File Contents",
   },
 
   /**
@@ -561,7 +526,6 @@ const placeholders: PlaceholderList = {
   "{{currentAppName}}": {
     name: "currentAppName",
     aliases: ["{{currentApp}}", "{{currentApplication}}", "{{currentApplicationName}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const app = (await getFrontmostApplication()).name || "";
@@ -576,6 +540,31 @@ const placeholders: PlaceholderList = {
     example: "Tell me about {{currentAppName}}",
     description: "Replaced with the name of the current application.",
     hintRepresentation: "{{currentAppName}}",
+    fullRepresentation: "Current Application Name",
+  },
+
+  /**
+   * Placeholder for the bundle ID of the current application.
+   */
+  "{{currentAppBundleID}}": {
+    name: "currentAppBundleID",
+    aliases: ["{{currentApplicationBundleID}}"],
+    apply: async (str: string, context?: { [key: string]: string }) => {
+      try {
+        const id = (await getFrontmostApplication()).bundleId || "";
+        return { result: id, currentAppBundleID: id };
+      } catch (e) {
+        return { result: "", currentAppBundleID: "" };
+      }
+    },
+    result_keys: ["currentAppBundleID"],
+    constant: true,
+    fn: async () =>
+      (await Placeholders.allPlaceholders["{{currentAppBundleID}}"].apply("{{currentAppBundleID}}")).result,
+    example: "Tell me about {{currentAppBundleID}}",
+    description: "Replaced with the bundle ID of the current application.",
+    hintRepresentation: "{{currentAppBundleID}}",
+    fullRepresentation: "Current Application Bundle ID",
   },
 
   /**
@@ -584,7 +573,6 @@ const placeholders: PlaceholderList = {
   "{{currentAppPath}}": {
     name: "currentAppPath",
     aliases: ["{{currentApplicationPath}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const appPath = (await getFrontmostApplication()).path || "";
@@ -599,6 +587,7 @@ const placeholders: PlaceholderList = {
     example: "Tell me about {{currentAppPath}}",
     description: "Replaced with the path of the current application.",
     hintRepresentation: "{{currentAppPath}}",
+    fullRepresentation: "Current Application Path",
   },
 
   /**
@@ -606,15 +595,6 @@ const placeholders: PlaceholderList = {
    */
   "{{currentDirectory}}": {
     name: "currentDirectory",
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          return (await getFrontmostApplication()).name == "Finder";
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const dir = await runAppleScript(
         `tell application "Finder" to return POSIX path of (insertion location as alias)`
@@ -627,6 +607,7 @@ const placeholders: PlaceholderList = {
     example: "Tell me about {{currentDirectory}}",
     description: "Replaced with the path of the current working directory in Finder.",
     hintRepresentation: "{{currentDirectory}}",
+    fullRepresentation: "Current Directory Path",
   },
 
   /**
@@ -635,15 +616,6 @@ const placeholders: PlaceholderList = {
   "{{currentURL}}": {
     name: "currentURL",
     aliases: ["{{currentTabURL}}"],
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          return SupportedBrowsers.includes((await getFrontmostApplication()).name);
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const appName = context?.["currentAppName"]
@@ -662,6 +634,7 @@ const placeholders: PlaceholderList = {
     example: "Tell me about {{currentURL}}",
     description: "Replaced with the URL of the current tab in any supported browser.",
     hintRepresentation: "{{currentURL}}",
+    fullRepresentation: "URL of Current Browser Tab",
   },
 
   /**
@@ -670,15 +643,6 @@ const placeholders: PlaceholderList = {
   "{{currentTabText}}": {
     name: "currentTabText",
     aliases: ["{{tabText}}"],
-    rules: [
-      async (str: string, context?: { [key: string]: string }) => {
-        try {
-          return SupportedBrowsers.includes((await getFrontmostApplication()).name);
-        } catch (e) {
-          return false;
-        }
-      },
-    ],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const appName = context?.["currentAppName"]
@@ -702,6 +666,7 @@ const placeholders: PlaceholderList = {
     example: "Summarize this: {{currentTabText}}",
     description: "Replaced with the visible text of the current tab in any supported browser.",
     hintRepresentation: "{{currentTabText}}",
+    fullRepresentation: "Text of Current Browser Tab",
   },
 
   /**
@@ -710,7 +675,6 @@ const placeholders: PlaceholderList = {
   "{{user}}": {
     name: "user",
     aliases: ["{{username}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const user = os.userInfo().username;
       return { result: user, user: user };
@@ -721,6 +685,7 @@ const placeholders: PlaceholderList = {
     example: "Come up with nicknames for {{user}}",
     description: "Replaced with the username of the currently logged-in user.",
     hintRepresentation: "{{user}}",
+    fullRepresentation: "User Name",
   },
 
   /**
@@ -729,7 +694,6 @@ const placeholders: PlaceholderList = {
   "{{homedir}}": {
     name: "homedir",
     aliases: ["{{homeDirectory}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const dir = os.homedir();
       return { result: dir, homedir: dir };
@@ -740,6 +704,7 @@ const placeholders: PlaceholderList = {
     example: '{{as:tell application "Finder" to reveal POSIX file "{{homedir}}"}}',
     description: "Replaced with the path of the home directory for the currently logged-in user.",
     hintRepresentation: "{{homedir}}",
+    fullRepresentation: "Home Directory Path",
   },
 
   /**
@@ -747,7 +712,6 @@ const placeholders: PlaceholderList = {
    */
   "{{hostname}}": {
     name: "hostname",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const name = os.hostname();
       return { result: name, hostname: name };
@@ -758,6 +722,7 @@ const placeholders: PlaceholderList = {
     example: "Come up with aliases for {{hostname}}",
     description: "Replaced with the hostname of the current machine.",
     hintRepresentation: "{{hostname}}",
+    fullRepresentation: "Device Hostname",
   },
 
   /**
@@ -765,7 +730,6 @@ const placeholders: PlaceholderList = {
    */
   "{{computerName}}": {
     name: "computerName",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "computerName" in context) {
         return { result: context["computerName"], computerName: context["computerName"] };
@@ -780,6 +744,7 @@ const placeholders: PlaceholderList = {
     example: "Come up with aliases for {{computerName}}",
     description: "Replaced with the 'pretty' hostname of the current machine.",
     hintRepresentation: "{{computerName}}",
+    fullRepresentation: "Computer Name",
   },
 
   /**
@@ -787,7 +752,6 @@ const placeholders: PlaceholderList = {
    */
   "{{shortcuts}}": {
     name: "shortcuts",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const shortcuts =
         context && "shortcuts" in context
@@ -801,6 +765,7 @@ const placeholders: PlaceholderList = {
     example: "Based on the following list, recommend some Siri Shortcuts for me to create: {{shortcuts}}",
     description: "Replaced with a comma-separated list of names of each Shortcut on the current machine.",
     hintRepresentation: "{{shortcuts}}",
+    fullRepresentation: "List of Siri Shortcuts",
   },
 
   /**
@@ -809,7 +774,6 @@ const placeholders: PlaceholderList = {
   "{{date( format=(\"|').*?(\"|'))?}}": {
     name: "date",
     aliases: ["{{currentDate( format=(\"|').*?(\"|'))?}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const format = str.match(/(?<=format=("|')).*?(?=("|'))/)?.[0] || "MMMM d, yyyy";
       const dateStr =
@@ -838,6 +802,7 @@ const placeholders: PlaceholderList = {
     example: "What happened on {{date format='MMMM d'}} in history?",
     description: "Replaced with the current date in the specified format.",
     hintRepresentation: "{{date}}",
+    fullRepresentation: "Current Date",
   },
 
   /**
@@ -850,7 +815,6 @@ const placeholders: PlaceholderList = {
       "{{currentDay( locale=(\"|').*?(\"|'))?}}",
       "{{currentDayName( locale=(\"|').*?(\"|'))?}}",
     ],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const locale = str.match(/(?<=locale=("|')).*?(?=("|'))/)?.[0] || "en-US";
       const day = new Date().toLocaleDateString(locale, { weekday: "long" });
@@ -867,6 +831,7 @@ const placeholders: PlaceholderList = {
     example: "Write a generic agenda for {{day locale='en-GB'}}",
     description: "Replaced with the name of the current day of the week in the specified locale.",
     hintRepresentation: "{{day}}",
+    fullRepresentation: "Day of Week",
   },
 
   /**
@@ -875,7 +840,6 @@ const placeholders: PlaceholderList = {
   "{{time( format=(\"|').*?(\"|'))?}}": {
     name: "time",
     aliases: ["{{currentTime( format=(\"|').*?(\"|'))?}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const format = str.match(/(?<=format=("|')).*?(?=("|'))/)?.[0] || "HH:mm:s a";
       const time =
@@ -904,6 +868,7 @@ const placeholders: PlaceholderList = {
     example: "It's currently {{time format='HH:mm'}}. How long until dinner?",
     description: "Replaced with the current time in the specified format.",
     hintRepresentation: "{{time}}",
+    fullRepresentation: "Current Time",
   },
 
   /**
@@ -912,7 +877,6 @@ const placeholders: PlaceholderList = {
   "{{systemLanguage}}": {
     name: "systemLanguage",
     aliases: ["{{language}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const lang =
         context && "lang" in context
@@ -929,6 +893,7 @@ const placeholders: PlaceholderList = {
     example: 'Translate "Ciao" to {{systemLanguage}}',
     description: "Replaced with the name of the default language for the current user.",
     hintRepresentation: "{{systemLanguage}}",
+    fullRepresentation: "System Language",
   },
 
   /**
@@ -936,7 +901,6 @@ const placeholders: PlaceholderList = {
    */
   "{{musicTracks}}": {
     name: "musicTracks",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "musicTracks" in context) {
         return { result: context["musicTracks"], musicTracks: context["musicTracks"] };
@@ -951,6 +915,7 @@ const placeholders: PlaceholderList = {
     example: "Recommend some new songs based on the themes of these songs: {{musicTracks}}",
     description: "Replaced with a comma-separated list of track names in Music.app.",
     hintRepresentation: "{{musicTracks}}",
+    fullRepresentation: "List of Music Tracks",
   },
 
   /**
@@ -959,7 +924,6 @@ const placeholders: PlaceholderList = {
   "{{currentTrack}}": {
     name: "currentTrack",
     aliases: ["{{currentSong}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "currentTrack" in context) {
         return { result: context["currentTrack"], currentTrack: context["currentTrack"] };
@@ -974,6 +938,7 @@ const placeholders: PlaceholderList = {
     example: "What's the history behind {{currentTrack}}?",
     description: "Replaced with the name of the currently playing track in Music.app.",
     hintRepresentation: "{{currentTrack}}",
+    fullRepresentation: "Name of Current Music Track",
   },
 
   /**
@@ -981,7 +946,6 @@ const placeholders: PlaceholderList = {
    */
   "{{lastNote}}": {
     name: "lastNote",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "lastNote" in context) {
         return { result: context["lastNote"], lastNote: context["lastNote"] };
@@ -996,6 +960,7 @@ const placeholders: PlaceholderList = {
     example: "Summarize this: {{lastNote}}",
     description: "Replaced with the HTML text of the most recently edited note in Notes.app.",
     hintRepresentation: "{{lastNote}}",
+    fullRepresentation: "Text of Last Note",
   },
 
   /**
@@ -1003,7 +968,6 @@ const placeholders: PlaceholderList = {
    */
   "{{lastEmail}}": {
     name: "lastEmail",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "lastEmail" in context) {
         return { result: context["lastEmail"], lastEmail: context["lastEmail"] };
@@ -1018,6 +982,7 @@ const placeholders: PlaceholderList = {
     example: "Summarize this: {{lastEmail}}",
     description: "Replaced with the text of the most recently received email in Mail.app.",
     hintRepresentation: "{{lastEmail}}",
+    fullRepresentation: "Text of Last Email",
   },
 
   /**
@@ -1026,7 +991,6 @@ const placeholders: PlaceholderList = {
   "{{installedApps}}": {
     name: "installedApps",
     aliases: ["{{apps}}", "{{installedApplications}}", "{{applications}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "installedApps" in context) {
         return { result: context["installedApps"], installedApps: context["installedApps"] };
@@ -1041,6 +1005,47 @@ const placeholders: PlaceholderList = {
     example: "Based on this list of apps, recommend some new ones I might like: {{installedApps}}",
     description: "Replaced with the comma-separated list of names of applications installed on the system.",
     hintRepresentation: "{{installedApps}}",
+    fullRepresentation: "List of Installed Applications",
+  },
+
+  "{{screenContent}}": {
+    name: "screenContent",
+    apply: async (str: string, context?: { [key: string]: string }) => {
+      const currentApp = await getMenubarOwningApplication();
+      const content = await ScriptRunner.ScreenCapture();
+      const overview = filterString(
+        `<Current application: ${currentApp}>\n${content.replaceAll("{{screenContent}}", "")}`,
+        3000
+      );
+      return { result: overview, screenContent: overview };
+    },
+    result_keys: ["screenContent"],
+    constant: true,
+    fn: async () => (await Placeholders.allPlaceholders["{{screenContent}}"].apply("{{screenContent}}")).result,
+    example: "Based on the following screenshot info, what am I looking at? {{screenContent}}",
+    description: "Replaced with image vision information extracted from a screen capture of your entire display.",
+    hintRepresentation: "{{screenContent}}",
+    fullRepresentation: "Screen Content",
+  },
+
+  "{{windowContent}}": {
+    name: "windowContent",
+    apply: async (str: string, context?: { [key: string]: string }) => {
+      const currentApp = await getMenubarOwningApplication();
+      const content = await ScriptRunner.ScreenCapture(true);
+      const overview = filterString(
+        `<Current application: ${currentApp}>\n${content.replaceAll("{{windowContent}}", "")}`,
+        3000
+      );
+      return { result: overview, windowContent: overview };
+    },
+    result_keys: ["windowContent"],
+    constant: true,
+    fn: async () => (await Placeholders.allPlaceholders["{{windowContent}}"].apply("{{windowContent}}")).result,
+    example: "Based on the following screenshot info, what am I looking at? {{windowContent}}",
+    description: "Replaced with image vision information extracted from a screen capture of the active window.",
+    hintRepresentation: "{{windowContent}}",
+    fullRepresentation: "Current Window Content",
   },
 
   /**
@@ -1048,7 +1053,6 @@ const placeholders: PlaceholderList = {
    */
   "{{commands}}": {
     name: "commands",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "commands" in context) {
         return { result: context["commands"], commands: context["commands"] };
@@ -1064,6 +1068,7 @@ const placeholders: PlaceholderList = {
     example: "Based on this list of AI commands, suggest some new ones I could create: {{commands}}",
     description: "Replaced with the comma-separated list of names of all installed PromptLab commands.",
     hintRepresentation: "{{commands}}",
+    fullRepresentation: "List of PromptLb Commands",
   },
 
   /**
@@ -1071,7 +1076,6 @@ const placeholders: PlaceholderList = {
    */
   "{{safariTopSites}}": {
     name: "safariTopSites",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "safariTopSites" in context) {
         return { result: context["safariTopSites"], safariTopSites: context["safariTopSites"] };
@@ -1087,6 +1091,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the comma-separated list of titles and URLs of the most frequently visited websites in Safari.",
     hintRepresentation: "{{safariTopSites}}",
+    fullRepresentation: "Safari Top Sites",
   },
 
   /**
@@ -1094,7 +1099,6 @@ const placeholders: PlaceholderList = {
    */
   "{{safariBookmarks}}": {
     name: "safariBookmarks",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "safariBookmarks" in context) {
         return { result: context["safariBookmarks"], safariBookmarks: context["safariBookmarks"] };
@@ -1109,6 +1113,7 @@ const placeholders: PlaceholderList = {
     example: "Based on this list of websites, suggest some new ones I might like: {{safariBookmarks}}",
     description: "Replaced with the comma-separated list of titles and URLs of bookmarks in Safari.",
     hintRepresentation: "{{safariBookmarks}}",
+    fullRepresentation: "Safari Bookmarks",
   },
 
   /**
@@ -1116,7 +1121,6 @@ const placeholders: PlaceholderList = {
    */
   "{{runningApplications}}": {
     name: "runningApplications",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "runningApplications" in context) {
         return { result: context["runningApplications"], runningApplications: context["runningApplications"] };
@@ -1133,6 +1137,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with the comma-separated list of names of all running applications that are visible to the user.",
     hintRepresentation: "{{runningApplications}}",
+    fullRepresentation: "Running Applications",
   },
 
   /**
@@ -1141,18 +1146,17 @@ const placeholders: PlaceholderList = {
   "{{uuid}}": {
     name: "uuid",
     aliases: ["{{UUID}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       let newUUID = crypto.randomUUID();
-      const usedUUIDs = await getStorage(StorageKeys.USED_UUIDS);
+      const usedUUIDs = await getStorage(STORAGE_KEYS.USED_UUIDS);
       if (Array.isArray(usedUUIDs)) {
         while (usedUUIDs.includes(newUUID)) {
           newUUID = crypto.randomUUID();
         }
         usedUUIDs.push(newUUID);
-        await setStorage(StorageKeys.USED_UUIDS, usedUUIDs);
+        await setStorage(STORAGE_KEYS.USED_UUIDS, usedUUIDs);
       } else {
-        await setStorage(StorageKeys.USED_UUIDS, [newUUID]);
+        await setStorage(STORAGE_KEYS.USED_UUIDS, [newUUID]);
       }
       return { result: newUUID, uuid: newUUID };
     },
@@ -1162,6 +1166,7 @@ const placeholders: PlaceholderList = {
     example: "{{copy:{{uuid}}}}",
     description: "Replaced with a unique UUID. UUIDs are tracked in the {{usedUUIDs}} placeholder.",
     hintRepresentation: "{{uuid}}",
+    fullRepresentation: "New UUID",
   },
 
   /**
@@ -1169,9 +1174,8 @@ const placeholders: PlaceholderList = {
    */
   "{{usedUUIDs}}": {
     name: "usedUUIDs",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
-      const usedUUIDs = await getStorage(StorageKeys.USED_UUIDS);
+      const usedUUIDs = await getStorage(STORAGE_KEYS.USED_UUIDS);
       if (Array.isArray(usedUUIDs)) {
         return { result: usedUUIDs.join(", "), usedUUIDs: usedUUIDs.join(", ") };
       }
@@ -1184,6 +1188,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a comma-separated list of all previously used UUIDs since PromptLab's LocalStorage was last reset.",
     hintRepresentation: "{{usedUUIDs}}",
+    fullRepresentation: "List of Used UUIDs",
   },
 
   /**
@@ -1192,7 +1197,7 @@ const placeholders: PlaceholderList = {
    */
   "{{location}}": {
     name: "location",
-    rules: [],
+    aliases: ["{{currentLocation}}"],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "location" in context) {
         return { result: context["location"], location: context["location"] };
@@ -1211,6 +1216,7 @@ const placeholders: PlaceholderList = {
     example: "Tell me the history of {{location}}.",
     description: 'Replaced with the user\'s current location in the format "city, region, country".',
     hintRepresentation: "{{location}}",
+    fullRepresentation: "Current Location",
   },
 
   /**
@@ -1218,7 +1224,6 @@ const placeholders: PlaceholderList = {
    */
   "{{todayWeather}}": {
     name: "todayWeather",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "todayWeather" in context) {
         return { result: context["todayWeather"], todayWeather: context["todayWeather"] };
@@ -1233,6 +1238,7 @@ const placeholders: PlaceholderList = {
     example: "Summarize the following forecast for {{location}} today: {{todayWeather}}",
     description: "Replaced with 24-hour weather forecast data at the user's current location, in JSON format.",
     hintRepresentation: "{{todayWeather}}",
+    fullRepresentation: "Today's Weather",
   },
 
   /**
@@ -1240,7 +1246,6 @@ const placeholders: PlaceholderList = {
    */
   "{{weekWeather}}": {
     name: "weekWeather",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "weekWeather" in context) {
         return { result: context["weekWeather"], weekWeather: context["weekWeather"] };
@@ -1255,6 +1260,7 @@ const placeholders: PlaceholderList = {
     example: "Summarize the following forecast for {{location}} this week: {{weekWeather}}",
     description: "Replaced with 7-day weather forecast data at the user's current location, in JSON format.",
     hintRepresentation: "{{weekWeather}}",
+    fullRepresentation: "This Week's Weather",
   },
 
   /**
@@ -1262,7 +1268,6 @@ const placeholders: PlaceholderList = {
    */
   "{{todayEvents}}": {
     name: "todayEvents",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "todayEvents" in context) {
         return { result: context["todayEvents"], todayEvents: context["todayEvents"] };
@@ -1278,6 +1283,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a list of the name, start time, and end time of all calendar events that are scheduled over the next 24 hours.",
     hintRepresentation: "{{todayEvents}}",
+    fullRepresentation: "Today's Calendar Events",
   },
 
   /**
@@ -1285,7 +1291,6 @@ const placeholders: PlaceholderList = {
    */
   "{{weekEvents}}": {
     name: "weekEvents",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "weekEvents" in context) {
         return { result: context["weekEvents"], weekEvents: context["weekEvents"] };
@@ -1301,6 +1306,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a list of the name, start time, and end time of all calendar events scheduled over the next 7 days.",
     hintRepresentation: "{{weekEvents}}",
+    fullRepresentation: "This Week's Calendar Events",
   },
 
   /**
@@ -1308,7 +1314,6 @@ const placeholders: PlaceholderList = {
    */
   "{{monthEvents}}": {
     name: "monthEvents",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "monthEvents" in context) {
         return { result: context["monthEvents"], monthEvents: context["monthEvents"] };
@@ -1324,6 +1329,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a list of the name, start time, and end time of all calendar events scheduled over the next 30 days.",
     hintRepresentation: "{{monthEvents}}",
+    fullRepresentation: "This Month's Calendar Events",
   },
 
   /**
@@ -1331,7 +1337,6 @@ const placeholders: PlaceholderList = {
    */
   "{{yearEvents}}": {
     name: "yearEvents",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "yearEvents" in context) {
         return { result: context["yearEvents"], yearEvents: context["yearEvents"] };
@@ -1347,6 +1352,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a list of the name, start time, and end time of all calendar events scheduled over the next 365 days.",
     hintRepresentation: "{{yearEvents}}",
+    fullRepresentation: "This Year's Calendar Events",
   },
 
   /**
@@ -1355,7 +1361,6 @@ const placeholders: PlaceholderList = {
   "{{todayReminders}}": {
     name: "todayReminders",
     aliases: ["{{todayTasks}}", "{{todayTodos}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "todayReminders" in context) {
         return { result: context["todayReminders"], todayReminders: context["todayReminders"] };
@@ -1371,6 +1376,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a list of the name and due date/time of all reminders that are scheduled over the next 24 hours.",
     hintRepresentation: "{{todayReminders}}",
+    fullRepresentation: "Today's Reminders",
   },
 
   /**
@@ -1379,7 +1385,6 @@ const placeholders: PlaceholderList = {
   "{{weekReminders}}": {
     name: "weekReminders",
     aliases: ["{{weekTasks}}", "{{weekTodos}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "weekReminders" in context) {
         return { result: context["weekReminders"], weekReminders: context["weekReminders"] };
@@ -1395,6 +1400,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a list of the name and due date/time of all reminders that are scheduled over the next 7 days.",
     hintRepresentation: "{{weekReminders}}",
+    fullRepresentation: "This Week's Reminders",
   },
 
   /**
@@ -1403,7 +1409,6 @@ const placeholders: PlaceholderList = {
   "{{monthReminders}}": {
     name: "monthReminders",
     aliases: ["{{monthTasks}}", "{{monthTodos}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "monthReminders" in context) {
         return { result: context["monthReminders"], monthReminders: context["monthReminders"] };
@@ -1419,6 +1424,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a list of the name and due date/time of all reminders that are scheduled over the next 30 days.",
     hintRepresentation: "{{monthReminders}}",
+    fullRepresentation: "This Month's Reminders",
   },
 
   /**
@@ -1427,7 +1433,6 @@ const placeholders: PlaceholderList = {
   "{{yearReminders}}": {
     name: "yearReminders",
     aliases: ["{{yearTasks}}", "{{yearTodos}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "yearReminders" in context) {
         return { result: context["yearReminders"], yearReminders: context["yearReminders"] };
@@ -1443,6 +1448,7 @@ const placeholders: PlaceholderList = {
     description:
       "Replaced with a list of the name and due date/time of all reminders that are scheduled over the next 365 days.",
     hintRepresentation: "{{yearReminders}}",
+    fullRepresentation: "This Year's Reminders",
   },
 
   /**
@@ -1451,7 +1457,6 @@ const placeholders: PlaceholderList = {
   "{{previousCommand}}": {
     name: "previousCommand",
     aliases: ["{{lastCommand}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "previousCommand" in context) {
         return { result: context["previousCommand"], previousCommand: context["previousCommand"] };
@@ -1464,6 +1469,7 @@ const placeholders: PlaceholderList = {
     example: "Run command in background: {{{{previousCommand}}}}",
     description: "Replaced with the name of the last command executed.",
     hintRepresentation: "{{previousCommand}}",
+    fullRepresentation: "Previous Command Name",
   },
 
   /**
@@ -1472,7 +1478,6 @@ const placeholders: PlaceholderList = {
   "{{previousPrompt}}": {
     name: "previousPrompt",
     aliases: ["{{lastPrompt}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "previousPrompt" in context) {
         return { result: context["previousPrompt"], previousPrompt: context["previousPrompt"] };
@@ -1485,6 +1490,7 @@ const placeholders: PlaceholderList = {
     example: "Compare these prompts: First prompt: ###some text###\n\nSecond prompt: ###{{previousPrompt}}###",
     description: "Replaced with the fully substituted text of the previous prompt.",
     hintRepresentation: "{{previousPrompt}}",
+    fullRepresentation: "Previous Command Prompt",
   },
 
   /**
@@ -1493,7 +1499,6 @@ const placeholders: PlaceholderList = {
   "{{previousResponse}}": {
     name: "previousResponse",
     aliases: ["{{lastResponse}}", "{{previousOutput}}", "{{lastOutput}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (context && "previousResponse" in context) {
         return { result: context["previousResponse"], previousResponse: context["previousResponse"] };
@@ -1507,6 +1512,7 @@ const placeholders: PlaceholderList = {
       "Compare these responses: First response: ###{{prompt:some text}}###\n\nSecond Response: ###{{previousResponse}}###",
     description: "Replaced with the text of the AI's previous response.",
     hintRepresentation: "{{previousResponse}}",
+    fullRepresentation: "Previous Command Response",
   },
 
   ...textFileExtensions
@@ -1524,7 +1530,6 @@ const placeholders: PlaceholderList = {
         )}:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}`
       ] = {
         name: `textfile:${ext}`,
-        rules: [],
         apply: async (str: string, context?: { [key: string]: string }) => {
           if (!context) return { result: "", [`textfile:${ext}`]: "" };
           if (!context["selectedFiles"]) return { result: "", [`image:${ext}`]: "" };
@@ -1564,6 +1569,7 @@ const placeholders: PlaceholderList = {
         example: `{{${ext}:This one if any ${ext} file is selected:This one if no ${ext} file is selected}}`,
         description: `Flow control directive to include some content if any ${ext} file is selected and some other content if no ${ext} file is selected.`,
         hintRepresentation: `{{${ext}:...:...}}`,
+        fullRepresentation: `${ext.toUpperCase()} Condition`,
       };
       return acc;
     }, {} as { [key: string]: Placeholder }),
@@ -1573,7 +1579,6 @@ const placeholders: PlaceholderList = {
    */
   "{{textfiles:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}": {
     name: "contentForTextFiles",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (!context) return { result: "", contentForTextFiles: "" };
       if (!context["selectedFiles"]) return { result: "", contentForTextFiles: "" };
@@ -1602,12 +1607,12 @@ const placeholders: PlaceholderList = {
     description:
       "Flow control directive to include some content if any text file is selected and some other content if no text file is selected.",
     hintRepresentation: "{{textfiles:...:...}}",
+    fullRepresentation: "Text File Condition",
   },
 
   ...imageFileExtensions.reduce((acc, ext) => {
     acc[`{{${ext}:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}`] = {
       name: `image:${ext}`,
-      rules: [],
       apply: async (str: string, context?: { [key: string]: string }) => {
         if (!context) return { result: "", [`image:${ext}`]: "" };
         if (!context["selectedFiles"]) return { result: "", [`image:${ext}`]: "" };
@@ -1637,6 +1642,7 @@ const placeholders: PlaceholderList = {
       example: `{{${ext}:This one if any ${ext} file is selected:This one if no ${ext} file is selected}}`,
       description: `Flow control directive to include some content if any ${ext} file is selected and some other content if no ${ext} file is selected.`,
       hintRepresentation: `{{${ext}:...:...}}`,
+      fullRepresentation: `${ext.toUpperCase()} Condition`,
     };
     return acc;
   }, {} as { [key: string]: Placeholder }),
@@ -1646,7 +1652,6 @@ const placeholders: PlaceholderList = {
    */
   "{{images:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}": {
     name: "contentForImages",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (!context) return { result: "", contentForImages: "" };
       if (!context["selectedFiles"]) return { result: "", contentForImages: "" };
@@ -1675,12 +1680,12 @@ const placeholders: PlaceholderList = {
     description:
       "Flow control directive to include some content if any image file is selected and some other content if no image file is selected.",
     hintRepresentation: "{{images:...:...}}",
+    fullRepresentation: "Image File Condition",
   },
 
   ...videoFileExtensions.reduce((acc, ext) => {
     acc[`{{${ext}:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}`] = {
       name: `video:${ext}`,
-      rules: [],
       apply: async (str: string, context?: { [key: string]: string }) => {
         if (!context) return { result: "", [`video:${ext}`]: "" };
         if (!context["selectedFiles"]) return { result: "", [`video:${ext}`]: "" };
@@ -1710,6 +1715,7 @@ const placeholders: PlaceholderList = {
       example: `{{${ext}:This one if any ${ext} file is selected:This one if no ${ext} file is selected}}`,
       description: `Flow control directive to include some content if any ${ext} file is selected and some other content if no ${ext} file is selected.`,
       hintRepresentation: `{{${ext}:...:...}}`,
+      fullRepresentation: `${ext.toUpperCase()} Condition`,
     };
     return acc;
   }, {} as { [key: string]: Placeholder }),
@@ -1719,7 +1725,6 @@ const placeholders: PlaceholderList = {
    */
   "{{videos:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}": {
     name: "contentForVideos",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (!context) return { result: "", contentForVideos: "" };
       if (!context["selectedFiles"]) return { result: "", contentForVideos: "" };
@@ -1748,12 +1753,12 @@ const placeholders: PlaceholderList = {
     description:
       "Flow control directive to include some content if any video file is selected and some other content if no video file is selected.",
     hintRepresentation: "{{videos:...:...}}",
+    fullRepresentation: "Video File Condition",
   },
 
   ...audioFileExtensions.reduce((acc, ext) => {
     acc[`{{${ext}:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}`] = {
       name: `audio:${ext}`,
-      rules: [],
       apply: async (str: string, context?: { [key: string]: string }) => {
         if (!context) return { result: "", [`audio:${ext}`]: "" };
         if (!context["selectedFiles"]) return { result: "", [`audio:${ext}`]: "" };
@@ -1783,6 +1788,7 @@ const placeholders: PlaceholderList = {
       example: `{{${ext}:This one if any ${ext} file is selected:This one if no ${ext} file is selected}}`,
       description: `Flow control directive to include some content if any ${ext} file is selected and some other content if no ${ext} file is selected.`,
       hintRepresentation: `{{${ext}:...:...}}`,
+      fullRepresentation: `${ext.toUpperCase()} Condition`,
     };
     return acc;
   }, {} as { [key: string]: Placeholder }),
@@ -1792,7 +1798,6 @@ const placeholders: PlaceholderList = {
    */
   "{{audio:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}": {
     name: "contentForAudio",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (!context) return { result: "", contentForAudio: "" };
       if (!context["selectedFiles"]) return { result: "", contentForAudio: "" };
@@ -1821,6 +1826,7 @@ const placeholders: PlaceholderList = {
     description:
       "Flow control directive to include some content if any audio file is selected and some other content if no audio file is selected.",
     hintRepresentation: "{{audio:...:...}}",
+    fullRepresentation: "Audio File Condition",
   },
 
   /**
@@ -1828,7 +1834,6 @@ const placeholders: PlaceholderList = {
    */
   "{{(pdf|PDF):(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)(:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?))?}}": {
     name: "contentForPDFs",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       if (!context) return { result: "", ["image:pdf"]: "" };
       if (!context["selectedFiles"]) return { result: "", ["image:pdf"]: "" };
@@ -1857,6 +1862,7 @@ const placeholders: PlaceholderList = {
     description:
       "Flow control directive to include some content if any PDF file is selected and some other content if no PDF file is selected.",
     hintRepresentation: "{{pdf:...:...}}",
+    fullRepresentation: "PDF File Condition",
   },
 
   /**
@@ -1865,7 +1871,6 @@ const placeholders: PlaceholderList = {
   "{{(url|URL)( raw=(true|false))?:.*?}}": {
     name: "url",
     aliases: ["{{https?:\\/?\\/?[\\s\\S]*?}}"],
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const URL =
@@ -1888,6 +1893,7 @@ const placeholders: PlaceholderList = {
     description:
       "Placeholder for the visible text content at a given URL. Accepts an optional `raw` parameter, e.g. `{{url:https://www.google.com raw=true}}`, to return the raw HTML of the page instead of the visible text.",
     hintRepresentation: "{{url:...}}",
+    fullRepresentation: "Visible Text at URL",
   },
 
   /**
@@ -1895,7 +1901,6 @@ const placeholders: PlaceholderList = {
    */
   "{{file:(.|^[\\s\\n\\r])*?}}": {
     name: "file",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const target = str.match(/(?<=(file:))[\s\S]*?(?=}})/)?.[0];
       if (!target) return { result: "", file: "" };
@@ -1918,6 +1923,7 @@ const placeholders: PlaceholderList = {
     example: "{{file:/Users/username/Desktop/file.txt}}",
     description: "Placeholder for the raw text of a file at the given path.",
     hintRepresentation: "{{file:...}}",
+    fullRepresentation: "Text of File At Path",
   },
 
   /**
@@ -1925,7 +1931,6 @@ const placeholders: PlaceholderList = {
    */
   "{{increment:[\\s\\S]*?}}": {
     name: "increment",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const name = str.match(/(?<=(increment:))[\s\S]*?(?=}})/)?.[0];
       const identifier = `id-${name}`;
@@ -1939,6 +1944,7 @@ const placeholders: PlaceholderList = {
     example: "{{increment:counter}}",
     description: "Directive to increment a persistent counter variable by 1. Returns the new value of the counter.",
     hintRepresentation: "{{increment:x}}",
+    fullRepresentation: "Increment Persistent Counter Variable",
   },
 
   /**
@@ -1946,7 +1952,6 @@ const placeholders: PlaceholderList = {
    */
   "{{decrement:[\\s\\S]*?}}": {
     name: "decrement",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const name = str.match(/(?<=(decrement:))[\s\S]*?(?=}})/)?.[0];
       const identifier = `id-${name}`;
@@ -1960,6 +1965,160 @@ const placeholders: PlaceholderList = {
     example: "{{decrement:counter}}",
     description: "Directive to decrement a persistent counter variable by 1.",
     hintRepresentation: "{{decrement:x}}",
+    fullRepresentation: "Decrement Persistent Counter Variable",
+  },
+
+  /**
+   * Placeholder for the text of the focused element in the frontmost window of a supported browser.
+   */
+  '{{focusedElement( browser="(.*?)")?}}': {
+    name: "focusedElement",
+    aliases: [
+      '{{activeElement( browser="(.*?)")?}}',
+      '{{selectedElement( browser="(.*?)")?}}',
+      '{{focusedElementText( browser="(.*?)")?}}',
+      '{{activeElementText( browser="(.*?)")?}}',
+      '{{selectedElementText( browser="(.*?)")?}}',
+    ],
+    apply: async (str: string, context?: { [key: string]: string }) => {
+      try {
+        const browser = str.match(/(focusedElement|activeElement|selectedElement)( browser=")(.*?)(")?/)?.[3];
+        const appName = browser
+          ? browser
+          : context?.["currentAppName"]
+          ? context["currentAppName"]
+          : (await getFrontmostApplication()).name;
+
+        const js = `document.querySelector('div:hover').innerText`;
+        const elementText = await runJSInActiveTab(js, appName);
+        return { result: elementText };
+      } catch (e) {
+        return { result: "" };
+      }
+    },
+    dependencies: ["currentAppName"],
+    constant: false,
+    fn: async (browser: string) =>
+      (
+        await Placeholders.allPlaceholders['{{focusedElement( browser="(.*?)")?}}'].apply(
+          `{{focusedElement browser="${browser}"}}`
+        )
+      ).result,
+    example: 'Summarize this: {{focusedElement browser="Safari"}}',
+    description:
+      "Replaced with the text content of the currently focused HTML element in the active tab of the given browser. If no browser is specified, the frontmost browser is used.",
+    hintRepresentation: "{{focusedElement}}",
+    fullRepresentation: "Text of Focused Browser Element",
+  },
+
+  /**
+   * Placeholder for the text of the first element matching the given selector in the frontmost window of a supported browser.
+   */
+  '{{textOfElement( browser="(.*)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}': {
+    name: "elementText",
+    aliases: ['{{elementText( browser="(.*)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}'],
+    apply: async (str: string, context?: { [key: string]: string }) => {
+      try {
+        const specifier = str.match(
+          /{{(textOfElement|elementText)( browser="(.*)")?:(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/
+        )?.[4];
+        if (!specifier) return { result: "" };
+
+        const browser = str.match(
+          /{{(textOfElement|elementText)( browser="(.*)"):(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/
+        )?.[3];
+
+        const appName = browser
+          ? browser
+          : context?.["currentAppName"]
+          ? context["currentAppName"]
+          : (await getFrontmostApplication()).name;
+
+        let js = `document.getElementById('${specifier}')?.innerText`;
+        if (specifier.startsWith(".")) {
+          js = `document.getElementsByClassName('${specifier.slice(1)}')[0]?.innerText`;
+        } else if (specifier.startsWith("#")) {
+          js = `document.getElementById('${specifier.slice(1)}')?.innerText`;
+        } else if (specifier.startsWith("[")) {
+          js = `document.querySelector('${specifier}')?.innerText`;
+        } else if (specifier.startsWith("<") && specifier.endsWith(">")) {
+          js = `document.getElementsByTagName('${specifier.slice(1, -1)}')[0]?.innerText`;
+        }
+
+        const elementText = await runJSInActiveTab(js, appName);
+        return { result: elementText };
+      } catch (e) {
+        return { result: "" };
+      }
+    },
+    dependencies: ["currentAppName"],
+    constant: false,
+    fn: async (specifier: string, browser?: string) =>
+      (
+        await Placeholders.allPlaceholders[
+          '{{textOfElement( browser="(.*)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}'
+        ].apply(`{{elementText${browser ? ` browser="${browser}"` : ``}:${specifier}}}`)
+      ).result,
+    example: "Summarize this: {{elementText:#article}}",
+    description: "Replaced with the text content of an HTML element in the active tab of any supported browser.",
+    hintRepresentation: "{{elementText}}",
+    fullRepresentation: "Text of Browser Element With Specifier",
+  },
+
+  /**
+   * Placeholder for the raw HTML of the first element matching the given selector in the active tab of a supported browser.
+   */
+  '{{HTMLOfElement( browser="(.*)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}': {
+    name: "elementHTML",
+    aliases: [
+      '{{element( browser="(.*)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}',
+      '{{elementHTML( browser="(.*)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}',
+    ],
+    apply: async (str: string, context?: { [key: string]: string }) => {
+      try {
+        const specifier = str.match(
+          /{{(HTMLOfElement|element|elementHTML)( browser="(.*)")?:(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/
+        )?.[4];
+        if (!specifier) return { result: "" };
+
+        const browser = str.match(
+          /{{(HTMLOfElement|element|elementHTML)( browser="(.*)"):(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/
+        )?.[3];
+
+        const appName = browser
+          ? browser
+          : context?.["currentAppName"]
+          ? context["currentAppName"]
+          : (await getFrontmostApplication()).name;
+
+        let js = `document.getElementById('${specifier}')?.outerHTML`;
+        if (specifier.startsWith(".")) {
+          js = `document.getElementsByClassName('${specifier.slice(1)}')[0]?.outerHTML`;
+        } else if (specifier.startsWith("#")) {
+          js = `document.getElementById('${specifier.slice(1)}')?.outerHTML`;
+        } else if (specifier.startsWith("[")) {
+          js = `document.querySelector('${specifier}')?.outerHTML`;
+        } else if (specifier.startsWith("<") && specifier.endsWith(">")) {
+          js = `document.getElementsByTagName('${specifier.slice(1, -1)}')[0]?.outerHTML`;
+        }
+        const elementHTML = await runJSInActiveTab(js, appName);
+        return { result: elementHTML };
+      } catch (e) {
+        return { result: "" };
+      }
+    },
+    dependencies: ["currentAppName"],
+    constant: false,
+    fn: async (specifier: string, browser?: string) =>
+      (
+        await Placeholders.allPlaceholders[
+          '{{HTMLOfElement( browser="(.*)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}'
+        ].apply(`{{element${browser ? ` browser="${browser}"` : ``}:${specifier}}}`)
+      ).result,
+    example: "Summarize this: {{elementHTML:#article}}",
+    description: "Replaced with the raw HTML source of an HTML element in the active tab of any supported browser.",
+    hintRepresentation: "{{elementHTML}}",
+    fullRepresentation: "HTML of Browser Element With Specifier",
   },
 
   /**
@@ -1967,7 +2126,6 @@ const placeholders: PlaceholderList = {
    */
   "{{nearbyLocations:([\\s\\S]*)}}": {
     name: "nearbyLocations",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const query = str.match(/(?<=(nearbyLocations:))[\s\S]*?(?=}})/)?.[0];
       const nearbyLocations = await searchNearbyLocations(query || "");
@@ -1983,6 +2141,7 @@ const placeholders: PlaceholderList = {
     example: "{{nearbyLocations:food}}",
     description: "Placeholder for a comma-separated list of nearby locations based on the given search query.",
     hintRepresentation: "{{nearbyLocations:...}}",
+    fullRepresentation: "Nearby Locations Search",
   },
 
   /**
@@ -1990,7 +2149,6 @@ const placeholders: PlaceholderList = {
    */
   "{{selectFile:[\\s\\S]*?}}": {
     name: "selectFile",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const file = str.match(/(?<=(selectFiles:))[\s\S]*?(?=}})/)?.[0];
       if (!file) return { result: "" };
@@ -2003,6 +2161,7 @@ const placeholders: PlaceholderList = {
     example: "{{selectFile:/Users/username/Desktop/file.txt}}",
     description: "Directive to a select file. The placeholder will always be replaced with an empty string.",
     hintRepresentation: "{{selectFile:...}}",
+    fullRepresentation: "Select File At Path",
   },
 
   /**
@@ -2010,7 +2169,6 @@ const placeholders: PlaceholderList = {
    */
   "{{shortcut:([\\s\\S]+?)(:[\\s\\S]*?)?}}": {
     name: "shortcut",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const matches = str.match(/{{shortcut:([\s\S]+?)?(:[\s\S]*?)?}}/);
       if (matches) {
@@ -2038,6 +2196,7 @@ const placeholders: PlaceholderList = {
     example: "{{shortcut:My Shortcut:7}}",
     description: "Directive to execute a Siri Shortcut by name, optionally supplying input, and insert the result.",
     hintRepresentation: "{{shortcut:...}}",
+    fullRepresentation: "Run Siri Shortcut",
   },
 
   /**
@@ -2045,7 +2204,6 @@ const placeholders: PlaceholderList = {
    */
   "{{prompt:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
     name: "prompt",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const prompt = str.match(/(?<=(prompt:))(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}/)?.[2] || "";
       if (prompt.trim().length == 0) return { result: "" };
@@ -2059,6 +2217,7 @@ const placeholders: PlaceholderList = {
     example: "{{prompt:Summarize {{url:https://example.com}}}}",
     description: "Replaced with the response to the prompt after running it in the background.",
     hintRepresentation: "{{prompt:...}}",
+    fullRepresentation: "Sub-Prompt",
   },
 
   /**
@@ -2066,7 +2225,6 @@ const placeholders: PlaceholderList = {
    */
   "{{command:([^:}]*[\\s]*)*?(:([^:}]*[\\s]*)*?)?(:([^:}]*[\\s]*)*?)?}}": {
     name: "command",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const command = str.match(/command:([^:]*?)(:[^}:]*?)*(?=}})/)?.[1] || "";
       const extension = str.match(/(?<=(command:[^:]*?:))([^:]*?)(:[^}:]*?)*(?=}})/)?.[2] || "";
@@ -2113,6 +2271,7 @@ const placeholders: PlaceholderList = {
     description:
       "Directive to run a Raycast command by name, optionally narrowing down the search to a specific extension. Input can be supplied as well.",
     hintRepresentation: "{{command:cmdName:extName:input}}",
+    fullRepresentation: "Run Raycast Command",
   },
 
   /**
@@ -2120,7 +2279,6 @@ const placeholders: PlaceholderList = {
    */
   "{{(youtube|yt):([\\s\\S]*?)}}": {
     name: "youtube",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const specifier = str.match(/(?<=(youtube|yt):)[\s\S]*?(?=}})/)?.[0] || "";
       if (specifier.trim().length == 0) {
@@ -2138,6 +2296,7 @@ const placeholders: PlaceholderList = {
     example: "{{youtube:https://www.youtube.com/watch?v=dQw4w9WgXcQ}}",
     description: "Replaced with the transcript of the corresponding YouTube video.",
     hintRepresentation: "{{youtube:...}}",
+    fullRepresentation: "Transcription of YouTube Video",
   },
 
   /**
@@ -2145,7 +2304,6 @@ const placeholders: PlaceholderList = {
    */
   "{{(as|AS):(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
     name: "as",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const script = str.match(/(as|AS):(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/)?.[2];
@@ -2165,6 +2323,7 @@ const placeholders: PlaceholderList = {
     description:
       "Placeholder for output of an AppleScript script. If the script fails, this placeholder will be replaced with an empty string.",
     hintRepresentation: "{{as:...}}",
+    fullRepresentation: "Run AppleScript",
   },
 
   /**
@@ -2172,7 +2331,6 @@ const placeholders: PlaceholderList = {
    */
   "{{(jxa|JXA):(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
     name: "jxa",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const script = str.match(/(?<=(jxa|JXA):)(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/)?.[2];
@@ -2197,6 +2355,7 @@ const placeholders: PlaceholderList = {
     description:
       "Placeholder for output of a JavaScript for Automation script. If the script fails, this placeholder will be replaced with an empty string.",
     hintRepresentation: "{{jxa:...}}",
+    fullRepresentation: "Run JXA Script",
   },
 
   /**
@@ -2204,7 +2363,6 @@ const placeholders: PlaceholderList = {
    */
   "{{shell( .*)?:(.|[ \\n\\r\\s])*?}}": {
     name: "shell",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
         const settings = loadAdvancedSettingsSync().placeholderSettings;
@@ -2226,6 +2384,7 @@ const placeholders: PlaceholderList = {
     description:
       "Placeholder for output of a shell script. If the script fails, this placeholder will be replaced with an empty string.",
     hintRepresentation: "{{shell:...}}",
+    fullRepresentation: "Run Shell Script",
   },
 
   /**
@@ -2233,7 +2392,6 @@ const placeholders: PlaceholderList = {
    */
   "{{set [a-zA-Z0-9_]+:[\\s\\S]*?}}": {
     name: "setPersistentVariable",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const matches = str.match(/{{set ([a-zA-Z0-9_]+):([\s\S]*?)}}/);
       if (matches) {
@@ -2250,6 +2408,7 @@ const placeholders: PlaceholderList = {
     description:
       "Directive to set the value of a persistent variable. If the variable does not exist, it will be created. The placeholder will always be replaced with an empty string.",
     hintRepresentation: "{{set x:...}}",
+    fullRepresentation: "Set Value of Persistent Variable",
   },
 
   /**
@@ -2257,7 +2416,6 @@ const placeholders: PlaceholderList = {
    */
   "{{copy:[\\s\\S]*?}}": {
     name: "copy",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const text = str.match(/(?<=(copy:))[\s\S]*?(?=}})/)?.[0];
       if (!text) return { result: "" };
@@ -2276,6 +2434,7 @@ const placeholders: PlaceholderList = {
     description:
       "Directive to copy the provided text to the clipboard. The placeholder will always be replaced with an empty string.",
     hintRepresentation: "{{copy:...}}",
+    fullRepresentation: "Copy To Clipboard",
   },
 
   /**
@@ -2283,7 +2442,6 @@ const placeholders: PlaceholderList = {
    */
   "{{paste:[\\s\\S]*?}}": {
     name: "paste",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const text = str.match(/(?<=(paste:))[\s\S]*?(?=}})/)?.[0];
       if (!text) return { result: "" };
@@ -2298,18 +2456,27 @@ const placeholders: PlaceholderList = {
     description:
       "Directive to paste the provided text in the frontmost application. The placeholder will always be replaced with an empty string.",
     hintRepresentation: "{{paste:...}}",
+    fullRepresentation: "Paste From Clipboard",
   },
 
   /**
    * Placeholder for output of a JavaScript script. If the script fails, this placeholder will be replaced with an empty string. The script is run in a sandboxed environment.
    */
-  "{{(js|JS):(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
+  '{{(js|JS)( target="(.*?)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}': {
     name: "js",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       try {
-        const script = str.match(/(?<=(js|JS)):(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/)?.[2];
+        const script = str.match(/(?<=(js|JS))( target="(.*?)")?:(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/)?.[4];
+        const target = str.match(/(?<=(js|JS))( target="(.*?)")?:(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/)?.[3];
         if (!script) return { result: "", js: "" };
+
+        if (target) {
+          // Run in active browser tab
+          const res = await runJSInActiveTab(script.replaceAll(/(\n|\r|\t|\\|")/g, "\\$1"), target);
+          return { result: res, js: res };
+        }
+
+        // Run in sandbox
         const sandbox = Object.values(Placeholders.allPlaceholders).reduce((acc, placeholder) => {
           acc[placeholder.name] = placeholder.fn;
           return acc;
@@ -2325,13 +2492,17 @@ const placeholders: PlaceholderList = {
       }
     },
     constant: false,
-    fn: async (script: string) =>
-      (await Placeholders.allPlaceholders["{{(js|JS):(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}"].apply(`{{js:${script}}}`))
-        .result,
+    fn: async (script: string, target?: string) =>
+      (
+        await Placeholders.allPlaceholders['{{(js|JS)( target="(.*?)")?:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}'].apply(
+          `{{js${target == undefined ? `` : ` target="${target}"`}:${script}}}`
+        )
+      ).result,
     example: '{{js:log("Hello World")}}',
     description:
       "Placeholder for output of a JavaScript script. If the script fails, this placeholder will be replaced with an empty string. The script is run in a sandboxed environment.",
     hintRepresentation: "{{js:...}}",
+    fullRepresentation: "Run JavaScript",
   },
 
   /**
@@ -2339,7 +2510,6 @@ const placeholders: PlaceholderList = {
    */
   "{{cutoff [0-9]+:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
     name: "cutoff",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       const matches = str.match(/(?<=(cutoff ))[0-9]+:(([^{]|{(?!{)|{{[\s\S]*?}})*?)}}/);
       if (!matches) return { result: "" };
@@ -2357,6 +2527,7 @@ const placeholders: PlaceholderList = {
     example: "{{cutoff 5:Hello World}}",
     description: "Cuts off the content after the specified number of characters.",
     hintRepresentation: "{{cutoff n:...}}",
+    fullRepresentation: "Cutoff",
   },
 
   /**
@@ -2364,7 +2535,6 @@ const placeholders: PlaceholderList = {
    */
   "{{(ignore|IGNORE):[^}]*?}}": {
     name: "ignore",
-    rules: [],
     apply: async (str: string, context?: { [key: string]: string }) => {
       return { result: "" };
     },
@@ -2375,6 +2545,7 @@ const placeholders: PlaceholderList = {
     description:
       "Directive to ignore all content within the directive. Allows placeholders and directives to run without influencing the output.",
     hintRepresentation: "{{ignore:...}}",
+    fullRepresentation: "Ignore",
   },
 };
 
@@ -2496,7 +2667,6 @@ const loadCustomPlaceholders = async (settings: { allowCustomPlaceholderPaths: b
               new RegExp(key);
               acc[key] = {
                 name: placeholder.name,
-                rules: [],
                 apply: async (str: string, context?: { [key: string]: string }) => {
                   const match = str.match(new RegExp(`${key}`));
                   let value = placeholder.value;
@@ -2514,6 +2684,7 @@ const loadCustomPlaceholders = async (settings: { allowCustomPlaceholderPaths: b
                 description: placeholder.description,
                 example: placeholder.example,
                 hintRepresentation: placeholder.hintRepresentation,
+                fullRepresentation: `${placeholder.name} (Custom)`,
               };
             } catch (e) {
               showToast({ title: `Failed to load placeholder "${key}"`, message: `Invalid regex.` });
@@ -2663,7 +2834,7 @@ const bulkApply = async (str: string, context?: { [key: string]: string }): Prom
  * @returns The value of the variable, or an empty string if the variable does not exist.
  */
 export const getPersistentVariable = async (name: string): Promise<string> => {
-  const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+  const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
   const variable = vars.find((variable) => variable.name == name);
   if (variable) {
     return variable.value;
@@ -2677,7 +2848,7 @@ export const getPersistentVariable = async (name: string): Promise<string> => {
  * @param value The initial value of the variable.
  */
 export const setPersistentVariable = async (name: string, value: string) => {
-  const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+  const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
   const variable = vars.find((variable) => variable.name == name);
   if (variable) {
     vars.splice(vars.indexOf(variable), 1);
@@ -2686,7 +2857,7 @@ export const setPersistentVariable = async (name: string, value: string) => {
   } else {
     vars.push({ name: name, value: value, initialValue: value });
   }
-  await setStorage(StorageKeys.PERSISTENT_VARIABLES, vars);
+  await setStorage(STORAGE_KEYS.PERSISTENT_VARIABLES, vars);
 };
 
 /**
@@ -2694,13 +2865,13 @@ export const setPersistentVariable = async (name: string, value: string) => {
  * @param name The name of the variable to reset.
  */
 export const resetPersistentVariable = async (name: string): Promise<string> => {
-  const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+  const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
   const variable = vars.find((variable) => variable.name == name);
   if (variable) {
     vars.splice(vars.indexOf(variable), 1);
     variable.value = variable.initialValue;
     vars.push(variable);
-    await setStorage(StorageKeys.PERSISTENT_VARIABLES, vars);
+    await setStorage(STORAGE_KEYS.PERSISTENT_VARIABLES, vars);
     return variable.value;
   }
   return "";
@@ -2711,11 +2882,11 @@ export const resetPersistentVariable = async (name: string): Promise<string> => 
  * @param name The name of the variable to delete.
  */
 export const deletePersistentVariable = async (name: string) => {
-  const vars: PersistentVariable[] = await getStorage(StorageKeys.PERSISTENT_VARIABLES);
+  const vars: PersistentVariable[] = await getStorage(STORAGE_KEYS.PERSISTENT_VARIABLES);
   const variable = vars.find((variable) => variable.name == name);
   if (variable) {
     vars.splice(vars.indexOf(variable), 1);
-    await setStorage(StorageKeys.PERSISTENT_VARIABLES, vars);
+    await setStorage(STORAGE_KEYS.PERSISTENT_VARIABLES, vars);
   }
 };
 

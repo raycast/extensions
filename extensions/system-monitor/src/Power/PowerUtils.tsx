@@ -1,91 +1,52 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import { ExecError } from "../Interfaces";
 
 const execp = promisify(exec);
 
-const getCycleCount = async (): Promise<string> => {
-  try {
-    const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Cycle Count' | awk '{print $3}'");
+export const getCycleCount = async (): Promise<string> => {
+  const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Cycle Count' | awk '{print $3}'");
 
-    return output.stdout.trim();
-  } catch (err) {
-    const execErr = err as ExecError;
-    throw execErr;
-  }
+  return output.stdout.trim();
 };
 
-const getIsCharging = async (): Promise<boolean> => {
-  try {
-    const output = await execp(
-      "/usr/sbin/system_profiler SPPowerDataType | grep 'Charging' | sed -n 2p | awk '{print $2}'"
-    );
+export const getIsCharging = async (): Promise<boolean> => {
+  const output = await execp(
+    "/usr/sbin/system_profiler SPPowerDataType | grep 'Charging' | sed -n 2p | awk '{print $2}'"
+  );
 
-    return output.stdout.trim() === "Yes";
-  } catch (err) {
-    const execErr = err as ExecError;
-    throw execErr;
-  }
-};
-const getBatteryLevel = async (): Promise<string> => {
-  try {
-    const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'State of Charge' | awk '{print $5}'");
-
-    return output.stdout.trim();
-  } catch (err) {
-    const execErr = err as ExecError;
-    throw execErr;
-  }
-};
-const getBatteryCondition = async (): Promise<string> => {
-  try {
-    const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Condition' | awk '{print $2}'");
-
-    return output.stdout.trim();
-  } catch (err) {
-    const execErr = err as ExecError;
-    throw execErr;
-  }
+  return output.stdout.trim() === "Yes";
 };
 
-const getMaxBatteryCapacity = async (): Promise<string> => {
-  try {
-    const output = await execp(
-      "/usr/sbin/system_profiler SPPowerDataType | grep 'Maximum Capacity' | awk '{print $3}'"
-    );
+export const getBatteryLevel = async (): Promise<string> => {
+  const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'State of Charge' | awk '{print $5}'");
 
-    return output.stdout.trim();
-  } catch (err) {
-    const execErr = err as ExecError;
-    throw execErr;
-  }
+  return output.stdout.trim();
+};
+export const getBatteryCondition = async (): Promise<string> => {
+  const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Condition' | awk '{print $2}'");
+
+  return output.stdout.trim();
 };
 
-const getBatteryTime = async (): Promise<string> => {
-  try {
-    const output = await execp("/usr/bin/pmset -g ps | sed -n 2p | awk '{print $5}'");
+export const getMaxBatteryCapacity = async (): Promise<string> => {
+  const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Maximum Capacity' | awk '{print $3}'");
 
-    return output.stdout.trim();
-  } catch (err) {
-    const execErr = err as ExecError;
-    throw execErr;
-  }
+  return output.stdout.trim();
 };
 
-const getTimeOnBattery = async (): Promise<string> => {
-  try {
-    const output = await execp(
-      '/usr/bin/pmset -g log | grep "Using AC" | tail -n 1 | awk \'{print $1 " " $2 " " $3}\''
-    );
-    const lastChargeDate = output.stdout.trim();
-    const startTime = new Date(Date.parse(lastChargeDate));
-    const endTime = new Date();
+export const getBatteryTime = async (): Promise<string> => {
+  const output = await execp("/usr/bin/pmset -g ps | sed -n 2p | awk '{print $5}'");
 
-    return convertMsToTime(endTime.valueOf() - startTime.valueOf());
-  } catch (err) {
-    const execErr = err as ExecError;
-    throw execErr;
-  }
+  return output.stdout.trim();
+};
+
+export const getTimeOnBattery = async (): Promise<string> => {
+  const output = await execp('/usr/bin/pmset -g log | grep "Using AC" | tail -n 1 | awk \'{print $1 " " $2 " " $3}\'');
+  const lastChargeDate = output.stdout.trim();
+  const startTime = new Date(Date.parse(lastChargeDate));
+  const endTime = new Date();
+
+  return convertMsToTime(endTime.valueOf() - startTime.valueOf());
 };
 
 const padTo2Digits = (num: number) => {
@@ -101,14 +62,4 @@ const convertMsToTime = (milliseconds: number) => {
   minutes = minutes % 60;
 
   return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-};
-
-export {
-  getIsCharging,
-  getCycleCount,
-  getBatteryLevel,
-  getBatteryCondition,
-  getMaxBatteryCapacity,
-  getBatteryTime,
-  getTimeOnBattery,
 };

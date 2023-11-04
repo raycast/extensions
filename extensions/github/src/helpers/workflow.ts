@@ -31,7 +31,7 @@ export function getWorkflowStatus(workflow_run: WorkflowRun): List.Item.Props["i
             value: { source: Icon.CheckCircle, tintColor: Color.Green },
             tooltip: `Status: Completed in ${differenceInSeconds(
               new Date(workflow_run.updated_at),
-              new Date(workflow_run.created_at)
+              new Date(workflow_run.created_at),
             )}s`,
           };
         case "failure":

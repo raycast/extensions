@@ -1,5 +1,12 @@
 # Timers Changelog
 
+## [Stopwatch menu bar improvements, minor UX fixes] - 2023-09-30
+
+- Add ability to delete stopwatches from menu bar
+- Fix bug where pausing stopwatch from menu bar didn't work properly
+- Fix bug where "Dismiss Timer Alert" would crash when run without "Ring Continuously" preference set
+- Un-require settings that should be optional
+
 ## [Menu bar improvements, reset stopwatches, end time for timers] - 2023-06-08
 
 - Add menu bar support for stopwatches

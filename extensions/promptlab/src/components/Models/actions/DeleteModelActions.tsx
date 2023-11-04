@@ -1,7 +1,7 @@
 import { Action, Alert, Icon, confirmAlert, showToast } from "@raycast/api";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import { Model, ModelManager } from "../../../utils/types";
-import { isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
 
 /**
  * Action to delete a model.
@@ -25,7 +25,7 @@ export const DeleteModelAction = (props: {
     <Action
       title="Delete Model"
       icon={Icon.Trash}
-      shortcut={{ modifiers: ["cmd"], key: "d" }}
+      shortcut={getActionShortcut("DeleteModelAction", settings)}
       style={Action.Style.Destructive}
       onAction={async () => {
         if (
@@ -61,7 +61,7 @@ export const DeleteAllModelsAction = (props: { models: ModelManager; settings: t
     <Action
       title="Delete All Models"
       icon={Icon.Trash}
-      shortcut={{ modifiers: ["cmd", "opt"], key: "d" }}
+      shortcut={getActionShortcut("DeleteAllModelsAction", settings)}
       style={Action.Style.Destructive}
       onAction={async () => {
         if (
