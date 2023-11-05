@@ -24,12 +24,16 @@ export default function Command() {
       onSelectionChange={async (query) => {
         const selectedItem = results.find((item) => item.query === query);
 
-        // evil voodoo
-        if (!selectedItem) return;
+        // when there is no history, or when there is no searchText
+        if (!selectedItem || !searchText) return;
+
+        // this is true when the user has manually changed the searchText
+        // because otherwise, selectedItem.query would have been changed along with searchText
         if (searchText !== selectedItem.query) {
-          if (!pauseSuggestions) {
-            setPauseSuggestions(true);
-          }
+          // then, we want to pause suggestions so that user can still switch to other suggestions
+          // from the original searchText
+          setPauseSuggestions(true);
+          // and then set the search text to the query
           setSearchText(selectedItem.query);
         }
       }}
