@@ -71,7 +71,6 @@ export function vaultPluginCheck(vaults: Vault[], plugin: string) {
   const { configFileName } = getPreferenceValues();
   vaults = vaults.filter((vault: Vault) => {
     const communityPluginsPath = `${vault.path}/${configFileName || ".obsidian"}/community-plugins.json`;
-    console.log(communityPluginsPath, fs.existsSync(communityPluginsPath));
     if (!fs.existsSync(communityPluginsPath)) {
       vaultsWithoutPlugin.push(vault);
     } else {
