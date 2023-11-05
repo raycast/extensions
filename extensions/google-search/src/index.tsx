@@ -9,12 +9,12 @@ export default function Command() {
     searchText,
     setSearchText,
     search,
-    pauseSuggestions,
     setPauseSuggestions,
     addHistory,
     deleteAllHistory,
     deleteHistoryItem,
   } = useSearch();
+
   const preferences = getPreferenceValues<Preferences>();
 
   return (

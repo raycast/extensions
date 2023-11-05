@@ -69,7 +69,7 @@ export async function getAutoSearchResults(searchText: string, signal: AbortSign
       // show just the URL if user has disabled showing description
       results.push({
         id: nanoid(),
-        query: showSearchDescription ? (description || item) : item,
+        query: showSearchDescription ? description || item : item,
         description: `Open URL for '${item}'`,
         url: item,
         isNavigation: true,
