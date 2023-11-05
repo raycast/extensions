@@ -21,6 +21,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={search}
+      selectedItemId={results.length > 0 ? results[0].id : undefined}
       onSelectionChange={async (id) => {
         const selectedItem = results.find((item) => item.id === id);
 
