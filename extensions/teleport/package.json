@@ -50,6 +50,13 @@
       "subtitle": "Teleport",
       "description": "List all applications available in teleport",
       "mode": "view"
+    },
+    {
+      "name": "list-kubernetes-clusters",
+      "title": "List Kubernetes Clusters",
+      "subtitle": "Teleport",
+      "description": "List all kubernetes clusters available in teleport",
+      "mode": "view"
     }
   ],
   "preferences": [

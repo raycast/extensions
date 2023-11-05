@@ -31,14 +31,48 @@ export async function getApplicationsList() {
   return JSON.parse(result.stdout.toString());
 }
 
+export async function getKubernetesClustersList() {
+  const result = spawnSync(
+    "sh",
+    [`${environment.assetsPath}/scripts/teleport-kubernetes-clusters-list.sh`],
+    getOptions()
+  );
+
+  return JSON.parse(result.stdout.toString());
+}
+
+export async function getKubernetesClustersPodsList() {
+  const result = spawnSync(
+    "sh",
+    [`${environment.assetsPath}/scripts/teleport-kubernetes-clusters-pods-list.sh`],
+    getOptions()
+  );
+
+  return JSON.parse(result.stdout.toString()).items;
+}
+
 export function getServerCommand(server: string, username: string) {
   return `tsh ssh ${username}@${server}`;
+}
+
+export function getKubernetesPodCommand(pod: string, namespace: string) {
+  return `kubectl -n ${namespace} exec -it ${pod} -- bash`;
 }
 
 export async function connectToDatabase(connection: string, username: string, protocol: string, database: string) {
   const result = spawnSync(
     "sh",
     [`${environment.assetsPath}/scripts/teleport-database-connect.sh`, connection, username, protocol, database],
+    getOptions()
+  );
+
+  return result.stdout.toString();
+}
+
+export async function connectToKubernetesCluster(cluster: string) {
+  const result = spawnSync(
+    "sh",
+    [`${environment.assetsPath}/scripts/teleport-kubernetes-cluster-connect.sh`, cluster],
     getOptions()
   );
 

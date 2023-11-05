@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { getApplicationsList, connectToApplication } from "./utils";
 
 async function open(name: string) {
@@ -19,7 +19,7 @@ async function open(name: string) {
 }
 
 export default function Command() {
-  const { data, isLoading } = usePromise(getApplicationsList);
+  const { data, isLoading } = useCachedPromise(getApplicationsList);
 
   return (
     <List isLoading={isLoading}>
