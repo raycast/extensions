@@ -4,7 +4,7 @@
 - Allow users to configure whether to show search descriptions or not
 - Show delete actions as destructive
 - Add shortcuts to copy actions
-- Add action to autocomplete the search text
+- Switching selected item in the search results list updates the search query, making it perform similar to how autocomplete works on Google Chrome
 
 ## [Update] - 2022-12-10
 
