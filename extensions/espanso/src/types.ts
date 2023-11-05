@@ -20,4 +20,11 @@ export type EspansoMatch = {
   label?: string;
 } & BaseMatch;
 
-export type FormattedEspansoMatch = EspansoMatch & MultiTrigger;
+export type NormalizedEspansoMatch = EspansoMatch & MultiTrigger;
+
+export type EspansoConfig = {
+  config: string;
+  packages: string;
+  runtime: string;
+  match: string;
+};
