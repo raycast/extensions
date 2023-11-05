@@ -57,14 +57,16 @@ export async function getAutoSearchResults(searchText: string, signal: AbortSign
   const json = JSON.parse(text);
 
   const results: SearchResult[] = [];
-
+  const { showSearchDescription } = getPreferenceValues<Preferences>();
+  
   json[1].map((item: string, i: number) => {
     const type = json[4]["google:suggesttype"][i];
     const description = json[2][i];
 
     if (type === "NAVIGATION") {
+      // show just the URL if user has disabled showing description
       results.push({
-        query: description.length > 0 ? description : item,
+        query: showSearchDescription ? description : item,
         description: `Open URL for '${item}'`,
         url: item,
         isNavigation: true,
