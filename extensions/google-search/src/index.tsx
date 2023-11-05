@@ -21,8 +21,8 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={search}
-      onSelectionChange={async (query) => {
-        const selectedItem = results.find((item) => item.query === query);
+      onSelectionChange={async (id) => {
+        const selectedItem = results.find((item) => item.id === id);
 
         // when there is no history, or when there is no searchText
         if (!selectedItem || !searchText) return;
@@ -43,8 +43,8 @@ export default function Command() {
       <List.Section title="Results" subtitle={results.length.toString()}>
         {results.map((item) => (
           <List.Item
-            id={item.query}
-            key={item.query}
+            id={item.id}
+            key={item.id}
             title={item.query}
             subtitle={preferences.showSearchDescription ? item.description : undefined}
             icon={getIcon(item)}
@@ -60,8 +60,6 @@ export default function Command() {
                     }}
                     icon={{ source: Icon.ArrowRight }}
                   />
-                  {/* <Action title="Autocomplete" onAction={() => setSearchText(item.query)} /> */}
-
                   <Action.CopyToClipboard
                     title="Copy URL to Clipboard"
                     content={item.url}
