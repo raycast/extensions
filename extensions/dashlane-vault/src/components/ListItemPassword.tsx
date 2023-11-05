@@ -18,11 +18,14 @@ export const ListItemPassword = ({ item }: Props) => {
   const itemName = item.title ?? item.url;
   const username = isInitialLoaded ? item.email ?? item.login ?? item.secondaryLogin : undefined;
 
+  const keywords = [item.title, item.url, item.email, item.login, item.secondaryLogin].filter(Boolean);
+
   return (
     <List.Item
       key={item.id}
       title={itemName}
       subtitle={username}
+      keywords={keywords}
       icon={getItemIcon(item)}
       accessories={getAccessories(item)}
       actions={
