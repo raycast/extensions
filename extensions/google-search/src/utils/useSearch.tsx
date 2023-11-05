@@ -14,6 +14,7 @@ export function useSearch() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchText, setSearchText] = useState("");
   const cancelRef = useRef<AbortController | null>(null);
+  const [pauseSuggestions, setPauseSuggestions] = useState(true);
 
   useEffect(() => {
     getHistory();
@@ -26,13 +27,13 @@ export function useSearch() {
   // Static result and filter history
   useEffect(() => {
     setStaticResults(getStaticResult(searchText));
-  }, [searchText]);
+  }, [searchText, pauseSuggestions]);
 
   // Static result and filter history
   useEffect(() => {
     const lowerSearchText = searchText.toLowerCase();
     setHistoryResults(history.filter((item) => item.query.toLowerCase().includes(lowerSearchText)));
-  }, [searchText, history]);
+  }, [searchText, history, pauseSuggestions]);
 
   // Autosuggestions
   useEffect(() => {
@@ -62,16 +63,19 @@ export function useSearch() {
     };
 
     fetchQuery();
-  }, [searchText]);
+  }, [searchText, pauseSuggestions]);
 
   // Combine all results
   useEffect(() => {
+    if (pauseSuggestions) return;
+
+    // combine and deduplicate results
     const combinedResults = [...staticResults, ...historyResults, ...autoResults].filter(
       (value, index, self) => index === self.findIndex((t) => t.query === value.query),
     );
 
     setResults(combinedResults);
-  }, [staticResults, historyResults, autoResults]);
+  }, [staticResults, historyResults, autoResults, pauseSuggestions]);
 
   async function getHistory() {
     const newHistory = await getSearchHistory();
@@ -122,6 +126,8 @@ export function useSearch() {
   }
 
   async function search(query: string) {
+    // user changed the search text, so we want to show new results
+    setPauseSuggestions(false);
     setSearchText(query);
   }
 
@@ -131,6 +137,8 @@ export function useSearch() {
     searchText,
     setSearchText,
     search,
+    pauseSuggestions,
+    setPauseSuggestions,
     history,
     addHistory,
     deleteAllHistory,

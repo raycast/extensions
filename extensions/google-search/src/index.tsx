@@ -3,14 +3,36 @@ import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
 
 export default function Command() {
-  const { isLoading, results, search, searchText, setSearchText, addHistory, deleteAllHistory, deleteHistoryItem } =
-    useSearch();
+  const {
+    isLoading,
+    results,
+    searchText,
+    setSearchText,
+    search,
+    pauseSuggestions,
+    setPauseSuggestions,
+    addHistory,
+    deleteAllHistory,
+    deleteHistoryItem,
+  } = useSearch();
   const preferences = getPreferenceValues<Preferences>();
 
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={search}
+      onSelectionChange={async (query) => {
+        const selectedItem = results.find((item) => item.query === query);
+
+        // evil voodoo
+        if (!selectedItem) return;
+        if (searchText !== selectedItem.query) {
+          if (!pauseSuggestions) {
+            setPauseSuggestions(true);
+          }
+          setSearchText(selectedItem.query);
+        }
+      }}
       searchText={searchText}
       searchBarPlaceholder="Search Google or enter a URL..."
     >
@@ -34,7 +56,7 @@ export default function Command() {
                     }}
                     icon={{ source: Icon.ArrowRight }}
                   />
-                  <Action title="Autocomplete" onAction={() => setSearchText(item.query)} />
+                  {/* <Action title="Autocomplete" onAction={() => setSearchText(item.query)} /> */}
 
                   <Action.CopyToClipboard
                     title="Copy URL to Clipboard"
