@@ -17,7 +17,8 @@ export default function Command() {
       <List.Section title="Results" subtitle={results.length.toString()}>
         {results.map((item) => (
           <List.Item
-            key={item.id}
+            id={item.query}
+            key={item.query}
             title={item.query}
             subtitle={preferences.showSearchDescription ? item.description : undefined}
             icon={getIcon(item)}

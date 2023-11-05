@@ -1,5 +1,4 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { nanoid } from "nanoid";
 import { Preferences, SearchResult } from "./types";
 import fetch from "node-fetch";
 import iconv from "iconv-lite";
@@ -28,7 +27,6 @@ export function getStaticResult(searchText: string): SearchResult[] {
 
   const result: SearchResult[] = [
     {
-      id: nanoid(),
       query: searchText,
       description: `Search Google for '${searchText}'`,
       url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
@@ -66,7 +64,6 @@ export async function getAutoSearchResults(searchText: string, signal: AbortSign
 
     if (type === "NAVIGATION") {
       results.push({
-        id: nanoid(),
         query: description.length > 0 ? description : item,
         description: `Open URL for '${item}'`,
         url: item,
@@ -74,7 +71,6 @@ export async function getAutoSearchResults(searchText: string, signal: AbortSign
       });
     } else if (type === "QUERY") {
       results.push({
-        id: nanoid(),
         query: item,
         description: `Search Google for '${item}'`,
         url: `https://www.google.com/search?q=${encodeURIComponent(item)}`,
