@@ -1,3 +1,3 @@
 export interface GetBrightness {
-    brightness: number;
+  brightness: number;
 }
