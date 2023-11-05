@@ -1,18 +1,13 @@
 import { Action, ActionPanel, Application, Clipboard, Detail, List, getFrontmostApplication } from "@raycast/api";
-
-import { homedir } from "os";
-import path from "path";
 import { useEffect, useState } from "react";
 import { ProcessOutput } from "zx";
 import { commandNotFoundMd, noContentMd } from "./messages";
-import { FormattedEspansoMatch } from "./types";
-import { getMatches } from "./utils";
-
-const matchFilesDirectory: string = path.join(homedir(), "Library/Application Support/espanso/match");
+import { NormalizedEspansoMatch } from "./types";
+import { getEspansoConfig, getMatches } from "./utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [items, setItems] = useState<FormattedEspansoMatch[]>([]);
+  const [items, setItems] = useState<NormalizedEspansoMatch[]>([]);
   const [error, setError] = useState<ProcessOutput | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
 
@@ -27,7 +22,10 @@ export default function Command() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const matches: FormattedEspansoMatch[] = getMatches(matchFilesDirectory);
+        const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+        const packageMatches = getMatches(packageFilesDirectory, { packagePath: true });
+        const userMatches = getMatches(matchFilesDirectory);
+        const matches: NormalizedEspansoMatch[] = userMatches.concat(packageMatches);
         matches.sort((a, b) => {
           if (a.label && b.label) {
             return a.label.localeCompare(b.label);
