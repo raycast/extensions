@@ -1,4 +1,4 @@
-import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD, showToast } from "@raycast/api";
+import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { useState, useEffect } from "react";
 import prettyBytes from "pretty-bytes";
@@ -82,8 +82,10 @@ export default function ProcessList() {
   const killProcess = (process: Process) => {
     exec(`kill -9 ${process.id}`);
     setFetchResult(state.filter((p) => p.id !== process.id));
-    clearSearchBar({ forceScrollToTop: true });
-    showHUD(`✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`);
+    showToast({
+      title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
+      style: Toast.Style.Success
+    });
   };
 
   const subtitleString = (process: Process) => {
