@@ -1,6 +1,7 @@
 import fse from "fs-extra";
 import path from "path";
-import { EspansoMatch, MultiTrigger, Replacement, FormattedEspansoMatch } from "./types";
+import { $ } from "zx";
+import { EspansoMatch, MultiTrigger, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import YAML from "yaml";
 
 function lastUpdatedDate(file: string) {
@@ -34,16 +35,24 @@ export function appendMatchToFile(fileContent: string, fileName: string, espanso
   return { fileName, filePath };
 }
 
-export function getMatches(espansoMatchDir: string): FormattedEspansoMatch[] {
-  const matchFiles = fse
-    .readdirSync(espansoMatchDir)
-    .filter((fileName) => {
-      const filePath = path.join(espansoMatchDir, fileName);
-      return fse.statSync(filePath).isFile() && path.extname(fileName).toLowerCase() === ".yml";
-    })
-    .map((fileName) => path.join(espansoMatchDir, fileName));
+export function getMatches(espansoMatchDir: string, options?: { packagePath: boolean }): NormalizedEspansoMatch[] {
+  let matchFiles: string[];
+  const finalMatches: NormalizedEspansoMatch[] = [];
 
-  const finalMatches: FormattedEspansoMatch[] = [];
+  if (options && options.packagePath) {
+    matchFiles = fse
+      .readdirSync(espansoMatchDir)
+      .filter((path) => path != ".DS_Store")
+      .map((packageDir) => path.join(espansoMatchDir, packageDir, "package.yml"));
+  } else {
+    matchFiles = fse
+      .readdirSync(espansoMatchDir)
+      .filter((fileName) => {
+        const filePath = path.join(espansoMatchDir, fileName);
+        return fse.statSync(filePath).isFile() && path.extname(fileName).toLowerCase() === ".yml";
+      })
+      .map((fileName) => path.join(espansoMatchDir, fileName));
+  }
 
   for (const matchFile of matchFiles) {
     const content = fse.readFileSync(matchFile);
@@ -65,6 +74,31 @@ export function getMatches(espansoMatchDir: string): FormattedEspansoMatch[] {
       }),
     );
   }
-
   return finalMatches;
+}
+
+export async function getEspansoConfig(): Promise<EspansoConfig> {
+  const configObject: EspansoConfig = {
+    config: "",
+    packages: "",
+    runtime: "",
+    match: "",
+  };
+
+  $.verbose = false;
+  const { stdout: configString } = await $`espanso path`;
+
+  configString.split("\n").forEach((item) => {
+    const [key, value] = item.split(":");
+    if (key && value) {
+      const lowercaseKey = key.trim().toLowerCase() as keyof EspansoConfig;
+      if (lowercaseKey in configObject) {
+        configObject[lowercaseKey] = value.trim();
+      }
+    }
+  });
+
+  configObject.match = path.join(configObject.config, "match");
+
+  return configObject;
 }
