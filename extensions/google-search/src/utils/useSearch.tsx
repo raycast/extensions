@@ -2,10 +2,11 @@ import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/ap
 import { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 import { getAutoSearchResults, getSearchHistory, getStaticResult } from "./handleResults";
-import { SearchResult, HISTORY_KEY, Preferences } from "./types";
+import { SearchResult, HISTORY_KEY } from "./types";
 
 export function useSearch() {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
+
   const [isLoading, setIsLoading] = useState(true);
   const [history, setHistory] = useState<SearchResult[]>([]);
   const [staticResults, setStaticResults] = useState<SearchResult[]>([]);
