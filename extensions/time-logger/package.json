@@ -57,7 +57,7 @@
       "title": "Log Your Work",
       "description": "Manage your epics and log your work to Google Calendar",
       "mode": "view",
-      "subtitle": "gcal (Google Calendar)"
+      "subtitle": "Google Calendar"
     }
   ],
   "dependencies": {
