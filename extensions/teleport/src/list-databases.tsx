@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Form } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { getDatabasesList, connectToDatabase } from "./utils";
+import { databasesList, connectToDatabase } from "./utils";
+import { useMemo } from "react";
 
 async function open(name: string, protocol: string, database: string) {
   const toast = await showToast({
@@ -11,7 +11,7 @@ async function open(name: string, protocol: string, database: string) {
   const prefs = getPreferenceValues();
 
   try {
-    await connectToDatabase(name, prefs.username, protocol, database);
+    connectToDatabase(name, prefs.username, protocol, database);
     toast.style = Toast.Style.Success;
     toast.title = "Success !";
   } catch (err) {
@@ -39,11 +39,12 @@ function DatabaseForm(props: { name: string; protocol: string }) {
 }
 
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(getDatabasesList);
+  const { data, isLoading } = databasesList();
+  const results = useMemo(() => JSON.parse(data || "[]") || [], [data]);
 
   return (
     <List isLoading={isLoading}>
-      {data?.map((item: { metadata: { name: string }; spec: { protocol: string } }, index: number) => {
+      {results.map((item: { metadata: { name: string }; spec: { protocol: string } }, index: number) => {
         const name = item.metadata.name;
         const protocol = item.spec.protocol;
 

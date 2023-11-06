@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { getApplicationsList, connectToApplication } from "./utils";
+import { applicationsList, connectToApplication } from "./utils";
+import { useMemo } from "react";
 
 async function open(name: string) {
   const toast = await showToast({
@@ -9,7 +9,7 @@ async function open(name: string) {
   });
 
   try {
-    await connectToApplication(name);
+    connectToApplication(name);
     toast.style = Toast.Style.Success;
     toast.title = "Success !";
   } catch (err) {
@@ -19,11 +19,12 @@ async function open(name: string) {
 }
 
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(getApplicationsList);
+  const { data, isLoading } = applicationsList();
+  const results = useMemo(() => JSON.parse(data || "[]") || [], [data]);
 
   return (
     <List isLoading={isLoading}>
-      {data?.map((item: { metadata: { name: string }; spec: { public_addr: string } }, index: number) => {
+      {results.map((item: { metadata: { name: string }; spec: { public_addr: string } }, index: number) => {
         const name = item.metadata.name;
         const public_addr = item.spec.public_addr;
 

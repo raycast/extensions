@@ -1,10 +1,9 @@
 import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import {
-  connectToKubernetesCluster,
-  getKubernetesClustersList,
-  getKubernetesClustersPodsList,
-  getKubernetesPodCommand,
+  appleScriptTerminalCommand,
+  kubernetesClustersList,
+  kubernetesClustersPodsList,
+  kubernetesPodCommand,
 } from "./utils";
 import { runAppleScript } from "run-applescript";
 import { useMemo } from "react";
@@ -16,23 +15,9 @@ async function open(name: string, namespace: string) {
   });
 
   const prefs = getPreferenceValues();
-  const terminal = prefs.terminal.name;
 
   try {
-    const command = getKubernetesPodCommand(name, namespace);
-
-    await runAppleScript(`
-            tell application "Finder" to activate
-            tell application "${terminal}" to activate
-            tell application "System Events" to tell process "${terminal}" to keystroke "t" using command down
-            tell application "System Events" to tell process "${terminal}"
-                delay 0.5
-                keystroke "${command}"
-                delay 0.5
-                key code 36
-            end tell  
-        `);
-
+    await runAppleScript(appleScriptTerminalCommand(prefs.terminal.name, kubernetesPodCommand(name, namespace)));
     toast.style = Toast.Style.Success;
     toast.title = "Success !";
   } catch (err) {
@@ -42,17 +27,12 @@ async function open(name: string, namespace: string) {
 }
 
 function ListPods(props: { name: string }) {
-  const { data, isLoading } = useCachedPromise(
-    async (name) => {
-      await connectToKubernetesCluster(name);
-      return await getKubernetesClustersPodsList();
-    },
-    [props.name]
-  );
+  const { data, isLoading } = kubernetesClustersPodsList(props.name);
+  const results = useMemo(() => JSON.parse(data || "{}").items || [], [data]);
 
   return (
     <List isLoading={isLoading}>
-      {data?.map((item: { metadata: { name: string; namespace: string } }, index: number) => {
+      {results.map((item: { metadata: { name: string; namespace: string } }, index: number) => {
         const name = item.metadata.name;
         const namespace = item.metadata.namespace;
 
@@ -75,11 +55,12 @@ function ListPods(props: { name: string }) {
 }
 
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(getKubernetesClustersList);
+  const { data, isLoading } = kubernetesClustersList();
+  const results = useMemo(() => JSON.parse(data || "[]") || [], [data]);
 
   return (
     <List isLoading={isLoading}>
-      {data?.map((item: { kube_cluster_name: string }, index: number) => {
+      {results.map((item: { kube_cluster_name: string }, index: number) => {
         const name = item.kube_cluster_name;
 
         return (
