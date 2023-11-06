@@ -5,6 +5,9 @@
   "description": "An extension for Raycast that let's you access Cilium Docs through Raycast.",
   "icon": "command-icon.png",
   "author": "dario_mader",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Documentation"
   ],
@@ -12,14 +15,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Docs",
+      "title": "Search Cilium Docs",
       "description": "Search the Cilium Docs",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.61.0",
-    "axios": "^1.6.0",
+    "@raycast/utils": "^1.10.0",
     "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
