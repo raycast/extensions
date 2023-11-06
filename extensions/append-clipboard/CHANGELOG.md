@@ -2,7 +2,7 @@
 
 ## [Enhancements] - 2023-11-06
 
-- Added support for \n and \t as separators.
+- Added support for {newline} and {tab} as separators.
 - The preferences for appendSeparator and prependSeparator all save to appendSeparator.
 
 ## [Add trim feature] - 2023-07-19
