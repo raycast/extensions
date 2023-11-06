@@ -21,7 +21,7 @@ export function useCreatedIssues(repository: string | null) {
         numberOfClosedItems: 20,
       });
     },
-    [repository]
+    [repository],
   );
 
   const openedIssues = data?.createdOpen.nodes as IssueFieldsFragment[];

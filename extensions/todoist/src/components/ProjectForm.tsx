@@ -34,11 +34,7 @@ type ProjectFormValues = {
 export default function ProjectForm({ project, fromProjectList }: ProjectFormProps) {
   const { push, pop } = useNavigation();
 
-  const { data, setData, error, isLoading } = useSyncData();
-
-  if (error) {
-    handleError({ error, title: "Unable to get projects" });
-  }
+  const { data, setData, isLoading } = useSyncData();
 
   const isCreatingProject = !project;
 

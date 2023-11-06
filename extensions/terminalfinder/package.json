@@ -30,7 +30,7 @@
     },
     {
       "name": "finderToITerm",
-      "title": "Finder → ITerm",
+      "title": "Finder → iTerm",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"

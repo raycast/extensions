@@ -1,10 +1,11 @@
-import { Clipboard, closeMainWindow, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { captureException } from "~/utils/development";
+import { showCopySuccessMessage } from "~/utils/clipboard";
 
 function CopyTotpAction() {
   const bitwarden = useBitwarden();
@@ -20,8 +21,7 @@ function CopyTotpAction() {
       const totp = await bitwarden.getTotp(id);
       await toast?.hide();
       await Clipboard.copy(totp, { transient: getTransientCopyPreference("other") });
-      await showHUD("Copied to clipboard");
-      await closeMainWindow({ clearRootSearch: true });
+      await showCopySuccessMessage("Copied code to clipboard");
     } catch (error) {
       toast.message = "Failed to get TOTP";
       toast.style = Toast.Style.Failure;

@@ -2,6 +2,14 @@ import { Task } from "../api";
 
 import { isExactTimeTask } from "./dates";
 
+export const searchBarPlaceholder = "Filter tasks by name, priority, project, label or assignee";
+
+export enum ViewMode {
+  project = "project",
+  date = "date",
+  search = "search",
+}
+
 export function getTaskUrl(id: string) {
   return `https://todoist.com/app/task/${id}`;
 }

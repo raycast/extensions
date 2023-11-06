@@ -10,7 +10,8 @@
     "reloadedhead",
     "Timon",
     "luisFilipePT",
-    "LunaticMuch"
+    "LunaticMuch",
+    "jomifepe"
   ],
   "license": "MIT",
   "categories": [
@@ -117,7 +118,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.3",
+    "@raycast/api": "^1.57.1",
     "@raycast/utils": "^1.5.2",
     "dedupe": "^4.0.2",
     "fetch-readme": "^1.0.0",

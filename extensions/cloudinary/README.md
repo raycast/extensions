@@ -6,19 +6,9 @@ Cloudinary utilities available right from your Raycast launcher.
 
 ## Getting Started
 
-### On Mac
-
-* Install [pngpaste](https://github.com/jcsalterego/pngpaste)
-
-```
-brew install pngpaste
-```
-
 * Install the Cloudinary Raycast extension
 
-This extension is not yet published in the store.
-
-Until then, clone this repository and run the Import Extension task, selecting this project to import.
+https://www.raycast.com/colbyfayock/cloudinary
 
 * Configure Cloudinary account
 

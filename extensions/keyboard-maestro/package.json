@@ -12,22 +12,27 @@
       "title": "List Macros",
       "subtitle": "Keyboard Maestro",
       "description": "List and quickly trigger Keyboard Maestro Macros",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Macro Name",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.53.0",
     "plist": "^3.0.4",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "@types/plist": "^3.0.2",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"

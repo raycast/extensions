@@ -33,6 +33,13 @@
       "subtitle": "Specify",
       "description": "Search your vector files in your Specify repositories (PDFs files are not supported yet)",
       "mode": "view"
+    },
+    {
+      "name": "search-api-documentation",
+      "title": "Search API Documentation",
+      "subtitle": "Specify",
+      "description": "Search Specify's API documentation",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -46,7 +53,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.52.0",
     "axios": "^0.27.2",
     "js-base64": "^3.7.2",
     "react-use": "^17.4.0",

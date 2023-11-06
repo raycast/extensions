@@ -24,6 +24,7 @@ The Linkding API key and server URL from your Linkding instance are needed to us
 
 - Update bookmarks in extension
 
+
 ## Contributing
 
 Contributions are always welcome!

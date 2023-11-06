@@ -1,12 +1,14 @@
 import fetch from "node-fetch";
 
 export interface Crate {
+  id?: string;
   name: string;
   version: string;
   downloads: number;
   documentationURL?: string;
   homepageURL?: string;
   repositoryURL?: string;
+  description?: string;
 }
 
 export async function getCrates(search: string): Promise<Crate[]> {
@@ -19,12 +21,14 @@ export async function getCrates(search: string): Promise<Crate[]> {
   const crates: Crate[] = [];
   for (const crate of Object(json).crates) {
     crates.push({
+      id: crate.id,
       name: crate.name,
       version: crate.max_version,
       downloads: crate.downloads,
       documentationURL: crate.documentation,
       homepageURL: crate.homepage,
       repositoryURL: crate.repository,
+      description: crate.description,
     });
   }
   return crates;

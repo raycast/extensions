@@ -1,6 +1,6 @@
-import { Detail, environment, MenuBarExtra, showToast, Toast } from "@raycast/api";
+import { environment, List, MenuBarExtra, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { authorize } from "../api/oauth";
 import { User } from "../api/users";
@@ -18,6 +18,7 @@ let jiraCredentials: JiraCredentials | null = null;
 
 export function withJiraCredentials(component: JSX.Element) {
   const [x, forceRerender] = useState(0);
+  const [query, setQuery] = useState("");
 
   // we use a `useMemo` instead of `useEffect` to avoid a render
   useMemo(() => {
@@ -69,7 +70,7 @@ export function withJiraCredentials(component: JSX.Element) {
   if (!jiraCredentials) {
     if (environment.commandMode === "view") {
       // Using the <List /> component makes the placeholder buggy
-      return <Detail isLoading />;
+      return <List isLoading onSearchTextChange={setQuery} searchText={query} />;
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
     } else {
@@ -78,7 +79,7 @@ export function withJiraCredentials(component: JSX.Element) {
     }
   }
 
-  return component;
+  return React.cloneElement(component, { query: query });
 }
 
 export function getJiraCredentials() {

@@ -1,4 +1,4 @@
-import { autoSetWallpaper } from "./utils/common-utils";
+import { autoSetWallpaper, cache } from "./utils/common-utils";
 import { LocalStorageKey, RAYCAST_WALLPAPER_LIST_URL } from "./utils/constants";
 import { RaycastWallpaper } from "./types/types";
 import { environment, LaunchType, LocalStorage, showHUD } from "@raycast/api";
@@ -17,8 +17,15 @@ export const getRandomWallpaper = async () => {
     const _wallpaperList =
       typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as RaycastWallpaper[]);
 
+    const _excludeCache = cache.get(LocalStorageKey.EXCLUDE_LIST_CACHE);
+    const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
+
+    const wallpaperList = _wallpaperList.filter((value) => {
+      return !_excludeList.includes(value.url);
+    });
+
     if (_wallpaperList.length !== 0) {
-      const randomImage = _wallpaperList[Math.floor(Math.random() * _wallpaperList.length)];
+      const randomImage = wallpaperList[Math.floor(Math.random() * wallpaperList.length)];
       await autoSetWallpaper(randomImage);
     } else {
       //cache picture
@@ -31,7 +38,10 @@ export const getRandomWallpaper = async () => {
       })
         .then((axiosRes) => {
           const _raycastWallpaper = axiosRes.data as RaycastWallpaper[];
-          const randomImage = _raycastWallpaper[Math.floor(Math.random() * _raycastWallpaper.length)];
+          const raycastWallpaper = _raycastWallpaper.filter((value) => {
+            return !_excludeList.includes(value.url);
+          });
+          const randomImage = raycastWallpaper[Math.floor(Math.random() * raycastWallpaper.length)];
           autoSetWallpaper(randomImage);
 
           //cache list

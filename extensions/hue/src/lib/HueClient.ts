@@ -49,7 +49,7 @@ export default class HueClient {
     setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
     setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
     setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
-    setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
+    setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>,
   ) {
     this.http2Session = http2Session;
     this.bridgeConfig = bridgeConfig;
@@ -88,7 +88,7 @@ export default class HueClient {
 
   public async updateLight(light: Light, properties: LightRequest): Promise<Partial<Light>[]> {
     const response = await this.lightsQueue.enqueueRequest(() =>
-      this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties)
+      this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties),
     );
 
     return response.data.data;
@@ -96,7 +96,7 @@ export default class HueClient {
 
   public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<GroupedLight>): Promise<any> {
     const response = await this.groupedLightsQueue.enqueueRequest(() =>
-      this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties)
+      this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties),
     );
 
     return response.data.data;
@@ -146,10 +146,11 @@ export default class HueClient {
 
         try {
           if (response.headers[":status"] !== 200 && response.headers["content-type"] === "text/html") {
+            // On non-200 responses, the body is an HTML page with an error message
             const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
             if (errorMatch && errorMatch[0]) {
               console.error({ headers: response.headers, message: errorMatch[0] });
-              reject(new Error(errorMatch[0]));
+              return reject(`Status ${response.headers[":status"]}: ${errorMatch[0]}`);
             }
           }
 
@@ -158,17 +159,17 @@ export default class HueClient {
           if (response.data.errors != null && response.data.errors.length > 0) {
             const errorMessage = response.data.errors.map((error) => error.description).join(", ");
             console.error({ headers: response.headers, message: errorMessage });
-            reject(new Error(errorMessage));
+            return reject(errorMessage);
           }
 
-          resolve(response);
-        } catch (e) {
-          reject(e);
+          return resolve(response);
+        } catch (error) {
+          return reject(error);
         }
       });
 
-      stream.on("error", (e) => {
-        reject(e);
+      stream.on("error", (error) => {
+        return reject(error);
       });
 
       stream.end();
@@ -250,9 +251,9 @@ export default class HueClient {
     });
 
     stream.on("error", (error) => {
-      console.error(error);
       parser?.end();
       stream.close();
+      console.error(error, [parser?.input]);
     });
   }
 }
@@ -265,8 +266,8 @@ function createParser(parser: Chain | null, callback: (data: ParsedUpdateEvent) 
     parser = null;
   });
 
-  parser.on("error", (err) => {
-    console.error(`Parser error: ${err}`);
+  parser.on("error", (error) => {
+    console.error(error);
   });
 
   return parser;

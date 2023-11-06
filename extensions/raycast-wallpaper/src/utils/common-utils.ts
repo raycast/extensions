@@ -1,11 +1,12 @@
-import { environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
+import { Cache, environment, getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
 import fse, { existsSync } from "fs-extra";
-import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
 import { Preferences } from "../types/preferences";
-import { RaycastWallpaper } from "../types/types";
+import { RaycastWallpaper, RaycastWallpaperWithInfo } from "../types/types";
 import axios from "axios";
+import { runAppleScript } from "@raycast/utils";
 
+export const cache = new Cache();
 export const cachePath = environment.supportPath;
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -37,7 +38,7 @@ export async function downloadPicture(wallpaper: { title: string; url: string })
   await showToast(Toast.Style.Animated, "Downloading...");
 
   const picturePath = `${getSavedDirectory()}/${wallpaper.title}.png`;
-  await fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)), async (error) => {
+  fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)), async (error) => {
     if (error != null) {
       await showToast(Toast.Style.Failure, String(error));
     } else {
@@ -65,7 +66,7 @@ export async function downloadPicture(wallpaper: { title: string; url: string })
   });
 }
 
-export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
+export const setWallpaper = async (wallpaper: RaycastWallpaperWithInfo) => {
   const toast = await showToast(Toast.Style.Animated, "Downloading and setting wallpaper...");
 
   const { applyTo } = getPreferenceValues<Preferences>();
@@ -174,7 +175,7 @@ export const checkCache = (wallpaper: RaycastWallpaper) => {
   return fse.pathExistsSync(fixedPath);
 };
 
-export async function cachePicture(wallpaper: { title: string; url: string }) {
+export async function cachePicture(wallpaper: RaycastWallpaper) {
   const picturePath = buildCachePath(wallpaper);
   await fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)));
 }

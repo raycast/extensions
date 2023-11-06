@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { BrewItemList, getServices, serviceType } from "./services";
+import { BrewItemList, getServices, Service } from "./services";
 
 export default function Command() {
-  const [services, setServices] = useState<serviceType[]>();
+  const [services, setServices] = useState<Service[]>();
   useEffect(() => {
     getServices().then((service) => setServices(service));
   });

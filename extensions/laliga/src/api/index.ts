@@ -5,9 +5,11 @@ import {
   LaLigaClubs,
   LaLigaClubSquad,
   LaLigaMatch,
+  LaLigaMatchCommentaries,
   LaLigaStanding,
   LaLigaSubscriptionRounds,
   Match,
+  MatchCommentary,
   Round,
   Squad,
   Standing,
@@ -23,6 +25,7 @@ const { apikey } = getPreferenceValues();
 const endpoint = "https://apim.laliga.com/public-service/api/v1";
 const headers = {
   "Ocp-Apim-Subscription-Key": apikey,
+  "Content-Language": "en",
 };
 
 export const getCurrentGameWeek = async (competition: string) => {
@@ -140,10 +143,7 @@ export const getSquad = async (team: string): Promise<Squad[]> => {
       orderType: "DESC",
       // seasonYear: "2021",
     },
-    headers: {
-      "Ocp-Apim-Subscription-Key": apikey,
-      "Content-Language": "en",
-    },
+    headers,
   };
 
   try {
@@ -168,6 +168,27 @@ export const getSubscriptionRounds = async (competition: string): Promise<Round[
     const { data }: AxiosResponse<LaLigaSubscriptionRounds> = await axios(config);
 
     return data.rounds;
+  } catch (e) {
+    showFailureToast();
+
+    return [];
+  }
+};
+
+export const getMatchComments = async (slug: string): Promise<MatchCommentary[]> => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/matches/${slug}/comments`,
+    headers,
+    params: {
+      limit: 100,
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<LaLigaMatchCommentaries> = await axios(config);
+
+    return data.match_commentaries;
   } catch (e) {
     showFailureToast();
 

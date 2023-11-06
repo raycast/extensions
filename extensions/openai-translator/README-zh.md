@@ -77,7 +77,7 @@ npm install && npm run dev
 
 ### Azure OpenAI Service
 
-- API Entrypoint：`https://${resourceName}.openai.azure.com/openai/deployments/${deployName}/completions?api-version=${apiVersion}`
+- API Entrypoint：`https://${resourceName}.openai.azure.com/openai/deployments/${deployName}/chat/completions?api-version=${apiVersion}`
 - API Key: [Azure](https://portal.azure.com/) -> Azure OpenAI -> Keys and Endpoint
 - API Model: 无需配置
 

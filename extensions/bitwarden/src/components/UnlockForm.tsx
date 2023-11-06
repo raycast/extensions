@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
 import { useBitwarden } from "~/context/bitwarden";
-import { Preferences } from "~/types/preferences";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";

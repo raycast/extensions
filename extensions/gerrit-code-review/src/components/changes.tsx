@@ -72,15 +72,24 @@ export function FetchChanges(props: ChangeProps) {
         {changes.map((change) => (
           <List.Item
             key={change.url}
-            title={{ value: `${change._number}`, tooltip: `Project: ${change.project}, Branch: ${change.branch}` }}
+            title={{
+              value: `${change._number}`,
+              tooltip: `Project: ${change.project}, Branch: ${change.branch}`,
+            }}
             subtitle={{
               value: change.subject.length > 65 ? `${change.subject.substring(0, 62)}...` : `${change.subject}`,
               tooltip: `${change.subject}`,
             }}
-            icon={{ value: Icon.Person, tooltip: `Author: ${change.author.name}` }}
+            icon={{
+              value: Icon.Person,
+              tooltip: `Author: ${change.author.name}`,
+            }}
             accessories={[
               change.apiWarnings.length > 0
-                ? { tooltip: `${change.apiWarnings}`, icon: { source: Icon.Warning, tintColor: Color.Orange } }
+                ? {
+                    tooltip: `${change.apiWarnings}`,
+                    icon: { source: Icon.Warning, tintColor: Color.Orange },
+                  }
                 : {},
               change.status != "MERGED" && change.submitRequirementsMet !== undefined
                 ? {

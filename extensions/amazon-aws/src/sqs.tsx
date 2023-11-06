@@ -88,7 +88,7 @@ async function fetchQueueAttributes(queueUrl: string) {
     new GetQueueAttributesCommand({
       QueueUrl: queueUrl,
       AttributeNames: ["ApproximateNumberOfMessages"],
-    })
+    }),
   );
 
   return Attributes;

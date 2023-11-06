@@ -162,7 +162,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 ```markdown
 # Brew Changelog
 
-## [Added a bunch of new feedback] - 2022-01-17
+## [Added a bunch of new feedback] - 2023-01-17
 
 - Improve reliability of `outdated` command
 - Add action to copy formula/cask name

@@ -2,14 +2,14 @@ import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
-import { Task } from "../api";
+import { SyncData, Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
 import { getColorByKey } from "../helpers/colors";
 import { isRecurring, displayDueDate, isExactTimeTask, displayDueDateTime, isOverdue } from "../helpers/dates";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { displayReminderName } from "../helpers/reminders";
-import { QuickLinkView, ViewMode } from "../home";
-import useCachedData from "../hooks/useCachedData";
+import { ViewMode } from "../helpers/tasks";
+import { QuickLinkView } from "../home";
 import { ViewProps } from "../hooks/useViewTasks";
 
 import TaskActions from "./TaskActions";
@@ -19,12 +19,19 @@ type TaskListItemProps = {
   task: Task;
   mode?: ViewMode;
   viewProps?: ViewProps;
+  data?: SyncData;
+  setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
   quickLinkView?: QuickLinkView;
 };
 
-export default function TaskListItem({ task, mode, viewProps, quickLinkView }: TaskListItemProps): JSX.Element {
-  const [data] = useCachedData();
-
+export default function TaskListItem({
+  task,
+  mode,
+  viewProps,
+  data,
+  setData,
+  quickLinkView,
+}: TaskListItemProps): JSX.Element {
   const taskComments = data?.notes.filter((note) => note.item_id === task.id);
   const accessories: List.Item.Accessory[] = [];
   const keywords: string[] = [];
@@ -57,7 +64,7 @@ export default function TaskListItem({ task, mode, viewProps, quickLinkView }: T
 
   if (task.labels && task.labels.length > 0) {
     accessories.unshift({
-      icon: { source: "tag.svg", tintColor: Color.SecondaryText },
+      icon: { source: Icon.Tag, tintColor: Color.SecondaryText },
       text: `${task.labels.length}`,
       tooltip: `${task.labels.join(", ")}`,
     });
@@ -76,7 +83,7 @@ export default function TaskListItem({ task, mode, viewProps, quickLinkView }: T
   if (task.due?.date) {
     const exactTime = isExactTimeTask(task);
     const recurring = isRecurring(task);
-    const overdue = isOverdue(new Date(task.due.date));
+    const overdue = isOverdue(task.due.date);
 
     const text = exactTime ? displayDueDateTime(task.due.date) : displayDueDate(task.due.date);
 
@@ -91,7 +98,7 @@ export default function TaskListItem({ task, mode, viewProps, quickLinkView }: T
       accessories.unshift({ icon: Icon.Clock, text, tooltip: `Due time: ${text}` });
     }
 
-    if (isOverdue(new Date(task.due.date)) || mode !== ViewMode.date) {
+    if (isOverdue(task.due.date) || mode !== ViewMode.date) {
       accessories.unshift({
         icon: {
           source: recurring ? Icon.ArrowClockwise : Icon.Calendar,
@@ -146,7 +153,14 @@ export default function TaskListItem({ task, mode, viewProps, quickLinkView }: T
         <ActionPanel title={task.content}>
           <Action.Push title="Show Details" target={<TaskDetail taskId={task.id} />} icon={Icon.Sidebar} />
 
-          <TaskActions task={task} viewProps={viewProps} mode={mode} quickLinkView={quickLinkView} />
+          <TaskActions
+            task={task}
+            viewProps={viewProps}
+            mode={mode}
+            data={data}
+            setData={setData}
+            quickLinkView={quickLinkView}
+          />
         </ActionPanel>
       }
     />

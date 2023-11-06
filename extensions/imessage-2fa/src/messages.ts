@@ -34,13 +34,13 @@ function getQuery(options: { searchText?: string; searchType: SearchType }) {
 
   if (options.searchType === "code") {
     baseQuery = `${baseQuery} \nand (
-      message.text glob '*[0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9]*'
+      message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
       or message.text glob '*[0-9][0-9][0-9]-[0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
     )`;
   }
 

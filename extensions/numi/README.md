@@ -18,3 +18,10 @@ This command allows for quick search on Numi
 - `enter` will copy the result at the clipboard
 
 ![Query on Numi Command](https://raw.githubusercontent.com/raycast/extensions/711c5d9d36f3ed872fc29616945d33b137802c3f/extensions/numi/metadata/screenshot-02.png)
+
+## Use Numi CLI
+
+You can make this extension use the Numi CLI instead of the Numi API if you want
+
+- Install [numi-cli](https://github.com/nikolaeu/numi#numi-cli)
+- Open Extension Preferences and Check 'Use Numi CLI'

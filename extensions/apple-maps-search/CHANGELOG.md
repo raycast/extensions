@@ -1,5 +1,9 @@
 # Apple Maps Search Changelog
 
+## [Fix] - 2023-08-08
+
+- Fixed so the extension work correctly in fallback searches
+
 ## [Enhancement] - 2023-02-06
 
 - Set default origin value to "home" when using "Directions To" command.

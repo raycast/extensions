@@ -1,9 +1,10 @@
-import { Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
 import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { captureException } from "~/utils/development";
+import { showCopySuccessMessage } from "~/utils/clipboard";
 
 function CopyPasswordAction() {
   const selectedItem = useSelectedVaultItem();
@@ -16,7 +17,7 @@ function CopyPasswordAction() {
       const password = await getUpdatedVaultItem(selectedItem, (item) => item.login?.password, "Getting password...");
       if (password) {
         await Clipboard.copy(password, { transient: getTransientCopyPreference("password") });
-        await showHUD("Copied password to clipboard");
+        await showCopySuccessMessage("Copied password to clipboard");
       }
     } catch (error) {
       await showToast(Toast.Style.Failure, "Failed to get password");

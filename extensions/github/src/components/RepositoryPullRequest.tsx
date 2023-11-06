@@ -24,15 +24,13 @@ export function RepositoryPullRequestList(props: { repo: string }): JSX.Element 
       });
       return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
     },
-    [query]
+    [query],
   );
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} navigationTitle={props.repo} throttle>
       <List.Section title="Pull Requests" subtitle={`${data?.length}`}>
-        {data?.map((d) => (
-          <PullRequestListItem key={d.id} pullRequest={d} mutateList={mutateList} />
-        ))}
+        {data?.map((d) => <PullRequestListItem key={d.id} pullRequest={d} mutateList={mutateList} />)}
       </List.Section>
     </List>
   );

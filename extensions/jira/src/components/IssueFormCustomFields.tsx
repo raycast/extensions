@@ -4,6 +4,7 @@ import { Fragment } from "react";
 
 import { Team } from "../api/teams";
 import { User } from "../api/users";
+import { getUserAvatar } from "../helpers/avatars";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue, Option } from "../helpers/issues";
 
 import { IssueFormValues } from "./CreateIssueForm";
@@ -21,6 +22,8 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
   return (
     <>
       {fields.map(({ key, name, fieldSchema, allowedValues }) => {
+        if (!name) return null;
+
         let component;
         switch (fieldSchema) {
           case CustomFieldSchema.datePicker: {
@@ -100,7 +103,7 @@ export default function IssueFormCustomFields({ fields, itemProps, users }: Issu
                       key={user.accountId}
                       value={user.accountId}
                       title={user.displayName}
-                      icon={user.avatarUrls["32x32"]}
+                      icon={getUserAvatar(user)}
                     />
                   );
                 })}

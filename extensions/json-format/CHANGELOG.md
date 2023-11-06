@@ -1,5 +1,9 @@
 # Changelog
 
+## [Adds support for parsing stringified JSON] - 2023-06-29
+
+- If the JSON is stringified, it will be parsed before formatting
+
 ## [Allow to Preview Formatted JSON] - 2023-04-04
 
 - Ability to view formated JSON

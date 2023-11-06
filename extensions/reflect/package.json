@@ -7,7 +7,8 @@
   "author": "ryon",
   "contributors": [
     "joshknowles",
-    "tylerwince"
+    "tylerwince",
+    "ocavue"
   ],
   "categories": [
     "Applications",
@@ -57,6 +58,21 @@
           "label": "Prepend Timestamp (Optional)",
           "description": "Prepend a timestamp to your note",
           "type": "checkbox",
+          "required": false
+        },
+        {
+          "name": "timestampFormat",
+          "title": "Timestamp Format",
+          "description": "The format of prepended timestamp",
+          "type": "dropdown",
+          "data": [{
+            "title": "12 hour",
+            "value": "12"
+          },{
+            "title": "24 hour",
+            "value": "24"
+          }],
+          "default": "12",
           "required": false
         }
       ],

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "setapp",
+  "title": "Setapp",
+  "description": "Search Setapp apps",
+  "icon": "setapp-icon.png",
+  "author": "lardissone",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Setapp Apps",
+      "subtitle": "Search for Setapp apps",
+      "description": "Searches for installed and not installed apps",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.54.1",
+    "@raycast/utils": "^1.8.0",
+    "node-fetch": "^3.3.1",
+    "plist": "^3.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "20.3.2",
+    "@types/node-fetch": "^2.6.4",
+    "@types/plist": "^3.0.2",
+    "@types/react": "18.2.14",
+    "eslint": "^8.43.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.1.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

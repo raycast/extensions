@@ -5,7 +5,7 @@
   "description": "Hookmark Search UI in Raycast",
   "icon": "command-icon.png",
   "author": "QIanGua",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "categories": [
     "Applications",
     "Productivity"
@@ -16,6 +16,24 @@
       "name": "search-hookmark",
       "title": "Search Hookmark",
       "description": "Search Hookmark's bookmarks and open visited ones",
+      "mode": "view"
+    },
+    {
+      "name": "copy-hookmark-link",
+      "title": "Copy Hookmark Link",
+      "description": "Copy link of front active window",
+      "mode": "no-view"
+    },
+    {
+      "name": "hook-to-copied-link",
+      "title": "Hook to Copied Link",
+      "description": "Hook the current bookmark to copied item",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-hooked-link",
+      "title": "Show Hooked Link",
+      "description": "Show hooked bookmarks of active window",
       "mode": "view"
     }
   ],

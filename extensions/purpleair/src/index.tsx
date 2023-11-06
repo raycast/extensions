@@ -11,7 +11,7 @@ import {
 import { PurpleAir } from "./purpleAir";
 import { usePromise } from "@raycast/utils";
 import { useRef } from "react";
-import fetch from "cross-fetch";
+import fetch from "node-fetch";
 
 interface Preferences {
   sensor_index: string;
@@ -24,6 +24,7 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const url = `https://api.purpleair.com/v1/sensors/${preferences.sensor_index}/?api_key=${preferences.api_key}`;
 
+  // figure out how to move to using useFetch https://developers.raycast.com/utilities/react-hooks/usefetch
   const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = usePromise(
     async (url: string) => {

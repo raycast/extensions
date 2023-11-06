@@ -31,12 +31,12 @@ function PopularSeriesVideos(props: { number: number }) {
   const { popularSeriesVideos, isLoading } = usePopularSeriesVideos(props.number);
 
   return (
-    <List enableFiltering={false} isLoading={isLoading} isShowingDetail={true}>
+    <List filtering={false} isLoading={isLoading} isShowingDetail={true}>
       {popularSeriesVideos?.map((item) => (
         <Video
           title={item.title}
           cover={item.pic}
-          url={item.short_link}
+          url={item.short_link || item.short_link_v2}
           uploader={{
             mid: item.owner.mid,
             name: item.owner.name,

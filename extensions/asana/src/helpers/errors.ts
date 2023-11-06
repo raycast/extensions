@@ -13,7 +13,7 @@ export function handleUseCachedPromiseError(error: unknown) {
   if (error instanceof AxiosError) {
     const data = error.response?.data as { errors: { message: string }[] };
 
-    return showToast({ style: Toast.Style.Failure, title: error.message, message: data.errors[0].message });
+    return showToast({ style: Toast.Style.Failure, title: error.message, message: data.errors?.[0].message });
   }
 
   if (error instanceof Error) {

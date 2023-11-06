@@ -42,6 +42,10 @@ const GET_ISSUE_DETAIL = gql`
   }
 `;
 
+export function IssueListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Issues" icon={{ source: "issues.svg", tintColor: Color.PrimaryText }} />;
+}
+
 export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
@@ -272,7 +276,7 @@ export function IssueList({
 
   return (
     <List
-      searchBarPlaceholder="Search issues by name..."
+      searchBarPlaceholder="Search Issues by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
@@ -284,6 +288,7 @@ export function IssueList({
           <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
+      <IssueListEmptyView />
     </List>
   );
 }

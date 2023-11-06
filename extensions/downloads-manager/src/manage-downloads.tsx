@@ -1,9 +1,9 @@
 import { ActionPanel, Action, List } from "@raycast/api";
 import { PathLike } from "fs";
 import { useState } from "react";
-import { downloadsFolder, getDownloads } from "./utils";
+import { downloadsFolder, getDownloads, withAccessToDownloadsFolder } from "./utils";
 
-export default function Command() {
+function Command() {
   const [downloads, setDownloads] = useState(getDownloads());
 
   function handleTrash(paths: PathLike | PathLike[]) {
@@ -70,3 +70,5 @@ export default function Command() {
     </List>
   );
 }
+
+export default withAccessToDownloadsFolder(Command);

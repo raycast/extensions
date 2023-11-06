@@ -15,9 +15,7 @@ export function PopularVideoList() {
   }
   return (
     <ListOrGrid isLoading={isLoading} columns={griditemsize} aspectRatio={"4/3"}>
-      {data?.map((v) => (
-        <VideoItem key={v.id} video={v} />
-      ))}
+      {data?.map((v) => <VideoItem key={v.id} video={v} />)}
     </ListOrGrid>
   );
 }

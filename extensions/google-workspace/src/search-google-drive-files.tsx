@@ -5,14 +5,17 @@ import { useState } from "react";
 import { QueryTypes, getFilesURL, File, ScopeTypes } from "./api/getFiles";
 import FileListItem from "./components/FileListItem";
 
-import { withGoogleAuth, getOAuthToken } from "./components/withGoogleAuth";
+import { withGoogleAuth, getOAuthToken, getUserEmail } from "./components/withGoogleAuth";
 
 function SearchGoogleDriveFiles() {
   const [query, setQuery] = useState("");
   const [queryType, setQueryType] = useCachedState<QueryTypes>("query type", QueryTypes.fileName);
   const [scopeType, setScopeType] = useCachedState<ScopeTypes>("scope type", ScopeTypes.allDrives);
 
-  const { data, isLoading, mutate } = useFetch<{ files: File[] }>(getFilesURL(queryType, scopeType, query), {
+  const email = getUserEmail();
+
+  const { data, isLoading } = useFetch<{ files: File[] }>(getFilesURL(queryType, scopeType, query), {
+    keepPreviousData: true,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${getOAuthToken()}`,
@@ -69,7 +72,7 @@ function SearchGoogleDriveFiles() {
       {data?.files && data.files.length > 0 ? (
         <List.Section title="Recent Files" subtitle={`${data.files.length}`}>
           {data.files?.map((file) => (
-            <FileListItem file={file} key={file.id} mutate={mutate} />
+            <FileListItem file={file} key={file.id} email={email} />
           ))}
         </List.Section>
       ) : null}

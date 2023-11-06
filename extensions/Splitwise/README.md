@@ -1,7 +1,7 @@
 # Splitwise
 
 View the balance of your Splitwise account and add expenses by using natural language.
-At the moment, the extension only supports expenses with friends and not with groups.
+At the moment, the extension supports expenses with both friends and groups.
 
 ### How to get the API token
 1. Register your application via https://secure.splitwise.com/apps.

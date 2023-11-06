@@ -64,3 +64,9 @@ export const ZLocation = z.object({
   git: z.boolean().default(false),
 });
 export type Location = z.infer<typeof ZLocation>;
+
+export const zLaunchContext = z.object({
+  id: z.string(),
+  showForm: z.boolean().default(true),
+  values: z.record(z.string(), z.string()).default({}),
+});

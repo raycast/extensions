@@ -12,7 +12,9 @@
   "contributors": [
     "FezVrasta",
     "metakirby5",
-    "AlanHuang"
+    "AlanHuang",
+    "nirtamir2",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -100,7 +102,7 @@
           "value": "zh-CN"
         },
         {
-          "title": "🇹🇼 Taiwanese Mandarin",
+          "title": "Chinese Traditional",
           "value": "zh-TW"
         },
         {
@@ -181,7 +183,7 @@
         },
         {
           "title": "🇮🇱 Hebrew",
-          "value": "he"
+          "value": "iw"
         },
         {
           "title": "🇮🇳 Hindi",
@@ -622,7 +624,7 @@
         },
         {
           "title": "🇮🇱 Hebrew",
-          "value": "he"
+          "value": "iw"
         },
         {
           "title": "🇮🇳 Hindi",
@@ -699,6 +701,10 @@
         {
           "title": "🇱🇻 Latvian",
           "value": "lv"
+        },
+        {
+          "title": "🏛 Latin",
+          "value": "la"
         },
         {
           "title": "🇱🇹 Lithuanian",
@@ -932,6 +938,7 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
+    "prettier": "^3.0.1",
     "eslint-config-prettier": "^8.3.0",
     "typescript": "^4.4.3"
   },

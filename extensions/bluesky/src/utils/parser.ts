@@ -1,3 +1,4 @@
+import { Account, BskyRecord, Post, PostReason } from "../types/types";
 import { AppBskyActorDefs, AppBskyFeedDefs } from "@atproto/api";
 import {
   BlueskyImageEmbedType,
@@ -6,7 +7,6 @@ import {
   BlueskyRepostType,
   PostEndHorizontalLine,
 } from "./constants";
-import { BskyRecord, Post, PostReason, User } from "../types/types";
 
 import { Notification as BskyNotification } from "@atproto/api/dist/client/types/app/bsky/notification/listNotifications";
 import { Notification } from "../types/types";
@@ -87,8 +87,8 @@ _[${postTime}](${getPostUrl(post.author.handle, post.uri)})_  ${
 `;
 };
 
-export const parseUsers = (bskyUsers: AppBskyActorDefs.ProfileView[]): User[] => {
-  const users: User[] = bskyUsers.map((item) => {
+export const parseAccounts = (bskyUsers: AppBskyActorDefs.ProfileView[]): Account[] => {
+  const accounts: Account[] = bskyUsers.map((item) => {
     return {
       did: item.did,
       handle: item.handle,
@@ -96,11 +96,12 @@ export const parseUsers = (bskyUsers: AppBskyActorDefs.ProfileView[]): User[] =>
       avatarUrl: item.avatar ? item.avatar : "",
       description: item.description ? item.description : "",
       following: item.viewer && item.viewer.following ? true : false,
+      blockedUri: item.viewer && item.viewer.blocking ? item.viewer.blocking : null,
       muted: item.viewer && item.viewer.muted ? item.viewer.muted : false,
     };
   });
 
-  return users;
+  return accounts;
 };
 
 export const parseNotifications = (bskyNotifications: BskyNotification[]): Notification[] => {
@@ -126,6 +127,7 @@ export const parseNotifications = (bskyNotifications: BskyNotification[]): Notif
         author: {
           did: item.author.did,
           handle: item.author.handle,
+          blockedUri: item.author.viewer && item.author.viewer.blocking ? item.author.viewer.blocking : null,
           displayName: item.author.displayName ? item.author.displayName : "",
           avatarUrl: item.author.avatar ? item.author.avatar : "",
         },
@@ -238,6 +240,7 @@ export const parseFeed = async (bskyFeed: AppBskyFeedDefs.FeedViewPost[]): Promi
           createdByUser: {
             did: item.post.author.did,
             handle: item.post.author.handle,
+            blockedUri: item.post.viewer && item.post.viewer.blocking ? (item.post.viewer.blocking as string) : "",
             displayName: item.post.author.displayName ? item.post.author.displayName : "",
             avatarUrl: item.post.author.avatar ? item.post.author.avatar : "",
           },

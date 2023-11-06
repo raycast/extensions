@@ -1,5 +1,36 @@
 # Bitwarden Changelog
 
+## [Fix] - 2013-09-08
+
+- Fixed irregular identity table
+
+## [Fix] - 2023-08-29
+
+- Fixed crash in Logout command
+
+## [Improvements] - 2023-08-15
+
+- Adds ability to paste TOTP code into active application
+
+## [Fix] - 2023-08-01
+
+- Removed visible line break in card, identity and note details
+
+## [Improvements] - 2023-07-06
+
+- Display favorites at the top of the list on a separate section
+- Added ability to mark/remove items as favorites and reorder them in the list (with keybindings)
+- Display reprompt required icon on the list
+
+## [Update] - 2023-06-12
+
+- Fixed a bug that prevented the user from searching by username/email
+- Updated the raycast packages and resolved a small type checking TODO
+
+## [New Preference] - 2023-06-03
+
+- Added preference to change the window behaviour when copying values
+
 ## [New Command] - 2023-05-31
 
 - Added Logout command
@@ -13,7 +44,7 @@
 
 ## [Fix] - 2023-05-19
 
-- Avoid displaying timeout info label on Unlock Form when the preference is Never 
+- Avoid displaying timeout info label on Unlock Form when the preference is Never
 - Fix crashing when getting the name of the frontmost application
 
 ## [Improvements to Actions] - 2023-05-18
@@ -84,7 +115,7 @@
 
 ## [Copy Enhancement] - 2022-11-02
 
-- Copy passwords in a way that asks clipboard managers to not save it 
+- Copy passwords in a way that asks clipboard managers to not save it
 
 ## [UI Enhancement] - 2022-09-21
 

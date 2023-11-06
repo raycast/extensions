@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { useState } from "react";
 
 import { Profile, ProfileActionsProps } from "./types";
@@ -60,22 +60,10 @@ function Actions({ profile, farcasterInstalled }: ProfileActionsProps) {
   return (
     <ActionPanel>
       {farcasterInstalled && (
-        <Action.OpenInBrowser title="Open in Farcaster" url={`farcaster://profiles/${profile.body.id}`} />
+        <Action.Open title="Open in Warpcast (Desktop)" target={`farcaster://profiles/${profile.body.id}`} />
       )}
+      <Action.OpenInBrowser title="Open in Warpcast (Web)" url={`https://warpcast.com/${profile.body.username}`} />
       <Action.OpenInBrowser title="Open in Searchcaster" url={`https://searchcaster.xyz/u/${profile.body.username}`} />
-      <Action
-        title="Copy Shareable Link"
-        icon={{ source: Icon.Link }}
-        onAction={async () => {
-          await Clipboard.copy(`http://fcast.me/${profile.body.username}`);
-
-          showToast({
-            style: Toast.Style.Success,
-            title: "Success",
-            message: "Copied to clipboard",
-          });
-        }}
-      />
     </ActionPanel>
   );
 }

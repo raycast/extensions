@@ -27,6 +27,6 @@ Whenever a command is launched using a Deeplink, Raycast will ask you to confirm
 | Name         | Description                                                                                                                              | Type                                   |
 | :----------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | launchType   | Runs the command in the background, skipping bringing Raycast to the front.                                                              | Either `userInitiated` or `background` |
-| arguments    | If the command acepts [arguments](./arguments.md), they can be passed using this query parameter.                                        | URL-encoded JSON object.               |
-| context      | If the command make use of [LaunchContext](../../api-reference/utilities.md#launchcontext), it can be passed using this query parameter. | URL-encoded JSON object.               |
+| arguments    | If the command accepts [arguments](./arguments.md), they can be passed using this query parameter.                                       | URL-encoded JSON object.               |
+| context      | If the command make use of [LaunchContext](../../api-reference/command.md#launchcontext), it can be passed using this query parameter. | URL-encoded JSON object.               |
 | fallbackText | Some text to prefill the search bar or first text input of the command                                                                   | `string`                               |

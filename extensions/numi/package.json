@@ -10,7 +10,8 @@
     "Data"
   ],
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "viandwi24"
   ],
   "license": "MIT",
   "commands": [
@@ -38,6 +39,24 @@
       "placeholder": "10",
       "description": "The number of elements to save on the history",
       "default": "10"
+    },
+    {
+      "name": "use_numi_cli",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use numi-cli",
+      "placeholder": "Use numi-cli",
+      "description": "Use numi-cli instead of the Numi app",
+      "default": false
+    },
+    {
+      "name": "numi_cli_binary_path",
+      "type": "textfield",
+      "required": false,
+      "title": "Numi CLI bin path if using numi-cli",
+      "placeholder": "/opt/homebrew/bin/numi-cli",
+      "description": "The path to installed numi-cli binary",
+      "default": "/opt/homebrew/bin/numi-cli"
     }
   ],
   "dependencies": {

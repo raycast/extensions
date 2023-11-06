@@ -15,11 +15,11 @@ export default function Command() {
 
   return (
     <List
-      enableFiltering={false}
+      filtering={false}
       isLoading={isLoading}
       isShowingDetail={true}
       onSelectionChange={(id) => {
-        setCountSet(countSet.add(id));
+        setCountSet(countSet.add(id || ""));
 
         if (countSet.size % 16 === 0) setIdx(idx + 1);
       }}

@@ -80,7 +80,7 @@ Requires [Raycast Pro](https://www.raycast.com/pro) to support.
 
 ### Azure OpenAI Service
 
-- API Entrypoint:`https://${resourceName}.openai.azure.com/openai/deployments/${deployName}/completions?api-version=${apiVersion}`
+- API Entrypoint:`https://${resourceName}.openai.azure.com/openai/deployments/${deployName}/chat/completions?api-version=${apiVersion}`
 - API Key: [Azure](https://portal.azure.com/) -> Azure OpenAI -> Keys and Endpoint
 - API Model：No configuration required.
 

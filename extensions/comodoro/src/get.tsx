@@ -37,7 +37,7 @@ export default function Command() {
           });
         }
       } else {
-        const cmd = `${preferences.binaryPath} get ${preferences.protocol}`;
+        const cmd = `${preferences.binaryPath} get ${preferences.preset} ${preferences.protocol}`;
         console.debug(`cmd: ${cmd}`);
         const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
 

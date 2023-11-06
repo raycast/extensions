@@ -10,10 +10,7 @@ export const MIRED_MIN = 153;
 export const MIRED_MAX = 500;
 export const MIRED_STEP = (500.0 - 153.0) / 10.0;
 export const MIRED_DEFAULT = 357;
-/**
- * The mired from Hue's API is too warm, so we make it cooler by an arbitrary amount
- */
-export const MIRED_ADJUSTMENT = -50;
+export const DEFAULT_TRANSITION_TIME_MS = 400;
 export const COLORS: CssColor[] = [
   { name: "Alice Blue", value: "#f0f8ff" },
   { name: "Antique White", value: "#faebd7" },

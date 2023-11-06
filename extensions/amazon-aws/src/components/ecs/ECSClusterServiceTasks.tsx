@@ -11,7 +11,7 @@ function ECSClusterServiceTasks({ service }: { service: Service }) {
     [service.clusterArn || "", service.serviceName || ""],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return (

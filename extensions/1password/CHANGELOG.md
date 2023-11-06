@@ -1,8 +1,12 @@
 # 1Password Changelog
 
-## [Add Support for Password Items in 1Password 8] - 2023-05-30
+## [Concealed copy of the password] - 2023-10-02
 
-- Password items now support copying the password to the clipboard
+- Copying a password will be faster while avoiding being recorded in the Clipboard History.
+
+## [Raycast window closes after copying (opt-out option)] - 2023-06-06
+
+- NEW: Raycast window now closes itself after copying a username or password (you can turn this off in settings)
 
 ## [Bug fixes] - 2023-04-03
 

@@ -2,5 +2,6 @@
 type IntentionalAny = any;
 
 interface Preferences {
+  defaultDate: "none" | "today" | "tomorrow" | "dayAfterTomorrow" | "nextWeek";
   autoFillEnabled: boolean;
 }

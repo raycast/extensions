@@ -10,6 +10,9 @@ Search, view, and copy credentials from LastPass.
 
 Filter and select credentials, then use
 
-- `Enter` to copy `password` to clipboard
-- `Shift+Enter` to copy `username` to clipboard
-- `Opt+Enter` to see detailed credentials view
+- `Enter` to paste `password`
+- `Shift+Enter` to paste `username`
+- `Cmd+p` to copy `password` to clipboard
+- `Cmd+u` to copy `username` to clipboard
+- `Cmd+l` to copy `url` to clipboard
+- `Cmd+h` to toggle `Hide Password` feature

@@ -45,14 +45,22 @@
       "default": "comodoro"
     },
     {
+      "name": "preset",
+      "title": "Preset",
+      "subtitle": "Time Management Preset",
+      "description": "Cycle configuration for the time management.",
+      "required": true,
+      "type": "textfield",
+      "placeholder": "pomodoro"
+    },
+    {
       "name": "protocol",
       "title": "Protocol",
       "subtitle": "Communication Protocol",
       "description": "Communication used for client and server.",
-      "required": false,
+      "required": true,
       "type": "textfield",
-      "placeholder": "tcp",
-      "default": "tcp"
+      "placeholder": "tcp"
     }
   ],
   "dependencies": {

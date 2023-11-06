@@ -30,7 +30,10 @@ fragment ExtendedRepositoryFields on Repository {
   squashMergeAllowed
   rebaseMergeAllowed
   updatedAt
+  pushedAt
   stargazerCount
+  isArchived
+  isFork
   viewerHasStarred
   primaryLanguage {
     id
@@ -50,6 +53,16 @@ query searchRepositories($query: String!, $numberOfItems: Int!) {
   search(query: $query, first: $numberOfItems, type: REPOSITORY) {
     nodes {
       ...ExtendedRepositoryFields
+    }
+  }
+}
+
+query myLatestRepositories($numberOfItems: Int!) {
+  viewer {
+    repositories(first: $numberOfItems, orderBy: { field: PUSHED_AT, direction: DESC }) {
+      nodes {
+        ...ExtendedRepositoryFields
+      }
     }
   }
 }
@@ -115,17 +128,8 @@ query dataForRepository($owner: String!, $name: String!) {
         title
       }
     }
-    pullRequestTemplateLowercase: object(expression: "main:.github/pull_request_template.md") {
-      ... on Blob {
-        isTruncated
-        text
-      }
-    }
-    pullRequestTemplateUppercase: object(expression: "main:.github/PULL_REQUEST_TEMPLATE.md") {
-      ... on Blob {
-        isTruncated
-        text
-      }
+    pullRequestTemplates {
+      body
     }
     issueTemplates {
       name

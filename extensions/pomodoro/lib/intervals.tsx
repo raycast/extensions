@@ -6,6 +6,7 @@ export type Preferences = {
   longBreakIntervalDuration: string;
   completionImage: string;
   sound: string;
+  enableTimeOnMenuBar: boolean
 };
 
 export type IntervalType = "focus" | "short-break" | "long-break";

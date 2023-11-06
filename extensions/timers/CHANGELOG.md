@@ -1,5 +1,27 @@
 # Timers Changelog
 
+## [Stopwatch menu bar improvements, minor UX fixes] - 2023-09-30
+
+- Add ability to delete stopwatches from menu bar
+- Fix bug where pausing stopwatch from menu bar didn't work properly
+- Fix bug where "Dismiss Timer Alert" would crash when run without "Ring Continuously" preference set
+- Un-require settings that should be optional
+
+## [Menu bar improvements, reset stopwatches, end time for timers] - 2023-06-08
+
+- Add menu bar support for stopwatches
+- Add ability to hide menubar icon and timer/stopwatch title
+- Add reset functionality to Manage Stopwatches
+- Add end time for timers in Manage Timers (thanks to @benqqqq)
+- Show currently selected alert sound in custom sound selection for Preview Alert Sounds and Start Custom Timer commands
+- Fix bug where the 60-minute preset crashed when Start 60 Minute Timer command was run
+- Sort preferences for more natural grouping
+- Update to new Raycast APIs
+
+## [Enhancement] - 2023-06-07
+
+- Added option to hide menubar icon when no timers are running
+
 ## [Add volume cap error for alert sound] - 2023-03-19
 
 ## [Enhancement] - 2023-03-15
