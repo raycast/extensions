@@ -1,9 +1,9 @@
 import { ActionPanel, Action, Icon, Form, showToast, Toast } from "@raycast/api";
-import { Fragment, useState } from "react";
-import { DNSRecordType } from "./utils/types";
-import { deleteRecordByDomainAndId, deleteRecordByDomainSubdomainAndType } from "./utils/api";
+import { Fragment, useEffect, useState } from "react";
+import { DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
+import { deleteRecordByDomainAndId, deleteRecordByDomainSubdomainAndType, retrieveAllDomains } from "./utils/api";
 import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 
 export default function DeleteDNSRecord() {
   type DeleteRecordFormValues = {
@@ -15,6 +15,24 @@ export default function DeleteDNSRecord() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [deleteType, setDeleteType] = useState("domainAndID");
+
+  const [domains, setDomains] = useCachedState<Domain[]>("domains");
+  async function getDomainsFromApi() {
+    setIsLoading(true);
+    const response = await retrieveAllDomains() as RetrieveAllDomainsResponse;
+    if (response.status === "SUCCESS") {
+      setDomains(response.domains);
+      showToast({
+        style: Toast.Style.Success,
+        title: "SUCCESS",
+        message: `Fetched ${response.domains.length} domains`,
+      });
+    }
+    setIsLoading(false);
+  }
+  useEffect(() => {
+    if (!domains) getDomainsFromApi();
+  }, [])
 
   const navigationTitle = "Delete DNS Record";
   const { handleSubmit, itemProps } = useForm<DeleteRecordFormValues>({
@@ -98,7 +116,9 @@ export default function DeleteDNSRecord() {
       <Form.Description text={description} />
       <Form.Separator />
 
-      <Form.TextField title="Domain" placeholder="Enter domain" {...itemProps.domain} />
+      <Form.Dropdown title="Domain" {...itemProps.domain}>
+        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} />)}
+      </Form.Dropdown>
       {deleteType === "domainAndID" && <Form.TextField title="ID" placeholder="Enter id" {...itemProps.id} />}
 
       {deleteType !== "domainAndID" && (

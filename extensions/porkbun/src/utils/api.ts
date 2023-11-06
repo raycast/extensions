@@ -2,20 +2,14 @@ import {
   CreateDNSRecordRequest,
   EditDNSRecordByDomainSubdomainAndIdRequest,
   ErrorResponse,
-  Preferences,
   DNSRecordType,
   RequestBody,
   Response,
+  UpdateNameServersRequest,
 } from "./types";
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import fetch from "node-fetch";
-
-const API_KEY = getPreferenceValues<Preferences>().api_key;
-const SECRET_API_KEY = getPreferenceValues<Preferences>().secret_api_key;
-const API_URL = "https://porkbun.com/api/json/v3/";
-const headers = {
-  "Content-Type": "application/json",
-};
+import { API_HEADERS, API_KEY, API_URL, SECRET_API_KEY } from "./constants";
 
 const showError = (error: string) => {
   showToast({
@@ -24,11 +18,13 @@ const showError = (error: string) => {
     message: error,
   });
 };
-const callApi = async (endpoint: string, body?: RequestBody) => {
+const callApi = async (endpoint: string, animatedToastMessage = "", body?: RequestBody) => {
+  await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
+
   try {
     const apiResponse = await fetch(API_URL + endpoint, {
       method: "POST",
-      headers,
+      headers: API_HEADERS,
       body: JSON.stringify({
         apikey: API_KEY,
         secretapikey: SECRET_API_KEY,
@@ -51,16 +47,16 @@ const callApi = async (endpoint: string, body?: RequestBody) => {
 };
 
 export async function ping() {
-  return await callApi("ping");
+  return await callApi("ping", "Pinging");
 }
 
 export async function createRecord(domain: string, { ...params }: CreateDNSRecordRequest) {
   const body = { ...params };
-  return await callApi(`dns/create/${domain}`, body);
+  return await callApi(`dns/create/${domain}`, "Creating DNS Record", body);
 }
 export async function editRecordByDomainAndId(domain: string, id: number, { ...params }: CreateDNSRecordRequest) {
   const body = { ...params };
-  return await callApi(`dns/edit/${domain}/${id}`, body);
+  return await callApi(`dns/edit/${domain}/${id}`, "Editing DNS Record", body);
 }
 export async function editRecordByDomainSubdomainAndType(
   domain: string,
@@ -69,21 +65,32 @@ export async function editRecordByDomainSubdomainAndType(
   { ...params }: EditDNSRecordByDomainSubdomainAndIdRequest
 ) {
   const body = { ...params };
-  return await callApi(`dns/editByNameType/${domain}/${type}${subdomain && "/" + subdomain}`, body);
+  return await callApi(`dns/editByNameType/${domain}/${type}${subdomain && "/" + subdomain}`, "Editing DNS Record", body);
 }
 export async function deleteRecordByDomainAndId(domain: string, id: number) {
-  return await callApi(`dns/delete/${domain}/${id}`);
+  return await callApi(`dns/delete/${domain}/${id}`, "Deleting DNS Record(s)");
 }
 export async function deleteRecordByDomainSubdomainAndType(domain: string, subdomain: string, type: DNSRecordType) {
-  return await callApi(`dns/deleteByNameType/${domain}/${type}${subdomain && "/" + subdomain}`);
+  return await callApi(`dns/deleteByNameType/${domain}/${type}${subdomain && "/" + subdomain}`, "Deleting DNS Record(s)");
 }
 export async function retrieveRecordsByDomainOrId(domain: string, id: number) {
-  return await callApi(`dns/retrieve/${domain}${id > 0 ? "/" + id : ""}`);
+  return await callApi(`dns/retrieve/${domain}${id > 0 ? "/" + id : ""}`, "Retrieving DNS Record(s)");
 }
 export async function retrieveRecordsByDomainSubdomainAndType(domain: string, subdomain: string, type: DNSRecordType) {
-  return await callApi(`dns/retrieveByNameType/${domain}/${type}${subdomain && "/" + subdomain}`);
+  return await callApi(`dns/retrieveByNameType/${domain}/${type}${subdomain && "/" + subdomain}`, "Retrieving DNS Record(s)");
 }
 
 export async function retrieveSSLBundle(domain: string) {
-  return await callApi(`ssl/retrieve/${domain}`);
+  return await callApi(`ssl/retrieve/${domain}`, "Fetching SSL Bundle");
+}
+
+export async function retrieveAllDomains() {
+  return await callApi("domain/listAll", "Fetching Domains");
+}
+export async function getNameServersByDomain(domain: string) {
+  return await callApi(`domain/getNs/${domain}`, "Fetching Name Servers");
+}
+export async function updateNameServersByDomain(domain: string, {...params}: UpdateNameServersRequest) {
+  const body = { ...params };
+  return await callApi(`domain/updateNs/${domain}`, "Updating Name Servers", body);
 }

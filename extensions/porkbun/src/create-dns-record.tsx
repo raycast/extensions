@@ -1,9 +1,9 @@
 import { ActionPanel, Action, Icon, Form, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
-import { DNSRecordType } from "./utils/types";
-import { createRecord } from "./utils/api";
+import { useEffect, useState } from "react";
+import { DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
+import { createRecord, retrieveAllDomains } from "./utils/api";
 import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 
 export default function CreateDNSRecord() {
   interface FormValues {
@@ -16,6 +16,24 @@ export default function CreateDNSRecord() {
   }
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [domains, setDomains] = useCachedState<Domain[]>("domains");
+  async function getDomainsFromApi() {
+    setIsLoading(true);
+    const response = await retrieveAllDomains() as RetrieveAllDomainsResponse;
+    if (response.status === "SUCCESS") {
+      setDomains(response.domains);
+      showToast({
+        style: Toast.Style.Success,
+        title: "SUCCESS",
+        message: `Fetched ${response.domains.length} domains`,
+      });
+    }
+    setIsLoading(false);
+  }
+  useEffect(() => {
+    if (!domains) getDomainsFromApi();
+  }, [])
 
   const navigationTitle = "Create DNS Record";
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -83,7 +101,9 @@ export default function CreateDNSRecord() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Domain" placeholder="Enter domain" {...itemProps.domain} />
+      <Form.Dropdown title="Domain" {...itemProps.domain}>
+        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} />)}
+      </Form.Dropdown>
       <Form.Separator />
       <Form.Dropdown
         title="Type"

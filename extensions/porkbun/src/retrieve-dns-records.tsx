@@ -14,12 +14,13 @@ import {
 import { useEffect, useState } from "react";
 import {
   deleteRecordByDomainAndId,
+  retrieveAllDomains,
   retrieveRecordsByDomainOrId,
   retrieveRecordsByDomainSubdomainAndType,
 } from "./utils/api";
 import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, getFavicon, useForm } from "@raycast/utils";
-import { DNSRecordType, RetrieveDNSRecordsResponse } from "./utils/types";
+import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
+import { DNSRecordType, Domain, RetrieveAllDomainsResponse, RetrieveDNSRecordsResponse } from "./utils/types";
 
 export default function RetrieveDNSRecord() {
   type FormValues = {
@@ -34,7 +35,25 @@ export default function RetrieveDNSRecord() {
   const [filter, setFilter] = useState("");
   const [records, setRecords] = useState<RetrieveDNSRecordsResponse>();
   const [filteredRecords, setFilteredRecords] = useState<RetrieveDNSRecordsResponse>();
+  const [domains, setDomains] = useCachedState<Domain[]>("domains");
 
+  async function getDomainsFromApi() {
+    setIsLoading(true);
+    const response = await retrieveAllDomains() as RetrieveAllDomainsResponse;
+    if (response.status === "SUCCESS") {
+      setDomains(response.domains);
+      showToast({
+        style: Toast.Style.Success,
+        title: "SUCCESS",
+        message: `Fetched ${response.domains.length} domains`,
+      });
+    }
+    setIsLoading(false);
+  }
+  useEffect(() => {
+    if (!domains) getDomainsFromApi();
+  }, [])
+  
   const navigationTitle = "Retrieve DNS Records";
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
@@ -150,9 +169,11 @@ export default function RetrieveDNSRecord() {
       <Form.Description text={description} />
       <Form.Separator />
 
-      <Form.TextField title="Domain" placeholder="Enter domain" {...itemProps.domain} />
+      <Form.Dropdown title="Domain" {...itemProps.domain}>
+        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} icon={getFavicon(`https://${item.domain}`)} />)}
+      </Form.Dropdown>
       {itemProps.retrieve.value === "domainOrID" && (
-        <Form.TextField title="ID" placeholder="Enter id" {...itemProps.id} />
+        <Form.TextField title="ID (optional)" placeholder="106926652" {...itemProps.id} />
       )}
       {itemProps.retrieve.value === "domainSubdomainAndType" && (
         <>
@@ -171,7 +192,7 @@ export default function RetrieveDNSRecord() {
               />
             ))}
           </Form.Dropdown>
-          <Form.TextField title="Name" placeholder="_port._protocol (_100._tcp)" {...itemProps.name} />
+          <Form.TextField title="Name (optional)" placeholder="_port._protocol (_100._tcp)" {...itemProps.name} />
           <Form.Description text={`.${itemProps.domain.value || "DOMAIN"}`} />
         </>
       )}
@@ -228,13 +249,14 @@ export default function RetrieveDNSRecord() {
                     style={Action.Style.Destructive}
                     onAction={() => deleteRecord(record.id)}
                   />
-                  <ActionPanel.Section title="Copy">
-                    <Action.CopyToClipboard content={record.id} title="Copy ID" />
-                    <Action.CopyToClipboard content={record.type} title="Copy Type" />
-                    <Action.CopyToClipboard content={record.name} title="Copy Name" />
-                    <Action.CopyToClipboard content={record.content} title="Copy Content" />
-                    <Action.CopyToClipboard content={record.notes || ""} title="Copy Notes" />
-                  </ActionPanel.Section>
+                  <ActionPanel.Submenu title="Copy" icon={Icon.Clipboard}>
+                    <Action.CopyToClipboard content={JSON.stringify(record)} title="All as JSON" />
+                    <Action.CopyToClipboard content={record.id} title="ID" />
+                    <Action.CopyToClipboard content={record.type} title="Type" />
+                    <Action.CopyToClipboard content={record.name} title="Name" />
+                    <Action.CopyToClipboard content={record.content} title="Content" />
+                    <Action.CopyToClipboard content={record.notes || ""} title="Notes" />
+                  </ActionPanel.Submenu>
                 </ActionPanel>
               }
               icon={getFavicon(`https://${itemProps.domain.value}`)}

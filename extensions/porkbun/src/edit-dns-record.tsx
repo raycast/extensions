@@ -1,9 +1,9 @@
 import { ActionPanel, Action, Icon, Form, showToast, Toast, LaunchProps } from "@raycast/api";
-import { useState } from "react";
-import { DNSRecord, DNSRecordType } from "./utils/types";
-import { editRecordByDomainAndId, editRecordByDomainSubdomainAndType } from "./utils/api";
+import { useEffect, useState } from "react";
+import { DNSRecord, DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
+import { editRecordByDomainAndId, editRecordByDomainSubdomainAndType, retrieveAllDomains } from "./utils/api";
 import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 
 type EditRecordProps = {
   domain: string;
@@ -31,6 +31,24 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
 
   const [isLoading, setIsLoading] = useState(false);
   const [edit, setEdit] = useState("domainAndID");
+
+  const [domains, setDomains] = useCachedState<Domain[]>("domains");
+  async function getDomainsFromApi() {
+    setIsLoading(true);
+    const response = await retrieveAllDomains() as RetrieveAllDomainsResponse;
+    if (response.status === "SUCCESS") {
+      setDomains(response.domains);
+      showToast({
+        style: Toast.Style.Success,
+        title: "SUCCESS",
+        message: `Fetched ${response.domains.length} domains`,
+      });
+    }
+    setIsLoading(false);
+  }
+  useEffect(() => {
+    if (!domains) getDomainsFromApi();
+  }, [])
 
   const navigationTitle = "Edit DNS Record";
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -153,7 +171,7 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
         ))}
       </Form.Dropdown>
       <Form.TextField
-        title="Name"
+        title="Name (optional)"
         placeholder="_port._protocol (_100._tcp)"
         info="The subdomain for the record being created, not including the domain itself. Leave blank to create a record on the root domain. Use * to create a wildcard record."
         {...itemProps.name}
