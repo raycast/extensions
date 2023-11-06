@@ -14697,6 +14697,8 @@ export type PermissionSource = {
   organization: Organization;
   /** The level of access this source has granted to the user. */
   permission: DefaultRepositoryPermissionField;
+  /** The name of the role this source has granted to the user. */
+  roleName?: Maybe<Scalars["String"]>;
   /** The source of this permission. */
   source: PermissionGranter;
 };
@@ -32360,6 +32362,7 @@ export type ExtendedRepositoryFieldsFragment = {
   squashMergeAllowed: boolean;
   rebaseMergeAllowed: boolean;
   updatedAt: any;
+  pushedAt?: any | null;
   stargazerCount: number;
   viewerHasStarred: boolean;
   hasIssuesEnabled: boolean;
@@ -32399,6 +32402,7 @@ export type SearchRepositoriesQuery = {
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
           updatedAt: any;
+          pushedAt?: any | null;
           stargazerCount: number;
           viewerHasStarred: boolean;
           hasIssuesEnabled: boolean;
@@ -32414,6 +32418,43 @@ export type SearchRepositoriesQuery = {
       | { __typename?: "User" }
       | null
     > | null;
+  };
+};
+
+export type MyLatestRepositoriesQueryVariables = Exact<{
+  numberOfItems: Scalars["Int"];
+}>;
+
+export type MyLatestRepositoriesQuery = {
+  __typename?: "Query";
+  viewer: {
+    __typename?: "User";
+    repositories: {
+      __typename?: "RepositoryConnection";
+      nodes?: Array<{
+        __typename?: "Repository";
+        id: string;
+        nameWithOwner: string;
+        name: string;
+        url: any;
+        mergeCommitAllowed: boolean;
+        squashMergeAllowed: boolean;
+        rebaseMergeAllowed: boolean;
+        updatedAt: any;
+        pushedAt?: any | null;
+        stargazerCount: number;
+        viewerHasStarred: boolean;
+        hasIssuesEnabled: boolean;
+        hasWikiEnabled: boolean;
+        hasProjectsEnabled: boolean;
+        hasDiscussionsEnabled: boolean;
+        owner:
+          | { __typename?: "Organization"; login: string; avatarUrl: any }
+          | { __typename?: "User"; login: string; avatarUrl: any };
+        primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
+        releases: { __typename?: "ReleaseConnection"; totalCount: number };
+      } | null> | null;
+    };
   };
 };
 
@@ -33125,6 +33166,7 @@ export const ExtendedRepositoryFieldsFragmentDoc = gql`
     squashMergeAllowed
     rebaseMergeAllowed
     updatedAt
+    pushedAt
     stargazerCount
     viewerHasStarred
     primaryLanguage {
@@ -33647,6 +33689,18 @@ export const SearchRepositoriesDocument = gql`
     search(query: $query, first: $numberOfItems, type: REPOSITORY) {
       nodes {
         ...ExtendedRepositoryFields
+      }
+    }
+  }
+  ${ExtendedRepositoryFieldsFragmentDoc}
+`;
+export const MyLatestRepositoriesDocument = gql`
+  query myLatestRepositories($numberOfItems: Int!) {
+    viewer {
+      repositories(first: $numberOfItems, orderBy: { field: PUSHED_AT, direction: DESC }) {
+        nodes {
+          ...ExtendedRepositoryFields
+        }
       }
     }
   }
@@ -34263,6 +34317,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             ...wrappedRequestHeaders,
           }),
         "searchRepositories",
+        "query",
+      );
+    },
+    myLatestRepositories(
+      variables: MyLatestRepositoriesQueryVariables,
+      requestHeaders?: Dom.RequestInit["headers"],
+    ): Promise<MyLatestRepositoriesQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<MyLatestRepositoriesQuery>(MyLatestRepositoriesDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "myLatestRepositories",
         "query",
       );
     },

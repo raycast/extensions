@@ -1,6 +1,6 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";

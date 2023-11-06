@@ -30,6 +30,7 @@ fragment ExtendedRepositoryFields on Repository {
   squashMergeAllowed
   rebaseMergeAllowed
   updatedAt
+  pushedAt
   stargazerCount
   viewerHasStarred
   primaryLanguage {
@@ -50,6 +51,16 @@ query searchRepositories($query: String!, $numberOfItems: Int!) {
   search(query: $query, first: $numberOfItems, type: REPOSITORY) {
     nodes {
       ...ExtendedRepositoryFields
+    }
+  }
+}
+
+query myLatestRepositories($numberOfItems: Int!) {
+  viewer {
+    repositories(first: $numberOfItems, orderBy: { field: PUSHED_AT, direction: DESC }) {
+      nodes {
+        ...ExtendedRepositoryFields
+      }
     }
   }
 }
