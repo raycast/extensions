@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Add My Latest Repositories command] - 2023-11-06
+
+- Add a command to show my latest repositories in descending order.
+
 ## [Add Clone and Open command] - 2023-10-11
 
 - Add a command to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh repository results.
