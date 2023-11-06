@@ -52,13 +52,14 @@ export default function IndexCommand() {
     let result = await Promise.all(
       files.map(async (file) => {
         const content = await fs.readFile(file, "utf-8");
-        const json = await JSON.parse(content);
+        const stats = await fs.stat(file);
+        const json = JSON.parse(content);
 
         const author: string = json.author;
         const owner: string | undefined = json?.owner;
+        const access: string | undefined = json?.access;
         const name: string = json.name;
-
-        const link = `https://raycast.com/${owner == "null" ? author : owner}/${name}`;
+        const link = `https://raycast.com/${owner ?? author}/${name}`;
         const cleanedPath = file.replace("/package.json", "");
 
         return {
@@ -68,8 +69,10 @@ export default function IndexCommand() {
           icon: json.icon,
           commandCount: json.commands.length,
           owner,
+          access,
           title: json.title,
           link,
+          created: stats.ctime,
           isLocalExtension: !cleanedPath.match(/[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi),
         };
       }),
@@ -143,7 +146,18 @@ export default function IndexCommand() {
               accessories.push({ tag: item.author, icon: Icon.Person, tooltip: "Author" });
             }
 
+            if (item.owner && item.access === undefined) {
+              accessories.push({
+                tag: { color: Color.Red, value: "Private" },
+                icon: Icon.EyeDisabled,
+                tooltip: "Private Extension",
+              });
+            }
+
+            const date = new Date(item.created);
+
             accessories.push({ tag: `${item.commandCount}`, icon: Icon.ComputerChip, tooltip: "Commands" });
+            accessories.push({ date: date, tooltip: `Last updated: ${date.toLocaleString()}` });
 
             return (
               <List.Item
@@ -154,6 +168,7 @@ export default function IndexCommand() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title="Extension">
+                      <Action.OpenInBrowser url={item.link} />
                       <Action
                         onAction={() => {
                           Clipboard.copy(formatItem(item, preferences.format));

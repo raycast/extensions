@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.61.0 - 2023-11-02
+
+### 💎 Improvements
+
+- **Date Picker**: When specifying a min and/or max date, the suggestion will now always be within those bounds
+
+### 🐞 Fixes
+
+- Fixed a bug that previously could cause a `no-view` command to display an error icon in the root search, with no means of removing the error.
+
 ## 1.60.0 - 2023-10-18
 
 ## Introducing the Extension Issues Dashboard

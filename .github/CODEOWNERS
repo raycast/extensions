@@ -221,6 +221,7 @@
 /extensions/currency-exchange                        @xeric
 /extensions/curto-io-url-shortener                   @birobirobiro
 /extensions/cyberduck                                @scottaglia
+/extensions/cyberpanel                               @xmok
 /extensions/cypress-docs                             @robertguss
 /extensions/dad-jokes                                @pernielsentikaer @Abdulaziz-Aljadaan
 /extensions/dash                                     @RSO @sxn @JasonBoy
@@ -257,6 +258,7 @@
 /extensions/dictionary                               @DrChai
 /extensions/diff-checker                             @Destiner
 /extensions/dig                                      @danielbahl @pernielsentikaer
+/extensions/digitalocean                             @ShukantPal
 /extensions/directus                                 @bryantgillespie
 /extensions/discord                                  @Aayush9029
 /extensions/discord-timestamps                       @thewilloftheshadow @feyli
@@ -293,6 +295,7 @@
 /extensions/duck-duck-go-search                      @tegola @justspacedog
 /extensions/eagle                                    @Yukaii
 /extensions/easy-new-file                            @koinzhang
+/extensions/easy-ocr                                 @Rafo1994
 /extensions/easydict                                 @tisfeng
 /extensions/ebird                                    @OozyGrub
 /extensions/ecosia-search                            @MFCo
@@ -441,7 +444,7 @@
 /extensions/hellonext-changelogs                     @heertheeswaran
 /extensions/hellonext-wallpapers                     @imkarthikk
 /extensions/helm-docs                                @tiagomichaelsousa
-/extensions/heroicons                                @haackt
+/extensions/heroicons                                @haackt @mil3na
 /extensions/heroku                                   @Yukaii
 /extensions/hexlify                                  @gkpln3
 /extensions/hidden-icons                             @koinzhang
@@ -714,6 +717,7 @@
 /extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai @KevinBatdorf
 /extensions/obsidian-bookmarks                       @Dru89
 /extensions/obsidian-smart-capture                   @trillhause
+/extensions/odesli                                   @anned20
 /extensions/odin                                     @aamoussa97
 /extensions/office-quotes                            @braydoncoyer @sandypockets
 /extensions/office2pdf                               @ARui-tw
@@ -876,7 +880,7 @@
 /extensions/real-debrid-manager                      @YamenSharaf
 /extensions/rebrandly                                @grikomsn
 /extensions/recents                                  @GastroGeek @kgrhartlage
-/extensions/reclaim-ai                               @webergnr @maximilianzuern @shkreios @webergnr
+/extensions/reclaim-ai                               @lightbody @maximilianzuern @shkreios @webergnr
 /extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
 /extensions/redis                                    @k8scat
@@ -969,6 +973,7 @@
 /extensions/single-disk-eject                        @johndturn
 /extensions/sip                                      @jamesjlyons
 /extensions/sips                                     @SKaplanOfficial @arronhunt @nakaakist
+/extensions/sitespeakai                              @hermanschutte
 /extensions/sketch                                   @aesign
 /extensions/slack                                    @momme-rtf @Elliot67
 /extensions/slack-status                             @PitNikola @johnhampton
@@ -1042,6 +1047,7 @@
 /extensions/teamgantt                                @knownasilya
 /extensions/teamup-rooms                             @drewwatkins11
 /extensions/techcrunch                               @khlebobul
+/extensions/teleport                                 @lamberttraccard
 /extensions/tempmail                                 @Joshlucpoll
 /extensions/temporary-email                          @natterstefan @JoelKlint
 /extensions/tennis-standings                         @faisal3389
@@ -1136,6 +1142,7 @@
 /extensions/v2ex                                     @mopig
 /extensions/v2ex-viewer                              @daikaiyu
 /extensions/val-town                                 @KevinBatdorf
+/extensions/vat-calculator                           @Justiniscoding
 /extensions/vatlayer                                 @xmok
 /extensions/vault                                    @fonimus @ricoberger @pernielsentikaer
 /extensions/vc-ru-news                               @khlebobul

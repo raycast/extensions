@@ -1,6 +1,6 @@
 import { Icon, Image } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { isBefore, parseISO } from "date-fns";
+import { isBefore, isSameDay, parseISO } from "date-fns";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import { useMemo } from "react";
@@ -166,19 +166,25 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     `show-completed-reminders-${listId}`,
     false,
   );
-  const [sortBy, setSortBy] = useCachedState<SortByOption>(`sort-by-${listId}`, "default");
-  const [groupBy, setGroupBy] = useCachedState<GroupByOption>(`group-by-${listId}`, "default");
+
+  const viewDefault = listId === "today" || listId === "scheduled" ? "dueDate" : "default";
+
+  const [sortBy, setSortBy] = useCachedState<SortByOption>(`sort-by-${listId}`, viewDefault);
+  const [groupBy, setGroupBy] = useCachedState<GroupByOption>(`group-by-${listId}`, viewDefault);
   const [orderBy, setOrderBy] = useCachedState<OrderByOption>(`order-by-${listId}`, "asc");
 
   const reminders = useMemo(() => data?.reminders ?? [], [data]);
 
   const filteredReminders = useMemo(() => {
-    return (
-      reminders.filter((reminder) => {
-        if (listId === "all") return true;
-        return reminder.list?.id === listId;
-      }) ?? []
-    );
+    return reminders.filter((reminder) => {
+      if (listId === "all") return true;
+      if (listId === "today")
+        return reminder.dueDate
+          ? isOverdue(reminder.dueDate) || isSameDay(new Date(reminder.dueDate), parseDay())
+          : false;
+      if (listId === "scheduled") return !!reminder.dueDate;
+      return reminder.list?.id === listId;
+    });
   }, [listId, reminders]);
 
   const { sortByProp, sortedReminders, orderByProp } = useMemo(() => {
@@ -242,7 +248,17 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
 
     switch (groupBy) {
       case "default": {
-        const title = listId === "all" ? "All" : data?.lists.find((list) => list.id === listId)?.title ?? "Reminders";
+        let title = "Reminders";
+        if (listId === "all") {
+          title = "All";
+        } else if (listId === "today") {
+          title = "Today";
+        } else if (listId === "scheduled") {
+          title = "Scheduled";
+        } else {
+          title = data?.lists.find((list) => list.id === listId)?.title ?? "Reminders";
+        }
+
         sections = [{ title, reminders: incompleteReminders }];
         break;
       }
