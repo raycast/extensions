@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { DNSRecord, DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
 import { editRecordByDomainAndId, editRecordByDomainSubdomainAndType, retrieveAllDomains } from "./utils/api";
 import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 
 type EditRecordProps = {
   domain: string;
@@ -156,7 +156,9 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
       <Form.Description text={description} />
       <Form.Separator />
 
-      <Form.TextField title="Domain" placeholder="Enter domain" {...itemProps.domain} />
+      <Form.Dropdown title="Domain" {...itemProps.domain}>
+        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} icon={getFavicon(`https://${item.domain}`)} />)}
+      </Form.Dropdown>
       {edit === "domainAndID" && <Form.TextField title="ID" placeholder="Enter id" {...itemProps.id} />}
       {edit === "domainAndID" && <Form.Separator />}
       <Form.Dropdown

@@ -2,8 +2,8 @@ import { ActionPanel, Action, Icon, Form, showToast, Toast } from "@raycast/api"
 import { useEffect, useState } from "react";
 import { DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
 import { createRecord, retrieveAllDomains } from "./utils/api";
-import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { API_DOCS_URL, DNS_RECORD_TYPES } from "./utils/constants";
+import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 
 export default function CreateDNSRecord() {
   interface FormValues {
@@ -96,13 +96,13 @@ export default function CreateDNSRecord() {
           <Action.OpenInBrowser
             icon={Icon.Globe}
             title="Go to API Reference"
-            url="https://porkbun.com/api/json/v3/documentation#DNS%20Create%20Record"
+            url={`${API_DOCS_URL}DNS%20Create%20Record`}
           />
         </ActionPanel>
       }
     >
       <Form.Dropdown title="Domain" {...itemProps.domain}>
-        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} />)}
+        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} icon={getFavicon(`https://${item.domain}`)} />)}
       </Form.Dropdown>
       <Form.Separator />
       <Form.Dropdown

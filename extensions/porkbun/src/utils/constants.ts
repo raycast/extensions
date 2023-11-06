@@ -18,6 +18,12 @@ export const DEFAULT_NAMESERVERS = [
   "fortaleza.ns.porkbun.com",
   "maceio.ns.porkbun.com",
   "salvador.ns.porkbun.com"
+];
+
+export const URL_FORWARDING_TYPES = [
+  { title: "Temporary Redirect (302 / 307)", value:"temporary" , description: "A temporary redirect is used to tell web browsers and other clients that the current request should go to the new URL but any future request should still go to the original URL. You should probably use this one." },
+  { title: "Permanent Redirect (301)", value:"permanent" , description: "A permanent redirect is used to tell web browsers and other clients that all future requests for the URL should go to the new URL. This is meant to be permanent; only use it if you are certain you will not want to redirect or use the URL in another way in the future." },
+  { title: "Masked", value:"masked" , description: "A masked redirect will load the remote URL in a frame. This will allow the new domain to remain in the address bar of the user's web browser. However; the user will not be able to bookmark other pages of the site and have them function as expected. Masked URL forwarding may also have negative effects on SEO." }
 ]
 
 const FORCE_IPV4 = getPreferenceValues<Preferences>().force_ipv4;

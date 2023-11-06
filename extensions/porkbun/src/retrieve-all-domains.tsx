@@ -5,12 +5,14 @@ import { Domain, RetrieveAllDomainsResponse } from "./utils/types";
 import { retrieveAllDomains } from "./utils/api";
 import { API_DOCS_URL } from "./utils/constants";
 import GetNameServersComponent from "./components/GetNameServersComponent";
+import GetURLForwardingComponent from "./components/url-forwarding/GetURLForwardingComponent";
 
 export default function RetrieveAllDomains() {
   const [isLoading, setIsLoading] = useState(false);
   const [domains, setDomains] = useCachedState<Domain[]>("domains");
   const [filteredDomains, filterDomains] = useState<Domain[]>();
   const [filter, setFilter] = useState("");
+  const [searchText, setSearchText] = useState("");
   
   const callApi = async () => {
     setIsLoading(true);
@@ -33,15 +35,18 @@ export default function RetrieveAllDomains() {
   useEffect(() => {
     (() => {
       if (!domains) return;
-        filterDomains(!filter ? domains : domains.filter(item => {
+        const domainsWithSearchText = domains.filter(item => item.domain.includes(searchText));
+        filterDomains(!filter ? domainsWithSearchText : domainsWithSearchText.filter(item => {
           if (filter==="status_active")
             return item.status==="ACTIVE";
           else if (filter==="status_null")
             return !item.status;
         }));
     })();
-  }, [domains, filter])
+  }, [domains, filter, searchText])
 
+  const sectionTitle = domains && `Total: ${domains.length} | Filtered: ${filteredDomains?.length}`;
+  
   return (
     <List
       isLoading={isLoading}
@@ -66,8 +71,9 @@ export default function RetrieveAllDomains() {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
-      // onSearchTextChange={setSearchText}
+      onSearchTextChange={setSearchText}
     >
+      <List.Section title={sectionTitle}>
       {filteredDomains && filteredDomains.map(item => <List.Item key={item.domain} title={item.domain}
       icon={getFavicon(`https://${item.domain}`, { fallback: Icon.Globe })}
       accessories={[
@@ -77,6 +83,7 @@ export default function RetrieveAllDomains() {
               <ActionPanel>
                 <Action.OpenInBrowser url={item.domain} />
                 <Action.Push title="Get Name Servers" icon={Icon.AppWindowGrid3x3} target={<GetNameServersComponent domain={item.domain} />} />
+                <Action.Push title="Get URL Forwarding" icon={Icon.Forward} target={<GetURLForwardingComponent domain={item.domain} />} />
                 <Action icon={Icon.Redo} title="Reload Domains" onAction={callApi} />
                 <Action.OpenInBrowser
                   icon={Icon.Globe}
@@ -84,7 +91,7 @@ export default function RetrieveAllDomains() {
                   url={`${API_DOCS_URL}Domain%20List%20All`}
                 />
                 <ActionPanel.Section>
-                  <Action title="Retrieve SSL Bundle" onAction={async () => await launchCommand({ name: "retrieve-ssl-bundle", type: LaunchType.UserInitiated, arguments: { domain: item.domain } })} />
+                  <Action title="Retrieve SSL Bundle" icon={Icon.Lock} onAction={async () => await launchCommand({ name: "retrieve-ssl-bundle", type: LaunchType.UserInitiated, arguments: { domain: item.domain } })} />
                 </ActionPanel.Section>
               </ActionPanel>
             } detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
@@ -100,6 +107,7 @@ export default function RetrieveAllDomains() {
               <List.Item.Detail.Metadata.Label title="Auto Renew" icon={item.autoRenew==="1" ? Icon.Check : Icon.Multiply} />
               <List.Item.Detail.Metadata.Label title="Not Local" icon={item.notLocal==="1" ? Icon.Check : Icon.Multiply} />
             </List.Item.Detail.Metadata>} />} /> )}
+      </List.Section>
     </List>
   );
 }

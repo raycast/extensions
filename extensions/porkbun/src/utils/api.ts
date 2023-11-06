@@ -6,6 +6,7 @@ import {
   RequestBody,
   Response,
   UpdateNameServersRequest,
+  CreateUrlForwardingRequest,
 } from "./types";
 import { Toast, showToast } from "@raycast/api";
 import fetch from "node-fetch";
@@ -93,4 +94,14 @@ export async function getNameServersByDomain(domain: string) {
 export async function updateNameServersByDomain(domain: string, {...params}: UpdateNameServersRequest) {
   const body = { ...params };
   return await callApi(`domain/updateNs/${domain}`, "Updating Name Servers", body);
+}
+export async function getUrlForwardingByDomain(domain: string) {
+  return await callApi(`domain/getUrlForwarding/${domain}`, "Fetching URL Forwarding");
+}
+export async function deleteUrlForwardByDomainAndId(domain: string, id: string) {
+  return await callApi(`domain/deleteUrlForward/${domain}/${id}`, "Deleting URL Forwarding");
+}
+export async function createUrlForwarding(domain: string, { ...params }: CreateUrlForwardingRequest) {
+  const body = { ...params };
+  return await callApi(`domain/addUrlForward/${domain}`, "Creating URL Forward", body);
 }

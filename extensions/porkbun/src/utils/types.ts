@@ -43,7 +43,7 @@ export type EditDNSRecordByDomainSubdomainAndIdRequest = {
   ttl?: string;
   prio?: string;
 };
-export type RequestBody = CreateDNSRecordRequest | EditDNSRecordByDomainSubdomainAndIdRequest | UpdateNameServersRequest;
+export type RequestBody = CreateDNSRecordRequest | EditDNSRecordByDomainSubdomainAndIdRequest | UpdateNameServersRequest | CreateUrlForwardingRequest;
 
 export type ErrorResponse = {
   status: "ERROR";
@@ -94,6 +94,26 @@ export type GetNameServersResponse = {
 }
 export type UpdateNameServersRequest = {
   ns: string[];
+}
+
+export type UrlForwarding = {
+  id: string;
+  subdomain: string;
+  location: string;
+  type: "temporary" | "permanent" | "masked";
+  includePath: "yes" | "no";
+  wildcard: "yes" | "no";
+}
+export type getUrlForwardingResponse = {
+  status: "SUCCESS";
+  forwards: UrlForwarding[];
+}
+export type CreateUrlForwardingRequest = {
+  subdomain: string;
+  location: string;
+  type: "temporary" | "permanent" | "masked";
+  includePath: "yes" | "no";
+  wildcard: "yes" | "no";
 }
 
 export type SuccessResponse = {

@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import { DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
 import { deleteRecordByDomainAndId, deleteRecordByDomainSubdomainAndType, retrieveAllDomains } from "./utils/api";
 import { DNS_RECORD_TYPES } from "./utils/constants";
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 
 export default function DeleteDNSRecord() {
   type DeleteRecordFormValues = {
@@ -117,7 +117,7 @@ export default function DeleteDNSRecord() {
       <Form.Separator />
 
       <Form.Dropdown title="Domain" {...itemProps.domain}>
-        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} />)}
+        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} icon={getFavicon(`https://${item.domain}`)} />)}
       </Form.Dropdown>
       {deleteType === "domainAndID" && <Form.TextField title="ID" placeholder="Enter id" {...itemProps.id} />}
 
