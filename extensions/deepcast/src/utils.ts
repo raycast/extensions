@@ -38,7 +38,7 @@ function gotErrorToString(error: unknown) {
   return "Unknown error";
 }
 
-async function getSelection() {
+export async function getSelection() {
   try {
     return await getSelectedText();
   } catch (error) {

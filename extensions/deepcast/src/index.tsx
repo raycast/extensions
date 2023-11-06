@@ -1,16 +1,13 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  LaunchProps,
-  getPreferenceValues,
-  getSelectedText,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { SourceLanguage, TargetLanguage, sendTranslateRequest, source_languages, target_languages } from "./utils";
+import {
+  SourceLanguage,
+  TargetLanguage,
+  getSelection,
+  sendTranslateRequest,
+  source_languages,
+  target_languages,
+} from "./utils";
 import TranslationView from "./components/TranslationView";
 
 interface Values {
@@ -32,7 +29,12 @@ function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   );
 }
 
-const Command = (props: LaunchProps<{ arguments?: Arguments.Index }>) => {
+type LaunchContext = {
+  translation?: string;
+  sourceLanguage?: SourceLanguage;
+};
+
+const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   // Check whether component is called with an existing value for translation
   if (props?.launchContext?.translation) {
     const translation = props?.launchContext?.translation;
@@ -51,7 +53,7 @@ const Command = (props: LaunchProps<{ arguments?: Arguments.Index }>) => {
   // if there is no selected text, then just leave the source text empty
   useEffect(() => {
     if (props.fallbackText) return;
-    getSelectedText().then((content) => {
+    getSelection().then((content) => {
       setSourceText(content ?? "");
     });
   }, []);
