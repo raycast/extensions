@@ -1,5 +1,9 @@
 # Lark Changelog
 
+## [Update] - 2023-11-06
+
+- Fix "read properties of undefined"
+
 ## [Update] - 2023-07-24
 
 - Remove tenant domain logic, as Lark doesn't return the data anymore.
