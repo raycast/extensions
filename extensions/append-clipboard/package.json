@@ -26,7 +26,7 @@
           "type": "textfield",
           "required": false,
           "title": "Append Separator",
-          "description": "Separator between text when appending text. Use {newline} and {tab} for new line and tab.",
+          "description": "Separator between text when appending text. Use {newline} and {tab} for new line and tab",
           "default": ""
         },
         {
@@ -62,7 +62,7 @@
       "name": "prepend-text-to-clipboard",
       "title": "Prepend Text to Clipboard",
       "icon": "prepend-clipboard.png",
-      "description": "Separator between text when prepending text. Use {newline} and {tab} for new line and tab.",
+      "description": "Prepend selected text to your clipboard with different separators",
       "mode": "no-view",
       "preferences": [
         {
@@ -70,7 +70,7 @@
           "type": "textfield",
           "required": false,
           "title": "Prepend Separator",
-          "description": "Separator between text when prepending text",
+          "description": "Separator between text when prepending text. Use {newline} and {tab} for new line and tab",
           "default": ""
         },
         {
