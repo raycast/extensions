@@ -2,7 +2,8 @@
 
 ## [Enhancement] - 2023-11-03
 - Default to selected text for the `Translate` command
-- Added shortcut to copy the translation in the `Translate` command
+- Added action to copy the translation in the `Translate` command
+- Added action to paste the translation to frontmost app in the `Translate` command
 - Support fallback text for the `Translate` command
 
 ## [Arguments] - 2023-10-28

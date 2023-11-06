@@ -119,14 +119,25 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Translate" onSubmit={submit} />
-          <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
-          <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
-          <Action.CopyToClipboard
-            title="Copy Translation"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-            content={translation}
-          />
+          <ActionPanel.Section>
+            <Action.SubmitForm icon={Icon.ArrowRightCircle} title="Translate" onSubmit={submit} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Translation"
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              content={translation}
+            />
+            <Action.Paste
+              title="Paste Translation to Frontmost App"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              content={translation}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
+            <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       isLoading={loading}
