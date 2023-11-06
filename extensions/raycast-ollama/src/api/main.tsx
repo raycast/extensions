@@ -1,8 +1,4 @@
-import {
-  OllamaApiGenerateRequestBody,
-  OllamaApiGenerateResponseDone,
-  OllamaApiGenerateResponseMetadata,
-} from "./types";
+import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse } from "./types";
 import {
   ErrorOllamaCustomModel,
   ErrorOllamaModelNotInstalled,
@@ -38,9 +34,9 @@ export function ResultView(
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answerMetadata, setAnswerMetadata]: [
-    OllamaApiGenerateResponseMetadata,
-    React.Dispatch<React.SetStateAction<OllamaApiGenerateResponseMetadata>>
-  ] = React.useState({} as OllamaApiGenerateResponseMetadata);
+    OllamaApiGenerateResponse,
+    React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>
+  ] = React.useState({} as OllamaApiGenerateResponse);
   async function HandleError(err: Error) {
     if (err instanceof ErrorOllamaModelNotInstalled) {
       await showToast({ style: Toast.Style.Failure, title: err.message, message: err.suggest });
@@ -232,27 +228,42 @@ export function ResultView(
           <Detail.Metadata>
             <Detail.Metadata.Label title="Model" text={answerMetadata.model} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label
-              title="Generation Speed"
-              text={`${(answerMetadata.eval_count / (answerMetadata.eval_duration / 1e9)).toFixed(2)} token/s`}
-            />
-            <Detail.Metadata.Label
-              title="Total Inference Duration"
-              text={`${(answerMetadata.total_duration / 1e9).toFixed(2)}s`}
-            />
-            <Detail.Metadata.Label title="Load Duration" text={`${(answerMetadata.load_duration / 1e9).toFixed(2)}s`} />
-            <Detail.Metadata.Label title="Sample Duration" text={`${answerMetadata.sample_count} sample`} />
-            <Detail.Metadata.Label
-              title="Sample Duration"
-              text={`${(answerMetadata.sample_duration / 1e9).toFixed(2)}s`}
-            />
-            <Detail.Metadata.Label title="Prompt Eval Count" text={`${answerMetadata.prompt_eval_count}`} />
-            <Detail.Metadata.Label
-              title="Prompt Eval Duration"
-              text={`${(answerMetadata.prompt_eval_duration / 1e9).toFixed(2)}s`}
-            />
-            <Detail.Metadata.Label title="Eval Count" text={`${answerMetadata.eval_count}`} />
-            <Detail.Metadata.Label title="Eval Duration" text={`${(answerMetadata.eval_duration / 1e9).toFixed(2)}s`} />
+            {answerMetadata.eval_count && answerMetadata.eval_duration ? (
+              <Detail.Metadata.Label
+                title="Generation Speed"
+                text={`${(answerMetadata.eval_count / (answerMetadata.eval_duration / 1e9)).toFixed(2)} token/s`}
+              />
+            ) : null}
+            {answerMetadata.total_duration ? (
+              <Detail.Metadata.Label
+                title="Total Inference Duration"
+                text={`${(answerMetadata.total_duration / 1e9).toFixed(2)}s`}
+              />
+            ) : null}
+            {answerMetadata.load_duration ? (
+              <Detail.Metadata.Label
+                title="Load Duration"
+                text={`${(answerMetadata.load_duration / 1e9).toFixed(2)}s`}
+              />
+            ) : null}
+            {answerMetadata.prompt_eval_count ? (
+              <Detail.Metadata.Label title="Prompt Eval Count" text={`${answerMetadata.prompt_eval_count}`} />
+            ) : null}
+            {answerMetadata.prompt_eval_duration ? (
+              <Detail.Metadata.Label
+                title="Prompt Eval Duration"
+                text={`${(answerMetadata.prompt_eval_duration / 1e9).toFixed(2)}s`}
+              />
+            ) : null}
+            {answerMetadata.eval_count ? (
+              <Detail.Metadata.Label title="Eval Count" text={`${answerMetadata.eval_count}`} />
+            ) : null}
+            {answerMetadata.eval_duration ? (
+              <Detail.Metadata.Label
+                title="Eval Duration"
+                text={`${(answerMetadata.eval_duration / 1e9).toFixed(2)}s`}
+              />
+            ) : null}
           </Detail.Metadata>
         )
       }
@@ -273,8 +284,8 @@ export function ListView(): JSX.Element {
   const [selectedAnswer, setSelectedAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] =
     React.useState("0");
   const [answerListHistory, setAnswerListHistory]: [
-    Map<string, [string, string, OllamaApiGenerateResponseDone][] | undefined>,
-    React.Dispatch<React.SetStateAction<Map<string, [string, string, OllamaApiGenerateResponseDone][] | undefined>>>
+    Map<string, [string, string, OllamaApiGenerateResponse][] | undefined>,
+    React.Dispatch<React.SetStateAction<Map<string, [string, string, OllamaApiGenerateResponse][] | undefined>>>
   ] = React.useState(new Map());
   const [clipboardConversation, setClipboardConversation]: [string, React.Dispatch<React.SetStateAction<string>>] =
     React.useState("");
@@ -316,9 +327,9 @@ export function ListView(): JSX.Element {
         setAnswerListHistory((prevState) => {
           let prevData = prevState.get(chatName);
           if (prevData?.length === undefined) {
-            prevData = [[query, "", {} as OllamaApiGenerateResponseDone]];
+            prevData = [[query, "", {} as OllamaApiGenerateResponse]];
           } else {
-            prevData.push([query, "", {} as OllamaApiGenerateResponseDone]);
+            prevData.push([query, "", {} as OllamaApiGenerateResponse]);
           }
           prevState.set(chatName, prevData);
           setSelectedAnswer((prevData.length - 1).toString());
@@ -365,9 +376,7 @@ export function ListView(): JSX.Element {
     });
     await LocalStorage.getItem("answerListHistory").then((data) => {
       if (data) {
-        const dataMap: Map<string, [string, string, OllamaApiGenerateResponseDone][]> = new Map(
-          JSON.parse(data as string)
-        );
+        const dataMap: Map<string, [string, string, OllamaApiGenerateResponse][]> = new Map(JSON.parse(data as string));
         setAnswerListHistory(dataMap);
       }
     });
@@ -409,7 +418,7 @@ export function ListView(): JSX.Element {
     }
     setClipboardConversation(clipboard);
   }
-  function ActionOllama(item?: [string, string, OllamaApiGenerateResponseDone]): JSX.Element {
+  function ActionOllama(item?: [string, string, OllamaApiGenerateResponse]): JSX.Element {
     return (
       <ActionPanel>
         <ActionPanel.Section title="Ollama">
@@ -594,33 +603,42 @@ export function ListView(): JSX.Element {
                       <Detail.Metadata>
                         <Detail.Metadata.Label title="Model" text={item[2].model} />
                         <Detail.Metadata.Separator />
-                        <Detail.Metadata.Label
-                          title="Generation Speed"
-                          text={`${(item[2].eval_count / (item[2].eval_duration / 1e9)).toFixed(2)} token/s`}
-                        />
-                        <Detail.Metadata.Label
-                          title="Total Inference Duration"
-                          text={`${(item[2].total_duration / 1e9).toFixed(2)}s`}
-                        />
-                        <Detail.Metadata.Label
-                          title="Load Duration"
-                          text={`${(item[2].load_duration / 1e9).toFixed(2)}s`}
-                        />
-                        <Detail.Metadata.Label title="Sample Duration" text={`${item[2].sample_count} sample`} />
-                        <Detail.Metadata.Label
-                          title="Sample Duration"
-                          text={`${(item[2].sample_duration / 1e9).toFixed(2)}s`}
-                        />
-                        <Detail.Metadata.Label title="Prompt Eval Count" text={`${item[2].prompt_eval_count}`} />
-                        <Detail.Metadata.Label
-                          title="Prompt Eval Duration"
-                          text={`${(item[2].prompt_eval_duration / 1e9).toFixed(2)}s`}
-                        />
-                        <Detail.Metadata.Label title="Eval Count" text={`${item[2].eval_count}`} />
-                        <Detail.Metadata.Label
-                          title="Eval Duration"
-                          text={`${(item[2].eval_duration / 1e9).toFixed(2)}s`}
-                        />
+                        {item[2].eval_count && item[2].eval_duration ? (
+                          <Detail.Metadata.Label
+                            title="Generation Speed"
+                            text={`${(item[2].eval_count / (item[2].eval_duration / 1e9)).toFixed(2)} token/s`}
+                          />
+                        ) : null}
+                        {item[2].total_duration ? (
+                          <Detail.Metadata.Label
+                            title="Total Inference Duration"
+                            text={`${(item[2].total_duration / 1e9).toFixed(2)}s`}
+                          />
+                        ) : null}
+                        {item[2].load_duration ? (
+                          <Detail.Metadata.Label
+                            title="Load Duration"
+                            text={`${(item[2].load_duration / 1e9).toFixed(2)}s`}
+                          />
+                        ) : null}
+                        {item[2].prompt_eval_count ? (
+                          <Detail.Metadata.Label title="Prompt Eval Count" text={`${item[2].prompt_eval_count}`} />
+                        ) : null}
+                        {item[2].prompt_eval_duration ? (
+                          <Detail.Metadata.Label
+                            title="Prompt Eval Duration"
+                            text={`${(item[2].prompt_eval_duration / 1e9).toFixed(2)}s`}
+                          />
+                        ) : null}
+                        {item[2].eval_count ? (
+                          <Detail.Metadata.Label title="Eval Count" text={`${item[2].eval_count}`} />
+                        ) : null}
+                        {item[2].eval_duration ? (
+                          <Detail.Metadata.Label
+                            title="Eval Duration"
+                            text={`${(item[2].eval_duration / 1e9).toFixed(2)}s`}
+                          />
+                        ) : null}
                       </Detail.Metadata>
                     )
                   }
