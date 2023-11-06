@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { LocalStorage, Toast, showToast } from "@raycast/api";
 import { loadSavedData } from "../utils";
 
-import type { EpicData } from "../types";
+import type { EpicData, NewEpicData } from "../types";
 import { EPICS_STORAGE_KEY } from "../consts";
 
 export const useEpics = () => {
@@ -19,18 +19,17 @@ export const useEpics = () => {
     LocalStorage.setItem(EPICS_STORAGE_KEY, JSON.stringify(epics));
   }, [epics]);
 
-  const addEpic = (newEpicName: string) => {
-    if (epics === undefined) return;
-    const [name_, ...description_] = newEpicName.split("/");
-    const name = name_.trim();
-    const description = description_.join("/").trim();
+  const addEpic = (data: NewEpicData): boolean => {
+    if (epics === undefined) return false;
+
+    const { name, description } = data;
 
     if (epics.find((epic) => epic.name === name)) {
       showToast({
         title: "Epic with this name already exists",
         style: Toast.Style.Failure,
       });
-      return;
+      return false;
     }
 
     if (!name) {
@@ -38,8 +37,9 @@ export const useEpics = () => {
         title: "Empty epic name",
         style: Toast.Style.Failure,
       });
-      return;
+      return false;
     }
+
     setEpics([
       ...epics,
       {
@@ -48,26 +48,31 @@ export const useEpics = () => {
         description,
       },
     ]);
+
+    return true;
   };
 
-  const updateEpic = (epicName: string, query: string) => {
-    if (!epics) return;
+  const updateEpic = (epicName: string, newData: EpicData): boolean => {
+    if (!epics) return false;
 
-    if (epics === undefined) return;
-    const [, ...description_] = query.split("/");
-    const description = description_.join("/").trim();
+    if (epicName !== newData.name && epics.find((epic) => epic.name === newData.name)) {
+      showToast({
+        title: "Epic with this name already exists",
+        style: Toast.Style.Failure,
+      });
+      return false;
+    }
 
     setEpics(
       epics.map((epic) => {
         if (epic.name === epicName) {
-          return {
-            ...epic,
-            description,
-          };
+          return newData;
         }
         return epic;
       }),
     );
+
+    return true;
   };
 
   const updateLastUsedTimestamp = (epicName: string, timestamp?: number) => {

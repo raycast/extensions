@@ -1,19 +1,22 @@
-import { Action, ActionPanel, Icon, List, Detail } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Detail, confirmAlert } from "@raycast/api";
 import { useState } from "react";
 import { useEpics } from "./hooks/useEpics";
 import { useEpicInProgress } from "./hooks/useEpicInProgress";
 import { useMigrationManager } from "./hooks/useMigrationManager";
 import { useEpicFilter } from "./hooks/useEpicFilter";
 import { TimeLogAction } from "./components/TimeLogAction";
+import { EditEpic } from "./components/EditEpic";
+import { EpicData } from "./types";
+import { AddEpic } from "./components/AddEpic";
 
 export default function gcalTimeLogger() {
-  const [inputEpicName, setInputEpicName] = useState("");
+  const [queryInput, setQueryInput] = useState("");
   const { epics, deleteEpic, addEpic, updateLastUsedTimestamp, updateEpic } = useEpics();
   const { workingOnEpicData, setWorkingOnEpicData, startWork, workStartedAt } =
     useEpicInProgress(updateLastUsedTimestamp);
   const isMigrationNeeded = useMigrationManager();
 
-  const sortedEpics = useEpicFilter(epics, workingOnEpicData?.name, inputEpicName);
+  const sortedEpics = useEpicFilter(epics, workingOnEpicData?.name, queryInput);
 
   if (isMigrationNeeded === true) {
     return <Detail isLoading={isMigrationNeeded === undefined} markdown={`# Setting up...`} />;
@@ -21,17 +24,34 @@ export default function gcalTimeLogger() {
 
   const createEpicFromQuery = () => {
     if (epics) {
-      addEpic(inputEpicName);
+      const [name_, ...description_] = queryInput.split("/");
+      const name = name_.trim();
+      const description = description_.join("/").trim();
+
+      if (addEpic({ name, description })) {
+        setQueryInput("");
+      }
     }
-    setInputEpicName("");
+  };
+
+  const handleDeleteEpic = async (epicName: string) => {
+    if (await confirmAlert({ title: "Are you sure?", message: `The epic "${epicName}" will be deleted permanently` })) {
+      deleteEpic(epicName);
+    }
+  };
+
+  const handleDiscardWork = async () => {
+    if (await confirmAlert({ title: "Are you sure?", message: "Time will not be logged on Google Calendar" })) {
+      setWorkingOnEpicData(null);
+    }
   };
 
   return (
     <>
       <List
         filtering={false}
-        onSearchTextChange={setInputEpicName}
-        searchText={inputEpicName}
+        onSearchTextChange={setQueryInput}
+        searchText={queryInput}
         searchBarPlaceholder="Epic name / description (optional)"
         navigationTitle="Log time"
         isLoading={!epics || workingOnEpicData === undefined}
@@ -41,7 +61,7 @@ export default function gcalTimeLogger() {
             <List.Item
               key={epic.name}
               title={epic.name}
-              icon={Icon.PlayFilled}
+              icon={workingOnEpicData?.name === epic.name ? Icon.PlayFilled : undefined}
               subtitle={epic.description}
               accessories={
                 workingOnEpicData?.name === epic.name && workStartedAt
@@ -70,8 +90,9 @@ export default function gcalTimeLogger() {
                         key="delete-epic"
                         icon={Icon.XMarkCircle}
                         title="Delete This Epic"
+                        style={Action.Style.Destructive}
                         shortcut={{ modifiers: ["ctrl"], key: "d" }}
-                        onAction={() => deleteEpic(epic.name)}
+                        onAction={() => handleDeleteEpic(epic.name)}
                       />
                     </>
                   ) : (
@@ -79,26 +100,35 @@ export default function gcalTimeLogger() {
                       <TimeLogAction setWorkingOnEpic={setWorkingOnEpicData} workingOnEpic={workingOnEpicData} />
                       <Action
                         key="discard-work"
-                        icon={Icon.DeleteDocument}
-                        title="Finish Work (Discard Work)"
-                        onAction={() => setWorkingOnEpicData(null)}
+                        icon={Icon.XMarkCircleFilled}
+                        title="Discard Time"
+                        onAction={handleDiscardWork}
                         shortcut={{ modifiers: ["cmd"], key: "d" }}
                       />
                     </>
                   )}
-                  <Action
-                    key="create-epic-from-query"
+                  {!!queryInput && (
+                    <Action
+                      key="create-epic-from-query"
+                      icon={Icon.PlusCircle}
+                      title="Create Epic From Search Query"
+                      onAction={createEpicFromQuery}
+                    />
+                  )}
+                  <Action.Push
+                    key="create-new-epic"
                     icon={Icon.PlusCircle}
-                    title="Create Epic From Search Query"
+                    title="Create Epic"
                     shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    onAction={createEpicFromQuery}
+                    target={<AddEpic addEpic={addEpic} />}
                   />
-                  <Action
+                  <Action.Push
                     key="edit-epic-description"
-                    icon={Icon.Redo}
-                    title="Edit Description"
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={() => updateEpic(epic.name, inputEpicName)}
+                    icon={Icon.Document}
+                    title="Edit Epic"
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    target={<EditEpic epicData={epic} updateEpic={(data: EpicData) => updateEpic(epic.name, data)} />}
+                    // onAction={() => updateEpic(epic.name, queryInput)}
                   />
                 </ActionPanel>
               }
@@ -110,12 +140,20 @@ export default function gcalTimeLogger() {
             title="Create New Epic From Action Menu"
             actions={
               <ActionPanel title="Epic">
-                <Action
-                  key="create-epic-from-query-list"
+                {!!queryInput && (
+                  <Action
+                    key="create-epic-from-query-list"
+                    icon={Icon.PlusCircle}
+                    title="Create Epic From Search Query"
+                    onAction={createEpicFromQuery}
+                  />
+                )}
+                <Action.Push
+                  key="create-new-epic-list"
                   icon={Icon.PlusCircle}
-                  title="Create Epic From Search Query"
+                  title="Create Epic"
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  onAction={createEpicFromQuery}
+                  target={<AddEpic addEpic={addEpic} />}
                 />
               </ActionPanel>
             }
