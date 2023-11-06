@@ -55,9 +55,9 @@ export async function readContent() {
   const selected = await getSelection();
 
   if (preferredSource === "clipboard") {
-    return clipboard ?? selected;
+    return clipboard || selected;
   } else {
-    return selected ?? clipboard;
+    return selected || clipboard;
   }
 }
 

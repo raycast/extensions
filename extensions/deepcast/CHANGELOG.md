@@ -1,16 +1,16 @@
 # Deepcast Changelog
 
 ## [Enhancement] - 2023-11-03
-- Added support for using selected text for the `Translate` command
-- Added a shortcut to copy the translation to the clipboard in the `Translate` command
+- Default to selected text for the `Translate` command
+- Added shortcut to copy the translation in the `Translate` command
 - Support fallback text for the `Translate` command
 
 ## [Arguments] - 2023-10-28
-- Added support for inputting text to translate as an argument
+- Support arguments for `Translate Into ...` commands
 
 ## [Default Target Language and Fallback] - 2023-10-16
 - Added preferences to set the default target language for `Translate Into ...` commands
-- Support commands being a fallback command
+- Support fallback text for `Translate Into ...` commands
 
 ## [More Input/Output Options] - 2023-10-05
 
@@ -22,6 +22,6 @@
 - Added option to view translations in a Raycast window.
 - Added Loading indicator toast while fetching translations.
 
-## [Enhancement] - 2023-04-14
+## [More Languages] - 2023-04-14
 
 - Added Translate to Turkish, Korean, Indonesian, and Norwegian 
