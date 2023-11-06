@@ -265,7 +265,6 @@ ${err instanceof Error ? err.stack : String(err)}
           title="Labels"
           value={labelsUUID}
           onChange={setLabels}
-          storeValue={true}
           info="Tag is used to classify snippets"
         >
           {allLabels?.map((label) => (
