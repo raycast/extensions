@@ -1,12 +1,16 @@
-import { Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 
+import { useNotesContext } from "@/context/notes";
 import { VaultNote } from "@/types/dcli";
+import FavoriteActions from "./actions/FavoriteActions";
+import SyncAction from "./actions/note/SyncAction";
 
 type Props = {
   note: VaultNote;
 };
 
 export const ListItemNote = ({ note }: Props) => {
+  const { isInitialLoaded } = useNotesContext();
   const hasAttachments = (note.attachments?.length ?? 0) > 0;
 
   return (
@@ -14,7 +18,7 @@ export const ListItemNote = ({ note }: Props) => {
       title={note.title}
       detail={
         <List.Item.Detail
-          markdown={note.content}
+          markdown={isInitialLoaded ? note.content : undefined}
           metadata={
             hasAttachments && (
               <List.Item.Detail.Metadata>
@@ -36,6 +40,14 @@ export const ListItemNote = ({ note }: Props) => {
           tooltip: hasAttachments ? "Attachments" : undefined,
         },
       ]}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Item Actions">
+            <FavoriteActions item={note} />
+          </ActionPanel.Section>
+          <SyncAction />
+        </ActionPanel>
+      }
     />
   );
 };

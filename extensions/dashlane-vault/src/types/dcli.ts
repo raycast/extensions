@@ -61,7 +61,7 @@ export type VaultCredential = OmitIntersection<
 
 export type VaultCredentialStatus = VaultCredential["status"];
 
-export interface VaultNotesDto {
+export interface VaultNoteDto {
   anonId: string;
   /**
    * Stringified JSON
@@ -83,7 +83,7 @@ export interface VaultNotesDto {
 }
 
 export type VaultNote = OmitIntersection<
-  VaultNotesDto,
+  VaultNoteDto,
   {
     attachments?: NoteAttachment[];
     creationDatetime?: number;

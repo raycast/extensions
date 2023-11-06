@@ -1,12 +1,10 @@
-import { Cache } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
+import { CACHE_KEYS, cache } from "@/constants";
 import { hideIfDefined } from "@/helper/cache";
 import { getVaultCredentials } from "@/lib/dcli";
 import { VaultCredential } from "@/types/dcli";
-
-const cache = new Cache();
 
 export function useCachedPasswords() {
   const { data, isLoading, revalidate } = usePromise(getVaultCredentials);
@@ -30,7 +28,7 @@ export function useCachedPasswords() {
 }
 
 function getCachedPasswords(): VaultCredential[] | undefined {
-  const cached = cache.get("passwords");
+  const cached = cache.get(CACHE_KEYS.PASSWORDS);
   return cached ? JSON.parse(cached) : undefined;
 }
 
@@ -44,5 +42,5 @@ function setCachedPasswords(passwords: VaultCredential[]) {
     otpSecret: hideIfDefined(item.otpSecret),
     note: hideIfDefined(item.note),
   }));
-  cache.set("passwords", JSON.stringify(cleaned));
+  cache.set(CACHE_KEYS.PASSWORDS, JSON.stringify(cleaned));
 }

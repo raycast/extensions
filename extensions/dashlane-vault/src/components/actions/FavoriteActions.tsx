@@ -1,9 +1,9 @@
-import { useFavoritesContext } from "@/context/favorites";
-import { VaultCredential } from "@/types/dcli";
 import { Action, Icon } from "@raycast/api";
 
+import { useFavoritesContext } from "@/context/favorites";
+
 type Props = {
-  item: VaultCredential;
+  item: { id: string };
 };
 
 export default function FavoriteActions({ item }: Props) {

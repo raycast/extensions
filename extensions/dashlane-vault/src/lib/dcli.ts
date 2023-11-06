@@ -1,5 +1,5 @@
 import { execPromise } from "@/helper/exec";
-import { VaultCredential, VaultCredentialDto, VaultNote, VaultNotesDto } from "@/types/dcli";
+import { VaultCredential, VaultCredentialDto, VaultNote, VaultNoteDto } from "@/types/dcli";
 
 export async function syncVault() {
   await execPromise("dcli sync");
@@ -71,7 +71,7 @@ function parseVaultCredentials(jsonString: string): VaultCredential[] {
   }
 }
 
-function parseNote(dto: VaultNotesDto): VaultNote {
+function parseNote(dto: VaultNoteDto): VaultNote {
   return {
     ...dto,
     attachments: dto.attachments ? JSON.parse(dto.attachments) : undefined,
@@ -87,7 +87,7 @@ function parseNote(dto: VaultNotesDto): VaultNote {
 
 function parseNotes(jsonString: string) {
   try {
-    const parsed = JSON.parse(jsonString) as VaultNotesDto[];
+    const parsed = JSON.parse(jsonString) as VaultNoteDto[];
     return parsed.map(parseNote);
   } catch (error) {
     return [];
