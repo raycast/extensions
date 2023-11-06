@@ -1,5 +1,10 @@
 # reclaim Changelog
 
+## [Update] - 2023-11-02
+
+- Changed task filter to 'Archived' only
+- Changed order of task status
+  
 ## [Update] - 2023-10-31
 
 - Refactor of Event Fetching Process
