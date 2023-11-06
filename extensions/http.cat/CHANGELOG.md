@@ -1,6 +1,6 @@
 # HTTP.cat Status Codes Changelog
 
-## [Added HTTP.cat Status Codes] - 2023-10
+## [Added HTTP.cat Status Codes] - 2023-11-06
 
 Initial release.
 
