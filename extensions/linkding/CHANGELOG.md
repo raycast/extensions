@@ -1,5 +1,13 @@
 # Linkding Changelog
 
+## [Copy Shortcut & Creation and Deletion of Bookmarks] - 2023-11-04
+
+- Adds action and shortcut to copy bookmark to clipboard
+- Adds the ability to create and remove bookmarks
+- Fetches website metadata while creating a bookmark to automatically fill bookmark creation form
+- Changes keyboard shortcuts for delete and copy actions
+- Updates to racast@1.60.0
+
 ## [Multi-Linkding Instances & Axios cancellation toast fix] - 2023-05-29
 
 - Fixes a bug, where axios cancellations would be shown as an error toast message, Thanks @vkhitrin
