@@ -148,7 +148,7 @@ New title:
   return (
     <ActionPanel>
       <ActionPanel.Section title={todo.name}>
-        <Action.OpenInBrowser title="Open in Things" icon="things-icon.png" url={`things:///show?id=${todo.id}`} />
+        <Action.OpenInBrowser title="Open in Things" icon="things-flat.png" url={`things:///show?id=${todo.id}`} />
         {todo.status !== 'completed' && (
           <Action
             title="Mark as Completed"
@@ -283,7 +283,7 @@ New title:
         <ActionPanel.Section title={todo.project.name}>
           <Action.OpenInBrowser
             title="Open Project in Things"
-            icon="things-icon.png"
+            icon="things-flat.png"
             shortcut={{ modifiers: ['cmd'], key: 'o' }}
             url={`things:///show?id=${todo.project.id}`}
           />
@@ -294,7 +294,7 @@ New title:
         <ActionPanel.Section title={area.name}>
           <Action.OpenInBrowser
             title="Open Area in Things"
-            icon="things-icon.png"
+            icon="things-flat.png"
             shortcut={{ modifiers: ['opt'], key: 'o' }}
             url={`things:///show?id=${area.id.replace('THMAreaParentSource/', '')}`}
           />
@@ -307,7 +307,7 @@ New title:
       <ActionPanel.Section title={`${capitalize(commandListName)} List`}>
         <Action.OpenInBrowser
           title={`Open ${capitalize(commandListName)} List in Things`}
-          icon="things-icon.png"
+          icon="things-flat.png"
           shortcut={{ modifiers: ['ctrl'], key: 'o' }}
           url={`things:///show?id=${commandListName.toLowerCase()}`}
         />

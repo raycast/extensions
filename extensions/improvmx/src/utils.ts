@@ -1,5 +1,6 @@
 import { Color, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
+import { randomInt } from "node:crypto";
 
 interface Domain {
   display: string;
@@ -79,7 +80,7 @@ const generatePassword = () => {
   return Array(12)
     .fill(chars)
     .map(function (x) {
-      return x[Math.floor(Math.random() * x.length)];
+      return x[randomInt(x.length)];
     })
     .join("");
 };

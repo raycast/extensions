@@ -25,7 +25,7 @@ function toPascalCase(str: string): string {
 
 export default function Command() {
   return (
-    <Grid columns={6} inset={Grid.Inset.Large}>
+    <Grid columns={7} inset={Grid.Inset.Large}>
       <Grid.EmptyView
         title="Nothing found."
         description="Press Enter to request this icon"

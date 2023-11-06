@@ -1,5 +1,10 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2023-10-21
+
+- Resolved issue with binary plist for reading default browser. Now checks against all known browser paths as a fallback.
+- Fixed "Open in All Applications" opening browser not as a url
+
 ## [Enhancement] - 2023-10-18
 
 - Added option to filter search with the entire repo path.

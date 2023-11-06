@@ -24,7 +24,7 @@ export const listItems = {
 
 export const statusIcons: Record<'open' | 'completed' | 'canceled', Image.ImageLike> = {
   open: Icon.Circle,
-  completed: { source: Icon.Checkmark, tintColor: Color.Blue },
+  completed: { source: Icon.CheckCircle, tintColor: Color.Blue },
   canceled: { source: Icon.XMarkCircle, tintColor: Color.SecondaryText },
 };
 

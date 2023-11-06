@@ -14,7 +14,15 @@ import {
 import path from "path";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
+import { GetInstalledBrowsers } from "get-installed-browsers";
 import { GitRepo, Preferences, tildifyPath, GitRepoService, GitRepoType } from "./utils";
+
+const installedBrowsers = GetInstalledBrowsers().map(
+  // Safari gets found in /Applications here but actually exists in
+  // /System/Volumes/Preboot/Cryptexes/App/System/Applications, so strip the
+  // rest of the path for all browsers
+  (browser) => path.basename(path.dirname(path.dirname(path.dirname(browser.path))))
+);
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -88,12 +96,13 @@ function GitRepoListItem(props: {
     }
   })();
 
-  function getTarget(repo: GitRepo, bundleId = ""): string {
+  function getTarget(repo: GitRepo, app: Application): string {
     // Should it return the repo fullPath or url?
     if (
-      bundleId.toLowerCase() === repo.defaultBrowserId.toLowerCase() &&
       repo.remotes.length > 0 &&
-      repo.remotes[0].url.length > 0
+      repo.remotes[0].url.length > 0 &&
+      (app.bundleId?.toLowerCase() === repo.defaultBrowserId.toLowerCase() ||
+        installedBrowsers.includes(path.basename(app.path)))
     ) {
       return repo.remotes[0].url;
     }
@@ -111,20 +120,20 @@ function GitRepoListItem(props: {
             <Action.Open
               title={`Open in ${preferences.openWith1.name}`}
               icon={{ fileIcon: preferences.openWith1.path }}
-              target={`${getTarget(repo, preferences.openWith1.bundleId)}`}
+              target={`${getTarget(repo, preferences.openWith1)}`}
               application={preferences.openWith1.bundleId}
             />
             <Action.Open
               title={`Open in ${preferences.openWith2.name}`}
               icon={{ fileIcon: preferences.openWith2.path }}
-              target={`${getTarget(repo, preferences.openWith2.bundleId)}`}
+              target={`${getTarget(repo, preferences.openWith2)}`}
               application={preferences.openWith2.bundleId}
             />
             {preferences.openWith3 && (
               <Action.Open
                 title={`Open in ${preferences.openWith3.name}`}
                 icon={{ fileIcon: preferences.openWith3.path }}
-                target={`${getTarget(repo, preferences.openWith3.bundleId)}`}
+                target={`${getTarget(repo, preferences.openWith3)}`}
                 application={preferences.openWith3.bundleId}
                 shortcut={{ modifiers: ["opt"], key: "return" }}
               />
@@ -133,7 +142,7 @@ function GitRepoListItem(props: {
               <Action.Open
                 title={`Open in ${preferences.openWith4.name}`}
                 icon={{ fileIcon: preferences.openWith4.path }}
-                target={`${getTarget(repo, preferences.openWith4.bundleId)}`}
+                target={`${getTarget(repo, preferences.openWith4)}`}
                 application={preferences.openWith4.bundleId}
                 shortcut={{ modifiers: ["ctrl"], key: "return" }}
               />
@@ -142,7 +151,7 @@ function GitRepoListItem(props: {
               <Action.Open
                 title={`Open in ${preferences.openWith5.name}`}
                 icon={{ fileIcon: preferences.openWith5.path }}
-                target={`${getTarget(repo, preferences.openWith5.bundleId)}`}
+                target={`${getTarget(repo, preferences.openWith5)}`}
                 application={preferences.openWith5.bundleId}
                 shortcut={{ modifiers: ["shift"], key: "return" }}
               />
@@ -152,18 +161,18 @@ function GitRepoListItem(props: {
               icon={Icon.ChevronUp}
               onAction={() => {
                 // checking for app != null to not open in default app
-                function openIn(application?: Application | string) {
+                function openIn(application?: Application) {
                   if (application != null) {
-                    open(repo.fullPath, application);
+                    open(getTarget(repo, application), application.bundleId);
                   }
                 }
                 // awaiting all opens doesn't seem to work
                 // it gets stuck when opening with Finder
-                openIn(preferences.openWith1.bundleId);
-                openIn(preferences.openWith2.bundleId);
-                openIn(preferences.openWith3?.bundleId);
-                openIn(preferences.openWith4?.bundleId);
-                openIn(preferences.openWith5?.bundleId);
+                openIn(preferences.openWith1);
+                openIn(preferences.openWith2);
+                openIn(preferences.openWith3);
+                openIn(preferences.openWith4);
+                openIn(preferences.openWith5);
               }}
             />
             <Action.OpenWith path={repo.fullPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />

@@ -132,6 +132,7 @@
   "dependencies": {
     "@raycast/api": "^1.59.0",
     "@raycast/utils": "^1.5.2",
+    "get-installed-browsers": "^0.1.7",
     "default-browser": "^4.0.0",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"

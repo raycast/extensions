@@ -1,11 +1,15 @@
 # Bilibili Changelog
 
-## [New Feat] - 2023-08-04
+## [New Feature] - 2023-10-30
 
-• Support for notifications using terminal-notifier is provided.
-• Dynamic feed filtering is supported.
+- Implement filter for the dynamic feed.
 
-## [New Feat] - 2023-07-04
+## [New Feature] - 2023-08-04
+
+- Support for notifications using terminal-notifier is provided.
+- Dynamic feed filtering is supported.
+
+## [New Feature] - 2023-07-04
 
 - Notify of the new dynamics
 

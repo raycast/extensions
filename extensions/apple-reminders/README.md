@@ -1,4 +1,4 @@
-# Apple Reminders Beta
+# Apple Reminders
 
 Manage Apple Reminders from within Raycast:
 - View, complete and update your reminders
