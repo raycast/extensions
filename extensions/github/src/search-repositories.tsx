@@ -22,7 +22,7 @@ function SearchRepositories() {
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
     () =>
-      `${searchFilter} ${searchText} fork:${preferences.includeForks} ${
+      `${searchFilter} ${searchText} sort:updated-desc fork:${preferences.includeForks} ${
         preferences.includeArchived ? "" : "archived:false"
       }`,
     [searchText, searchFilter],

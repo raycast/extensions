@@ -32,6 +32,8 @@ fragment ExtendedRepositoryFields on Repository {
   updatedAt
   pushedAt
   stargazerCount
+  isArchived
+  isFork
   viewerHasStarred
   primaryLanguage {
     id
