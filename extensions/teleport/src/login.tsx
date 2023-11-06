@@ -21,12 +21,8 @@ export default async function Command(props: LaunchProps<{ arguments: { otp: str
 
     toast.style = Toast.Style.Success;
     toast.title = "Logged in !";
-    toast.message = output;
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to login !";
-    if (err instanceof Error) {
-      toast.message = err.message;
-    }
   }
 }

@@ -40,6 +40,7 @@ module.exports = async ({ github, context }: API) => {
 
   let owners;
   let extension;
+  let extensionFolder: string;
 
   const [codeowners, extensionName2Folder] = await Promise.all([
     getCodeOwners({ github, context }),
@@ -50,10 +51,12 @@ module.exports = async ({ github, context }: API) => {
     const [, owner, ext] = newMatch.exec(context.payload.issue.body) || [];
 
     extension = `${owner}/${ext}`;
-    owners = codeowners[`/extensions/${extensionName2Folder[`${owner}/${ext}`]}`];
+    extensionFolder = extensionName2Folder[extension];
+    owners = codeowners[`/extensions/${extensionFolder}`];
   } else {
-    const [, extensionFolder] =
+    const [, x] =
       newMatchGitHub.exec(context.payload.issue.body) || oldMatchGithub.exec(context.payload.issue.body) || [];
+    extensionFolder = x;
 
     extension = Object.values(extensionName2Folder).find(([_, folder]) => folder === extensionFolder)?.[0];
 
@@ -77,7 +80,7 @@ module.exports = async ({ github, context }: API) => {
   }
 
   if (!owners) {
-    console.log(`could not find the extension ${extension}`);
+    console.log(`could not find the code owners for ${extension} (folder: ${extensionFolder})`);
     await comment({
       github,
       context,

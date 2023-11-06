@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Form } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { getDatabasesList, connectToDatabase } from "./utils";
 
 async function open(name: string, protocol: string, database: string) {
@@ -17,9 +17,6 @@ async function open(name: string, protocol: string, database: string) {
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failure !";
-    if (err instanceof Error) {
-      toast.message = err.message;
-    }
   }
 }
 
@@ -42,7 +39,7 @@ function DatabaseForm(props: { name: string; protocol: string }) {
 }
 
 export default function Command() {
-  const { data, isLoading } = usePromise(getDatabasesList);
+  const { data, isLoading } = useCachedPromise(getDatabasesList);
 
   return (
     <List isLoading={isLoading}>

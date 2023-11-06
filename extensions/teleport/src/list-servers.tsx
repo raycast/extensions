@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { getServersList, getServerCommand } from "./utils";
 
 async function open(name: string) {
@@ -12,7 +12,7 @@ async function open(name: string) {
   const prefs = getPreferenceValues();
   const terminal = prefs.terminal.name;
   try {
-    const command = await getServerCommand(name, prefs.username);
+    const command = getServerCommand(name, prefs.username);
 
     await runAppleScript(`
             tell application "Finder" to activate
@@ -31,14 +31,11 @@ async function open(name: string) {
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failure !";
-    if (err instanceof Error) {
-      toast.message = err.message;
-    }
   }
 }
 
 export default function Command() {
-  const { data, isLoading } = usePromise(getServersList);
+  const { data, isLoading } = useCachedPromise(getServersList);
 
   return (
     <List isLoading={isLoading}>
