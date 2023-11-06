@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hide-desktop-icons",
+  "title": "Hide Desktop Icons",
+  "description": "Simplify hide the icons of the files and folders of your ~/Desktop folder",
+  "icon": "command-icon.png",
+  "author": "MatteoGauthier",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "hide",
+      "title": "Hide Desktop Icons",
+      "subtitle": "Make your desktop clean by hiding icons",
+      "description": "Disable the visibility of files and folders icons on the desktop",
+      "mode": "no-view",
+      "icon": "icon-empty.png",
+      "keywords": [
+        "hide",
+        "desktop",
+        "icons"
+      ]
+    },
+    {
+      "name": "show",
+      "title": "Show Desktop Icons",
+      "subtitle": "Reveal the icons on your desktop",
+      "description": "Enable the visibility of files and folders icons on the desktop",
+      "mode": "no-view",
+      "icon": "icon-filled.png",
+      "keywords": [
+        "show",
+        "desktop",
+        "icons"
+      ]
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Desktop Icons Visibility",
+      "subtitle": "Toggle desktop icons visibility",
+      "description": "Switch the visibility of files and folders icons on the desktop",
+      "mode": "no-view",
+      "icon": "icon-filled.png",
+      "keywords": [
+        "toggle",
+        "desktop",
+        "icons"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.1",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
