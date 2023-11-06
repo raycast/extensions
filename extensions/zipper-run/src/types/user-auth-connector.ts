@@ -1,11 +1,6 @@
-export type ConnectorType =
-  | 'github'
-  | 'github-app'
-  | 'slack'
-  | 'openai'
-  | 'zendesk';
+export type ConnectorType = "github" | "github-app" | "slack" | "openai" | "zendesk";
 
-export type UserAuthConnectorType = 'github' | 'slack';
+export type UserAuthConnectorType = "github" | "slack";
 
 export type UserAuthConnector = {
   type: UserAuthConnectorType;
@@ -17,6 +12,6 @@ export type UserAuthConnector = {
   appConnectorUserAuths: Required<{
     encryptedAccessToken: string;
     connectorType: string;
-    metadata: any;
+    metadata: unknown;
   }>[];
 };

@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Run applet",
+      "title": "Run Applet",
       "description": "Run applet on zipper",
       "mode": "view",
       "arguments": [
