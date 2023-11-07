@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rapidcap",
+  "title": "RapidCap",
+  "description": "Quickly save information without context switching",
+  "icon": "rapidcap-icon.png",
+  "author": "brittany_carusone",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-all-cards",
+      "title": "View All Cards",
+      "description": "Display list of all saved cards",
+      "mode": "view"
+    },
+    {
+      "name": "create-card",
+      "title": "Create Card",
+      "description": "Create new card",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dataFile",
+      "title": "Data File Path",
+      "type": "file",
+      "required": true,
+      "description": "File to save card data"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
