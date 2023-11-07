@@ -89,3 +89,7 @@ export function appleScriptTerminalCommand(terminal: string, command: string) {
                 key code 36
             end tell`;
 }
+
+export function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}

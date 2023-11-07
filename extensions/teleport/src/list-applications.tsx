@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Icon, Color } from "@raycast/api";
 import { applicationsList, connectToApplication } from "./utils";
 import { useMemo } from "react";
 
@@ -32,10 +32,12 @@ export default function Command() {
           <List.Item
             key={name + index}
             title={name}
+            icon={{ source: Icon.Dot, tintColor: Color.Green }}
             subtitle={public_addr}
             actions={
               <ActionPanel>
-                <Action title="Open" onAction={() => open(name)} />
+                <Action title="Open" icon={Icon.Window} onAction={() => open(name)} />
+                <Action.CopyToClipboard content={name} />
               </ActionPanel>
             }
           />

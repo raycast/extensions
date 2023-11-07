@@ -1,6 +1,7 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import {
   appleScriptTerminalCommand,
+  capitalize,
   kubernetesClustersList,
   kubernetesClustersPodsList,
   kubernetesPodCommand,
@@ -26,30 +27,49 @@ async function open(name: string, namespace: string) {
   }
 }
 
+interface Item {
+  metadata: { name: string; namespace: string; creationTimestamp: string };
+}
+
 function ListPods(props: { name: string }) {
   const { data, isLoading } = kubernetesClustersPodsList(props.name);
-  const results = useMemo(() => JSON.parse(data || "{}").items || [], [data]);
+  const results = useMemo(() => JSON.parse(data || "{}").items || [], [data]).reduce((acc: any, item: Item) => {
+    const namespace = item.metadata.namespace;
+    acc[namespace] ? acc[namespace].push(item) : (acc[namespace] = [item]);
+
+    return acc;
+  }, {});
 
   return (
     <List isLoading={isLoading}>
-      {results.map((item: { metadata: { name: string; namespace: string } }, index: number) => {
-        const name = item.metadata.name;
-        const namespace = item.metadata.namespace;
-
-        return (
-          <List.Item
-            key={name + index}
-            title={name}
-            subtitle={namespace}
-            actions={
-              <ActionPanel>
-                <Action title="Open" onAction={() => open(name, namespace)} />
-                <Action.CopyToClipboard content={name} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {Object.entries(results)
+        .sort(([namespaceA]: [string, any], [namespaceB]: [string, any]) => namespaceA.localeCompare(namespaceB))
+        .map(([namespace, group]: [string, any]) => {
+          return (
+            <List.Section title={capitalize(namespace)}>
+              {group
+                .sort((itemA: Item, itemB: Item) => itemA.metadata.name.localeCompare(itemB.metadata.name))
+                .map((item: Item, index: number) => {
+                  const name = item.metadata.name;
+                  return (
+                    <List.Item
+                      key={name + index}
+                      title={name}
+                      subtitle={new Date(item.metadata.creationTimestamp).toLocaleString()}
+                      icon={{ source: Icon.Dot, tintColor: Color.Green }}
+                      accessories={[{ text: { value: capitalize(namespace) } }]}
+                      actions={
+                        <ActionPanel>
+                          <Action title="Open" icon={Icon.Terminal} onAction={() => open(name, namespace)} />
+                          <Action.CopyToClipboard content={name} />
+                        </ActionPanel>
+                      }
+                    />
+                  );
+                })}
+            </List.Section>
+          );
+        })}
     </List>
   );
 }
@@ -67,9 +87,10 @@ export default function Command() {
           <List.Item
             key={name + index}
             title={name}
+            icon={{ source: Icon.Dot, tintColor: Color.Green }}
             actions={
               <ActionPanel>
-                <Action.Push title="List Pods" target={<ListPods name={name} />} />
+                <Action.Push title="List Pods" icon={Icon.List} target={<ListPods name={name} />} />
                 <Action.CopyToClipboard content={name} />
               </ActionPanel>
             }

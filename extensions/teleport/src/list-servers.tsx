@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { appleScriptTerminalCommand, connectToServerCommand, serversList } from "./utils";
 import { useMemo } from "react";
@@ -33,10 +33,11 @@ export default function Command() {
         return (
           <List.Item
             key={hostname + index}
+            icon={{ source: Icon.Dot, tintColor: Color.Green }}
             title={hostname}
             actions={
               <ActionPanel>
-                <Action title="Open" onAction={() => open(hostname)} />
+                <Action title="Open" icon={Icon.Terminal} onAction={() => open(hostname)} />
               </ActionPanel>
             }
           />
