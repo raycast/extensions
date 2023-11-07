@@ -62,7 +62,8 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
 }
 
 function stopTimer(timerFile: string) {
-  const deleteTimerCmd = `if [ -f "${timerFile}" ]; then rm "${timerFile}"; else echo "Timer deleted"; fi`;
+  const timerFilePath = environment.supportPath + "/" + timerFile;
+  const deleteTimerCmd = `if [ -f "${timerFilePath}" ]; then rm "${timerFilePath}"; else echo "Timer deleted"; fi`;
   const dismissFile = timerFile.replace(".timer", ".dismiss");
   const deleteDismissCmd = `if [ -f "${dismissFile}" ]; then rm "${dismissFile}"; else echo "Timer deleted"; fi`;
   execSync(deleteTimerCmd);
