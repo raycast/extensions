@@ -6,7 +6,7 @@ A Raycast extension for pinning anything with a path or URL to the menu bar, wit
 
 <img src="https://github.com/SKaplanOfficial/Raycast-Pins/blob/main/assets/pins-5.png?raw=true" alt="Example of the Pins menu bar extra in action, showing pinned sites, folders, Terminal commands, and groups." width="500" />
 
-## Feature Overview:
+## Feature Overview
 
 - Pin sites, files, folders, apps, Terminal commands, and scripts to your menu bar
 - Pin any kind of URL, using any kind of URL scheme
@@ -21,7 +21,7 @@ A Raycast extension for pinning anything with a path or URL to the menu bar, wit
 - Utilize placeholders to dynamically insert data into your pins
 - Highly configurable
 
-## Commands:
+## Commands
 
 - Show Pins - Initiates the menu bar extra
 - View Pins - Lists all pins, allows you to edit existing or rearrange existing pins
@@ -31,7 +31,7 @@ A Raycast extension for pinning anything with a path or URL to the menu bar, wit
 - Export Pin Data - Copies a JSON representation of your pins and groups to the clipboard
 - Import Data - Imports a JSON string containing pins and groups
 
-## Resources:
+## Resources
 
 - [Main Repository](https://github.com/SKaplanOfficial/Raycast-Pins) - The main repository for the Pins extension, containing the latest release and all documentation
 - [Placeholders Guide](https://github.com/SKaplanOfficial/Raycast-Pins/blob/main/assets/placeholders_guide.md) - A guide to the placeholders system used in Pins

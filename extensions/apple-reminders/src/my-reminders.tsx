@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import ReminderListItem from "./components/ReminderListItem";
@@ -8,26 +8,36 @@ import useViewReminders from "./hooks/useViewReminders";
 
 export default function Command() {
   const { displayCompletionDate } = getPreferenceValues<Preferences.MyReminders>();
-  const [listId, setListId] = useCachedState<string>("all");
+  const [listId, setListId] = useCachedState<string>("today");
 
   const { data, isLoading, mutate } = useData();
 
-  const { sections, viewProps } = useViewReminders(listId ? listId : "all", { data });
+  const { sections, viewProps } = useViewReminders(listId ? listId : "today", { data });
 
   const placeholder =
     listId === "all" ? "Filter by title, notes, priority or list" : "Filter by title, notes or priority";
-
-  const defaultList = data?.lists.find((list) => list.isDefault);
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder={placeholder}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by List" onChange={setListId} defaultValue={defaultList?.id} value={listId}>
+        <List.Dropdown tooltip="Filter by List" onChange={setListId} value={listId}>
           {data?.lists && data.lists.length > 0 ? (
             <>
-              <List.Dropdown.Item title="All" icon={Icon.Tray} value="all" />
+              <List.Dropdown.Section>
+                <List.Dropdown.Item
+                  title="Today"
+                  icon={{ source: Icon.Calendar, tintColor: Color.Blue }}
+                  value="today"
+                />
+                <List.Dropdown.Item
+                  title="Scheduled"
+                  icon={{ source: Icon.Calendar, tintColor: Color.Red }}
+                  value="scheduled"
+                />
+                <List.Dropdown.Item title="All" icon={Icon.Tray} value="all" />
+              </List.Dropdown.Section>
 
               {data?.lists.map((list) => {
                 return (

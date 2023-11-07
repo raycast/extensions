@@ -1,7 +1,7 @@
 import { MenuBarExtra } from "@raycast/api";
 import { getPinIcon } from "../lib/icons";
 import { Pin, deletePin, openPin } from "../lib/Pins";
-import { ExtensionPreferences } from "../lib/utils";
+import { ExtensionPreferences } from "../lib/preferences";
 import { LocalDataObject } from "../lib/LocalData";
 
 /**

@@ -1,8 +1,13 @@
 # reclaim Changelog
 
-## [Update] - 2023-11-01
+## [Update] - 2023-11-07
 
 - Introduce new functionality to filter out synchronized events managed by Reclaim that are part of multiple calendars.
+
+## [Update] - 2023-11-02
+
+- Changed task filter to 'Archived' only
+- Changed order of task status
 
 ## [Update] - 2023-10-31
 
