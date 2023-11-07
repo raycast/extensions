@@ -48,7 +48,7 @@ export default function Command() {
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Generated ✅",
+      title: "Generated",
       message: "Copied font-size to clipboard",
     });
   }
@@ -62,34 +62,34 @@ export default function Command() {
       }
     >
       <Form.Description text="Create dynamic font sizes using the 'clamp' CSS function." />
-      <Form.Dropdown id="unit" title="Measurement unit" value={unitType} onChange={handleUnitChange}>
+      <Form.Dropdown id="unit" title="Measurement Unit" value={unitType} onChange={handleUnitChange}>
         <Form.Dropdown.Item value="px" title="Pixels" />
         <Form.Dropdown.Item value="rem" title="REM" />
       </Form.Dropdown>
       <Input
         id="minViewportWidth"
-        title="Minimum viewport width"
+        title="Minimum Viewport Width"
         placeholder="Enter minimum"
         value={minViewportWidth}
         onChange={setMinViewportWidth}
       />
       <Input
         id="maxViewportWidth"
-        title="Maximum viewport width"
+        title="Maximum Viewport Width"
         placeholder="Enter maximum"
         value={maxViewportWidth}
         onChange={setMaxViewportWidth}
       />
       <Input
         id="minFontSize"
-        title="Minimum font size"
+        title="Minimum Font Size"
         placeholder="Enter minimum"
         value={minFontSize}
         onChange={setMinFontSize}
       />
       <Input
         id="maxFontSize"
-        title="Maximum font size"
+        title="Maximum Font Size"
         placeholder="Enter maximum"
         value={maxFontSize}
         onChange={setMaxFontSize}
