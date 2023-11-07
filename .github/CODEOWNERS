@@ -39,7 +39,7 @@
 /extensions/any-website-search                       @rben01
 /extensions/anybox                                   @francisfeng
 /extensions/anycoffee                                @aymericio
-/extensions/append-clipboard                         @koinzhang
+/extensions/append-clipboard                         @koinzhang @cyrusn
 /extensions/apple-books                              @vimtor
 /extensions/apple-developer-docs                     @CaliCastle
 /extensions/apple-devices                            @madza91
@@ -148,6 +148,7 @@
 /extensions/choose-a-license                         @sandypockets @Aayush9029
 /extensions/chuck-norris-facts                       @jorgecortesdev
 /extensions/cidr                                     @Yansongsongsong
+/extensions/cilium-docs                              @darox @pernielsentikaer
 /extensions/cinemas-nos                              @DiogoFerrer
 /extensions/circle-ci                                @qeude @kudrykv @jesse-c
 /extensions/citation-generator                       @AbhinavPalacharla
@@ -221,6 +222,7 @@
 /extensions/currency-exchange                        @xeric
 /extensions/curto-io-url-shortener                   @birobirobiro
 /extensions/cyberduck                                @scottaglia
+/extensions/cyberpanel                               @xmok
 /extensions/cypress-docs                             @robertguss
 /extensions/dad-jokes                                @pernielsentikaer @Abdulaziz-Aljadaan
 /extensions/dash                                     @RSO @sxn @JasonBoy
@@ -292,6 +294,7 @@
 /extensions/drupal-org                               @hussainweb
 /extensions/drupal-toolbox                           @emircanerkul @pernielsentikaer
 /extensions/duck-duck-go-search                      @tegola @justspacedog
+/extensions/dynamic-font-size                        @nilshoenson
 /extensions/eagle                                    @Yukaii
 /extensions/easy-new-file                            @koinzhang
 /extensions/easy-ocr                                 @Rafo1994
@@ -384,7 +387,7 @@
 /extensions/git-repos                                @moored @nitishpdmn
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @azlekov
-/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy
+/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither
 /extensions/github-cli-manual                        @demartini
 /extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy @LunaticMuch @pernielsentikaer
@@ -463,6 +466,7 @@
 /extensions/how-long-to-beat                         @Cronos87 @whitespacecode
 /extensions/http-mime                                @Envl @pernielsentikaer
 /extensions/http-status-codes                        @AlexVanderbist @pernielsentikaer
+/extensions/http.cat                                 @lucasmezencio @AlexVanderbist
 /extensions/hubspot                                  @harisvsulaiman @pernielsentikaer @6farer @scoop
 /extensions/hubspot-portal-launcher                  @chrisoklepke @pernielsentikaer
 /extensions/hue                                      @pindab0ter @thomaspaulmann @robertvanhoesel
@@ -879,7 +883,7 @@
 /extensions/real-debrid-manager                      @YamenSharaf
 /extensions/rebrandly                                @grikomsn
 /extensions/recents                                  @GastroGeek @kgrhartlage
-/extensions/reclaim-ai                               @lightbody @maximilianzuern @shkreios @webergnr
+/extensions/reclaim-ai                               @lightbody @maximilianzuern @shkreios @webergnr @maximilianzuern
 /extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
 /extensions/redis                                    @k8scat
@@ -1059,6 +1063,7 @@
 /extensions/textlint-rule-aws-service-name           @bun913
 /extensions/texts                                    @zavbala
 /extensions/tfl                                      @haneenmahd
+/extensions/the-matrix-of-destiny                    @ordinz
 /extensions/the-noble-quran                          @BalliAsghar
 /extensions/the-verge                                @klkvsky @pernielsentikaer
 /extensions/thesaurus                                @ABukSwienty
@@ -1066,6 +1071,7 @@
 /extensions/thrasher-magazine                        @whitespacecode
 /extensions/ticktick                                 @viduycheung @viduycheung @Alireza29675
 /extensions/tim                                      @tmwrnr
+/extensions/time-logger                              @aramikuto
 /extensions/time-traveling-world-clock               @himarky
 /extensions/time-until-i-do                          @MuhaddiMu
 /extensions/timers                                   @ThatNerdSquared @marcjulianschwarz @GastroGeek @pernielsentikaer @lokot0k @ThatNerdSquared

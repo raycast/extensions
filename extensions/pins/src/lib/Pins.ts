@@ -158,7 +158,15 @@ export const usePins = () => {
   const revalidatePins = async () => {
     setLoading(true);
     const storedPins: Pin[] = await getStorage(StorageKey.LOCAL_PINS);
-    setPins(storedPins);
+    const checkedPins: Pin[] = [];
+    for (const pin of storedPins) {
+      checkedPins.push({
+        ...pin,
+        group: pin.group == undefined ? "None" : pin.group,
+        id: pin.id == undefined ? await getNextPinID() : pin.id,
+      });
+    }
+    setPins(checkedPins);
     setLoading(false);
   };
 
@@ -377,7 +385,16 @@ export const modifyPin = async (
   notify = true,
 ) => {
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
-  const newData: Pin[] = storedPins.map((oldPin: Pin) => {
+  const checkedPins: Pin[] = [];
+  for (const pin of storedPins) {
+    checkedPins.push({
+      ...pin,
+      group: pin.group == undefined ? "None" : pin.group,
+      id: pin.id == undefined ? await getNextPinID() : pin.id,
+    });
+  }
+
+  const newData: Pin[] = checkedPins.map((oldPin: Pin) => {
     // Update pin if it exists
     if (pin.id != -1 && oldPin.id == pin.id) {
       return {
@@ -404,7 +421,7 @@ export const modifyPin = async (
 
   if (pin.id == -1) {
     pin.id = (await getStorage(StorageKey.NEXT_PIN_ID))[0] || 1;
-    while (storedPins.some((storedPin: Pin) => storedPin.id == pin.id)) {
+    while (checkedPins.some((checkedPin: Pin) => checkedPin.id == pin.id)) {
       pin.id = pin.id + 1;
     }
     setStorage(StorageKey.NEXT_PIN_ID, [pin.id + 1]);

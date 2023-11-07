@@ -1,5 +1,9 @@
 # Pins Changelog
 
+## [Bug fixes] - 2023-11-06
+
+- Fixed bug where pins with corrupted data from previous versions would cause themselves and others to disappear after editing. (Resolve SKaplanOfficial/Raycast-Pins4)
+
 ## [Bug fixes & Quality of Life Improvements] - 2023-11-01
 
 - Added group statistics, viewable when editing a group.

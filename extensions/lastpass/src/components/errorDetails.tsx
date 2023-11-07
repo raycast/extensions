@@ -6,7 +6,7 @@ const mask = (content: string, mask: string) => content.replace(mask, "*".repeat
 
 export const ErrorDetails = (args: { maskPattern: string; error: string }) => {
   const maskedError = mask(args.error, args.maskPattern);
-  if (args.error.includes("command not found")) {
+  if (args?.error?.includes("command not found")) {
     showToast({
       style: Toast.Style.Failure,
       title: "LastPass CLI not found",
