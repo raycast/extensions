@@ -2,7 +2,7 @@ import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from
 import { runAppleScript } from "run-applescript";
 import { appleScriptTerminalCommand, connectToServerCommand, serversList } from "./utils";
 import { useMemo } from "react";
-        
+
 async function open(name: string) {
   const toast = await showToast({
     style: Toast.Style.Animated,

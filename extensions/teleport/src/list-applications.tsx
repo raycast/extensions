@@ -2,7 +2,6 @@ import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { applicationsList, connectToApplication } from "./utils";
 import { useMemo } from "react";
 
-
 async function open(name: string) {
   const toast = await showToast({
     style: Toast.Style.Animated,
