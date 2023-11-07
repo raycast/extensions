@@ -5,6 +5,7 @@
 - Added action to copy the translation in the `Translate` command
 - Added action to paste the translation to frontmost app in the `Translate` command
 - Support fallback text for the `Translate` command
+- Add support for optional transliteration (romanization) for all commands. Uses https://github.com/sindresorhus/transliterate
 
 ## [Arguments] - 2023-10-28
 - Support arguments for `Translate Into ...` commands
