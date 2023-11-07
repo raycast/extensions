@@ -15,7 +15,7 @@ export const TranslationView = (props: { translation: string | null; sourceLangu
       actions={
         <ActionPanel title="What to do with Translation">
           <Action.CopyToClipboard title="Copy to Clipboard" content={translation} />
-          <Action.Paste title="Paste to Active App" content={translation} />
+          <Action.Paste title="Paste to Frontmost App" content={translation} />
         </ActionPanel>
       }
     />

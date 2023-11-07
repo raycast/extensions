@@ -8,6 +8,7 @@ import {
   LaunchType,
   closeMainWindow,
 } from "@raycast/api";
+import transliterate from "@sindresorhus/transliterate";
 import got from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
 
@@ -80,9 +81,10 @@ export async function sendTranslateRequest({
     const text = initialText || (await readContent());
 
     const toast = await showToast(Toast.Style.Animated, "Fetching translation...");
+
     try {
       const {
-        translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
+        translations: [{ text: _translation, detected_source_language: detectedSourceLanguage }],
       } = await got
         .post(`https://api${isPro(key) ? "" : "-free"}.deepl.com/v2/translate`, {
           headers: {
@@ -95,6 +97,7 @@ export async function sendTranslateRequest({
           },
         })
         .json<{ translations: { text: string; detected_source_language: SourceLanguage }[] }>();
+      const translation = getPreferenceValues<Preferences>().transliterate ? transliterate(_translation) : _translation;
       switch (onTranslateAction) {
         case "clipboard":
           await Clipboard.copy(translation);

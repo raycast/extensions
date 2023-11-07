@@ -673,10 +673,20 @@
           "value": "paste"
         }
       ]
+    },
+    {
+      "name": "transliterate",
+      "title": "Transliteration",
+      "label": "Use Transliterated Text",
+      "description": "Show the transliterated text instead of the original text. Chinese is not supported.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.61.1",
+    "@sindresorhus/transliterate": "^1.6.0",
     "@types/got": "^9.6.12",
     "got": "^11.8.2",
     "http-status-codes": "^2.3.0"
