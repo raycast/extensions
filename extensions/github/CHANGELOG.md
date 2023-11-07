@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix fork view and Change notification display] - 2023-11-07
+- Fix fork view
+- Change notification display
+
 ## [Add Clone and Open command] - 2023-10-11
 
 - Add a command to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh repository results.
