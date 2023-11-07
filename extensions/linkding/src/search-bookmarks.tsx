@@ -26,7 +26,7 @@ export default function searchLinkding() {
       }
     });
   }, [setLinkdingAccountMap]);
-  
+
   useEffect(() => {
     fetchBookmarks(searchText, selectedLinkdingAccount);
   }, [selectedLinkdingAccount, searchText]);
@@ -61,7 +61,6 @@ export default function searchLinkding() {
         fetchBookmarks(searchText, selectedLinkdingAccount);
       });
     }
-
   }
 
   function LinkdingAccountDropdown() {
