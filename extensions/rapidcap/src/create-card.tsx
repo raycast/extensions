@@ -27,19 +27,29 @@ function CreateCardAction() {
           setError(error);
         }
 
-        let cards: Card[] = [];
-        try {
-          cards = JSON.parse(data);
-          cards.push(values);
-        } catch (error) {
-          setError(error);
-        }
-
-        fs.writeFile(preferences.dataFile, JSON.stringify(cards, null, 4), (error) => {
-          if (error) {
+        if (data.length == 0) {
+          fs.writeFile(preferences.dataFile, JSON.stringify([values], null, 4), (error) => {
+            if (error) {
+              setError(error);
+            }
+          });
+        } else {
+          try {
+            const cards: Card[] = JSON.parse(data);
+            cards.push(values);
+            fs.writeFile(preferences.dataFile, JSON.stringify(cards, null, 4), (error) => {
+              if (error) {
+                setError(error);
+              }
+            });
+          } catch (error) {
             setError(error);
           }
-        });
+        }
+        let cards: Card[] = [];
+        
+
+        
       });
       pop();
     },
