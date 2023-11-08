@@ -82,10 +82,17 @@ function ListPods(props: { name: string }) {
                     <List.Item
                       key={name + index}
                       title={name}
-                      subtitle={new Date(item.metadata.creationTimestamp).toLocaleString()}
                       icon={{ source: Icon.Dot, tintColor: Color.Green }}
                       accessories={[
-                        { icon: list.has(name) ? { source: Icon.Star, tintColor: Color.Yellow } : undefined },
+                        {
+                          icon: list.has(name)
+                            ? {
+                                source: Icon.Star,
+                                tintColor: Color.Yellow,
+                              }
+                            : undefined,
+                        },
+                        { tag: { value: new Date(item.metadata.creationTimestamp) }, icon: { source: Icon.Clock } },
                         { tag: { value: capitalize(namespace) } },
                       ]}
                       actions={
@@ -147,7 +154,16 @@ export default function Command() {
               key={name + index}
               title={name}
               icon={{ source: Icon.Dot, tintColor: Color.Green }}
-              accessories={[{ icon: list.has(name) ? { source: Icon.Star, tintColor: Color.Yellow } : undefined }]}
+              accessories={[
+                {
+                  icon: list.has(name)
+                    ? {
+                        source: Icon.Star,
+                        tintColor: Color.Yellow,
+                      }
+                    : undefined,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.Push title="List Pods" icon={Icon.List} target={<ListPods name={name} />} />
