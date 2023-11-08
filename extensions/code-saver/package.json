@@ -48,7 +48,7 @@
     {
       "title": "Encrypt Key",
       "name": "encryptedKey",
-      "description": "We will encrypt your datastore with the key you give. Please keep it in mind. Leave it blank to disable the encryption.",
+      "description": "We will encrypt your datastore with the key you give. Please keep it in mind.",
       "type": "password",
       "required": true
     }

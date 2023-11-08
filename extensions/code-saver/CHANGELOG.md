@@ -1,5 +1,8 @@
 # code-saver Changelog
 
+## [Minor Change] - 2023-11-08
+- Add encryption for sqlite data store.
+
 ## [First Version] - 2023-11-06
 - Add creation for Label, Snippet and Library.
 - Add broswer for Snippet.

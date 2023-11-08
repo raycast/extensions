@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { useDataFetch, fetchSnippets } from "../../lib/hooks/use-data-ops";
 import { Snippet, Library, Label } from "../../lib/types/dto";
@@ -13,6 +13,7 @@ function SnippetItem({ snippet, onUpdateSuccess }: { snippet: Snippet; onUpdateS
     <List.Item
       title={snippet.title}
       actions={<ItemActions snippet={snippet} onUpdateSuccess={onUpdateSuccess} />}
+      accessories={snippet.formatType == "tldr" ? [{ icon: Icon.BulletPoints, tooltip: "View detail to copy one entry of code" }] : []}
       detail={<ItemDetail snippet={snippet} />}
     />
   );
