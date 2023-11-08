@@ -96,3 +96,17 @@ export async function getEspansoConfig(): Promise<EspansoConfig> {
 
   return configObject;
 }
+
+export const sortMatches = (matches: NormalizedEspansoMatch[]): NormalizedEspansoMatch[] => {
+  return matches.sort((a, b) => {
+    if (a.label && b.label) {
+      return a.label.localeCompare(b.label);
+    } else if (a.label) {
+      return -1; // a has label, b does not
+    } else if (b.label) {
+      return 1; // b has label, a does not
+    } else {
+      return a.triggers[0].localeCompare(b.triggers[0]);
+    }
+  });
+};
