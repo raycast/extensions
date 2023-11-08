@@ -20,7 +20,7 @@ export default function CreateDNSRecord() {
   const [domains, setDomains] = useCachedState<Domain[]>("domains");
   async function getDomainsFromApi() {
     setIsLoading(true);
-    const response = await retrieveAllDomains() as RetrieveAllDomainsResponse;
+    const response = (await retrieveAllDomains()) as RetrieveAllDomainsResponse;
     if (response.status === "SUCCESS") {
       setDomains(response.domains);
       showToast({
@@ -33,7 +33,7 @@ export default function CreateDNSRecord() {
   }
   useEffect(() => {
     if (!domains) getDomainsFromApi();
-  }, [])
+  }, []);
 
   const navigationTitle = "Create DNS Record";
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -93,16 +93,25 @@ export default function CreateDNSRecord() {
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title="Submit" onSubmit={handleSubmit} />
-          <Action.OpenInBrowser
-            icon={Icon.Globe}
-            title="Go to API Reference"
-            url={`${API_DOCS_URL}DNS%20Create%20Record`}
-          />
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              icon={Icon.Globe}
+              title="Go to API Reference"
+              url={`${API_DOCS_URL}DNS%20Create%20Record`}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
       <Form.Dropdown title="Domain" {...itemProps.domain}>
-        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} icon={getFavicon(`https://${item.domain}`)} />)}
+        {domains?.map((item) => (
+          <Form.Dropdown.Item
+            key={item.domain}
+            title={item.domain}
+            value={item.domain}
+            icon={getFavicon(`https://${item.domain}`)}
+          />
+        ))}
       </Form.Dropdown>
       <Form.Separator />
       <Form.Dropdown

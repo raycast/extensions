@@ -62,7 +62,7 @@ export default function DomainPricing() {
           if (Math.floor((Number(new Date()) - Number(updatedOn)) / (1000 * 60 * 60 * 24)) > 0) {
             if (
               await confirmAlert({
-                title: "Reload domains?",
+                title: "Reload domain pricing?",
                 message: "It has been at least 24 hours since domain pricing was last fetched.",
                 primaryAction: { title: "Reload" },
               })
@@ -96,7 +96,7 @@ export default function DomainPricing() {
       navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
-          <Action icon={Icon.Redo} title="Reload Domains" onAction={callApi} />
+          <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
             title="Go to API Reference"

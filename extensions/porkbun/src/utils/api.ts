@@ -6,11 +6,15 @@ import {
   RequestBody,
   Response,
   UpdateNameServersRequest,
-  CreateUrlForwardingRequest,
+  AddUrlForwardingRequest,
+  GetNameServersResponse,
+  GetUrlForwardingResponse,
+  RetrieveSSLBundleResponse,
+  RetrieveAllDomainsResponse,
 } from "./types";
 import { Toast, showToast } from "@raycast/api";
 import fetch from "node-fetch";
-import { API_HEADERS, API_KEY, API_URL, SECRET_API_KEY } from "./constants";
+import { API_HEADERS, API_KEY, API_METHOD, API_URL, SECRET_API_KEY } from "./constants";
 
 const showError = (error: string) => {
   showToast({
@@ -24,7 +28,7 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?: Reque
 
   try {
     const apiResponse = await fetch(API_URL + endpoint, {
-      method: "POST",
+      method: API_METHOD,
       headers: API_HEADERS,
       body: JSON.stringify({
         apikey: API_KEY,
@@ -39,10 +43,11 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?: Reque
     }
     return response;
   } catch (error) {
-    showError("Failed to execute request. Please try again later");
+    const message = "Failed to execute request. Please try again later";
+    showError(message);
     return {
       status: "ERROR",
-      message: "Failed to execute request. Please try again later",
+      message,
     } as ErrorResponse;
   }
 };
@@ -66,42 +71,54 @@ export async function editRecordByDomainSubdomainAndType(
   { ...params }: EditDNSRecordByDomainSubdomainAndIdRequest
 ) {
   const body = { ...params };
-  return await callApi(`dns/editByNameType/${domain}/${type}${subdomain && "/" + subdomain}`, "Editing DNS Record", body);
+  return await callApi(
+    `dns/editByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
+    "Editing DNS Record",
+    body
+  );
 }
 export async function deleteRecordByDomainAndId(domain: string, id: number) {
   return await callApi(`dns/delete/${domain}/${id}`, "Deleting DNS Record(s)");
 }
 export async function deleteRecordByDomainSubdomainAndType(domain: string, subdomain: string, type: DNSRecordType) {
-  return await callApi(`dns/deleteByNameType/${domain}/${type}${subdomain && "/" + subdomain}`, "Deleting DNS Record(s)");
+  return await callApi(
+    `dns/deleteByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
+    "Deleting DNS Record(s)"
+  );
 }
 export async function retrieveRecordsByDomainOrId(domain: string, id: number) {
   return await callApi(`dns/retrieve/${domain}${id > 0 ? "/" + id : ""}`, "Retrieving DNS Record(s)");
 }
 export async function retrieveRecordsByDomainSubdomainAndType(domain: string, subdomain: string, type: DNSRecordType) {
-  return await callApi(`dns/retrieveByNameType/${domain}/${type}${subdomain && "/" + subdomain}`, "Retrieving DNS Record(s)");
+  return await callApi(
+    `dns/retrieveByNameType/${domain}/${type}${subdomain && "/" + subdomain}`,
+    "Retrieving DNS Record(s)"
+  );
 }
 
 export async function retrieveSSLBundle(domain: string) {
-  return await callApi(`ssl/retrieve/${domain}`, "Fetching SSL Bundle");
+  return (await callApi(`ssl/retrieve/${domain}`, "Fetching SSL Bundle")) as ErrorResponse | RetrieveSSLBundleResponse;
 }
 
 export async function retrieveAllDomains() {
-  return await callApi("domain/listAll", "Fetching Domains");
+  return (await callApi("domain/listAll", "Fetching Domains")) as ErrorResponse | RetrieveAllDomainsResponse;
 }
 export async function getNameServersByDomain(domain: string) {
-  return await callApi(`domain/getNs/${domain}`, "Fetching Name Servers");
+  return (await callApi(`domain/getNs/${domain}`, "Fetching Name Servers")) as ErrorResponse | GetNameServersResponse;
 }
-export async function updateNameServersByDomain(domain: string, {...params}: UpdateNameServersRequest) {
+export async function updateNameServersByDomain(domain: string, { ...params }: UpdateNameServersRequest) {
   const body = { ...params };
   return await callApi(`domain/updateNs/${domain}`, "Updating Name Servers", body);
 }
 export async function getUrlForwardingByDomain(domain: string) {
-  return await callApi(`domain/getUrlForwarding/${domain}`, "Fetching URL Forwarding");
+  return (await callApi(`domain/getUrlForwarding/${domain}`, "Fetching URL Forwarding")) as
+    | ErrorResponse
+    | GetUrlForwardingResponse;
 }
 export async function deleteUrlForwardByDomainAndId(domain: string, id: string) {
   return await callApi(`domain/deleteUrlForward/${domain}/${id}`, "Deleting URL Forwarding");
 }
-export async function createUrlForwarding(domain: string, { ...params }: CreateUrlForwardingRequest) {
+export async function addUrlForwarding(domain: string, { ...params }: AddUrlForwardingRequest) {
   const body = { ...params };
-  return await callApi(`domain/addUrlForward/${domain}`, "Creating URL Forward", body);
+  return await callApi(`domain/addUrlForward/${domain}`, "Adding URL Forward", body);
 }

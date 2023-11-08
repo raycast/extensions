@@ -43,11 +43,16 @@ export type EditDNSRecordByDomainSubdomainAndIdRequest = {
   ttl?: string;
   prio?: string;
 };
-export type RequestBody = CreateDNSRecordRequest | EditDNSRecordByDomainSubdomainAndIdRequest | UpdateNameServersRequest | CreateUrlForwardingRequest;
+export type RequestBody =
+  | CreateDNSRecordRequest
+  | EditDNSRecordByDomainSubdomainAndIdRequest
+  | UpdateNameServersRequest
+  | AddUrlForwardingRequest;
 
 export type ErrorResponse = {
   status: "ERROR";
   message: string;
+  code?: string;
 };
 export type RetrieveSSLBundleResponse = {
   status: "SUCCESS";
@@ -82,19 +87,19 @@ export type Domain = {
   whoisPrivacy: 0 | "1";
   autoRenew: 0 | "1";
   notLocal: 0 | "1";
-}
+};
 export type RetrieveAllDomainsResponse = {
   status: "SUCCESS";
   domains: Domain[];
-}
+};
 
 export type GetNameServersResponse = {
   status: "SUCCESS";
   ns: string[];
-}
+};
 export type UpdateNameServersRequest = {
   ns: string[];
-}
+};
 
 export type UrlForwarding = {
   id: string;
@@ -103,18 +108,18 @@ export type UrlForwarding = {
   type: "temporary" | "permanent" | "masked";
   includePath: "yes" | "no";
   wildcard: "yes" | "no";
-}
-export type getUrlForwardingResponse = {
+};
+export type GetUrlForwardingResponse = {
   status: "SUCCESS";
   forwards: UrlForwarding[];
-}
-export type CreateUrlForwardingRequest = {
+};
+export type AddUrlForwardingRequest = {
   subdomain: string;
   location: string;
   type: "temporary" | "permanent" | "masked";
   includePath: "yes" | "no";
   wildcard: "yes" | "no";
-}
+};
 
 export type SuccessResponse = {
   status: "SUCCESS";

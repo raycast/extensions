@@ -39,7 +39,7 @@ export default function RetrieveDNSRecord() {
 
   async function getDomainsFromApi() {
     setIsLoading(true);
-    const response = await retrieveAllDomains() as RetrieveAllDomainsResponse;
+    const response = (await retrieveAllDomains()) as RetrieveAllDomainsResponse;
     if (response.status === "SUCCESS") {
       setDomains(response.domains);
       showToast({
@@ -52,8 +52,8 @@ export default function RetrieveDNSRecord() {
   }
   useEffect(() => {
     if (!domains) getDomainsFromApi();
-  }, [])
-  
+  }, []);
+
   const navigationTitle = "Retrieve DNS Records";
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
@@ -170,7 +170,14 @@ export default function RetrieveDNSRecord() {
       <Form.Separator />
 
       <Form.Dropdown title="Domain" {...itemProps.domain}>
-        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} icon={getFavicon(`https://${item.domain}`)} />)}
+        {domains?.map((item) => (
+          <Form.Dropdown.Item
+            key={item.domain}
+            title={item.domain}
+            value={item.domain}
+            icon={getFavicon(`https://${item.domain}`)}
+          />
+        ))}
       </Form.Dropdown>
       {itemProps.retrieve.value === "domainOrID" && (
         <Form.TextField title="ID (optional)" placeholder="106926652" {...itemProps.id} />

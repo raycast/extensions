@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, Form, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { DNSRecord, DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
+import { DNSRecord, DNSRecordType, Domain } from "./utils/types";
 import { editRecordByDomainAndId, editRecordByDomainSubdomainAndType, retrieveAllDomains } from "./utils/api";
 import { DNS_RECORD_TYPES } from "./utils/constants";
 import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
@@ -35,7 +35,7 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
   const [domains, setDomains] = useCachedState<Domain[]>("domains");
   async function getDomainsFromApi() {
     setIsLoading(true);
-    const response = await retrieveAllDomains() as RetrieveAllDomainsResponse;
+    const response = await retrieveAllDomains();
     if (response.status === "SUCCESS") {
       setDomains(response.domains);
       showToast({
@@ -48,7 +48,7 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
   }
   useEffect(() => {
     if (!domains) getDomainsFromApi();
-  }, [])
+  }, []);
 
   const navigationTitle = "Edit DNS Record";
   const { handleSubmit, itemProps } = useForm<FormValues>({
@@ -157,7 +157,14 @@ export default function EditDNSRecord(props: LaunchProps<{ arguments: EditRecord
       <Form.Separator />
 
       <Form.Dropdown title="Domain" {...itemProps.domain}>
-        {domains?.map(item => <Form.Dropdown.Item key={item.domain} title={item.domain} value={item.domain} icon={getFavicon(`https://${item.domain}`)} />)}
+        {domains?.map((item) => (
+          <Form.Dropdown.Item
+            key={item.domain}
+            title={item.domain}
+            value={item.domain}
+            icon={getFavicon(`https://${item.domain}`)}
+          />
+        ))}
       </Form.Dropdown>
       {edit === "domainAndID" && <Form.TextField title="ID" placeholder="Enter id" {...itemProps.id} />}
       {edit === "domainAndID" && <Form.Separator />}
