@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps, open, popToRoot } from "@raycast/api";
 import { useState } from "react";
 
 type Values = {
@@ -7,7 +7,7 @@ type Values = {
   focus: string;
 };
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ draftValues: Values }>) {
   const [queryError, setQueryError] = useState<string>();
 
   function handleSubmit({ query: q, copilot, focus }: Values) {
@@ -26,6 +26,7 @@ export default function Command() {
 
   return (
     <Form
+      enableDrafts
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
@@ -33,11 +34,18 @@ export default function Command() {
       }
     >
       <Form.Description text="Where knowledge begins" />
-      <Form.TextArea id="query" title="Ask Anything..." autoFocus error={queryError} />
+      <Form.TextArea
+        id="query"
+        title="Ask Anything..."
+        autoFocus
+        error={queryError}
+        defaultValue={props.draftValues?.query}
+      />
       <Form.Dropdown
         info="Focus allows you to fine tune your search by narrowing down the sources, for more targeted and relevant results. All follow-up questions in this Thread will focus the search on your chosen domain."
         id="focus"
         title="Focus"
+        defaultValue={props.draftValues?.focus}
       >
         <Form.Dropdown.Item value="all" title="All" />
         <Form.Dropdown.Item value="scholar" title="Academic" />
@@ -47,7 +55,7 @@ export default function Command() {
         <Form.Dropdown.Item value="reddit" title="Reddit" />
       </Form.Dropdown>
       <Form.Separator />
-      <Form.Checkbox defaultValue={false} id="copilot" label="Copilot" storeValue />
+      <Form.Checkbox defaultValue={props.draftValues?.copilot ?? false} id="copilot" label="Copilot" storeValue />
     </Form>
   );
 }
