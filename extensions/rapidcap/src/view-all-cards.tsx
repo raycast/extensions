@@ -68,9 +68,7 @@ export default function ViewAllCards() {
   );
 
   return (
-    <List
-      isLoading={cards.length === 0}
-    >
+    <List isLoading={cards.length === 0}>
       {cards.map((card, index) => (
         <List.Item
           key={index}

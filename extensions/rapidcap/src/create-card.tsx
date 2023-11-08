@@ -46,10 +46,6 @@ function CreateCardAction() {
             setError(error);
           }
         }
-        let cards: Card[] = [];
-        
-
-        
       });
       pop();
     },
