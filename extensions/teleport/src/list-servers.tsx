@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { appleScriptTerminalCommand, connectToServerCommand, serversList } from "./utils";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useFavorite } from "./hooks/use-favorite";
 
 async function open(name: string) {
   const toast = await showToast({
@@ -21,28 +22,60 @@ async function open(name: string) {
   }
 }
 
+interface Item {
+  spec: { hostname: string };
+}
+
 export default function Command() {
   const { data, isLoading } = serversList();
-  const results = useMemo(() => JSON.parse(data || "[]") || [], [data]);
+  const [searchText, setSearchText] = useState("");
+  const { list, toggleFavorite } = useFavorite<string>("servers");
+  let results = useMemo(() => JSON.parse(data || "[]") || [], [data]);
+
+  if (searchText.length > 0) {
+    results = results.filter((item: Item) => item.spec.hostname.toLowerCase().includes(searchText.toLowerCase()));
+  }
 
   return (
-    <List isLoading={isLoading}>
-      {results.map((item: { spec: { hostname: string } }, index: number) => {
-        const hostname = item.spec.hostname;
+    <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText}>
+      {results
+        .sort((itemA: Item, itemB: Item) => {
+          if (list.has(itemA.spec.hostname) && list.has(itemB.spec.hostname)) {
+            return itemA.spec.hostname.localeCompare(itemB.spec.hostname);
+          }
 
-        return (
-          <List.Item
-            key={hostname + index}
-            icon={{ source: Icon.Dot, tintColor: Color.Green }}
-            title={hostname}
-            actions={
-              <ActionPanel>
-                <Action title="Open" icon={Icon.Terminal} onAction={() => open(hostname)} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+          if (list.has(itemA.spec.hostname)) {
+            return -1;
+          }
+
+          if (list.has(itemB.spec.hostname)) {
+            return 1;
+          }
+
+          return itemA.spec.hostname.localeCompare(itemB.spec.hostname);
+        })
+        .map((item: Item, index: number) => {
+          const hostname = item.spec.hostname;
+
+          return (
+            <List.Item
+              key={hostname + index}
+              icon={{ source: Icon.Dot, tintColor: Color.Green }}
+              title={hostname}
+              accessories={[{ icon: list.has(hostname) ? { source: Icon.Star, tintColor: Color.Yellow } : undefined }]}
+              actions={
+                <ActionPanel>
+                  <Action title="Open" icon={Icon.Terminal} onAction={() => open(hostname)} />
+                  <Action
+                    title={list.has(hostname) ? "Unfavorite" : "Favorite"}
+                    icon={Icon.Star}
+                    onAction={() => toggleFavorite(hostname)}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 }

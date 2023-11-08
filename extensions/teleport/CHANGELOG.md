@@ -1,6 +1,7 @@
 # Teleport Changelog
 
 ## [New Commands] - 2023-11-08
+- Add favorite actions
 - Visual improvements, icons and colors
 - Add copy to clipboard actions
 
