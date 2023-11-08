@@ -16,29 +16,17 @@ export default function Command() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    async function getMatchFilesDirectory() {
-      try {
-        const { match: matchFilesDirectory } = await getEspansoConfig();
-        setMatchFilesDirectory(matchFilesDirectory);
-      } catch (err) {
-        setError(err instanceof Error ? err : null);
-      }
-    }
-    getMatchFilesDirectory();
-  }, []);
-
-  useEffect(() => {
-    async function fetchMatchFiles() {
+    const fetchData = async () => {
       try {
         const { match: matchFilesDirectory } = await getEspansoConfig();
         const sortedMatchFiles: { file: string; mtime: number }[] = getAndSortTargetFiles(matchFilesDirectory);
-        console.log("hello");
+        setMatchFilesDirectory(matchFilesDirectory);
         setSortedMatchFiles(sortedMatchFiles);
       } catch (err) {
         setError(err instanceof Error ? err : null);
       }
-    }
-    fetchMatchFiles();
+    };
+    fetchData();
   }, []);
 
   if (error) {

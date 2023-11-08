@@ -36,23 +36,17 @@ export function appendMatchToFile(fileContent: string, fileName: string, espanso
 }
 
 export function getMatches(espansoMatchDir: string, options?: { packagePath: boolean }): NormalizedEspansoMatch[] {
-  let matchFiles: string[];
   const finalMatches: NormalizedEspansoMatch[] = [];
 
-  if (options && options.packagePath) {
-    matchFiles = fse
-      .readdirSync(espansoMatchDir)
-      .filter((path) => path != ".DS_Store")
-      .map((packageDir) => path.join(espansoMatchDir, packageDir, "package.yml"));
-  } else {
-    matchFiles = fse
-      .readdirSync(espansoMatchDir)
-      .filter((fileName) => {
-        const filePath = path.join(espansoMatchDir, fileName);
-        return fse.statSync(filePath).isFile() && path.extname(fileName).toLowerCase() === ".yml";
-      })
-      .map((fileName) => path.join(espansoMatchDir, fileName));
-  }
+  const matchFiles = fse
+    .readdirSync(espansoMatchDir)
+    .filter((fileName) => (options?.packagePath ? true : path.extname(fileName).toLowerCase() === ".yml")) // Filter based on options
+    .filter((fileName) => fileName !== ".DS_Store")
+    .map((fileName) => {
+      const filePath = path.join(espansoMatchDir, fileName);
+      return options?.packagePath ? path.join(filePath, "package.yml") : filePath;
+    })
+    .filter((filePath) => !options?.packagePath || fse.statSync(filePath).isFile());
 
   for (const matchFile of matchFiles) {
     const content = fse.readFileSync(matchFile);
