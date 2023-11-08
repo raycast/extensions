@@ -1,5 +1,9 @@
 # Teleport Changelog
 
+## [New Commands] - 2023-11-08
+- Visual improvements, icons and colors
+- Add copy to clipboard actions
+
 ## [New Commands] - 2023-11-05
 - Add support for interacting with Kubernetes clusters
 
