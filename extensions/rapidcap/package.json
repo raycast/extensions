@@ -9,6 +9,10 @@
     "Productivity",
     "Other"
   ],
+  "keywords": [
+    "note",
+    "card"
+  ],
   "license": "MIT",
   "commands": [
     {
