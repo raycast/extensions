@@ -10,7 +10,9 @@ export interface InputParam {
   description?: string;
   defaultValue?: unknown;
   value?: unknown;
-  details?: unknown;
+  details?: {
+    values: unknown | unknown[];
+  };
 }
 
 export interface ParseInputResponse {

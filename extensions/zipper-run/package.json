@@ -19,13 +19,6 @@
           "placeholder": "Crontab generator",
           "description": "The name of the applet to run",
           "required": true
-        },
-        {
-          "name": "scriptName",
-          "type": "text",
-          "placeholder": "main.ts",
-          "description": "The name of the script to run",
-          "required": true
         }
       ]
     }
