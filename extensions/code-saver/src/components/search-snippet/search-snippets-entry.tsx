@@ -13,7 +13,11 @@ function SnippetItem({ snippet, onUpdateSuccess }: { snippet: Snippet; onUpdateS
     <List.Item
       title={snippet.title}
       actions={<ItemActions snippet={snippet} onUpdateSuccess={onUpdateSuccess} />}
-      accessories={snippet.formatType == "tldr" ? [{ icon: Icon.BulletPoints, tooltip: "View detail to copy one entry of code" }] : []}
+      accessories={
+        snippet.formatType == "tldr"
+          ? [{ icon: Icon.BulletPoints, tooltip: "View detail to copy one entry of code" }]
+          : []
+      }
       detail={<ItemDetail snippet={snippet} />}
     />
   );
