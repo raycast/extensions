@@ -205,6 +205,12 @@
       "mode": "view"
     },
     {
+      "name": "show-filters",
+      "title": "Show Filters",
+      "description": "Show filters based on given query",
+      "mode": "view"
+    },
+    {
       "name": "unfocus-current-task",
       "title": "Unfocus Current Task",
       "subtitle": "Todoist",
