@@ -44,7 +44,14 @@ One local-first snippet management extension for raycast. Store your code snippe
 ### Configuration
 
 This is one pure **local managed** code snippets store. You should
+
 1. Pick one local data store first. 
 2. Create one Library then
 3. Create snippet that you need.
 4. Brower the snippts you created.
+
+### Encryption
+
+We use [multiple cipher](https://utelle.github.io/SQLite3MultipleCiphers/) to encrypt the sqlite data store.
+
+The cipher we used is `AES 256 Bit` provided by `wxSQLite3`. You can see the details [here](https://utelle.github.io/SQLite3MultipleCiphers/docs/ciphers/cipher_aes256cbc/) and [here](https://github.com/utelle/wxsqlite3).

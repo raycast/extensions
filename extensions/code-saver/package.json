@@ -44,6 +44,13 @@
       ],
       "default": "1Week",
       "required": true
+    },
+    {
+      "title": "Encrypt Key",
+      "name": "encryptedKey",
+      "description": "We will encrypt your datastore with the key you give. Please keep it in mind. Leave it blank to disable the encryption.",
+      "type": "password",
+      "required": true
     }
   ],
   "commands": [
@@ -65,6 +72,7 @@
   "dependencies": {
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",
+    "better-sqlite3-multiple-ciphers": "^9.0.0",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.10",
     "drizzle-orm": "^0.28.6",

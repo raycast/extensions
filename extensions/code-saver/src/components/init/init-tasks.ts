@@ -99,6 +99,7 @@ export const upgradeDBSchema: InitTaskFunc = async () => {
 The following steps may help to recover:
 - Please check the integrity of DB \`${UserDefinedDBPath}\`.
     - Is that modified manually by accident?
+    - Is your encrpted key correct?
 - You can recover with backup of DB \`${newBackUpDBPath}\`
 Error details are as follows:
 \`\`\`
