@@ -1,5 +1,8 @@
 # Timers Changelog
 
+## [Fix bug where stopping a timer did not stop the alert due to incorrect .dismiss path] - 2023-11-08
+- Fix bug where the `.dismiss` file wasn't being deleted when a timer was stopped, leading to a perpetually ringing timer (thanks to @atuooo for the contribution)
+
 ## [Fix dismiss command, add "Stop Running Timer" command, screenshot update] - 2023-11-05
 
 - Fix bug where "Dismiss Timer Alert" would crash due to improper filtering of running timers
