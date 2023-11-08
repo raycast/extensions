@@ -53,10 +53,9 @@ export default function ViewAllCards() {
         if (error) {
           setError(error);
         }
-        console.log("Updated file successfully");
       });
     },
-    [state.cards, setState]
+    [state.cards, setState],
   );
 
   const handleDelete = useCallback(
@@ -69,10 +68,9 @@ export default function ViewAllCards() {
         if (error) {
           setError(error);
         }
-        console.log("Updated file successfully");
       });
     },
-    [state.cards, setState]
+    [state.cards, setState],
   );
 
   return (

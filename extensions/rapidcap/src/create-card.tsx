@@ -34,7 +34,6 @@ function CreateCardAction() {
           if (error) {
             setError(error);
           }
-          console.log("Updated file successfully");
         });
       });
       pop();
