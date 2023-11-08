@@ -20,7 +20,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
   async function sync() {
     try {
       const toast = await showToast({
-        title: "Syncing with Dashlane...",
+        title: "Syncing with Dashlane",
         style: Toast.Style.Animated,
       });
 

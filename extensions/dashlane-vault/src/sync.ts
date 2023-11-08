@@ -6,7 +6,7 @@ import { syncVault } from "@/lib/dcli";
 export default checkIfInstalled(async () => {
   try {
     const toast = await showToast({
-      title: "Syncing with Dashlane...",
+      title: "Syncing with Dashlane",
       style: Toast.Style.Animated,
     });
 

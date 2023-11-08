@@ -1,5 +1,5 @@
 # Dashlane Vault Changelog
 
-## [Initial Version] - 2023-10-20
+## [Add Dashlane Vault] - 2023-11-08
 
 Initial version code
