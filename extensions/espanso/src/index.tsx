@@ -25,18 +25,9 @@ export default function Command() {
         const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
         const packageMatches = getMatches(packageFilesDirectory, { packagePath: true });
         const userMatches = getMatches(matchFilesDirectory);
-        const matches: NormalizedEspansoMatch[] = userMatches.concat(packageMatches);
-        matches.sort((a, b) => {
-          if (a.label && b.label) {
-            return a.label.localeCompare(b.label);
-          } else if (a.label) {
-            return -1; // a has label, b does not
-          } else if (b.label) {
-            return 1; // b has label, a does not
-          } else {
-            return a.triggers[0].localeCompare(b.triggers[0]);
-          }
-        });
+        let matches: NormalizedEspansoMatch[] = userMatches.concat(packageMatches);
+
+        matches = sortMatches(matches);
 
         setItems(matches);
         setIsLoading(false);
