@@ -2,8 +2,8 @@
 
 ## [New Commands] - 2023-11-08
 - Add favorite actions
-- Visual improvements, icons and colors
 - Add copy to clipboard actions
+- Visual improvements, icons and colors
 
 ## [New Commands] - 2023-11-05
 - Add support for interacting with Kubernetes clusters
