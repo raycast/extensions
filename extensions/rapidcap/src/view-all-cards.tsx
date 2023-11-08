@@ -6,19 +6,9 @@ import DeleteCardAction from "./delete-card";
 import EditCardAction from "./edit-card";
 import fs from "fs";
 
-type State = {
-  cards: Card[];
-  isLoading: boolean;
-  searchText: string;
-};
-
 export default function ViewAllCards() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
-  const [state, setState] = useState<State>({
-    cards: [],
-    isLoading: false,
-    searchText: "",
-  });
+  const [cards, setCards] = useState<Card[]>([]);
   const [error, setError] = useState<Error | unknown>();
 
   useEffect(() => {
@@ -29,7 +19,7 @@ export default function ViewAllCards() {
 
       try {
         const cards: Card[] = JSON.parse(data);
-        setState((previous) => ({ ...previous, cards: cards }));
+        setCards(() => cards);
       } catch (error) {
         setError(error);
       }
@@ -48,10 +38,10 @@ export default function ViewAllCards() {
 
   const handleEdit = useCallback(
     (card: Card, index: number) => {
-      const updatedCards = [...state.cards];
+      const updatedCards = cards;
       updatedCards.splice(index, 1);
       updatedCards.push(card);
-      setState((previous) => ({ ...previous, cards: updatedCards }));
+      setCards(() => updatedCards);
 
       fs.writeFile(preferences.dataFile, JSON.stringify(updatedCards, null, 4), (error) => {
         if (error) {
@@ -59,14 +49,14 @@ export default function ViewAllCards() {
         }
       });
     },
-    [state.cards, setState],
+    [cards, setCards],
   );
 
   const handleDelete = useCallback(
     (index: number) => {
-      const newCards = [...state.cards];
+      const newCards = cards;
       newCards.splice(index, 1);
-      setState((previous) => ({ ...previous, cards: newCards }));
+      setCards(() => newCards);
 
       fs.writeFile(preferences.dataFile, JSON.stringify(newCards, null, 4), (error) => {
         if (error) {
@@ -74,17 +64,14 @@ export default function ViewAllCards() {
         }
       });
     },
-    [state.cards, setState],
+    [cards, setCards],
   );
 
   return (
     <List
-      isLoading={state.isLoading}
-      onSearchTextChange={(newValue) => {
-        setState((previous) => ({ ...previous, searchText: newValue }));
-      }}
+      isLoading={cards.length === 0}
     >
-      {state.cards.map((card, index) => (
+      {cards.map((card, index) => (
         <List.Item
           key={index}
           title={card.question}
