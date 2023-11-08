@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ProcessOutput } from "zx";
 import { commandNotFoundMd, noContentMd } from "./messages";
 import { NormalizedEspansoMatch } from "./types";
-import { getEspansoConfig, getMatches } from "./utils";
+import { getEspansoConfig, getMatches, sortMatches } from "./utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
