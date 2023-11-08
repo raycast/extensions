@@ -31,7 +31,7 @@
   "preferences": [
     {
       "name": "dataFile",
-      "title": "Data File Path",
+      "title": "Data File Path (JSON)",
       "type": "file",
       "required": true,
       "description": "File to save card data"
