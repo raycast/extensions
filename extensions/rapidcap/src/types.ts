@@ -4,8 +4,4 @@ interface Card {
   tag: string;
 }
 
-interface Preferences {
-  dataFile: string;
-}
-
-export type { Card, Preferences };
+export type { Card };

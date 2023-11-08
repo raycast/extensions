@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Icon, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Card, Preferences } from "./types";
+import { Card } from "./types";
 import ViewCardAction from "./view-card";
 import DeleteCardAction from "./delete-card";
 import EditCardAction from "./edit-card";
@@ -13,13 +13,13 @@ type State = {
 };
 
 export default function ViewAllCards() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [state, setState] = useState<State>({
     cards: [],
     isLoading: false,
     searchText: "",
   });
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | unknown>();
 
   useEffect(() => {
     fs.readFile(preferences.dataFile, "utf-8", (error, data) => {
@@ -27,8 +27,12 @@ export default function ViewAllCards() {
         setError(error);
       }
 
-      const cards: Card[] = JSON.parse(data);
-      setState((previous) => ({ ...previous, cards: cards }));
+      try {
+        const cards: Card[] = JSON.parse(data);
+        setState((previous) => ({ ...previous, cards: cards }));
+      } catch (error) {
+        setError(error);
+      }
     });
   }, []);
 
@@ -37,7 +41,7 @@ export default function ViewAllCards() {
       showToast({
         style: Toast.Style.Failure,
         title: "Something went wrong",
-        message: error.message,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }, [error]);
@@ -76,8 +80,6 @@ export default function ViewAllCards() {
   return (
     <List
       isLoading={state.isLoading}
-      searchText={state.searchText}
-      filtering={true}
       onSearchTextChange={(newValue) => {
         setState((previous) => ({ ...previous, searchText: newValue }));
       }}

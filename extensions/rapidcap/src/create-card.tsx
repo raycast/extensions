@@ -1,21 +1,21 @@
 import { Form, Action, ActionPanel, useNavigation, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { Preferences, Card } from "./types";
+import { Card } from "./types";
 import fs from "fs";
 import validateTag from "./utils";
 
 function CreateCardAction() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const { pop } = useNavigation();
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | unknown>();
 
   useEffect(() => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
         title: "Something went wrong",
-        message: error.message,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }, [error]);
@@ -27,8 +27,13 @@ function CreateCardAction() {
           setError(error);
         }
 
-        const cards: Card[] = JSON.parse(data);
-        cards.push(values);
+        let cards: Card[] = [];
+        try {
+          cards = JSON.parse(data);
+          cards.push(values);
+        } catch (error) {
+          setError(error);
+        }
 
         fs.writeFile(preferences.dataFile, JSON.stringify(cards, null, 4), (error) => {
           if (error) {
