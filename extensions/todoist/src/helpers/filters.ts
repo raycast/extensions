@@ -5,16 +5,13 @@ import { Filter, Task } from "../api";
 import { getColorByKey } from "./colors";
 import { sortByDate } from "./sortBy";
 
-
 export function getFilterUrl(id: string) {
   return `https://todoist.com/app/filter/${id}`;
 }
 
-export function getFilterAppUrl(id:string) {
+export function getFilterAppUrl(id: string) {
   return `todoist://filter?id=${id}`;
 }
-
-
 
 export function filterSort(tasks: Task[]) {
   tasks.sort((a, b) => {

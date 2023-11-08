@@ -16,7 +16,6 @@ function Filters() {
     return data?.filters.sort((a, b) => a.item_order - b.item_order) ?? [];
   }, [data]);
 
-
   async function toggleFavorite(filter: TFilter) {
     try {
       await showToast({

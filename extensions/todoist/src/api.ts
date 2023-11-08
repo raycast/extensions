@@ -90,14 +90,13 @@ export async function syncRequest(params: Record<string, any>) {
 export async function getFilterTasks(query: string) {
   const todoistApi = getTodoistRestApi();
   try {
-    const { data } = await todoistApi.get<Task[]>("/tasks", { params: { filter: query } }); 
+    const { data } = await todoistApi.get<Task[]>("/tasks", { params: { filter: query } });
     return data as Task[];
   } catch (error) {
-     throw new Error("Error fetching filter tasks:" + error);
+    throw new Error("Error fetching filter tasks:" + error);
     return [];
   }
 }
-
 
 export async function initialSync() {
   return syncRequest({ sync_token: "*", resource_types: ["all"] });
@@ -571,15 +570,15 @@ export async function deleteLabel(id: string, { data, setData }: CachedDataParam
   }
 }
 
-export type Filter = { 
-  id: string; 
+export type Filter = {
+  id: string;
   name: string;
   query: string;
   color: string;
   item_order: number;
   is_deleted: boolean;
   is_favorite: boolean;
-}
+};
 
 type UpdateFilterArgs = {
   id: string;
@@ -631,8 +630,7 @@ export async function deleteFilter(id: string, { data, setData }: CachedDataPara
       }),
     });
   }
-} 
-
+}
 
 export type Section = {
   id: string;
