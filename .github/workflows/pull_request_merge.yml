@@ -72,13 +72,13 @@ jobs:
           pr_repo_name=$(echo $pr_info | jq -r .headRepository.name)
           pr_repo_owner=$(echo $pr_info | jq -r .headRepositoryOwner.login)
 
-          if [[ "$can_modify" == "false" ]]; then
-            error="Edits from maintainers are disabled."
-            echo $error
-            exit 1
-          fi
-
           if ! [[ -z $(git status -s .) ]] ; then
+            if [[ "$can_modify" == "false" ]]; then
+              error="Edits from maintainers are disabled."
+              echo $error
+              exit 1
+            fi
+
             git add .
             git status .
             git commit --message "Update CHANGELOG.md and optimise images"
@@ -88,10 +88,6 @@ jobs:
           else
             echo "No changes."
           fi
-
-          git tag -f -a __raycast_latest_merged_$pr_branch__ -m "Used by the Ray CLI to track the latest commit that was merged"
-          git push -f https://${{ env.GITHUB_TOKEN }}@github.com/$pr_repo_owner/$pr_repo_name.git __raycast_latest_merged_$pr_branch__
-          echo "Pushed merged tag."
       - name: Sleep for 30 seconds
         run: sleep 30 # sleep 30s for ubuntu
         shell: bash
