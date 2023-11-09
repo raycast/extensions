@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Device, getStatus, getDevices, getErrorDetails, ErrorDetails } from "./shared";
 
-function DeviceList() {
+export default function DeviceList() {
   const [devices, setDevices] = useState<Device[]>();
   const [error, setError] = useState<ErrorDetails>();
   useEffect(() => {
@@ -12,7 +12,7 @@ function DeviceList() {
         const _list = getDevices(status);
         setDevices(_list);
       } catch (error) {
-        setError(getErrorDetails(error, "Couldn’t load device list."));
+        setError(getErrorDetails(error, "Couldn't load device list."));
       }
     }
     fetch();
@@ -71,10 +71,6 @@ function DeviceList() {
       )}
     </List>
   );
-}
-
-export default function Command() {
-  return <DeviceList />;
 }
 
 function formatDate(d: Date) {

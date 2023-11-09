@@ -23,7 +23,7 @@ function setExitNode(host: string, allowLAN: boolean) {
   }
 }
 
-function ExitNodeList() {
+export default function ExitNodeList() {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [error, setError] = useState<ErrorDetails>();
   const [exitNodes, setExitNodes] = useState<Device[]>([]);
@@ -84,7 +84,7 @@ function ExitNodeList() {
               }
               accessories={[
                 {
-                  text: exitNode.exitnode ? `        Connected` : "",
+                  tag: exitNode.exitnode ? `Connected` : "",
                 },
               ]}
               actions={
@@ -102,8 +102,4 @@ function ExitNodeList() {
       )}
     </List>
   );
-}
-
-export default function Command() {
-  return <ExitNodeList />;
 }

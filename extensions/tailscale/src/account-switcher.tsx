@@ -42,7 +42,7 @@ function loadUsers(unparsedUsers: string[]) {
   return users;
 }
 
-function AccountSwitchList() {
+export default function AccountSwitchList() {
   const [users, setUsers] = useState<User[]>();
   const [error, setError] = useState<ErrorDetails>();
   useEffect(() => {
@@ -105,8 +105,4 @@ function AccountSwitchList() {
       )}
     </List>
   );
-}
-
-export default function Command() {
-  return <AccountSwitchList />;
 }
