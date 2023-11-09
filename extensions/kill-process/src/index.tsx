@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   clearSearchBar,
+  closeMainWindow,
   getPreferenceValues,
   Icon,
   List,
@@ -93,15 +94,14 @@ export default function ProcessList() {
   const killProcess = (process: Process) => {
     exec(`kill -9 ${process.id}`);
     setFetchResult(state.filter((p) => p.id !== process.id));
-    if (multipleKills) {
-      showToast({
-        title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
-        style: Toast.Style.Success,
-      });
-    } else {
+    if (!multipleKills) {
       clearSearchBar({ forceScrollToTop: true });
-      showHUD(`✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`);
+      closeMainWindow();
     }
+    showToast({
+      title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
+      style: Toast.Style.Success,
+    });
   };
 
   const subtitleString = (process: Process) => {
