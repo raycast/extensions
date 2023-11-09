@@ -25,11 +25,11 @@ export default function Command() {
         const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
         const packageMatches = getMatches(packageFilesDirectory, { packagePath: true });
         const userMatches = getMatches(matchFilesDirectory);
-        let matches: NormalizedEspansoMatch[] = userMatches.concat(packageMatches);
+        const combinedMatches: NormalizedEspansoMatch[] = userMatches.concat(packageMatches);
 
-        matches = sortMatches(matches);
+        const sortedMatches = sortMatches(combinedMatches);
 
-        setItems(matches);
+        setItems(sortedMatches);
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof ProcessOutput ? err : null);
