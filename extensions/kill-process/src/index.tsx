@@ -5,7 +5,6 @@ import {
   getPreferenceValues,
   Icon,
   List,
-  popToRoot,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -95,7 +94,6 @@ export default function ProcessList() {
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (!multipleKills) {
       closeMainWindow();
-      popToRoot({ clearSearchBar: true })
     }
     showToast({
       title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
