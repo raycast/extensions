@@ -1,8 +1,9 @@
 # Teleport Changelog
 
-## [New Commands] - 2023-11-08
+## [New Actions] - 2023-11-08
 - Add favorite actions
 - Add copy to clipboard actions
+- Add default database action to database list
 - Visual improvements, icons and colors
 
 ## [New Commands] - 2023-11-05

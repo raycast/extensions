@@ -68,10 +68,11 @@ export default function Command() {
                   <Action title="Open" icon={Icon.Window} onAction={() => open(name)} />
                   <Action
                     title={list.has(name) ? "Unfavorite" : "Favorite"}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     icon={Icon.Star}
                     onAction={() => toggleFavorite(name)}
                   />
-                  <Action.CopyToClipboard content={name} />
+                  <Action.CopyToClipboard content={name} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
                 </ActionPanel>
               }
             />

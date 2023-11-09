@@ -1,9 +1,22 @@
-import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues, Form, Icon, Color } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Form,
+  Icon,
+  Color,
+  useNavigation,
+} from "@raycast/api";
 import { databasesList, connectToDatabase, capitalize } from "./utils";
 import { useMemo, useState } from "react";
 import { useFavorite } from "./hooks/use-favorite";
+import { usePreferences } from "./hooks/use-preferences";
+import { FormValidation, useForm } from "@raycast/utils";
 
-async function open(name: string, protocol: string, database: string) {
+async function open(name: string, protocol: string, database: string, pop?: () => void) {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Connecting...",
@@ -12,6 +25,7 @@ async function open(name: string, protocol: string, database: string) {
   const prefs = getPreferenceValues();
 
   try {
+    pop && pop();
     connectToDatabase(name, prefs.username, protocol, database);
     toast.style = Toast.Style.Success;
     toast.title = "Success !";
@@ -21,20 +35,72 @@ async function open(name: string, protocol: string, database: string) {
   }
 }
 
-function DatabaseForm(props: { name: string; protocol: string }) {
+function OpenWithDatabaseForm(props: { name: string; protocol: string }) {
+  const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<SetupDefaultDatabaseFormValues>({
+    async onSubmit(values) {
+      await open(props.name, props.protocol, values.database, pop);
+    },
+    validation: {
+      database: FormValidation.Required,
+    },
+  });
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={(values: { database: string }) => {
-              return open(props.name, props.protocol, values.database);
-            }}
-          />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="database" title="Database" />
+      <Form.TextField title="Database" {...itemProps.database} />
+    </Form>
+  );
+}
+
+interface SetupDefaultDatabaseFormValues {
+  database: string;
+}
+
+function SetupDefaultDatabaseForm(props: {
+  name: string;
+  defaults: Map<string, string>;
+  setDefaults: (key: string, value: string) => void;
+}) {
+  const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps } = useForm<SetupDefaultDatabaseFormValues>({
+    async onSubmit(values) {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Connecting...",
+      });
+
+      try {
+        pop();
+        props.setDefaults(props.name, values.database);
+        toast.style = Toast.Style.Success;
+        toast.title = "Success !";
+      } catch (err) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failure !";
+      }
+    },
+    initialValues: {
+      database: props.defaults.get(props.name) ?? "",
+    },
+  });
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Database" {...itemProps.database} />
     </Form>
   );
 }
@@ -53,7 +119,8 @@ export default function Command() {
   const { data, isLoading } = databasesList();
   const [searchText, setSearchText] = useState("");
   const { list, toggleFavorite } = useFavorite<string>("databases");
-  const results = useMemo(() => JSON.parse(data || "[]") || [], [data]).reduce((acc: any, item: Item) => {
+  const { list: defaults, set: setDefaults } = usePreferences("database-defaults");
+  const results = useMemo(() => JSON.parse(data || "[]") || [], [data, defaults]).reduce((acc: any, item: Item) => {
     if (searchText.length > 0 && !item.metadata.name.toLowerCase().includes(searchText.toLowerCase())) {
       return acc;
     }
@@ -105,23 +172,43 @@ export default function Command() {
                               }
                             : undefined,
                         },
+                        {
+                          tag: defaults.get(name)
+                            ? {
+                                value: defaults.get(name),
+                              }
+                            : "",
+                        },
                         { tag: { value: capitalize(protocol) } },
                       ]}
                       icon={{ source: Icon.Dot, tintColor: Color.Green }}
                       actions={
                         <ActionPanel>
-                          <Action title="Open" icon={Icon.Terminal} onAction={() => open(name, protocol, "")} />
+                          <Action
+                            title="Open"
+                            icon={Icon.Terminal}
+                            onAction={() => open(name, protocol, defaults.get(name) ?? "")}
+                          />
                           <Action.Push
                             title="Open With Database"
                             icon={Icon.Terminal}
-                            target={<DatabaseForm name={name} protocol={protocol} />}
+                            target={<OpenWithDatabaseForm name={name} protocol={protocol} />}
+                          />
+                          <Action.Push
+                            title="Setup Default Database"
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                            icon={Icon.Cog}
+                            target={
+                              <SetupDefaultDatabaseForm name={name} defaults={defaults} setDefaults={setDefaults} />
+                            }
                           />
                           <Action
                             title={list.has(name) ? "Unfavorite" : "Favorite"}
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                             icon={Icon.Star}
                             onAction={() => toggleFavorite(name)}
                           />
-                          <Action.CopyToClipboard content={name} />
+                          <Action.CopyToClipboard content={name} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
                         </ActionPanel>
                       }
                     />

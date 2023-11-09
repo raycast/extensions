@@ -62,15 +62,26 @@ export default function Command() {
               key={hostname + index}
               icon={{ source: Icon.Dot, tintColor: Color.Green }}
               title={hostname}
-              accessories={[{ icon: list.has(hostname) ? { source: Icon.Star, tintColor: Color.Yellow } : undefined }]}
+              accessories={[
+                {
+                  icon: list.has(hostname)
+                    ? {
+                        source: Icon.Star,
+                        tintColor: Color.Yellow,
+                      }
+                    : undefined,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action title="Open" icon={Icon.Terminal} onAction={() => open(hostname)} />
                   <Action
                     title={list.has(hostname) ? "Unfavorite" : "Favorite"}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     icon={Icon.Star}
                     onAction={() => toggleFavorite(hostname)}
                   />
+                  <Action.CopyToClipboard content={hostname} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
                 </ActionPanel>
               }
             />

@@ -100,10 +100,11 @@ function ListPods(props: { name: string }) {
                           <Action title="Open" icon={Icon.Terminal} onAction={() => open(name, namespace)} />
                           <Action
                             title={list.has(name) ? "Unfavorite" : "Favorite"}
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                             icon={Icon.Star}
                             onAction={() => toggleFavorite(name)}
                           />
-                          <Action.CopyToClipboard content={name} />
+                          <Action.CopyToClipboard content={name} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
                         </ActionPanel>
                       }
                     />
@@ -169,10 +170,11 @@ export default function Command() {
                   <Action.Push title="List Pods" icon={Icon.List} target={<ListPods name={name} />} />
                   <Action
                     title={list.has(name) ? "Unfavorite" : "Favorite"}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     icon={Icon.Star}
                     onAction={() => toggleFavorite(name)}
                   />
-                  <Action.CopyToClipboard content={name} />
+                  <Action.CopyToClipboard content={name} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
                 </ActionPanel>
               }
             />
