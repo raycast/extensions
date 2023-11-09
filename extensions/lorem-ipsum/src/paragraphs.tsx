@@ -1,5 +1,5 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { generateParagraphs, preformAction, safeLoremIpsumNumberArg } from "./utils";
+import { generateParagraphs, produceOutput, safeLoremIpsumNumberArg } from "./utils";
 import { LoremIpsumArguments } from "./types";
 
 export default async function ParagraphCommand(props?: { arguments: LoremIpsumArguments }) {
@@ -13,6 +13,6 @@ export default async function ParagraphCommand(props?: { arguments: LoremIpsumAr
     await showHUD(`❌ ${error.message}`);
   } else {
     const output = generateParagraphs(safeLoremIpsumNumber);
-    await preformAction(action, output);
+    await produceOutput(action, output);
   }
 }
