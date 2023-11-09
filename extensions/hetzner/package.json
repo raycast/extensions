@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hetzner",
+  "title": "Hetzner",
+  "description": "Provides different actions via the Hetzner API",
+  "icon": "hetzner-icon.png",
+  "author": "alex-w0",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchServer",
+      "title": "Manager Servers",
+      "description": "Shows a list of all hetzner servers",
+      "mode": "view"
+    },
+    {
+      "name": "createServer",
+      "title": "Create Server",
+      "description": "Creates a server",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "projectId",
+      "description": "Set your Hetzner Project ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Hetzner Project ID"
+    },
+    {
+      "name": "accessToken",
+      "description": "Provide your generated access token from Hetzner",
+      "type": "password",
+      "required": true,
+      "title": "Hetzner API Access Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.1",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "eslint": "^8.51.0",
+    "eslint-plugin-react": "^7.33.2",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
