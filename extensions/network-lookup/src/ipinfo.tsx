@@ -1,9 +1,11 @@
 import { Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { LaunchProps } from "@raycast/api";
+import net from "net";
 interface IPArguments {
   ip?: string;
 }
+
 interface IPinfo {
   ip: string;
   hostname: string;
@@ -15,9 +17,8 @@ interface IPinfo {
 }
 
 export default function Command(props: LaunchProps<{ arguments: IPArguments }>) {
-  const net = require("net");
-  const isValid = net.isIP(props.arguments.ip);
-  if (isValid == false) {
+  const isValid = net.isIP(props.arguments.ip as string);
+  if (isValid == 0) {
     return <Detail markdown="Not an IP address" />;
   }
   const { isLoading, data }: { isLoading: boolean; data?: IPinfo } = useFetch(
@@ -31,11 +32,11 @@ export default function Command(props: LaunchProps<{ arguments: IPArguments }>) 
   );
   const markdown = `
 ## IP: ${data?.ip}
-## Hostname: ${data?.hostname ?? 'N/A'}
-## Anycast: ${data?.anycast ?? 'false'}
-## City: ${data?.city ?? 'N/A'}
-## Country: ${data?.country ?? 'N/A'}
-## Region: ${data?.region ?? 'N/A'}
-## ASN: ${data?.org ?? 'No ASN'}`;
+## Hostname: ${data?.hostname ?? "N/A"}
+## Anycast: ${data?.anycast ?? "false"}
+## City: ${data?.city ?? "N/A"}
+## Country: ${data?.country ?? "N/A"}
+## Region: ${data?.region ?? "N/A"}
+## ASN: ${data?.org ?? "No ASN"}`;
   return <Detail isLoading={isLoading} markdown={markdown} />;
 }
