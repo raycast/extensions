@@ -31,6 +31,7 @@ export type StatusDevice = {
   TailscaleIPs: string[];
   LastSeen: string;
   UserID: number;
+  HostName: string;
 };
 
 /**
