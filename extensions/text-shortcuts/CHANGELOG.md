@@ -1,6 +1,6 @@
 # Text Shortcuts Changelog
 
-## [Sort by Frequency of Use] - {PR_MERGE_DATE}
+## [Sort by Frequency of Use] - 2023-11-09
 
 - Optimize Shortcuts Sorting: Sort by Frequency of Use
 - Add Empty View to the Shortcut Library command
