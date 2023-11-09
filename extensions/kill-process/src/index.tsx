@@ -1,4 +1,14 @@
-import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  clearSearchBar,
+  getPreferenceValues,
+  Icon,
+  List,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { exec } from "child_process";
 import { useState, useEffect } from "react";
 import prettyBytes from "pretty-bytes";
@@ -16,6 +26,7 @@ export default function ProcessList() {
   const shouldShowPID = preferences.shouldShowPID ?? false;
   const shouldShowPath = preferences.shouldShowPath ?? false;
   const refreshDuration = +preferences.refreshDuration;
+  const multipleKills = preferences.allowMultipleKills ?? false;
   const [sortByMem, setSortByMem] = useState<boolean>(preferences.sortByMem ?? false);
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps ?? false);
 
@@ -82,10 +93,15 @@ export default function ProcessList() {
   const killProcess = (process: Process) => {
     exec(`kill -9 ${process.id}`);
     setFetchResult(state.filter((p) => p.id !== process.id));
-    showToast({
-      title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
-      style: Toast.Style.Success
-    });
+    if (multipleKills) {
+      showToast({
+        title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
+        style: Toast.Style.Success,
+      });
+    } else {
+      clearSearchBar({ forceScrollToTop: true });
+      showHUD(`✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`);
+    }
   };
 
   const subtitleString = (process: Process) => {
