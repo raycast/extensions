@@ -1,5 +1,10 @@
 # Text Shortcuts Changelog
 
+## [Sort by Frequency of Use] - 2023-11-09
+
+- Optimize Shortcuts Sorting: Sort by Frequency of Use
+- Add Empty View to the Shortcut Library command
+
 ## [Add Menu Bar command] - 2022-10-20
 
 - Add Menu Bar command: Shortcut Library
