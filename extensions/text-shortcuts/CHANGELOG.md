@@ -2,8 +2,9 @@
 
 ## [Sort by Frequency of Use] - 2023-11-09
 
-- Optimize Shortcuts Sorting: Sort by Frequency of Use
+- Optimize Shortcuts Sorting: Sort by Frequency of Use (Please use Edit Shortcuts in the Shortcut Library command to update custom Shortcuts so that they can be sorted by frequency of use)
 - Add Empty View to the Shortcut Library command
+- Some minor view interface updates
 
 ## [Add Menu Bar command] - 2022-10-20
 
