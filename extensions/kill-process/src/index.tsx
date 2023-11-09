@@ -1,12 +1,11 @@
 import {
   Action,
   ActionPanel,
-  clearSearchBar,
   closeMainWindow,
   getPreferenceValues,
   Icon,
   List,
-  showHUD,
+  popToRoot,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -95,8 +94,8 @@ export default function ProcessList() {
     exec(`kill -9 ${process.id}`);
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (!multipleKills) {
-      clearSearchBar({ forceScrollToTop: true });
       closeMainWindow();
+      popToRoot({ clearSearchBar: true })
     }
     showToast({
       title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
