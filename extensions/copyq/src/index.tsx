@@ -1,4 +1,12 @@
-import { ActionPanel, Detail, List, Action, getPreferenceValues, Icon, Clipboard } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  List,
+  Action,
+  getPreferenceValues,
+  Icon,
+  Clipboard,
+} from "@raycast/api";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
 
@@ -51,7 +59,7 @@ export default function Command() {
   const items = clipboardContents.map((text, index) => (
     <List.Item
       key={index}
-      title={text} // Use the string content
+      title={text}
       actions={
         <ActionPanel>
           <Action
@@ -59,18 +67,18 @@ export default function Command() {
             icon={Icon.Clipboard}
             onAction={async () => {
               await selectClipboardContents(defaultTab, index);
-              Clipboard.paste({text})
+              Clipboard.paste({ text });
             }}
           />
-          <Action.Push title="Preview" icon={Icon.ArrowsExpand} target={<Detail markdown={text} />} />
+          <Action.Push
+            title="Preview"
+            icon={Icon.ArrowsExpand}
+            target={<Detail markdown={text} />}
+          />
         </ActionPanel>
       }
     />
   ));
 
-  return (
-    <List>
-      {items}
-    </List>
-  );
+  return <List>{items}</List>;
 }

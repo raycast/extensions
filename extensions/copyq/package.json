@@ -21,7 +21,6 @@
           "name": "copyq_path",
           "title": "CopyQ Path",
           "description": "Path to CopyQ executable",
-          "default": "/usr/local/bin/copyq",
           "required": true
         },
         {
@@ -49,7 +48,10 @@
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "18.18.4",
     "@types/react": "18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
     "eslint": "^8.51.0",
+    "eslint-plugin-react": "^7.33.2",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
