@@ -1,7 +1,6 @@
 import { ActionPanel, closeMainWindow, Action, Icon, List, open, Keyboard, getPreferenceValues } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
-import { SearchResult } from "./utils/types";
 
 export default function Command() {
   const {
@@ -9,11 +8,9 @@ export default function Command() {
     results,
     searchText,
     setSearchText,
-    pauseSuggestions,
     setPauseSuggestions,
     selectedItemId,
     setSelectedItemId,
-    history,
     addHistory,
     deleteAllHistory,
     deleteHistoryItem,
@@ -24,16 +21,13 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      throttle
       onSearchTextChange={(newText) => {
-        console.log('b')
-        setPauseSuggestions(true);
         setSearchText(newText);
         setSelectedItemId("_default");
+        setPauseSuggestions(false);
       }}
       onSelectionChange={async (id) => {
-        console.log('a', pauseSuggestions, id)
-        if (id === "_default") return
+        if (id === "_default") return;
         const selectedItem = results.find((item) => item.id === id);
         if (!selectedItem) return;
         setPauseSuggestions(true);

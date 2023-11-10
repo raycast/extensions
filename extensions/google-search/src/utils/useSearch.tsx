@@ -18,7 +18,6 @@ export function useSearch() {
   const [pauseSuggestions, setPauseSuggestions] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
 
-
   useEffect(() => {
     getHistory();
 
@@ -27,12 +26,12 @@ export function useSearch() {
     };
   }, []);
 
-  // Static result and filter history
+  // Static result
   useEffect(() => {
     setStaticResults(getStaticResult(searchText));
   }, [searchText]);
 
-  // Static result and filter history
+  // History
   useEffect(() => {
     const lowerSearchText = searchText.toLowerCase();
     setHistoryResults(history.filter((item) => item.query.toLowerCase().includes(lowerSearchText)));
@@ -109,7 +108,7 @@ export function useSearch() {
     await LocalStorage.removeItem(HISTORY_KEY);
 
     setHistory([]);
-    showToast(Toast.Style.Success, "Cleared search history");
+    await showToast(Toast.Style.Success, "Cleared search history");
   }
 
   async function deleteHistoryItem(result: SearchResult) {
