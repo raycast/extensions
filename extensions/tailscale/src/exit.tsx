@@ -37,7 +37,7 @@ export default function ExitNodeList() {
           setIsActive(true);
         }
       } catch (error) {
-        setError(getErrorDetails(error, "Couldn't load exit nodes."));
+        setError(getErrorDetails(error, "Couldn’t load exit nodes."));
       }
     }
     fetch();

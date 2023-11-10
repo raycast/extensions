@@ -12,7 +12,7 @@ export default function DeviceList() {
         const _list = getDevices(status);
         setDevices(_list);
       } catch (error) {
-        setError(getErrorDetails(error, "Couldn't load device list."));
+        setError(getErrorDetails(error, "Couldn’t load device list."));
       }
     }
     fetch();

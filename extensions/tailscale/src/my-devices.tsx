@@ -14,7 +14,7 @@ export default function MyDeviceList() {
         const _mylist = _list.filter((device) => device.userid === me);
         setDevices(_mylist);
       } catch (error) {
-        setError(getErrorDetails(error, "Couldn't load device list."));
+        setError(getErrorDetails(error, "Couldn’t load device list."));
       }
     }
     fetch();
