@@ -8,11 +8,11 @@ export default async function Status() {
 
     // tailscale is guaranteed to be online because getStats throws if it isn't
 
-    const hostname = data.Self.HostName;
+    const magicDNSSuffix = data.MagicDNSSuffix;
     const devices = getDevices(data);
     const activeExitNode = devices.find((d) => d.exitnode);
 
-    subtitle = `✅ Tailscale is connected on ${hostname}`;
+    subtitle = `✅ Tailscale is connected on ${magicDNSSuffix}`;
     if (activeExitNode) {
       subtitle += ` via ${activeExitNode.name}`;
     }

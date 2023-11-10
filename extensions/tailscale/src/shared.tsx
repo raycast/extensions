@@ -38,9 +38,11 @@ export type StatusDevice = {
  * StatusResponse is a subset of the fields returned by `tailscale status --json`.
  */
 export type StatusResponse = {
-  Peer: Record<string, StatusDevice>;
-  Self: StatusDevice;
+  Version: string;
   TailscaleIPs: string[];
+  Self: StatusDevice;
+  MagicDNSSuffix: string;
+  Peer: Record<string, StatusDevice>;
   User: Record<
     string,
     {
@@ -50,7 +52,6 @@ export type StatusResponse = {
       ProfilePictureURL: string;
     }
   >;
-  Version: string;
 };
 
 export function getStatus() {
