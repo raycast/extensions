@@ -30,13 +30,13 @@ export function useSearch() {
   // Static result and filter history
   useEffect(() => {
     setStaticResults(getStaticResult(searchText));
-  }, [searchText, pauseSuggestions]);
+  }, [searchText]);
 
   // Static result and filter history
   useEffect(() => {
     const lowerSearchText = searchText.toLowerCase();
     setHistoryResults(history.filter((item) => item.query.toLowerCase().includes(lowerSearchText)));
-  }, [searchText, history, pauseSuggestions]);
+  }, [searchText, history]);
 
   // Autosuggestions
   useEffect(() => {
@@ -66,7 +66,7 @@ export function useSearch() {
     };
 
     fetchQuery();
-  }, [searchText, pauseSuggestions]);
+  }, [searchText]);
 
   // Combine all results
   useEffect(() => {
@@ -128,24 +128,11 @@ export function useSearch() {
     showToast(Toast.Style.Success, "Removed from history");
   }
 
-  async function search(query: string) {
-    console.log('pauseSuggestions', pauseSuggestions);
-
-    // user changed the search text, so we want to show new results
-    console.log(query)
-    if (query.length === 0) {
-      setPauseSuggestions(false);
-    }
-
-    setSearchText(query);
-  }
-
   return {
     isLoading,
     results,
     searchText,
     setSearchText,
-    search,
     pauseSuggestions,
     setPauseSuggestions,
     selectedItemId,

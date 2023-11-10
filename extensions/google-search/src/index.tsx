@@ -9,7 +9,6 @@ export default function Command() {
     results,
     searchText,
     setSearchText,
-    search,
     pauseSuggestions,
     setPauseSuggestions,
     selectedItemId,
@@ -25,41 +24,22 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      throttle={true}
-      onSearchTextChange={search}
-      selectedItemId={selectedItemId}
-      onSelectionChange={async (id) => {
-
-        const matches = (item: SearchResult, text: string) => {
-          if (item.isNavigation) {
-            return item.url === text;
-          }
-          return item.query === text;
-        }
-
-        const selectedItem = results.find((item) => item.id === id);
-
-        // when there is no history, or when there is no searchText
-        if (!selectedItem || !searchText) return;
-
-        // this is true when the user has manually changed the searchText
-        // because otherwise, selectedItem.query would have been changed along with searchText
-        if (!matches(selectedItem, searchText)) {
-          console.log('a')
-          // then, we want to pause suggestions so that user can still switch to other suggestions
-          // from the original searchText
-          // and then set the search text to the query
-          setPauseSuggestions(true);
-          if (selectedItem.isNavigation) {
-            setSearchText(selectedItem.url);
-          } else {
-            setSearchText(selectedItem.query);
-          }
-        } else {
-          console.log('b')
-          setPauseSuggestions(false);
-        }
+      throttle
+      onSearchTextChange={(newText) => {
+        console.log('b')
+        setPauseSuggestions(true);
+        setSearchText(newText);
+        setSelectedItemId("_default");
       }}
+      onSelectionChange={async (id) => {
+        console.log('a', pauseSuggestions, id)
+        if (id === "_default") return
+        const selectedItem = results.find((item) => item.id === id);
+        if (!selectedItem) return;
+        setPauseSuggestions(true);
+        setSearchText(selectedItem.isNavigation ? selectedItem.url : selectedItem.query);
+      }}
+      selectedItemId={selectedItemId}
       searchText={searchText}
       searchBarPlaceholder="Search Google or enter a URL..."
     >

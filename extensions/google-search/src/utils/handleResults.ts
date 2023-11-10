@@ -28,7 +28,7 @@ export function getStaticResult(searchText: string): SearchResult[] {
 
   const result: SearchResult[] = [
     {
-      id: nanoid(),
+      id: "_default",
       query: searchText,
       description: `Search Google for '${searchText}'`,
       url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
