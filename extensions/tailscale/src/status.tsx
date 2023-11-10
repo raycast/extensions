@@ -1,5 +1,5 @@
 import { updateCommandMetadata } from "@raycast/api";
-import { getDevices, getStatus } from "./shared";
+import { getDevices, getErrorDetails, getStatus } from "./shared";
 
 export default async function Status() {
   let subtitle: string;
@@ -16,8 +16,8 @@ export default async function Status() {
     if (activeExitNode) {
       subtitle += ` via ${activeExitNode.name}`;
     }
-  } catch {
-    subtitle = "❌ Tailscale is offline.";
+  } catch (err) {
+    subtitle = "❌ " + getErrorDetails(err, "").title;
   }
   await updateCommandMetadata({ subtitle });
 }
