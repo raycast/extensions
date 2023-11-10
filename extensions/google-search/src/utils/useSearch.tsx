@@ -16,6 +16,8 @@ export function useSearch() {
   const [searchText, setSearchText] = useState("");
   const cancelRef = useRef<AbortController | null>(null);
   const [pauseSuggestions, setPauseSuggestions] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
+
 
   useEffect(() => {
     getHistory();
@@ -127,7 +129,10 @@ export function useSearch() {
   }
 
   async function search(query: string) {
+    console.log('pauseSuggestions', pauseSuggestions);
+
     // user changed the search text, so we want to show new results
+    console.log(query)
     if (query.length === 0) {
       setPauseSuggestions(false);
     }
@@ -143,6 +148,8 @@ export function useSearch() {
     search,
     pauseSuggestions,
     setPauseSuggestions,
+    selectedItemId,
+    setSelectedItemId,
     history,
     addHistory,
     deleteAllHistory,

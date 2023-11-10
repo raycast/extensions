@@ -1,6 +1,7 @@
 import { ActionPanel, closeMainWindow, Action, Icon, List, open, Keyboard, getPreferenceValues } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
+import { SearchResult } from "./utils/types";
 
 export default function Command() {
   const {
@@ -9,7 +10,11 @@ export default function Command() {
     searchText,
     setSearchText,
     search,
+    pauseSuggestions,
     setPauseSuggestions,
+    selectedItemId,
+    setSelectedItemId,
+    history,
     addHistory,
     deleteAllHistory,
     deleteHistoryItem,
@@ -20,9 +25,18 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      throttle={true}
       onSearchTextChange={search}
-      selectedItemId={results.length > 0 ? results[0].id : undefined}
+      selectedItemId={selectedItemId}
       onSelectionChange={async (id) => {
+
+        const matches = (item: SearchResult, text: string) => {
+          if (item.isNavigation) {
+            return item.url === text;
+          }
+          return item.query === text;
+        }
+
         const selectedItem = results.find((item) => item.id === id);
 
         // when there is no history, or when there is no searchText
@@ -30,12 +44,20 @@ export default function Command() {
 
         // this is true when the user has manually changed the searchText
         // because otherwise, selectedItem.query would have been changed along with searchText
-        if (searchText !== selectedItem.query) {
+        if (!matches(selectedItem, searchText)) {
+          console.log('a')
           // then, we want to pause suggestions so that user can still switch to other suggestions
           // from the original searchText
-          setPauseSuggestions(true);
           // and then set the search text to the query
-          setSearchText(selectedItem.query);
+          setPauseSuggestions(true);
+          if (selectedItem.isNavigation) {
+            setSearchText(selectedItem.url);
+          } else {
+            setSearchText(selectedItem.query);
+          }
+        } else {
+          console.log('b')
+          setPauseSuggestions(false);
         }
       }}
       searchText={searchText}
