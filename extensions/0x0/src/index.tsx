@@ -15,7 +15,6 @@ export default function Command() {
   const { handleSubmit, itemProps } = useForm<UploadFormValues>({
     async onSubmit(values) {
       const uploadToast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
-      console.log(values);
       setUploading(true);
       const url = "https://0x0.st";
       try {
@@ -25,7 +24,6 @@ export default function Command() {
         formData.append("file", fileBuffer, {
           filename: path.basename(filePath),
         });
-        console.log("🚀 ~ file: index.tsx:23 ~ onSubmit ~ formData: ", formData);
 
         const response = await fetch(url, {
           method: "POST",
