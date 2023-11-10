@@ -7,7 +7,7 @@ import useInterval from "./hooks/use-interval";
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
   const [state, setState] = useState<Process[]>([]);
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const [query, setQuery] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
   const shouldIncludePaths = preferences.shouldSearchInPaths;
@@ -196,7 +196,7 @@ export default function ProcessList() {
     >
       {state
         .filter((process) => {
-          if (query === "" || query == null) {
+          if (query === "") {
             return true;
           }
           const nameMatches = process.processName.toLowerCase().includes(query.toLowerCase());
@@ -211,7 +211,7 @@ export default function ProcessList() {
         })
         .sort((a, b) => {
           // If this flag is true, we bring apps to the top, but only if we have a query.
-          if (query != null && shouldPrioritizeAppsWhenFiltering) {
+          if (shouldPrioritizeAppsWhenFiltering) {
             const appTypes = ["app", "aggregatedApp"];
             if (appTypes.includes(a.type) && !appTypes.includes(b.type)) {
               return -1;
