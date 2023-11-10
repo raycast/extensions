@@ -23,11 +23,11 @@ export default function Command() {
       isLoading={isLoading}
       onSearchTextChange={(newText) => {
         setSearchText(newText);
-        setSelectedItemId("_default");
         setPauseSuggestions(false);
+        setSelectedItemId(results?.at(0)?.id);
       }}
       onSelectionChange={async (id) => {
-        if (id === "_default") return;
+        if (id === results?.at(0)?.id) return;
         const selectedItem = results.find((item) => item.id === id);
         if (!selectedItem) return;
         setPauseSuggestions(true);
