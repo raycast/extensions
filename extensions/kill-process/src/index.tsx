@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  getPreferenceValues,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 import { useState, useEffect } from "react";
 import prettyBytes from "pretty-bytes";
