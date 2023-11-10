@@ -22,14 +22,23 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={(newText) => {
+// set the search text
         setSearchText(newText);
+        // unpause suggestions if they were previously paused
         setPauseSuggestions(false);
-        setSelectedItemId(results?.at(0)?.id);
+        // select the first result (the static one) if the search text isn't empty
+        if (newText !== "") {
+          setSelectedItemId(results?.at(0)?.id);
+        }
       }}
       onSelectionChange={async (id) => {
-        if (id === results?.at(0)?.id) return;
         const selectedItem = results.find((item) => item.id === id);
         if (!selectedItem) return;
+        // if the first item isn't history, do nothing if the selected item is the first item
+        // if the search text is empty, do nothing if the selected item is the first item
+        if (!selectedItem.isHistory || searchText === "") {
+          if (id === results?.at(0)?.id) return;
+        }
         setPauseSuggestions(true);
         setSearchText(selectedItem.isNavigation ? selectedItem.url : selectedItem.query);
       }}
