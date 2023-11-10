@@ -96,14 +96,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.3",
-    "pretty-bytes": "^6.1.0"
+    "@raycast/api": "^1.61.2",
+    "pretty-bytes": "^6.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
+    "@types/react": "18.2.37",
+    "eslint": "^8.53.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
