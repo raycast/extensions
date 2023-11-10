@@ -12,7 +12,7 @@ export default async function Status() {
     const devices = getDevices(data);
     const activeExitNode = devices.find((d) => d.exitnode);
 
-    subtitle = `✅ Tailscale is connected on ${magicDNSSuffix}`;
+    subtitle = `✅ Connected on ${magicDNSSuffix}`;
     if (activeExitNode) {
       subtitle += ` via ${activeExitNode.name}`;
     }

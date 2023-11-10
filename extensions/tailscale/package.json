@@ -58,8 +58,8 @@
     },
     {
       "name": "status",
-      "title": "Tailscale Status",
-      "description": "Show the tailscale status.",
+      "title": "Status",
+      "description": "Show Tailscale's connection status.",
       "mode": "no-view",
       "interval": "30s"
     }
