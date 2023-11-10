@@ -4,59 +4,70 @@ import { useState } from "react";
 import fetch from "node-fetch";
 import FormData from "form-data";
 import path from "path";
+import { FormValidation, useForm } from "@raycast/utils";
+
+interface UploadFormValues {
+  file: string[];
+}
 
 export default function Command() {
-  const [file, setFile] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const { handleSubmit, itemProps } = useForm<UploadFormValues>({
+    async onSubmit(values) {
+      const uploadToast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
+      console.log(values);
+      setUploading(true);
+      const url = "https://0x0.st";
+      try {
+        const formData = new FormData();
+        const filePath = values.file[0];
+        const fileBuffer = fs.readFileSync(filePath);
+        formData.append("file", fileBuffer, {
+          filename: path.basename(filePath),
+        });
+        console.log("🚀 ~ file: index.tsx:23 ~ onSubmit ~ formData: ", formData);
 
-  async function handleSubmit() {
-    const uploadToast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
-    setUploading(true);
-    const url = "https://0x0.st";
-    try {
-      const formData = new FormData();
-      const fileBuffer = fs.readFileSync(file[0]);
-      formData.append("file", fileBuffer, {
-        filename: path.basename(file[0]),
-      });
+        const response = await fetch(url, {
+          method: "POST",
+          headers: formData.getHeaders(),
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: formData.getHeaders(),
-        body: formData,
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const result = await response.text();
+        uploadToast.style = Toast.Style.Success;
+        uploadToast.title = "Upload successful";
+        uploadToast.message = "Link copied to clipboard";
+        await Clipboard.copy(result);
+        uploadToast.primaryAction = {
+          title: "Open in Browser",
+          onAction: (toast) => {
+            open(result);
+            toast.hide();
+          },
+        };
+        setUploading(false);
+      } catch (error) {
+        setUploading(false);
       }
-
-      const result = await response.text();
-      uploadToast.style = Toast.Style.Success;
-      uploadToast.title = "Upload successful";
-      uploadToast.message = "Link copied to clipboard";
-      await Clipboard.copy(result);
-      uploadToast.primaryAction = {
-        title: "Open in Browser",
-        onAction: (toast) => {
-          open(result);
-          toast.hide();
-        },
-      };
-      setUploading(false);
-    } catch (error) {
-      setUploading(false);
-    }
-  }
+    },
+    validation: {
+      file: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Upload" onSubmit={() => handleSubmit()} />
+          <Action.SubmitForm title="Upload" onSubmit={handleSubmit} />
         </ActionPanel>
       }
       isLoading={uploading}
     >
-      <Form.FilePicker id="files" value={file} onChange={setFile} allowMultipleSelection={false} />
+      <Form.FilePicker allowMultipleSelection={false} {...itemProps.file} />
     </Form>
   );
 }
