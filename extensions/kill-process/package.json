@@ -78,11 +78,20 @@
       "type": "checkbox"
     },
     {
-      "description": "Allow killing multiple processes at once. This keeps the Raycast window open after killing a process",
-      "label": "Allow multiple kills",
-      "name": "allowMultipleKills",
+      "description": "Close window after killing a process",
+      "label": "Close window after kill",
+      "name": "closeWindowAfterKill",
       "required": false,
-      "title": "Multiple Processes",
+      "default": true,
+      "title": "After Killing",
+      "type": "checkbox"
+    },
+    {
+      "description": "Clear search bar after killing a process",
+      "label": "Clear search bar after kill",
+      "name": "clearSearchBarAfterKill",
+      "required": false,
+      "default": true,
       "type": "checkbox"
     },
     {
