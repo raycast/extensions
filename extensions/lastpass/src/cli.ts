@@ -51,7 +51,7 @@ const execute = async (command: string) => {
 
 const authorize = (subcommand: string, opts: { password: string }) => {
   const { password } = opts;
-  const quote = password.includes('"') ? "'" : '"';
+  const quote = password?.includes('"') ? "'" : '"';
   const maskedCommand = `echo ${quote}${password}${quote} | LPASS_DISABLE_PINENTRY=1 lpass ${subcommand}`;
   return maskedCommand;
 };

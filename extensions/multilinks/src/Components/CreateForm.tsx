@@ -90,7 +90,7 @@ function CreateForm(props: { data?: LinkItem; onCreate?: () => void }) {
     return () => {
       updateBrowserList = false;
     };
-  });
+  }, []);
 
   return (
     <Form

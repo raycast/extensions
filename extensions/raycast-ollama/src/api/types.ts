@@ -61,36 +61,22 @@ export interface OllamaApiGenerateOptionsRequestBody {
   num_thread?: number;
 }
 
-export interface OllamaApiGenerateResponseUndone {
+export interface OllamaApiGenerateResponse {
   model: string;
   created_at: string;
   response: string;
   done: boolean;
-}
-
-export interface OllamaApiGenerateResponseDone {
-  model: string;
-  created_at: string;
-  done: boolean;
-  context: number[];
-  total_duration: number;
-  load_duration: number;
-  sample_count: number;
-  sample_duration: number;
-  prompt_eval_count: number;
-  prompt_eval_duration: number;
-  eval_count: number;
-  eval_duration: number;
+  context?: number[];
+  total_duration?: number;
+  load_duration?: number;
+  prompt_eval_count?: number;
+  prompt_eval_duration?: number;
+  eval_count?: number;
+  eval_duration?: number;
 }
 
 export interface OllamaApiEmbeddingsResponse {
   embedding: number[];
-}
-
-export interface OllamaApiGenerateResponse {
-  metadata: OllamaApiGenerateResponseMetadata;
-  answer: string;
-  error: boolean;
 }
 
 export interface OllamaApiGenerateResponseMetadata {

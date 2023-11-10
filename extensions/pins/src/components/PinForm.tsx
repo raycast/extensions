@@ -95,7 +95,7 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                   values.nameField,
                   values.urlField,
                   values.iconField,
-                  values.groupField,
+                  values.groupField || "None",
                   values.openWithField,
                   values.dateField,
                   values.execInBackgroundField,
