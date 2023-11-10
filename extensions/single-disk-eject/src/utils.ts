@@ -88,7 +88,7 @@ export async function ejectVolume(volume: Volume): Promise<void> {
       throw new Error("Unsupported environment");
   }
 
-  // NOTE: This potentially could through an error, however the calling function
+  // NOTE: This could potentially let an error go through, however the calling function
   // should handle it, and show toasts appropriately
   await exec(exePath, options);
 }
