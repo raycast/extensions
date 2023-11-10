@@ -55,6 +55,13 @@
       "subtitle": "Tailscale",
       "description": "Open the Tailscale Admin Console",
       "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Tailscale Status",
+      "description": "Show the tailscale status.",
+      "mode": "no-view",
+      "interval": "30s"
     }
   ],
   "preferences": [
