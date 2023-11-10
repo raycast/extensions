@@ -10,7 +10,8 @@
     {
       "name": "index",
       "title": "Run Applet",
-      "description": "Run applet on zipper",
+      "subtitle": "Zipper",
+      "description": "Run applet on Zipper",
       "mode": "view",
       "arguments": [
         {
