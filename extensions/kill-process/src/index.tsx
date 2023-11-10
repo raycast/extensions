@@ -1,4 +1,14 @@
-import { Action, ActionPanel, clearSearchBar, closeMainWindow, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  clearSearchBar,
+  closeMainWindow,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { exec } from "child_process";
 import { useState, useEffect } from "react";
 import prettyBytes from "pretty-bytes";
@@ -88,7 +98,7 @@ export default function ProcessList() {
       closeMainWindow();
     }
     if (clearSearchBarAfterKill) {
-      clearSearchBar({ forceScrollToTop: true })
+      clearSearchBar({ forceScrollToTop: true });
     }
     showToast({
       title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
