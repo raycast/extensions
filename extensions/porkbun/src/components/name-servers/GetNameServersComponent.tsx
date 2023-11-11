@@ -53,7 +53,9 @@ ${!ns ? "" : ns.join(`\n\n`)}`}
             icon={Icon.Pencil}
             target={<UpdateNameServersComponent domain={domain} initialNS={ns} onNameServersUpdated={getFromApi} />}
           />
-          <Action.OpenInBrowser title="Go to API Reference" url={`${API_DOCS_URL}Domain%20Get%20Name%20Servers`} />
+          <ActionPanel.Section>
+            <Action.OpenInBrowser title="Go to API Reference" url={`${API_DOCS_URL}Domain%20Get%20Name%20Servers`} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

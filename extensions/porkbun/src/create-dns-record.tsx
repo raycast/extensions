@@ -1,11 +1,11 @@
-import { ActionPanel, Action, Icon, Form, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, Form, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
+import { DNSRecordType, Domain } from "./utils/types";
 import { createRecord, retrieveAllDomains } from "./utils/api";
-import { API_DOCS_URL, DNS_RECORD_TYPES } from "./utils/constants";
+import { API_DOCS_URL, DNS_RECORD_TYPES, MINIMUM_TTL } from "./utils/constants";
 import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 
-export default function CreateDNSRecord() {
+export default function CreateDNSRecord(props: LaunchProps<{ launchContext: { domain: string } }>) {
   interface FormValues {
     domain: string;
     name: string;
@@ -20,7 +20,7 @@ export default function CreateDNSRecord() {
   const [domains, setDomains] = useCachedState<Domain[]>("domains");
   async function getDomainsFromApi() {
     setIsLoading(true);
-    const response = (await retrieveAllDomains()) as RetrieveAllDomainsResponse;
+    const response = await retrieveAllDomains();
     if (response.status === "SUCCESS") {
       setDomains(response.domains);
       showToast({
@@ -64,7 +64,7 @@ export default function CreateDNSRecord() {
       ttl: (value) => {
         if (value) {
           if (Number(value)) {
-            if (Number(value) < 600) return "Minimum TTL is 600";
+            if (Number(value) < MINIMUM_TTL) return `Minimum TTL is ${MINIMUM_TTL}`;
           } else {
             return "TTL must be a number";
           }
@@ -74,15 +74,15 @@ export default function CreateDNSRecord() {
       },
       prio: (value) => {
         if (value && DNS_RECORD_TYPES.some((record) => record.type === itemProps.type.value && record.hasPriority)) {
-          if (!Number(value)) {
+          if (!Number(value) && value !== "0") {
             return "The item must be a number";
           }
         }
       },
     },
     initialValues: {
-      domain: "",
-      ttl: "600",
+      domain: props.launchContext?.domain,
+      ttl: MINIMUM_TTL.toString(),
     },
   });
 

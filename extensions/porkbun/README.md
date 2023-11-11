@@ -1,6 +1,6 @@
 # <img src="./assets/porkbun.png" width="20" height="20" /> Porkbun Raycast Extension
 
-This is a Raycast extension for [Porkbun](https://porkbun.com/). With this extension, you can fetch latest domain pricing and create, list, edit or delete DNS records for API-enabled domains in your account.
+This is a Raycast extension for [Porkbun](https://porkbun.com/). With this extension, you can fetch latest domain pricing and create, list, edit or delete DNS records, URL Forwarding and Name Servers for API-enabled domains in your account.
 
 ## 🚀 Getting Started
 

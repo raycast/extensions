@@ -13,6 +13,8 @@ export const DNS_RECORD_TYPES = [
   { type: "CAA", description: "Certification Authority Authorization", hasPriority: false },
 ];
 
+export const MINIMUM_TTL = 600;
+
 export const DEFAULT_NAMESERVERS = [
   "curitiba.ns.porkbun.com",
   "fortaleza.ns.porkbun.com",

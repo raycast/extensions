@@ -109,17 +109,63 @@ export default function RetrieveAllDomains() {
                     icon={Icon.Forward}
                     target={<GetURLForwardingComponent domain={item.domain} />}
                   />
-                  <Action
-                    title="Retrieve SSL Bundle"
-                    icon={Icon.Lock}
-                    onAction={async () =>
-                      await launchCommand({
-                        name: "retrieve-ssl-bundle",
-                        type: LaunchType.UserInitiated,
-                        arguments: { domain: item.domain },
-                      })
-                    }
-                  />
+                  <ActionPanel.Submenu title="Go To" icon={Icon.ArrowRight}>
+                    <Action
+                      title="Retrieve DNS Records"
+                      icon={Icon.Text}
+                      onAction={() =>
+                        launchCommand({
+                          name: "retrieve-dns-records",
+                          type: LaunchType.UserInitiated,
+                          context: { domain: item.domain },
+                        })
+                      }
+                    />
+                    <Action
+                      title="Delete DNS Record"
+                      icon={Icon.DeleteDocument}
+                      onAction={() =>
+                        launchCommand({
+                          name: "delete-dns-record",
+                          type: LaunchType.UserInitiated,
+                          context: { domain: item.domain },
+                        })
+                      }
+                    />
+                    <Action
+                      title="Create DNS Record"
+                      icon={Icon.Plus}
+                      onAction={() =>
+                        launchCommand({
+                          name: "create-dns-record",
+                          type: LaunchType.UserInitiated,
+                          context: { domain: item.domain },
+                        })
+                      }
+                    />
+                    <Action
+                      title="Edit DNS Record"
+                      icon={Icon.Pencil}
+                      onAction={() =>
+                        launchCommand({
+                          name: "edit-dns-record",
+                          type: LaunchType.UserInitiated,
+                          context: { domain: item.domain },
+                        })
+                      }
+                    />
+                    <Action
+                      title="Retrieve SSL Bundle"
+                      icon={Icon.Lock}
+                      onAction={async () =>
+                        await launchCommand({
+                          name: "retrieve-ssl-bundle",
+                          type: LaunchType.UserInitiated,
+                          arguments: { domain: item.domain },
+                        })
+                      }
+                    />
+                  </ActionPanel.Submenu>
                   <Action icon={Icon.Redo} title="Reload Domains" onAction={callApi} />
                   <ActionPanel.Section>
                     <Action.OpenInBrowser

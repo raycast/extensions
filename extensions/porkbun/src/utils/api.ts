@@ -120,5 +120,5 @@ export async function deleteUrlForwardByDomainAndId(domain: string, id: string) 
 }
 export async function addUrlForwarding(domain: string, { ...params }: AddUrlForwardingRequest) {
   const body = { ...params };
-  return await callApi(`domain/addUrlForward/${domain}`, "Adding URL Forward", body);
+  return await callApi(`domain/addUrlForward/${domain}`, "Adding URL Forwarding", body);
 }

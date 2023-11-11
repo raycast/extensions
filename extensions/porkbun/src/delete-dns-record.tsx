@@ -1,11 +1,11 @@
-import { ActionPanel, Action, Icon, Form, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, Form, showToast, Toast, LaunchProps } from "@raycast/api";
 import { Fragment, useEffect, useState } from "react";
-import { DNSRecordType, Domain, RetrieveAllDomainsResponse } from "./utils/types";
+import { DNSRecordType, Domain } from "./utils/types";
 import { deleteRecordByDomainAndId, deleteRecordByDomainSubdomainAndType, retrieveAllDomains } from "./utils/api";
 import { API_DOCS_URL, DNS_RECORD_TYPES } from "./utils/constants";
 import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 
-export default function DeleteDNSRecord() {
+export default function DeleteDNSRecord(props: LaunchProps<{ launchContext: { domain: string } }>) {
   type DeleteRecordFormValues = {
     domain: string;
     id: string;
@@ -19,7 +19,7 @@ export default function DeleteDNSRecord() {
   const [domains, setDomains] = useCachedState<Domain[]>("domains");
   async function getDomainsFromApi() {
     setIsLoading(true);
-    const response = (await retrieveAllDomains()) as RetrieveAllDomainsResponse;
+    const response = await retrieveAllDomains();
     if (response.status === "SUCCESS") {
       setDomains(response.domains);
       showToast({
@@ -82,6 +82,9 @@ export default function DeleteDNSRecord() {
           }
         }
       },
+    },
+    initialValues: {
+      domain: props.launchContext?.domain,
     },
   });
 

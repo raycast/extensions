@@ -3,6 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import fetch from "node-fetch";
 import { Fragment, useEffect, useState } from "react";
 import { DomainPricing, Response } from "./utils/types";
+import { API_DOCS_URL } from "./utils/constants";
 
 export default function DomainPricing() {
   const [isLoading, setIsLoading] = useState(false);
@@ -97,11 +98,7 @@ export default function DomainPricing() {
       actions={
         <ActionPanel>
           <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />
-          <Action.OpenInBrowser
-            icon={Icon.Globe}
-            title="Go to API Reference"
-            url="https://porkbun.com/api/json/v3/documentation#Domain%20Pricing"
-          />
+          <Action.OpenInBrowser icon={Icon.Globe} title="Go to API Reference" url={`${API_DOCS_URL}Domain%20Pricing`} />
         </ActionPanel>
       }
       searchBarAccessory={
@@ -125,12 +122,14 @@ export default function DomainPricing() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://porkbun.com/tld/${domain}`} />
-                <Action icon={Icon.Redo} title="Reload Domains" onAction={callApi} />
-                <Action.OpenInBrowser
-                  icon={Icon.Globe}
-                  title="Go to API Reference"
-                  url="https://porkbun.com/api/json/v3/documentation#Domain%20Pricing"
-                />
+                <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser
+                    icon={Icon.Globe}
+                    title="Go to API Reference"
+                    url={`${API_DOCS_URL}Domain%20Pricing`}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
             key={domain}

@@ -10,6 +10,7 @@ import {
   LaunchType,
   confirmAlert,
   Alert,
+  LaunchProps,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
@@ -18,11 +19,11 @@ import {
   retrieveRecordsByDomainOrId,
   retrieveRecordsByDomainSubdomainAndType,
 } from "./utils/api";
-import { DNS_RECORD_TYPES } from "./utils/constants";
+import { API_DOCS_URL, DNS_RECORD_TYPES } from "./utils/constants";
 import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
 import { DNSRecordType, Domain, RetrieveAllDomainsResponse, RetrieveDNSRecordsResponse } from "./utils/types";
 
-export default function RetrieveDNSRecord() {
+export default function RetrieveDNSRecord(props: LaunchProps<{ launchContext: { domain: string } }>) {
   type FormValues = {
     retrieve: string;
     domain: string;
@@ -97,6 +98,9 @@ export default function RetrieveDNSRecord() {
         }
       },
     },
+    initialValues: {
+      domain: props.launchContext?.domain,
+    },
   });
 
   const description =
@@ -157,7 +161,7 @@ export default function RetrieveDNSRecord() {
           <Action.OpenInBrowser
             icon={Icon.Globe}
             title="Go to API Reference"
-            url="https://porkbun.com/api/json/v3/documentation#DNS%20Retrieve%20Records%20by%20Domain%20or%20ID"
+            url={`${API_DOCS_URL}DNS%20Retrieve%20Records%20by%20Domain%20or%20ID`}
           />
         </ActionPanel>
       }
@@ -246,7 +250,7 @@ export default function RetrieveDNSRecord() {
                       launchCommand({
                         name: "edit-dns-record",
                         type: LaunchType.UserInitiated,
-                        arguments: { domain: itemProps.domain.value, ...record },
+                        context: { domain: itemProps.domain.value, ...record },
                       })
                     }
                   />
