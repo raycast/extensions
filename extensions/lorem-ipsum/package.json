@@ -73,8 +73,8 @@
     },
     {
       "name": "ai-generate",
-      "title": "Generate with AI",
-      "subtitle": "Generate content on a topic",
+      "title": "Generate paragraphs with AI",
+      "subtitle": "Generate content on any topic",
       "description": "Use AI to generate some placeholder text",
       "mode": "no-view",
       "arguments": [
@@ -82,7 +82,7 @@
           "name": "topic",
           "type": "text",
           "required": false,
-          "placeholder": "topic"
+          "placeholder": "any topic"
         }
       ]
     }
