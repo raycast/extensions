@@ -78,7 +78,7 @@ export const safeLoremIpsumNumberArg = async (arg: string | undefined) => {
 };
 
 export const produceOutput = async (content: string) => {
-  const { preference = "clipboard" } = getPreferenceValues();
+  const { action: preference = "clipboard" } = getPreferenceValues();
 
   switch (preference) {
     case "clipboard":

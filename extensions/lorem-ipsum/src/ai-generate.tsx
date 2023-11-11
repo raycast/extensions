@@ -1,4 +1,4 @@
-import { AI, showHUD } from "@raycast/api";
+import { AI, showHUD, showToast, Toast } from "@raycast/api";
 import { produceOutput } from "./utils";
 
 export default async function AICommand(props?: {
@@ -7,15 +7,19 @@ export default async function AICommand(props?: {
   };
 }) {
   const topic = props?.arguments.topic;
+  const isRandom = topic !== undefined;
 
-  const onSpecificTopic = topic !== undefined;
+  const action = isRandom
+    ? `Generate two paragraphs of text on some random topic that you choose.`
+    : `Generate two paragraphs on the following topic: "${topic}"`;
+  const rules = `Make sure all sentences are complete. Add a blank between each paragraph.`;
+  const prompt = `${action}\n${rules}`;
 
-  const prompt = onSpecificTopic
-    ? `Generate two paragraphs on the following topic: "${topic}"`
-    : `Generate two paragraphs of text on some random topic that you choose.`;
-  const notification = onSpecificTopic ? `Generating content on ${topic}...` : `Generating some random content...`;
+  const notification = isRandom ? `Generating some random content...` : `Generating content on ${topic}...`;
 
-  showHUD(notification);
+  await showToast({
+    title: notification,
+  });
 
   const response = await AI.ask(prompt);
 
