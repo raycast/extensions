@@ -7,7 +7,7 @@ export default async function AICommand(props?: {
   };
 }) {
   const topic = props?.arguments.topic;
-  const isRandom = topic !== undefined;
+  const isRandom = topic === "";
 
   const action = isRandom
     ? `Generate two paragraphs of text on some random topic that you choose.`
@@ -15,7 +15,12 @@ export default async function AICommand(props?: {
   const rules = `Make sure all sentences are complete. Add a blank between each paragraph.`;
   const prompt = `${action}\n${rules}`;
 
-  const notification = isRandom ? `Generating some random content...` : `Generating content on ${topic}...`;
+  console.log({
+    topic,
+    isRandom,
+  });
+
+  const notification = isRandom ? `Generating some random content...` : `Generating content on "${topic}"...`;
 
   await showToast({
     title: notification,
