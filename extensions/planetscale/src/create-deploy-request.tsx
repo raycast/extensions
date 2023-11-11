@@ -1,6 +1,6 @@
 import { useBranches, useDatabases, useOrganizations } from "./utils/hooks";
-import { FormValidation, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { FormValidation, getAvatarIcon, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Color, Form, popToRoot, showToast, Toast } from "@raycast/api";
 import { pscale } from "./utils/api";
 import { useEffect } from "react";
 import { enrichToastWithURL } from "./utils/raycast";
@@ -100,16 +100,29 @@ export default function CreateDeployRequest({
       }
     >
       {!organization && (
-        <Form.Dropdown title="Organization" {...itemProps.organization}>
+        <Form.Dropdown storeValue title="Organization" {...itemProps.organization}>
           {organizations?.map((organization) => (
-            <Form.Dropdown.Item key={organization.name} title={organization.name} value={organization.name} />
+            <Form.Dropdown.Item
+              key={organization.name}
+              icon={getAvatarIcon(organization.name)}
+              title={organization.name}
+              value={organization.name}
+            />
           ))}
         </Form.Dropdown>
       )}
       {!database && (
-        <Form.Dropdown title="Database" {...itemProps.database}>
+        <Form.Dropdown storeValue title="Database" {...itemProps.database}>
           {databases?.map((database) => (
-            <Form.Dropdown.Item key={database.name} title={database.name} value={database.name} />
+            <Form.Dropdown.Item
+              key={database.name}
+              icon={{
+                source: "database-1234.svg",
+                tintColor: Color.PrimaryText,
+              }}
+              title={database.name}
+              value={database.name}
+            />
           ))}
         </Form.Dropdown>
       )}

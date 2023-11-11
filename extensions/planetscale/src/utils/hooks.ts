@@ -1,5 +1,6 @@
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { pscale } from "./api";
+import { useEffect } from "react";
 
 export function useOrganizations() {
   const { data: organizations, isLoading: organizationsLoading } = useCachedPromise(
@@ -59,4 +60,53 @@ export function useBranches(args: { organization?: string; database?: string }) 
   return { branches, branchesLoading };
 }
 
-export function useSelectedOrganization() {}
+export function useDeployRequests(args: { organization?: string; database?: string }) {
+  const { data: deployRequests, isLoading: deployRequestsLoading } = useCachedPromise(
+    async (key, { organization, database }) => {
+      if (!organization || !database) {
+        return [];
+      }
+      const response = await pscale.listDeployRequests({
+        page: 1,
+        per_page: 100,
+        organization,
+        database,
+      });
+      return response.data.data;
+    },
+    ["deploy-requests", args],
+    {
+      initialData: [],
+    },
+  );
+  return { deployRequests, deployRequestsLoading };
+}
+
+export function useSelectedOrganization() {
+  const [organization, setOrganization] = useCachedState<string>("organization");
+  const { organizations, organizationsLoading } = useOrganizations();
+
+  useEffect(() => {
+    const defaultOrganization = organizations?.[0]?.name;
+    if (!organizationsLoading && !organization && defaultOrganization) {
+      setOrganization(defaultOrganization);
+    }
+  }, [organizationsLoading, organization, organizations]);
+
+  return [organization, setOrganization] as const;
+}
+
+export function useSelectedDatabase() {
+  const [organization] = useSelectedOrganization();
+  const [database, setDatabase] = useCachedState<string>("database");
+  const { databases, databasesLoading } = useDatabases({ organization });
+
+  useEffect(() => {
+    const defaultDatabase = databases?.[0]?.name;
+    if (!databasesLoading && !database && defaultDatabase) {
+      setDatabase(defaultDatabase);
+    }
+  }, [databasesLoading, database, databases]);
+
+  return [database, setDatabase] as const;
+}

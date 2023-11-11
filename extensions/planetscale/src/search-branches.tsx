@@ -1,38 +1,19 @@
-import { Action, ActionPanel, Color, Keyboard, List } from "@raycast/api";
-import { getAvatarIcon, useCachedState } from "@raycast/utils";
-import { useEffect } from "react";
+import { Action, ActionPanel, Color, Image, Keyboard, List } from "@raycast/api";
+import { getAvatarIcon } from "@raycast/utils";
 import { format } from "date-fns";
-import { useBranches, useDatabases, useOrganizations } from "./utils/hooks";
+import { useBranches, useSelectedDatabase, useSelectedOrganization } from "./utils/hooks";
 import CreateDeployRequest from "./create-deploy-request";
 import { DatabaseDropdown } from "./utils/components";
 
 export default function SearchBranches() {
-  const [organization, setOrganization] = useCachedState<string>("organization");
-  const [database, setDatabase] = useCachedState<string>("database");
-  const { organizations, organizationsLoading } = useOrganizations();
-  const { databases, databasesLoading } = useDatabases({ organization });
+  const [organization, setOrganization] = useSelectedOrganization();
+  const [database, setDatabase] = useSelectedDatabase();
   const { branches, branchesLoading } = useBranches({ organization, database });
-
-  const isLoading = branchesLoading || organizationsLoading || databasesLoading;
-
-  useEffect(() => {
-    const defaultOrganization = organizations?.[0]?.name;
-    if (!isLoading && !organization && defaultOrganization) {
-      setOrganization(defaultOrganization);
-    }
-  }, [isLoading, organization, organizations]);
-
-  useEffect(() => {
-    const defaultDatabase = databases?.[0]?.name;
-    if (!isLoading && !database && defaultDatabase) {
-      setDatabase(defaultDatabase);
-    }
-  }, [isLoading, database, databases]);
 
   return (
     <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search Branches"
+      isLoading={branchesLoading}
+      searchBarPlaceholder="Search branches"
       throttle
       searchBarAccessory={
         <DatabaseDropdown
@@ -75,7 +56,6 @@ export default function SearchBranches() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.OpenInBrowser title="Open in Browser" url={branch.html_url} />
-                {/*<Action.Push title="New Branch" target={} shortcut={Shortcut.Common.New} />*/}
                 {database && organization && branch && !branch.production ? (
                   <Action.Push
                     icon={{

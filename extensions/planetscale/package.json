@@ -25,6 +25,13 @@
       "subtitle": "PlanetScale",
       "description": "Create a deploy request in PlanetScale",
       "mode": "view"
+    },
+    {
+      "name": "search-deploy-requests",
+      "title": "Search Deploy Requests",
+      "subtitle": "PlanetScale",
+      "description": "Search PlanetScale deploy requests",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -41,10 +48,12 @@
     "@raycast/api": "^1.60.1",
     "@raycast/utils": "^1.4.8",
     "api": "^6.1.1",
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.30.0",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.200",
     "@types/node": "18.18.4",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
