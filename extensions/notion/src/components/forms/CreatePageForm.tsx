@@ -2,16 +2,10 @@ import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, T
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 
-import {
-  useDatabaseProperties,
-  useDatabases,
-  useRecentPages,
-  useRelations,
-  useUsers,
-} from "../../hooks";
+import { useDatabaseProperties, useDatabases, useRecentPages, useRelations, useUsers } from "../../hooks";
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
-import { CustomizeProperties } from "../CustomizeProperties";
+import { CustomizeProperties, useCreateDatabasePagePreferences } from "../CustomizeProperties";
 
 import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
 
@@ -68,12 +62,12 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
             },
             secondaryAction: page.url
               ? {
-                title: "Copy URL",
-                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-                onAction: () => {
-                  Clipboard.copy(page.url as string);
-                },
-              }
+                  title: "Copy URL",
+                  shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                  onAction: () => {
+                    Clipboard.copy(page.url as string);
+                  },
+                }
               : undefined,
           });
 
@@ -117,6 +111,9 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
 
   const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
 
+  const { data, isLoading, visibleProperties, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown } =
+    useCreateDatabasePagePreferences(databaseId ?? "", databaseProperties);
+
   return (
     <Form
       isLoading={isLoadingDatabases || isLoadingRelationPages}
@@ -130,16 +127,15 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
               quicklink={getQuicklink()}
               icon={Icon.Link}
             />
-            {databaseId &&
+            {databaseId && (
               <Action.Push
                 title="Customize Properties"
                 icon={Icon.BulletPoints}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
                 target={<CustomizeProperties databaseId={databaseId} databaseProperties={databaseProperties} />}
               />
-            }
+            )}
           </ActionPanel.Section>
-         
         </ActionPanel>
       }
     >
@@ -163,10 +159,10 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
                     d.icon_emoji
                       ? d.icon_emoji
                       : d.icon_file
-                        ? d.icon_file
-                        : d.icon_external
-                          ? d.icon_external
-                          : Icon.List
+                      ? d.icon_file
+                      : d.icon_external
+                      ? d.icon_external
+                      : Icon.List
                   }
                 />
               );
@@ -176,7 +172,12 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
         </>
       )}
 
-      {databaseProperties.map(convertToField)}
+      {databaseProperties
+        // only show visible properties
+        .filter((property) => visibleProperties.includes(property.id))
+        // sort the visible props by their order
+        .sort((a, b) => visibleProperties.indexOf(a.id) - visibleProperties.indexOf(b.id))
+        .map(convertToField)}
       <Form.Separator />
       <Form.TextArea
         id="content"

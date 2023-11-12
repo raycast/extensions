@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { DatabaseProperty } from "../utils/notion";
@@ -10,7 +10,7 @@ stored data format:
 {
   "databaseId": {
     "visible": ["propertyId1", "propertyId2"]
-    // hidden properties are everything else
+    "hidden": ["propertyId1", "propertyId2"]
     showEndDate: ["propertyId1", "propertyId2"] // for date property only
   }
 }
@@ -18,6 +18,7 @@ stored data format:
 
 export type PropertyPreferences = {
   visible: string[];
+  hidden: string[];
   showEndDate: string[]; // for date property only
 };
 
@@ -28,18 +29,16 @@ export type DatabasePreferences = {
 // export function CustomizeProperty(props: { databaseId: string, databaseProperties: DatabaseProperty[], togglePropertyVisibility: (propertyId: string) => void, toggleShowEndDate: (propertyId: string) => void, moveUp: (propertyId: string) => void, moveDown: (propertyId: string) => void }) {
 // }
 
-export function CustomizeProperties(props: { databaseId: string; databaseProperties: DatabaseProperty[] }) {
-  const properties = props.databaseProperties;
-  const databaseId = props.databaseId;
-
+export function useCreateDatabasePagePreferences(databaseId: string, properties: DatabaseProperty[]) {
   let { data, isLoading, mutate } = useCachedPromise(async () => {
+    // await LocalStorage.removeItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES");
     const data = await LocalStorage.getItem<string>("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES");
 
     const allDatabasePrefs = JSON.parse(data ?? "{}") as DatabasePreferences;
 
     return allDatabasePrefs;
   });
-  console.log(data);
+
   if (!data) {
     data = {};
   }
@@ -47,104 +46,167 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
     data = {
       [databaseId]: {
         visible: properties.map((property) => property.id),
+        hidden: [],
         showEndDate: [],
       },
     };
   }
 
   const visibleProperties = data[databaseId]?.visible;
-  console.log("a", visibleProperties);
 
   function togglePropertyVisibility(propertyId: string) {
-    const newPrefs = { ...data };
-
-    // if doesn't have the key databaseId, add it
-    if (!newPrefs[databaseId]) {
-      newPrefs[databaseId] = { visible: [], showEndDate: [] };
+    if (!data) {
+      data = {};
+    }
+    if (!data[databaseId]) {
+      data = {
+        [databaseId]: {
+          visible: properties.map((property) => property.id),
+          hidden: [],
+          showEndDate: [],
+        },
+      };
     }
 
-    if (newPrefs[databaseId].visible.includes(propertyId)) {
-      newPrefs[databaseId].visible = newPrefs[databaseId].visible.filter((id) => id !== propertyId);
+    if (data[databaseId].visible.includes(propertyId)) {
+      data[databaseId].visible = data[databaseId].visible.filter((id) => id !== propertyId);
+    } else if (data[databaseId].hidden.includes(propertyId)) {
+      data[databaseId].hidden = data[databaseId].hidden.filter((id) => id !== propertyId);
     } else {
-      newPrefs[databaseId].visible.push(propertyId);
+      data[databaseId].visible.push(propertyId);
     }
 
-    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(newPrefs));
+    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
     mutate();
   }
 
   function toggleShowEndDate(propertyId: string) {
-    const newPrefs = { ...data };
-
-    if (newPrefs[databaseId].showEndDate.includes(propertyId)) {
-      newPrefs[databaseId].showEndDate = newPrefs[databaseId].showEndDate.filter((id) => id != propertyId);
-    } else {
-      newPrefs[databaseId].showEndDate.push(propertyId);
+    if (!data) {
+      data = {};
+    }
+    if (!data[databaseId]) {
+      data = {
+        [databaseId]: {
+          visible: properties.map((property) => property.id),
+          hidden: [],
+          showEndDate: [],
+        },
+      };
     }
 
-    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(newPrefs));
+    if (data[databaseId].showEndDate.includes(propertyId)) {
+      data[databaseId].showEndDate = data[databaseId].showEndDate.filter((id) => id != propertyId);
+    } else {
+      data[databaseId].showEndDate.push(propertyId);
+    }
+
+    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
     mutate();
   }
 
   function moveUp(propertyId: string) {
-    const newPrefs = { ...data };
-
-    const index = newPrefs[databaseId].visible.indexOf(propertyId);
-    if (index > 0) {
-      const temp = newPrefs[databaseId].visible[index - 1];
-      newPrefs[databaseId].visible[index - 1] = propertyId;
-      newPrefs[databaseId].visible[index] = temp;
+    if (!data) {
+      data = {};
+    }
+    if (!data[databaseId]) {
+      data = {
+        [databaseId]: {
+          visible: properties.map((property) => property.id),
+          hidden: [],
+          showEndDate: [],
+        },
+      };
     }
 
-    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(newPrefs));
+    const index = data[databaseId].visible.indexOf(propertyId);
+    if (index > 0) {
+      const temp = data[databaseId].visible[index - 1];
+      data[databaseId].visible[index - 1] = propertyId;
+      data[databaseId].visible[index] = temp;
+    }
+
+    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
     mutate();
   }
 
   function moveDown(propertyId: string) {
-    const newPrefs = { ...data };
-
-    const index = newPrefs[databaseId].visible.indexOf(propertyId);
-    if (index < newPrefs[databaseId].visible.length - 1) {
-      const temp = newPrefs[databaseId].visible[index + 1];
-      newPrefs[databaseId].visible[index + 1] = propertyId;
-      newPrefs[databaseId].visible[index] = temp;
+    if (!data) {
+      data = {};
+    }
+    if (!data[databaseId]) {
+      data = {
+        [databaseId]: {
+          visible: properties.map((property) => property.id),
+          hidden: [],
+          showEndDate: [],
+        },
+      };
     }
 
-    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(newPrefs));
+    const index = data[databaseId].visible.indexOf(propertyId);
+    if (index < data[databaseId].visible.length - 1) {
+      const temp = data[databaseId].visible[index + 1];
+      data[databaseId].visible[index + 1] = propertyId;
+      data[databaseId].visible[index] = temp;
+    }
+
+    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
     mutate();
   }
 
+  return {
+    data,
+    isLoading,
+    visibleProperties,
+    togglePropertyVisibility,
+    toggleShowEndDate,
+    moveUp,
+    moveDown,
+  };
+}
+
+export function CustomizeProperties(props: { databaseId: string; databaseProperties: DatabaseProperty[] }) {
+  const properties = props.databaseProperties;
+  const databaseId = props.databaseId;
+
+  const { data, isLoading, visibleProperties, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown } =
+    useCreateDatabasePagePreferences(databaseId, properties);
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter properties by name...">
-      <List.Section title="Visible properties">
-        {properties
-          .filter((property) => visibleProperties.includes(property.id))
-          .map((property) => {
-            return (
-              <List.Item
-                key={property.id}
-                title={property.name}
-                accessories={[{ text: property.type }]}
-                actions={
-                  <ActionPanel>
-                    <Action title="Hide" onAction={() => togglePropertyVisibility(property.id)} />
-                    <Action
-                      title="Move Up"
-                      onAction={() => moveUp(property.id)}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-                    />
-                    <Action
-                      title="Move Down"
-                      onAction={() => moveDown(property.id)}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
+      <List.Section title="Visible Properties">
+        {visibleProperties.map((propertyId) => {
+          const property = properties.find((p) => p.id == propertyId);
+          if (!property) return null;
+          return (
+            <List.Item
+              key={property.id}
+              title={property.name}
+              accessories={[{ tag: property.type }]}
+              actions={
+                <ActionPanel>
+                  <Action title="Hide" icon={Icon.EyeDisabled} onAction={() => togglePropertyVisibility(property.id)} />
+                  <Action
+                    title="Move Up"
+                    icon={Icon.ArrowUp}
+                    onAction={() => {
+                      moveUp(property.id);
+                    }}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                  />
+                  <Action
+                    title="Move Down"
+                    icon={Icon.ArrowDown}
+                    onAction={() => moveDown(property.id)}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
-      <List.Section title="Hidden properties">
+      <List.Section title="Hidden Properties">
         {properties
           .filter((property) => !visibleProperties.includes(property.id))
           .map((property) => {
@@ -155,7 +217,7 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
                 accessories={[{ text: property.type }]}
                 actions={
                   <ActionPanel>
-                    <Action title="Show" onAction={() => togglePropertyVisibility(property.id)} />
+                    <Action title="Show" icon={Icon.Eye} onAction={() => togglePropertyVisibility(property.id)} />
                   </ActionPanel>
                 }
               />
