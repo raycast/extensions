@@ -93,6 +93,11 @@ export default [
         path: `${documentationInstallation}/astro`,
       },
       {
+        doc: "laravel",
+        name: "Laravel",
+        path: `${documentationInstallation}/laravel`,
+      },
+      {
         doc: "manual",
         name: "Manual",
         path: `${documentationInstallation}/manual`,
@@ -111,6 +116,11 @@ export default [
         doc: "vite",
         name: "Vite",
         path: `${documentationBase}/dark-mode/vite`,
+      },
+      {
+        doc: "astro",
+        name: "Astro",
+        path: `${documentationBase}/dark-mode/astro`,
       },
     ],
   },
