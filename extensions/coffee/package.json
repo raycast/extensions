@@ -64,7 +64,6 @@
       "required": false,
       "default": true,
       "title": "Options",
-      "placeholder": "Prevent Display Sleep",
       "label": "Prevent Display Sleep"
     },
     {
@@ -73,18 +72,14 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Options",
-      "placeholder": "Prevent System Sleep",
       "label": "Prevent System Sleep"
     },
     {
       "name": "preventDisk",
-      "description": "Prevent the disc from sleeping",
+      "description": "Prevent the disk from sleeping",
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Options",
-      "placeholder": "Prevent Disk Sleep",
       "label": "Prevent Disk Sleep"
     }
   ],
