@@ -109,15 +109,13 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     };
   }
 
+  const { isLoading: isLoadingPropPrefs, data } = useCreateDatabasePagePreferences(databaseId, databaseProperties);
 
-  const { data, isLoading, visibleProperties, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown } =
-    useCreateDatabasePagePreferences(databaseId ?? "", databaseProperties);
+  const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
 
-    const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users,data );
-  
   return (
     <Form
-      isLoading={isLoadingDatabases || isLoadingRelationPages}
+      isLoading={isLoadingPropPrefs || isLoadingDatabases || isLoadingRelationPages}
       navigationTitle={initialDatabaseId ? "Create New Page" : "Create Database Page"}
       actions={
         <ActionPanel>
@@ -140,7 +138,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
         </ActionPanel>
       }
     >
-      {initialDatabaseId ? null : (
+      {initialDatabaseId || (
         <>
           <Form.Dropdown
             title="Database"
@@ -173,12 +171,15 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
         </>
       )}
 
-      {databaseProperties
-        // only show visible properties
-        .filter((property) => visibleProperties.includes(property.id))
-        // sort the visible props by their order
-        .sort((a, b) => visibleProperties.indexOf(a.id) - visibleProperties.indexOf(b.id))
-        .map(convertToField)}
+      {data &&
+        databaseId &&
+        databaseProperties
+          // only show visible properties
+          .filter((property) => data[databaseId].visible.includes(property.id))
+          // sort the visible props by their order
+          .sort((a, b) => data[databaseId].visible.indexOf(a.id) - data[databaseId].visible.indexOf(b.id))
+          .map(convertToField)}
+
       <Form.Separator />
       <Form.TextArea
         id="content"
