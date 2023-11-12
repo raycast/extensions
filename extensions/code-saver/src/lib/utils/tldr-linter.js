@@ -49,7 +49,7 @@ module.exports.ERRORS = parser.ERRORS = {
       examples: [],
     };
   };
-  parser.finish = function () { };
+  parser.finish = function () {};
   parser.yy.ERRORS = parser.ERRORS;
   parser.yy.error = function (location, error) {
     if (!parser.ERRORS[error]) {
