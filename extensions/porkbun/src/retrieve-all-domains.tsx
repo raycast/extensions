@@ -69,12 +69,21 @@ export default function RetrieveAllDomains() {
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
           <List.Dropdown.Item title="All" icon={Icon.CircleProgress100} value="" />
           <List.Dropdown.Section title="Status">
-            <List.Dropdown.Item title="Active" icon={{ source: Icon.Dot, tintColor: Color.Green }} value="status_active" />
+            <List.Dropdown.Item
+              title="Active"
+              icon={{ source: Icon.Dot, tintColor: Color.Green }}
+              value="status_active"
+            />
             <List.Dropdown.Item title="null" icon={{ source: Icon.Dot, tintColor: Color.Yellow }} value="status_null" />
           </List.Dropdown.Section>
           <List.Dropdown.Section title="TLD">
             {[...new Set(domains?.map((domain) => domain.tld))].map((tld) => (
-              <List.Dropdown.Item key={tld} icon={{ source: `${TLD_SVG_BASE_URL}${tld}.svg`, fallback: "porkbun.png" }} title={tld} value={`tld_${tld}`} />
+              <List.Dropdown.Item
+                key={tld}
+                icon={{ source: `${TLD_SVG_BASE_URL}${tld}.svg`, fallback: "porkbun.png" }}
+                title={tld}
+                value={`tld_${tld}`}
+              />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
