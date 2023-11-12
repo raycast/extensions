@@ -2,6 +2,8 @@ import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, T
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 
+// todo: find out where databaseView is used
+
 import {
   useDatabaseProperties,
   useDatabases,
@@ -71,12 +73,12 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
             },
             secondaryAction: page.url
               ? {
-                  title: "Copy URL",
-                  shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-                  onAction: () => {
-                    Clipboard.copy(page.url as string);
-                  },
-                }
+                title: "Copy URL",
+                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                onAction: () => {
+                  Clipboard.copy(page.url as string);
+                },
+              }
               : undefined,
           });
 
@@ -147,12 +149,14 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
               quicklink={getQuicklink()}
               icon={Icon.Link}
             />
-            <Action.Push
-              title="Customize Properties"
-              icon={Icon.BulletPoints}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
-              target={<CustomizeProperties />}
-            />
+            {databaseId &&
+              <Action.Push
+                title="Customize Properties"
+                icon={Icon.BulletPoints}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                target={<CustomizeProperties databaseId={databaseId} databaseProperties={databaseProperties} />}
+              />
+            }
           </ActionPanel.Section>
           {databaseView && setDatabaseView ? (
             <ActionPanel.Section title="View options">
@@ -199,10 +203,10 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
                     d.icon_emoji
                       ? d.icon_emoji
                       : d.icon_file
-                      ? d.icon_file
-                      : d.icon_external
-                      ? d.icon_external
-                      : Icon.List
+                        ? d.icon_file
+                        : d.icon_external
+                          ? d.icon_external
+                          : Icon.List
                   }
                 />
               );
