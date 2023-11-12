@@ -1,5 +1,5 @@
 import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
-import { exec } from "child_process";
+import { exec } from "node:child_process";
 
 function preventArguments(args?: string | undefined) {
   const preferences = getPreferenceValues<Preferences>();

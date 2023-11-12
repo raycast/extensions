@@ -6,7 +6,7 @@ import { stopCaffeinate, startCaffeinate } from "./utils";
 export default function Command(props: LaunchProps) {
   const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
-  const { isLoading, data, mutate } = useExec("ps aux | pgrep caffeinate", [], {
+  const { isLoading, data, mutate } = useExec("pgrep caffeinate", [], {
     shell: true,
     execute: hasLaunchContext ? false : true,
     parseOutput: (output) => output.stdout.length > 0,
