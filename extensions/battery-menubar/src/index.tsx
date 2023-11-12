@@ -11,13 +11,15 @@ export const execp = promisify(exec);
 
 type BatteryAndCPUState = BatteryState & { cpu: CPUStats };
 
+const cacheKey = "batteryAndCPUState-V2";
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [batt, setBattState] = useCachedState<{
     prev: BatteryAndCPUState | null;
     next: BatteryAndCPUState;
     latest: BatteryAndCPUState;
-  } | null>("batteryAndCPUState", null);
+  } | null>(cacheKey, null);
 
   const { isLoading: battIsLoading } = useCachedPromise(getBatteryState, [], {
     onData(data) {
@@ -164,7 +166,6 @@ export default function Command() {
               subtitle={"Battery cycles"}
               onAction={openBatterySettings}
             />
-
             <MenuBarExtra.Item
               icon={{
                 source: Icon.Bolt,

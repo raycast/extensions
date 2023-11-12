@@ -137,7 +137,6 @@ export default function Command() {
       ...safari.bookmarks,
       ...vivaldi.bookmarks,
     ]
-      .filter((item) => item.title)
       .map((item) => {
         let domain;
         try {

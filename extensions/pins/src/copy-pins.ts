@@ -7,22 +7,7 @@ import * as TOML from "@iarna/toml";
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 import { getPinsJSON } from "./lib/Pins";
-
-/**
- * Preferences for the Copy Pins Data command.
- */
-type CopyPinsPreferences = {
-  /**
-   * A directory to export pins to, if any. By default, pins are copied to the clipboard.
-   */
-
-  exportLocation: string;
-
-  /**
-   * The format to export pins in. Either "csv" or "json" (default).
-   */
-  exportFormat: string;
-};
+import { CopyPinsPreferences } from "./lib/preferences";
 
 /**
  * Raycast command for exporting Pins and Groups data to the clipboard or a file.
