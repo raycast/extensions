@@ -2,11 +2,13 @@ import { Form, Icon, Image } from "@raycast/api";
 import type { useForm } from "@raycast/utils";
 
 import { notionColorToTintColor, getPageIcon, Page, DatabaseProperty, User } from "../../utils/notion";
+import { DatabasePreferences } from "../CustomizeProperties";
 
 export function createConvertToFieldFunc(
   itemPropsFor: GetFieldPropsFunc,
   relationPages: Record<string, Page[]> | undefined,
   users: User[],
+  data: DatabasePreferences,
 ) {
   return (property: DatabaseProperty) => {
     let placeholder = property.type.replace(/_/g, " ");
@@ -70,13 +72,13 @@ export type GetFieldPropsFunc = <T extends DatabaseProperty["type"]>(property: D
 export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
   typeof useForm<{
     [k: string]: T extends "date"
-      ? Date | null
-      : T extends "checkbox"
-      ? boolean
-      : T extends "multi_select" | "relation" | "people"
-      ? string[]
-      : T extends "formula"
-      ? null
-      : string;
+    ? Date | null
+    : T extends "checkbox"
+    ? boolean
+    : T extends "multi_select" | "relation" | "people"
+    ? string[]
+    : T extends "formula"
+    ? null
+    : string;
   }>
 >["itemProps"][string];

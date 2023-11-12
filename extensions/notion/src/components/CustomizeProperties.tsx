@@ -52,9 +52,7 @@ export function useCreateDatabasePagePreferences(databaseId: string, properties:
     };
   }
 
-  const visibleProperties = data[databaseId]?.visible;
-
-  function togglePropertyVisibility(propertyId: string) {
+  function updatePreferences(updateFunction: (preferences: PropertyPreferences) => void) {
     if (!data) {
       data = {};
     }
@@ -68,100 +66,57 @@ export function useCreateDatabasePagePreferences(databaseId: string, properties:
       };
     }
 
-    if (data[databaseId].visible.includes(propertyId)) {
-      data[databaseId].visible = data[databaseId].visible.filter((id) => id !== propertyId);
-    } else if (data[databaseId].hidden.includes(propertyId)) {
-      data[databaseId].hidden = data[databaseId].hidden.filter((id) => id !== propertyId);
-    } else {
-      data[databaseId].visible.push(propertyId);
-    }
+    updateFunction(data[databaseId]);
 
     LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
     mutate();
   }
 
-  function toggleShowEndDate(propertyId: string) {
-    if (!data) {
-      data = {};
-    }
-    if (!data[databaseId]) {
-      data = {
-        [databaseId]: {
-          visible: properties.map((property) => property.id),
-          hidden: [],
-          showEndDate: [],
-        },
-      };
-    }
+  const togglePropertyVisibility = (propertyId: string) =>
+    updatePreferences((p) => {
+      if (p.visible.includes(propertyId)) {
+        p.visible = p.visible.filter((id) => id !== propertyId);
+      } else if (p.hidden.includes(propertyId)) {
+        p.hidden = p.hidden.filter((id) => id !== propertyId);
+      } else {
+        p.visible.push(propertyId);
+      }
+    });
 
-    if (data[databaseId].showEndDate.includes(propertyId)) {
-      data[databaseId].showEndDate = data[databaseId].showEndDate.filter((id) => id != propertyId);
-    } else {
-      data[databaseId].showEndDate.push(propertyId);
-    }
 
-    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
-    mutate();
-  }
+  const toggleShowEndDate = (propertyId: string) =>
+    updatePreferences((p) => {
+      if (p.showEndDate.includes(propertyId)) {
+        p.showEndDate = p.showEndDate.filter((id) => id != propertyId);
+      } else {
+        p.showEndDate.push(propertyId);
+      }
+    });
 
-  function moveUp(propertyId: string) {
-    if (!data) {
-      data = {};
-    }
-    if (!data[databaseId]) {
-      data = {
-        [databaseId]: {
-          visible: properties.map((property) => property.id),
-          hidden: [],
-          showEndDate: [],
-        },
-      };
-    }
 
-    const index = data[databaseId].visible.indexOf(propertyId);
-    if (index > 0) {
-      const temp = data[databaseId].visible[index - 1];
-      data[databaseId].visible[index - 1] = propertyId;
-      data[databaseId].visible[index] = temp;
-    }
+  const moveProperty = (propertyId: string, direction: "up" | "down") =>
+    updatePreferences((p) => {
+      const index = p.visible.indexOf(propertyId);
+      if (direction === "up" && index > 0) {
+        const temp = p.visible[index - 1];
+        p.visible[index - 1] = propertyId;
+        p.visible[index] = temp;
+      } else if (direction === "down" && index < p.visible.length - 1) {
+        const temp = p.visible[index + 1];
+        p.visible[index + 1] = propertyId;
+        p.visible[index] = temp;
+      }
+    });
 
-    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
-    mutate();
-  }
-
-  function moveDown(propertyId: string) {
-    if (!data) {
-      data = {};
-    }
-    if (!data[databaseId]) {
-      data = {
-        [databaseId]: {
-          visible: properties.map((property) => property.id),
-          hidden: [],
-          showEndDate: [],
-        },
-      };
-    }
-
-    const index = data[databaseId].visible.indexOf(propertyId);
-    if (index < data[databaseId].visible.length - 1) {
-      const temp = data[databaseId].visible[index + 1];
-      data[databaseId].visible[index + 1] = propertyId;
-      data[databaseId].visible[index] = temp;
-    }
-
-    LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
-    mutate();
-  }
 
   return {
     data,
     isLoading,
-    visibleProperties,
+    visibleProperties: data[databaseId]?.visible,
     togglePropertyVisibility,
     toggleShowEndDate,
-    moveUp,
-    moveDown,
+    moveUp: (propertyId: string) => moveProperty(propertyId, "up"),
+    moveDown: (propertyId: string) => moveProperty(propertyId, "down"),
   };
 }
 
@@ -186,12 +141,17 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
               actions={
                 <ActionPanel>
                   <Action title="Hide" icon={Icon.EyeDisabled} onAction={() => togglePropertyVisibility(property.id)} />
+                  {property.type === "date" && (
+                    <Action
+                      title={data?.[databaseId]?.showEndDate?.includes(property.id) ? "Hide End Date" : "Show End Date"}
+                      icon={Icon.Calendar}
+                      onAction={() => toggleShowEndDate(property.id)}
+                    />
+                  )}
                   <Action
                     title="Move Up"
                     icon={Icon.ArrowUp}
-                    onAction={() => {
-                      moveUp(property.id);
-                    }}
+                    onAction={() =>  moveUp(property.id)}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
                   />
                   <Action
@@ -214,7 +174,7 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
               <List.Item
                 key={property.id}
                 title={property.name}
-                accessories={[{ text: property.type }]}
+                accessories={[{ tag: property.type }]}
                 actions={
                   <ActionPanel>
                     <Action title="Show" icon={Icon.Eye} onAction={() => togglePropertyVisibility(property.id)} />

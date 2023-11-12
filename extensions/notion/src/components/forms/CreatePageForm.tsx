@@ -109,11 +109,12 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     };
   }
 
-  const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
 
   const { data, isLoading, visibleProperties, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown } =
     useCreateDatabasePagePreferences(databaseId ?? "", databaseProperties);
 
+    const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users,data );
+  
   return (
     <Form
       isLoading={isLoadingDatabases || isLoadingRelationPages}
