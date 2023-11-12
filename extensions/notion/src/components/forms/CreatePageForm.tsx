@@ -2,12 +2,9 @@ import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, T
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 
-// todo: find out where databaseView is used
-
 import {
   useDatabaseProperties,
   useDatabases,
-  useDatabasesView,
   useRecentPages,
   useRelations,
   useUsers,
@@ -15,7 +12,6 @@ import {
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
 import { CustomizeProperties } from "../CustomizeProperties";
-import { ActionSetVisibleProperties } from "../actions";
 
 import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
 
@@ -33,7 +29,6 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   const initialDatabaseId = defaults?.database;
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
-  const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
   const { data: databaseProperties } = useDatabaseProperties(databaseId);
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
@@ -93,20 +88,6 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     },
   });
 
-  function filterProperties(dp: DatabaseProperty) {
-    return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
-  }
-  function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
-    if (a.type == "title") return -1;
-    if (b.type == "title") return 1;
-    if (!databaseView?.create_properties) return 0;
-    const valueA = databaseView.create_properties.indexOf(a.id);
-    const valueB = databaseView.create_properties.indexOf(b.id);
-    if (valueA > valueB) return 1;
-    if (valueA < valueB) return -1;
-    return 0;
-  }
-
   function getQuicklink() {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
@@ -158,28 +139,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
               />
             }
           </ActionPanel.Section>
-          {databaseView && setDatabaseView ? (
-            <ActionPanel.Section title="View options">
-              <ActionSetVisibleProperties
-                databaseProperties={databaseProperties?.filter((dp) => dp.id !== "title") || []}
-                selectedPropertiesIds={databaseView?.create_properties || databaseProperties.map((x) => x.id)}
-                onSelect={(propertyId) => {
-                  setDatabaseView({
-                    ...databaseView,
-                    create_properties: databaseView.create_properties
-                      ? [...databaseView.create_properties, propertyId]
-                      : [propertyId],
-                  });
-                }}
-                onUnselect={(propertyId) => {
-                  setDatabaseView({
-                    ...databaseView,
-                    create_properties: databaseView.create_properties?.filter((pid) => pid !== propertyId),
-                  });
-                }}
-              />
-            </ActionPanel.Section>
-          ) : null}
+         
         </ActionPanel>
       }
     >
@@ -216,7 +176,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
         </>
       )}
 
-      {databaseProperties?.filter(filterProperties).sort(sortProperties).map(convertToField)}
+      {databaseProperties.map(convertToField)}
       <Form.Separator />
       <Form.TextArea
         id="content"
