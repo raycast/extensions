@@ -54,7 +54,14 @@
       "subtitle": "Coffee",
       "description": "Prevent your Mac from sleeping for a certain time",
       "mode": "view"
-    }
+    },
+    {
+        "name": "status",
+        "title": "Caffeinate Status",
+        "description": "Show the current caffeination status",
+        "mode": "no-view",
+        "interval": "1m"
+      }
   ],
   "preferences": [
     {

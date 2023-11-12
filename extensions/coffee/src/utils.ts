@@ -32,6 +32,7 @@ export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) 
   if (updateMenubar) {
     try {
       await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: false } });
+      await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: false } });
     } catch (error) {
       console.error(error);
     }
@@ -49,6 +50,7 @@ export async function startCaffeinate(updateMenubar = true, hudMessage?: string,
   if (updateMenubar) {
     try {
       await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: true } });
+      await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: true } });
     } catch (error) {
       console.error(error);
     }

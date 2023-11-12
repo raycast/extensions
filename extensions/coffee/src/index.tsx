@@ -1,6 +1,5 @@
-import { LaunchProps, MenuBarExtra, updateCommandMetadata } from "@raycast/api";
+import { LaunchProps, MenuBarExtra } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { useEffect } from "react";
 import { stopCaffeinate, startCaffeinate } from "./utils";
 
 export default function Command(props: LaunchProps) {
@@ -14,14 +13,6 @@ export default function Command(props: LaunchProps) {
 
   const caffeinateStatus = hasLaunchContext ? props.launchContext?.caffeinated : data;
   const caffeinateLoader = hasLaunchContext ? false : isLoading;
-
-  useEffect(() => {
-    const updateSubtitle = async () => {
-      updateCommandMetadata({ subtitle: `Status: ${caffeinateStatus ? "Caffeinated" : "Decaffeinated"}` });
-    };
-
-    updateSubtitle();
-  }, [caffeinateStatus]);
 
   return (
     <MenuBarExtra
