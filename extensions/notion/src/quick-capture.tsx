@@ -131,7 +131,7 @@ ${result?.content}
     }
 
     getText();
-  }, []);
+  }, [setValue]);
 
   return (
     <Form

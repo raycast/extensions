@@ -33,7 +33,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
 
   useEffect(() => {
     setRecentPage(databasePage);
-  }, [databaseId]);
+  }, [databaseId, setRecentPage, databasePage]);
 
   if (isLoadingDatabaseProperties || isLoadingDatabaseViews) {
     return <List isLoading />;

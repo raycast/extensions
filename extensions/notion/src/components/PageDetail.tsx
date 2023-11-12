@@ -31,7 +31,7 @@ export function PageDetail({ page, setRecentPage, users }: PageDetailProps) {
 
   useEffect(() => {
     setRecentPage(page);
-  }, [page.id]);
+  }, [page.id, setRecentPage, page]);
 
   const lastEditedUser = users?.find((u) => u.id === page.last_edited_user);
   const createdByUser = users?.find((u) => u.id === page.created_by);
