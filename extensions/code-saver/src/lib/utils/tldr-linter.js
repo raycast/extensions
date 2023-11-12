@@ -49,7 +49,7 @@ module.exports.ERRORS = parser.ERRORS = {
       examples: [],
     };
   };
-  parser.finish = function () {};
+  parser.finish = function () { };
   parser.yy.ERRORS = parser.ERRORS;
   parser.yy.error = function (location, error) {
     if (!parser.ERRORS[error]) {
@@ -186,7 +186,7 @@ linter.process = function (file, page, verbose, alsoFormat) {
   };
 
   if (parser.yy.page.examples.length > MAX_EXAMPLES) {
-    result.errors.push({ locinfo: { first_line: "0" }, code: "TLDR019", description: this.ERRORS.TLDR019 });
+    result.errors.push({ locinfo: { first_line: "0" }, code: "TLDR019", description: parser.ERRORS.TLDR019 });
   }
 
   if (alsoFormat) result.formatted = linter.format(parser.yy.page);
@@ -200,16 +200,17 @@ linter.process = function (file, page, verbose, alsoFormat) {
 
 linter.processFile = function (file, verbose, alsoFormat, ignoreErrors) {
   const result = linter.process(file, fs.readFileSync(file, "utf8"), verbose, alsoFormat);
+  console.log(result);
   if (path.extname(file) !== ".md") {
-    result.errors.push({ locinfo: { first_line: "0" }, code: "TLDR107", description: this.ERRORS.TLDR107 });
+    result.errors.push({ locinfo: { first_line: "0" }, code: "TLDR107", description: parser.ERRORS.TLDR107 });
   }
 
   if (RegExp(/\s/).test(path.basename(file))) {
-    result.errors.push({ locinfo: { first_line: "0" }, code: "TLDR108", description: this.ERRORS.TLDR108 });
+    result.errors.push({ locinfo: { first_line: "0" }, code: "TLDR108", description: parser.ERRORS.TLDR108 });
   }
 
   if (/[A-Z]/.test(path.basename(file))) {
-    result.errors.push({ locinfo: { first_line: "0" }, code: "TLDR109", description: this.ERRORS.TLDR109 });
+    result.errors.push({ locinfo: { first_line: "0" }, code: "TLDR109", description: parser.ERRORS.TLDR109 });
   }
 
   if (ignoreErrors) {
