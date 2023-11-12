@@ -3,7 +3,7 @@ Documentation pulled manually from https://github.com/shadcn/ui/tree/main/apps/w
 For now we upload this file manually and update the date here
  */
 
-const lastUpdated = "2023-08-19T15:44:18.731Z";
+const lastUpdated = "2023-11-12T01:31:06.888Z";
 
 const documentationBase = "https://ui.shadcn.com/docs";
 const documentationInstallation = `${documentationBase}/installation`;
