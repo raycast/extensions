@@ -3,7 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import fetch from "node-fetch";
 import { Fragment, useEffect, useState } from "react";
 import { DomainPricing, Response } from "./utils/types";
-import { API_DOCS_URL } from "./utils/constants";
+import { API_DOCS_URL, TLD_SVG_BASE_URL } from "./utils/constants";
 
 export default function DomainPricing() {
   const [isLoading, setIsLoading] = useState(false);
@@ -116,7 +116,7 @@ export default function DomainPricing() {
         Object.entries(filteredList).map(([domain, pricing]) => (
           <List.Item
             icon={{
-              source: `https://porkbun-media.s3-us-west-2.amazonaws.com/tld-buns/_${domain}.svg`,
+              source: `${TLD_SVG_BASE_URL}${domain}.svg`,
               fallback: "porkbun.png",
             }}
             actions={

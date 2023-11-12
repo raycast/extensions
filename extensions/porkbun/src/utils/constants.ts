@@ -54,3 +54,4 @@ export const API_HEADERS = {
 export const API_METHOD = "POST";
 
 export const API_DOCS_URL = "https://porkbun.com/api/json/v3/documentation#";
+export const TLD_SVG_BASE_URL = "https://porkbun-media.s3-us-west-2.amazonaws.com/tld-buns/_";

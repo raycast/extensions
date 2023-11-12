@@ -3,7 +3,7 @@ import { getFavicon, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { Domain } from "./utils/types";
 import { retrieveAllDomains } from "./utils/api";
-import { API_DOCS_URL } from "./utils/constants";
+import { API_DOCS_URL, TLD_SVG_BASE_URL } from "./utils/constants";
 import GetNameServersComponent from "./components/name-servers/GetNameServersComponent";
 import GetURLForwardingComponent from "./components/url-forwarding/GetURLForwardingComponent";
 
@@ -67,14 +67,14 @@ export default function RetrieveAllDomains() {
       searchBarPlaceholder="Search domain"
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
-          <List.Dropdown.Item title="All" value="" />
+          <List.Dropdown.Item title="All" icon={Icon.CircleProgress100} value="" />
           <List.Dropdown.Section title="Status">
-            <List.Dropdown.Item title="Active" value="status_active" />
-            <List.Dropdown.Item title="null" value="status_null" />
+            <List.Dropdown.Item title="Active" icon={{ source: Icon.Dot, tintColor: Color.Green }} value="status_active" />
+            <List.Dropdown.Item title="null" icon={{ source: Icon.Dot, tintColor: Color.Yellow }} value="status_null" />
           </List.Dropdown.Section>
           <List.Dropdown.Section title="TLD">
             {[...new Set(domains?.map((domain) => domain.tld))].map((tld) => (
-              <List.Dropdown.Item key={tld} title={tld} value={`tld_${tld}`} />
+              <List.Dropdown.Item key={tld} icon={{ source: `${TLD_SVG_BASE_URL}${tld}.svg`, fallback: "porkbun.png" }} title={tld} value={`tld_${tld}`} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
