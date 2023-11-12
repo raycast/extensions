@@ -181,6 +181,9 @@ export const QueryLogs = ({ query: _query, sourceId: _sourceId }: { query: strin
         />
       );
     };
+
+    const allMessages = data?.data.filter((log) => !!log.message) ?? [];
+
     return (
       <List
         searchText={query}
@@ -194,8 +197,8 @@ export const QueryLogs = ({ query: _query, sourceId: _sourceId }: { query: strin
           </ActionPanel>
         }
       >
-        {data?.data.map(renderLog)}
-        {!data?.data.length && <List.EmptyView title="No logs found"></List.EmptyView>}
+        {allMessages.map(renderLog)}
+        {!allMessages.length && <List.EmptyView title="No logs found"></List.EmptyView>}
       </List>
     );
   };

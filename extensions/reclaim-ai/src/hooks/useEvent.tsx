@@ -10,6 +10,7 @@ import reclaimApi from "./useApi";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useTask } from "./useTask";
 import { useUser } from "./useUser";
+import { filterMultipleOutDuplicateEvents } from "../utils/events";
 
 const useEvent = () => {
   const { fetcher } = reclaimApi();
@@ -36,7 +37,7 @@ const useEvent = () => {
       if (!eventsResponse || error) throw error;
 
       // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-      return eventsResponse;
+      return filterMultipleOutDuplicateEvents(eventsResponse);
     } catch (error) {
       console.error("Error while fetching events", error);
     }
