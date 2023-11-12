@@ -52,7 +52,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
   ${openGraph?.description}
   `;
 
-  if (!openGraph) return <Detail isLoading={isLoading} markdown="Loading" />;
+  if (!openGraph) return <Detail isLoading={isLoading} markdown="Loading..." />;
 
   return (
     <Detail
