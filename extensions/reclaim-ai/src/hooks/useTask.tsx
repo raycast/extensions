@@ -18,7 +18,6 @@ const useTask = () => {
         minChunkSize: task.durationMin,
         maxChunkSize: task.durationMax,
         notes: task.notes,
-        alwaysPrivate: true,
         priority: task.priority,
         onDeck: task.onDeck,
       };
