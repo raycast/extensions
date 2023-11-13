@@ -16,7 +16,7 @@
       "name": "searchServer",
       "title": "Manager Servers",
       "subtitle": "Hetzner",
-      "description": "Shows a list of all hetzner servers",
+      "description": "Shows a list of all Hetzner servers",
       "mode": "view"
     },
     {
