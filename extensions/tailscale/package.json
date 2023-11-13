@@ -59,6 +59,7 @@
     {
       "name": "status",
       "title": "Status",
+      "subtitle": "Tailscale",
       "description": "Show Tailscale's connection status.",
       "mode": "no-view",
       "interval": "30s"
