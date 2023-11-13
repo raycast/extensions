@@ -1,6 +1,6 @@
 # Porkbun Changelog
 
-## [IPv4 + Retrieve All Domains endpoint] - {PR_MERGE_DATE}
+## [IPv4 + Retrieve All Domains endpoint] - 2023-11-13
 
 ### Enhancements
 
