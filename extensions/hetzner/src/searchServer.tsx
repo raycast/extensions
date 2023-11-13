@@ -11,7 +11,7 @@ import { HetznerServer, HetznerStatus } from "./models/server";
 import { getConfig } from "./config";
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [servers, setServers] = useState<HetznerServer[]>([]);
 
   const { consoleURL, projectId } = getConfig();
