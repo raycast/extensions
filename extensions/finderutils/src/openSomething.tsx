@@ -28,9 +28,9 @@ export default async (props: LaunchProps<{ arguments: { thing: string; applicati
   try {
     const result = (await runAppleScript(script)).trim();
     if (result.includes("application")) {
-      await showToast(Toast.Style.Failure, "Error opening thing:", "Application not found");
+      await showToast(Toast.Style.Failure, "Error opening file:", "Application not found");
     } else if (result.includes("file")) {
-      await showToast(Toast.Style.Failure, "Error opening thing:", "Thing not found");
+      await showToast(Toast.Style.Failure, "Error opening file:", "File not found");
     } else {
       await showToast(Toast.Style.Success, "Done", result);
     }
