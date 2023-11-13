@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Optimize file operations] - {PR_MERGE_DATE}
+## [Optimize file operations] - 2023-11-13
 
 - Optimize the selection of files and directories
 - List layout add Detail show file icon
