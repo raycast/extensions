@@ -227,6 +227,7 @@
 /extensions/dad-jokes                                @pernielsentikaer @Abdulaziz-Aljadaan
 /extensions/dash                                     @RSO @sxn @JasonBoy
 /extensions/dashlane                                 @dpnick
+/extensions/dashlane-vault                           @tmwrnr
 /extensions/datadog                                  @kudrykv @rcruzper @aexvir @albertoxamin
 /extensions/date-converter                           @asportnoy
 /extensions/datetime-format-converter                @yangxyo
@@ -297,7 +298,7 @@
 /extensions/dynamic-font-size                        @nilshoenson
 /extensions/eagle                                    @Yukaii
 /extensions/easy-new-file                            @koinzhang
-/extensions/easy-ocr                                 @Rafo1994
+/extensions/easy-ocr                                 @Rafo1994 @wojciechkrol
 /extensions/easydict                                 @tisfeng
 /extensions/ebird                                    @OozyGrub
 /extensions/ecosia-search                            @MFCo
@@ -344,6 +345,7 @@
 /extensions/file-manager                             @erics118 @BalliAsghar @urwrstkn8mare @fengtianze
 /extensions/filezilla                                @naqet
 /extensions/finary                                   @jetaix
+/extensions/finderutils                              @edrf12
 /extensions/findnearby                               @lichin-lin
 /extensions/finnish-dictionary                       @albertoxamin
 /extensions/fip                                      @louison
@@ -391,7 +393,7 @@
 /extensions/github-cli-manual                        @demartini
 /extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy @LunaticMuch @pernielsentikaer
-/extensions/github-gist                              @koinzhang @Aayush9029 @LunaticMuch @pernielsentikaer
+/extensions/github-gist                              @koinzhang @Aayush9029 @LunaticMuch @pernielsentikaer @nbbaier
 /extensions/github-menu-bar                          @fe9lix
 /extensions/github-repository-search                 @thomaspaulmann @immint023 @mheidinger
 /extensions/github-review-requests                   @resessh @kudrykv
@@ -541,7 +543,7 @@
 /extensions/keyboard-maestro                         @eluce2
 /extensions/keyboard-shortcut-sequences              @SKaplanOfficial
 /extensions/keychain-password-gen                    @breadone
-/extensions/kill-process                             @rolandleth @crazyones110 @zhenpewu @Saafo
+/extensions/kill-process                             @rolandleth @crazyones110 @zhenpewu @Saafo @erics118
 /extensions/kinopio-inbox                            @pketh
 /extensions/kinopoisk                                @mattisssa
 /extensions/knowwa                                   @d0utone
@@ -735,6 +737,7 @@
 /extensions/one-time-secret                          @LarsaSolidor
 /extensions/onenote                                  @alewandows
 /extensions/ones                                     @k8scat
+/extensions/open-graph                               @davidho0403
 /extensions/open-in-android-studio                   @3llomi
 /extensions/open-in-json-hero                        @ericallam @ivanovart
 /extensions/open-in-visual-studio-code               @shubzkothekar @thomaspaulmann
@@ -774,6 +777,7 @@
 /extensions/pera-explorer                            @akgunberk
 /extensions/perchance-generator                      @Visual-Studio-Coder
 /extensions/performance-hud                          @say4n
+/extensions/perplexity                               @third774
 /extensions/pestphp-documentation                    @danyelkeddah
 /extensions/pexels                                   @koinzhang
 /extensions/phind-search                             @aiyogg @pernielsentikaer
@@ -956,7 +960,7 @@
 /extensions/session                                  @jamesjlyons @pernielsentikaer
 /extensions/setapp                                   @lardissone
 /extensions/sf-symbols-search                        @peteschaffner
-/extensions/shadcn-ui                                @luisFilipePT
+/extensions/shadcn-ui                                @luisFilipePT @WilliamWelsh
 /extensions/shell                                    @KELiON
 /extensions/shell-buddy                              @JohnBra
 /extensions/shopify-developer-changelog              @sandypockets
