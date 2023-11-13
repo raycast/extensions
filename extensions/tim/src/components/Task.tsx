@@ -75,13 +75,21 @@ const Task: React.FC<{ id: UUID }> = ({ id }) => {
                 title="Average time per day"
                 text={durationFormatter.format(averagePerDay)}
               />
-              <List.Item.Detail.Metadata.Label title="Rate" text={currencyFormatter.format(task.rate ?? 0)} />
-              <List.Item.Detail.Metadata.Label title="Value" text={currencyFormatter.format(value)} />
-              <List.Item.Detail.Metadata.TagList title="Tags">
-                {tags.map((tag) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={tag.id} text={tag.title} color={tag.color} />
-                ))}
-              </List.Item.Detail.Metadata.TagList>
+
+              {task.rate && (
+                <>
+                  <List.Item.Detail.Metadata.Label title="Rate" text={currencyFormatter.format(task.rate ?? 0)} />
+                  <List.Item.Detail.Metadata.Label title="Value" text={currencyFormatter.format(value)} />
+                </>
+              )}
+
+              {tags && tags.length > 0 && (
+                <List.Item.Detail.Metadata.TagList title="Tags">
+                  {tags.map((tag) => (
+                    <List.Item.Detail.Metadata.TagList.Item key={tag.id} text={tag.title} color={tag.color} />
+                  ))}
+                </List.Item.Detail.Metadata.TagList>
+              )}
             </List.Item.Detail.Metadata>
           }
         />
