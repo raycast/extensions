@@ -46,7 +46,7 @@
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince
 /extensions/apple-reminders                          @thomaslombart
-/extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @hugivar @danulqua @rgrunberg @Visual-Studio-Coder
+/extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @Visual-Studio-Coder
 /extensions/archiver                                 @404J
 /extensions/arxiv                                    @koayon @pernielsentikaer
 /extensions/asana                                    @thomaslombart
@@ -541,7 +541,7 @@
 /extensions/keyboard-maestro                         @eluce2
 /extensions/keyboard-shortcut-sequences              @SKaplanOfficial
 /extensions/keychain-password-gen                    @breadone
-/extensions/kill-process                             @rolandleth @crazyones110 @zhenpewu @Saafo
+/extensions/kill-process                             @rolandleth @crazyones110 @zhenpewu @Saafo @erics118
 /extensions/kinopio-inbox                            @pketh
 /extensions/kinopoisk                                @mattisssa
 /extensions/knowwa                                   @d0utone
@@ -956,7 +956,7 @@
 /extensions/session                                  @jamesjlyons @pernielsentikaer
 /extensions/setapp                                   @lardissone
 /extensions/sf-symbols-search                        @peteschaffner
-/extensions/shadcn-ui                                @luisFilipePT
+/extensions/shadcn-ui                                @luisFilipePT @WilliamWelsh
 /extensions/shell                                    @KELiON
 /extensions/shell-buddy                              @JohnBra
 /extensions/shopify-developer-changelog              @sandypockets

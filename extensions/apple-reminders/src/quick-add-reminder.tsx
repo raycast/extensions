@@ -41,7 +41,7 @@ Here are the list names with their respective ids:
 ${lists}
 
 Please make sure to follow these rules:
-- You should return a valid, parsable JSON object.
+- You MUST return a valid, parsable JSON object.
 - Don't add a key if the user didn't specify it.
 - IMPORTANT: Don't add a list id if the user didn't specify any list name.
 - A date with a recurrence must have a due date. If no due date is specified, add one as you see fit.

@@ -8,7 +8,8 @@
   "contributors": [
     "crazyones110",
     "zhenpewu",
-    "Saafo"
+    "Saafo",
+    "erics118"
   ],
   "license": "MIT",
   "commands": [
@@ -22,41 +23,46 @@
   "preferences": [
     {
       "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name.",
-      "label": "Filtering should search process paths",
+      "label": "Search Process Paths",
       "name": "shouldSearchInPaths",
       "required": false,
+      "default": false,
       "title": "Filtering",
       "type": "checkbox"
     },
     {
       "description": "Determines whether the pid of the process should be searched for the query, or only the process name.",
-      "label": "Filtering should search process pid",
+      "label": "Search Process PID",
       "name": "shouldSearchInPid",
       "required": false,
+      "default": false,
       "title": "",
       "type": "checkbox"
     },
     {
       "description": "Determines whether apps are listed before other results when filtering.",
-      "label": "Prioritize apps when filtering",
+      "label": "Prioritize Apps",
       "name": "shouldPrioritizeAppsWhenFiltering",
       "required": false,
+      "default": false,
       "title": "",
       "type": "checkbox"
     },
     {
       "description": "Determines whether processes are sorted by CPU or memory usage.",
-      "label": "Sort processes by memory usage",
+      "label": "Sort by Memory Usage",
       "name": "sortByMem",
       "required": false,
+      "default": false,
       "title": "",
       "type": "checkbox"
     },
     {
       "description": "Determines whether aggregate processes belong to the same app.",
-      "label": "Aggregate apps",
+      "label": "Aggregate Apps",
       "name": "aggregateApps",
       "required": false,
+      "default": false,
       "title": "",
       "type": "checkbox"
     },
@@ -65,15 +71,34 @@
       "label": "Show PID",
       "name": "shouldShowPID",
       "required": false,
+      "default": false,
       "title": "Display",
       "type": "checkbox"
     },
     {
-      "description": "Show process Path.",
+      "description": "Show process path.",
       "label": "Show Process Path",
       "name": "shouldShowPath",
       "required": false,
+      "default": false,
       "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Close window after killing a process",
+      "label": "Close Window",
+      "name": "closeWindowAfterKill",
+      "required": false,
+      "default": true,
+      "title": "After Killing",
+      "type": "checkbox"
+    },
+    {
+      "description": "Clear search bar after killing a process",
+      "label": "Clear Search Bar",
+      "name": "clearSearchBarAfterKill",
+      "required": false,
+      "default": true,
       "type": "checkbox"
     },
     {
@@ -83,28 +108,27 @@
       "required": false,
       "title": "Refresh Duration",
       "type": "textfield",
-      "default": "3000"
+      "default": "3000",
+      "placeholder": "3000"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.3",
-    "pretty-bytes": "^6.1.0"
+    "@raycast/api": "^1.61.2",
+    "pretty-bytes": "^6.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.37",
+    "eslint": "^8.53.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "publish": "npx @raycast/api@latest publish",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
