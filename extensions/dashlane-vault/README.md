@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/dashlane/assets/dashlane-512.png" width="128" height="128" />
+  <img src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/dashlane-vault/assets/dashlane-512.png" width="128" height="128" />
 
   <br/>
 
