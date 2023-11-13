@@ -42,6 +42,11 @@ function CreateCardAction() {
                 setError(error);
               }
             });
+            showToast({
+              style: Toast.Style.Success,
+              title: "Success!",
+              message: "Card successfully created",
+            })
           } catch (error) {
             setError(error);
           }
