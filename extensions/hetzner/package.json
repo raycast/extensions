@@ -15,12 +15,14 @@
     {
       "name": "searchServer",
       "title": "Manager Servers",
+      "subtitle": "Hetzner",
       "description": "Shows a list of all hetzner servers",
       "mode": "view"
     },
     {
       "name": "createServer",
       "title": "Create Server",
+      "subtitle": "Hetzner",
       "description": "Creates a server",
       "mode": "no-view"
     }
