@@ -23,8 +23,8 @@
     {
       "name": "createFile",
       "title": "Create File",
-      "subtitle": "Open Path",
-      "description": "Create file on open directory",
+      "subtitle": "Finder Utilities",
+      "description": "Create a file in the active Finder window",
       "mode": "no-view",
       "arguments": [
         {
@@ -38,8 +38,8 @@
     {
       "name": "openSomething",
       "title": "Open Something",
-      "subtitle": "From Path",
-      "description": "Open the thing in the default or specified app",
+      "subtitle": "Finder Utilities",
+      "description": "Open the file in the default or specified app",
       "mode": "no-view",
       "arguments": [
         {
