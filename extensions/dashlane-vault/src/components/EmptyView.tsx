@@ -14,7 +14,7 @@ export default function EmptyView({ isEmpty, isLoading, syncAction }: Props) {
   return (
     <List.EmptyView
       icon={{ source: "dashlane-64.png" }}
-      title={isEmpty ? "Vault empty." : "No matching items found."}
+      title={isEmpty ? "Vault empty" : "No matching items found"}
       description={
         isEmpty
           ? "Hit the sync button to sync your vault or try logging in again."
