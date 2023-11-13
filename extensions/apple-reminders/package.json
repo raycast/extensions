@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "reminders",
-  "title": "Apple Reminders Beta",
+  "name": "apple-reminders",
+  "title": "Apple Reminders",
   "description": "Manage Apple Reminders.",
   "icon": "icon.png",
   "author": "thomaslombart",
@@ -16,7 +16,7 @@
     {
       "name": "my-reminders",
       "title": "My Reminders",
-      "subtitle": "Apple Reminders Beta",
+      "subtitle": "Apple Reminders",
       "description": "View and complete your reminders.",
       "mode": "view",
       "preferences": [
@@ -33,7 +33,7 @@
     {
       "name": "create-reminder",
       "title": "Create Reminder",
-      "subtitle": "Apple Reminders Beta",
+      "subtitle": "Apple Reminders",
       "description": "Create and prioritize new reminders.",
       "mode": "view"
     },
@@ -41,7 +41,7 @@
       "name": "menu-bar",
       "title": "Menu Bar Reminders",
       "icon": "icon.png",
-      "subtitle": "Apple Reminders Beta",
+      "subtitle": "Apple Reminders",
       "description": "Manage your reminders in the menu bar.",
       "mode": "menu-bar",
       "preferences": [
@@ -82,7 +82,7 @@
     {
       "name": "quick-add-reminder",
       "title": "Quick Add Reminder",
-      "subtitle": "Apple Reminders Beta",
+      "subtitle": "Apple Reminders",
       "description": "Quickly add a reminder in Reminders.",
       "mode": "no-view",
       "preferences": [

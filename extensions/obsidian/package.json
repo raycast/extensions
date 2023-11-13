@@ -26,6 +26,15 @@
       "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
     },
     {
+      "name": "configFileName",
+      "type": "textfield",
+      "placeholder": ".obsidian",
+      "title": "Config filename",
+      "required": false,
+      "default": ".obsidian",
+      "description": "Override the vault config filename (default: .obsidian)"
+    },
+    {
       "name": "excludedFolders",
       "type": "textfield",
       "placeholder": "folder1, folder2, ...",
@@ -136,8 +145,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }
@@ -222,8 +235,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }
@@ -416,8 +433,12 @@
               "value": "obsidian"
             },
             {
-              "title": "Open in new Pane",
+              "title": "Open in new Obsidian tab",
               "value": "newpane"
+            },
+            {
+              "title": "Open in default app",
+              "value": "defaultapp"
             }
           ]
         }

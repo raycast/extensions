@@ -83,15 +83,20 @@ function OpenPullRequestMenu() {
         )}
         emptyElement={<MenuBarItem title="No Pull Requests" />}
       >
-        {data?.map((i) => (
-          <MenuBarItem
-            key={i.id}
-            title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
-            icon="pull-request.svg"
-            tooltip={i.repository.nameWithOwner}
-            onAction={() => open(i.permalink)}
-          />
-        ))}
+        {data?.map((i) => {
+          // GitHub had an outage on Nov. 3rd that caused the returned PRs to be null
+          // This corrupted the cache so let's check first if there's a PR before rendering
+          if (!i) return null;
+          return (
+            <MenuBarItem
+              key={i.id}
+              title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
+              icon="pull-request.svg"
+              tooltip={i.repository.nameWithOwner}
+              onAction={() => open(i.permalink)}
+            />
+          );
+        })}
       </MenuBarSection>
       <MenuBarSection>
         <MenuBarItemConfigureCommand />

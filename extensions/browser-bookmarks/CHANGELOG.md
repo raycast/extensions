@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fixes] - 2023-11-03
+
+- Fixed an issue where Chrome bookmarks with no title were not displayed.
+
 ## [Bug Fixes] - 2023-10-25
 
 - Fixed an issue where Arc bookmarks could break the extension.

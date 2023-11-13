@@ -43,7 +43,7 @@ export default function Command() {
   }, []);
 
   if (error) {
-    return <ErrorDetails error={error} />;
+    return <ErrorDetails maskPattern={password} error={error} />;
   }
 
   return (
