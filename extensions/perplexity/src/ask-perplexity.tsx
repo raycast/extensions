@@ -47,7 +47,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values; argume
       }
     >
       <Form.Description text="Where knowledge begins" />
-      <Form.TextArea title="Ask Anything..." {...itemProps.query} />
+      <Form.TextArea title="Ask Anything" {...itemProps.query} />
       <Form.Dropdown
         title="Focus"
         info="Focus allows you to fine tune your search by narrowing down the sources, for more targeted and relevant results. All follow-up questions in this Thread will focus the search on your chosen domain."
