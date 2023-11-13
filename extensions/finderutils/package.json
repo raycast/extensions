@@ -37,9 +37,9 @@
     },
     {
       "name": "openSomething",
-      "title": "Open File",
+      "title": "Open Element",
       "subtitle": "Finder Utilities",
-      "description": "Open the file in the default or specified app",
+      "description": "Open element (file/folder) in the default or specified app",
       "mode": "no-view",
       "arguments": [
         {
