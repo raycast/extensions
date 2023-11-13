@@ -29,13 +29,13 @@ function preventArguments(args?: string | undefined) {
 }
 
 export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) {
-  if (updateMenubar) {
-    try {
+  try {
+    if (updateMenubar) {
       await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: false } });
-      await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: false } });
-    } catch (error) {
-      console.error(error);
     }
+    await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: false } });
+  } catch (error) {
+    console.error(error);
   }
 
   if (hudMessage) {
@@ -47,13 +47,13 @@ export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) 
 
 export async function startCaffeinate(updateMenubar = true, hudMessage?: string, args?: string | undefined) {
   await stopCaffeinate(false);
-  if (updateMenubar) {
-    try {
+  try {
+    if (updateMenubar) {
       await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: true } });
-      await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: true } });
-    } catch (error) {
-      console.error(error);
     }
+    await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: true } });
+  } catch (error) {
+    console.error(error);
   }
 
   if (hudMessage) {
