@@ -114,11 +114,16 @@ export function CustomizeProperty(props: {
   moveUp: (propertyId: string) => void;
   moveDown: (propertyId: string) => void;
 }) {
+  const endDateShown = props.data[props.databaseId]?.showEndDate?.includes(props.property.id) ?? false;
   return (
     <List.Item
       key={props.property.id}
       icon={getPropertyIcon(props.property)}
       title={props.property.name}
+      accessories={[
+        { tag: props.property.type },
+        ...(endDateShown && props.property.type === "date" ? [{ tag: "End date shown" }] : [])
+      ]}
       actions={
         <ActionPanel>
           <Action

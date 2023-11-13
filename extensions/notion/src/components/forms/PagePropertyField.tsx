@@ -1,12 +1,14 @@
-import { Form, Icon, Image } from "@raycast/api";
+import { Detail, Form, Icon, Image } from "@raycast/api";
 import type { useForm } from "@raycast/utils";
 
 import { notionColorToTintColor, getPageIcon, Page, DatabaseProperty, User } from "../../utils/notion";
+import { DatabasePreferences } from "../CustomizeProperties";
 
 export function createConvertToFieldFunc(
   itemPropsFor: GetFieldPropsFunc,
   relationPages: Record<string, Page[]> | undefined,
   users: User[],
+  showEndDates: string[] | undefined,
 ) {
   return (property: DatabaseProperty) => {
     let placeholder = property.type.replace(/_/g, " ");
@@ -14,7 +16,21 @@ export function createConvertToFieldFunc(
 
     switch (property.type) {
       case "date":
-        return <Form.DatePicker {...itemPropsFor<typeof property.type>(property)} />;
+        const showEndDate = showEndDates?.includes(property.id);
+        return <>
+          <Form.DatePicker
+            {...itemPropsFor<typeof property.type>(property)}
+            title={showEndDate ? property.name + " Start" : property.name}
+          />
+          {showEndDate &&
+            <Form.DatePicker
+              {...itemPropsFor<typeof property.type>(property)}
+              id={"property::endDate::" + property.id}
+              key={"property::endDate::" + property.id}
+              title={property.name + " End"}
+            />
+          }
+        </>
       case "checkbox":
         return <Form.Checkbox {...itemPropsFor<typeof property.type>(property)} label={placeholder} />;
       case "select":
@@ -70,13 +86,13 @@ export type GetFieldPropsFunc = <T extends DatabaseProperty["type"]>(property: D
 export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
   typeof useForm<{
     [k: string]: T extends "date"
-      ? Date | null
-      : T extends "checkbox"
-      ? boolean
-      : T extends "multi_select" | "relation" | "people"
-      ? string[]
-      : T extends "formula"
-      ? null
-      : string;
+    ? Date | null
+    : T extends "checkbox"
+    ? boolean
+    : T extends "multi_select" | "relation" | "people"
+    ? string[]
+    : T extends "formula"
+    ? null
+    : string;
   }>
 >["itemProps"][string];
