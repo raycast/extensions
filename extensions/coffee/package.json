@@ -35,9 +35,9 @@
     },
     {
       "name": "index",
-      "title": "Caffeinate Status Menubar",
+      "title": "Caffeinate Status Menu Bar",
       "subtitle": "Coffee",
-      "description": "Get the status of the current caffeination in your menubar",
+      "description": "Get the status of the current caffeination in your menu bar",
       "mode": "menu-bar",
       "interval": "1m"
     },
