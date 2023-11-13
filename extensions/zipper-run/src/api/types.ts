@@ -31,11 +31,16 @@ export type AppInfo = {
     orgImage: string;
   };
 };
-
-export interface BootInfoResult {
-  ok: boolean;
-  data: BootInfo;
-}
+export type BootInfoResult =
+  | {
+      ok: true;
+      data: BootInfo;
+    }
+  | {
+      ok: false;
+      status: number;
+      error: string;
+    };
 
 export interface InputParam {
   key: string;

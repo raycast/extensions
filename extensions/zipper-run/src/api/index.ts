@@ -2,18 +2,14 @@ import fetch, { Response } from "node-fetch";
 import { BootInfoResult, AppletConfigs } from "./types";
 
 export async function fetchBootInfo(appletName: string, filename: string = ""): Promise<BootInfoResult | undefined> {
-  try {
-    const response = await fetch(`https://zipper.dev/api/bootInfo/${appletName}`, {
-      method: "POST",
-      body: JSON.stringify({ filename }),
-    });
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    return (await response.json()) as BootInfoResult;
-  } catch (error) {
-    console.error("Failed to fetch boot info:", error);
-  }
+  const response = await fetch(`https://zipper.dev/api/bootInfo/${appletName}`, {
+    method: "POST",
+    body: JSON.stringify({ filename }),
+  });
+
+  const bootInfo = (await response.json()) as BootInfoResult;
+
+  return bootInfo;
 }
 
 export async function fetchConfig({

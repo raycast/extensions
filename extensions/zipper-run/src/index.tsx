@@ -1,4 +1,4 @@
-import { ActionPanel, Action, LaunchProps, Detail, useNavigation, List } from "@raycast/api";
+import { ActionPanel, Action, LaunchProps, Detail, useNavigation, List, Icon } from "@raycast/api";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 import { InputsForm } from "./components/InputsForm";
@@ -21,6 +21,8 @@ export default function Command(props: LaunchProps<{ arguments: AppletArguments 
   const [appletBootInfo, setAppletBootInfo] = useState<BootInfo | undefined>();
   const [appletInputs, setAppletInputs] = useState<InputParams>();
 
+  const [error, setError] = useState<string | undefined>();
+
   async function handleSubmit(values: Values) {
     setIsLoading(true);
     const appletUrlArguments = Object.keys(values)
@@ -33,11 +35,13 @@ export default function Command(props: LaunchProps<{ arguments: AppletArguments 
       appletUrlArguments,
     });
 
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
     const data = (await response.json()) as Record<string, string>;
+
+    if (!data.ok) {
+      setError(data.error);
+      setIsLoading(false);
+      return;
+    }
 
     push(<AppResults appResults={data.data} isLoading={isLoading} />);
     setIsLoading(false);
@@ -66,14 +70,20 @@ export default function Command(props: LaunchProps<{ arguments: AppletArguments 
     async function boot() {
       setIsLoading(true);
       const bootInfo = await fetchBootInfo(appletName);
+
+      if (bootInfo && !bootInfo.ok) {
+        setError(bootInfo.error);
+        setIsLoading(false);
+        return;
+      }
+
       if (bootInfo && bootInfo.ok) {
         setAppletBootInfo(bootInfo.data);
-        // Automatically select main.ts if it's the only script
         if (bootInfo.data.runnableScripts.length === 1 && bootInfo.data.runnableScripts[0] === "main.ts") {
           setAppletInputs(bootInfo.data.inputs);
-          // getConfig(bootInfo.data);
         }
       }
+
       setIsLoading(false);
     }
     boot();
@@ -91,8 +101,16 @@ export default function Command(props: LaunchProps<{ arguments: AppletArguments 
     fetchInputs();
   }, [selectedScript]);
 
-  if (isLoading) {
+  if (isLoading && !error) {
     return <Detail isLoading={true} />;
+  }
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView icon={Icon.Warning} title="Something went wrong" description={error} />
+      </List>
+    );
   }
 
   if ((selectedScript && appletInputs) || (appletBootInfo?.runnableScripts.length === 1 && appletInputs)) {
