@@ -57,7 +57,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={openGraph.title}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="title" text={openGraph.title} />
