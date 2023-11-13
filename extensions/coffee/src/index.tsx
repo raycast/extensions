@@ -29,14 +29,13 @@ export default function Command(props: LaunchProps) {
           <MenuBarExtra.Item
             title={caffeinateStatus ? "Decaffeinate" : "Caffeinate"}
             onAction={async () => {
-              if (!caffeinateStatus) {
+              if (caffeinateStatus) {
+                // Kill caffeinate process
+                await mutate(stopCaffeinate(false), { optimisticUpdate: () => false });
+              } else {
                 // Spawn a new process to run caffeinate
                 await mutate(startCaffeinate(false), { optimisticUpdate: () => true });
-                return;
               }
-
-              // Kill caffeinate process
-              await mutate(stopCaffeinate(false), { optimisticUpdate: () => false });
             }}
           />
         </>
