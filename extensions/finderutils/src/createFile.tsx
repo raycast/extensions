@@ -28,7 +28,7 @@ export default async (props: LaunchProps<{ arguments: { filename: string } }>) =
           do shell script command
       `;
 
-  if (autoOpen !== undefined && autoOpen.includes(extension)) {
+  if (autoOpen !== undefined && (autoOpen.includes("*") || autoOpen.includes(extension))) {
     script += `
       set command to "open " & pathList & "${filename}"
       do shell script command
