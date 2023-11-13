@@ -1,18 +1,15 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
+interface Config {
   projectId: string;
   accessToken: string;
-}
-
-interface Config extends Preferences {
   apiURL: string;
   consoleURL: string;
 }
 
 export function getConfig(): Config {
   return {
-    ...getPreferenceValues<Preferences>(),
+    ...getPreferenceValues(),
     apiURL: "https://api.hetzner.cloud",
     consoleURL: "https://console.hetzner.cloud",
   };
