@@ -21,12 +21,12 @@ export default function Command() {
   }, []);
 
   const updateServersList = async (): Promise<void> => {
-    setServers([]);
     setIsLoading(true);
+    setServers([]);
     const servers = await getAllServers();
 
-    setIsLoading(false);
     setServers(servers);
+    setIsLoading(false);
   };
 
   const updateServerStatus = (serverId: number, state: HetznerStatus) => {
