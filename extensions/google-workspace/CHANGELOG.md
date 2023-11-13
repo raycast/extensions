@@ -1,8 +1,13 @@
 # Google Workspace Changelog
 
+## [Add menu bar shortcuts] - 2023-11-16
+
+- Create new Google documents from the menu bar.
+- Add an alternate to the menu bar command to open starred files in Raycast instead of Google Drive
+
 ## [Fix opening link from Search Google Drive Files command]
 
-Previously, there was a problem where links would open under the incorrect Google account. This issue has been resolved, ensuring that links now open with the correct Google account.
+Previously, there was a problem where links would open under the incorrect Google account. This issue has been resolved ensuring that links now open with the correct Google account.
 
 ## [Fix Google Spreadsheets creation command] - 2023-03-12
 

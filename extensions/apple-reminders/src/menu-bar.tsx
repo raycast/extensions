@@ -10,6 +10,7 @@ import {
   launchCommand,
   LaunchType,
   openCommandPreferences,
+  openExtensionPreferences,
 } from "@raycast/api";
 import {
   addWeeks,
@@ -25,7 +26,12 @@ import {
 } from "date-fns";
 import { useMemo } from "react";
 
-import { deleteReminder, toggleCompletionStatus, setReminderPriority, setReminderDueDate } from "./api";
+import {
+  deleteReminder as apiDeleteReminder,
+  toggleCompletionStatus,
+  setReminderPriority,
+  setReminderDueDate,
+} from "./api";
 import { getPriorityIcon, truncateMiddle } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 
@@ -106,6 +112,24 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: `Unable to set due date`,
+      });
+    }
+  }
+
+  async function deleteReminder(reminder: Reminder) {
+    try {
+      await apiDeleteReminder(reminder.id);
+      await mutate();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Deleted Reminder",
+        message: reminder.title,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Unable to delete reminder",
+        message: reminder.title,
       });
     }
   }
@@ -219,7 +243,7 @@ export default function Command() {
                   </MenuBarExtra.Submenu>
 
                   <MenuBarExtra.Item
-                    title="Delete Reminder"
+                    title="Delete Reminder…"
                     icon={Icon.Trash}
                     onAction={async () => {
                       if (
@@ -229,23 +253,16 @@ export default function Command() {
                           icon: { source: Icon.Trash, tintColor: Color.Red },
                         })
                       ) {
-                        try {
-                          await deleteReminder(reminder.id);
-                          await mutate();
-                          await showToast({
-                            style: Toast.Style.Success,
-                            title: "Deleted Reminder",
-                            message: reminder.title,
-                          });
-                        } catch (error) {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: "Unable to delete reminder",
-                            message: reminder.title,
-                          });
-                        }
+                        await deleteReminder(reminder);
                       }
                     }}
+                    alternate={
+                      <MenuBarExtra.Item
+                        title="Delete Reminder"
+                        icon={Icon.Trash}
+                        onAction={() => deleteReminder(reminder)}
+                      />
+                    }
                   />
                 </MenuBarExtra.Submenu>
               );
@@ -269,6 +286,9 @@ export default function Command() {
           icon={Icon.Gear}
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openCommandPreferences}
+          alternate={
+            <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          }
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

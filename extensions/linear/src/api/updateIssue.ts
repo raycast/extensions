@@ -45,7 +45,7 @@ export async function updateIssue(issueId: Issue["id"], payload: UpdateIssuePayl
           success
         }
       }
-    `
+    `,
   );
 
   return { success: data?.issueUpdate.success };
