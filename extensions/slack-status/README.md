@@ -2,6 +2,10 @@
 
 Extension for quickly changing your Slack status. Set up presets for common statuses or set a custom one. Make sure to explore available actions in the action panel (`⌘ + K`). And if you want to spice it up, use Raycast AI to set your status. Simply type what you are doing and hit return to let AI pick an emoji, title, and duration of your status.
 
+## Automatic Setup
+
+Simply open the extension and authenticate with OAuth to your workspace. Afterwards use the extension to quickly set your Slack status right from Raycast.
+
 ## Manual Setup
 
 The extension supports OAuth, which makes it easy to connect to your Slack workspace. If you prefer a manual setup, follow those steps to create your own Slack app and use it's access token to access your Slack workspace.
