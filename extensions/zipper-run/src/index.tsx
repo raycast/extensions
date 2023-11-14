@@ -16,7 +16,7 @@ interface AppletArguments {
 export default function Command(props: LaunchProps<{ arguments: AppletArguments }>) {
   const { appletName } = props.arguments;
   const { push } = useNavigation();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedScript, setSelectedScript] = useState<string>("");
   const [appletBootInfo, setAppletBootInfo] = useState<BootInfo | undefined>();
   const [appletInputs, setAppletInputs] = useState<InputParams>();
@@ -134,6 +134,7 @@ export default function Command(props: LaunchProps<{ arguments: AppletArguments 
           <List.Item
             key={script}
             title={script}
+            icon={Icon.CodeBlock}
             actions={
               <ActionPanel>
                 <Action title="Select" icon={Icon.Checkmark} onAction={() => setSelectedScript(script)} />
