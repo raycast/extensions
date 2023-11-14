@@ -5,6 +5,9 @@
   "description": "Run a zipper applet",
   "icon": "zipper-icon.png",
   "author": "ariel_conti",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
