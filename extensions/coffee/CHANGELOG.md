@@ -1,7 +1,9 @@
 # Coffee Changelog
 
 ## [Status command] - 2023-11-12
+
 - Create separate status command
+-  Optimized code
 
 ## [Fix] - 2023-01-19
 
