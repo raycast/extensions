@@ -1,5 +1,8 @@
 # Kill Process Changelog
 
+## [Kill Multiple] - 2023-11-09
+- Added preference to kill multiple processes without reopening Raycast
+
 ## [Sort by memory and App aggregation] - 2023-06-22
 
 - Now can sort processes by CPU or memory usage

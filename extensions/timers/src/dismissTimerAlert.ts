@@ -10,15 +10,14 @@ export default async () => {
       title: "Ring Continuously setting not enabled!",
     });
   }
-  const timers = getTimers();
-  timers.filter((t: Timer) => t.timeLeft === 0);
-  if (timers.length === 0) {
+  const finishedTimers = getTimers().filter((t: Timer) => t.timeLeft === 0);
+  if (finishedTimers.length === 0) {
     return await showToast({
       style: Toast.Style.Failure,
       title: "No finished timers found!",
     });
   }
   await closeMainWindow();
-  const dismissFile = timers[0].originalFile.replace(".timer", ".dismiss");
+  const dismissFile = finishedTimers[0].originalFile.replace(".timer", ".dismiss");
   unlinkSync(environment.supportPath + "/" + dismissFile);
 };

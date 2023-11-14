@@ -17,7 +17,7 @@ import { useUser } from "./hooks/useUser";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
-import { eventColors, truncateEventSize } from "./utils/events";
+import { eventColors, filterMultipleOutDuplicateEvents, truncateEventSize } from "./utils/events";
 import { parseEmojiField } from "./utils/string";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
@@ -89,7 +89,7 @@ export default function Command() {
     }
   );
 
-  const eventData = eventsResponse;
+  const eventData = filterMultipleOutDuplicateEvents(eventsResponse);
 
   const showDeclinedEvents = useMemo(() => {
     return !!currentUser?.settings.showDeclinedEvents;
