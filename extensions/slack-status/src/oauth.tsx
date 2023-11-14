@@ -43,7 +43,7 @@ export function withOAuthSession<P extends object>(Component: ComponentType<P>, 
   };
 }
 
-export function useOAuthSession() {
+export function getOAuthSession() {
   if (!accessToken) {
     throw new Error("You must call `withOAuthSession` before using `useOAuth`");
   }

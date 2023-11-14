@@ -2,7 +2,7 @@ import { OAuth } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 import fetch from "node-fetch";
-import { OAuthSessionConfig, useOAuthSession } from "./oauth";
+import { OAuthSessionConfig, getOAuthSession } from "./oauth";
 
 type SlackOAuthResponse = {
   ok: boolean;
@@ -16,7 +16,7 @@ type SlackOAuthResponse = {
 let webClient: WebClient;
 
 export function useSlack() {
-  const accessToken = useOAuthSession();
+  const accessToken = getOAuthSession();
   webClient = webClient ?? new WebClient(accessToken);
   return webClient;
 }
