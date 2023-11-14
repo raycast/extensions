@@ -207,7 +207,7 @@
     {
       "name": "show-filters",
       "title": "Show Filters",
-      "description": "Show filters based on given query",
+      "description": "Show your Todoist filters.",
       "mode": "view"
     },
     {
