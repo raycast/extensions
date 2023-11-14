@@ -129,14 +129,14 @@ export default function Command(props: LaunchProps<{ arguments: AppletArguments 
     // Prioritize main.ts without mutating the original array
     const runnableScripts = ["main.ts", ...appletBootInfo.runnableScripts.filter((script) => script !== "main.ts")];
     return (
-      <List navigationTitle="Scripts available">
+      <List>
         {runnableScripts.map((script) => (
           <List.Item
             key={script}
             title={script}
             actions={
               <ActionPanel>
-                <Action title="Select" onAction={() => setSelectedScript(script)} />
+                <Action title="Select" icon={Icon.Checkmark} onAction={() => setSelectedScript(script)} />
               </ActionPanel>
             }
           />
