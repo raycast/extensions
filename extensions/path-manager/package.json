@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "path-manager",
+  "title": "Path Manager",
+  "description": "Manage, search, and quickly open saved directory paths in the terminal.",
+  "icon": "512px-Rounded.png",
+  "author": "Headrsh",
+  "preferences": [
+    {
+      "name": "defaultTerminal",
+      "description": "Select your default terminal application to open paths.",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Terminal Application",
+      "default": "Terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "Applications",
+    "System",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "terminal",
+    "path",
+    "iterm"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-path",
+      "title": "Add Path",
+      "description": "Stores a file path with an alias for easy access later.",
+      "mode": "view"
+    },
+    {
+      "name": "list-paths",
+      "title": "List Paths",
+      "description": "Display a list of all saved paths and their aliases.",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-path",
+      "title": "Go to Path",
+      "description": "Opens a terminal tab navigating to the chosen path.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "alias",
+          "placeholder": "alias",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
