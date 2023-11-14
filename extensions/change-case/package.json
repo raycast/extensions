@@ -17,7 +17,8 @@
   "keywords": [
     "text",
     "transform",
-    "string"
+    "string",
+    "sponge"
   ],
   "license": "MIT",
   "commands": [
