@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Toast, showToast, open, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, Toast, showToast, open, Clipboard, Icon } from "@raycast/api";
 import fs from "fs";
 import { useState } from "react";
 import fetch from "node-fetch";
@@ -12,7 +12,7 @@ interface UploadFormValues {
 
 export default function Command() {
   const [uploading, setUploading] = useState(false);
-  const { handleSubmit, itemProps } = useForm<UploadFormValues>({
+  const { handleSubmit, itemProps, reset } = useForm<UploadFormValues>({
     async onSubmit(values) {
       const uploadToast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
       setUploading(true);
@@ -47,6 +47,7 @@ export default function Command() {
           },
         };
         setUploading(false);
+        await reset();
       } catch (error) {
         setUploading(false);
       }
@@ -60,12 +61,12 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Upload" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Upload" onSubmit={handleSubmit} icon={Icon.Upload} />
         </ActionPanel>
       }
       isLoading={uploading}
     >
-      <Form.FilePicker allowMultipleSelection={false} {...itemProps.file} />
+      <Form.FilePicker allowMultipleSelection={false} {...itemProps.file} title="File" />
     </Form>
   );
 }
