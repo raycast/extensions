@@ -34,7 +34,7 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.58.0",
+    "@raycast/api": "^1.60.0",
     "@raycast/utils": "^1.9.1",
     "@slack/web-api": "^6.4.0",
     "moment": "^2.29.1",
@@ -43,9 +43,11 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
+    "@types/node": "^18.8.4",
     "@types/pluralize": "^0.0.30",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
+    "react": "^18.2.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
