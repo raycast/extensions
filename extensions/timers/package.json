@@ -77,6 +77,7 @@
       "title": "Start Custom Timer",
       "description": "Set a countdown for a custom amount of time.",
       "mode": "view",
+      "keywords": ["new"],
       "arguments": [
         {
           "name": "hours",
@@ -133,7 +134,8 @@
     },
     {
       "name": "dismissTimerAlert",
-      "title": "Dismiss Timer Alert",
+      "title": "Dismiss Ringing Timer",
+      "keywords": ["Dismiss Timer Alert", "Alert"],
       "description": "Stop a ringing alert from a finished timer.",
       "mode": "no-view"
     },
@@ -149,6 +151,12 @@
       "title": "Preview Alert Sounds",
       "description": "Play samples of different alert sound effects.",
       "mode": "view"
+    },
+    {
+      "name": "stopRunningTimer",
+      "title": "Stop Running Timer",
+      "description": "Stop the running timer closest to completion.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -193,7 +201,7 @@
     {
       "name": "volumeSetting",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Timer Alert Volume",
       "description": "Volume of the alert sound. Decimal between 0 and 1.",
       "default": "1"
@@ -201,16 +209,16 @@
     {
       "name": "ringContinuously",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "title": "Timer Alert Type",
       "description": "Whether or not to play the timer alert sound continuously until dismissed.",
       "label": "Ring Continuously",
-      "default": false
+      "default": true
     },
     {
       "name": "showMenuBarItemWhen",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Show Menu Bar Item When",
       "description": "When to show icon in menubar.",
       "default": "Always",
@@ -232,7 +240,7 @@
     {
       "name": "showTitleInMenuBar",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "title": "Show Title in Menu Bar",
       "description": "Whether or not to show the timer or stopwatch title in the menu bar.",
       "label": "Show title",
@@ -241,7 +249,7 @@
     {
       "name": "copyOnSwStop",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "title": "Copy on Stopwatch Stop",
       "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
       "label": "Copy elapsed time",
@@ -250,7 +258,7 @@
     {
       "name": "newTimerInputOrder",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "New Timer Input Order",
       "description": "Order for input fields in new timer form.",
       "default": "Hours , Minutes, Seconds",
@@ -267,14 +275,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8"
+    "@raycast/api": "^1.61.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.48",
-    "eslint": "^7.32.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "~20.8.10",
+    "@types/react": "^18.2.35",
+    "eslint": "^8.53.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,5 +1,50 @@
 # Changelog
 
+## 1.61.0 - 2023-11-02
+
+### 💎 Improvements
+
+- **Date Picker**: When specifying a min and/or max date, the suggestion will now always be within those bounds
+
+### 🐞 Fixes
+
+- Fixed a bug that previously could cause a `no-view` command to display an error icon in the root search, with no means of removing the error.
+
+## 1.60.0 - 2023-10-18
+
+## Introducing the Extension Issues Dashboard
+
+![](.gitbook/assets/extension-issues.png)
+
+The new Extension Issues Dashboard is designed to help you quickly troubleshoot and resolve issues in any of your extensions by providing real-time visibility into errors encountered by users. You can access it at https://www.raycast.com/extension-issues, or by using the new `View Issues` action.
+
+### ✨ New
+
+- It is now possible to write extensions [using ESM](https://developers.raycast.com/faq) instead of CommonJS
+
+### 💎 Improvements
+
+- Updated NodeJS runtime to 18.18.2
+- When copying a deeplink with some arguments in the root search, copy the deeplink with those arguments
+
+### 🐞 Fixes
+
+- Fixed an issue where animated toasts would hang around after the command was unloaded.
+
+## 1.59.0 - 2023-09-21
+
+### ✨ New
+
+- **PickDate**: Similar to `Form.DatePicker`, you can also check whether the user picked a full day or a specific time with `Action.PickDate.isFullDay(date)`.
+
+### 💎 Improvements
+
+- **Clipboard**: The `transient` option is renamed to `concealed`.
+
+### 🐞 Fixes
+
+- **MenuBarExtra:** Right-clicking `MenuBarExtra.Item`s should now work in macOS Sonoma.
+
 ## 1.58.0 - 2023-09-06
 
 ### ✨ New

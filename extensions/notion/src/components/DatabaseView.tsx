@@ -1,7 +1,7 @@
 import { List, Image } from "@raycast/api";
 
-import { notionColorToTintColor } from "../utils/notion";
-import { Page, DatabasePropertyOption, DatabaseProperty, DatabaseView, User } from "../utils/types";
+import { notionColorToTintColor, Page, DatabaseProperty, DatabasePropertyOption, User } from "../utils/notion";
+import { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
 import { ActionEditPageProperty } from "./actions";
@@ -108,8 +108,16 @@ export function DatabaseView(props: DatabaseViewProps) {
 
   databasePages.forEach((p) => {
     const prop = Object.values(p.properties).find((x) => x.id === propertyId);
+    let propId = "_select_null_";
 
-    const propId = prop && "select" in prop && prop.select?.id ? prop.select.id : "_select_null_";
+    if (prop) {
+      if (prop.type == "select" && prop.select?.id) {
+        propId = prop.select.id;
+      } else if (prop.type == "status" && prop.status?.id) {
+        propId = prop.status.id;
+      }
+    }
+
     if (!tempSections[propId]) {
       tempSections[propId] = [];
     }

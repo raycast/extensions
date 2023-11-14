@@ -5,11 +5,16 @@
   "description": "The fastest way to search and create Notion pages.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
+  "owner": "notion",
+  "access": "public",
   "license": "MIT",
   "contributors": [
     "mathieudutour",
     "metakirby5",
-    "thomaslombart"
+    "thomaslombart",
+    "erics118",
+    "bkeys818",
+    "alexs"
   ],
   "categories": [
     "Applications",
@@ -87,25 +92,29 @@
   ],
   "dependencies": {
     "@mozilla/readability": "^0.4.4",
-    "@notionhq/client": "^2.2.7",
-    "@raycast/api": "^1.55.0",
-    "@raycast/utils": "^1.8.0",
+    "@notionhq/client": "^2.2.13",
+    "@raycast/api": "^1.61.2",
+    "@raycast/utils": "^1.10.1",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^2.30.0",
-    "linkedom": "^0.15.1",
-    "node-fetch": "^3.3.1",
+    "linkedom": "^0.15.6",
+    "node-fetch": "^3.3.2",
     "notion-to-md": "^3.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "@types/node-fetch": "^2.6.2",
-    "eslint": "^7.31.0",
-    "eslint-plugin-import": "^2.27.5",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.37",
+    "eslint": "^8.53.0",
+    "eslint-plugin-import": "^2.29.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

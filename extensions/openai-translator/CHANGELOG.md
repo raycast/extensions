@@ -1,5 +1,9 @@
 # OpenAI Translator Changelog
 
+## [Toggle metadata visiability] - 2023-09-14
+
+- Add preference and action to show/hide metadata in DetailView by @aiyogg
+
 ## [Updated model] - 2023-06-20
 
 - Added gpt-3.5-turbo-0613 model

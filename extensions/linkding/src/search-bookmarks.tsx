@@ -1,18 +1,22 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { Agent } from "https";
-import { LinkdingAccountMap, LinkdingBookmark, LinkdingForm, LinkdingResponse } from "./types/linkding-types";
+import { LinkdingAccount, LinkdingAccountForm, LinkdingAccountMap, LinkdingBookmark } from "./types/linkding-types";
 
 import { getPersistedLinkdingAccounts } from "./service/user-account-service";
+import { deleteBookmark, searchBookmarks } from "./service/bookmark-service";
+import { showErrorToast, showSuccessToast } from "./util/bookmark-util";
+import { LinkdingShortcut } from "./types/linkding-shortcuts";
 
 export default function searchLinkding() {
-  const [selectedLinkdingAccount, setSelectedLinkdingAccount] = useState<LinkdingForm | null>(null);
+  const [selectedLinkdingAccount, setSelectedLinkdingAccount] = useState<LinkdingAccountForm | LinkdingAccount | null>(
+    null
+  );
   const [linkdingAccountMap, setLinkdingAccountMap] = useState<LinkdingAccountMap>({});
   const [isLoading, setLoading] = useState(true);
   const [hasLinkdingAccounts, setHasLindingAccounts] = useState(false);
   const [linkdingBookmarks, setLinkdingBookmarks] = useState<LinkdingBookmark[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     getPersistedLinkdingAccounts().then((linkdingMap) => {
@@ -23,39 +27,39 @@ export default function searchLinkding() {
     });
   }, [setLinkdingAccountMap]);
 
+  useEffect(() => {
+    fetchBookmarks(searchText, selectedLinkdingAccount);
+  }, [selectedLinkdingAccount, searchText]);
+
   function createAbortController(timeoutMs: number) {
+    abortControllerRef.current?.abort();
     const abortController = new AbortController();
     setTimeout(() => abortController.abort(), timeoutMs || 0);
-
+    abortControllerRef.current = abortController;
     return abortController;
   }
 
-  function fetchBookmarks(searchText: string, linkdingAccount: LinkdingForm | null) {
+  function fetchBookmarks(searchText: string, linkdingAccount: LinkdingAccountForm | null) {
     if (linkdingAccount) {
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = createAbortController(5000);
+      createAbortController(5000);
       setLoading(true);
-      axios<LinkdingResponse>(`${linkdingAccount.serverUrl}/api/bookmarks?` + new URLSearchParams({ q: searchText }), {
-        signal: abortControllerRef.current?.signal,
-        responseType: "json",
-        httpsAgent: new Agent({ rejectUnauthorized: !linkdingAccount.ignoreSSL }),
-        headers: { Authorization: `Token ${linkdingAccount.apiKey}` },
-      })
+      searchBookmarks(linkdingAccount, searchText, abortControllerRef)
         .then((data) => {
           setLinkdingBookmarks(data.data.results);
         })
-        .catch((err) => {
-          if (!axios.isCancel(err)) {
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Something went wrong",
-              message: err.message,
-            });
-          }
-        })
+        .catch(showErrorToast)
         .finally(() => {
           setLoading(false);
         });
+    }
+  }
+
+  function deleteBookmarkCallback(bookmarkId: number) {
+    if (selectedLinkdingAccount) {
+      deleteBookmark(selectedLinkdingAccount, bookmarkId).then(() => {
+        showSuccessToast("Bookmark deleted");
+        fetchBookmarks(searchText, selectedLinkdingAccount);
+      });
     }
   }
 
@@ -79,14 +83,18 @@ export default function searchLinkding() {
     return (
       <List
         isLoading={isLoading}
-        onSearchTextChange={(searchText) => fetchBookmarks(searchText, selectedLinkdingAccount)}
+        onSearchTextChange={setSearchText}
         searchBarPlaceholder="Search through bookmarks..."
         searchBarAccessory={<LinkdingAccountDropdown />}
         throttle
       >
         <List.Section title="Results" subtitle={linkdingBookmarks?.length + ""}>
           {linkdingBookmarks?.map((linkdingBookmark) => (
-            <SearchListItem key={linkdingBookmark.id} linkdingBookmark={linkdingBookmark} />
+            <SearchListItem
+              key={linkdingBookmark.id}
+              linkdingBookmark={linkdingBookmark}
+              deleteBookmarkCallback={deleteBookmarkCallback}
+            />
           ))}
         </List.Section>
       </List>
@@ -103,7 +111,17 @@ export default function searchLinkding() {
   }
 }
 
-function SearchListItem({ linkdingBookmark }: { linkdingBookmark: LinkdingBookmark }) {
+function SearchListItem({
+  linkdingBookmark,
+  deleteBookmarkCallback,
+}: {
+  linkdingBookmark: LinkdingBookmark;
+  deleteBookmarkCallback: (bookmarkId: number) => void;
+}) {
+  function showCopyToast() {
+    showSuccessToast("Copied to Clipboard");
+  }
+
   return (
     <List.Item
       title={
@@ -112,12 +130,25 @@ function SearchListItem({ linkdingBookmark }: { linkdingBookmark: LinkdingBookma
           : linkdingBookmark.website_title ?? linkdingBookmark.url
       }
       subtitle={
-        linkdingBookmark.description.length > 0 ? linkdingBookmark.description : linkdingBookmark.website_description
+        linkdingBookmark.description && linkdingBookmark.description.length > 0
+          ? linkdingBookmark.description
+          : linkdingBookmark.website_description
       }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={linkdingBookmark.url} />
+            <Action.OpenInBrowser url={linkdingBookmark.url} />
+            <Action.CopyToClipboard
+              content={linkdingBookmark.url}
+              onCopy={showCopyToast}
+              shortcut={LinkdingShortcut.COPY_SHORTCUT}
+            />
+            <Action
+              onAction={() => deleteBookmarkCallback(linkdingBookmark.id)}
+              icon={{ source: Icon.Trash }}
+              title="Delete"
+              shortcut={LinkdingShortcut.DELETE_SHORTCUT}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

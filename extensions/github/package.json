@@ -14,7 +14,11 @@
     "pernielsentikaer",
     "loxygenk",
     "oilbeater",
-    "LunaticMuch"
+    "LunaticMuch",
+    "aeorge",
+    "daquinoaldo",
+    "ppy",
+    "lin"
   ],
   "categories": [
     "Developer Tools",
@@ -77,6 +81,24 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "application",
+          "type": "appPicker",
+          "required": false,
+          "title": "IDE Application",
+          "default": "/Applications/Visual Studio Code.app",
+          "placeholder": "/Applications/Visual Studio Code.app",
+          "description": "Will be used to open the cloned repository."
+        },
+        {
+          "name": "baseClonePath",
+          "type": "directory",
+          "required": false,
+          "title": "Clone Path",
+          "default": "~/GitHub",
+          "placeholder": "~/GitHub",
+          "description": "Path in which the repositories will be cloned."
+        },
+        {
           "name": "includeForks",
           "type": "checkbox",
           "required": false,
@@ -102,6 +124,12 @@
           "description": "Display owner name alongside repository name in search results"
         }
       ]
+    },
+    {
+      "name": "my-latest-repositories",
+      "title": "My Latest Repositories",
+      "description": "List your repositories by latest updated",
+      "mode": "view"
     },
     {
       "name": "workflow-runs",
@@ -131,6 +159,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "search-discussions",
+      "title": "Search Discussions",
+      "description": "Search recent Discussions globally in all repositories",
+      "mode": "view"
     },
     {
       "name": "my-discussions",
@@ -200,6 +234,22 @@
       "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
+    },
+    {
+      "name": "defaultSearchTerms",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Search Terms",
+      "description": "Default search to be populated when searching issues, pull requests and discussions.",
+      "default": "author:@me"
+    },
+    {
+      "name": "numberOfResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of search results",
+      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "placeholder": "50"
     }
   ],
   "dependencies": {
@@ -216,7 +266,7 @@
     "@graphql-codegen/typescript": "^3.0.2",
     "@graphql-codegen/typescript-graphql-request": "^4.5.9",
     "@graphql-codegen/typescript-operations": "^3.0.2",
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.15.11",
     "concurrently": "^8.2.0",

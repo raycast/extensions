@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Include team key as keyword in Create Issue command] - 2023-09-22
+
+Added the team key as a keyword in the "Create Issue" function so that it will appear when the user searches for a key.
+
 ## [Fix] - 2023-08-23
 
 Fixed "Workflow state not in same team as issue" error for Break Issue into Sub-issues error.

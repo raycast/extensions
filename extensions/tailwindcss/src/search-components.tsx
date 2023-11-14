@@ -21,7 +21,7 @@ const entries = groupBy(
       category: formatTitle(doc.loc.split("/").at(-3) as string),
       url: doc.loc,
     })),
-  (x) => x.category + "$$" + x.section
+  (x) => x.category + "$$" + x.section,
 );
 
 export default function SearchDocumentation() {

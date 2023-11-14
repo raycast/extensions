@@ -1,10 +1,12 @@
-import { OllamaApiTags, OllamaApiDelete, OllamaApiPull } from "./api/ollama";
+import { OllamaApiTags, OllamaApiDelete, OllamaApiPull, OllamaAvailableModelsOnRegistry } from "./api/ollama";
 import { OllamaApiTagsResponse, OllamaApiTagsResponseModel } from "./api/types";
 import * as React from "react";
 import { Form, Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 
 export default function Command(): JSX.Element {
+  const [ModelsOnRegistry, setModelsOnRegistry]: [string[], React.Dispatch<React.SetStateAction<string[]>>] =
+    React.useState([] as string[]);
   const [Models, setModels]: [
     OllamaApiTagsResponse | undefined,
     React.Dispatch<React.SetStateAction<OllamaApiTagsResponse | undefined>>
@@ -14,9 +16,20 @@ export default function Command(): JSX.Element {
   const [showForm, setShowForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
   async function fetchAvailableModels(): Promise<void> {
+    setIsLoading(true);
     await OllamaApiTags()
       .then((data) => {
         setModels(data);
+        setIsLoading(false);
+      })
+      .catch(async (err) => await showToast({ style: Toast.Style.Failure, title: err.message }));
+  }
+
+  async function fetchRegistry(): Promise<void> {
+    setIsLoading(true);
+    await OllamaAvailableModelsOnRegistry()
+      .then((data) => {
+        setModelsOnRegistry(data);
         setIsLoading(false);
       })
       .catch(async (err) => await showToast({ style: Toast.Style.Failure, title: err.message }));
@@ -48,12 +61,15 @@ export default function Command(): JSX.Element {
       e.on("message", async (data) => {
         await showToast({ style: Toast.Style.Animated, title: data });
       });
-      e.on("downloading", (data) => {
-        setModels((prevState) => {
-          const newState = prevState;
-          if (newState?.models[index as number]) newState.models[index as number].download = data as number;
-          return { ...prevState, ...(newState as OllamaApiTagsResponse) };
-        });
+      e.on("downloading", (data: number) => {
+        const prevDownload = Models?.models[index as number].download?.toFixed(2);
+        const currentDownload = data.toFixed(2);
+        if (currentDownload !== prevDownload)
+          setModels((prevState) => {
+            const newState = prevState;
+            if (newState?.models[index as number]) newState.models[index as number].download = Number(currentDownload);
+            return { ...prevState, ...(newState as OllamaApiTagsResponse) };
+          });
       });
       e.on("done", async () => {
         await fetchAvailableModels();
@@ -110,6 +126,10 @@ export default function Command(): JSX.Element {
     fetchAvailableModels();
   }, []);
 
+  React.useEffect(() => {
+    //if (showForm && ModelsOnRegistry.length === 0) fetchRegistry();
+  }, [showForm]);
+
   if (showForm)
     return (
       <Form
@@ -124,7 +144,16 @@ export default function Command(): JSX.Element {
           </ActionPanel>
         }
       >
-        <Form.TextField id="Model" title="Model Name" placeholder="Model Name" />
+        {ModelsOnRegistry.length === undefined || ModelsOnRegistry.length === 0 ? (
+          <Form.TextField id="Model" title="Model Name" placeholder="Model Name" />
+        ) : null}
+        {ModelsOnRegistry.length && ModelsOnRegistry.length > 0 ? (
+          <Form.Dropdown id="Model" title="Model Name">
+            {ModelsOnRegistry.map((item) => {
+              return <Form.Dropdown.Item key={item} title={item} value={item} />;
+            })}
+          </Form.Dropdown>
+        ) : null}
       </Form>
     );
 

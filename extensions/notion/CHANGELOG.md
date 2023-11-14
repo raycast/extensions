@@ -1,5 +1,30 @@
 # Notion Changelog
 
+## [Fixes] - 2023-10-12
+
+- Fix duplicated recent and searched pages sometimes showing
+- Modify how recent pages are stored
+- Fix last edited time showing as the current time
+- Fix duped recent pages after page title changed
+- Allow selecting just a date without a time
+- Support quick edit status property
+- Fix not being able to create a page with an empty select property
+
+## [Deep links] - 2023-09-29
+
+- New action to `Create Database Page` that copies a [deeplink](https://manual.raycast.com/deeplink) to open the command as configured.
+
+## [Small enhancements] - 2023-09-22
+
+- Add support for selecting options from Status properties
+
+## [Fix bugs and add colors] - 2023-09-06
+
+- Fix status property support in database list view, database kanban view, and create page view
+- Fix action panel calling "Databases" as "Pages"
+- Fix deleting databases
+- Use notion-provided colors
+
 ## [Small fixes] - 2023-08-16
 
 - Hide formula fields when creating database pages
@@ -13,6 +38,7 @@ This update introduces a new `Quick Capture` command. This lets you quickly save
 The page preview now includes a secondary action allowing you to see a metadata panel with page properties. Many properties are supported, including title, emails, numbers, checkboxes, statuses, and more! Speaking of properties, page properties in the list view now make use of Raycast components, improving their visual appearance. Tooltips have also been added to make it easier to identify the property you are viewing. Additionally, when searching Notion pages, you can now see the last author who edited the page.
 
 Page list items have also gained some actions to enhance the extension's power. Now you can:
+
 - Create quick links to your favorite pages
 - Delete pages
 - Copy a page's formatted URL (useful in chat apps such as Slack)

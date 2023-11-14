@@ -18,7 +18,8 @@ const useTask = () => {
         minChunkSize: task.durationMin,
         maxChunkSize: task.durationMax,
         notes: task.notes,
-        alwaysPrivate: true,
+        priority: task.priority,
+        onDeck: task.onDeck,
       };
 
       const [createdTask, error] = await axiosPromiseData<Task>(
@@ -109,6 +110,19 @@ const useTask = () => {
     }
   };
 
+  // Set task to incomplete
+  const incompleteTask = async (task: Task) => {
+    try {
+      const [updatedStatus, error] = await axiosPromiseData(
+        fetcher(`/planner/unarchive/task/${task.id}`, { method: "POST", responseType: "json" })
+      );
+      if (!updatedStatus || error) throw error;
+      return updatedStatus;
+    } catch (error) {
+      console.error("Error while updating task", error);
+    }
+  };
+
   return {
     createTask,
     handleStartTask,
@@ -117,6 +131,7 @@ const useTask = () => {
     addTime,
     updateTask,
     doneTask,
+    incompleteTask,
   };
 };
 

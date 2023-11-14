@@ -248,7 +248,15 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         <>
           <Form.Dropdown title="Team" storeValue {...itemProps.teamId}>
             {teams.map((team) => {
-              return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
+              return (
+                <Form.Dropdown.Item
+                  title={team.name}
+                  value={team.id}
+                  key={team.id}
+                  keywords={[team.key]}
+                  icon={getTeamIcon(team)}
+                />
+              );
             })}
           </Form.Dropdown>
           <Form.Separator />

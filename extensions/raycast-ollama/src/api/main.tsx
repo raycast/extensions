@@ -1,46 +1,47 @@
+import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse } from "./types";
 import {
-  OllamaApiEmbeddingsResponse,
-  OllamaApiGenerateRequestBody,
-  OllamaApiGenerateResponseDone,
-  OllamaApiGenerateResponseMetadata,
-} from "./types";
-import { ErrorOllamaCustomModel, ErrorOllamaModelNotInstalled, ErrorRaycastApiNoTextSelected } from "./errors";
-import { OllamaApiEmbeddings, OllamaApiGenerate } from "./ollama";
+  ErrorOllamaCustomModel,
+  ErrorOllamaModelNotInstalled,
+  ErrorRaycastApiNoTextSelectedOrCopied,
+  ErrorRaycastApiNoTextSelected,
+  ErrorRaycastApiNoTextCopied,
+} from "./errors";
+import { OllamaApiGenerate, OllamaApiTags } from "./ollama";
 import * as React from "react";
 import { Action, ActionPanel, Detail, Form, Icon, List, LocalStorage, Toast, showToast } from "@raycast/api";
-import { getSelectedText, getPreferenceValues } from "@raycast/api";
+import { getSelectedText, Clipboard, getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues();
 
 /**
  * Return JSX element with generated text and relative metadata.
- * @param {OllamaApiGenerateRequestBody} body - Ollama Generate Body Request.
- * @param {boolean} selectText - If true, get text from selected text.
- * @param {boolean} embeddings - If true, use embeddings.
- * @param {string} embeddingsModel - Model used for embeddings. By default use same model for inference.
+ * @param {string} command - Command name.
+ * @param {string | undefined} systemPrompt - System Prompt.
+ * @param {string | undefined} model - Model used for inference.
  * @returns {JSX.Element} Raycast Detail View.
  */
 export function ResultView(
-  body: OllamaApiGenerateRequestBody,
-  selectText: boolean,
-  embeddings = false,
-  embeddingsModel = body.model
+  command = "",
+  systemPrompt: string | undefined = undefined,
+  model: string | undefined = undefined
 ): JSX.Element {
-  const [embeddingsResponse, setEmbeddingsResponse]: [
-    OllamaApiEmbeddingsResponse,
-    React.Dispatch<React.SetStateAction<OllamaApiEmbeddingsResponse>>
-  ] = React.useState({} as OllamaApiEmbeddingsResponse);
+  // Main
+  const [modelGenerate, setModelGenerate]: [
+    string | undefined,
+    React.Dispatch<React.SetStateAction<string | undefined>>
+  ] = React.useState();
+  const query: React.MutableRefObject<string> = React.useRef("");
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const [answer, setAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [answerMetadata, setAnswerMetadata]: [
-    OllamaApiGenerateResponseMetadata,
-    React.Dispatch<React.SetStateAction<OllamaApiGenerateResponseMetadata>>
-  ] = React.useState({} as OllamaApiGenerateResponseMetadata);
-
+    OllamaApiGenerateResponse,
+    React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>
+  ] = React.useState({} as OllamaApiGenerateResponse);
   async function HandleError(err: Error) {
     if (err instanceof ErrorOllamaModelNotInstalled) {
       await showToast({ style: Toast.Style.Failure, title: err.message, message: err.suggest });
       setLoading(false);
+      setShowSelectModelForm(true);
       return;
     } else if (err instanceof ErrorOllamaCustomModel) {
       await showToast({
@@ -55,10 +56,15 @@ export function ResultView(
       setLoading(false);
     }
   }
-
   async function Inference(): Promise<void> {
     await showToast({ style: Toast.Style.Animated, title: "🧠 Performing Inference." });
     setLoading(true);
+    setAnswer("");
+    const body = {
+      model: modelGenerate,
+      prompt: query.current,
+    } as OllamaApiGenerateRequestBody;
+    if (systemPrompt) body.system = systemPrompt;
     OllamaApiGenerate(body)
       .then(async (emiter) => {
         emiter.on("data", (data) => {
@@ -75,54 +81,128 @@ export function ResultView(
         await HandleError(err);
       });
   }
-
-  async function Embeddings(text: string): Promise<void> {
-    await showToast({ style: Toast.Style.Animated, title: "🧠 Performing Embeddings." });
-    setLoading(true);
-    await OllamaApiEmbeddings(text, embeddingsModel)
-      .then((response) => {
-        setLoading(false);
-        setEmbeddingsResponse(response);
-      })
-      .catch(async (err) => {
-        await HandleError(err);
-      });
+  async function GetModels(): Promise<void> {
+    const generate = await LocalStorage.getItem(`${command}_model_generate`);
+    if (generate) {
+      setModelGenerate(generate as string);
+    } else {
+      setShowSelectModelForm(true);
+    }
   }
-
   React.useEffect(() => {
-    if (selectText && !embeddings) {
-      getSelectedText()
-        .then((selectedText) => {
-          body.prompt = selectedText;
-          Inference();
-        })
-        .catch(async (err) => {
-          await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextSelected.message });
-          console.error(err);
-        });
-    } else if (!selectText) {
-      Inference();
+    if (modelGenerate)
+      switch (preferences.ollamaResultViewInput) {
+        case "SelectedText":
+          getSelectedText()
+            .then((text) => {
+              query.current = text;
+              Inference();
+            })
+            .catch(async () => {
+              if (preferences.ollamaResultViewInputFallback) {
+                Clipboard.readText()
+                  .then((text) => {
+                    if (text === undefined) throw "Empty Clipboard";
+                    query.current = text;
+                    Inference();
+                  })
+                  .catch(async () => {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: ErrorRaycastApiNoTextSelectedOrCopied.message,
+                    });
+                  });
+              } else {
+                await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextSelected.message });
+              }
+            });
+          break;
+        case "Clipboard":
+          Clipboard.readText()
+            .then((text) => {
+              if (text === undefined) throw "Empty Clipboard";
+              query.current = text;
+              Inference();
+            })
+            .catch(async () => {
+              if (preferences.ollamaResultViewInputFallback) {
+                getSelectedText()
+                  .then((text) => {
+                    query.current = text;
+                    Inference();
+                  })
+                  .catch(async () => {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: ErrorRaycastApiNoTextSelectedOrCopied.message,
+                    });
+                  });
+              } else {
+                await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextCopied.message });
+              }
+            });
+          break;
+      }
+  }, [modelGenerate]);
+  React.useEffect(() => {
+    if (model) {
+      setModelGenerate(model);
+    } else {
+      GetModels();
     }
   }, []);
 
-  React.useEffect(() => {
-    if (selectText && embeddings) {
-      getSelectedText()
-        .then((selectedText) => {
-          Embeddings(selectedText);
-        })
-        .catch(async (err) => {
-          await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextSelected.message });
-          console.error(err);
+  // Form: Select Model
+  const [showSelectModelForm, setShowSelectModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
+    React.useState(false);
+  const [installedModels, setInstalledModels]: [string[], React.Dispatch<React.SetStateAction<string[]>>] =
+    React.useState([] as string[]);
+  async function setLocalStorageModels(generate: string) {
+    LocalStorage.setItem(`${command}_model_generate`, generate);
+    setModelGenerate(generate);
+    setShowSelectModelForm(false);
+  }
+  async function getInstalledModels() {
+    const installedModels: string[] | undefined = await OllamaApiTags()
+      .then((response): string[] => {
+        const installedModels: string[] = [];
+        response.models.map((model) => {
+          installedModels.push(model.name);
         });
-    }
-  }, []);
-
+        return installedModels;
+      })
+      .catch(async (err): Promise<undefined> => {
+        await showToast({ style: Toast.Style.Failure, title: err.message });
+        return undefined;
+      });
+    if (installedModels) setInstalledModels([...installedModels]);
+  }
   React.useEffect(() => {
-    if (embeddingsResponse.embedding) {
-      //Inference();
-    }
-  }, [embeddingsResponse]);
+    if (showSelectModelForm && installedModels.length === 0) getInstalledModels();
+  }, [showSelectModelForm]);
+  const FormSetModel: JSX.Element = (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit" onSubmit={(values) => setLocalStorageModels(values.modelGenerate)} />
+          <Action.Open
+            title="Manage Models"
+            icon={Icon.Box}
+            target="raycast://extensions/massimiliano_pasquini/raycast-ollama/ollama-models"
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown id="modelGenerate" title="Model" defaultValue={modelGenerate}>
+        {installedModels.map((model) => {
+          return <Form.Dropdown.Item value={model} title={model} key={model} />;
+        })}
+      </Form.Dropdown>
+    </Form>
+  );
+
+  if (showSelectModelForm) return FormSetModel;
 
   return (
     <Detail
@@ -133,6 +213,12 @@ export function ResultView(
           <ActionPanel title="Actions">
             <Action.CopyToClipboard content={answer} />
             <Action title="Retry" onAction={Inference} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.Repeat} />
+            <Action
+              title="Change Model"
+              icon={Icon.Box}
+              onAction={() => setShowSelectModelForm(true)}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
+            />
           </ActionPanel>
         )
       }
@@ -142,17 +228,42 @@ export function ResultView(
           <Detail.Metadata>
             <Detail.Metadata.Label title="Model" text={answerMetadata.model} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label
-              title="Total Inference Duration"
-              text={`${(answerMetadata.total_duration / 1e9).toFixed(2)}s`}
-            />
-            <Detail.Metadata.Label title="Prompt Eval Count" text={`${answerMetadata.prompt_eval_count}`} />
-            <Detail.Metadata.Label
-              title="Prompt Eval Duration"
-              text={`${(answerMetadata.prompt_eval_duration / 1e9).toFixed(2)}s`}
-            />
-            <Detail.Metadata.Label title="Eval Count" text={`${answerMetadata.eval_count}`} />
-            <Detail.Metadata.Label title="Eval Duration" text={`${(answerMetadata.eval_duration / 1e9).toFixed(2)}s`} />
+            {answerMetadata.eval_count && answerMetadata.eval_duration ? (
+              <Detail.Metadata.Label
+                title="Generation Speed"
+                text={`${(answerMetadata.eval_count / (answerMetadata.eval_duration / 1e9)).toFixed(2)} token/s`}
+              />
+            ) : null}
+            {answerMetadata.total_duration ? (
+              <Detail.Metadata.Label
+                title="Total Inference Duration"
+                text={`${(answerMetadata.total_duration / 1e9).toFixed(2)}s`}
+              />
+            ) : null}
+            {answerMetadata.load_duration ? (
+              <Detail.Metadata.Label
+                title="Load Duration"
+                text={`${(answerMetadata.load_duration / 1e9).toFixed(2)}s`}
+              />
+            ) : null}
+            {answerMetadata.prompt_eval_count ? (
+              <Detail.Metadata.Label title="Prompt Eval Count" text={`${answerMetadata.prompt_eval_count}`} />
+            ) : null}
+            {answerMetadata.prompt_eval_duration ? (
+              <Detail.Metadata.Label
+                title="Prompt Eval Duration"
+                text={`${(answerMetadata.prompt_eval_duration / 1e9).toFixed(2)}s`}
+              />
+            ) : null}
+            {answerMetadata.eval_count ? (
+              <Detail.Metadata.Label title="Eval Count" text={`${answerMetadata.eval_count}`} />
+            ) : null}
+            {answerMetadata.eval_duration ? (
+              <Detail.Metadata.Label
+                title="Eval Duration"
+                text={`${(answerMetadata.eval_duration / 1e9).toFixed(2)}s`}
+              />
+            ) : null}
           </Detail.Metadata>
         )
       }
@@ -162,27 +273,27 @@ export function ResultView(
 
 /**
  * Return JSX element with generated text on list view.
- * @param {OllamaApiGenerateRequestBody} body - Ollama Generate Body Request.
  * @returns {JSX.Element} Raycast List View.
  */
-export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
+export function ListView(): JSX.Element {
+  // Main
+  const modelGenerate: React.MutableRefObject<string | undefined> = React.useRef();
   const [loading, setLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const [query, setQuery]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
   const [chatName, setChatName]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("Current");
   const [selectedAnswer, setSelectedAnswer]: [string, React.Dispatch<React.SetStateAction<string>>] =
     React.useState("0");
   const [answerListHistory, setAnswerListHistory]: [
-    Map<string, [string, string, OllamaApiGenerateResponseDone][] | undefined>,
-    React.Dispatch<React.SetStateAction<Map<string, [string, string, OllamaApiGenerateResponseDone][] | undefined>>>
+    Map<string, [string, string, OllamaApiGenerateResponse][] | undefined>,
+    React.Dispatch<React.SetStateAction<Map<string, [string, string, OllamaApiGenerateResponse][] | undefined>>>
   ] = React.useState(new Map());
-  const [showForm, setShowForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
   const [clipboardConversation, setClipboardConversation]: [string, React.Dispatch<React.SetStateAction<string>>] =
     React.useState("");
-
   async function HandleError(err: Error) {
     if (err instanceof ErrorOllamaModelNotInstalled) {
       await showToast({ style: Toast.Style.Failure, title: err.message, message: err.suggest });
       setLoading(false);
+      setShowSelectModelForm(true);
       return;
     } else if (err instanceof ErrorOllamaCustomModel) {
       await showToast({
@@ -197,11 +308,13 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
       setLoading(false);
     }
   }
-
   async function Inference(): Promise<void> {
     await showToast({ style: Toast.Style.Animated, title: "🧠 Performing Inference." });
     setLoading(true);
-    body.prompt = query;
+    const body = {
+      model: modelGenerate.current,
+      prompt: query,
+    } as OllamaApiGenerateRequestBody;
     if (answerListHistory.has(chatName)) {
       const l = answerListHistory.get(chatName)?.length;
       if (l && l > 0) {
@@ -214,9 +327,9 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
         setAnswerListHistory((prevState) => {
           let prevData = prevState.get(chatName);
           if (prevData?.length === undefined) {
-            prevData = [[query, "", {} as OllamaApiGenerateResponseDone]];
+            prevData = [[query, "", {} as OllamaApiGenerateResponse]];
           } else {
-            prevData.push([query, "", {} as OllamaApiGenerateResponseDone]);
+            prevData.push([query, "", {} as OllamaApiGenerateResponse]);
           }
           prevState.set(chatName, prevData);
           setSelectedAnswer((prevData.length - 1).toString());
@@ -251,28 +364,31 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
         await HandleError(err);
       });
   }
-
   async function SaveAnswerListHistory(): Promise<void> {
     const currentData = answerListHistory.get(chatName);
     if (currentData && currentData[currentData.length - 1][2].context) {
       await LocalStorage.setItem("answerListHistory", JSON.stringify([...answerListHistory]));
     }
   }
-
   async function GetAnswerList(): Promise<void> {
     await LocalStorage.getItem("chatName").then((data) => {
       if (data) setChatName(data as string);
     });
     await LocalStorage.getItem("answerListHistory").then((data) => {
       if (data) {
-        const dataMap: Map<string, [string, string, OllamaApiGenerateResponseDone][]> = new Map(
-          JSON.parse(data as string)
-        );
+        const dataMap: Map<string, [string, string, OllamaApiGenerateResponse][]> = new Map(JSON.parse(data as string));
         setAnswerListHistory(dataMap);
       }
     });
   }
-
+  async function GetModels(): Promise<void> {
+    const generate = await LocalStorage.getItem("chat_model_generate");
+    if (generate) {
+      modelGenerate.current = generate as string;
+    } else {
+      setShowSelectModelForm(true);
+    }
+  }
   async function ClearAnswerList(): Promise<void> {
     setAnswerListHistory((prevState) => {
       if (chatName === "Current") {
@@ -289,32 +405,11 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
     await LocalStorage.setItem("chatName", "Current");
     await LocalStorage.setItem("answerListHistory", JSON.stringify([...answerListHistory]));
   }
-
-  async function SaveChatToHistory(): Promise<void> {
-    setAnswerListHistory((prevState) => {
-      const chat = prevState.get("Current");
-      if (chat) {
-        prevState.set(chatName, chat);
-        prevState.set("Current", undefined);
-      }
-      return new Map(prevState);
-    });
-    setChatName("Current");
-    await LocalStorage.setItem("chatName", "Current");
-    await LocalStorage.setItem("answerListHistory", JSON.stringify([...answerListHistory]));
-    setShowForm(false);
-  }
-
   async function ChangeChat(name: string): Promise<void> {
     setChatName(name);
     setClipboardConversationByName(name);
     await LocalStorage.setItem("chatName", name);
   }
-
-  function showFormView(): void {
-    setShowForm(true);
-  }
-
   function setClipboardConversationByName(name: string) {
     let clipboard = "";
     const data = answerListHistory.get(name);
@@ -323,8 +418,7 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
     }
     setClipboardConversation(clipboard);
   }
-
-  function ActionOllama(item?: [string, string, OllamaApiGenerateResponseDone]): JSX.Element {
+  function ActionOllama(item?: [string, string, OllamaApiGenerateResponse]): JSX.Element {
     return (
       <ActionPanel>
         <ActionPanel.Section title="Ollama">
@@ -348,7 +442,7 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
             <Action
               title="Archive Conversation"
               icon={Icon.Box}
-              onAction={showFormView}
+              onAction={() => setShowFormSaveChat(true)}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
             />
           )}
@@ -360,38 +454,115 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
           )}
+          <Action
+            title="Change Model"
+            icon={Icon.Box}
+            onAction={() => setShowSelectModelForm(true)}
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+          />
         </ActionPanel.Section>
       </ActionPanel>
     );
   }
-
   React.useEffect(() => {
     SaveAnswerListHistory();
     setClipboardConversationByName(chatName);
   }, [answerListHistory]);
-
   React.useEffect(() => {
     GetAnswerList();
+    GetModels();
   }, []);
 
-  if (showForm)
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm onSubmit={SaveChatToHistory} title="Save Conversation" />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField
-          id="chatName"
-          title="Chat Name"
-          placeholder="Enter Chat Name"
-          value={chatName}
-          onChange={setChatName}
-        />
-      </Form>
-    );
+  // Form: Save Chat
+  const [showFormSaveChat, setShowFormSaveChat]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
+    React.useState(false);
+  async function SaveChatToHistory(): Promise<void> {
+    setAnswerListHistory((prevState) => {
+      const chat = prevState.get("Current");
+      if (chat) {
+        prevState.set(chatName, chat);
+        prevState.set("Current", undefined);
+      }
+      return new Map(prevState);
+    });
+    setChatName("Current");
+    await LocalStorage.setItem("chatName", "Current");
+    await LocalStorage.setItem("answerListHistory", JSON.stringify([...answerListHistory]));
+    setShowFormSaveChat(false);
+  }
+  const FormSaveChat: JSX.Element = (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={SaveChatToHistory} title="Save Conversation" />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="chatName"
+        title="Chat Name"
+        placeholder="Enter Chat Name"
+        value={chatName}
+        onChange={setChatName}
+      />
+    </Form>
+  );
+
+  // Form: Select Model
+  const [showSelectModelForm, setShowSelectModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
+    React.useState(false);
+  const [installedModels, setInstalledModels]: [string[], React.Dispatch<React.SetStateAction<string[]>>] =
+    React.useState([] as string[]);
+  async function setLocalStorageModels(generate: string) {
+    LocalStorage.setItem(`chat_model_generate`, generate);
+    modelGenerate.current = generate;
+    setShowSelectModelForm(false);
+  }
+  async function getInstalledModels() {
+    const installedModels: string[] | undefined = await OllamaApiTags()
+      .then((response): string[] => {
+        const installedModels: string[] = [];
+        response.models.map((model) => {
+          installedModels.push(model.name);
+        });
+        return installedModels;
+      })
+      .catch(async (err): Promise<undefined> => {
+        await showToast({ style: Toast.Style.Failure, title: err.message });
+        return undefined;
+      });
+    if (installedModels) setInstalledModels([...installedModels]);
+  }
+  React.useEffect(() => {
+    if (showSelectModelForm && installedModels.length === 0) getInstalledModels();
+  }, [showSelectModelForm]);
+  const FormSetModel: JSX.Element = (
+    <Form
+      actions={
+        <ActionPanel>
+          {installedModels.length > 0 && (
+            <Action.SubmitForm title="Submit" onSubmit={(values) => setLocalStorageModels(values.modelGenerate)} />
+          )}
+          <Action.Open
+            title="Manage Models"
+            icon={Icon.Box}
+            target="raycast://extensions/massimiliano_pasquini/raycast-ollama/ollama-models"
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Dropdown id="modelGenerate" title="Model" defaultValue={modelGenerate.current}>
+        {installedModels.map((model) => {
+          return <Form.Dropdown.Item value={model} title={model} key={model} />;
+        })}
+      </Form.Dropdown>
+    </Form>
+  );
+
+  if (showSelectModelForm) return FormSetModel;
+
+  if (showFormSaveChat) return FormSaveChat;
 
   return (
     <List
@@ -416,18 +587,65 @@ export function ListView(body: OllamaApiGenerateRequestBody): JSX.Element {
           answerListHistory.get(chatName)?.length != undefined &&
           (answerListHistory.get(chatName)?.length as number) > 0
         ) {
-          return answerListHistory
-            .get(chatName)
-            ?.map((item, index) => (
-              <List.Item
-                icon={Icon.Message}
-                title={item[0]}
-                key={index}
-                id={index.toString()}
-                actions={!loading && ActionOllama(item)}
-                detail={<List.Item.Detail markdown={`${item[1]}`} />}
-              />
-            ));
+          return answerListHistory.get(chatName)?.map((item, index) => (
+            <List.Item
+              icon={Icon.Message}
+              title={item[0]}
+              key={index}
+              id={index.toString()}
+              actions={!loading && ActionOllama(item)}
+              detail={
+                <List.Item.Detail
+                  markdown={`${item[1]}`}
+                  metadata={
+                    preferences.ollamaShowMetadata &&
+                    item[2].context && (
+                      <Detail.Metadata>
+                        <Detail.Metadata.Label title="Model" text={item[2].model} />
+                        <Detail.Metadata.Separator />
+                        {item[2].eval_count && item[2].eval_duration ? (
+                          <Detail.Metadata.Label
+                            title="Generation Speed"
+                            text={`${(item[2].eval_count / (item[2].eval_duration / 1e9)).toFixed(2)} token/s`}
+                          />
+                        ) : null}
+                        {item[2].total_duration ? (
+                          <Detail.Metadata.Label
+                            title="Total Inference Duration"
+                            text={`${(item[2].total_duration / 1e9).toFixed(2)}s`}
+                          />
+                        ) : null}
+                        {item[2].load_duration ? (
+                          <Detail.Metadata.Label
+                            title="Load Duration"
+                            text={`${(item[2].load_duration / 1e9).toFixed(2)}s`}
+                          />
+                        ) : null}
+                        {item[2].prompt_eval_count ? (
+                          <Detail.Metadata.Label title="Prompt Eval Count" text={`${item[2].prompt_eval_count}`} />
+                        ) : null}
+                        {item[2].prompt_eval_duration ? (
+                          <Detail.Metadata.Label
+                            title="Prompt Eval Duration"
+                            text={`${(item[2].prompt_eval_duration / 1e9).toFixed(2)}s`}
+                          />
+                        ) : null}
+                        {item[2].eval_count ? (
+                          <Detail.Metadata.Label title="Eval Count" text={`${item[2].eval_count}`} />
+                        ) : null}
+                        {item[2].eval_duration ? (
+                          <Detail.Metadata.Label
+                            title="Eval Duration"
+                            text={`${(item[2].eval_duration / 1e9).toFixed(2)}s`}
+                          />
+                        ) : null}
+                      </Detail.Metadata>
+                    )
+                  }
+                />
+              }
+            />
+          ));
         }
         return <List.EmptyView icon={Icon.Message} title="Start a Conversation with Ollama" />;
       })()}

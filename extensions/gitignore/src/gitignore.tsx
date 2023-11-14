@@ -117,14 +117,21 @@ function PreviewAction({ selected }: { selected: GitignoreFile[] }) {
     <Action.Push
       title="Preview"
       icon={Icon.Eye}
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       target={<GitignorePreview gitignoreFiles={selected} />}
     />
   );
 }
 
 function PasteAction({ selected }: { selected: GitignoreFile[] }) {
-  return <Action title="Paste to App" icon={Icon.TextDocument} onAction={() => exportPaste(selected)} />;
+  return (
+    <Action
+      title="Paste to App"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      icon={Icon.TextDocument}
+      onAction={() => exportPaste(selected)}
+    />
+  );
 }
 
 function CopyToClipboardAction({ selected }: { selected: GitignoreFile[] }) {

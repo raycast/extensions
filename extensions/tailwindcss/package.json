@@ -6,7 +6,10 @@
   "icon": "tailwind-icon.png",
   "author": "vimtor",
   "contributors": [
-    "cy-98"
+    "cy-98",
+    "emilsharier",
+    "pernielsentikaer",
+    "eric_huang"
   ],
   "license": "MIT",
   "commands": [
@@ -102,7 +105,7 @@
     "color-convert": "^2.0.1",
     "css": "^3.0.0",
     "lodash": "^4.17.21",
-    "tailwindcss": "^3.2.4"
+    "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
     "@types/color-convert": "^2.0.0",
@@ -114,7 +117,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

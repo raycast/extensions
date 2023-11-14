@@ -12,5 +12,6 @@ describe("tv schedule repository", () => {
 
         expect(programs[0]).toHaveProperty("startTime");
         expect(programs[0]).toHaveProperty("description");
+        expect(programs.filter(program => program.live)).toHaveLength(1);
     });
 });

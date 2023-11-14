@@ -30,7 +30,6 @@ export default function Command() {
           key={item.id}
           title={item.title}
           accessories={getAccessories(item)}
-          subtitle={item.description}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
@@ -41,6 +40,18 @@ export default function Command() {
                 url={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
                 title="Preview URL"
               />
+              <ActionPanel.Section title="Quick Links">
+                <Action.OpenInBrowser
+                  title="Open Dashboard"
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  url="https://app.cal.com"
+                />
+                <Action.CopyToClipboard
+                  title="Copy My Link"
+                  shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  content={`https://cal.com/${user?.username}`}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

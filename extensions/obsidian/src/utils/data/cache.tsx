@@ -86,3 +86,7 @@ export function getNotesFromCache(vault: Vault) {
   }
   return cacheNotesFor(vault);
 }
+
+export function clearCache() {
+  cache.clear();
+}

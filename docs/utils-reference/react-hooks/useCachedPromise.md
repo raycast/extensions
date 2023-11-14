@@ -1,6 +1,10 @@
 # `useCachedPromise`
 
-Hook which wraps an asynchronous function or a function that returns a Promise and returns the [AsyncState](#asyncstate) corresponding to the execution of the function. The last value will be kept between command runs.
+Hook which wraps an asynchronous function or a function that returns a Promise and returns the [AsyncState](#asyncstate) corresponding to the execution of the function.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useCachedPromise` first returns the data from cache (stale), then executes the promise (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
 
 {% hint style="info" %}
 The value needs to be JSON serializable.
@@ -69,14 +73,15 @@ export default function Command() {
   const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = useCachedPromise(
     async (url: string) => {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: abortable.current?.signal });
       const result = await response.text();
       return result;
     },
     ["https://api.example"],
     {
       initialData: "Some Text",
-    }
+      abortable,
+    },
   );
 
   return (
@@ -116,7 +121,7 @@ export default function Command() {
     {
       // to make sure the screen isn't flickering when the searchText changes
       keepPreviousData: true,
-    }
+    },
   );
 
   return (
@@ -148,7 +153,7 @@ export default function Command() {
       const result = await response.text();
       return result;
     },
-    ["https://api.example"]
+    ["https://api.example"],
   );
 
   const appendFoo = async () => {
@@ -163,7 +168,7 @@ export default function Command() {
           optimisticUpdate(data) {
             return data + "foo";
           },
-        }
+        },
       );
       // yay, the API call worked!
       toast.style = Toast.Style.Success;
@@ -238,6 +243,6 @@ export type MutatePromise<T> = (
     optimisticUpdate?: (data: T) => T;
     rollbackOnError?: boolean | ((data: T) => T);
     shouldRevalidateAfter?: boolean;
-  }
+  },
 ) => Promise<any>;
 ```

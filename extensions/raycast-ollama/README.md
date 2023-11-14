@@ -5,16 +5,16 @@ Use [Ollama](https://ollama.ai) for local llama inference on Raycast.
 ## Requirements
 
 1. Ollama installed and running.
-2. At least orca 3b and llama2 7b model installed (they are the default). Use 'Manage Models' commands for pulling images or ollama cli.
+2. At least one model installed. Use 'Manage Models' commands for pulling images or ollama cli.
 
 ```bash
-ollama pull orca
+ollama pull orca-mini
 ollama pull llama2
 ```
 
 ## Use a different model
 
-This plugin allows you to select a different model for each command. Keep in mind that you need to have the corresponding model installed on your machine. You can find all available model [here](https://gist.github.com/mchiang0610/b959e3c189ec1e948e4f6a1f737a1fc5).
+This plugin allows you to select a different model for each command. Keep in mind that you need to have the corresponding model installed on your machine. You can find all available model [here](https://ollama.ai/library).
 
 ## Create your own custom commands
 

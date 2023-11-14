@@ -1,5 +1,21 @@
 # Jira Changelog
 
+## [Add project list in Search Issues command] - 2023-10-06
+
+It is now possible to filter issues by projects in the `Search Issues` command. If a project is selected, you can simply input the ticket number in the search query for faster results.
+
+## [Implement Comments on issues] - 2023-10-03
+
+- Add list of comments
+- Add new comment action
+- Add edit comment action
+- Add delete comment action
+
+
+## [Render authenticated image URIs] - 2023-09-10
+
+- Now successfully renders images and icons that require authenticated HTTP requests
+
 ## [Fix searching for sprints] - 2023-09-06
 
 - Fixes an issue where searching for sprints would fail if the start date is not defined.

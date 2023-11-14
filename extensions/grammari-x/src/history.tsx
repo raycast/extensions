@@ -14,7 +14,6 @@ export default function History() {
   const history = useHistory();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
-
   const getActionPanel = (chat: Chat) => (
     <ActionPanel>
       <CopyActionSection answer={chat.answer} question={chat.question} />

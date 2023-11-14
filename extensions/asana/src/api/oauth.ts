@@ -23,7 +23,7 @@ export async function authorize() {
   }
 
   const authRequest = await client.authorizationRequest({
-    endpoint: "https://asana.oauth-proxy.raycast.com/authorize",
+    endpoint: "https://asana.oauth.raycast.com/authorize",
     clientId,
     scope: "default",
   });
@@ -37,7 +37,7 @@ export async function authorize() {
 
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
   try {
-    const response = await axios.post<OAuth.TokenResponse>("https://asana.oauth-proxy.raycast.com/token", {
+    const response = await axios.post<OAuth.TokenResponse>("https://asana.oauth.raycast.com/token", {
       client_id: clientId,
       code: authCode,
       code_verifier: authRequest.codeVerifier,
@@ -62,7 +62,7 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
   try {
     const { data: tokenResponse } = await axios.post<OAuth.TokenResponse>(
-      "https://asana.oauth-proxy.raycast.com/refresh-token",
+      "https://asana.oauth.raycast.com/refresh-token",
       { client_id: clientId, refresh_token: refreshToken, grant_type: "refresh_token" }
     );
     tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
