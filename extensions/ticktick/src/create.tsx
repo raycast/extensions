@@ -55,7 +55,9 @@ export default function TickTickCreate() {
           default:
             break;
         }
-      } catch (error) {}
+      } catch (error) {
+        // error
+      }
     })();
   }, [defaultTitle]);
 
