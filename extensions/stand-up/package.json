@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stand-up",
+  "title": "StandUp",
+  "description": "Frictionless note taking, to document your day for stand-up the next",
+  "icon": "command-icon.png",
+  "author": "theomjones",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "required": true,
+      "type": "directory",
+      "description": "Where to save your stand-up notes",
+      "name": "notesDirectory",
+      "title": "Notes directory"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Take Note",
+      "description": "Take a stand-up note",
+      "mode": "view"
+    },
+    {
+      "name": "show-notes",
+      "title": "View Notes",
+      "description": "Show stand-up notes",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2",
+    "dayjs": "^1.11.10",
+    "fs-extra": "^11.1.1",
+    "lodash": "^4.17.21",
+    "lowdb": "^6.1.1",
+    "nanoid": "^5.0.3",
+    "react-use": "^17.4.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/fs-extra": "^11.0.4",
+    "@types/lodash": "^4.14.201",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "@types/uuid": "^9.0.7",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
