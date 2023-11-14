@@ -58,7 +58,7 @@ function Filters() {
   }
 
   return (
-    <List searchBarPlaceholder="Filter task filters by name">
+    <List searchBarPlaceholder="Filter filters by name">
       {filters.map((filter) => {
         return (
           <List.Item
