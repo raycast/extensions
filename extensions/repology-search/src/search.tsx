@@ -81,7 +81,9 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {Object.keys(packageSections).length > 0 ? (
+      {inputValue.length < 2 ? (
+        <List.EmptyView title="No Results" />
+      ) : (
         Object.entries(packageSections).map(([sectionTitle, packages]) => (
           <List.Section key={sectionTitle} title={sectionTitle}>
             {packages.map((pkg, index) => (
@@ -111,8 +113,6 @@ export default function Command() {
             ))}
           </List.Section>
         ))
-      ) : (
-        <List.EmptyView title="No Results" />
       )}
     </List>
   );
