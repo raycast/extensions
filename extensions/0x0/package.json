@@ -5,6 +5,9 @@
   "description": "Upload files to https://0x0.st.",
   "icon": "0x0.png",
   "author": "pseudobun",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Applications",
@@ -13,7 +16,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Upload",
+      "title": "Upload File",
+      "subtitle": "0x0",
       "description": "Select a file and upload it to 0x0.st.",
       "mode": "view"
     }
