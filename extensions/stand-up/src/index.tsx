@@ -4,10 +4,9 @@ import { addEntry, EntryType } from "./api";
 
 interface FormDate {
   notes: string;
-  date: Date,
+  date: Date;
   type: EntryType;
 }
-
 
 export default function Command() {
   const onSubmit = async (data: FormDate) => {
@@ -15,19 +14,21 @@ export default function Command() {
       date: data.date,
       notes: data.notes,
       type: data.type,
-    })
+    });
     await showHUD(`Note added at ${dayjs(data.date).format("DD/MM @HH:mm")}`, {
       clearRootSearch: true,
       popToRootType: PopToRootType.Immediate,
-    })
-  }
+    });
+  };
 
   return (
-    <Form actions={
-      <ActionPanel>
-        <Action.SubmitForm onSubmit={onSubmit} />
-      </ActionPanel>
-    }>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={onSubmit} />
+        </ActionPanel>
+      }
+    >
       <Form.Description text="Add a new stand-up note" />
       <Form.TextField id="notes" title="Note" />
       <Form.DatePicker id="date" title="Date" defaultValue={new Date()} />

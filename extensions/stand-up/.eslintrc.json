@@ -1,7 +1,4 @@
 {
   "root": true,
-  "extends": ["@raycast"],
-  "rules": {
-    "@raycast/prefer-title-case": "off"
-  }
+  "extends": ["@raycast"]
 }

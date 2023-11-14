@@ -16,7 +16,7 @@ function NewNoteAction() {
   return (
     <Action
       icon={Icon.NewDocument}
-      title="Create note"
+      title="Create Note"
       onAction={() => {
         launchCommand({
           name: "index",
@@ -143,7 +143,7 @@ export default function Command() {
                           key: "backspace",
                           modifiers: ["cmd", "shift"],
                         }}
-                        title="Delete all on day"
+                        title="Delete All on Day"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         onAction={async () => {

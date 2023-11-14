@@ -1,10 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
-    notesDirectory: string;
+  notesDirectory: string;
 }
 
-
 export function getPreferences(): Preferences {
-    return getPreferenceValues() as Preferences;
+  return getPreferenceValues() as Preferences;
 }
