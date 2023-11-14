@@ -8,6 +8,11 @@
   "contributors": [
     "BalliAsghar"
   ],
+  "keywords": [
+    "rust",
+    "cargo",
+    "package manager"
+  ],
   "license": "MIT",
   "commands": [
     {

@@ -42,7 +42,7 @@ function loadUsers(unparsedUsers: string[]) {
   return users;
 }
 
-function AccountSwitchList() {
+export default function AccountSwitchList() {
   const [users, setUsers] = useState<User[]>();
   const [error, setError] = useState<ErrorDetails>();
   useEffect(() => {
@@ -53,7 +53,7 @@ function AccountSwitchList() {
         const _list = loadUsers(data);
         setUsers(_list);
       } catch (error) {
-        setError(getErrorDetails(error, "Couldn't load users."));
+        setError(getErrorDetails(error, "Couldn’t load users."));
       }
     }
     fetch();
@@ -105,8 +105,4 @@ function AccountSwitchList() {
       )}
     </List>
   );
-}
-
-export default function Command() {
-  return <AccountSwitchList />;
 }

@@ -3,7 +3,7 @@ import { startCaffeinate, stopCaffeinate } from "./utils";
 
 export default async () => {
   try {
-    execSync("ps aux | pgrep caffeinate");
+    execSync("pgrep caffeinate");
 
     await stopCaffeinate(true, "Your Mac is now decaffeinated");
   } catch (error) {
