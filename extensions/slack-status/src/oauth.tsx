@@ -25,7 +25,7 @@ export function OAuthSessionProvider(props: { children: ReactNode; config: OAuth
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
     } else {
-      console.error("`withLinearClient` is only supported in `view` and `menu-bar` mode");
+      console.error("`withOAuthSession` is only supported in `view` and `menu-bar` mode");
       return <Detail />;
     }
   }
@@ -45,7 +45,7 @@ export function withOAuthSession<P extends object>(Component: ComponentType<P>, 
 
 export function useOAuthSession() {
   if (!accessToken) {
-    throw new Error("You must call `withOAuth` before using `useOAuth`");
+    throw new Error("You must call `withOAuthSession` before using `useOAuth`");
   }
 
   return accessToken;
