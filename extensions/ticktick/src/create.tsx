@@ -10,6 +10,8 @@ import {
   AI,
   getPreferenceValues,
   Icon,
+  getSelectedText,
+  Clipboard,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useStartApp from "./hooks/useStartApp";
@@ -29,7 +31,7 @@ interface FormValues {
 
 export default function TickTickCreate() {
   const { isInitCompleted } = useStartApp();
-  const { autoFillEnabled } = getPreferenceValues<Preferences>();
+  const { autoFillEnabled, defaultTitle } = getPreferenceValues<Preferences>();
   const defaultDate = useMemo(() => {
     return getDefaultDate();
   }, []);
@@ -37,6 +39,25 @@ export default function TickTickCreate() {
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
   const [title, setTitle] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        switch (defaultTitle) {
+          case "selection": {
+            setTitle((await getSelectedText()) || "");
+            break;
+          }
+          case "clipboard": {
+            setTitle((await Clipboard.readText()) || "");
+            break;
+          }
+          default:
+            break;
+        }
+      } catch (error) {}
+    })();
+  }, [defaultTitle]);
 
   useEffect(() => {
     (async () => {
