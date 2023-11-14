@@ -1,17 +1,16 @@
-# shortcuts-disco
+# Shortcuts Search RayCast extension
 
-Shortcuts helper
+Allows to list, search and run shortcuts for different applications.
 
-# TODO
+By selecting shortcut extension actually runs the shortcut using AppleScript.
 
-- [x] Tune command with all shortcuts
-    - [x] either open app and run shortcut or remove that feature from the command
-- [x] Complex shortcuts support
-    - [x] arrows
-    - [x] F-keys
-    - [x] shortcut chording (two sequential shortcuts)
-    - [x] home/end/pgUp/pgDown
-- [ ]  Add validation
-    - [x] non-supported key used
-    - [ ] everything should be lowercase
-    - [ ] can't use only modifiers without base
+Data is taken from: https://shortcuts.solomk.in.
+
+Please see contribution guide for adding new shortcuts [here](https://github.com/solomkinmv/shortcuts-disco/blob/main/README.md#shortcuts-contribution).
+
+## Screenshots
+
+![](metadata/shortcuts-search-1.png)
+![](metadata/shortcuts-search-2.png)
+![](metadata/shortcuts-search-3.png)
+![](metadata/shortcuts-search-4.png)
