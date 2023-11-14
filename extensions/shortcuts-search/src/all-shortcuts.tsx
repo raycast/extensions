@@ -10,7 +10,6 @@ export default function AllShortcutsCommand() {
   const {
     data: sortedApplications,
     visitItem,
-    resetRanking,
   } = useFrecencySorting(shortcuts.applications, {
     key: (app) => app.name,
   });
