@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Form, ActionPanel, Action, Detail } from "@raycast/api";
+import { Form, ActionPanel, Action, Detail, Icon } from "@raycast/api";
 import { fetchConfig } from "../api";
 import { BootInfo, AppletConfigs, Values } from "../api/types";
 import { InputParams } from "../types/boot-info";
@@ -79,7 +79,7 @@ export const InputsForm = ({ appletData, inputs, scriptName, handleSubmit, isLoa
       navigationTitle="Inputs"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit" icon={Icon.ArrowRight} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
