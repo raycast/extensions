@@ -1,71 +1,116 @@
 import { useEffect, useState } from "react";
-import {  getUserPackageInformation, getUserPackages } from "./utils/api";
+import { getUserPackageInformation, getUserPackages } from "./utils/api";
 import { GetUserPackageInformationResponse, GetUserPackagesResponse } from "./types";
-import { Action, ActionPanel, Color, Detail, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, Toast, showToast } from "@raycast/api";
 import { getTitleFromKey } from "./utils/functions";
 
 export default function UserPackages() {
-    const { push } = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
+  const [packages, setPackages] = useState<string[]>();
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [packages, setPackages] = useState<string[]>();
-
-    async function getFromApi() {
-        setIsLoading(true);
-        const response = await getUserPackages();
-        if (response.error==="0") {
-            const data = response as GetUserPackagesResponse;
-            const { list } = data;
-            setPackages(list);
-            await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Packages`);
-        }
-        setIsLoading(false);
+  async function getFromApi() {
+    setIsLoading(true);
+    const response = await getUserPackages();
+    if (response.error === "0") {
+      const data = response as GetUserPackagesResponse;
+      const { list } = data;
+      setPackages(list);
+      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Packages`);
     }
+    setIsLoading(false);
+  }
 
-    useEffect(() => {
-getFromApi();
-    }, [])
+  useEffect(() => {
+    getFromApi();
+  }, []);
 
-    return <List isLoading={isLoading}>
-        {packages && packages.map(packageName => <List.Item key={packageName} title={packageName} icon={Icon.Box} actions={<ActionPanel>
-            <Action title="Get Detailed Information" icon={Icon.Network} onAction={() => push(<GetPackageInformation packageName={packageName} />)} />
-        </ActionPanel>} />)}
+  return (
+    <List isLoading={isLoading}>
+      {packages &&
+        packages.map((packageName) => (
+          <List.Item
+            key={packageName}
+            title={packageName}
+            icon={Icon.Box}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Get Detailed Information"
+                  icon={Icon.Network}
+                  target={<GetPackageInformation packageName={packageName} />}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
+  );
 }
 
 type GetPackageInformationProps = {
-    packageName: string;
-}
+  packageName: string;
+};
 function GetPackageInformation({ packageName }: GetPackageInformationProps) {
-    const [isLoading, setIsLoading] = useState(true);
-    const [information, setInformation] = useState<GetUserPackageInformationResponse>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [information, setInformation] = useState<GetUserPackageInformationResponse>();
 
-    async function getFromApi() {
-        setIsLoading(true)
-        const response = await getUserPackageInformation(packageName);
-        if (response.error==="0") {
-            const data = response as GetUserPackageInformationResponse;
-            setInformation(data);
+  async function getFromApi() {
+    setIsLoading(true);
+    const response = await getUserPackageInformation(packageName);
+    if (response.error === "0") {
+      const data = response as GetUserPackageInformationResponse;
+      setInformation(data);
 
-            await showToast(Toast.Style.Success, "SUCCESS", "Fetched User Package Information");
-        }
-        setIsLoading(false);
+      await showToast(Toast.Style.Success, "SUCCESS", "Fetched User Package Information");
     }
+    setIsLoading(false);
+  }
 
-    useEffect(() => {
-        getFromApi();
-    }, [])
+  useEffect(() => {
+    getFromApi();
+  }, []);
 
-    return <Detail navigationTitle="User Package Information" isLoading={isLoading} markdown={`## Package: ${packageName}`} metadata={!information ? undefined : <Detail.Metadata>
-        {Object.entries(information).map(([key, val]) => {
-            const title = getTitleFromKey(key);
-            if (val==="ON")
-                return <Detail.Metadata.Label key={key} title={title} text={undefined} icon={{ source: Icon.Check, tintColor: Color.Green }} />
-            else if (val==="OFF")
-                return <Detail.Metadata.Label key={key} title={title} text={undefined} icon={{ source: Icon.Multiply, tintColor: Color.Red }} />
-            else
-                return <Detail.Metadata.Label key={key} title={title} text={val} />
-            
-        })}
-    </Detail.Metadata>} />
+  return (
+    <Detail
+      navigationTitle="User Package Information"
+      isLoading={isLoading}
+      markdown={`## Package: ${packageName}`}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard
+            title="Copy All as JSON"
+            content={JSON.stringify({ package: packageName, ...information })}
+          />
+        </ActionPanel>
+      }
+      metadata={
+        !information ? undefined : (
+          <Detail.Metadata>
+            {Object.entries(information).map(([key, val]) => {
+              const title = getTitleFromKey(key);
+              if (val === "ON")
+                return (
+                  <Detail.Metadata.Label
+                    key={key}
+                    title={title}
+                    text={undefined}
+                    icon={{ source: Icon.Check, tintColor: Color.Green }}
+                  />
+                );
+              else if (val === "OFF")
+                return (
+                  <Detail.Metadata.Label
+                    key={key}
+                    title={title}
+                    text={undefined}
+                    icon={{ source: Icon.Multiply, tintColor: Color.Red }}
+                  />
+                );
+              else return <Detail.Metadata.Label key={key} title={title} text={val} />;
+            })}
+          </Detail.Metadata>
+        )
+      }
+    />
+  );
 }

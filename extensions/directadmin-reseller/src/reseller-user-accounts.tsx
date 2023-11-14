@@ -1,479 +1,669 @@
 import { useEffect, useState } from "react";
-import { createUser, deleteUser, getResellerIPs, getResellerUserAccounts, getUserConfig, getUserDomains, getUserPackages, getUserUsage, modifyUser, suspendOrUnsuspendUser } from "./utils/api";
-import { RESELLER_USERNAME, TITLES_FOR_KEYS } from "./utils/constants";
-import { CreateUserFormValues, GetResellerIPsResponse, GetResellerUserAccountsResponse, GetUserConfigResponse, GetUserDomainsResponse, GetUserPackagesResponse, GetUserUsageResponse, ModifyUserFormValues, ModifyUserRequest, SuccessResponse } from "./types";
-import { Action, ActionPanel, Alert, Color, Detail, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  createUser,
+  deleteUser,
+  getResellerIPs,
+  getResellerUserAccounts,
+  getUserConfig,
+  getUserDomains,
+  getUserPackages,
+  getUserUsage,
+  modifyUser,
+  suspendOrUnsuspendUser,
+} from "./utils/api";
+import { RESELLER_USERNAME } from "./utils/constants";
+import {
+  CreateUserFormValues,
+  GetResellerIPsResponse,
+  GetResellerUserAccountsResponse,
+  GetUserConfigResponse,
+  GetUserDomainsResponse,
+  GetUserPackagesResponse,
+  GetUserUsageResponse,
+  ModifyUserFormValues,
+  ModifyUserRequest,
+  SuccessResponse,
+} from "./types";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Detail,
+  Form,
+  Icon,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import { getTitleFromKey } from "./utils/functions";
+import CreateNewDomainComponent from "./components/CreateNewDomainComponent";
 
 export default function GetAccounts() {
-    const { push } = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
+  const [users, setUsers] = useState<string[]>();
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [users, setUsers] = useState<string[]>();
-
-    async function getFromApi() {
-        setIsLoading(true);
-        const response = await getResellerUserAccounts(RESELLER_USERNAME);
-        if (response.error==="0") {
-            const data = response as GetResellerUserAccountsResponse;
-            const { list } = data;
-            setUsers(list);
-            await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Users`);
-        }
-        setIsLoading(false);
+  async function getFromApi() {
+    setIsLoading(true);
+    const response = await getResellerUserAccounts(RESELLER_USERNAME);
+    if (response.error === "0") {
+      const data = response as GetResellerUserAccountsResponse;
+      const { list } = data;
+      setUsers(list);
+      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Users`);
     }
+    setIsLoading(false);
+  }
 
-    useEffect(() => {
-getFromApi();
-    }, [])
+  useEffect(() => {
+    getFromApi();
+  }, []);
 
-    async function confirmAndDeleteUser(user: string) {
-        if (
-            await confirmAlert({
-                title: `Delete user '${user}'?`,
-                message: "This action cannot be undone.",
-                icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
-                primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive }
-            })
-        ) {
-            const response = await deleteUser({ confirmed: "Confirm", delete: "yes", select0: user })
-            if (response.error==="0") {
-                const data = response as SuccessResponse;
-                await showToast(Toast.Style.Success, data.text, data.details);
-                await getFromApi();
+  async function confirmAndDeleteUser(user: string) {
+    if (
+      await confirmAlert({
+        title: `Delete user '${user}'?`,
+        message: "This action cannot be undone.",
+        icon: { source: Icon.DeleteDocument, tintColor: Color.Red },
+        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+      })
+    ) {
+      const response = await deleteUser({ confirmed: "Confirm", delete: "yes", select0: user });
+      if (response.error === "0") {
+        const data = response as SuccessResponse;
+        await showToast(Toast.Style.Success, data.text, data.details);
+        await getFromApi();
+      }
+    }
+  }
+
+  async function unsuspendUser(user: string) {
+    const response = await suspendOrUnsuspendUser({ dounsuspend: 1, select0: user });
+    if (response.error === "0") {
+      const data = response as SuccessResponse;
+      await showToast(Toast.Style.Success, data.text, data.details);
+    }
+  }
+  async function suspendUser(user: string) {
+    const response = await suspendOrUnsuspendUser({ dosuspend: 1, select0: user });
+    if (response.error === "0") {
+      const data = response as SuccessResponse;
+      await showToast(Toast.Style.Success, data.text, data.details);
+    }
+  }
+
+  return (
+    <List isLoading={isLoading}>
+      <List.Item
+            title={RESELLER_USERNAME}
+            icon={Icon.PersonCircle}
+            accessories={[{tag: "RESELLER_USER"}]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="See User Usage"
+                  icon={Icon.Network}
+                  target={<GetUserUsage user={RESELLER_USERNAME} is_reseller={true} />}
+                />
+                <Action.Push
+                  title="See User Config"
+                  icon={Icon.WrenchScrewdriver}
+                  target={<GetUserConfig user={RESELLER_USERNAME} is_reseller={true} />}
+                />
+                <ActionPanel.Section>
+                  {/* <Action title="Create User" icon={Icon.Plus} onAction={() => push(<CreateUser onUserCreated={getFromApi} />)} /> */}
+                  <Action.Push
+                    title="Create User"
+                    icon={Icon.Plus}
+                    target={<CreateUser onUserCreated={getFromApi} />}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
             }
-        }
-    }
-
-    async function unsuspendUser(user: string) {
-        const response = await suspendOrUnsuspendUser({ dounsuspend: 1, select0: user });
-        if (response.error==="0") {
-            const data = response as SuccessResponse;
-            await showToast(Toast.Style.Success, data.text, data.details);
-        }
-    }
-    async function suspendUser(user: string) {
-        const response = await suspendOrUnsuspendUser({ dosuspend: 1, select0: user });
-        if (response.error==="0") {
-            const data = response as SuccessResponse;
-            await showToast(Toast.Style.Success, data.text, data.details);
-        }
-    }
-
-    return <List isLoading={isLoading}>
-        {users && users.map(user => <List.Item key={user} title={user} icon={Icon.Person} actions={<ActionPanel>
-            <Action title="See User Usage" icon={Icon.Network} onAction={() => push(<GetUserUsage user={user} />)} />
-            <Action title="See User Config" icon={Icon.WrenchScrewdriver} onAction={() => push(<GetUserConfig user={user} />)} />
-            <Action title="See User Domains" icon={Icon.Globe} onAction={() => push(<GetUserDomains user={user} />)} />
-            <ActionPanel.Section>
-                <Action title="Suspend User" icon={Icon.Pause} onAction={() => suspendUser(user)} />
-                <Action title="Unsuspend User" icon={Icon.Play} onAction={() => unsuspendUser(user)} />
-                <Action title="Delete User" icon={Icon.DeleteDocument} style={Action.Style.Destructive} onAction={() => confirmAndDeleteUser(user)} />
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-                {/* <Action title="Create User" icon={Icon.Plus} onAction={() => push(<CreateUser onUserCreated={getFromApi} />)} /> */}
-                <Action.Push title="Create User" icon={Icon.Plus} target={<CreateUser onUserCreated={getFromApi} />} shortcut={{ modifiers: ["cmd"], key: "n" }} />
-            </ActionPanel.Section>
-        </ActionPanel>} />)}
-        {!isLoading && <List.Section title="Actions">
-            <List.Item title="Create User" icon={Icon.Plus} actions={<ActionPanel>
-                <Action title="Create User" icon={Icon.Plus} onAction={() => push(<CreateUser onUserCreated={getFromApi} />)} />
-            </ActionPanel>} />
-        </List.Section>}
+          />
+      {users &&
+        users.map((user) => (
+          <List.Item
+            key={user}
+            title={user}
+            icon={Icon.Person}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="See User Usage"
+                  icon={Icon.Network}
+                  target={<GetUserUsage user={user} />}
+                />
+                <Action.Push
+                  title="See User Config"
+                  icon={Icon.WrenchScrewdriver}
+                  target={<GetUserConfig user={user} />}
+                />
+                <Action.Push
+                  title="See User Domains"
+                  icon={Icon.Globe}
+                  target={<GetUserDomains user={user} />}
+                />
+                <ActionPanel.Section>
+                  <Action
+                    title="Suspend User"
+                    icon={{ source: Icon.Pause, tintColor: Color.Yellow }}
+                    onAction={() => suspendUser(user)}
+                  />
+                  <Action
+                    title="Unsuspend User"
+                    icon={{ source: Icon.Play, tintColor: Color.Green }}
+                    onAction={() => unsuspendUser(user)}
+                  />
+                  <Action
+                    title="Delete User"
+                    icon={Icon.DeleteDocument}
+                    style={Action.Style.Destructive}
+                    onAction={() => confirmAndDeleteUser(user)}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  {/* <Action title="Create User" icon={Icon.Plus} onAction={() => push(<CreateUser onUserCreated={getFromApi} />)} /> */}
+                  <Action.Push
+                    title="Create User"
+                    icon={Icon.Plus}
+                    target={<CreateUser onUserCreated={getFromApi} />}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      {!isLoading && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Create User"
+            icon={Icon.Plus}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Create User"
+                  icon={Icon.Plus}
+                  target={<CreateUser onUserCreated={getFromApi} />}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
+  );
 }
 
 type GetUserUsageProps = {
-    user: string;
-}
-function GetUserUsage({ user }: GetUserUsageProps) {
-    const [isLoading, setIsLoading] = useState(true);
-    const [usage, setUsage] = useState<GetUserUsageResponse>();
+  user: string;
+  is_reseller?: boolean;
+};
+function GetUserUsage({ user, is_reseller=false }: GetUserUsageProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [usage, setUsage] = useState<GetUserUsageResponse>();
 
-    async function getFromApi() {
-        setIsLoading(true)
-        const response = await getUserUsage(user);
-        if (response.error==="0") {
-            const data = response as GetUserUsageResponse;
-            setUsage(data);
+  async function getFromApi() {
+    setIsLoading(true);
+    const response = await getUserUsage(user, is_reseller);
+    if (response.error === "0") {
+      const data = response as GetUserUsageResponse;
+      setUsage(data);
 
-            await showToast(Toast.Style.Success, "SUCCESS", "Fetched User Usage");
-        }
-        setIsLoading(false);
+      await showToast(Toast.Style.Success, "SUCCESS", "Fetched User Usage");
     }
+    setIsLoading(false);
+  }
 
-    useEffect(() => {
-        getFromApi();
-    }, [])
+  useEffect(() => {
+    getFromApi();
+  }, []);
 
-    return <Detail navigationTitle="Get User Usage" isLoading={isLoading} markdown={`## User: ${user}`} metadata={!usage ? undefined : <Detail.Metadata>    
-        {Object.entries(usage).map(([key, val]) => {
-            const title = getTitleFromKey(key);
-            return <Detail.Metadata.Label key={key} title={title} text={val || undefined} icon={val ? undefined : Icon.Minus} />
-        })}
-    </Detail.Metadata>} actions={<ActionPanel><Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify(usage)} /></ActionPanel>} />
+  return (
+    <Detail
+      navigationTitle="Get User Usage"
+      isLoading={isLoading}
+      markdown={`## User: ${user}`}
+      metadata={
+        !usage ? undefined : (
+          <Detail.Metadata>
+            {Object.entries(usage).map(([key, val]) => {
+              const title = getTitleFromKey(key);
+              return (
+                <Detail.Metadata.Label
+                  key={key}
+                  title={title}
+                  text={val || undefined}
+                  icon={val ? undefined : Icon.Minus}
+                />
+              );
+            })}
+          </Detail.Metadata>
+        )
+      }
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify({ user, ...usage })} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 type GetUserConfigProps = {
-    user: string;
-}
-function GetUserConfig({ user }: GetUserConfigProps) {
-    const [isLoading, setIsLoading] = useState(true);
-    const [config, setConfig] = useState<GetUserConfigResponse>();
+  user: string;
+  is_reseller?: boolean;
+};
+function GetUserConfig({ user, is_reseller=false }: GetUserConfigProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [config, setConfig] = useState<GetUserConfigResponse>();
 
-    async function getFromApi() {
-        setIsLoading(true)
-        const response = await getUserConfig(user);
-        if (response.error==="0") {
-            const data = response as GetUserConfigResponse;
-            setConfig(data);
-            await showToast(Toast.Style.Success, "SUCCESS", "Fetched User Config");
-        }
-        setIsLoading(false);
+  async function getFromApi() {
+    setIsLoading(true);
+    const response = await getUserConfig(user, is_reseller);
+    if (response.error === "0") {
+      const data = response as GetUserConfigResponse;
+      setConfig(data);
+      await showToast(Toast.Style.Success, "SUCCESS", "Fetched User Config");
     }
+    setIsLoading(false);
+  }
 
-    useEffect(() => {
-        getFromApi();
-    }, [])
+  useEffect(() => {
+    getFromApi();
+  }, []);
 
-    return <Detail navigationTitle="Get User Config" isLoading={isLoading} markdown={`## User: ${user}`} metadata={!config ? undefined : <Detail.Metadata>
-        {Object.entries(config).map(([key, val]) => {
-            const title = getTitleFromKey(key);
-            return <Detail.Metadata.Label key={key} title={title} text={val || undefined} icon={val ? undefined : Icon.Minus} />
-        })}
-    </Detail.Metadata>} actions={!config ? undefined : <ActionPanel><Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify(config)} />
-        <Action.Push title="Modify User" icon={Icon.Pencil} target={<ModifyUser user={user} currentConfig={config} onUserModified={getFromApi} />} />
-    </ActionPanel>} />
+  return (
+    <Detail
+      navigationTitle="Get User Config"
+      isLoading={isLoading}
+      markdown={`## User: ${user}`}
+      metadata={
+        !config ? undefined : (
+          <Detail.Metadata>
+            {Object.entries(config).map(([key, val]) => {
+              const title = getTitleFromKey(key);
+              return (
+                <Detail.Metadata.Label
+                  key={key}
+                  title={title}
+                  text={val || undefined}
+                  icon={val ? undefined : Icon.Minus}
+                />
+              );
+            })}
+          </Detail.Metadata>
+        )
+      }
+      actions={
+        !config ? undefined : (
+          <ActionPanel>
+            <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify(config)} />
+            <Action.Push
+              title="Modify User"
+              icon={Icon.Pencil}
+              target={<ModifyUser user={user} currentConfig={config} onUserModified={getFromApi} />}
+            />
+          </ActionPanel>
+        )
+      }
+    />
+  );
 }
 
 type GetUserDomainsProps = {
-    user: string;
-}
+  user: string;
+};
 function GetUserDomains({ user }: GetUserDomainsProps) {
-    const [isLoading, setIsLoading] = useState(true);
-    const [domains, setDomains] = useState<GetUserDomainsResponse>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [domains, setDomains] = useState<GetUserDomainsResponse>();
 
-    async function getFromApi() {
-        setIsLoading(true)
-        const response = await getUserDomains(user);
-        if (response.error==="0") {
-            const data: GetUserDomainsResponse = {};
-            Object.entries(response).map(([key, val]) => {
-                if (key==="error") return;
-                const vals = val as string;
-                const splitVals = vals.split(":");
-                data[key] = {
-                    bandwidth_used: splitVals[0],
-                    bandwidth_limit: splitVals[1],
-                    disk_usage: splitVals[2],
-                    log_usage: splitVals[3],
-                    subdomains: splitVals[4],
-                    suspended: splitVals[5],
-                    quote: splitVals[6],
-                    ssl: splitVals[7],
-                    cgi: splitVals[8],
-                    php: splitVals[9],
-                }
-            })
-            setDomains(data);
-            await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${Object.keys(data).length} Domains`);
-        }
-        setIsLoading(false);
+  async function getFromApi() {
+    setIsLoading(true);
+    const response = await getUserDomains(user);
+    if (response.error === "0") {
+      const data: GetUserDomainsResponse = {};
+      Object.entries(response).map(([key, val]) => {
+        if (key === "error") return;
+        const vals = val as string;
+        const splitVals = vals.split(":");
+        data[key] = {
+          bandwidth_used: splitVals[0],
+          bandwidth_limit: splitVals[1],
+          disk_usage: splitVals[2],
+          log_usage: splitVals[3],
+          subdomains: splitVals[4],
+          suspended: splitVals[5],
+          quote: splitVals[6],
+          ssl: splitVals[7],
+          cgi: splitVals[8],
+          php: splitVals[9],
+        };
+      });
+      setDomains(data);
+      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${Object.keys(data).length} Domains`);
     }
+    setIsLoading(false);
+  }
 
-    useEffect(() => {
-        getFromApi();
-    }, [])
+  useEffect(() => {
+    getFromApi();
+  }, []);
 
-    return <List navigationTitle="Get User Domains" isLoading={isLoading} isShowingDetail>
-        {domains && Object.entries(domains).map(([domain, domainVal]) => <List.Item key={domain} title={domain} icon={getFavicon(`https://${domain}`, { fallback: Icon.Globe })} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
-            {Object.entries(domainVal).map(([key, val]) => {
-                const title = getTitleFromKey(key);
-                return <List.Item.Detail.Metadata.Label key={key} title={title} text={val} />
-            })}
-        </List.Item.Detail.Metadata>} />}  actions={<ActionPanel><Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify(domainVal)} /></ActionPanel>} />)}
+  return (
+    <List navigationTitle="Get User Domains" isLoading={isLoading} isShowingDetail>
+      {domains &&
+        Object.entries(domains).map(([domain, domainVal]) => (
+          <List.Item
+            key={domain}
+            title={domain}
+            icon={getFavicon(`https://${domain}`, { fallback: Icon.Globe })}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    {Object.entries(domainVal).map(([key, val]) => {
+                      const title = getTitleFromKey(key);
+                      return <List.Item.Detail.Metadata.Label key={key} title={title} text={val} />;
+                    })}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify({ domain, ...domainVal })} />
+                <ActionPanel.Section>
+                <Action.Push
+                  title="Create Domain"
+                  icon={Icon.Plus}
+                  target={<CreateNewDomainComponent onDomainCreated={getFromApi} userToImpersonate={user} />}
+                />
+              </ActionPanel.Section></ActionPanel>
+            }
+          />
+        ))}
+        {!isLoading && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Create Domain"
+            icon={Icon.Plus}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Create Domain"
+                  icon={Icon.Plus}
+                  target={<CreateNewDomainComponent onDomainCreated={getFromApi} userToImpersonate={user} />}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
+  );
 }
 
 type CreateUserProps = {
-    onUserCreated: () => void;
-}
+  onUserCreated: () => void;
+};
 function CreateUser({ onUserCreated }: CreateUserProps) {
-    const { pop } = useNavigation();
+  const { pop } = useNavigation();
 
-    const [packages, setPackages] = useState<string[]>();
-    const [IPs, setIPs] = useState<string[]>();
-    // const [customizePackage, setCustomizePackage] = useState(false);
+  const [packages, setPackages] = useState<string[]>();
+  const [IPs, setIPs] = useState<string[]>();
+  // const [customizePackage, setCustomizePackage] = useState(false);
 
-    const { handleSubmit, itemProps } = useForm<CreateUserFormValues>({
-        async onSubmit(values) {
-            const notify = values.notify ? "yes" : "no";
-            const response = await createUser({ ...values, action: "create", add: "Submit", notify });
+  const { handleSubmit, itemProps } = useForm<CreateUserFormValues>({
+    async onSubmit(values) {
+      const notify = values.notify ? "yes" : "no";
+      const response = await createUser({ ...values, action: "create", add: "Submit", notify });
 
-            if (response.error==="0") {
-                const data = response as SuccessResponse;
-                await showToast(Toast.Style.Success, data.text, data.details);
-                onUserCreated();
-                pop();
-            }
-        },
-        validation: {
-            username(value) {
-                if (!value)
-                    return "The item is required";
-                else if (value.length < 4 || value.length > 8)
-                    return "The item must be 4-8 characters";
-                else if (!value.match(/^[0-9a-z]+$/))
-                    return "The item can only be alphanumeric";
-            },
-            email: FormValidation.Required,
-            passwd(value) {
-                if (!value)
-                    return "The item is required";
-                else if (value.length < 5)
-                    return "The item must be 5+ characters";
-                else if (itemProps.passwd2.value && itemProps.passwd2.value!==value)
-                    return "Passwords do not match";
-            },
-            passwd2(value) {
-                if (!value)
-                    return "The item is required";
-                else if (value.length < 5)
-                    return "The item must be 5+ characters";
-                else if (itemProps.passwd.value && itemProps.passwd.value!==value)
-                    return "Passwords do not match";
-            },
-            domain: FormValidation.Required,
-            package: FormValidation.Required,
-            ip: FormValidation.Required
-        },
-      });
-
-      async function getPackagesFromApi() {
-        const response = await getUserPackages();
-        if (response.error==="0") {
-            const data = response as GetUserPackagesResponse;
-            const { list } = data;
-            setPackages(list);
-            await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Packages`);
-        }
+      if (response.error === "0") {
+        const data = response as SuccessResponse;
+        await showToast(Toast.Style.Success, data.text, data.details);
+        onUserCreated();
+        pop();
       }
-      async function getIPsFromApi() {
-        const response = await getResellerIPs();
-        if (response.error==="0") {
-            const data = response as GetResellerIPsResponse;
-            const { list } = data;
-            setIPs(list);
-            await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} IPs`);
-        }
+    },
+    validation: {
+      username(value) {
+        if (!value) return "The item is required";
+        else if (value.length < 4 || value.length > 8) return "The item must be 4-8 characters";
+        else if (!value.match(/^[0-9a-z]+$/)) return "The item can only be alphanumeric";
+      },
+      email: FormValidation.Required,
+      passwd(value) {
+        if (!value) return "The item is required";
+        else if (value.length < 5) return "The item must be 5+ characters";
+        else if (itemProps.passwd2.value && itemProps.passwd2.value !== value) return "Passwords do not match";
+      },
+      passwd2(value) {
+        if (!value) return "The item is required";
+        else if (value.length < 5) return "The item must be 5+ characters";
+        else if (itemProps.passwd.value && itemProps.passwd.value !== value) return "Passwords do not match";
+      },
+      domain: FormValidation.Required,
+      package: FormValidation.Required,
+      ip: FormValidation.Required,
+    },
+  });
+
+  async function getPackagesFromApi() {
+    const response = await getUserPackages();
+    if (response.error === "0") {
+      const data = response as GetUserPackagesResponse;
+      const { list } = data;
+      setPackages(list);
+      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Packages`);
+    }
+  }
+  async function getIPsFromApi() {
+    const response = await getResellerIPs();
+    if (response.error === "0") {
+      const data = response as GetResellerIPsResponse;
+      const { list } = data;
+      setIPs(list);
+      await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} IPs`);
+    }
+  }
+
+  useEffect(() => {
+    getPackagesFromApi();
+    getIPsFromApi();
+  }, []);
+
+  return (
+    <Form
+      navigationTitle="Create User"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
+        </ActionPanel>
       }
+    >
+      <Form.TextField title="Username" placeholder="new_user" {...itemProps.username} />
+      <Form.TextField title="E-mail" placeholder="new_user@raycast.local" {...itemProps.email} />
+      <Form.PasswordField title="Password" placeholder="hunter2" {...itemProps.passwd} />
+      <Form.PasswordField title="Repeat Password" placeholder="hunter2" {...itemProps.passwd2} />
+      <Form.TextField title="Domain" placeholder="raycast.local" {...itemProps.domain} />
 
-      useEffect(() => {
-        getPackagesFromApi();
-        getIPsFromApi();
-      }, [])
-
-    return <Form navigationTitle="Create User" actions={<ActionPanel>
-        <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
-    </ActionPanel>}>
-        <Form.TextField title="Username" {...itemProps.username} />
-        <Form.TextField title="E-mail" {...itemProps.email} />
-        <Form.PasswordField title="Password" {...itemProps.passwd} />
-        <Form.PasswordField title="Repeat Password" {...itemProps.passwd2} />
-        <Form.TextField title="Domain" {...itemProps.domain} />
-
-        {/* <Form.Separator /> */}
-        <Form.Dropdown title="User Package" {...itemProps.package}>
-            {packages?.map(packageName => <Form.Dropdown.Item key={packageName} title={packageName} value={packageName} />)}
-        </Form.Dropdown>
-        {/* <Form.Checkbox id="customizePackage" label="Customize Package" onChange={setCustomizePackage} />
+      {/* <Form.Separator /> */}
+      <Form.Dropdown title="User Package" {...itemProps.package}>
+        {packages?.map((packageName) => (
+          <Form.Dropdown.Item key={packageName} title={packageName} value={packageName} />
+        ))}
+      </Form.Dropdown>
+      {/* <Form.Checkbox id="customizePackage" label="Customize Package" onChange={setCustomizePackage} />
         {customizePackage && (
 
         )}
         <Form.Separator /> */}
 
-        <Form.Dropdown title="IP" {...itemProps.ip}>
-            {IPs?.map(IP => <Form.Dropdown.Item key={IP} title={IP} value={IP} />)}
-        </Form.Dropdown>
-        <Form.Checkbox label="Send E-mail Notification" {...itemProps.notify} />
+      <Form.Dropdown title="IP" {...itemProps.ip}>
+        {IPs?.map((IP) => <Form.Dropdown.Item key={IP} title={IP} value={IP} />)}
+      </Form.Dropdown>
+      <Form.Checkbox label="Send E-mail Notification" {...itemProps.notify} />
     </Form>
+  );
 }
 
 type ModifyUserProps = {
-    user: string;
-    currentConfig: GetUserConfigResponse;
-    onUserModified: () => void;
-}
+  user: string;
+  currentConfig: GetUserConfigResponse;
+  onUserModified: () => void;
+};
 function ModifyUser({ user, currentConfig, onUserModified }: ModifyUserProps) {
-    const { pop } = useNavigation();
+  const { pop } = useNavigation();
 
-    const { handleSubmit, itemProps } = useForm<ModifyUserFormValues>({
-        async onSubmit(values) {
-            const body = {};
-            Object.entries(values).forEach(([key, val]) => {
-                if (typeof val === "boolean")
-                    body[key] = val ? "ON" : "OFF";
-                else if (["skin", "ns1", "ns2"].includes(key))
-                    body[key] = val;
-                else
-                    body[key] = Number(val);
-            })
+  function validateAsNumberOrUnlimited(value: string | undefined) {
+    if (value)
+      if (!Number(value) && value !== "0" && value !== "unlimited") return "The item must be a number";
+      else if (Number(value) < 0) return "The item must be greater than zero";
+  }
 
-            const response = await modifyUser({ ...body as ModifyUserRequest, action: "customize", user });
+  const { handleSubmit, itemProps } = useForm<ModifyUserFormValues>({
+    async onSubmit(values) {
+      const body = {} as { [key: string]: string | number };
 
-            if (response.error==="0") {
-                const data = response as SuccessResponse;
-                await showToast(Toast.Style.Success, data.text, data.details);
-                onUserModified();
-                pop();
-            }
-        },
-        initialValues: {
-            bandwidth: currentConfig.bandwidth,
-            quota: currentConfig.quota,
-            vdomains: currentConfig.vdomains,
-            nsubdomains: currentConfig.nsubdomains,
-            nemails: currentConfig.nemails,
-            nemailf: currentConfig.nemailf,
-            nemailml: currentConfig.nemailml,
-            nemailr: currentConfig.nemailr,
-            mysql: currentConfig.mysql,
-            domainptr: currentConfig.domainptr,
-            ftp: currentConfig.ftp,
-            aftp: currentConfig.aftp==="ON" ? true : false,
-            cgi: currentConfig.cgi==="ON" ? true : false,
-            php: currentConfig.php==="ON" ? true : false,
-            spam: currentConfig.spam==="ON" ? true : false,
-            cron: currentConfig.cron==="ON" ? true : false,
-            ssl: currentConfig.ssl==="ON" ? true : false,
-            sysinfo: currentConfig.sysinfo==="ON" ? true : false,
-            ssh: currentConfig.ssh==="ON" ? true : false,
-            dnscontrol: currentConfig.dnscontrol==="ON" ? true : false,
-            skin: currentConfig.skin,
-            ns1: currentConfig.ns1,
-            ns2: currentConfig.ns2,
-        },
-        validation: {
-            bandwidth(value) {
-                if (value)
-                    if (!Number(value) && value!=="0")
-                        return "The item must be a number";
-                    else if (Number(value) < 0)
-                        return "The item must be greater than zero";
-            },
-            quota(value) {
-                if (value)
-                    if (!Number(value) && value!=="0")
-                        return "The item must be a number";
-                    else if (Number(value) < 0)
-                        return "The item must be greater than zero";
-            },
-vdomains(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-},
-nsubdomains(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-},
-nemails(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-},
-nemailf(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-},
-nemailml(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-},
-nemailr(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-},
-mysql(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-},
-domainptr(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-},
-ftp(value) {
-    if (value)
-        if (!Number(value) && value!=="0")
-            return "The item must be a number";
-        else if (Number(value) < 0)
-            return "The item must be greater than zero";
-}
-        },
+      Object.entries(values).forEach(([key, val]) => {
+        if (typeof val === "boolean") body[key] = val ? "ON" : "OFF";
+        else if (["skin", "ns1", "ns2"].includes(key)) body[key] = val;
+        else body[key] = val === "unlimited" ? 0 : Number(val);
       });
 
-    return <Form navigationTitle="Modify User" actions={<ActionPanel>
-        <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
-    </ActionPanel>}>
-        <Form.TextField title="Bandwidth" {...itemProps.bandwidth} />
-        <Form.Checkbox label="Unlimited Bandwidth" {...itemProps.ubandwidth} />
-        <Form.TextField title={getTitleFromKey("quota")} {...itemProps.quota} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("quota")}`} {...itemProps.uquota} />
-        <Form.TextField title={getTitleFromKey("vdomains")} {...itemProps.vdomains} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("vdomains")}`} {...itemProps.uvdomains} />
-        <Form.TextField title={getTitleFromKey("nsubdomains")} {...itemProps.nsubdomains} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("nsubdomains")}`} {...itemProps.unsubdomains} />
-        <Form.TextField title={getTitleFromKey("nemails")} {...itemProps.nemails} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("nemails")}`} {...itemProps.unemails} />
-        <Form.TextField title={getTitleFromKey("nemailf")} {...itemProps.nemailf} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("nemailf")}`} {...itemProps.unemailf} />
-        <Form.TextField title={getTitleFromKey("nemailml")} {...itemProps.nemailml} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("nemailml")}`} {...itemProps.unemailml} />
-        <Form.TextField title={getTitleFromKey("nemailr")} {...itemProps.nemailr} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("nemailr")}`} {...itemProps.unemailr} />
-        <Form.TextField title={getTitleFromKey("mysql")} {...itemProps.mysql} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("mysql")}`} {...itemProps.umysql} />
-        <Form.TextField title={getTitleFromKey("domainptr")} {...itemProps.domainptr} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("domainptr")}`} {...itemProps.udomainptr} />
-        <Form.TextField title={getTitleFromKey("ftp")} {...itemProps.ftp} />
-        <Form.Checkbox label={`Unlimited ${getTitleFromKey("ftp")}`} {...itemProps.uftp} />
+      const response = await modifyUser({ ...(body as ModifyUserRequest), action: "customize", user });
 
-        <Form.TextField title={getTitleFromKey("skin")} {...itemProps.skin} />
-        <Form.TextField title={getTitleFromKey("ns1")} {...itemProps.ns1} />
-        <Form.TextField title={getTitleFromKey("ns2")} {...itemProps.ns2} />
-        <Form.Separator />
-        
-        <Form.Checkbox label={getTitleFromKey("aftp")} {...itemProps.aftp} />
-        <Form.Checkbox label={getTitleFromKey("cgi")} {...itemProps.cgi} />
-        <Form.Checkbox label={getTitleFromKey("php")} {...itemProps.php} />
-        <Form.Checkbox label={getTitleFromKey("spam")} {...itemProps.spam} />
-        <Form.Checkbox label={getTitleFromKey("cron")} {...itemProps.cron} />
-        <Form.Checkbox label={getTitleFromKey("ssl")} {...itemProps.ssl} />
-        <Form.Checkbox label={getTitleFromKey("sysinfo")} {...itemProps.sysinfo} />
-        <Form.Checkbox label={getTitleFromKey("ssh")} {...itemProps.ssh} />
-        <Form.Checkbox label={getTitleFromKey("dnscontrol")} {...itemProps.dnscontrol} />
+      if (response.error === "0") {
+        const data = response as SuccessResponse;
+        await showToast(Toast.Style.Success, data.text, data.details);
+        onUserModified();
+        pop();
+      }
+    },
+    initialValues: {
+      bandwidth: currentConfig.bandwidth,
+      ubandwidth: currentConfig.bandwidth === "unlimited",
+      quota: currentConfig.quota,
+      uquota: currentConfig.quota === "unlimited",
+      uvdomains: currentConfig.vdomains === "unlimited",
+      nsubdomains: currentConfig.nsubdomains,
+      unsubdomains: currentConfig.nsubdomains === "unlimited",
+      nemails: currentConfig.nemails,
+      unemails: currentConfig.nemails === "unlimited",
+      nemailf: currentConfig.nemailf,
+      unemailf: currentConfig.nemailf === "unlimited",
+      nemailml: currentConfig.nemailml,
+      unemailml: currentConfig.nemailml === "unlimited",
+      nemailr: currentConfig.nemailr,
+      unemailr: currentConfig.nemailr === "unlimited",
+      mysql: currentConfig.mysql,
+      umysql: currentConfig.mysql === "unlimited",
+      domainptr: currentConfig.domainptr,
+      udomainptr: currentConfig.domainptr === "unlimited",
+      ftp: currentConfig.ftp,
+      uftp: currentConfig.ftp === "unlimited",
+      aftp: currentConfig.aftp === "ON" ? true : false,
+      cgi: currentConfig.cgi === "ON" ? true : false,
+      php: currentConfig.php === "ON" ? true : false,
+      spam: currentConfig.spam === "ON" ? true : false,
+      cron: currentConfig.cron === "ON" ? true : false,
+      ssl: currentConfig.ssl === "ON" ? true : false,
+      sysinfo: currentConfig.sysinfo === "ON" ? true : false,
+      ssh: currentConfig.ssh === "ON" ? true : false,
+      dnscontrol: currentConfig.dnscontrol === "ON" ? true : false,
+      skin: currentConfig.skin,
+      ns1: currentConfig.ns1,
+      ns2: currentConfig.ns2,
+    },
+    validation: {
+      bandwidth(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      quota(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      vdomains(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      nsubdomains(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      nemails(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      nemailf(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      nemailml(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      nemailr(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      mysql(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      domainptr(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+      ftp(value) {
+        return validateAsNumberOrUnlimited(value);
+      },
+    },
+  });
+
+  return (
+    <Form
+      navigationTitle="Modify User"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Bandwidth" placeholder="1024" {...itemProps.bandwidth} />
+      <Form.Checkbox label="Unlimited Bandwidth" {...itemProps.ubandwidth} />
+      <Form.TextField title={getTitleFromKey("quota")} placeholder="1024" {...itemProps.quota} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("quota")}`} {...itemProps.uquota} />
+      <Form.TextField title={getTitleFromKey("vdomains")} placeholder="1" {...itemProps.vdomains} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("vdomains")}`} {...itemProps.uvdomains} />
+      <Form.TextField title={getTitleFromKey("nsubdomains")} placeholder="0" {...itemProps.nsubdomains} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("nsubdomains")}`} {...itemProps.unsubdomains} />
+      <Form.TextField title={getTitleFromKey("nemails")} placeholder="1" {...itemProps.nemails} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("nemails")}`} {...itemProps.unemails} />
+      <Form.TextField title={getTitleFromKey("nemailf")} placeholder="0" {...itemProps.nemailf} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("nemailf")}`} {...itemProps.unemailf} />
+      <Form.TextField title={getTitleFromKey("nemailml")} placeholder="0" {...itemProps.nemailml} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("nemailml")}`} {...itemProps.unemailml} />
+      <Form.TextField title={getTitleFromKey("nemailr")} placeholder="0" {...itemProps.nemailr} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("nemailr")}`} {...itemProps.unemailr} />
+      <Form.TextField title={getTitleFromKey("mysql")} placeholder="1" {...itemProps.mysql} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("mysql")}`} {...itemProps.umysql} />
+      <Form.TextField title={getTitleFromKey("domainptr")} placeholder="1" {...itemProps.domainptr} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("domainptr")}`} {...itemProps.udomainptr} />
+      <Form.TextField title={getTitleFromKey("ftp")} placeholder="1" {...itemProps.ftp} />
+      <Form.Checkbox label={`Unlimited ${getTitleFromKey("ftp")}`} {...itemProps.uftp} />
+
+      <Form.TextField title={getTitleFromKey("skin")} placeholder="evolution" {...itemProps.skin} />
+      <Form.TextField title={getTitleFromKey("ns1")} placeholder="ns1.example.com" {...itemProps.ns1} />
+      <Form.TextField title={getTitleFromKey("ns2")} placeholder="ns2.example.com" {...itemProps.ns2} />
+      <Form.Separator />
+
+      <Form.Checkbox label={getTitleFromKey("aftp")} {...itemProps.aftp} />
+      <Form.Checkbox label={getTitleFromKey("cgi")} {...itemProps.cgi} />
+      <Form.Checkbox label={getTitleFromKey("php")} {...itemProps.php} />
+      <Form.Checkbox label={getTitleFromKey("spam")} {...itemProps.spam} />
+      <Form.Checkbox label={getTitleFromKey("cron")} {...itemProps.cron} />
+      <Form.Checkbox label={getTitleFromKey("ssl")} {...itemProps.ssl} />
+      <Form.Checkbox label={getTitleFromKey("sysinfo")} {...itemProps.sysinfo} />
+      <Form.Checkbox label={getTitleFromKey("ssh")} {...itemProps.ssh} />
+      <Form.Checkbox label={getTitleFromKey("dnscontrol")} {...itemProps.dnscontrol} />
     </Form>
+  );
 }

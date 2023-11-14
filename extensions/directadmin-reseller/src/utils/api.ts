@@ -14,37 +14,43 @@ import {
   GetEmailAccountsRequest,
   GetSessionRequest,
   ModifyUserRequest,
-  SuspendOrUnsuspendUserRequest
+  SuspendOrUnsuspendUserRequest,
 } from "../types";
 import fetch, { Response } from "node-fetch";
-import { API_HEADERS, API_URL } from "./constants";
+import { API_URL, RESELLER_PASSWORD, RESELLER_USERNAME, TOKEN } from "./constants";
 import { showFailureToast } from "@raycast/utils";
 
-const callApi = async (endpoint: string, animatedToastMessage = "", body?) => {
+const callApi = async (endpoint: string, animatedToastMessage = "", body?, userToImpersonate="") => {
+  const token = (userToImpersonate==="") ? TOKEN : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
+  const headers = { Authorization: `Basic ${token}` };
+
   await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
 
   let apiResponse;
-  if (!body)
-    apiResponse = await fetch(API_URL + "CMD_API_" + endpoint, { headers: API_HEADERS, method: "POST" });
+  if (!body) apiResponse = await fetch(API_URL + "CMD_API_" + endpoint, { headers, method: "POST" });
   else
-    apiResponse = await fetch(API_URL + "CMD_API_" + endpoint, { headers: API_HEADERS, method: "POST", body: JSON.stringify(body) });
+    apiResponse = await fetch(API_URL + "CMD_API_" + endpoint, {
+      headers,
+      method: "POST",
+      body: JSON.stringify(body),
+    });
   // const apiResponse = await fetch(API_URL + "CMD_API_" + endpoint, { headers: API_HEADERS, method: "POST" });
   if (!apiResponse.ok) {
     return returnApiResponseAsError(apiResponse);
   } else {
-    const apiResponseContentType = apiResponse.headers.get('Content-Type');
+    const apiResponseContentType = apiResponse.headers.get("Content-Type");
     if (apiResponseContentType?.includes("text/html")) {
-        const text = "DirectAdmin Error";
-        await showFailureToast(text);
-        const errorResponse = {
-          error: "1",
-          text,
-          details: ""
+      const text = "DirectAdmin Error";
+      await showFailureToast(text);
+      const errorResponse = {
+        error: "1",
+        text,
+        details: "",
       } as ErrorResponse;
       return errorResponse;
     }
     const response = await apiResponse.text();
-    
+
     const urlSearchParams = new URLSearchParams(response);
     const params = {} as { [key: string]: string | string[] };
     urlSearchParams.forEach((value, key) => {
@@ -54,7 +60,7 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?) => {
         params[key].push(value);
       } else {
         params[key] = value;
-      }    
+      }
     });
 
     // Since some endpoints return an error=0 whereas others return no error,
@@ -65,29 +71,33 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?) => {
 };
 
 async function returnApiResponseAsError(apiResponse: Response) {
-    const response = new URLSearchParams(await apiResponse.text());
-    const text = response.get('text') as string;
-    const details = response.get('details') as string;
-    const errorResponse = {
-        error: "1",
-        text: text,
-        details: details
-    } as ErrorResponse;
-    const { status } = apiResponse;
-    await showToast(Toast.Style.Failure, `${status} Error`, text);
-    return errorResponse;
+  const response = new URLSearchParams(await apiResponse.text());
+  const text = response.get("text") as string;
+  const details = response.get("details") as string;
+  const errorResponse = {
+    error: "1",
+    text: text,
+    details: details,
+  } as ErrorResponse;
+  const { status } = apiResponse;
+  await showToast(Toast.Style.Failure, `${status} Error`, text);
+  return errorResponse;
 }
 
-// 
+//
 export async function getResellerUserAccounts(reseller: string) {
   const params = new URLSearchParams({ reseller });
   return await callApi(`SHOW_USERS?${params}`, "Fetching Users");
 }
-export async function getUserUsage(user: string) {
+export async function getUserUsage(user: string, is_reseller=false) {
+  if (is_reseller) 
+    return await callApi(`SHOW_USER_USAGE`, "Fetching User Usage");
   const params = new URLSearchParams({ user });
   return await callApi(`SHOW_USER_USAGE?${params}`, "Fetching User Usage");
 }
-export async function getUserConfig(user: string) {
+export async function getUserConfig(user: string, is_reseller=false) {
+  if (is_reseller)
+    return await callApi(`SHOW_USER_CONFIG`, "Fetching User Config");
   const params = new URLSearchParams({ user });
   return await callApi(`SHOW_USER_CONFIG?${params}`, "Fetching User Config");
 }
@@ -102,19 +112,19 @@ export async function deleteUser(body: DeleteUserRequest) {
   return await callApi("SELECT_USERS", "Deleting User", body);
 }
 export async function suspendOrUnsuspendUser(body: SuspendOrUnsuspendUserRequest) {
-  const message = ("dosuspend" in body) ? "Suspending User" : "Unsuspending User";
+  const message = "dosuspend" in body ? "Suspending User" : "Unsuspending User";
   return await callApi("SELECT_USERS", message, body);
 }
 export async function modifyUser(body: ModifyUserRequest) {
   return await callApi("MODIFY_USER", "Modifying User", body);
 }
 
-// 
+//
 export async function getResellerIPs() {
   return await callApi("SHOW_RESELLER_IPS", "Fetching Reseller IPs");
 }
 export async function getResellerIPInformation(ip: string) {
-     const params = new URLSearchParams({ ip });
+  const params = new URLSearchParams({ ip });
   return await callApi(`SHOW_RESELLER_IPS?${params}`, "Fetching Reseller IP Information");
 }
 
@@ -131,8 +141,8 @@ export async function getUserPackageInformation(packageName: string) {
 export async function getDomains() {
   return await callApi("SHOW_DOMAINS", "Fetching Domains");
 }
-export async function createDomain(body: CreateNewDomainRequest) {
-  return await callApi("DOMAIN", "Creating Domain", body);
+export async function createDomain(body: CreateNewDomainRequest, userToImpersonate="") {
+  return await callApi("DOMAIN", "Creating Domain", body, userToImpersonate);
 }
 export async function getSubdomains(domain: string) {
   return await callApi("SUBDOMAINS", "Fetching Subdomains", { domain });
