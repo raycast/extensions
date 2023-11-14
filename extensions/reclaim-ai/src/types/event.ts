@@ -138,6 +138,7 @@ export interface Event {
   published: boolean;
   reclaimEventType: string;
   reclaimManaged: boolean;
+  recurringEventId?: string;
   recurring: boolean;
   recurringException: boolean;
   recurringInstance: boolean;

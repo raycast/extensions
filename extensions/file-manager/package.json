@@ -94,10 +94,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.58.0",
-    "filesize": "^10.0.12"
+    "@raycast/api": "^1.59.0",
+    "filesize": "^10.0.20"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/node": "~20.6.0",
     "@types/react": "^18.2.21",
     "@typescript-eslint/eslint-plugin": "^6.7.0",

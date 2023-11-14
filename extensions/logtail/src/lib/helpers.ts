@@ -17,9 +17,9 @@ export const getLogLevelColor = (level: string) => {
   }
 };
 
-export const removeAnsi = (str: string) =>
+export const removeAnsi = (str: string | null) =>
   // eslint-disable-next-line no-control-regex
-  str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "");
+  str?.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "") ?? "";
 
 export const getQueryString = (query?: string, sourceId?: string) => {
   const params = new URLSearchParams();

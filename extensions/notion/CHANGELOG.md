@@ -1,5 +1,19 @@
 # Notion Changelog
 
+## [Fixes] - 2023-10-12
+
+- Fix duplicated recent and searched pages sometimes showing
+- Modify how recent pages are stored
+- Fix last edited time showing as the current time
+- Fix duped recent pages after page title changed
+- Allow selecting just a date without a time
+- Support quick edit status property
+- Fix not being able to create a page with an empty select property
+
+## [Deep links] - 2023-09-29
+
+- New action to `Create Database Page` that copies a [deeplink](https://manual.raycast.com/deeplink) to open the command as configured.
+
 ## [Small enhancements] - 2023-09-22
 
 - Add support for selecting options from Status properties

@@ -57,14 +57,14 @@ export default function AddTunnel({ revalidate, domains }: Props) {
         await Clipboard.copy(tunnel);
 
         toast.style = Toast.Style.Success;
-        toast.title = `Tunnel created on ${tunnel}!`;
+        toast.title = `Tunnel created!`;
         toast.message = "URL copied to clipboard.";
 
         revalidate();
 
         pop();
       } catch (err) {
-        console.log(err);
+        console.error(err);
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to create tunnel";
         if (err instanceof Error) {

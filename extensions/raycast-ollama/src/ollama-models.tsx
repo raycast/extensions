@@ -144,14 +144,16 @@ export default function Command(): JSX.Element {
           </ActionPanel>
         }
       >
-        {ModelsOnRegistry.length === 0 && <Form.TextField id="Model" title="Model Name" placeholder="Model Name" />}
-        {ModelsOnRegistry.length > 0 && (
+        {ModelsOnRegistry.length === undefined || ModelsOnRegistry.length === 0 ? (
+          <Form.TextField id="Model" title="Model Name" placeholder="Model Name" />
+        ) : null}
+        {ModelsOnRegistry.length && ModelsOnRegistry.length > 0 ? (
           <Form.Dropdown id="Model" title="Model Name">
             {ModelsOnRegistry.map((item) => {
               return <Form.Dropdown.Item key={item} title={item} value={item} />;
             })}
           </Form.Dropdown>
-        )}
+        ) : null}
       </Form>
     );
 

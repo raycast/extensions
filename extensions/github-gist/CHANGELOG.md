@@ -1,5 +1,9 @@
 # GitHub Gist Changelog
 
+## [Add Copy Raw Link action] - 2023-11-09
+
+- Add action to copy the raw link of the gist file
+
 ## [Update] - 2023-07-26
 
 - Updated dependencies

@@ -1,7 +1,7 @@
 import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
 
 import { openPin, Pin } from "../lib/Pins";
-import { ExtensionPreferences } from "../lib/utils";
+import { ExtensionPreferences } from "../lib/preferences";
 
 /**
  * A menu item to open all pins in a submenu.

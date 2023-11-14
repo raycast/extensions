@@ -24,12 +24,26 @@ After installing, follow the instructions on screen, and you should be good to g
 
 ## Setting up favorite devices
 
-1. Go to the extension's settings
-2. Enable the desired number of favorite device commands
-3. Ensure "Toothpick" (the extension) is highlighted (and not a command)
+1. Go to the extension's settings.
+2. Enable the desired number of favorite device commands.
+3. Ensure "Toothpick" (the extension) is highlighted (and not a command).
 4. Write your device's name in the corresponding preference field.
 
 You should now be able to connect to your device of choice via the configured commands.
+
+## Enabling 'blueutil' backend
+
+The default 'AppleScript' Bluetooth backend works and is available out-of-the-box on modern macOS installs.  
+That said, AppleScript itself is flaky at best. Various device-specific issues popped up with no way to reproduce them.  
+As a solution, Toothpick now has an opt-in Bluetooth backend based on 'blueutil'. It is more stable, faster and easy to set up.  
+
+1. Install 'blueutil' via 'brew'.
+2. Go to the extension's settings.
+3. Click on the 'Bluetooth Backend' dropdown.
+4. Select 'blueutil (Experimental)'
+
+As implied by the backend's name, this feature is experimental and hasn't been tested extensively.  
+If any issues pop up, please report them through the feedback links below. 
 
 ## Feedback
 

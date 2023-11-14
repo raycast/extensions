@@ -1,5 +1,8 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2023-09-22
+- Properly support VSCodium and Cursor in for commands relating to extensions
+
 ## [Update] - 2023-08-25
 
 - Adds support for Cursor as an option in the extension settings.

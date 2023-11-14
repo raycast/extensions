@@ -64,7 +64,7 @@ export function getIssueListSections(issues?: Issue[]) {
     });
 }
 
-export function getIssueDescription(description: string) {
+export function getMarkdownFromHtml(description: string) {
   const nodeToMarkdown = new NodeHtmlMarkdown(
     { keepDataImages: true },
     // For some reasons, Jira doesn't wrap code blocks within a <code> block
@@ -145,7 +145,7 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
     const name = issue.names[key];
     const value = issue.renderedFields[key];
 
-    return value ? `\n\n## ${name}\n\n${getIssueDescription(value)}` : null;
+    return value ? `\n\n## ${name}\n\n${getMarkdownFromHtml(value)}` : null;
   });
 
   const customMetadataFields = metadataFieldsKeys
