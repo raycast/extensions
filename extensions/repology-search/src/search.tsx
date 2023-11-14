@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { ActionPanel, Action, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Toast, showToast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { PackageDetail } from "./PackageDetail";
 import { Package } from "./types";
 
-// Define a type for your sections
 type PackageSections = {
   [key: string]: Package[];
 };
@@ -49,7 +48,7 @@ export default function Command() {
     return packages.filter((pkg) => selectedRepo === "" || pkg.repo === selectedRepo);
   }, [packages, selectedRepo]);
 
-  // Grouping and sorting filtered packages within each section
+  // Group packages by repository
   const packageSections = filteredPackages.reduce<PackageSections>((sections, pkg) => {
     const sectionKey = pkg.repo;
     if (!sections[sectionKey]) {
@@ -59,9 +58,13 @@ export default function Command() {
     return sections;
   }, {});
 
-  // Sort each section's packages by srcname
+  // Sort each section's packages by visiblename or srcname
   for (const section in packageSections) {
-    packageSections[section].sort((a, b) => a.srcname.localeCompare(b.srcname));
+    packageSections[section].sort((a, b) => {
+      const aName = a.visiblename || a.srcname;
+      const bName = b.visiblename || b.srcname;
+      return aName.localeCompare(bName);
+    });
   }
 
   return (
@@ -89,7 +92,11 @@ export default function Command() {
                 accessories={[{ text: pkg.version }]}
                 actions={
                   <ActionPanel>
-                    <Action.Push title="Show Details" target={<PackageDetail pkg={pkg} />} />
+                    <Action.Push
+                      title="Show Details"
+                      icon={Icon.AppWindowSidebarRight}
+                      target={<PackageDetail pkg={pkg} />}
+                    />
                     <Action.CopyToClipboard content={pkg.visiblename || pkg.binname || pkg.srcname} />
                     <Action.OpenInBrowser
                       url={`https://repology.org/projects/?search=${
@@ -105,7 +112,7 @@ export default function Command() {
           </List.Section>
         ))
       ) : (
-        <List.EmptyView title="No packages found" description="Try a different search query" />
+        <List.EmptyView title="No Results" />
       )}
     </List>
   );
