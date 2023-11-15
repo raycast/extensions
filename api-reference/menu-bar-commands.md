@@ -228,6 +228,40 @@ export default function Command() {
 
 {% endtab %}
 
+{% tab title="ItemWithAlternate.tsx" %}
+
+If an item provides another `MenuBarEtra.Item` via its `alternate`, prop, the second item will be shown then the user presses the ⌥ (opt) key. There are a few limitation:
+
+1. The `alternate` item may not have a custom shortcut. Instead, it will inherit its parent's shortcut, with the addition of ⌥ (opt) as a modifier.
+2. The `alternate` item may not also specify an alternate.
+3. A parent item that provides an `alternate` may not use ⌥ (opt) as a modifier.
+
+```typescript
+import { Icon, MenuBarExtra, open } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <MenuBarExtra icon={Icon.Bookmark}>
+      <MenuBarExtra.Item
+        icon="raycast.png"
+        title="Open Raycast Homepage"
+        shortcut={{ key: "r", modifiers: ["cmd"] }}
+        onAction={() => open("https://raycast.com")}
+        alternate={
+          <MenuBarExtra.Item
+            icon="raycast.png"
+            title="Open Raycast Store"
+            onAction={() => open("https://raycast.com/store")}
+          />
+        }
+      />
+    </MenuBarExtra>
+  );
+}
+```
+
+{% endtab %}
+
 {% endtabs %}
 
 #### Props
@@ -235,6 +269,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The main title displayed for this item. | <code>string</code> | - |
+| alternate | A [MenuBarExtra.Item](menu-bar-commands.md#menubarextra.item) to be displayed when a user presses the ⌥ (opt) key. | <code>ReactElement&lt;[MenuBarExtra.Item.Props](menu-bar-commands.md#props), string></code> | - |
 | icon | An optional icon for this item. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | A shortcut used to invoke this item when its parent menu is open. | <code>[Keyboard.Shortcut](keyboard.md#keyboard.shortcut)</code> | - |
 | subtitle | The subtitle displayed for this item. | <code>string</code> | - |
