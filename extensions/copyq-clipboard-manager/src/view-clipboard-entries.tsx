@@ -60,7 +60,7 @@ export default function Command() {
       });
     });
   }
-  
+
   // Utilize the getNumItems function to check the number of items in the tab
   async function checkNumItems() {
     const numItems = await getNumItems();
