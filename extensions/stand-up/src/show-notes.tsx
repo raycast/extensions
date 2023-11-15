@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, launchCommand, LaunchType, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import dayjs, { Dayjs } from "dayjs";
 import advanced from "dayjs/plugin/advancedFormat";
 import isBetween from "dayjs/plugin/isBetween";
@@ -11,6 +11,8 @@ import { useAsync } from "react-use";
 import { deleteAllForDay, deleteEntry, EntryType, FORMAT_KEY, getDaysByDateDescending } from "./api";
 import { CopyDayMarkdownAction } from "./utils/copy-markdown";
 import { SummariseDayAction } from "./utils/summarise-day";
+import ActionStyle = Alert.ActionStyle;
+import { EditNoteAction } from "./components/edit-note";
 
 function NewNoteAction() {
   return (
@@ -66,6 +68,17 @@ export default function Command() {
 
   const keys = Object.keys(data?.value?.days || {});
 
+  const dropdownItems = [
+    {
+      value: dayjs().format(FORMAT_KEY),
+      title: "Today",
+    },
+    {
+      value: dayjs().subtract(1, "day").format(FORMAT_KEY),
+      title: "Yesterday",
+    },
+  ];
+
   return (
     <List
       isLoading={data.loading}
@@ -73,8 +86,9 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown onChange={setFilter} tooltip="Filter by day">
           <List.Dropdown.Item title="Show all" value="all" />
-          <List.Dropdown.Item title="Today" value={dayjs().format(FORMAT_KEY)} />
-          <List.Dropdown.Item title="Yesterday" value={dayjs().subtract(1, "day").format(FORMAT_KEY)} />
+          {dropdownItems.map((d) => {
+            return <List.Dropdown.Item key={d.title} {...d} />;
+          })}
         </List.Dropdown>
       }
     >
@@ -111,6 +125,15 @@ export default function Command() {
                 });
               }
 
+              if (entry.type === EntryType.Blocker) {
+                accessories.push({
+                  tag: {
+                    value: "Blocker",
+                    color: Color.Red,
+                  },
+                });
+              }
+
               return (
                 <List.Item
                   key={date.toISOString()}
@@ -122,6 +145,7 @@ export default function Command() {
                   ]}
                   actions={
                     <ActionPanel>
+                      <EditNoteAction entry={entry} />
                       <NewNoteAction />
                       <CopyDayMarkdownAction day={data.value?.days[key]} />
                       <SummariseDayAction day={data.value?.days[key]} />
@@ -147,6 +171,17 @@ export default function Command() {
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         onAction={async () => {
+                          const ok = await confirmAlert({
+                            title: "Are you sure?",
+                            message: "This will delete all entries for this day, and they cannot be recovered",
+                            primaryAction: {
+                              title: "Delete all",
+                              style: ActionStyle.Destructive,
+                            },
+                          });
+                          if (!ok) {
+                            return;
+                          }
                           await deleteAllForDay(date);
                           setMutateCount((p) => p + 1);
                         }}

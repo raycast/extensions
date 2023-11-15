@@ -7,6 +7,7 @@ import { getPreferences } from "./preferences";
 export enum EntryType {
   Meeting = "Meeting",
   Note = "Note",
+  Blocker = "Blocker",
 }
 
 export type Entry = {
@@ -14,6 +15,7 @@ export type Entry = {
   notes: string;
   id: string;
   type: EntryType;
+  description?: string;
 };
 
 export type Data = {
@@ -33,6 +35,31 @@ interface EntryInput {
   notes: string;
   date?: Date;
   type?: EntryType;
+  description?: string;
+}
+
+export async function updateEntry(id: string, entry: EntryInput) {
+const db = await getDB();
+  const days = db.data.days;
+
+  for (const day in days) {
+    const entries = days[day];
+    const existing = entries[id];
+
+    if (existing) {
+      const type = entry.type ? entry.type : existing.type;
+      const datetime = entry.date ? entry.date : existing.datetime;
+
+      entries[id] = {
+        ...entry,
+        datetime,
+        id,
+        type,
+      };
+    }
+  }
+
+  await db.write();
 }
 
 export async function addEntry(entry: EntryInput) {
@@ -45,9 +72,9 @@ export async function addEntry(entry: EntryInput) {
   const existing = db.data.days[current];
 
   const newEntry: Entry = {
+    ...entry,
     datetime,
     id,
-    notes: entry.notes,
     type,
   };
 
