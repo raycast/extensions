@@ -2,7 +2,7 @@
 
 Check for CSS bugs by outlining all the elements in your web page.
 
-![Screencast of Outline Page Extention](src="https://raw.githubusercontent.com/raycast/extensions/6c25f03826ce42b722b6f06e71dea5a1555fb410/extensions/outline-page/assets/screencast.gif")
+![Screencast of Outline Page Extention](https://raw.githubusercontent.com/raycast/extensions/6c25f03826ce42b722b6f06e71dea5a1555fb410/extensions/outline-page/assets/screencast.gif)
 
 Works on Safari and Chromium based browsers.
 
