@@ -1716,3 +1716,15 @@ export const slackEmojiCodeMap = {
   ":zombie:": "🧟",
   ":zzz:": "💤",
 };
+
+export function getEmojiForCode(code: string, options?: { fallbackEmoji: string }) {
+  return slackEmojiCodeMap[code] ?? options?.fallbackEmoji ?? "💬";
+}
+
+export function getCodeForEmoji(emoji: string, options?: { fallbackCode: string }) {
+  return (
+    Object.entries(slackEmojiCodeMap).find(([, value]) => value === emoji)?.[0] ??
+    options?.fallbackCode ??
+    ":speech_balloon:"
+  );
+}
