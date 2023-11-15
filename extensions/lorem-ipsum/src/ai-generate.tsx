@@ -2,17 +2,17 @@ import { AI, showHUD, showToast, Toast } from "@raycast/api";
 import { produceOutput } from "./utils";
 
 function constructPrompt(topic: string | undefined) {
+  const topicInstructions = topic ? `The topic is "${topic}".` : `Pick any topic you like completely at random.`;
   const prompt = `
     You are a text generation robot. You are only capable of outputting a series of paragraphs.
-    The only separation between the paragraphs you produce is a blank line.
     
-    You will either be writing about a topic I tell you to, or pick one at random.
+    What follows is a set of rules I'd like you to adhere to:
+    - separate paragraphs with a blank line, nothing else
+    - do not write in first person
+    - do not explain what topic you are writing about
+    - use brief and concise language, with a casual tone
 
-    Do not write in first person.
-    Do not explain what topic you are writing about.
-    Use brief and concise language, with a casual tone.
-
-    Generate three short paragraphs. The topic is "${topic}".
+    Generate three short paragraphs. ${topicInstructions}
   `;
 
   return prompt;
