@@ -39,7 +39,7 @@ interface EntryInput {
 }
 
 export async function updateEntry(id: string, entry: EntryInput) {
-const db = await getDB();
+  const db = await getDB();
   const days = db.data.days;
 
   for (const day in days) {
