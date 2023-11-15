@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation} from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import fs from "fs";
 
@@ -38,7 +38,9 @@ export default function Command() {
       }
     >
       <Form.Dropdown title="Document type" {...itemProps.documentType}>
-         {documentTypes?.map(({ id, name }) => <Form.Dropdown.Item value={name} title={name} key={id} />)}
+        {documentTypes?.map(({ id, name }) => (
+          <Form.Dropdown.Item value={name} title={name} key={id} />
+        ))}
       </Form.Dropdown>
       <Form.FilePicker title="Document (PDF)" allowMultipleSelection={false} {...itemProps.filePaths} />
       <Form.Separator />
