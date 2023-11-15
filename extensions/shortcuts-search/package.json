@@ -45,7 +45,7 @@
     {
       "name": "current-app",
       "title": "Copy Current App's Bundle Id",
-      "description": "Saves current app's bundle id in the clipboard as a concealed entry",
+      "description": "Saves current app's bundle id in the clipboard",
       "mode": "no-view"
     }
   ],
