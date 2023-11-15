@@ -7,8 +7,9 @@ import {
   Icon,
   List,
   PopToRootType,
+  showHUD,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { runShortcuts } from "./engine/shortcut-runner";
 import {
@@ -59,11 +60,16 @@ export default function AppShortcuts(props: { bundleId: string } | undefined) {
 
   const initAppShortcuts = (bundleId: string, shortcuts: Shortcuts) => {
     const foundApp = shortcuts.applications.find((app) => app.bundleId === bundleId);
-    const foundKeymaps = foundApp?.keymaps.map((k) => k.title) ?? [];
-    const foundSections = foundApp?.keymaps[0].sections ?? [];
-    setAppShortcuts(foundApp);
-    setKeymaps(foundKeymaps);
-    setKeymapSections(foundSections);
+    if (!foundApp) {
+      closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+      showFailureToast(undefined, { title: `Shortcuts not available for application ${bundleId}` });
+    } else {
+      const foundKeymaps = foundApp?.keymaps.map((k) => k.title) ?? [];
+      const foundSections = foundApp?.keymaps[0].sections ?? [];
+      setAppShortcuts(foundApp);
+      setKeymaps(foundKeymaps);
+      setKeymapSections(foundSections);
+    }
   };
 
   useEffect(() => {
@@ -99,7 +105,7 @@ export default function AppShortcuts(props: { bundleId: string } | undefined) {
 
   return (
     <List
-      isLoading={shortcutsProviderResponse.isLoading || keyCodesResponse.isLoading || !bundleId}
+      isLoading={keymapSections.length === 0}
       navigationTitle="Current App Shortcuts"
       searchBarPlaceholder="Search for shortcuts"
       searchBarAccessory={<KeymapDropdown keymaps={keymaps} onKeymapChange={onKeymapChange} />}
@@ -113,7 +119,16 @@ export default function AppShortcuts(props: { bundleId: string } | undefined) {
                   key={shortcut.title}
                   title={shortcut.title}
                   subtitle={generateHotkeyText(shortcut)}
-                  accessories={shortcut.comment ? [{ text: shortcut.comment, icon: Icon.SpeechBubble }] : undefined}
+                  accessories={
+                    shortcut.comment
+                      ? [
+                          {
+                            text: shortcut.comment,
+                            icon: Icon.SpeechBubble,
+                          },
+                        ]
+                      : undefined
+                  }
                   keywords={[section.title]}
                   actions={
                     shortcut.sequence.length > 0 ? (
