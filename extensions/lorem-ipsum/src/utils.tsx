@@ -17,18 +17,15 @@ const loremIpsumOptions = {
 
 const generator = new LoremIpsum(loremIpsumOptions);
 
-// generator.generateWords(1);
-// generator.generateParagraphs(7);
-
 export const generateParagraphs = (count: number) => {
   return Array.from(Array(count))
     .map(() =>
       generator.generateSentences(
         Math.floor(
           Math.random() *
-            (loremIpsumOptions.sentencesPerParagraph.max - loremIpsumOptions.sentencesPerParagraph.min + 1)
-        ) + loremIpsumOptions.sentencesPerParagraph.min
-      )
+            (loremIpsumOptions.sentencesPerParagraph.max - loremIpsumOptions.sentencesPerParagraph.min + 1),
+        ) + loremIpsumOptions.sentencesPerParagraph.min,
+      ),
     )
     .join("\r\n\r\n"); // newline + seperator line
 };
@@ -40,8 +37,6 @@ export const generateSentences = (count: number) => {
 export const generateWords = (count: number) => {
   return generator.generateWords(count);
 };
-
-export const notify = () => {};
 
 export const safeLoremIpsumNumberArg = async (arg: string | undefined) => {
   if (!arg) {
