@@ -44,16 +44,11 @@
       "title": "View Notes",
       "description": "Show stand-up notes",
       "mode": "view"
-    },
-    {
-      "name": "test",
-      "title": "Test Note",
-      "description": "Test a given note functionality",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.61.2",
+    "@raycast/utils": "^1.10.1",
     "dayjs": "^1.11.10",
     "lowdb": "^6.1.1",
     "nanoid": "^5.0.3",

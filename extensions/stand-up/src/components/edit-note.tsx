@@ -1,11 +1,15 @@
 import { FormData, NoteForm } from "./note-form";
 import { Entry, updateEntry } from "../api";
-import { Action, showHUD } from "@raycast/api";
+import { Action, PopToRootType, showHUD } from "@raycast/api";
 
 export function EditNote({ entry }: { entry: Entry }) {
   const onSubmit = async (data: FormData) => {
     await updateEntry(entry.id, data);
-    return showHUD("Note updated");
+
+    showHUD("Note updated", {
+      clearRootSearch: true,
+      popToRootType: PopToRootType.Immediate,
+    });
   };
   return (
     <NoteForm
