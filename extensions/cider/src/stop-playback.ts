@@ -10,7 +10,11 @@ export default async function Command() {
   try {
     await fetch("http://localhost:10769/next");
     if (exitOnSuccess) await showHUD("⏹️ Stopped Playback");
-    else await showToast({ style: Toast.Style.Success, title: "Stopped Playback" });
+    else
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Stopped Playback",
+      });
   } catch {
     await showToast({
       style: Toast.Style.Failure,

@@ -10,7 +10,11 @@ export default async function Command() {
   try {
     await fetch("http://localhost:10769/addToLibrary");
     if (exitOnSuccess) await showHUD("➕ Added to Library");
-    else await showToast({ style: Toast.Style.Success, title: "Added to Library" });
+    else
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Added to Library",
+      });
   } catch {
     await showToast({
       style: Toast.Style.Failure,

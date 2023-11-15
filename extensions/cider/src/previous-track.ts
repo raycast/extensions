@@ -10,7 +10,11 @@ export default async function Command() {
   try {
     await fetch("http://localhost:10769/previous");
     if (exitOnSuccess) await showHUD("⏮️ Returned to the Previous Track");
-    else await showToast({ style: Toast.Style.Success, title: "Returned to the Previous Track" });
+    else
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Returned to the Previous Track",
+      });
   } catch {
     await showToast({
       style: Toast.Style.Failure,

@@ -47,7 +47,9 @@ export default function Command() {
   async function fetchCurrentPlayer() {
     try {
       const res = (
-        (await fetch("http://localhost:10769/currentPlayingSong").then((res) => res.json())) as currentPlayer
+        (await fetch("http://localhost:10769/currentPlayingSong").then((res) =>
+          res.json(),
+        )) as currentPlayer
       ).info;
       setSongName(res.name);
       setArtistName(res.artistName);
@@ -55,7 +57,12 @@ export default function Command() {
       setSongDuration(res.durationInMillis);
       setSongPosition(res.currentPlaybackTime);
       setSongStatus(res.status);
-      setAlbumArt(res.artwork.url.replace("{w}x{h}", `${res.artwork.width}x${res.artwork.height}`));
+      setAlbumArt(
+        res.artwork.url.replace(
+          "{w}x{h}",
+          `${res.artwork.width}x${res.artwork.height}`,
+        ),
+      );
       setReleaseDate(new Date(res.releaseDate).toLocaleDateString());
       setIsPlaying(true);
     } catch {
@@ -80,7 +87,10 @@ export default function Command() {
     }, 250);
   }, []);
   return (
-    <List isShowingDetail={isShowingDetail} onSelectionChange={(id) => changeISD(id)}>
+    <List
+      isShowingDetail={isShowingDetail}
+      onSelectionChange={(id) => changeISD(id)}
+    >
       {isPlaying ? (
         <>
           <List.Item title={songName} subtitle={"Title"} />
@@ -92,14 +102,20 @@ export default function Command() {
             detail={<List.Item.Detail markdown={`![Album Art](${albumArt})`} />}
           />
           <List.Item
-            title={`${parseFromSeconds(songPosition)} / ${parseFromMillis(songDuration)}`}
+            title={`${parseFromSeconds(songPosition)} / ${parseFromMillis(
+              songDuration,
+            )}`}
             subtitle={"Duration"}
           />
           <List.Item title={songStatus} subtitle={"Status"} />
           <List.Item title={releaseDate} subtitle={"Release Date"} />
         </>
       ) : (
-        <List.EmptyView title={"Not Playing"} description={"Try Playing Something First"} icon={Icon.Music} />
+        <List.EmptyView
+          title={"Not Playing"}
+          description={"Try Playing Something First"}
+          icon={Icon.Music}
+        />
       )}
     </List>
   );

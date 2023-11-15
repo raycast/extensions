@@ -99,7 +99,7 @@
     "cross-fetch": "^4.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "18.18.4",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",

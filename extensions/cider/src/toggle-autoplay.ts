@@ -10,7 +10,11 @@ export default async function Command() {
   try {
     await fetch("http://localhost:10769/toggleAutoplay");
     if (exitOnSuccess) await showHUD("♾️ Toggled Autoplay");
-    else await showToast({ style: Toast.Style.Success, title: "Toggled Autoplay" });
+    else
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Toggled Autoplay",
+      });
   } catch {
     await showToast({
       style: Toast.Style.Failure,

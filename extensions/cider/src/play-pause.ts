@@ -10,7 +10,11 @@ export default async function Command() {
   try {
     await fetch("http://localhost:10769/playPause");
     if (exitOnSuccess) await showHUD("⏯️ Toggled Play/Pause");
-    else await showToast({ style: Toast.Style.Success, title: "Toggled Play/Pause" });
+    else
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Toggled Play/Pause",
+      });
   } catch {
     await showToast({
       style: Toast.Style.Failure,
