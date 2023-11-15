@@ -1,9 +1,9 @@
-import { AppShortcuts, AtomicShortcut, SectionShortcut } from "../model/internal/internal-models";
+import { Application, AtomicShortcut, SectionShortcut } from "../model/internal/internal-models";
 import { modifierMapping, Modifiers } from "../model/internal/modifiers";
 import { InputApp, InputShortcut } from "../model/input/input-models";
 
 export class ShortcutsParser {
-  public parseInputShortcuts(inputApps: InputApp[]): AppShortcuts[] {
+  public parseInputShortcuts(inputApps: InputApp[]): Application[] {
     return inputApps.map((inputApp) => {
       return {
         name: inputApp.name,

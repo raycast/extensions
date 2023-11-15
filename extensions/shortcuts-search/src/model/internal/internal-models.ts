@@ -1,12 +1,12 @@
 import { Modifiers } from "./modifiers";
 
 export interface Shortcuts {
-  applications: AppShortcuts[];
+  applications: Application[];
 }
 
-export interface AppShortcuts {
-  bundleId: string;
+export interface Application {
   name: string;
+  bundleId?: string;
   keymaps: Keymap[];
 }
 

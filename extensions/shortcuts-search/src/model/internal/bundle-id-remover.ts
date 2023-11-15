@@ -1,4 +1,4 @@
-export function removeHiddenBundleId(bundleId: string): string {
-  if (bundleId.endsWith(".fake.bundle.id")) return "";
+export function removeHiddenBundleId(bundleId: string | undefined): string {
+  if (bundleId === undefined || bundleId.endsWith(".fake.bundle.id")) return "";
   return bundleId;
 }

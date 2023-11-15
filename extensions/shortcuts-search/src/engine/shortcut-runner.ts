@@ -38,7 +38,12 @@ const appleScript = `
   }
 `;
 
-export async function runShortcuts(bundleId: string, delay: number, sequence: AtomicShortcut[], keyCodes: KeyCodes) {
+export async function runShortcuts(
+  bundleId: string | undefined,
+  delay: number,
+  sequence: AtomicShortcut[],
+  keyCodes: KeyCodes
+) {
   console.log(`Running shortcut for application ${bundleId} with delay ${delay}`);
   try {
     await runAppleScript(appleScript, generateArguments(bundleId, delay, sequence, keyCodes), {
@@ -67,9 +72,14 @@ export async function runShortcuts(bundleId: string, delay: number, sequence: At
  * modifier MN
  * base key for chord N
  *
- * Note: macOS fake bundle id is an exception and will be replaced as an empty string
+ * Note: non-existing bundleId will be replaced as an empty string
  */
-function generateArguments(bundleId: string, delay: number, sequence: AtomicShortcut[], keyCodes: KeyCodes): string[] {
+function generateArguments(
+  bundleId: string | undefined,
+  delay: number,
+  sequence: AtomicShortcut[],
+  keyCodes: KeyCodes
+): string[] {
   const args: string[] = [removeHiddenBundleId(bundleId), String(delay), String(sequence.length)];
   sequence.forEach((atomic) => {
     args.push(String(atomic.modifiers.length));

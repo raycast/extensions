@@ -1,6 +1,6 @@
 import { ShortcutsParser } from "./input-parser";
 import { InputApp } from "../model/input/input-models";
-import { AppShortcuts, AtomicShortcut } from "../model/internal/internal-models";
+import { Application, AtomicShortcut } from "../model/internal/internal-models";
 import { Modifiers } from "../model/internal/modifiers";
 
 describe("Parses shortcut correctly", () => {
@@ -8,6 +8,15 @@ describe("Parses shortcut correctly", () => {
 
   it("Parses app shortcut", () => {
     expect(parser.parseInputShortcuts([generateInputAppWithShortcut()])).toEqual([generateExpectedAppWithShortcut()]);
+  });
+
+  it("Parses app without bundleId", () => {
+    const inputApp = generateInputAppWithShortcut();
+    inputApp.bundleId = undefined;
+    const expectedApplication = generateExpectedAppWithShortcut();
+    expectedApplication.bundleId = undefined;
+
+    expect(parser.parseInputShortcuts([inputApp])).toEqual([expectedApplication]);
   });
 
   it("Parses shortcut without modifiers", () => {
@@ -49,7 +58,7 @@ function generateInputAppWithShortcut(override?: { shortcut: string }): InputApp
   };
 }
 
-function generateExpectedAppWithShortcut(override?: { shortcutSequence?: AtomicShortcut[] }): AppShortcuts {
+function generateExpectedAppWithShortcut(override?: { shortcutSequence?: AtomicShortcut[] }): Application {
   return {
     bundleId: "some-bundle-id",
     name: "some-name",

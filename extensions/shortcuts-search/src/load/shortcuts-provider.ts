@@ -1,4 +1,4 @@
-import { AppShortcuts, Shortcuts } from "../model/internal/internal-models";
+import { Application, Shortcuts } from "../model/internal/internal-models";
 import { ShortcutsParser } from "./input-parser";
 import Validator from "./validator";
 import { useFetch } from "@raycast/utils";
@@ -62,7 +62,7 @@ class ShortcutsProvider {
     };
   }
 
-  public getShortcutsByApp(bundleId: string): AppShortcuts | undefined {
+  public getShortcutsByApp(bundleId: string): Application | undefined {
     const shortcuts = this.getShortcuts();
     return shortcuts.applications.find((app) => app.bundleId === bundleId);
   }
