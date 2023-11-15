@@ -7,7 +7,6 @@ import {
   Icon,
   List,
   PopToRootType,
-  showHUD,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
