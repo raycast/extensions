@@ -43,14 +43,4 @@ export default function useExtraction(documentType?: string, file?: string): Ext
   }, [documentType, file, sensible_api_key, extraction]);
 
   return { data: extraction.data, error: extraction.error, isLoading: extraction.isLoading };
-
-  // cache the result of the extraction
-  // return useFetch<Extraction>(`https://api.sensible.so/dev/extract/${documentType}`, {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/pdf",
-  //     Authorization: `Bearer ${sensible_api_key}`,
-  //   },
-  //   body: readFileSync(file),
-  // });
 }

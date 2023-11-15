@@ -32,7 +32,7 @@
     "@raycast/api": "^1.61.2",
     "@raycast/utils": "^1.10.1",
     "node-fetch": "^3.2.9",
-    "sensible-api": "^0.0.2"
+    "sensible-api": "^0.0.3"
   },
   "devDependencies": {
     "@types/react": "^18.0.15",
