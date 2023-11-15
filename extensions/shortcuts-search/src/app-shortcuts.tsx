@@ -51,6 +51,7 @@ function KeymapDropdown(props: { keymaps: string[]; onKeymapChange: (newValue: s
 
 export default function AppShortcuts(props?: { app: Application }) {
   const [bundleId, setBundleId] = useState(props?.app?.bundleId);
+  const [isLoading, setIsLoading] = useState(true);
   const [application, setApplication] = useState<Application | undefined>(props?.app);
   const [keymaps, setKeymaps] = useState<string[]>([]);
   const [keymapSections, setKeymapSections] = useState<Section[]>([]);
@@ -58,6 +59,7 @@ export default function AppShortcuts(props?: { app: Application }) {
   const shortcutsProviderResponse = useAllShortcuts();
 
   const initAppShortcuts = (bundleId: string, shortcuts: Shortcuts) => {
+    setIsLoading(true);
     const foundApp = application ?? shortcuts.applications.find((app) => app.bundleId === bundleId);
     if (!foundApp) {
       // noinspection JSIgnoredPromiseFromCall
@@ -71,6 +73,7 @@ export default function AppShortcuts(props?: { app: Application }) {
       setKeymaps(foundKeymaps);
       setKeymapSections(foundSections);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -106,8 +109,7 @@ export default function AppShortcuts(props?: { app: Application }) {
 
   return (
     <List
-      isLoading={keymapSections.length === 0}
-      navigationTitle="Current App Shortcuts"
+      isLoading={isLoading}
       searchBarPlaceholder="Search for shortcuts"
       searchBarAccessory={<KeymapDropdown keymaps={keymaps} onKeymapChange={onKeymapChange} />}
     >
