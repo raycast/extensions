@@ -5,6 +5,9 @@
   "description": "List your current installed Raycast extensions",
   "icon": "extension-icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "erics118"
+  ],
   "categories": [
     "Fun"
   ],
@@ -16,14 +19,6 @@
       "description": "List your current installed Raycast extensions",
       "mode": "view",
       "preferences": [
-        {
-          "name": "jqPath",
-          "description": "The path to jq, leave blank for default brew path",
-          "type": "textfield",
-          "required": false,
-          "title": "Path to jq",
-          "placeholder": "/opt/homebrew/bin/jq"
-        },
         {
           "name": "separator",
           "description": "Select output format",
@@ -63,16 +58,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
+    "@raycast/api": "^1.60.1",
     "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.33",
+    "eslint": "^8.52.0",
     "prettier": "^3.0.3",
-    "typescript": "^4.4.3"
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

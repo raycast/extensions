@@ -1,13 +1,12 @@
 import { ActionPanel, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
-import { GenealActions } from "./components/actions/GeneralActions";
 import Group from "./components/Group";
 import Task from "./components/Task";
 import { View } from "./components/View";
-
-import { useCachedState } from "@raycast/utils";
+import { GenealActions } from "./components/actions/GeneralActions";
 import { useData } from "./state/data";
-import { Data, Tag, Node } from "./types/tim";
+import { Data, Node, Tag } from "./types/tim";
 
 const Tasks: React.FC = () => {
   const { data, isLoading } = useData();
@@ -86,7 +85,7 @@ function getFirstLevel(data?: Data, tagFilter = "") {
 
     const task = data.tasks[node.id];
     if (task) {
-      if (tagFilter && !task.tags.includes(tagFilter)) {
+      if (tagFilter && !task.tags?.includes(tagFilter)) {
         continue;
       }
       tasks.push(node);

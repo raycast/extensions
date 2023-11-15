@@ -154,10 +154,10 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
   );
 }
 
-export default function Command({ launchContext }: LaunchProps<{ launchContext: { query: string } }>) {
+export default function Command({ launchContext, fallbackText }: LaunchProps<{ launchContext: { query: string } }>) {
   return (
     <View>
-      <SearchCommand initialSearchText={launchContext?.query} />
+      <SearchCommand initialSearchText={launchContext?.query ?? fallbackText} />
     </View>
   );
 }

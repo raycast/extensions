@@ -14,8 +14,13 @@ import { VaultFavorites } from "./favorites";
 import { ReactNode } from "react";
 import { VaulEngines } from "./engines";
 
-export function setNamespaceAndGoToTree(values: { namespace: string }, push: (component: ReactNode) => void) {
-  setVaultNamespace(values.namespace);
+export async function setNamespaceAndGoToTree(
+  values: {
+    namespace: string;
+  },
+  push: (component: ReactNode) => void
+) {
+  await setVaultNamespace(values.namespace);
   push(<VaultTree path={"/"} />);
 }
 

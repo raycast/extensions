@@ -1,5 +1,10 @@
 # Things Changelog
 
+## [Minor improvements] - 2023-10-31
+
+- Use the Things flat icon in the menu bar and actions to make it stand out
+- Add a preference to hide the top Things to-do in the menu bar
+
 ## [Quick Add To-Do using natural language processing (NLP)] - 2023-09-05
 
 Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go. 

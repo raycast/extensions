@@ -3,5 +3,6 @@ type IntentionalAny = any;
 
 interface Preferences {
   defaultDate: "none" | "today" | "tomorrow" | "dayAfterTomorrow" | "nextWeek";
+  defaultTitle: "none" | "clipboard" | "selection";
   autoFillEnabled: boolean;
 }

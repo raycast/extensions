@@ -40,19 +40,27 @@ module.exports = async ({ github, context }: API) => {
 
   let owners;
   let extension;
+  let extensionFolder: string;
+
+  const [codeowners, extensionName2Folder] = await Promise.all([
+    getCodeOwners({ github, context }),
+    getExtensionName2Folder({ github, context }),
+  ]);
 
   if (newMatch.test(context.payload.issue.body)) {
     const [, owner, ext] = newMatch.exec(context.payload.issue.body) || [];
-    extension = ext;
 
-    const codeowners = await getCodeOwners({ github, context });
-    owners = codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[`${owner}/${ext}`]}`];
+    extension = `${owner}/${ext}`;
+    extensionFolder = extensionName2Folder[extension];
+    owners = codeowners[`/extensions/${extensionFolder}`];
   } else {
-    const [, ext] =
+    const [, x] =
       newMatchGitHub.exec(context.payload.issue.body) || oldMatchGithub.exec(context.payload.issue.body) || [];
-    extension = ext;
+    extensionFolder = x;
 
-    if (!ext) {
+    extension = Object.values(extensionName2Folder).find(([_, folder]) => folder === extensionFolder)?.[0];
+
+    if (!extension) {
       console.log(`could not find the extension in the body`);
       await comment({
         github,
@@ -68,12 +76,11 @@ module.exports = async ({ github, context }: API) => {
       return;
     }
 
-    const codeowners = await getCodeOwners({ github, context });
-    owners = codeowners[`/extensions/${ext}`];
+    owners = codeowners[`/extensions/${extensionFolder}`];
   }
 
   if (!owners) {
-    console.log(`could not find the extension ${extension}`);
+    console.log(`could not find the code owners for ${extension} (folder: ${extensionFolder})`);
     await comment({
       github,
       context,
@@ -136,7 +143,7 @@ module.exports = async ({ github, context }: API) => {
     issue_number: context.payload.issue.number,
     owner: context.repo.owner,
     repo: context.repo.repo,
-    labels: [limitLabelLength(`extension: ${extension}`)],
+    labels: [extensionLabel(extension, extensionName2Folder)],
   });
 
   try {
@@ -239,6 +246,11 @@ async function comment({ github, context, comment }: Pick<API, "github" | "conte
   }
 }
 
-function limitLabelLength(label: string) {
+function extensionLabel(extension: string, extensionName2Folder: { [key: string]: string }) {
+  const names = Object.keys(extensionName2Folder).map((x) => x.split("/")[1]);
+  const multipleExtensionsWithTheSameName = names.filter((x) => x === extension).length > 1;
+
+  const label = `extension: ${multipleExtensionsWithTheSameName ? extension : extension.split("/")[1]}`;
+
   return label.length > 50 ? label.substring(0, 49) + "…" : label;
 }

@@ -28,7 +28,7 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
-  const { itemProps, handleSubmit, reset, focus, values } = useForm<CreateReminderValues>({
+  const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({
     initialValues: {
       listId: listId ?? defaultList?.id ?? "",
     },
@@ -99,13 +99,8 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
           pop();
         }
 
-        reset({
-          title: "",
-          notes: "",
-          dueDate: null,
-          priority: "",
-          listId: "",
-        });
+        setValue("title", "");
+        setValue("notes", "");
 
         focus("title");
       } catch (error) {
