@@ -22,7 +22,7 @@ export default function Command() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const copyqPath = preferences.copyq_path;
   const defaultTab = preferences.default_tab;
-  const defaultNumItems = preferences.default_num_items;
+  let defaultNumItems = preferences.default_num_items;
 
   // Check if CopyQ is installed
   try {
@@ -44,6 +44,32 @@ export default function Command() {
       </List>
     );
   }
+
+  // Define a function that gets the amount of items in the tab
+  function getNumItems(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const command = `"${copyqPath}" tab ${defaultTab} count`;
+      exec(command, (error, stdout) => {
+        if (error) {
+          // Typically occurs when CopyQ path is incorrect or not installed.
+          console.log(`error: ${error.message}`);
+          reject(error);
+        } else {
+          resolve(parseInt(stdout, 10));
+        }
+      });
+    });
+  }
+  
+  // Utilize the getNumItems function to check the number of items in the tab
+  async function checkNumItems() {
+    const numItems = await getNumItems();
+    // Ensure that defaultNumItems is less than or equal to the number of items in the tab
+    if (defaultNumItems > numItems) {
+      defaultNumItems = numItems;
+    }
+  }
+  checkNumItems();
 
   const [clipboardContents, setClipboardContents] = useState<string[]>([]);
 
@@ -77,7 +103,12 @@ export default function Command() {
   }
 
   useEffect(() => {
-    storeClipboardContents(defaultTab, defaultNumItems);
+    async function fetchData() {
+      await checkNumItems();
+      storeClipboardContents(defaultTab, defaultNumItems);
+    }
+
+    fetchData();
   }, [defaultTab, defaultNumItems]);
 
   const items = clipboardContents.map((text, index) => (
