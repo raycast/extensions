@@ -13,34 +13,23 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "searchServer",
-      "title": "Manager Servers",
-      "subtitle": "Hetzner",
-      "description": "Shows a list of all Hetzner servers",
+      "name": "addProject",
+      "title": "Add Project",
+      "description": "Configure the projects that should be managed by this extension",
       "mode": "view"
     },
     {
-      "name": "createServer",
-      "title": "Create Server",
-      "subtitle": "Hetzner",
-      "description": "Creates a server",
-      "mode": "no-view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "projectId",
-      "description": "Set your Hetzner Project ID",
-      "type": "textfield",
-      "required": true,
-      "title": "Hetzner Project ID"
+      "name": "manageProject",
+      "title": "Manage Projects",
+      "description": "Configure the projects that should be managed by this extension",
+      "mode": "view"
     },
     {
-      "name": "accessToken",
-      "description": "Provide your generated access token from Hetzner",
-      "type": "password",
-      "required": true,
-      "title": "Hetzner API Access Token"
+      "name": "manageServer",
+      "title": "Manage Servers",
+      "subtitle": "Hetzner",
+      "description": "Shows a list of all Hetzner servers",
+      "mode": "view"
     }
   ],
   "dependencies": {
