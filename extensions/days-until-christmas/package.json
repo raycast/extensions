@@ -5,6 +5,9 @@
   "description": "It shows how many days until Christmas left 🎄🎁",
   "icon": "icon.png",
   "author": "megapixel23",
+  "contributors": [
+    "erics118"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -15,21 +18,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.1"
+    "@raycast/api": "^1.62.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.9.0",
+    "@types/react": "18.2.37",
+    "eslint": "^8.53.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
