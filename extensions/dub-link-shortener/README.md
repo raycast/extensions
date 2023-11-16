@@ -12,4 +12,4 @@ You need 3 things from Dub:
 1) Create a new API key here: https://app.dub.co/settings/tokens
 2) See below screenshot
 3) See below screenshot
-![instructions for project slug and domain](assets/project-instructions.png)
+![instructions for project slug and domain](https://github.com/quuu/raycast-extensions/blob/main/extensions/dub-link-shortener/assets/project-instructions.png?raw=true)
