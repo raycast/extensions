@@ -129,7 +129,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
               content={translation}
             />
             <Action.Paste
-              title="Paste Translation to Frontmost App"
+              title="Paste in Frontmost App"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
               content={translation}
             />
