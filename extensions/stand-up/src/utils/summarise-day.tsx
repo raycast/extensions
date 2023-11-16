@@ -1,6 +1,6 @@
 import { Entry } from "../api";
 import { Action, AI, Detail, environment, Icon } from "@raycast/api";
-import { useAsync } from "react-use";
+import { useCachedPromise } from "@raycast/utils";
 
 export async function summariseDay(standup: Record<string, Entry>): Promise<string> {
   if (!environment.canAccess(AI)) {
@@ -15,11 +15,14 @@ export async function summariseDay(standup: Record<string, Entry>): Promise<stri
 }
 
 function Summariser(props: { day: Record<string, Entry> }) {
-  const res = useAsync(() => {
-    return summariseDay(props.day);
-  });
+  const {isLoading, data} = useCachedPromise(
+    (input: Record<string, Entry>) => {
+      return summariseDay(input);
+    },
+    [props.day],
+  );
 
-  return <Detail isLoading={res.loading} markdown={`# Summary\n\n ${res.value || "Please wait..."}`} />;
+  return <Detail isLoading={isLoading} markdown={`# Summary\n\n ${data || "Please wait..."}`} />;
 }
 
 export function SummariseDayAction(props: { day?: Record<string, Entry> }) {
