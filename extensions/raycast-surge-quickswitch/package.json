@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-surge-quickswitch",
+  "title": "Surge Quick Switch",
+  "description": "Quick Turn on or off of Surge Proxy",
+  "icon": "surge-icon.png",
+  "author": "cary",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "x-key",
+      "title": "HTTP API X-Key",
+      "description": "X-Key is required to access the main function.",
+      "placeholder": "More - Settings - Remote Controller",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "port",
+      "title": "TCP Port",
+      "description": "Port is required to access the main function.",
+      "placeholder": "6171",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "disable-surge",
+      "title": "Disable Surge",
+      "description": "Turn off System Proxy and Enhanced Mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable-surge",
+      "title": "Enable Surge",
+      "description": "Turn on System Proxy and Enhanced Mode",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2",
+    "axios": "^0.24.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
