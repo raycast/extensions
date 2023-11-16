@@ -292,7 +292,7 @@
       ]
     },
     {
-      "name": "current",
+      "name": "current-track",
       "title": "Current Track",
       "description": "Show the current song/episode state.",
       "mode": "no-view",
