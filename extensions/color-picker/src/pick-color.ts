@@ -21,7 +21,7 @@ export default async function command(props: PickColorCommandLaunchProps) {
 
     await Clipboard.copy(hex);
 
-    await showHUD("Copied color to clipboard");
+    await showHUD(`Copied color ${hex} to clipboard`);
     try {
       await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     } catch (e) {
