@@ -1,36 +1,25 @@
-import { useState } from "react";
-import { Detail } from "@raycast/api";
 import { calculate, format } from "./lib";
-import useInterval from "./lib/useInterval";
+import { updateCommandMetadata } from "@raycast/api";
 
-const emojis = ["🎁", "🍪", "❄️", "🎄", "🔔", "🎅", "☃️", "⛄"];
+const emojis = ["🎁", "🍪", "❄️", "🎄", "🔔", "🎅", "☃️", "⛄", "🤶", "🦌"];
 
-export default function Command() {
-  const [s] = useState(() => {
-    const now = new Date();
+export default async function Command() {
+  const now = new Date();
 
-    return calculate({
-      currDate: now,
-      neededDate: new Date(now.getFullYear(), 11, 25),
-    });
+  const s = calculate({
+    currDate: now,
+    neededDate: new Date(now.getFullYear(), 11, 25),
   });
-  const [emoji, setEmoji] = useState(emojis[0]);
+  const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-  useInterval(() => {
-    const randomNumber = Math.floor(Math.random() * emojis.length);
-
-    setEmoji(emojis[randomNumber]);
-  }, 1500);
+  let subtitle = "";
 
   if (s.isToday) {
-    return <Detail markdown={`## Merry Christmas ${emoji}`} />;
+    subtitle = `Merry Christmas! ${emoji}`;
+  } else {
+    subtitle = `${s.days ? `${format(s.days, "day")} and ` : ""}${s.hours ? format(s.hours, "hour") : ""
+      } until Christmas ${emoji}`;
   }
 
-  return (
-    <Detail
-      markdown={`## It's ${s.days ? `${format(s.days, "day")} and ` : ""}${
-        s.hours ? format(s.hours, "hour") : ""
-      } until Christmas ${emoji}`}
-    />
-  );
+  await updateCommandMetadata({ subtitle });
 }

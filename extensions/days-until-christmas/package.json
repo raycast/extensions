@@ -14,7 +14,8 @@
       "name": "index",
       "title": "How Many Days Until Christmas?",
       "description": "It shows how many days until Christmas left 🎄🎁",
-      "mode": "view"
+      "mode": "no-view",
+      "interval": "1h"
     }
   ],
   "dependencies": {
