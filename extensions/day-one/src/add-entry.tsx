@@ -16,10 +16,6 @@ export default function Command() {
     const { body, date, journal } = values;
 
     try {
-      console.log("before add", {
-        journal,
-      });
-
       await addEntry({
         body,
         date,
