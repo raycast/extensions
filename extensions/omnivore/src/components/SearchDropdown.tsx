@@ -8,7 +8,7 @@ export default function SearchDropdown(props: {
   const { searchTypes, onSearchTypeChange } = props
   return (
     <List.Dropdown
-      tooltip="Select Drink Type"
+      tooltip="Select Search Type"
       storeValue={true}
       onChange={(newValue) => {
         onSearchTypeChange(newValue)
