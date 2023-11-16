@@ -17,8 +17,12 @@ export default async function Command() {
   if (s.isToday) {
     subtitle = `Merry Christmas! ${emoji}`;
   } else {
-    subtitle = `${s.days ? `${format(s.days, "day")} and ` : ""}${s.hours ? format(s.hours, "hour") : ""
-      } until Christmas ${emoji}`;
+    const parts = [];
+
+    if (s.days) parts.push(format(s.days, "day"));
+    if (s.hours) parts.push(format(s.hours, "hour"));
+
+    subtitle = `${parts.join(" and ")} until Christmas ${emoji}`;
   }
 
   await updateCommandMetadata({ subtitle });
