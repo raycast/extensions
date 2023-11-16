@@ -18,7 +18,7 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   
   useEffect(() => {
     const isSelectedProfileInvalid =
-    selectedProfile && !profileOptions.some((profile) => profile.name === selectedProfile);
+      selectedProfile && !profileOptions.some((profile) => profile.name === selectedProfile);
 
     if (!selectedProfile || isSelectedProfileInvalid) {
       setSelectedProfile(profileOptions[0]?.name);
