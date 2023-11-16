@@ -285,7 +285,7 @@
       "arguments": [
         {
           "name": "position",
-          "placeholder": "Position",
+          "placeholder": "Seconds",
           "type": "text",
           "required": true
         }
