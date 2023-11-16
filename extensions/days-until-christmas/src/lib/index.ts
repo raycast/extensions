@@ -7,22 +7,26 @@ export const getTitle = () => {
     currDate: now,
     neededDate: new Date(now.getFullYear(), 11, 25),
   });
+
   const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-  let subtitle = "";
+  let title = "";
 
   if (s.isToday) {
-    subtitle = `Merry Christmas! ${emoji}`;
+    title = `Merry Christmas! ${emoji}`;
   } else {
     const parts = [];
 
     if (s.days) parts.push(format(s.days, "day"));
     if (s.hours) parts.push(format(s.hours, "hour"));
 
-    subtitle = `${parts.join(" and ")} until Christmas ${emoji}`;
+    title = `${parts.join(" and ")} until Christmas`;
   }
-  return subtitle;
-}
+  return {
+    title,
+    emoji,
+  };
+};
 
 export const calculate = ({
   currDate,

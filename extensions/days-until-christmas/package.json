@@ -13,8 +13,15 @@
     {
       "name": "index",
       "title": "How Many Days Until Christmas?",
-      "description": "It shows how many days until Christmas left 🎄🎁",
+      "description": "Shows the number many days until Christmas left 🎄🎁",
       "mode": "no-view",
+      "interval": "1h"
+    },
+    {
+      "name": "menu-bar",
+      "title": "How Many Days Until Christmas?",
+      "description": "Shows the number many days until Christmas left 🎄🎁",
+      "mode": "menu-bar",
       "interval": "1h"
     }
   ],
