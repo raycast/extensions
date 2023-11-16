@@ -1,6 +1,7 @@
-import { Form, ActionPanel, Action, showHUD } from "@raycast/api";
-import { addEntry } from "./day-one";
+import { Form, ActionPanel, Action, showHUD, Detail, open } from "@raycast/api";
+import { missingCLIError, useDayOneIntegration } from "./day-one";
 import { useCachedState } from "@raycast/utils";
+import { useState } from "react";
 
 type Values = {
   body: string;
@@ -9,10 +10,12 @@ type Values = {
 };
 
 export default function Command() {
-  const [journal, setJournal] = useCachedState<string | undefined>("journal", undefined);
-  const [error, setError] = useCachedState("error", "");
+  const { installed, addEntry } = useDayOneIntegration();
 
-  async function handleSubmit(values: Values) {
+  const [journal, setJournal] = useCachedState<string | undefined>("journal", undefined);
+  const [error, setError] = useState("");
+
+  async function submit(values: Values) {
     const { body, date, journal } = values;
 
     try {
@@ -32,12 +35,40 @@ export default function Command() {
     }
   }
 
+  async function submitAndOpen(values: Values) {
+    const { body, date, journal } = values;
+
+    try {
+      const entryId = await addEntry({
+        body,
+        date,
+        journal,
+      });
+      const url = `dayone://view?entryId=${entryId}`;
+
+      void open(url);
+    } catch (error) {
+      if (typeof error === "string" && error.includes("journal")) {
+        setError("journal");
+      } else {
+        setError("unknown");
+      }
+    }
+  }
+
+  if (installed === "pending") {
+    return null;
+  } else if (!installed) {
+    return <Detail markdown={missingCLIError} />;
+  }
+
   return (
     <Form
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save" onSubmit={submit} />
+          <Action.SubmitForm title="Save and Open" onSubmit={submitAndOpen} />
         </ActionPanel>
       }
     >

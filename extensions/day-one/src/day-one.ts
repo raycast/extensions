@@ -1,16 +1,9 @@
-import childProcess from "node:child_process";
+import { useCachedState } from "@raycast/utils";
+import { useEffect } from "react";
+import { exec } from "./utils";
 
-async function exec(command: string) {
-  return new Promise((resolve, reject) => {
-    childProcess.exec(command, (error, stdout, stderr) => {
-      if (error !== null) {
-        reject(stderr);
-      } else {
-        resolve(stdout);
-      }
-    });
-  });
-}
+export const missingCLIError = `### Day One CLI Missing 🚨
+[Download here](https://dayoneapp.com/guides/tips-and-tutorials/command-line-interface-cli/)`;
 
 type Entry = {
   body: string;
@@ -18,7 +11,18 @@ type Entry = {
   journal?: string;
 };
 
-export async function addEntry(entry: Entry) {
+export async function isDayOneInstalled(): Promise<boolean> {
+  try {
+    const result = await exec("dayone2");
+    const commandExists = !result.includes("command not found");
+
+    return commandExists;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function addEntry(entry: Entry) {
   const date = entry.date.toISOString().split("T")[0];
   let command = `dayone2 new "${entry.body}" --date "${date}"`;
 
@@ -27,6 +31,31 @@ export async function addEntry(entry: Entry) {
   }
 
   const result = await exec(command);
+  const match = /uuid: (\w+)/.exec(result);
+  const uuid = match?.[1];
 
-  return result;
+  return uuid;
 }
+
+type DayOneHook = () => {
+  installed: boolean | "pending";
+  addEntry: (entry: Entry) => Promise<string | undefined>;
+};
+
+export const useDayOneIntegration: DayOneHook = () => {
+  const [installed, setInstalled] = useCachedState("installed", true);
+
+  useEffect(() => {
+    async function check() {
+      const state = await isDayOneInstalled();
+      setInstalled(state);
+    }
+
+    check();
+  }, []);
+
+  return {
+    installed,
+    addEntry,
+  };
+};
