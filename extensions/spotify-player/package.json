@@ -296,7 +296,8 @@
       "title": "Current Track",
       "description": "Show the current song/episode state.",
       "mode": "no-view",
-      "interval": "30s"
+      "interval": "30s",
+      "disabledByDefault": true
     },
     {
       "name": "startRadio",
