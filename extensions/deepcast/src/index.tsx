@@ -116,7 +116,8 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     }
   };
 
-  const pronunciation = translation ? transliterate(translation) : "";
+  const transliteration = transliterate(translation);
+  const pronunciation = transliteration == translation ? "" : transliteration;
 
   return (
     <Form
