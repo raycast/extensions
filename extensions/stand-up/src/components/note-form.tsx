@@ -53,7 +53,7 @@ export function NoteForm(props: NoteFormProps) {
       />
       <Form.TextArea defaultValue={initialData.description} id="description" title="Description" />
       <Form.DatePicker id="date" title="Date" defaultValue={initialData.date} />
-      <Form.Dropdown title="Note type" id={"type"} defaultValue={initialData.type}>
+      <Form.Dropdown title="Note Type" id={"type"} defaultValue={initialData.type}>
         <Form.Dropdown.Item value={EntryType.Note} title="Note" />
         <Form.Dropdown.Item value={EntryType.Meeting} title="Meeting" />
         <Form.Dropdown.Item value={EntryType.Blocker} title="Blocker" />
