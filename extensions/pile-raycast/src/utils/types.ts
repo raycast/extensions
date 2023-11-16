@@ -23,6 +23,8 @@ export interface PileSettings {
   theme: "light" | "dark";
 }
 
+export type NoteI = [string, PileDataI];
+
 export enum PostHightlightsI {
   None = "None",
   Highlight = "Highlight",

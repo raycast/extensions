@@ -6,7 +6,7 @@ import { existsSync } from "fs";
 import snarkdown from "snarkdown";
 import { join } from "path";
 import PileOperations from "./utils/fileOperations";
-import { HighlightI, PilePost, PileSettings, PostHightlightsI } from "./utils/types";
+import { HighlightI, NoteI, PilePost, PileSettings, PostHightlightsI } from "./utils/types";
 
 import rehypeParse from "rehype-parse";
 import rehypeRemark from "rehype-remark";
@@ -66,10 +66,10 @@ export default function Command() {
     try {
       const posts = await PileOperations.readFile(join(path, "index.json"));
       const parsedPosts = JSON.parse(posts as string);
-      let postContentHolder: any = [];
+
+      let postContentHolder: PilePost[] = [];
       // Use map to create an array of promises
-      // @ts-ignore
-      const promises = parsedPosts.map(async (post: any) => {
+      const promises = parsedPosts.map(async (post: NoteI) => {
         const postPath = join(path, post[0]);
 
         // Check if the file exists
@@ -77,9 +77,8 @@ export default function Command() {
           return null; // Skip this iteration
         }
 
-        // @ts-ignore
-        const postContent: any = await PileOperations.readFile(join(path, post[0] as string));
-        const parsedPostContent = PileOperations.generateJSONFileFromMarkdown(postContent.toString());
+        const postContent = await PileOperations.readFile(join(path, post[0] as string));
+        const parsedPostContent = PileOperations.generateJSONFileFromMarkdown(String(postContent));
 
         const file = await unified()
           .use(rehypeParse)

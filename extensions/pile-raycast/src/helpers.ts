@@ -1,6 +1,6 @@
 import { PostHightlightsI } from "./utils/types";
 
-export function getFilePathForNewPost(basePath: string, timestamp: Date = new Date()) {
+export function getFilePathForNewPost(basePath: string) {
   const date = new Date();
   const month = date.toLocaleString("default", { month: "short" });
   const year = date.getFullYear().toString();

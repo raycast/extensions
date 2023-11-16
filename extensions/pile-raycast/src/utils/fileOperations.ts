@@ -6,9 +6,10 @@ import { showToast, LocalStorage } from "@raycast/api";
 import { remark } from "remark";
 import { homedir } from "os";
 import { existsSync } from "fs";
+import { PileDataI } from "./types";
 
 class PileOperations {
-  public static generateMarkdownFile = (content: string, data: any) => {
+  public static generateMarkdownFile = (content: string, data: PileDataI) => {
     return matter.stringify(content, data, { engines: { JSON } });
   };
 
@@ -20,8 +21,8 @@ class PileOperations {
     return remark().process(html);
   };
 
-  public static createDirectory = async (path: string) => {
-    return new Promise(async (resolve, reject) => {
+  public static createDirectory = (path: string) => {
+    return new Promise((resolve, reject) => {
       mkdir(path, { recursive: true })
         .then(() => {
           resolve("Directory created successfully");
@@ -35,7 +36,7 @@ class PileOperations {
     });
   };
 
-  public static addFileToIndex = async (path: string, data: any) => {
+  public static addFileToIndex = async (path: string, data: PileDataI) => {
     const filePath = join(path, "index.json");
     const fileData = readFile(filePath, "utf-8");
     const tempData = await fileData;
@@ -97,7 +98,7 @@ class PileOperations {
         .then(() => {
           return true;
         })
-        .catch((_) => {
+        .catch(() => {
           return false;
         });
     }
