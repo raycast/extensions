@@ -1,4 +1,4 @@
-import { ActionPanel, Action, showToast, LocalStorage, LaunchProps, List, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Action, showToast, List, Detail, Icon } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { homedir } from "os";
 import removeMd from "remove-markdown";
@@ -14,15 +14,7 @@ import remarkStringify from "remark-stringify";
 import { unified } from "unified";
 import CreatePileAction from "./components/actions/CreatePileAction";
 import CreatePostAction from "./components/actions/CreatePostAction";
-import { getFilePathForNewPost, renderHighlightColor } from "./helpers";
-
-interface PostValues {
-  title: string;
-  description?: string;
-  thought?: string;
-  dueDate?: Date;
-  pile?: PileSettings;
-}
+import { renderHighlightColor } from "./helpers";
 
 const defaultPost = {
   content: "",
@@ -45,12 +37,10 @@ interface PileState {
   filter: PileSettings | null;
   searchText: string;
   currentPile: PileSettings | null;
-  posts: any;
+  posts: PilePost[];
 }
 
-export default function Command(props: LaunchProps<{ draftValues: PostValues }>) {
-  const { draftValues } = props;
-
+export default function Command() {
   const [state, setState] = useState<PileState>({
     isLoading: true,
     filter: null,
@@ -74,11 +64,12 @@ export default function Command(props: LaunchProps<{ draftValues: PostValues }>)
   async function loadPosts(path: string) {
     setState((previous) => ({ ...previous, isLoading: true }));
     try {
-      const posts: any = await PileOperations.readFile(join(path, "index.json"));
-      const parsedPosts = JSON.parse(posts);
+      const posts = await PileOperations.readFile(join(path, "index.json"));
+      const parsedPosts = JSON.parse(posts as string);
       let postContentHolder: any = [];
       // Use map to create an array of promises
-      let promises = parsedPosts.map(async (post: any) => {
+      // @ts-ignore
+      const promises = parsedPosts.map(async (post: any) => {
         const postPath = join(path, post[0]);
 
         // Check if the file exists
@@ -86,7 +77,8 @@ export default function Command(props: LaunchProps<{ draftValues: PostValues }>)
           return null; // Skip this iteration
         }
 
-        const postContent: any = await PileOperations.readFile(join(path, post[0]));
+        // @ts-ignore
+        const postContent: any = await PileOperations.readFile(join(path, post[0] as string));
         const parsedPostContent = PileOperations.generateJSONFileFromMarkdown(postContent.toString());
 
         const file = await unified()
@@ -166,7 +158,9 @@ export default function Command(props: LaunchProps<{ draftValues: PostValues }>)
       await PileOperations.createDirectory(postPath);
       await PileOperations.saveFile(path, fileContents, true);
       await PileOperations.addFileToIndex(path, post.data);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async function createPile(name: string, theme: "light" | "dark", path: string) {
@@ -181,13 +175,11 @@ export default function Command(props: LaunchProps<{ draftValues: PostValues }>)
       path: path + "/" + name,
     };
 
-    const emptyIndex: Array<any> = [];
-
     const newPiles = [...parsedData, newPile];
 
     await PileOperations.createDirectory(path + "/" + name);
     await PileOperations.saveFile(filePath, JSON.stringify(newPiles));
-    await PileOperations.saveFile(join(path + "/" + name, "index.json"), JSON.stringify(emptyIndex));
+    await PileOperations.saveFile(join(path + "/" + name, "index.json"), JSON.stringify([]));
     pilesRef.current = [...(pilesRef?.current ?? []), newPile];
     setState((previous) => ({ ...previous, filter: newPile, currentPile: newPile }));
   }
@@ -213,7 +205,7 @@ export default function Command(props: LaunchProps<{ draftValues: PostValues }>)
         updatedAt: new Date().toISOString(),
         highlight: highlight.highlight,
         highlightColor: highlight.highlightColor,
-      } as any;
+      };
 
       savePost({ content, data }, state.filter?.path);
       showToast({ title: "Post created" });
@@ -252,10 +244,10 @@ export default function Command(props: LaunchProps<{ draftValues: PostValues }>)
         onCreate={handleCreatePost}
         onPileCreate={handleCreate}
       />
-      {state.posts.map((post: any, index: number) => (
+      {state.posts.map((post: PilePost, index: number) => (
         <List.Item
           key={index}
-          icon={{ source: Icon.CircleFilled, tintColor: renderHighlightColor(post?.data?.highlight) }}
+          icon={{ source: Icon.CircleFilled, tintColor: renderHighlightColor(post?.data?.highlight || "transparent") }}
           title={post?.data?.title || ""}
           actions={
             <ActionPanel>

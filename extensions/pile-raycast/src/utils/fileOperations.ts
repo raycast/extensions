@@ -1,7 +1,6 @@
 import matter = require("gray-matter");
 import { join } from "path";
 import { writeFile, readFile, mkdir } from "fs/promises";
-import { PilePost } from "./types";
 import { getFilePathForNewPost, getRelativeFilePath } from "../helpers";
 import { showToast, LocalStorage } from "@raycast/api";
 import { remark } from "remark";
@@ -23,7 +22,7 @@ class PileOperations {
 
   public static createDirectory = async (path: string) => {
     return new Promise(async (resolve, reject) => {
-      await mkdir(path, { recursive: true })
+      mkdir(path, { recursive: true })
         .then(() => {
           resolve("Directory created successfully");
         })
@@ -98,7 +97,7 @@ class PileOperations {
         .then(() => {
           return true;
         })
-        .catch((error) => {
+        .catch((_) => {
           return false;
         });
     }

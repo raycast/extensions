@@ -2,7 +2,11 @@ import { useCallback } from "react";
 import { Form, Action, ActionPanel, useNavigation, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 
-export default function CreatePileForm({ onCreate }: { onCreate: any }) {
+export default function CreatePileForm({
+  onCreate,
+}: {
+  onCreate: (name: string, theme: "dark" | "light", path: string) => void;
+}) {
   const { pop } = useNavigation();
 
   const handleSubmit = useCallback(
