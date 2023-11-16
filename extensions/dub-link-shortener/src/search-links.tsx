@@ -45,8 +45,6 @@ function SearchLinks() {
                     <List.Item.Detail.Metadata.Label title={"Clicks"} text={value.clicks + ""} />
                     <List.Item.Detail.Metadata.Separator />
 
-                    {/* <List.Item.Detail.Metadata.Label title={"Source"} text={value.source} />
-                    <List.Item.Detail.Metadata.Separator /> */}
                     <List.Item.Detail.Metadata.Label
                       title={"Created At"}
                       text={value.createdAt.substring(0, 19).replace("T", " ")}

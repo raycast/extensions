@@ -18,8 +18,8 @@ export default function ShortenLinkWrapper() {
 }
 function ShortenLink() {
   const [originalLink, setOriginalLink] = useState<string>("");
-
   const { mutate: createShortLink } = useCreateShortLink();
+
   async function handleSubmit(values: Values) {
     const url = values.url;
     createShortLink(url, {
@@ -32,6 +32,7 @@ function ShortenLink() {
     });
   }
 
+  // TODO move this into a useQuery call
   useEffect(() => {
     async function getSelectedOrClipboardValue() {
       const selectedOrClipboardValue = await fetchLink();
