@@ -15,6 +15,7 @@ const Standings = () => {
     League: data?.leagueStandings,
   };
   const conferenceData = preferenceMapping[conference as keyof typeof preferenceMapping];
+  const sectionTitle = conference === League ? conference : `${conference} Conference`;
 
   return (
     <List
@@ -32,7 +33,7 @@ const Standings = () => {
         </List.Dropdown>
       }
     >
-      <List.Section title={`${conference} Conference`}>
+      <List.Section title={sectionTitle}>
         {conferenceData?.map((team: Team) => {
           return <TeamComponent key={team.id} team={team} />;
         })}
