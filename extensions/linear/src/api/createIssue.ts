@@ -70,7 +70,7 @@ export async function createIssue(payload: CreateIssuePayload) {
           }
         }
       }
-    `
+    `,
   );
 
   return { success: data?.issueCreate.success, issue: data?.issueCreate.issue };
@@ -103,7 +103,7 @@ export async function createSubIssue(payload: CreateSubIssuePayload) {
           success
         }
       }
-    `
+    `,
   );
 
   return { success: data?.issueCreate.success };

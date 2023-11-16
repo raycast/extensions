@@ -1,7 +1,8 @@
 import { FileType, TemplateType } from "../types/file-type";
 import React from "react";
-import { Grid, List } from "@raycast/api";
+import { environment, Grid, List } from "@raycast/api";
 import { ActionNewFileHere } from "./action-new-file-here";
+import fileUrl from "file-url";
 
 export function NewFileHereItem(props: {
   layout: string;
@@ -16,6 +17,13 @@ export function NewFileHereItem(props: {
       keywords={fileType.keywords}
       icon={{ source: fileType.icon }}
       title={{ value: fileType.name, tooltip: fileType.name + "." + fileType.extension }}
+      detail={
+        <List.Item.Detail
+          markdown={`<img src="${fileUrl(`${environment.assetsPath}/${fileType.icon}`)}" alt="${
+            fileType.name
+          }" height="190" />`}
+        />
+      }
       actions={
         <ActionNewFileHere
           fileType={fileType}

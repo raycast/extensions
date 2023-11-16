@@ -59,7 +59,7 @@ function Notifications() {
           return {
             ...data,
             notifications: data?.notifications?.map((x) =>
-              x.id === notification.id ? { ...x, readAt: new Date() } : x
+              x.id === notification.id ? { ...x, readAt: new Date() } : x,
             ),
           };
         },
@@ -70,7 +70,7 @@ function Notifications() {
           return {
             ...data,
             notifications: data?.notifications?.map((x) =>
-              x.id === notification.id ? { ...x, readAt: notification.readAt } : x
+              x.id === notification.id ? { ...x, readAt: notification.readAt } : x,
             ),
           };
         },
@@ -100,7 +100,7 @@ function Notifications() {
           return {
             ...data,
             notifications: data?.notifications?.map((x) =>
-              x.id === notification.id ? { ...x, readAt: undefined } : x
+              x.id === notification.id ? { ...x, readAt: undefined } : x,
             ),
           };
         },
@@ -111,7 +111,7 @@ function Notifications() {
           return {
             ...data,
             notifications: data?.notifications?.map((x) =>
-              x.id === notification.id ? { ...x, readAt: notification.readAt } : x
+              x.id === notification.id ? { ...x, readAt: notification.readAt } : x,
             ),
           };
         },

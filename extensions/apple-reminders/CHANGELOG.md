@@ -1,5 +1,15 @@
 # Apple Reminders Changelog
 
+## [Minor improvements] - 2023-11-16
+
+- Press `⌥` to delete a reminder without any confirmation in the menu bar. 
+- Add a preference to always initially select the default list in the `Create Reminder` command
+
+## [Bug fixes] - 2023-11-13
+
+- Add notifications to reminders when they're set for a specific time
+- Don't reset the due date, priority, and list fields when creating a new reminder
+
 ## [Today and Scheduled views] - 2023-11-03
 
 - Add support for today and scheduled views, similar to those in the native Reminders app.

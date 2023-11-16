@@ -17307,6 +17307,7 @@ export type PullRequestParametersInput = {
 /** A review object for a given pull request. */
 export type PullRequestReview = Comment &
   Deletable &
+  Minimizable &
   Node &
   Reactable &
   RepositoryNode &
@@ -17340,8 +17341,12 @@ export type PullRequestReview = Comment &
     id: Scalars["ID"];
     /** Check if this comment was edited and includes an edit with the creation data */
     includesCreatedEdit: Scalars["Boolean"];
+    /** Returns whether or not a comment has been minimized. */
+    isMinimized: Scalars["Boolean"];
     /** The moment the editor made the last edit */
     lastEditedAt?: Maybe<Scalars["DateTime"]>;
+    /** Returns why the comment was minimized. One of `abuse`, `off-topic`, `outdated`, `resolved`, `duplicate` and `spam`. Note that the case and formatting of these values differs from the inputs to the `MinimizeComment` mutation. */
+    minimizedReason?: Maybe<Scalars["String"]>;
     /** A list of teams that this review was made on behalf of. */
     onBehalfOf: TeamConnection;
     /** Identifies when the comment was published at. */
@@ -17368,6 +17373,8 @@ export type PullRequestReview = Comment &
     userContentEdits?: Maybe<UserContentEditConnection>;
     /** Check if the current viewer can delete this object. */
     viewerCanDelete: Scalars["Boolean"];
+    /** Check if the current viewer can minimize this object. */
+    viewerCanMinimize: Scalars["Boolean"];
     /** Can user react to this subject */
     viewerCanReact: Scalars["Boolean"];
     /** Check if the current viewer can update this object. */
@@ -24092,6 +24099,8 @@ export type Sponsorship = Node & {
    * @deprecated `Sponsorship.maintainer` will be removed. Use `Sponsorship.sponsorable` instead. Removal on 2020-04-01 UTC.
    */
   maintainer: User;
+  /** The platform that was most recently used to pay for the sponsorship. */
+  paymentSource?: Maybe<SponsorshipPaymentSource>;
   /** The privacy level for this sponsorship. */
   privacyLevel: SponsorshipPrivacy;
   /**
@@ -24203,6 +24212,14 @@ export type SponsorshipOrder = {
 export enum SponsorshipOrderField {
   /** Order sponsorship by creation time. */
   CreatedAt = "CREATED_AT",
+}
+
+/** How payment was made for funding a GitHub Sponsors sponsorship. */
+export enum SponsorshipPaymentSource {
+  /** Payment was made through GitHub. */
+  Github = "GITHUB",
+  /** Payment was made through Patreon. */
+  Patreon = "PATREON",
 }
 
 /** The privacy of a sponsorship */
@@ -32469,6 +32486,8 @@ export type MyLatestRepositoriesQuery = {
         updatedAt: any;
         pushedAt?: any | null;
         stargazerCount: number;
+        isArchived: boolean;
+        isFork: boolean;
         viewerHasStarred: boolean;
         hasIssuesEnabled: boolean;
         hasWikiEnabled: boolean;

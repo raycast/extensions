@@ -1,5 +1,9 @@
 # reclaim Changelog
 
+## [Fix] - 2023-11-13
+
+- Create task is now using the default task visibility rather than always private
+
 ## [Update] - 2023-11-07
 
 - Introduce new functionality to filter out synchronized events managed by Reclaim that are part of multiple calendars.

@@ -1,22 +1,22 @@
 import {
+  Action,
   ActionPanel,
-  List,
+  Application,
+  Cache,
+  Clipboard,
+  closeMainWindow,
+  Color,
+  environment,
+  getFrontmostApplication,
   getPreferenceValues,
   getSelectedText,
-  Action,
   Icon,
-  Color,
-  Clipboard,
+  LaunchProps,
+  List,
+  popToRoot,
   showHUD,
-  closeMainWindow,
   showToast,
   Toast,
-  Cache,
-  Application,
-  getFrontmostApplication,
-  environment,
-  LaunchProps,
-  popToRoot,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { CaseFunction, CaseType, functions } from "./types.js";
@@ -282,7 +282,7 @@ export default function Command(props: LaunchProps) {
       <List.Section title="All Cases">
         {Object.entries(functions)
           .filter(
-            ([key, _]) =>
+            ([key]) =>
               preferences[key.replace(/ +/g, "")] &&
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType),
