@@ -9,6 +9,7 @@ import {
   target_languages,
 } from "./utils";
 import TranslationView from "./components/TranslationView";
+import transliterate from "@sindresorhus/transliterate";
 
 interface Values {
   key?: string;
@@ -115,6 +116,8 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     }
   };
 
+  const pronunciation = translation ? transliterate(translation) : "";
+
   return (
     <Form
       actions={
@@ -132,6 +135,11 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
               title="Paste in Frontmost App"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
               content={translation}
+            />
+            <Action.CopyToClipboard
+              title="Copy Pronunciation"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              content={pronunciation}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -168,6 +176,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
         ))}
       </Form.Dropdown>
       <Form.TextArea id="translation" value={translation} />
+      <Form.Description title="Pronunciation" text={pronunciation} />
     </Form>
   );
 };

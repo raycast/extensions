@@ -673,15 +673,6 @@
           "value": "paste"
         }
       ]
-    },
-    {
-      "name": "transliterate",
-      "title": "Transliteration",
-      "label": "Use Transliterated Text",
-      "description": "Show the transliterated text instead of the original text. Chinese is not supported.",
-      "required": false,
-      "type": "checkbox",
-      "default": false
     }
   ],
   "dependencies": {
