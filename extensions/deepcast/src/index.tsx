@@ -116,8 +116,8 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     }
   };
 
-  const transliteration = transliterate(translation);
-  const pronunciation = transliteration == translation ? "" : transliteration;
+  const _t = transliterate(translation);
+  const transliteration = _t == translation ? "" : _t;
 
   return (
     <Form
@@ -138,9 +138,9 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
               content={translation}
             />
             <Action.CopyToClipboard
-              title="Copy Pronunciation"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              content={pronunciation}
+              title="Copy Transliteration"
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              content={transliteration}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -177,7 +177,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
         ))}
       </Form.Dropdown>
       <Form.TextArea id="translation" value={translation} />
-      <Form.Description title="Pronunciation" text={pronunciation} />
+      <Form.Description title="Transliteration" text={transliteration} />
     </Form>
   );
 };
