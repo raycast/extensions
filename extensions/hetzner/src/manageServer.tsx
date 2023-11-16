@@ -73,7 +73,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              title="Select default project"
+              title="Select Default Project"
               icon={Icon.RotateClockwise}
               onAction={() => navigateToManageProject()}
             />
@@ -88,12 +88,12 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Change project"
+                  title="Change Project"
                   icon={Icon.House}
                   onAction={() => navigateToManageProject()}
                 />
                 <Action
-                  title="Refresh all servers"
+                  title="Refresh All Servers"
                   icon={Icon.RotateClockwise}
                   onAction={() => updateServersList()}
                 />
@@ -144,8 +144,8 @@ export default function Command() {
                         server.status === "running"
                           ? Color.Green
                           : server.status === "off"
-                          ? Color.Red
-                          : Color.Yellow,
+                            ? Color.Red
+                            : Color.Yellow,
                     },
                   },
                 ]}

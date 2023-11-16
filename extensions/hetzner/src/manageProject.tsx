@@ -91,7 +91,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              title="Add new project"
+              title="Add New Project"
               icon={Icon.House}
               onAction={() => navigateToAddProject()}
             />
@@ -124,12 +124,12 @@ export default function Command() {
               actions={
                 <ActionPanel title={project.name}>
                   <Action
-                    title="Set as default project"
+                    title="Set as Default Project"
                     icon={{ source: Icon.Star, tintColor: Color.Yellow }}
                     onAction={() => changeProject(project)}
                   />
                   <Action
-                    title="Delete project"
+                    title="Delete Project"
                     style={Action.Style.Destructive}
                     icon={Icon.Globe}
                     onAction={() => deleteProject(project)}
