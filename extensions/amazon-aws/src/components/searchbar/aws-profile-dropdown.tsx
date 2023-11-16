@@ -15,17 +15,13 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   const [selectedProfile, setSelectedProfile] = useCachedState<string>("aws_profile");
   const profileOptions = useProfileOptions();
 
-  let isUsingAwsVault = false;
-  let vaultSessions: string[] | undefined = undefined;
+  const vaultSessions = useVaultSessions();
+  const isUsingAwsVault = !!vaultSessions && preferences.useAWSVault;
 
-  if (preferences.useAWSVault) {
-    vaultSessions = useVaultSessions();
-    isUsingAwsVault = !!vaultSessions;
-    useAwsVault({
-      profile: vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined,
-      onUpdate: () => onProfileSelected?.(),
-    });
-  }
+  useAwsVault({
+    profile: isUsingAwsVault && vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined,
+    onUpdate: () => onProfileSelected?.(),
+  });
 
   useEffect(() => {
     const isSelectedProfileInvalid =
