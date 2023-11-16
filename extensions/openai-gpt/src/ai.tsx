@@ -46,6 +46,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default function Command() {
+  const maxTokensGPT41106Preview = 128000;
+  const maxTokensGPT35Turbo1106 = 16385;
   const maxTokensGPT4 = 8192;
   const maxTokensGPT35Turbo = 4096;
   const maxTokensDavinci = 4000;
@@ -64,10 +66,10 @@ export default function Command() {
   const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensDavinci);
 
   const modelLimit = {} as modelTokenLimit;
+  modelLimit["gpt-4-1106-preview"] = maxTokensGPT41106Preview;
+  modelLimit["gpt-3.5-turbo-1106"] = maxTokensGPT35Turbo1106;
   modelLimit["gpt-4"] = maxTokensGPT4;
   modelLimit["gpt-3.5-turbo"] = maxTokensGPT35Turbo;
-  modelLimit["text-davinci-003"] = maxTokensDavinci;
-  modelLimit["text-davinci-002"] = maxTokensDavinci;
   modelLimit["text-curie-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-babbage-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-ada-001"] = maxTokensAdaBabbageCurie;
@@ -120,7 +122,10 @@ export default function Command() {
     setIsLoading(true);
     try {
       const completion: gptCompletion =
-        formRequest.model === "gpt-3.5-turbo" || formRequest.model === "gpt-4"
+        formRequest.model === "gpt-3.5-turbo" ||
+        formRequest.model === "gpt-4" ||
+        formRequest.model === "gpt-4-1106-preview" ||
+        formRequest.model === "gpt-3.5-turbo-1106"
           ? await openai.createChatCompletion({
               model: formRequest.model,
               messages: [
@@ -146,7 +151,10 @@ export default function Command() {
             });
       await showToast({ title: "Answer Received" });
       const response =
-        formRequest.model === "gpt-3.5-turbo" || formRequest.model === "gpt-4"
+        formRequest.model === "gpt-3.5-turbo" ||
+        formRequest.model === "gpt-4" ||
+        formRequest.model === "gpt-4-1106-preview" ||
+        formRequest.model === "gpt-3.5-turbo-1106"
           ? `\n\n${completion.data.choices[0].message.content}`
           : completion.data.choices[0].text;
       setTextPrompt(textPrompt + response);
