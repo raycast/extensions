@@ -200,6 +200,7 @@
 /extensions/copy-gcp-icons                           @pomdtr
 /extensions/copy-path                                @koinzhang
 /extensions/copy-skeet-link                          @justin
+/extensions/copyq-clipboard-manager                  @andrewcincotta
 /extensions/cosmic-bookmarks                         @kemiljk
 /extensions/counter                                  @EvanZhouDev @pernielsentikaer
 /extensions/country-lookup                           @pernielsentikaer
@@ -232,7 +233,7 @@
 /extensions/date-converter                           @asportnoy
 /extensions/datetime-format-converter                @yangxyo
 /extensions/dawa                                     @SimonJ @pernielsentikaer
-/extensions/days-until-christmas                     @MEGApixel23
+/extensions/days-until-christmas                     @MEGApixel23 @erics118
 /extensions/dbt-documentation                        @b-per
 /extensions/dbtCloud                                 @zsombor-flds
 /extensions/debank                                   @Yukaii
@@ -688,7 +689,7 @@
 /extensions/nato-phonetic-alphabet                   @jesse-c
 /extensions/nature-remo                              @uetchy
 /extensions/naver-search                             @ajchemist
-/extensions/nba-game-viewer                          @AbhinavPalacharla @djpowers @michaelli1324
+/extensions/nba-game-viewer                          @AbhinavPalacharla @djpowers @michaelli1324 @degouville
 /extensions/neodb                                    @Sevichecc
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner @jonohewitt @jasonbarry @peduarte
@@ -904,6 +905,7 @@
 /extensions/remove-paywall                           @tegola @whitespacecode
 /extensions/render                                   @Destiner
 /extensions/replicate                                @KevinBatdorf @bfirsh @cbh123
+/extensions/repology-search                          @sebdanielsson
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
 /extensions/resend                                   @xmok
 /extensions/resmo                                    @ozgunarslantas
@@ -1007,7 +1009,7 @@
 /extensions/speedtest                                @tonka3000 @koayon @pernielsentikaer @stevensd2m
 /extensions/spoiler-converter                        @Visual-Studio-Coder @varunsatish2017
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq
-/extensions/spotify-player                           @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @hjoelh
+/extensions/spotify-player                           @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @hjoelh @hobhouse
 /extensions/spryker-docs                             @DinisEsteves
 /extensions/ssh-manager                              @scopsy @LenoxFro @RtiM0 @solid-pixel
 /extensions/ssh-tunnel-manager                       @MinatoHikari
@@ -1088,7 +1090,7 @@
 /extensions/tinypng                                  @kawamataryo
 /extensions/tip-calculator                           @Visual-Studio-Coder @pernielsentikaer
 /extensions/tldr                                     @pomdtr
-/extensions/tmdb                                     @Aayush9029 @andreaselia
+/extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart
 /extensions/tmux-sessioner                           @louishuyng
 /extensions/todo-list                                @maggie-j-liu @joshkorol @madza91 @bkeys818 @pernielsentikaer
 /extensions/todoist                                  @thomaslombart @AnishDe12020 @kud @casassg
