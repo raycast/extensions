@@ -65,6 +65,7 @@ function generateInputAppWithShortcut(override?: {
   return {
     bundleId: override?.appBundleId ?? "some-bundle-id",
     name: override?.appName ?? "some-name",
+    slug: "some-slug",
     keymaps: [
       {
         title: override?.keymapTitle ?? "Default",

@@ -39,6 +39,7 @@ function generateInputAppWithShortcut(override?: { shortcut: string }): InputApp
   return {
     bundleId: "some-bundle-id",
     name: "some-name",
+    slug: "some-slug",
     keymaps: [
       {
         title: "keymap-name",
@@ -62,6 +63,7 @@ function generateExpectedAppWithShortcut(override?: { shortcutSequence?: AtomicS
   return {
     bundleId: "some-bundle-id",
     name: "some-name",
+    slug: "some-slug",
     keymaps: [
       {
         title: "keymap-name",

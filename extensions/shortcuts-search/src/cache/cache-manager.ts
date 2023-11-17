@@ -1,7 +1,7 @@
 import { Cache } from "@raycast/api";
 
 export class CacheManager {
-  private static readonly TTL_MILLIS = 10_000;
+  private static readonly TTL_MILLIS = 3600_000;
   private readonly cache: Cache = new Cache();
 
   public getCachedItem<T>(cacheKey: string): CachedItem<T> | undefined {

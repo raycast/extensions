@@ -5,8 +5,9 @@ export interface Shortcuts {
 }
 
 export interface Application {
-  name: string;
   bundleId?: string;
+  name: string;
+  slug: string;
   keymaps: Keymap[];
 }
 
