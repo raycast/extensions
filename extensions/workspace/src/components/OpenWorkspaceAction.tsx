@@ -1,5 +1,4 @@
 import { Action, Icon } from "@raycast/api";
-import { Workspace } from "../types";
 function OpenWorkspaceAction(props: { onOpen: () => void }) {
   return (
     <Action

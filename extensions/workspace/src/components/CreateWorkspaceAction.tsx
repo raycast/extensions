@@ -1,7 +1,5 @@
-import { Action, ActionPanel, Keyboard, LocalStorage, Icon } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
 import { Workspace } from "../types";
-import { runAppleScript } from "run-applescript";
-import { url } from "inspector";
 import { CreateWorkspaceForm } from ".";
 
 function CreateWorkspaceAction(props: { draftValue?: Workspace; onCreate: (workspace: Workspace) => void }) {
