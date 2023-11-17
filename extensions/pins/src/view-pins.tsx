@@ -6,13 +6,24 @@ import {
   ActionPanel,
   getPreferenceValues,
   LocalStorage,
-  showToast,
   environment,
+  Keyboard,
+  showToast,
 } from "@raycast/api";
-import { setStorage, getStorage, ExtensionPreferences, cutoff } from "./lib/utils";
+import { setStorage, getStorage, cutoff } from "./lib/utils";
+import { ExtensionPreferences } from "./lib/preferences";
 import { PinForm } from "./components/PinForm";
 import { Direction, StorageKey } from "./lib/constants";
-import { Pin, checkExpirations, getLastOpenedPin, getPinKeywords, openPin, sortPins, usePins } from "./lib/Pins";
+import {
+  Pin,
+  checkExpirations,
+  deletePin,
+  getLastOpenedPin,
+  getPinKeywords,
+  openPin,
+  sortPins,
+  usePins,
+} from "./lib/Pins";
 import { useGroups } from "./lib/Groups";
 import path from "path";
 import {
@@ -26,9 +37,10 @@ import {
 } from "./lib/accessories";
 import { getPinIcon } from "./lib/icons";
 import RecentApplicationsList from "./components/RecentApplicationsList";
-import { installExamples } from "./lib/defaults";
 import CopyPinActionsSubmenu from "./components/actions/CopyPinActionsSubmenu";
 import DeletePinAction from "./components/actions/DeletePinAction";
+import { InstallExamplesAction } from "./components/actions/InstallExamplesAction";
+import { ViewPinsPreferences } from "./lib/preferences";
 
 /**
  * Moves a pin up or down in the list of pins. Pins stay within their groups unless grouping is disabled in preferences.
@@ -38,7 +50,7 @@ import DeletePinAction from "./components/actions/DeletePinAction";
  */
 const movePin = async (pin: Pin, direction: Direction, setPins: React.Dispatch<React.SetStateAction<Pin[]>>) => {
   const storedPins: Pin[] = await getStorage(StorageKey.LOCAL_PINS);
-  const preferences = getPreferenceValues<ExtensionPreferences & CommandPreferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences & ViewPinsPreferences>();
 
   const localPinGroup = storedPins.filter((p) => p.group == pin.group || !preferences.showGroups);
   const positionInGroup = localPinGroup.findIndex((p) => p.id == pin.id);
@@ -65,37 +77,8 @@ const CreateNewPinAction = (props: { setPins: React.Dispatch<React.SetStateActio
     <Action.Push
       title="Create New Pin"
       icon={Icon.PlusCircle}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
       target={<PinForm setPins={setPins} />}
-    />
-  );
-};
-
-/**
- * Action to install example pins. Only shows if examples are not installed and no pins have been created.
- * @param props.setExamplesInstalled The function to set the examples installed state.
- * @param props.revalidatePins The function to revalidate the pins.
- * @param props.revalidateGroups The function to revalidate the groups.
- * @returns An action component.
- */
-const InstallExamplesAction = (props: {
-  setExamplesInstalled: React.Dispatch<React.SetStateAction<LocalStorage.Value | undefined>>;
-  revalidatePins: () => Promise<void>;
-  revalidateGroups: () => Promise<void>;
-}) => {
-  const { setExamplesInstalled, revalidatePins, revalidateGroups } = props;
-  return (
-    <Action
-      title="Install Example Pins"
-      icon={Icon.Download}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
-      onAction={async () => {
-        await installExamples();
-        setExamplesInstalled(true);
-        await revalidatePins();
-        await revalidateGroups();
-        await showToast({ title: "Examples Installed!" });
-      }}
     />
   );
 };
@@ -116,66 +99,16 @@ const PlaceholdersGuideAction = () => {
 };
 
 /**
- * Preferences for the View Pins command.
- */
-interface CommandPreferences {
-  /**
-   * Whether to display groups as separate sections.
-   */
-  showGroups: boolean;
-
-  /**
-   * Whether to display subtitles for pins.
-   */
-  showSubtitles: boolean;
-
-  /**
-   * Whether to display icons for applications that pins open with, if one is specified.
-   */
-  showApplication: boolean;
-
-  /**
-   * Whether to display a the initial creation date of each pin.
-   */
-  showCreationDate: boolean;
-
-  /**
-   * Whether to display the expiration date for pins that have one.
-   */
-  showExpiration: boolean;
-
-  /**
-   * Whether to display the execution visibility for Terminal command pins.
-   */
-  showExecutionVisibility: boolean;
-
-  /**
-   * Whether to display an icon accessory for text fragments.
-   */
-  showFragment: boolean;
-
-  /**
-   * Whether to display the number of times a pin has been opened.
-   */
-  showFrequency: boolean;
-
-  /**
-   * Whether to display an indicator for the most recently opened pin.
-   */
-  showLastOpened: boolean;
-}
-
-/**
  * Raycast command to view all pins in a list within the Raycast window.
  */
 export default function ViewPinsCommand() {
   const { pins, setPins, loadingPins, revalidatePins } = usePins();
   const { groups, loadingGroups, revalidateGroups } = useGroups();
   const [examplesInstalled, setExamplesInstalled] = useState<LocalStorage.Value | undefined>(true);
-  const preferences = getPreferenceValues<ExtensionPreferences & CommandPreferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences & ViewPinsPreferences>();
 
   useEffect(() => {
-    Promise.resolve(LocalStorage.getItem(StorageKey.EXAMPLES_INSTALLED)).then((examplesInstalled) => {
+    Promise.resolve(LocalStorage.getItem(StorageKey.EXAMPLE_PINS_INSTALLED)).then((examplesInstalled) => {
       setExamplesInstalled(examplesInstalled);
     });
     Promise.resolve(checkExpirations());
@@ -217,13 +150,13 @@ export default function ViewPinsCommand() {
                 <Action.Push
                   title="Edit"
                   icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                   target={<PinForm pin={pin} setPins={setPins} pins={pins} />}
                 />
                 <Action.Push
                   title="Duplicate"
                   icon={Icon.EyeDropper}
-                  shortcut={{ modifiers: ["cmd", "ctrl"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Duplicate}
                   target={<PinForm pin={{ ...pin, name: pin.name + " Copy", id: -1 }} setPins={setPins} pins={pins} />}
                 />
 
@@ -234,7 +167,7 @@ export default function ViewPinsCommand() {
                   <Action
                     title="Move Up"
                     icon={Icon.ArrowUp}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                    shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={async () => {
                       await movePin(pin, Direction.UP, setPins);
                     }}
@@ -247,15 +180,36 @@ export default function ViewPinsCommand() {
                   <Action
                     title="Move Down"
                     icon={Icon.ArrowDown}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    shortcut={Keyboard.Shortcut.Common.MoveDown}
                     onAction={async () => {
                       await movePin(pin, Direction.DOWN, setPins);
                     }}
                   />
                 ) : null}
                 <DeletePinAction pin={pin} setPins={setPins} />
+                <Action
+                  title="Delete All Pins (Keep Groups)"
+                  icon={Icon.Trash}
+                  onAction={async () => {
+                    const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+                    for (let index = 0; index < storedPins.length; index++) {
+                      await deletePin(storedPins[index], setPins, index == 0, false);
+                    }
+                    await showToast({ title: "Deleted All Pins" });
+                  }}
+                  style={Action.Style.Destructive}
+                  shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                />
               </ActionPanel.Section>
               <CreateNewPinAction setPins={setPins} />
+              {!examplesInstalled ? (
+                <InstallExamplesAction
+                  setExamplesInstalled={setExamplesInstalled}
+                  revalidatePins={revalidatePins}
+                  revalidateGroups={revalidateGroups}
+                  kind="pins"
+                />
+              ) : null}
               <PlaceholdersGuideAction />
               <CopyPinActionsSubmenu pin={pin} pins={pins} />
             </ActionPanel>
@@ -273,11 +227,12 @@ export default function ViewPinsCommand() {
       actions={
         <ActionPanel>
           <CreateNewPinAction setPins={setPins} />
-          {!examplesInstalled && pins.length == 0 ? (
+          {!examplesInstalled || pins.length == 0 ? (
             <InstallExamplesAction
               setExamplesInstalled={setExamplesInstalled}
               revalidatePins={revalidatePins}
               revalidateGroups={revalidateGroups}
+              kind="pins"
             />
           ) : null}
         </ActionPanel>
@@ -295,18 +250,19 @@ export default function ViewPinsCommand() {
           </List.Section>
         ) : (
           getPinListItems(pins.filter((pin) => pin.group == group.name))
-        )
+        ),
       )}
 
       <RecentApplicationsList
         pinActions={
           <>
             <CreateNewPinAction setPins={setPins} />
-            {!examplesInstalled && pins.length == 0 ? (
+            {!examplesInstalled || pins.length == 0 ? (
               <InstallExamplesAction
                 setExamplesInstalled={setExamplesInstalled}
                 revalidatePins={revalidatePins}
                 revalidateGroups={revalidateGroups}
+                kind="pins"
               />
             ) : null}
           </>

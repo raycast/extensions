@@ -1,5 +1,17 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fixes] - 2023-11-03
+
+- Fixed an issue where Chrome bookmarks with no title were not displayed.
+
+## [Bug Fixes] - 2023-10-25
+
+- Fixed an issue where Arc bookmarks could break the extension.
+
+## [Open browser bookmark preference] - 2023-10-25
+
+- Added a preference to open the browser from which the bookmark originated, instead of your default browser.
+
 ## [Improvements] - 2023-10-18
 
 - Always sort the bookmarks by their frecency

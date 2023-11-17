@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.62.0 - 2023-11-15
+
+### ✨ New
+
+- **Menu Bar:** `MenuBarExtra.Item`s have a new prop, `alternate`. If an `alternate` is defined, it will replace its parent `MenuBarExtra.Item` when the user presses the ⌥ (option) key.
+- The Node runtime has been updated to [Node 20](https://nodejs.org/en/blog/announcements/v20-release-announce/), the [current](https://github.com/nodejs/Release#release-schedule) Long-term Support (LTS) release.
+- **AI**: You can now use the `gpt-4` model with `AI.ask`. If a user does not have access to this model, it will gracefully fall back to an available model. You can check if a user has access using `environment.canAccess('gpt-4')`.
+
+### 💎 Improvements
+
+- **Error Handling:** `Could not communicate with command worker` errors should not be reported anymore.
+
+### 🐞 Fixes
+
+- **Toast:** Fixed an issue that caused toast actions to not work after a toast was updated.
+- **Error Handling:** Fixed an edge case that could cause an out-of-memory error while an uncaught exception was processed, obfuscating the original error.
+- **Performance**: Fixed an issue where some keyboard events would be dropped while an extension was loading.
+- **Markdown**: Fixed a regression where HTML comments would show up in the rendered Markdown.
+
+## 1.61.0 - 2023-11-02
+
+### 💎 Improvements
+
+- **Date Picker**: When specifying a min and/or max date, the suggestion will now always be within those bounds
+
+### 🐞 Fixes
+
+- Fixed a bug that previously could cause a `no-view` command to display an error icon in the root search, with no means of removing the error.
+
 ## 1.60.0 - 2023-10-18
 
 ## Introducing the Extension Issues Dashboard

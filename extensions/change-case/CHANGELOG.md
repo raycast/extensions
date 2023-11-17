@@ -1,7 +1,14 @@
 # Change Case Changelog
 
+## [Add Keywords] - 2023-11-13
+- Added a few keywords to make searching in the store easier
+
+## [Update Dependencies] - 2023-10-18
+- Switch to ESM-only packages because they are now supported
+
 ## [Update] - 2023-10-03
 - Support unicode characters
+- Package dependencies with the extension because ESM-only packages are not supported yet
 
 ## [Support Quicklinks] - 2023-09-07
 

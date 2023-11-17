@@ -16,6 +16,35 @@ interface Option {
 
 const options: { title: string; list: Option[] }[] = [
   {
+    title: "Convert to VideoLoop",
+    list: [
+      {
+        icon: Icon.FilmStrip,
+        key: ActionType.convertVideoLoop,
+        title: "Convert VideoLoop",
+        execute: fileManager.convert.videoloopmp4,
+        detail: () => {
+          const process = fileState$.process.use();
+          const processing = fileState$.processing.use();
+          const actionType = fileState$.latestAction.use();
+          let content = "";
+          if (processing) {
+            content = `Processing: ${process} %`;
+          } else if (process === 100 && actionType === ActionType.convertVideoLoop) {
+            content = `Processed`;
+          } else {
+            content = `## Convert file to VideoLoop
+            Press enter to start conversion.
+            ------------------------------
+            This process will create a .mp4-file without sound and place it in the same folder as the original, with "_videoloop" as a suffix. The file is encoded using x264 at around 4000kbps, scaling the short end to become 1080p. This uses the Very Slow preset in FFMPEG to maximize quality.
+            `;
+          }
+          return <List.Item.Detail markdown={content} />;
+        },
+      },
+    ],
+  },
+  {
     title: "Copy Info",
     list: [
       {
@@ -61,8 +90,8 @@ ${fileState$.selectedFilePath.get()}
           const actionType = fileState$.latestAction.use();
           let content = "";
           if (processing) {
-            content = `Processing: ${process}`;
-          } else if (process === 1 && actionType === ActionType.rotate180) {
+            content = `Processing: ${process} %`;
+          } else if (process === 100 && actionType === ActionType.rotate180) {
             content = `Processed`;
           } else {
             content = `Press enter start rotate`;
@@ -81,8 +110,8 @@ ${fileState$.selectedFilePath.get()}
           const actionType = fileState$.latestAction.use();
           let content = "";
           if (processing) {
-            content = `Processing: ${process}`;
-          } else if (process === 1 && actionType === ActionType.rotate90) {
+            content = `Processing: ${process} %`;
+          } else if (process === 100 && actionType === ActionType.rotate90) {
             content = `Processed`;
           } else {
             content = `Press enter start rotate`;
@@ -101,8 +130,8 @@ ${fileState$.selectedFilePath.get()}
           const actionType = fileState$.latestAction.use();
           let content = "";
           if (processing) {
-            content = `Processing: ${process}`;
-          } else if (process === 1 && actionType === ActionType.rotate_90) {
+            content = `Processing: ${process} %`;
+          } else if (process === 100 && actionType === ActionType.rotate_90) {
             content = `Processed`;
           } else {
             content = `Press enter start rotate`;

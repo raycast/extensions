@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copyq-clipboard-manager",
+  "title": "CopyQ Clipboard Manager",
+  "description": "Lists CopyQ clipboard entries and allows user to paste them.",
+  "icon": "command-icon.png",
+  "author": "andrewcincotta",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-clipboard-entries",
+      "title": "View Clipboard Entries",
+      "description": "Lists CopyQ clipboard entries and allows user to select/paste them.",
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "textfield",
+          "name": "copyq_path",
+          "title": "CopyQ Path",
+          "description": "Path to CopyQ executable",
+          "required": true
+        },
+        {
+          "type": "textfield",
+          "name": "default_tab",
+          "title": "Default Tab",
+          "description": "Name of Default CopyQ Tab",
+          "required": true
+        },
+        {
+          "type": "textfield",
+          "name": "default_num_items",
+          "title": "Default Number of Items",
+          "description": "Default Number of Items to Display",
+          "default": "10",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "eslint": "^8.51.0",
+    "eslint-plugin-react": "^7.33.2",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

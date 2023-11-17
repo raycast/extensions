@@ -71,7 +71,6 @@ export function PageListItem({
   }
 
   const lastEditedUser = users?.find((u) => u.id === page.last_edited_user);
-
   if (page.last_edited_time) {
     const date = new Date(page.last_edited_time);
     accessories.push({
@@ -84,7 +83,7 @@ export function PageListItem({
   }
 
   const quickEditProperties = databaseProperties?.filter((property) =>
-    ["checkbox", "select", "multi_select", "status", "people"].includes(property.type),
+    ["checkbox", "status", "select", "multi_select", "status", "people"].includes(property.type),
   );
 
   const visiblePropertiesIds: string[] =
@@ -132,7 +131,7 @@ export function PageListItem({
   return (
     <List.Item
       title={title}
-      icon={{ value: icon, tooltip: page.object === "database" ? "Database" : "Page" }}
+      icon={{ value: icon, tooltip: pageWord }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
@@ -228,6 +227,7 @@ export function PageListItem({
                   });
                 }}
                 onUnselect={(propertyId: string) => {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
                   const { [propertyId]: _, ...remainingProperties } = databaseView?.properties ?? {};
 
                   setDatabaseView({

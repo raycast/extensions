@@ -74,24 +74,39 @@ export async function downloadVideo(url: string, options: DownloadOptions) {
   let videoDownloaded = 0;
   let audioDownloaded = 0;
 
-  await Promise.all([
-    pipeline(
-      ytdl.downloadFromInfo(info, { format: videoFormat }).on("progress", (chunk, downloaded, total) => {
-        videoDownloaded = downloaded / total;
-        const progress = videoDownloaded + audioDownloaded;
-        toast.message = `${Math.round((progress / 2) * 100)}%`;
-      }),
-      fs.createWriteStream(videoTempFile)
-    ),
-    pipeline(
-      ytdl.downloadFromInfo(info, { format: audioFormat }).on("progress", (chunk, downloaded, total) => {
-        audioDownloaded = downloaded / total;
-        const progress = videoDownloaded + audioDownloaded;
-        toast.message = `${Math.round((progress / 2) * 100)}%`;
-      }),
-      fs.createWriteStream(audioTempFile)
-    ),
-  ]);
+  try {
+    await Promise.all([
+      pipeline(
+        ytdl.downloadFromInfo(info, { format: videoFormat }).on("progress", (chunk, downloaded, total) => {
+          videoDownloaded = downloaded / total;
+          const progress = videoDownloaded + audioDownloaded;
+          toast.message = `${Math.round((progress / 2) * 100)}%`;
+        }),
+        fs.createWriteStream(videoTempFile)
+      ),
+      pipeline(
+        ytdl.downloadFromInfo(info, { format: audioFormat }).on("progress", (chunk, downloaded, total) => {
+          audioDownloaded = downloaded / total;
+          const progress = videoDownloaded + audioDownloaded;
+          toast.message = `${Math.round((progress / 2) * 100)}%`;
+        }),
+        fs.createWriteStream(audioTempFile)
+      ),
+    ]);
+  } catch (err) {
+    toast.title = "Download Failed";
+    toast.style = Toast.Style.Failure;
+
+    const error = err as Error;
+    if (error.message.includes("private video")) {
+      toast.message = "This video is private and cannot be downloaded.";
+    } else if (error.message.includes("429")) {
+      toast.message = "You have exceeded your download quota.";
+    } else {
+      toast.message = "Please try again later.";
+    }
+    return;
+  }
 
   return new Promise((resolve) => {
     const command = ffmpeg();
@@ -115,7 +130,7 @@ export async function downloadVideo(url: string, options: DownloadOptions) {
       .outputOptions("-strict", "-2")
       .save(filePath)
       .on("error", (err) => {
-        toast.title = "Download Failed";
+        toast.title = "Encoding Failed";
         toast.message = err.message;
         toast.style = Toast.Style.Failure;
         console.error(err);
@@ -171,15 +186,30 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
 
   const videoTempFile = tempfile(".mp4");
 
-  await pipeline(
-    ytdl
-      .downloadFromInfo(info, { filter: (format) => format.itag.toString() === formatObject.itag })
-      .on("progress", (chunk, downloaded, total) => {
-        const progress = downloaded / total;
-        toast.message = `${Math.round(progress * 100)}%`;
-      }),
-    fs.createWriteStream(videoTempFile)
-  );
+  try {
+    await pipeline(
+      ytdl
+        .downloadFromInfo(info, { filter: (format) => format.itag.toString() === formatObject.itag })
+        .on("progress", (chunk, downloaded, total) => {
+          const progress = downloaded / total;
+          toast.message = `${Math.round(progress * 100)}%`;
+        }),
+      fs.createWriteStream(videoTempFile)
+    );
+  } catch (err) {
+    toast.title = "Download Failed";
+    toast.style = Toast.Style.Failure;
+
+    const error = err as Error;
+    if (error.message.includes("private video")) {
+      toast.message = "This video is private and cannot be downloaded.";
+    } else if (error.message.includes("429")) {
+      toast.message = "You have exceeded your download quota.";
+    } else {
+      toast.message = "Please try again later.";
+    }
+    return;
+  }
 
   const filePath = options.copyToClipboard
     ? tempfile(".mp3")
@@ -204,7 +234,7 @@ export async function downloadAudio(url: string, options: DownloadOptions) {
       .format("mp3")
       .save(filePath)
       .on("error", (err) => {
-        toast.title = "Download Failed";
+        toast.title = "Encoding Failed";
         toast.message = err.message;
         toast.style = Toast.Style.Failure;
       })

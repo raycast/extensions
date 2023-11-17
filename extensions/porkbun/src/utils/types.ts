@@ -1,8 +1,3 @@
-export type Preferences = {
-  api_key: string;
-  secret_api_key: string;
-};
-
 type Coupon = {
   code: string;
   max_per_user: number;
@@ -48,11 +43,16 @@ export type EditDNSRecordByDomainSubdomainAndIdRequest = {
   ttl?: string;
   prio?: string;
 };
-export type RequestBody = CreateDNSRecordRequest | EditDNSRecordByDomainSubdomainAndIdRequest;
+export type RequestBody =
+  | CreateDNSRecordRequest
+  | EditDNSRecordByDomainSubdomainAndIdRequest
+  | UpdateNameServersRequest
+  | AddUrlForwardingRequest;
 
 export type ErrorResponse = {
   status: "ERROR";
   message: string;
+  code?: string;
 };
 export type RetrieveSSLBundleResponse = {
   status: "SUCCESS";
@@ -76,6 +76,51 @@ export type RetrieveDNSRecordsResponse = {
   cloudflare: "enabled" | "disabled";
   records: DNSRecord[];
 };
+
+export type Domain = {
+  domain: string;
+  status: string;
+  tld: string;
+  createDate: string;
+  expireDate: string;
+  securityLock: 0 | "1";
+  whoisPrivacy: 0 | "1";
+  autoRenew: 0 | "1";
+  notLocal: 0 | "1";
+};
+export type RetrieveAllDomainsResponse = {
+  status: "SUCCESS";
+  domains: Domain[];
+};
+
+export type GetNameServersResponse = {
+  status: "SUCCESS";
+  ns: string[];
+};
+export type UpdateNameServersRequest = {
+  ns: string[];
+};
+
+export type UrlForwarding = {
+  id: string;
+  subdomain: string;
+  location: string;
+  type: "temporary" | "permanent" | "masked";
+  includePath: "yes" | "no";
+  wildcard: "yes" | "no";
+};
+export type GetUrlForwardingResponse = {
+  status: "SUCCESS";
+  forwards: UrlForwarding[];
+};
+export type AddUrlForwardingRequest = {
+  subdomain: string;
+  location: string;
+  type: "temporary" | "permanent" | "masked";
+  includePath: "yes" | "no";
+  wildcard: "yes" | "no";
+};
+
 export type SuccessResponse = {
   status: "SUCCESS";
   pricing?: DomainPricing;
