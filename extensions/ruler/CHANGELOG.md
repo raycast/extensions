@@ -1,7 +1,8 @@
 # Ruler Changelog
 
 ## [Typos] - 2023-11-16
-- Fixed some typos
+
+- Fixed typos
 
 ## [Enhancement] - 2023-10-31
 
