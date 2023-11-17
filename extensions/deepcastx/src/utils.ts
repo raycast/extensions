@@ -86,9 +86,7 @@ export async function sendTranslateRequest({
         id: number;
       }>(url, {
         method: "POST",
-        body: { text: text,
-          source_lang: sourceLanguage ?? "",
-          target_lang: targetLanguage, },
+        body: { text: text, source_lang: sourceLanguage ?? "", target_lang: targetLanguage },
       });
       const detectedSourceLanguage = sourceLanguage;
       switch (onTranslateAction) {

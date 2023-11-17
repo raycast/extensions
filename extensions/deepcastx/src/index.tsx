@@ -140,7 +140,6 @@ const Command = (props: LaunchProps) => {
         title="Alternatives"
         placeholder="No alternatives found"
       />
-
     </Form>
   );
 };

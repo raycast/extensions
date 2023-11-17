@@ -1,5 +1,7 @@
 # DeepcastX
 
+>Warning: This extension is not compliant with the Terms of Service of DeepL. Use at your own risk.
+
 Based on [Deepcast](https://www.raycast.com/mooxl/deepcast) with DeepLX API URL support
 
 If you had a DeepL API, you can use [Deepcast](https://www.raycast.com/mooxl/deepcast) to translate text in Raycast. But if you don't have a DeepL API, you can use this extension to translate text in Raycast.
