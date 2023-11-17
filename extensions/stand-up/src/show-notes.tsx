@@ -177,6 +177,7 @@ export default function Command() {
                           const ok = await confirmAlert({
                             title: "Are you sure?",
                             message: "This will delete all entries for this day, and they cannot be recovered",
+                            icon: Icon.Trash,
                             primaryAction: {
                               title: "Delete all",
                               style: ActionStyle.Destructive,

@@ -5,6 +5,9 @@
   "description": "Frictionless note taking, to document your day for stand-up the next",
   "icon": "command-icon.png",
   "author": "theomjones",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools"
   ],
