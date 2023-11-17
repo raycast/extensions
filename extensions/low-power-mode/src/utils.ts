@@ -3,11 +3,13 @@ import { showHUD } from "@raycast/api";
 
 import { execSync } from "child_process";
 
+const LOW_POWER_MODE_ENABLED = "1";
+
 export const isLowPowerModeEnabled = () => {
   try {
-    const result = execSync("pmset -g | grep lowpowermode | awk -F' ' '{ print$2 }'");
-    const resultInString = result.toString().trim();
-    return resultInString === "1";
+    const result = execSync("pmset -g | grep lowpowermode");
+    const lowPowerModeValue = result.toString().trim().at(-1);
+    return lowPowerModeValue === LOW_POWER_MODE_ENABLED;
   } catch (error) {
     showFailureToast(error, { title: "Could not determine the Low Power Mode state" });
   }
