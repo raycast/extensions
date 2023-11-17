@@ -1,10 +1,9 @@
-import {  Toast, showToast, useNavigation } from "@raycast/api";
+import { Toast, showToast, useNavigation } from "@raycast/api";
 import { useCallback } from "react";
 import { Workspace } from "../types";
 import WorkspaceForm from "./WorkspaceForm";
 
-
-export function CreateWorkspaceForm(props: { draftValue?: Workspace; onCreate: (workspace: Workspace) => void; }) {
+export function CreateWorkspaceForm(props: { draftValue?: Workspace; onCreate: (workspace: Workspace) => void }) {
   const { onCreate, draftValue } = props;
   const { pop } = useNavigation();
 
@@ -16,14 +15,12 @@ export function CreateWorkspaceForm(props: { draftValue?: Workspace; onCreate: (
         title: "Created Workspace",
         message: workspace.title,
       });
-      pop()
+      pop();
     },
-    [onCreate, pop]
+    [onCreate, pop],
   );
 
-  return (
-    <WorkspaceForm draftValue={draftValue} handleSubmit={handleSubmit} />
-  );
+  return <WorkspaceForm draftValue={draftValue} handleSubmit={handleSubmit} />;
 }
 
 export default CreateWorkspaceForm;

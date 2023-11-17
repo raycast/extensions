@@ -11,7 +11,6 @@ function CreateWorkspaceAction(props: { draftValue?: Workspace; onCreate: (works
       target={<CreateWorkspaceForm draftValue={props.draftValue} onCreate={props.onCreate} />}
     />
   );
-
 }
 
 export default CreateWorkspaceAction;

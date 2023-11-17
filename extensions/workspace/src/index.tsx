@@ -5,17 +5,15 @@ import { CreateWorkspaceAction, DeleteWorkspaceAction, OpenWorkspaceAction } fro
 import { nanoid } from "nanoid";
 import { openFile, openUrl } from "./api";
 
-
 type State = {
   isLoading: boolean;
   workspaces: Workspace[];
-}
+};
 
 export default function Command() {
-
   const [state, setState] = useState<State>({
     isLoading: true,
-    workspaces: []
+    workspaces: [],
   });
   // 读取workspaces
   useEffect(() => {
@@ -47,7 +45,7 @@ export default function Command() {
       const newWorkspaces = [...state.workspaces, workspace];
       setState((previous) => ({ ...previous, workspaces: newWorkspaces }));
     },
-    [state.workspaces, setState]
+    [state.workspaces, setState],
   );
 
   const handleDelete = useCallback(
@@ -56,15 +54,15 @@ export default function Command() {
       newWorkspaces.splice(index, 1);
       setState((previous) => ({ ...previous, workspaces: newWorkspaces }));
     },
-    [state.workspaces, setState]
+    [state.workspaces, setState],
   );
 
   const handleOpen = useCallback(
     async (workspace: Workspace) => {
-      console.log('handleOpen');
+      console.log("handleOpen");
       console.log(workspace);
       if (workspace.urls?.length === 0 && workspace.files?.length === 0) {
-        console.log('handleOpenError');
+        console.log("handleOpenError");
         await showToast({
           style: Toast.Style.Failure,
           title: "Content is Empty",
@@ -74,13 +72,11 @@ export default function Command() {
       await openUrl(workspace.urls!);
       await openFile(workspace.files!);
     },
-    [state.workspaces, setState]
+    [state.workspaces, setState],
   );
 
   return (
-    <List
-      isLoading={state.isLoading}
-    >
+    <List isLoading={state.isLoading}>
       {state.workspaces.map((workspace, index) => (
         <List.Item
           key={workspace.id}
@@ -93,7 +89,6 @@ export default function Command() {
             </ActionPanel>
           }
         />
-
       ))}
 
       <List.EmptyView
@@ -106,5 +101,5 @@ export default function Command() {
         }
       />
     </List>
-  )
+  );
 }
