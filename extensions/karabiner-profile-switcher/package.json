@@ -2,17 +2,28 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "karabiner-profile-switcher",
   "title": "Karabiner Profile Switcher",
-  "description": "List Karabiner Elements profiles and switch beween them",
+  "description": "List Karabiner Elements profiles and switch between them",
   "icon": "command-icon.png",
   "author": "lucaschultz",
+  "contributors": [
+    "erics118"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Switch Profiles",
       "subtitle": "Karabiner Elements",
-      "description": "List Karabiner Elements profiles and switch beween them",
+      "description": "List Karabiner Elements profiles and switch between them",
       "mode": "view"
+    },
+    {
+      "name": "current-profile",
+      "title": "Current Profile",
+      "subtitle": "Karabiner Elements",
+      "description": "Show the current Karabiner Elements profile",
+      "mode": "no-view",
+      "interval": "1h"
     }
   ],
   "dependencies": {
