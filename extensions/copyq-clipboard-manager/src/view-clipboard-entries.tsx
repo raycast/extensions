@@ -72,8 +72,10 @@ export default function Command() {
   checkNumItems();
 
   const [clipboardContents, setClipboardContents] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function storeClipboardContents(tab: string, numItems: number) {
+    setIsLoading(true);
     const promises: Promise<string>[] = [];
 
     for (let i = 0; i < numItems; i++) {
@@ -95,6 +97,7 @@ export default function Command() {
 
     const results = await Promise.all(promises);
     setClipboardContents(results);
+    setIsLoading(false);
   }
 
   function selectClipboardContents(tab: string, index: number) {
@@ -131,5 +134,5 @@ export default function Command() {
     />
   ));
 
-  return <List>{items}</List>;
+  return <List isLoading={isLoading}>{items}</List>;
 }
