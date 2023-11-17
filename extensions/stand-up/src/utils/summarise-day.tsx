@@ -15,7 +15,7 @@ export async function summariseDay(standup: Record<string, Entry>): Promise<stri
 }
 
 function Summariser(props: { day: Record<string, Entry> }) {
-  const {isLoading, data} = useCachedPromise(
+  const { isLoading, data } = useCachedPromise(
     (input: Record<string, Entry>) => {
       return summariseDay(input);
     },

@@ -68,7 +68,6 @@ export default function Command() {
     [filter],
   );
 
-
   const keys = Object.keys(data?.days || {});
 
   const dropdownItems = [
@@ -114,7 +113,6 @@ export default function Command() {
         return (
           <List.Section title={sectionTitle} key={key}>
             {entries.map((entry) => {
-
               const date = dayjs(entry.datetime);
               const time = date.format("HH:mm");
 
