@@ -280,12 +280,12 @@
       "name": "seek",
       "title": "Seek",
       "subtitle": "Spotify",
-      "description": "Seek to a position in the current song/episode.",
+      "description": "Seek forward/backward in the current song/episode.",
       "mode": "no-view",
       "disabledByDefault": true,
       "arguments": [
         {
-          "name": "position",
+          "name": "difference",
           "placeholder": "Seconds",
           "type": "text",
           "required": true

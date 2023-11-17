@@ -3,7 +3,7 @@
 ## [More Commands] - 2023-09-07
 
 - Added `Current Track` command to view the current track and artist/show, and the like state
-- Added `Seek` command to seek to an arbitrary position in the track
+- Added `Seek` command to seek forward/backward in the track
 - Added `Replay` command to go to the beginning of the song, replaying it
 - Added `Set Volume` command to set the volume to an arbitrary percent, using an argument
 - Renamed `Toggle Repeat` to  `Cycle Repeat` command to cycle between all three repeat states instead of just two states

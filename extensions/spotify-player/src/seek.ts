@@ -1,31 +1,46 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { seek } from "./api/seek";
+import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.Seek }>) {
-  // volume is a string
-  const position = Number(props.arguments.position);
+  // position is a string, convert it to a number
+  const difference = Number(props.arguments.difference);
 
   // make sure position is a valid number
-  if (isNaN(position)) {
-    await showHUD("Position must be a number");
-    return;
-  }
-
-  // make sure volume is greater than 100
-  if (position < 0) {
-    await showHUD("Position must be between 0 and 100");
+  if (isNaN(difference)) {
+    await showHUD("Seconds must be a number");
     return;
   }
 
   await setSpotifyClient();
 
+  if (difference === 0) {
+    await showHUD("No change in position");
+    return;
+  }
+
+  const currentlyPlayingData = await getCurrentlyPlaying();
+
+  const currentPosition = currentlyPlayingData?.progress_ms ?? 0;
+  const newPosition = currentPosition / 1000 + difference;
+
+  if (newPosition < 0) {
+    await showHUD("Cannot seek before the start of the track");
+    return;
+  }
+
   try {
-    const res = await seek(position);
+    const res = await seek(newPosition);
+
     if (res == "next") {
       await showHUD("Skipping to next track");
     } else if (res == "position") {
-      await showHUD(`Position set to ${position}s`);
+      if (difference > 0) {
+        await showHUD(`Seeked forward ${difference}s`);
+      } else {
+        await showHUD(`Seeked backward ${-difference}s`);
+      }
     } else {
       await showHUD("No active device");
     }
