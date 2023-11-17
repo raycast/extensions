@@ -139,6 +139,7 @@ export default function Command() {
               return (
                 <List.Item
                   key={date.toISOString()}
+                  keywords={[entry.notes, entry.description || ""]}
                   accessories={[
                     ...accessories,
                     {
