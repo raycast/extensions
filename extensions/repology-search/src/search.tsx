@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import { ActionPanel, Action, Icon, List, Toast, showToast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { PackageDetail } from "./PackageDetail";
@@ -8,26 +8,36 @@ type PackageSections = {
   [key: string]: Package[];
 };
 
+function getUniqueSortedRepos(packages: Package[]): string[] {
+  const allRepos = packages.map((pkg) => pkg.repo);
+  const uniqueRepos = Array.from(new Set(allRepos));
+  uniqueRepos.sort((a, b) => a.localeCompare(b));
+  return uniqueRepos;
+}
+
+function getFilteredPackages(packages: Package[], selectedRepo: string): Package[] {
+  return packages.filter((pkg) => selectedRepo === "" || pkg.repo === selectedRepo);
+}
+
+function groupPackagesByRepo(packages: Package[]): PackageSections {
+  return packages.reduce<PackageSections>((sections, pkg) => {
+    const sectionKey = pkg.repo;
+    if (!sections[sectionKey]) {
+      sections[sectionKey] = [];
+    }
+    sections[sectionKey].push(pkg);
+    return sections;
+  }, {});
+}
+
 export default function Command() {
-  const [inputValue, setInputValue] = useState<string>("");
-  const [selectedRepo, setSelectedRepo] = useState<string>("");
-  const [debouncedQuery, setDebouncedQuery] = useState<string>("");
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (inputValue.length >= 2) {
-        setDebouncedQuery(inputValue);
-      }
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [inputValue]);
-
-  const { data, isLoading, error } = useFetch<{ [key: string]: Package[] }>(
-    `https://repology.org/api/v1/project/${debouncedQuery}`,
+  const [searchText, setSearchText] = useState("");
+  const [selectedRepo, setSelectedRepo] = useState("");
+  const { isLoading, data, error } = useFetch<{ [key: string]: Package[] }>(
+    `https://repology.org/api/v1/project/${searchText}`,
     {
       keepPreviousData: true,
-      execute: debouncedQuery.length >= 2,
+      execute: searchText.length >= 2,
     },
   );
 
@@ -36,42 +46,16 @@ export default function Command() {
   }
 
   const packages = data ? Object.values(data).flat() : [];
-
-  // Extract unique repositories for the dropdown
-  const repos = useMemo(() => {
-    const allRepos = packages.map((pkg) => pkg.repo);
-    return Array.from(new Set(allRepos));
-  }, [packages]);
-
-  // Filter packages based on the selected repository
-  const filteredPackages = useMemo(() => {
-    return packages.filter((pkg) => selectedRepo === "" || pkg.repo === selectedRepo);
-  }, [packages, selectedRepo]);
-
-  // Group packages by repository
-  const packageSections = filteredPackages.reduce<PackageSections>((sections, pkg) => {
-    const sectionKey = pkg.repo;
-    if (!sections[sectionKey]) {
-      sections[sectionKey] = [];
-    }
-    sections[sectionKey].push(pkg);
-    return sections;
-  }, {});
-
-  // Sort each section's packages by visiblename or srcname
-  for (const section in packageSections) {
-    packageSections[section].sort((a, b) => {
-      const aName = a.visiblename || a.srcname;
-      const bName = b.visiblename || b.srcname;
-      return aName.localeCompare(bName);
-    });
-  }
+  const repos = getUniqueSortedRepos(packages);
+  const filteredPackages = getFilteredPackages(packages, selectedRepo);
+  const packageSections = groupPackagesByRepo(filteredPackages);
 
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={setInputValue}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search for packages"
+      throttle
       searchBarAccessory={
         <List.Dropdown tooltip="Select Repository" storeValue={true} onChange={setSelectedRepo}>
           <List.Dropdown.Item title="All Repositories" value="" />
@@ -81,7 +65,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {inputValue.length < 2 ? (
+      {searchText.length < 2 ? (
         <List.EmptyView title="No Results" />
       ) : (
         Object.entries(packageSections).map(([sectionTitle, packages]) => (
