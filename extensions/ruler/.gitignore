@@ -11,3 +11,13 @@ compiled_raycast_swift
 
 # misc
 .DS_Store
+
+# xcode
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/
+DerivedData/
+.swiftpm/config/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
