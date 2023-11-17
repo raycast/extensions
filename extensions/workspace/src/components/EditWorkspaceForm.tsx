@@ -3,24 +3,24 @@ import { useCallback } from "react";
 import { Workspace } from "../types";
 import WorkspaceForm from "./WorkspaceForm";
 
-function CreateWorkspaceForm(props: { draftValue?: Workspace; onCreate: (workspace: Workspace) => void }) {
-  const { onCreate, draftValue } = props;
+function EditWorkspaceForm(props: { draftValue?: Workspace; onEdit: (workspace: Workspace) => void }) {
+  const { onEdit, draftValue } = props;
   const { pop } = useNavigation();
 
   const handleSubmit = useCallback(
     (workspace: Workspace) => {
-      onCreate(workspace);
+      onEdit(workspace);
       showToast({
         style: Toast.Style.Success,
-        title: "Created Workspace",
+        title: "Edit Workspace",
         message: workspace.title,
       });
       pop();
     },
-    [onCreate, pop],
+    [onEdit, pop],
   );
 
   return <WorkspaceForm draftValue={draftValue} handleSubmit={handleSubmit} />;
 }
 
-export default CreateWorkspaceForm;
+export default EditWorkspaceForm;

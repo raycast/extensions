@@ -1,7 +1,7 @@
 import { ActionPanel, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Workspace } from "./types";
 import { useState, useEffect, useCallback } from "react";
-import { CreateWorkspaceAction, DeleteWorkspaceAction, OpenWorkspaceAction } from "./components";
+import { CreateWorkspaceAction, DeleteWorkspaceAction, OpenWorkspaceAction, EditWorkspaceAction } from "./components";
 import { nanoid } from "nanoid";
 import { openFile, openUrl } from "./api";
 
@@ -29,7 +29,6 @@ export default function Command() {
         const workspaces: Workspace[] = JSON.parse(storedWorkspaces);
         setState((previous) => ({ ...previous, workspaces, isLoading: false }));
       } catch (e) {
-        // can't decode todos
         setState((previous) => ({ ...previous, workspaces: [], isLoading: false }));
       }
     })();
@@ -48,6 +47,16 @@ export default function Command() {
     [state.workspaces, setState],
   );
 
+  const handleEdit = useCallback(
+    (workspace: Workspace) => {
+      const newWorkspaces = [...state.workspaces];
+      const index = newWorkspaces.findIndex((w) => w.id === workspace.id);
+      newWorkspaces[index] = workspace;
+      setState((previous) => ({ ...previous, workspaces: newWorkspaces }));
+    },
+    [state.workspaces, setState],
+  );
+
   const handleDelete = useCallback(
     (index: number) => {
       const newWorkspaces = [...state.workspaces];
@@ -59,10 +68,7 @@ export default function Command() {
 
   const handleOpen = useCallback(
     async (workspace: Workspace) => {
-      console.log("handleOpen");
-      console.log(workspace);
       if (workspace.urls?.length === 0 && workspace.files?.length === 0) {
-        console.log("handleOpenError");
         await showToast({
           style: Toast.Style.Failure,
           title: "Content is Empty",
@@ -85,6 +91,7 @@ export default function Command() {
             <ActionPanel>
               <OpenWorkspaceAction onOpen={() => handleOpen(workspace)} />
               <CreateWorkspaceAction onCreate={handleCreate} />
+              <EditWorkspaceAction draftValue={workspace} onEdit={handleEdit} />
               <DeleteWorkspaceAction onDelete={() => handleDelete(index)} />
             </ActionPanel>
           }
