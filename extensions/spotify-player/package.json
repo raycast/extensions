@@ -277,22 +277,6 @@
       "disabledByDefault": true
     },
     {
-      "name": "seek",
-      "title": "Seek",
-      "subtitle": "Spotify",
-      "description": "Seek forward/backward in the current song/episode.",
-      "mode": "no-view",
-      "disabledByDefault": true,
-      "arguments": [
-        {
-          "name": "difference",
-          "placeholder": "Seconds",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
       "name": "current-track",
       "title": "Current Track",
       "description": "Show the current song/episode state.",
