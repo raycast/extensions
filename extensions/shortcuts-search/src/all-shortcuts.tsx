@@ -8,7 +8,7 @@ export default function AllShortcutsCommand() {
   const { push } = useNavigation();
   const { isLoading, shortcuts } = useAllShortcuts();
   const { data: sortedApplications, visitItem } = useFrecencySorting(shortcuts.applications, {
-    key: (app) => app.slug
+    key: (app) => app.slug,
   });
 
   return (
