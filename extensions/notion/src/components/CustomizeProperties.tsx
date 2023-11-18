@@ -168,14 +168,24 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
         {data?.[databaseId]?.visible.map((propertyId) => {
           const property = properties.find((p) => p.id == propertyId);
           if (!property) return null;
-          return <CustomizeProperty key={property.id} {...{ data, databaseId, property, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown }} />;
+          return (
+            <CustomizeProperty
+              key={property.id}
+              {...{ data, databaseId, property, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown }}
+            />
+          );
         })}
       </List.Section>
       <List.Section title="Hidden Properties">
         {data?.[databaseId]?.hidden.map((propertyId) => {
           const property = properties.find((p) => p.id == propertyId);
           if (!property) return null;
-          return <CustomizeProperty key={property.id} {...{ data, databaseId, property, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown }} />;
+          return (
+            <CustomizeProperty
+              key={property.id}
+              {...{ data, databaseId, property, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown }}
+            />
+          );
         })}
       </List.Section>
     </List>

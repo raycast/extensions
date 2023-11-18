@@ -136,12 +136,12 @@ export function getPageIcon(page: Page): Image.ImageLike {
   return page.icon_emoji
     ? page.icon_emoji
     : page.icon_file
-    ? page.icon_file
-    : page.icon_external
-    ? page.icon_external
-    : page.object === "database"
-    ? Icon.List
-    : Icon.BlankDocument;
+      ? page.icon_file
+      : page.icon_external
+        ? page.icon_external
+        : page.object === "database"
+          ? Icon.List
+          : Icon.BlankDocument;
 }
 
 export function getPageName(page: Page): string {
