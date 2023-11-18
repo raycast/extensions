@@ -104,14 +104,21 @@ export default function Command() {
   // if the events returned my moment/next are synced events then return the original event from the events call if it exists
   const eventMoment = useMemo(() => {
     if (!eventMomentData) return eventMomentData;
+
+    const findEvent = (event: Event | undefined | null) => {
+      if (!event || !eventData || eventData.length === 0) return event;
+
+      const originalEventID = getOriginalEventIDFromSyncEvent(event);
+      if (!originalEventID) return event;
+
+      return eventData.find((e) => e.eventId === originalEventID) ?? event;
+    };
+
     const { event, nextEvent } = eventMomentData;
+
     return {
-      event: event
-        ? eventData?.find((event) => event.eventId === getOriginalEventIDFromSyncEvent(event)) ?? event
-        : null,
-      nextEvent: nextEvent
-        ? eventData?.find((event) => event.eventId === getOriginalEventIDFromSyncEvent(nextEvent)) ?? nextEvent
-        : null,
+      event: findEvent(event),
+      nextEvent: findEvent(nextEvent),
     };
   }, [eventMomentData, eventData]);
 
