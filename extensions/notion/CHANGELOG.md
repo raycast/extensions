@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Update preferences] - 2023-10-12
+
+- Allow users to choose a custom browser to open Notion pages in.
+
 ## [Fixes] - 2023-10-12
 
 - Fix duplicated recent and searched pages sometimes showing
