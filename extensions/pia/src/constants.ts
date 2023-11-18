@@ -1,4 +1,4 @@
-export const piaPath = '/usr/local/bin/piactl'
+export const piaPath = "/usr/local/bin/piactl";
 export const openPiaScript = ` tell application "Private Internet Access"
       if not application "Private Internet Access" is running then
         activate

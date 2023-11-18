@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pia",
-  "title": "PIA Controls",
-  "description": "Private Internet Access",
+  "title": "Private Internet Access",
+  "description": "Private Internet Access VPN Controller",
   "icon": "icon.png",
   "author": "yakitrak",
   "categories": [

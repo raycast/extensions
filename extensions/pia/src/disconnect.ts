@@ -1,4 +1,4 @@
-import { runPrivateInternetAcessCmd } from './utils'
+import { runPrivateInternetAcessCmd } from "./utils";
 export default async () => {
-    await runPrivateInternetAcessCmd('disconnect', "Disconnecting from Private Internet Access...")
+  await runPrivateInternetAcessCmd("disconnect", "Disconnecting from Private Internet Access...");
 };
