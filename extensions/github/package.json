@@ -121,6 +121,14 @@
           "default": false,
           "label": "Display Owner Names",
           "description": "Display owner name alongside repository name in search results"
+        },
+        {
+          "name": "repoAsTitle",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Repo As Title",
+          "description": "Show the repository name first instead of the message title"
         }
       ]
     },

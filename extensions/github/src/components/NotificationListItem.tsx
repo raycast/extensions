@@ -29,14 +29,27 @@ export default function NotificationListItem({
   const reason = getNotificationReason(notification);
   const updatedAt = new Date(notification.updated_at);
 
+  const { repoAsTitle } = getPreferenceValues<Preferences>();
+
+  let title = "";
+  let subtitle = "";
+
+  if(repoAsTitle){
+    title = getNotificationSubtitle(notification);
+    subtitle = notification.subject.title;
+  } else {
+    title = notification.subject.title;
+    subtitle = getNotificationSubtitle(notification);
+  }
+
   return (
     <List.Item
       icon={{
         value: { source: icon.value, tintColor: Color.PrimaryText },
         tooltip: getNotificationTypeTitle(notification),
       }}
-      title={getNotificationSubtitle(notification)}
-      subtitle={notification.subject.title}
+      title={title}
+      subtitle={subtitle}
       accessories={[
         {
           text: reason,
