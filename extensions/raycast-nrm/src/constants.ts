@@ -1,6 +1,7 @@
 export const USER_HOME = process.env.HOME || process.env.USERPROFILE || `/Users/${process.env.USER}`;
 
-export const REMOTE_REGISTRY_SOURCES = 'https://gist.githubusercontent.com/lihaizhong/bafad768c908871a689c020cc405c81e/raw/7be8cc3b29672fea581546a212c64446e94f654f/register.json'
+export const REMOTE_REGISTRY_SOURCES =
+  "https://gist.githubusercontent.com/lihaizhong/bafad768c908871a689c020cc405c81e/raw/7be8cc3b29672fea581546a212c64446e94f654f/register.json";
 
 export const REGISTRY_SOURCES = [
   {

@@ -15,7 +15,7 @@ export class NpmExec {
       cwd: USER_HOME,
       env,
     });
-  
+
     if (childProcess) {
       const { stdout, stderr } = await childProcess;
 
