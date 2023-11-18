@@ -16,7 +16,6 @@ import { parseHTML } from "linkedom";
 import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
-import { View } from "./components";
 import { useSearchPages } from "./hooks";
 import { appendToPage, createDatabasePage, getPageIcon } from "./utils/notion";
 
@@ -43,7 +42,7 @@ function validateUrl(input: string) {
   return urlPattern.test(input);
 }
 
-function QuickCapture() {
+export default function QuickCapture() {
   const [searchText, setSearchText] = useState<string>("");
 
   const { data: searchPages, isLoading } = useSearchPages(searchText);
@@ -172,13 +171,5 @@ ${result?.content}
         })}
       </Form.Dropdown>
     </Form>
-  );
-}
-
-export default function Command() {
-  return (
-    <View>
-      <QuickCapture />
-    </View>
   );
 }
