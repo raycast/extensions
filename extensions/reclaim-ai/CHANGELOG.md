@@ -1,6 +1,6 @@
 # reclaim Changelog
 
-## [Update] - {2023-11-20}
+## [Update] - 2023-11-20
 
 - Menubar Update: Reverted logic to build `/next/moment` response in code, now utilizing endpoint support for events from all calendars.
 - Join Meeting Enhancement: Added checks to handle events without a `meetingUrl`. For synced events, the function now fetches the original event to obtain and use its `meetingUrl`.
