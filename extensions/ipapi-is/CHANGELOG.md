@@ -1,3 +1,3 @@
-# ipapi.ps Changelog
+# ipapi.is Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
