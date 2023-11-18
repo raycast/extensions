@@ -3,18 +3,6 @@ import { useCachedPromise } from "@raycast/utils";
 
 import { DatabaseProperty, convertPropTypeToName, getPropertyIcon } from "../utils/notion";
 
-/*
-
-stored data format:
-
-{
-  "databaseId": {
-    "visible": ["propertyId1", "propertyId2"]
-    "hidden": ["propertyId1", "propertyId2"]
-  }
-}
-*/
-
 export type PropertyPreferences = {
   visible: string[];
   hidden: string[];
@@ -37,7 +25,7 @@ export function useCreateDatabasePagePreferences(databaseId: string | null, prop
       allDatabasePrefs = {
         [databaseId]: {
           visible: properties.map((property) => property.id),
-          hidden: []
+          hidden: [],
         },
       };
     }
@@ -137,8 +125,10 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
   const properties = props.databaseProperties;
   const databaseId = props.databaseId;
 
-  const { data, isLoading, togglePropertyVisibility, moveUp, moveDown } =
-    useCreateDatabasePagePreferences(databaseId, properties);
+  const { data, isLoading, togglePropertyVisibility, moveUp, moveDown } = useCreateDatabasePagePreferences(
+    databaseId,
+    properties,
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter properties by name...">
