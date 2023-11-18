@@ -11,7 +11,6 @@ stored data format:
   "databaseId": {
     "visible": ["propertyId1", "propertyId2"]
     "hidden": ["propertyId1", "propertyId2"]
-    showEndDate: ["propertyId1", "propertyId2"] // for date property only
   }
 }
 */
@@ -19,7 +18,6 @@ stored data format:
 export type PropertyPreferences = {
   visible: string[];
   hidden: string[];
-  showEndDate: string[]; // for date property only
 };
 
 export type DatabasePreferences = {
@@ -39,8 +37,7 @@ export function useCreateDatabasePagePreferences(databaseId: string | null, prop
       allDatabasePrefs = {
         [databaseId]: {
           visible: properties.map((property) => property.id),
-          hidden: [],
-          showEndDate: [],
+          hidden: []
         },
       };
     }
@@ -58,19 +55,6 @@ export function useCreateDatabasePagePreferences(databaseId: string | null, prop
       data[databaseId].visible = [...data[databaseId].visible, propertyId];
     } else {
       data[databaseId].visible.push(propertyId);
-    }
-
-    await LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
-    mutate();
-  }
-
-  async function toggleShowEndDate(propertyId: string) {
-    if (!data || !databaseId) return;
-
-    if (data[databaseId].showEndDate.includes(propertyId)) {
-      data[databaseId].showEndDate = data[databaseId].showEndDate.filter((id) => id != propertyId);
-    } else {
-      data[databaseId].showEndDate.push(propertyId);
     }
 
     await LocalStorage.setItem("CREATE_DATABASE_PAGE_PROPERTY_PREFERENCES", JSON.stringify(data));
@@ -99,7 +83,6 @@ export function useCreateDatabasePagePreferences(databaseId: string | null, prop
     data,
     isLoading,
     togglePropertyVisibility,
-    toggleShowEndDate,
     moveUp: (propertyId: string) => moveProperty(propertyId, "up"),
     moveDown: (propertyId: string) => moveProperty(propertyId, "down"),
   };
@@ -112,7 +95,6 @@ export function CustomizeProperty(props: {
   databaseId: string;
   property: DatabaseProperty;
   togglePropertyVisibility: (propertyId: string) => void;
-  toggleShowEndDate: (propertyId: string) => void;
   moveUp: (propertyId: string) => void;
   moveDown: (propertyId: string) => void;
 }) {
@@ -129,17 +111,6 @@ export function CustomizeProperty(props: {
             icon={Icon.Eye}
             onAction={() => props.togglePropertyVisibility(props.property.id)}
           />
-          {props.property.type === "date" && (
-            <Action
-              title={
-                props.data?.[props.databaseId]?.showEndDate?.includes(props.property.id)
-                  ? "Hide End Date"
-                  : "Show End Date"
-              }
-              icon={Icon.Calendar}
-              onAction={() => props.toggleShowEndDate(props.property.id)}
-            />
-          )}
           {!props.isFirst && (
             <Action
               title="Move Up"
@@ -166,7 +137,7 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
   const properties = props.databaseProperties;
   const databaseId = props.databaseId;
 
-  const { data, isLoading, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown } =
+  const { data, isLoading, togglePropertyVisibility, moveUp, moveDown } =
     useCreateDatabasePagePreferences(databaseId, properties);
 
   return (
@@ -180,7 +151,7 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
               key={property.id}
               isFirst={i === 0}
               isLast={i === length - 1}
-              {...{ data, databaseId, property, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown }}
+              {...{ data, databaseId, property, togglePropertyVisibility, moveUp, moveDown }}
             />
           );
         })}
@@ -194,7 +165,7 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
               key={property.id}
               isFirst={i === 0}
               isLast={i === length - 1}
-              {...{ data, databaseId, property, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown }}
+              {...{ data, databaseId, property, togglePropertyVisibility, moveUp, moveDown }}
             />
           );
         })}
