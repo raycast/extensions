@@ -11,14 +11,7 @@ import {
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { runShortcuts } from "./engine/shortcut-runner";
-import {
-  Application,
-  AtomicShortcut,
-  Keymap,
-  Section,
-  SectionShortcut,
-  Shortcuts,
-} from "./model/internal/internal-models";
+import { Application, AtomicShortcut, Keymap, Section, SectionShortcut } from "./model/internal/internal-models";
 import { modifierSymbols } from "./model/internal/modifiers";
 import useAllShortcuts from "./load/shortcuts-provider";
 import useKeyCodes from "./load/key-codes-provider";
@@ -50,51 +43,45 @@ function KeymapDropdown(props: { keymaps: string[]; onKeymapChange: (newValue: s
 }
 
 export default function AppShortcuts(props?: { app: Application }) {
-  const [bundleId, setBundleId] = useState(props?.app?.bundleId);
-  const [isLoading, setIsLoading] = useState(true);
   const [application, setApplication] = useState<Application | undefined>(props?.app);
+  const [bundleId, setBundleId] = useState(props?.app?.bundleId);
   const [keymaps, setKeymaps] = useState<string[]>([]);
   const [keymapSections, setKeymapSections] = useState<Section[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const keyCodesResponse = useKeyCodes();
-  const shortcutsProviderResponse = useAllShortcuts();
+  const shortcutsProviderResponse = useAllShortcuts({ execute: !props?.app });
 
-  const initAppShortcuts = (bundleId: string, shortcuts: Shortcuts) => {
-    setIsLoading(true);
-    const foundApp = application ?? shortcuts.applications.find((app) => app.bundleId === bundleId);
+  useEffect(() => {
+    if (application || shortcutsProviderResponse.isLoading || !bundleId) {
+      return;
+    }
+    const foundApp = shortcutsProviderResponse.shortcuts.applications.find((app) => app.bundleId === bundleId);
     if (!foundApp) {
       // noinspection JSIgnoredPromiseFromCall
       closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
       // noinspection JSIgnoredPromiseFromCall
       showFailureToast(undefined, { title: `Shortcuts not available for application ${bundleId}` });
-    } else {
-      const foundKeymaps = foundApp?.keymaps.map((k) => k.title) ?? [];
-      const foundSections = foundApp?.keymaps[0].sections ?? [];
-      setApplication(foundApp);
-      setKeymaps(foundKeymaps);
-      setKeymapSections(foundSections);
-    }
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    if (shortcutsProviderResponse.isLoading || !bundleId) {
       return;
     }
-    initAppShortcuts(bundleId, shortcutsProviderResponse.shortcuts); // init only when everything loaded
-  }, [shortcutsProviderResponse.isLoading, bundleId]);
+    setApplication(foundApp);
+  }, [shortcutsProviderResponse.isLoading, bundleId, application]);
 
-  usePromise(
-    async () => {
-      return application?.bundleId ?? (await getFrontmostApplication()).bundleId;
+  useEffect(() => {
+    if (!application) return;
+    const foundKeymaps = application?.keymaps.map((k) => k.title) ?? [];
+    const foundSections = application?.keymaps[0].sections ?? [];
+    setKeymaps(foundKeymaps);
+    setKeymapSections(foundSections);
+    setIsLoading(false);
+  }, [application]);
+
+  usePromise(async () => application?.bundleId ?? (await getFrontmostApplication()).bundleId, [], {
+    onData: (bundleId) => {
+      if (!bundleId) return;
+      setBundleId(bundleId);
     },
-    [],
-    {
-      onData: (bundleId) => {
-        if (!bundleId) return;
-        setBundleId(bundleId);
-      },
-    }
-  );
+    execute: !props?.app,
+  });
 
   const onKeymapChange = (newValue: string) => {
     setKeymapSections(selectKeymap(application?.keymaps ?? [], newValue)?.sections ?? []);
@@ -112,6 +99,7 @@ export default function AppShortcuts(props?: { app: Application }) {
       isLoading={isLoading}
       searchBarPlaceholder="Search for shortcuts"
       searchBarAccessory={<KeymapDropdown keymaps={keymaps} onKeymapChange={onKeymapChange} />}
+      navigationTitle={application?.name}
     >
       {keymapSections.map((section) => {
         return (

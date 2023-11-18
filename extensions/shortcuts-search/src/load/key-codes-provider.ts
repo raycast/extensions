@@ -1,4 +1,4 @@
-import { useFetch } from "@raycast/utils";
+import { useFetch, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { CacheManager } from "../cache/cache-manager";
 
@@ -12,30 +12,32 @@ const cacheManager = new CacheManager();
 const CACHE_KEY = "key-codes";
 
 export default function useKeyCodes() {
-  const cachedItem = cacheManager.getCachedItem<IncomingKeyCodes>(CACHE_KEY);
-  const [shouldUpdateCache] = useState(!cacheManager.cacheItemIsValid(cachedItem));
-  const useKeyCodesFetchResult = useFetch<IncomingKeyCodes>("https://shortcuts.solomk.in/data/key-codes.json", {
-    keepPreviousData: true,
-    onData: (data) => {
-      cacheManager.setValueWithTtl(CACHE_KEY, data);
+  const [keyCodes, setKeyCodes] = useState<Map<string, string> | undefined>();
+  const [shouldUpdateCache, setShouldUpdateCache] = useState(false);
+
+  usePromise(async () => cacheManager.getCachedItem<IncomingKeyCodes>(CACHE_KEY), [], {
+    onData: async (cachedItem) => {
+      if (cacheManager.cacheItemIsValid(cachedItem)) {
+        if (!cachedItem) return;
+        setKeyCodes(new Map(cachedItem.data.keyCodes));
+      } else {
+        setShouldUpdateCache(true);
+      }
     },
-    execute: shouldUpdateCache,
   });
 
-  if (cachedItem) {
-    return {
-      isLoading: false,
-      data: new Map(cachedItem?.data.keyCodes),
-    };
-  }
-  if (!useKeyCodesFetchResult.data) {
-    return {
-      isLoading: true,
-      data: undefined,
-    };
-  }
+  useFetch<IncomingKeyCodes>("https://shortcuts.solomk.in/data/key-codes.json", {
+    keepPreviousData: true,
+    execute: shouldUpdateCache,
+    onData: async (fetchedData) => {
+      console.log("Received key codes");
+      setKeyCodes(new Map(fetchedData.keyCodes));
+      await cacheManager.setValueWithTtl(CACHE_KEY, fetchedData);
+    },
+  });
+
   return {
-    isLoading: false,
-    data: new Map(useKeyCodesFetchResult?.data?.keyCodes),
+    isLoading: keyCodes === undefined,
+    data: keyCodes,
   };
 }
