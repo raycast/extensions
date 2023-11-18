@@ -77,7 +77,7 @@ export function useCreateDatabasePagePreferences(databaseId: string | null, prop
 }
 
 export function CustomizeProperty(props: {
-  data: DatabasePreferences;
+  databasePrefs: DatabasePreferences;
   isFirst: boolean;
   isLast: boolean;
   databaseId: string;
@@ -95,7 +95,7 @@ export function CustomizeProperty(props: {
       actions={
         <ActionPanel>
           <Action
-            title={props.data?.[props.databaseId]?.visible.includes(props.property.id) ? "Hide" : "Show"}
+            title={props.databasePrefs?.[props.databaseId]?.visible.includes(props.property.id) ? "Hide" : "Show"}
             icon={Icon.Eye}
             onAction={() => {
               // still show this action for the title property, but just error for it
@@ -137,15 +137,18 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
   const properties = props.databaseProperties;
   const databaseId = props.databaseId;
 
-  const { data, isLoading, togglePropertyVisibility, moveUp, moveDown } = useCreateDatabasePagePreferences(
-    databaseId,
-    properties,
-  );
+  const {
+    data: databasePrefs,
+    isLoading,
+    togglePropertyVisibility,
+    moveUp,
+    moveDown,
+  } = useCreateDatabasePagePreferences(databaseId, properties);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter properties by name...">
       <List.Section title="Visible Properties">
-        {data?.[databaseId]?.visible.map((propertyId, i, { length }) => {
+        {databasePrefs?.[databaseId]?.visible.map((propertyId, i, { length }) => {
           const property = properties.find((p) => p.id == propertyId);
           if (!property) return null;
           return (
@@ -153,13 +156,13 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
               key={property.id}
               isFirst={i === 0}
               isLast={i === length - 1}
-              {...{ data, databaseId, property, togglePropertyVisibility, moveUp, moveDown }}
+              {...{ databasePrefs, databaseId, property, togglePropertyVisibility, moveUp, moveDown }}
             />
           );
         })}
       </List.Section>
       <List.Section title="Hidden Properties">
-        {data?.[databaseId]?.hidden.map((propertyId, i, { length }) => {
+        {databasePrefs?.[databaseId]?.hidden.map((propertyId, i, { length }) => {
           const property = properties.find((p) => p.id == propertyId);
           if (!property) return null;
           return (
@@ -167,7 +170,7 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
               key={property.id}
               isFirst={i === 0}
               isLast={i === length - 1}
-              {...{ data, databaseId, property, togglePropertyVisibility, moveUp, moveDown }}
+              {...{ databasePrefs, databaseId, property, togglePropertyVisibility, moveUp, moveDown }}
             />
           );
         })}
