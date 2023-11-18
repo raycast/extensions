@@ -29,6 +29,13 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
   const { setRecentPage } = useRecentPages();
 
+  const { data: databasePrefs, isLoading: isLoadingPropPrefs } = useCreateDatabasePagePreferences(
+    databaseId,
+    databaseProperties,
+  );
+
+  const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
+
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
@@ -110,10 +117,6 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
     };
   }
 
-  const { isLoading: isLoadingPropPrefs, data } = useCreateDatabasePagePreferences(databaseId, databaseProperties);
-
-  const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
-
   return (
     <Form
       isLoading={isLoadingPropPrefs || isLoadingDatabases || isLoadingRelationPages}
@@ -172,13 +175,15 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
         </>
       )}
 
-      {data &&
+      {databasePrefs &&
         databaseId &&
         databaseProperties
           // only show visible properties
-          .filter((property) => data[databaseId].visible.includes(property.id))
+          .filter((property) => databasePrefs[databaseId].visible.includes(property.id))
           // sort the visible props by their order
-          .sort((a, b) => data[databaseId].visible.indexOf(a.id) - data[databaseId].visible.indexOf(b.id))
+          .sort(
+            (a, b) => databasePrefs[databaseId].visible.indexOf(a.id) - databasePrefs[databaseId].visible.indexOf(b.id),
+          )
           .map(convertToField)}
 
       <Form.Separator />

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { DatabaseProperty, convertPropTypeToName, getPropertyIcon } from "../utils/notion";
@@ -97,7 +97,19 @@ export function CustomizeProperty(props: {
           <Action
             title={props.data?.[props.databaseId]?.visible.includes(props.property.id) ? "Hide" : "Show"}
             icon={Icon.Eye}
-            onAction={() => props.togglePropertyVisibility(props.property.id)}
+            onAction={() => {
+              // still show this action for the title property, but just error for it
+              // otherwise, the move up/down action (depending on the position of the title field) would
+              // get the `enter` shortcut, which is weird
+              if (props.property.type === "title") {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Cannot hide the title property",
+                });
+              } else {
+                props.togglePropertyVisibility(props.property.id);
+              }
+            }}
           />
           {!props.isFirst && (
             <Action
