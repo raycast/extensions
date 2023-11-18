@@ -261,14 +261,14 @@ export async function updateIssueAssignee(issueIdOrKey: string, accountId: strin
 
 export async function startWatchingIssue(issueIdOrKey: string) {
   return request(`/issue/${issueIdOrKey}/watchers`, {
-    method: "POST"
+    method: "POST",
   });
 }
 
 export async function stopWatchingIssue(issueIdOrKey: string, accountId: string) {
   return request(`/issue/${issueIdOrKey}/watchers`, {
     method: "DELETE",
-    params: { accountId: accountId }
+    params: { accountId: accountId },
   });
 }
 

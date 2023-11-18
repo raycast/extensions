@@ -110,7 +110,7 @@ export default function IssueActions({
     }
   }
 
-  const isWatchedByMe = issue.fields?.watches?.isWatching
+  const isWatchedByMe = issue.fields?.watches?.isWatching;
 
   async function watchIssue() {
     try {
