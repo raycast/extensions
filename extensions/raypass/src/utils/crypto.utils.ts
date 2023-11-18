@@ -1,33 +1,37 @@
 import type { Record } from "../types";
 import crypto from "node:crypto";
 
-const algorithm = "aes-256-ctr";
-const key = crypto.createHash("sha256").digest("hex");
+const algorithm = "aes-192-cbc";
 
-const hash = ({ password }: { password: string }) => {
-  const hmac = crypto.createHmac("sha256", key);
+const hash = (password: string) => crypto.scryptSync(password, "salt", 24);
+
+const hmac = (data: string, password: string) => {
+  const hmac = crypto.createHmac("sha256", hash(password));
   hmac.update(password);
-  return hmac.digest("base64").substr(0, 32);
+  hmac.update(data);
+  return hmac.digest("hex");
 };
 
-const encrypt = ({ text, password }: { text: string; password: string }) => {
-  const key = hash({ password });
-  const iv = crypto.randomBytes(16);
+const encrypt = (data: string, password: string): string => {
+  const key = hash(password);
+  const iv = key.subarray(0, 16);
   const cipher = crypto.createCipheriv(algorithm, key, iv);
-  const result = Buffer.concat([iv, cipher.update(text), cipher.final()]);
-  return result.toString("hex");
+  const encrypted = cipher.update(data, "utf8", "hex") + cipher.final("hex");
+  return [encrypted, hmac(data, key.toString("hex"))].join(",");
 };
 
-const decrypt = ({ text, password }: { text: string; password: string }) => {
-  const key = hash({ password });
-  const [iv, encrypted] = [text.slice(0, 32), text.slice(32)];
-  const decipher = crypto.createDecipheriv(algorithm, key, Buffer.from(iv, "hex"));
-  const data = Buffer.concat([decipher.update(Buffer.from(encrypted, "hex")), decipher.final()]);
+const decrypt = ([encrypted, receivedHmac]: [string, string], password: string) => {
+  const key = hash(password);
+  const iv = key.subarray(0, 16);
+  const decipher = crypto.createDecipheriv(algorithm, key, iv);
 
   try {
-    return JSON.parse(data.toString()) as Array<Record>;
+    const decrypted = decipher.update(encrypted, "hex", "utf8") + decipher.final("utf8");
+    if (hmac(decrypted, key.toString("hex")) !== receivedHmac) return Error("Integrity compromised");
+    return JSON.parse(decrypted) as Array<Record>;
   } catch (e) {
-    throw new Error("Invalid password");
+    // if data is tampered and block length is not valid then this will throw invalid password...
+    return Error("Invalid Password");
   }
 };
 

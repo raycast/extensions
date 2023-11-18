@@ -33,7 +33,7 @@ const createDocument = async ({ name, password }: NewDocumentData): Promise<void
 
   try {
     const payload = JSON.stringify([]);
-    const data = password ? c.encrypt({ text: payload, password }) : payload;
+    const data = password ? c.encrypt(payload, password) : payload;
     await fs.promises.writeFile(docLocation, data, "utf-8");
     await local.docs.append({ name: fileName, location: docLocation, isEncrypted: password ? true : false });
     return;
@@ -78,7 +78,17 @@ const getDocument = async ({ documentName, password }: { documentName: string; p
   if (isEncrypted && !password) throw new Error("Document is encrypted, and no password was provided");
   try {
     const data = await fs.promises.readFile(location, "utf-8");
-    const records = isEncrypted && password ? c.decrypt({ text: data, password }) : (JSON.parse(data) as Array<Record>);
+    const records =
+      isEncrypted && password
+        ? c.decrypt(data.split(",") as [string, string], password)
+        : (JSON.parse(data) as Array<Record>);
+
+    if (records instanceof Error) {
+      // properly handle this...
+      console.log(records.message);
+      throw new Error(records.message);
+    }
+
     return { name, location, records };
   } catch (error) {
     throw new Error(`Could not read document at ${location}`);
@@ -114,7 +124,8 @@ const indexDocumentDirectory = async (): Promise<{
   }
 
   try {
-    const documentNames = await fs.promises.readdir(baseDir);
+    let documentNames = await fs.promises.readdir(baseDir);
+    documentNames = documentNames.filter((name) => name.includes(".json") || name.includes(".enc"));
     if (documentNames.length === 0) return { activeRef: !!active, documents: [] };
     const documents = documentNames.map((name) => {
       const isActive = active ? active.name === name : documentNames[0] === name;

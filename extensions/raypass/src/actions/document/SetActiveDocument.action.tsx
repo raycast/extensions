@@ -1,6 +1,7 @@
 import { Action, Icon, useNavigation, showToast, Toast } from "@raycast/api";
+import { documentStore } from "../../context";
 import { docs } from "../../utils";
-import { Records } from "../../views";
+import { Records, EncryptedPasswordForm } from "../../views";
 
 interface Props {
   doc: { name: string; isActive: boolean };
@@ -8,12 +9,14 @@ interface Props {
 
 export const SetActiveDocument: React.FC<Props> = ({ doc }) => {
   const { push } = useNavigation();
-  // reval
 
   const handleSetActiveDocument = async () => {
-    // pop for active?
     try {
       await docs.set({ documentName: doc.name });
+      const { ref, password } = documentStore.getState();
+      const encryptedWithNoPassword = ref && ref.isEncrypted && !password;
+      if (encryptedWithNoPassword) return push(<EncryptedPasswordForm documentName={doc.name} />);
+
       return push(<Records />);
     } catch (err) {
       await showToast(Toast.Style.Failure, "Failed to set active document", `${err}`);
@@ -21,12 +24,5 @@ export const SetActiveDocument: React.FC<Props> = ({ doc }) => {
     }
   };
 
-  return (
-    <Action
-      icon={Icon.Switch}
-      // shortcut={{ modifiers: ["cmd"], key: "enter" }}
-      title="Select Document"
-      onAction={handleSetActiveDocument}
-    />
-  );
+  return <Action icon={Icon.Switch} title="Select Document" onAction={handleSetActiveDocument} />;
 };

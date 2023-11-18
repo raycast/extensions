@@ -44,7 +44,7 @@ const editRecord = async ({
 
   try {
     const payload = JSON.stringify(updatedDocument);
-    const data = ref.isEncrypted && password ? c.encrypt({ text: payload, password }) : payload;
+    const data = ref.isEncrypted && password ? c.encrypt(payload, password) : payload;
 
     await fs.promises.writeFile(ref.location, data, "utf-8");
     return { success: true };
@@ -66,7 +66,7 @@ const deleteRecord = async ({ id, password }: { id: string; password?: string })
 
   try {
     const payload = JSON.stringify(updatedDocument);
-    const data = ref.isEncrypted && password ? c.encrypt({ text: payload, password }) : payload;
+    const data = ref.isEncrypted && password ? c.encrypt(payload, password) : payload;
     await fs.promises.writeFile(ref.location, data, "utf-8");
     return { success: true };
   } catch (error) {
@@ -94,7 +94,7 @@ const createRecord = async ({ record, password }: { record: Omit<Record, "id">; 
 
   try {
     const payload = JSON.stringify(updatedDocument);
-    const data = isEncrypted && password ? c.encrypt({ text: payload, password }) : payload;
+    const data = isEncrypted && password ? c.encrypt(payload, password) : payload;
 
     await fs.promises.writeFile(location, data, "utf-8");
 

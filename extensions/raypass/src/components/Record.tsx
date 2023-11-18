@@ -18,11 +18,13 @@ import {
 import totp from "totp-generator";
 
 interface Props extends RecordType {
+  documentName: string;
   revalidateRecords: RevalidateRecords;
 }
 
 export const Record: React.FC<Props> = ({
   id,
+  documentName,
   name,
   url,
   username,
@@ -62,6 +64,7 @@ export const Record: React.FC<Props> = ({
           }
         />
       }
+      //? Should the actions be removed?
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`Record ${id}`}>
@@ -81,7 +84,7 @@ export const Record: React.FC<Props> = ({
           <ActionPanel.Section title="RayPass Actions">
             <NewRecordAction revalidateRecords={revalidateRecords} />
             <ManageDocumentsAction />
-            <ShowDocument name={name} />
+            <ShowDocument name={documentName} />
             <RefreshLocalReferencesActions />
             <ExitRayPassAction />
           </ActionPanel.Section>
