@@ -14,7 +14,7 @@ export async function deleteNotification(id: Notification["id"]) {
           success
         }
       }
-    `
+    `,
   );
 
   return { success: data?.notificationArchive.success };

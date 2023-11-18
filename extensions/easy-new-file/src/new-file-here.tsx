@@ -91,5 +91,5 @@ export const showCreateSuccess = async (fileName: string, filePath: string, fold
       await showInFinder(filePath);
     }
   }
-  await showHUD(`${fileName} created in ${folderPath.slice(0, -1)}`);
+  await showHUD(`📄 ${fileName} created in ${folderPath.slice(0, -1)}`);
 };

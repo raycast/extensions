@@ -1,5 +1,15 @@
 # raycast-ollama Changelog
 
+## [BugFix] - 2023-11-5
+
+- [BugFix] Fixed error `ModelsOnRegistry.lengh undefined`.
+- [BugFix] Fixed error `SyntaxError: Unexpected end of JSON input` caused by Ollama Generate API response no longer providing `sample_count` and `sample_duration` fields.
+
+## [Improvement] - 2023-10-21
+
+- [Improvement] New Preference 'Input Source' permit to chose input between 'Selected Text' or 'Clipboard'. Default to 'Selected Text'.
+- [Improvement] New Preference 'Enable Input Source Fallback' if enabled fallback to the other input source if main input is empty. Disabled by default.
+
 ## [Improvement and BugFix] - 2023-09-18
 
 - [Improvement] Moved Model preferences to LocalStorage.

@@ -4,10 +4,13 @@
   "title": "Reclaim",
   "description": "AI scheduling for Google Calendar – quickly create Tasks, join meetings, share Scheduling Links, & manage your calendar",
   "icon": "command-icon.png",
-  "author": "webergnr",
+  "author": "lightbody",
   "contributors": [
-      "ilian"
-    ],
+    "ilian",
+    "shkreios",
+    "webergnr",
+    "aaron_johnson"
+  ],
   "owner": "reclaim-ai",
   "access": "public",
   "categories": [
@@ -117,7 +120,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {

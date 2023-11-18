@@ -1,6 +1,6 @@
 import { Action, Icon, ActionPanel, showToast, Toast, confirmAlert, Color, useNavigation } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { IssuePriorityValue, ProjectMilestone, User } from "@linear/sdk";
+import { IssuePriorityValue, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
 import { format } from "date-fns";
 

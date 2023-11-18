@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-03 12:37:46
- * Last modified  : 2023-09-03 12:43:51
+ * Last modified  : 2023-11-01 00:43:36
  */
 
 import { environment, showHUD, showToast } from "@raycast/api";
@@ -57,7 +57,7 @@ export const removedScheduledEvaluation = async (target: string, dueDate: Date) 
   const delayedExecutions: { target: string; dueDate: string }[] = await getStorage(StorageKey.DELAYED_EXECUTIONS);
   await setStorage(
     StorageKey.DELAYED_EXECUTIONS,
-    delayedExecutions.filter((execution) => execution.target != target && new Date(execution.dueDate) != dueDate)
+    delayedExecutions.filter((execution) => execution.target != target && new Date(execution.dueDate) != dueDate),
   );
 };
 
@@ -74,6 +74,6 @@ export const checkDelayedExecutions = async () => {
   }
   await setStorage(
     StorageKey.DELAYED_EXECUTIONS,
-    delayedExecutions.filter((execution) => new Date(execution.dueDate) > now)
+    delayedExecutions.filter((execution) => new Date(execution.dueDate) > now),
   );
 };

@@ -1,6 +1,6 @@
 # Linkding
 
-Uses Raycast to search through Linking Bookmarks.
+Uses Raycast to search through Linking bookmarks.
 
 ## Screenshots
 
@@ -11,16 +11,19 @@ Uses Raycast to search through Linking Bookmarks.
 
 ## Features
 
-- Support Bookmark search through multiple Linkding Accounts and Servers
-- Open Bookmarks in the Browser
+- Support bookmark search through multiple Linkding accounts and servers
+- Open bookmarks in the browser
+- Copy bookmarks to clipboard
+- Create and delete bookmarks in the extension
 
 ## Notice
 
-The Linkding API Key and Server URL from your Linkding instance are needed to use this extension.
+The Linkding API key and server URL from your Linkding instance are needed to use this extension.
 
 ## Planned Features
 
-- Create, Update, Delete Bookmarks in extension
+- Update bookmarks in extension
+
 
 ## Contributing
 

@@ -18,7 +18,8 @@ const useTask = () => {
         minChunkSize: task.durationMin,
         maxChunkSize: task.durationMax,
         notes: task.notes,
-        alwaysPrivate: true,
+        priority: task.priority,
+        onDeck: task.onDeck,
       };
 
       const [createdTask, error] = await axiosPromiseData<Task>(

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mynaui-icons",
+  "title": "MynaUI Icons",
+  "description": "Search and Copy MynaUI Icons.",
+  "icon": "command-icon.png",
+  "author": "praveenjuge",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "mynaui",
+    "icons",
+    "icon",
+    "ui",
+    "design",
+    "designer",
+    "developer",
+    "development"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search MynaUI Icons",
+      "description": "Search all Icons",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "icons",
+        "icon",
+        "ui"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@mynaui/icons": "0.0.38",
+    "@raycast/api": "^1.60.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.33",
+    "eslint": "^8.52.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

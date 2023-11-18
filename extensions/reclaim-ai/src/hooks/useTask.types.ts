@@ -10,6 +10,8 @@ export interface CreateTaskProps {
   snoozeUntil: Date;
   due: Date;
   notes: string;
+  priority: string;
+  onDeck: boolean;
 }
 
 export type ApiResponseTasks = Task[];

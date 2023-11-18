@@ -15,6 +15,8 @@
     "dancannon",
     "pernielsentikaer",
     "stevensd2m",
+    "hjoelh",
+    "hobhouse",
     "bkeys818"
   ],
   "license": "MIT",
@@ -42,7 +44,48 @@
       "title": "Your Library",
       "subtitle": "Spotify",
       "description": "Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the \"Search\" command, it includes a category dropdown and contextual actions.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Default View",
+          "data": [
+            {
+              "title": "All",
+              "value": "all"
+            },
+            {
+              "title": "Playlists",
+              "value": "playlists"
+            },
+            {
+              "title": "Albums",
+              "value": "albums"
+            },
+            {
+              "title": "Artists",
+              "value": "artists"
+            },
+            {
+              "title": "Songs",
+              "value": "tracks"
+            },
+            {
+              "title": "Podcasts & Shows",
+              "value": "shows"
+            },
+            {
+              "title": "Episodes",
+              "value": "episodes"
+            }
+          ],
+          "default": "All",
+          "description": "Open a specific view by default",
+          "name": "Default-View",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Default View"
+        }
+      ]
     },
     {
       "name": "nowPlaying",

@@ -1,5 +1,9 @@
 # Vault Changelog
 
+## [Login With OIDC] - 2023-11-03
+
+- Add OIDC login via vault, this becomes the default login method, but can still be changed in preferences
+
 ## [Fix] - 2023-05-26
 
 - Update dependencies

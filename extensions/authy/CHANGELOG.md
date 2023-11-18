@@ -1,5 +1,7 @@
 # Authy Extension Changelog
 
+## [Updated extension name] - 2023-10-16
+
 ## [Updated Contributors] - 2023-06-14
 
 ## [Bug fix] - 2023-03-30

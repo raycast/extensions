@@ -1,5 +1,22 @@
 # Xcode Changelog
 
+## [Maintenance Update] - 2023-10-28
+
+- Added an option to open the App Group directory from the "Show Recent Builds in Menu Bar"
+- Added missing Xcode 15 icon when searching for Xcode releases
+
+## [Updates to Simulator and Recent Builds] - 2023-10-07
+
+- Added Restart Simulator
+- Added Rename Simulator
+- Added Push Notifications using a payload
+- Added iCloud Sync
+- Added Open AppGroup directory
+  
+## [Updated Swift Package Types] - 2023-10-03
+
+- Updated Swift Package types when creating a new Swift Package.
+
 ## [Xcode Project List] - 2023-08-15
 
 - The favorites section will always be shown at first in the "Search Recent Projects" command.

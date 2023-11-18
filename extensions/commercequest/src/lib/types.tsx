@@ -29,3 +29,8 @@ export interface ItemType {
   id: string;
   name: string;
 }
+
+export interface ItemGroup {
+  title: string;
+  items: SearchResult[];
+}

@@ -5,15 +5,15 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-03 12:43:31
- * Last modified  : 2023-09-03 23:16:39
+ * Last modified  : 2023-11-01 00:44:12
  */
 
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 
 import { StorageKey } from "./constants";
-import { Group } from "./Groups";
-import { Pin } from "./Pins";
-import { setStorage } from "./utils";
+import { getNextGroupID, Group } from "./Groups";
+import { getNextPinID, Pin } from "./Pins";
+import { getStorage, setStorage } from "./utils";
 
 /**
  * A set of example pins and groups to help users get started.
@@ -136,8 +136,8 @@ const examplePins: Pin[] = [
   },
   {
     id: 15,
-    name: "Website Summary",
-    url: "{{alert:{{AI:Summarize the following content sourced from {{currentURL}}: ###{{currentTabText}}###}}}}",
+    name: "Summarize Tab",
+    url: '{{alert title="Tab Summary":{{AI:Summarize the following content sourced from {{currentURL}}: ###{{currentTabText}}###}}}}',
     icon: "Network",
     group: "Raycast AI Examples",
     application: "None",
@@ -145,7 +145,7 @@ const examplePins: Pin[] = [
   {
     id: 16,
     name: "Summarize Clipboard",
-    url: "{{alert:{{AI:Summarize this: ###{{clipboardText}}###}}}}",
+    url: '{{alert title="Clipboard Summary":{{AI:Summarize this: ###{{clipboardText}}###}}}}',
     icon: "Clipboard",
     group: "Raycast AI Examples",
     application: "None",
@@ -182,6 +182,14 @@ const examplePins: Pin[] = [
     group: "Placeholder Examples",
     application: "None",
     execInBackground: true,
+  },
+  {
+    id: 21,
+    name: "Summarize Selected Text",
+    url: '{{alert title="Selected Text Summary":{{AI:Summarize this: ###{{selectedText}}###}}}}',
+    icon: "Text",
+    group: "Raycast AI Examples",
+    application: "None",
   },
 ];
 
@@ -222,9 +230,44 @@ const exampleGroups: Group[] = [
 /**
  * Imports default pins and groups into local storage.
  */
-export const installExamples = async () => {
-  await setStorage(StorageKey.LOCAL_PINS, examplePins);
-  await setStorage(StorageKey.LOCAL_GROUPS, exampleGroups);
-  await LocalStorage.setItem(StorageKey.EXAMPLES_INSTALLED, true);
+export const installExamples = async (kind: "pins" | "groups") => {
+  if (kind == "pins") {
+    const storedPins: Pin[] = (await getStorage(StorageKey.LOCAL_PINS)) || [];
+
+    let nextPinID = await getNextPinID();
+    const examplesWithValidIDs = examplePins
+      .map((pin) => {
+        if (pin.id < nextPinID) {
+          pin.id = nextPinID;
+          nextPinID++;
+        }
+        pin.dateCreated = new Date().toUTCString();
+        return pin;
+      })
+      .filter((pin) => !storedPins.some((storedPin) => storedPin.url == pin.url));
+
+    const allPins = [...storedPins, ...examplesWithValidIDs];
+    await setStorage(StorageKey.LOCAL_PINS, allPins);
+    await LocalStorage.setItem(StorageKey.EXAMPLE_PINS_INSTALLED, true);
+  }
+
+  const storedGroups: Group[] = (await getStorage(StorageKey.LOCAL_GROUPS)) || [];
+
+  let nextGroupID = await getNextGroupID();
+  const examplesWithValidIDs = exampleGroups
+    .map((group) => {
+      if (group.id < nextGroupID) {
+        group.id = nextGroupID;
+        nextGroupID++;
+      }
+      group.dateCreated = new Date().toUTCString();
+      return group;
+    })
+    .filter((group) => !storedGroups.some((storedGroup) => storedGroup.name == group.name));
+
+  const allGroups = [...storedGroups, ...examplesWithValidIDs];
+  await setStorage(StorageKey.LOCAL_GROUPS, allGroups);
+  await LocalStorage.setItem(StorageKey.EXAMPLE_GROUPS_INSTALLED, true);
+
   await showToast({ title: "Examples Installed!", style: Toast.Style.Success });
 };
