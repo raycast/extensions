@@ -27,7 +27,29 @@ export const _supportedPropTypes = [
   "relation",
   "status",
 ] satisfies PagePropertyType["type"][];
+
 export const supportedPropTypes: PagePropertyType["type"][] = _supportedPropTypes;
+
+export function convertPropTypeToName(propType: PagePropertyType["type"]): string {
+  const propTypeNames: Record<string, string> = {
+    title: "Title",
+    number: "Number",
+    rich_text: "Rich Text",
+    url: "URL",
+    email: "Email",
+    phone_number: "Phone Number",
+    date: "Date",
+    checkbox: "Checkbox",
+    select: "Select",
+    multi_select: "Multi-select",
+    formula: "Formula",
+    people: "People",
+    relation: "Relation",
+    status: "Status",
+  };
+
+  return propTypeNames[propType] || "";
+}
 
 export * from "./user";
 

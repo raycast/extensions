@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { DatabaseProperty, getPropertyIcon } from "../utils/notion";
+import { DatabaseProperty, convertPropTypeToName, getPropertyIcon } from "../utils/notion";
 
 /*
 
@@ -107,6 +107,8 @@ export function useCreateDatabasePagePreferences(databaseId: string | null, prop
 
 export function CustomizeProperty(props: {
   data: DatabasePreferences;
+  isFirst: boolean;
+  isLast: boolean;
   databaseId: string;
   property: DatabaseProperty;
   togglePropertyVisibility: (propertyId: string) => void;
@@ -119,6 +121,7 @@ export function CustomizeProperty(props: {
       key={props.property.id}
       icon={getPropertyIcon(props.property)}
       title={props.property.name}
+      accessories={[{ tag: convertPropTypeToName(props.property.type) }]}
       actions={
         <ActionPanel>
           <Action
@@ -137,18 +140,22 @@ export function CustomizeProperty(props: {
               onAction={() => props.toggleShowEndDate(props.property.id)}
             />
           )}
-          <Action
-            title="Move Up"
-            icon={Icon.ArrowUp}
-            onAction={() => props.moveUp(props.property.id)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-          />
-          <Action
-            title="Move Down"
-            icon={Icon.ArrowDown}
-            onAction={() => props.moveDown(props.property.id)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-          />
+          {!props.isFirst && (
+            <Action
+              title="Move Up"
+              icon={Icon.ArrowUp}
+              onAction={() => props.moveUp(props.property.id)}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+            />
+          )}
+          {!props.isLast && (
+            <Action
+              title="Move Down"
+              icon={Icon.ArrowDown}
+              onAction={() => props.moveDown(props.property.id)}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            />
+          )}
         </ActionPanel>
       }
     />
@@ -165,24 +172,28 @@ export function CustomizeProperties(props: { databaseId: string; databasePropert
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter properties by name...">
       <List.Section title="Visible Properties">
-        {data?.[databaseId]?.visible.map((propertyId) => {
+        {data?.[databaseId]?.visible.map((propertyId, i, { length }) => {
           const property = properties.find((p) => p.id == propertyId);
           if (!property) return null;
           return (
             <CustomizeProperty
               key={property.id}
+              isFirst={i === 0}
+              isLast={i === length - 1}
               {...{ data, databaseId, property, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown }}
             />
           );
         })}
       </List.Section>
       <List.Section title="Hidden Properties">
-        {data?.[databaseId]?.hidden.map((propertyId) => {
+        {data?.[databaseId]?.hidden.map((propertyId, i, { length }) => {
           const property = properties.find((p) => p.id == propertyId);
           if (!property) return null;
           return (
             <CustomizeProperty
               key={property.id}
+              isFirst={i === 0}
+              isLast={i === length - 1}
               {...{ data, databaseId, property, togglePropertyVisibility, toggleShowEndDate, moveUp, moveDown }}
             />
           );
