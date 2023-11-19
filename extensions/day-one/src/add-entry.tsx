@@ -1,7 +1,7 @@
-import { Form, ActionPanel, Action, showHUD, Detail, open, LaunchProps } from "@raycast/api";
+import { Form, ActionPanel, Action, showHUD, Detail, open, LaunchProps, popToRoot, PopToRootType } from "@raycast/api";
 import { missingCLIError, useDayOneIntegration } from "./day-one";
 import { useCachedState } from "@raycast/utils";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 type Values = {
   body: string;
@@ -17,45 +17,37 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
   const [date, setDate] = useState(draftValues?.date || new Date());
   const [error, setError] = useState("");
 
-  async function submit(values: Values) {
-    const { body, date, journal } = values;
+  type SubmitOptions = {
+    notify: boolean;
+  };
 
+  const submitEntry = useCallback(async (values: Values, options: SubmitOptions): Promise<string | null> => {
     try {
-      await addEntry({
-        body,
-        date,
-        journal,
-      });
+      const entryId = await addEntry(values);
 
-      showHUD(journal ? `Saved entry in "${journal}"` : "Saved entry!");
+      if (options.notify) {
+        showHUD(values.journal ? `Saved entry in "${values.journal}"` : "Saved entry!", {
+          popToRootType: PopToRootType.Immediate,
+        });
+      }
+
+      return entryId;
     } catch (error) {
       if (typeof error === "string" && error.includes("journal")) {
         setError("journal");
       } else {
         setError("unknown");
       }
+
+      return null;
     }
-  }
+  }, []);
 
   async function submitAndOpen(values: Values) {
-    const { body, date, journal } = values;
+    const entryId = await submitEntry(values, { notify: false });
 
-    try {
-      const entryId = await addEntry({
-        body,
-        date,
-        journal,
-      });
-      const url = `dayone://view?entryId=${entryId}`;
-
-      void open(url);
-    } catch (error) {
-      if (typeof error === "string" && error.includes("journal")) {
-        setError("journal");
-      } else {
-        setError("unknown");
-      }
-    }
+    void open(`dayone://view?entryId=${entryId}`);
+    void popToRoot();
   }
 
   if (installed === "pending") {
@@ -69,7 +61,7 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={submit} />
+          <Action.SubmitForm title="Save" onSubmit={(values: Values) => void submitEntry(values, { notify: true })} />
           <Action.SubmitForm title="Save and Open" onSubmit={submitAndOpen} />
         </ActionPanel>
       }

@@ -34,12 +34,14 @@ async function addEntry(entry: Entry) {
   const match = /uuid: (\w+)/.exec(result);
   const uuid = match?.[1];
 
+  if (uuid === undefined) throw Error("Failed to parse entry id from Day One CLI");
+
   return uuid;
 }
 
 type DayOneHook = () => {
   installed: boolean | "pending";
-  addEntry: (entry: Entry) => Promise<string | undefined>;
+  addEntry: (entry: Entry) => Promise<string>;
 };
 
 export const useDayOneIntegration: DayOneHook = () => {
