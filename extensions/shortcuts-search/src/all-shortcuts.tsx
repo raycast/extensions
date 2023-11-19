@@ -6,7 +6,7 @@ import { getAvatarIcon, useFrecencySorting } from "@raycast/utils";
 
 export default function AllShortcutsCommand() {
   const { push } = useNavigation();
-  const { isLoading, shortcuts } = useAllShortcuts();
+  const { isLoading, data: shortcuts } = useAllShortcuts();
   const { data: sortedApplications, visitItem } = useFrecencySorting(shortcuts.applications, {
     key: (app) => app.slug,
   });

@@ -55,7 +55,7 @@ export default function AppShortcuts(props?: { app: Application }) {
     if (application || shortcutsProviderResponse.isLoading || !bundleId) {
       return;
     }
-    const foundApp = shortcutsProviderResponse.shortcuts.applications.find((app) => app.bundleId === bundleId);
+    const foundApp = shortcutsProviderResponse.data.applications.find((app) => app.bundleId === bundleId);
     if (!foundApp) {
       // noinspection JSIgnoredPromiseFromCall
       closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });

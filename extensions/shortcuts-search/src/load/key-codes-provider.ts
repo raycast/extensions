@@ -1,6 +1,5 @@
-import { useFetch, usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { CacheManager } from "../cache/cache-manager";
+import fetch from "cross-fetch";
+import { useRefreshableCachedState } from "./use-refreshable-cached-state";
 
 export type KeyCodes = Map<string, string>;
 
@@ -8,36 +7,26 @@ interface IncomingKeyCodes {
   keyCodes: [string, string][];
 }
 
-const cacheManager = new CacheManager();
-const CACHE_KEY = "key-codes";
+const cacheKey = "key-codes";
 
-export default function useKeyCodes() {
-  const [keyCodes, setKeyCodes] = useState<Map<string, string> | undefined>();
-  const [shouldUpdateCache, setShouldUpdateCache] = useState(false);
+interface UseKeyCodesResult {
+  isLoading: boolean;
+  data: Map<string, string> | undefined;
+  revalidate: () => void;
+}
 
-  usePromise(async () => cacheManager.getCachedItem<IncomingKeyCodes>(CACHE_KEY), [], {
-    onData: async (cachedItem) => {
-      if (cacheManager.cacheItemIsValid(cachedItem)) {
-        if (!cachedItem) return;
-        setKeyCodes(new Map(cachedItem.data.keyCodes));
-      } else {
-        setShouldUpdateCache(true);
-      }
+export default function useKeyCodes(): UseKeyCodesResult {
+  return useRefreshableCachedState<IncomingKeyCodes, Map<string, string> | undefined>(
+    cacheKey,
+    async () => {
+      console.log("Fetching key codes");
+      const res = await fetch("https://shortcuts.solomk.in/data/key-codes.json");
+      const json: IncomingKeyCodes = await res.json();
+      return json;
     },
-  });
-
-  useFetch<IncomingKeyCodes>("https://shortcuts.solomk.in/data/key-codes.json", {
-    keepPreviousData: true,
-    execute: shouldUpdateCache,
-    onData: async (fetchedData) => {
-      console.log("Received key codes");
-      setKeyCodes(new Map(fetchedData.keyCodes));
-      await cacheManager.setValueWithTtl(CACHE_KEY, fetchedData);
-    },
-  });
-
-  return {
-    isLoading: keyCodes === undefined,
-    data: keyCodes,
-  };
+    {
+      dataParser: (incomingKeyCodes: IncomingKeyCodes | undefined) =>
+        incomingKeyCodes ? new Map<string, string>(incomingKeyCodes.keyCodes) : undefined,
+    }
+  );
 }

@@ -1,78 +1,66 @@
-import { Application, Shortcuts } from "../model/internal/internal-models";
+import { Shortcuts } from "../model/internal/internal-models";
 import { ShortcutsParser } from "./input-parser";
 import Validator from "./validator";
-import { useFetch, usePromise } from "@raycast/utils";
 import { AllApps } from "../model/input/input-models";
 import useKeyCodes from "./key-codes-provider";
+import fetch from "cross-fetch";
 import { useEffect, useState } from "react";
-import { CacheManager } from "../cache/cache-manager";
+import { useRefreshableCachedState } from "./use-refreshable-cached-state";
 
-const cacheManager = new CacheManager();
-const CACHE_KEY = "shortcuts";
+const cacheKey = "shortcuts";
 
 interface Properties {
   execute: boolean;
 }
 
-export default function useAllShortcuts(props?: Properties) {
+interface UseAllShortcutsResult {
+  isLoading: boolean;
+  data: Shortcuts;
+}
+
+const emptyShortcuts: Shortcuts = {
+  applications: [],
+};
+export default function useAllShortcuts(props?: Properties): UseAllShortcutsResult {
   if (props && !props.execute) {
     return {
       isLoading: false,
-      shortcuts: {
-        applications: [],
-      },
+      data: emptyShortcuts,
     };
   }
-  const [shouldUpdateCache, setShouldUpdateCache] = useState(false);
-  const [shortcuts, setShortcuts] = useState<Shortcuts>({
-    applications: [],
-  });
+
   const keyCodesResult = useKeyCodes();
-
-  const cacheQueryResult = usePromise(async () => cacheManager.getCachedItem<Shortcuts>(CACHE_KEY), [], {
-    onData: async (cachedItem) => {
-      if (cacheManager.cacheItemIsValid(cachedItem)) {
-        if (!cachedItem) return;
-        setShortcuts(cachedItem.data);
-      } else {
-        setShouldUpdateCache(true);
-      }
-    },
-  });
-  const fetchResult = useFetch<AllApps>("https://shortcuts.solomk.in/data/combined-apps.json", {
-    keepPreviousData: true,
-    execute: shouldUpdateCache,
-  });
-
-  useEffect(() => {
-    if (cacheQueryResult.isLoading) return;
-    const cachedItem = cacheQueryResult.data;
-    if (cacheManager.cacheItemIsValid(cachedItem)) {
-      setShortcuts(cachedItem!.data);
-    } else {
-      setShouldUpdateCache(true);
-    }
-  }, [cacheQueryResult]);
-
-  useEffect(() => {
-    if (keyCodesResult.isLoading || fetchResult.isLoading) {
-      return;
-    }
-    if (shouldUpdateCache && fetchResult.data && keyCodesResult.data) {
+  const [alreadyUpdated, setAlreadyUpdated] = useState(true);
+  const refreshableCachedState = useRefreshableCachedState<Shortcuts | undefined, Shortcuts>(
+    cacheKey,
+    async () => {
+      if (!keyCodesResult.data) return undefined;
+      console.log("Fetching shortcuts");
+      const res = await fetch("https://shortcuts.solomk.in/data/combined-apps.json");
+      const json: AllApps = await res.json();
       const updatedShortcuts = new ShortcutsProvider(
-        fetchResult.data,
+        json,
         new ShortcutsParser(),
         new Validator(keyCodesResult.data)
       ).getShortcuts();
-      setShortcuts(updatedShortcuts);
-      cacheManager.setValueWithTtl(CACHE_KEY, updatedShortcuts);
+      return updatedShortcuts;
+    },
+    {
+      dataParser: (v) => {
+        return v ? v : emptyShortcuts;
+      },
+      execute: !keyCodesResult.data,
     }
-  }, [keyCodesResult.isLoading, fetchResult.isLoading, shouldUpdateCache]);
+  );
 
-  return {
-    isLoading: shortcuts.applications.length === 0,
-    shortcuts: shortcuts,
-  };
+  useEffect(() => {
+    if (!keyCodesResult.isLoading && refreshableCachedState.data.applications.length === 0 && alreadyUpdated) {
+      setAlreadyUpdated(false);
+      refreshableCachedState.revalidate();
+    }
+  }, [keyCodesResult, refreshableCachedState]);
+
+  return refreshableCachedState;
 }
 
 class ShortcutsProvider {
@@ -87,10 +75,5 @@ class ShortcutsProvider {
     return {
       applications: this.parser.parseInputShortcuts(this.allApps.list),
     };
-  }
-
-  public getShortcutsByApp(bundleId: string): Application | undefined {
-    const shortcuts = this.getShortcuts();
-    return shortcuts.applications.find((app) => app.bundleId === bundleId);
   }
 }
