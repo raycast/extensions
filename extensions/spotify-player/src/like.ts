@@ -2,6 +2,7 @@ import { showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { addToMySavedTracks } from "./api/addToMySavedTracks";
+import { containsMySavedTracks } from "./api/containsMySavedTrack";
 
 export default async function Command() {
   await setSpotifyClient();
@@ -19,9 +20,19 @@ export default async function Command() {
     return await showHUD("Liking episodes is not supported yet");
   }
 
+  if (trackId === undefined) {
+    return await showHUD("Unable to retrieve the track ID");
+  }
+
+  const trackAlreadyLiked = await containsMySavedTracks({ trackIds: [trackId] });
+
+  if (trackAlreadyLiked[0]) {
+    return await showHUD(`${currentlyPlayingData?.item.name} has already been liked`);
+  }
+
   try {
     await addToMySavedTracks({
-      trackIds: trackId ? [trackId] : [],
+      trackIds: [trackId],
     });
     await showHUD(`Liked ${currentlyPlayingData?.item.name}`);
   } catch (error) {
