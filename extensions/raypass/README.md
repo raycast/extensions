@@ -3,6 +3,8 @@
    <h1 align="center">RayPass</h1>
    <sub>Manage passwords through <a href="https://raycast.com/">Raycast</a> that just you and your laptop know.</sub>
  </p>
+
+RayPass is a local password manager. Passwords are stored locally on the users hard disk in "documents". A user can create one or many documents, optionally encrypt them, then make as many password records as they please inside them. Users can create, delete, search, and switch between documents. A user can also create, edit, delete, or copy each individual field of a password record. 
  
  https://user-images.githubusercontent.com/72945168/193752304-b2292fd1-c663-4ae6-baf5-3ef3f8c45998.mov
 
