@@ -132,7 +132,7 @@ export default function IssueActions({
       await showToast({
         style: Toast.Style.Success,
         title: "Changed watching status",
-        message: `${isWatchedByMe ? "Not watching" : "Watching"} ${issue.key}`,
+        message: `${isWatchedByMe ? "Stopped watching" : "Started watching"} ${issue.key}`,
       });
     } catch (error) {
       await showToast({
