@@ -4,10 +4,6 @@ import BookmarkList from "./components/bookmark-list";
 import Bookmark from "./dtos/bookmark-dto";
 import { fetchBookmarks, isTowerCliInstalled, towerCliRequiredMessage } from "./utils";
 
-interface State {
-  items?: Bookmark[];
-}
-
 export function fetchRepositories(): Promise<void | Bookmark[]> {
   return fetchBookmarks().catch((error) => {
     const err = error instanceof Error ? error : new Error("Something went wrong");
