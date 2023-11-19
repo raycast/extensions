@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showHUD, Detail, open } from "@raycast/api";
+import { Form, ActionPanel, Action, showHUD, Detail, open, LaunchProps } from "@raycast/api";
 import { missingCLIError, useDayOneIntegration } from "./day-one";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
@@ -9,10 +9,12 @@ type Values = {
   journal?: string;
 };
 
-export default function Command() {
+const AddEntryCommand = ({ draftValues }: LaunchProps) => {
   const { installed, addEntry } = useDayOneIntegration();
 
-  const [journal, setJournal] = useCachedState<string | undefined>("journal", undefined);
+  const [body, setBody] = useState(draftValues?.body || "");
+  const [journal, setJournal] = useCachedState("journal", draftValues?.journal || "");
+  const [date, setDate] = useState(draftValues?.date || new Date());
   const [error, setError] = useState("");
 
   async function submit(values: Values) {
@@ -72,13 +74,22 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="body" title="Body" placeholder="What's on your mind?" autoFocus enableMarkdown />
+      <Form.TextArea
+        id="body"
+        title="Body"
+        placeholder="What's on your mind?"
+        autoFocus
+        enableMarkdown
+        value={body}
+        onChange={setBody}
+      />
       <Form.DatePicker
         id="date"
         title="Date"
         info="You can add entries to any day. Defaults to today."
         type={Form.DatePicker.Type.Date}
-        defaultValue={new Date()}
+        value={date}
+        onChange={setDate}
       />
 
       <Form.TextField
@@ -95,4 +106,6 @@ export default function Command() {
       />
     </Form>
   );
-}
+};
+
+export default AddEntryCommand;
