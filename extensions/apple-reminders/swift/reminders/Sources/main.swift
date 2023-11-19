@@ -89,6 +89,7 @@ func create(_ values: [String: Any]) throws -> [String: Any] {
         [.year, .month, .day, .hour, .minute, .second],
         from: dueDate
       )
+      reminder.addAlarm(EKAlarm(absoluteDate: dueDate))
     } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
       reminder.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day],
@@ -137,8 +138,6 @@ func create(_ values: [String: Any]) throws -> [String: Any] {
       throw "Recurrence object missing required values"
     }
   }
-
-
 
   if let priorityString = values["priority"] as? String {
     switch priorityString {

@@ -9,7 +9,6 @@ import {
   getPreferenceValues,
   useNavigation,
   showToast,
-  Color,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
@@ -160,8 +159,8 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                   createAttachment({
                     issueId: issue.id,
                     url: attachment,
-                  })
-                )
+                  }),
+                ),
               );
               toast.message = `Successfully uploaded ${attachmentWord}`;
             } catch (error) {

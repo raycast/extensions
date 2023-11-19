@@ -8,6 +8,7 @@ import { TracksSection } from "./components/TracksSection";
 import { PlaylistsSection } from "./components/PlaylistsSection";
 import { ShowsSection } from "./components/ShowsSection";
 import { EpisodesSection } from "./components/EpisodessSection";
+import { getPreferenceValues } from "@raycast/api";
 
 const filters = {
   all: "All",
@@ -23,7 +24,7 @@ type FilterValue = keyof typeof filters;
 
 function YourLibraryCommand() {
   const [searchText, setSearchText] = useState("");
-  const [searchFilter, setSearchFilter] = useState<FilterValue>("all");
+  const [searchFilter, setSearchFilter] = useState<FilterValue>(getPreferenceValues()["Default-View"] ?? filters.all);
   const { myLibraryData, myLibraryIsLoading } = useYourLibrary({
     options: { keepPreviousData: true },
   });

@@ -1,9 +1,8 @@
 import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
-import { caffeinatePreferences } from "./interfaces";
-import { exec } from "child_process";
+import { exec } from "node:child_process";
 
 function preventArguments(args?: string | undefined) {
-  const preferences = getPreferenceValues<caffeinatePreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const preventArguments = [];
 
   if (preferences.preventDisplay) {
@@ -30,12 +29,13 @@ function preventArguments(args?: string | undefined) {
 }
 
 export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) {
-  if (updateMenubar) {
-    try {
-      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffinated: false } });
-    } catch (error) {
-      console.error(error);
+  try {
+    if (updateMenubar) {
+      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: false } });
     }
+    await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: false } });
+  } catch (error) {
+    console.error(error);
   }
 
   if (hudMessage) {
@@ -47,12 +47,13 @@ export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) 
 
 export async function startCaffeinate(updateMenubar = true, hudMessage?: string, args?: string | undefined) {
   await stopCaffeinate(false);
-  if (updateMenubar) {
-    try {
-      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffinated: true } });
-    } catch (error) {
-      console.error(error);
+  try {
+    if (updateMenubar) {
+      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: true } });
     }
+    await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: true } });
+  } catch (error) {
+    console.error(error);
   }
 
   if (hudMessage) {

@@ -35,6 +35,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
+  const { setRecentPage } = useRecentPages();
 
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
@@ -66,7 +67,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
             primaryAction: {
               title: "Open Page",
               shortcut: { modifiers: ["cmd"], key: "o" },
-              onAction: () => handleOnOpenPage(page, useRecentPages().setRecentPage),
+              onAction: () => handleOnOpenPage(page, setRecentPage),
             },
             secondaryAction: page.url
               ? {

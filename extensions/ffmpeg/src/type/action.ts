@@ -1,5 +1,6 @@
 export enum ActionType {
   none = "none",
+  convertVideoLoop = "convertVideoLoop",
   copyVideoInfo = "copyVideoInfo",
   copyPath = "copyPath",
   rotate180 = "rotate180",
