@@ -2,11 +2,11 @@
 
 ## [Fix bug with loading Create Issue panel with extensive metadata] - 2023-11-19
 
-- Fixes an issue with issue creation where large amounts of issue metadata could cause out-of-memory errors during loading.
+Fixes an issue with issue creation where large amounts of issue metadata could cause out-of-memory errors during loading.
 
 ## [Add watching functionality to issue actions] - 2023-11-19
 
-- Add start/stop watching issue action.
+Add start/stop watching issue action.
 
 ## [Add project list in Search Issues command] - 2023-10-06
 
