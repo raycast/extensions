@@ -1,5 +1,12 @@
 # CleanShot X Extension User Guide
 
+TLDR;
+![How to enable API](./media/EnableAPI.png)
+
+1. Open CleanShot X Settings
+2. Goto Advanced Tab
+3. Toggle API
+
 CleanShot X is a versatile screen capture and recording tool designed to make capturing, recording, and enhancing your screenshots as easy and efficient as possible. This user guide provides detailed instructions on how to use the CleanShot X Extension for Raycast.
 
 ## Table of Contents
