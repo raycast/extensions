@@ -10,7 +10,7 @@ Please see contribution guide for adding new shortcuts [here](https://github.com
 
 ## Screenshots
 
-![list of all applications](media/shortcuts-search-1.png)
-![search of applications](media/shortcuts-search-2.png)
-![list of all shortcuts for safari](media/shortcuts-search-3.png)
-![search of shortcuts for safari](media/shortcuts-search-4.png)
+![list of all applications](metadata/shortcuts-search-1.png)
+![search of applications](metadata/shortcuts-search-2.png)
+![list of all shortcuts for safari](metadata/shortcuts-search-3.png)
+![search of shortcuts for safari](metadata/shortcuts-search-4.png)
