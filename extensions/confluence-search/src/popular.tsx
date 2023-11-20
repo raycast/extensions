@@ -2,11 +2,10 @@ import "./util/fetchPolyfill";
 
 import { Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
-import { useAsyncEffect } from "use-async-effect";
-
-import { SearchActions } from "./SearchResults";
-import { Content, fetchHydratedPopularFeed } from "./api/confluence";
 import { useAuthorizeSite } from "./util/hooks";
+import { Content, fetchHydratedPopularFeed } from "./api/confluence";
+import { useAsyncEffect } from "use-async-effect";
+import { SearchActions } from "./SearchResults";
 
 export default function Command() {
   const site = useAuthorizeSite();

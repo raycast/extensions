@@ -2,12 +2,11 @@
 import "./util/fetchPolyfill";
 
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
-import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-import { fetchUsers } from "./api/confluence";
-import { Site } from "./api/site";
+import { AbortError } from "node-fetch";
 import { useAuthorizeSite } from "./util/hooks";
+import { Site } from "./api/site";
+import { fetchUsers } from "./api/confluence";
 
 const DEFAULT_TYPE_FILTER = "atlassian";
 

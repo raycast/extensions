@@ -2,10 +2,9 @@ import "./util/fetchPolyfill";
 
 import { List, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
-
+import { useAuthorizeSite } from "./util/hooks";
 import { Site } from "./api/site";
 import { StandardUrlActionPanel } from "./util/action-panels";
-import { useAuthorizeSite } from "./util/hooks";
 
 function useLocations(site?: Site) {
   const [locations, setLocations] = useState<Location[]>();

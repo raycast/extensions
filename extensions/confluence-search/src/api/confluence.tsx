@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getContentIcon } from "../util/icons";
-
 import { apiAuthorize } from "./auth";
 import { Site } from "./site";
 import { get } from "./util";

@@ -6,7 +6,6 @@ import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAsyncEffect } from "use-async-effect";
 
-import { SearchActions, SearchListItem } from "./SearchResults";
 import {
   fetchFavouriteSpaces,
   fetchRecentlyViewed,
@@ -17,6 +16,7 @@ import {
   sortByLastViewed,
 } from "./api/confluence";
 import { Site } from "./api/site";
+import { SearchActions, SearchListItem } from "./SearchResults";
 import { useAuthorizeSite } from "./util/hooks";
 import { capitalize } from "./util/text";
 

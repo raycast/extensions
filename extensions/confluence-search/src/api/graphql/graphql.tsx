@@ -1,10 +1,9 @@
+import fetch from "node-fetch";
 import { ApolloClient, ApolloLink, createHttpLink, InMemoryCache, NormalizedCacheObject } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { environment, LocalStorage } from "@raycast/api";
 import { RestLink } from "apollo-link-rest";
 import { AsyncStorageWrapper, CachePersistor } from "apollo3-cache-persist";
-import fetch from "node-fetch";
-
 import { apiAuthorize } from "../auth";
 import { client } from "../oauth";
 

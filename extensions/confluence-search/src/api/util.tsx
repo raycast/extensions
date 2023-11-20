@@ -1,5 +1,4 @@
 import fetch, { RequestInfo } from "node-fetch";
-
 import { client } from "./oauth";
 
 export async function get(url: RequestInfo, signal?: AbortSignal) {

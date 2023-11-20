@@ -1,7 +1,5 @@
 import { Url } from "url";
-
 import { LocalStorage } from "@raycast/api";
-
 import { fetchSites } from "./atlassian";
 
 const ACTIVE_SITE = "activeSite";
