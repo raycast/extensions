@@ -21,7 +21,7 @@
   "preferences": [
     {
       "name": "sensible_api_key",
-      "title": "Sensible API key",
+      "title": "Sensible API Key",
       "description": "Located at app.sensible.so/account",
       "type": "password",
       "default": "",
