@@ -1,5 +1,9 @@
 # reclaim Changelog
 
+## [Update] - 2023-11-20
+
+- Limit contributors to reclaim staff, nothing changed in the code. 
+
 ## [Fix] - 2023-11-13
 
 - Create task is now using the default task visibility rather than always private
