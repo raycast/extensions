@@ -25,7 +25,6 @@ Learn more about using the Reclaim Raycast extension [here](https://help.reclaim
 
 A big thank you to the people who have contributed to the Raycast extension for Reclaim.ai!
 
-- [ilian](https://github.com/ilian)
 - [maximilianzuern](https://github.com/maximilianzuern)
 - [shkreios](https://github.com/shkreios)
 - [webergnr](https://github.com/webergnr)
