@@ -31,7 +31,7 @@ export function useYourLibrary({ options }: UseMyLibraryProps) {
     [],
     {
       keepPreviousData: options?.keepPreviousData,
-    },
+    }
   );
 
   const [playlistsData, albumsData, artistsData, tracksData, showsData, episodesData] = data;
