@@ -22,7 +22,7 @@
       "name": "omnivore-capture",
       "title": "Quick Capture",
       "description": "Quickly capture and save a url to your Omnivore inbox",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "url",

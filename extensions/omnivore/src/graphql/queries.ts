@@ -70,3 +70,19 @@ export const deleteArticleQuery = `
     }
   }
 `
+
+export const articleQuery = `
+  query GetArticle($username: String!, $slug: String!, $format: String) {
+    article(username: $username, slug: $slug, format: $format) {
+      ... on ArticleSuccess {
+        article {
+          id
+          content
+        }
+      }
+      ... on ArticleError {
+        errorCodes
+      }
+    }
+  }
+`
