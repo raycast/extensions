@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import npmExec from "./npm";
-import { REGISTRY_SOURCES } from "./constants";
+import { getRegistrySources } from "./octokit";
+import { IRegistrySourceItem } from "./constants";
 
 export default function Command() {
+  const [registrySources, setRegistrySources] = useState<IRegistrySourceItem[]>([]);
   const [selectedValue, setSelectedValue] = useState<{ isLoading: boolean; data: string | null }>({
     isLoading: true,
     data: null,
   });
   const initialize = async () => {
     const data = await npmExec.exec("config", "get", "registry");
+    const sources = await getRegistrySources();
 
     setSelectedValue({ isLoading: false, data });
+    setRegistrySources(sources);
   };
   const handleAction = async (registry: string) => {
     setSelectedValue((pre) => ({ ...pre, isLoading: true }));
@@ -25,7 +29,7 @@ export default function Command() {
 
   return (
     <List isLoading={selectedValue.isLoading}>
-      {REGISTRY_SOURCES.map((item) => (
+      {registrySources.map((item) => (
         <List.Item
           key={item.id}
           icon={selectedValue.data === item.registry ? Icon.CheckCircle : Icon.Circle}

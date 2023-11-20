@@ -1,4 +1,4 @@
-import nvexeca from "nvexeca";
+import { execa } from "execa";
 import { shellEnv, EnvironmentVariables } from "shell-env";
 import { USER_HOME } from "./constants";
 
@@ -11,22 +11,18 @@ export class NpmExec {
     }
 
     const { env } = this;
-    const { childProcess } = await nvexeca("latest", "npm", args, {
+    const childProcess = await execa("npm", args, {
       cwd: USER_HOME,
       env,
     });
 
-    if (childProcess) {
-      const { stdout, stderr } = await childProcess;
+    const { stdout, stderr } = await childProcess;
 
-      if (stderr) {
-        throw stderr;
-      }
-
-      return stdout;
+    if (stderr) {
+      throw stderr;
     }
 
-    return null;
+    return stdout || null;
   }
 }
 
