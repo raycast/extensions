@@ -4,6 +4,3 @@ export type DocumentType = {
   created: string;
 };
 
-export interface Preferences {
-  sensible_api_key: string;
-}
