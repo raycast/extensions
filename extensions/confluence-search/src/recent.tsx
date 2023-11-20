@@ -1,14 +1,15 @@
 import "./util/fetchPolyfill";
 
+import { useQuery } from "@apollo/client";
 import { List, showToast, Toast } from "@raycast/api";
 import { useContext } from "react";
+
+import { SearchActions, SearchListItem } from "./SearchResults";
+import { mapToSearchResult, SearchResult, SEARCH_EXPAND, sortByLastViewed } from "./api/confluence";
 import { GET_CONFLUENCE_SEARCH_WITH_EXPAND } from "./api/graphql";
-import { useQuery } from "@apollo/client";
+import { Site } from "./api/site";
 import { buildAuthenticatedCommand } from "./util/AuthenticatedCommandContainer";
 import { SiteContext } from "./util/SiteContext";
-import { Site } from "./api/site";
-import { mapToSearchResult, SearchResult, SEARCH_EXPAND, sortByLastViewed } from "./api/confluence";
-import { SearchActions, SearchListItem } from "./SearchResults";
 
 const RECENTS_COUNT = 50;
 export default buildAuthenticatedCommand({ Command });

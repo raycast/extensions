@@ -1,7 +1,8 @@
-import { List } from "@raycast/api";
 import { ApolloProvider } from "@apollo/client";
-import { useAuthorizeSite, useGraphqlClient } from "./hooks";
+import { List } from "@raycast/api";
+
 import { SiteContext } from "./SiteContext";
+import { useAuthorizeSite, useGraphqlClient } from "./hooks";
 
 function AuthenticatedCommandContainer({ Command, checkScopes }: AuthenticatedCommandContainerProps) {
   const site = useAuthorizeSite(checkScopes);

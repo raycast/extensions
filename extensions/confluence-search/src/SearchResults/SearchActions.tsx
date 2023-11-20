@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
+
 import { SearchResult } from "../api/confluence";
 import { StandardUrlActionSection } from "../util/action-panels";
 import { capitalize } from "../util/text";

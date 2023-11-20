@@ -1,9 +1,10 @@
 import "./util/fetchPolyfill";
-import { useState, useEffect } from "react";
 import { ActionPanel, Action, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { setActiveSite, Site } from "./api/site";
+import { useState, useEffect } from "react";
+
 import { fetchSites } from "./api/atlassian";
 import { authorizeSite } from "./api/auth";
+import { setActiveSite, Site } from "./api/site";
 
 export default function Command() {
   const { pop } = useNavigation();

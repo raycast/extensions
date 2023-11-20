@@ -54,17 +54,17 @@
       ]
     },
     {
-      "name": "people",
-      "title": "People",
-      "subtitle": "Confluence",
-      "description": "Search for people in Confluence.",
-      "mode": "view"
-    },
-    {
       "name": "recent",
       "title": "Recent",
       "subtitle": "Confluence",
       "description": "See your recently viewed pages.",
+      "mode": "view"
+    },
+    {
+      "name": "people",
+      "title": "People",
+      "subtitle": "Confluence",
+      "description": "Search for people in Confluence.",
       "mode": "view"
     },
     {
@@ -104,26 +104,25 @@
     }
   ],
   "dependencies": {
-    "@apollo/client": "^3.6.8",
-    "@raycast/api": "^1.48.5",
+    "@apollo/client": "^3.8.7",
+    "@raycast/api": "^1.62.1",
     "apollo-link-rest": "^0.9.0",
-    "apollo3-cache-persist": "^0.14.0",
-    "async-mutex": "^0.3.2",
-    "graphql": "^15.0.0",
-    "node-fetch": "^3.2.10",
-    "qs": "^6.11.0",
-    "use-async-effect": "^2.2.6"
+    "apollo3-cache-persist": "^0.14.1",
+    "async-mutex": "^0.4.0",
+    "eslint-plugin-import": "^2.29.0",
+    "graphql": "^15.8.0",
+    "node-fetch": "^3.3.2",
+    "qs": "^6.11.2",
+    "use-async-effect": "^2.2.7"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18",
-    "@types/react": "^18.0.27",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.37",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.24.6",
-    "typescript": "^4.4.3"
+    "prettier": "^2.8.8",
+    "react": "^18.2.0",
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "ray build -e dist",

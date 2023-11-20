@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import "./util/fetchPolyfill";
+
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { AbortError } from "node-fetch";
-import { useAuthorizeSite } from "./util/hooks";
-import { Site } from "./api/site";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { fetchUsers } from "./api/confluence";
+import { Site } from "./api/site";
+import { useAuthorizeSite } from "./util/hooks";
 
 const DEFAULT_TYPE_FILTER = "atlassian";
 

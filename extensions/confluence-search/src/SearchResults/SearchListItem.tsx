@@ -1,4 +1,5 @@
 import { List, Icon, Color, Image } from "@raycast/api";
+
 import { SearchResult } from "../api/confluence";
 
 export function SearchListItem({ searchResult, actions }: { searchResult: SearchResult; actions: React.ReactNode }) {

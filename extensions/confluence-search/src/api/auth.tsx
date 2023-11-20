@@ -1,4 +1,5 @@
 import { confirmAlert, Icon, popToRoot } from "@raycast/api";
+
 import { authorize as oauthAuthorize, refreshTokenIfRequired, scopes } from "./oauth";
 import { getOrSetDefaultSite, hasSiteGotRequiredScopes, Site } from "./site";
 
