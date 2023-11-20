@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import type { DocumentType, Preferences } from "../types";
+import type { DocumentType } from "../types";
 
 const ENV = "v0";
 
