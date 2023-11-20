@@ -300,7 +300,7 @@ export type Attachment = {
   id: string;
   filename: string;
   mimeType: string;
-  size: string;
+  size: number;
   content: string;
   thumbnail?: string;
   created: string;
