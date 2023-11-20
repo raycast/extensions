@@ -22,6 +22,17 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "useAWSVault",
+      "title": "Use AWS Vault",
+      "description": "Use AWS Vault to manage your AWS credentials",
+      "required": true,
+      "default": false,
+      "label": "Use AWS Vault"
+    }
+  ],
   "commands": [
     {
       "name": "ec2",

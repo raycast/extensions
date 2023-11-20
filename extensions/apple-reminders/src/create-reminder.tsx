@@ -1,4 +1,15 @@
-import { ActionPanel, Action, Form, Icon, showToast, Toast, open, closeMainWindow, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  open,
+  closeMainWindow,
+  useNavigation,
+  getPreferenceValues,
+} from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -28,9 +39,11 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
+  const { selectDefaultList } = getPreferenceValues<Preferences.CreateReminder>();
+
   const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({
     initialValues: {
-      listId: listId ?? defaultList?.id ?? "",
+      listId: listId ?? selectDefaultList ? defaultList?.id : "",
     },
     validation: {
       title: FormValidation.Required,
@@ -186,6 +199,7 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
         <Form.Dropdown.Item title="Medium" value="medium" icon={getPriorityIcon("medium")} />
         <Form.Dropdown.Item title="Low" value="low" icon={getPriorityIcon("low")} />
       </Form.Dropdown>
+
       <Form.Dropdown {...itemProps.listId} title="List" storeValue>
         {data?.lists.map((list) => {
           return (

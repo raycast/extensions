@@ -33,7 +33,7 @@ The interface of the extension follows the interface of the OpenAI Playground.
 
 You can set different parameters for the AI model:
 
-`AI Model`: type of the model you want to use. `gpt-4` is the most powerful one for now, but `gpt-3.5-turbo` is cheaper, faster, and almost as capable.
+`AI Model`: type of the model you want to use. `gpt-4-1106-preview` is the most powerful one for now, but `gpt-3.5-turbo-1106` is cheaper, faster, and almost as capable.
 
 `Temperature`: controls randomness of the AI model. The lower it is, the less random (and "creative") the results will be.
 
@@ -47,10 +47,10 @@ You can set different parameters for the AI model:
 
 ### Supported AI Models
 
-1. `gpt-4`
-2. `gpt-3.5-turbo`
-3. `text-davinci-003`
-4. `text-davinci-002`
+1. `gpt-4-1106-preview`
+2. `gpt-3.5-turbo-1106`
+3. `gpt-4`
+4. `gpt-3.5-turbo`
 5. `text-curie-001`
 6. `text-babbage-001`
 7. `text-ada-001`

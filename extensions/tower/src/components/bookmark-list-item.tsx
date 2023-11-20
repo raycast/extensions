@@ -47,7 +47,7 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
       }
       accessories={[
         {
-          text: bookmark.getBranch,
+          text: bookmark.getBranch.name,
           icon: { source: "icon-branches.png", tintColor: Color.PrimaryText },
         },
       ]}

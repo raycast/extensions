@@ -3,7 +3,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 export default async function tesseractOcr(imagePath: string) {
   const config = {
-    lang: "eng",
+    lang: getPreferenceValues<Preferences>().tesseract_lang,
     oem: 1,
     psm: 3,
     binary: getPreferenceValues<Preferences>().tesseract_path,

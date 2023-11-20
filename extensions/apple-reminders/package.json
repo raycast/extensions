@@ -35,7 +35,17 @@
       "title": "Create Reminder",
       "subtitle": "Apple Reminders",
       "description": "Create and prioritize new reminders.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "selectDefaultList",
+          "type": "checkbox",
+          "label": "Initially select the default list",
+          "description": "When enabled, the Reminders's default list will be initially selected instead of the last used list.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "menu-bar",
@@ -113,20 +123,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1",
     "date-fns": "^2.30.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.200",
-    "@types/node": "^20.8.7",
-    "@types/react": "^18.2.29",
-    "eslint": "^8.51.0",
-    "eslint-plugin-import": "^2.28.1",
+    "@types/lodash": "^4.14.201",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "eslint": "^8.53.0",
+    "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.0",
     "react": "^18.2.0",
     "typescript": "^5.2.2"
   },

@@ -166,9 +166,15 @@ export function OpenInDefaultAppAction(props: { note: Note; notes: Note[]; vault
   const { note } = props;
   const [defaultApp, setDefaultApp] = useState<string>("Default App");
   useEffect(() => {
-    getDefaultApplication(note.path).then((app) => setDefaultApp(app.name));
+    getDefaultApplication(note.path)
+      .then((app) => setDefaultApp(app.name))
+      .catch((err) => {
+        console.error(err);
+        setDefaultApp("");
+      });
   }, [note.path]);
 
+  if (!defaultApp) return null;
   return <Action.Open title={`Open in ${defaultApp}`} target={note.path} icon={Icon.AppWindow} />;
 }
 
