@@ -1,5 +1,12 @@
 # IP Geolocation Changelog
 
+## [Improvement] - 2023-11-16
+
+- Support IPv6 for query
+- Remove URI if user submit a domain
+- Check the IP address is a valid IP before submit to API
+- Bump up the libraries version
+
 ## [Command metadata] - 2023-08-14
 
 - Command metadata: show IP address in the command palette

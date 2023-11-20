@@ -123,6 +123,10 @@ type IssueStatus = {
   };
 };
 
+type IssueWatches = {
+  isWatching: boolean;
+};
+
 export type Issue = {
   id: string;
   key: string;
@@ -134,6 +138,7 @@ export type Issue = {
     project: Project | null;
     updated: string;
     status: IssueStatus;
+    watches: IssueWatches;
   };
 };
 
@@ -150,7 +155,7 @@ type GetIssuesResponse = {
 
 export async function getIssues({ jql } = { jql: "" }) {
   const params = {
-    fields: "summary,updated,issuetype,status,priority,assignee,project",
+    fields: "summary,updated,issuetype,status,priority,assignee,project,watches",
     startAt: "0",
     maxResults: "200",
     validateQuery: "warn",
@@ -198,9 +203,23 @@ type GetCreateIssueMetadataResponse = {
   projects: { issuetypes: IssueTypeWithCustomFields[] }[];
 };
 
-export async function getCreateIssueMetadata(projectId: string) {
-  const params = { expand: "projects.issuetypes.fields,style", projectIds: projectId };
+export async function getCreateIssueMetadataSummary(projectId: string) {
+  const params = { projectIds: projectId };
 
+  return getCreateIssueMetadataWithParams(params);
+}
+
+export async function getCreateIssueMetadata(projectId: string, issueTypeId: string) {
+  const params = { expand: "projects.issuetypes.fields", projectIds: projectId, issuetypeIds: issueTypeId };
+
+  return getCreateIssueMetadataWithParams(params);
+}
+
+async function getCreateIssueMetadataWithParams(params: {
+  projectIds: string;
+  expand?: string;
+  issuetypeIds?: string;
+}) {
   const result = await request<GetCreateIssueMetadataResponse>(`/issue/createmeta`, { params });
 
   if (!result?.projects) {
@@ -254,6 +273,19 @@ export async function updateIssueAssignee(issueIdOrKey: string, accountId: strin
   });
 }
 
+export async function startWatchingIssue(issueIdOrKey: string) {
+  return request(`/issue/${issueIdOrKey}/watchers`, {
+    method: "POST",
+  });
+}
+
+export async function stopWatchingIssue(issueIdOrKey: string, accountId: string) {
+  return request(`/issue/${issueIdOrKey}/watchers`, {
+    method: "DELETE",
+    params: { accountId: accountId },
+  });
+}
+
 export function getIssueEditMetadata(issueIdOrKey: string) {
   return request<{ fields: { assignee: { autoCompleteUrl: string } } }>(`/issue/${issueIdOrKey}/editmeta`);
 }
@@ -268,7 +300,7 @@ export type Attachment = {
   id: string;
   filename: string;
   mimeType: string;
-  size: string;
+  size: number;
   content: string;
   thumbnail?: string;
   created: string;

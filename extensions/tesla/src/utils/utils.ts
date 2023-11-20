@@ -1,4 +1,5 @@
 import moment from "moment";
+import { Distance } from "../types/Distance";
 
 export const getTimeDiffString = (start: number, end: number): string => {
   const duration = moment.duration(end - start, "seconds");
@@ -25,4 +26,10 @@ export const getElapsedTime = (start: number, end: number): string => {
   const duration = getTimeDiffString(start, end);
 
   return `${startTime} - ${endTimePortion} - ${duration}`;
+};
+
+export const getDistance = (miles: number, preference: Distance): number => {
+  if (preference === "miles") return miles;
+  const kilometers = miles * 1.60934;
+  return kilometers;
 };
