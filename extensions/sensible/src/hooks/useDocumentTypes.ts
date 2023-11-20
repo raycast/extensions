@@ -6,7 +6,7 @@ import type { DocumentType, Preferences } from "../types";
 const ENV = "v0";
 
 export default function useDocumentTypes() {
-  const { sensible_api_key } = getPreferenceValues<Preferences>();
+  const { sensible_api_key } = getPreferenceValues<ExtensionPreferences>();
 
   return useFetch<DocumentType[]>(`https://api.sensible.so/${ENV}/document_types`, {
     method: "GET",
