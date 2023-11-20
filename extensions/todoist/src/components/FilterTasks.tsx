@@ -14,8 +14,8 @@ import TaskListSections from "./TaskListSections";
 type FilterTasksProps = { name: string; quickLinkView?: QuickLinkView };
 
 function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
-  const [cache_data] = useCachedData();
-  const filters = cache_data?.filters;
+  const [cachedData] = useCachedData();
+  const filters = cachedData?.filters;
   const filter = filters?.find((filter: { name: string }) => filter.name === name);
   const query = filter?.query || "";
   const [tasks, setTasks] = useState<Task[]>([]);
