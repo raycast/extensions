@@ -123,6 +123,10 @@ type IssueStatus = {
   };
 };
 
+type IssueWatches = {
+  isWatching: boolean;
+};
+
 export type Issue = {
   id: string;
   key: string;
@@ -134,6 +138,7 @@ export type Issue = {
     project: Project | null;
     updated: string;
     status: IssueStatus;
+    watches: IssueWatches;
   };
 };
 
@@ -150,7 +155,7 @@ type GetIssuesResponse = {
 
 export async function getIssues({ jql } = { jql: "" }) {
   const params = {
-    fields: "summary,updated,issuetype,status,priority,assignee,project",
+    fields: "summary,updated,issuetype,status,priority,assignee,project,watches",
     startAt: "0",
     maxResults: "200",
     validateQuery: "warn",
@@ -251,6 +256,19 @@ export async function updateIssueAssignee(issueIdOrKey: string, accountId: strin
   return request(`/issue/${issueIdOrKey}/assignee`, {
     method: "PUT",
     body: JSON.stringify({ accountId }),
+  });
+}
+
+export async function startWatchingIssue(issueIdOrKey: string) {
+  return request(`/issue/${issueIdOrKey}/watchers`, {
+    method: "POST",
+  });
+}
+
+export async function stopWatchingIssue(issueIdOrKey: string, accountId: string) {
+  return request(`/issue/${issueIdOrKey}/watchers`, {
+    method: "DELETE",
+    params: { accountId: accountId },
   });
 }
 
