@@ -7,7 +7,7 @@ import { AlbumsSection } from "./components/AlbumsSection";
 import { TracksSection } from "./components/TracksSection";
 import { PlaylistsSection } from "./components/PlaylistsSection";
 import { ShowsSection } from "./components/ShowsSection";
-import { EpisodesSection } from "./components/EpisodessSection";
+import { EpisodesSection } from "./components/EpisodesSection";
 import { getPreferenceValues } from "@raycast/api";
 
 const filters = {
