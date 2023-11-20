@@ -75,8 +75,7 @@
       "name": "openIn",
       "type": "appPicker",
       "title": "Open Page in",
-      "required": true,
-      "default": "Notion",
+      "required": false,
       "description": "Choose where to open Notion page."
     }
   ],
