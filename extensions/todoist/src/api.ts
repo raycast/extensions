@@ -604,7 +604,7 @@ export async function updateFilter(args: UpdateFilterArgs, { data, setData }: Ca
   if (data) {
     setData({
       ...data,
-      labels: data.labels.map((p) => (p.id === args.id ? updatedData.labels[0] : p)),
+      filters: data.filters.map((p) => (p.id === args.id ? updatedData.filters[0] : p)),
     });
   }
 }
@@ -625,7 +625,7 @@ export async function deleteFilter(id: string, { data, setData }: CachedDataPara
   if (data) {
     setData({
       ...data,
-      labels: data.labels.filter((l) => {
+      filters: data.filters.filter((l) => {
         return l.id != id;
       }),
     });

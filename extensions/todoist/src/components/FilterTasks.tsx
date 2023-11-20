@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, useCachedPromise } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { Task, getFilterTasks } from "../../src/api";
@@ -13,25 +13,32 @@ import TaskListSections from "./TaskListSections";
 type FilterTasksProps = { name: string; quickLinkView?: QuickLinkView };
 
 function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
-  const [data] = useCachedData();
-  const filters = data?.filters;
-  const filter = filters?.find((filter) => filter.name === name);
+  const [cache_data] = useCachedData();
+  const filters = cache_data?.filters;
+  const filter = filters?.find((filter: { name: string; }) => filter.name === name);
   const query = filter?.query || "";
   const [tasks, setTasks] = useState<Task[]>([]);
 
+ 
+
+  const getFilterTasksCached = async (query: string) => {
+    const tasks = await getFilterTasks(query);
+    return tasks;
+  };
+
+  const { isLoading, data, revalidate } = useCachedPromise(getFilterTasksCached, [query]);
+
   useEffect(() => {
     if (query) {
-      getFilterTasks(query)
-        .then((fetchedTasks) => {
-          setTasks(filterSort(fetchedTasks));
-        })
-        .catch(() => {
-          throw new Error("Error fetching filter tasks");
-        });
-    } else {
-      setTasks([]);
+      revalidate();
     }
   }, [query]);
+
+  useEffect(() => {
+    if (data) {
+      setTasks(filterSort(data));
+    }
+  }, [data]);
 
   const { sections, viewProps, sortedTasks } = useViewTasks(`todoist.filter${name}`, { tasks, data });
 
