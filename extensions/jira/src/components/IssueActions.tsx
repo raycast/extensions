@@ -9,6 +9,8 @@ import {
   getIssueTransitions,
   Issue,
   Priority,
+  startWatchingIssue,
+  stopWatchingIssue,
   IssueDetail as TIssueDetail,
   Transition,
   updateIssue,
@@ -108,6 +110,39 @@ export default function IssueActions({
     }
   }
 
+  const isWatchedByMe = issue.fields?.watches?.isWatching;
+
+  async function watchIssue() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Changing watching status" });
+
+      await mutateWithOptimisticUpdate({
+        asyncUpdate: isWatchedByMe ? stopWatchingIssue(issue.key, myself.accountId) : startWatchingIssue(issue.key),
+        optimisticUpdate(issue) {
+          return {
+            ...issue,
+            fields: {
+              ...issue.fields,
+              watches: { isWatching: !isWatchedByMe },
+            },
+          };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Changed watching status",
+        message: `${isWatchedByMe ? "Stopped watching" : "Started watching"} ${issue.key}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed changing watching status",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   return (
     <ActionPanel title={issue.key}>
       <ActionPanel.Section>
@@ -140,6 +175,13 @@ export default function IssueActions({
           icon={getUserAvatar(myself)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onAction={assignToMe}
+        />
+
+        <Action
+          title={isWatchedByMe ? "Stop Watching" : "Start Watching"}
+          icon={isWatchedByMe ? Icon.EyeDisabled : Icon.Eye}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+          onAction={watchIssue}
         />
 
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
