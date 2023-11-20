@@ -1,4 +1,5 @@
-import { List, ActionPanel, Action, Icon, useCachedPromise } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 import { Task, getFilterTasks } from "../../src/api";
