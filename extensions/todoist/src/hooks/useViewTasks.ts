@@ -44,7 +44,7 @@ export type ViewProps = {
 type UseViewTasks = {
   tasks: Task[];
   optionsToExclude?: (GroupByOption | SortByOption)[];
-  data?: SyncData | Task[];
+  data?: SyncData;
 };
 
 export default function useViewTasks(name: string, { tasks, optionsToExclude, data }: UseViewTasks) {
