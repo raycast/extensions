@@ -1,5 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
 import {
+  BodyRequest,
   ChangeEmailAccountPasswordRequest,
   CreateDatabaseRequest,
   CreateEmailAccountRequest,
@@ -20,21 +21,20 @@ import fetch, { Response } from "node-fetch";
 import { API_URL, RESELLER_PASSWORD, RESELLER_USERNAME, TOKEN } from "./constants";
 import { showFailureToast } from "@raycast/utils";
 
-const callApi = async (endpoint: string, animatedToastMessage = "", body?, userToImpersonate="") => {
+const callApi = async (endpoint: string, animatedToastMessage = "", body?: BodyRequest, userToImpersonate="") => {
   const token = (userToImpersonate==="") ? TOKEN : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
   const headers = { Authorization: `Basic ${token}` };
 
   await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
 
   let apiResponse;
-  if (!body) apiResponse = await fetch(API_URL + "CMD_API_" + endpoint, { headers, method: "POST" });
+  if (!body) apiResponse = await fetch(API_URL + endpoint, { headers, method: "POST" });
   else
-    apiResponse = await fetch(API_URL + "CMD_API_" + endpoint, {
+    apiResponse = await fetch(API_URL + endpoint, {
       headers,
       method: "POST",
       body: JSON.stringify(body),
     });
-  // const apiResponse = await fetch(API_URL + "CMD_API_" + endpoint, { headers: API_HEADERS, method: "POST" });
   if (!apiResponse.ok) {
     return returnApiResponseAsError(apiResponse);
   } else {
@@ -56,8 +56,7 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?, userT
     urlSearchParams.forEach((value, key) => {
       if (urlSearchParams.getAll(key).length > 1 || key.includes("[]")) {
         key = key.replace("[]", ""); // Remove square brackets
-        params[key] = params[key] || [];
-        params[key].push(value);
+        params[key] = (params[key] as string[] || []).concat(value);
       } else {
         params[key] = value;
       }
@@ -66,6 +65,11 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?, userT
     // Since some endpoints return an error=0 whereas others return no error,
     //  we will add an "error=0" to make error-checking easier
     if (!("error" in params)) params.error = "0";
+    if (params.error==="1") {
+      const text = urlSearchParams.get("text") as string;
+      const details = urlSearchParams.get("details") || "";
+      await showFailureToast(details, { title: text })
+    };
     return params;
   }
 };
@@ -73,11 +77,11 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?, userT
 async function returnApiResponseAsError(apiResponse: Response) {
   const response = new URLSearchParams(await apiResponse.text());
   const text = response.get("text") as string;
-  const details = response.get("details") as string;
+  const details = response.get("details") || "";
   const errorResponse = {
     error: "1",
-    text: text,
-    details: details,
+    text,
+    details,
   } as ErrorResponse;
   const { status } = apiResponse;
   await showToast(Toast.Style.Failure, `${status} Error`, text);
@@ -144,14 +148,14 @@ export async function getDomains() {
 export async function createDomain(body: CreateNewDomainRequest, userToImpersonate="") {
   return await callApi("DOMAIN", "Creating Domain", body, userToImpersonate);
 }
-export async function getSubdomains(domain: string) {
-  return await callApi("SUBDOMAINS", "Fetching Subdomains", { domain });
+export async function getSubdomains(domain: string, userToImpersonate="") {
+  return await callApi("SUBDOMAINS", "Fetching Subdomains", { domain }, userToImpersonate);
 }
-export async function createSubdomain(body: CreateSubdomainRequest) {
-  return await callApi("SUBDOMAINS", "Creating Subdomain", body);
+export async function createSubdomain(body: CreateSubdomainRequest, userToImpersonate="") {
+  return await callApi("SUBDOMAINS", "Creating Subdomain", body, userToImpersonate);
 }
-export async function deleteSubdomain(body: DeleteSubdomainRequest) {
-  return await callApi("SUBDOMAINS", "Deleting Subdomain", body);
+export async function deleteSubdomain(body: DeleteSubdomainRequest, userToImpersonate="") {
+  return await callApi("SUBDOMAINS", "Deleting Subdomain", body, userToImpersonate);
 }
 
 // Databases
@@ -171,15 +175,15 @@ export async function getSession(body: GetSessionRequest) {
 }
 
 // Emails
-export async function getEmailAccounts(body: GetEmailAccountsRequest) {
-  return await callApi("POP", "Fetching Email Accounts", body);
+export async function getEmailAccounts(body: GetEmailAccountsRequest, userToImpersonate="") {
+  return await callApi("POP", "Fetching Email Accounts", body, userToImpersonate);
 }
-export async function changeEmailAccountPassword(body: ChangeEmailAccountPasswordRequest) {
-  return await callApi("CHANGE_EMAIL_PASSWORD", "Changing Email Account Password", body);
+export async function changeEmailAccountPassword(body: ChangeEmailAccountPasswordRequest, userToImpersonate="") {
+  return await callApi("CHANGE_EMAIL_PASSWORD", "Changing Email Account Password", body, userToImpersonate);
 }
-export async function createEmailAccount(body: CreateEmailAccountRequest) {
-  return await callApi("POP", "Creating Email Account", body);
+export async function createEmailAccount(body: CreateEmailAccountRequest, userToImpersonate="") {
+  return await callApi("POP", "Creating Email Account", body, userToImpersonate);
 }
-export async function deleteEmailAccount(body: DeleteEmailAccountRequest) {
-  return await callApi("POP", "Deleting Email Account", body);
+export async function deleteEmailAccount(body: DeleteEmailAccountRequest, userToImpersonate="") {
+  return await callApi("POP", "Deleting Email Account", body, userToImpersonate);
 }

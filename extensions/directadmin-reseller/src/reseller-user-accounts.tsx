@@ -39,8 +39,10 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
-import { getTitleFromKey } from "./utils/functions";
+import { getTextAndIconFromVal, getTitleFromKey } from "./utils/functions";
 import CreateNewDomainComponent from "./components/CreateNewDomainComponent";
+import GetSubdomainsComponent from "./components/subdomains/GetSubdomainsComponent";
+import GetEmailAccountsComponent from "./components/email-accounts/GetEmailAccountsComponent";
 
 export default function GetAccounts() {
   const [isLoading, setIsLoading] = useState(true);
@@ -81,14 +83,14 @@ export default function GetAccounts() {
   }
 
   async function unsuspendUser(user: string) {
-    const response = await suspendOrUnsuspendUser({ dounsuspend: 1, select0: user });
+    const response = await suspendOrUnsuspendUser({ dounsuspend: true, select0: user });
     if (response.error === "0") {
       const data = response as SuccessResponse;
       await showToast(Toast.Style.Success, data.text, data.details);
     }
   }
   async function suspendUser(user: string) {
-    const response = await suspendOrUnsuspendUser({ dosuspend: 1, select0: user });
+    const response = await suspendOrUnsuspendUser({ dosuspend: true, select0: user });
     if (response.error === "0") {
       const data = response as SuccessResponse;
       await showToast(Toast.Style.Success, data.text, data.details);
@@ -233,6 +235,7 @@ function GetUserUsage({ user, is_reseller=false }: GetUserUsageProps) {
         !usage ? undefined : (
           <Detail.Metadata>
             {Object.entries(usage).map(([key, val]) => {
+              if (key==="error") return;
               const title = getTitleFromKey(key);
               return (
                 <Detail.Metadata.Label
@@ -287,13 +290,15 @@ function GetUserConfig({ user, is_reseller=false }: GetUserConfigProps) {
         !config ? undefined : (
           <Detail.Metadata>
             {Object.entries(config).map(([key, val]) => {
+              if (key==="error") return;
               const title = getTitleFromKey(key);
+              const { text, icon } = getTextAndIconFromVal(val);
               return (
                 <Detail.Metadata.Label
                   key={key}
                   title={title}
-                  text={val || undefined}
-                  icon={val ? undefined : Icon.Minus}
+                  text={text}
+                  icon={icon}
                 />
               );
             })}
@@ -377,6 +382,16 @@ function GetUserDomains({ user }: GetUserDomainsProps) {
             }
             actions={
               <ActionPanel>
+                <Action.Push
+                  title="Get Subdomains"
+                  icon={Icon.Globe}
+                  target={<GetSubdomainsComponent domain={domain} userToImpersonate={user} />}
+                />
+                <Action.Push
+                  title="Get Email Accounts"
+                  icon={Icon.AtSymbol}
+                  target={<GetEmailAccountsComponent domain={domain} userToImpersonate={user} />}
+                />
                 <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify({ domain, ...domainVal })} />
                 <ActionPanel.Section>
                 <Action.Push

@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from
 import { FormValidation, useForm } from "@raycast/utils";
 import { CreateNewDomainFormValues, SuccessResponse } from "../types";
 import { createDomain } from "../utils/api";
+import { RESELLER_USERNAME } from "../utils/constants";
 
 type CreateNewDomainProps = {
     onDomainCreated: () => void;
@@ -49,6 +50,7 @@ export default  function CreateNewDomainComponent({ onDomainCreated, userToImper
           </ActionPanel>
         }
       >
+        <Form.Description title="User" text={userToImpersonate || RESELLER_USERNAME} />
         <Form.TextField title="Domain" placeholder="example.com" {...itemProps.domain} />
         <Form.TextField title="Bandwidth (MB)" placeholder="1024" {...itemProps.bandwidth} />
         <Form.Checkbox label="Unlimited Bandwidth" {...itemProps.ubandwidth} />

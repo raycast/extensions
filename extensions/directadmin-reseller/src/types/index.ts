@@ -124,8 +124,10 @@ export type DeleteUserRequest = {
   select0: string;
 };
 export type SuspendOrUnsuspendUserRequest = {
-  dosuspend?: any;
-  dounsuspend?: any;
+  // dosuspend?: any;
+  // dounsuspend?: any;
+  dosuspend?: boolean;
+  dounsuspend?: boolean;
   select0: string;
 };
 export type ModifyUserFormValues = {
@@ -323,7 +325,8 @@ export type ChangeEmailAccountPasswordRequest = {
   oldpassword: string;
   password1: string;
   password2: string;
-  api: any;
+  // api: any;
+  api: boolean;
 };
 export type CreateEmailAccountFormValues = {
   domain: string;
@@ -349,7 +352,7 @@ export type DeleteEmailAccountRequest = {
 };
 
 export type SuccessResponse = {
-  error: "0";
+  error?: "0";
   text: string;
   details: string;
 };
@@ -358,3 +361,18 @@ export type ErrorResponse = {
   text: string;
   details: string;
 };
+export type BodyRequest = CreateUserRequest
+| DeleteUserRequest
+| SuspendOrUnsuspendUserRequest
+| ModifyUserRequest
+| CreateNewDomainRequest
+| CreateSubdomainRequest
+| DeleteSubdomainRequest
+| CreateDatabaseRequest
+| DeleteDatabaseRequest
+| GetSessionRequest
+| GetEmailAccountsRequest
+| ChangeEmailAccountPasswordRequest
+| CreateEmailAccountRequest
+| DeleteEmailAccountRequest
+| { domain: string }
