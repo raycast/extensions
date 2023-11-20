@@ -37,7 +37,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Document type" {...itemProps.documentType}>
+      <Form.Dropdown title="Document Type" {...itemProps.documentType}>
         {documentTypes?.map(({ id, name }) => (
           <Form.Dropdown.Item value={name} title={name} key={id} />
         ))}
