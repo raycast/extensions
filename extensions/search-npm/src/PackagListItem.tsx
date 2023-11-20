@@ -34,11 +34,11 @@ interface PackageListItemProps {
 export interface Preferences {
   defaultOpenAction: 'openRepository' | 'openHomepage' | 'npmPackagePage'
   historyCount: string
+  showLinkToSearchResultsInListView: boolean
 }
 
 export const PackageListItem = ({
   result,
-  searchTerm,
   setHistory,
   isFavorited,
   handleFaveChange,
@@ -170,12 +170,6 @@ export const PackageListItem = ({
                 return action
               })
               .filter(Boolean)}
-            {searchTerm ? (
-              <Action.OpenInBrowser
-                url={`https://www.npmjs.com/search?q=${searchTerm}`}
-                title="npm Search Results"
-              />
-            ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section title="Actions">
             {isFavorited ? (

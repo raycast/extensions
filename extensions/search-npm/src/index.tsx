@@ -1,7 +1,15 @@
-import { List, showToast, Toast } from '@raycast/api'
+import {
+  List,
+  showToast,
+  Toast,
+  Icon,
+  ActionPanel,
+  Action,
+  getPreferenceValues,
+} from '@raycast/api'
 import { useFetch, useCachedState } from '@raycast/utils'
 import { useState, useEffect, useCallback } from 'react'
-import { PackageListItem } from './PackagListItem'
+import { PackageListItem, Preferences } from './PackagListItem'
 import { addToHistory, getHistory } from './utils/history-storage'
 import { HistoryListItem } from './HistoryListItem'
 import { useDebounce } from 'use-debounce'
@@ -15,6 +23,8 @@ export default function PackageList() {
   const [debouncedSearchTermForHistory] = useDebounce(searchTerm, 600)
   const [history, setHistory] = useCachedState<HistoryItem[]>('history', [])
   const [favorites, fetchFavorites] = useFavorites()
+  const { showLinkToSearchResultsInListView }: Preferences =
+    getPreferenceValues()
 
   const { isLoading, data, revalidate } = useFetch<NpmFetchResponse>(
     `${API_PATH}${searchTerm.replace(/\s/g, '+')}`,
@@ -63,24 +73,40 @@ export default function PackageList() {
       {searchTerm ? (
         <>
           {data?.length ? (
-            <List.Section title="Results" subtitle={data.length.toString()}>
-              {data.map((result) => {
-                return (
-                  <PackageListItem
-                    key={result.name}
-                    result={result}
-                    searchTerm={searchTerm}
-                    setHistory={setHistory}
-                    isFavorited={
-                      favorites.findIndex(
-                        (item) => item.name === result.name,
-                      ) !== -1
-                    }
-                    handleFaveChange={fetchFavorites}
-                  />
-                )
-              })}
-            </List.Section>
+            <>
+              {showLinkToSearchResultsInListView ? (
+                <List.Item
+                  title={`View search results for "${searchTerm}" on npmjs.com`}
+                  icon={Icon.MagnifyingGlass}
+                  actions={
+                    <ActionPanel>
+                      <Action.OpenInBrowser
+                        url={`https://www.npmjs.com/search?q=${searchTerm}`}
+                        title="View Npm Search Results"
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ) : null}
+              <List.Section title="Results" subtitle={data.length.toString()}>
+                {data.map((result) => {
+                  return (
+                    <PackageListItem
+                      key={result.name}
+                      result={result}
+                      searchTerm={searchTerm}
+                      setHistory={setHistory}
+                      isFavorited={
+                        favorites.findIndex(
+                          (item) => item.name === result.name,
+                        ) !== -1
+                      }
+                      handleFaveChange={fetchFavorites}
+                    />
+                  )
+                })}
+              </List.Section>
+            </>
           ) : null}
         </>
       ) : (

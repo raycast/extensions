@@ -115,6 +115,15 @@
       "required": false,
       "default": "30",
       "value": "30"
+    },
+    {
+      "name": "showLinkToSearchResultsInListView",
+      "type": "checkbox",
+      "label": "Show link in list view",
+      "title": "Show link to npmjs.com results in list view",
+      "description": "Show link to npmjs.com search results in list view",
+      "required": false,
+      "value": true
     }
   ],
   "dependencies": {
