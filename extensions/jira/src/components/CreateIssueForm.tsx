@@ -2,7 +2,15 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, Clipboard, useNaviga
 import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
-import { createIssue, getCreateIssueMetadataSummary, Component, Version, addAttachment, Priority, getCreateIssueMetadata } from "../api/issues";
+import {
+  createIssue,
+  getCreateIssueMetadataSummary,
+  Component,
+  Version,
+  addAttachment,
+  Priority,
+  getCreateIssueMetadata,
+} from "../api/issues";
 import { getLabels } from "../api/labels";
 import { getProjects } from "../api/projects";
 import { getUsers } from "../api/users";

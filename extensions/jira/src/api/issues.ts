@@ -215,7 +215,11 @@ export async function getCreateIssueMetadata(projectId: string, issueTypeId: str
   return getCreateIssueMetadataWithParams(params);
 }
 
-async function getCreateIssueMetadataWithParams(params: { projectIds: string; expand?: string; issuetypeIds?: string; }) {
+async function getCreateIssueMetadataWithParams(params: {
+  projectIds: string;
+  expand?: string;
+  issuetypeIds?: string;
+}) {
   const result = await request<GetCreateIssueMetadataResponse>(`/issue/createmeta`, { params });
 
   if (!result?.projects) {
