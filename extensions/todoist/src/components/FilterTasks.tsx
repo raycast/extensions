@@ -65,7 +65,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   return (
     <TaskListSections
       mode={ViewMode.project}
-      sections={viewProps.groupBy?.value === "default" ? [{ name, tasks: sortedTasks }] : sections}
+      sections={viewProps.groupBy?.value === "default" ? [{ name, tasks: tasks }] : sections}
       viewProps={viewProps}
       quickLinkView={quickLinkView}
     />
