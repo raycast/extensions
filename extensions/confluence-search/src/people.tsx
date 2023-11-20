@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import "./util/fetchPolyfill";
+
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AbortError } from "node-fetch";
