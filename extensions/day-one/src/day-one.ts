@@ -45,7 +45,7 @@ type DayOneHook = () => {
 };
 
 export const useDayOneIntegration: DayOneHook = () => {
-  const [installed, setInstalled] = useCachedState("installed", true);
+  const [installed, setInstalled] = useCachedState("installed", false);
 
   useEffect(() => {
     async function check() {
