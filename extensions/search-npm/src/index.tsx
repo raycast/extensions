@@ -8,11 +8,11 @@ import {
   getPreferenceValues,
 } from '@raycast/api'
 import { useFetch, useCachedState } from '@raycast/utils'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { PackageListItem, Preferences } from './PackagListItem'
 import { addToHistory, getHistory } from './utils/history-storage'
 import { HistoryListItem } from './HistoryListItem'
-import { useDebounce } from 'use-debounce'
+import { useDebouncedCallback } from 'use-debounce'
 import type { NpmFetchResponse } from './npmResponse.model'
 import type { HistoryItem } from './utils/history-storage'
 import { useFavorites } from './useFavorites'
@@ -20,7 +20,6 @@ import { useFavorites } from './useFavorites'
 const API_PATH = 'https://www.npmjs.com/search/suggestions?q='
 export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const [debouncedSearchTermForHistory] = useDebounce(searchTerm, 600)
   const [history, setHistory] = useCachedState<HistoryItem[]>('history', [])
   const [favorites, fetchFavorites] = useFavorites()
   const { showLinkToSearchResultsInListView }: Preferences =
@@ -38,19 +37,19 @@ export default function PackageList() {
     },
   )
 
-  const setHistorySearchItem = useCallback(async (text: string) => {
-    const history = await addToHistory({ term: text, type: 'search' })
-    setHistory(history)
-  }, [])
+  const debounced = useDebouncedCallback(
+    async (value) => {
+      const history = await addToHistory({ term: value, type: 'search' })
+      setHistory(history)
+    },
+    600,
+    { debounceOnServer: true },
+  )
 
   useEffect(() => {
-    if (debouncedSearchTermForHistory) {
-      setHistorySearchItem(debouncedSearchTermForHistory)
-    }
-  }, [debouncedSearchTermForHistory])
-
-  useEffect(() => {
-    if (!searchTerm) {
+    if (searchTerm) {
+      debounced(searchTerm)
+    } else {
       revalidate()
     }
   }, [searchTerm])
