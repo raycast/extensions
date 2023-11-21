@@ -37,7 +37,7 @@ export default function Command() {
           subtitle={item.subtitle}
           actions={
             <ActionPanel>
-              <Action title={item.title} onAction={() => handleAction(item.registry)} />
+              <Action title={`Select ${item.title}`} onAction={() => handleAction(item.registry)} />
             </ActionPanel>
           }
         />

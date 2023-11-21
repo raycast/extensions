@@ -1,16 +1,21 @@
 import { request } from "@octokit/request";
 import fetch from "cross-fetch";
-import { DEFAULT_REGISTRY_SOURCES, GIST_ID, GIST_TOKEN, IRegistrySourceItem } from "./constants";
+import { preference } from "./preference";
+import { DEFAULT_REGISTRY_SOURCES, IRegistrySourceItem } from "./constants";
 
 export const getRegistrySources = async () => {
+  if (!(preference.gistId && preference.personalAccessTokens)) {
+    return DEFAULT_REGISTRY_SOURCES;
+  }
+
   let content: string = "";
 
   try {
-    const { data } = await request(`GET /gists/${GIST_ID}`, {
-      gist_id: GIST_ID,
+    const { data } = await request(`GET /gists/${preference.gistId}`, {
+      gist_id: preference.gistId,
       headers: {
         accept: "application/vnd.github+json",
-        authorization: `token ${GIST_TOKEN}`,
+        authorization: `token ${preference.personalAccessTokens}`,
         "X-GitHub-Api-Version": "2022-11-28",
       },
       request: {
@@ -18,7 +23,7 @@ export const getRegistrySources = async () => {
       },
     });
 
-    content = data?.files?.["register.json"]?.content || "";
+    content = data?.files?.[preference.filename]?.content || "";
 
     if (content) {
       return JSON.parse(content.trim()) as IRegistrySourceItem[];

@@ -7,10 +7,6 @@ export interface IRegistrySourceItem {
 
 export const USER_HOME: string = process.env.HOME || process.env.USERPROFILE || `/Users/${process.env.USER}`;
 
-export const GIST_TOKEN: string = "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";
-
-export const GIST_ID: string = "bafad768c908871a689c020cc405c81e";
-
 export const DEFAULT_REGISTRY_SOURCES: IRegistrySourceItem[] = [
   {
     id: "npm",
@@ -23,12 +19,6 @@ export const DEFAULT_REGISTRY_SOURCES: IRegistrySourceItem[] = [
     title: "yarn",
     subtitle: "https://yarnpkg.com",
     registry: "https://registry.yarnpkg.com/",
-  },
-  {
-    id: "tencent",
-    title: "tencent",
-    subtitle: "https://mirrors.cloud.tencent.com/npm/",
-    registry: "https://mirrors.cloud.tencent.com/npm/",
   },
   {
     id: "cnpm",
