@@ -15,12 +15,14 @@
     {
       "name": "omnivore-search",
       "title": "Search Article",
+      "subtitle": "Omnivore",
       "description": "Search through articles gathered in the Omnivore",
       "mode": "view"
     },
     {
       "name": "omnivore-capture",
       "title": "Quick Capture",
+      "subtitle": "Omnivore",
       "description": "Quickly capture and save a url to your Omnivore inbox",
       "mode": "no-view",
       "arguments": [
