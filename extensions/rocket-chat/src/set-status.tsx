@@ -28,7 +28,7 @@ export default function Command() {
   }
 
   return (
-    <List searchBarPlaceholder="Search user" isLoading={isLoading}>
+    <List isLoading={isLoading}>
       <List.Section title="User Status">
         <List.Item
           icon={{ source: Icon.Circle, tintColor: Color.Green }}
