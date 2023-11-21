@@ -3,19 +3,27 @@ import { Card } from "./types";
 import DeleteCardAction from "./delete-card";
 import EditCardAction from "./edit-card";
 
-function ViewCardAction(props: { card: Card; onEdit: ({ question, answer, tag }: Card) => void; onDelete: () => void }) {
+function ViewCardAction(props: {
+  card: Card;
+  onEdit: ({ question, answer, tag }: Card) => void;
+  onDelete: () => void;
+}) {
   const { card } = props;
 
   return (
-    <Action.Push 
-      icon={Icon.AppWindowSidebarRight} 
-      title="View Card" 
+    <Action.Push
+      icon={Icon.AppWindowSidebarRight}
+      title="View Card"
       target={<ViewCardDetail card={card} onEdit={props.onEdit} onDelete={props.onDelete} />}
     />
   );
 }
 
-function ViewCardDetail(props: { card: Card; onEdit: ({ question, answer, tag }: Card) => void; onDelete: () => void }) {
+function ViewCardDetail(props: {
+  card: Card;
+  onEdit: ({ question, answer, tag }: Card) => void;
+  onDelete: () => void;
+}) {
   const { card, onEdit, onDelete } = props;
   const { pop } = useNavigation();
 
@@ -34,14 +42,19 @@ function ViewCardDetail(props: { card: Card; onEdit: ({ question, answer, tag }:
       }
       actions={
         <ActionPanel>
-          <EditCardAction card={card} onEdit={(updatedCard) => {
-            onEdit(updatedCard);
-            pop();
-          }} />
-          <DeleteCardAction onDelete={() => {
-            onDelete();
-            pop();
-          }} />
+          <EditCardAction
+            card={card}
+            onEdit={(updatedCard) => {
+              onEdit(updatedCard);
+              pop();
+            }}
+          />
+          <DeleteCardAction
+            onDelete={() => {
+              onDelete();
+              pop();
+            }}
+          />
         </ActionPanel>
       }
     />

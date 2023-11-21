@@ -40,8 +40,7 @@ export default function ViewAllCards() {
     } catch (e) {
       setError(e);
     }
-    
-  };
+  }
 
   async function handleDelete(index: number) {
     try {
@@ -53,7 +52,7 @@ export default function ViewAllCards() {
     } catch (e) {
       setError(e);
     }
-  };
+  }
 
   return (
     <List isLoading={cards.length === 0}>
@@ -67,7 +66,11 @@ export default function ViewAllCards() {
           accessories={[{ tag: { value: card.tag }, icon: Icon.Tag }]}
           actions={
             <ActionPanel>
-              <ViewCardAction card={card} onEdit={(updatedCard) => handleEdit(updatedCard, index)} onDelete={() => handleDelete(index)} />
+              <ViewCardAction
+                card={card}
+                onEdit={(updatedCard) => handleEdit(updatedCard, index)}
+                onDelete={() => handleDelete(index)}
+              />
               <EditCardAction card={card} onEdit={(updatedCard) => handleEdit(updatedCard, index)} />
               <DeleteCardAction onDelete={() => handleDelete(index)} />
             </ActionPanel>
