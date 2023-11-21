@@ -10,7 +10,7 @@ type Values = {
 };
 
 const AddEntryCommand = ({ draftValues }: LaunchProps) => {
-  const { installed, addEntry } = useDayOneIntegration();
+  const { installed, addEntry, loading } = useDayOneIntegration();
 
   const [body, setBody] = useState(draftValues?.body || "");
   const [journal, setJournal] = useCachedState("journal", draftValues?.journal || "");
@@ -26,7 +26,7 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
       const entryId = await addEntry(values);
 
       if (options.notify) {
-        showHUD(values.journal ? `Saved entry in "${values.journal}"` : "Saved entry!", {
+        showHUD(values.journal ? `✅ Saved entry in "${values.journal}"` : "✅ Saved entry", {
           popToRootType: PopToRootType.Immediate,
         });
       }
@@ -50,14 +50,17 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
     void popToRoot();
   }
 
-  if (installed === "pending") {
-    return null;
-  } else if (!installed) {
-    return <Detail markdown={missingCLIError} />;
+  if (!installed && !loading) {
+    return <Detail isLoading={loading} markdown={missingCLIError} />;
+  }
+
+  if (loading) {
+    return <Form isLoading={loading} />;
   }
 
   return (
     <Form
+      isLoading={loading}
       enableDrafts
       actions={
         <ActionPanel>
