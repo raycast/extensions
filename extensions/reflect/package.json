@@ -96,6 +96,12 @@
           "type": "text",
           "placeholder": "What's top of mind?",
           "required": true
+        },
+        {
+          "name": "list",
+          "type": "text",
+          "placeholder": "Parent list substring",
+          "required": false
         }
       ],
       "mode": "no-view"
