@@ -14,7 +14,7 @@ type User = {
   created_at: string;
 };
 
-export default function useUserId() {
+export function useUserId() {
   const { data, isLoading } = useTwitchRequest<User | undefined>({
     url: `https://api.twitch.tv/helix/users`,
     cacheKey: `${clientId}_user`,

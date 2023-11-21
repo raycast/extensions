@@ -7,7 +7,7 @@ import useFollowedChannels from "./helpers/useFollowedChannels";
 import useChannelVideos from "./helpers/useChannelVideos";
 import useLoadMoreChannelVideos from "./helpers/useLoadMoreChannelVideos";
 import useChannelDetails from "./helpers/useChannelDetails";
-import useUserId from "./helpers/useUserId";
+import { useUserId } from "./helpers/useUserId";
 
 import { FollowedStreams } from "./interfaces/FollowedStreams";
 import { Video } from "./interfaces/Video";

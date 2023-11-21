@@ -1,5 +1,6 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
 import fetch from "node-fetch";
+import { randomUUID } from "node:crypto";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
@@ -41,7 +42,7 @@ async function authorize(): Promise<string> {
     }
     return tokenSet.accessToken;
   }
-
+  const nonce = randomUUID();
   const authRequest = await client.authorizationRequest({
     endpoint: "https://id.twitch.tv/oauth2/authorize",
     clientId,
@@ -49,10 +50,11 @@ async function authorize(): Promise<string> {
     extraParameters: {
       response_type: "code",
       redirect_uri: "https://raycast.com/redirect?packageName=Extension",
+      nonce,
     },
   });
   const { authorizationCode } = await client.authorize(authRequest);
-  const newTokenSet = await fetchTokens(authRequest, authorizationCode);
+  const newTokenSet = await fetchTokens(authRequest, authorizationCode, nonce);
   await client.setTokens(newTokenSet);
   return newTokenSet.access_token;
 }
@@ -60,6 +62,7 @@ async function authorize(): Promise<string> {
 async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
   authorizationCode: string,
+  nonce: string,
 ): Promise<OAuth.TokenResponse> {
   const response = await fetch("https://id.twitch.tv/oauth2/token", {
     method: "POST",
@@ -75,7 +78,10 @@ async function fetchTokens(
   if (!response.ok) {
     throw new Error(response.statusText);
   }
-  const data = (await response.json()) as OAuth.TokenResponse;
+  const data = (await response.json()) as OAuth.TokenResponse & { nonce: string };
+  if (data.nonce !== nonce) {
+    throw new Error("Invalid nonce");
+  }
   return {
     ...data,
     scope: (data.scope as unknown as string[]).join(" "),

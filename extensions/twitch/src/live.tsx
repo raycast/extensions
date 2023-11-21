@@ -1,7 +1,7 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
 import { formatDate } from "./helpers/datetime";
 import useFollowedStreams from "./helpers/useFollowedStreams";
-import useUserId from "./helpers/useUserId";
+import { useUserId } from "./helpers/useUserId";
 
 export default function main() {
   const { data: userId, isLoading: isLoadingUserId } = useUserId();

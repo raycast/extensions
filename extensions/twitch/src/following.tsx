@@ -4,7 +4,7 @@ import millify from "millify";
 import { action } from "./helpers/action";
 import { formatDate, getUpTime } from "./helpers/datetime";
 import { renderDetails } from "./helpers/renderDetails";
-import useUserId from "./helpers/useUserId";
+import { useUserId } from "./helpers/useUserId";
 import useFollowedStreams from "./helpers/useFollowedStreams";
 import { useFrecencySorting } from "@raycast/utils";
 
