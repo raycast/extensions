@@ -1,29 +1,23 @@
-import { useEffect, useState, useCallback } from "react";
-import { ActionPanel, Icon, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { Card } from "./types";
 import ViewCardAction from "./view-card";
 import DeleteCardAction from "./delete-card";
 import EditCardAction from "./edit-card";
-import fs from "fs";
+import { getCards, saveCards } from "./storage";
 
 export default function ViewAllCards() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [cards, setCards] = useState<Card[]>([]);
   const [error, setError] = useState<Error | unknown>();
 
   useEffect(() => {
-    fs.readFile(preferences.dataFile, "utf-8", (error, data) => {
-      if (error) {
-        setError(error);
-      }
-
-      try {
-        const cards: Card[] = JSON.parse(data);
-        setCards(cards);
-      } catch (error) {
-        setError(error);
-      }
-    });
+    try {
+      (async () => {
+        setCards(await getCards());
+      })();
+    } catch (e) {
+      setError(e);
+    }
   }, []);
 
   useEffect(() => {
@@ -36,36 +30,30 @@ export default function ViewAllCards() {
     }
   }, [error]);
 
-  const handleEdit = useCallback(
-    (card: Card, index: number) => {
-      const updatedCards = cards;
-      updatedCards.splice(index, 1);
-      updatedCards.push(card);
-      setCards(updatedCards);
+  async function handleEdit(editedCard: Card, index: number) {
+    try {
+      const cards: Card[] = await getCards();
+      cards.splice(index, 1, editedCard);
 
-      fs.writeFile(preferences.dataFile, JSON.stringify(updatedCards, null, 4), (error) => {
-        if (error) {
-          setError(error);
-        }
-      });
-    },
-    [cards, setCards],
-  );
+      await saveCards(cards);
+      setCards(await getCards());
+    } catch (e) {
+      setError(e);
+    }
+    
+  };
 
-  const handleDelete = useCallback(
-    (index: number) => {
-      const newCards = cards;
-      newCards.splice(index, 1);
-      setCards(() => newCards);
+  async function handleDelete(index: number) {
+    try {
+      const cards: Card[] = await getCards();
+      cards.splice(index, 1);
 
-      fs.writeFile(preferences.dataFile, JSON.stringify(newCards, null, 4), (error) => {
-        if (error) {
-          setError(error);
-        }
-      });
-    },
-    [cards, setCards],
-  );
+      await saveCards(cards);
+      setCards(await getCards());
+    } catch (e) {
+      setError(e);
+    }
+  };
 
   return (
     <List isLoading={cards.length === 0}>
@@ -79,7 +67,7 @@ export default function ViewAllCards() {
           accessories={[{ tag: { value: card.tag }, icon: Icon.Tag }]}
           actions={
             <ActionPanel>
-              <ViewCardAction card={card} />
+              <ViewCardAction card={card} onEdit={(updatedCard) => handleEdit(updatedCard, index)} onDelete={() => handleDelete(index)} />
               <EditCardAction card={card} onEdit={(updatedCard) => handleEdit(updatedCard, index)} />
               <DeleteCardAction onDelete={() => handleDelete(index)} />
             </ActionPanel>

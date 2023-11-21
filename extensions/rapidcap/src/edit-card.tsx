@@ -44,7 +44,7 @@ function EditCardForm(props: { card: Card; onEdit: ({ question, answer, tag }: C
       navigationTitle="Edit Card"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit Card" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Update Card" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
