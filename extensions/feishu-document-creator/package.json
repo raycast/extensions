@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "feishu-document-creator",
   "title": "Feishu Document Creator",
-  "description": "Create Feishu document in one click using native Feishu/Lark URLs.",
+  "description": "Create Feishu/Lark document in one click using native Feishu/Lark URLs.",
   "icon": "feishu-icon.png",
   "author": "rokcso",
   "categories": [
