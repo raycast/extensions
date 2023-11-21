@@ -1,4 +1,4 @@
-import { AI, showHUD, showToast, Toast } from "@raycast/api";
+import { AI, showToast, Toast } from "@raycast/api";
 import { produceOutput } from "./utils";
 
 function constructPrompt(topic: string | undefined) {
@@ -30,9 +30,7 @@ export default async function AICommand(props?: {
 
   const notification = isRandom ? `Generating some random content...` : `Generating content on "${topic}"...`;
 
-  void showToast({
-    title: notification,
-  });
+  await showToast(Toast.Style.Animated, notification);
 
   const response = await AI.ask(prompt, {
     model: "gpt-3.5-turbo",
