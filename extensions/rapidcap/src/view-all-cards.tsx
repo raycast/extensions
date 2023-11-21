@@ -19,7 +19,7 @@ export default function ViewAllCards() {
 
       try {
         const cards: Card[] = JSON.parse(data);
-        setCards(() => cards);
+        setCards(cards);
       } catch (error) {
         setError(error);
       }
@@ -41,7 +41,7 @@ export default function ViewAllCards() {
       const updatedCards = cards;
       updatedCards.splice(index, 1);
       updatedCards.push(card);
-      setCards(() => updatedCards);
+      setCards(updatedCards);
 
       fs.writeFile(preferences.dataFile, JSON.stringify(updatedCards, null, 4), (error) => {
         if (error) {
@@ -73,8 +73,10 @@ export default function ViewAllCards() {
         <List.Item
           key={index}
           title={card.question}
+          subtitle={card.answer}
           icon={Icon.AppWindowList}
-          accessories={[{ text: card.answer }, { tag: { value: card.tag }, icon: Icon.Tag }]}
+          keywords={[card.tag]}
+          accessories={[{ tag: { value: card.tag }, icon: Icon.Tag }]}
           actions={
             <ActionPanel>
               <ViewCardAction card={card} />
