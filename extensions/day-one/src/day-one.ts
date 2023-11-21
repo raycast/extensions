@@ -1,5 +1,5 @@
 import { useCachedState } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { exec } from "./utils";
 
 export const missingCLIError = `### Day One CLI Missing 🚨
@@ -42,15 +42,18 @@ async function addEntry(entry: Entry) {
 type DayOneHook = () => {
   installed: boolean | "pending";
   addEntry: (entry: Entry) => Promise<string>;
+  loading: boolean;
 };
 
 export const useDayOneIntegration: DayOneHook = () => {
   const [installed, setInstalled] = useCachedState("installed", false);
+  const [loading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function check() {
       const state = await isDayOneInstalled();
       setInstalled(state);
+      setIsLoading(false);
     }
 
     check();
@@ -59,5 +62,6 @@ export const useDayOneIntegration: DayOneHook = () => {
   return {
     installed,
     addEntry,
+    loading,
   };
 };
