@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
   LocalStorage,
-  getPreferenceValues
+  getPreferenceValues,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -78,9 +78,9 @@ export default function Command() {
 
   const showTimestampFormat: boolean = itemProps.prependTimestamp.value ?? false;
 
-  const {parentLists = ""} = getPreferenceValues<ExtensionPreferences>()
+  const { parentLists = "" } = getPreferenceValues<ExtensionPreferences>();
 
-  const parentListOptions = parentLists.split(',').map((item) => item.trim());
+  const parentListOptions = parentLists.split(",").map((item) => item.trim());
 
   return (
     <Form
@@ -99,14 +99,12 @@ export default function Command() {
         </Form.Dropdown>
       ) : null}
       {parentListOptions.length > 0 ? (
-          <Form.Dropdown storeValue={true} title="Parent List (Optional)" {...itemProps.parentList}>
-            <Form.Dropdown.Item value="" title="-" />
-            {parentListOptions.map(opt => {
-              return (
-                  <Form.Dropdown.Item key={opt} value={opt} title={opt.replaceAll('[', '').replaceAll(']', '')} />
-              )
-            })}
-          </Form.Dropdown>
+        <Form.Dropdown storeValue={true} title="Parent List (Optional)" {...itemProps.parentList}>
+          <Form.Dropdown.Item value="" title="-" />
+          {parentListOptions.map((opt) => {
+            return <Form.Dropdown.Item key={opt} value={opt} title={opt.replaceAll("[", "").replaceAll("]", "")} />;
+          })}
+        </Form.Dropdown>
       ) : null}
       <Form.Separator />
       <Form.Dropdown {...itemProps.graphId} title="Graph" value={graphId} onChange={setGraphId}>
