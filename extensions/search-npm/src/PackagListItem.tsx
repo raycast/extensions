@@ -120,13 +120,15 @@ export const PackageListItem = ({
   }
 
   const accessories: List.Item.Accessory[] = [
-    {
-      icon: Icon.Tag,
-      tooltip: pkg?.keywords?.length ? pkg.keywords.join(', ') : '',
-    },
+    pkg?.keywords?.length
+      ? {
+          icon: Icon.Tag,
+          tooltip: pkg.keywords.join(', '),
+        }
+      : {},
   ]
   if (!isViewingFavorites) {
-    accessories.unshift(
+    accessories.push(
       {
         text: `v${pkg.version}`,
         tooltip: `Latest version`,
@@ -137,7 +139,7 @@ export const PackageListItem = ({
       },
     )
     if (isFavorited) {
-      accessories.unshift({
+      accessories.push({
         icon: Icon.Star,
       })
     }
