@@ -4,7 +4,7 @@ import { Card } from "./types";
 function ViewCardAction(props: { card: Card }) {
   const { card } = props;
 
-  return <Action.Push icon={Icon.Pencil} title="View Card" target={<ViewCardDetail card={card} />} />;
+  return <Action.Push icon={Icon.AppWindowSidebarRight} title="View Card" target={<ViewCardDetail card={card} />} />;
 }
 
 function ViewCardDetail(props: { card: Card }) {
