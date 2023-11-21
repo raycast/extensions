@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Mark notification as read without opening it] - 2023-11-16
+
+- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.
+
 ## [Search Repositories improvements + Fixes] - 2023-11-06
 
 - Add "Archived" and "Fork" tag accessories in the "Search Repositories" results.

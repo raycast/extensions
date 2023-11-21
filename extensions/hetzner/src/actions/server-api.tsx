@@ -8,8 +8,10 @@ import {
 } from "../models/server";
 import axios, { AxiosRequestConfig } from "axios";
 import { getConfig } from "../config";
+import { Project } from "../models/project";
 
 async function handleServerStatusChange(
+  project: Project,
   server: HetznerServer,
   { action }: HetznerActionResponseData,
   finalState: HetznerStatus,
@@ -45,7 +47,7 @@ async function handleServerStatusChange(
   let currentInterval = 0;
   const interval = setInterval(async () => {
     currentInterval++;
-    const data = await getServer(server);
+    const data = await getServer(project, server);
     updateStatus(server.id, data.status);
 
     if (currentInterval >= 15) {
@@ -68,11 +70,14 @@ async function handleServerStatusChange(
   }, 1000);
 }
 
-export async function getServer(server: HetznerServer): Promise<HetznerServer> {
-  const { accessToken, apiURL } = getConfig();
+export async function getServer(
+  project: Project,
+  server: HetznerServer,
+): Promise<HetznerServer> {
+  const { apiURL } = getConfig();
 
   const config: AxiosRequestConfig = {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: { Authorization: `Bearer ${project.accessToken}` },
   };
 
   const response = await axios.get(`${apiURL}/v1/servers/${server.id}`, config);
@@ -80,17 +85,19 @@ export async function getServer(server: HetznerServer): Promise<HetznerServer> {
   return response.data.server;
 }
 
-export async function getAllServers(): Promise<HetznerServer[]> {
+export async function getAllServers(
+  project: Project,
+): Promise<HetznerServer[]> {
   const allServers: HetznerServer[] = [];
   let pageMetaData: HetznerServerPageMetaData = {
     previous_page: null,
     next_page: 1,
     page: 0,
   };
-  const { accessToken, apiURL } = getConfig();
+  const { apiURL } = getConfig();
 
   const config: AxiosRequestConfig = {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: { Authorization: `Bearer ${project.accessToken}` },
   };
 
   while (pageMetaData.next_page !== null) {
@@ -133,6 +140,7 @@ export async function getAllServers(): Promise<HetznerServer[]> {
 }
 
 export async function startServer(
+  project: Project,
   server: HetznerServer,
   updateStatus: UpdateServerStatus,
 ): Promise<void> {
@@ -142,10 +150,10 @@ export async function startServer(
       title: `Server action will be executed.`,
     });
 
-    const { accessToken, apiURL } = getConfig();
+    const { apiURL } = getConfig();
 
     const config: AxiosRequestConfig = {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${project.accessToken}` },
     };
 
     const { data } = await axios.post<HetznerActionResponseData>(
@@ -154,7 +162,13 @@ export async function startServer(
       config,
     );
 
-    await handleServerStatusChange(server, data, "running", updateStatus);
+    await handleServerStatusChange(
+      project,
+      server,
+      data,
+      "running",
+      updateStatus,
+    );
   } catch (e) {
     console.error(e);
     await showToast({
@@ -166,6 +180,7 @@ export async function startServer(
 }
 
 export async function stopServer(
+  project: Project,
   server: HetznerServer,
   updateStatus: UpdateServerStatus,
 ): Promise<void> {
@@ -186,10 +201,10 @@ export async function stopServer(
         title: `Server action will be executed.`,
       });
 
-      const { accessToken, apiURL } = getConfig();
+      const { apiURL } = getConfig();
 
       const config: AxiosRequestConfig = {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${project.accessToken}` },
       };
 
       const { data } = await axios.post<HetznerActionResponseData>(
@@ -198,7 +213,13 @@ export async function stopServer(
         config,
       );
 
-      await handleServerStatusChange(server, data, "off", updateStatus);
+      await handleServerStatusChange(
+        project,
+        server,
+        data,
+        "off",
+        updateStatus,
+      );
     } catch (e) {
       console.error(e);
       await showToast({
@@ -211,6 +232,7 @@ export async function stopServer(
 }
 
 export async function rebootServer(
+  project: Project,
   server: HetznerServer,
   updateStatus: UpdateServerStatus,
 ): Promise<void> {
@@ -229,10 +251,10 @@ export async function rebootServer(
         title: `Server action will be executed.`,
       });
 
-      const { accessToken, apiURL } = getConfig();
+      const { apiURL } = getConfig();
 
       const config: AxiosRequestConfig = {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${project.accessToken}` },
       };
 
       const { data } = await axios.post<HetznerActionResponseData>(
@@ -241,7 +263,13 @@ export async function rebootServer(
         config,
       );
 
-      await handleServerStatusChange(server, data, "running", updateStatus);
+      await handleServerStatusChange(
+        project,
+        server,
+        data,
+        "running",
+        updateStatus,
+      );
     } catch (e) {
       console.error(e);
       await showToast({
@@ -254,6 +282,7 @@ export async function rebootServer(
 }
 
 export async function shutdownServer(
+  project: Project,
   server: HetznerServer,
   updateStatus: UpdateServerStatus,
 ): Promise<void> {
@@ -274,10 +303,10 @@ export async function shutdownServer(
         title: `Server action will be executed.`,
       });
 
-      const { accessToken, apiURL } = getConfig();
+      const { apiURL } = getConfig();
 
       const config: AxiosRequestConfig = {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${project.accessToken}` },
       };
 
       const { data } = await axios.post<HetznerActionResponseData>(
@@ -286,7 +315,13 @@ export async function shutdownServer(
         config,
       );
 
-      await handleServerStatusChange(server, data, "off", updateStatus);
+      await handleServerStatusChange(
+        project,
+        server,
+        data,
+        "off",
+        updateStatus,
+      );
     } catch (e) {
       console.error(e);
       await showToast({

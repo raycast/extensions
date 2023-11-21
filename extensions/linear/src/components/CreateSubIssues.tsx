@@ -59,7 +59,7 @@ ${
 }
 
 Break down the Linear issue with this title: "${issue.title}"`,
-    { execute: !!issue && !isLoadingIssue, creativity: 0.5 }
+    { execute: !!issue && !isLoadingIssue, creativity: 0.5 },
   );
 
   // We need to wait for the initial data to be processed before rendering the list
@@ -111,8 +111,8 @@ Break down the Linear issue with this title: "${issue.title}"`,
             description: i.description,
             parentId: issue.id,
             stateId: firstUnstartedState?.id,
-          })
-        )
+          }),
+        ),
       );
 
       await showToast({ style: Toast.Style.Success, title: "Created sub-issues" });
@@ -143,7 +143,7 @@ Break down the Linear issue with this title: "${issue.title}"`,
                       }
 
                       return i;
-                    })
+                    }),
                   )
                 }
               />

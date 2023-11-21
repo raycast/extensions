@@ -253,8 +253,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.3",
-    "@raycast/utils": "^1.9.0",
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1",
     "date-fns": "^2.30.0",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
@@ -267,15 +267,17 @@
     "@graphql-codegen/typescript-graphql-request": "^4.5.9",
     "@graphql-codegen/typescript-operations": "^3.0.2",
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.184",
-    "@types/node": "^18.15.11",
-    "concurrently": "^8.2.0",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.37.0",
-    "eslint-plugin-import": "^2.27.5",
-    "graphql": "^16.6.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.0.3"
+    "@types/lodash": "^4.14.201",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.53.0",
+    "eslint-plugin-import": "^2.29.0",
+    "graphql": "^16.8.1",
+    "prettier": "^3.1.0",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

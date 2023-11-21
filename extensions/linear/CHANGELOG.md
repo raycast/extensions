@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Mark notification as read without opening it] - 2023-11-16
+
+- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.
+
 ## [Include team key as keyword in Create Issue command] - 2023-09-22
 
 Added the team key as a keyword in the "Create Issue" function so that it will appear when the user searches for a key.
