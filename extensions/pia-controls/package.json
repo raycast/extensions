@@ -12,15 +12,13 @@
   "commands": [
     {
       "name": "connect",
-      "title": "Connect",
-      "subtitle": "Connect to PIA",
+      "title": "Connect to PIA",
       "description": "Connects to PIA",
       "mode": "no-view"
     },
     {
       "name": "disconnect",
-      "title": "Disconnect",
-      "subtitle": "Disconnect from PIA",
+      "title": "Disconnect from PIA",
       "description": "Disconnects from PIA",
       "mode": "no-view"
     }
