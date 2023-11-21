@@ -10,6 +10,9 @@
   ],
   "icon": "command-icon.png",
   "author": "lucaschultz",
+  "contributors": [
+    "Sheraff"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,6 +28,12 @@
       "mode": "menu-bar",
       "icon": "command-icon.png",
       "interval": "1m"
+    },
+    {
+      "name": "known-ports",
+      "title": "Edit List of Known Ports",
+      "description": "Add or Remove Ports that should always be shown on top",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -77,6 +86,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

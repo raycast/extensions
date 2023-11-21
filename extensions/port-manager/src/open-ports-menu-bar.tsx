@@ -16,6 +16,7 @@ export default function Command() {
   const openPorts = removeDuplicates(
     processes
       .filter((p) => p.portInfo !== undefined && p.portInfo.length > 0)
+      .sort((a, b) => Number(b.known) - Number(a.known))
       .flatMap((p) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return p.portInfo!.map((info) => ({ port: `${info.port}`, process: p }));
@@ -29,7 +30,10 @@ export default function Command() {
       icon={{ source: { light: "menu-bar-icon-light.png", dark: "menu-bar-icon-dark.png" } }}
     >
       {openPorts.map((openPort) => (
-        <MenuBarExtra.Submenu key={openPort.port} title={openPort.port}>
+        <MenuBarExtra.Submenu
+          key={openPort.port}
+          title={openPort.process.known ? `${openPort.process.nickname}: ${openPort.port}` : openPort.port}
+        >
           <MenuBarExtra.Section title={openPort.process.name ?? "Untitled Process"}>
             <MenuBarExtra.Item
               title="Kill"

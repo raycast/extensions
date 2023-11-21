@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Icon, confirmAlert, getPreferenceValues } from "@raycast/api";
 import Alerts from "../feedback/Alerts";
-import Process from "../models/Process";
 import { KillSignal, killProcess } from "../utilities/killProcess";
+import { ProcessInfo } from "../models/interfaces";
 
-export type ProcessWithKillableParent = Process & {
+export type ProcessWithKillableParent = ProcessInfo & {
   parentPid: number;
 };
 
-export function isProcessWithKillableParent(process: Process): process is ProcessWithKillableParent {
+export function isProcessWithKillableParent(process: ProcessInfo): process is ProcessWithKillableParent {
   return process.parentPid !== undefined && process.parentPid !== 1;
 }
 
