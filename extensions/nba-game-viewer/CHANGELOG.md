@@ -1,5 +1,9 @@
 # NBA Game Viewer Changelog
 
+## [Improvements] - 2023-11-14
+
+- Add the option to choose the default conference (East or West) and to view standings for the whole league.
+
 ## [Fix] - 2023-10-30
 
 - Add a rule to set the year according to the start of the new NBA season, traditionally in October.

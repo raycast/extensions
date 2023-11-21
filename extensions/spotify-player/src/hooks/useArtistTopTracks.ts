@@ -14,7 +14,7 @@ export function useArtistTopTracks({ artistId = "", options }: UseArtistTopTrack
     [artistId],
     {
       execute: options?.execute !== false && !!artistId,
-    }
+    },
   );
 
   return { artistTopTracksData: data, artistTopTracksError: error, artistTopTracksIsLoading: isLoading };

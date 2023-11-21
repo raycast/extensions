@@ -46,7 +46,7 @@
   "dependencies": {
     "@raycast/api": "^1.60.1",
     "@raycast/utils": "^1.10.0",
-    "fuse.js": "^6.6.2",
+    "fuse.js": "^7.0.0",
     "ini": "^4.1.1",
     "simple-plist": "^1.4.0-0",
     "sql.js": "^1.8.0"

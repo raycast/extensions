@@ -98,6 +98,8 @@
     "@types/node": "^20.5.4",
     "@types/react": "^18.2.21",
     "eslint": "^8.47.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.1",
     "prettier": "^3.0.2",
     "typescript": "^5.1.6"
   },
@@ -106,6 +108,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "prepare": "husky install"
   }
 }

@@ -165,7 +165,7 @@ export default function Command() {
         }
 
         // If both frecencies are undefined, sort by title
-        return a.title.localeCompare(b.title);
+        return a.title?.localeCompare(b.title);
       });
 
     setBookmarks(bookmarks);
@@ -241,6 +241,7 @@ export default function Command() {
       ],
       threshold: 0.4,
       includeScore: true,
+      ignoreLocation: true,
     });
   }, [folderBookmarks]);
 

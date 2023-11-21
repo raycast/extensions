@@ -24,6 +24,25 @@ export const truncateEventSize = (eventTitle: string) => {
   }
   return eventTitle;
 };
+/**
+ * Function that returns the original events id if the event is a synced event otherwise returns null.
+ * @param {ApiResponseEvents[number]} event - The event object.
+ * @returns {string|null} The sync ID if found, null otherwise.
+ */
+export const getOriginalEventIDFromSyncEvent = (event: ApiResponseEvents[number]) => {
+  try {
+    const [type, ...rest] = decodeBase32(event.recurringEventId ?? event.eventId)
+      .replace("\x00", "")
+      .split(":");
+
+    if (type === "reclaim-personal-sync") {
+      const [id] = rest;
+      return id;
+    }
+  } catch (error) {
+    return null;
+  }
+};
 
 /**
  * Filter out events that are synced, managed by Reclaim and part of multiple calendars

@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Make Vault Optional] - 2023-11-16
+
+- Make vault optional for people who have it installed but do not want to use it.
+
 ## [Fix Broken Secrets Manager Link] - 2023-08-14
 
 - Fix broken region-routing for secrets manager links.

@@ -1,5 +1,10 @@
 # Browser Bookmarks Changelog
 
+## [Bug fixes] - 2023-11-21
+
+- Improved search results
+- Fixed `toLocaleCompare` issue
+
 ## [Bug Fixes] - 2023-11-03
 
 - Fixed an issue where Chrome bookmarks with no title were not displayed.
