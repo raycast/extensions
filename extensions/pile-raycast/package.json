@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Create Post",
-      "description": "Template for creating a post",
+      "description": "Creates a post in Pile journaling application",
       "mode": "view"
     }
   ],
