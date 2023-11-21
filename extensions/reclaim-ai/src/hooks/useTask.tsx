@@ -1,3 +1,7 @@
+import { getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useMemo } from "react";
+import { NativePreferences } from "../types/preferences";
 import { Task } from "../types/task";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import reclaimApi from "./useApi";
@@ -5,6 +9,23 @@ import { ApiResponseTasks, CreateTaskProps } from "./useTask.types";
 
 const useTask = () => {
   const { fetcher } = reclaimApi();
+
+  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }),
+    [apiToken]
+  );
+
+  const useFetchTasks = () =>
+    useFetch<ApiResponseTasks>(`${apiUrl}/tasks`, {
+      headers,
+      keepPreviousData: true,
+    });
 
   const createTask = async (task: CreateTaskProps) => {
     try {
@@ -124,6 +145,7 @@ const useTask = () => {
   };
 
   return {
+    useFetchTasks,
     createTask,
     handleStartTask,
     handleStopTask,
