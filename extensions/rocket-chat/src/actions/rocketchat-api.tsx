@@ -226,7 +226,7 @@ export async function getDirectMessageList(): Promise<DirectMessage[]> {
     result.push(...item);
   }
 
-  return result
+  return result;
 }
 
 export async function getUserList(): Promise<User[]> {
@@ -275,5 +275,5 @@ export async function getUserList(): Promise<User[]> {
     result.push(...item);
   }
 
-  return result
+  return result;
 }
