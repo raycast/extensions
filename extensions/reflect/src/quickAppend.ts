@@ -19,8 +19,6 @@ export default async (props: LaunchProps<{ arguments: Arguments.QuickAppend }>) 
   const matchedLists = parentLists.find((list) => list.toLowerCase().search(searchString.toLowerCase()) !== -1);
   const listName = searchString ? matchedLists?.split(",")[0] || preferences.listName : preferences.listName;
 
-  console.log("listName", listName);
-
   try {
     const authorizationToken = await authorize();
     const text = prependTimestampIfSelected(props.fallbackText || props.arguments.text, preferences);
