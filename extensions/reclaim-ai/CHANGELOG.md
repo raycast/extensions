@@ -1,5 +1,9 @@
 # reclaim Changelog
 
+## [Update] - 2023-11-22
+- Data Fetching Refactor: Replaced custom `axios` + `useState` + `useEffect` fetching logic with `useFetch` from `@raycast/utils` for improved caching and faster FCP.
+- Improved Hook Architecture: Encapsulated fetching logic within respective custom hooks for better code organization and maintainability.
+
 ## [Update] - 2023-11-21
 - Menubar Update: Reverted logic to build `/next/moment` response in code, now utilizing endpoint support for events from all calendars.
 - Join Meeting Enhancement: Added checks to handle events without a `meetingUrl`. For synced events, the function now fetches the original event to obtain and use its `meetingUrl`.
