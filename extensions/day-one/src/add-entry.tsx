@@ -1,4 +1,16 @@
-import { Form, ActionPanel, Action, showHUD, Detail, open, LaunchProps, popToRoot, PopToRootType } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showHUD,
+  Detail,
+  open,
+  LaunchProps,
+  popToRoot,
+  PopToRootType,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { missingCLIError, useDayOneIntegration } from "./day-one";
 import { useCachedState } from "@raycast/utils";
 import { useCallback, useState } from "react";
@@ -22,11 +34,16 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
   };
 
   const submitEntry = useCallback(async (values: Values, options: SubmitOptions): Promise<string | null> => {
+    if (values.body.length === 0) {
+      showToast(Toast.Style.Failure, "Body can't be empty");
+      return null;
+    }
+
     try {
       const entryId = await addEntry(values);
 
       if (options.notify) {
-        showHUD(values.journal ? `✅ Saved entry in "${values.journal}"` : "✅ Saved entry", {
+        showHUD(values.journal ? `Saved entry in "${values.journal}"` : "Saved entry!", {
           popToRootType: PopToRootType.Immediate,
         });
       }
@@ -45,9 +62,10 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
 
   async function submitAndOpen(values: Values) {
     const entryId = await submitEntry(values, { notify: false });
-
-    void open(`dayone://view?entryId=${entryId}`);
-    void popToRoot();
+    if (entryId !== null) {
+      await popToRoot();
+      await open(`dayone://view?entryId=${entryId}`);
+    }
   }
 
   if (!installed && !loading) {
