@@ -3,8 +3,6 @@ import { readFileSync } from "fs";
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { SensibleSDK, type ExtractionResult } from "sensible-api";
 
-import type { Preferences } from "../types";
-
 type Extraction = {
   data: ExtractionResult | undefined;
   error?: string;
@@ -12,7 +10,7 @@ type Extraction = {
 };
 
 export default function useExtraction(documentType?: string, file?: string): Extraction {
-  const { sensible_api_key } = getPreferenceValues<Preferences>();
+  const { sensible_api_key } = getPreferenceValues<ExtensionPreferences>();
 
   const [extraction, setExtraction] = useState<Extraction>({ data: undefined, error: undefined, isLoading: true });
 

@@ -3,4 +3,3 @@ export type DocumentType = {
   name: string;
   created: string;
 };
-
