@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pile-raycast",
-  "title": "Pile-Raycast",
+  "title": "Pile",
   "description": "A raycast extension for the Pile journaling app",
   "icon": "logo-v2.png",
   "author": "desmondsofua",
