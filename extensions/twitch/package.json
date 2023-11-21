@@ -9,7 +9,8 @@
     "Aayush9029",
     "suth",
     "pernielsentikaer",
-    "MiracleXYZ"
+    "MiracleXYZ",
+    "Sheraff"
   ],
   "license": "MIT",
   "preferences": [
@@ -19,15 +20,15 @@
       "default": "",
       "title": "Client ID",
       "required": true,
-      "description": "Twitch ClientId https://twitchapps.com/tokengen/"
+      "description": "Your app’s registered client ID. Create a twitch app from https://dev.twitch.tv/docs/authentication/register-app/ and set https://www.raycast.com/redirect?packageName=Extension as the OAuth Redirect URL."
     },
     {
-      "name": "authorization",
+      "name": "clientSecret",
       "type": "password",
       "default": "",
-      "title": "Authorization Token",
+      "title": "Client Secret",
       "required": true,
-      "description": "Twitch Bearer Token (Must be matching with ClientId) https://twitchapps.com/tokengen/"
+      "description": "Your app’s registered client secret associated with the Client ID."
     },
     {
       "name": "primaryaction",
@@ -64,13 +65,13 @@
       "required": false,
       "description": "VLC Player is required for low latency streams"
     },
-{
-    "name": "streamlinkConfig",
-    "type": "textfield",
-    "title": "Custom Streamlink Config",
-    "required": false,
-    "description": "(optional) Path to custom streamlink config file"
-},
+    {
+      "name": "streamlinkConfig",
+      "type": "textfield",
+      "title": "Custom Streamlink Config",
+      "required": false,
+      "description": "(optional) Path to custom streamlink config file"
+    },
     {
       "name": "quality",
       "type": "dropdown",
@@ -119,26 +120,44 @@
       "description": "Search following Channels",
       "icon": "icon.png",
       "mode": "view"
+    },
+    {
+      "name": "offline",
+      "title": "Search Following Channels (offline)",
+      "description": "Search following Channels (offline)",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "live",
+      "title": "Display Live Followed Channels in the Menu Bar",
+      "description": "Display Live Followed Channels in the Menu Bar",
+      "icon": "icon.png",
+      "mode": "menu-bar",
+      "interval": "10m"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
-    "dedent-js": "^1.0.1",
-    "millify": "^5.0.0",
-    "node-fetch": "^3.1.0"
+    "@raycast/api": "^1.62.1",
+    "@raycast/utils": "^1.10.1",
+    "millify": "^6.1.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@raycast/eslint-plugin": "^1.0.7",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "prettier": "^3.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
   }
 }
