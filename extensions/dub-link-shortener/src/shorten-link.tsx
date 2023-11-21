@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { useCreateShortLink } from "./utils/api";
@@ -28,7 +28,12 @@ function ShortenLink() {
         await Clipboard.copy(`https://${domain}/${key}`);
         showToast({ title: "Shortened link", message: "See logs for submitted values" });
       },
-      onError: () => showToast({ title: "Failed to shorten link", message: "See logs for submitted values" }),
+      onError: () =>
+        showToast({
+          title: "Failed to shorten link",
+          message: "See logs for submitted values",
+          style: Toast.Style.Failure,
+        }),
     });
   }
 
@@ -40,6 +45,8 @@ function ShortenLink() {
     }
     getSelectedOrClipboardValue();
   }, []);
+
+  console.log({ originalLink });
 
   return (
     <Form
