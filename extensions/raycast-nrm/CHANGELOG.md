@@ -1,4 +1,4 @@
-# raycast-nrm Changelog
+# NRM Changelog
 
 ## [1.0.0] - 2023-11-18
 - 支持静态地址源获取
