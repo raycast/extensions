@@ -1,5 +1,5 @@
 import { Toast, closeMainWindow, showToast } from "@raycast/api";
-import { ConnectionStatus, connectToWarp, getWarpStatus } from "./lib";
+import { ConnectionStatus, disconnectFromWarp, getWarpStatus } from "./lib";
 
 export default async () => {
   try {
@@ -12,7 +12,7 @@ export default async () => {
       });
       return;
     }
-    const disconnectionResult = await connectToWarp();
+    const disconnectionResult = await disconnectFromWarp();
     if (disconnectionResult) {
       await showToast({
         style: Toast.Style.Success,

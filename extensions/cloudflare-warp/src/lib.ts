@@ -11,7 +11,7 @@ export function execCommand(cmd: string) {
   return execPromise(`"${wrapCliCmd}" ${cmd}`);
 }
 
-export async function connectToWarp(): Promise<Boolean> {
+export async function connectToWarp(): Promise<boolean> {
   try {
     const { stdout } = await execCommand("connect");
     if (stdout.includes("Success")) {
@@ -24,7 +24,7 @@ export async function connectToWarp(): Promise<Boolean> {
   }
 }
 
-export async function disconnectFromWarp(): Promise<Boolean> {
+export async function disconnectFromWarp(): Promise<boolean> {
   try {
     const { stdout } = await execCommand("disconnect");
     if (stdout.includes("Success")) {
@@ -95,7 +95,7 @@ export async function getVirtualNetworks(): Promise<VirtualNetwork[]> {
   return networks;
 }
 
-export async function switchVirtualNetwork(id: string): Promise<Boolean> {
+export async function switchVirtualNetwork(id: string): Promise<boolean> {
   try {
     const disconnected = await disconnectFromWarp();
     if (!disconnected) {
