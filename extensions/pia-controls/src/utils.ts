@@ -84,14 +84,12 @@ function executeCommand(command: string): Promise<{ stdout: string; stderr: stri
 
 function mapRegionsToDisplayObjects(regions: string[]): Region[] {
     return regions.map(region => {
-        let title = '';
-        const words = region.split('-');
-        if (words.length > 1) {
-            words.shift();
-            title = words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-        } else {
-            title = region.charAt(0).toUpperCase() + region.slice(1);
+        let words = region.split('-');
+        words = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        if (words[0].length === 2) {
+            words[0] = words[0].toUpperCase()
         }
+        const title = words.join(' ');
         return {
             name: region,
             title,

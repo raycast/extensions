@@ -1,25 +1,19 @@
 import {Action, ActionPanel, Icon, List} from "@raycast/api";
-import {useEffect, useState} from "react";
+import {useCachedPromise} from "@raycast/utils";
 import {connectToPIA, disconnectFromPIA, getPIACurrentRegion, getPIARegions} from "./utils";
 import {Region} from "./types";
 
 export default function Command() {
-    const [isLoading, setIsLoading] = useState(true);
-    const [regions, setRegions] = useState<Region[]>([]);
-    const [currentRegion, setCurrentRegion] = useState<string>();
-
-    useEffect(() => {
-        getPIARegions().then((regions) => {
-            setRegions(regions);
-            setIsLoading(false);
-        });
-    }, [])
-
-    useEffect(() => {
-        getPIACurrentRegion().then((region) => {
-            setCurrentRegion(region);
-        })
-    }, [])
+    const {isLoading, data: regions} = useCachedPromise(
+        async () => {
+            return await getPIARegions();
+        },
+    );
+    const {data: currentRegion, revalidate: reloadCurrentRegion} = useCachedPromise(
+        async () => {
+            return await getPIACurrentRegion();
+        },
+    );
 
     return (
 
@@ -33,27 +27,28 @@ export default function Command() {
                 return (<List.Item
                     key={index}
                     title={item.title}
-                    subtitle={item.name}
                     accessories={[{
-                        icon: currentlyConnected ? Icon.Circle : undefined,
-                        text: currentlyConnected ? "Connected" : undefined
+                        ...currentlyConnected && {tag: {value: "Connected", color: "green"}},
+                        icon: currentlyConnected ? Icon.Checkmark : undefined,
                     }]}
                     keywords={[item.name, item.title, connectedKeyword]}
                     actions={<ActionPanel>
                         {!currentlyConnected && <Action
                             title="Connect"
+                            icon={Icon.Plus}
                             shortcut={{modifiers: ["cmd"], key: "c"}}
                             onAction={async () => {
                                 await connectToPIA(item.name);
-                                setCurrentRegion(item.name);
+                                reloadCurrentRegion();
                             }}
                         />}
                         {currentlyConnected && <Action
                             title="Disconnect"
+                            icon={Icon.Xmark}
                             shortcut={{modifiers: ["cmd"], key: "d"}}
                             onAction={async () => {
                                 await disconnectFromPIA();
-                                setCurrentRegion(undefined);
+                                reloadCurrentRegion();
                             }}
                         />}
                         <Action.CopyToClipboard title="Copy Region Name" content={item.name}/>
