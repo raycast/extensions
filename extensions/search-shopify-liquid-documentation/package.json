@@ -14,7 +14,6 @@
     {
       "name": "index",
       "title": "Search Shopify's Liquid Documentation",
-      "subtitle": "List of all the Shopify Liquid Documentation",
       "description": "Search the Shopify liquid Documentation direclty from Raycast",
       "mode": "view"
     }
