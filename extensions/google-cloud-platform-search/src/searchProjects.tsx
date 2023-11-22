@@ -35,7 +35,7 @@ export function ProjectList() {
     showToast(
       ToastStyle.Failure,
       "Could not fetch updated projects, check your internet and setup the GCloud CLI!",
-      error.message
+      error.message,
     );
   }
 
@@ -45,9 +45,7 @@ export function ProjectList() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search projects by name or id...">
-      {data?.map((project) => (
-        <ProjectListItem key={project.projectId} project={project} />
-      ))}
+      {data?.map((project) => <ProjectListItem key={project.projectId} project={project} />)}
     </List>
   );
 }
