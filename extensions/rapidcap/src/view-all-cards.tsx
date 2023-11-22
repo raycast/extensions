@@ -9,15 +9,19 @@ import { getCards, saveCards } from "./storage";
 export default function ViewAllCards() {
   const [cards, setCards] = useState<Card[]>([]);
   const [error, setError] = useState<Error | unknown>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    setLoading(true);
     try {
       (async () => {
+        setLoading(true);
         setCards(await getCards());
       })();
     } catch (e) {
       setError(e);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -55,7 +59,7 @@ export default function ViewAllCards() {
   }
 
   return (
-    <List isLoading={cards.length === 0}>
+    <List isLoading={loading}>
       {cards.map((card, index) => (
         <List.Item
           key={index}
