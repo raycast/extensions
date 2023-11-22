@@ -14,24 +14,28 @@
     {
       "name": "now-playing",
       "title": "Now Playing",
+      "subtitle": "Cider",
       "description": "Shows information about the current track",
       "mode": "view"
     },
     {
       "name": "next-track",
       "title": "Next Track",
+      "subtitle": "Cider",
       "description": "Skips to the next track",
       "mode": "no-view"
     },
     {
       "name": "previous-track",
       "title": "Previous Track",
+      "subtitle": "Cider",
       "description": "Goes back to the previous track",
       "mode": "no-view"
     },
     {
       "name": "adjust-volume",
       "title": "Adjust Volume",
+      "subtitle": "Cider",
       "description": "Adjusts Cider's volume",
       "mode": "no-view",
       "arguments": [
@@ -46,24 +50,28 @@
     {
       "name": "toggle-autoplay",
       "title": "Toggle Autoplay",
+      "subtitle": "Cider",
       "description": "Toggles autoplay in Cider",
       "mode": "no-view"
     },
     {
       "name": "add-to-library",
       "title": "Add to Library",
+      "subtitle": "Cider",
       "description": "Adds the current playing track to the library",
       "mode": "no-view"
     },
     {
       "name": "play-pause",
       "title": "Play/Pause",
+      "subtitle": "Cider",
       "description": "Alternates between play and pause in Cider",
       "mode": "no-view"
     },
     {
       "name": "seek",
       "title": "Seek",
+      "subtitle": "Cider",
       "description": "Seeks to a certain timestamp in Cider",
       "mode": "no-view",
       "arguments": [
@@ -78,6 +86,7 @@
     {
       "name": "stop-playback",
       "title": "Stop Playback",
+      "subtitle": "Cider",
       "description": "Completely stops playing anything in Cider",
       "mode": "no-view"
     }
@@ -85,12 +94,12 @@
   "preferences": [
     {
       "name": "exitOnSuccess",
-      "title": "Exit on Success",
+      "title": "Options",
       "description": "Closes Raycast when a command succeeds",
       "type": "checkbox",
       "defaultValue": false,
-      "label": "Yes?",
-      "required": true
+      "label": "Exit on Success",
+      "required": false
     }
   ],
   "dependencies": {
