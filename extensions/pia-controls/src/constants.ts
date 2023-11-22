@@ -12,3 +12,4 @@ export const openPiaScript = ` tell application "Private Internet Access"
         end repeat
       end if
     end tell`;
+

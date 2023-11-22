@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pia-controls",
   "title": "Private Internet Access Controls",
-  "description": "Private Internet Access VPN Controller",
+  "description": "Private Internet Access VPN Controls",
   "icon": "icon.png",
   "author": "yakitrak",
   "categories": [
@@ -13,14 +13,30 @@
     {
       "name": "connect",
       "title": "Connect to PIA",
+      "subtitle": "PIA Controls",
       "description": "Connects to PIA",
       "mode": "no-view"
     },
     {
       "name": "disconnect",
       "title": "Disconnect from PIA",
+      "subtitle": "PIA Controls",
       "description": "Disconnects from PIA",
       "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "PIA Status",
+      "subtitle": "PIA Controls",
+      "description": "Displays connection and region status",
+      "mode": "no-view"
+    },
+    {
+      "name": "connectToRegion",
+      "title": "Connect to PIA Region",
+      "subtitle": "PIA Controls",
+      "description": "Connects to PIA Region",
+      "mode": "view"
     }
   ],
   "dependencies": {
