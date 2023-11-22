@@ -1,13 +1,30 @@
-import { execPromise } from "@/helper/exec";
+import { getPreferenceValues } from "@raycast/api";
+import { existsSync } from "fs";
+
+import { execFilePromis } from "@/helper/exec";
 import { VaultCredential, VaultCredentialDto, VaultNote, VaultNoteDto } from "@/types/dcli";
 
+const preferences = getPreferenceValues<Preferences>();
+
+const CLI_PATH =
+  preferences.cliPath ?? ["/usr/local/bin/dcli", "/opt/homebrew/bin/dcli"].find((path) => existsSync(path));
+
+async function dcli(...args: string[]) {
+  if (CLI_PATH) {
+    const { stdout } = await execFilePromis(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
+    return stdout;
+  }
+
+  throw Error("Dashlane CLI is not found!");
+}
+
 export async function syncVault() {
-  await execPromise("dcli sync");
+  await dcli("sync");
 }
 
 export async function getVaultCredentials() {
   try {
-    const { stdout } = await execPromise("dcli password --output json");
+    const stdout = await dcli("password", "--output", "json");
     return parseVaultCredentials(stdout);
   } catch (error) {
     return [];
@@ -16,7 +33,7 @@ export async function getVaultCredentials() {
 
 export async function getNotes() {
   try {
-    const { stdout } = await execPromise("dcli note --output json");
+    const stdout = await dcli("note", "--output", "json");
     return parseNotes(stdout);
   } catch (error) {
     return [];
@@ -24,22 +41,18 @@ export async function getNotes() {
 }
 
 export async function getPassword(id: string) {
-  const { stdout } = await execPromise(`dcli password id=${id} -o password`);
+  const stdout = await dcli("password", `id=${id}`, "--output", "password");
   return stdout.trim();
 }
 
 export async function getOtpSecret(id: string) {
-  const { stdout } = await execPromise(`dcli otp id=${id} --print`);
+  const stdout = await dcli("otp", `id=${id}`, "--print");
   return stdout.trim();
-}
-
-export async function logout() {
-  await execPromise("dcli logout");
 }
 
 export async function checkIfCliIsInstalled() {
   try {
-    await execPromise("dcli -V");
+    await dcli("--version");
     return true;
   } catch (error) {
     return false;

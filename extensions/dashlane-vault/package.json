@@ -32,6 +32,17 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "default": "/usr/local/bin/dcli",
+      "description": "Enter the CLI binary path",
+      "name": "cliPath",
+      "placeholder": "e.g., /usr/local/bin/dcli",
+      "required": false,
+      "title": "Dashlane CLI path",
+      "type": "textfield"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.61.1",
     "@raycast/utils": "^1.10.1"
