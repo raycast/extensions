@@ -50,15 +50,6 @@ export async function getOtpSecret(id: string) {
   return stdout.trim();
 }
 
-export async function checkIfCliIsInstalled() {
-  try {
-    await dcli("--version");
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
 function parseVaultCredential(dto: VaultCredentialDto): VaultCredential {
   return {
     ...dto,
