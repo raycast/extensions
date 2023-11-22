@@ -1,6 +1,9 @@
 # Hetzner Changelog
 
-## [Fix server ipv4 nullable type and use the navigationTitle to show the project name] - 2023-11-22
+## [Update] - 2023-11-22
+
+- Fix server ipv4 nullable type
+- Use the navigationTitle to show the project name
 
 ## [Add multiple Hetzner projects] - 2023-11-16
 
