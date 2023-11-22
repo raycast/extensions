@@ -66,6 +66,7 @@ export default function Command() {
       searchBarPlaceholder="Search server"
       isShowingDetail={!isLoading && servers.length !== 0}
       isLoading={isLoading}
+      navigationTitle={selectedProject?.name}
     >
       <List.EmptyView
         icon={Icon.Bug}
@@ -126,11 +127,7 @@ export default function Command() {
               />
             }
           />
-          <List.Section
-            title={`Project: ${
-              selectedProject.name
-            } - ${servers.length.toString()} servers`}
-          >
+          <List.Section title={`${servers.length.toString()} Servers`}>
             {servers.map((server) => (
               <List.Item
                 key={server.id}
@@ -157,11 +154,13 @@ export default function Command() {
                           title="Server Name"
                           text={server.name}
                         />
-                        <List.Item.Detail.Metadata.Label
-                          title="IPv4"
-                          icon="icon-globe.svg"
-                          text={server.public_net.ipv4.ip}
-                        />
+                        {server.public_net.ipv4 && (
+                          <List.Item.Detail.Metadata.Label
+                            title="IPv4"
+                            icon="icon-globe.svg"
+                            text={server.public_net.ipv4.ip}
+                          />
+                        )}
                         {server.public_net.ipv6 && (
                           <List.Item.Detail.Metadata.Label
                             title="IPv6"
@@ -276,11 +275,13 @@ export default function Command() {
                     )}
 
                     <ActionPanel.Section>
-                      <Action.CopyToClipboard
-                        title="Copy IPv4 Address"
-                        shortcut={Keyboard.Shortcut.Common.Copy}
-                        content={server.public_net.ipv4.ip}
-                      />
+                      {server.public_net.ipv4 && (
+                        <Action.CopyToClipboard
+                          title="Copy IPv4 Address"
+                          shortcut={Keyboard.Shortcut.Common.Copy}
+                          content={server.public_net.ipv4.ip}
+                        />
+                      )}
                       <Action.CopyToClipboard
                         title="Copy Server Name"
                         content={server.name}
