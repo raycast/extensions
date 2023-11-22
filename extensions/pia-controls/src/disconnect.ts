@@ -1,4 +1,4 @@
-import {disconnectFromPIA} from "./utils";
+import { disconnectFromPIA } from "./utils";
 export default async () => {
   await disconnectFromPIA();
 };

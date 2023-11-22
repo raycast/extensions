@@ -1,4 +1,4 @@
-import {  connectToPIA} from "./utils";
+import { connectToPIA } from "./utils";
 export default async () => {
-   await connectToPIA();
+  await connectToPIA();
 };
