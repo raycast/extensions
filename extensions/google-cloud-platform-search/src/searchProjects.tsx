@@ -44,7 +44,7 @@ export function ProjectList() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search projects by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search projects by name or id...">
       {data?.map((project) => (
         <ProjectListItem key={project.projectId} project={project} />
       ))}
@@ -68,6 +68,7 @@ function ProjectListItem(props: { project: Project }) {
   return (
     <List.Item
       title={props.project.displayName ?? props.project.projectId}
+      keywords={[props.project.projectId]}
       accessoryTitle={props.project.projectId}
       icon="command-icon.png"
       actions={<ProductActions project={props.project} />}
