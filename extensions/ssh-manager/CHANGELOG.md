@@ -1,6 +1,6 @@
 # ssh-manager Changelog
 
-## [Fix] - 2023-11-06
+## [Fix] - 2023-11-22
 
 - Fixed a bug where a connection with a remote command did not work properly while saving.
 
