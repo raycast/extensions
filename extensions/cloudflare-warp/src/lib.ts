@@ -105,7 +105,7 @@ export async function switchVirtualNetwork(id: string): Promise<boolean> {
     if (!stdout.includes("Success")) {
       throw new Error("Failed to switch network");
     }
-    const connectStatus = await connectToWarp;
+    const connectStatus = await connectToWarp();
     if (!connectStatus) {
       throw new Error("Failed to connect");
     }

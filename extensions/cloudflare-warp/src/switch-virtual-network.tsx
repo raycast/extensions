@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, PopToRootType, showHUD } from "@raycast/api";
+import { Action, ActionPanel, List, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { VirtualNetwork, getVirtualNetworks, switchVirtualNetwork } from "./lib";
 
@@ -45,11 +45,18 @@ export default () => {
   }, []);
 
   const onSwitchVirtualNetwork = async (id: string) => {
-    await switchVirtualNetwork(id);
-    await showHUD("Switched Virtual Network", {
-      clearRootSearch: true,
-      popToRootType: PopToRootType.Immediate,
-    });
+    const result = await switchVirtualNetwork(id);
+    if (result) {
+      await showHUD("Switched Virtual Network", {
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      });
+    } else {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to switch Virtual Network",
+      });
+    }
   };
   if (!isLoading && items.length === 0) {
     return (
