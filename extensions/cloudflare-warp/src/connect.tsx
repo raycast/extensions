@@ -1,24 +1,22 @@
-import { Toast, closeMainWindow, showToast } from "@raycast/api";
+import { PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import { ConnectionStatus, connectToWarp, getWarpStatus } from "./lib";
 
 export default async () => {
   try {
     const statusResult = await getWarpStatus();
     if (statusResult.status === ConnectionStatus.Connected) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Already connected",
+      await showHUD("Already connected", {
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
       });
-      await closeMainWindow();
       return;
     }
     const connectionResult = await connectToWarp();
     if (connectionResult) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Connected",
+      await showHUD("Connected", {
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
       });
-      await closeMainWindow();
       return;
     }
 
@@ -28,6 +26,5 @@ export default async () => {
       style: Toast.Style.Failure,
       title: "Failed to connect",
     });
-    await closeMainWindow();
   }
 };
