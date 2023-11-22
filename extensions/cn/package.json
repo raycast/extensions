@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cn",
+  "title": "cn",
+  "description": "",
+  "icon": "command-icon.png",
+  "author": "kojunho",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Connect to NUGU Servers",
+      "description": "cn 을 이용해서 서버에 접속합니다.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
