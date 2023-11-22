@@ -23,7 +23,7 @@ export const searchIpGeolocation = (
       return;
     }
     if (
-      ((searchContent.match(/\./g) || []).length === 3 && !searchContent.match(/[A-Z]/)) ||
+      ((searchContent.match(/\./g) || []).length === 3 && /^[0-9.]*$/.test(searchContent)) ||
       (searchContent.includes(":") && (searchContent.match(/:/g) || []).length >= 2)
     ) {
       if (!net.isIP(searchContent)) {
