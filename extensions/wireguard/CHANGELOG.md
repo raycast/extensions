@@ -1,7 +1,7 @@
 # Wireguard Changelog
 ## [Fixed] - 2023-11-23
 
-- Fixed the issue where quotes at the end of a name were omitted when the name was more than 30 characters long, detail: https://www.raycast.com/extension-issues/sbugzhu/wireguard/4639679654
+- Fixed the issue where quotes at the end of a name were omitted when the name was more than 30 characters long
 
 ## [Feature] - 2023-04-26
 
