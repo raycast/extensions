@@ -75,7 +75,7 @@ export type VirtualNetwork = {
 export async function getVirtualNetworks(): Promise<VirtualNetwork[]> {
   const { stdout } = await execCommand("get-virtual-networks");
   const lines = stdout.trim().split("\n");
-  const currentlySelected = lines[0].split(" ")[1];
+  const currentlySelected = lines[1].split(" ")[2]?.trim() ?? "";
   const rawData = lines.slice(2).filter((line) => line !== "");
 
   const networks = [];
@@ -87,8 +87,8 @@ export async function getVirtualNetworks(): Promise<VirtualNetwork[]> {
       id: id.substring(4),
       name: name.substring(6),
       comment: comment.substring(8),
-      default: defaultNetwork === "true",
-      active: id === currentlySelected,
+      default: defaultNetwork.substring(9) === "true",
+      active: id.substring(4) === currentlySelected,
     });
     i += 4;
   }
