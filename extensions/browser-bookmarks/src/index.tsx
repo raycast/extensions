@@ -556,7 +556,6 @@ function SelectProfileSubmenu({
   const { data: availableBrowsers } = useAvailableBrowsers();
 
   const hasBrowser = availableBrowsers?.map((browser) => browser.bundleId).includes(bundleId);
-  console.log("hasBrowser", hasBrowser);
   if (!hasBrowser || profiles.length <= 1) {
     return null;
   }
