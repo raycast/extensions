@@ -1,3 +1,3 @@
 # JSON inline
 
-A extension to converts a JSON to inline
+An extension that converts json to inline

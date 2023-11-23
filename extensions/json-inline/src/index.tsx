@@ -21,8 +21,8 @@ export default function Command() {
         id="curly-braces"
         label="Add space between curly braces"
         value={formatOptions.spaceBetweenCurlyBrackets}
-        onChange={value => {
-          setFormatOptions(previous => ({
+        onChange={(value) => {
+          setFormatOptions((previous) => ({
             ...previous,
             spaceBetweenCurlyBrackets: value,
           }));
@@ -32,8 +32,8 @@ export default function Command() {
         id="square-brackets"
         label="Add space between square brackets"
         value={formatOptions.spaceBetweenSquareBrackets}
-        onChange={value => {
-          setFormatOptions(previous => ({
+        onChange={(value) => {
+          setFormatOptions((previous) => ({
             ...previous,
             spaceBetweenSquareBrackets: value,
           }));
@@ -72,9 +72,7 @@ function formatJSONtoInline(data: string, options?: FormatOptions): string | nul
 
     let base: string;
 
-    base = JSON.stringify(jsonObject)
-      .replace(/,/g, ", ")
-      .replace(/:"/g, ': "');
+    base = JSON.stringify(jsonObject).replace(/,/g, ", ").replace(/:"/g, ': "');
 
     if (options?.spaceBetweenCurlyBrackets) {
       base = base

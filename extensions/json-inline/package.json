@@ -1,15 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "json-inline",
-  "title": "JSON inline",
+  "title": "JSON Inline",
   "description": "A extension to converts a JSON to inline",
   "icon": "command-icon.png",
   "author": "tiagobarros01",
+  "categories": ["Productivity", "Data"],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "JSON inline",
+      "title": "JSON Inline",
       "description": "Open the extension",
       "mode": "view"
     }
