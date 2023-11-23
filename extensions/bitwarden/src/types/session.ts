@@ -5,4 +5,5 @@ export interface SessionState {
   readonly isAuthenticated: boolean;
   readonly passwordHash: string | undefined;
   readonly lastActivityTime: Date | undefined;
+  readonly lockReason: string | undefined;
 }

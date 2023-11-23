@@ -1,11 +1,11 @@
-import { List, Detail, ActionPanel, Action, getPreferenceValues, LaunchProps, Icon } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { List, ActionPanel, Action, LaunchProps, Icon } from "@raycast/api";
+import { useState } from "react";
 import { ContentView } from "./views/content";
 import { useQuery } from "./hooks/useQuery";
 import { LangDropdown } from "./views/lang-dropdown";
 import { useHistory } from "./hooks/useHistory";
-import { TranslateMode } from "./providers/openai/translate";
 import capitalize from "capitalize";
+import { TranslateMode } from "./providers/types";
 
 export default function getBase(
   props: LaunchProps,

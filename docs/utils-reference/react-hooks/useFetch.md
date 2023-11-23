@@ -1,6 +1,10 @@
 # `useFetch`
 
-Hook which fetches the URL and returns the [AsyncState](#asyncstate) corresponding to the execution of the fetch. The last value will be kept between command runs.
+Hook which fetches the URL and returns the [AsyncState](#asyncstate) corresponding to the execution of the fetch.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useFetch` first returns the data from cache (stale), then sends the request (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
 
 ## Signature
 
@@ -33,7 +37,7 @@ With a few options:
 
 Including the [useCachedPromise](./useCachedPromise.md)'s options:
 
-- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See [Argument dependent on List search text](#argument-dependent-on-list-search-text) for more information.
 
 Including the [useCachedState](./useCachedState.md)'s options:
 
@@ -60,7 +64,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, revalidate } = useFetch("https://api.example");
 
   return (
@@ -74,7 +78,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Argument dependent on List search text
@@ -88,7 +92,7 @@ import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch(`https://api.example?q=${searchText}`, {
     // to make sure the screen isn't flickering when the searchText changes
@@ -102,7 +106,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -117,7 +121,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate } = useFetch("https://api.example");
 
   const appendFoo = async () => {
@@ -157,7 +161,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Types

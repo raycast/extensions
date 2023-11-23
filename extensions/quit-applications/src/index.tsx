@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, popToRoot } from "@raycast/api";
 import React from "react";
 import { runAppleScript } from "run-applescript";
 import { execSync } from "child_process";
@@ -18,24 +18,25 @@ function applicationIconFromPath(path: string): string {
    * '/Applications/Visual Studio Code.app' -> '/Applications/Visual Studio Code.app/Contents/Resources/{file name}.icns'
    */
 
-  // read path/Contents/Info.plist and look for <key>CFBundleIconFile</key>
+  // read path/Contents/Info.plist and look for <key>CFBundleIconFile</key> or <key>CFBundleIconName</key>
+  // the actual icon file is located at path/Contents/Resources/{file name}.icns
 
   const infoPlist = `${path}/Contents/Info.plist`;
-  const stdout = execSync(
-    [
-      "plutil",
-      "-convert",
-      "json",
-      '"' + infoPlist + '"',
-      "-o",
-      // By using a dash ("-") for the -o parameter value the output
-      // will be printed in the stdout instead into a local file
-      "-",
-    ].join(" ")
-  ).toString();
 
-  const json = JSON.parse(stdout);
-  let iconFileName = json.CFBundleIconFile;
+  const possibleIconKeyNames = ["CFBundleIconFile", "CFBundleIconName"];
+
+  let iconFileName = null;
+
+  for (const keyName of possibleIconKeyNames) {
+    try {
+      iconFileName = execSync(["plutil", "-extract", keyName, "raw", '"' + infoPlist + '"'].join(" "))
+        .toString()
+        .trim();
+      break;
+    } catch (error) {
+      continue;
+    }
+  }
 
   if (!iconFileName) {
     // no icon found. fallback to empty string (no icon)
@@ -48,6 +49,7 @@ function applicationIconFromPath(path: string): string {
   }
 
   const iconPath = `${path}/Contents/Resources/${iconFileName}`;
+  console.log(iconPath);
   return iconPath;
 }
 
@@ -64,7 +66,7 @@ async function getRunningAppsPaths(): Promise<string[]> {
     return appPaths
   `);
 
-  return result.split(", ").map((appPath) => appPath.trim());
+  return result.split(", ").map((appPath: string) => appPath.trim());
 }
 
 function quitApp(app: string) {
@@ -115,12 +117,19 @@ function restartAppWithToast(app: string): boolean {
   }
 }
 
+function getQuickLinkForApp(appName: string, action: string): string {
+  const context = JSON.stringify({ appName, action });
+  const encodedContext = encodeURIComponent(context);
+  return `raycast://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
+}
+
 interface AppListState {
   apps: {
     name: string;
     iconPath: string;
   }[];
   isLoading: boolean;
+  launchContext?: { appName: string; action: string /* quit | restart */ };
 }
 
 class AppList extends React.Component<Record<string, never>, AppListState> {
@@ -130,16 +139,30 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
     this.state = {
       apps: [],
       isLoading: true,
+      launchContext: props.launchContext,
     };
   }
 
   componentDidMount() {
+    if (this.state.launchContext && this.state.launchContext.appName && this.state.launchContext.action) {
+      const { appName, action } = this.state.launchContext;
+
+      if (action === "quit") {
+        quitAppWithToast(appName);
+        popToRoot().then();
+        return;
+      }
+
+      if (action === "restart") {
+        restartAppWithToast(appName);
+        popToRoot().then();
+        return;
+      }
+    }
+
     getRunningAppsPaths().then((appCandidatePaths) => {
       // filter out all apps that do not end with .app
       const appPaths = appCandidatePaths.filter((appPath) => appPath.endsWith(".app"));
-
-      console.log(appPaths);
-
       const appNames = appPaths.map((appPath) => applicationNameFromPath(appPath));
       const appIcons = appPaths.map((appPath) => applicationIconFromPath(appPath));
 
@@ -178,6 +201,14 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
                   onAction={() => {
                     restartAppWithToast(app.name);
                   }}
+                />
+                <Action.CreateQuicklink
+                  title="Create Quit Quicklink"
+                  quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
+                />
+                <Action.CreateQuicklink
+                  title="Create Restart Quicklink"
+                  quicklink={{ link: getQuickLinkForApp(app.name, "restart"), name: `Restart ${app.name}` }}
                 />
               </ActionPanel>
             }

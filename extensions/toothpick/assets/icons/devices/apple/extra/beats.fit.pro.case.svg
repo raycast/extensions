@@ -1,15 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 26.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve">
-<style type="text/css">
-	.st0{fill-opacity:0;}
-	.st1{fill:#FFFFFF;fill-opacity:0.85;}
-</style>
-<g>
-	<rect x="1" y="15.4" class="st0" width="62" height="33.3"/>
-	<path class="st1" d="M1.1,30.2h14.8c0.4-0.8,1.2-1.4,2.1-1.4h27.9c1,0,1.8,0.5,2.2,1.4h14.8c-1-9.8-8.1-14.9-20.9-14.9H22
-		C9.3,15.4,2.1,20.5,1.1,30.2z M42,48.6c13.5,0,20.8-5.7,21-16.4H48.1c-0.4,0.8-1.2,1.4-2.2,1.4H18c-1,0-1.8-0.5-2.1-1.4H1
-		c0.1,10.3,7.9,16.4,21,16.4H42z M32,40.1c-1.1,0-2-0.9-2-2c0-1.1,0.9-2,2-2s2,0.9,2,2C34,39.2,33.1,40.1,32,40.1z"/>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 64 64">
+  <path fill="none" d="M1 15.4h62v33.3H1z"/>
+  <path fill="#fff" fill-opacity=".85" d="M1.1 30.2h14.8c.4-.8 1.2-1.4 2.1-1.4h27.9c1 0 1.8.5 2.2 1.4h14.8c-1-9.8-8.1-14.9-20.9-14.9H22c-12.7.1-19.9 5.2-20.9 14.9zM42 48.6c13.5 0 20.8-5.7 21-16.4H48.1c-.4.8-1.2 1.4-2.2 1.4H18c-1 0-1.8-.5-2.1-1.4H1c.1 10.3 7.9 16.4 21 16.4h20zm-10-8.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
 </svg>

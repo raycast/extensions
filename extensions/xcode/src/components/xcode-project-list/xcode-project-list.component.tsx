@@ -52,6 +52,7 @@ export function XcodeProjectList(props: {
           onChange={setProjectTypeFilter}
         />
       }
+      filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Favorites">
         {favoriteXcodeProjects?.map((xcodeProject) => (

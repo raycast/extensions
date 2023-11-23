@@ -1,13 +1,16 @@
-import { getPreferenceValues, List } from "@raycast/api";
+import { getPreferenceValues, Icon, List } from "@raycast/api";
 import React from "react";
-import { RaycastWallpaper } from "../types/types";
+import { RaycastWallpaperWithInfo } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { Preferences } from "../types/preferences";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
 
-export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpaper[] }) {
+export function RaycastWallpaperList(props: {
+  raycastWallpapers: RaycastWallpaperWithInfo[];
+  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+}) {
   const preferences = getPreferenceValues<Preferences>();
-  const { raycastWallpapers } = props;
+  const { raycastWallpapers, setRefresh } = props;
 
   return (
     <List
@@ -23,10 +26,15 @@ export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpape
             key={index + value.title}
             icon={{ source: value.url.replace(".png", "-preview.png") }}
             title={value.title}
+            accessories={
+              value.exclude ? [{ icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" }] : []
+            }
             detail={
               <List.Item.Detail isLoading={false} markdown={`![](${value.url.replace(".png", "-preview.png")})`} />
             }
-            actions={<ActionOnRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} />}
+            actions={
+              <ActionOnRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} setRefresh={setRefresh} />
+            }
           />
         );
       })}

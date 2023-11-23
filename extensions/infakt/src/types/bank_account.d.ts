@@ -6,6 +6,6 @@ export type BankAccountObject = {
   account_number: string;
   swift: string;
   default: boolean;
-  currency: Currency;
-  custom_name: string;
+  currency: Currency | null;
+  custom_name: string | null;
 };

@@ -1,0 +1,307 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "waktu-solat",
+  "title": "Waktu Solat",
+  "description": "Check Malaysia Prayer Time (JAKIM)",
+  "icon": "mosque.png",
+  "author": "msms",
+  "contributors": [
+    "ezzylan"
+  ],
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Waktu Solat",
+      "description": "View Malaysia Prayer Times directly from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "View Waktu Solat on Menu Bar",
+      "description": "View Malaysia Prayer Times directly from your menu bar",
+      "mode": "menu-bar",
+      "interval": "1d"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "zone",
+      "title": "Zone",
+      "description": "Select your zone",
+      "type": "dropdown",
+      "required": false,
+      "default": "WLY01",
+      "data": [
+        {
+          "title": "JHR01 - Pulau Aur dan Pulau Pemanggil",
+          "value": "JHR01"
+        },
+        {
+          "title": "JHR02 - Johor Bahru, Kota Tinggi, Mersing, Kulai",
+          "value": "JHR02"
+        },
+        {
+          "title": "JHR03 - Kluang, Pontian",
+          "value": "JHR03"
+        },
+        {
+          "title": "JHR04 - Batu Pahat, Muar, Segamat, Gemas Johor, Tangkak",
+          "value": "JHR04"
+        },
+        {
+          "title": "KDH01 - Kota Setar, Kubang Pasu, Pokok Sena (Daerah Kecil)",
+          "value": "KDH01"
+        },
+        {
+          "title": "KDH02 - Kuala Muda, Yan, Pendang",
+          "value": "KDH02"
+        },
+        {
+          "title": "KDH03 - Padang Terap, Sik",
+          "value": "KDH03"
+        },
+        {
+          "title": "KDH04 - Baling",
+          "value": "KDH04"
+        },
+        {
+          "title": "KDH05 - Bandar Baharu, Kulim",
+          "value": "KDH05"
+        },
+        {
+          "title": "KDH06 - Langkawi",
+          "value": "KDH06"
+        },
+        {
+          "title": "KDH07 - Puncak Gunung Jerai",
+          "value": "KDH07"
+        },
+        {
+          "title": "KTN01 - Bachok, Kota Bharu, Machang, Pasir Mas, Pasir Puteh, Tanah Merah, Tumpat, Kuala Krai, Mukim Chiku",
+          "value": "KTN01"
+        },
+        {
+          "title": "KTN02 - Gua Musang (Daerah Galas Dan Bertam), Jeli, Jajahan Kecil Lojing",
+          "value": "KTN02"
+        },
+        {
+          "title": "MLK01 - SELURUH NEGERI MELAKA",
+          "value": "MLK01"
+        },
+        {
+          "title": "NGS01 - Tampin, Jempol",
+          "value": "NGS01"
+        },
+        {
+          "title": "NGS02 - Jelebu, Kuala Pilah, Rembau",
+          "value": "NGS02"
+        },
+        {
+          "title": "NGS03 - Port Dickson, Seremban",
+          "value": "NGS03"
+        },
+        {
+          "title": "PHG01 - Pulau Tioman",
+          "value": "PHG01"
+        },
+        {
+          "title": "PHG02 - Kuantan, Pekan, Rompin, Muadzam Shah",
+          "value": "PHG02"
+        },
+        {
+          "title": "PHG03 - Jerantut, Temerloh, Maran, Bera, Chenor, Jengka",
+          "value": "PHG03"
+        },
+        {
+          "title": "PHG04 - Bentong, Lipis, Raub",
+          "value": "PHG04"
+        },
+        {
+          "title": "PHG05 - Genting Sempah, Janda Baik, Bukit Tinggi",
+          "value": "PHG05"
+        },
+        {
+          "title": "PHG06 - Cameron Highlands, Genting Higlands, Bukit Fraser",
+          "value": "PHG06"
+        },
+        {
+          "title": "PLS01 - Kangar, Padang Besar, Arau",
+          "value": "PLS01"
+        },
+        {
+          "title": "PNG01 - Seluruh Negeri Pulau Pinang",
+          "value": "PNG01"
+        },
+        {
+          "title": "PRK01 - Tapah, Slim River, Tanjung Malim",
+          "value": "PRK01"
+        },
+        {
+          "title": "PRK02 - Kuala Kangsar, Sg. Siput , Ipoh, Batu Gajah, Kampar",
+          "value": "PRK02"
+        },
+        {
+          "title": "PRK03 - Lenggong, Pengkalan Hulu, Grik",
+          "value": "PRK03"
+        },
+        {
+          "title": "PRK04 - Temengor, Belum",
+          "value": "PRK04"
+        },
+        {
+          "title": "PRK05 - Kg Gajah, Teluk Intan, Bagan Datuk, Seri Iskandar, Beruas, Parit, Lumut, Sitiawan, Pulau Pangkor",
+          "value": "PRK05"
+        },
+        {
+          "title": "PRK06 - Selama, Taiping, Bagan Serai, Parit Buntar",
+          "value": "PRK06"
+        },
+        {
+          "title": "PRK07 - Bukit Larut",
+          "value": "PRK07"
+        },
+        {
+          "title": "SBH01 - Bahagian Sandakan (Timur), Bukit Garam, Semawang, Temanggong, Tambisan, Bandar Sandakan, Sukau",
+          "value": "SBH01"
+        },
+        {
+          "title": "SBH02 - Beluran, Telupid, Pinangah, Terusan, Kuamut, Bahagian Sandakan (Barat)",
+          "value": "SBH02"
+        },
+        {
+          "title": "SBH03 - Lahad Datu, Silabukan, Kunak, Sahabat, Semporna, Tungku, Bahagian Tawau (Timur)",
+          "value": "SBH03"
+        },
+        {
+          "title": "SBH04 - Bandar Tawau, Balong, Merotai, Kalabakan, Bahagian Tawau (Barat)",
+          "value": "SBH04"
+        },
+        {
+          "title": "SBH05 - Kudat, Kota Marudu, Pitas, Pulau Banggi, Bahagian Kudat",
+          "value": "SBH05"
+        },
+        {
+          "title": "SBH06 - Gunung Kinabalu",
+          "value": "SBH06"
+        },
+        {
+          "title": "SBH07 - Kota Kinabalu, Ranau, Kota Belud, Tuaran, Penampang, Papar, Putatan, Bahagian Pantai Barat",
+          "value": "SBH07"
+        },
+        {
+          "title": "SBH08 - Pensiangan, Keningau, Tambunan, Nabawan, Bahagian Pendalaman (Atas)",
+          "value": "SBH08"
+        },
+        {
+          "title": "SBH09 - Beaufort, Kuala Penyu, Sipitang, Tenom, Long Pasia, Membakut, Weston, Bahagian Pendalaman (Bawah)",
+          "value": "SBH09"
+        },
+        {
+          "title": "SGR01 - Gombak, Petaling, Sepang, Hulu Langat, Hulu Selangor, S.Alam",
+          "value": "SGR01"
+        },
+        {
+          "title": "SGR02 - Kuala Selangor, Sabak Bernam",
+          "value": "SGR02"
+        },
+        {
+          "title": "SGR03 - Klang, Kuala Langat",
+          "value": "SGR03"
+        },
+        {
+          "title": "SWK01 - Limbang, Lawas, Sundar, Trusan",
+          "value": "SWK01"
+        },
+        {
+          "title": "SWK02 - Miri, Niah, Bekenu, Sibuti, Marudi",
+          "value": "SWK02"
+        },
+        {
+          "title": "SWK03 - Pandan, Belaga, Suai, Tatau, Sebauh, Bintulu",
+          "value": "SWK03"
+        },
+        {
+          "title": "SWK04 - Sibu, Mukah, Dalat, Song, Igan, Oya, Balingian, Kanowit, Kapit",
+          "value": "SWK04"
+        },
+        {
+          "title": "SWK05 - Sarikei, Matu, Julau, Rajang, Daro, Bintangor, Belawai",
+          "value": "SWK05"
+        },
+        {
+          "title": "SWK06 - Lubok Antu, Sri Aman, Roban, Debak, Kabong, Lingga, Engkelili, Betong, Spaoh, Pusa, Saratok",
+          "value": "SWK06"
+        },
+        {
+          "title": "SWK07 - Serian, Simunjan, Samarahan, Sebuyau, Meludam",
+          "value": "SWK07"
+        },
+        {
+          "title": "SWK08 - Kuching, Bau, Lundu, Sematan",
+          "value": "SWK08"
+        },
+        {
+          "title": "SWK09 - Zon Khas (Kampung Patarikan)",
+          "value": "SWK09"
+        },
+        {
+          "title": "TRG01 - Kuala Terengganu, Marang, Kuala Nerus",
+          "value": "TRG01"
+        },
+        {
+          "title": "TRG02 - Besut, Setiu",
+          "value": "TRG02"
+        },
+        {
+          "title": "TRG03 - Hulu Terengganu",
+          "value": "TRG03"
+        },
+        {
+          "title": "TRG04 - Dungun, Kemaman",
+          "value": "TRG04"
+        },
+        {
+          "title": "WLY01 - Kuala Lumpur, Putrajaya",
+          "value": "WLY01"
+        },
+        {
+          "title": "WLY02 - Labuan",
+          "value": "WLY02"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "axios": "^1.5.1",
+    "humanize-duration": "^3.30.0",
+    "jsdom": "^22.1.0",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.2",
+    "node-html-parser": "^6.1.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/humanize-duration": "^3.27.1",
+    "@types/jsdom": "^21.1.3",
+    "@types/moment": "^2.13.0",
+    "@types/node": "20.8.0",
+    "eslint": "^8.50.0",
+    "@types/react": "18.0.9",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

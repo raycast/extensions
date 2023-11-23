@@ -1,15 +1,15 @@
-import { getJsonDailyLogPath } from "../../shared/getDailyLogPath";
-import * as fs from "fs";
 import { v4 as uuid } from "uuid";
 import { NewDailyLog } from "../../domain/dailyLog/NewDailyLog";
 import { DailyLog } from "../../domain/dailyLog/DailyLog";
 import { DailyLogRepository } from "../../domain/dailyLog/DailyLogRepository";
+import { DataStorage } from "../shared/DataStorage";
 
 export class JsonDailyLogRepository implements DailyLogRepository {
+  constructor(private readonly dataStorage: DataStorage) {}
+
   private saveLogs(logs: DailyLog[], date: Date): void {
     const logsJson = JSON.stringify(logs);
-    const dailyLogPath = getJsonDailyLogPath(date);
-    fs.writeFileSync(dailyLogPath, logsJson);
+    this.dataStorage.save(logsJson, date);
   }
 
   update(log: DailyLog): void {
@@ -26,10 +26,10 @@ export class JsonDailyLogRepository implements DailyLogRepository {
   }
 
   getAllForDate(date: Date): DailyLog[] {
-    if (!fs.existsSync(getJsonDailyLogPath(date))) {
+    if (!this.dataStorage.dataForDateExists(date)) {
       return [];
     }
-    const logsJson = fs.readFileSync(getJsonDailyLogPath(date), "utf8");
+    const logsJson = this.dataStorage.readForDate(date);
     return JSON.parse(logsJson).map((log: any) => new DailyLog(log.id, new Date(log.date), log.title));
   }
 
@@ -44,9 +44,6 @@ export class JsonDailyLogRepository implements DailyLogRepository {
   }
 
   deleteAllForDate(date: Date): void {
-    if (!fs.existsSync(getJsonDailyLogPath(date))) {
-      return;
-    }
-    fs.rmSync(getJsonDailyLogPath(date));
+    this.dataStorage.deleteAllDataForDate(date);
   }
 }

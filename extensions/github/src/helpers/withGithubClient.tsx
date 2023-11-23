@@ -16,7 +16,7 @@ export function withGithubClient(component: JSX.Element) {
   // we use a `useMemo` instead of `useEffect` to avoid a render
   useMemo(() => {
     (async function () {
-      const { personalAccessToken } = getPreferenceValues();
+      const { personalAccessToken } = getPreferenceValues<Preferences>();
       const token = personalAccessToken || (await authorize());
       const authorization = personalAccessToken ? `token ${token}` : `bearer ${token}`;
       github = getSdk(new GraphQLClient("https://api.github.com/graphql", { headers: { authorization } }));

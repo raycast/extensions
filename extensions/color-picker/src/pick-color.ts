@@ -15,9 +15,13 @@ export default async function command(props: PickColorCommandLaunchProps) {
     addToHistory(pickedColor);
 
     const hex = getFormattedColor(pickedColor);
+    if (!hex) {
+      throw new Error("Failed to format color");
+    }
+
     await Clipboard.copy(hex);
 
-    await showHUD("Copied color to clipboard");
+    await showHUD(`Copied color ${hex} to clipboard`);
     try {
       await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     } catch (e) {

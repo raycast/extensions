@@ -1,3 +1,5 @@
+import { Icon } from "@raycast/api";
+
 export interface Repository {
   name: string;
   namespace: string;
@@ -240,4 +242,10 @@ export interface ListAccessTokensResponse {
   next: string | null;
   previous: string | null;
   results: AccessToken[];
+}
+
+export interface ItemAccessory {
+  icon: Icon;
+  text?: string;
+  tooltip?: string;
 }

@@ -11,13 +11,13 @@ export default function TodoList() {
 
   return (
     <List
-      navigationTitle={`Manage Todo List${editing !== false ? " • Editing" : searchMode ? " • Searching" : ""}`}
-      key={searchMode ? "search" : "nosearch"}
       actions={<ListActions />}
       enableFiltering={searchMode}
-      searchText={searchBarText}
+      key={searchMode ? "search" : "nosearch"}
+      navigationTitle={`Manage Todo List${editing !== false ? " • Editing" : searchMode ? " • Searching" : ""}`}
       onSearchTextChange={(text: string) => setSearchBarText(text)}
       searchBarPlaceholder={searchMode ? "Search todos" : "Type and hit enter to add an item to your list"}
+      searchText={searchBarText}
     >
       <TodoSection sectionKey="pinned" />
       <TodoSection sectionKey="todo" />

@@ -13,7 +13,7 @@ Source repo: https://github.com/KevinBatdorf/laravel-forge-raycast
 
 ## Non-Forge API Features
 - Check site connectivity
-- Open comand from raycast:// url
+- Open command from raycast:// url
 - Background deploy status refresh with menubar display
 - System notification on deploy
 - Open terminal session

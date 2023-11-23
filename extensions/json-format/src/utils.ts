@@ -9,27 +9,25 @@ import {
 import beautify from 'js-beautify';
 
 export function formatJS(text: string) {
-  const indent = getIndentation();
   const trimmedText = text.trim();
 
-  try {
-    JSON.parse(trimmedText);
-  } catch (err) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: trimmedText ? 'Invalid input' : 'Empty input',
-    });
-
-    return null;
+  const firstChar = trimmedText[0];
+  let json;
+  if (firstChar === '"') {
+    json = convert(parse(trimmedText));
+  } else {
+    json = convert(trimmedText);
   }
+  if (!json) return;
 
+  const indent = getIndentation();
   const options = {
     indent_size: indent === 'tab' ? 1 : parseInt(indent, 10),
     space_in_empty_paren: true,
     indent_with_tabs: indent === 'tab',
   };
 
-  const output = beautify(trimmedText, options);
+  const output = beautify(json, options);
 
   return output;
 }
@@ -59,4 +57,34 @@ function getIndentation(): IndentType {
 function autoPasteEnabled(): boolean {
   const { autopaste } = getPreferenceValues<Preferences>();
   return autopaste;
+}
+
+function convert(input: string) {
+  if (input.endsWith(';')) input = input.slice(0, -1);
+  try {
+    if (isExecuteable(input)) throw new Error('executeable');
+    const result = Function(`"use strict";return (${input})`)();
+    return JSON.stringify(result);
+  } catch {
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Please copy a valid JSON/JS Object',
+    });
+  }
+}
+
+function isExecuteable(input: string) {
+  return /\([\s\S]*?\)|[\w$]\s*`[\s\S]*?`/.test(input);
+}
+
+function parse(input: string) {
+  try {
+    return JSON.parse(input);
+  } catch (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Please enter a valid JSON string',
+    });
+    return;
+  }
 }

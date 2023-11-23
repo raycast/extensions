@@ -10,6 +10,7 @@ export interface Bookmark {
   id: string;
   url: string;
   title: string;
+  description?: string;
   tags?: string;
   private: boolean;
   readLater: boolean;
@@ -27,7 +28,11 @@ export enum SearchKind {
 }
 
 export function useSearchBookmarks(searchKind: SearchKind) {
-  const [state, setState] = useState<BookmarksState>({ bookmarks: [], isLoading: true, title: "" });
+  const [state, setState] = useState<BookmarksState>({
+    bookmarks: [],
+    isLoading: true,
+    title: "",
+  });
   const cancelRef = useRef<AbortController | null>(null);
 
   const search = useCallback(
@@ -60,7 +65,11 @@ export function useSearchBookmarks(searchKind: SearchKind) {
           return;
         }
         console.error("searchBookmarks error", error);
-        showToast({ title: "Could not search bookmarks", message: String(error), style: Toast.Style.Failure });
+        showToast({
+          title: "Could not search bookmarks",
+          message: String(error),
+          style: Toast.Style.Failure,
+        });
       }
     },
     [searchKind]
@@ -117,6 +126,7 @@ export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
   const params = new URLSearchParams();
   params.append("url", bookmark.url);
   params.append("description", bookmark.title ?? "New Bookmark");
+  params.append("extended", bookmark.description ?? "");
   params.append("tags", bookmark.tags ?? "");
   params.append("shared", bookmark.private ? "no" : "yes");
   params.append("toread", bookmark.readLater ? "yes" : "no");

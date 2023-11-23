@@ -127,3 +127,7 @@ export const useSessionStats = ({ refreshInterval = INTERVAL }: { refreshInterva
     { refreshInterval }
   );
 };
+
+export const isLocalTransmission = () => {
+  return preferences.host === "localhost" || preferences.host === "127.0.0.1";
+};

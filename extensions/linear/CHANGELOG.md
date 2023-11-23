@@ -1,5 +1,29 @@
 # Linear Changelog
 
+## [Mark notification as read without opening it] - 2023-11-16
+
+- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.
+
+## [Include team key as keyword in Create Issue command] - 2023-09-22
+
+Added the team key as a keyword in the "Create Issue" function so that it will appear when the user searches for a key.
+
+## [Fix] - 2023-08-23
+
+Fixed "Workflow state not in same team as issue" error for Break Issue into Sub-issues error.
+
+## [Add milestone functionality] - 2023-08-16
+
+Linear now allows users to create milestones within projects. This feature is now available on this extension.
+
+## [Add "Break Issue Into Sub-Issues" action] - 2023-05-09
+
+Thanks to AI, the Linear extension has a new issue action: `Break Issue Into Sub-Issues`. It takes the issue title and description as context and generates actionable sub-issues that you can choose to create or not.
+
+## [Set title field as default in Create Issue command] - 2023-05-02
+
+Previously, the `Team` field was the default one when the user had more than one team in the `Create Issue` command. Since users often add issues to the same team, let's make the `Title` field the default.
+
 ## [Remove Raycast signature] - 2023-04-19
 
 - Remove Raycast signature preference from the `Create Issue` command

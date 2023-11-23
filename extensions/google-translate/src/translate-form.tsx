@@ -1,12 +1,12 @@
 import React from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import debounce from "debounce";
-import { useSelectedLanguagesSet } from "./hooks";
-import { LanguageCode, supportedLanguagesByCode, languages } from "./languages";
-import { AUTO_DETECT, simpleTranslate, SimpleTranslateResult } from "./simple-translate";
+import { usePromise } from "@raycast/utils";
+import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
+import { LanguageCode, supportedLanguagesByCode, languages, getLanguageFlag } from "./languages";
+import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
 
-const TranslateForm = () => {
+export default function TranslateForm() {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
   const langFrom = selectedLanguageSet.langFrom;
   const langTo = selectedLanguageSet.langTo;
@@ -15,9 +15,21 @@ const TranslateForm = () => {
   const fromLangObj = supportedLanguagesByCode[langFrom];
   const toLangObj = supportedLanguagesByCode[langTo];
 
-  const [text, setText] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [translated, setTranslated] = React.useState<SimpleTranslateResult | null>(null);
+  const [text, setText] = useTextState();
+  const debouncedValue = useDebouncedValue(text, 500);
+  const { data: translated, isLoading } = usePromise(
+    simpleTranslate,
+    [debouncedValue, { langFrom: fromLangObj.code, langTo: toLangObj.code }],
+    {
+      onError(error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: error.name,
+          message: error.message,
+        });
+      },
+    },
+  );
 
   const handleChange = (value: string) => {
     if (value.length > 5000) {
@@ -31,31 +43,6 @@ const TranslateForm = () => {
       setText(value);
     }
   };
-
-  const doTranslate = React.useMemo(() => {
-    const debouncedTranslate = debounce(async (text: string, langFrom: LanguageCode, langTo: LanguageCode) => {
-      const result = await simpleTranslate(text, {
-        langFrom,
-        langTo,
-      });
-
-      setTranslated(result);
-      setIsLoading(false);
-    }, 500);
-
-    return (text: string | undefined, langFrom: LanguageCode, langTo: LanguageCode) => {
-      if (text) {
-        setIsLoading(true);
-        debouncedTranslate(text, langFrom, langTo);
-      } else {
-        setTranslated(null);
-      }
-    };
-  }, []);
-
-  React.useEffect(() => {
-    doTranslate(text, langFrom, langTo);
-  }, [text, langFrom, langTo]);
 
   const autoDetectedLanguage = React.useMemo(() => {
     if (langFrom === AUTO_DETECT && translated) {
@@ -71,12 +58,13 @@ const TranslateForm = () => {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Generals">
+            <Action.CopyToClipboard title="Copy Translated" content={translated?.translatedText ?? ""} />
+            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />
             <Action.CopyToClipboard
-              title="Copy Translated"
-              content={translated?.translatedText ?? ""}
-              icon={toLangObj?.flag}
+              title="Copy Pronunciation"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              content={translated?.pronunciationText ?? ""}
             />
-            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} icon={fromLangObj?.flag} />
             <Action.OpenInBrowser
               title="Open in Google Translate"
               shortcut={{ modifiers: ["opt"], key: "enter" }}
@@ -104,38 +92,41 @@ const TranslateForm = () => {
               onAction={() => {
                 setSelectedLanguageSet({ langFrom: langTo, langTo: langFrom });
               }}
-              title={`${toLangObj.flag || toLangObj.code} <-> ${fromLangObj.flag || fromLangObj.code} Switch Languages`}
+              title={`${getLanguageFlag(toLangObj, toLangObj?.code)} <-> ${getLanguageFlag(
+                fromLangObj,
+                fromLangObj?.code,
+              )} Switch Languages`}
             />
             <ActionPanel.Submenu
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               title="Change Languages"
-              icon={fromLangObj?.flag}
+              icon={getLanguageFlag(fromLangObj)}
             >
               <ActionPanel.Submenu
                 shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                 title="Change From Language"
-                icon={fromLangObj?.flag}
+                icon={getLanguageFlag(fromLangObj)}
               >
                 {languages.map((lang) => (
                   <Action
                     key={lang.code}
                     onAction={() => setLangFrom(lang.code)}
                     title={lang.name}
-                    icon={lang?.flag ?? "🏳️"}
+                    icon={getLanguageFlag(lang)}
                   />
                 ))}
               </ActionPanel.Submenu>
               <ActionPanel.Submenu
                 shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                 title="Change To Language"
-                icon={toLangObj?.flag}
+                icon={getLanguageFlag(toLangObj)}
               >
                 {languages.map((lang) => (
                   <Action
                     key={lang.code}
                     onAction={() => setLangTo(lang.code)}
                     title={lang.name}
-                    icon={lang?.flag ?? "🏳️"}
+                    icon={getLanguageFlag(lang)}
                   />
                 ))}
               </ActionPanel.Submenu>
@@ -144,7 +135,7 @@ const TranslateForm = () => {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="text" title="Text" onChange={handleChange} />
+      <Form.TextArea id="text" title="Text" value={text} onChange={handleChange} />
       <Form.Dropdown
         id="language_from"
         title="From"
@@ -156,11 +147,11 @@ const TranslateForm = () => {
           <Form.Dropdown.Item
             value={autoDetectedLanguage.code}
             title={`${autoDetectedLanguage.name} (Auto-detect)`}
-            icon={autoDetectedLanguage?.flag ?? "🏳️"}
+            icon={getLanguageFlag(autoDetectedLanguage)}
           />
         )}
         {languages.map((lang) => (
-          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
+          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown
@@ -173,7 +164,7 @@ const TranslateForm = () => {
         {languages
           .filter((lang) => lang.code !== AUTO_DETECT)
           .map((lang) => (
-            <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
+            <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
           ))}
       </Form.Dropdown>
       <Form.TextArea
@@ -182,8 +173,7 @@ const TranslateForm = () => {
         value={translated?.translatedText ?? ""}
         placeholder="Translation"
       />
+      <Form.Description title="Pronunciation" text={translated?.pronunciationText ?? ""} />
     </Form>
   );
-};
-
-export default TranslateForm;
+}

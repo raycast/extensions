@@ -26,7 +26,7 @@ function persistedStorage<T>({
         JSON.stringify({
           lastRefresh,
           data,
-        })
+        }),
       );
       return data;
     };

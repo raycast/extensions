@@ -3,7 +3,10 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { getIssue, Issue } from "../api/issues";
-import { formatDate, getCustomFieldsForDetail, getIssueDescription, getStatusColor } from "../helpers/issues";
+import { getAuthenticatedUri, getBaseUrl } from "../api/request";
+import { getProjectAvatar, getUserAvatar } from "../helpers/avatars";
+import { formatDate, getCustomFieldsForDetail, getMarkdownFromHtml, getStatusColor } from "../helpers/issues";
+import { replaceAsync } from "../helpers/string";
 
 import IssueActions from "./IssueActions";
 import IssueDetailCustomFields from "./IssueDetailCustomFields";
@@ -18,7 +21,29 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
     data: issue,
     isLoading,
     mutate,
-  } = useCachedPromise((issueId) => getIssue(issueId), [issueKey], { initialData: initialIssue });
+  } = useCachedPromise(
+    async (issueId) => {
+      const issue = await getIssue(issueId);
+
+      if (!issue) {
+        return null;
+      }
+
+      const baseUrl = getBaseUrl();
+      const description = issue.renderedFields?.description ?? "";
+      // Resolve all the image URLs to data URIs in the cached promise for better performance
+      // Jira images use partial URLs, so we need to prepend the base URL
+      const resolvedDescription = await replaceAsync(description, /src="(.*?)"/g, async (_, uri) => {
+        const dataUri = await getAuthenticatedUri(`${baseUrl}${uri}`, "image/jpeg");
+        return `src="${dataUri}"`;
+      });
+      issue.renderedFields.description = resolvedDescription;
+
+      return issue;
+    },
+    [issueKey],
+    { initialData: initialIssue }
+  );
 
   const attachments = issue?.fields.attachment;
   const numberOfAttachments = attachments?.length ?? 0;
@@ -27,11 +52,15 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
   const { customMarkdownFields, customMetadataFields } = useMemo(() => getCustomFieldsForDetail(issue), [issue]);
 
   const markdown = useMemo(() => {
-    let markdown = `# ${issue?.fields.summary}`;
-    const description = issue?.renderedFields?.description;
+    if (!issue) {
+      return "";
+    }
+
+    let markdown = `# ${issue.fields.summary}`;
+    const description = issue.renderedFields?.description;
 
     if (description) {
-      markdown += `\n\n${getIssueDescription(description)}`;
+      markdown += `\n\n${getMarkdownFromHtml(description)}`;
     }
 
     customMarkdownFields.forEach((markdownField) => {
@@ -40,12 +69,6 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
 
     return markdown;
   }, [issue]);
-
-  // If coming from Create Issue's toast action, there's no initial issue
-  // so don't display anything until the data is fully loaded
-  if (!issue) {
-    return null;
-  }
 
   return (
     <Detail
@@ -64,17 +87,21 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
 
           <Detail.Metadata.Label title="Issue Key" text={issue?.key} icon={issue?.fields.issuetype.iconUrl} />
 
-          <Detail.Metadata.Label
-            title="Project"
-            text={issue?.fields.project?.name ?? "None"}
-            icon={issue?.fields.project?.avatarUrls["32x32"]}
-          />
+          {issue?.fields.project ? (
+            <Detail.Metadata.Label
+              title="Project"
+              text={issue.fields.project.name ?? "None"}
+              icon={getProjectAvatar(issue.fields.project)}
+            />
+          ) : null}
 
           <Detail.Metadata.Label
             title="Status"
             text={{
               value: issue?.fields.status.name || "",
-              color: getStatusColor(issue?.fields.status.statusCategory.colorName),
+              color: issue?.fields.status.statusCategory
+                ? getStatusColor(issue?.fields.status.statusCategory.colorName)
+                : undefined,
             }}
           />
 
@@ -87,14 +114,14 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
           <Detail.Metadata.Label
             title="Assignee"
             text={issue?.fields.assignee ? issue?.fields.assignee.displayName : "Unassigned"}
-            icon={issue?.fields.assignee ? issue?.fields.assignee.avatarUrls["32x32"] : Icon.Person}
+            icon={getUserAvatar(issue?.fields.assignee)}
           />
 
           {issue ? (
             <Detail.Metadata.Label
               title="Reporter"
               text={issue.fields.reporter ? issue.fields.reporter.displayName : "Unassigned"}
-              icon={issue.fields.reporter ? issue.fields.reporter.avatarUrls["32x32"] : Icon.Person}
+              icon={getUserAvatar(issue.fields.reporter)}
             />
           ) : null}
 

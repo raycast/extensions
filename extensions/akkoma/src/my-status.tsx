@@ -24,7 +24,7 @@ export default function ViewStatusCommand() {
         cache.set("latest_statuses", JSON.stringify(status));
       } catch (error) {
         const requestErr = error as AkkomaError;
-        showToast(Toast.Style.Failure, "Error", requestErr.message);
+        showToast(Toast.Style.Failure, "Error", requestErr.error);
       } finally {
         setIsLoading(false);
       }

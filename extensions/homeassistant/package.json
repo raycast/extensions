@@ -190,7 +190,7 @@
     {
       "name": "notificationmenu",
       "title": "Notifications Menu",
-      "description": "Display Persistent Notifications in the MenuBar",
+      "description": "Display Persistent Notifications, Low Batteries and Update in the Menu Bar",
       "mode": "menu-bar",
       "subtitle": "Home Assistant",
       "interval": "1m",
@@ -202,6 +202,15 @@
           "label": "Show Notification Count in Menubar",
           "required": false,
           "default": false
+        },
+        {
+          "name": "indicatorUpdates",
+          "description": "Pending Updates will activate the Indicator",
+          "type": "checkbox",
+          "required": false,
+          "title": "Indicator",
+          "label": "Updates",
+          "default": true
         }
       ]
     },
@@ -214,7 +223,7 @@
     },
     {
       "name": "weathermenu",
-      "title": "Weather Menu Bar",
+      "title": "Weather Menu",
       "description": "Display Weather entity in the Menu Bar",
       "mode": "menu-bar",
       "interval": "15m",
@@ -228,6 +237,154 @@
           "placeholder": "weather.home"
         }
       ]
+    },
+    {
+      "name": "assist",
+      "title": "Assist",
+      "description": "Conversation with Home Assistant Assist",
+      "mode": "view",
+      "subtitle": "Home Assistant"
+    },
+    {
+      "name": "connection",
+      "title": "Connection Check",
+      "description": "Check the Connection to Home Assistant",
+      "mode": "view",
+      "subtitle": "Home Assistant",
+      "disabledByDefault": true
+    },
+    {
+      "name": "mediaplayermenu",
+      "title": "Mediaplayer Menu",
+      "description": "Display Media Players in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "media_player.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "media_player.player1,media_player.player2,media_player.bath*"
+        }
+      ]
+    },
+    {
+      "name": "lightsmenu",
+      "title": "Lights Menu",
+      "description": "Display Lights in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "light.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "light.mylight1,light.mylight2,light.bath*"
+        }
+      ]
+    },
+    {
+      "name": "coversmenu",
+      "title": "Covers Menu",
+      "description": "Display Covers in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "cover.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "cover.mycover1,cover.bath*"
+        }
+      ]
+    },
+    {
+      "name": "batteriesmenu",
+      "title": "Batteries Menu",
+      "description": "Display Batteries in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "sensor.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "sensor.mysensor1,cover.mysensor*"
+        },
+        {
+          "name": "excludeHigher",
+          "description": "Exclude Battery with a Level higher then the given value. Keep empty to disable the filter",
+          "type": "textfield",
+          "required": false,
+          "title": "Exclude Higher then",
+          "placeholder": "50"
+        }
+      ]
+    },
+    {
+      "name": "entitiesmenu",
+      "title": "Entities Menu",
+      "description": "Show given entities in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": true,
+          "title": "Included Entities",
+          "placeholder": "cover.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "cover.mycover1,cover.bath*"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -238,6 +395,30 @@
       "title": "Home Assistant URL",
       "description": "URL of your Home Assistant instance",
       "placeholder": "http://homeassistant.local:8123"
+    },
+    {
+      "name": "instanceInternal",
+      "type": "textfield",
+      "required": false,
+      "title": "Internal Home Assistant URL (optional)",
+      "description": "URL of your Home Assistant instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi or the url is pingable.",
+      "placeholder": "http://homeassistant.local:8123"
+    },
+    {
+      "name": "homeSSIDs",
+      "type": "textfield",
+      "required": false,
+      "title": "Home Network Detection",
+      "description": "A list of your Home Network WiFi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home WiFi. Only required if the Internal Home Assistant URL is set.",
+      "placeholder": "HomeWiFi1,HomeWiFi2"
+    },
+    {
+      "name": "usePing",
+      "description": "Use ping to detect Home Network",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Ping",
+      "default": true
     },
     {
       "name": "token",
@@ -280,25 +461,31 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "home-assistant-js-websocket": "^5.11.1",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.5.2",
+    "home-assistant-js-websocket": "^8.1.0",
     "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
+    "multicast-dns": "^7.2.5",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
+    "ping": "^0.4.4",
+    "plist": "^3.0.6",
     "url-join": "^4.0.1",
     "ws": "^8.2.3"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
     "@types/lodash-es": "^4.17.6",
+    "@types/multicast-dns": "^7.2.1",
     "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
+    "@types/ping": "^0.4.1",
+    "@types/plist": "^3.0.2",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.0",
     "typescript": "^4.3.5"
   },
   "scripts": {

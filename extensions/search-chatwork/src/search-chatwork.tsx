@@ -57,17 +57,26 @@ export default function CommandToSearchChatWork() {
                           <DetailOfChat
                             roomName={CWMessageMgr[0].CWRooms[i].CWRoom.name}
                             contents={msg.body}
-                            link={Constants.getCWAppLinkUrl(CWMessageMgr[0].CWRooms[i].CWRoom.room_id, msg.message_id)}
+                            link={Constants.getCWAppLinkUrlForChat(
+                              CWMessageMgr[0].CWRooms[i].CWRoom.room_id,
+                              msg.message_id
+                            )}
                           />
                         }
                       />
                       <Action.OpenInBrowser
                         title="Open in Chatwork"
-                        url={Constants.getCWAppLinkUrl(CWMessageMgr[0].CWRooms[i].CWRoom.room_id, msg.message_id)}
+                        url={Constants.getCWAppLinkUrlForChat(
+                          CWMessageMgr[0].CWRooms[i].CWRoom.room_id,
+                          msg.message_id
+                        )}
                       />
                       <Action.CopyToClipboard
                         title="Copy URL"
-                        content={Constants.getCWAppLinkUrl(CWMessageMgr[0].CWRooms[i].CWRoom.room_id, msg.message_id)}
+                        content={Constants.getCWAppLinkUrlForChat(
+                          CWMessageMgr[0].CWRooms[i].CWRoom.room_id,
+                          msg.message_id
+                        )}
                       />
                     </ActionPanel>
                   }

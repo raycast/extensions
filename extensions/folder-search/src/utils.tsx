@@ -138,6 +138,17 @@ const lastUsedSort = (a: SpotlightSearchResult, b: SpotlightSearchResult) => {
   return new Date(safeB).getTime() - new Date(safeA).getTime();
 };
 
+const fixDoubleConcat = (text: string): string => {
+  const regex = /^(.+)\1$/; // Matches a string followed by the same string again
+
+  if (regex.test(text)) {
+    const originalText = text.replace(regex, "$1");
+    return originalText;
+  }
+
+  return text;
+};
+
 export {
   loadPlugins,
   safeSearchScope,
@@ -147,4 +158,5 @@ export {
   copyFolderToClipboard,
   maybeMoveResultToTrash,
   lastUsedSort,
+  fixDoubleConcat,
 };

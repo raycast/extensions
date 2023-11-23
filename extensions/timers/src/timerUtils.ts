@@ -62,8 +62,9 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
 }
 
 function stopTimer(timerFile: string) {
-  const deleteTimerCmd = `if [ -f "${timerFile}" ]; then rm "${timerFile}"; else echo "Timer deleted"; fi`;
-  const dismissFile = timerFile.replace(".timer", ".dismiss");
+  const timerFilePath = environment.supportPath + "/" + timerFile;
+  const deleteTimerCmd = `if [ -f "${timerFilePath}" ]; then rm "${timerFilePath}"; else echo "Timer deleted"; fi`;
+  const dismissFile = timerFilePath.replace(".timer", ".dismiss");
   const deleteDismissCmd = `if [ -f "${dismissFile}" ]; then rm "${dismissFile}"; else echo "Timer deleted"; fi`;
   execSync(deleteTimerCmd);
   execSync(deleteDismissCmd);
@@ -79,12 +80,15 @@ function getTimers() {
         secondsSet: -99,
         timeLeft: -99,
         originalFile: timerFile,
+        timeEnds: new Date(),
       };
       timer.name = readFileSync(environment.supportPath + "/" + timerFile).toString();
       const timerFileParts = timerFile.split("---");
       timer.secondsSet = Number(timerFileParts[1].split(".")[0]);
       const timeStarted = timerFileParts[0].replace(/__/g, ":");
       timer.timeLeft = Math.max(0, Math.round(timer.secondsSet - secondsBetweenDates({ d2: timeStarted })));
+      timer.timeEnds = new Date(timeStarted);
+      timer.timeEnds.setSeconds(timer.timeEnds.getSeconds() + timer.secondsSet);
       setOfTimers.push(timer);
     }
   });

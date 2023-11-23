@@ -11,7 +11,7 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import querystring from "node:querystring";
 import { requestCostTime } from "../../axiosConfig";
-import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanguage/types";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
 import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getBaiduLangCode, getYoudaoLangCodeFromBaiduCode, isValidLangCode } from "../../language/languages";
@@ -59,7 +59,7 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
     if (!hasBaiduAppKey()) {
       console.warn(`Baidu AppId or AppSecret is empty`);
     } else {
-      console.warn(`Baidu translate not support langauge: ${fromLanguage} to ${toLanguage}`);
+      console.warn(`Baidu translate not support language: ${fromLanguage} to ${toLanguage}`);
     }
 
     const result: QueryTypeResult = {
@@ -162,9 +162,9 @@ export async function baiduLanguageDetect(text: string): Promise<DetectedLangMod
     requestBaiduTextTranslate(queryWordInfo)
       .then((baiduTypeResult) => {
         const baiduResult = baiduTypeResult.result as BaiduTranslateResult;
-        const baiduLanaugeId = baiduResult.from || "";
-        const youdaoLanguageId = getYoudaoLangCodeFromBaiduCode(baiduLanaugeId);
-        console.warn(`---> Baidu language detect: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
+        const baiduLanguageId = baiduResult.from || "";
+        const youdaoLanguageId = getYoudaoLangCodeFromBaiduCode(baiduLanguageId);
+        console.warn(`---> Baidu language detect: ${baiduLanguageId}, youdaoId: ${youdaoLanguageId}`);
 
         /**
        * Generally speaking, Baidu language auto-detection is more accurate than Tencent language recognition.
@@ -185,7 +185,7 @@ export async function baiduLanguageDetect(text: string): Promise<DetectedLangMod
         }
         const detectedLanguageResult: DetectedLangModel = {
           type: type,
-          sourceLangCode: baiduLanaugeId,
+          sourceLangCode: baiduLanguageId,
           youdaoLangCode: youdaoLanguageId,
           confirmed: confirmed,
           result: baiduResult,
@@ -220,16 +220,16 @@ export async function baiduWebDetect(text: string): Promise<DetectedLangModel> {
 
         const baiduWebLanguageDetect = response.data as BaiduWebLanguageDetect;
         if (baiduWebLanguageDetect.error === 0) {
-          const baiduLanaugeId = baiduWebLanguageDetect.lan || "";
-          const youdaoLanguageId = getYoudaoLangCodeFromBaiduCode(baiduLanaugeId);
+          const baiduLanguageId = baiduWebLanguageDetect.lan || "";
+          const youdaoLanguageId = getYoudaoLangCodeFromBaiduCode(baiduLanguageId);
           const isConfirmed = isValidLangCode(youdaoLanguageId);
 
           console.warn(`---> Baidu detect cost: ${response.headers[requestCostTime]} ms`);
-          console.warn(`---> Baidu detect language: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
+          console.warn(`---> Baidu detect language: ${baiduLanguageId}, youdaoId: ${youdaoLanguageId}`);
 
           const detectedLanguageResult: DetectedLangModel = {
             type: type,
-            sourceLangCode: baiduLanaugeId,
+            sourceLangCode: baiduLanguageId,
             youdaoLangCode: youdaoLanguageId,
             confirmed: isConfirmed,
             result: baiduWebLanguageDetect,

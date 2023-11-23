@@ -1,5 +1,9 @@
 # Downloads Manager Changelog
 
+## [Check Permission] - 2023-06-21
+
+- Added a check for access to the configured Downloads folder
+
 ## [Add new action] - 2023-03-30
 
 - Added the action `Copy File` for the `Manage Downloads` command

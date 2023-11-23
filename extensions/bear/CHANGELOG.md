@@ -1,5 +1,15 @@
 # Bear Changelog
 
+## [Create new note configurations and new search feature] - 2023-07-09
+
+- When creating a new note, you can choose default options that you don't have to pick in the form. Options are: opening the note in the main window, in a new window, or don't open it at all.
+- When searching notes, now if the query didn't match any note, you can create a new note with the query as the title.
+
+## [Adding tag's filter in search notes] - 2023-05-23
+
+- Adding tag's filter in search notes command
+- Changing `cmd+p` from preview to filter notes to `cmd+shift+p` to be consistent with Raycast's conventions
+
 ## [Add support for Bear 2] - 2023-04-01
 
 - Add support for Bear 2

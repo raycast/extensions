@@ -1,0 +1,160 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mail",
+  "title": "Apple Mail",
+  "description": "Extension for Apple Mail.",
+  "icon": "mail.png",
+  "author": "yug2005",
+  "contributors": [
+    "ikupenov",
+    "pernielsentikaer",
+    "fengtianze"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "The primary action to be performed on the selected message.",
+      "type": "dropdown",
+      "default": "seeMessage",
+      "required": false,
+      "data": [
+        {
+          "title": "See Message",
+          "value": "seeMessage"
+        },
+        {
+          "title": "Open in Mail",
+          "value": "openMessage"
+        }
+      ]
+    },
+    {
+      "name": "saveDirectory",
+      "title": "Save Attachments To",
+      "description": "Directory to save mail attachments.",
+      "type": "textfield",
+      "default": "~/Downloads",
+      "required": false
+    },
+    {
+      "name": "messageLimit",
+      "title": "Message Limit",
+      "description": "The amount of messages to retrieve.",
+      "type": "dropdown",
+      "default": "10",
+      "required": false,
+      "data": [
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "25",
+          "value": "25"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "check-for-mail",
+      "title": "Check For New Mail",
+      "description": "Check for new mail for all accounts.",
+      "mode": "no-view"
+    },
+    {
+      "name": "compose-new-message",
+      "title": "Compose New Message",
+      "description": "Compose a new message.",
+      "mode": "view"
+    },
+    {
+      "name": "see-recent-mail",
+      "title": "See Recent Mail",
+      "description": "See recent unread messages.",
+      "mode": "view"
+    },
+    {
+      "name": "see-important-mail",
+      "title": "See Important Mail",
+      "description": "See messages in the important mailboxes.",
+      "mode": "view"
+    },
+    {
+      "name": "see-mail-accounts",
+      "title": "See Mail Accounts",
+      "description": "See mail accounts.",
+      "mode": "view"
+    },
+    {
+      "name": "share-with-mail",
+      "title": "Share With Mail",
+      "description": "Share selected Finder items with Mail.",
+      "mode": "view"
+    },
+    {
+      "name": "refresh-mail",
+      "title": "Refresh Mail",
+      "description": "Refresh all mailboxes.",
+      "mode": "no-view",
+      "interval": "30m"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "description": "Clears the cache for all accounts.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.1",
+    "@raycast/utils": "^1.7.1",
+    "javascript-time-ago": "^2.5.9",
+    "json2md": "^1.12.0",
+    "juice": "^9.0.0",
+    "mailparser": "^3.6.4",
+    "mime-types": "^2.1.35",
+    "run-applescript": "^6.0.0",
+    "turndown": "^7.1.2",
+    "utf8": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/json2md": "^1.5.1",
+    "@types/mailparser": "^3.4.0",
+    "@types/mime-types": "^2.1.1",
+    "@types/turndown": "^5.0.1",
+    "@types/utf8": "^3.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

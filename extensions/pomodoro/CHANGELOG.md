@@ -1,5 +1,13 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2023-07-13
+
+Changed the progress indicator on Menu Bar from Circle to Pomodoro icon
+
+## [Enhancement] - 2023-07-10
+
+Added option to hide time on Menu Bar
+
 ## [Enhancement] - 2023-03-23
 
 Added possibility to play completion sound

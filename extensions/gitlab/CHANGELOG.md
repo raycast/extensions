@@ -1,5 +1,43 @@
 # GitLab Changelog
 
+## [Fix] - 2023-10-21
+
+- Fix possible crash in todo commands if the title is empty
+
+## [Fix] - 2023-10-15
+
+- Fix possible crashes in menubar items
+- Fix possible crashes in label lists
+- Catch error if launchCommand fails
+- Fix menubar icon color on dark theme
+
+## [Fixed unicode chars in title] - 2023-09-21
+
+- Fixed an error with unicode chars in titles
+
+## [Fixed menubar colors] - 2023-08-08
+
+- Fixes the dynamic color for the GitLab Menu Bar command icons, specifically the Merge Request one.
+
+## [Optimize Recent Activities] - 2023-07-02
+
+- Add unsupported activity
+- Rename `My Recent Activities` to `Recent Activities`
+- `Recent Activities` got a dropdrown to switch between `My Activities` and `My Projects`
+- Add `Merge Request Menu` command
+- Add `Issues Menu` command
+- Add group filter dropdown for epics
+- `My Groups` only show one level at a time
+
+## [Add Merge Request Template] - 2023-07-04
+
+- Add template choice for merge request creation
+
+## [Search Scope] - 2023-04-27
+
+- Add scope dropdown for `Search Issues` and `Search Merge Requests`
+- Add possibility to search for named parameters in `Search Issues` and `Search Merge Requests`.
+
 ## [Remove Branch] - 2023-04-17
 
 - Add checkbox `Delete source branch` for a new MR (default state of project is respected)

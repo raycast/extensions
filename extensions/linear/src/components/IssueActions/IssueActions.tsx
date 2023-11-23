@@ -24,6 +24,8 @@ import StateSubmenu from "./StateSubmenu";
 import EditIssueForm from "../EditIssueForm";
 import IssueComments from "../IssueComments";
 import IssueCommentForm from "../IssueCommentForm";
+import CreateSubIssues from "../CreateSubIssues";
+import MilestoneSubmenu from "./MilestoneSubmenu";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -462,6 +464,8 @@ export default function IssueActions({
 
         <ProjectSubmenu issue={issue} updateIssue={updateIssue} />
 
+        <MilestoneSubmenu issue={issue} updateIssue={updateIssue} />
+
         <ParentIssueSubmenu issue={issue} updateIssue={updateIssue} />
 
         <Action
@@ -479,6 +483,13 @@ export default function IssueActions({
           icon={Icon.List}
           target={<SubIssues issue={issue} mutateList={mutateList} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        />
+
+        <Action.Push
+          title="Break Issues Into Sub-Issues"
+          icon={Icon.Stars}
+          target={<CreateSubIssues issue={issue} />}
+          shortcut={{ modifiers: ["opt", "shift"], key: "m" }}
         />
 
         <Action.Push

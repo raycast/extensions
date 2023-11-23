@@ -5,6 +5,7 @@ export interface Country {
   };
   capital: string[];
   cca2: string;
+  cca3: string;
   population: number;
   area: number;
   currencies: Currencies;

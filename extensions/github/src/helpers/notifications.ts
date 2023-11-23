@@ -40,7 +40,7 @@ export function getGitHubURL(notification: Notification, userId?: string) {
       notification.subject.url,
       notification.id,
       userId,
-      latestCommentId ? "#issuecomment-" + latestCommentId : undefined
+      latestCommentId ? "#issuecomment-" + latestCommentId : undefined,
     );
   } else if (notification.subject.type === "CheckSuite") {
     return generateGitHubUrl(`${notification.repository.html_url}/actions`, notification.id, userId);
@@ -104,6 +104,15 @@ export function getNotificationTypeTitle(notification: Notification): string {
 }
 
 export function getNotificationSubtitle(notification: Notification) {
+  const reason = getNotificationReason(notification);
+  const numberTag = getIssueOrPrNumberTag(notification);
+
+  return numberTag
+    ? `${numberTag} ･ ${notification.repository.full_name} ･ ${reason}`
+    : `${notification.repository.full_name} ･ ${reason}`;
+}
+
+export function getNotificationReason(notification: Notification) {
   switch (notification.reason) {
     case "assign":
       return "Assigned";
@@ -132,6 +141,13 @@ export function getNotificationSubtitle(notification: Notification) {
     default:
       return "";
   }
+}
+
+export function getIssueOrPrNumberTag(notification: Notification) {
+  if (notification.subject.type !== "Issue" && notification.subject.type !== "PullRequest") return;
+
+  const id = notification.subject.url?.split("/").at(-1);
+  return id ? `#${id}` : undefined;
 }
 
 export function getNotificationTooltip(date: Date) {

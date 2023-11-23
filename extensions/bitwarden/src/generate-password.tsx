@@ -30,9 +30,7 @@ function GeneratePasswordComponent() {
   const handlePasswordTypeChange = (type: string) => setOption("passphrase", type === "passphrase");
 
   const handleFieldChange = <O extends keyof PasswordGeneratorOptions>(field: O) => {
-    return (value: PasswordGeneratorOptions[O]) => {
-      setOption(field, value);
-    };
+    return (value: PasswordGeneratorOptions[O]) => setOption(field, value);
   };
 
   const passwordType: PasswordType = options?.passphrase ? "passphrase" : "password";

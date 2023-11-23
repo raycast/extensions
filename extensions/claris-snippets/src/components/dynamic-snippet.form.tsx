@@ -7,7 +7,6 @@ import {
   showHUD,
   showToast,
   Toast,
-  Clipboard,
   useNavigation,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
@@ -33,9 +32,8 @@ export default function DynamicSnippetForm(props: DynamicSnippetFormProps) {
         snippetText = snippetText.replaceAll(field.name, values[field.name]);
       });
 
-      await Clipboard.copy(snippetText);
       try {
-        XMLToFMObjects();
+        await XMLToFMObjects(snippetText);
         closeMainWindow();
         pop();
         showHUD("Copied to Clipboard");

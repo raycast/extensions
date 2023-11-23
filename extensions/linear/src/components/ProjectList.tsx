@@ -29,12 +29,15 @@ export default function ProjectList() {
       return projects;
     }
 
-    const projectsNormalizedById = projects.reduce((acc, project) => {
-      return {
-        ...acc,
-        [project.id]: project,
-      };
-    }, {} as Record<string, ProjectResult | undefined>);
+    const projectsNormalizedById = projects.reduce(
+      (acc, project) => {
+        return {
+          ...acc,
+          [project.id]: project,
+        };
+      },
+      {} as Record<string, ProjectResult | undefined>,
+    );
 
     const currentRoadmap = roadmaps?.find((r) => r.id === roadmap);
 

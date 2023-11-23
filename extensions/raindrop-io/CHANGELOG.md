@@ -1,5 +1,10 @@
 # Raindrop.io Extension Changelog
 
+## [Save multiple links, create collections]
+
+- Save multiple links to a collection at once. This is useful in saving entire browsing sessions or folders in Arc browser.
+- Create new collections on the fly while saving links.
+
 ## [Fixes] - 2023-04-21
 
 - Added a fix to avoid duplicate and empty collections in dropdown results.

@@ -1,6 +1,6 @@
-import { List, Detail, render, Icon, Color, ActionPanel, showToast, ToastStyle } from "@raycast/api";
+import { List, Detail, Icon, Color, ActionPanel, showToast, ToastStyle } from "@raycast/api";
 import fetch from "node-fetch";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 interface switchHostsList {
   success: boolean;
@@ -89,4 +89,4 @@ function SwitchHostsList() {
   }
 }
 
-render(<SwitchHostsList />);
+export default SwitchHostsList;

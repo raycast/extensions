@@ -1,5 +1,28 @@
 # Figma Files Changelog
 
+## [Improved search and filter options] - 2023-10-02
+
+- You can now search for projects.
+- The dropdown filter now lists all projects inside a team even when multiple teams are configured.
+
+## [Support for starring files, Grid UX improvements] - 2023-08-31
+
+- Added support for starring frequently accessed figma files. Max starred files limit is 10.
+- Added accessory icon in grid to identify files with branches.
+- Added tooltip on hover to view entire file names.
+
+## [Support for opening file branches and improvements] - 2023-06-07
+
+- Added support for opening a specific branch of a file through the CMD+K menu.
+- Added icons to differentiate between Projects and Teams.
+- When a single team is added, the search dropdown shows projects instead of teams.
+- Handled edge cases like when a project or team is empty.
+
+## [Multi-team support and better caching] - 2023-05-12
+
+- Added support for multiple teams. You can now search across multiple teams by providing a comma separated list of teamIDs in preferences.
+- Search results are cached for smoother experience. You can now also search for files when offline.
+
 ## [Fixes] - 2022-12-20
 
 - Fixed a bug that caused the extension to crash if a project didn't have any files

@@ -1,5 +1,9 @@
 # Chinese Character Changelog
 
+## [Quotation mark Conversion] - 2023-05-08
+
+- Add the conversion of quotation marks between simplified and traditional Chinese
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0

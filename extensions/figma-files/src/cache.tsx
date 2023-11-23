@@ -1,11 +1,11 @@
 import { LocalStorage } from "@raycast/api";
-import type { File, ProjectFiles, Node } from "./types";
+import type { File, Node, TeamFiles } from "./types";
 
 const PROJECT_FILES_CACHE_KEY = "PROJECT_FILES";
 const PAGES_CACHE_KEY = "PAGES";
 
-export async function storeFiles(projectFiles: ProjectFiles[]) {
-  const data = JSON.stringify(projectFiles);
+export async function storeFiles(teamFiles: TeamFiles[]) {
+  const data = JSON.stringify(teamFiles);
   await LocalStorage.setItem(PROJECT_FILES_CACHE_KEY, data);
 }
 

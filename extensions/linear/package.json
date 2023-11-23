@@ -11,7 +11,8 @@
     "mathieudutour",
     "thomas",
     "peduarte",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "mil3na"
   ],
   "categories": [
     "Productivity"
@@ -30,7 +31,7 @@
           "type": "dropdown",
           "required": false,
           "description": "Select the field to focus automatically once the form is rendered",
-          "default": "team",
+          "default": "title",
           "data": [
             {
               "title": "Team",
@@ -215,25 +216,28 @@
     }
   ],
   "dependencies": {
-    "@linear/sdk": "^2.3.0",
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.16",
-    "date-fns": "^2.28.0",
-    "file-type": "^18.2.0",
+    "@linear/sdk": "^8.0.0",
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1",
+    "date-fns": "^2.30.0",
+    "file-type": "^18.7.0",
     "lodash": "^4.17.21",
+    "nanoid": "^4.0.2",
     "node-emoji": "^1.11.0",
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/lodash": "^4.14.182",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.14.201",
+    "@types/node": "^20.9.0",
     "@types/node-emoji": "^1.8.1",
-    "@types/object-hash": "^2.2.1",
-    "@types/remove-markdown": "^0.3.1",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.21.0",
-    "typescript": "^4.4.3"
+    "@types/object-hash": "^3.0.6",
+    "@types/react": "^18.2.37",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^8.53.0",
+    "prettier": "^3.1.0",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

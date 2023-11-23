@@ -11,5 +11,5 @@ export function secondToDate(second: number) {
 }
 
 export function formatNumber(number: number | undefined) {
-  return number ? (number > 9999 ? (number / 10000).toFixed(1) + "万" : String(number)) : "";
+  return number ? (number > 9999 ? `${(number / 1000).toFixed(1)}K` : String(number)) : "";
 }

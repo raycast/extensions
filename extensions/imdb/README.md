@@ -1,13 +1,11 @@
 <p align="center">
-  <img src="assets/icon.png" height="128">
+  <img src="assets/popcorn-small.png">
   <h1 align="center">IMDb Search</h1>
 </p>
 
 A [Raycast](https://raycast.com/) extenstion that lets you easily open your favorite film or tv series on [IMDb](https://imdb.com/).
 
 This extension is made by [Ryan Voevodin](https://twitter.com/RyanVoevodin) and uses [The Open Movie Database API](https://www.omdbapi.com/) (OMDb) by Brian Fritz.
-
-![Example of IMDb Search Extension on Raycast](https://ryan-exe.s3.ap-southeast-2.amazonaws.com/imdb-raycast/showcase.png)
 
 ## Getting your API Token
 
@@ -17,8 +15,6 @@ This extension is made by [Ryan Voevodin](https://twitter.com/RyanVoevodin) and 
    > Note: You may need to change the activation link to `https://`
 4. Copy your key e.g. `ab12c345` onto the IMDb Search preference pane on Raycast (see image below).
 5. You're all ready to go, start searching.
-
-![Enter your API on Preference Pane](https://ryan-exe.s3.ap-southeast-2.amazonaws.com/imdb-raycast/enterAPI.png)
 
 ## Troubleshooting
 
@@ -37,6 +33,12 @@ The API key you've provided either hasn't been activated or is incorrect.
 ### Other Issues
 
 If any other issues persist, feel free to [contact me](https://twitter.com/RyanVoevodin).
+
+### Credits
+
+- Popcorn and YouTube icon by [Freepik](https://www.flaticon.com/de/kostenlose-icons/popcorn)
+- Director icon by [www.wishforge.games](https://www.iconfinder.com/bitfreak86)
+- Number icon by [Travis Avery](https://thenounproject.com/icon/number-2342369/)
 
 ## Notes
 

@@ -247,22 +247,22 @@ export default function KafkaConsumers() {
                   onAction={async () => await load(env)}
                 />
                 <Action
-                  title="Set offset at latest"
+                  title="Set Offset at Latest"
                   icon={Icon.ArrowRightCircleFilled}
                   onAction={() => setOffset(consumer, "latest")}
                 />
                 <Action
-                  title="Set offset at earliest"
+                  title="Set Offset at Earliest"
                   icon={Icon.ArrowLeftCircleFilled}
                   onAction={() => setOffset(consumer, "earliest")}
                 />
                 <Action.PickDate
-                  title="Set offset from date"
+                  title="Set Offset from Date"
                   icon={Icon.Clock}
                   onChange={(date) => setOffset(consumer, date)}
                 />
                 <Action
-                  title="Set offset from latest - 10"
+                  title="Set Offset from Latest - 10"
                   icon={Icon.MinusCircleFilled}
                   onAction={() => setOffset(consumer, 10)}
                 />

@@ -1,7 +1,8 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
+import { getBoundedPreferenceNumber } from "./components/Menu";
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
@@ -10,16 +11,10 @@ import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
 import { getGitHubClient } from "./helpers/withGithubClient";
 
-type SearchRepositoriesPrefs = {
-  includeForks: boolean;
-  includeArchived: boolean;
-  displayOwnerName: boolean;
-};
-
 function SearchRepositories() {
   const { github } = getGitHubClient();
 
-  const preferences = getPreferenceValues<SearchRepositoriesPrefs>();
+  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
@@ -27,10 +22,10 @@ function SearchRepositories() {
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
     () =>
-      `${searchFilter} ${searchText} fork:${preferences.includeForks} ${
+      `${searchFilter} ${searchText} sort:updated-desc fork:${preferences.includeForks} ${
         preferences.includeArchived ? "" : "archived:false"
       }`,
-    [searchText, searchFilter]
+    [searchText, searchFilter],
   );
 
   const {
@@ -39,17 +34,20 @@ function SearchRepositories() {
     mutate: mutateList,
   } = useCachedPromise(
     async (query) => {
-      const result = await github.searchRepositories({ query, numberOfItems: 20 });
+      const result = await github.searchRepositories({
+        query,
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+      });
 
       return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
     },
     [query],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   const foundRepositories = useMemo(
     () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
-    [data]
+    [data],
   );
 
   return (

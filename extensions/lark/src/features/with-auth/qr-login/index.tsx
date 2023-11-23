@@ -4,7 +4,7 @@ import { toDataURL } from 'qrcode';
 import { initQRCode, NextStep, QRCodeStatus, User } from '../../../services/auth';
 
 interface QRLoginProps {
-  onConfirm: (tenantDomain: string, cookies: string[]) => void;
+  onConfirm: (cookies: string[]) => void;
 }
 
 export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
@@ -37,7 +37,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
         if (unmountedRef.current || tokenRef.current !== qrCode.token) return;
 
         if (result.next_step === NextStep.EnterApp) {
-          return onConfirm(userRef.current!.tenant.tenant_full_domain, result.cookie || []);
+          return onConfirm(result.cookie || []);
         }
 
         if (result.status === QRCodeStatus.Outdated) {
@@ -82,7 +82,7 @@ export const QRLogin: React.FC<QRLoginProps> = ({ onConfirm }) => {
             ) : status === QRCodeStatus.Scanned ? (
               <Detail.Metadata.Label title="Status" icon={Icon.Checkmark} text="Scanned" />
             ) : status === QRCodeStatus.Canceled ? (
-              <Detail.Metadata.Label title="Status" icon={Icon.XmarkCircle} text="Cancelled" />
+              <Detail.Metadata.Label title="Status" icon={Icon.XMarkCircle} text="Cancelled" />
             ) : (
               <Detail.Metadata.Label title="Status" text={QRCodeStatus[status]} />
             )}
@@ -115,13 +115,13 @@ async function getQRCodeMarkdownContent(token: string): Promise<string> {
       margin: 2,
       width: 300,
       color:
-        environment.theme === 'light'
+        environment.appearance === 'light'
           ? {
               light: '#0000',
               dark: '#262426',
             }
           : { light: '#0000', dark: '#dedede' },
-    }
+    },
   );
   return `![](${qrCodeData})`;
 }

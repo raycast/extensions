@@ -1,10 +1,11 @@
-import { environment, Icon, Image, Keyboard, List } from "@raycast/api";
+import { environment, getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
 import { execa, ExecaError } from "execa";
 import { chmod } from "fs/promises";
 import { join } from "path";
 import { Color, HistoryItem } from "./types";
 import convert from "color-convert";
-import { extensionPreferences } from "./preferences";
+
+const preferences: Preferences = getPreferenceValues();
 
 export async function pickColor() {
   const command = join(environment.assetsPath, "color-picker");
@@ -23,7 +24,7 @@ export async function pickColor() {
 }
 
 export function getFormattedColor(color: Color) {
-  switch (extensionPreferences.colorFormat) {
+  switch (preferences.colorFormat) {
     case "hex": {
       return getHex(color);
     }
@@ -72,10 +73,15 @@ export function getShortcut(index: number) {
 
 export function getIcon(color: string | Color) {
   const hex = typeof color === "string" ? color : getFormattedColor(color);
+  if (!hex) {
+    return undefined;
+  }
+
   const icon: Image.ImageLike = {
     source: Icon.CircleFilled,
     tintColor: { light: hex, dark: hex, adjustContrast: false },
   };
+
   return icon;
 }
 

@@ -9,7 +9,8 @@
     "otakustay",
     "EmersonEmerson",
     "pernielsentikaer",
-    "arronhunt"
+    "arronhunt",
+    "kvdo2"
   ],
   "categories": [
     "Design Tools"
@@ -92,7 +93,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.58.0",
     "@raycast/utils": "^1.4.7",
     "@types/execa": "^2.0.0",
     "color-convert": "^2.0.1",

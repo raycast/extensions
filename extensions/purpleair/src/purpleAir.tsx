@@ -143,7 +143,7 @@ export interface AQIReport {
   LongDescription: string;
 }
 
-function aqiFromPM(pm: number): AQIReport {
+function aqiFromPM(pm: number, humidity: number): AQIReport {
   const r: AQIReport = {
     Number: pm,
     Description: "-",
@@ -167,6 +167,11 @@ function aqiFromPM(pm: number): AQIReport {
     Hazardous                        301 – 400  |  250.5 – 350.4
     Hazardous                        401 – 500  |  350.5 – 500.4
     */
+
+  // we need to adjust the pm2.5 value per the EPA update
+  // https://cfpub.epa.gov/si/si_public_record_report.cfm?dirEntryId=353088&Lab=CEMM
+
+  pm = calculateEPAValue(pm, humidity);
 
   if (pm > 350.5) {
     r.Number = calcAQI(pm, 500, 401, 500.4, 350.5);
@@ -217,9 +222,33 @@ function calcAQI(Cp: number, Ih: number, Il: number, BPh: number, BPl: number) {
   return Math.round((a / b) * c + Il);
 }
 
+function calculateEPAValue(pm2_5_atm: number, RH: number): number {
+  if (pm2_5_atm >= 0 && pm2_5_atm < 30) {
+    return 0.524 * pm2_5_atm - 0.0862 * RH + 5.75;
+  } else if (pm2_5_atm >= 30 && pm2_5_atm < 50) {
+    return (0.786 * (pm2_5_atm / 20 - 3 / 2) + 0.524 * (1 - (pm2_5_atm / 20 - 3 / 2))) * pm2_5_atm - 0.0862 * RH + 5.75;
+  } else if (pm2_5_atm >= 50 && pm2_5_atm < 210) {
+    return 0.786 * pm2_5_atm - 0.0862 * RH + 5.75;
+  } else if (pm2_5_atm >= 210 && pm2_5_atm < 260) {
+    return (
+      (0.69 * (pm2_5_atm / 50 - 21 / 5) + 0.786 * (1 - (pm2_5_atm / 50 - 21 / 5))) * pm2_5_atm -
+      0.0862 * RH * (1 - (pm2_5_atm / 50 - 21 / 5)) +
+      2.966 * (pm2_5_atm / 50 - 21 / 5) +
+      5.75 * (1 - (pm2_5_atm / 50 - 21 / 5)) +
+      8.84 * Math.pow(10, -4) * Math.pow(pm2_5_atm, 2) * (pm2_5_atm / 50 - 21 / 5)
+    );
+  } else if (pm2_5_atm >= 260) {
+    return 2.966 + 0.69 * pm2_5_atm + 8.84 * Math.pow(10, -4) * Math.pow(pm2_5_atm, 2);
+  }
+
+  // Default return statement
+  return pm2_5_atm;
+}
+
 export class PurpleAir {
   purpleSensor: PurpleSensor;
   private _currentAQI: AQIReport;
+  private _humidity: number;
   private _AQI_10Minutes: AQIReport;
   private _AQI_30Minutes: AQIReport;
   private _AQI_60Minutes: AQIReport;
@@ -230,6 +259,11 @@ export class PurpleAir {
   public get currentAQI(): AQIReport {
     return this._currentAQI;
   }
+
+  public get Humitiy(): number {
+    return this._humidity;
+  }
+
   public get AQI_10Minutes(): AQIReport {
     return this._AQI_10Minutes;
   }
@@ -256,13 +290,23 @@ export class PurpleAir {
 
   constructor(json: string) {
     this.purpleSensor = this.toPurpleSensor(json);
-    this._currentAQI = aqiFromPM(this.purpleSensor.sensor["pm2.5"] as number) as AQIReport;
-    this._AQI_10Minutes = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_10minute"] as number) as AQIReport;
-    this._AQI_30Minutes = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_30minute"] as number) as AQIReport;
-    this._AQI_60Minutes = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_60minute"] as number) as AQIReport;
-    this._AQI_6Hour = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_6hour"] as number) as AQIReport;
-    this._AQI_24Hour = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_24hour"] as number) as AQIReport;
-    this._AQI_1Week = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_1week"] as number) as AQIReport;
+    this._humidity = this.purpleSensor.sensor.humidity;
+    this._currentAQI = aqiFromPM(this.purpleSensor.sensor["pm2.5"] as number, this._humidity) as AQIReport;
+    this._AQI_10Minutes = aqiFromPM(
+      this.purpleSensor.sensor.stats["pm2.5_10minute"] as number,
+      this._humidity
+    ) as AQIReport;
+    this._AQI_30Minutes = aqiFromPM(
+      this.purpleSensor.sensor.stats["pm2.5_30minute"] as number,
+      this._humidity
+    ) as AQIReport;
+    this._AQI_60Minutes = aqiFromPM(
+      this.purpleSensor.sensor.stats["pm2.5_60minute"] as number,
+      this._humidity
+    ) as AQIReport;
+    this._AQI_6Hour = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_6hour"] as number, this._humidity) as AQIReport;
+    this._AQI_24Hour = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_24hour"] as number, this._humidity) as AQIReport;
+    this._AQI_1Week = aqiFromPM(this.purpleSensor.sensor.stats["pm2.5_1week"] as number, this._humidity) as AQIReport;
   }
 
   public getAirQualitySummary(): string {

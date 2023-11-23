@@ -5,6 +5,9 @@
   "description": "search and connect databases in Sequel Ace",
   "icon": "icon.png",
   "author": "nagauta",
+  "contributors": [
+    "macbookandrew"
+  ],
   "categories": [
     "Productivity",
     "Data"
@@ -27,6 +30,15 @@
       "title": "Sequel Ace data directory",
       "placeholder": "Leave blank for default location",
       "description": "If you moved the data directory\r\n(must be full-paths or tidle-prefixed ones)"
+    },
+    {
+      "name": "searchByGroupName",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Search by Group Name",
+      "description": "Toggle the Ability to Search by Group Name.",
+      "label": "Search by Group Name"
     }
   ],
   "dependencies": {

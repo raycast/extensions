@@ -1,8 +1,9 @@
 import { ActionPanel, Icon, List, Action, LocalStorage } from '@raycast/api';
-import { faker, UsableLocale } from '@faker-js/faker';
+import { UsableLocale } from '@faker-js/faker';
 import _ from 'lodash';
 import isUrl from 'is-url';
 import { useCallback, useEffect, useState } from 'react';
+import faker from './faker';
 
 type LocalStorageValues = {
   pinnedItemIds: string;
@@ -28,6 +29,7 @@ const blacklistPaths = [
   'helpers',
   'mersenne',
   'random',
+  'science',
 ];
 
 const buildItems = (path: string) => {
@@ -50,16 +52,18 @@ const buildItems = (path: string) => {
 
       return acc;
     },
-    []
+    [],
   );
 };
 
 function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
   const { item, pin, unpin } = props;
   const [value, setValue] = useState(item.value);
+
   const updateValue = async () => {
     setValue(item.getValue());
   };
+
   useEffect(() => {
     updateValue();
   }, [item]);
@@ -96,6 +100,34 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ['ctrl'], key: 'r' }}
             onAction={updateValue}
+          />
+          <Action.CreateQuicklink
+            title="Create Copy Quicklink"
+            quicklink={{
+              name: `Copy Random ${_.startCase(item.id)}`,
+              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+                JSON.stringify({
+                  section: item.section,
+                  id: item.id,
+                  locale: faker.locale,
+                  mode: 'copy',
+                }),
+              )}`,
+            }}
+          />
+          <Action.CreateQuicklink
+            title="Create Paste Quicklink"
+            quicklink={{
+              name: `Paste Random ${_.startCase(item.id)}`,
+              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+                JSON.stringify({
+                  section: item.section,
+                  id: item.id,
+                  locale: faker.locale,
+                  mode: 'paste',
+                }),
+              )}`,
+            }}
           />
         </ActionPanel>
       }

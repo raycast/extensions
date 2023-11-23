@@ -14,17 +14,20 @@ import {
   Icon,
   Color,
   Keyboard,
+  Detail,
 } from "@raycast/api";
-import { useState, useMemo, useEffect } from "react";
+import dedent from "dedent-js";
+import { useState, useMemo, useEffect, Fragment } from "react";
 import { $enum } from "ts-enum-util";
 import prettyBytes from "pretty-bytes";
 import { usePersistentState } from "raycast-toolkit";
 import { truncate } from "./utils/string";
 import { padList } from "./utils/list";
-import { useAllTorrents, useMutateTorrent, useSessionStats } from "./modules/client";
-import { renderDetails } from "./utils/renderDetails";
+import { formatDate } from "./utils/date";
+import { useAllTorrents, useMutateTorrent, useSessionStats, isLocalTransmission } from "./modules/client";
+import { renderPieces } from "./utils/renderCells";
 import { useAsync } from "react-use";
-import { type SessionStats, TorrentStatus, type Torrent } from "./types";
+import { SessionStats, TorrentStatus, Torrent } from "./types";
 import { formatStatus, statusIcon } from "./utils/status";
 import { TorrentConfiguration } from "./components/TorrentConfiguration";
 import path from "path";
@@ -244,15 +247,10 @@ function TorrentListItem({
     [rateDownload, rateUpload, percentDone]
   );
 
-  const details = useAsync(
-    () =>
-      renderDetails(
-        torrent,
-        downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")
-      ),
-    [torrent, downloadStats]
+  const cellImage = useAsync(
+    () => renderPieces({ pieces: torrent.pieces, complete: torrent.percentDone === 1 }),
+    [torrent]
   );
-
   const files = torrent.files.filter((file) => existsSync(path.join(torrent.downloadDir, file.name)));
 
   return (
@@ -265,8 +263,32 @@ function TorrentListItem({
       detail={
         isShowingDetail && (
           <List.Item.Detail
-            markdown={details.value ?? `\`\`\`\n${details.error}\n\`\`\``}
-            isLoading={details.loading}
+            isLoading={cellImage.loading}
+            markdown={dedent(`
+                # ${downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")}
+
+                ${cellImage.value && `<img src="data:image/svg+xml,${encodeURIComponent(cellImage.value)}"/>`}
+                ${torrent.errorString && `**Error**: ${torrent.errorString}`}
+              `)}
+            metadata={
+              <Detail.Metadata>
+                {preferences.showFilesAboveTorrentInfo ? (
+                  <>
+                    <FileList torrent={torrent} />
+                    <Detail.Metadata.Separator />
+                    <TorrentInfo torrent={torrent} />
+                  </>
+                ) : (
+                  <>
+                    <TorrentInfo torrent={torrent} />
+                    <Detail.Metadata.Separator />
+                    <FileList torrent={torrent} />
+                  </>
+                )}
+                <Detail.Metadata.Separator />
+                <TrackerList torrent={torrent} />
+              </Detail.Metadata>
+            }
           />
         )
       }
@@ -299,11 +321,13 @@ function TorrentListItem({
                 onAction={() => onRemove(torrent)}
               />
             </ActionPanel.Submenu>
-            <Action.Open
-              title="Open Download Folder"
-              shortcut={{ key: "d", modifiers: ["cmd"] }}
-              target={torrent.downloadDir}
-            />
+            {isLocalTransmission() ? (
+              <Action.Open
+                title="Open Download Folder"
+                shortcut={{ key: "d", modifiers: ["cmd"] }}
+                target={torrent.downloadDir}
+              />
+            ) : null}
             {files.length >= 1 ? (
               <ActionPanel.Submenu
                 icon={Icon.Upload}
@@ -352,5 +376,60 @@ function TorrentListItem({
         </ActionPanel>
       }
     />
+  );
+}
+
+function TorrentInfo({ torrent }: { torrent: Torrent }) {
+  return (
+    <>
+      <Detail.Metadata.Label title="Pieces" text={`${torrent.pieceCount} / ${prettyBytes(torrent.pieceSize)}`} />
+      <Detail.Metadata.Label title="Hash" text={torrent.hashString} />
+      <Detail.Metadata.Label title="Private" text={torrent.isPrivate ? "Yes" : "No"} />
+      {torrent.creator && <Detail.Metadata.Label title="Creator" text={torrent.creator} />}
+      {torrent.dateCreated > 0 && <Detail.Metadata.Label title="Created On" text={formatDate(torrent.dateCreated)} />}
+      <Detail.Metadata.Label title="Directory" text={torrent.downloadDir} />
+      {torrent.comment && <Detail.Metadata.Label title="Comment" text={torrent.comment} />}
+    </>
+  );
+}
+
+function FileList({ torrent }: { torrent: Torrent }) {
+  return (
+    <>
+      {torrent.files.map((file, key) => (
+        <Detail.Metadata.Label
+          text={file.name}
+          title={`${((100 / file.length) * file.bytesCompleted).toFixed(2)}% - ${prettyBytes(file.length)}`}
+          key={key}
+        />
+      ))}
+    </>
+  );
+}
+
+function TrackerList({ torrent }: { torrent: Torrent }) {
+  return (
+    <>
+      {torrent.trackers
+        .reduce<Array<Torrent["trackerStats"]>>((acc, tracker) => {
+          acc[tracker.tier] = (acc[tracker.tier] || []).concat(
+            torrent.trackerStats.find(({ announce }) => announce === tracker.announce) as Torrent["trackerStats"][0]
+          );
+          return acc;
+        }, [])
+        .map((trackers) => {
+          return trackers.map((tracker, key) => (
+            <Fragment key={key}>
+              <Detail.Metadata.Label title={tracker.host} text={`Tier ${trackers[0].tier + 1}`} />
+              <Detail.Metadata.Label title="Last Announce" text={formatDate(tracker.lastAnnounceTime)} />
+              <Detail.Metadata.Label title="Last Scape" text={formatDate(tracker.lastScrapeTime)} />
+              <Detail.Metadata.Label title="Seeders" text={`${tracker.seederCount}`} />
+              <Detail.Metadata.Label title="Leechers" text={`${tracker.leecherCount}`} />
+              <Detail.Metadata.Label title="Downloaded" text={`${tracker.downloadCount}`} />
+              <Detail.Metadata.Separator />
+            </Fragment>
+          ));
+        })}
+    </>
   );
 }

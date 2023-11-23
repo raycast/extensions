@@ -12,7 +12,7 @@ import { showToast, Toast } from "@raycast/api";
 import { exec, execFile } from "child_process";
 import { execa } from "execa";
 import querystring from "node:querystring";
-import { DetectedLangModel, LanguageDetectType } from "./detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "./detectLanguage/types";
 import { QueryWordInfo } from "./dictionary/youdao/types";
 import { getAppleLangCode, getYoudaoLangCodeFromAppleCode } from "./language/languages";
 import { RequestErrorInfo, RequestType, TranslationType } from "./types";

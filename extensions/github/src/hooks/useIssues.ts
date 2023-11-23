@@ -22,7 +22,7 @@ export function useIssues(repository: string | null) {
         numberOfOpenItems: 20,
       });
     },
-    [repository]
+    [repository],
   );
 
   const assignedIssues = data?.assignedOpen.nodes as IssueFieldsFragment[];

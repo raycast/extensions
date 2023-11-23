@@ -2,6 +2,14 @@
 
 ## [New Feature] - 2023-02-28
 
+- Add ability to choose a [project task](https://support.toggl.com/en/articles/2220738-tasks) when creating a new time entry.
+
+## [Enhancements] - 2023-07-05
+
+- New preference that allows archived projects to be hidden (default: true).
+
+## [New Feature] - 2023-02-28
+
 - Display the total time tracking in the current today in the main windows navigation title.
 
 ## [Update] - 2023-02-13

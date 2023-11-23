@@ -1,22 +1,23 @@
 import { List } from "@raycast/api";
-import { douyinSearchUrl, TrendsTags, trendsTags } from "./utils/trend-utils";
-import { commonPreferences, listIcon, listIconDark } from "./utils/common-utils";
-import { getTrends } from "./hooks/hooks";
-import { TrendActions } from "./utils/ui-component";
+import { TrendsTags, trendsTags } from "./utils/constants";
+import { getAllTrends } from "./hooks/hooks";
 import { useState } from "react";
+import { rememberTag } from "./types/preferences";
+import { TrendListItem } from "./components/trend-list-item";
+import { TrendsEmptyView } from "./components/trends-empty-view";
 
-export default function TrendOfWeibo() {
-  const { rememberTag } = commonPreferences();
+export default function SearchTrendsOfSocialNetwork() {
   const [trendsTag, setTrendsTag] = useState<string>(TrendsTags.ALL);
-  const { weiBoTrends, zhiHuTrends, douYinTrends } = getTrends();
+  const { weiBoTrends, zhiHuTrends, douYinTrends, baiduTrend, toutiaoTrend, toutiaoNewsTrend, biliTrend, loading } =
+    getAllTrends(50);
 
   return (
     <List
-      isLoading={weiBoTrends.length === 0 && zhiHuTrends.length === 0 && douYinTrends.length === 0}
-      searchBarPlaceholder={"Search trends"}
+      isLoading={loading}
+      searchBarPlaceholder={`Search trends`}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Collection Tag"
+          tooltip="Trends Tag"
           storeValue={rememberTag}
           onChange={(newValue) => {
             setTrendsTag(newValue);
@@ -28,53 +29,66 @@ export default function TrendOfWeibo() {
         </List.Dropdown>
       }
     >
+      <TrendsEmptyView />
+
       {(trendsTag === TrendsTags.ALL || trendsTag === TrendsTags.WEIBO) && (
-        <List.Section title={"WeiBo"}>
+        <List.Section title={TrendsTags.WEIBO}>
           {weiBoTrends?.map((value, index) => {
-            return (
-              <List.Item
-                id={index + value.url}
-                key={index + value.url}
-                icon={{ source: { light: `${listIcon[index]}`, dark: `${listIconDark[index]}` } }}
-                title={value.name}
-                accessories={[{ text: `${(value.hot / 10000).toFixed(1)}w` }]}
-                actions={<TrendActions url={value.url} name={value.name} />}
-              />
-            );
+            return <TrendListItem key={index + value.name} index={index} trend={value} keywords={[TrendsTags.WEIBO]} />;
           })}
         </List.Section>
       )}
 
       {(trendsTag === TrendsTags.ALL || trendsTag === TrendsTags.ZHIHU) && (
-        <List.Section title={"ZhiHU"}>
+        <List.Section title={TrendsTags.ZHIHU}>
           {zhiHuTrends?.map((value, index) => {
-            return (
-              <List.Item
-                id={index + value.url}
-                key={index + value.url}
-                icon={{ source: { light: `${listIcon[index]}`, dark: `${listIconDark[index]}` } }}
-                title={value.query}
-                accessories={[{ text: `${value.name}` }]}
-                actions={<TrendActions url={value.url} name={value.name} />}
-              />
-            );
+            return <TrendListItem key={index + value.name} index={index} trend={value} keywords={[TrendsTags.ZHIHU]} />;
           })}
         </List.Section>
       )}
 
       {(trendsTag === TrendsTags.ALL || trendsTag === TrendsTags.DOUYIN) && (
-        <List.Section title={"DouYin"}>
+        <List.Section title={TrendsTags.DOUYIN}>
           {douYinTrends?.map((value, index) => {
             return (
-              <List.Item
-                id={index + value.name}
-                key={index + value.name}
-                icon={{ source: { light: `${listIcon[index]}`, dark: `${listIconDark[index]}` } }}
-                title={value.name}
-                accessories={[{ text: `${(value.hot / 10000).toFixed(1)}w` }]}
-                actions={<TrendActions url={douyinSearchUrl + encodeURIComponent(value.name)} name={value.name} />}
-              />
+              <TrendListItem key={index + value.name} index={index} trend={value} keywords={[TrendsTags.DOUYIN]} />
             );
+          })}
+        </List.Section>
+      )}
+
+      {(trendsTag === TrendsTags.ALL || trendsTag === TrendsTags.BAIDU) && (
+        <List.Section title={"BaiDu"}>
+          {baiduTrend?.map((value, index) => {
+            return <TrendListItem key={index + value.name} index={index} trend={value} keywords={[TrendsTags.BAIDU]} />;
+          })}
+        </List.Section>
+      )}
+
+      {(trendsTag === TrendsTags.ALL || trendsTag === TrendsTags.TOUTIAO) && (
+        <List.Section title={TrendsTags.TOUTIAO}>
+          {toutiaoTrend?.map((value, index) => {
+            return (
+              <TrendListItem key={index + value.name} index={index} trend={value} keywords={[TrendsTags.TOUTIAO]} />
+            );
+          })}
+        </List.Section>
+      )}
+
+      {(trendsTag === TrendsTags.ALL || trendsTag === TrendsTags.TOUTIAONEWS) && (
+        <List.Section title={TrendsTags.TOUTIAONEWS}>
+          {toutiaoNewsTrend?.map((value, index) => {
+            return (
+              <TrendListItem key={index + value.name} index={index} trend={value} keywords={[TrendsTags.TOUTIAONEWS]} />
+            );
+          })}
+        </List.Section>
+      )}
+
+      {(trendsTag === TrendsTags.ALL || trendsTag === TrendsTags.BILI) && (
+        <List.Section title={TrendsTags.BILI}>
+          {biliTrend?.map((value, index) => {
+            return <TrendListItem key={index + value.name} index={index} trend={value} keywords={[TrendsTags.BILI]} />;
           })}
         </List.Section>
       )}

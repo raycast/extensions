@@ -6,7 +6,12 @@
   "icon": "command-icon.png",
   "author": "RSO",
   "contributors": [
-    "sxn"
+    "sxn",
+    "JasonJiang"
+  ],
+  "categories": [
+    "Documentation",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -15,19 +20,41 @@
       "title": "Find in Dash",
       "subtitle": "Dash",
       "description": "Filter a Dash docset and search for the provided string in it.",
+      "mode": "view"
+    },
+    {
+      "name": "docset",
+      "title": "Find in Specific Dash Docset",
+      "subtitle": "Docset keyword in Dash",
+      "description": "Directly search for the provided string in specific docset.",
       "mode": "view",
       "arguments": [
         {
-          "name": "searchstring",
-          "placeholder": "Query",
+          "name": "docset",
+          "placeholder": "Docset keyword",
           "type": "text",
-          "required": false
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create-docset-link",
+      "title": "Create Docset Quicklink",
+      "subtitle": "Docset keyword in Dash",
+      "description": "Create a quicklink for a specific docset in Dash.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "docset",
+          "placeholder": "Docset keyword",
+          "type": "text",
+          "required": true
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.0",
+    "@raycast/api": "^1.53.4",
     "execa": "6.1.0",
     "fast-xml-parser": "3.20.3",
     "html-entities": "2.3.2",

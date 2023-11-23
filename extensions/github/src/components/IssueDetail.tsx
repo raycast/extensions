@@ -41,7 +41,7 @@ export default function IssueDetail({ initialIssue, mutateList }: PullRequestDet
       return issueDetails.node as IssueDetailFieldsFragment;
     },
     [initialIssue.id],
-    { initialData: initialIssue }
+    { initialData: initialIssue },
   );
 
   let markdown = `# ${issue.title}`;

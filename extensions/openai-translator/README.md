@@ -5,22 +5,18 @@
 Quick Tips and Tricks:
 [![Quick Tips and Tricks for Raycast OpenAI Translator](https://img.youtube.com/vi/2tW9iKz2nT0/maxresdefault.jpg)](https://www.youtube.com/watch?v=2tW9iKz2nT0)
 
+
 # Insipired By
 
 - [yetone/openai-translator](https://github.com/yetone/openai-translator)
+- [abielzulio/chatgpt-raycast](https://github.com/abielzulio/chatgpt-raycast)
 - [yihong0618/iWhat](https://github.com/yihong0618/iWhat)
-
-# Learn a lot from
-
-- [yetone/openai-translator](https://github.com/yetone/openai-translator) (MIT License)
-- [abielzulio/chatgpt-raycast](https://github.com/abielzulio/chatgpt-raycast) (MIT License)
 
 # Install
 
 ## Store
 
 [Raycast OpenAI Translator](https://www.raycast.com/douo/openai-translator)
-
 
 ## Manual
 
@@ -37,8 +33,6 @@ After the extension command show up, You can stop(`Ctrl-c`) the server safely.
 
 ![Intro](doc/configuration.png)
 
-Get your [OpenAI](https://platform.openai.com/account/api-keys) API Keys
-
 ## Main Feature
 
 - Selected text translation
@@ -54,18 +48,49 @@ Get your [OpenAI](https://platform.openai.com/account/api-keys) API Keys
 
 ![Commands](doc/commands.png)
 
-Thanks to [yetone/openai-translator](https://github.com/yetone/openai-translator)：
 
 - Translate
 - Polishing
 - Summarize
+- What/What is it?
 
 ![Translate](doc/translate.png)
-
-- What/What is it? (Thanks to [yihong0618/iWhat](https://github.com/yihong0618/iWhat) 的 Prompts)
-
 ![What](doc/what-en.png)
 
+## Multiple LLM Provider Support
+
+- [OpenAI ChatGPT](https://chat.openai.com/)
+- [Raycast AI](https://www.raycast.com/pro)
+- [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service)
+- [PaLM 2](https://ai.google/discover/palm2)
+
+### OpenAI ChatGPT
+
+- API Entrypoint: https://api.openai.com/v1/chat/completions
+- API Key: Get your [OpenAI](https://platform.openai.com/account/api-keys) API Key.
+- API Model: gpt-3.5-turbo/etc
+
+### Raycast AI
+
+- API Entrypoint: none
+- API Key: none
+- API Model: No configuration required.
+
+Requires [Raycast Pro](https://www.raycast.com/pro) to support.
+
+### Azure OpenAI Service
+
+- API Entrypoint:`https://${resourceName}.openai.azure.com/openai/deployments/${deployName}/chat/completions?api-version=${apiVersion}`
+- API Key: [Azure](https://portal.azure.com/) -> Azure OpenAI -> Keys and Endpoint
+- API Model：No configuration required.
+
+### PaLM 2
+
+- API Entrypoint: none
+- API Key: [MakerSuite->API Keys](Https:/ /makersuite.google.Com/app/API key)
+- API Model：No configuration required, the current text-bison
+
+Function is limited and only supports US IP addresses.
 
 ## Others
 

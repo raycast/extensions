@@ -22,7 +22,7 @@ export default async function main() {
     return;
   }
 
-  const command = `open -b me.damir.dropover-mac ${files.map((file) => file.path).join(" ")}`;
+  const command = `open -b me.damir.dropover-mac ${files.map((file) => `'${file.path}'`).join(" ")}`;
   try {
     await execPromise(command);
     await showHUD(`📎 Added ${files.length} to Dropover`).then();
