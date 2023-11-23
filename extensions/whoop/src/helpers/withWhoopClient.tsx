@@ -17,7 +17,7 @@ export function withWhoopClient(component: JSX.Element) {
         Authorization: `Bearer ${accessToken}`,
       };
 
-      api.defaults.fetch = nodeFetch as any;
+      api.defaults.fetch = nodeFetch as unknown as typeof api.defaults.fetch;
 
       whoopClient = api;
 
@@ -56,7 +56,7 @@ export async function setWhoopClient() {
     Authorization: `Bearer ${accessToken}`,
   };
 
-  api.defaults.fetch = nodeFetch as any;
+  api.defaults.fetch = nodeFetch as unknown as typeof api.defaults.fetch;
 
   whoopClient = api;
 }

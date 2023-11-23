@@ -63,7 +63,7 @@ function CycleListItem({ workout, isLoading, units }: { workout: Workout; isLoad
 
   return (
     <List.Item
-      title={`${formatDate(workout.created_at, "MMM d")}  ·  ${sportName}`}
+      title={`${formatDate(workout.created_at, "MMM d", true)}  ·  ${sportName}`}
       accessories={[{ icon: getProgressIcon(strain / 21, WhoopColor.strain) }]}
       detail={
         <List.Item.Detail

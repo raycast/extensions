@@ -9,7 +9,7 @@ async function setupAPI() {
   api.defaults.headers = {
     Authorization: `Bearer ${accessToken}`,
   };
-  api.defaults.fetch = nodeFetch as any;
+  api.defaults.fetch = nodeFetch as unknown as typeof api.defaults.fetch;
 }
 
 export async function getCycleCollection(params?: CollectionFunctionParams): Promise<api.PaginatedCycleResponse> {
