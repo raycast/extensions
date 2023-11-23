@@ -1,11 +1,11 @@
 import { VPN } from "./type";
-import { CMD_PATH, getFlagByName, getFlagEmoji, runScript, runScriptReturnArray } from "./utils";
+import { CMD_PATH, getFlagByName, runScript } from "./utils";
 
 export default async () => {
   const GET_VPN_NAMES = `${CMD_PATH} --nc list | grep "com.wireguard.macos"`;
   // Regular matching text:
   // * (Connected)      xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx VPN (com.wireguard.macos) "Home"                      [VPN:com.wireguard.macos]
-  const REG_VPN = /\* (\(\w+\)).*?"(.*)"/gm;
+  const REG_VPN = /\* (\(\w+\)).*?"(.*?)"?\s+\[VPN:/gm;
   const VPNItems: VPN[] = [];
   const cmdResult = await runScript(GET_VPN_NAMES);
   let execString = REG_VPN.exec(cmdResult);
@@ -32,7 +32,17 @@ export async function getVPNStatusByName(VPNName: string) {
 }
 
 export async function getConnectedVPNArray() {
-  const GET_CONNECTED_VPN = `${CMD_PATH} --nc list | grep "com.wireguard.macos" | grep "(Connected)" | awk -F '"' '{print$2}'`;
-  const VPNNameArray = await runScriptReturnArray(GET_CONNECTED_VPN);
+  // const GET_CONNECTED_VPN = `${CMD_PATH} --nc list | grep "com.wireguard.macos" | grep "(Connected)"`;
+  const GET_CONNECTED_VPN = `${CMD_PATH} --nc list | grep "com.wireguard.macos"`;
+  const REG_VPN = /\*\s+\(Connected\).*?\).*?"(.*?)"?\s+\[VPN:/gm;
+  const VPNNameArray: string[] = [];
+  const cmdResult = await runScript(GET_CONNECTED_VPN);
+  if (cmdResult !== "") {
+    let execString = REG_VPN.exec(cmdResult);
+    while (execString !== null) {
+      VPNNameArray.push(execString[1]);
+      execString = REG_VPN.exec(cmdResult);
+    }
+  }
   return VPNNameArray;
 }
