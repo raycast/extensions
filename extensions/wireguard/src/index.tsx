@@ -27,8 +27,8 @@ export default function Command() {
         <List.Item
           icon={
             VPN.isConnected
-              ? { source: Icon.Bolt, tintColor: { light: "#333", dark: "#DDD" } }
-              : { source: Icon.BoltDisabled, tintColor: { light: "#888", dark: "#999" } }
+              ? "connect.png"
+              : "disconnect.png"
           }
           key={index}
           title={showFlag ? VPN.flag + " " + VPN.name : VPN.name}
