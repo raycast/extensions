@@ -10,7 +10,7 @@ type API = {
   core: typeof Core;
 };
 
-module.exports = async ({ github, context }: API) => {
+export default async ({ github, context }: API) => {
   const changedFiles: string[] = JSON.parse(process.env.CHANGED_FILES || "[]");
   const codeowners = await getCodeOwners({ github, context });
 
