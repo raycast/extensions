@@ -45,7 +45,7 @@ const activitySchema = z.array(
       firstname: z.string(),
       lastname: z.string(),
     }),
-    hourly_rate: z.number(),
+    hourly_rate: z.number().optional(),
     timer_started_at: z.nullable(z.string()),
     created_at: z.string(),
     updated_at: z.string(),
