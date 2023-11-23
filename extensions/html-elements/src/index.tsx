@@ -8,7 +8,6 @@ export default function SearchHTMLElements() {
   const [selectedElement, setSelectedElement] = useState<ElementDetails | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
 
-
   useEffect(() => {
     const fetchElements = async () => {
       if (searchText) {
@@ -21,7 +20,7 @@ export default function SearchHTMLElements() {
   }, [searchText]);
 
   const handleSelectionChange = (id: string | null) => {
-    const selected = elements.find(element => element.title === id);
+    const selected = elements.find((element) => element.title === id);
     if (selected) {
       setSelectedElement(selected);
     }
@@ -32,8 +31,8 @@ export default function SearchHTMLElements() {
   }
 
   return (
-    <List 
-      onSearchTextChange={setSearchText} 
+    <List
+      onSearchTextChange={setSearchText}
       onSelectionChange={handleSelectionChange}
       isLoading={!isInitialLoad && elements.length === 0}
     >
@@ -46,7 +45,11 @@ export default function SearchHTMLElements() {
           actions={
             <ActionPanel>
               <Action title="Read Docs" onAction={() => setSelectedElement(element)} />
-              <Action.OpenInBrowser title="Open in Browser" url={element.mdn_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+              <Action.OpenInBrowser
+                title="Open in Browser"
+                url={element.mdn_url}
+                shortcut={{ modifiers: ["cmd"], key: "enter" }}
+              />
             </ActionPanel>
           }
         />
@@ -54,7 +57,6 @@ export default function SearchHTMLElements() {
     </List>
   );
 }
-
 
 type ElementDetailsViewProps = {
   element: ElementDetails;
