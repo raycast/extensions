@@ -20,7 +20,7 @@ export async function isPIAConnected(): Promise<boolean> {
   try {
     const { stdout } = await executeCommand(`${piaPath} get connectionstate`);
     const trimmed = stdout.trim();
-    return trimmed === "Connected" || trimmed === "Connecting";
+    return trimmed === "Connected" || trimmed === "Connecting" || trimmed === "DisconnectingToReconnect";
   } catch (error) {
     console.error("Error checking PIA connection:", error);
     return false;
@@ -57,7 +57,7 @@ export async function connectToPIA(region?: string): Promise<void> {
   await runPrivateInternetAccessCmd(`connect`);
   const isConnected = await isPIAConnected();
   if (isConnected) {
-    await showHUD("Private Internet Access connected");
+    await showHUD(`Private Internet Access connected (${region})`);
   }
 }
 
