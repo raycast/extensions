@@ -23,13 +23,13 @@ export default async (VPN: VPN) => {
 };
 
 export async function disconnectVPNByName(VPNName: string, isSilently = false) {
-  let ConvertedName = VPNName.replace(/"/g, '\\"');
+  const ConvertedName = VPNName?.replace(/"/g, '\\"')?.replace(/`/g, "\\`");
   const DISCONNECT_VPN = `${CMD_PATH} --nc stop "${ConvertedName}"`;
   await runScript(DISCONNECT_VPN, isSilently);
 }
 
 export async function connectVPNByName(VPNName: string, isSilently = false) {
-  let ConvertedName = VPNName.replace(/"/g, '\\"');
+  const ConvertedName = VPNName?.replace(/"/g, '\\"')?.replace(/`/g, "\\`");
   const CONNECT_VPN = `${CMD_PATH} --nc start "${ConvertedName}"`;
   await runScript(CONNECT_VPN, isSilently);
 }
