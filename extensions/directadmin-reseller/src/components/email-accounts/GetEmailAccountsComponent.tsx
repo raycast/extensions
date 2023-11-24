@@ -5,11 +5,11 @@ import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, sho
 import CreateEmailAccountComponent from "./CreateEmailAccountComponent";
 import ChangeEmailAccountPasswordComponent from "./ChangeEmailAccountPasswordComponent";
 
-type GetEmailAccountsCompponentProps = {
+type GetEmailAccountsComponentProps = {
     domain: string;
     userToImpersonate?: string;
 };
-  export default function GetEmailAccountsComponent({ domain, userToImpersonate="" }: GetEmailAccountsCompponentProps) {
+  export default function GetEmailAccountsComponent({ domain, userToImpersonate="" }: GetEmailAccountsComponentProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [emailAccounts, setEmailAccounts] = useState<string[]>();
   
@@ -94,6 +94,23 @@ type GetEmailAccountsCompponentProps = {
               />
             ))
           ))}
+          {!isLoading && (
+          <List.Section title="Actions">
+            <List.Item
+              title="Create Email Account"
+              icon={Icon.Plus}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Create Email Account"
+                    icon={Icon.Plus}
+                    target={<CreateEmailAccountComponent domain={domain} onEmailAccountCreated={getFromApi} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+        )}
       </List>
     );
   }

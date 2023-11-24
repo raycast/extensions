@@ -12,7 +12,7 @@
   "preferences": [
     {
       "name": "reseller_username",
-      "description": "",
+      "description": "DirectAdmin Reseller Username",
       "title": "Reseller Username",
       "type": "textfield",
       "placeholder": "reseller",
@@ -20,7 +20,7 @@
     },
     {
       "name": "reseller_password",
-      "description": "",
+      "description": "DirectAdmin Reseller Password",
       "title": "Reseller Password",
       "type": "password",
       "placeholder": "hunter2",
@@ -28,7 +28,7 @@
     },
     {
       "name": "directadmin_url",
-      "description": "",
+      "description": "Link to DirectAdmin instance with Port",
       "title": "DirectAdmin URL",
       "type": "textfield",
       "placeholder": "https://demo.directadmin.com:2222",
@@ -40,42 +40,42 @@
       "name": "reseller-ip-s",
       "title": "Reseller IPs",
       "subtitle": "DirectAdmin Reseller",
-      "description": "",
+      "description": "List of IPs currently owned by reseller",
       "mode": "view"
     },
     {
       "name": "reseller-user-accounts",
       "title": "Reseller User Accounts",
       "subtitle": "DirectAdmin Reseller",
-      "description": "",
+      "description": "List of Users currently owned by reseller",
       "mode": "view"
     },
     {
       "name": "user-packages",
       "title": "User Packages",
       "subtitle": "DirectAdmin Reseller",
-      "description": "",
+      "description": "List of available User Packages",
       "mode": "view"
     },
     {
       "name": "domains",
       "title": "Domains",
       "subtitle": "DirectAdmin Reseller",
-      "description": "",
+      "description": "List all of the domains",
       "mode": "view"
     },
     {
       "name": "databases",
       "title": "Databases",
       "subtitle": "DirectAdmin Reseller",
-      "description": "",
+      "description": "List all of the databases",
       "mode": "view"
     },
     {
       "name": "session",
       "title": "Session",
       "subtitle": "DirectAdmin Reseller",
-      "description": "",
+      "description": "Get session information including usertype and base64 encoded password",
       "mode": "view",
       "arguments": [
         {

@@ -14,8 +14,10 @@ import {
   ErrorResponse,
   GetEmailAccountsRequest,
   GetSessionRequest,
+  ChangeUserAccountEmailRequest,
   ModifyUserRequest,
   SuspendOrUnsuspendUserRequest,
+  ChangeUserTicketingEmailRequest,
 } from "../types";
 import fetch, { Response } from "node-fetch";
 import { API_URL, RESELLER_PASSWORD, RESELLER_USERNAME, TOKEN } from "./constants";
@@ -122,6 +124,12 @@ export async function suspendOrUnsuspendUser(body: SuspendOrUnsuspendUserRequest
 export async function modifyUser(body: ModifyUserRequest) {
   return await callApi("MODIFY_USER", "Modifying User", body);
 }
+export async function changeUserAccountEmail(body: ChangeUserAccountEmailRequest, userToImpersonate="") {
+  return await callApi("CHANGE_INFO", "Changing User Account Email", body, userToImpersonate);
+}
+export async function changeUserTicketingEmail(body: ChangeUserTicketingEmailRequest, userToImpersonate="") {
+  return await callApi("TICKET", "Changing User Ticketing Email", body, userToImpersonate);
+}
 
 //
 export async function getResellerIPs() {
@@ -159,14 +167,14 @@ export async function deleteSubdomain(body: DeleteSubdomainRequest, userToImpers
 }
 
 // Databases
-export async function getDatabases() {
-  return await callApi("DATABASES", "Fetching Databases");
+export async function getDatabases(userToImpersonate="") {
+  return await callApi("DATABASES", "Fetching Databases", undefined, userToImpersonate);
 }
-export async function createDatabase(body: CreateDatabaseRequest) {
-  return await callApi("DATABASES", "Creating Databases", body);
+export async function createDatabase(body: CreateDatabaseRequest, userToImpersonate="") {
+  return await callApi("DATABASES", "Creating Database", body, userToImpersonate);
 }
-export async function deleteDatabase(body: DeleteDatabaseRequest) {
-  return await callApi("DATABASES", "Deleting Database", body);
+export async function deleteDatabase(body: DeleteDatabaseRequest, userToImpersonate="") {
+  return await callApi("DATABASES", "Deleting Database", body, userToImpersonate);
 }
 
 // Session

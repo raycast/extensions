@@ -1,13 +1,15 @@
 import { Detail, LaunchProps, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getSession } from "./utils/api";
-import { GetSessionResponse } from "./types";
+import { ErrorResponse, GetSessionResponse } from "./types";
+import ErrorComponent from "./components/ErrorComponent";
 
 export default function GetSession(props: LaunchProps<{ arguments: Arguments.Session }>) {
   const { ip, session_id } = props.arguments;
 
   const [isLoading, setIsLoading] = useState(true);
   const [markdown, setMarkdown] = useState("");
+  const [error, setError] = useState<ErrorResponse>();
 
   async function getFromApi() {
     setIsLoading(true);
@@ -21,10 +23,7 @@ Password: ${data.password}
 User Type: ${data.usertype}`);
       await showToast(Toast.Style.Success, "SUCCESS", "Fetched Session");
     } else {
-      setMarkdown(`## ERROR
-            
-${response.details}`);
-      await showToast(Toast.Style.Failure, "ERROR", response.details as string);
+      setError(response as ErrorResponse);
     }
     setIsLoading(false);
   }
@@ -33,5 +32,5 @@ ${response.details}`);
     getFromApi();
   }, []);
 
-  return <Detail isLoading={isLoading} markdown={markdown} />;
+  return error ? <ErrorComponent errorResponse={error} /> : <Detail isLoading={isLoading} markdown={markdown} />;
 }

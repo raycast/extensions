@@ -204,6 +204,20 @@ export type ModifyUserRequest = {
   ns1: string;
   ns2: string;
 };
+export type ChangeUserAccountEmailRequest = {
+  evalue: string;
+  domain?: string;
+  email: "Save";
+}
+export type ChangeUserTicketingEmailRequest = {
+  email: string;
+  ON: "yes" | "no";
+  save?: "Save";
+}
+export type ChangeUserTicketingEmailFormValues = {
+  email: string;
+  ON: boolean;
+}
 
 //
 export type GetResellerIPsResponse = ListResponse;
@@ -376,3 +390,5 @@ export type BodyRequest = CreateUserRequest
 | CreateEmailAccountRequest
 | DeleteEmailAccountRequest
 | { domain: string }
+| ChangeUserAccountEmailRequest
+| ChangeUserTicketingEmailRequest

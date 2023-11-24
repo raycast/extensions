@@ -1,3 +1,3 @@
 # DirectAdmin Changelog
 
-## [Initial Version] - 2023-10-29
+## [Initial Version] - {PR_MERGE_DATE}

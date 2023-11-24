@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import {
+  changeUserAccountEmail,
+  changeUserTicketingEmail,
   createUser,
   deleteUser,
   getResellerIPs,
@@ -13,7 +15,10 @@ import {
 } from "./utils/api";
 import { RESELLER_USERNAME } from "./utils/constants";
 import {
+  ChangeUserAccountEmailRequest,
+  ChangeUserTicketingEmailFormValues,
   CreateUserFormValues,
+  ErrorResponse,
   GetResellerIPsResponse,
   GetResellerUserAccountsResponse,
   GetUserConfigResponse,
@@ -43,10 +48,13 @@ import { getTextAndIconFromVal, getTitleFromKey } from "./utils/functions";
 import CreateNewDomainComponent from "./components/CreateNewDomainComponent";
 import GetSubdomainsComponent from "./components/subdomains/GetSubdomainsComponent";
 import GetEmailAccountsComponent from "./components/email-accounts/GetEmailAccountsComponent";
+import ErrorComponent from "./components/ErrorComponent";
+import GetDatabasesComponent from "./components/databases/GetDatabasesComponent";
 
 export default function GetAccounts() {
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<string[]>();
+  const [error, setError] = useState<ErrorResponse>();
 
   async function getFromApi() {
     setIsLoading(true);
@@ -56,7 +64,7 @@ export default function GetAccounts() {
       const { list } = data;
       setUsers(list);
       await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Users`);
-    }
+    } else if (response.error === "1") setError(response as ErrorResponse);
     setIsLoading(false);
   }
 
@@ -97,9 +105,9 @@ export default function GetAccounts() {
     }
   }
 
-  return (
+  return error ? <ErrorComponent errorResponse={error} /> : (
     <List isLoading={isLoading}>
-      <List.Item
+      {!isLoading && <List.Item
             title={RESELLER_USERNAME}
             icon={Icon.PersonCircle}
             accessories={[{tag: "RESELLER_USER"}]}
@@ -126,7 +134,7 @@ export default function GetAccounts() {
                 </ActionPanel.Section>
               </ActionPanel>
             }
-          />
+          />}
       {users &&
         users.map((user) => (
           <List.Item
@@ -146,9 +154,24 @@ export default function GetAccounts() {
                   target={<GetUserConfig user={user} />}
                 />
                 <Action.Push
+                  title="Change User Account Email"
+                  icon={Icon.Envelope}
+                  target={<ChangeUserAccountEmail user={user} />}
+                />
+                <Action.Push
+                  title="Change User Ticketing Email"
+                  icon={Icon.Message}
+                  target={<ChangeUserTicketingEmail user={user} />}
+                />
+                <Action.Push
                   title="See User Domains"
                   icon={Icon.Globe}
                   target={<GetUserDomains user={user} />}
+                />
+                <Action.Push
+                  title="See User Databases"
+                  icon={Icon.Coin}
+                  target={<GetDatabasesComponent userToImpersonate={user} />}
                 />
                 <ActionPanel.Section>
                   <Action
@@ -679,6 +702,80 @@ function ModifyUser({ user, currentConfig, onUserModified }: ModifyUserProps) {
       <Form.Checkbox label={getTitleFromKey("sysinfo")} {...itemProps.sysinfo} />
       <Form.Checkbox label={getTitleFromKey("ssh")} {...itemProps.ssh} />
       <Form.Checkbox label={getTitleFromKey("dnscontrol")} {...itemProps.dnscontrol} />
+    </Form>
+  );
+}
+
+type ChangeUserAccountEmailProps = {
+  user: string;
+};
+function ChangeUserAccountEmail({ user }: ChangeUserAccountEmailProps) {
+  const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps } = useForm<ChangeUserAccountEmailRequest>({
+    async onSubmit(values) {
+      const response = await changeUserAccountEmail({ evalue: values.evalue, email: "Save" }, user);
+
+      if (response.error === "0") {
+        const data = response as SuccessResponse;
+        await showToast(Toast.Style.Success, data.text, data.details);
+        pop();
+      }
+    },
+    validation: {
+      evalue: FormValidation.Required
+    },
+  });
+
+  return (
+    <Form
+      navigationTitle="Change User Account Email"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="User" text={user} />
+      <Form.TextField title="New Email" placeholder="new_email@example.com" {...itemProps.evalue} info="This is the account email and does not modify the ticket/messaging system email" />
+    </Form>
+  );
+}
+
+type ChangeUserTicketingEmailProps = {
+  user: string;
+};
+function ChangeUserTicketingEmail({ user }: ChangeUserTicketingEmailProps) {
+  const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps } = useForm<ChangeUserTicketingEmailFormValues>({
+    async onSubmit(values) {
+      const { email, ON  } = values;
+      const response = await changeUserTicketingEmail({ email, ON: ON ? "yes" : "no" }, user);
+
+      if (response.error === "0") {
+        const data = response as SuccessResponse;
+        await showToast(Toast.Style.Success, data.text, data.details);
+        pop();
+      }
+    },
+    validation: {
+      email: FormValidation.Required
+    },
+  });
+
+  return (
+    <Form
+      navigationTitle="Change User Ticketing Email"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Check} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="User" text={user} />
+      <Form.TextField title="New Email" placeholder="new_email@example.com" {...itemProps.email} info="This email address is the one that will be used when tickets or messages are sent back and forth" />
+      <Form.Checkbox label="Notify On Each Message" {...itemProps.ON} />
     </Form>
   );
 }

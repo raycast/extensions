@@ -3,6 +3,7 @@ import {
   getDomains,
 } from "./utils/api";
 import {
+  ErrorResponse,
   GetDomainsResponse,
 } from "./types";
 import {
@@ -17,10 +18,12 @@ import { getFavicon } from "@raycast/utils";
 import CreateNewDomainComponent from "./components/CreateNewDomainComponent";
 import GetSubdomainsComponent from "./components/subdomains/GetSubdomainsComponent";
 import GetEmailAccountsComponent from "./components/email-accounts/GetEmailAccountsComponent";
+import ErrorComponent from "./components/ErrorComponent";
 
 export default function Domains() {
   const [isLoading, setIsLoading] = useState(true);
   const [domains, setDomains] = useState<string[]>();
+  const [error, setError] = useState<ErrorResponse>();
 
   async function getFromApi() {
     setIsLoading(true);
@@ -31,7 +34,7 @@ export default function Domains() {
       const { list } = data;
       setDomains(list);
       await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Domains`);
-    }
+    } else if (response.error === "1") setError(response as ErrorResponse);
     setIsLoading(false);
   }
 
@@ -39,7 +42,7 @@ export default function Domains() {
     getFromApi();
   }, []);
 
-  return (
+  return error ? <ErrorComponent errorResponse={error} /> : (
     <List isLoading={isLoading}>
       {domains &&
         domains.map((domain) => (

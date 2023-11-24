@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { getResellerIPInformation, getResellerIPs } from "./utils/api";
 import { Action, ActionPanel, Detail, Icon, List, Toast, showToast } from "@raycast/api";
-import { GetResellerIPInformationResponse, GetResellerIPsResponse } from "./types";
+import { ErrorResponse, GetResellerIPInformationResponse, GetResellerIPsResponse } from "./types";
+import ErrorComponent from "./components/ErrorComponent";
 
 export default function ResellerIPs() {
   const [isLoading, setIsLoading] = useState(true);
   const [resellerIPs, setResellerIPs] = useState<string[]>();
+  const [error, setError] = useState<ErrorResponse>();
 
   async function getFromApi() {
     setIsLoading(true);
@@ -15,7 +17,7 @@ export default function ResellerIPs() {
       const { list } = data;
       setResellerIPs(list);
       await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Reseller IPs`);
-    }
+    } else if (response.error === "1") setError(response as ErrorResponse);
     setIsLoading(false);
   }
 
@@ -23,7 +25,7 @@ export default function ResellerIPs() {
     getFromApi();
   }, []);
 
-  return (
+  return error ? <ErrorComponent errorResponse={error} /> : (
     <List isLoading={isLoading}>
       {resellerIPs &&
         resellerIPs.map((ip) => (

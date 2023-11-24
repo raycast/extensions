@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { getUserPackageInformation, getUserPackages } from "./utils/api";
-import { GetUserPackageInformationResponse, GetUserPackagesResponse } from "./types";
+import { ErrorResponse, GetUserPackageInformationResponse, GetUserPackagesResponse } from "./types";
 import { Action, ActionPanel, Color, Detail, Icon, List, Toast, showToast } from "@raycast/api";
 import { getTitleFromKey } from "./utils/functions";
+import ErrorComponent from "./components/ErrorComponent";
 
 export default function UserPackages() {
   const [isLoading, setIsLoading] = useState(true);
   const [packages, setPackages] = useState<string[]>();
+  const [error, setError] = useState<ErrorResponse>();
 
   async function getFromApi() {
     setIsLoading(true);
@@ -16,7 +18,7 @@ export default function UserPackages() {
       const { list } = data;
       setPackages(list);
       await showToast(Toast.Style.Success, "SUCCESS", `Fetched ${list.length} Packages`);
-    }
+    } else if (response.error === "1") setError(response as ErrorResponse);
     setIsLoading(false);
   }
 
@@ -24,7 +26,7 @@ export default function UserPackages() {
     getFromApi();
   }, []);
 
-  return (
+  return error ? <ErrorComponent errorResponse={error} /> : (
     <List isLoading={isLoading}>
       {packages &&
         packages.map((packageName) => (
