@@ -1,6 +1,6 @@
 # Wolfram Alpha
 
-_Query Wolfram Alpha right from Raycast_
+_Query Wolfram Alpha right from Raycast_ test
 
 ## Create an App ID
 
