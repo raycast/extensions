@@ -21,7 +21,7 @@ export type Activity = {
   task: Task;
   customer: Customer;
   user: User;
-  hourly_rate: number;
+  hourly_rate?: number;
   timer_started_at: string | null;
   created_at: string;
   updated_at: string;
