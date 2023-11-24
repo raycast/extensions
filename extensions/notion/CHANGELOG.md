@@ -1,7 +1,7 @@
 # Notion Changelog
 
 
-## [Open in Notion alternate action] - 2023-04-28
+## [Open in Notion alternate action] - 2023-11-28
 - If primary action is set to open in app, secondary action will open in browser and vice versa
 
 ## [Fixes] - 2023-10-12
