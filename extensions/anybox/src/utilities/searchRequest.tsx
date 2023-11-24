@@ -9,6 +9,9 @@ interface Tag {
   color: string;
   icon: string;
 }
+interface Folder extends Tag {
+  orignalName: string;
+}
 
 export interface SearchQuery {
   // Search keyword
@@ -22,14 +25,12 @@ export interface SearchQuery {
   // Limit search scope to one specific tag.
   tag?: string;
 
+  // Identifier of folder.
+  // Limit search scope to one specific folder.
+  folder?: string;
+
   // Limit search scope to starred or unstarred.
   starred?: "yes" | "no";
-
-  // If search link descriptions
-  linkDescriptions?: "yes" | "no";
-
-  // If search should support Pinyin.
-  pinyin: "yes" | "no";
 
   // Bookmarks returned. 50 is the default and the maximum
   limit?: number;
@@ -37,6 +38,7 @@ export interface SearchQuery {
 
 export interface Link {
   tags: Tag[];
+  folder?: Folder;
   dateLastOpened: string;
   dateAdded: string;
   preferredBrowser: string;
@@ -52,16 +54,14 @@ export interface Link {
 
 export interface Preferences {
   api_key: string;
-  usePinyin: boolean;
   searchTags: boolean;
-  searchLinkDescriptions: boolean;
+  searchFolders: boolean;
+  asIcons: boolean;
+  preferLinkIcons: boolean;
 }
 
 export default async function searchRequest(query: SearchQuery): Promise<[Link]> {
   const preferences: Preferences = getPreferenceValues();
-  if (preferences.searchLinkDescriptions) {
-    query.linkDescriptions = "yes";
-  }
   // @ts-expect-error: Don’t know how to satify URLSearchParams’s type.
   const searchParams = new URLSearchParams(query);
   return fetch("http://127.0.0.1:6391/search?" + searchParams, {

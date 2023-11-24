@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dashlane-vault",
+  "title": "Dashlane Vault",
+  "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
+  "icon": "dashlane-512.png",
+  "author": "tm.wrnr",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "passwords",
+      "title": "Search Passwords",
+      "subtitle": "Dashlane",
+      "description": "Search all passwords in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Search Notes",
+      "subtitle": "Dashlane",
+      "description": "Search all notes in the Dashlane vault",
+      "mode": "view"
+    },
+    {
+      "name": "sync",
+      "title": "Sync Vault",
+      "subtitle": "Dashlane",
+      "description": "Sync your Dashlane vault",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "default": "/usr/local/bin/dcli",
+      "description": "Enter the CLI binary path",
+      "name": "cliPath",
+      "placeholder": "e.g., /usr/local/bin/dcli",
+      "required": false,
+      "title": "Dashlane CLI path",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@total-typescript/ts-reset": "^0.5.1",
+    "@types/node": "^20.8.10",
+    "@types/react": "18.2.31",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "prettier-plugin-organize-imports": "^3.2.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

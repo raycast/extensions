@@ -1,6 +1,18 @@
 # Anybox Changelog
 
-## [Feature Improvement] - 2023-09-11
+## [New Feature] - 2023-11-01
+
+- Option to show search resutls as icons.
+- Add new commands “Save Clipboard With Folder” and “Save Current Tab With Folder”.
+- Update Raycast API version to the latest.
+- Fix some bugs.
+
+## [New Commands] - 2023-10-10
+
+- Support folders.
+- Support setting comment on saving.
+
+## [Feature Improvement] - 2023-09-15
 
 - Rename “Collection” to “Tag”.
 - Support nested tags.

@@ -13,7 +13,7 @@ type ExtensionPreferences = {
   /** Self-hosted domain - The self-hosted domain of your enterprise. For example: mycompany.com */
   "selfHostedDomain"?: string,
   /** Recent List Count - Items count when fetching recent list */
-  "recentListCount"?: string
+  "recentListCount": string
 }
 
 /** Preferences accessible in all the extension's commands */
@@ -28,3 +28,5 @@ declare namespace Arguments {
   /** Arguments passed to the `search-docs` command */
   export type SearchDocs = {}
 }
+
+

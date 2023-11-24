@@ -45,7 +45,7 @@ async function getFirefoxProfiles() {
   const installKey = Object.keys(iniFile).find((key) => key.startsWith("Install"));
 
   const defaultProfile: string = installKey ? iniFile[installKey]?.Default : profiles[0].path;
-  profiles.sort((a, b) => a.name.localeCompare(b.name));
+  profiles.sort((a, b) => a.name?.localeCompare(b.name));
 
   return { profiles, defaultProfile };
 }
@@ -70,7 +70,7 @@ function getFirefoxFolders(db: Database) {
         AND moz_bookmarks.title IS NOT NULL
         AND moz_bookmarks.title <> ''
         AND moz_bookmarks.fk IS NULL;
-    `
+    `,
   );
 
   while (statement.step()) {
@@ -102,7 +102,7 @@ function getFirefoxBookmarks(db: Database) {
       WHERE moz_bookmarks.type = 1
         AND moz_bookmarks.title IS NOT NULL
         AND moz_places.url IS NOT NULL;
-    `
+    `,
   );
 
   while (statement.step()) {
@@ -132,7 +132,7 @@ export default function useFirefoxBookmarks(enabled: boolean) {
 
       return profiles;
     },
-    [enabled]
+    [enabled],
   );
 
   const { data, isLoading, mutate } = useCachedPromise(
@@ -151,7 +151,7 @@ export default function useFirefoxBookmarks(enabled: boolean) {
 
       return { folders, bookmarks };
     },
-    [currentProfile, enabled]
+    [currentProfile, enabled],
   );
 
   const folders = useMemo(
@@ -178,7 +178,7 @@ export default function useFirefoxBookmarks(enabled: boolean) {
           browser: BROWSERS_BUNDLE_ID.firefox,
         };
       }) || [],
-    [data]
+    [data],
   );
 
   const bookmarks = useMemo(
@@ -194,7 +194,7 @@ export default function useFirefoxBookmarks(enabled: boolean) {
           browser: BROWSERS_BUNDLE_ID.firefox,
         };
       }) || [],
-    [data, folders]
+    [data, folders],
   );
 
   return {

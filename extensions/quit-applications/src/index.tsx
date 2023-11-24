@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, popToRoot } from "@raycast/api";
 import React from "react";
 import { runAppleScript } from "run-applescript";
 import { execSync } from "child_process";
@@ -66,7 +66,7 @@ async function getRunningAppsPaths(): Promise<string[]> {
     return appPaths
   `);
 
-  return result.split(", ").map((appPath) => appPath.trim());
+  return result.split(", ").map((appPath: string) => appPath.trim());
 }
 
 function quitApp(app: string) {
@@ -117,12 +117,19 @@ function restartAppWithToast(app: string): boolean {
   }
 }
 
+function getQuickLinkForApp(appName: string, action: string): string {
+  const context = JSON.stringify({ appName, action });
+  const encodedContext = encodeURIComponent(context);
+  return `raycast://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
+}
+
 interface AppListState {
   apps: {
     name: string;
     iconPath: string;
   }[];
   isLoading: boolean;
+  launchContext?: { appName: string; action: string /* quit | restart */ };
 }
 
 class AppList extends React.Component<Record<string, never>, AppListState> {
@@ -132,10 +139,27 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
     this.state = {
       apps: [],
       isLoading: true,
+      launchContext: props.launchContext,
     };
   }
 
   componentDidMount() {
+    if (this.state.launchContext && this.state.launchContext.appName && this.state.launchContext.action) {
+      const { appName, action } = this.state.launchContext;
+
+      if (action === "quit") {
+        quitAppWithToast(appName);
+        popToRoot().then();
+        return;
+      }
+
+      if (action === "restart") {
+        restartAppWithToast(appName);
+        popToRoot().then();
+        return;
+      }
+    }
+
     getRunningAppsPaths().then((appCandidatePaths) => {
       // filter out all apps that do not end with .app
       const appPaths = appCandidatePaths.filter((appPath) => appPath.endsWith(".app"));
@@ -177,6 +201,14 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
                   onAction={() => {
                     restartAppWithToast(app.name);
                   }}
+                />
+                <Action.CreateQuicklink
+                  title="Create Quit Quicklink"
+                  quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
+                />
+                <Action.CreateQuicklink
+                  title="Create Restart Quicklink"
+                  quicklink={{ link: getQuickLinkForApp(app.name, "restart"), name: `Restart ${app.name}` }}
                 />
               </ActionPanel>
             }

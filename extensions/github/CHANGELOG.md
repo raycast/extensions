@@ -1,5 +1,25 @@
 # GitHub Changelog
 
+## [Mark notification as read without opening it] - 2023-11-16
+
+- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.
+
+## [Search Repositories improvements + Fixes] - 2023-11-06
+
+- Add "Archived" and "Fork" tag accessories in the "Search Repositories" results.
+- Hide archived repositories in the different create commands.
+- Sort repositories by last updated.
+- Fix the updated date to use the latest commit push.
+- Fix Open Pull Request menu bar command following GitHub's outage
+
+## [Add My Latest Repositories command] - 2023-11-06
+
+- Add a command to show my latest repositories in descending order.
+
+## [Add Clone and Open command] - 2023-10-11
+
+- Add a command to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh repository results.
+
 ## [Fix menu colors] - 2023-09-30
 
 - Fix menu colors for issues and pr menus.
@@ -18,7 +38,7 @@
 
 ## [Added missing value] - 2023-08-04
 
-- Fix missing repo name for non numberTag cases 
+- Fix missing repo name for non numberTag cases
 
 ## [Menu Commands] - 2023-07-18
 

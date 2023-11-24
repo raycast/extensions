@@ -1,8 +1,13 @@
-import { Cache, LocalStorage, showHUD } from "@raycast/api";
+import { Cache, LocalStorage, showToast, Toast } from "@raycast/api";
 import { execFileSync } from "child_process";
 import { scriptPath } from "./constants";
 
 export async function toggleSystemAudioInputLevel(currentAudioInputLevel: number) {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Running...",
+  });
+
   const cache = new Cache();
 
   if (currentAudioInputLevel > 0 && currentAudioInputLevel <= 1) {
@@ -15,8 +20,14 @@ export async function toggleSystemAudioInputLevel(currentAudioInputLevel: number
 
   execFileSync(scriptPath, ["set", newLevel.toString()]);
 
-  const message = newLevel == 0 ? "Audio input muted" : "Audio input unmuted";
-  await showHUD(message);
+  if (newLevel == 0) {
+    toast.title = "Audio input muted";
+    toast.style = Toast.Style.Failure;
+  } else {
+    toast.title = "Audio input unmuted";
+    toast.style = Toast.Style.Success;
+  }
+
   cache.set("currentAudioInputLevel", String(newLevel));
   return newLevel;
 }

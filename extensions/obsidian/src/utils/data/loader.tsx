@@ -34,7 +34,6 @@ export class NoteLoader {
     const notes: Note[] = [];
     const files = this._getFiles();
     const bookmarked = getBookmarkedNotePaths(this.vault);
-
     for (const f of files) {
       const comp = f.split("/");
       const f_name = comp.pop();

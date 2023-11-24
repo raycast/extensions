@@ -77,6 +77,7 @@ async function getChromiumProfiles(path: string) {
   const file = await read(`${path}/Local State`, "utf-8");
   const localState = JSON.parse(file);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const profileInfoCache: Record<string, any> = localState.profile.info_cache;
 
   const profiles = Object.entries(profileInfoCache)
@@ -94,7 +95,7 @@ async function getChromiumProfiles(path: string) {
 
   const defaultProfile = localState.profile?.last_used?.length > 0 ? localState.profile.last_used : profiles[0].path;
 
-  profiles.sort((a, b) => a.name.localeCompare(b.name));
+  profiles.sort((a, b) => a.name?.localeCompare(b.name));
   return { profiles, defaultProfile };
 }
 
@@ -107,7 +108,7 @@ type UseChromiumBookmarksParams = {
 
 export default function useChromiumBookmarks(
   enabled: boolean,
-  { path, browserIcon, browserName, browserBundleId }: UseChromiumBookmarksParams
+  { path, browserIcon, browserName, browserBundleId }: UseChromiumBookmarksParams,
 ) {
   const [currentProfile, setCurrentProfile] = useCachedState(`${browserName}-profile`, "");
 
@@ -126,7 +127,7 @@ export default function useChromiumBookmarks(
 
       return profiles;
     },
-    [enabled, path]
+    [enabled, path],
   );
 
   const { data, isLoading, mutate } = useCachedPromise(
@@ -138,7 +139,7 @@ export default function useChromiumBookmarks(
       const file = await read(`${path}/${profile}/Bookmarks`);
       return JSON.parse(file.toString()) as BookmarksRoot;
     },
-    [currentProfile, enabled, path]
+    [currentProfile, enabled, path],
   );
 
   const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];

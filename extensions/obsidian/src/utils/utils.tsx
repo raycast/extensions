@@ -68,8 +68,9 @@ export function getNoteFileContent(path: string, filter = false) {
 
 export function vaultPluginCheck(vaults: Vault[], plugin: string) {
   const vaultsWithoutPlugin: Vault[] = [];
+  const { configFileName } = getPreferenceValues();
   vaults = vaults.filter((vault: Vault) => {
-    const communityPluginsPath = vault.path + "/.obsidian/community-plugins.json";
+    const communityPluginsPath = `${vault.path}/${configFileName || ".obsidian"}/community-plugins.json`;
     if (!fs.existsSync(communityPluginsPath)) {
       vaultsWithoutPlugin.push(vault);
     } else {
@@ -86,7 +87,8 @@ export function vaultPluginCheck(vaults: Vault[], plugin: string) {
 }
 
 export function getUserIgnoreFilters(vault: Vault) {
-  const appJSONPath = vault.path + "/.obsidian/app.json";
+  const { configFileName } = getPreferenceValues();
+  const appJSONPath = `${vault.path}/${configFileName || ".obsidian"}/app.json`;
   if (!fs.existsSync(appJSONPath)) {
     return [];
   } else {
@@ -96,7 +98,8 @@ export function getUserIgnoreFilters(vault: Vault) {
 }
 
 export function getBookmarkedJSON(vault: Vault) {
-  const bookmarkedNotesPath = vault.path + "/.obsidian/bookmarks.json";
+  const { configFileName } = getPreferenceValues();
+  const bookmarkedNotesPath = `${vault.path}/${configFileName || ".obsidian"}/bookmarks.json`;
   if (!fs.existsSync(bookmarkedNotesPath)) {
     return [];
   } else {
@@ -105,7 +108,8 @@ export function getBookmarkedJSON(vault: Vault) {
 }
 
 export function writeToBookmarkedJSON(vault: Vault, bookmarkedNotes: Note[]) {
-  const bookmarkedNotesPath = vault.path + "/.obsidian/bookmarks.json";
+  const { configFileName } = getPreferenceValues();
+  const bookmarkedNotesPath = `${vault.path}/${configFileName || ".obsidian"}/bookmarks.json`;
   fs.writeFileSync(bookmarkedNotesPath, JSON.stringify({ items: bookmarkedNotes }));
 }
 
@@ -264,41 +268,38 @@ async function ISO8601_week_no(dt: Date) {
   return 1 + Math.ceil((firstThursday - tdt.getTime()) / 604800000);
 }
 
-export async function applyTemplates(content: string) {
+/** both content and template might have templates to apply */
+export async function applyTemplates(content: string, template = "") {
   const date = new Date();
   const week = await ISO8601_week_no(date);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const seconds = date.getSeconds().toString().padStart(2, "0");
-
   const timestamp = Date.now().toString();
-
-  content = content.replaceAll("{time}", date.toLocaleTimeString());
-  content = content.replaceAll("{date}", date.toLocaleDateString());
-
-  content = content.replaceAll("{week}", week.toString().padStart(2, "0"));
-
-  content = content.replaceAll("{year}", date.getFullYear().toString());
-  content = content.replaceAll("{month}", MONTH_NUMBER_TO_STRING[date.getMonth()]);
-  content = content.replaceAll("{day}", DAY_NUMBER_TO_STRING[date.getDay()]);
-
-  content = content.replaceAll("{hour}", hours);
-  content = content.replaceAll("{minute}", minutes);
-  content = content.replaceAll("{second}", seconds);
-  content = content.replaceAll("{millisecond}", date.getMilliseconds().toString());
-
-  content = content.replaceAll("{timestamp}", timestamp);
-  content = content.replaceAll("{zettelkastenID}", timestamp);
-
   const clipboard = await getClipboardContent();
-  content = content.replaceAll("{clipboard}", clipboard);
-  content = content.replaceAll("{clip}", clipboard);
 
-  content = content.replaceAll("{\n}", "\n");
-  content = content.replaceAll("{newline}", "\n");
-  content = content.replaceAll("{nl}", "\n");
-
-  return content;
+  const preprocessed = template.includes("{content}")
+    ? template // Has {content} e.g. | {hour}:{minute} | {content} |
+    : template + content; // Does not have {content}, then add it to the end
+  return preprocessed
+    .replaceAll("{content}", content)
+    .replaceAll("{time}", date.toLocaleTimeString())
+    .replaceAll("{date}", date.toLocaleDateString())
+    .replaceAll("{week}", week.toString().padStart(2, "0"))
+    .replaceAll("{year}", date.getFullYear().toString())
+    .replaceAll("{month}", MONTH_NUMBER_TO_STRING[date.getMonth()])
+    .replaceAll("{day}", DAY_NUMBER_TO_STRING[date.getDay()])
+    .replaceAll("{hour}", hours)
+    .replaceAll("{minute}", minutes)
+    .replaceAll("{second}", seconds)
+    .replaceAll("{millisecond}", date.getMilliseconds().toString())
+    .replaceAll("{timestamp}", timestamp)
+    .replaceAll("{zettelkastenID}", timestamp)
+    .replaceAll("{clipboard}", clipboard)
+    .replaceAll("{clip}", clipboard)
+    .replaceAll("{\n}", "\n")
+    .replaceAll("{newline}", "\n")
+    .replaceAll("{nl}", "\n");
 }
 
 export async function appendSelectedTextTo(note: Note) {
@@ -419,7 +420,7 @@ export function isNote(note: Note | undefined): note is Note {
 
 function validFile(file: string, includes: string[]) {
   for (const include of includes) {
-    if (file.includes(include)) {
+    if (include && file.includes(include)) {
       return false;
     }
   }
@@ -428,12 +429,16 @@ function validFile(file: string, includes: string[]) {
 
 export function walkFilesHelper(dirPath: string, exFolders: string[], fileEndings: string[], arrayOfFiles: string[]) {
   const files = fs.readdirSync(dirPath);
+  const { configFileName } = getPreferenceValues();
 
   arrayOfFiles = arrayOfFiles || [];
 
   for (const file of files) {
     const next = fs.statSync(dirPath + "/" + file);
-    if (next.isDirectory() && validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"])) {
+    if (
+      next.isDirectory() &&
+      validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile", configFileName].filter(Boolean))
+    ) {
       arrayOfFiles = walkFilesHelper(dirPath + "/" + file, exFolders, fileEndings, arrayOfFiles);
     } else {
       if (
@@ -441,6 +446,7 @@ export function walkFilesHelper(dirPath: string, exFolders: string[], fileEnding
         file !== ".md" &&
         !file.includes(".excalidraw") &&
         !dirPath.includes(".obsidian") &&
+        !dirPath.includes(configFileName || ".obsidian") &&
         validFolder(dirPath, exFolders)
       ) {
         arrayOfFiles.push(path.join(dirPath, "/", file));

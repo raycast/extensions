@@ -75,7 +75,6 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
           </ActionPanel>
         }
       />
-
       {comments?.map((comment) => {
         const createdAt = new Date(comment.createdAt);
 

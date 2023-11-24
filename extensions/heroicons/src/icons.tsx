@@ -29,9 +29,6 @@ const cache = new Cache();
 
 export default function IconsCommand() {
   const [isLoading, setLoading] = useState(true);
-  const [tags, setTags] = useState<{ [key: string]: string[] }>(
-    cache.get("heroicons-tags") === undefined ? {} : JSON.parse(cache.get("heroicons-tags") as string)
-  );
   const [iconNames, setIconNames] = useState<string[]>(cache.get("heroicons-icons")?.split(",") || []);
   const [variant, setVariant] = useState<string>("all");
   const [preferences] = useState(getPreferenceValues<Preferences>());
@@ -190,23 +187,11 @@ export default function IconsCommand() {
         style: Toast.Style.Failure,
       });
     }
-    if (tags || iconNames) {
-      Promise.all([got(Heroicons.tags()), got(Heroicons.icons())])
-        .then(([tagsRes, iconsRes]) => {
-          if (!tagsRes.body.startsWith("export const tags = ")) {
-            showHUD("❌ An error occured.");
-            throw new Error("Security vulnerability, content may be altered.");
-          }
-
+    if (iconNames) {
+      Promise.all([got(Heroicons.icons())])
+        .then(([iconsRes]) => {
           setIconNames(iconsRes.body.split("\n").map((x) => x.replace(".svg", "")));
           cache.set("heroicons-icons", iconNames.join(","));
-
-          writeFileSync(join(environment.assetsPath, "tags.mjs"), tagsRes.body);
-          import(join(environment.assetsPath, "tags.mjs")).then((mod) => {
-            setTags(mod.tags);
-            cache.set("heroicons-tags", JSON.stringify(mod.tags));
-            setLoading(false);
-          });
         })
         .catch(() => {
           showHUD("❌ An error occured. Try again later.");
@@ -231,7 +216,6 @@ export default function IconsCommand() {
           return (
             <Grid.Item
               key={icon}
-              keywords={tags[icon]?.concat(icon.replaceAll("-", " "))}
               title={title(icon)}
               subtitle={title(variant)}
               content={{

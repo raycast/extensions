@@ -1,4 +1,4 @@
-import { Icon, showToast, closeMainWindow, showHUD, Action, Toast, getPreferenceValues } from "@raycast/api";
+import { Action, Icon, Toast, closeMainWindow, getPreferenceValues, showHUD, showToast } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import Bookmark from "../dtos/bookmark-dto";

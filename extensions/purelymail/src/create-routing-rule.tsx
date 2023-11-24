@@ -1,18 +1,9 @@
-import {
-  openExtensionPreferences,
-  showToast,
-  Detail,
-  Toast,
-  ActionPanel,
-  Action,
-  Form,
-  popToRoot,
-  Icon,
-} from "@raycast/api";
+import { showToast, Toast, ActionPanel, Action, Form, popToRoot, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { createRoutingRule, getDomains } from "./utils/api";
 import { CreateRoutingRequest, Domain, Response } from "./utils/types";
 import { getFavicon } from "@raycast/utils";
+import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
   domains?: Domain[];
@@ -176,14 +167,7 @@ TO: '${targets}'`;
   };
 
   return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
+    <ErrorComponent error={state.error} />
   ) : (
     <Form
       isLoading={state.domains === undefined || state.isLoading}

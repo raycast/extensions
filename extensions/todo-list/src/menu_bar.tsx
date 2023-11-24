@@ -28,7 +28,7 @@ export default function MenuBar() {
         <>
           <TodoList sectionKey="pinned" todos={todoSections["pinned"]} />
           <TodoList sectionKey="todo" todos={todoSections["todo"]} />
-          <TodoList sectionKey="completed" todos={todoSections["completed"]} limit={completedLimit} />
+          <TodoList limit={completedLimit} sectionKey="completed" todos={todoSections["completed"]} />
         </>
       ) : (
         <MenuBarExtra.Item title="No Todos" />
@@ -57,7 +57,7 @@ const TodoList = ({
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item title={SECTIONS_DATA[sectionKey].name} />
       {todos.sort(sortTodoItem).map((todo, idx) => (
-        <MenuBarTodoItem key={idx} item={todo} idx={idx} sectionKey={sectionKey} />
+        <MenuBarTodoItem idx={idx} item={todo} key={idx} sectionKey={sectionKey} />
       ))}
     </>
   );
