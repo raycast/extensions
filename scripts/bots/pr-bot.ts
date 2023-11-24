@@ -11,22 +11,20 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
-  const changedFiles: string[] = JSON.parse(process.env.CHANGED_FILES || "[]");
-  const codeowners = await getCodeOwners({ github, context });
-
   const touchedExtensions = new Set(
-    changedFiles
+    process.env.CHANGED_EXTENSIONS?.split(",")
       .filter((x) => x.startsWith("extensions"))
       .map((x) => {
         const parts = x.split("/");
         return parts[1];
       })
   );
-
   if (touchedExtensions.size > 1) {
     console.log("We only notify people when updating a single extension");
     return;
   }
+
+  const codeowners = await getCodeOwners({ github, context });
 
   const sender = context.payload.sender.login;
 
