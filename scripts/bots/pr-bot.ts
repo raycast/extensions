@@ -19,6 +19,7 @@ export default async ({ github, context }: API) => {
         return parts[1];
       })
   );
+  console.log(process.env.CHANGED_EXTENSIONS, touchedExtensions);
   if (touchedExtensions.size > 1) {
     console.log("We only notify people when updating a single extension");
     return;
