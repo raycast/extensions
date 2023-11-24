@@ -1,11 +1,8 @@
-import { Image, Icon, ActionPanel, Action } from "@raycast/api";
+import { Image, ActionPanel } from "@raycast/api";
 import { useMe } from "../hooks/useMe";
-import { getMySavedTracks } from "../api/getMySavedTracks";
-import { useSearch } from "../hooks/useSearch";
 import { ListOrGridItem } from "./ListOrGridItem";
 import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
-import { TracksList } from "./TracksList";
 
 type PlaylistLikedTracksItemProps = {
   type: "grid" | "list";

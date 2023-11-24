@@ -77,7 +77,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                         onAction={async () => {
                           await LocalStorage.setItem(
                             "recent-searches",
-                            JSON.stringify(recentSearches.filter((item: string) => item !== search))
+                            JSON.stringify(recentSearches.filter((item: string) => item !== search)),
                           );
                           recentSearchRevalidate();
                         }}
@@ -85,7 +85,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
                     </ActionPanel>
                   }
                 />
-              )
+              ),
           )}
         </List.Section>
       </List>
