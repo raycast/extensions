@@ -47,10 +47,10 @@ export default function CreateEmailAccountComponent({
       },
       quota(value) {
         if (!value) return "The item is required";
-        else if (!Number(value) || Number(value) < 0) return "The item must be a number > -1";
+        else if (!Number(value) && value!=="0" || Number(value) < 0) return "The item must be a number > -1";
       },
       limit(value) {
-        if (value) if (!Number(value) || Number(value) < 0) return "The item must be a number > -1";
+        if (value) if (!Number(value) && value!=="0" || Number(value) < 0) return "The item must be a number > -1";
       },
     },
   });

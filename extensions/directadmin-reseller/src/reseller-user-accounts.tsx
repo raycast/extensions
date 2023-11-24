@@ -111,7 +111,7 @@ export default function GetAccounts() {
     <List isLoading={isLoading}>
       {!isLoading && (
         <List.Item
-          title={RESELLER_USERNAME}
+          title={"reseller_125sx"}
           icon={Icon.PersonCircle}
           accessories={[{ tag: "RESELLER_USER" }]}
           actions={
