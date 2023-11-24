@@ -34,5 +34,5 @@ export const TITLES_FOR_KEYS = {
   sysinfo: "SysInfo",
   usertype: "User Type",
   vdomains: "Virtual Domains",
-  wordpress: "WordPress"
+  wordpress: "WordPress",
 };

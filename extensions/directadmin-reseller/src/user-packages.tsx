@@ -26,7 +26,9 @@ export default function UserPackages() {
     getFromApi();
   }, []);
 
-  return error ? <ErrorComponent errorResponse={error} /> : (
+  return error ? (
+    <ErrorComponent errorResponse={error} />
+  ) : (
     <List isLoading={isLoading}>
       {packages &&
         packages.map((packageName) => (

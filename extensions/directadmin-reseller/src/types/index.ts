@@ -208,16 +208,16 @@ export type ChangeUserAccountEmailRequest = {
   evalue: string;
   domain?: string;
   email: "Save";
-}
+};
 export type ChangeUserTicketingEmailRequest = {
   email: string;
   ON: "yes" | "no";
   save?: "Save";
-}
+};
 export type ChangeUserTicketingEmailFormValues = {
   email: string;
   ON: boolean;
-}
+};
 
 //
 export type GetResellerIPsResponse = ListResponse;
@@ -375,20 +375,21 @@ export type ErrorResponse = {
   text: string;
   details: string;
 };
-export type BodyRequest = CreateUserRequest
-| DeleteUserRequest
-| SuspendOrUnsuspendUserRequest
-| ModifyUserRequest
-| CreateNewDomainRequest
-| CreateSubdomainRequest
-| DeleteSubdomainRequest
-| CreateDatabaseRequest
-| DeleteDatabaseRequest
-| GetSessionRequest
-| GetEmailAccountsRequest
-| ChangeEmailAccountPasswordRequest
-| CreateEmailAccountRequest
-| DeleteEmailAccountRequest
-| { domain: string }
-| ChangeUserAccountEmailRequest
-| ChangeUserTicketingEmailRequest
+export type BodyRequest =
+  | CreateUserRequest
+  | DeleteUserRequest
+  | SuspendOrUnsuspendUserRequest
+  | ModifyUserRequest
+  | CreateNewDomainRequest
+  | CreateSubdomainRequest
+  | DeleteSubdomainRequest
+  | CreateDatabaseRequest
+  | DeleteDatabaseRequest
+  | GetSessionRequest
+  | GetEmailAccountsRequest
+  | ChangeEmailAccountPasswordRequest
+  | CreateEmailAccountRequest
+  | DeleteEmailAccountRequest
+  | { domain: string }
+  | ChangeUserAccountEmailRequest
+  | ChangeUserTicketingEmailRequest;

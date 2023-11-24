@@ -1,19 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  getDomains,
-} from "./utils/api";
-import {
-  ErrorResponse,
-  GetDomainsResponse,
-} from "./types";
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  Toast,
-  showToast,
-} from "@raycast/api";
+import { getDomains } from "./utils/api";
+import { ErrorResponse, GetDomainsResponse } from "./types";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import CreateNewDomainComponent from "./components/CreateNewDomainComponent";
 import GetSubdomainsComponent from "./components/subdomains/GetSubdomainsComponent";
@@ -42,7 +30,9 @@ export default function Domains() {
     getFromApi();
   }, []);
 
-  return error ? <ErrorComponent errorResponse={error} /> : (
+  return error ? (
+    <ErrorComponent errorResponse={error} />
+  ) : (
     <List isLoading={isLoading}>
       {domains &&
         domains.map((domain) => (

@@ -25,7 +25,9 @@ export default function ResellerIPs() {
     getFromApi();
   }, []);
 
-  return error ? <ErrorComponent errorResponse={error} /> : (
+  return error ? (
+    <ErrorComponent errorResponse={error} />
+  ) : (
     <List isLoading={isLoading}>
       {resellerIPs &&
         resellerIPs.map((ip) => (

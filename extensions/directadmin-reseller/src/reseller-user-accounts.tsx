@@ -105,36 +105,39 @@ export default function GetAccounts() {
     }
   }
 
-  return error ? <ErrorComponent errorResponse={error} /> : (
+  return error ? (
+    <ErrorComponent errorResponse={error} />
+  ) : (
     <List isLoading={isLoading}>
-      {!isLoading && <List.Item
-            title={RESELLER_USERNAME}
-            icon={Icon.PersonCircle}
-            accessories={[{tag: "RESELLER_USER"}]}
-            actions={
-              <ActionPanel>
+      {!isLoading && (
+        <List.Item
+          title={RESELLER_USERNAME}
+          icon={Icon.PersonCircle}
+          accessories={[{ tag: "RESELLER_USER" }]}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="See User Usage"
+                icon={Icon.Network}
+                target={<GetUserUsage user={RESELLER_USERNAME} is_reseller={true} />}
+              />
+              <Action.Push
+                title="See User Config"
+                icon={Icon.WrenchScrewdriver}
+                target={<GetUserConfig user={RESELLER_USERNAME} is_reseller={true} />}
+              />
+              <ActionPanel.Section>
                 <Action.Push
-                  title="See User Usage"
-                  icon={Icon.Network}
-                  target={<GetUserUsage user={RESELLER_USERNAME} is_reseller={true} />}
+                  title="Create User"
+                  icon={Icon.Plus}
+                  target={<CreateUser onUserCreated={getFromApi} />}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
-                <Action.Push
-                  title="See User Config"
-                  icon={Icon.WrenchScrewdriver}
-                  target={<GetUserConfig user={RESELLER_USERNAME} is_reseller={true} />}
-                />
-                <ActionPanel.Section>
-                  {/* <Action title="Create User" icon={Icon.Plus} onAction={() => push(<CreateUser onUserCreated={getFromApi} />)} /> */}
-                  <Action.Push
-                    title="Create User"
-                    icon={Icon.Plus}
-                    target={<CreateUser onUserCreated={getFromApi} />}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />}
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      )}
       {users &&
         users.map((user) => (
           <List.Item
@@ -143,11 +146,7 @@ export default function GetAccounts() {
             icon={Icon.Person}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="See User Usage"
-                  icon={Icon.Network}
-                  target={<GetUserUsage user={user} />}
-                />
+                <Action.Push title="See User Usage" icon={Icon.Network} target={<GetUserUsage user={user} />} />
                 <Action.Push
                   title="See User Config"
                   icon={Icon.WrenchScrewdriver}
@@ -163,11 +162,7 @@ export default function GetAccounts() {
                   icon={Icon.Message}
                   target={<ChangeUserTicketingEmail user={user} />}
                 />
-                <Action.Push
-                  title="See User Domains"
-                  icon={Icon.Globe}
-                  target={<GetUserDomains user={user} />}
-                />
+                <Action.Push title="See User Domains" icon={Icon.Globe} target={<GetUserDomains user={user} />} />
                 <Action.Push
                   title="See User Databases"
                   icon={Icon.Coin}
@@ -192,7 +187,6 @@ export default function GetAccounts() {
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  {/* <Action title="Create User" icon={Icon.Plus} onAction={() => push(<CreateUser onUserCreated={getFromApi} />)} /> */}
                   <Action.Push
                     title="Create User"
                     icon={Icon.Plus}
@@ -211,11 +205,7 @@ export default function GetAccounts() {
             icon={Icon.Plus}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Create User"
-                  icon={Icon.Plus}
-                  target={<CreateUser onUserCreated={getFromApi} />}
-                />
+                <Action.Push title="Create User" icon={Icon.Plus} target={<CreateUser onUserCreated={getFromApi} />} />
               </ActionPanel>
             }
           />
@@ -229,7 +219,7 @@ type GetUserUsageProps = {
   user: string;
   is_reseller?: boolean;
 };
-function GetUserUsage({ user, is_reseller=false }: GetUserUsageProps) {
+function GetUserUsage({ user, is_reseller = false }: GetUserUsageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [usage, setUsage] = useState<GetUserUsageResponse>();
 
@@ -258,7 +248,7 @@ function GetUserUsage({ user, is_reseller=false }: GetUserUsageProps) {
         !usage ? undefined : (
           <Detail.Metadata>
             {Object.entries(usage).map(([key, val]) => {
-              if (key==="error") return;
+              if (key === "error") return;
               const title = getTitleFromKey(key);
               return (
                 <Detail.Metadata.Label
@@ -285,7 +275,7 @@ type GetUserConfigProps = {
   user: string;
   is_reseller?: boolean;
 };
-function GetUserConfig({ user, is_reseller=false }: GetUserConfigProps) {
+function GetUserConfig({ user, is_reseller = false }: GetUserConfigProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [config, setConfig] = useState<GetUserConfigResponse>();
 
@@ -313,17 +303,10 @@ function GetUserConfig({ user, is_reseller=false }: GetUserConfigProps) {
         !config ? undefined : (
           <Detail.Metadata>
             {Object.entries(config).map(([key, val]) => {
-              if (key==="error") return;
+              if (key === "error") return;
               const title = getTitleFromKey(key);
               const { text, icon } = getTextAndIconFromVal(val);
-              return (
-                <Detail.Metadata.Label
-                  key={key}
-                  title={title}
-                  text={text}
-                  icon={icon}
-                />
-              );
+              return <Detail.Metadata.Label key={key} title={title} text={text} icon={icon} />;
             })}
           </Detail.Metadata>
         )
@@ -417,16 +400,17 @@ function GetUserDomains({ user }: GetUserDomainsProps) {
                 />
                 <Action.CopyToClipboard title="Copy All as JSON" content={JSON.stringify({ domain, ...domainVal })} />
                 <ActionPanel.Section>
-                <Action.Push
-                  title="Create Domain"
-                  icon={Icon.Plus}
-                  target={<CreateNewDomainComponent onDomainCreated={getFromApi} userToImpersonate={user} />}
-                />
-              </ActionPanel.Section></ActionPanel>
+                  <Action.Push
+                    title="Create Domain"
+                    icon={Icon.Plus}
+                    target={<CreateNewDomainComponent onDomainCreated={getFromApi} userToImpersonate={user} />}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
             }
           />
         ))}
-        {!isLoading && (
+      {!isLoading && (
         <List.Section title="Actions">
           <List.Item
             title="Create Domain"
@@ -531,18 +515,11 @@ function CreateUser({ onUserCreated }: CreateUserProps) {
       <Form.PasswordField title="Repeat Password" placeholder="hunter2" {...itemProps.passwd2} />
       <Form.TextField title="Domain" placeholder="raycast.local" {...itemProps.domain} />
 
-      {/* <Form.Separator /> */}
       <Form.Dropdown title="User Package" {...itemProps.package}>
         {packages?.map((packageName) => (
           <Form.Dropdown.Item key={packageName} title={packageName} value={packageName} />
         ))}
       </Form.Dropdown>
-      {/* <Form.Checkbox id="customizePackage" label="Customize Package" onChange={setCustomizePackage} />
-        {customizePackage && (
-
-        )}
-        <Form.Separator /> */}
-
       <Form.Dropdown title="IP" {...itemProps.ip}>
         {IPs?.map((IP) => <Form.Dropdown.Item key={IP} title={IP} value={IP} />)}
       </Form.Dropdown>
@@ -589,6 +566,7 @@ function ModifyUser({ user, currentConfig, onUserModified }: ModifyUserProps) {
       ubandwidth: currentConfig.bandwidth === "unlimited",
       quota: currentConfig.quota,
       uquota: currentConfig.quota === "unlimited",
+      vdomains: currentConfig.vdomains,
       uvdomains: currentConfig.vdomains === "unlimited",
       nsubdomains: currentConfig.nsubdomains,
       unsubdomains: currentConfig.nsubdomains === "unlimited",
@@ -723,7 +701,7 @@ function ChangeUserAccountEmail({ user }: ChangeUserAccountEmailProps) {
       }
     },
     validation: {
-      evalue: FormValidation.Required
+      evalue: FormValidation.Required,
     },
   });
 
@@ -737,7 +715,12 @@ function ChangeUserAccountEmail({ user }: ChangeUserAccountEmailProps) {
       }
     >
       <Form.Description title="User" text={user} />
-      <Form.TextField title="New Email" placeholder="new_email@example.com" {...itemProps.evalue} info="This is the account email and does not modify the ticket/messaging system email" />
+      <Form.TextField
+        title="New Email"
+        placeholder="new_email@example.com"
+        {...itemProps.evalue}
+        info="This is the account email and does not modify the ticket/messaging system email"
+      />
     </Form>
   );
 }
@@ -750,7 +733,7 @@ function ChangeUserTicketingEmail({ user }: ChangeUserTicketingEmailProps) {
 
   const { handleSubmit, itemProps } = useForm<ChangeUserTicketingEmailFormValues>({
     async onSubmit(values) {
-      const { email, ON  } = values;
+      const { email, ON } = values;
       const response = await changeUserTicketingEmail({ email, ON: ON ? "yes" : "no" }, user);
 
       if (response.error === "0") {
@@ -760,7 +743,7 @@ function ChangeUserTicketingEmail({ user }: ChangeUserTicketingEmailProps) {
       }
     },
     validation: {
-      email: FormValidation.Required
+      email: FormValidation.Required,
     },
   });
 
@@ -774,7 +757,12 @@ function ChangeUserTicketingEmail({ user }: ChangeUserTicketingEmailProps) {
       }
     >
       <Form.Description title="User" text={user} />
-      <Form.TextField title="New Email" placeholder="new_email@example.com" {...itemProps.email} info="This email address is the one that will be used when tickets or messages are sent back and forth" />
+      <Form.TextField
+        title="New Email"
+        placeholder="new_email@example.com"
+        {...itemProps.email}
+        info="This email address is the one that will be used when tickets or messages are sent back and forth"
+      />
       <Form.Checkbox label="Notify On Each Message" {...itemProps.ON} />
     </Form>
   );

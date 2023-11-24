@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "directadmin-reseller",
   "title": "DirectAdmin Reseller",
-  "description": "...",
-  "icon": "directadmin.png",
+  "description": "Interact with DirectAdmin as a Reseller",
+  "icon": "directadmin-reseller.png",
   "author": "xmok",
   "categories": [
     "Developer Tools"
@@ -52,21 +52,21 @@
     },
     {
       "name": "user-packages",
-      "title": "User Packages",
+      "title": "Reseller User Packages",
       "subtitle": "DirectAdmin Reseller",
       "description": "List of available User Packages",
       "mode": "view"
     },
     {
       "name": "domains",
-      "title": "Domains",
+      "title": "My Domains",
       "subtitle": "DirectAdmin Reseller",
       "description": "List all of the domains",
       "mode": "view"
     },
     {
       "name": "databases",
-      "title": "Databases",
+      "title": "My Databases",
       "subtitle": "DirectAdmin Reseller",
       "description": "List all of the databases",
       "mode": "view"
@@ -94,13 +94,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
+    "@raycast/api": "^1.62.0",
     "@raycast/utils": "^1.10.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
+    "@types/node": "^20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
