@@ -18,9 +18,14 @@ export async function checkOpenInApp() {
   }
 }
 
-export async function handleOnOpenPage(page: Page, setRecentPage: (page: Page) => Promise<void>): Promise<void> {
+export async function handleOnOpenPage(
+  page: Page,
+  setRecentPage: (page: Page) => Promise<void>,
+  openPageIn?: "web" | "app",
+) {
   if (!page.url) return;
-  open(openIn === "app" ? page.url.replace("https", "notion") : page.url);
+  const openAction = openPageIn || openIn;
+  open(openAction === "app" ? page.url.replace("https", "notion") : page.url);
   await setRecentPage(page);
   closeMainWindow();
 }

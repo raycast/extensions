@@ -1,15 +1,15 @@
 import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, getPreferenceValues, Icon, Image, List } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
 import {
-  deletePage,
-  notionColorToTintColor,
-  getPageIcon,
+  DatabaseProperty,
   deleteDatabase,
+  deletePage,
+  getPageIcon,
+  notionColorToTintColor,
   Page,
   PagePropertyType,
-  DatabaseProperty,
   User,
 } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
@@ -17,9 +17,9 @@ import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";
-import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
+import { ActionEditPageProperty, ActionSetVisibleProperties } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
-import { CreatePageForm, DatabaseViewForm, AppendToPageForm } from "./forms";
+import { AppendToPageForm, CreatePageForm, DatabaseViewForm } from "./forms";
 
 function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -121,9 +121,21 @@ export function PageListItem({
     <Action title="Open in Notion" icon="notion-logo.png" onAction={() => handleOnOpenPage(page, setRecentPage)} />
   );
 
+  const { open_in } = getPreferenceValues<Preferences>();
+  const otherNotionActionTitle = open_in === "web" ? "Open in App" : "Open in Browser";
+  const otherNotionAction = open_in === "web" ? "app" : "web";
+  const openInNotionOtherAction = (
+    <Action
+      title={otherNotionActionTitle}
+      icon="notion-logo.png"
+      onAction={() => handleOnOpenPage(page, setRecentPage, otherNotionAction)}
+    />
+  );
+
   const actions = {
     raycast: openInRaycastAction[page.object],
-    notion: openInNotionAction,
+    notionDefaultOpen: openInNotionAction,
+    notionOtherOpen: openInNotionOtherAction,
   };
 
   const pageWord = capitalize(page.object);
@@ -135,8 +147,9 @@ export function PageListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
-            {actions[primaryAction]}
-            {actions[primaryAction === "notion" ? "raycast" : "notion"]}
+            {primaryAction === "notion" ? actions["notionDefaultOpen"] : actions["raycast"]}
+            {primaryAction === "notion" ? actions["raycast"] : actions["notionDefaultOpen"]}
+            {actions["notionOtherOpen"]}
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
