@@ -1,5 +1,9 @@
 # Notion Changelog
 
+
+## [Open in Notion alternate action] - 2023-04-28
+- If primary action is set to open in app, secondary action will open in browser and vice versa
+
 ## [Fixes] - 2023-10-12
 
 - Fix duplicated recent and searched pages sometimes showing
@@ -69,3 +73,4 @@ The extension has also been revamped under the hood to improve maintainability a
 
 - Added an Action to open the Notion Page after creating it
 - Added a TextArea to add some content to the page directly
+
