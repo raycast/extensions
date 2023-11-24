@@ -13,11 +13,8 @@ type API = {
 export default async ({ github, context }: API) => {
   const touchedExtensions = new Set(
     process.env.CHANGED_EXTENSIONS?.split(",")
-      .filter((x) => x.startsWith("extensions"))
-      .map((x) => {
-        const parts = x.split("/");
-        return parts[1];
-      })
+      .map((x) => x.split("/extensions/extensions/extensions/")[1])
+      .map((x) => x.split("/")[0])
   );
   console.log(process.env.CHANGED_EXTENSIONS, touchedExtensions);
   if (touchedExtensions.size > 1) {
