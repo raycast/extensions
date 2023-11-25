@@ -130,7 +130,7 @@ export default function Command(props: LaunchProps) {
         });
       }
     }
-  }
+  };
 
   useEffect(() => {
     refreshContent();
