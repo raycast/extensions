@@ -42,7 +42,7 @@ export async function stopCaffeinate(updates: Updates, hudMessage?: string) {
 }
 
 export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
-  await stopCaffeinate({ menubar: false, status: false});
+  await stopCaffeinate({ menubar: false, status: false });
   update(updates, true);
 
   if (hudMessage) {
