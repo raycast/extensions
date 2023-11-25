@@ -10,7 +10,7 @@ export enum TransportType {
   Autoaggregate = "autoaggregate",
   Bluetooth = "bluetooth",
   BluetoothLowEnergy = "bluetoothle",
-  BuiltIn = "builtin",
+  "Built-In" = "builtin",
   DisplayPort = "displayport",
   Firewire = "firewire",
   HDMI = "hdmi",

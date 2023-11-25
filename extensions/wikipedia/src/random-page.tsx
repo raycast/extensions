@@ -1,9 +1,16 @@
-import { getRandomPageTitle } from "./wikipedia";
-import { openInBrowser } from "./utils";
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, open } from "@raycast/api";
+import { getRandomPageUrl } from "./utils/api";
+import { getStoredLanguage } from "./utils/language";
+import { openInBrowser } from "./utils/preferences";
 
-export default async function () {
-  const pageTitle = await getRandomPageTitle();
-  await openInBrowser(`https://wikipedia.org/wiki/${pageTitle}`);
-  await closeMainWindow({ clearRootSearch: true });
+export default async function randomPage() {
+  const language = await getStoredLanguage();
+  const { title, url } = await getRandomPageUrl(language);
+
+  if (openInBrowser) {
+    await open(url);
+    await closeMainWindow({ clearRootSearch: true });
+  } else {
+    await open(`raycast://extensions/vimtor/wikipedia/open-page?arguments=${encodeURI(JSON.stringify({ title }))}`);
+  }
 }

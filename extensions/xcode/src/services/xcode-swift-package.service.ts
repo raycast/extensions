@@ -1,12 +1,12 @@
 import { XcodeSwiftPackage } from "../models/swift-package/xcode-swift-package.model";
 import { execAsync } from "../shared/exec-async";
 import { XcodeSwiftPackageCreationParameters } from "../models/swift-package/xcode-swift-package-creation-parameters.model";
-import { joinPathComponents } from "../shared/join-path-components";
-import { XcodeProject } from "../models/project/xcode-project.model";
 import { runAppleScript } from "../shared/run-apple-script";
 import { XcodeSwiftPackageMetadata } from "../models/swift-package/xcode-swift-package-metadata.model";
 import { URL } from "url";
 import fetch from "node-fetch";
+import * as Path from "path";
+import { XcodeProject } from "../models/xcode-project/xcode-project.model";
 
 /**
  * XcodeSwiftPackageService
@@ -15,9 +15,9 @@ export class XcodeSwiftPackageService {
   /**
    * Create Swift Package from parameters
    */
-  createSwiftPackage(parameters: XcodeSwiftPackageCreationParameters): Promise<XcodeSwiftPackage> {
+  static createSwiftPackage(parameters: XcodeSwiftPackageCreationParameters): Promise<XcodeSwiftPackage> {
     // Initialize Swift Package path
-    const swiftPackagePath = joinPathComponents(parameters.location, parameters.name);
+    const swiftPackagePath = Path.join(parameters.location, parameters.name);
     // Execute command
     return execAsync(
       [
@@ -46,7 +46,7 @@ export class XcodeSwiftPackageService {
    * Retrieve a boolean if a given Swift Package Url is valid
    * @param url The Url to validate
    */
-  isSwiftPackageUrlValid(url: string): boolean {
+  static isSwiftPackageUrlValid(url: string): boolean {
     // Swift Package Url must start with "http" or "git"
     return url.startsWith("http") || url.startsWith("git");
   }
@@ -55,14 +55,14 @@ export class XcodeSwiftPackageService {
    * Retrieve Swift Package Metadata for Swift Package Url, if available
    * @param swiftPackageUrl The Swift Package Url
    */
-  async getSwiftPackageMetadata(swiftPackageUrl: string): Promise<XcodeSwiftPackageMetadata | null> {
+  static async getSwiftPackageMetadata(swiftPackageUrl: string): Promise<XcodeSwiftPackageMetadata | null> {
     // Initialize URL
     const url = new URL(swiftPackageUrl);
     // Check if host is GitHub
     if (url.host === "github.com") {
       // Fetch GitHub Repository details
       const gitHubAPIResponse = await fetch(
-        joinPathComponents("https://api.github.com/repos", url.pathname.replace(".git", ""))
+        Path.join("https://api.github.com/repos", url.pathname.replace(".git", ""))
       );
       // Retrieve GitHub Repository from response
       const gitHubRepository = (await gitHubAPIResponse.json()) as any;
@@ -83,7 +83,7 @@ export class XcodeSwiftPackageService {
    * @param url The Swift Package Url
    * @param xcodeProject The XcodeProject where the Swift Package should be added
    */
-  async addSwiftPackage(url: string, xcodeProject: XcodeProject): Promise<void> {
+  static async addSwiftPackage(url: string, xcodeProject: XcodeProject): Promise<void> {
     // Open Xcode Project
     await runAppleScript([
       'tell application "Finder"',
@@ -96,7 +96,7 @@ export class XcodeSwiftPackageService {
     ]);
     // Wait until Xcode Project has been opened
     // by performing a Promise race where either:
-    // - A 20 second timeout triggers which rejects with an error
+    // - A 20-second timeout triggers which rejects with an error
     // - The AppleScript finishes as the Xcode Project was successfully opened
     await Promise.race([
       new Promise((resolve, reject) => {

@@ -40,7 +40,7 @@ export const ComponentEditNote = ({ note, startedAt, activities, activity, onSub
         </ActionPanel>
       }
     >
-      <Form.TextField id="text" title="Note" defaultValue={note} />
+      <Form.TextArea id="text" title="Note" defaultValue={note} />
       <Form.Dropdown id="activityId" defaultValue={activity?.id}>
         {activities.map(activity => (
           <Form.Dropdown.Item key={activity.id} value={activity.id} title={activity.name} />

@@ -1,19 +1,8 @@
-import {
-  showToast,
-  ToastStyle,
-  Form,
-  Icon,
-  FormTagPicker,
-  FormTagPickerItem,
-  popToRoot,
-  ImageMask,
-  ActionPanel,
-  SubmitFormAction,
-} from "@raycast/api";
-import { Project, User, Label, Milestone, Branch, Issue } from "../gitlabapi";
+import { showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel, Action } from "@raycast/api";
+import { Project, User, Label, Milestone, Branch, Issue, TemplateSummary, TemplateDetail } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
-import { projectIcon, stringToSlug, toFormValues } from "../utils";
+import { getErrorMessage, projectIcon, showErrorToast, stringToSlug, toFormValues } from "../utils";
 import { useCache } from "../cache";
 
 interface MRFormValues {
@@ -26,7 +15,10 @@ interface MRFormValues {
   reviewer_ids: number[];
   labels: string[];
   milestone_id: number;
+  remove_source_branch: boolean;
 }
+
+const NO_TEMPLATE = "no_template";
 
 async function submit(values: MRFormValues) {
   try {
@@ -39,10 +31,10 @@ async function submit(values: MRFormValues) {
     const val = toFormValues(values);
     console.log(val);
     await gitlab.createMR(values.project_id, val);
-    await showToast(ToastStyle.Success, "Merge Request created", "Merge Request creation successful");
+    await showToast(Toast.Style.Success, "Merge Request created", "Merge Request creation successful");
     popToRoot();
-  } catch (error: any) {
-    await showToast(ToastStyle.Failure, "Error", error.message);
+  } catch (error) {
+    await showErrorToast(getErrorMessage(error));
   }
 }
 
@@ -81,20 +73,19 @@ export function IssueMRCreateForm({
         title: title,
         assignee_id: project?.owner?.id,
       });
-      showToast(ToastStyle.Success, "Merge Request created", "Merge Request creation successful");
+      showToast(Toast.Style.Success, "Merge Request created", "Merge Request creation successful");
       popToRoot();
     } catch (error) {
-      showToast(ToastStyle.Failure, "Cannot create Merge Request", (error instanceof Error && error.message) || "");
+      showErrorToast(getErrorMessage(error), "Cannot create Merge Request");
     }
   }
 
   return (
     <Form
-      onSubmit={submit}
       isLoading={project === undefined && branches === undefined}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Merge Request" onSubmit={submit} />
+          <Action.SubmitForm title="Create Merge Request" onSubmit={submit} />
         </ActionPanel>
       }
     >
@@ -109,7 +100,7 @@ export function IssueMRCreateForm({
   );
 }
 
-export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }) {
+export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }): JSX.Element {
   const [selectedProject, setSelectedProject] = useState<string | undefined>(
     props.project ? props.project.id.toString() : undefined
   );
@@ -130,68 +121,115 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
   const { projectinfo, errorProjectInfo, isLoadingProjectInfo } = useProject(selectedProject);
   const members = projectinfo?.members || [];
   const labels = projectinfo?.labels || [];
+  const mergeRequestTemplates = projectinfo?.mergeRequestTemplates || [];
   const isLoading = isLoadingProjects || isLoadingProjectInfo;
   const error = errorProjects || errorProjectInfo;
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot create Merge Request", error);
+    showErrorToast(error, "Cannot create Merge Request");
   }
 
   let project: Project | undefined;
   if (selectedProject) {
     project = projects?.find((pro) => pro.id.toString() === selectedProject);
   }
+  const removeBranchFlagOrDefault = (val?: boolean) => {
+    if (val !== undefined) {
+      return val;
+    }
+    return project?.remove_source_branch_after_merge ?? true;
+  };
+  const [removeBranch, setRemoveBranch] = useState<boolean | undefined>(undefined);
+  const [selectedTemplateName, setSelectedTemplateName] = useState<string>(NO_TEMPLATE);
+  const [description, setDescription] = useState<string | undefined>(undefined);
+
+  const { data: selectedTemplateDetail } = useCache<TemplateDetail | undefined>(
+    `project_${project?.id}_selected_template_${selectedTemplateName}`,
+    async () => {
+      if (selectedTemplateName === NO_TEMPLATE) return undefined;
+      return await gitlab.getProjectMergeRequestTemplate(project?.id || 0, selectedTemplateName);
+    },
+    { deps: [selectedTemplateName] }
+  );
+
+  useEffect(() => {
+    setDescription(selectedTemplateDetail?.content ?? "");
+  }, [selectedTemplateDetail]);
 
   return (
     <Form
-      onSubmit={submit}
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Merge Request" onSubmit={submit} />
+          <Action.SubmitForm title="Create Merge Request" onSubmit={submit} />
         </ActionPanel>
       }
     >
-      <ProjectDropdown projects={projects || []} setSelectedProject={setSelectedProject} value={selectedProject} />
+      <ProjectDropdown
+        projects={projects || []}
+        setSelectedProject={(newValue) => {
+          setRemoveBranch(undefined);
+          setSelectedProject(newValue);
+        }}
+        value={selectedProject}
+      />
       <SourceBranchDropdown project={project} info={projectinfo} value={props.branch} />
       <TargetBranchDropdown project={project} info={projectinfo} />
       <Form.TextField id="title" title="Title" placeholder="Enter title" />
-      <Form.TextArea id="description" title="Description" placeholder="Enter description" />
-      <FormTagPicker id="assignee_ids" title="Assignees" placeholder="Type or choose an assignee">
+      <Form.Dropdown id="template_id" title="Template" value={selectedTemplateName} onChange={setSelectedTemplateName}>
+        <Form.Dropdown.Item key={NO_TEMPLATE} value={NO_TEMPLATE} title={"None"} />
+        {mergeRequestTemplates.map((template) => (
+          <Form.Dropdown.Item key={template.id} value={template.id} title={template.name} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextArea
+        id="description"
+        title="Description"
+        placeholder="Enter description"
+        value={description}
+        onChange={setDescription}
+      />
+      <Form.TagPicker id="assignee_ids" title="Assignees" placeholder="Type or choose an assignee">
         {members.map((member) => (
-          <FormTagPickerItem
+          <Form.TagPicker.Item
             key={member.id.toString()}
             value={member.id.toString()}
             title={member.name || member.username}
-            icon={{ source: member.avatar_url, mask: ImageMask.Circle }}
+            icon={{ source: member.avatar_url, mask: Image.Mask.Circle }}
           />
         ))}
-      </FormTagPicker>
-      <FormTagPicker id="reviewer_ids" title="Reviewers" placeholder="Type or choose a reviewer">
+      </Form.TagPicker>
+      <Form.TagPicker id="reviewer_ids" title="Reviewers" placeholder="Type or choose a reviewer">
         {members.map((member) => (
-          <FormTagPickerItem
+          <Form.TagPicker.Item
             key={member.id.toString()}
             value={member.id.toString()}
             title={member.name || member.username}
             icon={{ source: member.avatar_url }}
           />
         ))}
-      </FormTagPicker>
-      <FormTagPicker id="labels" title="Labels" placeholder="Type or choose an label">
+      </Form.TagPicker>
+      <Form.TagPicker id="labels" title="Labels" placeholder="Type or choose an label">
         {labels.map((label) => (
-          <FormTagPickerItem
+          <Form.TagPicker.Item
             key={label.name}
             value={label.name}
             title={label.name}
             icon={{ source: Icon.Circle, tintColor: label.color }}
           />
         ))}
-      </FormTagPicker>
+      </Form.TagPicker>
       <Form.Dropdown id="milestone_id" title="Milestone">
         {projectinfo?.milestones?.map((m) => (
           <Form.Dropdown.Item key={m.id} value={m.id.toString()} title={m.title} />
         ))}
       </Form.Dropdown>
+      <Form.Checkbox
+        id="remove_source_branch"
+        label="Delete source branch when merge request is accepted"
+        value={removeBranchFlagOrDefault(removeBranch)}
+        onChange={setRemoveBranch}
+      />
     </Form>
   );
 }
@@ -233,8 +271,7 @@ function SourceBranchDropdown(props: {
       value = branches.length > 0 ? branches[0].name : "";
     }
     return (
-      <Form.Dropdown id="source_branch" title="Source Branch" value={value}>
-        <Form.Dropdown.Item key="_empty" value="" title="-" />
+      <Form.Dropdown id="source_branch" title="Source Branch" defaultValue={value}>
         {branches.map((branch) => (
           <Form.Dropdown.Item key={branch.name} value={branch.name} title={branch.name} />
         ))}
@@ -257,9 +294,8 @@ function TargetBranchDropdown(props: {
     const pro = props.project;
     const defaultBranch =
       pro.default_branch && pro.default_branch.length > 0 ? props.project.default_branch : undefined;
-    console.log(defaultBranch);
     return (
-      <Form.Dropdown id="target_branch" title="Target branch" value={defaultBranch}>
+      <Form.Dropdown id="target_branch" title="Target branch" defaultValue={defaultBranch}>
         {props.info?.branches.map((branch) => (
           <Form.Dropdown.Item key={branch.name} value={branch.name} title={branch.name} />
         ))}
@@ -305,6 +341,7 @@ export function useProject(query?: string): {
           const labels = await gitlab.getProjectLabels(proid);
           const milestones = await gitlab.getProjectMilestones(proid);
           const branches = ((await gitlab.fetch(`projects/${proid}/repository/branches`, {}, true)) as Branch[]) || [];
+          const mergeRequestTemplates = await gitlab.getProjectMergeRequestTemplates(proid);
 
           if (!didUnmount) {
             setProjectInfo({
@@ -313,14 +350,15 @@ export function useProject(query?: string): {
               labels: labels,
               milestones: milestones,
               branches: branches,
+              mergeRequestTemplates: mergeRequestTemplates,
             });
           }
         } else {
           console.log("no project selected");
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.toString());
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -344,4 +382,5 @@ interface ProjectInfoMR {
   labels: Label[];
   milestones: Milestone[];
   branches: Branch[];
+  mergeRequestTemplates: TemplateSummary[];
 }

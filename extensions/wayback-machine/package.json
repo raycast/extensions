@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wayback-machine",
+  "title": "Wayback Machine",
+  "description": "Quickly open and save webpages in Wayback Machine",
+  "icon": "518x0w.png",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "andreaselia"
+  ],
+  "categories": [
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open in Wayback Machine",
+      "description": "Open a webpage in Wayback Machine",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://www.raycast.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "save",
+      "title": "Save to Wayback Machine",
+      "description": "Save a webpage to Wayback Machine",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://www.raycast.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "saveMultiple",
+      "title": "Save Multiple to Wayback Machine",
+      "description": "Save multiple webpages to Wayback Machine",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "cross-fetch": "^3.1.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^3.0.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

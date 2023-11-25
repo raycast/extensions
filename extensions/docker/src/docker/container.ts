@@ -15,15 +15,7 @@ export const containerName = ({ Names, Name }: { Names?: string[]; Name?: string
 
 export const formatContainerDetailMarkdown = (container: ContainerInspectInfo | undefined) =>
   container !== undefined
-    ? `## ${containerName(container)}` +
-      '\n\n' +
-      markdown.attributes([
-        ['Image', container.Config.Image],
-        ['Status', container.State.Status],
-        ['Command', '`' + container.Config.Cmd?.join(' ') + '`'],
-      ]) +
-      renderEnvSection(container.Config.Env) +
-      `\n`
+    ? `# ${containerName(container)}` + '\n\n' + renderEnvSection(container.Config.Env) + `\n`
     : '';
 
 const renderEnvSection = (env: string[]) => {

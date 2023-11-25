@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-system-monitor",
+  "title": "System Monitor",
+  "description": "Show information and usage related to CPU , Memory , Power and Network",
+  "icon": "command-icon.png",
+  "author": "hossammourad",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "contributors": [
+    "Crayon144",
+    "pernielsentikaer",
+    "lucasmezencio"
+  ],
+  "commands": [
+    {
+      "name": "system-monitor",
+      "title": "System Monitor",
+      "description": "Show information and usage related to CPU , Memory , Power and Network",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.52.0",
+    "@raycast/utils": "^1.10.0",
+    "os-utils": "0.0.14",
+    "usehooks-ts": "^2.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
+    "@types/os-utils": "0.0.1",
+    "@types/react": "^17.0.28",
+    "eslint": "^7.32.0",
+    "react-devtools": "^4.11.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  },
+  "preferences": [
+    {
+      "name": "defaultview",
+      "description": "Select active tab upon launch",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default tab",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "CPU",
+          "value": "cpu"
+        },
+        {
+          "title": "Memory",
+          "value": "memory"
+        },
+        {
+          "title": "Power",
+          "value": "power"
+        },
+        {
+          "title": "Network",
+          "value": "network"
+        }
+      ]
+    }
+  ]
+}

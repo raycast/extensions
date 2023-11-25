@@ -1,4 +1,4 @@
-export type RunType = "all" | "clipboard" | "noclipboard" | "direct" | "form";
+export type RunType = "list" | "form" | "clipboard";
 
 export interface Category {
   title: string;
@@ -20,7 +20,7 @@ export interface Result {
 export interface Info {
   title: string;
   desc: string;
-  type: RunType;
+  type: [RunType, ...RunType[]];
   keywords?: string[];
   example?: string;
   icon?: string;

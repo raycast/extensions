@@ -1,89 +1,206 @@
 # Clipboard
 
-Use the Clipboard APIs to work with text from your clipboard and current selection. You can write contents to the clipboard through [`copyTextToClipboard`](clipboard.md#copytexttoclipboard) and clear it through [`clearClipboard`](clipboard.md#clearclipboard). The convenience action [`CopyToClipboardAction`](user-interface/actions.md#CopyToClipboardAction) can be used to copy content of a selected list item to the clipboard.The [`getSelectedText`](clipboard.md#getselectedtext) API allows to get the current text selection of the frontmost application. This can be handy if you need to transform or act on the selection. The [`pasteText`](clipboard.md#pastetext) function inserts text at the current cursor position. We use this in the Clipboard History to paste an entry to your frontmost app. You can use the [`PasteAction`](user-interface/actions.md#pasteaction) to add this functionality to your list or form.
+Use the Clipboard APIs to work with content from your clipboard. You can write contents to the clipboard through [`Clipboard.copy`](clipboard.md#clipboard.copy) and clear it through [`Clipboard.clear`](clipboard.md#clipboard.clear). The [`Clipboard.paste`](clipboard.md#clipboard.paste) function inserts text at the current cursor position in your frontmost app.
+
+The action [`Action.CopyToClipboard`](user-interface/actions.md#action.copytoclipboard) can be used to copy content of a selected list item to the clipboard and the action [`Action.Paste`](user-interface/actions.md#action.paste) can be used to insert text in your frontmost app.
 
 ## API Reference
 
-### clearClipboard
+### Clipboard.copy
+
+Copies text or a file to the clipboard.
+
+#### Signature
+
+```typescript
+async function copy(content: string | number | Content, options?: CopyOptions): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import { Clipboard } from "@raycast/api";
+
+export default async function Command() {
+  // copy some text
+  await Clipboard.copy("https://raycast.com");
+
+  const textContent: Clipboard.Content = {
+    text: "https://raycast.com",
+  };
+  await Clipboard.copy(textContent);
+
+  // copy a file
+  const file = "/path/to/file.pdf";
+  try {
+    const fileContent: Clipboard.Content = { file };
+    await Clipboard.copy(fileContent);
+  } catch (error) {
+    console.log(`Could not copy file '${file}'. Reason: ${error}`);
+  }
+
+  // copy confidential data
+  await Clipboard.copy("my-secret-password", { concealed: true });
+}
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="Clipboard.copy" />
+
+#### Return
+
+A Promise that resolves when the content is copied to the clipboard.
+
+### Clipboard.paste
+
+Pastes text or a file to the current selection of the frontmost application.
+
+#### Signature
+
+```typescript
+async function paste(content: string | Content): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import { Clipboard } from "@raycast/api";
+
+export default async function Command() {
+  await Clipboard.paste("I really like Raycast's API");
+}
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="Clipboard.paste" />
+
+#### Return
+
+A Promise that resolves when the content is pasted.
+
+### Clipboard.clear
 
 Clears the current clipboard contents.
 
 #### Signature
 
 ```typescript
-async function clearClipboard(): Promise<void>
+async function clear(): Promise<void>;
 ```
 
 #### Example
 
 ```typescript
-import { clearClipboard } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
 
-export default async () => {
-  await clearClipboard();
-};
+export default async function Command() {
+  await Clipboard.clear();
+}
 ```
 
 #### Return
 
-A promise that resolves when the clipboard is cleared.
+A Promise that resolves when the clipboard is cleared.
 
-### copyTextToClipboard
+### Clipboard.read
 
-Copies text to the clipboard.
+Reads the clipboard content as plain text, file name, or HTML.
 
 #### Signature
 
 ```typescript
-async function copyTextToClipboard(text: string): Promise<void>
+async function read(options?: { offset?: number }): Promise<ReadContent>;
 ```
 
 #### Example
 
 ```typescript
-import { copyTextToClipboard } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
 
 export default async () => {
-  await copyTextToClipboard("https://raycast.com");
+  const { text, file, html } = await Clipboard.read();
+  console.log(text);
+  console.log(file);
+  console.log(html);
 };
 ```
 
 #### Parameters
 
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| text | <code>string</code> | Yes | The text to copy to the clipboard. |
+<FunctionParametersTableFromJSDoc name="Clipboard.read" />
 
 #### Return
 
-A promise that resolves when the text got copied to the clipboard.
+A promise that resolves when the clipboard content was read as plain text, file name, or HTML.
 
-### pasteText
+### Clipboard.readText
 
-Pastes text to the current selection of the frontmost application.
+Reads the clipboard as plain text.
 
 #### Signature
 
 ```typescript
-async function pasteText(text: string): Promise<void>
+async function readText(options?: { offset?: number }): Promise<string | undefined>;
 ```
 
 #### Example
 
 ```typescript
-import { pasteText } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
 
-export default async () => {
-  await pasteText("I really like Raycast's API");
-};
+export default async function Command() {
+  const text = await Clipboard.readText();
+  console.log(text);
+}
 ```
 
 #### Parameters
 
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| text | <code>string</code> | Yes | The text to insert at the cursor. |
+<FunctionParametersTableFromJSDoc name="Clipboard.readText" />
 
 #### Return
 
-A promise that resolves when the text got pasted.
+A promise that resolves once the clipboard content is read as plain text.
+
+## Types
+
+### Clipboard.Content
+
+Type of content that is copied and pasted to and from the Clipboard
+
+```typescript
+type Content =
+  | {
+      text: string;
+    }
+  | {
+      file: PathLike;
+    };
+```
+
+### Clipboard.ReadContent
+
+Type of content that is read from the Clipboard
+
+```typescript
+type Content =
+  | {
+      text: string;
+    }
+  | {
+      file?: string;
+    }
+  | {
+      html?: string;
+    };
+```
+
+### Clipboard.CopyOptions
+
+Type of options passed to `Clipboard.copy`.
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="Clipboard.CopyOptions" />

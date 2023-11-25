@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, ImageMask, Color } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { getMyOpenPullRequests } from "./../../queries";
@@ -40,7 +40,11 @@ export function SearchMyPullRequests(): JSX.Element {
   }, []);
 
   if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading repositories", state.error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed loading repositories",
+      message: state.error.message,
+    });
   }
 
   return (
@@ -51,19 +55,23 @@ export function SearchMyPullRequests(): JSX.Element {
             key={pr.id}
             title={pr.title}
             subtitle={pr.repo?.fullName}
-            accessoryTitle={`${pr.commentCount} 💬  ·  Created by ${pr.author.nickname}`}
-            accessoryIcon={{ source: pr.author.url, mask: ImageMask.Circle }}
             icon={{ source: "icon-pr.png", tintColor: Color.PrimaryText }}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <OpenInBrowserAction
+                  <Action.OpenInBrowser
                     title="Open Pull Request in Browser"
                     url={`https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
             }
+            accessories={[
+              {
+                text: `${pr.commentCount} 💬  ·  Created by ${pr.author.nickname}`,
+                icon: { source: pr.author.url, mask: Image.Mask.Circle },
+              },
+            ]}
           />
         ))}
       </List.Section>

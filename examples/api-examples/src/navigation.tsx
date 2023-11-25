@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, PushAction, useNavigation } from "@raycast/api";
+import { ActionPanel, Detail, List, useNavigation, Action } from "@raycast/api";
 
 export default function Command() {
   const { push } = useNavigation();
@@ -9,7 +9,7 @@ export default function Command() {
         title="Push Action"
         actions={
           <ActionPanel title="Actions">
-            <PushAction title="Show Details" target={<Details description="# Hello there" />} />
+            <Action.Push title="Show Details" target={<Details description="# Hello there" />} />
           </ActionPanel>
         }
       />
@@ -17,7 +17,7 @@ export default function Command() {
         title="Custom Hook"
         actions={
           <ActionPanel>
-            <ActionPanel.Item
+            <Action
               title="Open Detail with Hook"
               onAction={() => {
                 push(<Details description="#Details" />);
@@ -32,14 +32,14 @@ export default function Command() {
 
 function Details(props: { description: string }) {
   const { pop } = useNavigation();
-  
+
   return (
     <Detail
       navigationTitle="Details"
       markdown={props.description}
       actions={
         <ActionPanel title="Detail">
-          <ActionPanel.Item title="Pop Back" onAction={pop} />
+          <Action title="Pop Back" onAction={pop} />
         </ActionPanel>
       }
     />

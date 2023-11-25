@@ -1,7 +1,17 @@
-import { Form, ActionPanel, SubmitFormAction, showToast, ToastStyle, getPreferenceValues, Detail } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  SubmitFormAction,
+  showToast,
+  ToastStyle,
+  getPreferenceValues,
+  Detail,
+  Icon,
+} from "@raycast/api";
 import { useState } from "react";
 import { removeBackgroundFromImageFile, RemoveBgError, RemoveBgResult } from "remove.bg";
 import { existsSync } from "fs";
+import { Action$ } from "raycast-toolkit";
 
 interface CommandForm {
   file: string;
@@ -49,6 +59,7 @@ const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> =
 export default function Command() {
   const [isLoading, setLoading] = useState(false);
   const [base64, setBase64] = useState<string>();
+  const [input, setInput] = useState<string>("");
 
   function handleSubmit(input: CommandForm) {
     setLoading(true);
@@ -74,13 +85,23 @@ export default function Command() {
       actions={
         <ActionPanel>
           <SubmitFormAction onSubmit={handleSubmit} />
+          <Action$.SelectFile
+            icon={Icon.Finder}
+            title="Select Image From Finder..."
+            prompt="Please select an image"
+            type="public.image"
+            shortcut={{ key: "o", modifiers: ["cmd"] }}
+            onSelect={setInput}
+          />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="file"
         title="Select image"
-        placeholder="Focus here, start dragging, press cmd+space release here"
+        value={input}
+        onChange={setInput}
+        placeholder="Enter the file path, or press ⌘ O"
       />
       <Form.Checkbox id="crop" label="Crop" defaultValue={false} />
       <Form.Dropdown id="size" title="Output image resolution" defaultValue="regular">

@@ -1,9 +1,9 @@
-import { ActionPanel, Color, CopyToClipboardAction, Icon, List, showToast, ToastStyle } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { ensureCLI, speedtestCLIDirectory } from "./lib/cli";
-import { Result, ResultProgress, runSpeedTest } from "./lib/speedtest";
-import { pingToString, speedToString } from "./lib/utils";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import * as afs from "fs/promises";
+import { speedtestCLIDirectory } from "./lib/cli";
+import { Result } from "./lib/speedtest";
+import { pingToString, speedToString } from "./lib/utils";
+import { useSpeedtest } from "./lib/hooks";
 
 function percentageToString(val: number | undefined): string | undefined {
   if (val === undefined) {
@@ -16,7 +16,10 @@ function percentageToString(val: number | undefined): string | undefined {
   return `${v}%`;
 }
 
-function ClearCacheAction(): JSX.Element {
+function ClearCacheAction(props: { isLoading: boolean }) {
+  if (props.isLoading) {
+    return null;
+  }
   const handle = async () => {
     try {
       const d = speedtestCLIDirectory();
@@ -25,112 +28,267 @@ function ClearCacheAction(): JSX.Element {
       // ignore
     }
   };
-  return (
-    <ActionPanel.Item
-      title="Clear CLI Cache"
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-      onAction={handle}
-    />
-  );
+  return <Action title="Clear CLI Cache" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} onAction={handle} />;
 }
 
-function ISPListItem(props: { name: string | undefined; summary: JSX.Element }): JSX.Element {
+function ISPListItem(props: {
+  url: string | undefined;
+  name: string | undefined;
+  summary: JSX.Element;
+  isLoading: boolean;
+  restart: JSX.Element;
+}): JSX.Element {
   const n = props.name;
+  const url = props.url;
   return (
     <List.Item
       title="Internet Service Provider"
       icon={{ source: Icon.Globe, tintColor: Color.Green }}
-      accessoryTitle={`${n ? n : "?"}`}
       actions={
         <ActionPanel>
-          {props.summary}
-          {n && <CopyToClipboardAction content={n} />}
-          <ClearCacheAction />
+          <ActionPanel.Section>
+            {props.summary}
+            {n && <Action.CopyToClipboard content={n} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${n ? n : "?"}`,
+        },
+      ]}
     />
   );
 }
 
-function ServerListItem(props: { serverName: string | undefined; summary: JSX.Element }): JSX.Element {
+function ServerListItem(props: {
+  url: string | undefined;
+  serverName: string | undefined;
+  summary: JSX.Element;
+  restart: JSX.Element;
+  isLoading: boolean;
+}): JSX.Element {
   const sn = props.serverName;
+  const url = props.url;
   return (
     <List.Item
       title="Server"
-      icon={{ source: "server.png" }}
-      accessoryTitle={`${sn ? sn : "?"}`}
+      icon={{ source: Icon.HardDrive, tintColor: Color.Green }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {sn && <CopyToClipboardAction content={sn} />}
+          <ActionPanel.Section>
+            {props.summary}
+            {sn && <Action.CopyToClipboard content={sn} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${sn ? sn : "?"}`,
+        },
+      ]}
     />
   );
 }
 
 function PingListItem(props: {
+  url: string | undefined;
   ping: number | undefined;
   progress: number | undefined;
   summary: JSX.Element;
+  restart: JSX.Element;
+  isLoading: boolean;
 }): JSX.Element {
   const p = props.ping;
+  const url = props.url;
   return (
     <List.Item
       title="Ping"
       subtitle={percentageToString(props.progress)}
       icon={{ source: Icon.LevelMeter, tintColor: Color.Blue }}
-      accessoryTitle={`${pingToString(p)}`}
       actions={
         <ActionPanel>
-          {props.summary}
-          {p && <CopyToClipboardAction content={pingToString(p)} />}
+          <ActionPanel.Section>
+            {props.summary}
+            {p && <Action.CopyToClipboard content={pingToString(p)} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${pingToString(p)}`,
+        },
+      ]}
     />
   );
 }
 
 function DownloadListItem(props: {
+  url: string | undefined;
   download: number | undefined;
   progress: number | undefined;
   summary: JSX.Element;
+  restart: JSX.Element;
+  isLoading: boolean;
 }): JSX.Element {
   const d = props.download;
+  const url = props.url;
   return (
     <List.Item
       title="Download"
       subtitle={percentageToString(props.progress)}
-      icon={{ source: "download.png", tintColor: Color.Blue }}
-      accessoryTitle={`${speedToString(d)}`}
+      icon={{ source: Icon.ArrowDownCircle, tintColor: Color.Blue }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {d && <CopyToClipboardAction content={speedToString(d)} />}
+          <ActionPanel.Section>
+            {props.summary}
+            {d && <Action.CopyToClipboard content={speedToString(d)} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${speedToString(d)}`,
+        },
+      ]}
     />
   );
 }
 
 function UploadListItem(props: {
+  url: string | undefined;
   upload: number | undefined;
   progress: number | undefined;
   summary: JSX.Element;
+  restart: JSX.Element;
+  isLoading: boolean;
 }): JSX.Element {
   const u = props.upload;
+  const url = props.url;
   return (
     <List.Item
       title="Upload"
       subtitle={percentageToString(props.progress)}
-      icon={{ source: "download.png", tintColor: "#bf71ff" }}
-      accessoryTitle={`${speedToString(u)}`}
+      icon={{ source: Icon.ArrowUpCircle, tintColor: "#bf71ff" }}
       actions={
         <ActionPanel>
-          {props.summary}
-          {u && <CopyToClipboardAction content={speedToString(u)} />}
+          <ActionPanel.Section>
+            {props.summary}
+            {u && <Action.CopyToClipboard content={speedToString(u)} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {url && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: `${speedToString(u)}`,
+        },
+      ]}
+    />
+  );
+}
+
+function ResultListItem(props: {
+  result: Result;
+  isLoading: boolean;
+  summary: JSX.Element;
+  restart: JSX.Element;
+}): JSX.Element {
+  const url = props.result?.url;
+  return (
+    <List.Item
+      title="Result Link"
+      icon={{ source: Icon.CheckCircle, tintColor: Color.Blue }}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            {props.summary}
+            {!props.isLoading && <Action.CopyToClipboard content={url ?? ""} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {!props.isLoading && (
+              <Action.OpenInBrowser
+                title="Open Results in Browser"
+                url={url ?? ""}
+                shortcut={{ modifiers: ["opt"], key: "enter" }}
+              />
+            )}
+            {props.restart}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearCacheAction isLoading={props.isLoading} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+      accessories={[
+        {
+          text: props.isLoading ? "?" : `${props.result.url || "?"}`,
+        },
+      ]}
     />
   );
 }
@@ -143,88 +301,86 @@ function CopySummaryAction(props: { result: Result }): JSX.Element {
     `Ping: ${pingToString(r.ping)}`,
     `Download: ${speedToString(r.download)}`,
     `Upload: ${speedToString(r.upload)}`,
+    `Result: ${r.url || "?"}`,
   ];
-  return <CopyToClipboardAction title="Copy Summary To Clipboard" content={parts.join("; ")} />;
+  return <Action.CopyToClipboard title="Copy Summary to Clipboard" content={parts.join("; ")} />;
 }
 
-export default function SpeedtestList() {
-  const { result, error, isLoading, resultProgress } = useSpeedtest();
-  if (error) {
-    showToast(ToastStyle.Failure, "Speedtest failed", error);
+function RestartAction(props: { isLoading: boolean; revalidate: () => void }) {
+  if (props.isLoading) {
+    return null;
   }
-  const title = isLoading ? "Speedtest running" : undefined;
-  const summaryAction = <CopySummaryAction result={result} />;
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={title}>
-      <ISPListItem name={result.isp} summary={summaryAction} />
-      <ServerListItem serverName={result.serverName} summary={summaryAction} />
-      <PingListItem ping={result.ping} progress={resultProgress.ping} summary={summaryAction} />
-      <DownloadListItem download={result.download} progress={resultProgress.download} summary={summaryAction} />
-      <UploadListItem upload={result.upload} progress={resultProgress.upload} summary={summaryAction} />
-    </List>
+    <Action
+      title="Restart"
+      icon={Icon.RotateAntiClockwise}
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      onAction={props.revalidate}
+    />
   );
 }
 
-function useSpeedtest(): {
-  result: Result;
-  error: string | undefined;
-  isLoading: boolean;
-  resultProgress: ResultProgress;
-} {
-  const [result, setResult] = useState<Result>({
-    isp: undefined,
-    location: undefined,
-    serverName: undefined,
-    download: undefined,
-    upload: undefined,
-    ping: undefined,
-  });
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [resultProgress, setResultProgress] = useState<ResultProgress>({
-    download: undefined,
-    upload: undefined,
-    ping: undefined,
-  });
-  let cancel = false;
-  useEffect(() => {
-    async function runTest() {
-      try {
-        await ensureCLI();
-        runSpeedTest(
-          (r: Result) => {
-            if (!cancel) {
-              setResult({ ...r });
-            }
-          },
-          (r: Result) => {
-            if (!cancel) {
-              setResult({ ...r });
-              setIsLoading(false);
-            }
-          },
-          (err: Error) => {
-            if (!cancel) {
-              setError(err.message);
-            }
-          },
-          (prog: ResultProgress) => {
-            if (!cancel) {
-              setResultProgress(prog);
-            }
-          }
-        );
-      } catch (err) {
-        if (!cancel) {
-          setError(err instanceof Error ? err.message : "unknown error");
-          setIsLoading(false);
-        }
-      }
-    }
-    runTest();
-    return () => {
-      cancel = true;
-    };
-  }, []);
-  return { result, error, isLoading, resultProgress };
+export default function SpeedtestList() {
+  const { result, error, isLoading, resultProgress, revalidate } = useSpeedtest();
+
+  if (error || result.error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Speedtest failed",
+      message: error,
+    });
+  }
+  const title = isLoading ? "Speedtest running" : undefined;
+  const summaryAction = <CopySummaryAction result={result} />;
+  const restartAction = <RestartAction isLoading={isLoading} revalidate={revalidate} />;
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder={title}>
+      {result.error ? (
+        <List.EmptyView icon={Icon.LevelMeter} title={result.error} />
+      ) : (
+        <>
+          <ISPListItem
+            url={result.url}
+            name={result.isp}
+            summary={summaryAction}
+            isLoading={isLoading}
+            restart={restartAction}
+          />
+          <ServerListItem
+            url={result.url}
+            isLoading={isLoading}
+            serverName={result.serverName}
+            summary={summaryAction}
+            restart={restartAction}
+          />
+          <PingListItem
+            url={result.url}
+            isLoading={isLoading}
+            ping={result.ping}
+            progress={resultProgress.ping}
+            summary={summaryAction}
+            restart={restartAction}
+          />
+          <DownloadListItem
+            url={result.url}
+            isLoading={isLoading}
+            download={result.download}
+            progress={resultProgress.download}
+            summary={summaryAction}
+            restart={restartAction}
+          />
+          <UploadListItem
+            url={result.url}
+            isLoading={isLoading}
+            upload={result.upload}
+            progress={resultProgress.upload}
+            summary={summaryAction}
+            restart={restartAction}
+          />
+          <ResultListItem result={result} isLoading={isLoading} summary={summaryAction} restart={restartAction} />
+        </>
+      )}
+    </List>
+  );
 }

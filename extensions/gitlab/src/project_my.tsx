@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
 import { ProjectList } from "./components/project";
 
-render(<ProjectList membership={true} />);
+export default function MyProjectsRoot(): JSX.Element {
+  return <ProjectList membership={true} />;
+}

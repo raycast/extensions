@@ -1,0 +1,38 @@
+# Google Workspace Changelog
+
+## [Add menu bar shortcuts] - 2023-11-16
+
+- Create new Google documents from the menu bar.
+- Add an alternate to the menu bar command to open starred files in Raycast instead of Google Drive
+
+## [Fix opening link from Search Google Drive Files command]
+
+Previously, there was a problem where links would open under the incorrect Google account. This issue has been resolved ensuring that links now open with the correct Google account.
+
+## [Fix Google Spreadsheets creation command] - 2023-03-12
+
+Fix the `Create Google Spreadsheet` command to use the authenticated user.
+
+## [Open file location in browser] - 2022-12-19
+
+Added an action allowing to open the file's location in Google Drive. This action is similar to the `Show file location` item when selecting a file in Google Drive.
+
+## [Search on all Drives] - 2022-09-01
+
+Added support to search not only on My Drive but also on Shared Drives.
+
+## [Open source the Extension] - 2022-08-04
+
+Google Workspace added to the public repository
+
+## [Select browser to open Google related links] - 2022-02-23
+
+Adds the ability to override which browser Google services will open to. Head over to the extension preferences to change the browser.
+
+## [Updated icons for commands] - 2022-01-04
+
+Added new icons for all commands.
+
+## [Added Extension to Store] - 2021-11-30
+
+Google Workspace added to the Raycast Store.

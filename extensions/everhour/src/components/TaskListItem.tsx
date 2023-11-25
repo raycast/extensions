@@ -5,20 +5,30 @@ import { Task } from "../types";
 import { startTaskTimer, stopCurrentTaskTimer } from "../api";
 import { createResolvedToast } from "../utils";
 
+const formatSeconds = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const min = minutes % 60;
+    return `${hours} ${hours === 1 ? "hour" : "hours"} and ${min} min`;
+  }
+  return `${minutes} min`;
+};
+
 export function TaskListItem({
   task,
   hasActiveTimer,
   refreshActiveTimer,
   refreshRecords,
-  todaysTimeRecords,
+  recentTimeRecords = [],
 }: {
   task: Task;
   hasActiveTimer: boolean;
   refreshActiveTimer: () => Promise<void>;
-  refreshRecords: () => Promise<any>;
-  todaysTimeRecords: Array<Array<Task>>;
+  refreshRecords: () => Promise<Array<Task>>;
+  recentTimeRecords?: Array<Task>;
 }) {
-  const [timeRecords, setTimeRecords] = useState<Array<any>>(todaysTimeRecords);
+  const [timeRecords, setTimeRecords] = useState<Array<Task>>(recentTimeRecords);
 
   const enableTaskTimer = async () => {
     const toast = await showToast(ToastStyle.Animated, "Starting timer");
@@ -47,31 +57,30 @@ export function TaskListItem({
   };
 
   const resolveTaskTime = (): string => {
-    const taskTimeToday = timeRecords.find((timeRecord) => timeRecord.id === task.id);
-
-    if (!taskTimeToday) {
-      return "0 min";
+    if (task.time?.recent > 0) {
+      return `${formatSeconds(task.time.recent)} in the last 7 days`;
     }
-
-    const { timeInMin } = taskTimeToday;
-    if (timeInMin >= 60) {
-      const hours = Math.floor(timeInMin / 60);
-      const min = timeInMin % 60;
-      return `${hours} ${hours === 1 ? "hour" : "hours"} and ${min} min`;
-    } else {
-      return `${timeInMin} min`;
+    const record = timeRecords.find((timeRecord) => timeRecord.id === task.id);
+    if (record && record.time.recent > 0) {
+      return `${formatSeconds(record.time.recent)} in the last 7 days`;
     }
+    return "";
   };
 
   return (
     <List.Item
       id={task.id}
       key={task.id}
-      title={`${task.name} - ${resolveTaskTime()} today`}
-      subtitle={hasActiveTimer ? "Timer Active" : ""}
-      icon={{ source: Icon.Dot, tintColor: Color.Green }}
+      title={task.name}
+      subtitle={resolveTaskTime()}
+      icon={{ source: Icon.Dot, tintColor: hasActiveTimer ? Color.Green : Color.SecondaryText }}
       actions={
         <ActionPanel>
+          {hasActiveTimer ? (
+            <ActionPanel.Item title="Stop Active Timer" onAction={disableActiveTimer} />
+          ) : (
+            <ActionPanel.Item title="Start Timer" onAction={enableTaskTimer} />
+          )}
           <PushAction
             title="Submit Custom Time"
             target={
@@ -84,8 +93,6 @@ export function TaskListItem({
               />
             }
           />
-          <ActionPanel.Item title="Start Timer" onAction={enableTaskTimer} />
-          <ActionPanel.Item title="Stop Active Timer" onAction={disableActiveTimer} />
         </ActionPanel>
       }
     />

@@ -12,10 +12,16 @@
       "title": "Dashboard",
       "description": "List Clash dashboard items",
       "mode": "view"
+    },
+    {
+      "name": "mode",
+      "title": "Mode",
+      "description": "Switch Clash Proxy Mode",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.31.0",
     "node-fetch": "^3.1.0",
     "ws": "^8.4.0"
   },

@@ -1,74 +1,55 @@
-import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
-import { Page, searchPages } from "./utils/notion";
-import { loadRecentlyOpenedPages } from "./utils/local-storage";
-import { PageListItem } from "./components";
+import React, { useState } from "react";
 
-export default function SearchPageList(): JSX.Element {
-  // Setup useState objects
-  const [pages, setPages] = useState<Page[]>();
-  const [recentlyOpenPages, setRecentlyOpenPages] = useState<Page[]>();
-  const [searchText, setSearchText] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+import { PageListItem, View } from "./components";
+import { useRecentPages, useSearchPages, useUsers } from "./hooks";
 
-  // Fetch and filter recently open pages
-  useEffect(() => {
-    const loadRecentlyOpenPage = async () => {
-      const cachedRecentlyOpenPages = await loadRecentlyOpenedPages();
+function Search() {
+  const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
+  const [searchText, setSearchText] = useState<string>("");
+  const { data: searchPages, isLoading, mutate } = useSearchPages(searchText);
+  const { data: users } = useUsers();
 
-      if (searchText) {
-        setRecentlyOpenPages(
-          cachedRecentlyOpenPages.filter(function (p: Page) {
-            return (p.title ? p.title : "Untitled").toLowerCase().includes(searchText.toLowerCase());
-          })
-        );
-      } else {
-        setRecentlyOpenPages(cachedRecentlyOpenPages);
-      }
-    };
-    loadRecentlyOpenPage();
-  }, [searchText]);
-
-  // Search pages
-  useEffect(() => {
-    const searchNotionPages = async () => {
-      setIsLoading(true);
-
-      if (searchText) {
-        const searchedPages = await searchPages(searchText);
-        if (searchedPages && searchedPages[0]) {
-          setPages(searchedPages);
-        }
-      } else {
-        setPages([]);
-      }
-      setIsLoading(false);
-    };
-    searchNotionPages();
-  }, [searchText]);
+  const sections = [
+    { title: "Recent", pages: recentPages ?? [] },
+    { title: "Search", pages: searchPages?.filter((p) => !recentPages?.some((q) => p.id == q.id)) ?? [] },
+  ];
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search pages" onSearchTextChange={setSearchText} throttle={true}>
-      <List.Section key="recently-open-pages" title="Recent">
-        {recentlyOpenPages?.map((p) => (
-          <PageListItem
-            key={`recently-open-page-${p.id}`}
-            page={p}
-            databaseView={undefined}
-            databaseProperties={undefined}
-          />
-        ))}
-      </List.Section>
-      <List.Section key="search-result" title="Search">
-        {pages?.map((p) => (
-          <PageListItem
-            key={`search-result-page-${p.id}`}
-            page={p}
-            databaseView={undefined}
-            databaseProperties={undefined}
-          />
-        ))}
-      </List.Section>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search pages"
+      onSearchTextChange={setSearchText}
+      throttle
+      filtering
+    >
+      {sections.map((section) => {
+        return (
+          <List.Section title={section.title} key={section.title}>
+            {section.pages.map((p) => {
+              return (
+                <PageListItem
+                  key={`${section.title}-${p.id}`}
+                  page={p}
+                  users={users}
+                  mutate={mutate}
+                  setRecentPage={setRecentPage}
+                  removeRecentPage={removeRecentPage}
+                />
+              );
+            })}
+          </List.Section>
+        );
+      })}
+      <List.EmptyView title="No pages found" />
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Search />
+    </View>
   );
 }

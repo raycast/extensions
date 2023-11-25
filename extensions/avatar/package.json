@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "avatar",
+  "title": "Avatar",
+  "description": "An avatar library for designers and developers. You can choose between simple identicons and lovely designed characters.",
+  "icon": "avatar-icon.png",
+  "author": "koinzhang",
+  "contributors": [
+    "madza"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Fun",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-avatar",
+      "title": "Generate Avatar",
+      "subtitle": "Multiavatar",
+      "description": "Generate your own avatar with custom seed.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "layout",
+      "type": "dropdown",
+      "description": "Set the layout of the avatar items.",
+      "required": true,
+      "title": "Avatar Layout",
+      "default": "Grid",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "Grid"
+        },
+        {
+          "title": "List",
+          "value": "List"
+        }
+      ]
+    },
+    {
+      "name": "columns",
+      "type": "dropdown",
+      "description": "Set the number of columns of the avatar items. (Only works with Grid layout)",
+      "required": false,
+      "title": "Avatar Item Columns",
+      "default": "7",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@multiavatar/multiavatar": "^1.0.7",
+    "axios": "^0.27.2",
+    "d3-color": "^3.1.0",
+    "fs-extra": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/d3-color": "^3.1.0",
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

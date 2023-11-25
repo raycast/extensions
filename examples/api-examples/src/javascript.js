@@ -1,3 +1,5 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast } from "@raycast/api";
 
-showToast(ToastStyle.Success, "Hello from JavaScript 👋");
+showToast({
+  title: "Hello from JavaScript 👋",
+});

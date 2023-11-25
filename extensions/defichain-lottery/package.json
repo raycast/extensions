@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "defichain-lottery",
+  "title": "Defichain Lottery",
+  "description": "Stats and your tickets for the Defichain Lottery",
+  "icon": "defichain-lottery-icon.png",
+  "author": "adrian-schnell",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Fun",
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "stats",
+      "title": "Statistics",
+      "subtitle": "Defichain Lottery",
+      "description": "Current and alltime Defichain Lottery stats",
+      "mode": "view"
+    },
+    {
+      "name": "tickets",
+      "title": "My Tickets and Wins",
+      "subtitle": "Defichain Lottery",
+      "description": "Check your own tickets and possible wins.",
+      "mode": "view",
+      "keywords": [
+        "result",
+        "my tickets",
+        "tickets",
+        "lottery"
+      ]
+    },
+    {
+      "name": "add-address",
+      "title": "Add Address",
+      "subtitle": "Defichain Lottery",
+      "description": "Add an address to your watchlist (used by the tickets command)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "address",
+          "title": "Add DFI Address",
+          "placeholder": "dfi address",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "add",
+        "address",
+        "lottery"
+      ]
+    },
+    {
+      "name": "remove-address",
+      "title": "Remove Address",
+      "subtitle": "Defichain Lottery",
+      "description": "Remove an address from the watchlist",
+      "mode": "view",
+      "keywords": [
+        "remove",
+        "delete",
+        "address",
+        "lottery"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.41.1",
+    "axios": "^1.1.3",
+    "moment": "^2.29.4",
+    "qrcode": "^1.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/qrcode": "^1.5.0",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

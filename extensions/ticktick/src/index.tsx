@@ -1,17 +1,20 @@
 import { List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import { getToday } from "./service/osScript";
-import { Section } from "./service/task";
+import { getTaskCopyContent, getTaskDetailMarkdownContent, Section } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
 import TaskItem from "./components/taskItem";
 import useSearchTasks from "./hooks/useSearchTasks";
+import useRefreshList from "./hooks/useRefreshList";
 
 const TickTickToday: React.FC<Record<string, never>> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [todaySections, setTodaySections] = useState<Section[] | null>(null);
   const { isInitCompleted } = useStartApp();
+  const { refreshPoint, refresh } = useRefreshList();
 
   useEffect(() => {
+    console.log("refreshPoint", refreshPoint);
     const getTodayTasks = async () => {
       const today = await getToday();
       setTodaySections(today);
@@ -20,9 +23,9 @@ const TickTickToday: React.FC<Record<string, never>> = () => {
     if (isInitCompleted) {
       getTodayTasks();
     }
-  }, [isInitCompleted]);
+  }, [isInitCompleted, refreshPoint]);
 
-  const { searchTasks } = useSearchTasks({ searchQuery, isInitCompleted });
+  const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
 
   const isLoading = useMemo(() => {
     if (!isInitCompleted) {
@@ -30,13 +33,18 @@ const TickTickToday: React.FC<Record<string, never>> = () => {
     }
 
     if (searchQuery) {
-      return searchTasks == null;
+      return isSearching;
     }
     return todaySections == null;
-  }, [isInitCompleted, searchQuery, searchTasks, todaySections]);
+  }, [isInitCompleted, searchQuery, isSearching, todaySections]);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchQuery} searchBarPlaceholder="Search all tasks...">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchQuery}
+      searchBarPlaceholder="Search all tasks..."
+      isShowingDetail
+    >
       {searchTasks
         ? searchTasks.map((task) => (
             <TaskItem
@@ -46,6 +54,10 @@ const TickTickToday: React.FC<Record<string, never>> = () => {
               title={task.title}
               projectId={task.projectId}
               priority={task.priority}
+              detailMarkdown={getTaskDetailMarkdownContent(task)}
+              tags={task.tags}
+              copyContent={getTaskCopyContent(task)}
+              refresh={refresh}
             />
           ))
         : todaySections?.map((section) => {
@@ -59,6 +71,10 @@ const TickTickToday: React.FC<Record<string, never>> = () => {
                     title={task.title}
                     projectId={task.projectId}
                     priority={task.priority}
+                    tags={task.tags}
+                    detailMarkdown={getTaskDetailMarkdownContent(task)}
+                    copyContent={getTaskCopyContent(task)}
+                    refresh={refresh}
                   />
                 ))}
               </List.Section>

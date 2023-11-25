@@ -1,12 +1,33 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cleanshotx",
-  "title": "Cleanshot X",
+  "title": "CleanShot X",
   "description": "Capture and record your screen!",
   "icon": "command-icon.png",
   "author": "Aayush9029",
+  "contributors": [
+    "thomaslombart",
+    "lukaszmtw",
+    "erics118"
+  ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "open-history",
+      "title": "Open History",
+      "subtitle": "CleanShot X",
+      "description": "Show Screenshots History",
+      "icon": "open-history.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "all-in-one",
+      "title": "All in One",
+      "subtitle": "CleanShot X",
+      "description": "Capture Record Crop All in One",
+      "icon": "all-in-one.png",
+      "mode": "no-view"
+    },
     {
       "name": "capture-fullscreen",
       "title": "Capture Fullscreen",
@@ -64,12 +85,15 @@
       "mode": "no-view"
     },
     {
-      "name": "text-recognition",
-      "title": "Text Recognition",
+      "name": "capture-text",
+      "title": "Capture Text (OCR)",
       "subtitle": "CleanShot X",
-      "description": "Text Recognition Using Ocr",
+      "description": "Capture text using OCR",
       "icon": "capture-text.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "text recognition"
+      ]
     },
     {
       "name": "annotate",
@@ -77,7 +101,15 @@
       "subtitle": "CleanShot X",
       "description": "Annotate Mode",
       "icon": "annotate.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filepath",
+          "placeholder": "File Path",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "open-from-clipboard",
@@ -96,6 +128,22 @@
       "mode": "no-view"
     },
     {
+      "name": "hide-desktop-icons",
+      "title": "Hide Desktop Icons",
+      "subtitle": "CleanShot X",
+      "description": "Hide Desktop Icons Visibility",
+      "icon": "hide-desktop-icons.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-desktop-icons",
+      "title": "Show Desktop Icons",
+      "subtitle": "CleanShot X",
+      "description": "Show Desktop Icons Visibility",
+      "icon": "show-desktop-icons.png",
+      "mode": "no-view"
+    },
+    {
       "name": "restore-recently-closed",
       "title": "Restore Recently Closed",
       "subtitle": "CleanShot X",
@@ -104,33 +152,58 @@
       "mode": "no-view"
     },
     {
+      "name": "add-quick-access-overlay",
+      "title": "Add Quick Access Overlay",
+      "subtitle": "CleanShot X",
+      "description": "Add Quick Access Overlay",
+      "icon": "add-quick-access-overlay.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filepath",
+          "placeholder": "File Path",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "pin",
       "title": "Pin Screenshot",
       "subtitle": "CleanShot X",
       "description": "Pin Screenshot to the Screen.",
       "icon": "pin.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filepath",
+          "placeholder": "File Path",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
+  "categories": [
+    "Applications"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "open": "^8.4.0"
+    "@raycast/api": "^1.62.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.49.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
-  },
-  "version": "1.0.0",
-  "main": "index.js"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

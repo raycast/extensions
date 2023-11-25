@@ -1,4 +1,4 @@
-import { getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import { URL } from "url";
 import { BackendNotExistError, NoBackendError } from "./error";
@@ -16,12 +16,12 @@ function prettyBytes(n: number) {
 }
 
 async function getCurrentBackend(): Promise<string | undefined> {
-  const backend: string | undefined = await getLocalStorageItem("current");
+  const backend: string | undefined = await LocalStorage.getItem("current");
   return backend;
 }
 
 async function getBackendSecret(backend: string): Promise<string | undefined> {
-  const secret: string | undefined = await getLocalStorageItem(backend);
+  const secret: string | undefined = await LocalStorage.getItem(backend);
   return secret;
 }
 
@@ -39,11 +39,23 @@ async function getCurrentBackendWithSecret() {
   }
 }
 
-async function fetchBackend(endpoint: string) {
+async function fetchBackend({
+  endpoint,
+  method = "GET",
+  body,
+}: {
+  endpoint: string;
+  method?: string;
+  body?: Record<string, string>;
+}) {
   const [backend, secret] = await getCurrentBackendWithSecret();
   const url = new URL(backend);
   const finalUrl = `${trimTrailingSlash(url.href)}${endpoint}`;
-  return fetch(finalUrl, secret ? { headers: { Authorization: `Bearer ${secret}` } } : undefined);
+  return fetch(finalUrl, {
+    method,
+    headers: secret ? { Authorization: `Bearer ${secret}` } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
 }
 
 async function buildWSURLBase(endpoint: string, params = {}) {
@@ -61,13 +73,13 @@ function trimTrailingSlash(s: string) {
 }
 
 async function setCurrentBackend(url: string) {
-  await setLocalStorageItem("current", url);
+  await LocalStorage.setItem("current", url);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function showFailureToast(title: string, error: any) {
   console.error(title, error);
-  await showToast(ToastStyle.Failure, title, error instanceof Error ? error.message : error.toString());
+  await showToast(Toast.Style.Failure, title, error instanceof Error ? error.message : error.toString());
 }
 
 function wait(duration: number): Promise<void> {
@@ -97,6 +109,10 @@ function getFormatDateString() {
   return formatDate(new Date()).toString();
 }
 
+function upperFirst(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export {
   wait,
   getCurrentBackend,
@@ -107,4 +123,5 @@ export {
   showFailureToast,
   getFormatDateString,
   getCurrentBackendWithSecret,
+  upperFirst,
 };

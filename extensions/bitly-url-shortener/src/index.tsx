@@ -1,12 +1,22 @@
-import { getPreferenceValues, showHUD, copyTextToClipboard } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch, { Headers } from "node-fetch";
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+async function reportError({ message }: { message: string }) {
+  await showToast(Toast.Style.Failure, "Error", message.toString());
+}
 
 export default async function () {
   try {
     const { accessToken } = getPreferenceValues();
-    const clipboard = await runAppleScript("the clipboard");
-    if (clipboard.length === 0) throw new Error("Clipboard is empty");
+    const clipboard = await Clipboard.readText();
+    if (!clipboard) {
+      return await reportError(new Error("Clipboard is empty"));
+    }
 
     //validate url or error out early.
     new URL(clipboard);
@@ -24,12 +34,12 @@ export default async function () {
 
     const { errors, link } = (await response.json()) as { link: string; errors?: [] };
     if (errors) {
-      throw new Error("Invalid URL String");
+      return await reportError(new Error(`Bitly API Error - ${JSON.stringify(errors)}, Clipboard Text - ${clipboard}`));
     }
 
-    await copyTextToClipboard(link);
-    await showHUD("Copied shortened URL to clipboard");
-  } catch (error: any) {
-    await showHUD(error.toString());
+    await Clipboard.copy(link);
+    await showToast(Toast.Style.Success, "Success", "Copied shortened URL to clipboard");
+  } catch (error: unknown) {
+    await reportError({ message: getErrorMessage(error) });
   }
 }

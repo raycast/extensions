@@ -1,42 +1,109 @@
-import { ActionPanel, Form, Icon, List, PushAction, SubmitFormAction, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { nanoid } from "nanoid";
+import { ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
+import { Filter, Todo } from "./types";
+import { CreateTodoAction, DeleteTodoAction, EmptyView, ToggleTodoAction } from "./components";
 
-interface Todo {
-  title: string;
-  isCompleted: boolean;
-}
+type State = {
+  filter: Filter;
+  isLoading: boolean;
+  searchText: string;
+  todos: Todo[];
+  visibleTodos: Todo[];
+};
 
 export default function Command() {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const [state, setState] = useState<State>({
+    filter: Filter.All,
+    isLoading: true,
+    searchText: "",
+    todos: [],
+    visibleTodos: [],
+  });
 
-  function handleCreate(todo: Todo) {
-    const newTodos = [...todos, todo];
-    setTodos(newTodos);
-  }
+  useEffect(() => {
+    (async () => {
+      const storedTodos = await LocalStorage.getItem<string>("todos");
 
-  function handleToggle(index: number) {
-    const newTodos = [...todos];
-    newTodos[index].isCompleted = !newTodos[index].isCompleted;
-    setTodos(newTodos);
-  }
+      if (!storedTodos) {
+        setState((previous) => ({ ...previous, isLoading: false }));
+        return;
+      }
 
-  function handleDelete(index: number) {
-    const newTodos = [...todos];
-    newTodos.splice(index, 1);
-    setTodos(newTodos);
-  }
+      try {
+        const todos: Todo[] = JSON.parse(storedTodos);
+        setState((previous) => ({ ...previous, todos, isLoading: false }));
+      } catch (e) {
+        // can't decode todos
+        setState((previous) => ({ ...previous, todos: [], isLoading: false }));
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    LocalStorage.setItem("todos", JSON.stringify(state.todos));
+  }, [state.todos]);
+
+  const handleCreate = useCallback(
+    (title: string) => {
+      const newTodos = [...state.todos, { id: nanoid(), title, isCompleted: false }];
+      setState((previous) => ({ ...previous, todos: newTodos, filter: Filter.All, searchText: "" }));
+    },
+    [state.todos, setState]
+  );
+
+  const handleToggle = useCallback(
+    (index: number) => {
+      const newTodos = [...state.todos];
+      newTodos[index].isCompleted = !newTodos[index].isCompleted;
+      setState((previous) => ({ ...previous, todos: newTodos }));
+    },
+    [state.todos, setState]
+  );
+
+  const handleDelete = useCallback(
+    (index: number) => {
+      const newTodos = [...state.todos];
+      newTodos.splice(index, 1);
+      setState((previous) => ({ ...previous, todos: newTodos }));
+    },
+    [state.todos, setState]
+  );
+
+  const filterTodos = useCallback(() => {
+    if (state.filter === Filter.Open) {
+      return state.todos.filter((todo) => !todo.isCompleted);
+    }
+    if (state.filter === Filter.Completed) {
+      return state.todos.filter((todo) => todo.isCompleted);
+    }
+    return state.todos;
+  }, [state.todos, state.filter]);
 
   return (
     <List
-      actions={
-        <ActionPanel>
-          <CreateTodoAction onCreate={handleCreate} />
-        </ActionPanel>
+      isLoading={state.isLoading}
+      searchText={state.searchText}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Todo List"
+          value={state.filter}
+          onChange={(newValue) => setState((previous) => ({ ...previous, filter: newValue as Filter }))}
+        >
+          <List.Dropdown.Item title="All" value={Filter.All} />
+          <List.Dropdown.Item title="Open" value={Filter.Open} />
+          <List.Dropdown.Item title="Completed" value={Filter.Completed} />
+        </List.Dropdown>
       }
+      enableFiltering
+      onSearchTextChange={(newValue) => {
+        setState((previous) => ({ ...previous, searchText: newValue }));
+      }}
     >
-      {todos.map((todo, index) => (
+      <EmptyView filter={state.filter} todos={filterTodos()} searchText={state.searchText} onCreate={handleCreate} />
+      {filterTodos().map((todo, index) => (
         <List.Item
-          key={index}
+          key={todo.id}
           icon={todo.isCompleted ? Icon.Checkmark : Icon.Circle}
           title={todo.title}
           actions={
@@ -53,58 +120,5 @@ export default function Command() {
         />
       ))}
     </List>
-  );
-}
-
-function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
-  return (
-    <PushAction
-      icon={Icon.Pencil}
-      title="Create Todo"
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
-      target={<CreateTodoForm onCreate={props.onCreate} />}
-    />
-  );
-}
-
-function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
-  return (
-    <ActionPanel.Item
-      icon={props.todo.isCompleted ? Icon.Circle : Icon.Checkmark}
-      title={props.todo.isCompleted ? "Uncomplete Todo" : "Complete Todo"}
-      onAction={props.onToggle}
-    />
-  );
-}
-
-function DeleteTodoAction(props: { onDelete: () => void }) {
-  return (
-    <ActionPanel.Item
-      icon={Icon.Trash}
-      title="Delete Todo"
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
-      onAction={props.onDelete}
-    />
-  );
-}
-
-function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
-  const { pop } = useNavigation();
-
-  function handleSubmit(values: { title: string }) {
-    props.onCreate({ title: values.title, isCompleted: false });
-    pop();
-  }
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <SubmitFormAction title="Create Todo" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="title" title="Title" />
-    </Form>
   );
 }

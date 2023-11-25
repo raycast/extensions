@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "whois",
+  "title": "Whois",
+  "description": "Retrieve whois data.",
+  "icon": "extension_icon.png",
+  "author": "zavbala",
+  "contributors": [
+    "snilan",
+    "solid-pixel"
+  ],
+  "categories": [
+    "Web",
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "whois",
+      "title": "Whois",
+      "description": "Retrieve whois data",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "input",
+          "title": "Input",
+          "description": "Domain or IP to lookup",
+          "placeholder": "raycast.com, 1.1.1.1",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.0",
+    "@raycast/utils": "^1.9.0",
+    "axios": "^1.3.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

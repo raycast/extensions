@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-in-json-hero",
+  "title": "Open in JSON Hero",
+  "description": "Opens JSON in your pasteboard in JSON Hero",
+  "icon": "command-icon.png",
+  "author": "maverickdotdev",
+  "contributors": [
+    "ivart"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open in JSON Hero",
+      "description": "Opens JSON in your pasteboard in JSON Hero",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ttl",
+      "description": "How long you want your file stored",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "1 minute",
+          "value": "60"
+        },
+        {
+          "title": "5 minute",
+          "value": "300"
+        },
+        {
+          "title": "15 minute",
+          "value": "900"
+        },
+        {
+          "title": "30 minutes",
+          "value": "1800"
+        },
+        {
+          "title": "1 hour",
+          "value": "3600"
+        },
+        {
+          "title": "6 hour",
+          "value": "21600"
+        },
+        {
+          "title": "12 hour",
+          "value": "43200"
+        },
+        {
+          "title": "1 day",
+          "value": "86400"
+        },
+        {
+          "title": "3 days",
+          "value": "259200"
+        },
+        {
+          "title": "1 week",
+          "value": "604800"
+        },
+        {
+          "title": "1 month",
+          "value": "2592000"
+        },
+        {
+          "title": "Eternity",
+          "value": "0"
+        }
+      ],
+      "default": "86400",
+      "title": "Keep the file for:"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.1",
+    "node-fetch": "^3.2.3",
+    "tiny-invariant": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

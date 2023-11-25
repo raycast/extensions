@@ -11,11 +11,14 @@ const useSearchTasks = (props: Props) => {
   const { searchQuery, isInitCompleted } = props;
 
   const [searchTasks, setSearchTasks] = useState<Task[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const getSearchTasks = async () => {
+      setIsSearching(true);
       const search = await getSearchByKeyword(searchQuery);
       setSearchTasks(search);
+      setIsSearching(false);
     };
 
     if (!searchQuery) {
@@ -27,7 +30,7 @@ const useSearchTasks = (props: Props) => {
     }
   }, [isInitCompleted, searchQuery]);
 
-  return { searchTasks };
+  return { searchTasks, isSearching };
 };
 
 export default useSearchTasks;

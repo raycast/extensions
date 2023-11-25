@@ -6,6 +6,10 @@
   "icon": "swift.png",
   "author": "BProg",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
   "commands": [
     {
       "name": "index",
@@ -16,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "^1.45.2",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {

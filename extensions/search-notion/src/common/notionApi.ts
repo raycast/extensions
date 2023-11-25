@@ -52,7 +52,7 @@ const parseRepositoryItem = (data: any) => {
   return r;
 };
 
-export const searchResources = async (q: string): Promise<QueryResultItem[]> => {
+export const searchResources = async (query: string): Promise<QueryResultItem[]> => {
   const preferences: Preferences = getPreferenceValues();
   const requestOptions = {
     method: "POST",
@@ -63,7 +63,7 @@ export const searchResources = async (q: string): Promise<QueryResultItem[]> => 
     },
     body: JSON.stringify({
       type: "BlocksInSpace",
-      query: `${encodeURIComponent(q)}`,
+      query,
       spaceId: `${preferences.spaceID}`,
       limit: 20,
       filters: {
@@ -77,7 +77,7 @@ export const searchResources = async (q: string): Promise<QueryResultItem[]> => 
         lastEditedTime: {},
         createdTime: {},
       },
-      sort: "Relevance",
+      sort: { field: "relevance" },
       source: "quick_find",
     }),
   };

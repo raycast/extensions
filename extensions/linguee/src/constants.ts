@@ -1,4 +1,4 @@
-export const validLanguagePairKeys = [
+export const ValidLanguagePairKeys = [
   "english-german",
   "english-chinese",
   "english-french",
@@ -6,10 +6,10 @@ export const validLanguagePairKeys = [
   "english-spanish",
 ] as const;
 
-export type ValidLanguagePairKey = typeof validLanguagePairKeys[number];
+export type ValidLanguagePairKey = (typeof ValidLanguagePairKeys)[number];
 
-export const validLanguagePairs: Record<
-  typeof validLanguagePairKeys[number],
+export const ValidLanguagePairs: Record<
+  (typeof ValidLanguagePairKeys)[number],
   {
     pair: string;
     title: string;

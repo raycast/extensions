@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export default async () => {
@@ -29,8 +29,14 @@ export default async () => {
 
   try {
     const result = await runAppleScript(script);
-    await showToast(ToastStyle.Success, "Currently Playing Track", result);
+    await showToast({
+      title: "Currently Playing Track",
+      message: result,
+    });
   } catch (err) {
-    await showToast(ToastStyle.Failure, "Failed getting playing track");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed getting playing track",
+    });
   }
 };

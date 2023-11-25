@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "airpods-noise-control",
+  "title": "AirPods Noise Control",
+  "description": "Toggle between Noise Cancellation and Transparency on your AirPods.",
+  "icon": "extension_icon.png",
+  "author": "chrahe",
+  "categories": [
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Switch Noise Control Mode",
+      "subtitle": "Transparency ↔ Noise Cancellation",
+      "description": "This command will toggle between Noise Cancellation and Transparency if AirPods are connected to your device.",
+      "mode": "no-view",
+      "keywords": [
+        "airpods",
+        "noise",
+        "cancellation",
+        "transparency",
+        "isolation",
+        "anc"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "airpodsIndex",
+      "title": "AirPods List Position",
+      "description": "When your AirPods are connected, at which position are they listed in your Sound menu? (1, 2, 3, etc.)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Position of your AirPods in the Sound menu (1, 2, 3, ...)"
+    },
+    {
+      "name": "ccLoc",
+      "title": "Control Center Localization",
+      "description": "What is the name of the Control Center in your language/region?",
+      "type": "textfield",
+      "required": false,
+      "default": "Control Center",
+      "placeholder": "Control Centre, Kontrollzentrum, ..."
+    },
+    {
+      "name": "soundLoc",
+      "title": "Sound Menu Localization",
+      "description": "What is the name of the Sound menu (in Control Center) in your language/region?",
+      "type": "textfield",
+      "required": false,
+      "default": "Sound",
+      "placeholder": "Sound, Ton, ..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.32.2",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

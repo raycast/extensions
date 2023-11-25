@@ -1,6 +1,17 @@
 import client, { Product } from "./client";
-import { GraphqlData, LoginResult, Manhour, Project, SearchResult, Space, Sprint, Task, User } from "./type";
-import { clearLocalStorage, preferences, showToast, ToastStyle } from "@raycast/api";
+import {
+  GraphqlData,
+  LoginResult,
+  Manhour,
+  Preferences,
+  Project,
+  SearchResult,
+  Space,
+  Sprint,
+  Task,
+  User,
+} from "./type";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import moment from "moment";
 import axios from "axios";
 
@@ -25,10 +36,10 @@ export enum ManhourFormat {
 export const MANHOUR_BASE = 100000;
 
 export function manhourMode(): string {
-  return (preferences.manhourMode.value ? preferences.manhourMode.value : preferences.manhourMode.default) as string;
+  return getPreferenceValues<Preferences>().manhourMode;
 }
 
-export async function mapTasks(uuids: string[]): Promise<{ [key: string]: Task }> {
+export async function mapTasks(uuids: string[], signal?: AbortSignal): Promise<{ [key: string]: Task }> {
   const query = `
   {
     tasks (
@@ -47,7 +58,7 @@ export async function mapTasks(uuids: string[]): Promise<{ [key: string]: Task }
   }`;
   const data: GraphqlData = { query };
   try {
-    const resp = await client.post(Product.PROJECT, "items/graphql", data);
+    const resp = await client.post(Product.PROJECT, "items/graphql", data, signal);
     const tasks: { [key: string]: Task } = {};
     (resp.data.tasks as Task[]).forEach((task) => {
       tasks[task.uuid] = task;
@@ -101,7 +112,7 @@ export async function searchSprints(key: string): Promise<Sprint[]> {
   }
 }
 
-export async function mapUsers(uuids: string[]): Promise<{ [key: string]: User }> {
+export async function mapUsers(uuids: string[], signal?: AbortSignal): Promise<{ [key: string]: User }> {
   const query = `
   {
     users (
@@ -116,7 +127,7 @@ export async function mapUsers(uuids: string[]): Promise<{ [key: string]: User }
   }`;
   const data: GraphqlData = { query };
   try {
-    const resp = await client.post(Product.PROJECT, "items/graphql", data);
+    const resp = await client.post(Product.PROJECT, "items/graphql", data, signal);
     const users = {} as { [key: string]: User };
     (resp.data.users as User[]).forEach((user) => {
       users[user.uuid as string] = user;
@@ -127,7 +138,7 @@ export async function mapUsers(uuids: string[]): Promise<{ [key: string]: User }
   }
 }
 
-export async function mapSpaces(uuids: string[]): Promise<{ [key: string]: Space }> {
+export async function mapSpaces(uuids: string[], signal?: AbortSignal): Promise<{ [key: string]: Space }> {
   const query = `
   {
     spaces (
@@ -141,7 +152,7 @@ export async function mapSpaces(uuids: string[]): Promise<{ [key: string]: Space
   }`;
   const data: GraphqlData = { query };
   try {
-    const resp = await client.post(Product.WIKI, "items/graphql", data);
+    const resp = await client.post(Product.WIKI, "items/graphql", data, signal);
     const spaces = {} as { [key: string]: Space };
     (resp.data.spaces as Space[]).forEach((space) => {
       spaces[space.uuid as string] = space;
@@ -152,7 +163,7 @@ export async function mapSpaces(uuids: string[]): Promise<{ [key: string]: Space
   }
 }
 
-export async function mapProjects(uuids: string[]): Promise<{ [key: string]: Project }> {
+export async function mapProjects(uuids: string[], signal?: AbortSignal): Promise<{ [key: string]: Project }> {
   const query = `
   {
     projects (
@@ -166,7 +177,7 @@ export async function mapProjects(uuids: string[]): Promise<{ [key: string]: Pro
   }`;
   const data: GraphqlData = { query };
   try {
-    const resp = await client.post(Product.PROJECT, "items/graphql", data);
+    const resp = await client.post(Product.PROJECT, "items/graphql", data, signal);
     const projects = {} as { [key: string]: Project };
     (resp.data.projects as Project[]).forEach((project) => {
       projects[project.uuid as string] = project;
@@ -177,16 +188,21 @@ export async function mapProjects(uuids: string[]): Promise<{ [key: string]: Pro
   }
 }
 
-export async function search(product: Product, q: string, types: SearchType[], start?: number): Promise<SearchResult> {
+export async function search(props: {
+  product: Product;
+  query: string;
+  types: SearchType[];
+  start?: number;
+  signal?: AbortSignal;
+}): Promise<SearchResult> {
   const params = {
-    q,
+    q: props.query,
     limit: 200,
-    start: start ? start : 0,
-    types: types.join(","),
+    start: props.start ?? 0,
+    types: props.types.join(","),
   };
   try {
-    const resp = await client.get(product, "search", params);
-    showToast(ToastStyle.Success, `Took ${resp.took_time}ms`);
+    const resp = await client.get(props.product, "search", params, props.signal);
     return Promise.resolve(resp as SearchResult);
   } catch (err) {
     return Promise.reject(new Error(`search failed: ${(err as Error).message}`));
@@ -194,20 +210,21 @@ export async function search(product: Product, q: string, types: SearchType[], s
 }
 
 interface ListManhoursParams {
-  userUUID: string;
+  userUUID?: string;
   startDate: string;
   endDate?: string;
   taskUUID?: string;
 }
 
-export async function listManhours(params: ListManhoursParams): Promise<Manhour[]> {
+export async function listManhours(params: ListManhoursParams, signal?: AbortSignal): Promise<Manhour[]> {
   params.endDate = params.endDate ? params.endDate : moment().format("YYYY-MM-DD");
   const queryTask = params.taskUUID ? `uuid_equal: "${params.taskUUID}"` : "";
+  const queryUser = params.userUUID ? `owner_equal: "${params.userUUID}"` : "";
   const query = `
   {
     manhours (
       filter: {
-        owner_equal: "${params.userUUID}"
+        ${queryUser}
         startTime_range: {
             gte: "${params.startDate}"
             lte: "${params.endDate}"
@@ -238,14 +255,14 @@ export async function listManhours(params: ListManhoursParams): Promise<Manhour[
   }`;
   const data: GraphqlData = { query };
   try {
-    const resp = await client.post(Product.PROJECT, "items/graphql", data);
+    const resp = await client.post(Product.PROJECT, "items/graphql", data, signal);
     return Promise.resolve(resp.data.manhours);
   } catch (err) {
     return Promise.reject(new Error(`list manhours failed: ${(err as Error).message}`));
   }
 }
 
-export async function listUsersByName(name: string): Promise<User[]> {
+export async function listUsersByName(name: string, signal?: AbortSignal): Promise<User[]> {
   const query = `
   {
     users (
@@ -260,14 +277,14 @@ export async function listUsersByName(name: string): Promise<User[]> {
   }`;
   const data: GraphqlData = { query };
   try {
-    const resp = await client.post(Product.PROJECT, "items/graphql", data);
+    const resp = await client.post(Product.PROJECT, "items/graphql", data, signal);
     return Promise.resolve(resp.data.users);
   } catch (err) {
     return Promise.reject(new Error(`list users by name failed: ${(err as Error).message}`));
   }
 }
 
-export async function addManhour(manhour: Manhour): Promise<void> {
+export async function addManhour(manhour: Manhour, signal?: AbortSignal): Promise<void> {
   const query = `
   mutation AddManhour {
     addManhour (
@@ -295,13 +312,13 @@ export async function addManhour(manhour: Manhour): Promise<void> {
   };
   const data: GraphqlData = { query, variables };
   try {
-    await client.post(Product.PROJECT, "items/graphql", data);
+    await client.post(Product.PROJECT, "items/graphql", data, signal);
   } catch (err) {
     return Promise.reject(new Error(`add manhour failed: ${(err as Error).message}`));
   }
 }
 
-export async function updateManhour(manhour: Manhour): Promise<void> {
+export async function updateManhour(manhour: Manhour, signal?: AbortSignal): Promise<void> {
   const query = `
   mutation UpdateManhour {
     updateManhour (
@@ -329,7 +346,7 @@ export async function updateManhour(manhour: Manhour): Promise<void> {
   };
   const data: GraphqlData = { query, variables };
   try {
-    await client.post(Product.PROJECT, "items/graphql", data);
+    await client.post(Product.PROJECT, "items/graphql", data, signal);
   } catch (err) {
     return Promise.reject(new Error(`update manhour failed: ${(err as Error).message}`));
   }
@@ -358,16 +375,18 @@ export async function deleteManhour(uuid: string): Promise<void> {
   }
 }
 
-export async function login(data: { email: string; password: string }): Promise<LoginResult> {
+export async function login(data: { email: string; password: string }, signal?: AbortSignal): Promise<LoginResult> {
   try {
-    const resp = await axios.post(`${preferences.url.value}/project/api/project/auth/login`, data, {
+    const api = `${getPreferenceValues<Preferences>().url}/project/api/project/auth/login`;
+    const resp = await axios.post(api, data, {
       headers: {
         "Content-Type": "application/json",
       },
+      signal,
     });
     return Promise.resolve(resp.data as LoginResult);
   } catch (err) {
-    await clearLocalStorage();
+    await LocalStorage.clear();
     return Promise.reject(new Error(`login failed: ${(err as Error).message}`));
   }
 }

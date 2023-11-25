@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "infakt",
+  "title": "InFakt",
+  "description": "Search, create and manage invoices, clients and products in inFakt directly from Raycast.",
+  "icon": "infakt-icon.png",
+  "author": "teziovsky",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search_invoices",
+      "title": "Search Invoices",
+      "subtitle": "inFakt",
+      "description": "Search invoices by number or client.",
+      "mode": "view"
+    },
+    {
+      "name": "create_invoice",
+      "title": "Create Invoice",
+      "subtitle": "inFakt",
+      "description": "Create a new invoice for specific client.",
+      "mode": "view"
+    },
+    {
+      "name": "search_clients",
+      "title": "Search Clients",
+      "subtitle": "inFakt",
+      "description": "Search clients by company name.",
+      "mode": "view"
+    },
+    {
+      "name": "search_products",
+      "title": "Search Products",
+      "subtitle": "inFakt",
+      "description": "Search products by name.",
+      "mode": "view"
+    },
+    {
+      "name": "create_product",
+      "title": "Create Product",
+      "subtitle": "inFakt",
+      "description": "Create a new product with automatically calculated prices.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "xApiKey",
+      "type": "password",
+      "required": true,
+      "title": "X-inFakt-ApiKey",
+      "description": "X-inFakt-ApiKey",
+      "placeholder": "Your X-inFakt-ApiKey"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.5",
+    "@raycast/utils": "^1.4.8",
+    "date-fns": "^2.29.3",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

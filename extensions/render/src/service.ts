@@ -165,7 +165,7 @@ export default class Service {
           params: {
             limit: 100,
           },
-        }
+        },
       );
       return data.map((item) => {
         return item.service;
@@ -186,7 +186,7 @@ export default class Service {
   async getService(id: string): Promise<ServiceResponse> {
     try {
       const { data } = await this.client.get<ServiceResponse>(
-        `/services/${id}`
+        `/services/${id}`,
       );
       return data;
     } catch (e) {
@@ -210,7 +210,7 @@ export default class Service {
           params: {
             limit: 100,
           },
-        }
+        },
       );
       return data.map((item) => item.deploy);
     } catch (e) {
@@ -229,7 +229,7 @@ export default class Service {
   async getDeploy(serviceId: string, id: string): Promise<DeployResponse> {
     try {
       const { data } = await this.client.get<DeployResponse>(
-        `/services/${serviceId}/deploys/${id}`
+        `/services/${serviceId}/deploys/${id}`,
       );
       return data;
     } catch (e) {
@@ -253,10 +253,10 @@ export default class Service {
           params: {
             limit: 100,
           },
-        }
+        },
       );
       return Object.fromEntries(
-        data.map((item) => [item.envVar.key, item.envVar.value])
+        data.map((item) => [item.envVar.key, item.envVar.value]),
       );
     } catch (e) {
       const error = e as AxiosError;
@@ -279,7 +279,7 @@ export default class Service {
           params: {
             limit: 100,
           },
-        }
+        },
       );
       return data.map((item) => item.customDomain);
     } catch (e) {

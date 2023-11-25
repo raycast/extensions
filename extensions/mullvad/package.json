@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mullvad",
+  "title": "Mullvad VPN Checker",
+  "description": "Fastest way to check if you are connected to Mullvad VPN",
+  "icon": "mullvad-icon.png",
+  "author": "0x46616c6b",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mullvad",
+      "title": "Check Mullvad Connection",
+      "description": "Check whether you are connected to Mullvad VPN",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.51.3",
+    "@raycast/utils": "1.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "20.2.1",
+    "@types/react": "18.2.6",
+    "eslint": "8.40.0",
+    "prettier": "2.5.1",
+    "typescript": "5.0.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,6 +1,6 @@
 # Bitly URL Shortener
 
-Extension to shorten your url’s with Bitly.
+Extension to shorten your url’s with Bitly. Copy the url to shorten and then run the command which will put the shortened url in the clipboard.
 
 ## How to Get Access Token
 

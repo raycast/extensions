@@ -1,4 +1,4 @@
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 export const SERVICES_KEY = "services";
 export const APPS_KEY = "apps";
@@ -6,13 +6,14 @@ export const REQUEST_ID = "requestId";
 export const DEVICE_ID = "deviceId";
 export const SECRET_SEED = "secretSeed";
 export const AUTHY_ID = "authyId";
+export const RECENTLY_USED = "recentlyUsed";
 
 export async function checkIfCached(key: string): Promise<boolean> {
-  return (await getLocalStorageItem(key)) != undefined;
+  return (await LocalStorage.getItem(key)) != undefined;
 }
 
 export async function getFromCache<T>(key: string): Promise<T> {
-  const fromCache = await getLocalStorageItem<string>(key);
+  const fromCache = await LocalStorage.getItem<string>(key);
   if (fromCache != undefined) {
     return JSON.parse(fromCache);
   } else {
@@ -21,9 +22,9 @@ export async function getFromCache<T>(key: string): Promise<T> {
 }
 
 export async function addToCache(key: string, value: object | string | number | boolean): Promise<void> {
-  return await setLocalStorageItem(key, JSON.stringify(value));
+  return await LocalStorage.setItem(key, JSON.stringify(value));
 }
 
 export async function removeFromCache(key: string): Promise<void> {
-  return await removeLocalStorageItem(key);
+  return await LocalStorage.removeItem(key);
 }

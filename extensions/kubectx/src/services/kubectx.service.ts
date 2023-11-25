@@ -2,11 +2,17 @@ import { execFile } from "child_process";
 import util from "util";
 
 import { commandOutputToArray } from "../lib/cli.parser";
-import { getBrewExecutablePath } from "../lib/cli";
+import { getBrewExecutablePath, getKubeConfig } from "../lib/cli";
 
 const execFilePromise = util.promisify(execFile);
 
 const path = getBrewExecutablePath("kubectx");
+
+const kubeConfig = getKubeConfig();
+
+if (kubeConfig) {
+  process.env.KUBECONFIG = kubeConfig;
+}
 
 export const getCurrentContext = async () => {
   const { stdout } = await execFilePromise(`${path}`, ["-c"]);

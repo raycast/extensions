@@ -1,45 +1,80 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitrise",
-  "title": "Bitrise Builds",
-  "description": "This extension shows a list of your latest Bitrise builds.\n\nIt requires a Bitrise API key which you can get on https://app.bitrise.io/me/profile#/security.\n\nIcons courtesy of the Bitrise team.",
-  "icon": "bitrise-logo.png",
-  "author": "ubuntudroid",
+  "title": "Bitrise",
+  "description": "Check your Bitrise CI builds and start new ones.",
+  "icon": "extension-icon.png",
+  "author": "ofalvai",
+  "contributors": [
+    "ubuntudroid"
+  ],
   "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "mobile",
+    "ci",
+    "build",
+    "workflow"
+  ],
   "commands": [
     {
-      "name": "index",
-      "title": "List Builds",
-      "subtitle": "Bitrise",
-      "description": "Shows a list of the latest Bitrise builds, including meta data. Allows to quickly open each build and - if applicable - PR.",
+      "name": "builds",
+      "title": "Builds",
+      "description": "List running and completed builds across all your apps or one specific app.",
+      "mode": "view"
+    },
+    {
+      "name": "apps",
+      "title": "Apps",
+      "description": "List all your apps and organizations.",
+      "mode": "view"
+    },
+    {
+      "name": "start-build",
+      "title": "Start Build",
+      "description": "Start a new Bitrise build",
+      "mode": "view"
+    },
+    {
+      "name": "steps",
+      "title": "Search Step Library",
+      "description": "Search Bitrise steps available in the Step Library",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "apiKey",
+      "description": "Bitrise API Personal Access Token",
+      "placeholder": "Enter the token you created in your Profile Settings",
       "type": "password",
       "required": true,
-      "title": "Bitrise API key",
-      "description": "Get it on https://app.bitrise.io/me/profile#/security"
+      "title": "Bitrise Token",
+      "link": "https://app.bitrise.io/me/profile#/security"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.53.2",
+    "@raycast/utils": "^1.7.1",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

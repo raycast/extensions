@@ -6,26 +6,47 @@
   "icon": "jisho-icon.png",
   "author": "dmacdermott",
   "license": "MIT",
+  "contributors": [
+    "mmtf"
+  ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "save-to-history-on-clear",
+      "label": "Save to history on clear",
+      "description": "Jisho saves the last search query to the history once the search query is cleared.",
+      "type": "checkbox",
+      "default": true
+    }
+  ],
   "commands": [
     {
-      "name": "index",
+      "name": "search",
       "title": "Translate Japanese",
       "subtitle": "Jisho",
       "description": "Search Jisho.org for Japanese translations",
       "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Search History",
+      "subtitle": "Jisho",
+      "description": "View previous search queries and results",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.46.0",
+    "@raycast/utils": "^1.4.16",
+    "nanoid": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },

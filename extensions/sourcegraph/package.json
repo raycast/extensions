@@ -6,39 +6,71 @@
   "icon": "command-icon.png",
   "author": "bobheadxi",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Documentation",
+    "Web"
+  ],
   "keywords": [
+    "sourcegraph",
     "search",
     "code",
-    "sourcegraph",
-    "codesearch"
+    "codesearch",
+    "code search"
   ],
-  "preferences": [],
+  "preferences": [
+    {
+      "name": "cloudToken",
+      "title": "Sourcegraph.com: Access token",
+      "description": "Available under 'Profile' -> 'Access token' on Sourcegraph.com",
+      "required": false,
+      "type": "password"
+    },
+    {
+      "name": "customInstance",
+      "title": "Sourcegraph Instance: Instance URL",
+      "description": "Required to use use 'Sourcegraph Instance' commands - URL of the Sourcegraph instance you want to connect to",
+      "placeholder": "https://sourcegraph.my-company.com",
+      "required": false,
+      "type": "textfield"
+    },
+    {
+      "name": "customInstanceToken",
+      "title": "Sourcegraph Instance: Access token",
+      "description": "Required to use 'Sourcegraph Instance' commands - available under 'Profile' -> 'Access token' on the Sourcegraph instance",
+      "required": false,
+      "type": "password"
+    },
+    {
+      "name": "featureSearchPatternDropdown",
+      "title": "Experimental features",
+      "label": "Search pattern dropdown",
+      "description": "Enable the search pattern dropdown in the search command.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    }
+  ],
   "commands": [
     {
-      "name": "searchCloud",
+      "name": "searchDotCom",
       "title": "Search Code",
-      "subtitle": "Sourcegraph Cloud",
-      "description": "Search your code and 2M+ public repositories.",
+      "subtitle": "Sourcegraph.com",
+      "description": "Search 2M+ public repositories on Sourcegraph.com",
       "mode": "view",
       "keywords": [
+        "sourcegraph",
         "search",
         "code",
-        "sourcegraph",
-        "src",
-        "cloud"
+        "code search",
+        "src"
       ],
       "preferences": [
         {
-          "name": "cloudToken",
-          "title": "Sourcegraph Cloud access token",
-          "description": "Available under 'Profile' -> 'Access token' on Sourcegraph Cloud",
-          "required": false,
-          "type": "password"
-        },
-        {
           "name": "cloudDefaultContext",
-          "title": "Sourcegraph Cloud default context",
-          "description": "Default context to set on all queries",
+          "title": "Default search context",
+          "description": "Default search context to set on all queries",
           "placeholder": "global",
           "required": false,
           "type": "textfield"
@@ -47,67 +79,139 @@
     },
     {
       "name": "searchInstance",
+      "icon": "logo-bw.png",
       "title": "Search Code",
       "subtitle": "Sourcegraph Instance",
-      "description": "Search code on a specific Sourcegraph instance.",
+      "description": "Search code on a Sourcegraph instance.",
       "mode": "view",
       "keywords": [
+        "sourcegraph",
         "search",
         "code",
-        "sourcegraph",
+        "code search",
         "src"
       ],
       "preferences": [
         {
-          "name": "customInstance",
-          "title": "URL",
-          "description": "Sourcegraph instance URL",
-          "placeholder": "https://sourcegraph.my-company.com",
-          "required": true,
-          "type": "textfield"
-        },
-        {
-          "name": "customInstanceToken",
-          "title": "Access token",
-          "description": "Available under 'Profile' -> 'Access token' on the Sourcegraph instance",
-          "required": true,
-          "type": "password"
-        },
-        {
           "name": "customInstanceDefaultContext",
           "title": "Default context",
-          "description": "Default context to set on all queries",
+          "description": "Default search context to set on all queries",
           "placeholder": "global",
           "required": false,
           "type": "textfield"
         }
       ]
+    },
+    {
+      "name": "searchHistoryDotCom",
+      "title": "Code Search History",
+      "subtitle": "Sourcegraph.com",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
+      ]
+    },
+    {
+      "name": "searchHistoryInstance",
+      "icon": "logo-bw.png",
+      "title": "Code Search History",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Browse and launch recent code searches.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "search code",
+        "history",
+        "recent"
+      ]
+    },
+    {
+      "name": "findNotebooksDotCom",
+      "title": "Find Search Notebooks",
+      "subtitle": "Sourcegraph.com",
+      "description": "Browse search notebooks on Sourcegraph.com.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "notebook",
+        "snb"
+      ],
+      "preferences": []
+    },
+    {
+      "name": "findNotebooksInstance",
+      "icon": "logo-bw.png",
+      "title": "Find Search Notebooks",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Browse search notebooks on a Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "notebook",
+        "snb"
+      ],
+      "preferences": []
+    },
+    {
+      "name": "manageBatchChangesInstance",
+      "icon": "logo-bw.png",
+      "title": "Manage Batch Changes",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Manage batch changes on a Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "batch",
+        "changes",
+        "bc"
+      ],
+      "preferences": []
     }
   ],
   "dependencies": {
-    "@bobheadxi/node-eventsource-http2": "^1.1.1",
-    "@raycast/api": "^1.27.0",
-    "node-fetch": "^3.0.0",
-    "remark": "^14.0.2",
-    "sourcegraph": "^25.4.0",
-    "strip-markdown": "^5.0.0"
+    "@apollo/client": "^3.7.3",
+    "@raycast/api": "^1.45.1",
+    "@raycast/utils": "^1.4.14",
+    "cross-fetch": "^3.1.5",
+    "eventsource": "^2.0.2",
+    "graphql": "^16.6.0",
+    "luxon": "^3.1.1",
+    "nanoid": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "~4.13.0",
-    "typescript": "^4.4.3"
+    "@graphql-codegen/cli": "^2.16.1",
+    "@graphql-codegen/fragment-matcher": "^3.3.3",
+    "@graphql-codegen/introspection": "^2.2.3",
+    "@graphql-codegen/typescript": "^2.8.5",
+    "@graphql-codegen/typescript-operations": "^2.5.10",
+    "@graphql-codegen/typescript-react-apollo": "^3.3.7",
+    "@types/eventsource": "^1.1.10",
+    "@types/luxon": "^3.1.0",
+    "@types/node": "~18.11.10",
+    "@types/react": "^18.0.26",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "fmt": "prettier --config .prettierrc -w ./",
-    "raycast-publish": ".scripts/raycast-publish.sh"
+    "fmt": "ray lint --fix",
+    "raycast-publish": ".scripts/raycast-publish.sh",
+    "gql": "graphql-codegen --config graphql-codegen.yml && npm run fmt"
   }
 }

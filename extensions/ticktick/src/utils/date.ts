@@ -27,3 +27,8 @@ export const getSectionNameByDate = (date: Date) => {
 
   return "";
 };
+
+export const formatToServerDate = (date: Date | moment.Moment | null | undefined) => {
+  if (date) return moment(date).utc().millisecond(0).format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
+  return undefined;
+};

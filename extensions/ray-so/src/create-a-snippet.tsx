@@ -2,6 +2,7 @@ import { Form, ActionPanel, SubmitFormAction, closeMainWindow, showToast, ToastS
 import { colors, languages } from "./constants";
 import { useState } from "react";
 import open from "open";
+import { encodeURI } from "js-base64";
 
 interface Values {
   title: string;
@@ -24,11 +25,9 @@ const defaultSnippet: Values = {
 
 export default function CreateSnippet() {
   const [code, setCode] = useState<Values>(defaultSnippet);
-  const url = `https://ray.so/?colors=${code.color}&background=${code.background}&darkMode=${code.darkMode}&padding=${
+  const url = `https://ray.so/#theme=${code.color}&background=${code.background}&darkMode=${code.darkMode}&padding=${
     code.padding
-  }&title=${code.title || "Untitled%201"}&code=${Buffer.from(code.snippet).toString("base64")}&language=${
-    code.language
-  }`;
+  }&title=${code.title || "Untitled%201"}&code=${encodeURI(code.snippet)}&language=${code.language}`;
 
   const handleSubmit = async () => {
     if (!code.snippet) {

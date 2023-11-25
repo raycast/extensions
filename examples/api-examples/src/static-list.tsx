@@ -17,7 +17,7 @@ export default function Command() {
         key={downloadsDir + info.title}
         title={info.title}
         icon={info.icon}
-        accessoryTitle={info.lastModifiedAt.toLocaleDateString()}
+        accessories={[{ text: info.lastModifiedAt.toLocaleDateString() }]}
       />
     ));
 

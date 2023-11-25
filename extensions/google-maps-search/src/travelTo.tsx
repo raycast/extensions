@@ -1,54 +1,64 @@
-import {
-  Form,
-  ActionPanel,
-  Icon,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  getPreferenceValues,
-  popToRoot,
-} from "@raycast/api";
-import { useState } from "react";
-import { TravelMode, makeDirectionsURL, Preferences } from "./utils";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, popToRoot } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { fetchItemInput } from "./utils/input";
+import { Preferences, TravelMode } from "./utils/types";
+import { makeDirectionsURL } from "./utils/url";
 
-enum orginOption {
-  CurLoc = "",
+/* The form's origin options. */
+enum OrginOption {
+  CurLoc = "curloc",
   Home = "home",
   Custom = "custom",
 }
 
 export default function Command() {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
 
   // Used to handle what the Form displays.
-  const [origin, setOrigin] = useState<string>("");
+  const [origin, setOrigin] = useState<OrginOption>(OrginOption.CurLoc);
   // Used to handle what is submitted to the Google Maps API.
   const [originAddress, setOriginAddress] = useState<string>("");
   const [destination, setDestination] = useState<string>("");
   const [mode, setMode] = useState<string>(preferences.preferredMode);
+  const [isLoading, setIsLoading] = useState<boolean>(preferences.useSelected);
+
+  // Get highlighted or copied text if preferred.
+  useEffect(() => {
+    async function _fetchItemInput() {
+      const inputItem = await fetchItemInput();
+      setDestination(inputItem);
+      setIsLoading(false);
+    }
+
+    if (preferences.useSelected) {
+      _fetchItemInput().then();
+    }
+  }, []);
 
   const handleOriginChange = (value: string) => {
-    if (value === orginOption.CurLoc) {
+    if (value === OrginOption.CurLoc) {
       setOriginAddress("");
-      setOrigin(orginOption.CurLoc);
-    } else if (value === orginOption.Home) {
+      setOrigin(OrginOption.CurLoc);
+    } else if (value === OrginOption.Home) {
       setOriginAddress(preferences.homeAddress);
-      setOrigin(orginOption.Home);
+      setOrigin(OrginOption.Home);
     } else {
       setOriginAddress("");
-      setOrigin(orginOption.Custom);
+      setOrigin(OrginOption.Custom);
     }
   };
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             url={makeDirectionsURL(originAddress, destination, mode)}
             icon={Icon.Globe}
             onOpen={() => popToRoot()}
           />
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             content={makeDirectionsURL(originAddress, destination, mode)}
             icon={Icon.Clipboard}
             onCopy={() => popToRoot()}
@@ -65,11 +75,11 @@ export default function Command() {
       />
       <Form.Separator />
       <Form.Dropdown id="origin" title="Origin" value={origin} onChange={handleOriginChange}>
-        <Form.DropdownItem value={orginOption.CurLoc} title="Current Location" icon="📍" />
-        <Form.DropdownItem value={orginOption.Home} title="Home" icon="🏠" />
-        <Form.DropdownItem value={orginOption.Custom} title="Custom Address" icon="✏️" />
+        <Form.Dropdown.Item value={OrginOption.CurLoc} title="Current Location" icon="📍" />
+        <Form.Dropdown.Item value={OrginOption.Home} title="Home" icon="🏠" />
+        <Form.Dropdown.Item value={OrginOption.Custom} title="Custom Address" icon="✏️" />
       </Form.Dropdown>
-      {origin === orginOption.Custom && (
+      {origin === OrginOption.Custom && (
         <Form.TextField
           id="originAddress"
           title="Origin Address"
@@ -79,10 +89,10 @@ export default function Command() {
         />
       )}
       <Form.Dropdown id="travelmode" title="Travel Mode" value={mode} onChange={setMode}>
-        <Form.DropdownItem value={TravelMode.Driving} title="Car" icon="🚗" />
-        <Form.DropdownItem value={TravelMode.Transit} title="Public Transport" icon="🚆" />
-        <Form.DropdownItem value={TravelMode.Walking} title="Walk" icon="🚶‍♀️" />
-        <Form.DropdownItem value={TravelMode.Bicycling} title="Bike" icon="🚲" />
+        <Form.Dropdown.Item value={TravelMode.Driving} title="Car" icon="🚗" />
+        <Form.Dropdown.Item value={TravelMode.Transit} title="Public Transport" icon="🚆" />
+        <Form.Dropdown.Item value={TravelMode.Walking} title="Walk" icon="🚶‍♀️" />
+        <Form.Dropdown.Item value={TravelMode.Bicycling} title="Bike" icon="🚲" />
       </Form.Dropdown>
     </Form>
   );

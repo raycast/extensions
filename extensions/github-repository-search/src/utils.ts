@@ -1,4 +1,4 @@
-import { ImageMask } from "@raycast/api";
+import { Image } from "@raycast/api";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import { Repository } from "./types";
@@ -20,7 +20,7 @@ export function getSubtitle(repository: Repository) {
 }
 
 export function getIcon(repository: Repository) {
-  return repository.owner?.avatarUrl ? { source: repository.owner.avatarUrl, mask: ImageMask.Circle } : undefined;
+  return repository.owner?.avatarUrl ? { source: repository.owner.avatarUrl, mask: Image.Mask.Circle } : undefined;
 }
 
 export function getAccessoryTitle(repository: Repository) {

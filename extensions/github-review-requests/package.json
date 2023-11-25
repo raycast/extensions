@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-review-requests",
+  "title": "GitHub Review Requests",
+  "description": "Search review requests on GitHub and listing them.",
+  "icon": "icon.png",
+  "author": "resessh",
+  "contributors": [
+    "bgnfu7re"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Review Requests",
+      "subtitle": "GitHub",
+      "description": "Search review requests on GitHub and listing them.",
+      "mode": "view"
+    },
+    {
+      "name": "actionablePullRequests",
+      "title": "Pending Pull Requests",
+      "description": "List actionable pending pull requests",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Create a token with repository access"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.1",
+    "graphql-request": "^4.0.0",
+    "graphql-tag": "^2.12.6",
+    "javascript-time-ago": "^2.3.9",
+    "octokit": "^2.0.4"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "2.5.0",
+    "@graphql-codegen/near-operation-file-preset": "^2.2.4",
+    "@graphql-codegen/typescript": "2.4.3",
+    "@graphql-codegen/typescript-graphql-request": "^4.5.8",
+    "@graphql-codegen/typescript-operations": "2.2.4",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "gen": "graphql-codegen --config codegen.yml",
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

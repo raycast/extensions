@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ethereum-gas-tracker",
+  "title": "Ethereum Gas Tracker",
+  "description": "See the current gas price of Ethereum.",
+  "icon": "command-icon.png",
+  "author": "vinch",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "hideIcon",
+      "description": "Hide icon from the menu bar",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Hide icon"
+    },
+    {
+      "name": "hideUnit",
+      "description": "Hide unit (Gwei) from the menu bar",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Hide unit"
+    }
+  ],
+  "commands": [
+    {
+      "name": "ethereum-gas-tracker",
+      "title": "Ethereum Gas Tracker",
+      "subtitle": "Crypto",
+      "description": "See the current gas price of Ethereum.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

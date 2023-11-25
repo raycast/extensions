@@ -1,112 +1,165 @@
-import { ActionPanel, Icon, List, ListItemProps, OpenInBrowserAction } from "@raycast/api";
-import { addDays } from "date-fns";
+import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
+import { format } from "date-fns";
+import removeMarkdown from "remove-markdown";
 
-import { Project, Task, ViewMode } from "../types";
-import { useFetch } from "../api";
-import { isRecurring, displayDueDate, getAPIDate } from "../utils";
-import { priorities } from "../constants";
+import { SyncData, Task } from "../api";
+import { getCollaboratorIcon } from "../helpers/collaborators";
+import { getColorByKey } from "../helpers/colors";
+import { isRecurring, displayDueDate, isExactTimeTask, displayDueDateTime, isOverdue } from "../helpers/dates";
+import { getPriorityIcon, priorities } from "../helpers/priorities";
+import { displayReminderName } from "../helpers/reminders";
+import { ViewMode } from "../helpers/tasks";
+import { QuickLinkView } from "../home";
+import { ViewProps } from "../hooks/useViewTasks";
 
-import { useTodoist } from "../TodoistProvider";
+import TaskActions from "./TaskActions";
+import TaskDetail from "./TaskDetail";
 
-const schedules = [
-  { name: "Today", amount: 0 },
-  { name: "Tomorrow", amount: 1 },
-  { name: "Next Week", amount: 7 },
-];
-interface TaskListItemProps {
+type TaskListItemProps = {
   task: Task;
-  mode: ViewMode;
-}
+  mode?: ViewMode;
+  viewProps?: ViewProps;
+  data?: SyncData;
+  setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
+  quickLinkView?: QuickLinkView;
+};
 
-export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Element {
-  const { completeTask, deleteTask, updateTask } = useTodoist();
-  const { data: projects } = useFetch<Project[]>("/projects");
-  const additionalListItemProps: Partial<ListItemProps> & { keywords: string[] } = { keywords: [] };
+export default function TaskListItem({
+  task,
+  mode,
+  viewProps,
+  data,
+  setData,
+  quickLinkView,
+}: TaskListItemProps): JSX.Element {
+  const taskComments = data?.notes.filter((note) => note.item_id === task.id);
+  const accessories: List.Item.Accessory[] = [];
+  const keywords: string[] = [];
 
-  switch (mode) {
-    case ViewMode.project:
-      if (task.due?.date) {
-        additionalListItemProps.accessoryTitle = displayDueDate(task.due.date);
-      }
-      break;
-    case ViewMode.date:
-      if (projects && projects.length > 0) {
-        const project = projects.find((project) => project.id === task.project_id);
+  if (mode !== ViewMode.project) {
+    const project = data?.projects.find((project) => project.id === task.project_id);
+    const section = data?.sections.find((section) => section.id === task.section_id);
 
-        if (project) {
-          additionalListItemProps.accessoryTitle = project.name;
-          additionalListItemProps.keywords.push(project.name);
-        }
-      }
+    if (project) {
+      const name = `${project.name}${section ? ` / ${section.name}` : ""}`;
+      accessories.unshift({
+        tag: {
+          value: name,
+          color: getColorByKey(project.color).value,
+        },
+        tooltip: `Project: ${name}`,
+      });
+      keywords.push(project.name);
+    }
   }
 
-  if (isRecurring(task)) {
-    additionalListItemProps.accessoryIcon = Icon.ArrowClockwise;
+  const collaborator = data?.collaborators.find((collaborator) => task.responsible_uid === collaborator.id);
+
+  if (collaborator) {
+    accessories.unshift({
+      icon: getCollaboratorIcon(collaborator),
+      tooltip: `Assigned to: ${collaborator.full_name}`,
+    });
+  }
+
+  if (task.labels && task.labels.length > 0) {
+    accessories.unshift({
+      icon: { source: Icon.Tag, tintColor: Color.SecondaryText },
+      text: `${task.labels.length}`,
+      tooltip: `${task.labels.join(", ")}`,
+    });
+
+    keywords.push(...task.labels);
+  }
+
+  if (taskComments && taskComments.length > 0) {
+    accessories.unshift({
+      icon: Icon.Bubble,
+      text: taskComments.length.toString(),
+      tooltip: `${taskComments.length} comment${taskComments.length === 1 ? "" : "s"}`,
+    });
+  }
+
+  if (task.due?.date) {
+    const exactTime = isExactTimeTask(task);
+    const recurring = isRecurring(task);
+    const overdue = isOverdue(task.due.date);
+
+    const text = exactTime ? displayDueDateTime(task.due.date) : displayDueDate(task.due.date);
+
+    if (mode === ViewMode.date && recurring) {
+      accessories.unshift({ icon: Icon.ArrowClockwise, tooltip: `Recurring task` });
+    }
+
+    if (mode === ViewMode.date && exactTime) {
+      const time = task.due?.date as string;
+      const text = format(new Date(time), "HH:mm");
+
+      accessories.unshift({ icon: Icon.Clock, text, tooltip: `Due time: ${text}` });
+    }
+
+    if (isOverdue(task.due.date) || mode !== ViewMode.date) {
+      accessories.unshift({
+        icon: {
+          source: recurring ? Icon.ArrowClockwise : Icon.Calendar,
+          tintColor: overdue ? Color.Red : Color.PrimaryText,
+        },
+        tooltip: `${recurring ? "Next due" : "Due"} date: ${text}`,
+        text,
+      });
+    }
+  }
+
+  const subTasks = data?.items.filter((item) => item.parent_id === task.id);
+
+  if (subTasks && subTasks?.length > 0) {
+    accessories.unshift({
+      icon: { source: "sub-task.svg", tintColor: Color.SecondaryText },
+      text: `${subTasks.length}`,
+      tooltip: `${subTasks.length} sub-tasks`,
+    });
   }
 
   const priority = priorities.find((p) => p.value === task.priority);
-
   if (priority) {
-    const icon = priority.value === 1 ? Icon.Circle : { source: Icon.Circle, tintColor: priority.color };
-    additionalListItemProps.keywords.push(priority.searchKeyword);
-    additionalListItemProps.icon = icon;
+    keywords.push(...priority.keywords);
+  }
+
+  const reminders =
+    data?.reminders.filter((r) => {
+      if (r.is_deleted === 1) return false;
+
+      return r.item_id === task.id;
+    }) ?? [];
+
+  if (reminders.length > 0) {
+    accessories.unshift({
+      icon: Icon.Alarm,
+      tooltip: `${reminders.length} reminder${reminders.length === 1 ? "" : "s"}: ${reminders
+        .map(displayReminderName)
+        .join(", ")}`,
+      ...(reminders.length > 1 ? { text: `${reminders.length}` } : {}),
+    });
   }
 
   return (
     <List.Item
-      id={String(task.id)}
-      title={task.content}
+      title={removeMarkdown(task.content)}
       subtitle={task.description}
-      {...additionalListItemProps}
+      icon={getPriorityIcon(task)}
+      keywords={keywords}
+      accessories={accessories}
       actions={
-        <ActionPanel>
-          <OpenInBrowserAction url={task.url} />
+        <ActionPanel title={task.content}>
+          <Action.Push title="Show Details" target={<TaskDetail taskId={task.id} />} icon={Icon.Sidebar} />
 
-          <ActionPanel.Item
-            id="completeTask"
-            title="Complete Task"
-            icon={Icon.Checkmark}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            onAction={() => completeTask(task)}
-          />
-
-          <ActionPanel.Submenu
-            icon={Icon.Calendar}
-            title="Schedule..."
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          >
-            {schedules.map(({ name, amount }) => (
-              <ActionPanel.Item
-                key={name}
-                id={name}
-                title={name}
-                onAction={() => updateTask(task, { due_date: getAPIDate(addDays(new Date(), amount)) })}
-              />
-            ))}
-          </ActionPanel.Submenu>
-
-          <ActionPanel.Submenu
-            icon={Icon.LevelMeter}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-            title="Change priority..."
-          >
-            {priorities.map(({ value, name, color }) => (
-              <ActionPanel.Item
-                key={name}
-                id={name}
-                title={name}
-                icon={{ source: Icon.Circle, tintColor: color }}
-                onAction={() => updateTask(task, { priority: value })}
-              />
-            ))}
-          </ActionPanel.Submenu>
-
-          <ActionPanel.Item
-            id="deleteTask"
-            title="Delete Task"
-            icon={Icon.Trash}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
-            onAction={() => deleteTask(task)}
+          <TaskActions
+            task={task}
+            viewProps={viewProps}
+            mode={mode}
+            data={data}
+            setData={setData}
+            quickLinkView={quickLinkView}
           />
         </ActionPanel>
       }

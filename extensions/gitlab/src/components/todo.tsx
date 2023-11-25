@@ -1,20 +1,15 @@
-import {
-  ActionPanel,
-  Color,
-  ImageLike,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import { Todo, User } from "../gitlabapi";
+import { ActionPanel, Color, Image, launchCommand, LaunchType, List } from "@raycast/api";
+import { Project, Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { gitlab } from "../common";
-import { useState, useEffect } from "react";
-import { ShowTodoDetailsAction, TodoItemActions } from "./todo_actions";
+import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
+import { GitLabOpenInBrowserAction } from "./actions";
+import { useTodos } from "./todo/utils";
+import { MyProjectsDropdown } from "./project";
+import { useState } from "react";
+import { capitalizeFirstLetter, getErrorMessage, showErrorToast } from "../utils";
+import { CacheActionPanelSection } from "./cache_actions";
 
-function userToIcon(user?: User): ImageLike {
+function userToIcon(user?: User): Image.ImageLike {
   let result = "";
   if (!user) {
     return "";
@@ -22,102 +17,135 @@ function userToIcon(user?: User): ImageLike {
   if (user.avatar_url) {
     result = user.avatar_url;
   }
-  return { source: result, mask: ImageMask.Circle };
+  return { source: result, mask: Image.Mask.Circle };
 }
 
-export function TodoList() {
-  const [searchText, setSearchText] = useState<string>();
-  const { todos, error, isLoading } = useSearch(searchText);
+const actionColors: Record<string, Color> = {
+  marked: Color.Green,
+  assigned: Color.Purple,
+  directly_addressed: Color.Red,
+  mentioned: Color.Green,
+};
 
-  if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
+function getActionColor(actionName: string): Color {
+  if (!actionName) {
+    return Color.Green;
   }
-
-  if (!todos) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  let result = actionColors[actionName];
+  if (!result) {
+    result = Color.Green;
   }
-
-  return (
-    <List
-      searchBarPlaceholder="Filter Todos by name..."
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}
-      throttle={true}
-    >
-      {todos?.map((todo) => (
-        <TodoListItem key={todo.id} todo={todo} />
-      ))}
-    </List>
-  );
+  return result;
 }
 
-export function TodoListItem(props: { todo: Todo }) {
-  const todo = props.todo;
-  const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
+const targetTypeSouce: Record<string, string> = {
+  mergerequest: GitLabIcons.merge_request,
+  issue: GitLabIcons.issue,
+  epic: GitLabIcons.epic,
+};
+
+function getTargetTypeSource(tt: string): string {
+  if (!tt) {
+    return GitLabIcons.todo;
+  }
+  let result = targetTypeSouce[tt.toLowerCase()];
+  if (!result) {
+    result = GitLabIcons.todo;
+  }
+  return result;
+}
+
+export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | null): Image.ImageLike {
+  const tt = todo.target_type;
+  return {
+    source: getTargetTypeSource(tt),
+    tintColor: overrideTintColor ? overrideTintColor : getActionColor(todo.action_name),
+  };
+}
+
+function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
+  if (props.searchMode) {
+    return <List.EmptyView title="No Todos" icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }} />;
+  }
   return (
-    <List.Item
-      id={todo.id.toString()}
-      title={todo.title}
-      subtitle={subtitle}
-      accessoryTitle={todo.action_name}
-      accessoryIcon={userToIcon(todo.author)}
-      icon={{ source: GitLabIcons.todo, tintColor: Color.Green }}
-      actions={
-        <ActionPanel>
-          <ShowTodoDetailsAction todo={todo} />
-          <OpenInBrowserAction url={todo.target_url} />
-          <TodoItemActions todo={todo} />
-        </ActionPanel>
-      }
+    <List.EmptyView
+      icon="✨"
+      title="Isn't an empty Todo list beautiful?"
+      description="Are you looking for things to do? Take a look at open issues or contribute to a Merge Request."
     />
   );
 }
 
-export function useSearch(query: string | undefined): {
-  todos?: Todo[];
-  error?: string;
-  isLoading: boolean;
-} {
-  const [todos, setTodos] = useState<Todo[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+export function TodoList(): JSX.Element {
+  const [project, setProject] = useState<Project>();
+  const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
 
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
+  if (error) {
+    showErrorToast(error, "Cannot search Merge Requests");
+  }
 
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
+  if (isLoading === undefined) {
+    return <List isLoading={true} searchBarPlaceholder="" />;
+  }
 
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const glTodos = await gitlab.getTodos({ search: query || "" });
-
-        if (!didUnmount) {
-          setTodos(glTodos);
-        }
-      } catch (e: any) {
-        if (!didUnmount) {
-          setError(e.message);
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
+  const refreshAll = async () => {
+    refresh();
+    try {
+      await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Could not open Todos Menu Command");
     }
+  };
 
-    fetchData();
+  return (
+    <List
+      searchBarPlaceholder="Filter Todos by Name..."
+      isLoading={isLoading}
+      throttle={true}
+      searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
+    >
+      <List.Section title="Todos" subtitle={`${todos?.length}`}>
+        {todos?.map((todo) => (
+          <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
+        ))}
+      </List.Section>
+      <TodoListEmptyView searchMode={todos && todos.length > 0} />
+    </List>
+  );
+}
 
-    return () => {
-      didUnmount = true;
-    };
-  }, [query]);
+export function getPrettyTodoActionName(todo: Todo): string {
+  return capitalizeFirstLetter(todo.action_name.replaceAll("_", " "));
+}
 
-  return { todos, error, isLoading };
+export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JSX.Element {
+  const todo = props.todo;
+  const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
+  const updatedAt = todo.updated_at ? new Date(todo.updated_at) : undefined;
+  return (
+    <List.Item
+      id={todo.id.toString()}
+      title={todo.title ? todo.title : "?"}
+      subtitle={subtitle}
+      accessories={[
+        { tag: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },
+        { date: updatedAt, tooltip: updatedAt ? `Updated: ${updatedAt.toLocaleString()}` : undefined },
+        { icon: userToIcon(todo.author), tooltip: todo.author?.name },
+      ]}
+      icon={{ value: getTodoIcon(todo), tooltip: todo.target_type }}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <ShowTodoDetailsAction todo={todo} />
+            <GitLabOpenInBrowserAction url={todo.target_url} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CloseTodoAction todo={todo} finished={props.refreshData} />
+            <CloseAllTodoAction finished={props.refreshData} />
+          </ActionPanel.Section>
+          <CacheActionPanelSection />
+        </ActionPanel>
+      }
+    />
+  );
 }

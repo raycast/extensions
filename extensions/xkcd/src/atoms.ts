@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 export const maxNumAtom = atom(-1);
-interface Status {
+export interface Status {
   [key: number]: boolean;
 }
 export const readStatusAtom = atom<Status>({});
@@ -10,3 +10,4 @@ export const totalReadAtom = atom((get) => {
   return numberReadEntries;
 });
 export const lastViewedAtom = atom(-1);
+export const currentComicAtom = atom(-1);

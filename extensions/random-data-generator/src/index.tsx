@@ -1,25 +1,12 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  PasteAction,
-  getPreferenceValues,
-  allLocalStorageItems,
-  setLocalStorageItem,
-} from '@raycast/api';
-import faker from 'faker';
+import { ActionPanel, Icon, List, Action, LocalStorage } from '@raycast/api';
+import { UsableLocale } from '@faker-js/faker';
 import _ from 'lodash';
 import isUrl from 'is-url';
 import { useCallback, useEffect, useState } from 'react';
+import faker from './faker';
 
 type LocalStorageValues = {
   pinnedItemIds: string;
-};
-
-type Preferences = {
-  locale: string;
 };
 
 type Item = {
@@ -37,14 +24,13 @@ const blacklistPaths = [
   'localeFallback',
   'definitions',
   'fake',
+  'faker',
   'unique',
   'helpers',
   'mersenne',
   'random',
+  'science',
 ];
-
-const { locale }: Preferences = getPreferenceValues();
-faker.locale = locale;
 
 const buildItems = (path: string) => {
   return _.reduce(
@@ -55,38 +41,46 @@ const buildItems = (path: string) => {
       }
 
       if (_.isFunction(func)) {
-        const getValue = (): string => func().toString();
+        const getValue = (): string => {
+          const value = func();
+          return value ? value.toString() : '';
+        };
         acc.push({ section: path, id: key, value: getValue(), getValue });
-      } else {
+      } else if (_.isObject(func)) {
         acc.push(...buildItems(path ? `${path}.${key}` : key));
       }
 
       return acc;
     },
-    []
+    [],
   );
 };
-
-const items = buildItems('');
-const groupedItems = _.groupBy(items, 'section');
 
 function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
   const { item, pin, unpin } = props;
   const [value, setValue] = useState(item.value);
+
+  const updateValue = async () => {
+    setValue(item.getValue());
+  };
+
+  useEffect(() => {
+    updateValue();
+  }, [item]);
 
   return (
     <List.Item
       title={_.startCase(item.id)}
       icon={Icon.Dot}
       keywords={[item.section]}
-      accessoryTitle={value}
+      detail={<List.Item.Detail markdown={value} />}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction title="Copy to Clipboard" content={value} />
-          <PasteAction title="Paste in Frontmost App" content={value} />
-          {isUrl(value) && <OpenInBrowserAction url={value} shortcut={{ modifiers: ['cmd'], key: 'o' }} />}
+          <Action.CopyToClipboard title="Copy to Clipboard" content={value} onCopy={updateValue} />
+          <Action.Paste title="Paste in Active App" content={value} onPaste={updateValue} />
+          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={{ modifiers: ['cmd'], key: 'o' }} />}
           {pin && (
-            <ActionPanel.Item
+            <Action
               title="Pin Entry"
               icon={Icon.Pin}
               shortcut={{ modifiers: ['shift', 'cmd'], key: 'p' }}
@@ -94,19 +88,45 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
             />
           )}
           {unpin && (
-            <ActionPanel.Item
+            <Action
               title="Unpin Entry"
-              icon={Icon.XmarkCircle}
+              icon={Icon.XMarkCircle}
               shortcut={{ modifiers: ['shift', 'cmd'], key: 'p' }}
               onAction={() => unpin(item)}
             />
           )}
-          <ActionPanel.Item
+          <Action
             title="Refresh Value"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ['ctrl'], key: 'r' }}
-            onAction={async () => {
-              setValue(item.getValue());
+            onAction={updateValue}
+          />
+          <Action.CreateQuicklink
+            title="Create Copy Quicklink"
+            quicklink={{
+              name: `Copy Random ${_.startCase(item.id)}`,
+              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+                JSON.stringify({
+                  section: item.section,
+                  id: item.id,
+                  locale: faker.locale,
+                  mode: 'copy',
+                }),
+              )}`,
+            }}
+          />
+          <Action.CreateQuicklink
+            title="Create Paste Quicklink"
+            quicklink={{
+              name: `Paste Random ${_.startCase(item.id)}`,
+              link: `raycast://extensions/loris/random/open-quicklink?arguments=${encodeURIComponent(
+                JSON.stringify({
+                  section: item.section,
+                  id: item.id,
+                  locale: faker.locale,
+                  mode: 'paste',
+                }),
+              )}`,
             }}
           />
         </ActionPanel>
@@ -115,19 +135,58 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
   );
 }
 
-export default function FakerList() {
-  const [pinnedItems, setPinnedItems] = useState<Item[]>([]);
+function Locales(props: { onChange: () => void }) {
+  const { onChange } = props;
 
-  const fetchPinnedItems = useCallback(async () => {
-    const values: LocalStorageValues = await allLocalStorageItems();
-    const pinnedItemIds = JSON.parse(values.pinnedItemIds || '{}');
-    const pinnedItems = _.map(pinnedItemIds, (pinnedItemId) => _.find(items, pinnedItemId)) as Item[];
-    setPinnedItems(pinnedItems);
+  return (
+    <List.Dropdown
+      tooltip="Change Language"
+      value={faker.locale}
+      onChange={(newLocale) => {
+        faker.locale = newLocale;
+        LocalStorage.setItem('locale', newLocale);
+        onChange();
+      }}
+    >
+      {Object.entries(faker.locales).map(([localeKey, locale]) => {
+        if (!locale) return null;
+
+        return <List.Dropdown.Item key={localeKey} title={locale.title} value={localeKey} />;
+      })}
+    </List.Dropdown>
+  );
+}
+
+export default function FakerList() {
+  const [items, setItems] = useState<Item[]>([]);
+  const generateItems = useCallback(() => {
+    setItems(buildItems(''));
   }, []);
 
+  const [groupedItems, setGroupedItems] = useState<Record<string, Item[]>>({});
+  const [pinnedItems, setPinnedItems] = useState<Item[]>([]);
   useEffect(() => {
+    const init = async () => {
+      const locale = (await LocalStorage.getItem('locale')) || 'en';
+      faker.setLocale(locale as UsableLocale);
+      generateItems();
+    };
+    init();
+  }, [generateItems]);
+
+  useEffect(() => {
+    const fetchPinnedItems = async () => {
+      if (items.length === 0) return;
+
+      const values: LocalStorageValues = await LocalStorage.allItems();
+      const pinnedItemIds = JSON.parse(values.pinnedItemIds || '{}');
+      const pinnedItems = _.map(pinnedItemIds, (pinnedItemId) => _.find(items, pinnedItemId)) as Item[];
+
+      setGroupedItems(_.groupBy(items, 'section'));
+      setPinnedItems(pinnedItems);
+    };
     fetchPinnedItems();
-  }, [fetchPinnedItems]);
+  }, [items]);
 
   const handlePinnedItemsChange = (nextPinnedItems: Item[]) => {
     setPinnedItems(nextPinnedItems);
@@ -135,7 +194,7 @@ export default function FakerList() {
       section,
       id,
     }));
-    setLocalStorageItem('pinnedItemIds', JSON.stringify(nextPinnedItemIds));
+    LocalStorage.setItem('pinnedItemIds', JSON.stringify(nextPinnedItemIds));
   };
 
   const pin = (item: Item) => {
@@ -151,8 +210,14 @@ export default function FakerList() {
     handlePinnedItemsChange(nextPinnedItems);
   };
 
+  const isLoading = Object.values(groupedItems).length === 0;
+
   return (
-    <List>
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarAccessory={isLoading ? null : <Locales onChange={generateItems} />}
+    >
       {pinnedItems.length > 0 && (
         <List.Section key="pinned" title="Pinned">
           {_.map(pinnedItems, (item) => (

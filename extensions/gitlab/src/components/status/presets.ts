@@ -1,20 +1,20 @@
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { isValidStatus, Status } from "../../gitlabapi";
 import { getErrorMessage } from "../../utils";
 
 const presetsStoreKey = "presets";
 
-export async function wipePresets() {
-  await removeLocalStorageItem(presetsStoreKey);
+export async function wipePresets(): Promise<void> {
+  await LocalStorage.removeItem(presetsStoreKey);
 }
 
 async function storePresets(presets: Status[]) {
-  await setLocalStorageItem(presetsStoreKey, JSON.stringify(presets));
+  await LocalStorage.setItem(presetsStoreKey, JSON.stringify(presets));
 }
 
 async function restorePresets(): Promise<Status[] | undefined> {
-  const content = await getLocalStorageItem(presetsStoreKey);
+  const content = await LocalStorage.getItem(presetsStoreKey);
   if (content !== undefined) {
     const data = JSON.parse(content.toString());
     if (Array.isArray(data)) {
@@ -42,7 +42,7 @@ export function usePresets(): {
   isLoading: boolean;
 } {
   const [presets, setPresets] = useState<Status[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>();
 
   useEffect(() => {

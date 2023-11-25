@@ -1,46 +1,17 @@
-import fs from "fs";
-import util from "util";
-import { bookmarksFilePath, getProfileName } from "../utils/pathUtils";
-import { NullableString, UrlDetail, UrlSearchResult } from "../schema/types";
-import { useUrlSearch } from "./useUrlSearch";
+import { promises, existsSync } from "fs";
+import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../types/interfaces";
+import { getBookmarksFilePath } from "../utils/pathUtils";
+import { ReactNode, useCallback, useEffect, useState } from "react";
+import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
+import { geNotInstalledMessage, getNoBookmarksMessage } from "../utils/messageUtils";
+import { validateAppIsInstalled } from "../actions";
 
-const fsReadFile = util.promisify(fs.readFile);
+function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
+  const bookmarks: HistoryEntry[] = [];
 
-type BookmarkNodeType = "folder" | "url";
-
-export interface BookmarkDirectory {
-  date_added: string;
-  children: BookmarkDirectory[];
-  type: BookmarkNodeType;
-  id: string;
-  guid: string;
-  source?: string;
-  url?: string;
-  name: string;
-  [key: string]: unknown;
-}
-
-export interface RawBookmarkRoot {
-  [key: string]: BookmarkDirectory;
-}
-
-export interface RawBookmarks {
-  roots: RawBookmarkRoot;
-  [key: string]: unknown;
-}
-
-const getBookmarksFromEdge = async (): Promise<UrlDetail[]> => {
-  const profileName = getProfileName();
-  const filePath = bookmarksFilePath(profileName);
-  const fileBuffer = await fsReadFile(filePath, { encoding: "utf-8" });
-  return getBookmarkEntriesFromRawBookmarks(JSON.parse(fileBuffer));
-};
-
-function getBookmarkEntriesFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): UrlDetail[] {
-  const bookmarks: UrlDetail[] = [];
   if (bookmarkDirectory.type === "folder") {
     bookmarkDirectory.children.forEach((child) => {
-      bookmarks.push(...getBookmarkEntriesFromBookmarkDirectory(child));
+      bookmarks.push(...extractBookmarkFromBookmarkDirectory(child));
     });
   } else if (bookmarkDirectory.type === "url" && bookmarkDirectory.url) {
     bookmarks.push({
@@ -53,27 +24,59 @@ function getBookmarkEntriesFromBookmarkDirectory(bookmarkDirectory: BookmarkDire
   return bookmarks;
 }
 
-const getBookmarkEntriesFromRawBookmarks = (rawBookmarks: RawBookmarks): UrlDetail[] => {
-  const bookmarks: UrlDetail[] = [];
+const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
+  const bookmarks: HistoryEntry[] = [];
   Object.keys(rawBookmarks.roots).forEach((rootKey) => {
     const rootLevelBookmarkFolders = rawBookmarks.roots[rootKey];
-    const bookmarkEntries = getBookmarkEntriesFromBookmarkDirectory(rootLevelBookmarkFolders);
+    const bookmarkEntries = extractBookmarkFromBookmarkDirectory(rootLevelBookmarkFolders);
     bookmarks.push(...bookmarkEntries);
   });
   return bookmarks;
 };
 
-const searchBookmarks = async (bookmarks: UrlDetail[], query: NullableString): Promise<UrlDetail[]> => {
-  if (!query) {
-    return bookmarks;
+const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
+  // First check if the app is installed
+  await validateAppIsInstalled();
+
+  const bookmarksFilePath = getBookmarksFilePath(profile);
+  if (!existsSync(bookmarksFilePath)) {
+    throw new Error(getNoBookmarksMessage());
   }
 
-  const terms = query.split(" ");
-  return bookmarks.filter((bookmark) => {
-    return terms.some((term) => bookmark.title.toLowerCase().includes(term.toLowerCase()));
-  });
+  const fileBuffer = await promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
+  return extractBookmarks(JSON.parse(fileBuffer));
 };
 
-export function useEdgeBookmarkSearch(query: NullableString): UrlSearchResult {
-  return useUrlSearch<UrlDetail[]>(query, getBookmarksFromEdge, searchBookmarks, "bookmarks");
+export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
+  const [data, setData] = useState<HistoryEntry[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [profile, setProfile] = useState<string>();
+  const [errorView, setErrorView] = useState<ReactNode>();
+
+  const revalidate = useCallback(
+    (profileId: string) => {
+      setProfile(profileId);
+    },
+    [profile]
+  );
+
+  useEffect(() => {
+    getBookmarks(profile)
+      .then((bookmarks) => {
+        setData(bookmarks.filter((bookmark) => bookmark.title.toLowerCase().includes(query?.toLowerCase() || "")));
+        setIsLoading(false);
+      })
+      .catch((e) => {
+        if (e.message === geNotInstalledMessage()) {
+          setErrorView(<NotInstalledError />);
+        } else if (e.message === getNoBookmarksMessage()) {
+          setErrorView(<NoBookmarksError />);
+        } else {
+          setErrorView(<UnknownError />);
+        }
+        setIsLoading(false);
+      });
+  }, [profile, query]);
+
+  return { errorView, isLoading, data, revalidate };
 }

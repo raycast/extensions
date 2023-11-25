@@ -267,7 +267,6 @@ async function addNewTimeEntry(description: string, projectId: string): Promise<
     method: "POST",
     body: {
       description,
-      billable: true,
       taskId: null,
       projectId,
       timeInterval: {

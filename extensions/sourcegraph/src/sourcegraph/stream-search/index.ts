@@ -1,12 +1,7 @@
-import EventSource from "@bobheadxi/node-eventsource-http2";
-import { AbortSignal } from "node-fetch";
-import { remark } from "remark";
-import strip from "strip-markdown";
+import EventSource from "eventsource";
 
-import { getMatchUrl, SearchEvent, SearchMatch } from "./stream";
-import { Sourcegraph } from "..";
-
-const stripMarkdown = remark().use(strip);
+import { getMatchUrl, SearchEvent, SearchMatch, AlertKind, LATEST_VERSION } from "./stream";
+import { LinkBuilder, Sourcegraph } from "..";
 
 export interface SearchResult {
   url: string;
@@ -16,17 +11,23 @@ export interface SearchResult {
 export interface Suggestion {
   title: string;
   description?: string;
-  query?: string;
+  /**
+   * query describes an entire query to replace the existing query with, or a partial
+   * query to be appended to the current query.
+   */
+  query?: { addition: string } | string;
 }
 
 export interface Alert {
   title: string;
   description?: string;
+  kind?: AlertKind;
 }
 
 export interface Progress {
   matchCount: number;
-  duration: string;
+  durationMs: number;
+  skipped: number;
 }
 
 export interface SearchHandlers {
@@ -36,42 +37,47 @@ export interface SearchHandlers {
   onProgress: (progress: Progress) => void;
 }
 
+export type PatternType = "literal" | "regexp" | "structural" | "lucky";
+
 export async function performSearch(
-  query: string,
+  abort: AbortSignal,
   src: Sourcegraph,
-  signal: AbortSignal,
+  query: string,
+  patternType: PatternType,
   handlers: SearchHandlers
 ): Promise<void> {
   if (query.length === 0) {
     return;
   }
 
-  const parameters = [
-    ["q", query],
-    ["v", "V2"],
-    ["t", "literal"],
-    // ["dl", "0"],
-    // ['dk', (decorationKinds || ['html']).join('|')],
-    // ['dc', (decorationContextLines || '1').toString()],
-    ["display", "1500"],
-  ];
-  const parameterEncoded = parameters.map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
-  const requestURL = `${src.instance}/search/stream?${parameterEncoded}`;
-  const stream = src.token
-    ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
-    : new EventSource(requestURL);
+  const link = new LinkBuilder("search");
 
-  return new Promise((resolve, reject) => {
-    // signal cancelling
-    signal.addEventListener("abort", () => {
+  const parameters = new URLSearchParams([
+    ["q", query],
+    ["v", LATEST_VERSION],
+    ["t", patternType],
+    ["display", "200"],
+  ]);
+  const requestURL = link.new(src, "/.api/search/stream", parameters);
+  const headers: { [key: string]: string } = {
+    "X-Requested-With": "Raycast-Sourcegraph",
+  };
+  if (src.token) {
+    headers["Authorization"] = `token ${src.token}`;
+  }
+
+  const stream = new EventSource(requestURL, { headers });
+  return new Promise((resolve) => {
+    /**
+     * All events that indicate the end of the request should use this to resolve.
+     */
+    const resolveStream = () => {
       stream.close();
       resolve();
-    });
+    };
 
-    // errors from stream
-    stream.addEventListener("error", (error) => {
-      reject(`${JSON.stringify(error)}`);
-    });
+    // signal cancelling
+    abort.addEventListener("abort", resolveStream);
 
     // matches from the Sourcegraph API
     stream.addEventListener("matches", (message) => {
@@ -82,13 +88,24 @@ export async function performSearch(
 
       handlers.onResults(
         event.data.map((match): SearchResult => {
-          const url = `${src.instance}${getMatchUrl(match)}`;
-          if (match.type === "commit") {
-            // Commit stuff comes already markdown-formatted?? so strip formatting
-            match.label = stripMarkdown.processSync(match.label)?.value.toString().split(`› `).pop() || "";
-            match.detail = stripMarkdown.processSync(match.detail)?.value.toString();
+          const matchURL = link.new(src, getMatchUrl(match));
+          // Do some pre-processing of results, since some of the API outputs are a bit
+          // confusing, to make it easier later on.
+          switch (match.type) {
+            case "content":
+              // Line number appears 0-indexed, for ease of use increment it so links
+              // aren't off by 1.
+              match.lineMatches?.forEach((l) => {
+                l.lineNumber += 1;
+              });
+              break;
+            case "symbol":
+              match.symbols.forEach((s) => {
+                // Turn this into a full URL
+                s.url = link.new(src, s.url);
+              });
           }
-          return { url, match };
+          return { url: matchURL, match };
         })
       );
     });
@@ -105,13 +122,24 @@ export async function performSearch(
           .filter((s) => s.count > 1)
           .map((f) => {
             return {
-              title: `Filter for '${f.label}'`,
-              description: `${f.count} matches`,
-              query: f.value,
+              title: f.label,
+              query: { addition: f.value },
             };
           }),
         false
       );
+    });
+
+    // errors from stream
+    stream.addEventListener("error", (message) => {
+      const event: SearchEvent = {
+        type: "error",
+        data: message.data ? JSON.parse(message.data) : {},
+      };
+      handlers.onAlert({
+        title: event.data.name ? event.data.name : event.data.message,
+        description: event.data.name ? event.data.message : undefined,
+      });
     });
 
     // alerts from the Sourcegraph API
@@ -133,7 +161,17 @@ export async function performSearch(
           event.data.proposedQueries.map((p) => {
             return {
               title: p.description || event.data.title,
-              description: !p.description ? event.data.title : "",
+              description: p.annotations
+                ?.map((annotation) => {
+                  switch (annotation.name) {
+                    case "ResultCount":
+                      return `${annotation.value} results`;
+                    default:
+                      return undefined;
+                  }
+                })
+                .filter((desc) => !!desc)
+                .join(", "),
               query: p.query,
             };
           }),
@@ -159,15 +197,19 @@ export async function performSearch(
         type: "progress",
         data: message.data ? JSON.parse(message.data) : {},
       };
+
+      const {
+        data: { matchCount, durationMs, skipped },
+      } = event;
+
       handlers.onProgress({
-        matchCount: event.data.matchCount,
-        duration: `${event.data.durationMs}ms`,
+        matchCount: matchCount,
+        durationMs: durationMs,
+        skipped: skipped?.length || 0,
       });
     });
 
     // done indicator
-    stream.addEventListener("done", () => {
-      resolve();
-    });
+    stream.addEventListener("done", resolveStream);
   });
 }

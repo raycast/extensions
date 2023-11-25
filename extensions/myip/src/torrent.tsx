@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Action, useNavigation } from "@raycast/api";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { useEffect, useState } from "react";
@@ -6,11 +6,10 @@ import { LoadingStatus } from ".";
 
 type Torrent = { idx: number; date: string; category: string; title: string; size: string; url: string | undefined };
 
-let isLive = true;
-
 export default function Torrent(param: { ip: string }) {
   const [status, setStatus] = useState<LoadingStatus>("loading");
   const [data, setData] = useState<Torrent[]>([]);
+  const { pop } = useNavigation();
 
   useEffect(() => {
     async function getTorrent() {
@@ -32,21 +31,13 @@ export default function Torrent(param: { ip: string }) {
           });
         });
 
-        if (isLive) {
-          setData(temp);
-          setStatus("success");
-        }
+        setData(temp);
+        setStatus("success");
       } catch (error) {
-        if (isLive) {
-          setStatus("failure");
-        }
+        setStatus("failure");
       }
     }
-    isLive = true;
     getTorrent();
-    return () => {
-      isLive = false;
-    };
   }, []);
 
   return (
@@ -55,7 +46,12 @@ export default function Torrent(param: { ip: string }) {
       navigationTitle="Torrent History"
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={"https://iknowwhatyoudownload.com"} />
+          <Action.OpenInBrowser
+            url={"https://iknowwhatyoudownload.com"}
+            onOpen={() => {
+              pop();
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -64,11 +60,11 @@ export default function Torrent(param: { ip: string }) {
           key={item.idx}
           title={item.title}
           subtitle={item.category}
-          accessoryTitle={item.date}
+          accessories={[{ text: item.date }]}
           actions={
             item.url && (
               <ActionPanel>
-                <OpenInBrowserAction url={"https://iknowwhatyoudownload.com" + item.url} />
+                <Action.OpenInBrowser url={"https://iknowwhatyoudownload.com" + item.url} />
               </ActionPanel>
             )
           }

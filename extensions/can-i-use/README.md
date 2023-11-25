@@ -2,8 +2,6 @@
 
 This extension provides up-to-date browser support for front-end web technologies on desktop and mobile web browsers.
 
-![Screenshot of the main view](./assets/demo.png)
-
 ## Browserlist configuration
 
 It's possible to configure this extension so that it reads the [Browserlist](https://github.com/browserslist/browserslist) configuration on web projects and show you the technologies supported (or not) directly from the main view. To do so, add the path to your project in the preferences in "Project path" (e.g `~/my-project`)

@@ -1,42 +1,14 @@
-import { ActionPanel, ActionPanelItem, Detail, showToast, Toast, ToastStyle } from "@raycast/api";
-import { execSync } from "child_process";
-import { useState } from "react";
+import { Detail } from "@raycast/api";
+import { AutoInstall } from "./autoInstall";
 
 export default function NotInstalled({
   onRefresh = () => {
     return;
   },
 }) {
-  const [isLoading, setIsLoading] = useState(false);
   return (
     <Detail
-      actions={
-        <ActionPanel>
-          {!isLoading && (
-            <ActionPanelItem
-              title="Install with Homebrew"
-              onAction={async () => {
-                if (isLoading) return;
-
-                setIsLoading(true);
-
-                const toast = new Toast({ style: ToastStyle.Animated, title: "Installing..." });
-                await toast.show();
-
-                try {
-                  execSync(`zsh -l -c 'brew tap jakehilborn/jakehilborn && brew install displayplacer'`);
-                  await toast.hide();
-                  onRefresh();
-                } catch {
-                  await toast.hide();
-                  await showToast(ToastStyle.Failure, "Error", "An unknown error occured while trying to install");
-                }
-                setIsLoading(false);
-              }}
-            />
-          )}
-        </ActionPanel>
-      }
+      actions={<AutoInstall onRefresh={onRefresh} />}
       markdown={`
 # 🚨 Error: Displayplacer Utility is not installed
 This extension depends on a command-line utilty that is not detected on your system. You must install it continue.

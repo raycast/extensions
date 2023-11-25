@@ -1,22 +1,27 @@
 import {
+  Action,
   ActionPanel,
-  copyTextToClipboard,
+  Clipboard,
   Form,
+  getPreferenceValues,
   Icon,
   List,
+  popToRoot,
   showHUD,
   showToast,
-  ToastStyle,
+  Toast,
   useNavigation,
 } from "@raycast/api";
+import { execa } from "execa";
 import React, { useEffect, useMemo, useState } from "react";
 import * as scripts from "./script";
 import { Category, Info, Result, Run, RunType, Script } from "./script/type";
-import { readClipboard } from "./script/util";
 
 let selectScript: Run | null = null;
 
 let isClipboardScriptRunning = false;
+
+const preferences = getPreferenceValues();
 
 export default function ToolboxList() {
   const [categorys, setCategorys] = useState<Category[]>();
@@ -50,7 +55,7 @@ export default function ToolboxList() {
 }
 
 const ListItem = React.memo(function ListItem(props: { item: Script }) {
-  const { push } = useNavigation();
+  const { pop, push } = useNavigation();
 
   const item = props.item;
   const info = item.info;
@@ -69,13 +74,13 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
 
   function moveWindow(runType: RunType) {
     if (runType === "clipboard") {
-      if (item.info.type === "form") {
-        push(<InputFormView info={info} />);
+      if (item.info.type.includes("list")) {
+        push(<InputListView info={info} />);
       } else {
-        push(<InputDirectView info={info} />);
+        push(<InputFormView info={info} />);
       }
-    } else if (runType === "direct") {
-      push(<InputDirectView info={info} />);
+    } else if (runType === "list") {
+      push(<InputListView info={info} />);
     } else if (runType === "form") {
       push(<InputFormView info={info} />);
     }
@@ -93,7 +98,8 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
       if (query) {
         scriptResult = await runScript(query);
         if (scriptResult.isSuccess) {
-          await copyTextToClipboard(scriptResult.result);
+          await Clipboard.copy(scriptResult.result);
+          copyAction(pop);
         }
       }
       isClipboardScriptRunning = false;
@@ -101,7 +107,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
         await showHUD("✅ Result Copied to Clipboard");
       } else {
         if (scriptResult.result) {
-          await showToast(ToastStyle.Failure, scriptResult.result);
+          await showToast(Toast.Style.Failure, scriptResult.result);
         }
         moveWindow(runType);
       }
@@ -118,34 +124,37 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
       icon={info.icon}
       actions={
         <ActionPanel>
-          {(info.type === "all" || info.type === "noclipboard" || info.type === "direct") && (
-            <ActionPanel.Item
-              title={"Run Script"}
-              icon={Icon.Pencil}
-              onAction={async () => {
-                action("direct");
-              }}
-            />
-          )}
-          {(info.type === "all" || info.type === "noclipboard" || info.type === "form") && (
-            <ActionPanel.Item
-              title={"Run Script to Form"}
-              icon={Icon.Document}
-              onAction={async () => {
-                action("form");
-              }}
-            />
-          )}
-          {(info.type === "all" || info.type === "clipboard") && (
-            <ActionPanel.Item
-              title={"Run Script to Clipboard"}
-              icon={Icon.ArrowRight}
-              shortcut={{ modifiers: ["ctrl"], key: "v" }}
-              onAction={async () => {
-                action("clipboard");
-              }}
-            />
-          )}
+          {info.type.map((type) => {
+            return type === "list" ? (
+              <Action
+                key={type}
+                title={"Run Script"}
+                icon={Icon.Pencil}
+                onAction={async () => {
+                  action("list");
+                }}
+              />
+            ) : type === "form" ? (
+              <Action
+                key={type}
+                title={"Run Script to Form"}
+                icon={Icon.Document}
+                onAction={async () => {
+                  action("form");
+                }}
+              />
+            ) : (
+              <Action
+                key={type}
+                title={"Run Script to Clipboard"}
+                icon={Icon.ArrowRight}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+                onAction={async () => {
+                  action("clipboard");
+                }}
+              />
+            );
+          })}
         </ActionPanel>
       }
     />
@@ -204,6 +213,7 @@ const useScriptHook = () => {
 };
 
 function ResultActionView(props: { content: Result; info: Info }) {
+  const { pop } = useNavigation();
   const content = props.content;
   const info = props.info;
   return (
@@ -211,21 +221,23 @@ function ResultActionView(props: { content: Result; info: Info }) {
     content.result.length > 0 && (
       <ActionPanel title={info.title}>
         <ActionPanel.Section>
-          <ActionPanel.Item
+          <Action
             title="Copy Result to Clipboard"
             icon={Icon.Clipboard}
             onAction={async () => {
-              await copyTextToClipboard(content.result);
+              await Clipboard.copy(content.result);
               await showHUD("✅ Result Copied to Clipboard");
+              copyAction(pop);
             }}
           />
 
-          <ActionPanel.Item
+          <Action
             title="Copy Query to Clipboard"
             icon={Icon.Clipboard}
             onAction={async () => {
-              await copyTextToClipboard(content.query);
+              await Clipboard.copy(content.query);
               await showHUD("✅ Query Copied to Clipboard");
+              copyAction(pop);
             }}
           />
         </ActionPanel.Section>
@@ -234,7 +246,7 @@ function ResultActionView(props: { content: Result; info: Info }) {
   );
 }
 
-function InputDirectView(props: { info: Info }) {
+function InputListView(props: { info: Info }) {
   const info = props.info;
   const { content, setContent } = useScriptHook();
 
@@ -286,11 +298,11 @@ function InputFormView(props: { info: Info }) {
 }
 
 async function isClipboardContent() {
-  const content = await readClipboard();
-  if (content.length === 0) {
+  const { stdout } = await execa("pbpaste");
+  if (stdout.length === 0) {
     return false;
   }
-  return content;
+  return stdout;
 }
 
 async function runScript(query: string): Promise<{ result: string; isSuccess: boolean }> {
@@ -315,3 +327,16 @@ async function runScript(query: string): Promise<{ result: string; isSuccess: bo
     return state;
   }
 }
+
+const copyAction = async (pop: () => void) => {
+  switch (preferences.copy) {
+    case "back":
+      pop();
+      break;
+    case "exit":
+      await popToRoot({ clearSearchBar: true });
+      break;
+    default:
+      break;
+  }
+};

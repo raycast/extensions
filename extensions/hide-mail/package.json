@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hide-mail",
+  "title": "HideMail - Email Relay Service",
+  "description": "Hide Your Real Email Address and Protect Your Identity and Privacy. Create a different identity for each website to hide your real e-mail address. Never receive unwanted emails again! The first 15 mailboxes are free.",
+  "icon": "Icon.png",
+  "author": "Flatroy",
+  "categories": [
+    "Applications",
+    "Web",
+    "Productivity",
+    "Data",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create Random Email Alias",
+      "subtitle": "HideMail",
+      "description": "Generate and copy a random private email alias to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-emails",
+      "title": "List All Emails",
+      "subtitle": "HideMail",
+      "description": "List and search email aliases",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.2",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@types/node": "~20.5.7",
+    "@types/node-fetch": "^2.6.4",
+    "@types/react": "^18.2.21",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.28.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "preferences": [
+    {
+      "name": "api_key",
+      "type": "password",
+      "required": true,
+      "title": "HideMail API Key",
+      "description": "Generate from our web-site - https://hidemail.app/user/api-tokens",
+      "placeholder": "API Key"
+    }
+  ]
+}

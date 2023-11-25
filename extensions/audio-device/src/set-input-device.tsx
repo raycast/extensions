@@ -1,6 +1,11 @@
-import { render } from "@raycast/api";
 import { DeviceList } from "./helpers";
 
-export default async function main() {
-  render(<DeviceList type="input" />);
+interface Props {
+  launchContext?: {
+    deviceId?: string;
+  };
+}
+
+export default function Command({ launchContext }: Props) {
+  return <DeviceList type="input" deviceId={launchContext?.deviceId} />;
 }

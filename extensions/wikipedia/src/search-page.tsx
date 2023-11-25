@@ -1,42 +1,123 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, OpenInBrowserAction } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Grid } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { useWikipediaPageSummary, useWikipediaSearch } from "./wikipedia";
+import WikipediaPage from "./components/wikipedia-page";
+import { findPagesByTitle, getPageData } from "./utils/api";
+import { toSentenceCase } from "./utils/formatting";
+import { languages, Locale, useLanguage } from "./utils/language";
+import { openInBrowser, prefersListView } from "./utils/preferences";
+import { useRecentArticles } from "./utils/recents";
 
-export default function SearchPage() {
-  const [search, setSearch] = useState("");
-  const { data: titles, isValidating } = useWikipediaSearch(search);
+const View = prefersListView ? List : Grid;
+
+export default function SearchPage(props: { arguments: { title: string } }) {
+  const [language, setLanguage] = useLanguage();
+  const [search, setSearch] = useState(props.arguments.title);
+  const { readArticles } = useRecentArticles();
+  const { data, isLoading } = useCachedPromise(findPagesByTitle, [search, language], {
+    keepPreviousData: true,
+  });
 
   return (
-    <List
+    <View
       throttle
-      isLoading={isValidating}
+      isLoading={isLoading}
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      fit={Grid.Fit.Fill}
+      searchText={search}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search pages by name..."
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            title="Search in Browser"
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            url={`https://${language}.wikipedia.org/w/index.php?fulltext=1&profile=advanced&search=${search}&title=Special%3ASearch&ns0=1`}
+          />
+        </ActionPanel>
+      }
+      searchBarAccessory={
+        <View.Dropdown tooltip="Language" value={language} onChange={(value) => setLanguage(value as Locale)}>
+          {languages.map((language) => (
+            <View.Dropdown.Item
+              key={language.value}
+              icon={language.icon}
+              title={language.title}
+              value={language.value}
+            />
+          ))}
+        </View.Dropdown>
+      }
     >
-      {titles?.map((title) => (
-        <PageItem key={title} title={title} />
-      ))}
-    </List>
+      {search ? (
+        data?.language === language && (
+          <View.Section title="Results">
+            {data?.results.map((title: string) => (
+              <PageItem key={title} search={search} title={title} language={language} />
+            ))}
+          </View.Section>
+        )
+      ) : (
+        <View.Section title="Recent Articles">
+          {readArticles.map((title) => (
+            <PageItem key={title} search={search} title={title} language={language} />
+          ))}
+        </View.Section>
+      )}
+    </View>
   );
 }
 
-function PageItem({ title }: { title: string }) {
-  const { data: extract } = useWikipediaPageSummary(title);
+function PageItem({ search, title, language }: { search: string; title: string; language: string }) {
+  const { data: page } = useCachedPromise(getPageData, [title, language]);
+
   return (
-    <List.Item
-      icon={Icon.TextDocument}
+    <View.Item
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      content={{ source: page?.thumbnail?.source || Icon.Image }}
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      icon={{ source: page?.thumbnail?.source || "../assets/wikipedia.png" }}
       id={title}
-      key={title}
       title={title}
-      subtitle={extract}
+      subtitle={page?.description ? toSentenceCase(page.description) : ""}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://wikipedia.org/wiki/${title}`} />
-          <CopyToClipboardAction
-            title="Copy URL"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-            content={`https://wikipedia.org/wiki/${title}`}
+          {openInBrowser ? (
+            <>
+              <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
+              <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+            </>
+          ) : (
+            <>
+              <Action.Push icon={Icon.Window} title="Show Details" target={<WikipediaPage title={title} />} />
+              <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
+            </>
+          )}
+          <Action.OpenInBrowser
+            title="Search in Browser"
+            url={`https://${language}.wikipedia.org/w/index.php?fulltext=1&profile=advanced&search=${search}&title=Special%3ASearch&ns0=1`}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
           />
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              title="Copy URL"
+              content={page?.content_urls.desktop.page || ""}
+            />
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              title="Copy Title"
+              content={title}
+            />
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              title="Copy Subtitle"
+              content={page?.description ?? ""}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

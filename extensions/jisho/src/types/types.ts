@@ -11,3 +11,11 @@ export interface SearchResult {
   definition: [string];
   url: string;
 }
+
+export interface Preferences {
+  "save-to-history-on-unmount": boolean;
+}
+
+export type SearchHistoryItem = (SearchResult & { type: "result" }) | { type: "query"; query: string };
+
+export type SearchHistory = SearchHistoryItem[];

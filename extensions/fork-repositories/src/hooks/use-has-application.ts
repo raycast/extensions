@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
 import { getApplications } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 
-const useHasApplication = (identifier: string) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFound, setIsFound] = useState(false);
-
-  useEffect(() => {
-    getApplications().then((applications) => {
+const useHasApplication = (identifier: string): [boolean, boolean] => {
+  const { data, isLoading } = useCachedPromise(
+    async () => {
+      const applications = await getApplications();
+      let isFound = false;
       for (const application of applications) {
         if ([application.name, application.path, application.bundleId].includes(identifier)) {
-          setIsFound(true);
+          isFound = true;
           break;
         }
       }
-      setIsLoading(false);
-    });
-  }, [identifier]);
-
-  return [isLoading, isFound];
+      return isFound;
+    },
+    [],
+    { initialData: false }
+  );
+  return [data, isLoading];
 };
 
 export { useHasApplication };

@@ -1,0 +1,1 @@
+export { useAllZonesPrivateNetworksQuery } from './usePrivateNetworksQuery'

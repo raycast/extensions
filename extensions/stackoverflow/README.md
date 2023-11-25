@@ -1,6 +1,8 @@
-# Raycast Search Stackoverflow
+# Raycast Search Stack Exchange Sites
 
-This extension brings [stackoverflow](https://stackoverflow.com/) search to Raycast!
+This extension brings [stack exchange](https://stackexchange.com/sites) search to Raycast! You can choose
+the site that you want to search using the List Dropdown in the main screen. This list will be
+autoupdated using stackexchange sites API every 30 days.
 
 ## Features
 
@@ -10,4 +12,4 @@ This extension brings [stackoverflow](https://stackoverflow.com/) search to Rayc
 
 ## Screenshot
 
-![](images/screenshot.png)
+![](metadata/stackoverflow-3.png)

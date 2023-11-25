@@ -1,0 +1,65 @@
+query SearchPullRequestsWithDependencies($query: String!) {
+  search(type: ISSUE, first: 50, query: $query) {
+    nodes {
+      __typename
+      ... on PullRequest {
+        id
+        number
+        title
+        url
+        createdAt
+        updatedAt
+
+        author {
+          login
+          avatarUrl
+        }
+
+        reviews(last: 1) {
+          nodes {
+            id
+            createdAt
+            state
+            url
+            submittedAt
+            author {
+              login
+              avatarUrl
+            }
+          }
+        }
+
+        comments(last: 1) {
+          nodes {
+            id
+            createdAt
+            bodyText
+            url
+            author {
+              login
+              avatarUrl
+            }
+          }
+        }
+
+        reviewRequests(last: 1) {
+          nodes {
+            requestedReviewer {
+              __typename
+              ... on User {
+                id
+                login
+                avatarUrl
+              }
+
+              ... on Team {
+                id
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

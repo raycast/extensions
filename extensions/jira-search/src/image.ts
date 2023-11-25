@@ -1,5 +1,5 @@
 import path from "path"
-import { environment, ImageLike, showToast, ToastStyle } from "@raycast/api"
+import { environment, showToast, Image, Toast } from "@raycast/api"
 import { promises as fs } from "fs"
 import { jiraFetch } from "./jira"
 import { Warning } from "./exception"
@@ -62,7 +62,7 @@ function parseImageUrl(url: string): ImageSpec {
   return imgSpec
 }
 
-export async function jiraImage(url: string): Promise<ImageLike | undefined> {
+export async function jiraImage(url: string): Promise<Image.ImageLike | undefined> {
   try {
     const imageSpec = parseImageUrl(url)
     const path = filePath(imageSpec)
@@ -74,7 +74,11 @@ export async function jiraImage(url: string): Promise<ImageLike | undefined> {
       return url
     } else {
       console.error(e)
-      await showToast(ToastStyle.Failure, "Failed to get Jira Icons", e instanceof Error ? e.message : undefined)
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to get Jira Icons",
+        message: e instanceof Error ? e.message : undefined,
+      })
       return undefined
     }
   }
@@ -82,5 +86,9 @@ export async function jiraImage(url: string): Promise<ImageLike | undefined> {
 
 export default async function ClearImageCache() {
   await fs.rm(imageDir, { force: true, recursive: true })
-  await showToast(ToastStyle.Success, "Image Cache cleared", "Image will be reloaded on next search")
+  await showToast({
+    style: Toast.Style.Success,
+    title: "Image Cache cleared",
+    message: "Image will be reloaded on next search",
+  })
 }

@@ -1,4 +1,4 @@
-import { ActionPanel, Color, CopyToClipboardAction, List, OpenAction, ShowInFinderAction } from "@raycast/api";
+import { Action, ActionPanel, Color, List } from "@raycast/api";
 import Bookmark from "../dtos/bookmark-dto";
 import OpenBookMarkAction from "./open-bookmark-action";
 
@@ -10,21 +10,20 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
       id={bookmark.RepositoryIdentifier}
       title={bookmark.Name}
       icon={{ source: "icon-folder.png", tintColor: Color.Blue }}
-      accessoryTitle={bookmark.getBranch}
-      accessoryIcon={{ source: "icon-branches.png", tintColor: Color.PrimaryText }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <OpenBookMarkAction bookmark={bookmark} />
-            <ShowInFinderAction path={bookmark.getPath} />
-            <OpenAction
+            <Action.ShowInFinder path={bookmark.getPath} />
+            <Action.OpenWith path={bookmark.getPath} shortcut={{ modifiers: ["cmd", "shift"], key: "return" }} />
+            <Action.Open
               title="Open in Code"
               icon="icon-vscode.png"
               target={bookmark.getPath}
               application="Visual Studio Code"
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
             />
-            <OpenAction
+            <Action.Open
               title="Open in iTerm"
               icon="icon-iterm.png"
               target={bookmark.getPath}
@@ -33,12 +32,12 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy Name"
               content={bookmark.Name}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy Path"
               content={bookmark.getPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
@@ -46,6 +45,12 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
           </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: bookmark.getBranch.name,
+          icon: { source: "icon-branches.png", tintColor: Color.PrimaryText },
+        },
+      ]}
     />
   );
 }

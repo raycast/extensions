@@ -1,26 +1,8 @@
-import { Detail } from "@raycast/api";
-import SearchCommand from "./components/search";
-import { customSourcegraph } from "./sourcegraph";
+import { LaunchProps } from "@raycast/api";
 
-export default function SearchInstance() {
-  const src = customSourcegraph();
-  if (!src) {
-    return (
-      <Detail
-        navigationTitle="Invalid custom instance URL"
-        markdown={"⚠️ No custom Sourcegraph instance configured - set one up in the extension preferences!"}
-      />
-    );
-  }
-  try {
-    new URL(src.instance);
-  } catch (e) {
-    return (
-      <Detail
-        navigationTitle="Invalid custom instance URL"
-        markdown={`⚠️ Instance URL '${src.instance}' is invalid: ${e}\n\nUpdate it in the extension preferences!`}
-      />
-    );
-  }
-  return SearchCommand(src);
+import SearchCommand from "./components/SearchCommand";
+import InstanceCommand from "./components/InstanceCommand";
+
+export default function SearchSelfHosted(props: LaunchProps) {
+  return <InstanceCommand Command={SearchCommand} props={props} />;
 }

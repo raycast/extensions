@@ -8,7 +8,7 @@
     Search npm
   </h1>
 
-Raycast extension to search for npm packages using [npms.io](https://npms.io)
+Raycast extension to search and favorite npm packages
 
   <p>
     <a href="https://www.raycast.com/mrmartineau/search-npm">
@@ -48,8 +48,9 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 
 - open the package's repository (if it is known)
 - open the package's homepage (if it is known)
+- open the package's changelog (if it is known)
 - open the package's npm page
-- open a npms.io search results page based on the package name
+- open the package's Skypack.dev page
 
 #### Info
 
@@ -58,15 +59,28 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 - view the package's [Snyk](https://snyk.io) vulnerability report
 - view the package source code on [GitHub.dev](https://github.dev) & [CodeSandbox](https://codesandbox.io)
 
+#### Actions
+
+- add/remove package to/from favorites
+
 #### Copy
 
 - copy yarn/npm install commands to clipboard
   - copy install command for preferred package manager: <kbd>cmd + shift + c</kbd>
-  - copy install command for alternate package manager: <kbd>cmd< + opt + c</kbd>
-- copy package name to clipboard - <kbd>cmd + c</kbd>
+  - copy install command for alternate package manager: <kbd>cmd + opt + c</kbd>
+- copy package name to clipboard
 
 ### Preferences
 
-- choose your preferred npm registry. `yarn` or `npm`
+- choose your default package manager. `yarn`, `npm` or `pnpm`
+- choose your secondary package manager. `yarn`, `npm` or `pnpm`
+- choose the default "open" action for a package: "open repository", "open homepage" or "open npm package page" or "open Skypack package page"
+- choose how many history items to show
 
-https://user-images.githubusercontent.com/64883/139598309-f47e1478-5f4e-44f6-bbea-e33a3b2f988b.mp4
+### Screencast
+
+https://github.com/raycast/extensions/assets/64883/e94be63a-50c9-4fa5-9f7c-788ebbb4ca72
+
+### Options
+
+<img width="311" alt="image" src="https://github.com/raycast/extensions/assets/64883/a4953656-6678-4f72-ac50-2e6b54a21172">

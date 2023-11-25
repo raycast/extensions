@@ -1,17 +1,14 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Icon,
   Image,
-  KeyboardShortcut,
   List,
-  OpenInBrowserAction,
-  OpenWithAction,
-  ShowInFinderAction,
   closeMainWindow,
   environment,
-  preferences,
-  render,
+  Application,
+  Action,
+  Keyboard,
+  getPreferenceValues,
 } from "@raycast/api";
 import Frecency from "frecency";
 import { mkdirSync, statSync, readFileSync, writeFileSync } from "fs";
@@ -23,14 +20,24 @@ import fuzzysort = require("fuzzysort");
 import config = require("parse-git-config");
 import gh = require("parse-github-url");
 
+interface Preferences {
+  paths: string;
+  includeWorkspaces: boolean;
+  editorApp: Application;
+  editorAppAlt: Application;
+  terminalApp: Application;
+}
+
 interface Remote {
   url: string;
 }
+
 type Repo = {
   name: string;
   host: string;
   url: string;
 };
+
 type ProjectList = Project[];
 
 class Project {
@@ -92,7 +99,9 @@ function searchProjects(query?: string): {
   projects: ProjectList;
 } {
   const projectList = useMemo(() => {
-    const projectPaths = (preferences.paths.value as string).split(",").map((s) => s.trim());
+    const projectPaths = getPreferenceValues<Preferences>()
+      .paths.split(",")
+      .map((s) => s.trim());
     const projects = projectPaths
       .flatMap((base) => {
         if (base.startsWith("~")) {
@@ -100,7 +109,13 @@ function searchProjects(query?: string): {
         }
         return sync(base + "/*");
       })
-      .filter((path) => statSync(path)?.isDirectory())
+      .filter(
+        (path) =>
+          statSync(path)?.isDirectory() ||
+          (getPreferenceValues<Preferences>().includeWorkspaces &&
+            statSync(path)?.isFile() &&
+            path.endsWith(".code-workspace"))
+      )
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
     return projects;
@@ -140,9 +155,12 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
   projectFrecency.save({ searchQuery: searchQuery || "", selectedId: project.fullPath });
 }
 
-function Command() {
+export default function Command() {
   const [searchQuery, setSearchQuery] = useState<string>();
   const { projects } = searchProjects(searchQuery);
+  const editorApp = getPreferenceValues<Preferences>().editorApp;
+  const editorAppAlt = getPreferenceValues<Preferences>().editorAppAlt;
+  const terminalApp = getPreferenceValues<Preferences>().terminalApp;
 
   return (
     <List onSearchTextChange={setSearchQuery} selectedItemId={projects[0] ? projects[0].fullPath : ""}>
@@ -155,42 +173,57 @@ function Command() {
           icon={Icon.TextDocument}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
-                title="Open in VSCode"
+              <Action
+                title={"Open in " + editorApp.name}
                 key="editor"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/Visual Studio Code.app" } });
+                  open(project.fullPath, { app: { name: editorApp.path } });
                   closeMainWindow();
                 }}
-                icon={{ fileIcon: "/Applications/Visual Studio Code.app" }}
+                icon={{ fileIcon: editorApp.path }}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
-              <ActionPanel.Item
-                title="Open in Terminal"
+              {editorAppAlt && (
+                <Action
+                  title={"Open in " + editorAppAlt.name}
+                  key="editorAlt"
+                  onAction={() => {
+                    updateFrecency(searchQuery, project);
+                    open(project.fullPath, { app: { name: editorAppAlt.path } });
+                    closeMainWindow();
+                  }}
+                  icon={{ fileIcon: editorAppAlt.path }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                />
+              )}
+              <Action
+                title={"Open in " + terminalApp.name}
                 key="terminal"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/iTerm.app", arguments: [project.fullPath] } });
+                  open(project.fullPath, {
+                    app: { name: terminalApp.path, arguments: [project.fullPath] },
+                  });
                   closeMainWindow();
                 }}
-                icon={{ fileIcon: "/Applications/iTerm.app" }}
+                icon={{ fileIcon: terminalApp.path }}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
               />
-              <ActionPanel.Item
-                title="Open in VSCode and Terminal"
+              <Action
+                title={"Open in both " + editorApp.name + " and " + terminalApp.name}
                 key="both"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/iTerm.app", arguments: [project.fullPath] } });
-                  open(project.fullPath, { app: { name: "/Applications/Visual Studio Code.app" } });
+                  open(project.fullPath, { app: { name: terminalApp.path, arguments: [project.fullPath] } });
+                  open(project.fullPath, { app: { name: editorApp.path } });
                   closeMainWindow();
                 }}
                 icon={Icon.Window}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
               />
               {project.gitRemotes().map((remote, i) => {
-                const shortcut = i === 0 ? ({ modifiers: ["cmd"], key: "b" } as KeyboardShortcut) : undefined;
+                const shortcut = i === 0 ? ({ modifiers: ["cmd"], key: "b" } as Keyboard.Shortcut) : undefined;
                 let icon = undefined as Image | undefined;
                 if (remote.host == "github.com") {
                   icon = { source: { dark: "github-brands-dark.png", light: "github-brands-light.png" } };
@@ -198,7 +231,7 @@ function Command() {
                   icon = { source: { dark: "gitlab-brands-dark.png", light: "gitlab-brands-light.png" } };
                 }
                 return (
-                  <OpenInBrowserAction
+                  <Action.OpenInBrowser
                     title={`Open on ${remote.host} (${remote.name})`}
                     key={`open remote ${remote.name}`}
                     url={remote.url}
@@ -208,20 +241,20 @@ function Command() {
                   />
                 );
               })}
-              <OpenWithAction
+              <Action.OpenWith
                 key="openwith"
                 path={project.fullPath}
                 onOpen={() => updateFrecency(searchQuery, project)}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
-              <ShowInFinderAction
+              <Action.ShowInFinder
                 title={"Open in Finder"}
                 key="finder"
                 onShow={() => updateFrecency(searchQuery, project)}
                 path={project.fullPath}
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
               />
-              <CopyToClipboardAction
+              <Action.CopyToClipboard
                 title={"Copy Path to Clipboard"}
                 key="clipboard"
                 onCopy={() => updateFrecency(searchQuery, project)}
@@ -237,4 +270,3 @@ function Command() {
 }
 
 mkdirSync(environment.supportPath, { recursive: true });
-render(<Command />);

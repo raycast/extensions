@@ -1,4 +1,14 @@
-import { ActionPanel, closeMainWindow, Form, Icon, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  closeMainWindow,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  popToRoot,
+  getPreferenceValues,
+} from "@raycast/api";
 import open from "open";
 
 interface FormValues {
@@ -13,7 +23,7 @@ interface FormValues {
 function CreateNoteAction() {
   async function handleSubmit(values: FormValues) {
     if (!values.text) {
-      showToast(ToastStyle.Failure, "Please enter text");
+      showToast(Toast.Style.Failure, "Please enter text");
       return;
     }
     open(
@@ -27,11 +37,13 @@ function CreateNoteAction() {
       { background: values.openNote === "no" ? true : false }
     );
     await closeMainWindow();
+    await popToRoot({ clearSearchBar: true });
   }
-  return <SubmitFormAction icon={Icon.Document} title="Create Note" onSubmit={handleSubmit} />;
+  return <Action.SubmitForm icon={Icon.Document} title="Create Note" onSubmit={handleSubmit} />;
 }
 
 export default function NewNote() {
+  const { newNoteOpenMode, prependTimeAndDate, pinNote } = getPreferenceValues();
   return (
     <Form
       navigationTitle={"Create Note"}
@@ -45,13 +57,13 @@ export default function NewNote() {
       <Form.TextArea id="text" title="Text" placeholder="Text to add to note ..." />
       <Form.TextField id="tags" title="Tags" placeholder="comma,separated,tags" />
       <Form.Separator />
-      <Form.Dropdown id="openNote" title="Open Note">
+      <Form.Dropdown id="openNote" title="Open Note" defaultValue={newNoteOpenMode}>
         <Form.Dropdown.Item value="no" title="Don't Open Note" />
         <Form.Dropdown.Item value="main" title="In Main Window" />
         <Form.Dropdown.Item value="new" title="In New Window" />
       </Form.Dropdown>
-      <Form.Checkbox id="timestamp" label="Prepend time and date" />
-      <Form.Checkbox id="pin" label="Pin note in notes list" />
+      <Form.Checkbox id="timestamp" label="Prepend time and date" defaultValue={prependTimeAndDate} />
+      <Form.Checkbox id="pin" label="Pin note in notes list" defaultValue={pinNote} />
     </Form>
   );
 }

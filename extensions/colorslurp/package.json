@@ -1,0 +1,152 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "colorslurp",
+  "title": "ColorSlurp",
+  "description": "Pick colors and convert them to different formats with ColorSlurp.",
+  "icon": "colorslurp-icon.png",
+  "author": "Jordan-Ellis",
+  "categories": [
+    "Applications",
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-magnifier",
+      "title": "Pick Color",
+      "description": "Pick colors with the magnifier.",
+      "mode": "no-view",
+      "keywords": [
+        "dropper",
+        "magnifier"
+      ]
+    },
+    {
+      "name": "recent-colors",
+      "title": "Recent Colors",
+      "description": "View recent colors",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action for the selected color.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "convert-color",
+      "title": "Convert Color",
+      "description": "Convert a color to a different format",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "color",
+          "placeholder": "Color",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action for the selected color.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "edit-color",
+      "title": "Edit Color",
+      "description": "Shows the specified color in ColorSlurp.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "color",
+          "placeholder": "Color",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "show-palettes",
+      "title": "Show Palettes",
+      "description": "Shows the palettes tab in ColorSlurp.",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-contrast",
+      "title": "Check Contrast",
+      "description": "Check the contrast of two different colors with ColorSlurp's contrast checker.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "foreground",
+          "placeholder": "Foreground",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "background",
+          "placeholder": "Background",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "show-settings",
+      "title": "Show Settings",
+      "description": "Shows ColorSlurp's settings.",
+      "mode": "no-view"
+    }
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.38.3",
+    "@raycast/utils": "^1.4.16",
+    "osascript-tag": "^0.1.2"
+  }
+}

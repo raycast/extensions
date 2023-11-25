@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pagerduty",
+  "title": "PagerDuty",
+  "description": "Display PagerDuty incidents and helps updating status.",
+  "icon": "command-icon.png",
+  "author": "horimislime",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View Incidents",
+      "subtitle": "PagerDuty",
+      "description": "Explore and Update Recent Incidents",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "User API Token",
+      "placeholder": "PagerDuty API token",
+      "description": "Generate your user API token (not account token) on User Settings page. For more detail, see https://support.pagerduty.com/docs/api-access-keys#section-generate-a-user-token-rest-api-key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.2",
+    "axios": "^0.27.2",
+    "date-fns": "^2.29.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

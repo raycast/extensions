@@ -6,6 +6,9 @@
   "icon": "icon.png",
   "author": "thomas",
   "license": "MIT",
+  "categories": [
+    "Fun"
+  ],
   "commands": [
     {
       "name": "index",
@@ -17,7 +20,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "use-interval": "^1.3.0"
+    "use-interval": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

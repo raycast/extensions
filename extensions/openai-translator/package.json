@@ -1,0 +1,646 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai-translator",
+  "title": "OpenAI Translator",
+  "description": "Translation based on ChatGPT API.",
+  "icon": "extension_icon.png",
+  "author": "douo",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "subtitle": "Based on ChatGPT API",
+      "description": "Translation based on ChatGPT API.",
+      "mode": "view"
+    },
+    {
+      "name": "polishing",
+      "title": "Polishing",
+      "subtitle": "Based on ChatGPT API",
+      "description": "Polishing based on ChatGPT API.",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "subtitle": "Based on ChatGPT API",
+      "description": "Summarize based on ChatGPT API.",
+      "mode": "view"
+    },
+    {
+      "name": "what",
+      "title": "What Is It?",
+      "subtitle": "Identifier based on ChatGPT API",
+      "description": "Identify some text and tell what is it?",
+      "mode": "view"
+    },
+    {
+      "name": "selected",
+      "title": "Query Selected",
+      "description": "Query selected text from frontmost application",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Query Mode",
+          "default": "translate",
+          "description": "Choice a mode to query using this command",
+          "data": [
+            {
+              "value": "translate",
+              "title": "Translate"
+            },
+            {
+              "value": "polishing",
+              "title": "Polishing"
+            },
+            {
+              "value": "summarize",
+              "title": "Summarize"
+            },
+            {
+              "value": "what",
+              "title": "What"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "clipboard",
+      "title": "Query Clipboard",
+      "description": "Query text from clipboard",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Query Mode",
+          "default": "translate",
+          "description": "Choice a mode to query using this command",
+          "data": [
+            {
+              "value": "translate",
+              "title": "Translate"
+            },
+            {
+              "value": "polishing",
+              "title": "Polishing"
+            },
+            {
+              "value": "summarize",
+              "title": "Summarize"
+            },
+            {
+              "value": "what",
+              "title": "What"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ocr",
+      "title": "Query OCR",
+      "description": "Query text from image",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "mode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Query Mode",
+          "default": "translate",
+          "description": "Choice a mode to query using this command",
+          "data": [
+            {
+              "value": "translate",
+              "title": "Translate"
+            },
+            {
+              "value": "polishing",
+              "title": "Polishing"
+            },
+            {
+              "value": "summarize",
+              "title": "Summarize"
+            },
+            {
+              "value": "what",
+              "title": "What"
+            }
+          ]
+        },
+        {
+          "name": "language",
+          "type": "dropdown",
+          "required": false,
+          "title": "Prefer Language",
+          "default": "en-US",
+          "description": "Prefer language to detect",
+          "data": [
+            {
+              "value": "en-US",
+              "title": "English"
+            },
+            {
+              "value": "fr-FR",
+              "title": "Français"
+            },
+            {
+              "value": "it-IT",
+              "title": "Italiano"
+            },
+            {
+              "value": "de-DE",
+              "title": "English"
+            },
+            {
+              "value": "pt-BR",
+              "title": "Português"
+            },
+            {
+              "value": "zh-Hans",
+              "title": "简体中文"
+            },
+            {
+              "value": "zh-Hant",
+              "title": "正體中文"
+            }
+          ]
+        },
+        {
+          "name": "level",
+          "type": "dropdown",
+          "required": false,
+          "title": "Level",
+          "default": "accurate",
+          "description": "A value that determines whether the request prioritizes accuracy or speed in text recognition.",
+          "data": [
+            {
+              "value": "accurate",
+              "title": "Accurate"
+            },
+            {
+              "value": "fast",
+              "title": "Fast"
+            }
+          ]
+        },
+        {
+          "name": "customWords",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Words",
+          "default": "",
+          "description": "An array of strings to supplement the recognized languages at the word-recognition stage.",
+          "placeholder": "An array of words split by ', '. ex: a, b, c"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "type": "dropdown",
+      "required": true,
+      "title": "Provider",
+      "default": "openai",
+      "description": "Choice API Provider",
+      "data": [
+        {
+          "value": "openai",
+          "title": "OpenAI"
+        },
+        {
+          "value": "raycast",
+          "title": "Raycast AI"
+        },
+        {
+          "value": "azure",
+          "title": "Azure"
+        },
+        {
+          "value": "palm2",
+          "title": "PaLM 2"
+        }
+      ]
+    },
+    {
+      "name": "apikey",
+      "label": "API Key",
+      "description": "Enter your API Key for your provider,  Type 'none' if your entrypoint do not require an API key",
+      "type": "password",
+      "title": "API Key",
+      "required": true
+    },
+    {
+      "name": "entrypoint",
+      "label": "API Entrypoint",
+      "description": "Enter your provider entrypoint, If your provider does not require an entrypoint, it will be ignored.",
+      "type": "textfield",
+      "title": "API Entrypoint",
+      "default": "https://api.openai.com/v1/chat/completions",
+      "required": true
+    },
+    {
+      "name": "apiModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "API Model",
+      "default": "gpt-3.5-turbo-0613",
+      "description": "Choose an OpenAI API model, which is only available when using the OpenAI provider",
+      "data": [
+        {
+          "value": "gpt-3.5-turbo-0613",
+          "title": "gpt-3.5-turbo-0613"
+        },
+        {
+          "value": "gpt-3.5-turbo",
+          "title": "gpt-3.5-turbo"
+        },
+        {
+          "value": "gpt-3.5-turbo-0301",
+          "title": "gpt-3.5-turbo-0301"
+        },
+        {
+          "value": "gpt-4",
+          "title": "gpt-4"
+        },
+        {
+          "value": "gpt-4-0314",
+          "title": "gpt-4-0314"
+        },
+        {
+          "value": "gpt-4-32k",
+          "title": "gpt-4-32k"
+        },
+        {
+          "value": "gpt-4-32k-0314",
+          "title": "gpt-4-32k-0314"
+        }
+      ]
+    },
+    {
+      "name": "toLang",
+      "type": "dropdown",
+      "required": true,
+      "title": "Translate to",
+      "default": "zh-Hans",
+      "data": [
+        {
+          "value": "en",
+          "title": "English"
+        },
+        {
+          "value": "zh-Hans",
+          "title": "简体中文"
+        },
+        {
+          "value": "zh-Hant",
+          "title": "正體中文"
+        },
+        {
+          "value": "yue",
+          "title": "粤语"
+        },
+        {
+          "value": "lzh",
+          "title": "古文"
+        },
+        {
+          "value": "jdbhw",
+          "title": "近代白话文"
+        },
+        {
+          "value": "xdbhw",
+          "title": "现代白话文"
+        },
+        {
+          "value": "ja",
+          "title": "日本語"
+        },
+        {
+          "value": "ko",
+          "title": "한국어"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "de",
+          "title": "Deutsch"
+        },
+        {
+          "value": "es",
+          "title": "Español"
+        },
+        {
+          "value": "it",
+          "title": "Italiano"
+        },
+        {
+          "value": "ru",
+          "title": "Русский"
+        },
+        {
+          "value": "pt",
+          "title": "Português"
+        },
+        {
+          "value": "nl",
+          "title": "Nederlands"
+        },
+        {
+          "value": "pl",
+          "title": "Polski"
+        },
+        {
+          "value": "ar",
+          "title": "العربية"
+        },
+        {
+          "value": "af",
+          "title": "Afrikaans"
+        },
+        {
+          "value": "am",
+          "title": "አማርኛ"
+        },
+        {
+          "value": "az",
+          "title": "Azərbaycan"
+        },
+        {
+          "value": "be",
+          "title": "Беларуская"
+        },
+        {
+          "value": "bg",
+          "title": "Български"
+        },
+        {
+          "value": "bn",
+          "title": "বাংলা"
+        },
+        {
+          "value": "bs",
+          "title": "Bosanski"
+        },
+        {
+          "value": "ca",
+          "title": "Català"
+        },
+        {
+          "value": "ceb",
+          "title": "Cebuano"
+        },
+        {
+          "value": "co",
+          "title": "Corsu"
+        },
+        {
+          "value": "cs",
+          "title": "Čeština"
+        },
+        {
+          "value": "cy",
+          "title": "Cymraeg"
+        },
+        {
+          "value": "da",
+          "title": "Dansk"
+        },
+        {
+          "value": "el",
+          "title": "Ελληνικά"
+        },
+        {
+          "value": "eo",
+          "title": "Esperanto"
+        },
+        {
+          "value": "et",
+          "title": "Eesti"
+        },
+        {
+          "value": "eu",
+          "title": "Euskara"
+        },
+        {
+          "value": "fa",
+          "title": "فارسی"
+        },
+        {
+          "value": "fi",
+          "title": "Suomi"
+        },
+        {
+          "value": "fj",
+          "title": "Fijian"
+        },
+        {
+          "value": "fy",
+          "title": "Frysk"
+        },
+        {
+          "value": "ga",
+          "title": "Gaeilge"
+        },
+        {
+          "value": "gd",
+          "title": "Gàidhlig"
+        },
+        {
+          "value": "gl",
+          "title": "Galego"
+        },
+        {
+          "value": "gu",
+          "title": "ગુજરાતી"
+        },
+        {
+          "value": "ha",
+          "title": "Hausa"
+        },
+        {
+          "value": "haw",
+          "title": "Hawaiʻi"
+        },
+        {
+          "value": "he",
+          "title": "עברית"
+        },
+        {
+          "value": "hi",
+          "title": "हिन्दी"
+        },
+        {
+          "value": "hmn",
+          "title": "Hmong"
+        },
+        {
+          "value": "hr",
+          "title": "Hrvatski"
+        },
+        {
+          "value": "ht",
+          "title": "Kreyòl Ayisyen"
+        },
+        {
+          "value": "hu",
+          "title": "Magyar"
+        },
+        {
+          "value": "hy",
+          "title": "Հայերեն"
+        },
+        {
+          "value": "id",
+          "title": "Bahasa Indonesia"
+        },
+        {
+          "value": "ig",
+          "title": "Igbo"
+        },
+        {
+          "value": "is",
+          "title": "Íslenska"
+        },
+        {
+          "value": "jw",
+          "title": "Jawa"
+        },
+        {
+          "value": "ka",
+          "title": "ქართული"
+        },
+        {
+          "value": "kk",
+          "title": "Қазақ"
+        }
+      ],
+      "description": "Choice First language"
+    },
+    {
+      "name": "isAutoLoadSelected",
+      "label": "Enable auto-load selected text",
+      "description": "Load selected text from your frontmost application to the search bar automatically",
+      "type": "checkbox",
+      "title": "Auto-load Selected",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoLoadClipboard",
+      "label": "Enable auto-load clipboard text",
+      "description": "Load selected text from your frontmost application to the search bar automatically",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoStart",
+      "label": "Enable auto-start translation",
+      "description": "Auto start translation if search bar auto-fill. for selected or clipboard prefer using \"Query XXX\" commands.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "maxHistorySize",
+      "description": "Enter a *number* as max history size",
+      "type": "textfield",
+      "title": "Max History Size",
+      "required": false,
+      "default": "30"
+    },
+    {
+      "name": "alwayShowMetadata",
+      "label": "Alway show metadata",
+      "description": "Toggle default visiability of metadata in the translation content view",
+      "type": "checkbox",
+      "title": "Metadata Visiability",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "useProxy",
+      "label": "Enable proxy for each request",
+      "description": "Each request will be passed through the proxy",
+      "type": "checkbox",
+      "title": "Use Proxy",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "proxyHost",
+      "description": "Sever address of the proxy",
+      "type": "textfield",
+      "title": "Socks5 Proxy Host",
+      "required": false
+    },
+    {
+      "name": "proxyPort",
+      "description": "Server port of the proxy",
+      "type": "textfield",
+      "title": "Socks5 Proxy Port",
+      "required": false
+    },
+    {
+      "name": "proxyUsername",
+      "description": "Leave empty if doesn't have",
+      "type": "textfield",
+      "title": "Socks5 Proxy Username",
+      "required": false
+    },
+    {
+      "name": "proxyPassword",
+      "description": "Leave empty if doesn't have",
+      "type": "password",
+      "title": "Socks5 Proxy Password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@google-ai/generativelanguage": "^0.2.0",
+    "@raycast/api": "^1.51.1",
+    "capitalize": "^2.0.4",
+    "eventsource-parser": "^0.1.0",
+    "google-auth-library": "^8.8.0",
+    "iso-639-1": "^2.1.15",
+    "iso-639-3-to-1": "^1.0.0",
+    "node-fetch": "^3.3.0",
+    "socks-proxy-agent": "^7.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/capitalize": "^2.0.0",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/uuid": "^9.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "2.8.4",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/{ocr,lang} assets",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

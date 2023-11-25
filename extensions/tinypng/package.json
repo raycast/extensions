@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinypng",
+  "title": "TinyPNG",
+  "description": "Compress the selected images in Finder with TinyPNG.",
+  "icon": "tinypng-icon.png",
+  "author": "kawamataryo",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compressImages",
+      "title": "Compress Images",
+      "subtitle": "TinyPNG",
+      "description": "Compress selected images with TinyPNG.",
+      "mode": "no-view"
+    },
+    {
+      "name": "resizingImages",
+      "title": "Resizing Images",
+      "subtitle": "TinyPNG",
+      "description": "Compress and resizing selected images with TinyPNG.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "method",
+          "placeholder": "fit",
+          "type": "text",
+          "description": "Resize method. Available values are values are 'fit', 'scale', 'cover', 'thumb'",
+          "required": true
+        },
+        {
+          "name": "width",
+          "placeholder": "width(px)",
+          "type": "text",
+          "description": "Width to be resized",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "height(px)",
+          "type": "text",
+          "description": "height to be resized",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "TinyPNG API Key.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "title": "Destination Folder Path",
+      "name": "destinationFolderPath",
+      "description": "Set Destination Folder path. Specify an absolute path or a relative path from the target file.",
+      "type": "textfield",
+      "required": true,
+      "default": "./compressed-images"
+    },
+    {
+      "title": "Options",
+      "name": "overwrite",
+      "description": "Whether to overwrite the original image file.",
+      "type": "checkbox",
+      "label": "Overwrite Original Image File",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "node-fetch": "^3.2.10",
+    "zod": "^3.20.6"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3",
+    "vitest": "^0.30.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest"
+  }
+}

@@ -1,7 +1,8 @@
-import { ActionPanel, Form, popToRoot, randomId, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
 import { isPhoneChat, PhoneChat, WhatsAppChat } from "./utils/types";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
 import { phone as parsePhone } from "phone";
+import { nanoid as randomId } from "nanoid";
 
 interface WhatsAppPhoneChatFormProps {
   defaultValue?: PhoneChat;
@@ -12,14 +13,14 @@ interface FormValues extends Omit<PhoneChat, "id" | "pinned"> {
 }
 
 export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneChatFormProps) {
-  const { chats, updateChats } = useWhatsAppChats();
+  const [chats, setChats] = useWhatsAppChats();
   const isCreation = !defaultValue;
 
   async function handleSubmit(formValues: FormValues) {
     const phoneInformation = parsePhone(formValues.phone);
 
     if (!phoneInformation.isValid) {
-      await showToast(ToastStyle.Failure, "Invalid phone format");
+      await showToast(Toast.Style.Failure, "Invalid phone format");
       return;
     }
 
@@ -36,13 +37,13 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
       .some((chat) => chat.phone === phoneInformation.phoneNumber);
 
     if (isNewPhoneNumber && doesPhoneNumberAlreadyExist) {
-      await showToast(ToastStyle.Failure, "Chat already exists");
+      await showToast(Toast.Style.Failure, "Chat already exists");
       return;
     }
 
     if (isCreation) {
-      await updateChats([...chats, savedChat]);
-      await showToast(ToastStyle.Success, `Created new chat`, savedChat.name);
+      setChats([...chats, savedChat]);
+      await showToast(Toast.Style.Success, `Created new chat`, savedChat.name);
     } else {
       const newChats = chats.map((chat) => {
         if (chat.id === savedChat.id) {
@@ -50,8 +51,8 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
         }
         return chat;
       });
-      await updateChats(newChats);
-      await showToast(ToastStyle.Success, `Updated existing chat`, savedChat.name);
+      setChats(newChats);
+      await showToast(Toast.Style.Success, `Updated existing chat`, savedChat.name);
     }
 
     await popToRoot({ clearSearchBar: true });
@@ -61,7 +62,7 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Save Chat" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save Chat" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

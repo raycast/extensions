@@ -5,7 +5,7 @@ export interface ProjectEntry {
   enabled: boolean;
 }
 
-export interface GitCachedProjectEntry {
+export interface CachedProjectEntry {
   name: string;
   fullPath: string;
 }
@@ -15,4 +15,12 @@ export interface Preferences {
   groupProjectsByTag: boolean;
   terminalAppPath: string;
   gitClientAppPath: string;
+  build: VSCodeBuild;
+  hideProjectsWithoutTag: boolean;
+}
+
+export enum VSCodeBuild {
+  Code = "Code",
+  Insiders = "Code - Insiders",
+  VSCodium = "VSCodium",
 }

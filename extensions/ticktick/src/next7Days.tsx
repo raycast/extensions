@@ -1,17 +1,20 @@
 import { List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import { getNext7Days } from "./service/osScript";
-import { Section } from "./service/task";
+import { getTaskCopyContent, getTaskDetailMarkdownContent, Section } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
 import useSearchTasks from "./hooks/useSearchTasks";
 import TaskItem from "./components/taskItem";
+import useRefreshList from "./hooks/useRefreshList";
 
 const TickTickNext7Days: React.FC<Record<string, never>> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sections, setSections] = useState<Section[] | null>(null);
   const { isInitCompleted } = useStartApp();
+  const { refreshPoint, refresh } = useRefreshList();
 
   useEffect(() => {
+    console.log("refreshPoint", refreshPoint);
     const getTasks = async () => {
       const tasks = await getNext7Days();
       setSections(tasks);
@@ -20,9 +23,9 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
     if (isInitCompleted) {
       getTasks();
     }
-  }, [isInitCompleted]);
+  }, [isInitCompleted, refreshPoint]);
 
-  const { searchTasks } = useSearchTasks({ searchQuery, isInitCompleted });
+  const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
 
   const isLoading = useMemo(() => {
     if (!isInitCompleted) {
@@ -30,13 +33,18 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
     }
 
     if (searchQuery) {
-      return searchTasks == null;
+      return isSearching;
     }
     return sections == null;
-  }, [isInitCompleted, searchQuery, searchTasks, sections]);
+  }, [isInitCompleted, searchQuery, isSearching, sections]);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchQuery} searchBarPlaceholder="Search all tasks...">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchQuery}
+      searchBarPlaceholder="Search all tasks..."
+      isShowingDetail
+    >
       {searchTasks
         ? searchTasks.map((task) => (
             <TaskItem
@@ -46,6 +54,10 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
               title={task.title}
               projectId={task.projectId}
               priority={task.priority}
+              tags={task.tags}
+              detailMarkdown={getTaskDetailMarkdownContent(task)}
+              copyContent={getTaskCopyContent(task)}
+              refresh={refresh}
             />
           ))
         : sections?.map((section) => {
@@ -59,6 +71,10 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
                     title={task.title}
                     projectId={task.projectId}
                     priority={task.priority}
+                    tags={task.tags}
+                    detailMarkdown={getTaskDetailMarkdownContent(task)}
+                    copyContent={getTaskCopyContent(task)}
+                    refresh={refresh}
                   />
                 ))}
               </List.Section>

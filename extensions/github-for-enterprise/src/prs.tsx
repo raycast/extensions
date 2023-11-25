@@ -2,7 +2,7 @@ import PRTemplate from "@/components/PullRequest";
 import { GET_PRS } from "@/queries/pull-requests";
 import { GetPullRequests } from "@/types";
 import { fetcher, partition, plural } from "@/utils";
-import { List, popToRoot, showToast, ToastStyle } from "@raycast/api";
+import { List, popToRoot, showToast, Toast } from "@raycast/api";
 import Fuse from "fuse.js";
 import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
@@ -15,7 +15,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [open, recentlyClosed] = useMemo(
     () => partition(data?.user.pullRequests.nodes || [], ({ state }) => /OPEN/.test(state)),
-    [data]
+    [data],
   );
 
   const fuseOpen = useMemo(
@@ -25,7 +25,7 @@ export default function Command() {
         ignoreLocation: true,
         keys: ["title", "number", "repository.nameWithOwner"],
       }),
-    [open]
+    [open],
   );
 
   const fuseRecentlyClosed = useMemo(
@@ -35,7 +35,7 @@ export default function Command() {
         ignoreLocation: true,
         keys: ["title", "number", "repository.nameWithOwner"],
       }),
-    [recentlyClosed]
+    [recentlyClosed],
   );
 
   const searchOpen = useCallback(
@@ -50,7 +50,7 @@ export default function Command() {
 
       return fuseOpen.search(str);
     },
-    [open]
+    [open],
   );
 
   const searchRecentlyClosed = useCallback(
@@ -65,12 +65,16 @@ export default function Command() {
 
       return fuseRecentlyClosed.search(str);
     },
-    [recentlyClosed]
+    [recentlyClosed],
   );
 
   if (error) {
     popToRoot();
-    showToast(ToastStyle.Failure, "Could not get pull requests", error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not get pull requests",
+      message: error.message,
+    });
   }
 
   return (
