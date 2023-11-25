@@ -8,20 +8,31 @@ function generateArgs(additionalArgs?: string) {
   if (preferences.preventDisplay) args.push("d");
   if (preferences.preventDisk) args.push("m");
   if (preferences.preventSystem) args.push("i");
-  if (additionalArgs) args.push(` ${args}`);
+  if (additionalArgs) args.push(` ${additionalArgs}`);
 
   return args.length > 0 ? `-${args.join("")}` : "";
 }
 
-export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) {
-  try {
-    if (updateMenubar) {
-      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: false } });
+type Updates = {
+  menubar: boolean;
+  status: boolean;
+};
+
+async function update(updates: Updates, caffeinated: boolean) {
+  if (updates.menubar) {
+    try {
+      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated } });
+    } catch (error) {
+      // catch error if menubar is not enabled
     }
-    await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: false } });
-  } catch (error) {
-    console.error(error);
   }
+  if (updates.status) {
+    await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated } });
+  }
+}
+
+export async function stopCaffeinate(updates: Updates, hudMessage?: string) {
+  update(updates, false);
 
   if (hudMessage) {
     await showHUD(hudMessage);
@@ -30,21 +41,9 @@ export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) 
   exec("/usr/bin/killall caffeinate");
 }
 
-export async function startCaffeinate(updateMenubar = true, hudMessage?: string, additionalArgs?: string) {
-  await stopCaffeinate(false);
-  try {
-    if (updateMenubar) {
-      // will error if menubar is not enabled
-      try {
-        await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: true } });
-      } catch (e) {
-        console.log("Menubar command is not enabled");
-      }
-    }
-    await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: true } });
-  } catch (error) {
-    console.error(error);
-  }
+export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
+  await stopCaffeinate({ menubar: false, status: false});
+  update(updates, true);
 
   if (hudMessage) {
     await showHUD(hudMessage);
