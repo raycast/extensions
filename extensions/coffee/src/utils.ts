@@ -1,28 +1,28 @@
 import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { exec } from "node:child_process";
 
-function preventArguments(args?: string | undefined) {
+function generateArgs(additionalArgs?: string) {
   const preferences = getPreferenceValues<Preferences>();
-  const preventArguments = [];
+  const args = [];
 
   if (preferences.preventDisplay) {
-    preventArguments.push("d");
+    args.push("d");
   }
 
   if (preferences.preventDisk) {
-    preventArguments.push("m");
+    args.push("m");
   }
 
   if (preferences.preventSystem) {
-    preventArguments.push("i");
+    args.push("i");
   }
 
-  if (typeof args === "string") {
-    preventArguments.push(` ${args}`);
+  if (additionalArgs) {
+    args.push(` ${args}`);
   }
 
-  if (preventArguments.length > 0) {
-    return `-${preventArguments.join("")}`;
+  if (args.length > 0) {
+    return `-${args.join("")}`;
   }
 
   return "";
@@ -45,7 +45,7 @@ export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) 
   exec("/usr/bin/killall caffeinate");
 }
 
-export async function startCaffeinate(updateMenubar = true, hudMessage?: string, args?: string | undefined) {
+export async function startCaffeinate(updateMenubar = true, hudMessage?: string, additionalArgs?: string) {
   await stopCaffeinate(false);
   try {
     if (updateMenubar) {
@@ -65,5 +65,5 @@ export async function startCaffeinate(updateMenubar = true, hudMessage?: string,
     await showHUD(hudMessage);
   }
 
-  exec(`/usr/bin/caffeinate ${preventArguments(args)}`);
+  exec(`/usr/bin/caffeinate ${generateArgs(additionalArgs)}`);
 }
