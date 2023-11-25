@@ -49,7 +49,12 @@ export async function startCaffeinate(updateMenubar = true, hudMessage?: string,
   await stopCaffeinate(false);
   try {
     if (updateMenubar) {
-      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: true } });
+      // will error if menubar is not enabled
+      try {
+        await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated: true } });
+      } catch (e) {
+        console.log("Menubar command is not enabled");
+      }
     }
     await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated: true } });
   } catch (error) {
