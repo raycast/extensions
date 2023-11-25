@@ -42,7 +42,7 @@ export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) 
     await showHUD(hudMessage);
   }
 
-  return exec("/usr/bin/killall caffeinate");
+  exec("/usr/bin/killall caffeinate");
 }
 
 export async function startCaffeinate(updateMenubar = true, hudMessage?: string, args?: string | undefined) {
@@ -65,5 +65,5 @@ export async function startCaffeinate(updateMenubar = true, hudMessage?: string,
     await showHUD(hudMessage);
   }
 
-  return exec(`/usr/bin/caffeinate ${preventArguments(args)}`);
+  exec(`/usr/bin/caffeinate ${preventArguments(args)}`);
 }
