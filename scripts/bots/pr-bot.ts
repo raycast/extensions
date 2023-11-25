@@ -12,6 +12,11 @@ type API = {
 
 export default async ({ github, context }: API) => {
   console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
+
+  if (!process.env.CHANGED_EXTENSIONS) {
+    console.log("No changed extensions");
+    return;
+  }
   const touchedExtensions = new Set(
     process.env.CHANGED_EXTENSIONS?.split(",")
       .map((x) => x.split("extensions/").filter(Boolean)[1])
