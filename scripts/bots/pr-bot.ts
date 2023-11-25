@@ -11,11 +11,13 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
   const touchedExtensions = new Set(
     process.env.CHANGED_EXTENSIONS?.split(",")
-      .map((x) => x.split("/extensions/extensions/extensions/")[1])
+      .map((x) => x.split("extensions/").filter(Boolean)[1])
       .map((x) => x.split("/")[0])
   );
+  console.log("changed extensions", touchedExtensions);
 
   if (touchedExtensions.size > 1) {
     console.log("We only notify people when updating a single extension");
