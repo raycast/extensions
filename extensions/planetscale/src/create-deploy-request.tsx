@@ -1,6 +1,6 @@
 import { useBranches, useDatabases, useOrganizations } from "./utils/hooks";
-import { FormValidation, getAvatarIcon, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Color, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { FormValidation, getAvatarIcon, useForm, usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { pscale } from "./utils/api";
 import { useEffect } from "react";
 import { enrichToastWithURL } from "./utils/raycast";
@@ -13,6 +13,22 @@ interface CreateDeployRequestForm {
   organization: string;
 }
 
+async function getDeployRequest(values: CreateDeployRequestForm) {
+  const existingRequests = await pscale.listDeployRequests({
+    state: "open",
+    branch: values.branch,
+    into_branch: values.deploy,
+    database: values.database,
+    organization: values.organization,
+  });
+  return existingRequests.data.data[0];
+}
+
+function useExistingDeployRequest(values: CreateDeployRequestForm) {
+  const { data, isLoading } = usePromise(getDeployRequest, [values]);
+  return { existingDeployRequest: data, existingDeployRequestLoading: isLoading };
+}
+
 export default function CreateDeployRequest({
   database,
   organization,
@@ -22,28 +38,20 @@ export default function CreateDeployRequest({
   organization?: string;
   branch?: string;
 }) {
-  const { itemProps, handleSubmit, values, setValue } = useForm<CreateDeployRequestForm>({
+  const { itemProps, values, handleSubmit, setValidationError, setValue, reset } = useForm<CreateDeployRequestForm>({
     validation: {
       branch: FormValidation.Required,
       deploy: FormValidation.Required,
     },
     initialValues: {
-      branch: branch,
+      branch,
       organization,
       database,
     },
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating deploy request" });
 
-      const existingRequests = await pscale.listDeployRequests({
-        state: "open",
-        branch: values.branch,
-        into_branch: values.deploy,
-        database: values.database ?? database,
-        organization: values.organization ?? organization,
-      });
-
-      const existingDeployRequest = existingRequests.data.data[0];
+      const existingDeployRequest = await getDeployRequest(values);
       if (existingDeployRequest) {
         toast.title = "Existing deploy request";
         toast.message = "A deploy request with the same details already exists";
@@ -64,19 +72,24 @@ export default function CreateDeployRequest({
         },
       );
 
+      reset({
+        notes: "",
+        branch: "",
+      });
+
       toast.title = "Deploy request created";
       toast.style = Toast.Style.Success;
       enrichToastWithURL(toast, deployRequest.data.html_url);
-
-      await popToRoot();
     },
   });
+
+  const { existingDeployRequest, existingDeployRequestLoading } = useExistingDeployRequest(values);
 
   const { organizations, organizationsLoading } = useOrganizations();
   const { databases, databasesLoading } = useDatabases({ organization: values.organization });
   const { branches, branchesLoading } = useBranches({ organization: values.organization, database: values.database });
 
-  const isLoading = organizationsLoading || branchesLoading || databasesLoading;
+  const isLoading = organizationsLoading || branchesLoading || databasesLoading || existingDeployRequestLoading;
 
   useEffect(() => {
     if (!branchesLoading && !branch) {
@@ -87,6 +100,14 @@ export default function CreateDeployRequest({
       if (deploy) setValue("deploy", deploy);
     }
   }, [branchesLoading, branches, branch]);
+
+  useEffect(() => {
+    if (existingDeployRequest) {
+      setValidationError("branch", "Deploy request exists.");
+    } else {
+      setValidationError("branch", null);
+    }
+  }, [existingDeployRequest]);
 
   return (
     <Form
@@ -114,27 +135,19 @@ export default function CreateDeployRequest({
       {!database && (
         <Form.Dropdown storeValue title="Database" {...itemProps.database}>
           {databases?.map((database) => (
-            <Form.Dropdown.Item
-              key={database.name}
-              icon={{
-                source: "database-1234.svg",
-                tintColor: Color.PrimaryText,
-              }}
-              title={database.name}
-              value={database.name}
-            />
+            <Form.Dropdown.Item key={database.name} title={database.name} value={database.name} />
           ))}
         </Form.Dropdown>
       )}
       {!organization || !database ? <Form.Separator /> : null}
-      <Form.Dropdown title="Origin" {...itemProps.branch}>
+      <Form.Dropdown autoFocus title="Origin" {...itemProps.branch}>
         {branches
           ?.filter((branch) => !branch.production)
           .map((branch) => <Form.Dropdown.Item key={branch.name} title={branch.name} value={branch.name} />)}
       </Form.Dropdown>
-      <Form.Dropdown autoFocus={!!branch} title="Target" {...itemProps.deploy}>
+      <Form.Dropdown title="Target" {...itemProps.deploy}>
         {branches
-          ?.filter((branch) => branch.id !== values.branch)
+          ?.filter((branch) => branch.name !== values.branch)
           .map((branch) => <Form.Dropdown.Item key={branch.name} title={branch.name} value={branch.name} />)}
       </Form.Dropdown>
       <Form.Separator />
