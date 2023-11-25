@@ -20,12 +20,12 @@ import {
   ChangeUserTicketingEmailRequest,
 } from "../types";
 import fetch, { Response } from "node-fetch";
-import { API_URL, RESELLER_PASSWORD, RESELLER_USERNAME, TOKEN } from "./constants";
+import { API_URL, RESELLER_PASSWORD, RESELLER_USERNAME, RESELLER_API_TOKEN } from "./constants";
 import { showFailureToast } from "@raycast/utils";
 
 const callApi = async (endpoint: string, animatedToastMessage = "", body?: BodyRequest, userToImpersonate = "") => {
   const token =
-    userToImpersonate === "" ? TOKEN : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
+    userToImpersonate === "" ? RESELLER_API_TOKEN : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
   const headers = { Authorization: `Basic ${token}` };
 
   await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
@@ -57,6 +57,7 @@ const callApi = async (endpoint: string, animatedToastMessage = "", body?: BodyR
     const urlSearchParams = new URLSearchParams(response);
     const params = {} as { [key: string]: string | string[] };
     urlSearchParams.forEach((value, key) => {
+      // this accounts for responeses like: list[]=item1&list[]=item2...
       if (urlSearchParams.getAll(key).length > 1 || key.includes("[]")) {
         key = key.replace("[]", ""); // Remove square brackets
         params[key] = ((params[key] as string[]) || []).concat(value);

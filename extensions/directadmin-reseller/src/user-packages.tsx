@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { getUserPackageInformation, getUserPackages } from "./utils/api";
 import { ErrorResponse, GetUserPackageInformationResponse, GetUserPackagesResponse } from "./types";
-import { Action, ActionPanel, Color, Detail, Icon, List, Toast, showToast } from "@raycast/api";
-import { getTitleFromKey } from "./utils/functions";
+import { Action, ActionPanel, Detail, Icon, List, Toast, showToast } from "@raycast/api";
+import { getTextAndIconFromVal, getTitleFromKey } from "./utils/functions";
 import ErrorComponent from "./components/ErrorComponent";
 
 export default function UserPackages() {
@@ -92,25 +92,8 @@ function GetPackageInformation({ packageName }: GetPackageInformationProps) {
           <Detail.Metadata>
             {Object.entries(information).map(([key, val]) => {
               const title = getTitleFromKey(key);
-              if (val === "ON")
-                return (
-                  <Detail.Metadata.Label
-                    key={key}
-                    title={title}
-                    text={undefined}
-                    icon={{ source: Icon.Check, tintColor: Color.Green }}
-                  />
-                );
-              else if (val === "OFF")
-                return (
-                  <Detail.Metadata.Label
-                    key={key}
-                    title={title}
-                    text={undefined}
-                    icon={{ source: Icon.Multiply, tintColor: Color.Red }}
-                  />
-                );
-              else return <Detail.Metadata.Label key={key} title={title} text={val} />;
+              const { text, icon } = getTextAndIconFromVal(val);
+              return <Detail.Metadata.Label key={key} title={title} text={text} icon={icon} />;
             })}
           </Detail.Metadata>
         )
