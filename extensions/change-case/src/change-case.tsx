@@ -98,7 +98,7 @@ export default function Command(props: LaunchProps) {
     return;
   }
 
-  const [clipboard, setClipboard] = useState<string>("");
+  const [content, setContent] = useState<string>("");
   const [frontmostApp, setFrontmostApp] = useState<Application>();
 
   const [pinned, setPinned] = useState<CaseType[]>([]);
@@ -118,19 +118,23 @@ export default function Command(props: LaunchProps) {
     setRecentCases(recent);
   }, [recent]);
 
+  const refreshContent = async () => {
+    try {
+      setContent(await readContent(preferredSource));
+    } catch (error) {
+      if (error instanceof NoTextError) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to convert",
+          message: "Please ensure that text is either selected or copied",
+        });
+      }
+    }
+  }
+
   useEffect(() => {
-    readContent(preferredSource)
-      .then((c) => setClipboard(c))
-      .catch((error) => {
-        if (error instanceof NoTextError) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Nothing to convert",
-            message: "Please ensure that text is either selected or copied",
-          });
-        }
-      });
-  }, [preferredSource]);
+    refreshContent();
+  }, []);
 
   const CopyToClipboard = (props: {
     case: CaseType;
@@ -251,6 +255,14 @@ export default function Command(props: LaunchProps) {
                 quicklink={{ name: `Convert to ${props.case}`, link: deeplink }}
               />
             </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action
+                title="Refresh Content"
+                icon={Icon.RotateAntiClockwise}
+                shortcut={{ key: "r", modifiers: ["cmd"] }}
+                onAction={refreshContent}
+              />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />
@@ -264,7 +276,7 @@ export default function Command(props: LaunchProps) {
           <CaseItem
             key={key}
             case={key as CaseType}
-            modified={modifyCasesWrapper(clipboard, functions[key])}
+            modified={modifyCasesWrapper(content, functions[key])}
             pinned={true}
           />
         ))}
@@ -274,7 +286,7 @@ export default function Command(props: LaunchProps) {
           <CaseItem
             key={key}
             case={key as CaseType}
-            modified={modifyCasesWrapper(clipboard, functions[key])}
+            modified={modifyCasesWrapper(content, functions[key])}
             recent={true}
           />
         ))}
@@ -288,7 +300,7 @@ export default function Command(props: LaunchProps) {
               !pinned.includes(key as CaseType),
           )
           .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(clipboard, func)} />
+            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(content, func)} />
           ))}
       </List.Section>
     </List>
