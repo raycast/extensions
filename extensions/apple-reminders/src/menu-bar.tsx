@@ -12,6 +12,7 @@ import {
   openCommandPreferences,
   openExtensionPreferences,
 } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import {
   addWeeks,
   endOfWeek,
@@ -39,6 +40,8 @@ export default function Command() {
   const { displayMenuBarCount, view } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
+  const [listId, setListId] = useCachedState<string>("menu-bar-list");
+  const list = data?.lists.find((l) => l.id === listId);
 
   const sections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -47,7 +50,8 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    data?.reminders.forEach((reminder) => {
+    const reminders = listId ? data?.reminders.filter((reminder) => reminder.list?.id === listId) : data?.reminders;
+    reminders?.forEach((reminder) => {
       if (reminder.isCompleted) return;
 
       if (!reminder.dueDate) {
@@ -149,6 +153,11 @@ export default function Command() {
       default:
         return title;
     }
+  }
+
+  async function handleListChange(listId?: string) {
+    setListId(listId);
+    await mutate();
   }
 
   return (
@@ -280,6 +289,18 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd"], key: "n" }}
           onAction={() => launchCommand({ name: "create-reminder", type: LaunchType.UserInitiated })}
         />
+
+        <MenuBarExtra.Submenu title={`Configure List (${list?.title ?? "All"})`} icon={Icon.List}>
+          <MenuBarExtra.Item title="All" onAction={() => handleListChange(undefined)} icon={Icon.Tray} />
+          {data?.lists.map((list) => (
+            <MenuBarExtra.Item
+              key={list.id}
+              title={list.title}
+              onAction={() => handleListChange(list.id)}
+              icon={{ source: Icon.Circle, tintColor: list.color }}
+            />
+          ))}
+        </MenuBarExtra.Submenu>
 
         <MenuBarExtra.Item
           title="Configure Command"
