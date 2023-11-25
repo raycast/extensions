@@ -25,7 +25,9 @@ import { showFailureToast } from "@raycast/utils";
 
 const callApi = async (endpoint: string, animatedToastMessage = "", body?: BodyRequest, userToImpersonate = "") => {
   const token =
-    userToImpersonate === "" ? RESELLER_API_TOKEN : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
+    userToImpersonate === ""
+      ? RESELLER_API_TOKEN
+      : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
   const headers = { Authorization: `Basic ${token}` };
 
   await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
