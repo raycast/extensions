@@ -5,27 +5,12 @@ function generateArgs(additionalArgs?: string) {
   const preferences = getPreferenceValues<Preferences>();
   const args = [];
 
-  if (preferences.preventDisplay) {
-    args.push("d");
-  }
+  if (preferences.preventDisplay) args.push("d");
+  if (preferences.preventDisk) args.push("m");
+  if (preferences.preventSystem) args.push("i");
+  if (additionalArgs) args.push(` ${args}`);
 
-  if (preferences.preventDisk) {
-    args.push("m");
-  }
-
-  if (preferences.preventSystem) {
-    args.push("i");
-  }
-
-  if (additionalArgs) {
-    args.push(` ${args}`);
-  }
-
-  if (args.length > 0) {
-    return `-${args.join("")}`;
-  }
-
-  return "";
+  return args.length > 0 ? `-${args.join("")}` : "";
 }
 
 export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) {
