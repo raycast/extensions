@@ -8,6 +8,20 @@ export function formatDate(date: string | number, options: Intl.DateTimeFormatOp
   });
 }
 
+export function formatLongAgo(date: string | number) {
+  const d = new Date(date);
+  const now = new Date();
+  const diff = now.getTime() - d.getTime();
+  // less than a week
+  if (diff < 604800000) {
+    return d.toLocaleString("en-US", { weekday: "long", hour: "numeric", minute: "numeric" });
+  } else if (d.getFullYear() === now.getFullYear()) {
+    return d.toLocaleString("en-US", { month: "long", day: "numeric", weekday: "long" });
+  } else {
+    return d.toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  }
+}
+
 function formatDuration(duration: number) {
   const diffSeconds = Math.floor(duration / 1000);
   const diffMinutes = Math.floor(duration / 60000);

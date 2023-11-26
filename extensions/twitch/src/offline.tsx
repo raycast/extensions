@@ -15,7 +15,7 @@ import { FollowedChannel } from "./interfaces/FollowedChannel";
 
 import millify from "millify";
 import { action, primaryActionStreamlink, ActionWatchStream, primaryActionBrowser } from "./helpers/action";
-import { formatDate, formatISODuration, getUpTime } from "./helpers/datetime";
+import { formatDate, formatISODuration, formatLongAgo, getUpTime } from "./helpers/datetime";
 import { renderDetails } from "./helpers/renderDetails";
 
 type ItemAccessory = Exclude<ComponentProps<typeof List.Item>["accessories"], null | undefined>[number];
@@ -66,8 +66,8 @@ function VideoListItem({ video, onAction }: { video: Video; onAction?: () => voi
                 icon={{ source: Icon.Clock, tintColor: Color.Blue }}
               />
               <List.Item.Detail.Metadata.Label
-                title="Created At"
-                text={`${getUpTime(video.created_at)} ago`}
+                title="Published On"
+                text={formatLongAgo(video.published_at)}
                 icon={{ source: Icon.Clock, tintColor: Color.Blue }}
               />
               {video.description && <List.Item.Detail.Metadata.Label title={video.description} />}
@@ -378,6 +378,11 @@ function FollowedChannelListItem({
 
               {!live && video && (
                 <>
+                  <List.Item.Detail.Metadata.Label
+                    title="Published On"
+                    text={formatLongAgo(video.published_at)}
+                    icon={{ source: Icon.Clock, tintColor: Color.Blue }}
+                  />
                   {Boolean(archives?.length) && (
                     <List.Item.Detail.Metadata.Label
                       title="VOD Archives"

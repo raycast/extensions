@@ -18,7 +18,7 @@ export default function useLoadMoreChannelVideos(channelId: string | undefined, 
         setIsLoading(false);
         if (data && data.data) {
           setCursor(data.pagination.cursor);
-          setVideos(data.data);
+          setVideos((prev) => prev.concat(data.data));
         } else if (data.message) {
           showToast({ title: "Error", message: data.message, style: Toast.Style.Failure });
         }
