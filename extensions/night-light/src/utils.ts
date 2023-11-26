@@ -20,7 +20,7 @@ export async function nightlight(args: Array<string>): Promise<void> {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed";
     toast.message = command.stderr.includes("nightlight: command not found")
-      ? "Please install nightlight via homebrew."
+      ? "Please install nightlight."
       : command.stderr;
   } else {
     toast.style = Toast.Style.Success;
