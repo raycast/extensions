@@ -3,6 +3,55 @@ import { useEffect, useState } from "react";
 import got from "got";
 import { getSubtitle } from "./utils/progress";
 import { todaysDate } from "./utils/date";
+interface DailySummary {
+  all_distraction_formatted: string;
+  all_distracting_duration_formatted: string;
+  all_distracting_percentage: number;
+  all_productive_duration_formatted: string;
+  all_productive_formatted: string;
+  all_productive_percentage: number;
+  business_percentage: number;
+  communication_and_scheduling_percentage: number;
+  design_and_composition_percentage: number;
+  entertainment_percentage: number;
+  neutral_duration_formatted: string;
+  neutral_percentage: number;
+  news_percentage: number;
+  productivity_pulse: number;
+  reference_and_learning_percentage: number;
+  shopping_percentage: number;
+  social_networking_percentage: number;
+  software_development_percentage: number;
+  total_duration_formatted: string;
+  total_hours: string;
+  uncategorized_percentage: number;
+  utilities_percentage: number;
+  [key: string]: number | string;
+}
+
+interface Today {
+  all_distracting_duration_formatted: string;
+  all_distracting_percentage: number;
+  all_productive_duration_formatted: string;
+  all_productive_percentage: number;
+  business_percentage: number;
+  communication_and_scheduling_percentage: number;
+  design_and_composition_percentage: number;
+  entertainment_percentage: number;
+  news_percentage: number;
+  neutral_percentage: number;
+  neutral_duration_formatted: string;
+  productivity_pulse: number;
+  reference_and_learning_percentage: number;
+  shopping_percentage: number;
+  social_networking_percentage: number;
+  software_development_percentage: number;
+  total_duration_formatted: string;
+  total_hours: string;
+  uncategorized_percentage: number;
+  utilities_percentage: number;
+  [key: string]: number | string;
+}
 
 const DailyBreakdown = function (sorted: Array<[string, number]>, today: Today): string {
   let breakdown = `| Category Breakdown | Time | Percentage | \n| --- | --- | --- |`;
@@ -43,44 +92,6 @@ export default function Command() {
   }
 
   const preferences = getPreferenceValues<Preferences>();
-
-  interface DailySummary {
-    utilities_percentage: number;
-    software_development_percentage: number;
-    design_and_composition_percentage: number;
-    uncategorized_percentage: number;
-    news_percentage: number;
-    shopping_percentage: number;
-    communication_and_scheduling_percentage: number;
-    business_percentage: number;
-    reference_and_learning_percentage: number;
-    entertainment_percentage: number;
-    social_networking_percentage: number;
-    total_hours: string;
-    neutral_percentage: number;
-    neutral_duration_formatted: string;
-    all_productive_duration_formatted: string;
-    all_productive_percentage: number;
-    all_productive_formatted: string;
-    all_distraction_formatted: string;
-    all_distracting_duration_formatted: string;
-    all_distracting_percentage: number;
-    productivity_pulse: number;
-    total_duration_formatted: string;
-    [key: string]: number | string;
-  }
-
-  interface Today {
-    all_productive_duration_formatted: string;
-    all_productive_percentage: number;
-    neutral_duration_formatted: string;
-    all_distracting_duration_formatted: string;
-    all_distracting_percentage: number;
-    productivity_pulse: number;
-    total_duration_formatted: string;
-    total_hours: string;
-    [key: string]: string | number;
-  }
 
   useEffect(() => {
     async function fetchDailySummary() {
