@@ -48,7 +48,7 @@ export default function Command() {
             <List.Item
               key={index}
               title={item.description}
-              accessories={[{ text: convertDate((item.created_at as Date), "long"), icon: Icon.Calendar }]}
+              accessories={[{ text: convertDate(item.created_at as Date, "long"), icon: Icon.Calendar }]}
               actions={
                 <ActionPanel title="Open in RescueTime">
                   <Action.OpenInBrowser
