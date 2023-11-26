@@ -4,24 +4,30 @@ import { convertDate } from "./utils/date";
 import got from "got";
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
+  const [state, setState] = useState<State>({ data: [], error: undefined });
 
   interface Preferences {
     APIkey: string;
   }
 
   interface State {
-    data?: Array<string>;
+    data?: FocusTimeItem[];
     error?: Error;
+  }
+
+  interface FocusTimeItem {
+    created_at: string | Date;
+    duration: number;
+    duration_unit: string;
   }
 
   const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    async function fetchStories() {
+    async function fetchFocusTimeFeed() {
       try {
-        const data = await got(`https://www.rescuetime.com/anapi/focustime_started_feed?key=${preferences.APIkey}`).json();
-        setState({ data: data as Array<string> });
+        const data: FocusTimeItem[] = await got(`https://www.rescuetime.com/anapi/focustime_started_feed?key=${preferences.APIkey}`).json();
+        setState({ data });
       } catch (error) {
         setState({
           error: error instanceof Error ? error : new Error("Something went wrong"),
@@ -29,7 +35,7 @@ export default function Command() {
       }
     }
 
-    fetchStories();
+    fetchFocusTimeFeed();
   }, []);
 
   if (state.data) {
@@ -46,7 +52,7 @@ export default function Command() {
           {state.data.map((item, index) => (
             <List.Item
               key={index}
-              title={convertDate(item.created_at, "long")}
+              title={convertDate(item.created_at as Date, "long")}
               accessories={[{ text: `${item.duration} ${item.duration_unit}`, icon: Icon.Clock }]}
               actions={
                 <ActionPanel title="Open FocusTime Settings">
