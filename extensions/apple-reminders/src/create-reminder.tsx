@@ -9,9 +9,10 @@ import {
   closeMainWindow,
   useNavigation,
   getPreferenceValues,
+  LaunchProps,
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 
 import { createReminder } from "./api";
 import { getPriorityIcon } from "./helpers";
@@ -29,21 +30,28 @@ type CreateReminderValues = {
 };
 
 type CreateReminderFormProps = {
+  draftValues?: CreateReminderValues;
   listId?: string;
   mutate?: MutatePromise<{ reminders: Reminder[]; lists: List[] } | undefined>;
 };
 
-export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) {
+export function CreateReminderForm({ draftValues, listId, mutate }: CreateReminderFormProps) {
   const { pop } = useNavigation();
   const { data } = useData();
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
   const { selectDefaultList } = getPreferenceValues<Preferences.CreateReminder>();
-
   const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({
     initialValues: {
-      listId: listId ?? selectDefaultList ? defaultList?.id : "",
+      title: draftValues?.title ?? "",
+      notes: draftValues?.notes ?? "",
+      dueDate: draftValues?.dueDate ?? null,
+      priority: draftValues?.priority ?? "",
+      listId: listId ?? draftValues?.listId ?? (selectDefaultList ? defaultList?.id : ""),
+      isRecurring: draftValues?.isRecurring ?? false,
+      frequency: draftValues?.frequency ?? "daily",
+      interval: draftValues?.interval ?? "1",
     },
     validation: {
       title: FormValidation.Required,
@@ -168,12 +176,13 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
           />
         </ActionPanel>
       }
+      enableDrafts={!listId}
     >
       <Form.TextField {...itemProps.title} title="Title" placeholder="New Reminder" />
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Add some notes" />
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due Date" min={new Date()} />
+      <Form.DatePicker {...itemProps.dueDate} title="Due Date" min={startOfDay(new Date())} />
       {values.dueDate ? (
         <>
           <Form.Checkbox {...itemProps.isRecurring} label="Is Recurring" />
@@ -185,7 +194,7 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
                 <Form.Dropdown.Item title="Monthly" value="monthly" />
                 <Form.Dropdown.Item title="Yearly" value="yearly" />
               </Form.Dropdown>
-              <Form.TextField {...itemProps.interval} title="Interval" defaultValue="1" />
+              <Form.TextField {...itemProps.interval} title="Interval" />
               <Form.Description text={recurrenceDescription} />
               <Form.Separator />
             </>
@@ -216,6 +225,6 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
   );
 }
 
-export default function Command() {
-  return <CreateReminderForm />;
+export default function Command({ draftValues }: LaunchProps<{ draftValues: CreateReminderValues }>) {
+  return <CreateReminderForm draftValues={draftValues} />;
 }

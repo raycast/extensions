@@ -1,5 +1,9 @@
 # IP Geolocation Changelog
 
+## [Fix] - 2023-11-22
+
+- Fixing the IPv4 match
+
 ## [Improvement] - 2023-11-16
 
 - Support IPv6 for query

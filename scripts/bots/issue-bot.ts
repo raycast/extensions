@@ -25,7 +25,7 @@ const closeIssueMatch = /@raycastbot close this issue/;
 const reopenIssueMatch = /@raycastbot reopen this issue/;
 const renameIssueMatch = /@raycastbot rename this issue to "(.+)"/;
 
-module.exports = async ({ github, context }: API) => {
+export default async ({ github, context }: API) => {
   const sender = context.payload.sender.login;
 
   if (sender === "raycastbot" || sender === "stale") {

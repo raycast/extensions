@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Add support for drafts] - 2023-11-24
+
+- Add support for drafts in `Create Reminder` command
+- Fix a bug that prevents selecting today's date without setting a time.
+
 ## [Minor improvements] - 2023-11-16
 
 - Press `⌥` to delete a reminder without any confirmation in the menu bar. 
