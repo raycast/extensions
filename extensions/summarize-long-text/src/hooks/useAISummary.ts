@@ -116,7 +116,7 @@ const useAISummary = (text: string | null): { summary: string | null; isLoading:
 
         showToast({
           ...SUCCESS_SUMMARIZING_TEXT,
-          message: `summary tokens: ${getTokens(finalSummary)}`,
+          message: `Summary tokens: ${getTokens(finalSummary)}`,
         });
       } catch (error: unknown) {
         error instanceof Error && showToast({ ...ERROR_SUMMARIZING_TEXT, message: error.message });
