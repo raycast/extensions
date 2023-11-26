@@ -19,7 +19,7 @@ export default function Command() {
 
   interface AlertItem {
     description: string;
-    created_at: Date;
+    created_at: string | Date;
     alert_id: number;
   }
 
@@ -48,12 +48,12 @@ export default function Command() {
             <List.Item
               key={index}
               title={item.description}
-              accessories={[{ text: convertDate(item.created_at, "long"), icon: Icon.Calendar }]}
+              accessories={[{ text: convertDate((item.created_at as Date), "long"), icon: Icon.Calendar }]}
               actions={
                 <ActionPanel title="Open in RescueTime">
                   <Action.OpenInBrowser
                     title="Open this Alert/Goal in RescueTime"
-                    url={`https://www.rescuetime.com/browse/goals/${item.alert_id}/by/hour/for/the/day/of/${item.created_at.split("T")[0]}`}
+                    url={`https://www.rescuetime.com/browse/goals/${item.alert_id}/by/hour/for/the/day/of/${(item.created_at as string).split("T")[0]}`}
                   />
                 </ActionPanel>
               }

@@ -4,14 +4,20 @@ import { convertDate } from "./utils/date";
 import got from "got";
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
+  const [state, setState] = useState<State>({ data: [], error: undefined });
 
   interface Preferences {
     APIkey: string;
   }
 
+  interface HighlightItem {
+    description: string;
+    created_at: string | Date;
+    // Add other properties if necessary
+  }
+
   interface State {
-    data?: Array<string>;
+    data?: HighlightItem[];
     error?: Error;
   }
 
@@ -20,8 +26,8 @@ export default function Command() {
   useEffect(() => {
     async function fetchHighlights() {
       try {
-        const data = await got(`https://www.rescuetime.com/anapi/highlights_feed?key=${preferences.APIkey}`).json();
-        setState({ data: data as Array<string> });
+        const data: HighlightItem[] = await got(`https://www.rescuetime.com/anapi/highlights_feed?key=${preferences.APIkey}`).json();
+        setState({ data });
       } catch (error) {
         setState({
           error: error instanceof Error ? error : new Error("Something went wrong"),
@@ -42,12 +48,12 @@ export default function Command() {
             <List.Item
               key={index}
               title={item.description}
-              accessories={[{ text: convertDate(item.created_at, "long"), icon: Icon.Calendar }]}
+              accessories={[{ text: convertDate(item.created_at as Date, "long"), icon: Icon.Calendar }]}
               actions={
                 <ActionPanel title="Open day in RescueTime">
                   <Action.OpenInBrowser
                     title="Open this highlight in RescueTime"
-                    url={`https://www.rescuetime.com/browse/highlights/for/the/day/of/${convertDate(item.created_at, "short")}`}
+                    url={`https://www.rescuetime.com/browse/highlights/for/the/day/of/${convertDate(item.created_at as Date, "short")}`}
                   />
                 </ActionPanel>
               }
