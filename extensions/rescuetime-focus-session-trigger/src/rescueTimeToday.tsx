@@ -56,23 +56,22 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
   interface DailySummary {
-  utilities_percentage: number;
-  software_development_percentage: number;
-  design_and_composition_percentage: number;
-  uncategorized_percentage: number;
-  news_percentage: number;
-  shopping_percentage: number;
-  communication_and_scheduling_percentage: number;
-  business_percentage: number;
-  reference_and_learning_percentage: number;
-  entertainment_percentage: number;
-  social_networking_percentage: number;
-  productivity_pulse: number;
-  total_duration_formatted: string;
-  total_hours?: number;
-  [key: string]: number | string | undefined;
-}
-
+    utilities_percentage: number;
+    software_development_percentage: number;
+    design_and_composition_percentage: number;
+    uncategorized_percentage: number;
+    news_percentage: number;
+    shopping_percentage: number;
+    communication_and_scheduling_percentage: number;
+    business_percentage: number;
+    reference_and_learning_percentage: number;
+    entertainment_percentage: number;
+    social_networking_percentage: number;
+    productivity_pulse: number;
+    total_duration_formatted: string;
+    total_hours?: number;
+    [key: string]: number | string | undefined;
+  }
 
   useEffect(() => {
     async function fetchDailySummary() {
