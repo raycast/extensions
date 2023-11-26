@@ -52,7 +52,6 @@ const App: React.FC = () => {
       }
       isLoading={isLoading}
       markdown={summary}
-      navigationTitle="Text Summary"
     />
   );
 };
