@@ -4,7 +4,7 @@ import got from "got";
 import { getSubtitle } from "./utils/progress";
 import { todaysDate } from "./utils/date";
 
-const DailyBreakdown = function (sorted: Array<string>, today: Array<string>) {
+const DailyBreakdown = function (sorted: Array<[string, number]>, today: Today): string {
   let breakdown = `| Category Breakdown | Time | Percentage | \n| --- | --- | --- |`;
 
   for (const [key, value] of Object.entries(sorted)) {
@@ -19,17 +19,6 @@ const DailyBreakdown = function (sorted: Array<string>, today: Array<string>) {
 
   return breakdown;
 };
-
-interface Today {
-  all_productive_duration_formatted: string;
-  all_productive_percentage: number;
-  neutral_duration_formatted: string;
-  neutral_percentage: number;
-  all_distracting_duration_formatted: string;
-  all_distracting_percentage: number;
-  productivity_pulse: number;
-  total_duration_formatted: string;
-}
 
 const DailyOverview = function (today: Today) {
   let overview = `| Category Overview | Time | Percentage  \n| --- | --- | --- |`;
@@ -67,10 +56,30 @@ export default function Command() {
     reference_and_learning_percentage: number;
     entertainment_percentage: number;
     social_networking_percentage: number;
+    total_hours: string;
+    neutral_percentage: number;
+    neutral_duration_formatted: string;
+    all_productive_duration_formatted: string;
+    all_productive_percentage: number;
+    all_productive_formatted: string;
+    all_distraction_formatted: string;
+    all_distracting_duration_formatted: string;
+    all_distracting_percentage: number;
     productivity_pulse: number;
     total_duration_formatted: string;
-    total_hours?: number;
-    [key: string]: number | string | undefined;
+    [key: string]: number | string;
+  }
+
+  interface Today {
+    all_productive_duration_formatted: string;
+    all_productive_percentage: number;
+    neutral_duration_formatted: string;
+    all_distracting_duration_formatted: string;
+    all_distracting_percentage: number;
+    productivity_pulse: number;
+    total_duration_formatted: string;
+    total_hours: string;
+    [key: string]: string | number;
   }
 
   useEffect(() => {
@@ -95,8 +104,8 @@ export default function Command() {
   }, []);
 
   if (state.data) {
-    const today = { ...state.data[0] };
-    const sortedToday = Object.entries({
+    const today: Today = state.data[0];
+    const sortedToday: [string, number][] = Object.entries({
       "⚙️utilities_percentage": today.utilities_percentage,
       "💻software_development_percentage": today.software_development_percentage,
       "🎨design_and_composition_percentage": today.design_and_composition_percentage,
@@ -108,13 +117,12 @@ export default function Command() {
       "🎓reference_and_learning_percentage": today.reference_and_learning_percentage,
       "🍿entertainment_percentage": today.entertainment_percentage,
       "📸social_networking_percentage": today.social_networking_percentage,
-    }).sort((a, b) => b[1] - a[1]);
+    }).sort((a, b) => (b[1] as number) - (a[1] as number));
 
     return (
       <Detail
         isLoading={!state.data && !state.error}
         markdown={`# 📊Pulse: ${today.productivity_pulse} | 🕑Time: ${today.total_duration_formatted}          
-                  \n
                   \n ${DailyOverview(today)}
                   \n ${DailyBreakdown(sortedToday, today)}
         `}
