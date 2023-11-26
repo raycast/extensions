@@ -118,9 +118,9 @@
     "@typescript-eslint/parser": "^6.0.0",
     "@raycast/eslint-config": "^1.0.6",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-react": "^7.29.4",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.0",
     "react-devtools": "^4.19.2",
     "typescript": "^5.2.2"
   },

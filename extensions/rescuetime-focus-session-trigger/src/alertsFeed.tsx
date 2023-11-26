@@ -11,7 +11,7 @@ export default function Command() {
   }
 
   interface State {
-    data?: Array<any>;
+    data?: Array<string>;
     error? : Error;
   }
 

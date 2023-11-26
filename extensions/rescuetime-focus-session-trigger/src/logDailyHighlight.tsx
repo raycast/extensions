@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Form, Toast, showToast, getPreferenceValues } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import got from "got";
 
 export default function Command() {
@@ -60,7 +60,7 @@ export default function Command() {
             storeValue={false}
             autoFocus={true}
             onBlur={(event) => {
-              const e = event as any;
+              const e = event as ChangeEvent<HTMLInputElement>;
               if (e.target.value?.length == 0) {
                 setTitleError("Description should't be empty!");
               } else {
@@ -98,7 +98,7 @@ function PostHighlight() {
 
     const preferences = getPreferenceValues<Preferences>();
     
-    const { handleSubmit, itemProps, values, focus, reset } = useForm({
+    const { handleSubmit, reset } = useForm({
       async onSubmit(values: { description: string; source: number; highlight_date: number }) {
         if (!values.description) {
           showToast({
@@ -114,7 +114,7 @@ function PostHighlight() {
         });
     
         try {
-          const { body } = await got.post("https://www.rescuetime.com/anapi/highlights_post", {
+          await got.post("https://www.rescuetime.com/anapi/highlights_post", {
             json: {
               key: preferences.APIkey,
               description: values.description,

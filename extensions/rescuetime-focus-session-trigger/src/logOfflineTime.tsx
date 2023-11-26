@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, Form, Toast, showToast, getPreferenceValues, preferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, Form, Toast, showToast, getPreferenceValues } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import got from "got";
 
 export default function Command() {
@@ -57,7 +57,7 @@ export default function Command() {
         storeValue={true}
         autoFocus={true}
         onBlur={(event) => {
-          const e = event as any;
+          const e = event as ChangeEvent<HTMLInputElement>;
           if (e.target.value?.length == 0) {
             setTitleError("Name should't be empty!");
           } else {
@@ -79,7 +79,7 @@ export default function Command() {
         onChange={dropTitleErrorIfNeeded}
         storeValue={false}
         onBlur={(event) => {
-          const e = event as any;
+          const e = event as ChangeEvent<HTMLInputElement>;
             
           if (e.target.value?.length > 254) {
             setTitleError("Details should be less than 255 characters!");
@@ -146,7 +146,7 @@ function PostOfflineTime() {
         });
     
         try {
-          const { body } = await got.post("https://www.rescuetime.com/anapi/offline_time_post", {
+          await got.post("https://www.rescuetime.com/anapi/offline_time_post", {
             json: {
               key: preferences.APIkey,
               activity_name: values.activity_name,

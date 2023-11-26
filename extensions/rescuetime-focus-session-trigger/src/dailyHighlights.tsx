@@ -1,4 +1,4 @@
-import { getPreferenceValues, ActionPanel, Detail, List, Action, Icon, updateCommandMetadata } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { convertDate } from "./utils/date";
 import got from "got";
@@ -11,7 +11,7 @@ export default function Command() {
   }
 
   interface State {
-    data?: Array<any>;
+    data?: Array<string>;
     error? : Error;
   }
 

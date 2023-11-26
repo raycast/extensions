@@ -1,18 +1,19 @@
-import { getPreferenceValues, ActionPanel, Detail, List, Action, Color, Icon, updateCommandMetadata } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, Detail, Action, updateCommandMetadata } from "@raycast/api";
 import { useEffect, useState } from "react";
 import got from "got";
 import { getSubtitle } from "./utils/progress";
 import { todaysDate } from "./utils/date";
 
 
-const DailyBreakdown = function (sorted: Array<any>, today: any) {
+const DailyBreakdown = function (sorted: Array<string>, today: Array<string>) {
   let breakdown = `| Category Breakdown | Time | Percentage | \n| --- | --- | --- |`
 
   for (const [key, value] of Object.entries(sorted)) {
-    let property = (value[0].replace('_percentage','')
+    const property = (value[0].replace('_percentage','')
+      .replace(key,'')
       .replace(/[\p{Emoji_Presentation}|\p{Emoji}\uFE0F]/gu, "") + '_duration_formatted')
       .replace(/\s/g, "")
-    breakdown += `\n\| ${value[0]
+    breakdown += `\n| ${value[0]
       .replace('_percentage','')
       .replaceAll('_',' ')
       .replaceAll('and','&')} | ${today[property]} | ${getSubtitle(value[1])} |`
@@ -21,12 +22,23 @@ const DailyBreakdown = function (sorted: Array<any>, today: any) {
   return breakdown
 }
 
-const DailyOverview = function (today: any) {
+interface Today {
+  all_productive_duration_formatted: string;
+  all_productive_percentage: number;
+  neutral_duration_formatted: string;
+  neutral_percentage: number;
+  all_distracting_duration_formatted: string;
+  all_distracting_percentage: number;
+  productivity_pulse: number;
+  total_duration_formatted: string;
+}
+
+const DailyOverview = function (today: Today) {
   let overview = `| Category Overview | Time | Percentage  \n| --- | --- | --- |`
 
-  overview += `\n\| 🤩All productive hours | ${today.all_productive_duration_formatted} | ${getSubtitle(today.all_productive_percentage)} | 
-  \| 😐All neutral hours | ${today.neutral_duration_formatted} | ${getSubtitle(today.neutral_percentage)} |
-  \| 😦All distracting hours | ${today.all_distracting_duration_formatted} | ${getSubtitle(today.all_distracting_percentage)} |`
+  overview += `\n| 🤩All productive hours | ${today.all_productive_duration_formatted} | ${getSubtitle(today.all_productive_percentage)} | 
+  | 😐All neutral hours | ${today.neutral_duration_formatted} | ${getSubtitle(today.neutral_percentage)} |
+  | 😦All distracting hours | ${today.all_distracting_duration_formatted} | ${getSubtitle(today.all_distracting_percentage)} |`
 
   return overview
 }
@@ -39,16 +51,21 @@ export default function Command() {
   }
 
   interface State {
-    data?: Array<any>;
+    data?: Array<string>;
     error? : Error;
   }
 
   const preferences = getPreferenceValues<Preferences>();
 
+  interface DailySummary {
+    productivity_pulse: number;
+    total_hours: number;
+  }
+
   useEffect(() => {
     async function fetchDailySummary() {
       try {
-        const data: any[] = await got(`https://www.rescuetime.com/anapi/daily_summary_feed?key=${preferences.APIkey}&date=${todaysDate()}`).json();
+        const data: DailySummary[] = await got(`https://www.rescuetime.com/anapi/daily_summary_feed?key=${preferences.APIkey}&date=${todaysDate()}`).json();
         setState({ data });
   
         if(data.length > 0) {
