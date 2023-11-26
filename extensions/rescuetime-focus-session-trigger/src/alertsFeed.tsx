@@ -4,24 +4,30 @@ import { convertDate } from "./utils/date";
 import got from "got";
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
+  const [state, setState] = useState<State>({data: [], error: undefined});
 
   interface Preferences {
     APIkey: string;
   }
 
   interface State {
-    data?: Array<string>;
+    data?: AlertItem[];
     error?: Error;
   }
 
   const preferences = getPreferenceValues<Preferences>();
 
+  interface AlertItem {
+    description: string;
+    created_at: Date;
+    alert_id: number;
+  }
+
   useEffect(() => {
-    async function fetchStories() {
+    async function fetchStories(): Promise<void> {
       try {
-        const data = await got(`https://www.rescuetime.com/anapi/alerts_feed?key=${preferences.APIkey}&op=status`).json();
-        setState({ data: data as Array<string> });
+        const data: AlertItem[] = await got(`https://www.rescuetime.com/anapi/alerts_feed?key=${preferences.APIkey}&op=status`).json();
+        setState({ data });
       } catch (error) {
         setState({
           error: error instanceof Error ? error : new Error("Something went wrong"),
@@ -34,7 +40,12 @@ export default function Command() {
 
   if (state.data) {
     if (state.data.length === 0) {
-      return <Detail isLoading={false} markdown={`No highlights recorded. Visit [RescueTime Highlights](https://www.rescuetime.com/browse/highlights) to learn more.`} />;
+      return (
+        <Detail
+          isLoading={false}
+          markdown={`No highlights recorded. Visit [RescueTime Highlights](https://www.rescuetime.com/browse/highlights) to learn more.`}
+        />
+      );
     } else {
       return (
         <List>
@@ -42,7 +53,9 @@ export default function Command() {
             <List.Item
               key={index}
               title={item.description}
-              accessories={[{ text: convertDate(item.created_at, "long"), icon: Icon.Calendar }]}
+              accessories={[
+                { text: convertDate(item.created_at, "long"), icon: Icon.Calendar },
+              ]}
               actions={
                 <ActionPanel title="Open in RescueTime">
                   <Action.OpenInBrowser
@@ -56,7 +69,8 @@ export default function Command() {
         </List>
       );
     }
-  } else {
+  }
+   else {
     return <Detail isLoading={true} markdown={`Waiting for Alerts data...`} />;
   }
 }
