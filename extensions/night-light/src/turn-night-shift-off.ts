@@ -2,8 +2,7 @@ import { nightlight } from "./utils";
 import { closeMainWindow, getPreferenceValues } from "@raycast/api";
 
 export default async function main() {
-  const { closeWindow } = getPreferenceValues<{ closeWindow: boolean }>();
-
-  if (closeWindow) await closeMainWindow();
-  await nightlight(["off"]);
+  if (getPreferenceValues<Preferences>().closeWindow) await closeMainWindow();
+  
+  await nightlight("off", "Turned night shift off");
 }

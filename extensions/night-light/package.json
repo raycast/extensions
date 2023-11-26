@@ -52,6 +52,13 @@
       "label": "Close Raycast window",
       "description": "Should the main Raycast window close when triggering a command?",
       "required": false
+    },
+    {
+      "title": "Night Light Path",
+      "name": "nightlightPath",
+      "type": "textfield",
+      "description": "Path to the nightlight executable",
+      "required": false
     }
   ],
   "dependencies": {
