@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nt-launcher",
+  "title": "NT Launcher",
+  "description": "Download and install NT app versions",
+  "icon": "icon.png",
+  "author": "agens",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Install Android",
+      "subtitle": "Pick an app version to see available artifacts to install",
+      "description": "Pick an app version to see available artifacts to install.",
+      "mode": "view"
+    },
+    {
+      "name": "triggerBuildIndex",
+      "title": "Trigger Build (In Progress)",
+      "subtitle": "Pick app type and branch to trigger a build",
+      "description": "Pick app type and branch to trigger a build",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "title": "Github Access Token",
+      "description": "Token to access the Norsk Tipping app repos. Go to https://github.com/settings/tokens and create a new one.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "buypassIdQa01",
+      "title": "BuypassID QA01",
+      "description": "Buypass ID for your QA01 user. Used when logging in on launch.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@octokit/endpoint": "^9.0.3",
+    "@raycast/api": "^1.62.2",
+    "@raycast/utils": "github:raycast/utils",
+    "adbkit": "^2.0.17",
+    "axios": "^1.6.2",
+    "node-fetch": "^3.3.2",
+    "unzip-stream": "^0.3.1",
+    "unzipper": "^0.10.14"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/unzipper": "^0.10.9",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
