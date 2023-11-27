@@ -96,7 +96,7 @@ export default function Command() {
         defaultValue={`${preferences.defaultOfflineDuration || 25}`}
       />
 
-      <Form.DatePicker id="start_date" title="Offline task start time" info="Required. Defaults to right now." defaultValue={new Date()} />
+      <Form.DatePicker id="start_date" title="Offline Task Start Time" info="Required. Defaults to right now." defaultValue={new Date()} />
     </Form>
   );
 }
