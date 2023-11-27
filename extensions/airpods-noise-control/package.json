@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "airpods-noise-control",
   "title": "AirPods Noise Control",
-  "description": "Toggle between Noise Cancellation and Transparency on your AirPods.",
+  "description": "Switch between Noise Cancellation, Transparency or Adaptive on your AirPods. Toggle Conversation Awareness on AirPods that support it.",
   "icon": "extension_icon.png",
   "author": "chrahe",
+  "contributors": [
+    "hllvc"
+  ],
   "categories": [
     "Media",
     "System"
@@ -12,10 +15,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "switch-noise-control",
       "title": "Switch Noise Control Mode",
-      "subtitle": "Transparency ↔ Noise Cancellation",
-      "description": "This command will toggle between Noise Cancellation and Transparency if AirPods are connected to your device.",
+      "subtitle": "Transparency ↔ Adaptive ↔ Noise Cancellation",
+      "description": "This command will switch Noise Cancellation, Transparency or Adaptive if AirPods are connected to your device.",
       "mode": "no-view",
       "keywords": [
         "airpods",
@@ -23,7 +26,86 @@
         "cancellation",
         "transparency",
         "isolation",
-        "anc"
+        "anc",
+        "adaptive"
+      ],
+      "preferences": [
+                {
+          "name": "optionOne",
+          "title": "Option One 🔵",
+          "description": "First option to switch between.",
+          "type": "dropdown",
+          "default": "Noise Cancellation",
+          "data": [
+            {
+              "title": "Noise Cancellation",
+              "value": "Noise Cancellation"
+            },
+            {
+              "title": "Transparency",
+              "value": "Transparency"
+            },
+            {
+              "title": "Adaptive",
+              "value": "Adaptive"
+            }
+          ],
+          "required": true
+        },
+        {
+          "name": "optionTwo",
+          "title": "Option Two 🟢",
+          "description": "Second option to switch between.",
+          "type": "dropdown",
+          "default": "Transparency",
+          "data": [
+            {
+              "title": "Noise Cancellation",
+              "value": "Noise Cancellation"
+            },
+            {
+              "title": "Transparency",
+              "value": "Transparency"
+            },
+            {
+              "title": "Adaptive",
+              "value": "Adaptive"
+            }
+          ],
+          "required": true
+        },
+        {
+          "title": "Preview",
+          "name": "showHudNC",
+          "label": "Show HUD For Noise Control",
+          "description": "Show HUD feedback on noise control change.",
+          "type": "checkbox",
+          "default": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "toggle-conversation-awareness",
+      "title": "Toggle Conversation Awareness",
+      "subtitle": "On ↔ Off",
+      "description": "This command will toggle between Conversation Awareness (on/off) if AirPods are connected to your device.",
+      "mode": "no-view",
+      "keywords": [
+        "airpods",
+        "conversation",
+        "awareness"
+      ],
+      "preferences": [
+        {
+          "title": "Preview",
+          "name": "showHudCA",
+          "label": "Show HUD For Conversation Awareness",
+          "description": "Show HUD feedback on conversation awareness change.",
+          "type": "checkbox",
+          "default": true,
+          "required": true
+        }
       ]
     }
   ],
@@ -57,7 +139,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.47.3",
-    "run-applescript": "^6.1.0"
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
