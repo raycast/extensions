@@ -32,7 +32,7 @@
       "description": "The baseUrl of your Rocket.Chat instance",
       "type": "textfield",
       "required": true,
-      "title": "BaseUrl"
+      "title": "Base URL"
     },
     {
       "name": "userId",
