@@ -52,7 +52,7 @@ export default function Command() {
               actions={
                 <ActionPanel title="Open in RescueTime">
                   <Action.OpenInBrowser
-                    title="Open this Alert/Goal in RescueTime"
+                    title="Open Alert/Goal in RescueTime"
                     url={`https://www.rescuetime.com/browse/goals/${item.alert_id}/by/hour/for/the/day/of/${(item.created_at as string).split("T")[0]}`}
                   />
                 </ActionPanel>
