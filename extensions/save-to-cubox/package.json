@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "save-to-cubox",
-  "title": "Save to cubox",
+  "title": "Save to Cubox",
   "description": "Save url or memo to your cubox",
   "icon": "command-icon.png",
   "author": "xyxc0673",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "save-to-cubox",
-      "title": "Save to cubox",
+      "title": "Save to Cubox",
       "description": "Save url or memo to your cubox",
       "mode": "view"
     }
