@@ -49,7 +49,7 @@ export default function Command() {
       <Form.Separator />
       <Form.TextField
         id="activity_name"
-        title="Activity name"
+        title="Activity Name"
         info="Required. Must be less than 255 characters."
         placeholder={activityPlaceholders[Math.floor(Math.random() * activityPlaceholders.length)]}
         error={titleError}
@@ -73,7 +73,7 @@ export default function Command() {
       />
       <Form.TextArea
         id="activity_details"
-        title="Activity details"
+        title="Activity Details"
         info="Optional. Must be less than 255 characters."
         error={titleError}
         onChange={dropTitleErrorIfNeeded}
