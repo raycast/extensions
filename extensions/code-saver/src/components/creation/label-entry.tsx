@@ -51,6 +51,7 @@ export default function UpsertLabelEntry({
     setIsSubmitting(true);
     const response = await upsertLabel({
       title: values.title,
+      colorHex: values.colorHex?.length == 0? undefined: values.colorHex,
       uuid,
     });
 
@@ -143,7 +144,7 @@ Leaving color hex blank will generate random one color."
       />
       <Form.Separator />
       <Form.Description text="Following is preview only. No need to fill anything in." />
-      <Form.TagPicker id="preview" title="Label Preview" value={previewTitle ? [previewTitle] : []}>
+      <Form.TagPicker id="preview" title="Label Preview" defaultValue={previewTitle ? [previewTitle] : []}>
         {previewColorHex && previewTitle && (
           <Form.TagPicker.Item
             key={previewTitle}
