@@ -1,9 +1,9 @@
 import { Clipboard, showHUD, getPreferenceValues, closeMainWindow } from "@raycast/api";
 
-import { numberWithVAT } from "./lib/vat";
+import { getNetPrice } from "./lib/vat";
 
 export default async function quickVat(props) {
-  var number = numberWithVAT(props.arguments.number);
+  var number = getNetPrice(props.arguments.number);
 
   if (getPreferenceValues().autopaste) {
     closeMainWindow();
