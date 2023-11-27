@@ -168,5 +168,5 @@ function PostOfflineTime() {
     },
   });
 
-  return <Action.SubmitForm icon={Icon.Upload} title="Submit offline time" onSubmit={handleSubmit} />;
+  return <Action.SubmitForm icon={Icon.Upload} title="Submit Offline Time" onSubmit={handleSubmit} />;
 }
