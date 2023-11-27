@@ -134,5 +134,5 @@ function PostHighlight() {
     },
   });
 
-  return <Action.SubmitForm icon={Icon.Upload} title="Submit highlight" onSubmit={handleSubmit} />;
+  return <Action.SubmitForm icon={Icon.Upload} title="Submit Highlight" onSubmit={handleSubmit} />;
 }
