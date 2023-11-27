@@ -22,7 +22,8 @@
     "erics118",
     "hjoelh",
     "hobhouse",
-    "bkeys818"
+    "bkeys818",
+    "bjarn-hau"
   ],
   "license": "MIT",
   "preferences": [
@@ -150,6 +151,13 @@
       "subtitle": "Spotify",
       "description": "Toggle the playback of the current song.",
       "mode": "no-view"
+    },
+    {
+      "name": "addCurrentSongToPlaylist",
+      "title": "Add Current Song to Playlist",
+      "subtitle": "Spotify",
+      "description": "Adds the current song to a playlist of your choice.",
+      "mode": "view"
     },
     {
       "name": "next",
