@@ -21,6 +21,7 @@
     {
       "name": "set-status",
       "title": "Set Status",
+      "subtitle": "Rocket.Chat",
       "description": "Change your presence status.",
       "mode": "view"
     }
