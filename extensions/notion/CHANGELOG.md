@@ -1,8 +1,8 @@
 # Notion Changelog
 
-## [Open in Notion alternate action] - {PR_MERGE_DATE}
+## [Add alternate open action] - {PR_MERGE_DATE}
 
-- If the primary action is set to open in Notion, the secondary action will open in the browser, and vice versa.
+- Add an action that alternates with the primary open action. For example, if the primary action is set to open in Notion, the alternate action will open in the browser, and vice versa.
 
 ## [Fixes] - 2023-10-12
 
