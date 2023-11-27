@@ -51,7 +51,7 @@ export default function UpsertLabelEntry({
     setIsSubmitting(true);
     const response = await upsertLabel({
       title: values.title,
-      colorHex: values.colorHex?.length == 0? undefined: values.colorHex,
+      colorHex: values.colorHex?.length == 0 ? undefined : values.colorHex,
       uuid,
     });
 
