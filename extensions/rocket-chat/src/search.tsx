@@ -45,34 +45,42 @@ export default function Command() {
         return;
       }
 
-      const [currentUser, fetchedTeams, fetchedChannels, fetchedMessages, fetchedUsers] = await Promise.all([
-        getCurrentUser(),
-        getDirectoryList("teams"),
-        getDirectoryList("channels"),
-        getDirectMessageList(),
-        getUserList(),
-      ]);
+      try {
+        const [currentUser, fetchedTeams, fetchedChannels, fetchedMessages, fetchedUsers] = await Promise.all([
+          getCurrentUser(),
+          getDirectoryList("teams"),
+          getDirectoryList("channels"),
+          getDirectMessageList(),
+          getUserList(),
+        ]);
 
-      for (const message of fetchedMessages) {
-        // If the user chatted with himself, then do not filter out his username
-        const usernames =
-          message.usernames.length <= 1
-            ? message.usernames
-            : message.usernames.filter((username) => username !== currentUser.username);
+        for (const message of fetchedMessages) {
+          // If the user chatted with himself, then do not filter out his username
+          const usernames =
+            message.usernames.length <= 1
+              ? message.usernames
+              : message.usernames.filter((username) => username !== currentUser.username);
 
-        message.involvedUsers = usernames
-          .map((username) => {
-            return fetchedUsers.find((user) => user.username === username);
-          })
-          .filter((user): user is User => Boolean(user));
-        message.isGroupChat = message.involvedUsers.length >= 2;
+          message.involvedUsers = usernames
+            .map((username) => {
+              return fetchedUsers.find((user) => user.username === username);
+            })
+            .filter((user): user is User => Boolean(user));
+          message.isGroupChat = message.involvedUsers.length >= 2;
+        }
+
+        setTeams(fetchedTeams);
+        setChannels(fetchedChannels);
+        setUsers(fetchedUsers);
+        setDirectMessages(fetchedMessages);
+        setIsLoading(false);
+      } catch (e) {
+        setTeams([]);
+        setChannels([]);
+        setUsers([]);
+        setDirectMessages([]);
+        setIsLoading(false);
       }
-
-      setTeams(fetchedTeams);
-      setChannels(fetchedChannels);
-      setUsers(fetchedUsers);
-      setDirectMessages(fetchedMessages);
-      setIsLoading(false);
     })();
   }, [searchText]);
 

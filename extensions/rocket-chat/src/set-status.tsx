@@ -16,10 +16,15 @@ export default function Command() {
       setIsLoading(true);
       setCurrentStatus(null);
 
-      const status = await getStatus(config.userId);
+      try {
+        const status = await getStatus(config.userId);
 
-      setCurrentStatus(status);
-      setIsLoading(false);
+        setCurrentStatus(status);
+        setIsLoading(false);
+      } catch {
+        setCurrentStatus(null);
+        setIsLoading(false);
+      }
     })();
   }, []);
 

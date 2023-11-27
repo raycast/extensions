@@ -1,6 +1,6 @@
 import { Channel, DirectMessage, Team, User, UserStatus } from "../models/user";
 import { getConfig } from "../config";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { open, showToast, Toast } from "@raycast/api";
 
 export async function createDirectMessage(user: User) {
@@ -38,13 +38,13 @@ export async function getDirectoryList<T extends "teams" | "channels">(
     },
   };
 
-  const getList = async function* () {
-    const count = 50;
-    let offset = 0;
-    let totalCount = -1; /* -1 signifies failure */
+  try {
+    const getList = async function* () {
+      const count = 50;
+      let offset = 0;
+      let totalCount = -1; /* -1 signifies failure */
 
-    while (offset === 0 || offset < totalCount) {
-      try {
+      while (offset === 0 || offset < totalCount) {
         const url = new URL(`${baseUrl}/api/v1/directory`);
 
         url.searchParams.append("query", `{"type": "${type}"}`);
@@ -57,25 +57,29 @@ export async function getDirectoryList<T extends "teams" | "channels">(
         totalCount = response.data.total;
 
         yield response.data.result;
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: `Loading ${type} failed!`,
-          message: error instanceof Error ? error.message : undefined,
-        });
-
-        throw error;
       }
+    };
+
+    const result = [];
+
+    for await (const item of getList()) {
+      result.push(...item);
     }
-  };
 
-  const result = [];
+    return result;
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Loading ${type} failed!`,
+      message: error instanceof Error ? error.message : undefined,
+    });
 
-  for await (const item of getList()) {
-    result.push(...item);
+    if (error instanceof AxiosError && error.response?.status === 401) {
+      return [];
+    }
+
+    throw error;
   }
-
-  return result;
 }
 
 export async function getStatus(userId: string): Promise<UserStatus> {
@@ -189,13 +193,13 @@ export async function getDirectMessageList(): Promise<DirectMessage[]> {
     },
   };
 
-  const getList = async function* () {
-    const count = 100;
-    let offset = 0;
-    let totalCount = -1; /* -1 signifies failure */
+  try {
+    const getList = async function* () {
+      const count = 100;
+      let offset = 0;
+      let totalCount = -1; /* -1 signifies failure */
 
-    while (offset === 0 || offset < totalCount) {
-      try {
+      while (offset === 0 || offset < totalCount) {
         const url = new URL(`${baseUrl}/api/v1/im.list`);
 
         url.searchParams.append("sort", '{ "lm": -1 }');
@@ -208,25 +212,29 @@ export async function getDirectMessageList(): Promise<DirectMessage[]> {
         totalCount = response.data.total;
 
         yield response.data.ims;
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Loading direct messages failed!",
-          message: error instanceof Error ? error.message : undefined,
-        });
-
-        throw error;
       }
+    };
+
+    const result: DirectMessage[] = [];
+
+    for await (const item of getList()) {
+      result.push(...item);
     }
-  };
 
-  const result: DirectMessage[] = [];
+    return result;
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Loading direct messages failed!",
+      message: error instanceof Error ? error.message : undefined,
+    });
 
-  for await (const item of getList()) {
-    result.push(...item);
+    if (error instanceof AxiosError && error.response?.status === 401) {
+      return [];
+    }
+
+    throw error;
   }
-
-  return result;
 }
 
 export async function getUserList(): Promise<User[]> {
@@ -239,13 +247,13 @@ export async function getUserList(): Promise<User[]> {
     },
   };
 
-  const getList = async function* () {
-    const count = 100;
-    let offset = 0;
-    let totalCount = -1; /* -1 signifies failure */
+  try {
+    const getList = async function* () {
+      const count = 100;
+      let offset = 0;
+      let totalCount = -1; /* -1 signifies failure */
 
-    while (offset === 0 || offset < totalCount) {
-      try {
+      while (offset === 0 || offset < totalCount) {
         const url = new URL(`${baseUrl}/api/v1/users.list`);
 
         url.searchParams.append("count", count.toString());
@@ -257,23 +265,27 @@ export async function getUserList(): Promise<User[]> {
         totalCount = response.data.total;
 
         yield response.data.users;
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Loading direct messages failed!",
-          message: error instanceof Error ? error.message : undefined,
-        });
-
-        throw error;
       }
+    };
+
+    const result: User[] = [];
+
+    for await (const item of getList()) {
+      result.push(...item);
     }
-  };
 
-  const result: User[] = [];
+    return result;
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Loading direct messages failed!",
+      message: error instanceof Error ? error.message : undefined,
+    });
 
-  for await (const item of getList()) {
-    result.push(...item);
+    if (error instanceof AxiosError && error.response?.status === 401) {
+      return [];
+    }
+
+    throw error;
   }
-
-  return result;
 }
