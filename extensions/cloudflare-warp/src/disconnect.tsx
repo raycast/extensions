@@ -1,4 +1,4 @@
-import { PopToRootType, Toast, closeMainWindow, showHUD, showToast } from "@raycast/api";
+import { PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import { ConnectionStatus, disconnectFromWarp, getWarpStatus } from "./lib";
 
 export default async () => {
@@ -26,6 +26,5 @@ export default async () => {
       style: Toast.Style.Failure,
       title: "Failed to disconnect",
     });
-    await closeMainWindow();
   }
 };
