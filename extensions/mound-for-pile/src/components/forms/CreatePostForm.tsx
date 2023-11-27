@@ -26,7 +26,7 @@ export function CreatePostForm({ onCreate }: { onCreate: (content: string, highl
         </ActionPanel>
       }
     >
-      <Form.TextArea id="content" title="What are you thinking?" autoFocus />
+      <Form.TextArea id="content" title="What Are You Thinking?" autoFocus />
       <Form.Dropdown id="highlight" title="Highlight" defaultValue="none">
         {PostHighlights.map((highlight: HighlightI) => (
           <Form.Dropdown.Item
