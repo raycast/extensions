@@ -81,7 +81,7 @@ export default function Command() {
         placeholder=""
       />
 
-      <Form.DatePicker id="highlight_date" title="Highlight date" info="Required. Defaults to today." defaultValue={new Date()} />
+      <Form.DatePicker id="highlight_date" title="Highlight Date" info="Required. Defaults to today." defaultValue={new Date()} />
     </Form>
   );
 }
