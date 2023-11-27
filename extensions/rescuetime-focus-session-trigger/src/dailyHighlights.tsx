@@ -52,7 +52,7 @@ export default function Command() {
               actions={
                 <ActionPanel title="Open day in RescueTime">
                   <Action.OpenInBrowser
-                    title="Open this highlight in RescueTime"
+                    title="Open Highlight in RescueTime"
                     url={`https://www.rescuetime.com/browse/highlights/for/the/day/of/${convertDate(item.created_at as Date, "short")}`}
                   />
                 </ActionPanel>
