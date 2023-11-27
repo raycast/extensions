@@ -1,10 +1,10 @@
 import { Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
-import { numberWithVAT } from "./lib/vat";
+import { getNetPrice } from "./lib/vat";
 
 export default async function quickVat(props) {
-  var number = numberWithVAT(props.arguments.number);
+  var number = getNetPrice(props.arguments.number);
 
   if (getPreferenceValues().autopaste) {
     showHUD(`Pasted Result to Active App`);
