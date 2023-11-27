@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Firefox Dev edition] - {PR_MERGE_DATE}
+
+- Add support for `Firefox Dev` browser, which uses the same profiles as `Firefox`.
+
 ## [Bug fixes] - 2023-11-21
 
 - Improved search results
