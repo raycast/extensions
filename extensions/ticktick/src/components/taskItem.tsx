@@ -69,7 +69,7 @@ const TaskItem: React.FC<{
         <ActionPanel>
           <Action.Open title="View" target={target} icon={Icon.Eye} />
           <Action
-            title="Compete"
+            title="Complete"
             onAction={async () => {
               if (togglingRef.current) return;
               togglingRef.current = true;
