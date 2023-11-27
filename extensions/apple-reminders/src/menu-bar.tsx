@@ -290,10 +290,7 @@ export default function Command() {
 
         <MenuBarExtra.Submenu
           title={`Select List (${list?.title ?? "All"})`}
-          icon={{
-            source: list ? Icon.Circle : Icon.Tray,
-            tintColor: list?.color ?? Color.PrimaryText,
-          }}
+          icon={list ? { source: Icon.Circle, tintColor: list.color } : Icon.Tray}
         >
           <MenuBarExtra.Item title="All" onAction={() => handleListChange(undefined)} icon={Icon.Tray} />
           {data?.lists.map((list) => (
