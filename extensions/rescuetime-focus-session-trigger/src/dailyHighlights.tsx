@@ -50,7 +50,7 @@ export default function Command() {
               title={item.description}
               accessories={[{ text: convertDate(item.created_at as Date, "long"), icon: Icon.Calendar }]}
               actions={
-                <ActionPanel title="Open day in RescueTime">
+                <ActionPanel title="Open Day in RescueTime">
                   <Action.OpenInBrowser
                     title="Open Highlight in RescueTime"
                     url={`https://www.rescuetime.com/browse/highlights/for/the/day/of/${convertDate(item.created_at as Date, "short")}`}
