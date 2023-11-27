@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useTask } from "./hooks/useTask";
-import { Task, TaskStatus } from "./types/task";
-import { TIME_BLOCK_IN_MINUTES, formatStrDuration, formatPriority, formatPriorityIcon } from "./utils/dates";
-import { addDays, addMinutes } from "date-fns";
 import { useUser } from "./hooks/useUser";
+import { Task, TaskStatus } from "./types/task";
+import { TIME_BLOCK_IN_MINUTES, formatPriority, formatPriorityIcon, formatStrDuration } from "./utils/dates";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -46,9 +45,7 @@ const StatusDropdown = (props: StatusDropdownProps) => {
 
 // Main Function
 function TaskList() {
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
-  const [tasks, setTasks] = useState<Task[]>([]);
   const { currentUser } = useUser();
   const defaults = useMemo(
     () => ({
@@ -57,24 +54,10 @@ function TaskList() {
     [currentUser]
   );
 
-  const { getAllTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
+  const { useFetchTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
 
-  // Get tasks via API
-  useEffect(() => {
-    const getTasks = async () => {
-      try {
-        setIsLoading(true);
-        const tasks = await getAllTasks();
-        setTasks(tasks ? tasks : []);
-      } catch (error) {
-        console.error("Error while fetching tasks", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void getTasks();
-  }, []);
+  const { data: tasksData, isLoading } = useFetchTasks();
+  const tasks = useMemo(() => tasksData ?? [], [tasksData]);
 
   const handleUpdatePriority = async (task: Task, priority: string) => {
     await showToast(Toast.Style.Animated, "Updating priority...");

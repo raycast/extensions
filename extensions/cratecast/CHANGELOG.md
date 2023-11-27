@@ -1,5 +1,9 @@
 # Crates Search
 
+## [Added] - 2023-11-13
+
+- Added keywords to make it easier to find in the store
+
 ## [Added] - 2023-10-19
 
 - Can now search for symbols in crates

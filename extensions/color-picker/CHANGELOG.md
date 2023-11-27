@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Enhancement] - 2023-11-17
+
+- Added HEX color to HUD when picking
+
 ## [Maintenance] - 2023-09-15
 
 - Fixed handling of undefined which was introduced with additional settings

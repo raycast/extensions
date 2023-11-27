@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import getVPN from "./getVPN";
 import toggle from "./toggle";
@@ -25,11 +25,7 @@ export default function Command() {
     <List isLoading={isLoading}>
       {data?.map((VPN, index) => (
         <List.Item
-          icon={
-            VPN.isConnected
-              ? { source: Icon.Bolt, tintColor: { light: "#333", dark: "#DDD" } }
-              : { source: Icon.BoltDisabled, tintColor: { light: "#888", dark: "#999" } }
-          }
+          icon={VPN.isConnected ? "connect.png" : "disconnect.png"}
           key={index}
           title={showFlag ? VPN.flag + " " + VPN.name : VPN.name}
           actions={
