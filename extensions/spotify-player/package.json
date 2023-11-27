@@ -153,8 +153,8 @@
       "mode": "no-view"
     },
     {
-      "name": "addCurrentSongToPlaylist",
-      "title": "Add Current Song to Playlist",
+      "name": "addPlayingSongToPlaylist",
+      "title": "Add Playing Song to Playlist",
       "subtitle": "Spotify",
       "description": "Adds the current song to a playlist of your choice.",
       "mode": "view"

@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2023-11-28
+
+- New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
+
 ## [Feature] - 2023-09-29
 
 - Show a Liked Songs playlist in search and library commands.
