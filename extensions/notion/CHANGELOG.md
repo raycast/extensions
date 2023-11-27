@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Open in Notion alternate action] - 2023-11-24
+## [Open in Notion alternate action] - {PR_MERGE_DATE}
 
 - If the primary action is set to open in Notion, the secondary action will open in the browser, and vice versa.
 
