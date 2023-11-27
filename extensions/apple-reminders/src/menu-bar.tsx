@@ -288,7 +288,13 @@ export default function Command() {
           onAction={() => launchCommand({ name: "create-reminder", type: LaunchType.UserInitiated })}
         />
 
-        <MenuBarExtra.Submenu title={`Configure List (${list?.title ?? "All"})`} icon={Icon.List}>
+        <MenuBarExtra.Submenu
+          title={`Select List (${list?.title ?? "All"})`}
+          icon={{
+            source: list ? Icon.Circle : Icon.Tray,
+            tintColor: list?.color ?? Color.PrimaryText,
+          }}
+        >
           <MenuBarExtra.Item title="All" onAction={() => handleListChange(undefined)} icon={Icon.Tray} />
           {data?.lists.map((list) => (
             <MenuBarExtra.Item
