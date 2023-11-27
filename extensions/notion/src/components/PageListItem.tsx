@@ -117,25 +117,24 @@ export function PageListItem({
     ),
   };
 
-  const openInNotionAction = (
-    <Action title="Open in Notion" icon="notion-logo.png" onAction={() => handleOnOpenPage(page, setRecentPage)} />
+  const { open_in } = getPreferenceValues<Preferences>();
+  const isDefaultNotionActionWeb = open_in === "web";
+  const openInNotionDefaultAction = createOpenInNotionAction(
+    isDefaultNotionActionWeb ? "Browser" : "App",
+    isDefaultNotionActionWeb ? Icon.Globe : "notion-logo.png",
+    () => handleOnOpenPage(page, setRecentPage, isDefaultNotionActionWeb ? "web" : "app"),
   );
 
-  const { open_in } = getPreferenceValues<Preferences>();
-  const otherNotionActionTitle = open_in === "web" ? "Open in App" : "Open in Browser";
-  const otherNotionAction = open_in === "web" ? "app" : "web";
-  const openInNotionOtherAction = (
-    <Action
-      title={otherNotionActionTitle}
-      icon="notion-logo.png"
-      onAction={() => handleOnOpenPage(page, setRecentPage, otherNotionAction)}
-    />
+  const openInNotionAlternativeAction = createOpenInNotionAction(
+    isDefaultNotionActionWeb ? "App" : "Browser",
+    isDefaultNotionActionWeb ? "notion-logo.png" : Icon.Globe,
+    () => handleOnOpenPage(page, setRecentPage, isDefaultNotionActionWeb ? "app" : "web"),
   );
 
   const actions = {
     raycast: openInRaycastAction[page.object],
-    notionDefaultOpen: openInNotionAction,
-    notionOtherOpen: openInNotionOtherAction,
+    notionDefaultOpen: openInNotionDefaultAction,
+    notionAltOpen: openInNotionAlternativeAction,
   };
 
   const pageWord = capitalize(page.object);
@@ -149,7 +148,7 @@ export function PageListItem({
           <ActionPanel.Section title={title}>
             {primaryAction === "notion" ? actions["notionDefaultOpen"] : actions["raycast"]}
             {primaryAction === "notion" ? actions["raycast"] : actions["notionDefaultOpen"]}
-            {actions["notionOtherOpen"]}
+            {actions["notionAltOpen"]}
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
@@ -286,6 +285,9 @@ export function PageListItem({
   );
 }
 
+function createOpenInNotionAction(title: string, icon: Image.ImageLike | string, action: () => void) {
+  return <ActionPanel.Item title={`Open in ${title}`} icon={icon} onAction={action} />;
+}
 function getPropertyAccessory(
   property: PagePropertyType | FormulaPropertyItemObjectResponse["formula"],
   title: string,
