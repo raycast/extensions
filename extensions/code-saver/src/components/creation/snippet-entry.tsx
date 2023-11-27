@@ -253,7 +253,7 @@ ${err instanceof Error ? err.stack : String(err)}
           }
         }}
         onChange={setLibraryUUID}
-        info="Library is the collection or album of snippets"
+        info="Library is the collection or album of snippets. `Cmd + K` to create new one."
       >
         {allLibs?.map((lib) => (
           <Form.Dropdown.Item value={lib.uuid} key={lib.uuid} title={lib.name} icon={getAvatarIcon(lib.name)} />
@@ -265,7 +265,7 @@ ${err instanceof Error ? err.stack : String(err)}
           title="Labels"
           value={labelsUUID}
           onChange={setLabels}
-          info="Tag is used to classify snippets"
+          info="Tag is used to classify snippets. `Cmd + K` to create new one."
         >
           {allLabels?.map((label) => (
             <Form.TagPicker.Item key={label.uuid} title={label.title} value={label.uuid} icon={labelIcon(label)} />
