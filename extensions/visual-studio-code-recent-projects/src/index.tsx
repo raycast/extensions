@@ -1,21 +1,11 @@
-import {
-  ActionPanel,
-  Action,
-  Grid,
-  Icon,
-  showToast,
-  open,
-  Toast,
-  openExtensionPreferences,
-  getPreferenceValues,
-} from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
 import { getBuildScheme } from "./lib/vscode";
-import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows } from "./preferences";
+import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows, terminalApp } from "./preferences";
 import { EntryLike, EntryType, PinMethods } from "./types";
 import {
   filterEntriesByType,
@@ -37,8 +27,6 @@ import {
 } from "./grid-or-list";
 import { usePinnedEntries } from "./pinned";
 import { runAppleScriptSync } from "run-applescript";
-
-const { terminalApp } = getPreferenceValues<Preferences.Index>();
 
 export default function Command() {
   const { data, isLoading, error } = useRecentEntries();

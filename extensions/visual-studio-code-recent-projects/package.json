@@ -30,17 +30,7 @@
       "title": "Search Recent Projects",
       "subtitle": "Visual Studio Code",
       "description": "Search and open recent projects from Visual Studio Code.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "terminalApp",
-          "type": "appPicker",
-          "default": "Terminal",
-          "required": false,
-          "title": "Terminal App",
-          "description": "Select which Terminal App to use when opening with a terminal"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "open-with-vscode",
@@ -131,6 +121,14 @@
       "label": "Close Other VSCode Windows",
       "default": false,
       "description": "Close other VSCode windows when opening a project"
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "default": "Terminal",
+      "required": false,
+      "title": "Terminal App",
+      "description": "Select which Terminal App to use when opening with a terminal"
     }
   ],
   "dependencies": {
