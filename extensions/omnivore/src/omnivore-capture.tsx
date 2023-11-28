@@ -9,18 +9,18 @@ export default async function QuickCapture(props: LaunchProps<{ arguments: Argum
     title: 'Saving Article',
   })
 
-  const isUrlSaved = await saveUrl(url, labels)
-  if (isUrlSaved) {
+  const urlSaveResponse = await saveUrl(url, labels)
+  if (urlSaveResponse.success) {
     showToast({
       style: Toast.Style.Success,
       title: 'Saved!',
-      message: 'Your URL was saved',
+      message: urlSaveResponse.message,
     })
   } else {
     showToast({
       style: Toast.Style.Failure,
       title: 'Not Saved',
-      message: 'Your URL was not saved',
+      message: urlSaveResponse.message,
     })
   }
 }

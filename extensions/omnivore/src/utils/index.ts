@@ -36,7 +36,19 @@ export async function archiveArticle(articleId: string, toArchive: boolean): Pro
   }
 }
 
-export async function saveUrl(url: string, labels: string): Promise<boolean> {
+export async function saveUrl(url: string, labels: string): Promise<{ success: boolean; message: string }> {
+  try {
+    new URL(url)
+  } catch (error) {
+    if (error instanceof TypeError) {
+      console.error('Invalid URL:', error.message)
+      return { success: false, message: 'Incorrect URL' }
+    } else {
+      console.error('Unexpected error:', error)
+      return { success: false, message: 'Unexpected error occurred' }
+    }
+  }
+
   const labelsArray = labels
     .split(',')
     .map((label) => `&labels=${encodeURIComponent(label.trim())}`)
@@ -52,14 +64,14 @@ export async function saveUrl(url: string, labels: string): Promise<boolean> {
     })
 
     if (response.ok) {
-      return true
+      return { success: true, message: 'Your URL was saved' }
     } else {
       console.error('Error during fetch')
-      return false
+      return { success: false, message: 'Error during saving' }
     }
   } catch (error) {
     console.error('Server error:', error)
-    return false
+    return { success: false, message: 'Server error' }
   }
 }
 
