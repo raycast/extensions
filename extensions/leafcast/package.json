@@ -14,12 +14,14 @@
     {
       "name": "pair-device",
       "title": "Pair Device",
+      "subtitle": "Leafcast",
       "description": "Pairs your Nanoleaf device with Raycast",
       "mode": "view"
     },
     {
       "name": "control-lights",
       "title": "Control Lights",
+      "subtitle": "Leafcast",
       "description": "Control various aspects of your Nanoleaf light panels",
       "mode": "view"
     }
