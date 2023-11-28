@@ -32,20 +32,23 @@ export async function getUrlFromSelectionOrClipboard(): Promise<string | undefin
 }
 
 export async function unshortenUrl(url: string): Promise<{ redirectionSteps: RedirectionStep[] }> {
-  const redirectionSteps = [{ step: "Original", url: url }];
-
   try {
     let response = await fetch(url, {
       method: "HEAD",
       redirect: "manual",
     });
+    const redirectionSteps = [{ url: url, statusCode: response.status, statusName: response.statusText }];
 
     while (response.url) {
       if (response.status === 301 || response.status === 302) {
         const nextUrl = response.headers.get("location");
         if (nextUrl) {
-          redirectionSteps.push({ step: "Redirect", url: nextUrl });
           response = await fetch(nextUrl, { method: "HEAD", redirect: "manual" });
+          redirectionSteps.push({
+            url: nextUrl,
+            statusCode: response.status,
+            statusName: response.statusText,
+          });
         } else {
           break;
         }
@@ -53,7 +56,6 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
         break;
       }
     }
-
     return { redirectionSteps };
   } catch (error) {
     if (error instanceof Error) {

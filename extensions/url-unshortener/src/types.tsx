@@ -1,8 +1,9 @@
 import { Icon } from "@raycast/api";
 
 export interface RedirectionStep {
-  step: string;
   url: string;
+  statusCode: number;
+  statusName: string;
 }
 
 export interface FaviconUrls {

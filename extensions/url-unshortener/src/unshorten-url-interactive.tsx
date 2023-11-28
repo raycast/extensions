@@ -100,6 +100,7 @@ export default function UrlRedirectionList() {
       searchText={initialUrl}
       searchBarPlaceholder="Enter or paste a URL here"
       onSearchTextChange={onSearchTextChange}
+      throttle
     >
       {redirectionSteps.length < 1 ? (
         <List.EmptyView title="No URL found in text selection or clipboard" />
@@ -107,9 +108,16 @@ export default function UrlRedirectionList() {
         redirectionSteps.map((step, index) => (
           <List.Item
             key={index}
-            title={step.step}
-            subtitle={step.url}
+            title={step.url}
             icon={{ source: typeof faviconUrls[step.url] === "string" ? faviconUrls[step.url] : Icon.Globe }}
+            accessories={[
+              {
+                tag: {
+                  value: step.statusCode.toString(),
+                },
+                icon: step.statusCode >= 200 && step.statusCode < 300 ? Icon.CheckCircle : Icon.ArrowClockwise,
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={step.url} />
