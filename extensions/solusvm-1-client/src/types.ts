@@ -33,4 +33,6 @@ export type ErrorResponse = {
 export type SuccessResponse =
   | GetVirtualServerStatusResponse
   | GetVirtualServerInformationResponse
-  | RebootVirtualServerResponse;
+  | RebootVirtualServerResponse
+  | BootVirtualServerResponse
+  | ShutdownVirtualServerResponse;
