@@ -8,8 +8,9 @@ HTML entities are used to display reserved characters in HTML.  For example, the
 
 Search for the character you want to display.
 
-![HTML-Entities](./metadata/html-entities-1.png)
-![HTML-Entities](./metadata/html-entities-2.png)
+<img width="1000" src="https://raw.githubusercontent.com/j3lte/raycast-html-entities/main/metadata/html-entities-1.png">
+
+<img width="1000" src="https://raw.githubusercontent.com/j3lte/raycast-html-entities/main/metadata/html-entities-2.png">
 
 When selected, you can copy the following:
 
@@ -17,5 +18,5 @@ When selected, you can copy the following:
 - HTML Code (<kbd>⌘</kbd> + <kbd>H</kbd>)
 - HTML Entity (when available) (<kbd>⌘</kbd> + <kbd>E</kbd>)
 - CSS Code (<kbd>⌘</kbd> + <kbd>S</kbd>)
-
-![HTML-Entities](./metadata/html-entities-3.png)
+-
+<img width="1000" src="https://raw.githubusercontent.com/j3lte/raycast-html-entities/main/metadata/html-entities-3.png">
