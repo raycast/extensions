@@ -1,8 +1,16 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  getPreferenceValues,
+  Toast,
+  openExtensionPreferences,
+} from "@raycast/api";
 import axios from "axios";
-import { useState } from "react";
+import { useForm } from "@raycast/utils";
 
-type Values = {
+type SubmitFormValues = {
   type: string;
   content: string;
   title: string;
@@ -22,93 +30,94 @@ const contentInfoMap: Record<string, string> = {
 
 export default function Command() {
   const preferences: Preferences = getPreferenceValues();
-  const [type, setType] = useState("url");
-  const [content, setContent] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [tags, setTags] = useState("");
-  const [folder, setFolder] = useState("");
 
-  async function handleSubmit(values: Values) {
-    const { type, content, title, description, tags, folder } = values;
+  const { handleSubmit, itemProps, reset, values } = useForm<SubmitFormValues>({
+    async onSubmit(values: SubmitFormValues) {
+      const { type, content, title, description, tags, folder } = values;
 
-    let tagList: string[] = [];
+      let tagList: string[] = [];
 
-    try {
-      tagList = tags.split(" ");
-    } catch (error) {
-      showToast({ title: "Save to Cubox", message: "Tags is not valid", style: Toast.Style.Failure });
-      return;
-    }
+      const { api } = preferences;
 
-    if (type === "url" && !content.startsWith("http")) {
-      showToast({ title: "Save to Cubox", message: "Url is not valid", style: Toast.Style.Failure });
-      return;
-    }
-
-    if (content !== "") {
-      const response = await axios.post(preferences.api, {
-        type: type,
-        content: content,
-        title: title,
-        description: description,
-        tags: tagList,
-        folder: folder,
-      });
-
-      if (response.data.code === 200) {
-        showToast({ title: "Save to Cubox", message: "Success" });
-        setContent("");
-        setTitle("");
-        setDescription("");
-        setTags("");
-        setFolder("");
-      } else {
-        showToast({ title: "Save to Cubox", message: response.data.message || "Unknown error" });
+      if (!api.startsWith("https://")) {
+        showToast({ title: "Save to Cubox", message: "Cubox API is incorrect", style: Toast.Style.Failure });
+        return;
       }
-    } else {
-      showToast({ title: "Save to Cubox", message: "Content is empty" });
-    }
-  }
+
+      try {
+        tagList = tags.split(" ");
+      } catch (error) {
+        showToast({ title: "Save to Cubox", message: "Tags is not valid", style: Toast.Style.Failure });
+        return;
+      }
+
+      if (type === "url" && !content.startsWith("http")) {
+        showToast({ title: "Save to Cubox", message: "Url is not valid", style: Toast.Style.Failure });
+        return;
+      }
+
+      if (content !== "") {
+        try {
+          const response = await axios.post(api, {
+            type: type,
+            content: content,
+            title: title,
+            description: description,
+            tags: tagList,
+            folder: folder,
+          });
+
+          if (response.data.code === 200) {
+            showToast({ title: "Save to Cubox", message: "Success" });
+            reset();
+          } else {
+            showToast({
+              title: "Save to Cubox",
+              message: response.data.message || "Unknown error",
+              style: Toast.Style.Failure,
+            });
+          }
+        } catch (error) {
+          showToast({ title: "Save to Cubox", message: error as string, style: Toast.Style.Failure });
+        }
+      } else {
+        showToast({ title: "Save to Cubox", message: "Content is empty", style: Toast.Style.Failure });
+      }
+    },
+    validation: {
+      content: (value) => {
+        if (value === "") {
+          return "Content is required";
+        }
+      },
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Save" />
+          <Action title="Open Preference" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
       navigationTitle="Save to Cubox"
     >
-      <Form.Dropdown id="type" title="Type" defaultValue={type} storeValue onChange={setType}>
+      <Form.Dropdown title="Type" {...itemProps.type}>
         <Form.Dropdown.Item value="url" title="url" />
         <Form.Dropdown.Item value="memo" title="memo" />
       </Form.Dropdown>
       <Form.TextArea
-        id="content"
         title="Content"
-        placeholder={`Enter ${type}`}
-        value={content}
-        onChange={setContent}
-        info={contentInfoMap[type]}
+        placeholder={`Enter ${values.type}`}
+        info={contentInfoMap[values.type]}
+        {...itemProps.content}
       />
       <Form.Separator />
-      <Form.TextField id="title" title="Card Title" placeholder="Optional" value={title} onChange={setTitle} />
-      <Form.TextArea
-        id="description"
-        title="Card Description"
-        placeholder="Optional"
-        value={description}
-        onChange={setDescription}
-      />
-      <Form.TextField
-        id="tags"
-        title="Tags"
-        placeholder="Separated by space, optional"
-        value={tags}
-        onChange={setTags}
-      />
-      <Form.TextField id="folder" title="Folder" placeholder="Optional" value={folder} onChange={setFolder} />
+      <Form.TextField title="Card Title" placeholder="Optional" {...itemProps.title} />
+      <Form.TextArea title="Card Description" placeholder="Optional" {...itemProps.description} />
+      <Form.TextField title="Tags" placeholder="Separated by space, optional" {...itemProps.tags} />
+      <Form.TextField title="Folder" placeholder="Optional" {...itemProps.folder} />
     </Form>
   );
 }
