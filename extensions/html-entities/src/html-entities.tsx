@@ -1,5 +1,6 @@
-import { List, Grid, ActionPanel, Action, Clipboard, environment } from "@raycast/api";
+import { List, Grid, ActionPanel, Action, Clipboard } from "@raycast/api";
 import { useState, useMemo, PropsWithChildren } from "react";
+import { encode } from "js-base64";
 
 import { prefersListView } from "./util/preferences";
 import { getElements, HTMLElement } from "./data";
@@ -28,6 +29,22 @@ const BaseView = ({
       {children}
     </Grid>
   );
+};
+
+const getSquare = (item: HTMLElement, dark = false) => {
+  const textColor = dark ? "#fff" : "#000";
+  const backgroundColor = dark ? "#000" : "#fff";
+  const size = 200;
+  return `
+  <svg height="${size}" width="${size}">
+    <rect fill="${backgroundColor}" x="0" y="0" width="${size}" height="${size}"></rect>
+    <text x="${size / 2}" y="${
+      size / 1.4
+    }" fill="${textColor}" text-anchor="middle" alignment-baseline="central" font-size="${
+      size / 2
+    }" line-height="0" font-family="mono-space">${unicodeToChar(item.uni)}</text>
+  </svg>
+  `;
 };
 
 const Actions = ({
@@ -74,15 +91,20 @@ const GridItem = ({
   item: HTMLElement;
   onCopy: (content: string | number | Clipboard.Content) => void;
 }) => {
-  const css = item.css.replace(/\\/g, "");
+  const [light, dark] = useMemo(() => {
+    return [
+      `data:image/svg+xml;base64,${encode(getSquare(item))}`,
+      `data:image/svg+xml;base64,${encode(getSquare(item, true))}`,
+    ];
+  }, [item]);
 
   return (
     <Grid.Item
       id={item.name}
       content={{
         source: {
-          dark: `${environment.assetsPath}/images/dark/${css}.png`,
-          light: `${environment.assetsPath}/images/light/${css}.png`,
+          dark,
+          light,
         },
       }}
       title={item.name}

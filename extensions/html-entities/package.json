@@ -50,28 +50,22 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.62.2",
-    "fuse.js": "^7.0.0"
+    "fuse.js": "^7.0.0",
+    "js-base64": "^3.7.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "async-await-queue": "^2.1.4",
     "eslint": "^8.51.0",
-    "node-html-to-image": "^4.0.0",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2",
-    "ultimate-text-to-image": "^1.0.1",
-    "yocto-queue": "^1.0.0"
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
-    "generate:glyphs": "npx ts-node scripts/generate.ts",
-    "generate:missing": "npx ts-node scripts/generate2.ts",
-    "generate": "npm run generate:glyphs && npm run generate:missing"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
