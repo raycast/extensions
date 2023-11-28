@@ -32,6 +32,7 @@
       "description": "The baseUrl of your Rocket.Chat instance",
       "type": "textfield",
       "required": true,
+      "placeholder": "https://open.rocket.chat (without trailing slash)",
       "title": "Base URL"
     },
     {
