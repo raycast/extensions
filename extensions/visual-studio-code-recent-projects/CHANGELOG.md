@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2023-11-28
+
+- Fix the "Open With Terminal" action by making the terminal preference a requirement
+
 ## [Update] - 2023-11-28
 
 - Add `Open With Terminal` action (only for directories)

@@ -126,7 +126,7 @@
       "name": "terminalApp",
       "type": "appPicker",
       "default": "Terminal",
-      "required": false,
+      "required": true,
       "title": "Terminal App",
       "description": "Select which Terminal App to use when opening with a terminal"
     }
