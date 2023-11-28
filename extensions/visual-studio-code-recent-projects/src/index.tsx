@@ -5,8 +5,8 @@ import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
 import { getBuildScheme } from "./lib/vscode";
-import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows } from "./preferences";
-import { EntryLike, EntryType, RemoteEntry, PinMethods, RemoteWorkspaceEntry } from "./types";
+import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows, terminalApp } from "./preferences";
+import { EntryLike, EntryType, PinMethods } from "./types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
@@ -168,6 +168,18 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
             />
             <Action.ShowInFinder path={path} />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            {isFolderEntry(props.entry) && (
+              <Action
+                title={`Open With ${terminalApp.name}`}
+                icon={{ fileIcon: terminalApp.path }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                onAction={() =>
+                  open(path, terminalApp).catch(() =>
+                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp.name}`)
+                  )
+                }
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
