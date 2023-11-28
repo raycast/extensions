@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, Color } from "@raycast/api";
 import { RedirectionStep, FaviconUrls } from "./types";
 import { getUrlFromSelectionOrClipboard, isValidUrl, unshortenUrl, getFaviconUrl } from "./utils";
 
@@ -114,6 +114,7 @@ export default function UrlRedirectionList() {
               {
                 tag: {
                   value: step.statusCode.toString(),
+                  color: step.statusCode >= 200 && step.statusCode < 300 ? Color.Green : Color.Yellow,
                 },
                 icon: step.statusCode >= 200 && step.statusCode < 300 ? Icon.CheckCircle : Icon.ArrowClockwise,
               },
