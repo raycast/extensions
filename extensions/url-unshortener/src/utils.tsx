@@ -2,18 +2,36 @@ import { Clipboard, getSelectedText, Icon } from "@raycast/api";
 import { RedirectionStep } from "./types";
 import fetch from "node-fetch";
 
-export function isValidUrl(url: string) {
-  try {
-    new URL(url);
-    return true;
-  } catch (_) {
-    return false;
+export function ensureHttpPrefix(url: string) {
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    return "https://" + url;
   }
+  return url;
+}
+
+export function isValidUrl(url: string) {
+  const regex = /^(http:\/\/|https:\/\/)[\w-]+(\.[\w-]+)+/;
+
+  if (regex.test(url)) {
+    try {
+      new URL(url);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+  return false;
 }
 
 export async function getUrlFromSelectionOrClipboard(): Promise<string | undefined> {
   try {
-    const selectedText = await getSelectedText();
+    let selectedText = await getSelectedText();
+
+    if (selectedText && isValidUrl(selectedText)) {
+      return selectedText;
+    }
+
+    selectedText = ensureHttpPrefix(selectedText);
     if (selectedText && isValidUrl(selectedText)) {
       return selectedText;
     }
@@ -25,9 +43,16 @@ export async function getUrlFromSelectionOrClipboard(): Promise<string | undefin
     }
   }
 
-  const clipboardText = await Clipboard.readText();
-  if (clipboardText && isValidUrl(clipboardText)) {
-    return clipboardText;
+  try {
+    let clipboardText = await Clipboard.readText();
+    if (clipboardText) {
+      clipboardText = ensureHttpPrefix(clipboardText);
+      if (isValidUrl(clipboardText)) {
+        return clipboardText;
+      }
+    }
+  } catch (error) {
+    console.error(error);
   }
 }
 
