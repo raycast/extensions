@@ -1,7 +1,7 @@
-import natural from "natural";
+import { WordPunctTokenizer } from "natural/lib/natural/tokenizers/index";
 import * as chrono from "chrono-node";
 
-const tokenizer = new natural.WordPunctTokenizer();
+const tokenizer = new WordPunctTokenizer();
 const EXCLUDED_INITIAL_TOKENS_REGEX = /(remind me to|remind me)\s*/i;
 
 export function extractTopicAndDateFromInputText(inputText: string) {

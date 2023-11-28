@@ -1,6 +1,12 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2023-11-28
+
+- Add `Open With Terminal` action (only for directories)
+- Add command preferences for Terminal app
+
 ## [Fix] - 2023-09-22
+
 - Properly support VSCodium and Cursor in for commands relating to extensions
 
 ## [Update] - 2023-08-25

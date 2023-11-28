@@ -1,4 +1,8 @@
 # Wireguard Changelog
+## [Fixed] - 2023-11-28
+
+- Fixed VPN not starting via `scutil` with too long a name
+
 ## [Fixed] - 2023-11-23
 
 - Fixed the issue where quotes at the end of a name were omitted when the name was more than 30 characters long

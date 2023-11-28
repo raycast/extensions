@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2023-09-29
+
+- Show a Liked Songs playlist in search and library commands.
+
 ## [More Commands] - 2023-09-07
 
 - Added `Current Track` command to view the current track and artist/show, and the like state
