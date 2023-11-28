@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2023-11-28
+
+- Hopefully Fix the "Open With Terminal" action by using the bundle identifier and checking that it exists
+
 ## [Update] - 2023-11-28
 
 - Add `Open With Terminal` action (only for directories)
