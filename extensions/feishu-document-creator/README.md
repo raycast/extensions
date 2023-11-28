@@ -2,7 +2,7 @@
 
 Create Feishu/Lark online document quickly using native Feishu/Lark URLs.
 
-Reference: [快速创建飞书云文档](https://www.feishu.cn/hc/zh-CN/articles/141734813422-%E5%BF%AB%E9%80%9F%E5%88%9B%E5%BB%BA%E9%A3%9E%E4%B9%A6%E4%BA%91%E6%96%87%E6%A1%A3)
+Reference: [](https://www.feishu.cn/hc/zh-CN/articles/141734813422-%E5%BF%AB%E9%80%9F%E5%88%9B%E5%BB%BA%E9%A3%9E%E4%B9%A6%E4%BA%91%E6%96%87%E6%A1%A3)
 
 ## Feishu/Lark URLs
 
