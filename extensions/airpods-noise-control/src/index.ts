@@ -6,7 +6,5 @@ export default async function main() {
   const prefs = getPreferenceValues<Prefs>();
   await closeMainWindow();
   const res = await execAirPodsMenu(prefs, "noise-control");
-  if (prefs.showHudNC && res)
-    showHUD(res);
+  if (prefs.showHudNC && res) showHUD(res);
 }
-

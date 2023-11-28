@@ -15,7 +15,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "switch-noise-control",
+      "name": "index",
       "title": "Switch Noise Control Mode",
       "subtitle": "Transparency ↔ Adaptive ↔ Noise Cancellation",
       "description": "This command will switch Noise Cancellation, Transparency or Adaptive if AirPods are connected to your device.",

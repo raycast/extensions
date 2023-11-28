@@ -1,14 +1,10 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { Prefs } from "./type";
-import {showHUD} from "@raycast/api";
 
-export async function execAirPodsMenu({
-  airpodsIndex,
-  soundLoc,
-  ccLoc,
-  optionOne,
-  optionTwo
-}: Prefs, toggleOption = ""): Promise<string | null> {
+export async function execAirPodsMenu(
+  { airpodsIndex, soundLoc, ccLoc, optionOne, optionTwo }: Prefs,
+  toggleOption = ""
+): Promise<string | null> {
   const script = `
 set AirPodsIndex to ${airpodsIndex}
 set ToggleOption to "${toggleOption}"
@@ -119,21 +115,23 @@ end tell
   `;
 
   const res = await runAppleScript<string>(script);
-  switch(res) {
-  case "sound-not-found": {
-    showFailureToast("", {title: "Sound not found. Check Localization!"});
-    return null;
-  }
-  case "control-center-not-found": {
-    showFailureToast("", {title: "Coltrol Center not found. Check Localization!"});
-    return null;
-  }
-  case "airpods-not-connected": {
-    showFailureToast("", {title: "AirPods not connected!"});
-    return null;
-  }
-  default: {
-    return res;
-  }
+  switch (res) {
+    case "sound-not-found": {
+      showFailureToast("", { title: "Sound not found. Check Localization!" });
+      return null;
+    }
+    case "control-center-not-found": {
+      showFailureToast("", {
+        title: "Coltrol Center not found. Check Localization!",
+      });
+      return null;
+    }
+    case "airpods-not-connected": {
+      showFailureToast("", { title: "AirPods not connected!" });
+      return null;
+    }
+    default: {
+      return res;
+    }
   }
 }
