@@ -22,6 +22,7 @@ const appKeyMapping = {
   "Code - Insiders": "com.microsoft.VSCodeInsiders",
   "VSCodium < 1.71": "com.visualstudio.code.oss",
   VSCodium: "com.vscodium",
+  Cursor: "Cursor",
 } as const;
 const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
@@ -121,10 +122,8 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
   projectsGrouped.forEach((value, key) => {
     elements.push(
       <List.Section key={key} title={key}>
-        {value?.map((project, index) => (
-          <ProjectListItem key={project.rootPath + index} {...project} />
-        ))}
-      </List.Section>
+        {value?.map((project, index) => <ProjectListItem key={project.rootPath + index} {...project} />)}
+      </List.Section>,
     );
   });
   return elements;
