@@ -88,7 +88,7 @@ export default function Command() {
     JSON.stringify(result);
     `;
 
-    const command: string = "copyq eval -";
+    const command: string = `"${copyqPath}" eval -`;
     const options: ExecSyncOptionsWithStringEncoding = {
       input: script,
       encoding: "utf8",
