@@ -99,7 +99,7 @@ Leaving color hex blank will generate random one color."
       />
       <Form.TextField
         id="title"
-        title="Label title"
+        title="Label Title"
         placeholder="Tag can be used to classify the snippets"
         error={titleError}
         onChange={dropTitleErrorIfNeeded}

@@ -41,6 +41,7 @@ export function ItemActions({ snippet, onUpdateSuccess }: ItemActionsProps) {
       <Action
         icon={Icon.DeleteDocument}
         title="Delete This Snippet"
+        style={Action.Style.Destructive}
         onAction={async () => {
           const err = await deleteSnippet(snippet.uuid);
           if (err != undefined) {
