@@ -89,6 +89,7 @@ export function useTwitchRequest<T>({
   cacheDuration = 60_000,
   enabled = true,
   select = defaultSelect,
+  loadingWhileStale = false,
 }: {
   url: string;
   cacheKey: string;
@@ -96,11 +97,12 @@ export function useTwitchRequest<T>({
   cacheDuration?: number;
   enabled?: boolean;
   select?: (data: any) => T;
+  loadingWhileStale?: boolean;
 }) {
   const [_updatedAt, setUpdatedAt] = useCachedState<string>(`${CACHE_PREFIX}_${cacheKey}_updated_at`, zeroDate);
   const updatedAt = Number(_updatedAt);
   const [previous, setPrevious] = useCachedState<T | undefined>(`${CACHE_PREFIX}_${cacheKey}`, undefined);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(loadingWhileStale ? true : previous === undefined);
   const prevRef = useRef(previous);
   prevRef.current = previous;
 
@@ -108,7 +110,9 @@ export function useTwitchRequest<T>({
     if (!enabled) return;
     if (updatedAt + cacheDuration >= Date.now()) return;
     const controller = new AbortController();
-    setIsLoading(previous === undefined);
+    if (!loadingWhileStale) {
+      setIsLoading(previous === undefined);
+    }
     getHeaders()
       .then((headers) => fetch(url, { headers, signal: controller.signal }))
       .then((response) => response.json())

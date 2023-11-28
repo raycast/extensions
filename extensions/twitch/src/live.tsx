@@ -5,7 +5,7 @@ import { useUserId } from "./helpers/useUserId";
 
 export default function main() {
   const { data: userId, isLoading: isLoadingUserId } = useUserId();
-  const { data: items = [], isLoading, updatedAt } = useFollowedStreams(userId);
+  const { data: items = [], isLoading, updatedAt } = useFollowedStreams(userId, { loadingWhileStale: true });
 
   return (
     <MenuBarExtra
