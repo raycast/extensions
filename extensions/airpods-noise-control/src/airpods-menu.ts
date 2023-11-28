@@ -3,7 +3,7 @@ import { Prefs } from "./type";
 
 export async function execAirPodsMenu(
   { airpodsIndex, soundLoc, ccLoc, optionOne, optionTwo }: Prefs,
-  toggleOption = ""
+  toggleOption = "",
 ): Promise<string | null> {
   const script = `
 set AirPodsIndex to ${airpodsIndex}
