@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "view-clipboard-entries",
-      "title": "View Default CopyQ Tab",
+      "title": "View Default Tab",
       "description": "Lists CopyQ clipboard entries and allows user to select/paste them.",
       "mode": "view",
       "preferences": [
@@ -20,20 +20,12 @@
           "title": "Default Tab",
           "description": "Name of Default CopyQ Tab",
           "required": true
-        },
-        {
-          "type": "textfield",
-          "name": "max_items",
-          "title": "Max Tabs",
-          "description": "Max number of CopyQ tabs to display. Set to 0 for no limit. Setting the limit too high will result in a long load time.",
-          "required": true,
-          "default": "0"
         }
       ]
     },
     {
       "name": "select-tab",
-      "title": "CopyQ",
+      "title": "Select Tab",
       "description": "Lists CopyQ tabs and allows the user to select one.",
       "mode": "view"
     }

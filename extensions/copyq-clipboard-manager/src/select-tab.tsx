@@ -1,83 +1,61 @@
 import {
+  openExtensionPreferences,
+  getPreferenceValues,
   ActionPanel,
   List,
   Action,
   Icon,
   launchCommand,
   LaunchType,
-  openExtensionPreferences,
-  getPreferenceValues,
+  Detail,
 } from "@raycast/api";
-import { exec } from "child_process";
-import { accessSync, constants } from "fs";
-import { useState, useEffect } from "react";
+import { execSync } from "child_process";
 
 interface ExtensionPreferences {
   copyq_path: string;
 }
 
 export default function Command() {
-  const copyq_path = getPreferenceValues<ExtensionPreferences>().copyq_path;
+  // Get CopyQ path from preferences
+  const copyqPath = getPreferenceValues<ExtensionPreferences>().copyq_path;
 
-  // Check if CopyQ is installed
+  // Error handling for missing CopyQ path and CopyQ not running
   try {
-    accessSync(copyq_path, constants.X_OK);
+    execSync(`${copyqPath} tab`, { encoding: "utf8" });
   } catch (err) {
-    // Return error message
     return (
-      <List>
-        <List.Item
-          title="CopyQ not found"
-          subtitle="Please check your CopyQ path in preferences."
-          actions={
-            <ActionPanel>
-              <Action title="Open Command Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
-              <Action.Paste title="Copy Path to Clipboard" content={copyq_path} />
-            </ActionPanel>
-          }
-        />
-      </List>
+      <Detail
+        markdown={
+          "CopyQ not found, or CopyQ server not running\n\nPlease check your CopyQ path in preferences, and make sure CopyQ server is running."
+        }
+        actions={
+          <ActionPanel>
+            <Action title="Open Command Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
+            <Action.Paste title="Copy Path to Clipboard" content={copyqPath} />
+          </ActionPanel>
+        }
+      />
     );
   }
 
-  // Get list of tabs
-  const [tabList, setTabList] = useState<string[]>([]);
+  // Get the list of tabs from CopyQ and return an array of strings
+  function getTabs(): string[] {
+    const command = `"${copyqPath}" tab`;
+    const stdout = execSync(command, { encoding: "utf8" });
 
-  function showtabs(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const command = `"${copyq_path}" tab`;
-      exec(command, (error, stdout) => {
-        if (error) {
-          console.log(`error: ${error.message}`);
-          reject(error.message);
-        } else {
-          resolve(stdout);
-        }
-      });
-    });
-  }
-
-  // Format list of tabs from string to array
-  function formatList(input: string): string[] {
-    const lines = input.split("\n");
+    // Format list of tabs from string to array
+    const lines = stdout.split("\n");
     const formattedList = lines.filter((line) => line.trim() !== "");
     // Remove & from items in the list
     formattedList.forEach((item, index) => {
       formattedList[index] = item.replace("&", "");
     });
+
     return formattedList;
   }
 
-  // Get list of tabs on mount
-  useEffect(() => {
-    showtabs()
-      .then((tabList) => {
-        setTabList(formatList(tabList));
-      })
-      .catch((error) => {
-        console.error("Error getting tab list:", error);
-      });
-  }, []); // Empty dependency array to run once when the component mounts
+  // Return the list of tabs
+  const tabList = getTabs();
 
   return (
     <List>
