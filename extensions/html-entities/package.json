@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "html-entities",
+  "title": "HTML Entities",
+  "description": "Lookup HTML codes for symbols",
+  "icon": "command-icon.png",
+  "author": "j3lte",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "html-entities",
+      "title": "HTML Entities",
+      "description": "Find HTML entities for symbols",
+      "icon": "command-icon.png",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "title": "Query",
+          "description": "The query to search for",
+          "placeholder": "Search for HTML entities",
+          "type": "text",
+          "defaultValue": ""
+        }
+      ],
+      "preferences": [
+        {
+          "name": "viewType",
+          "title": "View Type",
+          "description": "View type to use when searching for a HTML entity",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "List",
+              "value": "list"
+            },
+            {
+              "title": "Grid",
+              "value": "grid"
+            }
+          ],
+          "default": "grid",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.2",
+    "fuse.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "async-await-queue": "^2.1.4",
+    "eslint": "^8.51.0",
+    "node-html-to-image": "^4.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "ultimate-text-to-image": "^1.0.1",
+    "yocto-queue": "^1.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "generate:glyphs": "npx ts-node scripts/generate.ts",
+    "generate:missing": "npx ts-node scripts/generate2.ts",
+    "generate": "npm run generate:glyphs && npm run generate:missing"
+  }
+}
