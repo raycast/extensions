@@ -125,8 +125,8 @@
     {
       "name": "terminalApp",
       "type": "appPicker",
-      "default": "Terminal",
-      "required": true,
+      "default": "com.apple.Terminal",
+      "required": false,
       "title": "Terminal App",
       "description": "Select which Terminal App to use when opening with a terminal"
     }

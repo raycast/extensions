@@ -2,7 +2,7 @@
 
 ## [Fix] - 2023-11-28
 
-- Fix the "Open With Terminal" action by making the terminal preference a requirement
+- Hopefully Fix the "Open With Terminal" action by using the bundle identifier and checking that it exists
 
 ## [Update] - 2023-11-28
 
