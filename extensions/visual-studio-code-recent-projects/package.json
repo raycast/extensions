@@ -17,7 +17,8 @@
     "oilbeater",
     "QIanGua",
     "hakob_nersesian",
-    "erics118"
+    "erics118",
+    "tm.wrnr"
   ],
   "keywords": [
     "vscode"
@@ -29,7 +30,17 @@
       "title": "Search Recent Projects",
       "subtitle": "Visual Studio Code",
       "description": "Search and open recent projects from Visual Studio Code.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "terminalApp",
+          "type": "appPicker",
+          "default": "Terminal",
+          "required": false,
+          "title": "Terminal App",
+          "description": "Select which Terminal App to use when opening with a terminal"
+        }
+      ]
     },
     {
       "name": "open-with-vscode",

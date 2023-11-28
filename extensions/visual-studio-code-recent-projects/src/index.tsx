@@ -1,4 +1,14 @@
-import { ActionPanel, Action, Grid, Icon, showToast, open, Toast, openExtensionPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Grid,
+  Icon,
+  showToast,
+  open,
+  Toast,
+  openExtensionPreferences,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
@@ -6,7 +16,7 @@ import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
 import { getBuildScheme } from "./lib/vscode";
 import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows } from "./preferences";
-import { EntryLike, EntryType, RemoteEntry, PinMethods, RemoteWorkspaceEntry } from "./types";
+import { EntryLike, EntryType, PinMethods } from "./types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
@@ -27,6 +37,8 @@ import {
 } from "./grid-or-list";
 import { usePinnedEntries } from "./pinned";
 import { runAppleScriptSync } from "run-applescript";
+
+const { terminalApp } = getPreferenceValues<Preferences.Index>();
 
 export default function Command() {
   const { data, isLoading, error } = useRecentEntries();
@@ -168,6 +180,18 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
             />
             <Action.ShowInFinder path={path} />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            {isFolderEntry(props.entry) && (
+              <Action
+                title={`Open With ${terminalApp.name}`}
+                icon={{ fileIcon: terminalApp.path }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                onAction={() =>
+                  open(path, terminalApp).catch(() =>
+                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp.name}`)
+                  )
+                }
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
