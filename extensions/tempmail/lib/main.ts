@@ -4,17 +4,34 @@ import fs from "fs";
 import EmlParser from "eml-parser";
 import axios, { AxiosResponse } from "axios";
 import moment from "moment";
+<<<<<<< HEAD
+import { Auth, Domains, Identity, Message, Messages } from "./types";
+=======
+>>>>>>> contributions/merge-1701276408790659000
 
-interface Auth {
-  address: string;
-  password: string;
+async function handleAxiosError(e) {
+  if (e.response?.status == 401) {
+    await LocalStorage.removeItem("identity");
+    throw Error("Token Expired");
+  }
+  if (e.code == "ENOTFOUND") {
+    throw Error("Cannot connect to mail.tm API");
+  }
+  throw e;
 }
 
-interface Identity {
-  id: string;
-  token: string;
+export async function getDomains(): Promise<Domains> {
+  try {
+    const domains = await axios.get("https://api.mail.tm/domains");
+    return domains.data;
+  } catch (e) {
+    await handleAxiosError(e);
+  }
 }
 
+<<<<<<< HEAD
+export async function createCustomAuth(address: string) {
+=======
 async function handleAxiosError(e) {
   if (e.response?.status == 401) {
     await LocalStorage.removeItem("identity");
@@ -68,10 +85,45 @@ async function createAuth() {
     await handleAxiosError(e);
   }
 
+>>>>>>> contributions/merge-1701276408790659000
+  const auth: Auth = {
+    address,
+    password: Math.random().toString(36).slice(2, 15),
+  };
+
+  try {
+    await axios.post("https://api.mail.tm/accounts", auth);
+  } catch (e) {
+<<<<<<< HEAD
+    if (e.code == "ENOTFOUND") {
+      throw Error("Cannot connect to mail.tm API");
+    }
+    // Account already exists
+    if (e.response?.status == 422) {
+      return false;
+    }
+    throw e;
+  }
+
+  const identity = await getIdentity();
+  await deleteAuth(identity);
+
+  await LocalStorage.setItem("authentication", JSON.stringify(auth));
+}
+
+async function createAuth() {
+  let domains: Domains;
+  try {
+    const domainsResponse = await axios.get("https://api.mail.tm/domains");
+    domains = domainsResponse.data;
+  } catch (e) {
+    await handleAxiosError(e);
+  }
+
   const auth: Auth = {
     address: `${uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], separator: "-" })}-${Math.floor(
       Math.random() * (999 - 100 + 1) + 100
-    )}@${domains.data["hydra:member"][0]["domain"]}`,
+    )}@${domains["hydra:member"][0]["domain"]}`,
     password: Math.random().toString(36).slice(2, 15),
   };
 
@@ -82,6 +134,12 @@ async function createAuth() {
   }
 
   await LocalStorage.setItem("authentication", JSON.stringify(auth));
+=======
+    await handleAxiosError(e);
+  }
+
+  await LocalStorage.setItem("authentication", JSON.stringify(auth));
+>>>>>>> contributions/merge-1701276408790659000
   return auth;
 }
 
@@ -95,7 +153,7 @@ async function deleteAuth({ id, token }) {
   await LocalStorage.removeItem("identity");
 }
 
-async function getAuth() {
+async function getAuth(): Promise<Auth> {
   let auth: Auth;
   const rawAuth = await LocalStorage.getItem("authentication");
   if (!rawAuth) {
@@ -141,6 +199,17 @@ export async function setNewExpiry(newExpiry?: number) {
   await LocalStorage.setItem("expiry_time", newExpiry);
 }
 
+<<<<<<< HEAD
+async function getGetMessages(token: string, page = 1): Promise<Messages["hydra:member"]> {
+  const url = "https://api.mail.tm/messages" + (page ? `?page=${page}` : "");
+  let messages: Messages;
+
+  try {
+    const messagesRes = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    messages = messagesRes.data;
+=======
 async function getGetMessages(token: string, page = 1) {
   const url = "https://api.mail.tm/messages" + (page ? `?page=${page}` : "");
   let messagesRes;
@@ -149,17 +218,19 @@ async function getGetMessages(token: string, page = 1) {
     messagesRes = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
+>>>>>>> contributions/merge-1701276408790659000
   } catch (e) {
     await handleAxiosError(e);
   }
 
   if (
-    messagesRes.data["hydra:totalItems"] <= 30 ||
-    messagesRes.data["hydra:member"].length + (page - 1) * 30 == messagesRes.data["hydra:totalItems"]
+    messages["hydra:totalItems"] <= 30 ||
+    messages["hydra:member"].length + (page - 1) * 30 == messages["hydra:totalItems"]
   )
-    return messagesRes.data["hydra:member"];
+    return messages["hydra:member"];
 
-  return [getGetMessages(token, page + 1), ...messagesRes.data["hydra:member"]];
+  const additionMessages = await getGetMessages(token, page + 1);
+  return [...additionMessages, ...messages["hydra:member"]];
 }
 
 export async function getMailboxData() {
@@ -191,6 +262,8 @@ export async function getMailboxData() {
   await LocalStorage.setItem("last_active", new Date().toISOString());
 
   return { expiryMessage, currentAddress: auth.address, messages };
+<<<<<<< HEAD
+=======
 }
 
 async function readEmail(id: string) {
@@ -221,19 +294,65 @@ export async function deleteEmail(id: string) {
   } catch (e) {
     await handleAxiosError(e);
   }
+>>>>>>> contributions/merge-1701276408790659000
 }
 
-export async function getMessage(id: string) {
+async function readEmail(id: string) {
   const { token } = await getIdentity();
   let messageRes;
 
   try {
+<<<<<<< HEAD
+    await axios.patch(
+      `https://api.mail.tm/messages/${id}`,
+      {
+        seen: true,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/merge-patch+json" },
+      }
+    );
+  } catch (e) {
+    await handleAxiosError(e);
+  }
+}
+
+export async function deleteEmail(id: string) {
+  const { token } = await getIdentity();
+
+  try {
+    await axios.delete(`https://api.mail.tm/messages/${id}`, {
+=======
     messageRes = await axios.get(`https://api.mail.tm/messages/${id}`, {
+>>>>>>> contributions/merge-1701276408790659000
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch (e) {
     await handleAxiosError(e);
   }
+<<<<<<< HEAD
+}
+
+export async function getMessage(id: string): Promise<Message> {
+  const { token } = await getIdentity();
+  let message: Message;
+
+  try {
+    const messageRes = await axios.get(`https://api.mail.tm/messages/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    message = messageRes.data;
+  } catch (e) {
+    await handleAxiosError(e);
+  }
+
+  if (!message.seen) await readEmail(id);
+
+  return message;
+}
+
+export async function createHTMLFile(emlPath: string): Promise<string> {
+=======
 
   if (!messageRes.data.seen) await readEmail(id);
 
@@ -241,6 +360,7 @@ export async function getMessage(id: string) {
 }
 
 export async function createHTMLFile(emlPath: string) {
+>>>>>>> contributions/merge-1701276408790659000
   const htmlPath = emlPath.replaceAll("eml", "html");
   const htmlDir = htmlPath
     .split("/")
