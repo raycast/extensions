@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
-import { addDays, addMinutes } from "date-fns";
+import { addDays, addMinutes, setHours, setMilliseconds, setMinutes, setSeconds } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { useTask } from "./hooks/useTask";
 import { useTimePolicy } from "./hooks/useTimePolicy";
@@ -28,6 +28,20 @@ interface Props {
   loading?: boolean;
 }
 
+const getDefaultDueDate = (defaultDueDatePreference: number | undefined) => {
+  if (defaultDueDatePreference) {
+    let defaultDueDate = addDays(new Date(), defaultDueDatePreference);
+    // Set the time toward the end of the day
+    defaultDueDate = setHours(defaultDueDate, 18);
+    defaultDueDate = setMinutes(defaultDueDate, 0);
+    defaultDueDate = setSeconds(defaultDueDate, 0);
+    defaultDueDate = setMilliseconds(defaultDueDate, 0);
+    return defaultDueDate;
+  }
+
+  return null;
+}
+
 export default (props: Props) => {
   const { timeNeeded: userTimeNeeded, title: userTitle, interpreter } = props;
 
@@ -36,15 +50,22 @@ export default (props: Props) => {
   const { isLoading: isLoadingTimePolicy, getTimePolicy } = useTimePolicy();
 
   const defaults = useMemo(
-    () => ({
-      defaultDueDate: addDays(new Date(), currentUser?.features.taskSettings.defaults.dueInDays || 0),
-      defaultSnoozeDate: addMinutes(new Date(), currentUser?.features.taskSettings.defaults.delayedStartInMinutes || 0),
-      minDuration: (currentUser?.features.taskSettings.defaults.minChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
-      maxDuration: (currentUser?.features.taskSettings.defaults.maxChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
-      duration: (currentUser?.features.taskSettings.defaults.timeChunksRequired || 1) * TIME_BLOCK_IN_MINUTES,
-      schedulerVersion: currentUser?.features.scheduler || 14,
-    }),
-    [currentUser]
+      () => {
+        // RAI-10338 respect user settings of no default due date and no default snooze date
+        const defaultDueDatePreference = currentUser?.features.taskSettings.defaults.dueInDays;
+        const defaultDueDate = getDefaultDueDate(defaultDueDatePreference);
+        const defaultDelayedStartPreference = currentUser?.features.taskSettings.defaults.delayedStartInMinutes;
+        const defaultSnoozeDate = defaultDelayedStartPreference ? addMinutes(new Date(), defaultDelayedStartPreference) : null;
+        return ({
+          defaultDueDate: defaultDueDate,
+          defaultSnoozeDate: defaultSnoozeDate,
+          minDuration: (currentUser?.features.taskSettings.defaults.minChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
+          maxDuration: (currentUser?.features.taskSettings.defaults.maxChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
+          duration: (currentUser?.features.taskSettings.defaults.timeChunksRequired || 1) * TIME_BLOCK_IN_MINUTES,
+          schedulerVersion: currentUser?.features.scheduler || 14,
+        });
+      },
+      [currentUser]
   );
 
   const [timeNeeded, setTimeNeeded] = useState(
@@ -217,7 +238,7 @@ export default (props: Props) => {
         onChange={setSnooze}
         type={Form.DatePicker.Type.DateTime}
         id="snoozeUntil"
-        title="Starting"
+        title="Start after"
       />
       <Form.DatePicker value={due} onChange={setDue} type={Form.DatePicker.Type.DateTime} id="due" title="Due" />
       <Form.TextArea id="notes" title="Notes" />
