@@ -1,5 +1,11 @@
 # reclaim Changelog
 
+## [Fixes] - 2023-11-29
+
+- Fix duration string parsing so that task durations work correctly in more cases (RAI-9438)
+- Respect the user's preferred default task due date and start after date (RAI-10338)
+- Fix the URL for creating one-off scheduling links (RAI-11312)
+
 ## [Update] - 2023-11-22
 - Data Fetching Refactor: Replaced custom `axios` + `useState` + `useEffect` fetching logic with `useFetch` from `@raycast/utils` for improved caching and faster FCP.
 - Improved Hook Architecture: Encapsulated fetching logic within respective custom hooks for better code organization and maintainability.
