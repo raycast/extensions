@@ -61,7 +61,7 @@ export function SetDeviceAddressForm({ currentDeviceAddress, onSetDeviceAddress 
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSetDeviceAddress} title="Save Device Address" />
+          <Action.SubmitForm onSubmit={handleSetDeviceAddress} title="Save Device Address" icon={Icon.Checkmark} />
           <Action onAction={attemptAutoScan} title="Attempt Auto-Scan" icon={Icon.Network} />
         </ActionPanel>
       }

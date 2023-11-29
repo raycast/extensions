@@ -77,8 +77,13 @@ export default function Command() {
     <List
       actions={
         <ActionPanel>
-          <Action title="Pair Device" onAction={attemptToPairDevice} />
-          <Action title="Reset Device Address" style={Action.Style.Destructive} onAction={resetDeviceAddress} />
+          <Action title="Pair Device" onAction={attemptToPairDevice} icon={Icon.Plug} />
+          <Action
+            title="Reset Device Address"
+            style={Action.Style.Destructive}
+            onAction={resetDeviceAddress}
+            icon={Icon.XMarkCircle}
+          />
         </ActionPanel>
       }
     >
