@@ -21,9 +21,10 @@
     {
       "name": "api",
       "title": "Cubox API",
-      "description": "Your Cubox api",
+      "description": "Example: https://cubox.pro/c/api/save/xxxx",
       "type": "textfield",
-      "required": true
+      "required": true,
+      "placeholder": "Example: https://cubox.pro/c/api/save/xxxx"
     }
   ],
   "dependencies": {
