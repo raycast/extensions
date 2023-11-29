@@ -4,8 +4,8 @@ import { differenceInMinutes, isWeekend } from "date-fns";
 function getRemainingTime(now: Date) {
   const getEndHour = () => {
     const { endHour } = getPreferenceValues();
-    return endHour.split(":").map((i:string) => Number(i));
-  }
+    return endHour.split(":").map((i: string) => Number(i));
+  };
   const endOfWorkday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...getEndHour());
 
   const difference = differenceInMinutes(endOfWorkday, now, { roundingMethod: "floor" });
