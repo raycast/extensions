@@ -45,13 +45,11 @@ export default function Command() {
 
   // Define a function to get clipboard contents and return an array of text
   function getClipboardContents(tab: string) {
-    const command = `${copyqPath} tab ${tab} 'JSON.stringify(ItemSelection().select(/./).itemsFormat(mimeText).map(function(x){return str(x)}))'`;
+    // Gets clipboard contents seperated by null character
+    const command = `${copyqPath} tab ${tab} 'separator(String.fromCharCode(0)); read.apply(this, [...Array(size()).keys()])'`;
     const stdout = execSync(command, { encoding: "utf8" });
-
-    const jsonArray = JSON.parse(stdout);
-    const outputArray: string[] = jsonArray.map((item: string) => item);
-
-    return outputArray;
+    // Return the array split by null characters
+    return stdout.split("\0");
   }
 
   // Define a function to select clipboard contents by row
@@ -62,6 +60,7 @@ export default function Command() {
 
   // Get clipboard contents
   const clipboardContents = getClipboardContents(selectedTab);
+  console.log(clipboardContents.length);
 
   return (
     <List isShowingDetail>
