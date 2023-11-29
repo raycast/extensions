@@ -1,5 +1,5 @@
-import {format} from "date-fns";
-import {Icon} from "@raycast/api";
+import { format } from "date-fns";
+import { Icon } from "@raycast/api";
 
 export const formatDisplayEventHours = ({
   start,
@@ -41,7 +41,8 @@ export const formatDisplayHours = (date: Date, hoursFormat: "12h" | "24h" = "12h
 export const parseDurationToMinutes = (str: string): number => {
   const resInMilliseconds = parseDuration(str);
 
-  if (resInMilliseconds == null) { // check for undefined and null
+  if (resInMilliseconds == null) {
+    // check for undefined and null
     return 0;
   } else {
     return resInMilliseconds / MILLISECONDS_PER_MINUTE;
@@ -49,13 +50,13 @@ export const parseDurationToMinutes = (str: string): number => {
 };
 
 /**
-* Parses a string into milliseconds.
-* @param value The string duration
-* @returns the duration in ms
-*/
+ * Parses a string into milliseconds.
+ * @param value The string duration
+ * @returns the duration in ms
+ */
 function parseDuration(value: string): number | undefined {
   const PARSE_DURATION_REGEX =
-      /\[?(\d*[.,]?\d+)\s?(minute(?:s)?|min|mn|m|second(?:s)?|sec|s|h(?:ou)?r(?:s)?|h|day(?:s)?|d|w(?:ee)?k(?:s)?|w)]?/gi;
+    /\[?(\d*[.,]?\d+)\s?(minute(?:s)?|min|mn|m|second(?:s)?|sec|s|h(?:ou)?r(?:s)?|h|day(?:s)?|d|w(?:ee)?k(?:s)?|w)]?/gi;
 
   const stringToParse = value.toLowerCase();
 
@@ -181,11 +182,11 @@ export const formatDuration = (e: string | undefined) => {
 
 export const miniDuration = (d: string) => {
   return d
-      .replaceAll("less than a ", "1")
-      .replaceAll(" hours", "h")
-      .replaceAll(" hour", "h")
-      .replaceAll(" minutes", "m")
-      .replaceAll(" minute", "m");
+    .replaceAll("less than a ", "1")
+    .replaceAll(" hours", "h")
+    .replaceAll(" hour", "h")
+    .replaceAll(" minutes", "m")
+    .replaceAll(" minute", "m");
 };
 
 export const TIME_BLOCK_IN_MINUTES = 15;

@@ -40,7 +40,7 @@ const getDefaultDueDate = (defaultDueDatePreference: number | undefined) => {
   }
 
   return null;
-}
+};
 
 export default (props: Props) => {
   const { timeNeeded: userTimeNeeded, title: userTitle, interpreter } = props;
@@ -49,24 +49,23 @@ export default (props: Props) => {
   const { createTask } = useTask();
   const { isLoading: isLoadingTimePolicy, getTimePolicy } = useTimePolicy();
 
-  const defaults = useMemo(
-      () => {
-        // RAI-10338 respect user settings of no default due date and no default snooze date
-        const defaultDueDatePreference = currentUser?.features.taskSettings.defaults.dueInDays;
-        const defaultDueDate = getDefaultDueDate(defaultDueDatePreference);
-        const defaultDelayedStartPreference = currentUser?.features.taskSettings.defaults.delayedStartInMinutes;
-        const defaultSnoozeDate = defaultDelayedStartPreference ? addMinutes(new Date(), defaultDelayedStartPreference) : null;
-        return ({
-          defaultDueDate: defaultDueDate,
-          defaultSnoozeDate: defaultSnoozeDate,
-          minDuration: (currentUser?.features.taskSettings.defaults.minChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
-          maxDuration: (currentUser?.features.taskSettings.defaults.maxChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
-          duration: (currentUser?.features.taskSettings.defaults.timeChunksRequired || 1) * TIME_BLOCK_IN_MINUTES,
-          schedulerVersion: currentUser?.features.scheduler || 14,
-        });
-      },
-      [currentUser]
-  );
+  const defaults = useMemo(() => {
+    // RAI-10338 respect user settings of no default due date and no default snooze date
+    const defaultDueDatePreference = currentUser?.features.taskSettings.defaults.dueInDays;
+    const defaultDueDate = getDefaultDueDate(defaultDueDatePreference);
+    const defaultDelayedStartPreference = currentUser?.features.taskSettings.defaults.delayedStartInMinutes;
+    const defaultSnoozeDate = defaultDelayedStartPreference
+      ? addMinutes(new Date(), defaultDelayedStartPreference)
+      : null;
+    return {
+      defaultDueDate: defaultDueDate,
+      defaultSnoozeDate: defaultSnoozeDate,
+      minDuration: (currentUser?.features.taskSettings.defaults.minChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
+      maxDuration: (currentUser?.features.taskSettings.defaults.maxChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
+      duration: (currentUser?.features.taskSettings.defaults.timeChunksRequired || 1) * TIME_BLOCK_IN_MINUTES,
+      schedulerVersion: currentUser?.features.scheduler || 14,
+    };
+  }, [currentUser]);
 
   const [timeNeeded, setTimeNeeded] = useState(
     formatDuration(
