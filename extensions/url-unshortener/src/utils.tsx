@@ -65,7 +65,7 @@ export async function unshortenUrl(url: string): Promise<{ redirectionSteps: Red
     const redirectionSteps = [{ url: url, statusCode: response.status, statusName: response.statusText }];
 
     while (response.url) {
-      if (response.status === 301 || response.status === 302) {
+      if (response.status >= 300 && response.status < 400) {
         const nextUrl = response.headers.get("location");
         if (nextUrl) {
           response = await fetch(nextUrl, { method: "HEAD", redirect: "manual" });
