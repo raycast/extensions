@@ -1,21 +1,43 @@
-import { getPreferenceValues } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { Prefs } from "./type";
 
-export interface Prefs {
-  airpodsIndex: number;
-  soundLoc: string;
-  ccLoc: string;
-}
-
-const getScript = ({ airpodsIndex, soundLoc, ccLoc }: Prefs) => `
+export async function execAirPodsMenu(
+  { airpodsIndex, soundLoc, ccLoc, optionOne, optionTwo }: Prefs,
+  toggleOption = "",
+): Promise<string | null> {
+  const script = `
 set AirPodsIndex to ${airpodsIndex}
-set ANCIndex to AirPodsIndex + 2
-set TransparencyIndex to AirPodsIndex + 3
+set ToggleOption to "${toggleOption}"
+
+on getOptionIndex(Option)
+		if Option is equal to "Transparency"
+			set OptionIndex to 2
+		else if Option is equal to "Adaptive"
+			set OptionIndex to 3
+		else
+			set OptionIndex to 4
+		end if
+		return OptionIndex
+end getOptionIndex
+
+if ToggleOption is "noise-control"
+	set OptionOne to "${optionOne}"
+	set OptionTwo to "${optionTwo}"
+
+	set IndexOne to AirPodsIndex + getOptionIndex(OptionOne)
+	set IndexTwo to AirPodsIndex + getOptionIndex(OptionTwo)
+else
+	set OptionOne to "Off"
+	set OptionTwo to "On"
+
+	set IndexOne to AirPodsIndex + 5
+	set IndexTwo to AirPodsIndex + 6
+end if
 
 tell application "System Events"
 	tell application process "ControlCenter"
 		try
-		    set setting to "🔴 No change"
+			set output to "🔴 No Change"
 			set soundWindowIndex to -1
 			try
 				set menuBar to (first menu bar item whose description is "${soundLoc}") of menu bar 1
@@ -36,7 +58,7 @@ tell application "System Events"
 				end repeat
 				if soundWindowIndex is equal to -1 then
 					tell menuBar to click
-					return "⚠️ Error: Sound not found in Control Center (check localization)"
+					return "sound-not-found"
 				end if
 				set soundWindowButtonIndex to soundWindowIndex + 2
 				set soundWindowButton to item soundWindowButtonIndex of ccMenuElements
@@ -61,35 +83,55 @@ tell application "System Events"
 					click expandToggle
 					delay 1
 				end if
-				set currentMode to value of checkbox ANCIndex of btMenu as boolean
+				set currentMode to value of checkbox IndexOne of btMenu as boolean
 				if currentMode is true then
-					click checkbox TransparencyIndex of btMenu
-					set setting to "🟢 Transparency"
+					click checkbox IndexTwo of btMenu
+					set output to "🟢 " & OptionTwo
 				else
-					click checkbox ANCIndex of btMenu
-					set setting to "🔵 Noise Cancellation"
+					click checkbox IndexOne of btMenu
+					set output to "🔵 " & OptionOne
 				end if
 			else
 				tell menuBar to click
 				if soundWindowIndex is not equal to -1 then
 					tell menuBar to click
 				end if
-				return "⚠️ Error: AirPods not connected"
+				return "airpods-not-connected"
 			end if
 			tell menuBar to click
 			if soundWindowIndex is not equal to -1 then
 				tell menuBar to click
 			end if
-			return setting
+			return output
 		on error
-			return "⚠️ Error: Control Center not found (check localization)"
+			tell menuBar to click
+			if soundWindowIndex is not equal to -1 then
+				tell menuBar to click
+			end if
+			return "control-center-not-found"
 		end try
 	end tell
 end tell
-`;
+  `;
 
-export function runScript(): Promise<string> {
-  const preferences = getPreferenceValues<Prefs>();
-  const script = getScript(preferences);
-  return runAppleScript(script);
+  const res = await runAppleScript<string>(script);
+  switch (res) {
+    case "sound-not-found": {
+      showFailureToast("", { title: "Sound not found. Check Localization!" });
+      return null;
+    }
+    case "control-center-not-found": {
+      showFailureToast("", {
+        title: "Coltrol Center not found. Check Localization!",
+      });
+      return null;
+    }
+    case "airpods-not-connected": {
+      showFailureToast("", { title: "AirPods not connected!" });
+      return null;
+    }
+    default: {
+      return res;
+    }
+  }
 }
