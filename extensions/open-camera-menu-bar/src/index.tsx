@@ -5,8 +5,8 @@ export default function Command() {
     <MenuBarExtra
       icon={{
         source: {
-          light: "icon.svg",
-          dark: "icon-dark.svg",
+          light: "icon-dark.svg",
+          dark: "icon.svg",
         },
       }}
     >
