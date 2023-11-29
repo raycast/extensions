@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.63.0 - 2023-11-29
+
+### 💎 Improvements
+
+- Improved runtime error handling when using a Swift project
+
+### 🐞 Fixes
+
+- **Lists**: Fixed a race condition where the selected item would not be the first one after a list items update
+
+- **MenuBarExtra:** `alternate` are no longer supported on pre-Sonoma versions of macOS, as they would often appear alongside their parent items.
+
 ## 1.62.0 - 2023-11-15
 
 ### ✨ New
