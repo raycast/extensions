@@ -15,6 +15,9 @@
       "mode": "view"
     }
   ],
+  "contributors": [
+    "wimsy"
+  ],
   "preferences": [
     {
       "name": "domain",
