@@ -109,7 +109,7 @@ export default function Command() {
       </Form.Dropdown>
       <Form.TextArea
         title="Content"
-        placeholder={`Enter ${values.type}`}
+        placeholder={`Enter ${values.type == undefined || values.type == "url" ? "URL" : values.type}`}
         info={contentInfoMap[values.type]}
         {...itemProps.content}
       />
