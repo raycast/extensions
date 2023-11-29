@@ -19,10 +19,6 @@ type SubmitFormValues = {
   folder: string;
 };
 
-interface Preferences {
-  api: string;
-}
-
 const contentInfoMap: Record<string, string> = {
   url: "Complete url, including protocol like http:// or https://",
   memo: "Pure text, less than 3000 characters",
