@@ -12,7 +12,7 @@ import {
   PagePropertyType,
   User,
 } from "../utils/notion";
-import { handleOnOpenPage } from "../utils/openPage";
+import { handleOnOpenPage, isNotionInstalled } from "../utils/openPage";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
@@ -117,19 +117,23 @@ export function PageListItem({
     ),
   };
 
-  const { open_in } = getPreferenceValues<Preferences>();
-  const isDefaultNotionActionWeb = open_in === "web";
-  const openInNotionDefaultAction = createOpenInNotionAction(
-    isDefaultNotionActionWeb ? "Browser" : "App",
-    isDefaultNotionActionWeb ? Icon.Globe : "notion-logo.png",
-    () => handleOnOpenPage(page, setRecentPage, isDefaultNotionActionWeb ? "web" : "app"),
+  const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
+    handleOnOpenPage(page, setRecentPage, "app"),
+  );
+  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, () =>
+    handleOnOpenPage(page, setRecentPage, "web"),
   );
 
-  const openInNotionAlternativeAction = createOpenInNotionAction(
-    isDefaultNotionActionWeb ? "App" : "Browser",
-    isDefaultNotionActionWeb ? "notion-logo.png" : Icon.Globe,
-    () => handleOnOpenPage(page, setRecentPage, isDefaultNotionActionWeb ? "app" : "web"),
-  );
+  const { open_in } = getPreferenceValues<Preferences>();
+  const isDefaultNotionActionApp = open_in === "app";
+  let openInNotionDefaultAction;
+  let openInNotionAlternativeAction;
+  if (!isNotionInstalled) {
+    openInNotionDefaultAction = openInNotionBrowserAction;
+  } else {
+    openInNotionDefaultAction = isDefaultNotionActionApp ? openInNotionAppAction : openInNotionBrowserAction;
+    openInNotionAlternativeAction = isDefaultNotionActionApp ? openInNotionBrowserAction : openInNotionAppAction;
+  }
 
   const actions = {
     raycast: openInRaycastAction[page.object],
@@ -288,6 +292,7 @@ export function PageListItem({
 function createOpenInNotionAction(title: string, icon: Image.ImageLike | string, action: () => void) {
   return <ActionPanel.Item title={`Open in ${title}`} icon={icon} onAction={action} />;
 }
+
 function getPropertyAccessory(
   property: PagePropertyType | FormulaPropertyItemObjectResponse["formula"],
   title: string,

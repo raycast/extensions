@@ -3,15 +3,15 @@ import { closeMainWindow, getPreferenceValues, getApplications, open } from "@ra
 import { Page } from "./notion/page";
 
 export let openIn = "web";
+export let isNotionInstalled = false;
 
 export async function checkOpenInApp() {
   const preferences = getPreferenceValues<Preferences>();
-  let isNotionInstalled;
+
+  const installedApplications = await getApplications();
+  isNotionInstalled = installedApplications.some((app) => app.bundleId === "notion.id");
 
   if (preferences.open_in === "app") {
-    const installedApplications = await getApplications();
-    isNotionInstalled = installedApplications.some((app) => app.bundleId === "notion.id");
-
     openIn = isNotionInstalled ? "app" : "web";
   } else {
     openIn = "web";
