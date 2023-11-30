@@ -53,7 +53,7 @@ export async function authorize() {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
@@ -86,6 +86,7 @@ export async function refreshTokens(refreshToken: string): Promise<OAuth.TokenRe
   });
 
   if (!response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const error: any = await response.json();
     if (error.error === "invalid_grant") {
       oauthClient.removeTokens();

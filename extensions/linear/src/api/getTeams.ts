@@ -49,7 +49,7 @@ export async function getTeams() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.teams.nodes;

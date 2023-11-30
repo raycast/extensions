@@ -1,5 +1,10 @@
 # Hue Changelog
 
+## [Fix] - 2023-11-21
+
+- Fixed bugs
+- Updated dependencies
+
 ## [Add plug icon] - 2023-10-18
 
 * Add an icon for a plug

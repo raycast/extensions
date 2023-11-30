@@ -45,7 +45,7 @@ async function getFirefoxProfiles() {
   const installKey = Object.keys(iniFile).find((key) => key.startsWith("Install"));
 
   const defaultProfile: string = installKey ? iniFile[installKey]?.Default : profiles[0].path;
-  profiles.sort((a, b) => a.name.localeCompare(b.name));
+  profiles.sort((a, b) => a.name?.localeCompare(b.name));
 
   return { profiles, defaultProfile };
 }

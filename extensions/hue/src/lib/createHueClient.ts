@@ -56,9 +56,9 @@ export default async function createHueClient(
         return undefined;
       },
       lookup: (hostname, options, callback) => {
-        if (hostname.toLowerCase() === bridgeConfig.id && bridgeConfig.ipAddress !== undefined) {
-          // Resolve the Bridge ID to the IP address of the Hue Bridge
-          callback(null, bridgeConfig.ipAddress, 4);
+        if (bridgeConfig.ipAddress !== undefined && hostname.toLowerCase() === bridgeConfig.id) {
+          // Resolve the hostname (which is the Bridge ID) to the IP address of the Hue Bridge
+          callback(null, [{ address: bridgeConfig.ipAddress, family: 4 }]);
         } else {
           // Fallback to the default DNS lookup
           dns.lookup(hostname, options, callback);

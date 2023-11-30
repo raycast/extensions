@@ -41,7 +41,7 @@ function getParams(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
 
   params.append(
     "fields",
-    "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents)"
+    "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents)",
   );
 
   if (scope === ScopeTypes.allDrives) {
