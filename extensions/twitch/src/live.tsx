@@ -47,7 +47,7 @@ export default function main() {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         {items.length === 0 && <MenuBarExtra.Item title={`0 live followed channel`} />}
-        <MenuBarExtra.Item title={`updated ${formatDate(updatedAt, { second: undefined })}`} />
+        <MenuBarExtra.Item title={`Updated ${formatDate(updatedAt, { second: undefined })}`} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item

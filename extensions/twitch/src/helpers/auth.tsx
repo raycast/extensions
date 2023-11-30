@@ -23,7 +23,7 @@ export async function getHeaders() {
 }
 
 const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.AppURI,
+  redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Twitch",
   providerIcon: "TwitchGlitchPurple.png",
   description: "Connect your Twitch account…",
@@ -48,8 +48,6 @@ async function authorize(): Promise<string> {
     clientId,
     scope: "user:read:follows",
     extraParameters: {
-      response_type: "code",
-      redirect_uri: "https://raycast.com/redirect?packageName=Extension",
       nonce,
     },
   });
@@ -72,7 +70,7 @@ async function fetchTokens(
       code: authorizationCode,
       code_verifier: authRequest.codeVerifier,
       grant_type: "authorization_code",
-      redirect_uri: "https://raycast.com/redirect?packageName=Extension",
+      redirect_uri: authRequest.redirectURI,
     }),
   });
   if (!response.ok) {

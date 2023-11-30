@@ -102,29 +102,27 @@ export function useTwitchRequest<T>({
   const [_updatedAt, setUpdatedAt] = useCachedState<string>(`${CACHE_PREFIX}_${cacheKey}_updated_at`, zeroDate);
   const updatedAt = Number(_updatedAt);
   const [previous, setPrevious] = useCachedState<T | undefined>(`${CACHE_PREFIX}_${cacheKey}`, undefined);
-  const [isLoading, setIsLoading] = useState(loadingWhileStale ? true : previous === undefined);
+  const [isLoading, setIsLoading] = useState(loadingWhileStale ? enabled : !enabled ? false : previous === undefined);
   const prevRef = useRef(previous);
   prevRef.current = previous;
 
   useEffect(() => {
     if (!enabled) return;
     if (updatedAt + cacheDuration >= Date.now()) return;
-    const controller = new AbortController();
     if (!loadingWhileStale) {
       setIsLoading(previous === undefined);
     }
     getHeaders()
-      .then((headers) => fetch(url, { headers, signal: controller.signal }))
+      .then((headers) => fetch(url, { headers }))
       .then((response) => response.json())
       .then((data: any) => {
-        if (controller.signal.aborted) return;
         setIsLoading(false);
         if (data && data.data) {
           const next = select(data);
           const replaced = replaceEqualDeep(prevRef.current, next);
+          setUpdatedAt(String(Date.now()));
           if (replaced === prevRef.current) return;
           setPrevious(replaced);
-          setUpdatedAt(String(Date.now()));
           return;
         }
         if (data.message) {
@@ -136,7 +134,6 @@ export function useTwitchRequest<T>({
         setUpdatedAt(String(Date.now()));
       })
       .catch();
-    // return () => controller.abort()
   }, [enabled, cacheDuration, url]);
 
   return {
