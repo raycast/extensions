@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { Day, Game, Competitor } from "../types/schedule.types";
 import convertDate from "../utils/convertDate";
 import { useCachedPromise } from "@raycast/utils";
+import { log } from "console";
 
 const useSchedule = () => {
   const fetchGames = useCallback(async () => {
@@ -39,9 +40,11 @@ const useSchedule = () => {
               .map((competitor: any): Competitor => {
                 return {
                   displayName: competitor.team.displayName,
+                  abbreviation: competitor.team.abbreviation,
                   shortName: competitor.team.shortDisplayName,
                   logo: competitor.team.logo,
                   home: competitor.homeAway,
+                  score: competitor.score,
                 };
               })
               .sort((a: Competitor) => {

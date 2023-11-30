@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { Game } from "../types/schedule.types";
 import generateGameAccessories from "../utils/generateGameAccessories";
+import { log } from "console";
 
 type PropTypes = {
   game: Game;
@@ -10,7 +11,7 @@ const GameComponent = ({ game }: PropTypes) => {
   return (
     <List.Item
       key={game.id}
-      title={game.shortName}
+      title={game.name}
       icon={game.competitors[0].logo}
       accessories={generateGameAccessories(game)}
       actions={
