@@ -17,6 +17,7 @@ import * as infoMessages from "./info-messages";
 
 interface Preferences {
   openAiApiKey: string;
+  openAiBasePath: string | undefined;
 }
 
 interface gptFormValues {
@@ -42,6 +43,7 @@ interface modelTokenLimit {
 
 const configuration = new Configuration({
   apiKey: getPreferenceValues<Preferences>().openAiApiKey,
+  basePath: getPreferenceValues<Preferences>().openAiBasePath || undefined,
 });
 const openai = new OpenAIApi(configuration);
 
@@ -123,38 +125,38 @@ export default function Command() {
     try {
       const completion: gptCompletion =
         formRequest.model === "gpt-3.5-turbo" ||
-        formRequest.model === "gpt-4" ||
-        formRequest.model === "gpt-4-1106-preview" ||
-        formRequest.model === "gpt-3.5-turbo-1106"
+          formRequest.model === "gpt-4" ||
+          formRequest.model === "gpt-4-1106-preview" ||
+          formRequest.model === "gpt-3.5-turbo-1106"
           ? await openai.createChatCompletion({
-              model: formRequest.model,
-              messages: [
-                {
-                  role: "user",
-                  content: formRequest.prompt,
-                },
-              ],
-              temperature: Number(formRequest.temperature),
-              max_tokens: Number(formRequest.maxTokens),
-              top_p: Number(formRequest.topP),
-              frequency_penalty: Number(formRequest.frequencyPenalty),
-              presence_penalty: Number(formRequest.presencePenalty),
-            })
+            model: formRequest.model,
+            messages: [
+              {
+                role: "user",
+                content: formRequest.prompt,
+              },
+            ],
+            temperature: Number(formRequest.temperature),
+            max_tokens: Number(formRequest.maxTokens),
+            top_p: Number(formRequest.topP),
+            frequency_penalty: Number(formRequest.frequencyPenalty),
+            presence_penalty: Number(formRequest.presencePenalty),
+          })
           : await openai.createCompletion({
-              model: formRequest.model,
-              prompt: formRequest.prompt,
-              temperature: Number(formRequest.temperature),
-              max_tokens: Number(formRequest.maxTokens),
-              top_p: Number(formRequest.topP),
-              frequency_penalty: Number(formRequest.frequencyPenalty),
-              presence_penalty: Number(formRequest.presencePenalty),
-            });
+            model: formRequest.model,
+            prompt: formRequest.prompt,
+            temperature: Number(formRequest.temperature),
+            max_tokens: Number(formRequest.maxTokens),
+            top_p: Number(formRequest.topP),
+            frequency_penalty: Number(formRequest.frequencyPenalty),
+            presence_penalty: Number(formRequest.presencePenalty),
+          });
       await showToast({ title: "Answer Received" });
       const response =
         formRequest.model === "gpt-3.5-turbo" ||
-        formRequest.model === "gpt-4" ||
-        formRequest.model === "gpt-4-1106-preview" ||
-        formRequest.model === "gpt-3.5-turbo-1106"
+          formRequest.model === "gpt-4" ||
+          formRequest.model === "gpt-4-1106-preview" ||
+          formRequest.model === "gpt-3.5-turbo-1106"
           ? `\n\n${completion.data.choices[0].message.content}`
           : completion.data.choices[0].text;
       setTextPrompt(textPrompt + response);
