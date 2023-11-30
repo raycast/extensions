@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clipboard-to-file",
+  "title": "Clipboard to file",
+  "description": "Convert clipboard to a file ",
+  "icon": "command-icon.png",
+  "author": "jojoLockLock",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Clipboard to file",
+      "description": "convert clipboard to a file",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filename",
+          "type": "text",
+          "placeholder": "your filename, e.g: clipboard.txt"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
