@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
 import { RedirectionStep } from "./types";
-import { getUrlFromSelectionOrClipboard, isValidUrl, unshortenUrl, getFaviconUrl } from "./utils";
+import { getUrlFromSelectionOrClipboard, isValidUrl, ensureHttpPrefix, unshortenUrl, getFaviconUrl } from "./utils";
 
 export default function UrlRedirectionList() {
   const [redirectionSteps, setRedirectionSteps] = useState<RedirectionStep[]>([]);
@@ -56,6 +56,7 @@ export default function UrlRedirectionList() {
 
   const onSearchTextChange = async (newText: string) => {
     setInitialUrl(newText);
+    newText = ensureHttpPrefix(newText);
 
     if (isValidUrl(newText)) {
       await fetchData(newText);
