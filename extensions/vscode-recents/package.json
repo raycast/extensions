@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vscode-recents",
+  "title": "VSCode Favorites",
+  "description": "Quick access to your favorite VSCode projects",
+  "icon": "icon.png",
+  "author": "brunowolff",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "VSCode Favorites",
+      "mode": "menu-bar",
+      "icon": "vscode.png",
+      "subtitle": "VSCode Favorites",
+      "description": "List All Favorites",
+      "keywords": [
+        "vscode",
+        "favorites"
+      ]
+    },
+    {
+      "name": "add",
+      "title": "Add New Favorite",
+      "mode": "view",
+      "icon": "vscode.png",
+      "subtitle": "VSCode Favorites",
+      "description": "Add new favorite",
+      "keywords": [
+        "vscode",
+        "favorites"
+      ]
+    },
+    {
+      "name": "list",
+      "title": "List Favorites",
+      "mode": "view",
+      "icon": "vscode.png",
+      "subtitle": "VSCode Favorites",
+      "description": "List favorites",
+      "keywords": [
+        "vscode",
+        "favorites"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.4.8",
+    "nanoid": "^5.0.3",
+    "react-hook-form": "^7.48.2",
+    "swr": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
