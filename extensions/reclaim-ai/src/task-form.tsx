@@ -170,9 +170,9 @@ export default (props: Props) => {
       {defaults.schedulerVersion > 14 && (
         <Form.Dropdown id="priority" title="Priority" defaultValue="P2">
           <Form.Dropdown.Item title="Critical" value="P1" />
-          <Form.Dropdown.Item title="High priority" value="P2" />
-          <Form.Dropdown.Item title="Medium priority" value="P3" />
-          <Form.Dropdown.Item title="Low priority" value="P4" />
+          <Form.Dropdown.Item title="High Priority" value="P2" />
+          <Form.Dropdown.Item title="Medium Priority" value="P3" />
+          <Form.Dropdown.Item title="Low Priority" value="P4" />
         </Form.Dropdown>
       )}
       <Form.TextField
@@ -237,7 +237,7 @@ export default (props: Props) => {
         onChange={setSnooze}
         type={Form.DatePicker.Type.DateTime}
         id="snoozeUntil"
-        title="Start after"
+        title="Start After"
       />
       <Form.DatePicker value={due} onChange={setDue} type={Form.DatePicker.Type.DateTime} id="due" title="Due" />
       <Form.TextArea id="notes" title="Notes" />
