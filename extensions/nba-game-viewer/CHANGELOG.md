@@ -1,8 +1,9 @@
 # NBA Game Viewer Changelog
 
-## [Improvements] - 2023-11-14
+## [Improvements] - 2023-11-30
 
-- Add the option to choose the default conference (East or West) and to view standings for the whole league.
+- Add livescores to the Schedule view for terminated and in progress games
+- Use team’s full name instead of an abbreviation for better readability
 
 ## [Fix] - 2023-10-30
 

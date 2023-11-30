@@ -1,7 +1,6 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { Game } from "../types/schedule.types";
 import generateGameAccessories from "../utils/generateGameAccessories";
-import { log } from "console";
 
 type PropTypes = {
   game: Game;

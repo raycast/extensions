@@ -49,5 +49,3 @@ export const Conference = {
   Eastern: "Eastern",
   Western: "Western",
 } as const;
-
-export const League = "League" as const;
