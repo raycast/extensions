@@ -1,6 +1,11 @@
 # Bitwarden Changelog
 
-## [Fix] - 2013-09-08
+## [Fix] - 2023-11-30
+
+- Improved error handling
+- Fix "not logged in" error when locking the vault
+
+## [Fix] - 2023-09-08
 
 - Fixed irregular identity table
 
