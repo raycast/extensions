@@ -9,15 +9,8 @@ export default function UrlRedirectionList() {
   const [initialUrl, setInitialUrl] = useState<string>("");
 
   const fetchData = async (url: string) => {
-    setIsLoading(true);
-    setRedirectionSteps([]);
-
-    if (!isValidUrl(url)) {
-      setIsLoading(false);
-      return;
-    }
-
     try {
+      setIsLoading(true);
       const result = await unshortenUrl(url);
       setRedirectionSteps(result.redirectionSteps);
       await fetchFavicons(result.redirectionSteps);
@@ -33,6 +26,29 @@ export default function UrlRedirectionList() {
       setRedirectionSteps([{ url, statusCode: 0, statusName: "Error", errorMessage }]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchFavicons = async (steps: RedirectionStep[]) => {
+    return Promise.all(
+      steps.map(async (step: RedirectionStep) => {
+        try {
+          const faviconUrl = getFaviconUrl(step.url);
+          return { ...step, faviconUrl: faviconUrl || Icon.Globe };
+        } catch (error: unknown) {
+          return { ...step, faviconUrl: Icon.Globe };
+        }
+      }),
+    );
+  };
+
+  const onSearchTextChange = async (newText: string) => {
+    setInitialUrl(newText);
+
+    if (isValidUrl(newText)) {
+      await fetchData(newText);
+    } else {
+      setRedirectionSteps([]);
     }
   };
 
@@ -59,29 +75,6 @@ export default function UrlRedirectionList() {
       fetchFaviconsForSteps();
     }
   }, [redirectionSteps]);
-
-  const fetchFavicons = async (steps: RedirectionStep[]) => {
-    return Promise.all(
-      steps.map(async (step: RedirectionStep) => {
-        try {
-          const faviconUrl = await getFaviconUrl(step.url);
-          return { ...step, faviconUrl: faviconUrl || Icon.Globe };
-        } catch (error: unknown) {
-          return { ...step, faviconUrl: Icon.Globe };
-        }
-      }),
-    );
-  };
-
-  const onSearchTextChange = async (newText: string) => {
-    setInitialUrl(newText);
-
-    if (isValidUrl(newText)) {
-      await fetchData(newText);
-    } else {
-      setRedirectionSteps([]);
-    }
-  };
 
   return (
     <List
