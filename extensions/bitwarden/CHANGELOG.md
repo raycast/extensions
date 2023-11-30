@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix] - 2023-11-30
+## [Error handling] - 2023-11-30
 
 - Improved error handling
 - Fix "not logged in" error when locking the vault
