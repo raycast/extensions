@@ -5,14 +5,14 @@ import { useState } from "react";
 import { Conference, League, Team } from "../types/standings.types";
 
 const Standings = () => {
-  const { data, isLoading } = useStandings()
-  const { conferences: preference } = getPreferenceValues()
-  const [conference, setConference] = useState < string > (preference)
+  const { data, isLoading } = useStandings();
+  const { conferences: preference } = getPreferenceValues();
+  const [conference, setConference] = useState<string>(preference);
 
   const preferenceMapping = {
     Eastern: data?.easternStandings,
     Western: data?.westernStandings,
-    League: data?.leagueStandings
+    League: data?.leagueStandings,
   };
   const conferenceData = preferenceMapping[conference as keyof typeof preferenceMapping];
   const sectionTitle = conference === League ? conference : `${conference} Conference`;
@@ -22,8 +22,8 @@ const Standings = () => {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
-          tooltip='Conference'
-          placeholder='Select a conference'
+          tooltip="Conference"
+          placeholder="Select a conference"
           onChange={(value) => setConference(value)}
           value={conference}
         >
@@ -39,7 +39,7 @@ const Standings = () => {
         })}
       </List.Section>
     </List>
-  )
+  );
 };
 
-export default Standings
+export default Standings;

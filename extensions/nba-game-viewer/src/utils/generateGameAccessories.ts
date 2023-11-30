@@ -11,14 +11,11 @@ const generateGameAccessories = (game: Game) => {
   const scoreDisplay = `${away?.abbreviation} ${away?.score} - ${home?.score} ${home?.abbreviation}`;
 
   if (game.status.period !== 0 && game.status.inProgress === false) {
-    return [
-      { text: scoreDisplay },
-      { icon: { source: Icon.Checkmark, tintColor: Color.Green }, tooltip: "Completed" },
-    ];
+    return [{ text: scoreDisplay }, { icon: { source: Icon.Checkmark, tintColor: Color.Green }, tooltip: "Completed" }];
   }
 
   return [
-    { text: `${ scoreDisplay } - Quarter #${ game.status.period }` },
+    { text: `${scoreDisplay} - Quarter #${game.status.period}` },
     { icon: { source: Icon.Video, tintColor: Color.Green }, tooltip: "In Progress" },
   ];
 };
