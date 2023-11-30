@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Open Camera",
-      "subtitle": "Open the camera command",
+      "title": "Open Camera Menu Bar",
       "description": "Open the Camera command from the Menu Bar",
       "mode": "menu-bar"
     }
