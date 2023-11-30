@@ -1,9 +1,22 @@
 # Home Assistant Changelog
 
+## [New Logo] - 2023-09-30
+
+- Use the new Home Assistant logo
+
+## [Fix] - 2023-09-10
+
+- Notifications could not be opened from the Menubar and instead throw an error
+- Fix possible crashes when commands are not enable
+
+## [Fix] - 2023-08-15
+
+- Updates from HACS will be shown in the menu regardless of the update entity states
+
 ## [HACS-Menu] - 2023-08-03
 
 - Add HACS updates to menubar
-- Add `Update without Backup` menu to support updates for integration which does not support backups.
+- Add `Update without Backup` menu to support updates for integration which does not support backups
 
 ## [Menu] - 2023-07-25
 

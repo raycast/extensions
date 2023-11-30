@@ -1,5 +1,13 @@
 # Zotero Changelog
 
+## [Enhancements] - 2023-11-21
+
+- Add action to copy PDF URL
+
+## [Enhancements] - 2023-08-11
+
+- Add icons for preprints and patents
+
 ## [Enhancements] - 2023-07-29
 
 - Make open PDF as default action but fallback to "Open in Zotero" if PDF not available

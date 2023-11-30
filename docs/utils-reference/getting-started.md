@@ -16,6 +16,18 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.10.1
+
+- Fix an issue where the values passed to the `reset` function of the `useForm` hook wouldn't be respected.
+
+### v1.10.0
+
+- Add a new [`showFailureToast`](./functions/showFailureToast.md) function.
+
+### v1.9.1
+
+- Fix an issue where `useForm`'s `reset` function would not reset the value of some fields (which defeats its purpose...)
+
 ### v1.9.0
 
 - Add a new [`useFrecencySorting`](./react-hooks/useFrecencySorting.md) hook.

@@ -16,6 +16,7 @@ import IssueActions from "./IssueActions";
 import { format } from "date-fns";
 import { getDateIcon } from "../helpers/dates";
 import { getProjectIcon } from "../helpers/projects";
+import { getMilestoneIcon } from "../helpers/milestones";
 
 type IssueDetailProps = {
   issue: IssueResult;
@@ -102,6 +103,12 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   title="Project"
                   text={issue.project ? issue.project.name : "No Project"}
                   icon={getProjectIcon(issue.project)}
+                />
+
+                <Detail.Metadata.Label
+                  title="Milestone"
+                  text={issue.projectMilestone ? issue.projectMilestone.name : "No Milestone"}
+                  icon={getMilestoneIcon(issue.projectMilestone)}
                 />
 
                 <Detail.Metadata.Label

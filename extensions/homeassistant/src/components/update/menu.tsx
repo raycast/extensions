@@ -90,7 +90,8 @@ export function HACSMenubarItems(props: { state: State | undefined }) {
 
 export function UpdatesMenubarSection(props: { updates: State[] | undefined; hacs?: State }) {
   const updates = props.updates;
-  if (!updates || updates.length <= 0) {
+  const hacsRepos = getHACSRepositories(props.hacs);
+  if ((!updates || updates.length <= 0) && (!hacsRepos || hacsRepos.length <= 0)) {
     return (
       <MenuBarExtra.Section title="Updates">
         <MenuBarExtra.Item title="No Updates" />

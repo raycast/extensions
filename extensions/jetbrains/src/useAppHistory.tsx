@@ -23,6 +23,9 @@ function appHistorySorter(results: AppHistory[], sortOrder: string) {
 function projectsReducer(state: State, action: Action): State {
   switch (action.type) {
     case "setToolboxApp":
+      if (action.results === undefined) {
+        return { ...state, toolboxApp: false, isLoading: false };
+      }
       return { ...state, toolboxApp: action.results };
     case "setHistory":
       return { ...state, history: action.results };
@@ -73,7 +76,7 @@ export interface State {
   isLoading: boolean;
   sortOrder: string;
   filter: string;
-  toolboxApp?: ToolboxApp;
+  toolboxApp?: ToolboxApp | false;
   history?: AppHistory[];
   appHistory: AppHistory[];
   favourites: FavList;
@@ -102,7 +105,7 @@ export function myFavReducer(favourites: FavList, all: recentEntry[]): recentEnt
 
 export interface appHistoryReturn {
   isLoading: boolean;
-  toolboxApp: ToolboxApp | undefined;
+  toolboxApp: ToolboxApp | undefined | false;
   appHistory: AppHistory[];
   myFavs: recentEntry[];
   filter: string;
@@ -135,7 +138,7 @@ export function useAppHistory(): appHistoryReturn {
   }, []);
 
   useEffect(() => {
-    if (toolboxApp === undefined) {
+    if (toolboxApp === undefined || toolboxApp === false) {
       return;
     }
     if (toolboxApp.isV2) {

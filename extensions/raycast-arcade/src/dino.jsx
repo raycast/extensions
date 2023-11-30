@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, environment } from "@raycast/api";
+import { Detail, ActionPanel, Action, environment, Icon } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 import sound from "sound-play";
 
@@ -62,14 +62,14 @@ export default function ChromeDino() {
     `
         ▄█▀████▄
         ████▀▀▀▀
-  █▄   ▄██▀▀▀▀▀ 
+   ▄   ▄██▀▀▀▀▀ 
    ▀█▄████▄     
     ▀████▀      
      █▄ ▀▀      `,
     `
         ▄█▀████▄
         ████▀▀▀▀
-  █▄   ▄██▀▀▀▀▀ 
+   ▄   ▄██▀▀▀▀▀ 
    ▀█▄████▄     
     ▀████▀      
      ▀▀ █▄      `,
@@ -78,7 +78,7 @@ export default function ChromeDino() {
   const dinoJumpFrame = `
         ▄█▀████▄
         ████▀▀▀▀
-  █▄   ▄██▀▀▀▀▀ 
+   ▄   ▄██▀▀▀▀▀ 
    ▀█▄████▄     
     ▀████▀      
      █▄ █▄      `;
@@ -86,7 +86,7 @@ export default function ChromeDino() {
   const dinoHitFrame = `
         ▄██████▄
         ██X█████
-  █▄   ▄██▀▀▀▀▀ 
+   ▄   ▄██▀▀▀▀▀ 
    ▀█▄████▄     
     ▀████▀      
      █▄ █▄      `;
@@ -104,11 +104,11 @@ export default function ChromeDino() {
      `;
 
   let boardWidth = environment.textSize === "medium" ? 106 : 92;
-  let boardHeight = environment.textSize === "medium" ? 21 : 17;
+  let boardHeight = environment.textSize === "medium" ? 20 : 17;
   let [markdown, setMarkdown] = useState(
     Array(boardHeight)
       .fill()
-      .map(() => Array(boardWidth).fill(" "))
+      .map(() => Array(boardWidth).fill(" ")),
   );
   let status = useRef(Status.PLAYING);
   let time = useRef(0);
@@ -116,14 +116,19 @@ export default function ChromeDino() {
     y: 0,
     gravity: 0,
   });
+  let isTicking = useRef(false);
   let activeCacti = useRef([]);
   let activeClouds = useRef([]);
   let score = useRef(0);
   function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
+
   useEffect(() => {
-    tick();
+    if (!isTicking.current) {
+      tick();
+      isTicking.current = true;
+    }
   }, []);
 
   let tick = () => {
@@ -267,21 +272,24 @@ export default function ChromeDino() {
 
       time.current++;
       setTimeout(tick, 25);
+    } else {
+      isTicking.current = false;
     }
   };
 
   let jump = () => {
     if (dinoStatus.current.y === 0) {
+      playSound("dinoJumpSFX.mov");
       dinoStatus.current.gravity = 2.25;
     }
   };
 
   let enter = () => {
-    playSound("dinoJumpSFX.mov");
     if (status.current === Status.PLAYING) {
       jump();
     }
     if (status.current === Status.GAMEOVER) {
+      playSound("dinoJumpSFX.mov");
       time.current = 0;
       dinoStatus.current = {
         y: 0,
@@ -291,7 +299,10 @@ export default function ChromeDino() {
       activeClouds.current = [];
       score.current = 0;
       status.current = Status.PLAYING;
-      tick();
+      if (!isTicking.current) {
+        tick();
+        isTicking.current = true;
+      }
     }
   };
 
@@ -300,6 +311,7 @@ export default function ChromeDino() {
       actions={
         <ActionPanel>
           <Action
+            icon={status.current === Status.PLAYING ? Icon.ArrowUp : Icon.RotateClockwise}
             title={status.current === Status.PLAYING ? "Jump" : "Restart"}
             onAction={() => {
               enter();

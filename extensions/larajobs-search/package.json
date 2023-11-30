@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "larajobs-search",
+  "version": "1.0.1",
+  "title": "Search LaraJobs",
+  "description": "Search jobs on Larajobs",
+  "icon": "extension_icon.png",
+  "author": "Treblle",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Other",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Larajobs",
+      "description": "Search and open jobs from Larajobs right from Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "menu",
+      "title": "Menubar Larajobs",
+      "description": "See and open jobs from Larajobs right from your menubar.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.3",
+    "@raycast/utils": "^1.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^3.0.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

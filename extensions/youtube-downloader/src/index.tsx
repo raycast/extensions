@@ -3,23 +3,27 @@ import ytdl, { videoFormat } from "ytdl-core";
 import { useEffect, useMemo, useState } from "react";
 import { FormValidation, useForm } from "@raycast/utils";
 import prettyBytes from "pretty-bytes";
-import { downloadAudio, downloadVideo, preferences, FormatOptions } from "./utils";
+import {
+  downloadAudio,
+  downloadVideo,
+  parseHHMM,
+  FormatOptions,
+  DownloadOptions,
+  preferences,
+  formatHHMM,
+  isValidHHMM,
+} from "./utils";
 import { execSync } from "child_process";
 import fs from "fs";
-
-type Values = {
-  url: string;
-  format: string;
-  copyToClipboard: boolean;
-};
 
 export default function DownloadVideo() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [formats, setFormats] = useState<videoFormat[]>([]);
   const [error, setError] = useState(0);
+  const [duration, setDuration] = useState(0);
 
-  const { handleSubmit, values, itemProps, setValue } = useForm<Values>({
+  const { handleSubmit, values, itemProps, setValue, setValidationError } = useForm<DownloadOptions>({
     onSubmit: async (values) => {
       setLoading(true);
 
@@ -41,17 +45,40 @@ export default function DownloadVideo() {
         }
       },
       format: FormValidation.Required,
+      startTime: (value) => {
+        if (value) {
+          if (!isValidHHMM(value)) {
+            return "Invalid time format";
+          }
+        }
+      },
+      endTime: (value) => {
+        if (value) {
+          if (!isValidHHMM(value)) {
+            return "Invalid time format";
+          }
+          if (parseHHMM(value) > duration) {
+            return "End time is greater than video duration";
+          }
+        }
+      },
     },
   });
 
   useEffect(() => {
     if (values.url && ytdl.validateURL(values.url)) {
       setLoading(true);
-      ytdl.getInfo(values.url).then((info) => {
-        setLoading(false);
-        setTitle(info.videoDetails.title);
-        setFormats(info.formats);
-      });
+      ytdl
+        .getInfo(values.url)
+        .then((info) => {
+          setLoading(false);
+          setDuration(parseInt(info.videoDetails.lengthSeconds));
+          setTitle(info.videoDetails.title);
+          setFormats(info.formats);
+        })
+        .catch(() => {
+          setValidationError("url", "Video not found");
+        });
     }
   }, [values.url]);
 
@@ -81,7 +108,6 @@ export default function DownloadVideo() {
   const audioFormats = ytdl.filterFormats(formats, "audioonly").filter((format) => format.container === "mp4");
   const isSelectedAudio = currentFormat.itag === audioFormats[0]?.itag.toString();
   const audioContentLength = audioFormats[0]?.contentLength ?? "0";
-
   const videoFormats = ytdl
     .filterFormats(formats, "videoonly")
     .filter((format) => (format.container === "mp4" && !format.colorInfo) || format.container === "webm");
@@ -95,14 +121,14 @@ export default function DownloadVideo() {
             icon={Icon.Download}
             title={isSelectedAudio ? "Download Audio" : "Download Video"}
             onSubmit={(values) => {
-              handleSubmit({ ...values, copyToClipboard: false } as Values);
+              handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);
             }}
           />
           <Action.SubmitForm
             icon={Icon.CopyClipboard}
             title={isSelectedAudio ? "Copy Audio" : "Copy Video"}
             onSubmit={(values) => {
-              handleSubmit({ ...values, copyToClipboard: true } as Values);
+              handleSubmit({ ...values, copyToClipboard: true } as DownloadOptions);
             }}
           />
         </ActionPanel>
@@ -134,7 +160,6 @@ export default function DownloadVideo() {
               ))}
           </Form.Dropdown.Section>
         ))}
-
         <Form.Dropdown.Section title="Audio">
           {audioFormats.map((format) => (
             <Form.Dropdown.Item
@@ -146,6 +171,19 @@ export default function DownloadVideo() {
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>
+      <Form.Separator />
+      <Form.TextField
+        info="Optional. Specify when the output video should start. Follow the format HH:MM:SS or MM:SS."
+        title="Start Time"
+        placeholder="00:00"
+        {...itemProps.startTime}
+      />
+      <Form.TextField
+        info="Optional. Specify when the output video should end. Follow the format HH:MM:SS or MM:SS."
+        title="End Time"
+        placeholder={duration ? formatHHMM(duration) : "00:00"}
+        {...itemProps.endTime}
+      />
     </Form>
   );
 }

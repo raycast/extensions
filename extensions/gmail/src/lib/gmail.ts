@@ -148,6 +148,15 @@ export function generateQuery(options?: { baseQuery?: string[]; userQuery?: stri
   return parts.join(" ");
 }
 
+export async function markMessageAsArchived(message: gmail_v1.Schema$Message) {
+  const gmail = await getAuthorizedGmailClient();
+  await gmail.users.messages.modify({
+    userId: "me",
+    id: message.id || "",
+    requestBody: { removeLabelIds: ["INBOX"] },
+  });
+}
+
 export async function markMessageAsRead(message: gmail_v1.Schema$Message) {
   const gmail = await getAuthorizedGmailClient();
   await gmail.users.messages.modify({
@@ -175,10 +184,28 @@ export async function markMessageAsUnread(message: gmail_v1.Schema$Message) {
   });
 }
 
+export async function markMessagesAsUnread(messages: gmail_v1.Schema$Message[]) {
+  const gmail = await getAuthorizedGmailClient();
+  const ids = messages.map((m) => m.id as string).filter((m) => m);
+  await gmail.users.messages.batchModify({
+    userId: "me",
+    requestBody: { ids, addLabelIds: ["UNREAD"] },
+  });
+}
+
 export async function moveMessageToTrash(message: gmail_v1.Schema$Message) {
   if (message.id === undefined) {
     return;
   }
   const gmail = await getAuthorizedGmailClient();
   await gmail.users.messages.trash({ userId: "me", id: message.id || "" });
+}
+
+export async function moveMessagesToTrash(messages: gmail_v1.Schema$Message[]) {
+  const gmail = await getAuthorizedGmailClient();
+  const ids = messages.map((m) => m.id as string).filter((m) => m);
+  await gmail.users.messages.batchModify({
+    userId: "me",
+    requestBody: { ids, removeLabelIds: ["INBOX"], addLabelIds: ["TRASH"] },
+  });
 }

@@ -3,7 +3,7 @@
   "name": "arc",
   "title": "Arc",
   "description": "Search and quickly navigate Arc's history and open tabs.",
-  "icon": "icon-dark.png",
+  "icon": "icon.png",
   "author": "thomas",
   "owner": "the-browser-company",
   "access": "public",
@@ -12,6 +12,16 @@
     "Applications",
     "Productivity"
   ],
+  "keywords": [
+    "browser",
+    "arc",
+    "history",
+    "search",
+    "tabs",
+    "open",
+    "windows",
+    "web"
+  ],
   "license": "MIT",
   "contributors": [
     "pomdtr",
@@ -19,8 +29,9 @@
     "ankitchouhan1020",
     "pernielsentikaer",
     "danpalmer",
-    "hugivar",
-    "danulqua"
+    "danulqua",
+    "rgrunberg",
+    "Vaibhav-Satishkumar"
   ],
   "commands": [
     {
@@ -34,6 +45,13 @@
       "name": "new-window",
       "title": "Open New Window",
       "description": "Create and open a new window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "description": "Create and open a new blank window",
       "mode": "no-view",
       "subtitle": "Arc"
     },

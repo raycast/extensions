@@ -1,8 +1,8 @@
-import { runAppleScript } from "run-applescript";
 import * as os from "os";
 import { getPreferenceValues } from "@raycast/api";
 import { ExtensionPreferences, JSONObject } from "./types";
 import fetch from "node-fetch";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Removes extraneous symbols from a string and limits it to (by default) 3000 characters.
@@ -19,22 +19,22 @@ export const filterString = (str: string, cutoff?: number): string => {
     return str
       .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@: ~\n\r<>]/g, "")
       .replaceAll('"', "'")
-      .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+      .substring(0, cutoff || str.length);
   } else if (preferences.condenseAmount == "medium") {
     // Remove uncommon characters
     return str
       .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@: ~\n\r<>+*&|]/g, "")
       .replaceAll('"', "'")
-      .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+      .substring(0, cutoff || str.length);
   } else if (preferences.condenseAmount == "low") {
     // Remove all characters except for letters, numbers, and punctuation
     return str
       .replaceAll(/[^A-Za-z0-9,.?!\-'()/[\]{}@:; ~\n\r\t<>%^$~+*_&|]/g, "")
       .replaceAll('"', "'")
-      .substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+      .substring(0, cutoff || str.length);
   } else {
     // Just remove quotes and cut off at the limit
-    return str.replaceAll('"', "'").substring(0, cutoff || parseInt(preferences.lengthLimit) + 500 || 3000);
+    return str.replaceAll('"', "'").substring(0, cutoff || str.length);
   }
 };
 
@@ -207,24 +207,56 @@ const getOrionURL = async (): Promise<string> => {
 };
 
 /**
+ * Gets the URL of the active tab in OmniWeb.
+ * @returns A promise which resolves to the URL of the active tab as a string.
+ */
+const getOmniWebURL = async (): Promise<string> => {
+  return runAppleScript(`tell application "OmniWeb" to return address of active tab of browser 1`);
+};
+
+/**
+ * Gets the URL of the active tab in SigmaOS.
+ * @returns A promise which resolves to the URL of the active tab as a string.
+ */
+const getSigmaOSURL = async (): Promise<string> => {
+  return runAppleScript(`tell application "SigmaOS" to return URL of active tab of window 1`);
+};
+
+/**
  * The browsers from which the current URL can be obtained.
  */
 export const SupportedBrowsers = [
-  "Safari",
-  "Chromium",
-  "Google Chrome",
-  "Opera",
-  "Opera Neon",
-  "Vivaldi",
-  "Microsoft Edge",
-  "Brave Browser",
-  "Iron",
-  "Yandex",
-  "Blisk",
-  "Epic",
   "Arc",
+  "Blisk",
+  "Brave Browser Beta",
+  "Brave Browser Dev",
+  "Brave Browser Nightly",
+  "Brave Browser",
+  "Chromium",
+  "Epic",
+  "Google Chrome Beta",
+  "Google Chrome Canary",
+  "Google Chrome Dev",
+  "Google Chrome",
   "iCab",
+  "Iron",
+  "Maxthon Beta",
+  "Maxthon",
+  "Microsoft Edge Beta",
+  "Microsoft Edge Canary",
+  "Microsoft Edge Dev",
+  "Microsoft Edge",
+  "Opera Beta",
+  "Opera Developer",
+  "Opera GX",
+  "Opera Neon",
+  "Opera",
   "Orion",
+  "Safari",
+  "Vivaldi",
+  "Yandex",
+  "OmniWeb",
+  "SigmaOS",
 ];
 
 /**
@@ -238,14 +270,6 @@ export const getCurrentURL = async (browserName: string): Promise<string> => {
     case "Safari":
       return getCurrentSafariURL();
       break;
-    case "Google Chrome":
-    case "Microsoft Edge":
-    case "Brave Browser":
-    case "Opera":
-    case "Vivaldi":
-    case "Chromium":
-      return getChromiumURL(browserName);
-      break;
     case "Arc":
       return getArcURL();
       break;
@@ -253,6 +277,88 @@ export const getCurrentURL = async (browserName: string): Promise<string> => {
       return getiCabURL();
     case "Orion":
       return getOrionURL();
+      break;
+    case "OmniWeb":
+      return getOmniWebURL();
+      break;
+    case "SigmaOS":
+      return getSigmaOSURL();
+      break;
+    default:
+      return getChromiumURL(browserName);
+      break;
+  }
+  return "";
+};
+
+/**
+ * Executes a JavaScript script in the active tab of the specified browser.
+ *
+ * @param browserName The name of the browser application. Must be a member of {@link SupportedBrowsers}.
+ * @returns A promise which resolves to the result of the script as a string.
+ */
+export const runJSInActiveTab = async (script: string, browserName: string): Promise<string> => {
+  switch (browserName) {
+    case "Safari":
+      return runAppleScript(`tell application "Safari"
+          set theTab to current tab of window 1
+          tell theTab
+            return do JavaScript "try {
+              ${script}
+            } catch {
+              '';
+            }"
+          end tell
+        end tell`);
+      break;
+    case "Arc":
+      return runAppleScript(`tell application "Arc"
+          set theTab to active tab of front window
+          set js to "try {
+            ${script}
+          } catch {
+            '';
+          }"
+          
+          tell front window's active tab
+            return execute javascript js
+          end tell
+        end tell`);
+      break;
+    case "iCab":
+    case "SigmaOS":
+      // No way to return script
+      break;
+    case "Orion":
+      return runAppleScript(`tell application "Orion"
+          set theTab to current tab of window 1
+          do JavaScript "try {
+                      ${script}
+                    } catch {
+                      '';
+                    }" in theTab
+        end tell`);
+      break;
+    case "OmniWeb":
+      return runAppleScript(`tell application "OmniWeb"
+          do script "try {
+            ${script}
+          } catch {
+            '';
+          }" window browser 1
+        end tell`);
+      break;
+    default:
+      return runAppleScript(`tell application "${browserName}"
+          set theTab to active tab of window 1
+          tell theTab
+            return execute javascript "try {
+                      ${script}
+                    } catch {
+                      '';
+                    }"
+          end tell
+        end tell`);
       break;
   }
   return "";
@@ -322,8 +428,7 @@ export const getYouTubeVideoTranscriptById = async (videoId: string): Promise<st
     return "No transcript available.";
   }
 
-  const transcriptURL = "https://youtube.com" + englishCaptionTrack["baseUrl"];
-  const transcriptText = await getTextOfWebpage(transcriptURL);
+  const transcriptText = await getTextOfWebpage(englishCaptionTrack["baseUrl"]);
   return filterString(`Video Title: ${title}\n\nTranscript:\n${transcriptText}`);
 };
 

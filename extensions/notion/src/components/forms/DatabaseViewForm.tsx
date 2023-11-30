@@ -2,8 +2,8 @@ import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from
 import { useEffect, useState } from "react";
 
 import { useDatabaseProperties, useDatabases } from "../../hooks";
-import { notionColorToTintColor } from "../../utils/notion";
-import { DatabaseView, DatabaseProperty, DatabasePropertyOption } from "../../utils/types";
+import { notionColorToTintColor, DatabaseProperty, DatabasePropertyOption } from "../../utils/notion";
+import { DatabaseView } from "../../utils/types";
 
 export function DatabaseViewForm(props: {
   databaseId: string;
@@ -45,13 +45,13 @@ export function DatabaseViewForm(props: {
 
   useEffect(() => {
     if (databaseProperties && viewType === "kanban") {
-      const hasSelect = databaseProperties.some((dp) => dp.type === "select");
+      const hasSelect = databaseProperties.some((dp) => dp.type === "select" || dp.type === "status");
 
       if (!hasSelect) {
         showToast({
           style: Toast.Style.Failure,
           title: "Select Property Required",
-          message: 'Kanban view requires a "Select" type property.',
+          message: 'Kanban view requires a "Select" or "Status" type property.',
         });
         setViewType("list");
       }
@@ -108,7 +108,7 @@ export function DatabaseViewForm(props: {
       {databaseProperties && viewType === "kanban" ? (
         <KanbanViewFormItem
           databaseView={databaseView}
-          selectProperties={databaseProperties.filter((dp) => dp.type === "select")}
+          properties={databaseProperties.filter((dp) => dp.type === "select" || dp.type === "status")}
         />
       ) : null}
     </Form>
@@ -123,14 +123,14 @@ const statusTypes: { [key: string]: string } = {
   canceled: "Canceled",
 };
 
-function KanbanViewFormItem(props: { selectProperties: DatabaseProperty[]; databaseView?: DatabaseView }) {
-  const { selectProperties, databaseView } = props;
+function KanbanViewFormItem(props: { properties: DatabaseProperty[]; databaseView?: DatabaseView }) {
+  const { properties, databaseView } = props;
 
   const [statusPropertyId, setStatusPropertyId] = useState<string | undefined>(
-    databaseView?.kanban?.property_id ? databaseView?.kanban?.property_id : selectProperties[0]?.id,
+    databaseView?.kanban?.property_id ? databaseView?.kanban?.property_id : properties[0]?.id,
   );
 
-  const statusProperty = selectProperties.find((dp) => dp.id === statusPropertyId);
+  const statusProperty = properties.find((dp) => dp.id === statusPropertyId);
 
   function getStatusState(statusProperty: DatabaseProperty | undefined) {
     if (statusProperty && statusProperty.options) {
@@ -180,7 +180,7 @@ function KanbanViewFormItem(props: { selectProperties: DatabaseProperty[]; datab
 
   function updateStatusPropertyId(statusPropertyId: string) {
     setStatusPropertyId(statusPropertyId);
-    const statusProperty = selectProperties.find((dp) => dp.id === statusPropertyId);
+    const statusProperty = properties.find((dp) => dp.id === statusPropertyId);
     const newStatusState = getStatusState(statusProperty);
     if (newStatusState) {
       setStatusState(newStatusState);
@@ -194,7 +194,7 @@ function KanbanViewFormItem(props: { selectProperties: DatabaseProperty[]; datab
       value={statusPropertyId}
       onChange={updateStatusPropertyId}
     >
-      {selectProperties.map((dp) => (
+      {properties.map((dp) => (
         <Form.Dropdown.Item
           key={`kanban-status-property-${dp.id}`}
           value={dp.id}

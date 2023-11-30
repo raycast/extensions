@@ -1,3 +1,7 @@
+import { getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useMemo } from "react";
+import { NativePreferences } from "../types/preferences";
 import { Task } from "../types/task";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import reclaimApi from "./useApi";
@@ -5,6 +9,23 @@ import { ApiResponseTasks, CreateTaskProps } from "./useTask.types";
 
 const useTask = () => {
   const { fetcher } = reclaimApi();
+
+  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }),
+    [apiToken]
+  );
+
+  const useFetchTasks = () =>
+    useFetch<ApiResponseTasks>(`${apiUrl}/tasks`, {
+      headers,
+      keepPreviousData: true,
+    });
 
   const createTask = async (task: CreateTaskProps) => {
     try {
@@ -18,7 +39,8 @@ const useTask = () => {
         minChunkSize: task.durationMin,
         maxChunkSize: task.durationMax,
         notes: task.notes,
-        alwaysPrivate: true,
+        priority: task.priority,
+        onDeck: task.onDeck,
       };
 
       const [createdTask, error] = await axiosPromiseData<Task>(
@@ -109,7 +131,21 @@ const useTask = () => {
     }
   };
 
+  // Set task to incomplete
+  const incompleteTask = async (task: Task) => {
+    try {
+      const [updatedStatus, error] = await axiosPromiseData(
+        fetcher(`/planner/unarchive/task/${task.id}`, { method: "POST", responseType: "json" })
+      );
+      if (!updatedStatus || error) throw error;
+      return updatedStatus;
+    } catch (error) {
+      console.error("Error while updating task", error);
+    }
+  };
+
   return {
+    useFetchTasks,
     createTask,
     handleStartTask,
     handleStopTask,
@@ -117,6 +153,7 @@ const useTask = () => {
     addTime,
     updateTask,
     doneTask,
+    incompleteTask,
   };
 };
 

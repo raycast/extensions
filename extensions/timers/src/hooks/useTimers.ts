@@ -1,4 +1,3 @@
-import { environment } from "@raycast/api";
 import { useState } from "react";
 import {
   checkForOverlyLoudAlert,
@@ -34,7 +33,7 @@ export default function useTimers() {
 
   const handleStopTimer = (timer: Timer) => {
     setTimers(timers?.filter((t: Timer) => t.originalFile !== timer.originalFile));
-    stopTimer(`${environment.supportPath}/${timer.originalFile}`);
+    stopTimer(timer.originalFile);
     refreshTimers();
   };
 

@@ -104,6 +104,7 @@ ${
 | Use Audio Transcription? | ${isTrueStr(command.useAudioDetails) ? "Yes" : "No"} |
 | Use Barcode Detection? | ${isTrueStr(command.useBarcodeDetection) ? "Yes" : "No"} |
 | Use Face Detection? | ${isTrueStr(command.useFaceDetection) ? "Yes" : "No"} |
+| Use Horizon Detection? | ${isTrueStr(command.useHorizonDetection) ? "Yes" : "No"} |
 | Use Rectangle Detection? | ${isTrueStr(command.useRectangleDetection) ? "Yes" : "No"} |
 | Use Saliency Analysis? | ${isTrueStr(command.useSaliencyAnalysis) ? "Yes" : "No"} |
 ${isCommand(command) ? `| Model | ${command.model || "Not Specified"} |` : ``}

@@ -112,12 +112,14 @@ export default async function runModel(basePrompt: string, prompt: string, input
     };
 
     // Add the authentication header if necessary
-    if (targetModel.authType == "apiKey") {
-      headers["Authorization"] = `Api-Key ${targetModel.apiKey.trim()}`;
-    } else if (targetModel.authType == "bearerToken") {
-      headers["Authorization"] = `Bearer ${targetModel.apiKey.trim()}`;
-    } else if (targetModel.authType == "x-api-key") {
-      headers["X-API-Key"] = `${targetModel.apiKey.trim()}`;
+    if (targetModel.apiKey.length != 0) {
+      if (targetModel.authType == "apiKey") {
+        headers["Authorization"] = `Api-Key ${targetModel.apiKey.trim()}`;
+      } else if (targetModel.authType == "bearerToken") {
+        headers["Authorization"] = `Bearer ${targetModel.apiKey.trim()}`;
+      } else if (targetModel.authType == "x-api-key") {
+        headers["X-API-Key"] = `${targetModel.apiKey.trim()}`;
+      }
     }
 
     const modelSchema = raycastModel

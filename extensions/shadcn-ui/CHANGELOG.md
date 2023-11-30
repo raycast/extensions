@@ -1,5 +1,16 @@
 # shadcn/ui Changelog
 
+## [Update to shadcn/ui November 2023 version] - 2023-11-11
+
+- Added a couple missing documentation links
+- Updated "Add Component" commands to use @latest
+- Added support for Bun to "Add Component" commands
+
+## [Update to shadcn/ui August 2023 version] - 2023-08-19
+
+- Update README.md - updated header and add badges
+- Update documentation - New Dark Mode section and components.json page
+
 ## [Update to shadcn/ui July 2023 version] - 2023-07-24
 
 - Update README.md - new author personal site link

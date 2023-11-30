@@ -5,6 +5,9 @@
   "description": "Decode Your JSON Web Tokens – extract the header and data information from a JWT",
   "icon": "jwt.png",
   "author": "gdsmith",
+  "contributors": [
+    "zhhanging"
+  ],
   "categories": [
     "Data",
     "Developer Tools",

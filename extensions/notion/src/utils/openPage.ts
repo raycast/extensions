@@ -1,6 +1,6 @@
 import { closeMainWindow, getPreferenceValues, getApplications, open } from "@raycast/api";
 
-import { Page } from "./types";
+import { Page } from "./notion/page";
 
 export let openIn = "web";
 

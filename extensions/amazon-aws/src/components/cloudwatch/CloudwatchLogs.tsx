@@ -27,7 +27,7 @@ function CloudwatchLogs({
     <Detail
       markdown={logs?.reduce(
         (acc, cur) => `${cur.timestamp ? new Date(cur.timestamp).toLocaleString() : ""}-${cur.message}\n\n${acc}`,
-        ""
+        "",
       )}
       isLoading={isLoading}
       actions={

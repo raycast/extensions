@@ -1,8 +1,12 @@
 import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { getGMailMessageHeaderValue } from "../../lib/gmail";
 import {
+  convertToSemanticLabels,
+  generateLabelFilter,
   getAddressParts,
   getLabelDetailsFromIds,
+  getLabelIcon,
+  getLabelName,
   getMessageFileAttachmentNames,
   getMessageInternalDate,
   isMailUnread,
@@ -19,10 +23,17 @@ import {
   MessageMarkAllAsReadAction,
   MessageShowDetailsAction,
   MessageDebugActionPanelSection,
+  FilterActionPanelSection,
+  CreateQueryQuickLinkAction,
+  MessageMarkAsArchived,
+  FilterMessagesLikeGivenAction,
+  MessageCopyWebUrlAction,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 import { useContext } from "react";
 import { GMailContext } from "../context";
+import { ListSelectionController } from "../selection/utils";
+import { SelectionActionSection } from "../selection/actions";
 
 export function GMailMessageListItem(props: {
   message: gmail_v1.Schema$Message;
@@ -31,6 +42,10 @@ export function GMailMessageListItem(props: {
   detailsShown?: boolean;
   onDetailsShownChanged?: (newValue: boolean) => void;
   allUnreadMessages?: gmail_v1.Schema$Message[];
+  searchText?: string;
+  setSearchText?: (newValue: string) => void;
+  selectionController?: ListSelectionController<gmail_v1.Schema$Message>;
+  query?: string;
 }) {
   const data = props.message;
   const subject = () => {
@@ -58,6 +73,9 @@ export function GMailMessageListItem(props: {
   const to = getGMailMessageHeaderValue(data, "To");
   const toRecipients = to?.split(",");
   const icon = () => {
+    if (props.selectionController && props.selectionController.isSelected(props.message)) {
+      return Icon.CheckCircle;
+    }
     const textIcon = getAvatarIcon(getFirstValidLetter(from, "?") || "");
     if (textIcon) {
       return textIcon;
@@ -147,22 +165,108 @@ export function GMailMessageListItem(props: {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <MessageMarkAsReadAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageMarkAsReadAction
+              message={data}
+              onRevalidate={props.onRevalidate}
+              selectionController={props.selectionController}
+            />
             <MessageMarkAllAsReadAction messages={props.allUnreadMessages} onRevalidate={props.onRevalidate} />
-            <MessageMarkAsUnreadAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageMarkAsUnreadAction
+              message={data}
+              onRevalidate={props.onRevalidate}
+              selectionController={props.selectionController}
+            />
+            <MessageMarkAsArchived message={data} onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
+          <FilterActionPanelSection
+            labelsAll={labelsAll}
+            searchText={props.searchText}
+            setSearchText={props.setSearchText}
+          />
           <ActionPanel.Section>
-            <MessageDeleteAction message={data} onRevalidate={props.onRevalidate} />
+            <MessageDeleteAction
+              message={data}
+              onRevalidate={props.onRevalidate}
+              selectionController={props.selectionController}
+            />
           </ActionPanel.Section>
+          <SelectionActionSection message={props.message} selectionController={props.selectionController} />
           <ActionPanel.Section>
+            <FilterMessagesLikeGivenAction email={fromParts?.email} setSearchText={props.setSearchText} />
             <MessagesRefreshAction onRevalidate={props.onRevalidate} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <CreateQueryQuickLinkAction searchText={props.searchText} />
             <MessageCopyIdAction message={data} />
+            <MessageCopyWebUrlAction message={data} />
           </ActionPanel.Section>
-          <MessageDebugActionPanelSection message={data} />
+          <MessageDebugActionPanelSection message={data} query={props.query} />
         </ActionPanel>
       }
     />
+  );
+}
+
+export function QueryListDropdown(props: {
+  labels: gmail_v1.Schema$Label[] | undefined;
+  setSearchText: (newValue: string) => void;
+  hideLabelIDs?: string[];
+  defaultName?: string;
+  defaultValue?: string;
+}) {
+  const labels = props.labels;
+  if (!labels || labels.length <= 0 || !props.setSearchText) {
+    return null;
+  }
+  const handle = (newValue: string) => {
+    props.setSearchText(newValue);
+  };
+  const filterLabels = (labelsAll: gmail_v1.Schema$Label[] | undefined) => {
+    if (!props.hideLabelIDs || props.hideLabelIDs.length <= 0) {
+      return labelsAll;
+    }
+    return labelsAll?.filter((l) => !props.hideLabelIDs?.includes(l.id || ""));
+  };
+  const semanticLabels = convertToSemanticLabels(filterLabels(labels));
+  return (
+    <List.Dropdown tooltip="Filter" onChange={handle}>
+      <List.Dropdown.Section>
+        <List.Dropdown.Item
+          title={props.defaultName ? props.defaultName : "Default"}
+          icon={Icon.Box}
+          value={props.defaultValue || ""}
+        />
+      </List.Dropdown.Section>
+      <List.Dropdown.Section title="System">
+        {semanticLabels.systemLabels?.map((l) => (
+          <List.Dropdown.Item
+            key={l.id}
+            title={getLabelName(l) || "?"}
+            icon={getLabelIcon(l)}
+            value={generateLabelFilter(l)}
+          />
+        ))}
+      </List.Dropdown.Section>
+      <List.Dropdown.Section title="Categories">
+        {semanticLabels.categories?.map((l) => (
+          <List.Dropdown.Item
+            key={l.id}
+            title={getLabelName(l) || "?"}
+            icon={getLabelIcon(l)}
+            value={generateLabelFilter(l)}
+          />
+        ))}
+      </List.Dropdown.Section>
+      <List.Dropdown.Section title="Labels">
+        {semanticLabels.userLabels?.map((l) => (
+          <List.Dropdown.Item
+            key={l.id}
+            title={getLabelName(l) || "?"}
+            icon={getLabelIcon(l)}
+            value={generateLabelFilter(l)}
+          />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
   );
 }

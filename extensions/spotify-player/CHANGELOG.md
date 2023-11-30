@@ -1,5 +1,16 @@
 # Spotify Player Changelog
 
+## [Feature] - 2023-09-29
+
+- Show a Liked Songs playlist in search and library commands.
+
+## [More Commands] - 2023-09-07
+
+- Added `Current Track` command to view the current track and artist/show, and the like state
+- Added `Replay` command to go to the beginning of the song, replaying it
+- Added `Set Volume` command to set the volume to an arbitrary percent, using an argument
+- Renamed `Toggle Repeat` to  `Cycle Repeat` command to cycle between all three repeat states instead of just two states
+
 ## [Feature] - 2023-07-31
 
 - New Menu Bar Player preference to hide the icon when Spotify is not running, or when there is nothing playing.

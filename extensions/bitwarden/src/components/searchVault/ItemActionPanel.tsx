@@ -1,4 +1,4 @@
-import { ActionPanel, environment, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, environment, getPreferenceValues } from "@raycast/api";
 import ComponentReverser from "~/components/ComponentReverser";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import {
@@ -15,6 +15,7 @@ import {
   CopyIdentityFieldsActions,
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
+  PasteTotpAction,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
@@ -25,7 +26,7 @@ const VaultItemActionPanel = () => {
   const { type, id } = useSelectedVaultItem();
 
   return (
-    <ActionPanel title={environment.isDevelopment ? id : undefined}>
+    <ActionPanel>
       {type === ItemType.LOGIN && (
         <ActionPanel.Section>
           <ComponentReverser reverse={primaryAction === "copy"}>
@@ -33,6 +34,7 @@ const VaultItemActionPanel = () => {
             <CopyPasswordAction />
           </ComponentReverser>
           <CopyTotpAction />
+          <PasteTotpAction />
           <CopyUsernameAction />
           <OpenUrlInBrowserAction />
           <CopyLoginUrisActions />
@@ -79,6 +81,11 @@ const VaultItemActionPanel = () => {
       <ActionPanel.Section title="Vault Management">
         <VaultManagementActions />
       </ActionPanel.Section>
+      {environment.isDevelopment && (
+        <ActionPanel.Section title="Development">
+          <Action.CopyToClipboard title="Copy item UUID" content={id} />
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
 };

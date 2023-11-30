@@ -7,7 +7,7 @@ export function getLightsFromGroup(lights: Light[], group: Group): Light[] {
   return lights.filter((light) =>
     group.children.some((resource) => {
       return resource.rid === light.id || resource.rid === light.owner.rid;
-    })
+    }),
   );
 }
 

@@ -25,6 +25,7 @@ import EditIssueForm from "../EditIssueForm";
 import IssueComments from "../IssueComments";
 import IssueCommentForm from "../IssueCommentForm";
 import CreateSubIssues from "../CreateSubIssues";
+import MilestoneSubmenu from "./MilestoneSubmenu";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -462,6 +463,8 @@ export default function IssueActions({
         <CycleSubmenu issue={issue} updateIssue={updateIssue} />
 
         <ProjectSubmenu issue={issue} updateIssue={updateIssue} />
+
+        <MilestoneSubmenu issue={issue} updateIssue={updateIssue} />
 
         <ParentIssueSubmenu issue={issue} updateIssue={updateIssue} />
 

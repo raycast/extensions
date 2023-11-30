@@ -1,5 +1,22 @@
 # Timers Changelog
 
+## [Fix bug where stopping a timer did not stop the alert due to incorrect .dismiss path] - 2023-11-08
+- Fix bug where the `.dismiss` file wasn't being deleted when a timer was stopped, leading to a perpetually ringing timer (thanks to @atuooo for the contribution)
+
+## [Fix dismiss command, add "Stop Running Timer" command, screenshot update] - 2023-11-05
+
+- Fix bug where "Dismiss Timer Alert" would crash due to improper filtering of running timers
+- Rename "Dismiss Timer Alert" to "Dismiss Ringing Timer" to clarify what the command actually does
+- Add "Stop Running Timer" command to easily stop the timer closest to completion
+- Update screenshots to reflect newer UI and Raycast versions
+
+## [Stopwatch menu bar improvements, minor UX fixes] - 2023-09-30
+
+- Add ability to delete stopwatches from menu bar
+- Fix bug where pausing stopwatch from menu bar didn't work properly
+- Fix bug where "Dismiss Timer Alert" would crash when run without "Ring Continuously" preference set
+- Un-require settings that should be optional
+
 ## [Menu bar improvements, reset stopwatches, end time for timers] - 2023-06-08
 
 - Add menu bar support for stopwatches

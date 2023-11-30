@@ -1,6 +1,6 @@
 import { ChildProcess, exec, ExecException, execSync } from "child_process";
 import { env } from "../config";
-import { LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import { openTerminal } from "./terminalUtils";
 
 export function getAllSession(

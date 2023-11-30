@@ -1,5 +1,102 @@
 # Changelog
 
+## 1.63.0 - 2023-11-29
+
+### 💎 Improvements
+
+- Improved runtime error handling when using a Swift project
+
+### 🐞 Fixes
+
+- **Lists**: Fixed a race condition where the selected item would not be the first one after a list items update
+
+- **MenuBarExtra:** `alternate` are no longer supported on pre-Sonoma versions of macOS, as they would often appear alongside their parent items.
+
+## 1.62.0 - 2023-11-15
+
+### ✨ New
+
+- **Menu Bar:** `MenuBarExtra.Item`s have a new prop, `alternate`. If an `alternate` is defined, it will replace its parent `MenuBarExtra.Item` when the user presses the ⌥ (option) key.
+- The Node runtime has been updated to [Node 20](https://nodejs.org/en/blog/announcements/v20-release-announce/), the [current](https://github.com/nodejs/Release#release-schedule) Long-term Support (LTS) release.
+- **AI**: You can now use the `gpt-4` model with `AI.ask`. If a user does not have access to this model, it will gracefully fall back to an available model. You can check if a user has access using `environment.canAccess('gpt-4')`.
+
+### 💎 Improvements
+
+- **Error Handling:** `Could not communicate with command worker` errors should not be reported anymore.
+
+### 🐞 Fixes
+
+- **Toast:** Fixed an issue that caused toast actions to not work after a toast was updated.
+- **Error Handling:** Fixed an edge case that could cause an out-of-memory error while an uncaught exception was processed, obfuscating the original error.
+- **Performance**: Fixed an issue where some keyboard events would be dropped while an extension was loading.
+- **Markdown**: Fixed a regression where HTML comments would show up in the rendered Markdown.
+
+## 1.61.0 - 2023-11-02
+
+### 💎 Improvements
+
+- **Date Picker**: When specifying a min and/or max date, the suggestion will now always be within those bounds
+
+### 🐞 Fixes
+
+- Fixed a bug that previously could cause a `no-view` command to display an error icon in the root search, with no means of removing the error.
+
+## 1.60.0 - 2023-10-18
+
+## Introducing the Extension Issues Dashboard
+
+![](.gitbook/assets/extension-issues.png)
+
+The new Extension Issues Dashboard is designed to help you quickly troubleshoot and resolve issues in any of your extensions by providing real-time visibility into errors encountered by users. You can access it at https://www.raycast.com/extension-issues, or by using the new `View Issues` action.
+
+### ✨ New
+
+- It is now possible to write extensions [using ESM](https://developers.raycast.com/faq) instead of CommonJS
+
+### 💎 Improvements
+
+- Updated NodeJS runtime to 18.18.2
+- When copying a deeplink with some arguments in the root search, copy the deeplink with those arguments
+
+### 🐞 Fixes
+
+- Fixed an issue where animated toasts would hang around after the command was unloaded.
+
+## 1.59.0 - 2023-09-21
+
+### ✨ New
+
+- **PickDate**: Similar to `Form.DatePicker`, you can also check whether the user picked a full day or a specific time with `Action.PickDate.isFullDay(date)`.
+
+### 💎 Improvements
+
+- **Clipboard**: The `transient` option is renamed to `concealed`.
+
+### 🐞 Fixes
+
+- **MenuBarExtra:** Right-clicking `MenuBarExtra.Item`s should now work in macOS Sonoma.
+
+## 1.58.0 - 2023-09-06
+
+### ✨ New
+
+- **Alert**: Add a new option `rememberUserChoice` to show a checkbox to remember the user choice the next time the same Alert would be shown.
+- **DatePicker**: You can know check whether the user picked a full day or a specific time with `Form.DatePicker.isFullDay(date)`.
+
+### 💎 Improvements
+
+- The “Fork Extension” action is now also available in the Store for installed extensions.
+- All the APIs that accepts a file path will now resolve `~` if necessary.
+
+### 🐞 Fixes
+
+- Fix an issue where some Toasts would not disappear after the command was terminated.
+- Fix an issue where List Item’s accessories with an icon could have their text cut off.
+- Fix `getFrontmostApplication` failing for some applications.
+- The “Fork Extension” will now be more robust dealing with unexpected `package.json` formats.
+- Fixed an issue where newly created Extensions would not use the correct username after it had been updated.
+- Fix an issue where it was possible to set a multiline `searchText`
+
 ## 1.57.0 - 2023-08-09
 
 ### 🐞 Fixes

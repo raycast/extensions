@@ -1,8 +1,20 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2023-11-15
+
+ - Added Copy Pronunciation keyboard shortcut
+
+## [Enhancement] - 2023-08-31
+
+ - Added pronunciation for Translate and Translate Form
+
+## [Fix] - 2023-08-16
+
+ - Fixed case when autodetect language name is not found in our supported languages list
+
 ## [Fix] - 2023-08-09
 
-- Fix auto language detect when detected language is not in the available list
+- Fixed auto language detect when detected language is not in the available list
 - Added Latin
 
 ## [Fix] - 2023-06-21

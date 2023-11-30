@@ -5,6 +5,9 @@
   "description": "Browse shadcn/ui documentation, components and examples",
   "icon": "extension-icon.png",
   "author": "luisFilipePT",
+  "contributors": [
+    "williamwelsh"
+  ],
   "categories": [
     "Documentation",
     "Developer Tools"

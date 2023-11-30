@@ -1,5 +1,22 @@
 # Bitwarden Changelog
 
+## [Error handling] - 2023-11-30
+
+- Improved error handling
+- Fix "not logged in" error when locking the vault
+
+## [Fix] - 2023-09-08
+
+- Fixed irregular identity table
+
+## [Fix] - 2023-08-29
+
+- Fixed crash in Logout command
+
+## [Improvements] - 2023-08-15
+
+- Adds ability to paste TOTP code into active application
+
 ## [Fix] - 2023-08-01
 
 - Removed visible line break in card, identity and note details
@@ -32,7 +49,7 @@
 
 ## [Fix] - 2023-05-19
 
-- Avoid displaying timeout info label on Unlock Form when the preference is Never 
+- Avoid displaying timeout info label on Unlock Form when the preference is Never
 - Fix crashing when getting the name of the frontmost application
 
 ## [Improvements to Actions] - 2023-05-18
@@ -103,7 +120,7 @@
 
 ## [Copy Enhancement] - 2022-11-02
 
-- Copy passwords in a way that asks clipboard managers to not save it 
+- Copy passwords in a way that asks clipboard managers to not save it
 
 ## [UI Enhancement] - 2022-09-21
 

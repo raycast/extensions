@@ -1,7 +1,9 @@
-import { List, Detail, Action, ActionPanel, openExtensionPreferences } from "@raycast/api";
+import { List, Action, ActionPanel } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getOwnershipCode } from "./utils/api";
 import { Response } from "./utils/types";
+import { OPTIONAL_OWNERSHIP_DNS_RECORDS, REQUIRED_OWNERSHIP_DNS_RECORDS } from "./utils/constants";
+import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
   code?: string;
@@ -9,7 +11,7 @@ interface State {
   isLoading?: false;
 }
 
-export default function Command() {
+export default function GetOwnershipCode() {
   const [state, setState] = useState<State>({
     code: "",
     error: "",
@@ -44,29 +46,12 @@ export default function Command() {
     getFromApi();
   }, []);
 
-  const required = [
-    { type: "MX", host: "", value: "mailserver.purelymail.com." },
-    { type: "TXT", host: "", value: "v=spf1 include:_spf.purelymail.com ~all" },
-  ];
-  const optional = [
-    { type: "CNAME", host: "purelymail1._domainkey", value: "key1.dkimroot.purelymail.com." },
-    { type: "CNAME", host: "purelymail2._domainkey", value: "key2.dkimroot.purelymail.com." },
-    { type: "CNAME", host: "purelymail3._domainkey", value: "key3.dkimroot.purelymail.com." },
-    { type: "CNAME", host: "_dmarc", value: "dmarcroot.purelymail.com." },
-  ];
   return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
+    <ErrorComponent error={state.error} />
   ) : (
     <List isLoading={state.code === "" || state.isLoading}>
       <List.Section title="Required">
-        {required.map((r) => (
+        {REQUIRED_OWNERSHIP_DNS_RECORDS.map((r) => (
           <List.Item
             key={r.value}
             title={r.value}
@@ -102,7 +87,7 @@ export default function Command() {
         )}
       </List.Section>
       <List.Section title="Optional">
-        {optional.map((r) => (
+        {OPTIONAL_OWNERSHIP_DNS_RECORDS.map((r) => (
           <List.Item
             key={r.value}
             title={r.value}

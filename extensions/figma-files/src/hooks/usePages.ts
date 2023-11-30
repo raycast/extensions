@@ -36,7 +36,7 @@ export function usePages(file: File) {
   return pages;
 }
 
-async function fetchPages(file: File, signal: any): Promise<Node[]> {
+async function fetchPages(file: File, signal: AbortSignal | undefined): Promise<Node[]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
 
   try {

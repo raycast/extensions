@@ -112,7 +112,7 @@ function Group(props: {
             hueClient={props.hueClient}
             sendHueMessage={props.sendHueMessage}
           />
-        )
+        ),
       )}
     </Grid.Section>
   );

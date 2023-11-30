@@ -1,5 +1,46 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2023-11-30
+
+- [Improvement] Query you pdf or text based file with Ollama. More information on how to use is on README.md.
+- [Improvement] On Command 'Manage Models' is now possible to view all Modelfile parameters. If a specific parameter isn't set on Modelfile it display the default value.
+
+## [BugFix] - 2023-11-5
+
+- [BugFix] Fixed error `ModelsOnRegistry.lengh undefined`.
+- [BugFix] Fixed error `SyntaxError: Unexpected end of JSON input` caused by Ollama Generate API response no longer providing `sample_count` and `sample_duration` fields.
+
+## [Improvement] - 2023-10-21
+
+- [Improvement] New Preference 'Input Source' permit to chose input between 'Selected Text' or 'Clipboard'. Default to 'Selected Text'.
+- [Improvement] New Preference 'Enable Input Source Fallback' if enabled fallback to the other input source if main input is empty. Disabled by default.
+
+## [Improvement and BugFix] - 2023-09-18
+
+- [Improvement] Moved Model preferences to LocalStorage.
+- [Improvement] Is now possible to modify model on the go throw cmd + m shortcut.
+- [Improvement] Ollama Host is now configurable throw Preferences.
+- [Improvement] Metrics metadata now available on Chat Command. New metrics available: token/s, load_duration, sample_count, sample_duration.
+- [BugFix] Reduced re-rendering on models downloading.
+- Following command no longer available: ollama-ask, ollama-custom-ask, ollama-custom-chat.
+
+## [Improvement] - 2023-08-15
+
+- New command **Chat with Ollama**: an interactive chat (request / response) with possibility to save multiple conversation and resume them.
+- New command **Create Custom Command**: an easy way for create custom commands with quicklinks.
+- New command **Manage Models**: where you can view installed models, delete them and install new ones.
+
+## [Improvement and BugFix] - 2023-08-12
+
+- No longer needed custom MODFILEs.
+- Model no longer restricted to orca and llama. Now can be selected all available Ollama model.
+- Initial implementation of embeddings on code.
+- Resolved bug causing Metadata not showing up.
+
+## [Improvement] - 2023-08-11
+
+- Added llama2:70b model. Thanks to [suhaildawood](https://github.com/suhaildawood).
+
 ## [Improvement and BugFix] - 2023-08-7
 
 - Updated README.md with more information.

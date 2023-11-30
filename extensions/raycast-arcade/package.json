@@ -14,18 +14,41 @@
       "name": "tetris",
       "title": "Tetris",
       "description": "Play classic Tetris!",
-      "mode": "view"
+      "mode": "view",
+      "icon": "tetris.png"
     },
     {
       "name": "dino",
       "title": "Chrome Dino",
       "description": "Play the Chrome Dino game!",
-      "mode": "view"
+      "mode": "view",
+      "icon": "dinosaur.png"
     },
     {
       "name": "wordle",
       "title": "Wordle",
       "description": "Play Wordle!",
+      "mode": "view",
+      "icon": "wordle.png"
+    },
+    {
+      "name": "snake",
+      "title": "Snake",
+      "description": "Play classic Snake!",
+      "mode": "view",
+      "icon": "snake.png"
+    },
+    {
+      "name": "game2048",
+      "title": "2048",
+      "description": "Play classic 2048!",
+      "mode": "view",
+      "icon": "2048.png"
+    },
+    {
+      "name": "search",
+      "title": "Search Games",
+      "description": "Search for the Raycast Arcade games, all in one place.",
       "mode": "view"
     }
   ],
@@ -40,7 +63,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^3.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

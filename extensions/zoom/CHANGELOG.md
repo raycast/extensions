@@ -1,5 +1,9 @@
 # Zoom Changelog
 
+## [New Icon] - 2024-09-27
+
+Updated Icon to the newer zoom icon with a slightly different gradient to differentiate between the app and the raycast extension.
+
 ## [Open source the Extension] - 2022-08-04
 
 Zoom added to the public repository

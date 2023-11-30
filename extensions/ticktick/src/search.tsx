@@ -8,12 +8,14 @@ import { getProjects } from "./service/project";
 import SearchFilter from "./components/searchFilter";
 import { getTasksByProjectId } from "./service/osScript";
 import { usePromise } from "@raycast/utils";
+import useRefreshList from "./hooks/useRefreshList";
 
 const TickTickSearch: React.FC<Record<string, never>> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [projectFilter, setProjectFilter] = useState("all");
   const { isInitCompleted } = useStartApp();
   const [isLocalDataLoaded, setIsLocalDataLoaded] = useState(false);
+  const { refreshPoint, refresh } = useRefreshList();
 
   useEffect(() => {
     (async () => {
@@ -51,10 +53,11 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
   const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
 
   const { isLoading: isAllTasksLoading, data: sections } = usePromise(
-    async (projectId: string) => {
+    async (projectId: string, refreshPoint: number) => {
+      console.log("refreshPoint", refreshPoint);
       return await getTasksByProjectId(projectId);
     },
-    [projectFilter],
+    [projectFilter, refreshPoint],
     {
       execute: isLocalDataLoaded,
     }
@@ -89,6 +92,7 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
                   tags={task.tags}
                   detailMarkdown={getTaskDetailMarkdownContent(task)}
                   copyContent={getTaskCopyContent(task)}
+                  refresh={refresh}
                 />
               ))}
             </List.Section>
@@ -119,9 +123,10 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
         tags={task.tags}
         detailMarkdown={getTaskDetailMarkdownContent(task)}
         copyContent={getTaskCopyContent(task)}
+        refresh={refresh}
       />
     ));
-  }, [projectFilter, searchQuery, searchTasks, sections]);
+  }, [projectFilter, refresh, searchQuery, searchTasks, sections]);
 
   return (
     <List

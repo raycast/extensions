@@ -1,5 +1,14 @@
 # Tailscale Changelog
 
+## [Improved error handling] - 2023-09-30
+
+- Added more explicit error views for when Tailscale isn't running, isn't connected, or isn't installed
+- Fixes an error that prevented the "switch account" command from working
+
+## [Add custom tailscale path] - 2023-09-07
+
+- Added a preference for users to specify a custom path to the `tailscale` CLI
+
 ## [Improve UI for disconnecting exit node] - 2023-04-29
 
 - Updated the icon and accessory text for the "Turn off exit node" action
