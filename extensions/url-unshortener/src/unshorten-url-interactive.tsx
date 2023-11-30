@@ -42,6 +42,18 @@ export default function UrlRedirectionList() {
     );
   };
 
+  useEffect(() => {
+    const init = async () => {
+      const url = await getUrlFromSelectionOrClipboard();
+      if (url && isValidUrl(url)) {
+        setInitialUrl(url);
+        fetchData(url);
+      }
+    };
+
+    init();
+  }, []);
+
   const onSearchTextChange = async (newText: string) => {
     setInitialUrl(newText);
 
@@ -51,17 +63,6 @@ export default function UrlRedirectionList() {
       setRedirectionSteps([]);
     }
   };
-
-  useEffect(() => {
-    const init = async () => {
-      const url = await getUrlFromSelectionOrClipboard();
-      if (url) {
-        fetchData(url);
-      }
-    };
-
-    init();
-  }, []);
 
   useEffect(() => {
     const fetchFaviconsForSteps = async () => {
