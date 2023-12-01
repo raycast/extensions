@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import axios from "axios";
+import { TanaAPIHelper } from "./TanaAPIClient";
 
 export const TANA_URL = "https://europe-west1-tagr-prod.cloudfunctions.net";
 
@@ -8,11 +8,15 @@ type Preferences = {
 };
 export const prefs = getPreferenceValues<Preferences>();
 
-export type TanaResponse = string | { err: string };
-
-export const nodeApi = axios.create({
-  baseURL: TANA_URL,
-  headers: {
-    authorization: `Bearer ${prefs.nodeApiToken}`,
-  },
-});
+export const createPlainNode = async (name: string): Promise<string> => {
+  const helper = new TanaAPIHelper(prefs.nodeApiToken);
+  const tananode = await helper.createNode(
+    {
+      name,
+    },
+    // 'SCHEMA'
+    // 'LIBRARY'
+    "INBOX"
+  );
+  return tananode.name;
+};

@@ -9,3 +9,18 @@ Write a note in Raycast and and send it to Tana! The note that you write will be
 To configure this in Raycast, you'll need to provide an API token which can be generated in Tana. To generate this token, open the command line (Cmd/Ctrl-K) and select `Get API Token`. This will generate a token and add it your clipboard. Once generated, paste the token into the corresponding configuration in Raycast.
 
 *Note: currently only plaintext notes are supported.*
+
+### Contribution
+
+```bash
+bun install
+# dev
+bun run dev
+# publish
+bun run publish
+```
+
+[Tana input api sample](https://github.com/tanainc/tana-input-api-samples)
+
+[Tana import tool](https://github.com/tanainc/tana-import-tools)
+

@@ -9,6 +9,13 @@
     "Productivity"
   ],
   "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
   "commands": [
     {
       "name": "quickAddCommand",
@@ -30,23 +37,13 @@
   "dependencies": {
     "@raycast/api": "^1.40.1",
     "@raycast/utils": "^1.4.8",
-    "axios": "^1.1.2"
+    "node-fetch": "^3.3.2",
+    "readline": "^1.3.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "publish": "ray publish"
+    "@types/node": "^20.9.2",
+    "@types/react": "^18.2.37",
+    "typescript": "^5.2.2"
   }
 }
