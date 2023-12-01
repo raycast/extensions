@@ -16,7 +16,7 @@ export const createPlainNode = async (name: string): Promise<string> => {
     },
     // 'SCHEMA'
     // 'LIBRARY'
-    "INBOX"
+    "INBOX",
   );
   return tananode.name;
 };

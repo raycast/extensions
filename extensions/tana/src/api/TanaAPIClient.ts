@@ -1,15 +1,8 @@
 /* copy this from https://github.com/tanainc/tana-input-api-samples */
 import { APIField, APINode, APIPlainNode, TanaNode } from "../types/types";
 import fetch from "node-fetch";
-import { readFileSync } from "fs";
 import { attrDefTemplateId, coreTemplateId } from "../types/constants";
 
-function readfile(filename: string) {
-  // read filename from disk, return array buffer
-  const file = readFileSync(filename, { encoding: "base64" });
-
-  return file;
-}
 export class TanaAPIHelper {
   private endpoint = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
 
@@ -17,7 +10,10 @@ export class TanaAPIHelper {
     return `SCHEMA`;
   }
 
-  constructor(public token: string, public endpointUrl?: string) {
+  constructor(
+    public token: string,
+    public endpointUrl?: string,
+  ) {
     this.token = token;
 
     if (endpointUrl) {
@@ -37,10 +33,10 @@ export class TanaAPIHelper {
 
     const createdFields = await this.makeRequest(payload);
 
-    return createdFields.map((field: any) => ({
-      name: field.name as string,
-      description: field.description as string,
-      id: field.nodeId as string,
+    return createdFields.map((field) => ({
+      name: field.name,
+      description: field.description,
+      id: field.nodeId,
     }));
   }
 
@@ -89,7 +85,7 @@ export class TanaAPIHelper {
   }
 
   private async makeRequest(
-    payload: { targetNodeId?: string } & ({ nodes: (APINode | APIField)[] } | { setName: string })
+    payload: { targetNodeId?: string } & ({ nodes: (APINode | APIField)[] } | { setName: string }),
   ): Promise<TanaNode[]> {
     const response = await fetch(this.endpoint, {
       method: "POST",
@@ -103,9 +99,9 @@ export class TanaAPIHelper {
     if (response.status === 200 || response.status === 201) {
       const json = await response.json();
       if ("setName" in payload) {
-        return [json] as any as TanaNode[];
+        return [json] as TanaNode[];
       } else {
-        return (json as any).children as TanaNode[];
+        return (json as { children: TanaNode[] }).children as TanaNode[];
       }
     }
     console.log(await response.text());
