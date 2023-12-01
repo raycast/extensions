@@ -29,7 +29,7 @@ export async function deleteFile(filePath: string, fileName: string, refresh: ()
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        fs.rmSync(folderPath, { recursive: true, force: true });
+        fs.rmSync(filePath);
         refresh();
         showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
       },
@@ -48,7 +48,7 @@ export async function deleteDirectory(folderPath: string, folderName: string, re
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        fs.rmdirSync(folderPath);
+        fs.rmSync(folderPath, { recursive: true, force: true });
         refresh();
         showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
       },
