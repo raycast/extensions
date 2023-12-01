@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Date display bug] - 2023-12-01
+
+- Fix a bug that displays full-day dates with time in the tooltips of reminder items.
+
 ## [Minor improvements] - 2023-11-25
 
 - Add list filtering to the menu bar
