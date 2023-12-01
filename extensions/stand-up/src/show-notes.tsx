@@ -224,4 +224,6 @@ function getSectionTitle(date: Dayjs) {
   if (isThisWeek(date)) {
     return date.format("dddd");
   }
+
+  return "Older";
 }
