@@ -92,14 +92,16 @@ export default function PathForm({ initialPath = "", initialAlias = "", mode }: 
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="pathField"
-        value={pathValue}
-        title="Directory Path"
-        placeholder="Enter your path"
+      <Form.FilePicker
+        id="pathPicker"
+        title="Folder"
+        allowMultipleSelection={false}
+        canChooseDirectories
+        canChooseFiles={false}
+        value={pathValue ? [pathValue] : undefined}
         error={pathError}
-        onChange={(value) => {
-          setPath(value);
+        onChange={(selectedPath) => {
+          setPath(selectedPath[0]);
           dropPathErrorIfNeeded();
         }}
       />
