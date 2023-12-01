@@ -5,6 +5,9 @@
   "description": "Write notes in Raycast, and capture them in Tana.",
   "icon": "tana-icon.png",
   "author": "cheslip",
+  "contributors": [
+    "neil_brown"
+  ],
   "categories": [
     "Productivity"
   ],
