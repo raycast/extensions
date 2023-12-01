@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, LaunchProps } from "@raycast/api";
 import { RedirectionStep } from "./types";
 import {
   getUrlFromSelectionOrClipboard,
@@ -11,7 +11,7 @@ import {
   getIcon,
 } from "./utils";
 
-export default function UrlRedirectionList() {
+export default function UrlRedirectionList(props: LaunchProps) {
   const [redirectionSteps, setRedirectionSteps] = useState<RedirectionStep[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [initialUrl, setInitialUrl] = useState<string>("");
@@ -52,7 +52,7 @@ export default function UrlRedirectionList() {
 
   useEffect(() => {
     const init = async () => {
-      const url = await getUrlFromSelectionOrClipboard();
+      const url = props.fallbackText || (await getUrlFromSelectionOrClipboard());
       if (url && isValidUrl(url)) {
         setInitialUrl(url);
         fetchData(url);
