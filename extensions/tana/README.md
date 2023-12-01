@@ -18,6 +18,8 @@ bun install
 bun run dev
 # publish
 bun run publish
+# pull contributions
+bunx @raycast/api@latest pull-contributions
 ```
 
 [Tana input api sample](https://github.com/tanainc/tana-input-api-samples)
