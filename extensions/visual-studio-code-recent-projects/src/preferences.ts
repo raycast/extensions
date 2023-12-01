@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { VSCodeBuild } from "./types";
+import { ExtensionPreferences, VSCodeBuild } from "./types";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 

@@ -137,6 +137,27 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
   const subtitle = dirname(prettyPath);
   const keywords = path.split("/");
 
+  const getTitle = (revert = false) => {
+    return `Open in ${build} ${closeOtherWindows !== revert ? "| Close Other" : ""}`;
+  };
+
+  const getAction = (revert = false) => {
+    return () => {
+      if (closeOtherWindows !== revert) {
+        runAppleScriptSync(`
+        tell application "System Events"
+        tell process "${build}"
+        repeat while window 1 exists
+          click button 1 of window 1
+        end repeat
+        end tell
+        end tell
+        `);
+      }
+      open(props.uri, bundleIdentifier);
+    };
+  };
+
   return (
     <ListOrGridItem
       id={props.pinned ? path : undefined}
@@ -148,24 +169,8 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action
-              title={`Open in ${build}`}
-              icon="action-icon.png"
-              onAction={() => {
-                if (closeOtherWindows) {
-                  runAppleScriptSync(`
-                    tell application "System Events"
-                      tell process "${build}"
-                        repeat while window 1 exists
-                          click button 1 of window 1
-                        end repeat
-                      end tell
-                    end tell
-                  `);
-                }
-                open(props.uri, bundleIdentifier);
-              }}
-            />
+            <Action title={getTitle()} icon="action-icon.png" onAction={getAction()} />
+            <Action title={getTitle(true)} icon="action-icon.png" onAction={getAction(true)} />
             <Action.ShowInFinder path={path} />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             {isFolderEntry(props.entry) && terminalApp && (
@@ -199,7 +204,29 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
 function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods) {
   const remotePath = decodeURI(basename(props.uri));
   const scheme = getBuildScheme();
-  const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
+
+  const url = new URL(props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`));
+
+  let uri = url.toString();
+  let uriCloseOther = uri;
+
+  if (url.searchParams.has("windowId")) {
+    uri = url.toString();
+    url.searchParams.delete("windowId");
+    uriCloseOther = url.toString();
+  } else {
+    uriCloseOther = url.toString();
+    url.searchParams.append("windowId", "_blank");
+    uri = url.toString();
+  }
+
+  const getTitle = (revert = false) => {
+    return `Open in ${build} ${closeOtherWindows !== revert ? "| Close Other" : ""}`;
+  };
+
+  const getUrl = (revert = false) => {
+    return closeOtherWindows !== revert ? uriCloseOther : uri;
+  };
 
   return (
     <ListOrGridItem
@@ -211,7 +238,8 @@ function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; p
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title={`Open in ${build}`} icon="action-icon.png" url={uri} />
+            <Action.OpenInBrowser title={getTitle()} icon="action-icon.png" url={getUrl()} />
+            <Action.OpenInBrowser title={getTitle(true)} icon="action-icon.png" url={getUrl(true)} />
           </ActionPanel.Section>
           <PinActionSection {...props} />
         </ActionPanel>
