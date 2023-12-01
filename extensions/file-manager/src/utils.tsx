@@ -29,7 +29,7 @@ export async function deleteFile(filePath: string, fileName: string, refresh: ()
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        fs.rmSync(filePath);
+        fs.rmSync(folderPath, { recursive: true, force: true });
         refresh();
         showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
       },
