@@ -201,7 +201,7 @@ async function fetchPaths() {
   return parsedData;
 }
 
-async function ensureFileExists() {
+export async function ensureFileExists() {
   try {
     await fs.access(STORAGE_PATH, constants.F_OK);
   } catch (error) {

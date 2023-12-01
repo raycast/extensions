@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { promises as fs } from "fs";
 import { exec } from "child_process";
 import path from "path";
+import { ensureFileExists } from "./components/path-form";
 import PathForm from "./components/path-form";
 
 const STORAGE_PATH: string = path.join(environment.supportPath, "paths.json");
@@ -31,6 +32,7 @@ export default function ListPaths() {
   const terminalApp = preferences.defaultTerminal === "iTerm" ? "iTerm" : "Terminal";
 
   async function fetchPaths() {
+    await ensureFileExists();
     try {
       const rawData = await fs.readFile(STORAGE_PATH, "utf-8");
       const parsedData: Record<string, string> = JSON.parse(rawData);
