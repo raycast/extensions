@@ -40,6 +40,7 @@ export function ActionsInvoice({ invoice, mutateInvoices }: ActionsInvoiceProps)
         <Action.Push
           title="Send via Mail"
           icon={Icon.Envelope}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           target={<MailInvoice invoice={invoice} mutateInvoices={mutateInvoices} />}
         />
         {!invoice?.paid_date ? (
