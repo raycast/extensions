@@ -23,6 +23,7 @@ export function isOverdue(date: string) {
 
 export function displayDueDate(dateString: string) {
   const date = new Date(dateString);
+
   if (isOverdue(dateString)) {
     return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
   }
@@ -48,6 +49,10 @@ export function displayDueDate(dateString: string) {
   }
 
   return format(date, "dd MMMM yyy");
+}
+
+export function isFullDay(date: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
 }
 
 export function getPriorityIcon(priority: Priority) {
