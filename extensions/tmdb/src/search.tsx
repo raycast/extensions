@@ -99,6 +99,13 @@ function Movie({ movie }: { movie: MovieResponse }) {
         <ActionPanel>
           <Action.Push title="Show Details" icon={Icon.Sidebar} target={<MovieDetail movie={movie} />} />
           <Action.OpenInBrowser title="Open in TMDB" url={`https://www.themoviedb.org/movie/${movie.id ?? 0}`} />
+          {movie.id ? (
+            <Action.CopyToClipboard
+              title={`Copy TMDB ID: ${movie.id}`}
+              content={movie.id.toString()}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />
