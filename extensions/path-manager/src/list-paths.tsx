@@ -24,6 +24,7 @@ export default function ListPaths() {
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState("");
   const [paths, setPaths] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(true);
   const [filteredList, setFilteredList] = useState<{ alias: string; path: string }[]>([]);
 
   const preferences = getPreferenceValues();
@@ -43,6 +44,8 @@ export default function ListPaths() {
       });
       setPaths({});
       setFilteredList([]);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -132,6 +135,7 @@ export default function ListPaths() {
 
   return (
     <List
+      isLoading={isLoading}
       filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="List Paths"
