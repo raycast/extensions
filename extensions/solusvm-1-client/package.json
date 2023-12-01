@@ -33,6 +33,14 @@
       "description": "API Hash from API tab in SolusVM v1",
       "required": true,
       "type": "password"
+    },
+    {
+      "name": "confirm_before_actions",
+      "label": "Confirm Before Actions",
+      "description": "Confirm before Boot, Reboot or Shut Down",
+      "required": false,
+      "default": true,
+      "type": "checkbox"
     }
   ],
   "commands": [

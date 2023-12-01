@@ -1,9 +1,23 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, confirmAlert, showToast } from "@raycast/api";
 import { rebootVirtualServer } from "./api";
+import { CONFIRM_BEFORE_ACTIONS } from "./constants";
 
 export default async function RebootVirtualServer() {
-  const response = await rebootVirtualServer();
-  if (response.status === "success") {
-    await showToast(Toast.Style.Success, "SUCCESS", "Rebooted");
+  if (CONFIRM_BEFORE_ACTIONS) {
+    if (
+      await confirmAlert({
+        title: `Reboot Virtual Server?`,
+      })
+    ) {
+      const response = await rebootVirtualServer();
+      if (response.status === "success") {
+        await showToast(Toast.Style.Success, "SUCCESS", "Rebooted");
+      }
+    }
+  } else {
+    const response = await rebootVirtualServer();
+    if (response.status === "success") {
+      await showToast(Toast.Style.Success, "SUCCESS", "Rebooted");
+    }
   }
 }

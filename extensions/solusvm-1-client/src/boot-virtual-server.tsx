@@ -1,9 +1,23 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, confirmAlert, showToast } from "@raycast/api";
 import { bootVirtualServer } from "./api";
+import { CONFIRM_BEFORE_ACTIONS } from "./constants";
 
 export default async function BootVirtualServer() {
-  const response = await bootVirtualServer();
-  if (response.status === "success") {
-    await showToast(Toast.Style.Success, "SUCCESS", "Booted");
+  if (CONFIRM_BEFORE_ACTIONS) {
+    if (
+      await confirmAlert({
+        title: `Boot Virtual Server?`,
+      })
+    ) {
+      const response = await bootVirtualServer();
+      if (response.status === "success") {
+        await showToast(Toast.Style.Success, "SUCCESS", "Booted");
+      }
+    }
+  } else {
+    const response = await bootVirtualServer();
+    if (response.status === "success") {
+      await showToast(Toast.Style.Success, "SUCCESS", "Booted");
+    }
   }
 }

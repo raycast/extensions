@@ -1,6 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import { API_URL } from "./constants";
-import fetch from "node-fetch";
+import fetch, { FetchError } from "node-fetch";
 import { DOMParser } from "@xmldom/xmldom";
 import {
   BootVirtualServerResponse,
@@ -11,22 +10,36 @@ import {
   ShutdownVirtualServerResponse,
   SuccessResponse,
 } from "./types";
+import { API_HASH, API_KEY, SOLUSVM_URL } from "./constants";
 
 const callApi = async (action: string, animatedToastMessage = "") => {
   await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
 
-  const apiResponse = await fetch(API_URL + action + "&status=true");
-  if (!apiResponse.ok) {
-    const message = "Something went wrong";
+  try {
+    const API_URL = new URL(`api/client/command.php?key=${API_KEY}&hash=${API_HASH}&action=`, SOLUSVM_URL);
+
+    const apiResponse = await fetch(API_URL + action + "&status=true");
+    if (!apiResponse.ok) {
+      const message = "Something went wrong";
+      await showToast({ title: `${apiResponse.status} Error`, message, style: Toast.Style.Failure });
+      return { status: "error", statusmsg: message };
+    } else {
+      const response = await apiResponse.text();
+      const parsed = parseApiResponse(response) as ErrorResponse | SuccessResponse;
+      if (parsed.status === "error") {
+        await showToast({ title: "ERROR", message: parsed.statusmsg, style: Toast.Style.Failure });
+      }
+      return parsed;
+    }
+  } catch (error) {
+    let message = "Something went wrong";
+    if (error instanceof FetchError) {
+      message = error.message;
+    } else if (error instanceof TypeError) {
+      message = "Invalid URL - make sure the SolusVM URL is valid";
+    }
     await showToast({ title: "ERROR", message, style: Toast.Style.Failure });
     return { status: "error", statusmsg: message };
-  } else {
-    const response = await apiResponse.text();
-    const parsed = parseApiResponse(response) as ErrorResponse | SuccessResponse;
-    if (parsed.status === "error") {
-      await showToast({ title: "ERROR", message: parsed.statusmsg, style: Toast.Style.Failure });
-    }
-    return parsed;
   }
 };
 

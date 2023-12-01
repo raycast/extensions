@@ -18,6 +18,10 @@ This is a Raycast extension for [SolusVM](https://solusvm.com/) 1 Client level a
 
     c. API Hash from API tab in SolusVM v1
 
+## ⚙️ Preferences
+
+- By default, the extension will __confirm__ before `Reboot`, `Boot` or `Shut Down` but you can disable this in Preferences.
+
 ## 🗒️ Notes
 
 - This extension is for `SolusVM 1` so instances w/ `SolusVM 2` are not guaranteed to work.

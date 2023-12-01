@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-const SOLUSVM_URL = new URL(getPreferenceValues<Preferences>().solusVM_url);
-const API_KEY = getPreferenceValues<Preferences>().api_key;
-const API_HASH = getPreferenceValues<Preferences>().api_hash;
+export const CONFIRM_BEFORE_ACTIONS = getPreferenceValues<Preferences>().confirm_before_actions;
 
-export const API_URL = `${SOLUSVM_URL}/api/client/command.php?key=${API_KEY}&hash=${API_HASH}&action=`;
+export const SOLUSVM_URL = getPreferenceValues<Preferences>().solusVM_url;
+export const API_KEY = getPreferenceValues<Preferences>().api_key;
+export const API_HASH = getPreferenceValues<Preferences>().api_hash;

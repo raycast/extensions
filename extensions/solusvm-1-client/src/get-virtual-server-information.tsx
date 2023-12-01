@@ -16,24 +16,25 @@ export default function GetVirtualServerInformation() {
     free: string;
     percentUsed: string;
   };
-  const [hdd, setHDD] = useState<Usage>({
+  const DEFAULT_USAGE = {
     total: "",
     used: "",
     free: "",
     percentUsed: "",
-  });
-  const [bw, setBW] = useState<Usage>({
-    total: "",
-    used: "",
-    free: "",
-    percentUsed: "",
-  });
-  const [mem, setMem] = useState<Usage>({
-    total: "",
-    used: "",
-    free: "",
-    percentUsed: "",
-  });
+  };
+  const [hdd, setHDD] = useState<Usage>({ ...DEFAULT_USAGE });
+  const [bw, setBW] = useState<Usage>({ ...DEFAULT_USAGE });
+  const [mem, setMem] = useState<Usage>({ ...DEFAULT_USAGE });
+
+  function splitStringAndGetUsageObject(usage: string) {
+    const splitString = usage.split(",");
+    return {
+      total: splitString[0],
+      used: splitString[1],
+      free: splitString[2],
+      percentUsed: splitString[3],
+    };
+  }
 
   async function getFromApi() {
     setIsLoading(true);
@@ -42,24 +43,9 @@ export default function GetVirtualServerInformation() {
       setInformation(response);
 
       // hdd, bw, mem are comma separated so we store as object
-      setHDD({
-        total: response.hdd.split(",")[0],
-        used: response.hdd.split(",")[1],
-        free: response.hdd.split(",")[2],
-        percentUsed: response.hdd.split(",")[3],
-      });
-      setBW({
-        total: response.bw.split(",")[0],
-        used: response.bw.split(",")[1],
-        free: response.bw.split(",")[2],
-        percentUsed: response.bw.split(",")[3],
-      });
-      setMem({
-        total: response.mem.split(",")[0],
-        used: response.mem.split(",")[1],
-        free: response.mem.split(",")[2],
-        percentUsed: response.mem.split(",")[3],
-      });
+      setHDD({ ...splitStringAndGetUsageObject(response.hdd) });
+      setBW({ ...splitStringAndGetUsageObject(response.bw) });
+      setMem({ ...splitStringAndGetUsageObject(response.mem) });
 
       await showToast(Toast.Style.Success, "SUCCESS", "Fetched Information");
     } else setError(response);
