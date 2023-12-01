@@ -1,4 +1,4 @@
-import { Clipboard, getSelectedText, Icon } from "@raycast/api";
+import { Clipboard, Color, getSelectedText, Icon } from "@raycast/api";
 import { RedirectionStep } from "./types";
 import fetch from "node-fetch";
 
@@ -99,3 +99,18 @@ export function getFaviconUrl(url: string) {
     return Icon.Globe;
   }
 }
+
+export const getTagColor = (statusCode: number) => {
+  if (statusCode >= 200 && statusCode < 300) return Color.Green;
+  if (statusCode >= 300 && statusCode < 400) return Color.Yellow;
+  if (statusCode >= 400 && statusCode < 600) return Color.Red;
+  return Color.PrimaryText;
+};
+
+export const getIcon = (statusCode: number) => {
+  if (statusCode >= 100 && statusCode < 200) return Icon.Info;
+  if (statusCode >= 200 && statusCode < 300) return Icon.CheckCircle;
+  if (statusCode >= 300 && statusCode < 400) return Icon.ArrowClockwise;
+  if (statusCode >= 400 && statusCode < 600) return Icon.XMarkCircle;
+  return Icon.QuestionMark;
+};

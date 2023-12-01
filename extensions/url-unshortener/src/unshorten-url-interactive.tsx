@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import { RedirectionStep } from "./types";
-import { getUrlFromSelectionOrClipboard, isValidUrl, ensureHttpPrefix, unshortenUrl, getFaviconUrl } from "./utils";
+import {
+  getUrlFromSelectionOrClipboard,
+  isValidUrl,
+  ensureHttpPrefix,
+  unshortenUrl,
+  getFaviconUrl,
+  getTagColor,
+  getIcon,
+} from "./utils";
 
 export default function UrlRedirectionList() {
   const [redirectionSteps, setRedirectionSteps] = useState<RedirectionStep[]>([]);
@@ -101,25 +109,9 @@ export default function UrlRedirectionList() {
                     {
                       tag: {
                         value: step.statusCode.toString(),
-                        color:
-                          step.statusCode >= 200 && step.statusCode < 300
-                            ? Color.Green
-                            : step.statusCode >= 300 && step.statusCode < 400
-                              ? Color.Yellow
-                              : step.statusCode >= 400 && step.statusCode < 600
-                                ? Color.Red
-                                : Color.PrimaryText,
+                        color: getTagColor(step.statusCode),
                       },
-                      icon:
-                        step.statusCode >= 100 && step.statusCode < 200
-                          ? Icon.Info
-                          : step.statusCode >= 200 && step.statusCode < 300
-                            ? Icon.CheckCircle
-                            : step.statusCode >= 300 && step.statusCode < 400
-                              ? Icon.ArrowClockwise
-                              : step.statusCode >= 400 && step.statusCode < 600
-                                ? Icon.XMarkCircle
-                                : Icon.QuestionMark,
+                      icon: getIcon(step.statusCode),
                     },
                   ]
                 : []
