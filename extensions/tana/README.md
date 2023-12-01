@@ -13,13 +13,13 @@ To configure this in Raycast, you'll need to provide an API token which can be g
 ### Contribution
 
 ```bash
-bun install
+npm install
 # dev
-bun run dev
+npm run dev
 # publish
-bun run publish
+npm run publish
 # pull contributions
-bunx @raycast/api@latest pull-contributions
+npx raycast/api@latest pull-contributions
 ```
 
 [Tana input api sample](https://github.com/tanainc/tana-input-api-samples)
