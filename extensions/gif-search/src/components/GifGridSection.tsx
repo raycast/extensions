@@ -5,7 +5,7 @@ import { Grid } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
 
 export interface GifGridSectionProps {
-  title?: string;
+  title: string;
   term?: string;
   hide?: boolean;
   results?: IGif[];
@@ -36,6 +36,7 @@ export function GifGridSection(props: GifGridSectionProps & { loadMoreGifs: () =
           service={props.service}
           visitGifItem={visitGifItem}
           loadMoreGifs={props.loadMoreGifs}
+          section={props.title}
         />
       ))}
     </Grid.Section>
