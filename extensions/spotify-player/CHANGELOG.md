@@ -1,5 +1,12 @@
 # Spotify Player Changelog
 
+## [Feature & Optimisation] - 2023-12-02
+
+- Added `Select Device` command to select the device to play music on.
+- Automatically select a device when no device is selected.
+- Better handling when no device is found or Spotify is not installed.
+- Informative error toast messages.
+
 ## [Feature] - 2023-09-29
 
 - Show a Liked Songs playlist in search and library commands.
