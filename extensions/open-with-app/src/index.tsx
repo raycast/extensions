@@ -51,7 +51,7 @@ function getExtensions(items: FileSystemItem[]) {
       extensions.add(parts.at(-1)!);
     }
   }
-  return Array.from(extensions);
+  return Array.from(extensions).sort();
 }
 
 const home = homedir();
