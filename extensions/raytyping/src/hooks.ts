@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { faker } from "@faker-js/faker";
 import { calculateWPM, generateMatchingWords, generateNewTest, generateSuccessMessage } from "./utils";
 
 export function useGame() {
@@ -25,6 +24,7 @@ export function useGame() {
 
     // Generate new test
     const [test, newIndex] = generateNewTest(lastTest);
+
     // Only keep 5 last test
     if (lastTest.length === 6) {
       lastTest.shift();
