@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raytyping",
+  "title": "Raytyping",
+  "description": "This extension inspired by monkeytype. For developer who loves typing keyboard and measure their speed of typing skill",
+  "icon": "command-icon.png",
+  "author": "louishuyng",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "raytype",
+      "title": "Raytyping start",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.3.1",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
