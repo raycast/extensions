@@ -3,16 +3,42 @@ import { calculateAccuracy } from "./utils";
 import { useGame } from "./hooks";
 
 export default function Main() {
-  const { isFinish, typedText, setTypedText, speed, test, content, failedCount, isCorrect, reloadGame, inProgress } =
-    useGame();
+  const {
+    isFinish,
+    typedText,
+    setTypedText,
+    speed,
+    test,
+    content,
+    failedCount,
+    isCorrect,
+    reloadGame,
+    inProgress,
+    testLength,
+    setTestLength,
+  } = useGame();
 
   return (
     <List
-      searchText={isFinish ? "Reload to continue" : typedText}
+      searchText={typedText}
       isLoading={inProgress}
       isShowingDetail={true}
       searchBarPlaceholder="Type here"
-      onSearchTextChange={(value) => (isFinish ? () => null : setTypedText(value))}
+      onSearchTextChange={(value) => setTypedText(value)}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Word amount"
+          defaultValue={testLength}
+          onChange={setTestLength}
+          filtering={false}
+          storeValue={true}
+        >
+          <List.Dropdown.Item title="10 words" value="10" />
+          <List.Dropdown.Item title="25 words" value="25" />
+          <List.Dropdown.Item title="50 words" value="50" />
+          <List.Dropdown.Item title="100 words" value="100" />
+        </List.Dropdown>
+      }
     >
       <List.Item
         icon={{

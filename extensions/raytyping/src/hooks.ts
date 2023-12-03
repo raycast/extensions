@@ -4,6 +4,7 @@ import { calculateWPM, generateMatchingWords, generateNewTest, generateSuccessMe
 export function useGame() {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [test, setTest] = useState("");
+  const [testLength, setTestLength] = useState<string>("10");
 
   // Speed has been counted by word per minutes (wpm)
   const [speed, setSpeed] = useState<number>(0);
@@ -25,9 +26,10 @@ export function useGame() {
     setIsCorrect(true);
 
     // Generate new test
-    const test = generateNewTest();
+    const test = generateNewTest(parseInt(testLength));
 
     setTest(test);
+    setTypedText("");
     setContent(test);
 
     setInProgress(false);
@@ -39,8 +41,13 @@ export function useGame() {
   }, []);
 
   useEffect(() => {
+    reloadGame();
+  }, [testLength]);
+
+  useEffect(() => {
     // If game is finished the we dont want to process anything
     if (isFinish || typedText.length === 0) {
+      setInProgress(false);
       return;
     }
 
@@ -64,6 +71,7 @@ export function useGame() {
     if (matchedCount === test.length) {
       setIsFinish(true);
       setInProgress(false);
+      setTypedText("");
       setContent(generateSuccessMessage());
       return;
     }
@@ -84,6 +92,8 @@ export function useGame() {
     typedText: typedText,
     setTypedText: setTypedText,
     inProgress: inProgress,
+    setTestLength: setTestLength,
+    testLength: testLength,
     test: test,
   };
 }
