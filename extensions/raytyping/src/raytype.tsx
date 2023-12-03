@@ -3,11 +3,13 @@ import { calculateAccuracy } from "./utils";
 import { useGame } from "./hooks";
 
 export default function Main() {
-  const { isFinish, typedText, setTypedText, speed, test, content, failedCount, isCorrect, reloadGame } = useGame();
+  const { isFinish, typedText, setTypedText, speed, test, content, failedCount, isCorrect, reloadGame, inProgress } =
+    useGame();
 
   return (
     <List
       searchText={isFinish ? "Reload to continue" : typedText}
+      isLoading={inProgress}
       isShowingDetail={true}
       searchBarPlaceholder="Type here"
       onSearchTextChange={(value) => (isFinish ? () => null : setTypedText(value))}
@@ -20,7 +22,7 @@ export default function Main() {
         title={`${speed} wpm`}
         actions={
           <ActionPanel>
-            <Action title="Reload new game" onAction={() => reloadGame()} shortcut={{ modifiers: ["cmd"], key: "n" }} />
+            <Action title="Reload" onAction={() => reloadGame()} />
           </ActionPanel>
         }
         detail={

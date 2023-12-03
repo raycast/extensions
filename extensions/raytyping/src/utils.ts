@@ -1,4 +1,4 @@
-import test from "./test";
+import englishWords from "./english.json";
 
 export function calculateWPM(startTime: Date, text: string) {
   // Calculate the time taken in seconds
@@ -74,15 +74,19 @@ export function generateSuccessMessage() {
   return `You are super, to reload press **Enter**`;
 }
 
-export function generateNewTest(lastTestIds: number[]): [string, number] {
-  // Get length of the test
-  const length = test.length;
+export function generateNewTest(length = 10): string {
+  let word = 0;
+  let result = "";
 
-  // Random a number from 0 to length - 1
-  let randomIndex = null;
-  while (!randomIndex || lastTestIds.includes(randomIndex)) {
-    randomIndex = Math.floor(Math.random() * length);
+  while (word < length) {
+    const randomIndex = Math.floor(Math.random() * englishWords.length);
+    const randomWord = englishWords[randomIndex];
+    result += randomWord;
+
+    result += " ";
+
+    word += 1;
   }
 
-  return [test[randomIndex], randomIndex];
+  return result;
 }
