@@ -114,7 +114,6 @@ function ApplicationListItem({
       key={app.path}
       title={app.name}
       icon={{ fileIcon: app.path }}
-      id={app.path}
       actions={
         <ActionPanel>
           <Action title={`Open with ${app.name}`} onAction={openAction} />
