@@ -77,14 +77,17 @@ function makeTitle(items: FileSystemItem[]) {
   if (items.length === 0) return "Open with…";
   // single item
   if (items.length === 1) return `Open ${trimPath(items[0].path)} with…`;
+
+  const parent = items[0].path.split("/").slice(0, -1).join("/");
+  const canUseParent = parent && items.every((item) => item.path.startsWith(parent));
+
   // all items have same extension
   const extensions = getExtensions(items);
   if (extensions.length === 1 && extensions[0] !== "file") {
-    return `Open ${items.length} ${extensions[0]} files with…`;
+    return `Open ${items.length} ${extensions[0]} files${canUseParent ? ` from ${trimPath(parent)}` : ""} with…`;
   }
   // all items have same parent directory
-  const parent = items[0].path.split("/").slice(0, -1).join("/");
-  if (parent && items.every((item) => item.path.startsWith(parent))) {
+  if (canUseParent) {
     return `Open ${items.length} items from ${trimPath(parent)} with…`;
   }
   // fallback
