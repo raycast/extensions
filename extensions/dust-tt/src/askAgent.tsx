@@ -2,46 +2,46 @@ import { Action, ActionPanel, Form, Icon, LaunchType, List, showToast, Toast, us
 import { useAgents } from "./agents";
 import AskDustCommand from "./ask";
 import { AgentType } from "./dust_api/agent";
-import { useState } from "react";
+import { useForm } from "@raycast/utils";
+import { useEffect } from "react";
 
-export function AskAgentQuestionForm({ agent }: { agent: AgentType }) {
+interface AskAgentQuestionFormValues {
+  question: string;
+}
+
+export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentType; initialQuestion?: string }) {
   const { push } = useNavigation();
-  const [questionError, setQuestionError] = useState<string | undefined>(undefined);
-
+  const { handleSubmit, itemProps, setValue } = useForm<AskAgentQuestionFormValues>({
+    onSubmit(values) {
+      push(
+        <AskDustCommand launchType={LaunchType.UserInitiated} arguments={{ agent: agent, search: values.question }} />,
+      );
+    },
+    validation: {
+      question: (value) => {
+        if (!value) {
+          return "Ask a question";
+        }
+      },
+    },
+  });
+  useEffect(() => {
+    if (!initialQuestion) {
+      return;
+    }
+    setValue("question", initialQuestion);
+  }, [initialQuestion]);
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Ask"
-            shortcut={{ key: "return", modifiers: [] }}
-            onSubmit={(values) => {
-              push(
-                <AskDustCommand
-                  launchType={LaunchType.UserInitiated}
-                  arguments={{ agent: agent, search: values.question }}
-                />,
-              );
-            }}
-          />
+          <Action.SubmitForm title="Ask" shortcut={{ key: "return", modifiers: [] }} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description title="Agent" text={agent.name} />
       <Form.Description text={agent.description} />
-      <Form.TextArea
-        id="question"
-        title="Question"
-        enableMarkdown
-        error={questionError}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setQuestionError("You must ask a question");
-          } else {
-            setQuestionError(undefined);
-          }
-        }}
-      />
+      <Form.TextArea title="Question" enableMarkdown {...itemProps.question} />
     </Form>
   );
 }

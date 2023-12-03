@@ -52,7 +52,7 @@
           "name": "search",
           "placeholder": "Ask a question",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -71,6 +71,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1",
     "date-fns": "^3.0.0-alpha.2",
     "eventsource-parser": "^1.1.1",
     "node-fetch": "^3.3.2"
