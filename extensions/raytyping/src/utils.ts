@@ -83,7 +83,9 @@ export function generateNewTest(length = 10): string {
     const randomWord = englishWords[randomIndex];
     result += randomWord;
 
-    result += " ";
+    if (word !== length - 1) {
+      result += " ";
+    }
 
     word += 1;
   }

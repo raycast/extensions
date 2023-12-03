@@ -20,7 +20,9 @@ export function useGame() {
     setTypedText("");
     setSpeed(0);
     setStartTime(null);
+
     setFailedCount(0);
+    setIsCorrect(true);
 
     // Generate new test
     const test = generateNewTest();
