@@ -111,7 +111,6 @@ function ApplicationListItem({
   }
   return (
     <List.Item
-      key={app.path}
       title={app.name}
       icon={{ fileIcon: app.path }}
       actions={
