@@ -7,13 +7,11 @@ import { getMySavedShows } from "../api/getMySavedShows";
 import { getMySavedEpisodes } from "../api/getMySavedEpisodes";
 
 type UseMyLibraryProps = {
-  options?: {
-    execute?: boolean;
-    keepPreviousData?: boolean;
-  };
+  execute?: boolean;
+  keepPreviousData?: boolean;
 };
 
-export function useYourLibrary({ options }: UseMyLibraryProps) {
+export function useYourLibrary(options: UseMyLibraryProps = {}) {
   const {
     data = [],
     error,
