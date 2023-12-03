@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
-import { calculateWPM, generateMatchingWords, generateSuccessMessage } from "./utils";
+import { calculateWPM, generateMatchingWords, generateNewTest, generateSuccessMessage } from "./utils";
 
 export function useGame() {
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [lastTest, setLastTest] = useState<number[]>([]);
   const [test, setTest] = useState("");
 
   // Speed has been counted by word per minutes (wpm)
@@ -22,10 +23,17 @@ export function useGame() {
     setStartTime(null);
     setFailedCount(0);
 
-    const test = faker.word.words(3);
+    // Generate new test
+    const [test, newIndex] = generateNewTest(lastTest);
+    // Only keep 5 last test
+    if (lastTest.length === 6) {
+      lastTest.shift();
+    }
+    lastTest.push(newIndex);
+    setLastTest(lastTest);
+
     setTest(test);
     setContent(test);
-
     setIsFinish(false);
   }
 

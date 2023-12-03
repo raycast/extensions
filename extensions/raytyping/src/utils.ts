@@ -1,3 +1,5 @@
+import test from "./test";
+
 export function calculateWPM(startTime: Date, text: string) {
   // Calculate the time taken in seconds
   const endTime = new Date();
@@ -70,4 +72,17 @@ export function generateMatchingWords(
 
 export function generateSuccessMessage() {
   return `You are super, to reload press **Enter**`;
+}
+
+export function generateNewTest(lastTestIds: number[]): [string, number] {
+  // Get length of the test
+  const length = test.length;
+
+  // Random a number from 0 to length - 1
+  let randomIndex = null;
+  while (!randomIndex || lastTestIds.includes(randomIndex)) {
+    randomIndex = Math.floor(Math.random() * length);
+  }
+
+  return [test[randomIndex], randomIndex];
 }
