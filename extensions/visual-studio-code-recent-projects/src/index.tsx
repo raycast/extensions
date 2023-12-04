@@ -146,11 +146,11 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
       if (closeOtherWindows !== revert) {
         runAppleScriptSync(`
         tell application "System Events"
-        tell process "${build}"
-        repeat while window 1 exists
-          click button 1 of window 1
-        end repeat
-        end tell
+          tell process "${build}"
+            repeat while window 1 exists
+              click button 1 of window 1
+            end repeat
+          end tell
         end tell
         `);
       }
