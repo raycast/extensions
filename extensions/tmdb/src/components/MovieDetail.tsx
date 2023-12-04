@@ -97,7 +97,7 @@ export default function MovieDetail({ movie }: { movie: MovieResponse }) {
           <Action.OpenInBrowser title="Open in TMDB" url={`https://www.themoviedb.org/movie/${movie.id ?? 0}`} />
           {movie.id ? (
             <Action.CopyToClipboard
-              title={`Copy TMDB ID: ${movie.id}`}
+              title={`Copy TMDB ID`}
               content={movie.id.toString()}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
