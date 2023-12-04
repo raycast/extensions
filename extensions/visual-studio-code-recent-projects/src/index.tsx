@@ -210,27 +210,22 @@ function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; p
   const remotePath = decodeURI(basename(props.uri));
   const scheme = getBuildScheme();
 
-  const url = new URL(props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`));
-
-  let uri = url.toString();
-  let uriCloseOther = uri;
-
-  if (url.searchParams.has("windowId")) {
-    uri = url.toString();
-    url.searchParams.delete("windowId");
-    uriCloseOther = url.toString();
-  } else {
-    uriCloseOther = url.toString();
-    url.searchParams.append("windowId", "_blank");
-    uri = url.toString();
-  }
+  const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "| Close Other" : ""}`;
   };
 
-  const getUrl = (revert = false) => {
-    return closeOtherWindows !== revert ? uriCloseOther : uri;
+  const getUrl = (uri: string, revert = false) => {
+    const url = new URL(uri);
+    if (closeOtherWindows !== revert) {
+      // close other windows
+      url.searchParams.delete("windowId");
+    } else {
+      // don't close other windows
+      url.searchParams.set("windowId", "_blank");
+    }
+    return url.toString();
   };
 
   return (
@@ -243,11 +238,11 @@ function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; p
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title={getTitle()} icon="action-icon.png" url={getUrl()} />
+            <Action.OpenInBrowser title={getTitle()} icon="action-icon.png" url={getUrl(uri)} />
             <Action.OpenInBrowser
               title={getTitle(true)}
               icon="action-icon.png"
-              url={getUrl(true)}
+              url={getUrl(uri, true)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />
           </ActionPanel.Section>
