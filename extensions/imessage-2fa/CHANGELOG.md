@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - 2023-11-14
+
+- Add option to ignore messages that have been read
+
 ## [Update] - 2023-09-23
 
 - Resolves an issue where text codes would not be detected if their pattern resembled a phone number shortcode
