@@ -1,5 +1,9 @@
 # Dashlane Vault Changelog
 
+## [Fixes] - 2023-12-04
+
+- Fix crash if password has not item name
+
 ## [Fixes] - 2023-11-22
 
 - Fix "Dashlane CLI not installed" error
