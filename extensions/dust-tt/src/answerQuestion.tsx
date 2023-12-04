@@ -74,15 +74,17 @@ export function AskDustQuestion({ question, agent = DUST_AGENT }: { question: st
       isLoading={!dustAnswer}
       actions={
         <ActionPanel>
-          {!conversationId ? (
-            <Action.OpenInBrowser title="Open Dust" url={`${dustAssistantUrl}/new`} icon={Icon.Globe} />
-          ) : dustApi && conversationId ? (
-            <Action.OpenInBrowser
-              title="Continue On Dust"
-              url={`${dustAssistantUrl}/${conversationId}`}
-              icon={Icon.Globe}
-            />
-          ) : null}
+          <Action.OpenInBrowser
+            title="Continue On Dust"
+            url={`${dustAssistantUrl}/${conversationId ?? "new"}`}
+            icon={Icon.Globe}
+          />
+          {dustAnswer && (
+            <>
+              <Action.Paste content={dustAnswer} shortcut={{ modifiers: ["cmd"], key: ";" }} />
+              <Action.CopyToClipboard content={dustAnswer} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            </>
+          )}
         </ActionPanel>
       }
     />

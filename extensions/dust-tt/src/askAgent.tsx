@@ -1,12 +1,44 @@
-import { Action, ActionPanel, Form, Icon, LaunchType, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getSelectedText,
+  Icon,
+  LaunchType,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useAgents } from "./agents";
 import AskDustCommand from "./ask";
 import { AgentType } from "./dust_api/agent";
 import { useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface AskAgentQuestionFormValues {
   question: string;
+}
+
+export function useGetSelectedText() {
+  const [selectedText, setSelectedText] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    async function fetchHighlightedText() {
+      let text: string | undefined;
+      try {
+        text = await getSelectedText();
+      } catch (error) {
+        console.debug("Could not get selected text", error);
+        setSelectedText("");
+      }
+      if (text) {
+        await showToast(Toast.Style.Success, "Used highlighted text as question.");
+        setSelectedText(text);
+      }
+    }
+    fetchHighlightedText();
+  }, []);
+  return selectedText;
 }
 
 export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentType; initialQuestion?: string }) {
@@ -25,6 +57,7 @@ export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentT
       },
     },
   });
+
   useEffect(() => {
     if (!initialQuestion) {
       return;
@@ -48,7 +81,7 @@ export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentT
 
 export default function AskDustAgentCommand() {
   const { agents, isLoading, error } = useAgents();
-
+  const selectedText = useGetSelectedText();
   if (error) {
     showToast({
       style: Toast.Style.Failure,
@@ -79,6 +112,19 @@ export default function AskDustAgentCommand() {
                   shortcut={{ key: "return", modifiers: [] }}
                   target={<AskAgentQuestionForm agent={agent} />}
                 />
+                {selectedText && (
+                  <Action.Push
+                    title="Ask with the Selected Text"
+                    icon={Icon.Message}
+                    shortcut={{ key: "return", modifiers: ["cmd"] }}
+                    target={
+                      <AskDustCommand
+                        launchType={LaunchType.UserInitiated}
+                        arguments={{ agent: agent, search: selectedText }}
+                      />
+                    }
+                  />
+                )}
               </ActionPanel>
             }
           />
