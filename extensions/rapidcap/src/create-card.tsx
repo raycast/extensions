@@ -5,7 +5,7 @@ import { Card } from "./types";
 import validateTag from "./utils";
 import { getCards, saveCards } from "./storage";
 
-function CreateCardAction() {
+function CreateCardAction({ setCards }: { setCards: (cards: Card[]) => void }) {
   const { pop } = useNavigation();
   const [error, setError] = useState<Error | unknown>();
 
@@ -27,9 +27,11 @@ function CreateCardAction() {
 
           if (cards.length == 0) {
             await saveCards([values]);
+            setCards(await getCards());
           } else {
             cards.push(values);
             await saveCards(cards);
+            setCards(await getCards());
           }
 
           showToast({
