@@ -170,8 +170,13 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
         <ActionPanel>
           <ActionPanel.Section>
             <Action title={getTitle()} icon="action-icon.png" onAction={getAction()} />
-            <Action title={getTitle(true)} icon="action-icon.png" onAction={getAction(true)} />
             <Action.ShowInFinder path={path} />
+            <Action
+              title={getTitle(true)}
+              icon="action-icon.png"
+              onAction={getAction(true)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             {isFolderEntry(props.entry) && terminalApp && (
               <Action
@@ -239,7 +244,12 @@ function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; p
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title={getTitle()} icon="action-icon.png" url={getUrl()} />
-            <Action.OpenInBrowser title={getTitle(true)} icon="action-icon.png" url={getUrl(true)} />
+            <Action.OpenInBrowser
+              title={getTitle(true)}
+              icon="action-icon.png"
+              url={getUrl(true)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            />
           </ActionPanel.Section>
           <PinActionSection {...props} />
         </ActionPanel>
