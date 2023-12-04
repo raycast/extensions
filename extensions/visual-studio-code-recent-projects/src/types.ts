@@ -35,17 +35,6 @@ export enum VSCodeBuild {
   VSCodium = "VSCodium",
 }
 
-export type ExtensionPreferences = {
-  build: VSCodeBuild;
-  keepSectionOrder: boolean;
-  layout: "grid" | "list";
-  closeOtherWindows: boolean;
-  terminalApp: {
-    name: "terminal" | "iterm" | "wezterm" | "hyper" | "warp";
-    path: string;
-  };
-};
-
 export type RecentEntries = {
   entries: string;
 };
