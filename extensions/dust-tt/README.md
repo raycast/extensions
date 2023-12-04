@@ -1,6 +1,6 @@
 # Ask Dust.tt
 
-Query the [dust.tt](https://dust.tt/) service
+Query the [dust.tt](https://dust.tt/) service extention for [Raycast](https://www.raycast.com/)
 
 ## Setup
 
@@ -18,7 +18,9 @@ The ID can be found in any of the workspace's pages
 
 ### Ask Dust / GPT-4
 
-Directly ask something to the Dust or GPT-4 agent
+Directly ask something to the Dust or GPT-4 agent.
+
+If you ask a question with the parameter, you will get a form to add one, auto-filled with the currently selected text. 
 
 ### Ask agent
 
