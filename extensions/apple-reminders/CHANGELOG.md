@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Improve NLP in Quick Add Reminder] - 2023-12-04
+
+- Improve the NLP parsing in `Quick Add Reminder`.
+
 ## [Date display bug] - 2023-12-01
 
 - Fix a bug that displays full-day dates with time in the tooltips of reminder items.
