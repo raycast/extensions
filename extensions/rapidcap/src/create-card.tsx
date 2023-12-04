@@ -25,14 +25,11 @@ function CreateCardAction({ setCards }: { setCards: (cards: Card[]) => void }) {
         (async () => {
           const cards: Card[] = await getCards();
 
-          if (cards.length == 0) {
-            await saveCards([values]);
-            setCards(await getCards());
-          } else {
+          if (cards.length > 0) {
             cards.push(values);
-            await saveCards(cards);
-            setCards(await getCards());
           }
+          await saveCards(cards);
+          setCards(await getCards());
 
           showToast({
             style: Toast.Style.Success,
