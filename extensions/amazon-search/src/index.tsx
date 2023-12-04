@@ -1,19 +1,15 @@
-// Import necessary modules and components from Raycast API and other libraries
 import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { useState } from "react";
 
-// Define the interface for user preferences
 interface Preferences {
   top_level_domain: string;
 }
 
-// Define the interface for the autocomplete response
 interface AutocompleteResponse {
   suggestions: { value: string }[];
 }
 
-// Define an asynchronous function to fetch autocomplete suggestions from the Amazon API
 async function autoComplete(searchQuery: string, tld: string, marketplaceID: string): Promise<string[]> {
   try {
     const encodedQuery = encodeURIComponent(searchQuery);
@@ -33,7 +29,6 @@ async function autoComplete(searchQuery: string, tld: string, marketplaceID: str
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  // Mapping of top-level domains to marketplace IDs
   const marketplaceIDs: { [key: string]: string } = {
     "com.au": "A39IBJ37TRP1C6",
     "com.be": "AMEN7PMS3EDWL",
@@ -69,7 +64,6 @@ export default function Command() {
       return;
     }
 
-    // Get the top-level domain and marketplace ID based on user preferences
     const tld = preferences.top_level_domain;
     const mid = marketplaceIDs[tld];
 
@@ -89,7 +83,6 @@ export default function Command() {
           title={item}
           actions={
             <ActionPanel>
-              {/* Open the item in the browser */}
               <Action.OpenInBrowser
                 url={`https://www.amazon.${preferences.top_level_domain}/s?k=${encodeURIComponent(item)}`}
               />
