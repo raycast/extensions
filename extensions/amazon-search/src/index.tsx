@@ -24,7 +24,6 @@ async function autoComplete(searchQuery: string, tld: string, marketplaceID: str
 
     return data.suggestions.map((suggestion) => suggestion.value).filter((value: string) => value !== searchQuery);
   } catch (error) {
-
     console.error("Error fetching autocomplete data", error);
     showToast(Toast.Style.Failure, "Failed to fetch autocomplete data");
     return [];
