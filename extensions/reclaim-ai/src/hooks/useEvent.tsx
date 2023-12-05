@@ -1,22 +1,52 @@
 import { Icon, getPreferenceValues, open } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { format, isWithinInterval } from "date-fns";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { Event } from "../types/event";
 import { NativePreferences } from "../types/preferences";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import { formatDisplayEventHours, formatDisplayHours } from "../utils/dates";
+import { filterMultipleOutDuplicateEvents } from "../utils/events";
 import { parseEmojiField } from "../utils/string";
 import reclaimApi from "./useApi";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useTask } from "./useTask";
 import { useUser } from "./useUser";
-import { filterMultipleOutDuplicateEvents } from "../utils/events";
 
 const useEvent = () => {
   const { fetcher } = reclaimApi();
   const { currentUser } = useUser();
   const { handleStartTask, handleStopTask } = useTask();
-  const { apiUrl } = getPreferenceValues<NativePreferences>();
+  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }),
+    [apiToken]
+  );
+
+  const useFetchEvents = ({ start, end }: { start: Date; end: Date }) => {
+    const { data, ...rest } = useFetch<ApiResponseEvents>(
+      `${apiUrl}/events?${new URLSearchParams({
+        sourceDetails: "true",
+        start: format(start, "yyyy-MM-dd"),
+        end: format(end, "yyyy-MM-dd"),
+        allConnected: "true",
+      }).toString()}`,
+      {
+        headers,
+        keepPreviousData: true,
+      }
+    );
+
+    return {
+      data: useMemo(() => filterMultipleOutDuplicateEvents(data), [data]),
+      ...rest,
+    };
+  };
 
   const fetchEvents = async ({ start, end }: { start: Date; end: Date }) => {
     try {
@@ -193,6 +223,7 @@ const useEvent = () => {
   };
 
   return {
+    useFetchEvents,
     fetchEvents,
     getEventActions,
     showFormattedEventTitle,

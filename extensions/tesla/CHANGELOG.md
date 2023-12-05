@@ -1,5 +1,9 @@
 # Tesla Changelog
 
+## [Celsius and Kilometers Support] - 2023-11-19
+
+- Added Celsius and Kilometers option to extension preferences
+
 ## [New Additions] - 2023-09-09
 
 - Refactored to use the Tessie API instead of Teslascope

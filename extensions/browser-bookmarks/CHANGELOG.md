@@ -1,5 +1,14 @@
 # Browser Bookmarks Changelog
 
+## [Support for Firefox Dev edition] - {PR_MERGE_DATE}
+
+- Add support for `Firefox Dev` browser, which uses the same profiles as `Firefox`.
+
+## [Bug fixes] - 2023-11-21
+
+- Improved search results
+- Fixed `toLocaleCompare` issue
+
 ## [Bug Fixes] - 2023-11-03
 
 - Fixed an issue where Chrome bookmarks with no title were not displayed.

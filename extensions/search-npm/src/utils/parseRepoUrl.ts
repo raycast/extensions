@@ -2,8 +2,8 @@ import parsedGithubRepoUrl, { Result } from 'parse-github-url'
 import parsedGitlabRepoUrl, { ParseGitlabUrl } from 'gitlab-url-parse'
 
 interface ParseRepoUrlResponse {
-  owner: string | null
-  name: string | null
+  owner: string | null | undefined
+  name: string | null | undefined
   type?: 'github' | 'gitlab'
 }
 

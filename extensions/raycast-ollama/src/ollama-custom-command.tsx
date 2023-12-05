@@ -1,6 +1,6 @@
 import { RaycastArgumentsOllamaCommandCustom } from "./api/types";
-import { ResultView } from "./api/main";
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(props: RaycastArgumentsOllamaCommandCustom): JSX.Element {
-  return ResultView("", undefined, props.arguments.model);
+  return AnswerView("custom", props.arguments.model);
 }

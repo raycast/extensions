@@ -31,6 +31,30 @@ Follow the authentication steps from the official [Dashlane CLI documentation](h
 
 ### You're all set! 🎉
 
+## Troubleshooting
+
+To troubleshoot issues with syncing your vault or if passwords and notes are not appearing, please follow these steps:
+
+1. Check if the Dashlane CLI is installed by running the following command in your terminal:
+
+```sh
+dcli --version
+```
+
+2. Verify if you are logged in by running the following command in your terminal:
+
+```sh
+dcli accounts whoami
+```
+
+3. Retrieve the path to the Dashlane CLI by running the following command in your terminal:
+
+```sh
+which dcli
+```
+
+4. Set the path to the Dashlane CLI in the extension preferences of Raycast. Open Raycast preferences, navigate to the Dashlane Vault extension, and specify the path to the Dashlane CLI.
+
 ## Security
 
 The extension relies on the Dashlane CLI, so every security consideration that applies to the CLI applies to the extension as well. See <https://dashlane.github.io/dashlane-cli> for more information.

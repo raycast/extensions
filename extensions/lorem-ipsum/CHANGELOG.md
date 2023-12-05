@@ -1,5 +1,9 @@
 # Lorem Ipsum Changelog
 
+## [New PRO Feature] - 2023-11-21
+
+- Added Generate with AI command.
+
 ## [New Feature] - 2023-01-02
 
 - Add generate words command
