@@ -6,5 +6,5 @@ export default async function main() {
 
   close();
 
-  await showHUD("Frontmost App: " + frontMostApp.name);
+  await showHUD("Closing all apps except: " + frontMostApp.name);
 }
