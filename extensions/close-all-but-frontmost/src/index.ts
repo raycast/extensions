@@ -4,7 +4,7 @@ import { close } from "swift:../swift/MyExecutable";
 export default async function main() {
   const frontMostApp = await getFrontmostApplication();
 
-  close();
+  await close();
 
   await showHUD("Closing all apps except: " + frontMostApp.name);
 }
