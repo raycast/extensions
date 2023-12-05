@@ -8,6 +8,8 @@
 - Updated all (dev) dependencies to latest version
 - Added better code formatting and linting, cleaned up code
 - Updated download controller, this is now cancellable
+- Add Mirror List to the extension
+  - This is a list of all mirrors that are currently available in the extension
 
 ## [Feature Updates] - 2022-07-21
 

@@ -19,6 +19,13 @@
       "subtitle": "Library Genesis",
       "description": "Search books on Library Genesis.",
       "mode": "view"
+    },
+    {
+      "name": "test-mirrors",
+      "title": "Test Mirrors",
+      "subtitle": "Library Genesis",
+      "description": "Test the availability of mirrors.",
+      "mode": "view"
     }
   ],
   "preferences": [

@@ -8,16 +8,25 @@ export interface Mirror {
   parse?: (content: string, libgenUrl?: string) => BookEntry[];
 }
 
-const mirrors: Array<Mirror> = [
+export const mirrors: Array<Mirror> = [
   {
     baseUrl: "https://libgen.is",
   },
   {
     baseUrl: "https://libgen.rs",
   },
+  {
+    baseUrl: "https://libgen.st",
+  },
 ];
 
-async function timeConnection(url: string, abortSignal?: AbortSignal): Promise<{ url: string; time: number } | false> {
+interface MirrorResponse {
+  url: string;
+  time: number;
+  errored: boolean;
+}
+
+async function timeConnection(url: string, abortSignal?: AbortSignal): Promise<MirrorResponse> {
   const start = Date.now();
 
   try {
@@ -39,6 +48,7 @@ async function timeConnection(url: string, abortSignal?: AbortSignal): Promise<{
     const results = {
       url: url,
       time: Date.now() - start,
+      errored: false,
     };
     return results;
   } catch (err) {
@@ -46,28 +56,30 @@ async function timeConnection(url: string, abortSignal?: AbortSignal): Promise<{
     // we only care that at least one succeeds; so fail silently
     console.error(err);
   }
-  return false;
+  return {
+    url: url,
+    time: Number.MAX_SAFE_INTEGER,
+    errored: true,
+  };
 }
 
-// @param {Array} urls Can be an array of request objects or URL strings
-// @param {Function] callback
-async function faster(urls: string[], abortSignal?: AbortSignal) {
+async function faster(urls: string[], abortSignal?: AbortSignal): Promise<MirrorResponse | Error> {
   const speedTests = urls.map(async (value) => {
     return await timeConnection(value, abortSignal);
   });
   const results = await Promise.all(speedTests);
 
   const noResponses = results.every((value) => {
-    return !value;
+    return value.errored;
   });
 
   if (noResponses) return new Error("Bad response from all mirrors");
 
-  const sorted = (results as Array<{ url: string; time: number }>).sort((a, b) => {
+  const sorted = (results as Array<MirrorResponse>).sort((a, b) => {
     return a.time - b.time;
   });
 
-  return sorted[0].url;
+  return sorted[0];
 }
 
 export async function mirror(abortSignal?: AbortSignal): Promise<string | null> {
@@ -81,7 +93,7 @@ export async function mirror(abortSignal?: AbortSignal): Promise<string | null> 
       throw fastest;
     }
     return mirrors.filter((value) => {
-      return fastest.indexOf(value.baseUrl) === 0;
+      return fastest.url.indexOf(value.baseUrl) === 0;
     })[0].baseUrl;
   } catch (err) {
     console.error(err);
