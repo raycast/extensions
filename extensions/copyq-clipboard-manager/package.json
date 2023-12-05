@@ -5,7 +5,12 @@
   "description": "Lists CopyQ clipboard entries and allows user to paste them.",
   "icon": "command-icon.png",
   "author": "andrewcincotta",
-  "categories": ["Productivity"],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
