@@ -6,6 +6,7 @@ import { Grid, Icon } from "@raycast/api";
 import { CharacterActionPanel } from "@/components/CharacterActionPanel";
 import { useListContext } from "@/context/ListContext";
 import type { Character } from "@/lib/dataset-manager";
+import { gridColumnNumber } from "@/lib/preferences";
 import { numberToHex, upperCaseFirst } from "@/utils/string";
 
 import DataSetSelector from "./DataSetSelector";
@@ -60,6 +61,7 @@ const GridItem = memo(({ item }: { item: Character }) => {
 });
 
 export const ItemGrid = memo(() => {
+  const columnNumber = useMemo(() => gridColumnNumber(), []);
   const { list, onSearchTextChange, loading } = useListContext();
   return (
     <Grid
@@ -67,7 +69,7 @@ export const ItemGrid = memo(() => {
       onSearchTextChange={onSearchTextChange}
       filtering={false}
       searchBarAccessory={<DataSetSelector />}
-      columns={4}
+      columns={columnNumber}
     >
       {list.map((section) => (
         <Grid.Section

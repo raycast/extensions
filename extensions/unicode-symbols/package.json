@@ -45,6 +45,28 @@
       ],
       "default": "grid",
       "required": false
+    },
+    {
+      "name": "gridItemSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Item Size",
+      "description": "Control the size of individual grid cells in the grid view.",
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
     }
   ],
   "dependencies": {
