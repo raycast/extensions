@@ -116,8 +116,6 @@ function SearchListItem({ hit }: { hit: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={hit.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy URL"
               content={`${hit.url}`}
