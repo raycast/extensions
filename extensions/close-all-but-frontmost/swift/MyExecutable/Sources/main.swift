@@ -20,7 +20,6 @@ func close() {
         }
         .forEach { $0.terminate() }
 
-    print("Quit all applications except Xcode and \(String(describing: frontmostApplication.localizedName))")
 }
 
 
