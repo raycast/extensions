@@ -163,7 +163,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      icon={{ source: { light: "menu-icon@light.png", dark: "menu-icon@dark.png" } }}
+      icon={{ source: { light: "menu-icon.png", dark: "menu-icon@dark.png" } }}
       {...(displayMenuBarCount ? { title: String(remindersCount) } : {})}
     >
       {sections.map((section) => (
@@ -178,7 +178,7 @@ export default function Command() {
                 <MenuBarExtra.Item
                   title="Open Reminder"
                   onAction={() => open(reminder.openUrl, "com.apple.reminders")}
-                  icon={Icon.AppWindow}
+                  icon={Icon.AppWindowList}
                 />
 
                 <MenuBarExtra.Item
