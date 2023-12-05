@@ -3,7 +3,7 @@
 /extensions/0x0                                      @pseudobun @pernielsentikaer @jatindotdev
 /extensions/1-click-confetti                         @peduarte
 /extensions/1loc                                     @kud @kgrhartlage @sxn
-/extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @Davidwalser @henrik-dmg @justspacedog
+/extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @Davidwalser @henrik-dmg @justspacedog @kjeldahl
 /extensions/2fa-directory                            @andreaselia @pernielsentikaer
 /extensions/8ball                                    @Gitsack
 /extensions/Bilibili                                 @Fatpandac
@@ -203,7 +203,7 @@
 /extensions/copy-gcp-icons                           @pomdtr
 /extensions/copy-path                                @koinzhang
 /extensions/copy-skeet-link                          @justin
-/extensions/copyq-clipboard-manager                  @andrewcincotta
+/extensions/copyq-clipboard-manager                  @andrewcincotta @pernielsentikaer
 /extensions/cosmic-bookmarks                         @kemiljk
 /extensions/counter                                  @EvanZhouDev @pernielsentikaer
 /extensions/country-lookup                           @pernielsentikaer
@@ -390,6 +390,7 @@
 /extensions/getsound                                 @asgu @asgu @asgu
 /extensions/gg-deals                                 @whitespacecode
 /extensions/gh-pic                                   @xiangsanliu
+/extensions/ghost-docs                               @royalfig
 /extensions/gif-search                               @josephschmitt
 /extensions/git-branch-name-generator                @michaelbonner
 /extensions/git-co-authors                           @nickradford @pernielsentikaer
@@ -582,6 +583,7 @@
 /extensions/lastpass                                 @alex-popov-tech
 /extensions/latest-news                              @FilipeCerejo
 /extensions/latex-math-symbols                       @JeffersonDing
+/extensions/leafcast                                 @syropian
 /extensions/leetcode                                 @justin0u0
 /extensions/lega-serie-a                             @anhthang
 /extensions/lemmy                                    @httpjamesm
@@ -719,7 +721,7 @@
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
 /extensions/noteplan-3                               @shakedlokits @lukerandall @pr1mal
-/extensions/notion                                   @HenriChabrand @mathieudutour @metakirby5 @thomaslombart @erics118 @bkeys818 @AlexIsMaking
+/extensions/notion                                   @HenriChabrand @mathieudutour @metakirby5 @thomaslombart @erics118 @bkeys818 @AlexIsMaking @Yakitrak
 /extensions/notion_researcher                        @razgaon
 /extensions/nouns                                    @peduarte
 /extensions/novu                                     @djabarovgeorge
@@ -1109,7 +1111,7 @@
 /extensions/tinypng                                  @kawamataryo
 /extensions/tip-calculator                           @Visual-Studio-Coder @pernielsentikaer
 /extensions/tldr                                     @pomdtr
-/extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart
+/extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart @j3lte
 /extensions/tmux-sessioner                           @louishuyng
 /extensions/todo-list                                @maggie-j-liu @joshkorol @madza91 @bkeys818 @pernielsentikaer @telmen
 /extensions/todoist                                  @thomaslombart @AnishDe12020 @kud @casassg
@@ -1167,6 +1169,7 @@
 /extensions/urban-dictionary                         @pernielsentikaer @zhenpewu
 /extensions/url-shortener                            @Visual-Studio-Coder
 /extensions/url-tools                                @joshauh46
+/extensions/url-unshortener                          @sebdanielsson
 /extensions/user-agent                               @third774
 /extensions/utm-campaign-builder                     @vimtor
 /extensions/utm-virtual-machines                     @alaidriel
