@@ -1,5 +1,11 @@
 # Apple Reminders Changelog
 
+## [Use monochrome icons in menu bar] - 2023-12-05
+
+- Use monochrome icons in menu bar to keep extension more inline with other menu bar extensions (i.e. Color Picker, Open Camera Menu Bar)
+- Added monochrome menu bar icons for light and dark system appearance
+- Use AppWindow icon instead of Reminders app icon in reminder menu
+
 ## [Improve NLP in Quick Add Reminder] - 2023-12-04
 
 - Improve the NLP parsing in `Quick Add Reminder`.
