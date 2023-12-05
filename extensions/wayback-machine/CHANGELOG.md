@@ -1,5 +1,9 @@
 # Wayback Machine Changelog
 
+## [Update] - 2023-10-08
+
+Add multi URL support with a new view command
+
 ## [Update] - 2023-04-02
 
 Added a command to save and archive the site in its current state

@@ -24,7 +24,7 @@
   "preferences": [
     {
       "name": "downloadDirectory",
-      "title": "Download directory",
+      "title": "Download Directory",
       "description": "Where Cobalt should save downloaded files.",
       "default": "~/Downloads",
       "type": "directory",
@@ -40,9 +40,35 @@
       "required": false
     },
     {
+      "name": "filenamePattern",
+      "title": "File Name Style",
+      "description": "How downloaded files should be named.\n\nClassic: Default file name pattern.\nBasic: Title and basic info in brackets.\nPretty: Title and info in brackets.\nNerdy: Title and all info in brackets.\n\nSome services don't support rich file names and will always use the classic style.",
+      "type": "dropdown",
+      "required": false,
+      "default": "classic",
+      "data": [
+        {
+          "title": "Classic",
+          "value": "classic"
+        },
+        {
+          "title": "Basic",
+          "value": "basic"
+        },
+        {
+          "title": "Pretty",
+          "value": "pretty"
+        },
+        {
+          "title": "Nerdy",
+          "value": "nerdy"
+        }
+      ]
+    },
+    {
       "name": "vimeoDownloadType",
-      "title": "Vimeo download type",
-      "description": "Progressive: direct file link to Vimeo's CDN. Max quality is 1080p.\nDash: video and audio are merged into one file. Max quality is 4K.\n\nPick progressive if you want the best editor/player/social media compatibility.\nIf progressive download isn't available, dash is used instead.",
+      "title": "Vimeo Download Type",
+      "description": "Progressive: Direct file link to Vimeo's CDN. Max quality is 1080p.\nDash: Video and audio are merged into one file. Max quality is 4K.\n\nPick progressive if you want the best editor/player/social media compatibility.\nIf progressive download isn't available, dash is used instead.",
       "type": "dropdown",
       "required": false,
       "default": "progressive",
@@ -59,7 +85,7 @@
     },
     {
       "name": "notifyOnDownload",
-      "label": "Notify on successful download",
+      "label": "Notify on Successful Download",
       "description": "Sends you a notification when your download is complete.",
       "type": "checkbox",
       "required": false,
@@ -67,37 +93,37 @@
     },
     {
       "name": "removeTikTokWatermark",
-      "label": "Remove TikTok and Douyin watermarks",
+      "label": "Remove TikTok and Douyin Watermarks",
       "description": "Whether downloaded TikTok & Douyin videos should have watermarks removed.",
       "type": "checkbox",
       "required": false
     },
     {
       "name": "downloadOriginalTikTokSound",
-      "label": "Use original TikTok audio",
+      "label": "Use Original TikTok Audio",
       "description": "Downloads the original sound used in the TikTok video without any additional changes by the post's author.",
       "type": "checkbox",
       "required": false
     },
     {
       "name": "muteVideoAudio",
-      "label": "Mute video audio",
+      "label": "Mute Video Audio",
       "description": "Disable the audio track in video downloads.",
       "type": "checkbox",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0",
-    "@raycast/utils": "^1.9.0"
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.9",
+    "@types/react": "18.2.33",
+    "eslint": "^8.52.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

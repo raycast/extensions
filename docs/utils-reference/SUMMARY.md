@@ -3,6 +3,7 @@
 - [Getting Started](utils-reference/getting-started.md)
 - [Functions](utils-reference/functions/README.md)
   - [runAppleScript](utils-reference/functions/runAppleScript.md)
+  - [showFailureToast](utils-reference/functions/showFailureToast.md)
 - [Icons](utils-reference/icons/README.md)
   - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
   - [getFavicon](utils-reference/icons/getFavicon.md)

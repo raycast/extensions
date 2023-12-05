@@ -12,25 +12,29 @@ Search links, save links, show Quick Save, toggle Anydock or do other things rig
 
 3. Save Current Tab
 
-4. Save Current Tab with Collections
+4. Save Current Tab With Tags
 
-5. Save Clipboard
+5. Save Current Tab With Folder
 
-6. Save Clipboard with Collections
+6. Save Clipboard
 
-7. Save Note
+7. Save Clipboard With Tags
 
-8. Toggle Anydock
+8. Save Clipboard With Folder
 
-9. Toggle Stash Box
+9. Save Note
 
-10. Toggle Link Detection
+10. Toggle Anydock
 
-11. Switch Anydock Profile
+11. Toggle Stash Box
 
-12. Open All in Anydock Profile
+12. Toggle Link Detection
 
-13. Show List
+13. Switch Anydock Profile
+
+14. Open All in Anydock Profile
+
+15. Show List
 
 ## Getting API Key for Seach Links Command
 

@@ -20,7 +20,7 @@
 
 Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API. If you want to discover and install extensions, check out [our Store](https://raycast.com/store).
 
-Be sure to follow our [Community Guidelines](https://raycast.com/community) when submitting your extension and interacting with other folks in this repository.
+Be sure to follow our [Community Guidelines](https://manual.raycast.com/community-guidelines) when submitting your extension and interacting with other folks in this repository.
 
 ## Feedback
 

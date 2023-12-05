@@ -1,5 +1,9 @@
 # Confluence Changelog
 
+## [Bug fix] - 2023-11-19
+
+- Fixed a bug causing the People panel to not open
+
 ## [Update] - 2023-03-01
 
 - Complete makeover of the confluence extension

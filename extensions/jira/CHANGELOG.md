@@ -1,5 +1,29 @@
 # Jira Changelog
 
+## [Fix bug with loading Create Issue panel with extensive metadata] - 2023-11-19
+
+Fixes an issue with issue creation where large amounts of issue metadata could cause out-of-memory errors during loading.
+
+## [Add watching functionality to issue actions] - 2023-11-19
+
+Add start/stop watching issue action.
+
+## [Add project list in Search Issues command] - 2023-10-06
+
+It is now possible to filter issues by projects in the `Search Issues` command. If a project is selected, you can simply input the ticket number in the search query for faster results.
+
+## [Implement Comments on issues] - 2023-10-03
+
+- Add list of comments
+- Add new comment action
+- Add edit comment action
+- Add delete comment action
+
+
+## [Render authenticated image URIs] - 2023-09-10
+
+- Now successfully renders images and icons that require authenticated HTTP requests
+
 ## [Fix searching for sprints] - 2023-09-06
 
 - Fixes an issue where searching for sprints would fail if the start date is not defined.

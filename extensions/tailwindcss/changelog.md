@@ -1,5 +1,9 @@
 # Tailwind CSS Changelog
 
+## [Fixed sorting] - 2023-10-16
+
+- Fixed incorrect color sorting when querying colors.
+
 ## [Update] - 2023-09-06
 - Updated "Copy CSS" shortcut in Search Classes to cmd+shift+.
 - Updated Tailwind

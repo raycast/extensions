@@ -6,14 +6,7 @@ import { useEffect, useState } from "react";
 
 import { CategoryName, Item } from "./types";
 
-export type ActionID = "open-in-1password" | "open-in-browser" | "copy-username" | "copy-password";
-
-export type Preferences = {
-  cliPath: string;
-  version: "v7" | "v8";
-  primaryAction: ActionID;
-  secondaryAction: ActionID;
-};
+export type ActionID = Preferences["primaryAction"];
 
 export const cache = new Cache();
 

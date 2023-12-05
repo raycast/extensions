@@ -3,7 +3,8 @@ export interface Bookmark {
   title: string;
   originalUrl: string;
   pocketUrl: string;
-  type: "article" | "video";
+  type: "article" | "video" | "image";
+  archived: boolean;
   favorite: boolean;
   tags: Array<string>;
   author?: string;

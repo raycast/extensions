@@ -2,7 +2,7 @@ import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { daysInSeconds, hashRecord, projectIconUrl, showErrorToast } from "../utils";
+import { daysInSeconds, getFirstChar, hashRecord, projectIconUrl, showErrorToast } from "../utils";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
@@ -25,7 +25,7 @@ import { useCache } from "../cache";
 import { CacheActionPanelSection } from "./cache_actions";
 
 function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
-  return getTextIcon((project.name ? project.name[0] : "?").toUpperCase());
+  return getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase());
 }
 
 export function ProjectListItem(props: { project: Project; nameOnly?: boolean }): JSX.Element {

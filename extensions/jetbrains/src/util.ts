@@ -1,4 +1,13 @@
-import { Application, getApplications, getPreferenceValues, PreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  Application,
+  getApplications,
+  getPreferenceValues,
+  PreferenceValues,
+  showToast,
+  Toast,
+  environment,
+  Image,
+} from "@raycast/api";
 import { lstat, readFile, stat } from "fs/promises";
 import fg from "fast-glob";
 import { basename, dirname, resolve } from "path";
@@ -27,11 +36,12 @@ const preferences = getPreferenceValues<prefs>();
 
 export const bin = String(preferences["bin"]).replace("~", homedir());
 export const toolsInstall = String(preferences["toolsInstall"]).replace("~", homedir());
+export const toolsSupportDir = "~/Library/Application Support/JetBrains/Toolbox".replace("~", homedir());
 export const useUrl = Boolean(preferences["fallback"]);
 export const historicProjects = Boolean(preferences["historic"]);
 const ICON_GLOB = resolve(homedir(), "Applications/JetBrains Toolbox/*/Contents/Resources/icon.icns");
 const HISTORY_GLOB = resolve(toolsInstall, "apps/**/.history.json");
-const CHANNEL_GLOB = resolve(toolsInstall, "channels/*.json");
+const CHANNEL_GLOB = resolve(toolsSupportDir, "channels/*.json");
 const APP_GLOB = resolve(toolsInstall, "apps/**/*.app");
 const SETTINGS_GLOB = resolve(toolsInstall, ".settings.json");
 
@@ -41,7 +51,7 @@ const getAppFromPathAndBuild = (path: string, build: string, apps: file[]): file
 
 export interface file {
   title: string;
-  icon: string;
+  icon: Image.ImageLike;
   path: string;
   isDir: boolean;
   lastModifiedAt: Date;
@@ -49,7 +59,7 @@ export interface file {
 
 export interface recentEntry {
   title: string;
-  icon: string;
+  icon: Image.ImageLike;
   path: string;
   dirname: string;
   parts: string;
@@ -69,7 +79,7 @@ export interface AppHistory {
   toolName: string | false;
   app: file | undefined | Application;
   build: string;
-  icon: string;
+  icon: Image.ImageLike;
   xmlFiles: file[];
   entries?: recentEntry[];
 }
@@ -180,7 +190,7 @@ export const loadAppEntries = async (apps: AppHistory[]): Promise<AppHistory[]> 
   );
 };
 
-export const getRecent = async (path: string | string[], icon: string): Promise<file[]> => {
+export const getRecent = async (path: string | string[], icon: Image.ImageLike): Promise<file[]> => {
   return (await getFiles(path))
     .map((file) => ({
       ...file,
@@ -229,19 +239,23 @@ const globFromChannel = (channel: Channel) => {
   if (channel.tool.toolName === undefined) {
     return [];
   }
-  const defaults = channel.tool.extensions.find((extension: Extension) => extension?.defaultConfigDirectories ?? false);
+  const defaults = (channel.tool?.extensions ?? []).find(
+    (extension: Extension) => extension?.defaultConfigDirectories ?? false
+  );
   if (defaults?.defaultConfigDirectories === undefined) {
-    return [];
+    return ["Space Desktop", "Fleet", "dotTrace"].includes(channel.tool.toolName)
+      ? [`${environment.assetsPath}/unsupported.xml`]
+      : [`${environment.assetsPath}/missing.xml`];
   }
   const appPath = defaults.defaultConfigDirectories["idea.config.path"].replace("$HOME", homedir());
-  return [`${appPath}/options/recentProjects.xml`];
+  return [`${appPath}/options/recent(Projects|Solutions).xml`];
 };
 
 const shellFromChannel = (channel: Channel) => {
   if (channel.tool.toolName === undefined) {
     return undefined;
   }
-  const defaults = channel.tool.extensions.find((extension: Extension) => extension?.type === "shell");
+  const defaults = (channel.tool?.extensions ?? []).find((extension: Extension) => extension?.type === "shell");
   return defaults?.baseName;
 };
 
@@ -289,7 +303,7 @@ export const getSettings = async (): Promise<Settings | undefined> => {
 export const getHistory = async (): Promise<AppHistory[]> => {
   const icons = await getIcons();
   const apps = await getFiles(APP_GLOB, { deep: 5, onlyDirectories: true });
-  const scriptDir = (await getSettings())?.shell_scripts.location ?? bin;
+  const scriptDir = (await getSettings())?.shell_scripts.location.replace("~", homedir()) ?? bin;
   return (
     await Promise.all(
       (
@@ -327,7 +341,7 @@ export const getHistory = async (): Promise<AppHistory[]> => {
 };
 
 export const getV2History = async (): Promise<AppHistory[]> => {
-  const scriptDir = (await getSettings())?.shell_scripts.location ?? bin;
+  const scriptDir = (await getSettings())?.shell_scripts.location.replace("~", homedir()) ?? bin;
   return (
     await Promise.all(
       (
@@ -337,7 +351,7 @@ export const getV2History = async (): Promise<AppHistory[]> => {
         if (!channel.channel ?? null) {
           return null;
         }
-        const icon = await getJetBrainsAppIcon(channel.channel.installationDirectory);
+        const icon = { fileIcon: channel.channel.installationDirectory };
         const shell = shellFromChannel(channel);
         const tool = shell ? await which(shell, { path: scriptDir }).catch(() => false) : false;
         return {

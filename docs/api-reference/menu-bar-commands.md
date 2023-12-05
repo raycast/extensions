@@ -222,6 +222,40 @@ export default function Command() {
 
 {% endtab %}
 
+{% tab title="ItemWithAlternate.tsx" %}
+
+If an item provides another `MenuBarEtra.Item` via its `alternate`, prop, the second item will be shown then the user presses the ⌥ (opt) key. There are a few limitation:
+
+1. The `alternate` item may not have a custom shortcut. Instead, it will inherit its parent's shortcut, with the addition of ⌥ (opt) as a modifier.
+2. The `alternate` item may not also specify an alternate.
+3. A parent item that provides an `alternate` may not use ⌥ (opt) as a modifier.
+
+```typescript
+import { Icon, MenuBarExtra, open } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <MenuBarExtra icon={Icon.Bookmark}>
+      <MenuBarExtra.Item
+        icon="raycast.png"
+        title="Open Raycast Homepage"
+        shortcut={{ key: "r", modifiers: ["cmd"] }}
+        onAction={() => open("https://raycast.com")}
+        alternate={
+          <MenuBarExtra.Item
+            icon="raycast.png"
+            title="Open Raycast Store"
+            onAction={() => open("https://raycast.com/store")}
+          />
+        }
+      />
+    </MenuBarExtra>
+  );
+}
+```
+
+{% endtab %}
+
 {% endtabs %}
 
 #### Props

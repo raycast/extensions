@@ -25,7 +25,7 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
 
   try {
     if (!type || !id) {
-      await spotifyClient.putMePlayerPlay();
+      await spotifyClient.putMePlayerPlay({ context_uri: contextUri });
     } else if (type === "track") {
       if (contextUri) {
         await spotifyClient.putMePlayerPlay({

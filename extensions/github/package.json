@@ -14,7 +14,11 @@
     "pernielsentikaer",
     "loxygenk",
     "oilbeater",
-    "LunaticMuch"
+    "LunaticMuch",
+    "aeorge",
+    "daquinoaldo",
+    "ppy",
+    "lin"
   ],
   "categories": [
     "Developer Tools",
@@ -77,6 +81,24 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "application",
+          "type": "appPicker",
+          "required": false,
+          "title": "IDE Application",
+          "default": "/Applications/Visual Studio Code.app",
+          "placeholder": "/Applications/Visual Studio Code.app",
+          "description": "Will be used to open the cloned repository."
+        },
+        {
+          "name": "baseClonePath",
+          "type": "directory",
+          "required": false,
+          "title": "Clone Path",
+          "default": "~/GitHub",
+          "placeholder": "~/GitHub",
+          "description": "Path in which the repositories will be cloned."
+        },
+        {
           "name": "includeForks",
           "type": "checkbox",
           "required": false,
@@ -102,6 +124,12 @@
           "description": "Display owner name alongside repository name in search results"
         }
       ]
+    },
+    {
+      "name": "my-latest-repositories",
+      "title": "My Latest Repositories",
+      "description": "List your repositories by latest updated",
+      "mode": "view"
     },
     {
       "name": "workflow-runs",
@@ -131,6 +159,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "search-discussions",
+      "title": "Search Discussions",
+      "description": "Search recent Discussions globally in all repositories",
+      "mode": "view"
     },
     {
       "name": "my-discussions",
@@ -200,11 +234,27 @@
       "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
+    },
+    {
+      "name": "defaultSearchTerms",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Search Terms",
+      "description": "Default search to be populated when searching issues, pull requests and discussions.",
+      "default": "author:@me"
+    },
+    {
+      "name": "numberOfResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of search results",
+      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "placeholder": "50"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.3",
-    "@raycast/utils": "^1.9.0",
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1",
     "date-fns": "^2.30.0",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
@@ -216,16 +266,18 @@
     "@graphql-codegen/typescript": "^3.0.2",
     "@graphql-codegen/typescript-graphql-request": "^4.5.9",
     "@graphql-codegen/typescript-operations": "^3.0.2",
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/lodash": "^4.14.184",
-    "@types/node": "^18.15.11",
-    "concurrently": "^8.2.0",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.37.0",
-    "eslint-plugin-import": "^2.27.5",
-    "graphql": "^16.6.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.0.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.14.201",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.53.0",
+    "eslint-plugin-import": "^2.29.0",
+    "graphql": "^16.8.1",
+    "prettier": "^3.1.0",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

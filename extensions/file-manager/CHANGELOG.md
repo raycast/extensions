@@ -1,5 +1,21 @@
 # File Manager Changelog
 
+## [Fixes] - 2023-12-01
+
+- Resolved an issue with deleting non-empty folders.
+
+## [Fixes] - 2023-10-09
+
+- When a ~ was in the middle of the Start Directory preference value, it would incorrectly expand it.
+- Preferences were fetched for every single item, now it's only fetched once per directory
+
+## [Update] - 2023-09-12
+
+- Removed dedicated code for symlink file and directories, and instead pass it on to DirectoryItem or SymlinkItem
+- Added sections to actions
+- Added toggle quick look action to everything
+- Fixed showFileSize showing just an icon when the preference is disabled
+
 ## [Update] - 2023-09-08
 
 - Added support for quicklinks to open file manager to a specific folder

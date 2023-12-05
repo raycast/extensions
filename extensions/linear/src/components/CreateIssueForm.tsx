@@ -9,7 +9,6 @@ import {
   getPreferenceValues,
   useNavigation,
   showToast,
-  Color,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
@@ -160,8 +159,8 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                   createAttachment({
                     issueId: issue.id,
                     url: attachment,
-                  })
-                )
+                  }),
+                ),
               );
               toast.message = `Successfully uploaded ${attachmentWord}`;
             } catch (error) {
@@ -248,7 +247,15 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         <>
           <Form.Dropdown title="Team" storeValue {...itemProps.teamId}>
             {teams.map((team) => {
-              return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
+              return (
+                <Form.Dropdown.Item
+                  title={team.name}
+                  value={team.id}
+                  key={team.id}
+                  keywords={[team.key]}
+                  icon={getTeamIcon(team)}
+                />
+              );
             })}
           </Form.Dropdown>
           <Form.Separator />

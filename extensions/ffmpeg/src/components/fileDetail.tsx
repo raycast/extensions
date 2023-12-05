@@ -27,10 +27,13 @@ export function FileDetail() {
       $detail = (
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.TagList title="Basic File Info">
-            <List.Item.Detail.Metadata.TagList.Item text={fileType} color={Color.Green} />
+            <List.Item.Detail.Metadata.TagList.Item
+              text={fileType.charAt(0).toUpperCase() + fileType.slice(1)}
+              color={Color.Green}
+            />
             <List.Item.Detail.Metadata.TagList.Item text={fileSizeFormat(fileSize)} color={Color.Magenta} />
             {fileType === FileType.video && !hasAudioStream && (
-              <List.Item.Detail.Metadata.TagList.Item text={"Mute Video"} color={Color.Red} />
+              <List.Item.Detail.Metadata.TagList.Item text={"No Audio"} color={Color.Red} />
             )}
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Label title="File Name" text={path.basename(selectedFilePath)} />

@@ -1,5 +1,14 @@
 # Arc Changelog
 
+## [Improvements] - 2023-10-16
+
+- Allow multiple, comma separated tabs to be opened
+  
+## [Improvements] - 2023-09-12
+
+- Added a new `Open New Blank Window` command that opens a blank window in Arc
+- Added some new keywords to help with searching for the Arc Browser extension
+
 ## [Fixes] - 2023-08-11
 
 - Fixed an issue where, when searching for tabs with the same URL but different titles, the wrong tab would be opened.

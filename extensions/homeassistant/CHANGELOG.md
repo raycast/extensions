@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [New Logo] - 2023-09-30
+
+- Use the new Home Assistant logo
+
 ## [Fix] - 2023-09-10
 
 - Notifications could not be opened from the Menubar and instead throw an error

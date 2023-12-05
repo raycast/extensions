@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Application, Clipboard, Detail, List, getFrontmostApplication } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { $, ProcessOutput } from "zx";
+import { ProcessOutput } from "zx";
 import { commandNotFoundMd, noContentMd } from "./messages";
-import { EspansoMatch } from "./types";
+import { NormalizedEspansoMatch } from "./types";
+import { getEspansoConfig, getMatches, sortMatches } from "./utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [items, setItems] = useState<EspansoMatch[]>([]);
+  const [items, setItems] = useState<NormalizedEspansoMatch[]>([]);
   const [error, setError] = useState<ProcessOutput | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
 
@@ -21,10 +22,14 @@ export default function Command() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const { stdout: result } = await $`espanso match list -j`;
-        let matches: EspansoMatch[] = JSON.parse(result);
-        matches = matches.sort((a, b) => a.triggers[0].localeCompare(b.triggers[0]));
-        setItems(matches);
+        const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+        const packageMatches = getMatches(packageFilesDirectory, { packagePath: true });
+        const userMatches = getMatches(matchFilesDirectory);
+        const combinedMatches: NormalizedEspansoMatch[] = userMatches.concat(packageMatches);
+
+        const sortedMatches = sortMatches(combinedMatches);
+
+        setItems(sortedMatches);
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof ProcessOutput ? err : null);
@@ -47,10 +52,11 @@ export default function Command() {
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {items.map(({ triggers, replace }, index) => (
+      {items.map(({ triggers, replace, label }, index) => (
         <List.Item
           key={index}
-          title={triggers.join(", ")}
+          title={label || triggers.join(", ")}
+          subtitle={!label ? "" : triggers.join(", ")}
           detail={<List.Item.Detail markdown={replace} />}
           actions={
             <ActionPanel>

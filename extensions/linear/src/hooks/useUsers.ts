@@ -10,7 +10,7 @@ export default function useUsers() {
       return users.nodes;
     },
     [],
-    { initialData: [] }
+    { initialData: [] },
   );
 
   return { users: data, usersError: error, isLoadingUsers: (!data && !error) || isLoading };
