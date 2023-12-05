@@ -2,7 +2,7 @@
 
 ## [Fixes] - 2023-12-04
 
-- Fix crash if password has not item name
+- Fix crash if an entry doesn't have a name
 
 ## [Fixes] - 2023-11-22
 
