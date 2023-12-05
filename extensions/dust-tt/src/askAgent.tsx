@@ -106,23 +106,32 @@ export default function AskDustAgentCommand() {
             accessories={[{ icon: Icon.ArrowRight }]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Ask"
-                  icon={Icon.Message}
-                  shortcut={{ key: "return", modifiers: [] }}
-                  target={<AskAgentQuestionForm agent={agent} />}
-                />
-                {selectedText && (
+                {selectedText ? (
+                  <>
+                    <Action.Push
+                      title="Ask For Selected Text"
+                      icon={Icon.Message}
+                      shortcut={{ key: "return", modifiers: [] }}
+                      target={
+                        <AskDustCommand
+                          launchType={LaunchType.UserInitiated}
+                          arguments={{ agent: agent, search: selectedText }}
+                        />
+                      }
+                    />
+                    <Action.Push
+                      title="Edit Question Before Asking"
+                      icon={Icon.Highlight}
+                      shortcut={{ key: "return", modifiers: ["cmd"] }}
+                      target={<AskAgentQuestionForm agent={agent} initialQuestion={selectedText} />}
+                    />
+                  </>
+                ) : (
                   <Action.Push
-                    title="Ask with the Selected Text"
-                    icon={Icon.Message}
-                    shortcut={{ key: "return", modifiers: ["cmd"] }}
-                    target={
-                      <AskDustCommand
-                        launchType={LaunchType.UserInitiated}
-                        arguments={{ agent: agent, search: selectedText }}
-                      />
-                    }
+                    title="Ask"
+                    icon={Icon.Highlight}
+                    shortcut={{ key: "return", modifiers: [] }}
+                    target={<AskAgentQuestionForm agent={agent} />}
                   />
                 )}
               </ActionPanel>
