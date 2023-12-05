@@ -1,14 +1,15 @@
-![Keep Frontmost Logo](./assets/Icon.png)
-
-# Keep Frontmost
+<p align="center">
+  <img src="/assets/Icon.png" height="128">
+  <h1 align="center">Keep Frontmost</h1>
+</p>
 
 ## Description
 
-Closes All open apps except the frontmost one
+Closes All open apps except the frontmost one. I use the Raycast extension Macro to run a swift function inside my Raycast Extension.
 
 ## Contributing
 
-Contributions are welcome! Please read the contributing guidelines first.
+Contributions are always welcome! I'll be happy to answer questions if needed.
 
 ## License
 
