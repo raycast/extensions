@@ -36,7 +36,7 @@ export const javaScriptToJson: Script = {
   },
 };
 
-export const JsonToJavaScript: Script = {
+export const jsonToJavaScript: Script = {
   info: {
     title: "JSON to JS Object",
     desc: "Convert JSON to JavaScript Object",
