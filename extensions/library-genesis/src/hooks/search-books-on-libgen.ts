@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { isEmpty, sortBooksByPreferredLanguages, sortBooksByPreferredFileFormats } from "../utils/common-utils";
-import { getLibgenSearchResults } from "../utils/libgen-api";
-import { BookEntry, LibgenPreferences, SearchPriority } from "../types";
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
-import Style = Toast.Style;
+
+import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+
+import type { BookEntry, LibgenPreferences } from "@/types";
+import { SearchPriority } from "@/types";
+import { getLibgenSearchResults } from "@/utils/api";
+import { sortBooksByPreferredFileFormats, sortBooksByPreferredLanguages } from "@/utils/books";
+import { isEmpty } from "@/utils/common";
 
 export const searchBooksOnLibgen = (searchContent: string) => {
   const [books, setBooks] = useState<BookEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(() => {
     setBooks([]);
 
     // not loading when search is empty
@@ -40,7 +43,7 @@ export const searchBooksOnLibgen = (searchContent: string) => {
       .catch((error: Error) => {
         console.error(error);
         setLoading(false);
-        showToast(Style.Failure, String(error));
+        showToast(Toast.Style.Failure, String(error));
       });
   }, [searchContent]);
 
