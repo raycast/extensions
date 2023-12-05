@@ -30,7 +30,6 @@ export default function Command() {
           key={item.id}
           title={item.title}
           accessories={getAccessories(item)}
-          subtitle={item.description}
           keywords={item.length ? [item.length.toString()] : []}
           actions={
             <ActionPanel>
