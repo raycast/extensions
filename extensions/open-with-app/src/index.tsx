@@ -15,7 +15,7 @@ import { useCachedPromise, useFrecencySorting, usePromise, runAppleScript, showF
 import { homedir } from "node:os";
 
 /**
- * Get selected items from Finder, event if Finder is not the frontmost
+ * Get selected items from Finder, even if Finder is not the frontmost
  * application. (Raycast's getSelectedFinderItems only works if Finder is the
  * frontmost application.)
  */
