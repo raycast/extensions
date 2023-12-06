@@ -1,0 +1,528 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jetpack-commands",
+  "title": "Jetpack Commands",
+  "description": "Manage your Jetpack-connected WordPress sites.",
+  "icon": "jetpack-logo.png",
+  "author": "Automattic_Inc",
+  "categories": [
+    "Web",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-new-site",
+      "title": "Add New Site",
+      "description": "Create a new site on WordPress.com",
+      "keywords": [
+        "create site"
+      ],
+      "subtitle": "Create a new site on WordPress.com",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "import-site",
+      "title": "Import Site",
+      "description": "Migrate an existing WordPress site to WordPress.com",
+      "keywords": [
+        "migrate site"
+      ],
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-my-profile",
+      "title": "Open My Profile",
+      "description": "Access your personal profile on WordPress.com",
+      "keywords": [
+        "account",
+        "profile",
+        "display name"
+      ],
+      "subtitle": "Access your personal profile on WordPress.com",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-reader",
+      "title": "Open Reader",
+      "description": "Discover new blogs and keep up with the latest posts from sites you follow",
+      "subtitle": "Discover new blogs and keep up with the latest posts from sites you follow",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-account-settings",
+      "title": "Open Account Settings",
+      "description": "Adjust your WordPress.com account preferences and settings",
+      "keywords": [
+        "profile",
+        "email",
+        "language",
+        "color scheme"
+      ],
+      "subtitle": "Adjust your WordPress.com account preferences and settings",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "view-my-purchases",
+      "title": "View My Purchases",
+      "description": "Manage your Jetpack and WordPress.com purchases",
+      "keywords": [
+        "manage purchases",
+        "billing history",
+        "credit card",
+        "payment methods",
+        "subscriptions",
+        "upgrades"
+      ],
+      "subtitle": "Manage your Jetpack and WordPress.com purchases",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-my-sites",
+      "title": "View My Sites",
+      "description": "View your Jetpack-connected WordPress sites",
+      "keywords": [
+        "manage sites",
+        "sites dashboard"
+      ],
+      "subtitle": "View your Jetpack-connected WordPress sites",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-jetpack",
+      "title": "Add Jetpack To Self-Hosted Site",
+      "description": "Connect Jetpack to a self-hosted WordPress site",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-domains",
+      "title": "Manage Domains",
+      "description": "Manage and configure your domains on WordPress.com",
+      "keywords": [
+        "dns",
+        "domain mapping",
+        "domain registration",
+        "domain transfer",
+        "email forwarding",
+        "nameservers",
+        "subdomains",
+        "whois"
+      ],
+      "subtitle": "Manage and configure your domains on WordPress.com",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-dns-records",
+      "title": "Manage DNS Records",
+      "description": "Manage the DNS records for a WordPress.com site",
+      "keywords": [
+        "cname",
+        "mx",
+        "txt"
+      ],
+      "subtitle": "Manage the DNS records for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-site-dashboard",
+      "title": "Open Site Dashboard",
+      "description": "Open the dashboard for a Jetpack-connected WordPress site",
+      "keywords": [
+        "admin",
+        "wp-admin"
+      ],
+      "subtitle": "Open the dashboard for a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "open-stats",
+      "title": "Open Jetpack Stats",
+      "description": "Open the stats page for a Jetpack-connected WordPress site",
+      "subtitle": "Open the stats page for a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "register-domain",
+      "title": "Register Domain",
+      "description": "Register a new domain on WordPress.com",
+      "subtitle": "Register a new domain on WordPress.com",
+      "mode": "no-view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-activity-log",
+      "title": "Open Activity Log",
+      "description": "Open the activity log for a Jetpack-connected site",
+      "subtitle": "Open the activity log for a Jetpack-connected site",
+      "mode": "view"
+    },
+    {
+      "name": "open-backups",
+      "title": "Open Jetpack Backup",
+      "description": "Open the backups page for a Jetpack-connected site",
+      "subtitle": "Open the backups page for a Jetpack-connected site",
+      "mode": "view"
+    },
+    {
+      "name": "open-jetpack-scan",
+      "title": "Open Jetpack Scan",
+      "description": "Open the security scanning page for a Jetpack-connected site",
+      "mode": "view"
+    },
+    {
+      "name": "open-jetpack-social",
+      "title": "Open Jetpack Social",
+      "description": "Open the social connections page for a Jetpack-connected site",
+      "mode": "view"
+    },
+    {
+      "name": "open-site-monitoring-metrics",
+      "title": "Open Site Monitoring Metrics",
+      "description": "View the performance and related metrics for a WordPress.com site",
+      "subtitle": "View the performance and related metrics for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-php-logs",
+      "title": "Open PHP Logs",
+      "description": "Open the PHP logs for a WordPress.com site",
+      "keywords": [
+        "error logs",
+        "fatal errors",
+        "php errors",
+        "php warnings"
+      ],
+      "subtitle": "Open the PHP logs for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-phpmyadmin",
+      "title": "Open Database in PhpMyAdmin",
+      "description": "Open phpMyAdmin for a WordPress.com site",
+      "keywords": [
+        "database",
+        "mysql",
+        "phpMyAdmin"
+      ],
+      "subtitle": "Open phpMyAdmin for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-web-server-logs",
+      "title": "Open Web Server Logs",
+      "description": "Open the web server logs for a WordPress.com site",
+      "keywords": [
+        "access logs",
+        "apache logs",
+        "nginx logs",
+        "request logs"
+      ],
+      "subtitle": "Open the web server logs for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-hosting-configuration",
+      "title": "Manage Hosting Configuration",
+      "description": "Configure hosting features for a WordPress.com site",
+      "keywords": [
+        "admin interface style",
+        "cache",
+        "database",
+        "global edge cache",
+        "hosting",
+        "mysql",
+        "phpMyAdmin",
+        "php version",
+        "sftp/ssh credentials",
+        "staging sites",
+        "wp-cli"
+      ],
+      "subtitle": "Configure hosting features for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-staging-sites",
+      "title": "Manage Staging Sites",
+      "description": "Manage the staging sites for a WordPress.com site",
+      "keywords": [
+        "add staging site",
+        "create staging site",
+        "delete staging site",
+        "sync staging site"
+      ],
+      "subtitle": "Manage the staging sites for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "change-php-version",
+      "title": "Change PHP Version",
+      "description": "Change the PHP version for a WordPress.com site",
+      "subtitle": "Change the PHP version for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-cache-settings",
+      "title": "Manage Cache Settings",
+      "description": "Manage the cache settings for a WordPress.com site",
+      "keywords": [
+        "clear cache",
+        "disable cache",
+        "enable cache",
+        "global edge cache",
+        "purge cache"
+      ],
+      "subtitle": "Manage the cache settings for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "change-admin-interface-style",
+      "title": "Change Admin Interface Style",
+      "description": "Manage the admin interface style for a WordPress.com site",
+      "keywords": [
+        "wp-admin"
+      ],
+      "subtitle": "Manage the admin interface style for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "open-ssh-credentials",
+      "title": "Open SFTP/SSH Credentials",
+      "description": "View the SFTP/SSH credentials for a WordPress.com site",
+      "subtitle": "View the SFTP/SSH credentials for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "copy-ssh-connection",
+      "title": "Copy SSH/SFTP Connection String",
+      "description": "Copy the SSH/SFTP connection string for a WordPress.com site",
+      "subtitle": "Copy the SSH/SFTP connection string for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "reset-ssh-password",
+      "title": "Reset SSH/SFTP Password",
+      "description": "Reset the SSH/SFTP password for a WordPress.com site",
+      "subtitle": "Reset the SSH/SFTP password for a WordPress.com site",
+      "mode": "view",
+      "icon": "wpcom-logo.png"
+    },
+    {
+      "name": "manage-posts",
+      "title": "Manage Posts",
+      "description": "Access and edit the posts of a Jetpack-connected WordPress site",
+      "keywords": [
+        "edit posts",
+        "delete posts"
+      ],
+      "subtitle": "Access and edit the posts of a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "manage-pages",
+      "title": "Manage Pages",
+      "description": "Access and edit the pages of a Jetpack-connected WordPress site",
+      "keywords": [
+        "edit pages",
+        "delete pages"
+      ],
+      "subtitle": "Access and edit the pages of a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "manage-comments",
+      "title": "Manage Comments",
+      "description": "Access and edit the comments of a Jetpack-connected WordPress site",
+      "keywords": [
+        "edit comments",
+        "delete comments"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "view-media-uploads",
+      "title": "View Media Uploads",
+      "description": "Manage uploaded media files on a Jetpack-connected WordPress site",
+      "keywords": [
+        "manage uploads"
+      ],
+      "subtitle": "Manage uploaded media files on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "upload-media",
+      "title": "Upload Media",
+      "description": "Upload and manage media files on a Jetpack-connected WordPress site",
+      "subtitle": "Upload and manage media files on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "manage-themes",
+      "title": "Manage Themes",
+      "description": "Access and customize themes for a Jetpack-connected WordPress site",
+      "keywords": [
+        "activate theme",
+        "delete theme",
+        "install theme"
+      ],
+      "subtitle": "Access and customize themes for a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "install-theme",
+      "title": "Install Theme",
+      "description": "Install a theme on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "manage-plugins",
+      "title": "Manage Plugins",
+      "description": "Access and manage plugins for a Jetpack-connected WordPress site",
+      "keywords": [
+        "activate plugin",
+        "deactivate plugin",
+        "delete plugin",
+        "install plugin",
+        "update plugin"
+      ],
+      "subtitle": "Access and manage plugins for a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "install-plugin",
+      "title": "Install Plugin",
+      "description": "Install a plugin on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "manage-users",
+      "title": "Manage Users",
+      "description": "Manage user accounts and roles on a Jetpack-connected WordPress site",
+      "keywords": [
+        "add user",
+        "delete user",
+        "edit user",
+        "remove user",
+        "update user"
+      ],
+      "subtitle": "Manage user accounts and roles on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "open-general-settings",
+      "title": "Open General Settings",
+      "description": "Open the general settings page of a Jetpack-connected WordPress site",
+      "subtitle": "Open the general settings page of a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "add-new-post",
+      "title": "Add New Post",
+      "description": "Create a new post on a Jetpack-connected WordPress site",
+      "keywords": [
+        "create post",
+        "write post"
+      ],
+      "subtitle": "Create a new post on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "add-new-page",
+      "title": "Add New Page",
+      "description": "Create a new page on a Jetpack-connected WordPress site",
+      "keywords": [
+        "create page",
+        "write page"
+      ],
+      "subtitle": "Create a new page on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "add-new-user",
+      "title": "Add New User",
+      "description": "Register a new user on a Jetpack-connected WordPress site",
+      "keywords": [
+        "create user",
+        "invite user"
+      ],
+      "subtitle": "Register a new user on a Jetpack-connected WordPress site",
+      "mode": "view"
+    },
+    {
+      "name": "disable-global-edge-cache",
+      "title": "Disable Edge Cache",
+      "description": "Disable the edge cache for a WordPress.com site",
+      "keywords": [
+        "disable cache",
+        "disable edge cache"
+      ],
+      "subtitle": "Disable the edge cache for a WordPress.com site",
+      "icon": "wpcom-logo.png",
+      "mode": "view"
+    },
+    {
+      "name": "enable-global-edge-cache",
+      "title": "Enable Edge Cache",
+      "description": "Enable the edge cache for a WordPress.com site",
+      "keywords": [
+        "enable cache",
+        "enable edge cache"
+      ],
+      "subtitle": "Enable the edge cache for a WordPress.com site",
+      "icon": "wpcom-logo.png",
+      "mode": "view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "description": "Clear the cache for a WordPress.com site",
+      "subtitle": "Clear the cache for a WordPress.com site",
+      "keywords": [
+        "clear edge cache",
+        "purge edge cache",
+        "purge cache"
+      ],
+      "icon": "wpcom-logo.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "node-fetch": "^3.3.2",
+    "wpcom": "^5.4.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
