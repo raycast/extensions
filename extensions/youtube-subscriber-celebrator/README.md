@@ -1,6 +1,6 @@
 # YouTube Subscriber Celebrator - Raycast Extension
 
-<img src="https://github.com/imaNNeo/raycast_extensions/blob/main/youtube-subscriber-celebrator/assets/command-icon.png?raw=true" alt="YouTube Subscriber Celebrator" width="200"/>
+<img src="./assets/command-icon.png" alt="YouTube Subscriber Celebrator" width="200"/>
 
 ## Description
 
