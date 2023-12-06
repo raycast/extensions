@@ -3,7 +3,7 @@ import { useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { useRecentEntries } from "./db";
+import { RemoveMethods, useRecentEntries } from "./db";
 import { getBuildScheme } from "./lib/vscode";
 import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows, terminalApp } from "./preferences";
 import { EntryLike, EntryType, PinMethods } from "./types";
@@ -29,7 +29,7 @@ import { usePinnedEntries } from "./pinned";
 import { runAppleScriptSync } from "run-applescript";
 
 export default function Command() {
-  const { data, isLoading, error } = useRecentEntries();
+  const { data, isLoading, error, ...removeMethods } = useRecentEntries();
   const [type, setType] = useState<EntryType | null>(null);
   const { pinnedEntries, ...pinnedMethods } = usePinnedEntries();
 
@@ -62,7 +62,7 @@ export default function Command() {
     >
       <ListOrGridSection title="Pinned Projects">
         {pinnedEntries.filter(filterEntriesByType(type)).map((entry: EntryLike, index: number) => (
-          <EntryItem key={`pinned-${index}`} entry={entry} pinned={true} {...pinnedMethods} />
+          <EntryItem key={`pinned-${index}`} entry={entry} pinned={true} {...pinnedMethods} {...removeMethods} />
         ))}
       </ListOrGridSection>
       <ListOrGridSection title="Recent Projects">
@@ -70,7 +70,7 @@ export default function Command() {
           ?.filter(filterUnpinnedEntries(pinnedEntries))
           ?.filter(filterEntriesByType(type))
           .map((entry: EntryLike, index: number) => (
-            <EntryItem key={index} entry={entry} {...pinnedMethods} />
+            <EntryItem key={index} entry={entry} {...pinnedMethods} {...removeMethods} />
           ))}
       </ListOrGridSection>
     </ListOrGrid>
@@ -98,7 +98,7 @@ function EntryTypeDropdown(props: { onChange: (type: EntryType) => void }) {
   );
 }
 
-function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods) {
+function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & RemoveMethods) {
   if (isWorkspaceEntry(props.entry)) {
     return <LocalItem {...props} uri={props.entry.workspace.configPath} />;
   } else if (isFolderEntry(props.entry)) {
@@ -130,7 +130,7 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods) {
   }
 }
 
-function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & PinMethods) {
+function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & PinMethods & RemoveMethods) {
   const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
@@ -199,6 +199,7 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
+          <RemoveActionSection {...props} />
           <PinActionSection {...props} />
         </ActionPanel>
       }
@@ -206,7 +207,9 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
   );
 }
 
-function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods) {
+function RemoteItem(
+  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods
+) {
   const remotePath = decodeURI(basename(props.uri));
   const scheme = getBuildScheme();
 
@@ -246,6 +249,7 @@ function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; p
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             />
           </ActionPanel.Section>
+          <RemoveActionSection {...props} />
           <PinActionSection {...props} />
         </ActionPanel>
       }
@@ -332,6 +336,28 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
           props.unpinAll();
           await showToast({ title: "Unpinned all entries" });
         }}
+      />
+    </ActionPanel.Section>
+  );
+}
+
+function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
+  return (
+    <ActionPanel.Section>
+      <Action
+        icon={Icon.Trash}
+        title="Remove From Recent Projects"
+        style={Action.Style.Destructive}
+        onAction={() => props.removeEntry(props.entry)}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      />
+
+      <Action
+        icon={Icon.Trash}
+        title="Remove All Recent Projects"
+        style={Action.Style.Destructive}
+        onAction={() => props.removeAllEntries()}
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
       />
     </ActionPanel.Section>
   );
