@@ -31,8 +31,6 @@ export default function Command() {
       />
     );
   }
-  console.log(youtubeApiKey);
-  console.log(youtubeChannelId);
   const { data, isLoading } = useFetch<Data>(
     `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${youtubeChannelId}&key=${youtubeApiKey}`,
   );
