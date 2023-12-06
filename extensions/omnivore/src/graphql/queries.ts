@@ -56,6 +56,21 @@ export const archiveArticleQuery = `
   }
 `
 
+export const saveArticleQuery = `
+  mutation SaveUrl($input: SaveUrlInput!) {
+    saveUrl(input: $input) {
+      ... on SaveSuccess {
+        url
+        clientRequestId
+      }
+      ... on SaveError {
+        errorCodes
+        message
+      }
+    }
+  }
+`
+
 export const deleteArticleQuery = `
   mutation SetBookmarkArticle($input: SetBookmarkArticleInput!) {
     setBookmarkArticle(input: $input) {

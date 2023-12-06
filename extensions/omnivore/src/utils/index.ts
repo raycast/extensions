@@ -1,12 +1,15 @@
 import { getPreferenceValues } from '@raycast/api'
 import fetch from 'node-fetch'
-import { archiveArticleQuery, deleteArticleQuery } from '../graphql/queries'
+import { archiveArticleQuery, deleteArticleQuery, saveArticleQuery } from '../graphql/queries'
+
+import { v4 as uuidv4 } from 'uuid'
 
 const { apiKey } = getPreferenceValues<{ apiKey: string }>()
+const apiUrl = 'https://api-prod.omnivore.app/api/graphql'
 
 export async function archiveArticle(articleId: string, toArchive: boolean): Promise<boolean> {
   try {
-    const response = await fetch('https://api-prod.omnivore.app/api/graphql', {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +39,7 @@ export async function archiveArticle(articleId: string, toArchive: boolean): Pro
   }
 }
 
-export async function saveUrl(url: string, labels: string): Promise<{ success: boolean; message: string }> {
+export async function saveUrl(url: string): Promise<{ success: boolean; message: string }> {
   try {
     new URL(url)
   } catch (error) {
@@ -49,24 +52,32 @@ export async function saveUrl(url: string, labels: string): Promise<{ success: b
     }
   }
 
-  const labelsArray = labels
-    .split(',')
-    .map((label) => `&labels=${encodeURIComponent(label.trim())}`)
-    .join('')
-  const apiUrlWithLabels = `https://omnivore.app/api/save?url=${encodeURIComponent(url)}${labelsArray}`
+  const clientRequestId = uuidv4() // Generate a unique ID for each request
 
   try {
-    const response = await fetch(apiUrlWithLabels, {
-      method: 'GET',
+    const response = await fetch(apiUrl, {
+      method: 'POST',
       headers: {
-        authorization: apiKey,
+        'Content-Type': 'application/json',
+        Authorization: apiKey,
       },
+      body: JSON.stringify({
+        query: saveArticleQuery,
+        variables: {
+          input: {
+            clientRequestId,
+            source: 'api',
+            url: url,
+          },
+        },
+      }),
     })
 
     if (response.ok) {
       return { success: true, message: 'Your URL was saved' }
     } else {
-      console.error('Error during fetch')
+      const errorData = await response.json()
+      console.error('Error during fetch:', JSON.stringify(errorData))
       return { success: false, message: 'Error during saving' }
     }
   } catch (error) {
@@ -77,7 +88,7 @@ export async function saveUrl(url: string, labels: string): Promise<{ success: b
 
 export async function deleteArticle(articleId: string): Promise<boolean> {
   try {
-    const response = await fetch('https://api-prod.omnivore.app/api/graphql', {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -102,7 +113,7 @@ export async function deleteArticle(articleId: string): Promise<boolean> {
       return false
     }
   } catch (error) {
-    console.error('Error during fetch:', error)
+    console.error('Server error:', error)
     return false
   }
 }
