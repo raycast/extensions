@@ -30,7 +30,7 @@
       "subtitle": "Sync Keyboard Brightness",
       "description": "Sync Keyboard Brightness",
       "mode": "no-view",
-      "interval": "15m"
+      "interval": "4h"
     }
   ],
   "dependencies": {
