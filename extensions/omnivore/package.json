@@ -44,7 +44,7 @@
     {
       "name": "apiKey",
       "type": "password",
-      "required": false,
+      "required": true,
       "title": "Omnivore API Key",
       "description": "Your Omnivore's API key.",
       "link": "https://omnivore.app/settings/api",
