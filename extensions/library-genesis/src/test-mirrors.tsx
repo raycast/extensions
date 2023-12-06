@@ -4,10 +4,11 @@ import type { Image } from "@raycast/api";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { useTimingFetch } from "./hooks/use-timing-fetch";
+import type { Mirror } from "./utils/api/mirrors";
 import { mirrors } from "./utils/api/mirrors";
 
-const MirrorItem = ({ mirror }: { mirror: string }) => {
-  const { data, error, isLoading } = useTimingFetch(`${mirror}/json.php?ids=1&fields=*`);
+const MirrorItem = ({ mirror }: { mirror: Mirror }) => {
+  const { data, error, isLoading } = useTimingFetch(`${mirror.baseUrl}/json.php?ids=1&fields=*`);
 
   const subTitle = useMemo(() => {
     if (isLoading || !data || !data.startTime || !data.endTime) {
@@ -38,13 +39,13 @@ const MirrorItem = ({ mirror }: { mirror: string }) => {
 
   return (
     <List.Item
-      title={mirror}
+      title={mirror.baseUrl}
       subtitle={subTitle}
       icon={icon}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={mirror} />
-          <Action.CopyToClipboard title="Copy Mirror URL" content={mirror} />
+          <Action.OpenInBrowser title="Open in Browser" url={mirror.baseUrl} />
+          <Action.CopyToClipboard title="Copy Mirror URL" content={mirror.baseUrl} />
         </ActionPanel>
       }
     />
@@ -52,12 +53,10 @@ const MirrorItem = ({ mirror }: { mirror: string }) => {
 };
 
 export default function Command() {
-  const mirrorList = useMemo(() => mirrors.map((mirror) => mirror.baseUrl), []);
-
   return (
     <List searchBarPlaceholder={"Test mirrors"}>
-      {mirrorList.map((mirror) => (
-        <MirrorItem key={mirror} mirror={mirror} />
+      {mirrors.map((mirror) => (
+        <MirrorItem key={mirror.baseUrl} mirror={mirror} />
       ))}
     </List>
   );

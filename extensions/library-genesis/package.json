@@ -161,12 +161,13 @@
     "@raycast/utils": "^1.10.1",
     "cheerio": "^1.0.0-rc.12",
     "fs-extra": "^11.2.0",
-    "node-fetch": "^3.2.8"
+    "node-fetch": "^3.2.8",
+    "swr": "^2.2.4"
   },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
     "@raycast/eslint-config": "^1.0.6",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",

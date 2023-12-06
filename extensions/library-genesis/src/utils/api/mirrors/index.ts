@@ -2,23 +2,40 @@
 import fetch from "node-fetch";
 
 import type { BookEntry } from "@/types";
+import { parseContentIntoBooks } from "@/utils/api/mirrors/default";
 
+export type Parser = (content: string, libgenUrl?: string) => BookEntry[];
 export interface Mirror {
   baseUrl: string;
-  parse?: (content: string, libgenUrl?: string) => BookEntry[];
+  parse: Parser;
 }
 
 export const mirrors: Array<Mirror> = [
   {
     baseUrl: "https://libgen.is",
+    parse: parseContentIntoBooks,
   },
   {
     baseUrl: "https://libgen.rs",
+    parse: parseContentIntoBooks,
   },
   {
     baseUrl: "https://libgen.st",
+    parse: parseContentIntoBooks,
   },
 ];
+
+export const getMirror = (libgenUrl: string | null): Mirror => {
+  const mirror = mirrors.find((value) => {
+    return value.baseUrl === libgenUrl;
+  });
+  return mirror
+    ? mirror
+    : {
+        baseUrl: libgenUrl || "https://libgen.rs",
+        parse: parseContentIntoBooks,
+      };
+};
 
 interface MirrorResponse {
   url: string;
