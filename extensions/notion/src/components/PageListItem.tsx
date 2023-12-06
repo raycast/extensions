@@ -126,10 +126,9 @@ export function PageListItem({
 
   const { openIn } = getPreferenceValues<Preferences>();
   const isDefaultNotionActionApp = openIn && openIn.name === "Notion";
-  const isNotionInstalled = true;
   let openInNotionDefaultAction;
   let openInNotionAlternativeAction;
-  if (!isNotionInstalled) {
+  if (!isDefaultNotionActionApp) {
     openInNotionDefaultAction = openInNotionBrowserAction;
   } else {
     openInNotionDefaultAction = isDefaultNotionActionApp ? openInNotionAppAction : openInNotionBrowserAction;
