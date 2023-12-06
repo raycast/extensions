@@ -174,7 +174,12 @@ extension EKReminder {
     if let dueDateComponents,
       let dueDate = Calendar.current.date(from: dueDateComponents)
     {
-      dueDateString = isoDateFormatter.string(for: dueDate) ?? ""
+      let hasTime = (dueDateComponents.hour != nil && dueDateComponents.minute != nil)
+      if hasTime {
+        dueDateString = isoDateFormatter.string(for: dueDate) ?? ""
+      } else {
+        dueDateString = dateOnlyFormatter.string(for: dueDate) ?? ""
+      }
     }
 
     var completionDateString: String = ""

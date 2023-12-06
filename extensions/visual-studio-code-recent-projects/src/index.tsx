@@ -168,7 +168,7 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
             />
             <Action.ShowInFinder path={path} />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            {isFolderEntry(props.entry) && (
+            {isFolderEntry(props.entry) && terminalApp && (
               <Action
                 title={`Open With ${terminalApp.name}`}
                 icon={{ fileIcon: terminalApp.path }}
