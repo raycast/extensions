@@ -12,7 +12,7 @@ import {
   PagePropertyType,
   User,
 } from "../utils/notion";
-import { handleOnOpenPage, isNotionInstalled } from "../utils/openPage";
+import { handleOnOpenPage } from "../utils/openPage";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
@@ -118,14 +118,15 @@ export function PageListItem({
   };
 
   const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
-    handleOnOpenPage(page, setRecentPage, "app"),
+    handleOnOpenPage(page, setRecentPage),
   );
   const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, () =>
-    handleOnOpenPage(page, setRecentPage, "web"),
+    handleOnOpenPage(page, setRecentPage),
   );
 
-  const { open_in } = getPreferenceValues<Preferences>();
-  const isDefaultNotionActionApp = open_in === "app";
+  const { openIn } = getPreferenceValues<Preferences>();
+  const isDefaultNotionActionApp = openIn && openIn.name === "Notion";
+  const isNotionInstalled = true;
   let openInNotionDefaultAction;
   let openInNotionAlternativeAction;
   if (!isNotionInstalled) {

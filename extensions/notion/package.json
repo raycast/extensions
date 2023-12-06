@@ -15,7 +15,8 @@
     "erics118",
     "bkeys818",
     "alexs",
-    "yakitrak"
+    "yakitrak",
+    "leo_tuil"
   ],
   "categories": [
     "Applications",
@@ -73,21 +74,10 @@
       "link": "https://www.notion.so/my-integrations"
     },
     {
-      "name": "open_in",
-      "type": "dropdown",
+      "name": "openIn",
+      "type": "appPicker",
       "title": "Open Page in",
       "required": false,
-      "default": "app",
-      "data": [
-        {
-          "title": "Notion Application",
-          "value": "app"
-        },
-        {
-          "title": "Default Browser",
-          "value": "web"
-        }
-      ],
       "description": "Choose where to open Notion page."
     }
   ],
