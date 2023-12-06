@@ -1,5 +1,5 @@
-import { ListView } from "./api/main";
+import { ChatView } from "./api/ui/ChatView";
 
 export default function Command(): JSX.Element {
-  return ListView();
+  return <ChatView />;
 }

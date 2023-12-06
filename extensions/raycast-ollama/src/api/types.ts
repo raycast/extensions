@@ -2,11 +2,53 @@ export interface OllamaApiTagsResponse {
   models: OllamaApiTagsResponseModel[];
 }
 
+export interface OllamaApiShowResponse {
+  modelfile: string;
+  parameters: string;
+  template: string;
+}
+
+export interface OllamaApiShowModelfile {
+  from: string;
+  parameter: OllamaApiShowModelfileParameter;
+  template: string;
+  system?: string;
+  adapter?: string;
+  license?: string;
+}
+
+export interface OllamaApiShowModelfileParameter {
+  mirostat: number;
+  mirostat_eta: number;
+  mirostat_tau: number;
+  num_ctx: number;
+  num_gqa?: number;
+  num_gpu: number;
+  num_thread?: number;
+  repeat_last_n: number;
+  repeat_penalty: number;
+  temperature: number;
+  seed: number;
+  stop: (string | undefined)[];
+  tfs_z: number;
+  num_predict: number;
+  top_k: number;
+  top_p: number;
+}
+
 export interface OllamaApiTagsResponseModel {
   name: string;
   modified_at: string;
   size: number;
   download?: number;
+}
+
+export interface OllamaApiTagsExtended {
+  models: OllamaApiTagsModelExtended[];
+}
+
+export interface OllamaApiTagsModelExtended extends OllamaApiTagsResponseModel {
+  modelfile?: OllamaApiShowModelfile;
 }
 
 export interface OllamaApiPullResponse {
@@ -20,10 +62,13 @@ export interface OllamaApiPullResponse {
 export interface OllamaApiGenerateRequestBody {
   model: string;
   prompt: string;
+  format?: string;
+  options?: OllamaApiGenerateOptionsRequestBody;
   system?: string;
   template?: string;
   context?: number[];
-  options?: OllamaApiGenerateOptionsRequestBody;
+  stream?: boolean;
+  raw?: boolean;
 }
 
 export interface OllamaApiGenerateOptionsRequestBody {
@@ -137,4 +182,27 @@ export interface RaycastArgumentsOllamaCommandCustom {
   };
   launchType: string;
   launchContext?: string;
+}
+
+export interface DocumentLoaderFiles {
+  path: string;
+  mtime?: Date;
+}
+
+export interface ChainPreferences {
+  type: Chains;
+  parameter?: ChainPreferencesParameter;
+}
+
+export interface ChainPreferencesParameter {
+  docsNumber?: number;
+}
+
+export enum Chains {
+  STUFF = "Stuff",
+  REFINE = "Refine",
+}
+
+export enum PromptTags {
+  FILE = "/file",
 }

@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Manual Refresh] - 2023-11-27
+- Added a manual refresh action to refresh the selected text/clipboard
+
 ## [Add Keywords] - 2023-11-13
 - Added a few keywords to make searching in the store easier
 

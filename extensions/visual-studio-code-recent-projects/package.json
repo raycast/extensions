@@ -17,7 +17,8 @@
     "oilbeater",
     "QIanGua",
     "hakob_nersesian",
-    "erics118"
+    "erics118",
+    "tm.wrnr"
   ],
   "keywords": [
     "vscode"
@@ -120,6 +121,14 @@
       "label": "Close Other VSCode Windows",
       "default": false,
       "description": "Close other VSCode windows when opening a project"
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "default": "com.apple.Terminal",
+      "required": false,
+      "title": "Terminal App",
+      "description": "Select which Terminal App to use when opening with a terminal"
     }
   ],
   "dependencies": {

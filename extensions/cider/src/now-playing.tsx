@@ -34,14 +34,14 @@ interface currentPlayer {
 export default function Command() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
-  const [songName, setSongName] = useState<string>("");
-  const [artistName, setArtistName] = useState<string>("");
-  const [albumName, setAlbumName] = useState<string>("");
+  const [songName, setSongName] = useState<string>("Loading...");
+  const [artistName, setArtistName] = useState<string>("Loading...");
+  const [albumName, setAlbumName] = useState<string>("Loading...");
   const [songDuration, setSongDuration] = useState<number>(0);
   const [songPosition, setSongPosition] = useState<number>(0);
-  const [songStatus, setSongStatus] = useState<string>("");
-  const [albumArt, setAlbumArt] = useState<string>("");
-  const [releaseDate, setReleaseDate] = useState<string>("");
+  const [songStatus, setSongStatus] = useState<string>("Loading...");
+  const [albumArt, setAlbumArt] = useState<string>("Loading...");
+  const [releaseDate, setReleaseDate] = useState<string>("Loading...");
   const [isShowingDetail, setISD] = useState<boolean>(false);
 
   async function fetchCurrentPlayer() {
@@ -93,9 +93,9 @@ export default function Command() {
     >
       {isPlaying ? (
         <>
-          <List.Item title={songName} subtitle={"Title"} />
-          <List.Item title={artistName} subtitle={"Artist"} />
-          <List.Item title={albumName} subtitle={"Album"} />
+          <List.Item title={songName} subtitle={`🎵 Title`} />
+          <List.Item title={artistName} subtitle={`🎤 Artist`} />
+          <List.Item title={albumName} subtitle={`💿 Album`} />
           <List.Item
             title={"Album Art"}
             id={"albumArt"}
@@ -105,10 +105,10 @@ export default function Command() {
             title={`${parseFromSeconds(songPosition)} / ${parseFromMillis(
               songDuration,
             )}`}
-            subtitle={"Duration"}
+            subtitle={`⏱️ Duration`}
           />
-          <List.Item title={songStatus} subtitle={"Status"} />
-          <List.Item title={releaseDate} subtitle={"Release Date"} />
+          <List.Item title={songStatus} subtitle={`🔈 Status`} />
+          <List.Item title={releaseDate} subtitle={`📅 Release Date`} />
         </>
       ) : (
         <List.EmptyView

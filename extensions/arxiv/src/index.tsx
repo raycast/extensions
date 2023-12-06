@@ -3,7 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { URLSearchParams } from "node:url";
 import { formatDistanceToNow } from "date-fns";
-import natural from "natural";
+import { DiceCoefficient } from "natural/lib/natural/distance/index";
 import { SearchResult, ArxivCategory, ArxivCategoryColour, SearchListItemProps } from "./types";
 import { parseResponse } from "./utils";
 
@@ -106,8 +106,8 @@ function compareSearchResults(textToCompare: string) {
     const aTitle = a.title ? a.title[0] : "";
     const bTitle = b.title ? b.title[0] : "";
 
-    const aTitleSimilarity = natural.DiceCoefficient(aTitle, textToCompare);
-    const bTitleSimiarlity = natural.DiceCoefficient(bTitle, textToCompare);
+    const aTitleSimilarity = DiceCoefficient(aTitle, textToCompare);
+    const bTitleSimiarlity = DiceCoefficient(bTitle, textToCompare);
 
     return bTitleSimiarlity - aTitleSimilarity;
   };

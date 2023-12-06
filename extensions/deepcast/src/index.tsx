@@ -1,7 +1,15 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
-import { SourceLanguage, TargetLanguage, sendTranslateRequest, source_languages, target_languages } from "./utils";
+import { useEffect, useState } from "react";
+import {
+  SourceLanguage,
+  TargetLanguage,
+  getSelection,
+  sendTranslateRequest,
+  source_languages,
+  target_languages,
+} from "./utils";
 import TranslationView from "./components/TranslationView";
+import transliterate from "@sindresorhus/transliterate";
 
 interface Values {
   key?: string;
@@ -22,7 +30,12 @@ function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
   );
 }
 
-const Command = (props: LaunchProps) => {
+type LaunchContext = {
+  translation?: string;
+  sourceLanguage?: SourceLanguage;
+};
+
+const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   // Check whether component is called with an existing value for translation
   if (props?.launchContext?.translation) {
     const translation = props?.launchContext?.translation;
@@ -31,11 +44,20 @@ const Command = (props: LaunchProps) => {
   }
   const { defaultTargetLanguage } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState(false);
-  const [sourceText, setSourceText] = useState("");
+  const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
+
+  // set the source text to the selected text if no fallback text is provided
+  // if there is no selected text, then just leave the source text empty
+  useEffect(() => {
+    if (props.fallbackText) return;
+    getSelection().then((content) => {
+      setSourceText(content ?? "");
+    });
+  }, []);
 
   const submit = async (values: Values) => {
     if (!values.text || !values.to) return;
@@ -94,13 +116,37 @@ const Command = (props: LaunchProps) => {
     }
   };
 
+  const _t = transliterate(translation);
+  const transliteration = _t == translation ? "" : _t;
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Translate" onSubmit={submit} />
-          <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
-          <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
+          <ActionPanel.Section>
+            <Action.SubmitForm icon={Icon.ArrowRightCircle} title="Translate" onSubmit={submit} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Translation"
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              content={translation}
+            />
+            <Action.Paste
+              title="Paste in Frontmost App"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              content={translation}
+            />
+            <Action.CopyToClipboard
+              title="Copy Transliteration"
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              content={transliteration}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
+            <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       isLoading={loading}
@@ -131,6 +177,7 @@ const Command = (props: LaunchProps) => {
         ))}
       </Form.Dropdown>
       <Form.TextArea id="translation" value={translation} />
+      <Form.Description title="Transliteration" text={transliteration} />
     </Form>
   );
 };

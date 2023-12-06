@@ -5,7 +5,7 @@ export type VaultCredentialDto = {
   email?: string;
   login?: string;
   password: string;
-  url: string;
+  url?: string;
   secondaryLogin?: string;
   category?: string;
   note?: string;
