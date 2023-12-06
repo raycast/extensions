@@ -1,24 +1,23 @@
 import { getErrorMessage } from "../helpers/getError";
-import { SimplifiedEpisodeObject } from "../helpers/spotify.api";
+import { SimplifiedEpisodeObject, SavedEpisodeObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
+import { iterate } from "../helpers/spotifyIterator";
 
-type GetMySavedEpisodesProps = { limit?: number };
+type GetMySavedEpisodesProps = { limit: number };
 
-export async function getMySavedEpisodes({ limit = 50 }: GetMySavedEpisodesProps = {}) {
+export async function getMySavedEpisodes({ limit }: GetMySavedEpisodesProps) {
   const { spotifyClient } = getSpotifyClient();
-
+  const iterator = iterate<SavedEpisodeObject>(limit, (input) => spotifyClient.getMeEpisodes(input));
   try {
-    const response = await spotifyClient.getMeEpisodes({ limit });
-
-    // Normalize the response to match the SimplifiedEpisodeObject type
-    // because the Spotify API returns a SavedEpisodeObject type
-    const shows = (response?.items ?? []).map((episodeItem) => {
-      return {
-        ...episodeItem.episode,
-      };
-    });
-
-    return { items: shows as SimplifiedEpisodeObject[] };
+    const episodes: SimplifiedEpisodeObject[] = [];
+    for await (const items of iterator) {
+      for (const showItem of items) {
+        episodes.push({
+          ...showItem.episode,
+        } as SimplifiedEpisodeObject);
+      }
+    }
+    return { items: episodes };
   } catch (err) {
     const error = getErrorMessage(err);
     console.log("getMySavedEpisodes.ts Error:", error);

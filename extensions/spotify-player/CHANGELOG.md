@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Optimisation] - 2023-12-20
+
+- The `Your Library` command now loads 300 instead of 50 albums, artists, playlists, shows.
+
 ## [Feature & Optimisation] - 2023-12-02
 
 - Added `Select Device` command to select the device to play music on.

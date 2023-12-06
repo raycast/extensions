@@ -19,12 +19,12 @@ export function useYourLibrary(options: UseMyLibraryProps = {}) {
   } = useCachedPromise(
     () =>
       Promise.all([
-        getUserPlaylists(),
-        getMySavedAlbums(),
-        getFollowedArtists(),
-        getMySavedTracks(),
-        getMySavedShows(),
-        getMySavedEpisodes(),
+        getUserPlaylists({ limit: 300 }),
+        getMySavedAlbums({ limit: 300 }),
+        getFollowedArtists({ limit: 300 }),
+        getMySavedTracks({ limit: 50 }),
+        getMySavedShows({ limit: 300 }),
+        getMySavedEpisodes({ limit: 50 }),
       ]),
     [],
     {

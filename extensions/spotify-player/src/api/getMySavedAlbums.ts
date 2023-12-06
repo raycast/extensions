@@ -1,24 +1,23 @@
 import { getErrorMessage } from "../helpers/getError";
-import { SimplifiedAlbumObject } from "../helpers/spotify.api";
+import { SimplifiedAlbumObject, SavedAlbumObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
+import { iterate } from "../helpers/spotifyIterator";
 
-type GetMySavedAlbumsProps = { limit?: number };
+type GetMySavedAlbumsProps = { limit: number };
 
-export async function getMySavedAlbums({ limit = 50 }: GetMySavedAlbumsProps = {}) {
+export async function getMySavedAlbums({ limit }: GetMySavedAlbumsProps) {
   const { spotifyClient } = getSpotifyClient();
-
+  const iterator = iterate<SavedAlbumObject>(limit, (input) => spotifyClient.getMeAlbums(input));
   try {
-    const response = await spotifyClient.getMeAlbums({ limit });
-
-    // Normalize the response to match the SimplifiedAlbumObject type
-    // because the Spotify API returns a SavedAlbumObject type
-    const albums = (response?.items ?? []).map((albumItem) => {
-      return {
-        ...albumItem.album,
-      };
-    });
-
-    return { items: albums as SimplifiedAlbumObject[] };
+    const albums: SimplifiedAlbumObject[] = [];
+    for await (const items of iterator) {
+      for (const albumItem of items) {
+        albums.push({
+          ...albumItem.album,
+        } as SimplifiedAlbumObject);
+      }
+    }
+    return { items: albums };
   } catch (err) {
     const error = getErrorMessage(err);
     console.log("getMySavedAlbums.ts Error:", error);
