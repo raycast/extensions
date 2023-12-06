@@ -138,7 +138,7 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
   const keywords = path.split("/");
 
   const getTitle = (revert = false) => {
-    return `Open in ${build} ${closeOtherWindows !== revert ? "| Close Other" : ""}`;
+    return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
   };
 
   const getAction = (revert = false) => {
@@ -213,7 +213,7 @@ function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; p
   const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
 
   const getTitle = (revert = false) => {
-    return `Open in ${build} ${closeOtherWindows !== revert ? "| Close Other" : ""}`;
+    return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
   };
 
   const getUrl = (uri: string, revert = false) => {
