@@ -14,13 +14,14 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { usePromise } from "@raycast/utils";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { useMe } from "./hooks/useMe";
 import { ListOrGridSection } from "./components/ListOrGridSection";
 import PlaylistItem from "./components/PlaylistItem";
 import { addToPlaylist } from "./api/addToPlaylist";
-import { useMyPlaylists } from "./hooks/useMyPlaylists";
+import { useYourLibrary } from "./hooks/useYourLibrary";
 import { getError } from "./helpers/getError";
 import { CreateQuicklink } from "./components/CreateQuicklink";
 import getAllPlaylistItems from "./helpers/getAllPlaylistItems";
@@ -42,11 +43,10 @@ const preferences: AddToPlaylistCommandPreferences = getPreferenceValues();
 const DUPLICATE_SONG_CHECK = preferences.duplicateSongCheck;
 
 function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
+  const library = useYourLibrary();
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
-  const [searchText, setSearchText] = useState("");
-
-  const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
+  const { data: playlists } = usePromise(() => library.getAllPlaylists());
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
     return (
@@ -82,14 +82,20 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
   }
 
   useEffect(() => {
-    if (props?.playlistId && currentlyPlayingData?.item?.uri && !currentlyPlayingIsLoading) {
+    if (
+      props?.playlistId &&
+      currentlyPlayingData?.item?.uri &&
+      !currentlyPlayingIsLoading &&
+      playlists &&
+      playlists.length > 0
+    ) {
       const addToPlaylistAsync = async () => {
         try {
           await addToPlaylist({
             playlistId: props.playlistId!,
             trackUris: [currentlyPlayingData.item.uri!],
           });
-          const playlist = myPlaylistsData?.items?.find((p) => p.id == props.playlistId);
+          const playlist = playlists.find((p) => p.id == props.playlistId);
           if (!playlist) {
             showHUD("Playlist not found");
             popToRoot();
@@ -105,19 +111,13 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
 
       addToPlaylistAsync();
     }
-  }, [props?.playlistId, currentlyPlayingData?.item?.uri, currentlyPlayingIsLoading]);
+  }, [props?.playlistId, currentlyPlayingData?.item?.uri, currentlyPlayingIsLoading, playlists]);
 
   return (
-    <List
-      searchBarPlaceholder="Search for Playlist"
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      filtering={true}
-      isLoading={currentlyPlayingIsLoading}
-    >
+    <List searchBarPlaceholder="Search for Playlist" filtering={true} isLoading={currentlyPlayingIsLoading}>
       <ListOrGridSection type="list" title="Playlists">
-        {myPlaylistsData?.items
-          ?.filter((playlist) => playlist.owner?.id === meData?.id)
+        {(playlists ?? [])
+          .filter((playlist) => playlist.owner?.id === meData?.id)
           .map((playlist) => (
             <PlaylistItem
               type="list"

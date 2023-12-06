@@ -1,12 +1,7 @@
 import { updateCommandMetadata } from "@raycast/api";
 import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { getSpotifyClient, setSpotifyClient } from "./helpers/withSpotifyClient";
-import { containsMySavedTracks } from "./api/containsMySavedTrack";
-
-async function getIsLiked(id: string): Promise<boolean> {
-  const res = await containsMySavedTracks({ trackIds: [id] });
-  return res[0];
-}
+import { YourLibrary } from "./helpers/YourLibrary";
 
 async function getItem() {
   await setSpotifyClient();
@@ -28,7 +23,7 @@ async function getStatusString() {
   const id = item.id;
   if (!id) return "No active device";
 
-  const isLiked = await getIsLiked(id);
+  const isLiked = await YourLibrary.getInstance().containsSavedTrack(id);
 
   const name = item.name;
 

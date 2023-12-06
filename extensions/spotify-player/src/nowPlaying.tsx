@@ -14,21 +14,19 @@ import {
   Toast,
   Keyboard,
 } from "@raycast/api";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { View } from "./components/View";
 import { useMyDevices } from "./hooks/useMyDevices";
 import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { skipToNext } from "./api/skipToNext";
 import { skipToPrevious } from "./api/skipToPrevious";
-import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
-import { addToMySavedTracks } from "./api/addToMySavedTracks";
 import { transferMyPlayback } from "./api/transferMyPlayback";
-import { useMyPlaylists } from "./hooks/useMyPlaylists";
+import { useYourLibrary } from "./hooks/useYourLibrary";
 import { useMe } from "./hooks/useMe";
-import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { usePlaybackState } from "./hooks/usePlaybackState";
 import { formatMs } from "./helpers/formatMs";
-import { TracksList } from "./components/TracksList";
+import { AlbumTracksList } from "./components/AlbumTracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
 import { FooterAction } from "./components/FooterAction";
 import { StartRadioAction } from "./components/StartRadioAction";
@@ -38,17 +36,22 @@ import { getErrorMessage } from "./helpers/getError";
 import isMenuBarAvailable from "./helpers/isMenuBarAvailable";
 
 function NowPlayingCommand() {
+  const library = useYourLibrary();
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
   const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
   const { myDevicesData } = useMyDevices();
-  const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
-  const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
-    trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
-  });
+  const trackId = currentlyPlayingData?.item?.id;
+  const { data: trackAlreadyLiked, revalidate: containsSavedTracksRevalidate } = useCachedPromise(
+    (id?: string) => library.containsSavedTrack(id),
+    [trackId],
+    {
+      execute: !!trackId,
+    },
+  );
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
+  const { data: playlists } = usePromise(() => library.getAllPlaylists());
 
-  const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isPlaying = playbackStateData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
@@ -94,7 +97,8 @@ function NowPlayingCommand() {
   let trackOrEpisodeActions: React.JSX.Element | null = null;
 
   if (isTrack) {
-    const { album, artists, id: trackId, duration_ms } = item as TrackObject;
+    const track = item as TrackObject;
+    const { album, artists, id: trackId, duration_ms } = track;
     const albumName = album?.name;
     const albumImage = album?.images[0]?.url;
     const artistName = artists?.[0]?.name;
@@ -129,9 +133,9 @@ function NowPlayingCommand() {
             onAction={async () => {
               if (closeWindowOnAction) {
                 try {
-                  await removeFromMySavedTracks({
-                    trackIds: trackId ? [trackId] : [],
-                  });
+                  if (trackId) {
+                    await library.removeSavedTrack(trackId);
+                  }
                   await showHUD("Disliked");
                   await popToRoot();
                   return;
@@ -142,10 +146,10 @@ function NowPlayingCommand() {
               }
               const toast = await showToast({ title: "Disliking...", style: Toast.Style.Animated });
               try {
-                await removeFromMySavedTracks({
-                  trackIds: trackId ? [trackId] : [],
-                });
-                await containsMySavedTracksRevalidate();
+                if (trackId) {
+                  await library.removeSavedTrack(trackId);
+                }
+                await containsSavedTracksRevalidate();
                 toast.title = "Disliked";
                 toast.style = Toast.Style.Success;
               } catch (err) {
@@ -165,9 +169,7 @@ function NowPlayingCommand() {
             onAction={async () => {
               if (closeWindowOnAction) {
                 try {
-                  await addToMySavedTracks({
-                    trackIds: trackId ? [trackId] : [],
-                  });
+                  await library.addSavedTrack(track);
                   await showHUD("Liked");
                   await popToRoot();
                   return;
@@ -178,10 +180,8 @@ function NowPlayingCommand() {
               }
               const toast = await showToast({ title: "Liking...", style: Toast.Style.Animated });
               try {
-                await addToMySavedTracks({
-                  trackIds: trackId ? [trackId] : [],
-                });
-                await containsMySavedTracksRevalidate();
+                await library.addSavedTrack(track);
+                await containsSavedTracksRevalidate();
                 toast.title = "Liked";
                 toast.style = Toast.Style.Success;
               } catch (err) {
@@ -261,11 +261,13 @@ function NowPlayingCommand() {
           }}
         />
         <StartRadioAction trackId={trackId} artistId={artistId} onRadioStarted={() => currentlyPlayingRevalidate()} />
-        <Action.Push
-          icon={Icon.AppWindowGrid3x3}
-          title="Go to Album"
-          target={<TracksList album={album} showGoToAlbum={false} />}
-        />
+        {album && (
+          <Action.Push
+            icon={Icon.AppWindowGrid3x3}
+            title="Go to Album"
+            target={<AlbumTracksList album={album} showGoToAlbum={false} />}
+          />
+        )}
       </>
     );
   } else {
@@ -302,8 +304,8 @@ function NowPlayingCommand() {
           {isPlaying && <PauseAction onPause={() => playbackStateRevalidate()} />}
           {!isPlaying && <PlayAction onPlay={() => playbackStateRevalidate()} />}
           {trackOrEpisodeActions}
-          {myPlaylistsData?.items && meData && uri && (
-            <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
+          {playlists && playlists.length > 0 && meData && uri && (
+            <AddToPlaylistAction playlists={playlists} meData={meData} uri={uri} />
           )}
           <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
             {myDevicesData?.devices

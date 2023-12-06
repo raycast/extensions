@@ -1,7 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
-import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
+import { YourLibrary } from "./helpers/YourLibrary";
 import { safeLaunchCommandInBackground } from "./helpers/safeCommandLauncher";
 
 export default async function Command() {
@@ -21,9 +21,9 @@ export default async function Command() {
   }
 
   try {
-    await removeFromMySavedTracks({
-      trackIds: trackId ? [trackId] : [],
-    });
+    if (trackId) {
+      await YourLibrary.getInstance().removeSavedTrack(trackId);
+    }
     await showHUD(`Disliked ${currentlyPlayingData?.item.name}`);
     await safeLaunchCommandInBackground("current-track");
   } catch {

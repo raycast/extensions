@@ -1,19 +1,24 @@
 import { Action, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { addToMySavedTracks } from "../api/addToMySavedTracks";
+import { useCachedPromise } from "@raycast/utils";
 import { getErrorMessage } from "../helpers/getError";
-import { useContainsMyLikedTracks } from "../hooks/useContainsMyLikedTracks";
-import { removeFromMySavedTracks } from "../api/removeFromMySavedTracks";
+import { useYourLibrary } from "../hooks/useYourLibrary";
+import { SimplifiedTrackObject } from "../helpers/spotify.api";
 
 type AddToSavedTracksActionProps = {
-  trackId?: string;
+  track: SimplifiedTrackObject;
 };
 
-export function AddToSavedTracksAction({ trackId: trackId }: AddToSavedTracksActionProps) {
+export function AddToSavedTracksAction({ track }: AddToSavedTracksActionProps) {
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
-  const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
-    trackIds: trackId ? [trackId] : [],
-  });
-  const trackAlreadyLiked = containsMySavedTracksData?.[0];
+  const library = useYourLibrary();
+  const trackId = track.id;
+  const { data: trackAlreadyLiked, revalidate } = useCachedPromise(
+    (id?: string) => library.containsSavedTrack(id),
+    [trackId],
+    {
+      execute: !!trackId,
+    },
+  );
 
   return (
     <>
@@ -24,9 +29,9 @@ export function AddToSavedTracksAction({ trackId: trackId }: AddToSavedTracksAct
           onAction={async () => {
             if (closeWindowOnAction) {
               try {
-                await removeFromMySavedTracks({
-                  trackIds: trackId ? [trackId] : [],
-                });
+                if (trackId) {
+                  await library.removeSavedTrack(trackId);
+                }
                 await showHUD("Disliked");
                 await popToRoot();
                 return;
@@ -37,10 +42,10 @@ export function AddToSavedTracksAction({ trackId: trackId }: AddToSavedTracksAct
             }
             const toast = await showToast({ title: "Disliking...", style: Toast.Style.Animated });
             try {
-              await removeFromMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
-              await containsMySavedTracksRevalidate();
+              if (trackId) {
+                await library.removeSavedTrack(trackId);
+              }
+              await revalidate();
               toast.title = "Disliked";
               toast.style = Toast.Style.Success;
             } catch (err) {
@@ -60,9 +65,7 @@ export function AddToSavedTracksAction({ trackId: trackId }: AddToSavedTracksAct
           onAction={async () => {
             if (closeWindowOnAction) {
               try {
-                await addToMySavedTracks({
-                  trackIds: trackId ? [trackId] : [],
-                });
+                await library.addSavedTrack(track);
                 await showHUD("Liked");
                 await popToRoot();
                 return;
@@ -73,10 +76,8 @@ export function AddToSavedTracksAction({ trackId: trackId }: AddToSavedTracksAct
             }
             const toast = await showToast({ title: "Liking...", style: Toast.Style.Animated });
             try {
-              await addToMySavedTracks({
-                trackIds: trackId ? [trackId] : [],
-              });
-              await containsMySavedTracksRevalidate();
+              await library.addSavedTrack(track);
+              await revalidate();
               toast.title = "Liked";
               toast.style = Toast.Style.Success;
             } catch (err) {

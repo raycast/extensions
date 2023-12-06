@@ -166,6 +166,14 @@
           "required": false,
           "type": "dropdown",
           "placeholder": "Default View"
+        },
+        {
+          "name": "cacheRefreshInterval",
+          "title": "Cache Refresh Interval (hours)",
+          "description": "How often to automatically refresh the cache (in hours)",
+          "type": "textfield",
+          "default": "72",
+          "required": false
         }
       ]
     },

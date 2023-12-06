@@ -1,18 +1,21 @@
 import React from "react";
 import { Action, ActionPanel, Icon, popToRoot, showHUD } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { SimplifiedAlbumObject } from "../helpers/spotify.api";
 import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
-import { TracksList } from "./TracksList";
+import { AlbumTracksList } from "./AlbumTracksList";
 import { getErrorMessage } from "../helpers/getError";
-import { addToMySavedAlbums } from "../api/addToMySavedAlbums";
-import { removeFromMySavedAlbums } from "../api/removeFromMySavedAlbums";
-import { useContainsMySavedAlbum } from "../hooks/useContainsMySavedAlbum";
+import { useYourLibrary } from "../hooks/useYourLibrary";
 
 type AlbumActionPanelProps = { album: SimplifiedAlbumObject };
 
 export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
-  const { data: isAlbumSaved, mutate } = useContainsMySavedAlbum({ albumId: album.id });
+  const library = useYourLibrary();
+  const { data: isAlbumSaved, mutate } = useCachedPromise(
+    (albumId: string) => library.containsSavedAlbum(albumId),
+    [album.id],
+  );
 
   return (
     <ActionPanel>
@@ -24,7 +27,7 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
           macOS: { modifiers: ["cmd", "shift"], key: "a" },
           Windows: { modifiers: ["ctrl", "shift"], key: "a" },
         }}
-        target={<TracksList album={album} showGoToAlbum={false} />}
+        target={<AlbumTracksList album={album} showGoToAlbum={false} />}
       />
       <Action
         icon={isAlbumSaved ? Icon.Minus : Icon.Plus}
@@ -36,9 +39,9 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
         onAction={async () => {
           try {
             if (isAlbumSaved) {
-              await removeFromMySavedAlbums({ albumIds: [album.id] });
+              await library.removeSavedAlbum(album.id);
             } else {
-              await addToMySavedAlbums({ albumIds: [album.id] });
+              await library.addSavedAlbum(album);
             }
             await mutate();
             await showHUD(isAlbumSaved ? "Album removed from the library" : "Album added to the library");

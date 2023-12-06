@@ -60,6 +60,7 @@ export type PagingObject = {
 export type SimplifiedAlbumObject = AlbumBase & {
   album_group?: "album" | "single" | "compilation" | "appears_on";
   artists: SimplifiedArtistObject[];
+  added_at?: string;
 };
 export type LinkedTrackObject = {
   external_urls?: ExternalUrlObject;
@@ -90,6 +91,7 @@ export type SimplifiedTrackObject = {
   type?: string;
   uri?: string;
   is_local?: boolean;
+  added_at?: string;
 };
 export type PagingSimplifiedTrackObject = PagingObject & {
   items?: SimplifiedTrackObject[];
@@ -205,14 +207,18 @@ export type EpisodeBase = {
   uri: string;
   restrictions?: EpisodeRestrictionObject;
 };
-export type SimplifiedEpisodeObject = EpisodeBase;
+export type SimplifiedEpisodeObject = EpisodeBase & {
+  added_at?: string;
+};
 export type PagingSimplifiedEpisodeObject = PagingObject & {
   items?: SimplifiedEpisodeObject[];
 };
 export type ShowObject = ShowBase & {
   episodes: PagingSimplifiedEpisodeObject;
 };
-export type SimplifiedShowObject = ShowBase;
+export type SimplifiedShowObject = ShowBase & {
+  added_at?: string;
+};
 export type EpisodeObject = EpisodeBase & {
   show: SimplifiedShowObject;
 };

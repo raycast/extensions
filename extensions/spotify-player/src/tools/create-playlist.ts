@@ -1,5 +1,5 @@
 import { addToPlaylist } from "../api/addToPlaylist";
-import { createPlaylist } from "../api/createPlaylist";
+import { YourLibrary } from "../helpers/YourLibrary";
 import { withSpotifyClient } from "../helpers/withSpotifyClient";
 
 type Input = {
@@ -18,7 +18,7 @@ type Input = {
 };
 
 const tool = async ({ name, description, trackIDs }: Input) => {
-  const playlist = await createPlaylist({ name, description: description ?? "" });
+  const playlist = await YourLibrary.getInstance().createPlaylist(name, description ?? "");
   if (!playlist || !playlist.id) {
     throw new Error("Failed to create playlist");
   }

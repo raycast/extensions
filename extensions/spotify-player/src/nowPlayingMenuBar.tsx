@@ -14,23 +14,20 @@ import {
   Image,
   Keyboard,
 } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { pause } from "./api/pause";
 import { play } from "./api/play";
 import { skipToNext } from "./api/skipToNext";
 import { skipToPrevious } from "./api/skipToPrevious";
 import { startRadio } from "./api/startRadio";
-import { removeFromMySavedTracks } from "./api/removeFromMySavedTracks";
-import { addToMySavedTracks } from "./api/addToMySavedTracks";
 import { transferMyPlayback } from "./api/transferMyPlayback";
 import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { useMyDevices } from "./hooks/useMyDevices";
 import { isSpotifyInstalled } from "./helpers/isSpotifyInstalled";
 import { View } from "./components/View";
 import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
-import { useMyPlaylists } from "./hooks/useMyPlaylists";
+import { useYourLibrary } from "./hooks/useYourLibrary";
 import { addToPlaylist } from "./api/addToPlaylist";
-import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
 import { useMe } from "./hooks/useMe";
 import { formatTitle } from "./helpers/formatTitle";
 import { getErrorMessage } from "./helpers/getError";
@@ -53,11 +50,18 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
 
   // The hooks below will only execute when the Menu Bar is opened
   const { myDevicesData } = useMyDevices({ options: { execute: launchType === LaunchType.UserInitiated } });
-  const { myPlaylistsData } = useMyPlaylists({ options: { execute: launchType === LaunchType.UserInitiated } });
   const { meData } = useMe({ options: { execute: launchType === LaunchType.UserInitiated } });
-  const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
-    trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
-    options: { execute: launchType === LaunchType.UserInitiated },
+  const trackId = currentlyPlayingData?.item?.id;
+  const library = useYourLibrary();
+  const { data: trackAlreadyLiked, revalidate: containsSavedTracksRevalidate } = useCachedPromise(
+    (id?: string) => library.containsSavedTrack(id),
+    [trackId],
+    {
+      execute: launchType === LaunchType.UserInitiated && !!trackId,
+    },
+  );
+  const { data: playlists } = usePromise(() => library.getAllPlaylists(), [], {
+    execute: launchType === LaunchType.UserInitiated,
   });
 
   React.useEffect(() => {
@@ -74,7 +78,6 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   }, [uriFromSpotify, shouldExecute, spotifyAppData]);
 
   const isPlaying = spotifyAppData?.state === "PLAYING";
-  const trackAlreadyLiked = containsMySavedTracksData?.[0];
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   const currentTime = Date.now();
@@ -102,7 +105,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   let menuItems: React.JSX.Element | null = null;
 
   if (isTrack) {
-    const { artists, id: trackId, album } = item as TrackObject;
+    const track = item as TrackObject;
+    const { artists, id: trackId, album } = track;
     const artistName = artists?.[0]?.name;
     const artistId = artists?.[0]?.id;
     title = formatTitle({ name, artistName, hideArtistName, maxTextLength, cleanupTitle });
@@ -117,10 +121,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             title="Dislike"
             onAction={async () => {
               try {
-                await removeFromMySavedTracks({
-                  trackIds: trackId ? [trackId] : [],
-                });
-                await containsMySavedTracksRevalidate();
+                if (trackId) {
+                  await library.removeSavedTrack(trackId);
+                }
+                await containsSavedTracksRevalidate();
               } catch (err) {
                 const error = getErrorMessage(err);
                 showHUD(error);
@@ -134,10 +138,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
             title="Like"
             onAction={async () => {
               try {
-                await addToMySavedTracks({
-                  trackIds: trackId ? [trackId] : [],
-                });
-                await containsMySavedTracksRevalidate();
+                await library.addSavedTrack(track);
+                await containsSavedTracksRevalidate();
               } catch (err) {
                 const error = getErrorMessage(err);
                 showHUD(error);
@@ -271,8 +273,8 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       )}
       {menuItems}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
-        {myPlaylistsData?.items
-          ?.filter((playlist) => playlist.owner?.id === meData?.id)
+        {(playlists ?? [])
+          .filter((playlist) => playlist.owner?.id === meData?.id)
           .map((playlist) => {
             return (
               playlist.name &&

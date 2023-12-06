@@ -4,13 +4,14 @@ import { getSpotifyClient } from "../helpers/withSpotifyClient";
 type GetAlbumTracksProps = {
   albumId: string;
   limit: number;
+  offset?: number;
 };
 
-export async function getAlbumTracks({ albumId, limit }: GetAlbumTracksProps) {
+export async function getAlbumTracks({ albumId, limit, offset = 0 }: GetAlbumTracksProps) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
-    const response = await spotifyClient.getAlbumsByIdTracks(albumId, { limit });
+    const response = await spotifyClient.getAlbumsByIdTracks(albumId, { limit, offset });
     return response;
   } catch (err) {
     const error = getErrorMessage(err);

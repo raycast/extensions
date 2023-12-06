@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { SimplifiedAlbumObject, SimplifiedTrackObject } from "../helpers/spotify.api";
-import { TracksList } from "./TracksList";
-import { useMyPlaylists } from "../hooks/useMyPlaylists";
+import { AlbumTracksList } from "./AlbumTracksList";
+import { useYourLibrary } from "../hooks/useYourLibrary";
 import { useMe } from "../hooks/useMe";
 import { AddToPlaylistAction } from "./AddToPlaylistAction";
 import { FooterAction } from "./FooterAction";
@@ -29,8 +30,9 @@ export function TrackActionPanel({
   playingContext,
   tracksToQueue,
 }: TrackActionPanelProps) {
-  const { myPlaylistsData } = useMyPlaylists();
+  const library = useYourLibrary();
   const { meData } = useMe();
+  const { data: playlists } = usePromise(() => library.getAllPlaylists());
 
   return (
     <ActionPanel>
@@ -39,14 +41,14 @@ export function TrackActionPanel({
         <Action.Push
           icon={Icon.AppWindowList}
           title="Go to Album"
-          target={<TracksList album={album} showGoToAlbum={false} />}
+          target={<AlbumTracksList album={album} showGoToAlbum={false} />}
         />
       )}
       <StartRadioAction trackId={track.id} />
-      {showAddToSaved && <AddToSavedTracksAction trackId={track.id} />}
+      {showAddToSaved && <AddToSavedTracksAction track={track} />}
       {track.uri && <AddToQueueAction uri={track.uri} title={title} />}
-      {myPlaylistsData?.items && meData && track.uri && (
-        <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={track.uri} />
+      {playlists && playlists.length > 0 && meData && track.uri && (
+        <AddToPlaylistAction playlists={playlists} meData={meData} uri={track.uri} />
       )}
       <FooterAction url={track?.external_urls?.spotify} uri={track.uri} title={title} />
     </ActionPanel>

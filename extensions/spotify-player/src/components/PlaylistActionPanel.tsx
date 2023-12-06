@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon } from "@raycast/api";
 import { SimplifiedPlaylistObject } from "../helpers/spotify.api";
 import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
-import { TracksList } from "./TracksList";
+import { PlaylistTracksList } from "./PlaylistTracksList";
 
 type PlaylistActionPanelProps = {
   title: string;
@@ -20,7 +20,7 @@ export function PlaylistActionPanel({ title, playlist }: PlaylistActionPanelProp
           macOS: { modifiers: ["cmd", "shift"], key: "a" },
           Windows: { modifiers: ["ctrl", "shift"], key: "a" },
         }}
-        target={<TracksList playlist={playlist} />}
+        target={<PlaylistTracksList playlist={playlist} />}
       />
       <FooterAction url={playlist?.external_urls?.spotify} uri={playlist.uri} title={title} />
     </ActionPanel>

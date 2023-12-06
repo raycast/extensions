@@ -1,8 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
-import { addToMySavedTracks } from "./api/addToMySavedTracks";
-import { containsMySavedTracks } from "./api/containsMySavedTrack";
+import { YourLibrary } from "./helpers/YourLibrary";
 import { safeLaunchCommandInBackground } from "./helpers/safeCommandLauncher";
 import { TrackObject } from "./helpers/spotify.api";
 
@@ -29,16 +28,14 @@ export default async function Command() {
     return await showHUD("Unable to retrieve the track ID");
   }
 
-  const trackAlreadyLiked = await containsMySavedTracks({ trackIds: [trackId] });
+  const trackAlreadyLiked = await YourLibrary.getInstance().containsSavedTrack(trackId);
 
-  if (trackAlreadyLiked[0]) {
+  if (trackAlreadyLiked) {
     return await showHUD(`${item.name}${artistNameSuffix} has already been liked`);
   }
 
   try {
-    await addToMySavedTracks({
-      trackIds: [trackId],
-    });
+    await YourLibrary.getInstance().addSavedTrack(item);
     await showHUD(`Liked ${item.name}${artistNameSuffix}`);
     await safeLaunchCommandInBackground("current-track");
   } catch {

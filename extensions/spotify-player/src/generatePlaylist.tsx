@@ -3,7 +3,7 @@ import { showFailureToast, usePromise } from "@raycast/utils";
 import { searchTracks } from "./api/searchTracks";
 import { View } from "./components/View";
 import TrackListItem from "./components/TrackListItem";
-import { createPlaylist } from "./api/createPlaylist";
+import { YourLibrary } from "./helpers/YourLibrary";
 import { addToPlaylist } from "./api/addToPlaylist";
 import { play } from "./api/play";
 import { addToQueue } from "./api/addTrackToQueue";
@@ -66,10 +66,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
     if (!playlist) return;
     try {
       await showToast({ style: Toast.Style.Animated, title: "Adding playlist to Spotify" });
-      const spotifyPlaylist = await createPlaylist({
-        name: playlist.name,
-        description: playlist.description,
-      });
+      const spotifyPlaylist = await YourLibrary.getInstance().createPlaylist(playlist.name, playlist.description);
       if (spotifyPlaylist?.id) {
         const trackUris = (tracks?.map((track) => track?.uri).filter(Boolean) as string[]) ?? [];
         await addToPlaylist({ playlistId: spotifyPlaylist.id, trackUris: trackUris });

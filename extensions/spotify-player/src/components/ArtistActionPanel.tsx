@@ -2,8 +2,7 @@ import { Action, ActionPanel, Icon } from "@raycast/api";
 import { ArtistObject } from "../helpers/spotify.api";
 import { AlbumsGrid } from "./AlbumsGrid";
 import { useArtistAlbums } from "../hooks/useArtistAlbums";
-import { useArtistTopTracks } from "../hooks/useArtistTopTracks";
-import { TracksList } from "./TracksList";
+import { ArtistTopTracksList } from "./ArtistTopTracksList";
 import { FooterAction } from "./FooterAction";
 import { StartRadioAction } from "./StartRadioAction";
 import { PlayAction } from "./PlayAction";
@@ -15,7 +14,6 @@ type ArtistActionPanelProps = {
 
 export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
   const { artistAlbumsData } = useArtistAlbums({ artistId: artist.id });
-  const { artistTopTracksData } = useArtistTopTracks({ artistId: artist.id });
   const albums = artistAlbumsData?.items;
 
   return (
@@ -28,13 +26,7 @@ export function ArtistActionPanel({ title, artist }: ArtistActionPanelProps) {
           target={<AlbumsGrid albums={albums} title={artist.name} />}
         />
       )}
-      {artistTopTracksData && (
-        <Action.Push
-          icon={Icon.List}
-          title="Show Popular Songs"
-          target={<TracksList tracks={artistTopTracksData.tracks} />}
-        />
-      )}
+      <Action.Push icon={Icon.List} title="Show Popular Songs" target={<ArtistTopTracksList artist={artist} />} />
       <StartRadioAction artistId={artist.id} />
       <FooterAction url={artist?.external_urls?.spotify} uri={artist.uri} title={title} />
     </ActionPanel>
