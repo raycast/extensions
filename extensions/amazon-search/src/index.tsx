@@ -71,13 +71,19 @@ export default function Command() {
     setItems(results);
   };
 
-  return (
-    <List
-      onSearchTextChange={search}
-      isLoading={searchText.length > 0 && items.length === 0}
-      searchBarPlaceholder="Search Amazon..."
-    >
-      {items.map((item, index) => (
+return (
+  <List
+    onSearchTextChange={search}
+    isLoading={searchText.length > 0 && items.length === 0}
+    searchBarPlaceholder="Search Amazon..."
+  >
+    {items.length === 0 ? (
+      <List.EmptyView
+        icon="amazon-emptyview.png"
+        title="No Results"
+      />
+    ) : (
+      items.map((item, index) => (
         <List.Item
           key={index}
           title={item}
@@ -89,7 +95,8 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      ))}
-    </List>
-  );
+      ))
+    )}
+  </List>
+);
 }
