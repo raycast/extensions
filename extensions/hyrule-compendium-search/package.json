@@ -15,6 +15,7 @@
     {
       "name": "index",
       "title": "Get Entry",
+      "subtitle": "Hyrule Compendium Search",
       "icon": "command-icon.png",
       "description": "Get an entry from the compendium using fuzzy search",
       "mode": "view",
