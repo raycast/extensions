@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Enhancements] - 2023-12-07
+
+- Added Open and close other windows action
+
 ## [Fix] - 2023-11-28
 
 - Hopefully Fix the "Open With Terminal" action by using the bundle identifier and checking that it exists
