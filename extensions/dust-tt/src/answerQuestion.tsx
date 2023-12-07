@@ -89,7 +89,7 @@ export function AskDustQuestion({ question, agent = DUST_AGENT }: { question: st
               <Action.CopyToClipboard content={dustAnswer} shortcut={{ modifiers: ["cmd"], key: "." }} />
             </>
           )}
-          {dustDocuments && (
+          {dustDocuments && dustDocuments.length > 0 && (
             <Action.Push
               title="Source Urls"
               icon={Icon.BulletPoints}
