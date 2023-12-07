@@ -32,7 +32,7 @@
     "danulqua",
     "rgrunberg",
     "Vaibhav-Satishkumar",
-    "leo_tuil"
+    "tleo19"
   ],
   "commands": [
     {
@@ -100,24 +100,7 @@
       "title": "Open New Incognito Window",
       "subtitle": "Arc",
       "description": "Create and open a new incognito window",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "url",
-          "title": "URL",
-          "description": "The URL to open in the new window",
-          "type": "textfield",
-          "required": false
-        }
-      ],
-      "arguments": [
-        {
-          "name": "url",
-          "placeholder": "URL",
-          "type": "text",
-          "required": false
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "new-tab",
@@ -246,6 +229,20 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "release-notes",
+      "title": "Open Arc Release Notes",
+      "subtitle": "Arc",
+      "description": "Open the Arc release notes",
+      "mode": "no-view"
+    },
+    {
+      "name": "boost-gallery",
+      "title": "Open Arc Boost Gallery",
+      "subtitle": "Arc",
+      "description": "Open the Arc Boost Gallery",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
