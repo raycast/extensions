@@ -27,7 +27,7 @@ export default function Main() {
       onSearchTextChange={(value) => setTypedText(value)}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Word amount"
+          tooltip="Word Amount"
           defaultValue={testLength}
           onChange={setTestLength}
           filtering={false}
@@ -48,7 +48,7 @@ export default function Main() {
         title={`${speed} wpm`}
         actions={
           <ActionPanel>
-            <Action title="Reload" onAction={() => reloadGame()} />
+            <Action title="Reload" onAction={() => reloadGame()} icon={Icon.Bolt} />
           </ActionPanel>
         }
         detail={
