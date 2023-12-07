@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macosicons",
+  "title": "MacOSIcons.com",
+  "description": "Raycast extension for browsing and applying icons from macOSicons.com",
+  "icon": "main-icon.png",
+  "author": "shldk",
+  "categories": [
+    "System",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Icons Browser",
+      "subtitle": "macOSicons.com",
+      "description": "Show icons from macOSicons.com",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Icons History",
+      "subtitle": "macOSicons.com",
+      "description": "Show history of all icon changes performed by extension",
+      "mode": "view",
+      "icon": "history-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1",
+    "algoliasearch": "^4.20.0",
+    "@react-buddy/ide-toolbox": "^2.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.9.0",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
