@@ -71,32 +71,29 @@ export default function Command() {
     setItems(results);
   };
 
-return (
-  <List
-    onSearchTextChange={search}
-    isLoading={searchText.length > 0 && items.length === 0}
-    searchBarPlaceholder="Search Amazon..."
-  >
-    {items.length === 0 ? (
-      <List.EmptyView
-        icon="amazon-emptyview.png"
-        title="No Results"
-      />
-    ) : (
-      items.map((item, index) => (
-        <List.Item
-          key={index}
-          title={item}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                url={`https://www.amazon.${preferences.top_level_domain}/s?k=${encodeURIComponent(item)}`}
-              />
-            </ActionPanel>
-          }
-        />
-      ))
-    )}
-  </List>
-);
+  return (
+    <List
+      onSearchTextChange={search}
+      isLoading={searchText.length > 0 && items.length === 0}
+      searchBarPlaceholder="Search Amazon..."
+    >
+      {items.length === 0 ? (
+        <List.EmptyView icon="amazon-emptyview.png" title="No Results" />
+      ) : (
+        items.map((item, index) => (
+          <List.Item
+            key={index}
+            title={item}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  url={`https://www.amazon.${preferences.top_level_domain}/s?k=${encodeURIComponent(item)}`}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
+    </List>
+  );
 }
