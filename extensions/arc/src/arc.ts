@@ -122,10 +122,6 @@ export async function reloadTab(tab: Tab) {
 export async function makeNewTab(url: string) {
   await runAppleScript(`
     tell application "Arc"
-      if (count of windows) is 0 then
-        make new window
-      end if
-
       tell front window
         make new tab with properties {URL:"${url}"}
       end tell
