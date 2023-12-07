@@ -1,6 +1,6 @@
 # Omnivore Changelog
 
-## Searching improvements
+## [Searching improvements] - 2023-12-07
 
 - No results shows correct message
 - Metadata images updated with more contrasting background
