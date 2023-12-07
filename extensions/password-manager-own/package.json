@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "password-manager-own",
+  "title": "Password Manager (Own)",
+  "description": "Store your passwords encripted behind one password",
+  "icon": "command-icon.png",
+  "author": "plutotom",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Password manager",
+      "description": "A simple password manager for adding and reweaving passwords",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "crypto_password",
+      "type": "password",
+      "title": "Crypto Password",
+      "required": true,
+      "description": "The idea is to have to enter this password every once and a while, but this has not been added yet. Current this value is never used",
+      "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
+      "link": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.0",
+    "nanoid": "^5.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
