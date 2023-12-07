@@ -129,6 +129,8 @@ const EndOfInterval = () => {
     } else {
       markdownImage = `![${"You did it!"}](${preferences.completionImage})`;
     }
+  } else {
+    markdownImage = `![${"You did it!"}](${preferences.completionImage})`;
   }
 
   return (
