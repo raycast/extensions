@@ -35,9 +35,9 @@ export function useArticles(searchType: string, searchText: string) {
   const transformedData = data?.search?.edges?.map((edge: { node: Article }) => edge.node) || []
   const filteredData = transformedData.filter(
     (article: Article) =>
-      article.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      article.author.toLowerCase().includes(searchText.toLowerCase()) ||
-      article.labels.some((label) => label.name.toLowerCase().includes(searchText.toLowerCase())),
+      article.title?.toLowerCase().includes(searchText?.toLowerCase()) ||
+      article.author?.toLowerCase().includes(searchText?.toLowerCase()) ||
+      article.labels.some((label) => label.name?.toLowerCase().includes(searchText?.toLowerCase())),
   )
 
   return {
