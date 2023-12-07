@@ -29,6 +29,6 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
     }
     await handleOpenNewIncognitoTab(url);
   } catch {
-    await showHUD("❌ Failed opening a new incogntio window");
+    await showHUD("❌ Failed opening a new incognito window");
   }
 }
