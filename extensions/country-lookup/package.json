@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "country-lookup",
   "title": "Country Lookup",
-  "description": "Quickly lookup countries and get informational data about the countries",
+  "description": "Quickly lookup countries and get informational data about the countries.",
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
   "license": "MIT",
