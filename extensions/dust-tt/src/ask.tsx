@@ -8,7 +8,7 @@ export default function AskDustCommand(props: LaunchProps<{ arguments: { search:
   const question = props.arguments.search;
   const agent = props.arguments.agent || DUST_AGENT;
 
-  const selectedText = useGetSelectedText();
+  const selectedText = question ? undefined : useGetSelectedText();
   return question ? (
     <AskDustQuestion question={question} agent={agent} />
   ) : (

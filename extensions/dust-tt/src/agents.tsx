@@ -1,12 +1,46 @@
 import { AgentConfigurationType, AgentType } from "./dust_api/agent";
 import { DustApi, DustAPICredentials } from "./dust_api/api";
 import { useEffect, useState } from "react";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Color, getPreferenceValues, Image, LocalStorage } from "@raycast/api";
+import Asset = Image.Asset;
 
 export const DUST_AGENT: AgentType = {
   sId: "dust",
   name: "Dust",
   description: "An assistant with context on your company data.",
+};
+
+interface ManagedSource {
+  icon: Asset;
+  color: Color;
+  name: string;
+}
+export const MANAGED_SOURCES: { [id: string]: ManagedSource } = {
+  "managed-github": {
+    icon: "icons/github.svg",
+    color: Color.PrimaryText,
+    name: "GitHub",
+  },
+  "managed-google_drive": {
+    icon: "icons/google_drive.svg",
+    color: Color.Yellow,
+    name: "Google Drive",
+  },
+  "managed-slack": {
+    icon: "icons/slack.svg",
+    color: Color.Red,
+    name: "Slack",
+  },
+  "managed-notion": {
+    icon: "icons/notion.svg",
+    color: Color.Purple,
+    name: "Notion",
+  },
+  "managed-intercom": {
+    icon: "icons/intercom.svg",
+    color: Color.Blue,
+    name: "Intercom",
+  },
 };
 
 async function saveAgents(agents: { [id: string]: AgentConfigurationType }) {

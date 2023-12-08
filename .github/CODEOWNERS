@@ -47,7 +47,7 @@
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince
 /extensions/apple-reminders                          @thomaslombart
-/extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @Visual-Studio-Coder
+/extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @Visual-Studio-Coder @tleo19
 /extensions/archiver                                 @404J
 /extensions/arxiv                                    @koayon @pernielsentikaer
 /extensions/asana                                    @thomaslombart
@@ -396,7 +396,7 @@
 /extensions/git-branch-name-generator                @michaelbonner
 /extensions/git-co-authors                           @nickradford @pernielsentikaer
 /extensions/git-commands                             @manumorante
-/extensions/git-repos                                @moored @nitishpdmn
+/extensions/git-repos                                @moored @nitishpdmn @go-dima
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @azlekov
 /extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither
@@ -745,6 +745,7 @@
 /extensions/ohmyzsh-plugins                          @k8scat
 /extensions/ok-json                                  @francisfeng
 /extensions/omni-news                                @danielkastberg
+/extensions/omnivore                                 @KarolusD
 /extensions/one-tab-group                            @xiaoluoboding
 /extensions/one-thing                                @pernielsentikaer @mathieudutour
 /extensions/one-time-password                        @lacherogwu
@@ -1020,7 +1021,7 @@
 /extensions/solana-explorer                          @TrGiLong @AnishDe12020
 /extensions/sonarr                                   @Aayush9029
 /extensions/sort-mentions                            @YamenSharaf
-/extensions/soundboard                               @pernielsentikaer @andreaselia @FrankreedX
+/extensions/soundboard                               @pernielsentikaer @andreaselia @FrankreedX @jarntz
 /extensions/sourcegraph                              @bobheadxi
 /extensions/sourcetree                               @i906
 /extensions/spaces                                   @pradeepb28
