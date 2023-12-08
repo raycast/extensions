@@ -2,24 +2,27 @@
 
 Raycast extension for browsing and applying icons from [macOSicons.com](https://macosicons.com)
 
+#### `Icons Browser`
+
 ![home.jpeg](home.jpeg)
 
-The process of updating an icon for you Mac apps never was so easy:
+The process of updating an icon for the app is very easy:
 
-1. When you find an icon you like, select it, press `return` _(or select the default action from the menu)_
+1. When you find an icon you like, select it, press `return` _(or select the first action from the menu)_
    ![actions.jpeg](actions.jpeg)
-2. Find the application that you want to change the icon of.
-   ![update-app-icon.png](actions-update.png)
-3. And _viola,_ in this few clicks you have the new shiny icon set, isn't it cool?
+2. Select the application you want to change the icon of.
+   ![choose-app.jpeg](choose-app.jpeg)
+3. And _viola,_ in just a few clicks you've updated the icon for this application, isn't it cool?
+![dock.png](dock.png)
+#### `Icons History`
 
-To see whole your history of icon changes made since the beginning, there's a command called `Icons History`, which
-basically does exactly what it entails. 
+This command will show you the history of all icon changes you made using the extension, grouped by app.
 
-There are a lot of cool stuff you can do from here, I would definitely recommend exploring this one deeper, it might turn out to be much cooler than it looks like at first!
+Play and experiment right there without the need to switch between history and browser.
 
 ![history.jpeg](history.jpeg)
 
-##### Many thanks macOSicons for having such a great product out there for free! <3
+**Many thanks macOSicons for having such a great product out there for free! <3**
 
 _P.S. if you have any questions, or you found my usage of any available resources wrong or possibly inappropriate,
 please let me know right away!_
