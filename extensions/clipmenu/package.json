@@ -30,6 +30,42 @@
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
+  "preferences": [
+    {
+      "name": "preview",
+      "label": "Preview current content in menu bar",
+      "description": "show what's currently in clipboard",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "truncate",
+      "title": "Limit visible text length",
+      "description": "how many characters to show in menu bar",
+      "required": false,
+      "type": "dropdown",
+      "default": "60",
+      "data": [
+        {
+          "title": "15",
+          "value": "15"
+        },
+        {
+          "title": "30",
+          "value": "30"
+        },
+        {
+          "title": "60",
+          "value": "60"
+        },
+        {
+          "title": "No Limit",
+          "value": "1000"
+        }
+      ]
+    }
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
