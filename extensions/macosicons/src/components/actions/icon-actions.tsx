@@ -3,7 +3,6 @@ import {
   Action,
   ActionPanel,
   Application,
-  Detail,
   getApplications,
   Icon,
   showToast,
@@ -11,7 +10,7 @@ import {
 } from "@raycast/api";
 import { setMacOSIcon } from "../../utils";
 import React from "react";
-import { IconDetails, IconHit } from "../../types";
+import { IconHit } from "../../types";
 import { DB } from "../../db";
 
 export type ActionProps = { icon: IconHit };
@@ -70,21 +69,6 @@ const CopyURLToClipboard = ({ icon }: ActionProps) => (
     content={{ html: icon.icnsUrl ?? icon.appName }}
     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
   ></Action.CopyToClipboard>
-);
-
-const ShowJSON = ({ icon }: ActionProps) => {
-  return (
-    <Action.Push
-      title="Show JSON"
-      target={<DetailJSON icon={icon} />}
-      icon={Icon.Snippets}
-      shortcut={{ modifiers: ["cmd"], key: "j" }}
-    />
-  );
-};
-
-const DetailJSON = ({ icon }: { icon: IconDetails }) => (
-  <Detail markdown={"```json\n" + JSON.stringify(icon) + "\n```"} />
 );
 
 export const IconActions = ({ icon }: { icon: IconHit }) => (
