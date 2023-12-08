@@ -1,5 +1,7 @@
 # Wayback Machine Changelog
 
+## [Added metadata image] - 2023-12-08
+
 ## [Update] - 2023-10-08
 
 Add multi URL support with a new view command
