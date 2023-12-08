@@ -1,7 +1,3 @@
-export function iife(func: () => unknown) {
-  return func();
-}
-
-export async function iiafe(func: () => Promise<unknown>) {
-  return await func();
-}
+export const truncateText = (text: string, length: number): string => {
+  return text.length > length ? text.substring(0, length) + "..." : text;
+};
