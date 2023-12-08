@@ -1,5 +1,9 @@
 # Bilibili Changelog
 
+## [New Feature] - 2023-12-8
+
+- Support mark as watched for video
+
 ## [New Feature] - 2023-10-30
 
 - Implement filter for the dynamic feed.
