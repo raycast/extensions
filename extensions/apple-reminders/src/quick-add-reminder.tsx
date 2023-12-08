@@ -1,7 +1,7 @@
 import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
 
-import { createReminder, getData } from "./api";
+import { createReminder, getData, NewReminder } from "./api";
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddReminder }) {
   try {
@@ -96,47 +96,22 @@ Here are some examples to help you out:
 
 Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
-    const maxRetries = 3;
-    let retries = 0;
-    let json;
-    while (retries < maxRetries) {
-      try {
-        const result = await AI.ask(prompt);
-        console.log(result);
-        json = JSON.parse(result.trim());
-        if (json.recurrence && !json.dueDate) {
-          console.log("No recurrence due date included.");
-          throw new Error("Recurrence without dueDate");
-        }
-        // If no errors at this point, break the retry loop
-        break;
-      } catch (error) {
-        retries++;
-        console.log(`Retriying AI call. Retry count: ${retries}`);
-      }
+    const { description, ...newReminder } = await askAI(prompt);
+    if (props.arguments.notes) {
+      newReminder.notes = props.arguments.notes;
     }
 
-    // After exiting the loop, check if the retry limit was reached
-    if (retries === maxRetries) {
-      throw new Error("Max retries reached. Unable to get a valid response from AI.");
-    } else {
-      if (props.arguments.notes) {
-        json.notes = props.arguments.notes;
-      }
-    }
-
-    // The AI is assuming the user has a UTC timezone, so we need to adjust the date to actually match the user's timezone.
-    if (json.dueDate && json.dueDate.includes("T")) {
-      const date = new Date(json.dueDate);
+    if (newReminder.dueDate && newReminder.dueDate.includes("T")) {
+      const date = new Date(newReminder.dueDate);
       const timezoneOffset = date.getTimezoneOffset() * 60 * 1000;
-      json.dueDate = new Date(date.getTime() + timezoneOffset).toISOString();
+      newReminder.dueDate = new Date(date.getTime() + timezoneOffset).toISOString();
     }
 
-    await createReminder(json);
+    await createReminder(newReminder);
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Added reminder: " + json.description,
+      title: "Added reminder: " + description,
     });
   } catch (error) {
     console.log(error);
@@ -148,4 +123,22 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
       message,
     });
   }
+}
+
+async function askAI(prompt: string): Promise<NewReminder & { description: string }> {
+  const maxRetries = 3;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const result = await AI.ask(prompt);
+      const json = JSON.parse(result.trim());
+      if (json.recurrence && !json.dueDate) {
+        throw new Error("Recurrence without dueDate");
+      }
+      return json;
+    } catch (error) {
+      console.log(`Retriying AI call. Retry count: ${i}`);
+    }
+  }
+
+  throw new Error("Max retries reached. Unable to get a valid response from AI.");
 }
