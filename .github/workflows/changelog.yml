@@ -1,6 +1,8 @@
 name: Changelog Reminder
 
-on: pull_request
+on:
+  pull_request:
+    paths: ["extensions/**"]
 permissions:
   pull-requests: write
 jobs:
@@ -11,3 +13,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: mskelton/changelog-reminder-action@v3
+        with:
+          token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
