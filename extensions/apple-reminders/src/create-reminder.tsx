@@ -14,7 +14,7 @@ import {
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format, startOfDay } from "date-fns";
 
-import { createReminder } from "./api";
+import { NewReminder, createReminder } from "./api";
 import { getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
 
@@ -63,17 +63,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     },
     async onSubmit(values) {
       try {
-        const payload: {
-          title: string;
-          listId?: string;
-          notes?: string;
-          dueDate?: string;
-          priority?: string;
-          recurrence?: {
-            frequency: string;
-            interval: number;
-          };
-        } = {
+        const payload: NewReminder = {
           title: values.title,
           listId: values.listId,
         };
