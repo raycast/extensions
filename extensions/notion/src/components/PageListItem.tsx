@@ -124,8 +124,8 @@ export function PageListItem({
     handleOnOpenPage(page, setRecentPage),
   );
 
-  const { openIn } = getPreferenceValues<Preferences>();
-  const isDefaultNotionActionApp = openIn && openIn.name === "Notion";
+  const { open_in } = getPreferenceValues<Preferences>();
+  const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
   let openInNotionDefaultAction;
   let openInNotionAlternativeAction;
   if (!isDefaultNotionActionApp) {

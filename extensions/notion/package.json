@@ -74,7 +74,7 @@
       "link": "https://www.notion.so/my-integrations"
     },
     {
-      "name": "openIn",
+      "name": "open_in",
       "type": "appPicker",
       "title": "Open Page in",
       "required": false,

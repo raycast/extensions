@@ -2,7 +2,7 @@ import { closeMainWindow, getPreferenceValues, getApplications, open } from "@ra
 
 import { Page } from "./notion/page";
 
-let openIn = getPreferenceValues<Preferences>().openIn;
+let openIn = getPreferenceValues<Preferences>().open_in;
 
 let hasCheckedDefault = false;
 export async function checkedDefaultOpenMethod() {
