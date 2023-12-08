@@ -4,11 +4,20 @@
 
 ### Quick Add
 
-Write a note in Raycast and and send it to Tana! The note that you write will be added to a node that you configure.
+Write a note in Raycast and and send it to Tana!
+The note that you write will be added to your **Inbox**.
 
-To configure this in Raycast, you'll need to provide an API token which can be generated in Tana. To generate this token, open the command line (Cmd/Ctrl-K) and select `Get API Token`. This will generate a token and add it your clipboard. Once generated, paste the token into the corresponding configuration in Raycast.
+To configure this in Raycast, you'll need to provide an API token which can be generated in Tana. 
 
 *Note: currently only plaintext notes are supported.*
+
+### Generate API token in Tana
+Please follow instructions in [Tana Documentation](https://help.tana.inc/tana-input-api.html) to generate a token.
+Once generated, paste the token into the corresponding configuration in Raycast.
+
+If you have used this plugin before(in 2022), you also need to do the same thing since Tana have updated their API.
+![](./media/change-extension-configuration.png)
+
 
 ### Contribution
 
