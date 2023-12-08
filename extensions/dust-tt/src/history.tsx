@@ -89,6 +89,7 @@ export default function DustHistoryCommand() {
                       await LocalStorage.setItem("dust_history", JSON.stringify(newHistory));
                       setHistory(newHistory);
                     }}
+                    style={Action.Style.Destructive}
                   />
                   <Action
                     icon={Icon.Trash}
@@ -97,6 +98,7 @@ export default function DustHistoryCommand() {
                       await LocalStorage.setItem("dust_history", JSON.stringify([]));
                       setHistory([]);
                     }}
+                    style={Action.Style.Destructive}
                   />
                 </ActionPanel>
               }

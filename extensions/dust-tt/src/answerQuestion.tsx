@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { DustApi, DustAPICredentials } from "./dust_api/api";
+import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { DustApi, DustAPICredentials, DustDocument } from "./dust_api/api";
 import { useEffect, useState } from "react";
 import { addDustHistory } from "./history";
 import { AgentType } from "./dust_api/agent";
@@ -10,12 +10,14 @@ async function answerQuestion({
   dustApi,
   setDustAnswer,
   setConversationId,
+  setDustDocuments,
   agent = DUST_AGENT,
 }: {
   question: string;
   dustApi: DustApi;
   setDustAnswer: (answer: string) => void;
   setConversationId: (conversationId: string) => void;
+  setDustDocuments: (documents: DustDocument[]) => void;
   agent?: AgentType;
 }) {
   const { conversation, message, error } = await dustApi.createConversation({ question: question, agentId: agent.sId });
@@ -40,6 +42,7 @@ async function answerQuestion({
           agent: agent.name,
         });
       },
+      setDustDocuments,
     });
   }
 }
@@ -47,7 +50,7 @@ async function answerQuestion({
 export function AskDustQuestion({ question, agent = DUST_AGENT }: { question: string; agent?: AgentType }) {
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const [dustAnswer, setDustAnswer] = useState<string | undefined>(undefined);
-
+  const [dustDocuments, setDustDocuments] = useState<DustDocument[]>([]);
   const preferences = getPreferenceValues<DustAPICredentials>();
   const dustApi = new DustApi(preferences);
 
@@ -60,6 +63,7 @@ export function AskDustQuestion({ question, agent = DUST_AGENT }: { question: st
           agent: agent,
           setDustAnswer: setDustAnswer,
           setConversationId: setConversationId,
+          setDustDocuments: setDustDocuments,
         });
       })();
     }
@@ -85,8 +89,48 @@ export function AskDustQuestion({ question, agent = DUST_AGENT }: { question: st
               <Action.CopyToClipboard content={dustAnswer} shortcut={{ modifiers: ["cmd"], key: "." }} />
             </>
           )}
+          {dustDocuments && dustDocuments.length > 0 && (
+            <Action.Push
+              title="Source Urls"
+              icon={Icon.BulletPoints}
+              shortcut={{ modifiers: ["cmd"], key: "u" }}
+              target={<DocumentsList documents={dustDocuments} />}
+            />
+          )}
         </ActionPanel>
       }
     />
+  );
+}
+
+const colors = [Color.Blue, Color.Red, Color.Green, Color.Yellow, Color.Purple, Color.Orange];
+function DocumentsList({ documents }: { documents: DustDocument[] }) {
+  const sourceIdColors: { [id: string]: Color } = {};
+  let index = 0;
+  documents.forEach((document) => {
+    if (!sourceIdColors[document.dataSourceId]) {
+      sourceIdColors[document.dataSourceId] = colors[index % colors.length];
+      index++;
+    }
+  });
+  return (
+    <List>
+      {documents
+        .sort((a, b) => {
+          return a.reference - b.reference;
+        })
+        .map((document) => (
+          <List.Item
+            key={document.id}
+            title={`${document.reference} - ${document.sourceUrl}`}
+            accessories={[{ tag: { color: sourceIdColors[document.dataSourceId], value: document.dataSourceId } }]}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open in Browser" url={document.sourceUrl} />
+              </ActionPanel>
+            }
+          />
+        ))}
+    </List>
   );
 }
