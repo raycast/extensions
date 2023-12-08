@@ -25,10 +25,12 @@ const useTagsMarkdown = (tags: Tags, file: string) => {
       const lonRef = (tags.GPSLongitudeRef.value as string[])[0] === "E" ? "" : "-";
       const lon = tags.GPSLongitude.description;
       const url = `https://maps.google.com/maps?f=q&q=loc:${latRef}${lat},${lonRef}${lon}&t=k&spn=0.5,0.5`;
+      const osmUrl = `https://www.openstreetmap.org/#map=20/${latRef}${lat}/${lonRef}${lon}`;
+      const bingUrl = `https://www.bing.com/maps/?v=2&cp=${latRef}${lat}~${lonRef}${lon}&lvl=18.0&sty=c`;
       return [
         "## GPS",
-        "> This image has GPS coordinates, click the link below to open in Google Maps.\n",
-        `[Open in Google Maps](${url})`,
+        "> This image has GPS coordinates, click the link below to open a map.\n",
+        `Open in: [Google Maps](${url}) | [OpenStreetMap](${osmUrl}) | [Bing Maps](${bingUrl})`,
       ].join("\n");
     }
     return "";
