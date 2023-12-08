@@ -1,9 +1,12 @@
-import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
-import { closeTab, openNewTab, setActiveTab } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import type { ReactElement } from "react";
+
+import { Action, ActionPanel, Icon, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+
+import { closeTab, openNewTab, setActiveTab } from "../actions";
 import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "../constants";
+import type { Preferences, Tab } from "../interfaces";
+import { SettingsProfileOpenBehaviour } from "../interfaces";
 
 export class BraveActions {
   public static NewTab = NewTabActions;
@@ -97,7 +100,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
             })
           }
-          title={"Open in current profile"}
+          title={"Open in Current Profile"}
         />
         <Action
           onAction={() =>
@@ -108,7 +111,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
             })
           }
-          title={"Open in original profile"}
+          title={"Open in Original Profile"}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />

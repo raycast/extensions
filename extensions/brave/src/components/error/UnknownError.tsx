@@ -1,4 +1,5 @@
-import { Detail, showToast, Toast } from "@raycast/api";
+import { Detail, Toast, showToast } from "@raycast/api";
+
 import { DEFAULT_ERROR_TITLE, UnknownErrorText } from "../../constants";
 
 export function UnknownError() {

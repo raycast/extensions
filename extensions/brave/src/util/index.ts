@@ -1,4 +1,5 @@
 import path from "path";
+
 import { DEFAULT_BRAVE_PROFILE_ID, defaultBraveProfilePath, defaultBraveStatePath } from "../constants";
 
 const userLibraryDirectoryPath = () => {

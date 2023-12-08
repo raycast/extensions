@@ -1,9 +1,12 @@
-import { ReactNode, useCallback, useEffect, useState } from "react";
-import { getOpenTabs } from "../actions";
-import { Preferences, SearchResult, Tab } from "../interfaces";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import { getPreferenceValues } from "@raycast/api";
-import { NOT_INSTALLED_MESSAGE } from "../constants";
+
+import { getOpenTabs } from "../actions";
 import { NotInstalledError, UnknownError } from "../components";
+import { NOT_INSTALLED_MESSAGE } from "../constants";
+import type { Preferences, SearchResult, Tab } from "../interfaces";
 
 export function useTabSearch(query?: string): SearchResult<Tab> {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
@@ -18,7 +21,7 @@ export function useTabSearch(query?: string): SearchResult<Tab> {
       tabs = tabs.filter(
         (tab) =>
           tab.title.toLowerCase().includes(query.toLowerCase()) ||
-          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
+          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase()),
       );
     }
     setData(tabs);

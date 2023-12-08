@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { DEFAULT_ERROR_TITLE, DownloadText } from "../../constants";
 import { cpus } from "os";
 import { join } from "path";
-import { ExecError } from "../../interfaces";
+import { useState } from "react";
+
+import { ActionPanel, Detail, Toast, showToast } from "@raycast/api";
+
+import { DEFAULT_ERROR_TITLE, DownloadText } from "../../constants";
+import type { ExecError } from "../../interfaces";
 
 export const brewPrefix: string = (() => {
   try {
@@ -53,7 +55,7 @@ export function NotInstalledError() {
                   await showToast(
                     Toast.Style.Failure,
                     DEFAULT_ERROR_TITLE,
-                    "An unknown error occurred while trying to install"
+                    "An unknown error occurred while trying to install",
                   );
                 }
                 toast.title = "Installed! Please go back and try again.";

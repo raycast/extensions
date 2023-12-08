@@ -1,5 +1,11 @@
 # Brave Changelog
 
+## [Brave Browser Nightly] - 2023-12-08
+
+- Added support for Brave Browser Nightly
+- Add extra osascript to activate the browser window
+- Linting code
+
 ## [Bug Fixes & New Actions] - 2023-03-28
 
 - Fix errors caused by inconsistent number of hooks

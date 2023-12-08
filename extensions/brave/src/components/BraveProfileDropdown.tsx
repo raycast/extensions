@@ -1,10 +1,12 @@
-import { List } from "@raycast/api";
-import { useEffect } from "react";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { existsSync, promises } from "fs";
+import { useEffect } from "react";
+
+import { List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+
+import { BRAVE_PROFILES_KEY, BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "../constants";
+import type { BraveProfile } from "../interfaces";
 import { getLocalStatePath } from "../util";
-import { BraveProfile } from "../interfaces";
-import { DEFAULT_BRAVE_PROFILE_ID, BRAVE_PROFILE_KEY, BRAVE_PROFILES_KEY } from "../constants";
 
 interface Props {
   onProfileSelected?: (profile: string) => void;

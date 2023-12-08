@@ -1,8 +1,10 @@
-import { ReactNode } from "react";
-import { Image } from "@raycast/api";
+import type { ReactNode } from "react";
+
+import type { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 export interface Preferences {
+  readonly braveBuild: "stable" | "nightly";
   readonly useOriginalFavicon: boolean;
   readonly openTabInProfile: SettingsProfileOpenBehaviour;
 }
@@ -38,7 +40,7 @@ export class Tab {
     public readonly url: string,
     public readonly favicon: string,
     public readonly windowsIndex: number,
-    public readonly tabIndex: number
+    public readonly tabIndex: number,
   ) {}
 
   static parse(line: string): Tab {

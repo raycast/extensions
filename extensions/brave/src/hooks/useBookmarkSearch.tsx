@@ -1,10 +1,13 @@
-import { promises, existsSync } from "fs";
-import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../interfaces";
-import { getBookmarksFilePath } from "../util";
-import { ReactNode, useEffect, useState } from "react";
-import { NOT_INSTALLED_MESSAGE, DEFAULT_BRAVE_PROFILE_ID, BRAVE_PROFILE_KEY } from "../constants";
-import { NotInstalledError, UnknownError } from "../components";
+import { existsSync, promises } from "fs";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
+
 import { useCachedState } from "@raycast/utils";
+
+import { NotInstalledError, UnknownError } from "../components";
+import { BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID, NOT_INSTALLED_MESSAGE } from "../constants";
+import type { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../interfaces";
+import { getBookmarksFilePath } from "../util";
 
 function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];

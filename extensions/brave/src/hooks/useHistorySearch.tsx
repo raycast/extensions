@@ -1,8 +1,10 @@
 import { existsSync } from "fs";
-import { BraveProfile, HistoryEntry, SearchResult } from "../interfaces";
-import { getHistoryDbPath } from "../util";
 import { useEffect, useState } from "react";
+
 import { useSQL } from "@raycast/utils";
+
+import type { BraveProfile, HistoryEntry, SearchResult } from "../interfaces";
+import { getHistoryDbPath } from "../util";
 
 const whereClauses = (tableTitle: string, terms: string[]) => {
   return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");

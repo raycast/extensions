@@ -1,8 +1,10 @@
-import { HistoryEntry, Tab } from "../interfaces";
-import { ReactElement } from "react";
-import { getFavicon } from "@raycast/utils";
+import type { ReactElement } from "react";
+
 import { List } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
+
 import { BraveActions } from ".";
+import type { HistoryEntry, Tab } from "../interfaces";
 
 export class BraveListItems {
   public static TabList = TabListItem;

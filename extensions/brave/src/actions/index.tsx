@@ -1,7 +1,13 @@
-import { runAppleScript } from "run-applescript";
-import { closeMainWindow, popToRoot } from "@raycast/api";
-import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+
 import { NOT_INSTALLED_MESSAGE } from "../constants";
+import type { Preferences } from "../interfaces";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+
+const { braveBuild } = getPreferenceValues<Preferences>();
+
+export const getBraveBrowserName = (): string => (braveBuild === "nightly" ? "Brave Browser Nightly" : "Brave Browser");
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
@@ -13,7 +19,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   const openTabs = await runAppleScript(`
       set _output to ""
-      tell application "Brave Browser"
+      tell application "${getBraveBrowserName()}"
         set _window_index to 1
         repeat with w in windows
           set _tab_index to 1
@@ -21,7 +27,11 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
             set _title to get title of t
             set _url to get URL of t
             set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
+            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${
+              Tab.TAB_CONTENTS_SEPARATOR
+            }" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${
+              Tab.TAB_CONTENTS_SEPARATOR
+            }" & _tab_index & "\\n")
             set _tab_index to _tab_index + 1
           end repeat
           set _window_index to _window_index + 1
@@ -62,20 +72,22 @@ export async function openNewTab({
     closeMainWindow({ clearRootSearch: true });
   }
 
+  await unMinimizeWindow();
+
   let script = "";
 
   const getOpenInProfileCommand = (profile: string) =>
     `
     set profile to quoted form of "${profile}"
     set link to quoted form of "${url ? url : "about:blank"}"
-    do shell script "open -na 'Brave Browser' --args --profile-directory=" & profile & " " & link
+    do shell script "open -na '${getBraveBrowserName()}' --args --profile-directory=" & profile & " " & link
   `;
 
   switch (openTabInProfile) {
     case SettingsProfileOpenBehaviour.Default:
       script =
         `
-    tell application "Brave Browser"
+    tell application "${getBraveBrowserName()}"
       ${newWindow ? "make new window" : ""}
       ${incognito ? `make new window with properties {mode: "incognito"}` : ""}
       activate
@@ -84,9 +96,9 @@ export async function openNewTab({
         (url
           ? `with properties {URL:"${url}"}`
           : query
-          ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
-          : "") +
-        ` 
+            ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
+            : "") +
+        `
         ${newWindow || incognito ? "close tab 1" : ""}
       end tell
     end tell
@@ -102,11 +114,16 @@ export async function openNewTab({
       break;
   }
 
-  return await runAppleScript(script);
+  try {
+    return await runAppleScript(script);
+  } catch (error) {
+    console.error(`Error in openNewTab:`, error);
+    return false;
+  }
 }
 
 export async function closeTab(tabIndex: number): Promise<void> {
-  await runAppleScript(`tell application "Brave Browser"
+  await runAppleScript(`tell application "${getBraveBrowserName()}"
     tell window 1
       delete tab ${tabIndex}
     end tell
@@ -115,7 +132,7 @@ export async function closeTab(tabIndex: number): Promise<void> {
 
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
-    tell application "Brave Browser"
+    tell application "${getBraveBrowserName()}"
       activate
       set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
       set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
@@ -124,11 +141,27 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
+export async function unMinimizeWindow(): Promise<boolean> {
+  try {
+    const res = await runAppleScript(`
+      tell application "${getBraveBrowserName()}"
+        reopen
+        activate
+      end tell
+      return true
+    `);
+    return res === "true";
+  } catch (error) {
+    console.error("Error in unMinimizeWindow", error);
+    return false;
+  }
+}
+
 const checkAppInstalled = async (): Promise<boolean> => {
   const appInstalled = await runAppleScript(`
 set isInstalled to false
 try
-    do shell script "osascript -e 'exists application \\"Brave Browser\\"'"
+    do shell script "osascript -e 'exists application \\"${getBraveBrowserName()}\\"'"
     set isInstalled to true
 end try
 

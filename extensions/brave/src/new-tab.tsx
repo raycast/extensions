@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { getPreferenceValues, Icon, List } from "@raycast/api";
-import { useHistorySearch } from "./hooks/useHistorySearch";
-import { BraveActions, BraveListItems } from "./components";
-import { useTabSearch } from "./hooks/useTabSearch";
-import { BraveProfile, HistoryEntry, Preferences, SearchResult } from "./interfaces";
+
+import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { BRAVE_PROFILE_KEY, BRAVE_PROFILES_KEY, DEFAULT_BRAVE_PROFILE_ID } from "./constants";
+
+import { BraveActions, BraveListItems } from "./components";
 import BraveProfileDropDown from "./components/BraveProfileDropdown";
+import { BRAVE_PROFILES_KEY, BRAVE_PROFILE_KEY, DEFAULT_BRAVE_PROFILE_ID } from "./constants";
+import { useHistorySearch } from "./hooks/useHistorySearch";
+import { useTabSearch } from "./hooks/useTabSearch";
+import type { BraveProfile, HistoryEntry, Preferences, SearchResult } from "./interfaces";
 
 function orderByLastVisited(targetId: string, container?: SearchResult<HistoryEntry>[]): SearchResult<HistoryEntry>[] {
   if (!container?.length) {
