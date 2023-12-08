@@ -15,8 +15,8 @@ const handleError = (error: unknown) => {
 
 export const tagsToMarkdownTable = (tags: Tags): string => {
   const table = Object.entries(tags)
-    // Filter out Thumbnail because it's shown as an image
-    .filter(([key]) => !["Thumbnail"].includes(key))
+    // Filter out image tags because it's shown as an image
+    .filter(([key]) => !["Thumbnail", "Images"].includes(key))
     .sort(([key1], [key2]) => key1.localeCompare(key2))
     .map(([key, value]) => {
       if (value === undefined) {
@@ -48,7 +48,7 @@ export const exifFromFile = async (file: string): Promise<Tags | null> => {
   try {
     const filePath = decodeURIComponent(file).replace("file://", "");
     const buff = await fs.readFile(filePath);
-    const tags = ExifReader.load(buff);
+    const tags = ExifReader.load(buff, { includeUnknown: true });
     toast.hide();
     return tags;
   } catch (error) {
@@ -69,7 +69,7 @@ export const exifFromUrl = async (url: string): Promise<Tags | null> => {
       cancelable: true,
     });
     const buff = await fetch(urlObj, { signal: controller.signal }).then((res) => res.arrayBuffer());
-    const tags = ExifReader.load(buff);
+    const tags = ExifReader.load(buff, { includeUnknown: true });
 
     return tags;
   } catch (error) {
