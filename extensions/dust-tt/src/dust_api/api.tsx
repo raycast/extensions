@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import { createParser } from "eventsource-parser";
 import { ConversationType, UserMessageType } from "./conversation";
 import { AgentConfigurationType } from "./agent";
+import { MANAGED_SOURCES } from "../agents";
 export type AgentActionType = RetrievalActionType | DustAppRunActionType;
 
 type RetrievalActionType = {
@@ -376,7 +377,10 @@ export class DustApi {
                   reference: refCounter[k],
                 });
               }
-              return `[[${refCounter[k]}](${link})]`;
+              const icon = ref.dataSourceId in MANAGED_SOURCES ? MANAGED_SOURCES[ref.dataSourceId].icon : undefined;
+              const markdownIcon = icon ? `<img src="${icon}" width="16" height="16"> ` : "";
+              console.log("markdownIcon", markdownIcon);
+              return `[${markdownIcon}[${refCounter[k]}](${link})]`;
             }
             return "";
           })
