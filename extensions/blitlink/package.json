@@ -26,6 +26,7 @@
     "@raycast/api": "^1.63.0"
   },
   "devDependencies": {
+    "@types/react": "^18.2.42",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
