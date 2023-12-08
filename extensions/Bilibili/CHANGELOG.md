@@ -2,6 +2,7 @@
 
 ## [New Feature] - 2023-10-30
 
+- Support AI summary video
 - Implement filter for the dynamic feed.
 
 ## [New Feature] - 2023-08-04
