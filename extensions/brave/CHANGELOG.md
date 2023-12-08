@@ -1,11 +1,5 @@
 # Brave Changelog
 
-## [Tab Enhancements & New Commands] - 2023-12-08
-
-- Improve behavior when opening a new tab, if no window is open, a new window is opened
-- Added `Open Arc Release Notes` command to open the release notes for the current version of Arc.
-- Added `Open Arc Boost Gallery` command to open the gallery of Arc Boosts.
-
 ## [Bug Fixes & New Actions] - 2023-03-28
 
 - Fix errors caused by inconsistent number of hooks
