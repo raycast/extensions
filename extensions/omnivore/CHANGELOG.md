@@ -1,5 +1,10 @@
 # Omnivore Changelog
 
+## [Searching improvements] - 2023-12-07
+
+- No results shows correct message
+- Metadata images updated with more contrasting background
+
 ## [Initial Improvements] - 2023-11-20
 
 - Quick Lookup on article (markdown) added
