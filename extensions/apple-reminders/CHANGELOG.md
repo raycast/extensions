@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Improve NLP in Quick Add Reminder] - 2023-12-08
+
+- Improve NLP parsing in the `Quick Add Reminder` command by adding an endDate for recurring reminders.
+
 ## [Improve NLP in Quick Add Reminder] - 2023-12-04
 
 - Improve the NLP parsing in `Quick Add Reminder`.

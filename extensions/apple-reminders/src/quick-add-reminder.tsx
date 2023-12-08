@@ -56,7 +56,8 @@ Here's the JSON Object structure:
   "dueDate": <Task due date. Can either be a full day date (YYYY-MM-DD) or an ISO date if the time is specified (YYYY-MM-DDTHH:mm:ss.sssZ). Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. Never use dates before ${today} unless the specific month/day/year is provided. If the user includes a time before ${currentTime} and no date, assume they mean tomorrow>,
   "recurrence": {
     "frequency": <Recurrence frequency. Only pick the value from this list: "daily", "weekly", "monthly", "yearly".>,
-    "interval": <Recurrence interval. An integer greater than 0 that specifies how often a pattern repeats. If a recurrence frequency is "weekly" rule and the interval is 1, then the pattern repeats every week. If a recurrence frequency is "monthly" rule and the interval is 3, then the pattern repeats every 3 months.>
+    "interval": <Recurrence interval. An integer greater than 0 that specifies how often a pattern repeats. If a recurrence frequency is "weekly" rule and the interval is 1, then the pattern repeats every week. If a recurrence frequency is "monthly" rule and the interval is 3, then the pattern repeats every 3 months.>,
+    "endDate": <Recurrence end date. A full day date (YYYY-MM-DD). If no end date is specified, the recurrence will repeat forever.>
   }
 }
 
@@ -91,6 +92,7 @@ Here are some examples to help you out:
 - Dad's birthday on ${recentDateMonth} ${recentDateDay}: {"title":"Dad's birthday","description":"'Dad's birthday' on ${nextRecentDate} to default list","dueDate":"${nextRecentDate}"}
 - Monthly breakfast with friends Saturday: {"title":"Monthly breakfast with friends","description":"'Monthly breakfast with friends' recurring monthly starting ${saturday} to default list","dueDate":"${saturday}","recurrence":{"frequency":"monthly","interval":1}}
 - Review budget every 2 months starting from tomorrow: {"title":"Review budget","description":"'Review budget' every 2 months starting ${tomorrow} to default list","dueDate":"${tomorrow}", "recurrence":{"frequency":"monthly","interval":2}}
+- Water the flowers every day from tomorrow until ${upcomingDateWeekday}: {"title":"Water the flowers","description":"'Water the flowers' every day from ${tomorrow} until ${upcomingDate} to default list","dueDate":"${tomorrow}","recurrence":{"frequency":"daily","interval":1,"endDate":"${upcomingDate}"}}
 
 Task text: "${props.fallbackText ?? props.arguments.text}"`;
 

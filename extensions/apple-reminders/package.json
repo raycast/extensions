@@ -5,6 +5,9 @@
   "description": "Manage Apple Reminders.",
   "icon": "icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "tm.wrnr"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": [

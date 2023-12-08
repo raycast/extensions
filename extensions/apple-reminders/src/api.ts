@@ -12,6 +12,11 @@ export async function createReminder(reminder: {
   notes?: string;
   dueDate?: string;
   priority?: string;
+  recurrence?: {
+    frequency: "daily" | "weekly" | "monthly" | "yearly";
+    interval: number;
+    endDate?: string;
+  };
 }): Promise<Reminder> {
   const result = await reminders.create<Reminder>(reminder);
   return result;
