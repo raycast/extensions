@@ -31,7 +31,8 @@
     "danpalmer",
     "danulqua",
     "rgrunberg",
-    "Vaibhav-Satishkumar"
+    "Vaibhav-Satishkumar",
+    "tleo19"
   ],
   "commands": [
     {
@@ -99,7 +100,24 @@
       "title": "Open New Incognito Window",
       "subtitle": "Arc",
       "description": "Create and open a new incognito window",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new window",
+          "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "new-tab",

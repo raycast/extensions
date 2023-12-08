@@ -1,7 +1,8 @@
 import fetch from "node-fetch";
-import { ClientObject, CreateClientPayload, UpdateClientPayload } from "../types/client";
-import { ApiErrorResponse } from "../types/utils";
-import { ApiBaseUrl, ApiHeaders, ApiUrls } from "./helpers";
+
+import { ApiBaseUrl, ApiHeaders, ApiUrls } from "@/api/helpers";
+import { ClientObject, CreateClientPayload, UpdateClientPayload } from "@/types/client";
+import { ApiErrorResponse } from "@/types/utils";
 
 export const ApiClient = {
   async create(values: CreateClientPayload) {

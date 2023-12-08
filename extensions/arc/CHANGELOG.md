@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - 2023-12-07
+
+- The command `Open New Incognito Window` now accepts a URL
+
 ## [Improvements] - 2023-10-16
 
 - Allow multiple, comma separated tabs to be opened

@@ -18,7 +18,10 @@ export async function isKarabinerCliAvailable(): Promise<boolean> {
 export const KarabinerManager: ILayoutManager = class KarabinerProfile implements ILayout {
   static activeInput?: string;
 
-  private constructor(readonly id: string, readonly title: string) {}
+  private constructor(
+    readonly id: string,
+    readonly title: string,
+  ) {}
 
   get active(): boolean {
     return this.title === KarabinerManager.activeInput;

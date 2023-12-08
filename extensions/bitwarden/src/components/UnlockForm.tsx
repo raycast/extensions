@@ -28,10 +28,13 @@ const UnlockForm = (props: UnlockFormProps) => {
       setLoading(true);
       setUnlockError(undefined);
 
-      const state = await bitwarden.status();
-      if (state.status === "unauthenticated") {
+      const { error, result: vaultState } = await bitwarden.status();
+      if (error) throw error;
+
+      if (vaultState.status === "unauthenticated") {
         try {
-          await bitwarden.login();
+          const { error } = await bitwarden.login();
+          if (error) throw error;
         } catch (error) {
           const {
             displayableError = `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`,
