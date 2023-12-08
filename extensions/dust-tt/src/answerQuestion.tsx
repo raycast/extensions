@@ -3,7 +3,7 @@ import { DustApi, DustAPICredentials, DustDocument } from "./dust_api/api";
 import { useEffect, useState } from "react";
 import { addDustHistory } from "./history";
 import { AgentType } from "./dust_api/agent";
-import { DUST_AGENT } from "./agents";
+import { DUST_AGENT, MANAGED_SOURCES } from "./agents";
 
 async function answerQuestion({
   question,
@@ -103,16 +103,7 @@ export function AskDustQuestion({ question, agent = DUST_AGENT }: { question: st
   );
 }
 
-const colors = [Color.Blue, Color.Red, Color.Green, Color.Yellow, Color.Purple, Color.Orange];
 function DocumentsList({ documents }: { documents: DustDocument[] }) {
-  const sourceIdColors: { [id: string]: Color } = {};
-  let index = 0;
-  documents.forEach((document) => {
-    if (!sourceIdColors[document.dataSourceId]) {
-      sourceIdColors[document.dataSourceId] = colors[index % colors.length];
-      index++;
-    }
-  });
   return (
     <List>
       {documents
@@ -123,7 +114,25 @@ function DocumentsList({ documents }: { documents: DustDocument[] }) {
           <List.Item
             key={document.id}
             title={`${document.reference} - ${document.sourceUrl}`}
-            accessories={[{ tag: { color: sourceIdColors[document.dataSourceId], value: document.dataSourceId } }]}
+            icon={
+              document.dataSourceId in MANAGED_SOURCES
+                ? { source: MANAGED_SOURCES[document.dataSourceId].icon }
+                : { source: Icon.Globe }
+            }
+            accessories={[
+              {
+                tag: {
+                  color:
+                    document.dataSourceId in MANAGED_SOURCES
+                      ? MANAGED_SOURCES[document.dataSourceId].color
+                      : Color.SecondaryText,
+                  value:
+                    document.dataSourceId in MANAGED_SOURCES
+                      ? MANAGED_SOURCES[document.dataSourceId].name
+                      : document.dataSourceId,
+                },
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser title="Open in Browser" url={document.sourceUrl} />
