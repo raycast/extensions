@@ -11,3 +11,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: mskelton/changelog-reminder-action@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
