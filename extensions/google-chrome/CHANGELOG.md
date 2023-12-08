@@ -3,6 +3,13 @@
 
 - Add shortcut for make quick quicklinks when searching tabs.
 
+## [multi-word tab search enhancements and vulnerability fixes] - 2023-12-08
+
+- order-insensitivity: search "foo bar" now works with title/url "bar foo" or "foo bar".
+- spacing-insensitivity: search "foo bar" and "foo    bar" now work with title/url "foo bar".
+- url-title-insensitivity: search "foo bar" now works for title "bar" on url "foo.com"
+- updated dependent packages to resolve vulnerabilities listed in npm audit
+
 ## [New shortcut] - 2023-08-21
 
 - Changed shortcut for Close Tab in the Search Tab command.
