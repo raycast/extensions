@@ -33,7 +33,7 @@ export default function Command() {
       <List.EmptyView
         icon={taps % 2 === 0 ? "metronome-left.png" : "metronome-right.png"}
         title={startTime && bpm > 0 ? `Calculated BPM: ${bpm.toFixed(0)}` : "Ready to start!"}
-        description={startTime ? "Keep pressing enter to the beat!" : "Hit enter to the beat!"}
+        description={startTime?.current ? "Keep pressing enter to the beat!" : "Hit enter to the beat!"}
         actions={
           <ActionPanel>
             <Action title="Beat" icon={Icon.Music} onAction={handleTap} />
@@ -44,12 +44,7 @@ export default function Command() {
               onAction={() => resetStart(0)}
             />
             <ActionPanel.Section key="secondary">
-              <Action
-                icon={Icon.Gear}
-                title="Open Command Preferences"
-                shortcut={{ modifiers: ["cmd"], key: "," }}
-                onAction={openCommandPreferences}
-              />
+              <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
             </ActionPanel.Section>
           </ActionPanel>
         }
