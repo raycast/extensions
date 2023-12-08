@@ -1,6 +1,6 @@
 # Dust.tt Changelog
 
-## [Agent list and answer enhancements] - 2023-12-08
+## [Icons] - 2023-12-08
 
 * Add icons for managed sources in answers/source list (Notion, Slack, Google Drive, Github, Intercom etc.)
 
