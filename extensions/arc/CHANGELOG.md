@@ -6,6 +6,10 @@
 - Added `Open Arc Release Notes` command to open the release notes for the current version of Arc.
 - Added `Open Arc Boost Gallery` command to open the gallery of Arc Boosts.
 
+## [Improvements] - 2023-12-07
+
+- The command `Open New Incognito Window` now accepts a URL
+
 ## [Improvements] - 2023-10-16
 
 - Allow multiple, comma separated tabs to be opened

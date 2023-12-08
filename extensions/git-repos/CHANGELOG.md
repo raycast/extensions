@@ -1,5 +1,9 @@
 # Git Repos Changelog
 
+## [Enhancement] - 2023-12-07
+
+- Added sotring of results based on usage recency - most used paths will appear on top
+
 ## [Bug Fix] - 2023-10-21
 
 - Resolved issue with binary plist for reading default browser. Now checks against all known browser paths as a fallback.
