@@ -64,11 +64,7 @@ export function Video(props: {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open Video"
-            url={formatUrl(props.url)}
-            onOpen={props.onOpenCallback}
-          />
+          <Action.OpenInBrowser title="Open Video" url={formatUrl(props.url)} onOpen={props.onOpenCallback} />
           <Action.Push
             icon={Icon.QuoteBlock}
             title="AI Summary"
