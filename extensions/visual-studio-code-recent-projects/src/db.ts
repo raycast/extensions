@@ -43,7 +43,7 @@ export function useRecentEntries() {
     try {
       await saveEntries(parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)));
       await revalidate();
-      showToast(Toast.Style.Success, "Entry removed");
+      showToast(Toast.Style.Success, "Entry removed", `Restart ${build} to sync the list in ${build} (optional)`);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to remove entry");
     }
@@ -68,7 +68,11 @@ export function useRecentEntries() {
       ) {
         await saveEntries([]);
         await revalidate();
-        showToast(Toast.Style.Success, "All entries removed");
+        showToast(
+          Toast.Style.Success,
+          "All entries removed",
+          `Restart ${build} to sync the list in ${build} (optional)`
+        );
       }
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to remove entries");
