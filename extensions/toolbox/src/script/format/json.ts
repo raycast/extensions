@@ -55,8 +55,7 @@ export const unescapeJson: Script = {
     title: "Unescape JSON",
     desc: "Unescapes JSON",
     type: ["form", "clipboard"],
-    example: '{"photos": {"total": 10000,"total_pages": 910}}',
-  },
+    example: '"{\\"photos\\": {\\"total\\": 10000,\\"total_pages\\": 910}}"'},
   run(input) {
     try {
       return JSON.parse(input);
