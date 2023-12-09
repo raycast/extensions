@@ -13,7 +13,7 @@ The process of updating an icon for the app is very easy:
 2. Select the application you want to change the icon for
 ![choose-app.jpeg](choose-app.jpeg)
 
-3. And _viola,_ in just a few clicks you've updated the icon for chosen application, isn't it cool?
+3. And _viola,_ your new icon is immediately applied system-wide!
 ![dock.png](dock.png)
 
 > Due to limitations of macOS, everytime an application gets an update, the icon will be reverted to default one, but don't worry, I'm already working on fixing that ;)
