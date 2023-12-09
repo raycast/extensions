@@ -31,7 +31,7 @@
   ],
   "preferences": [
     {
-      "name": "nodeApiToken",
+      "name": "workspaceApiToken",
       "description": "API token for your capture node",
       "type": "password",
       "required": true,
