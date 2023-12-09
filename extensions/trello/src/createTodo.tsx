@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TrelloFetchResponse } from "./trelloResponse.model";
 import { returnBoards } from "./utils/fetchBoards";
