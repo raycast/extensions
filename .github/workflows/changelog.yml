@@ -5,6 +5,7 @@ on:
     paths: ["extensions/**"]
 permissions:
   pull-requests: write
+  contents: read
 jobs:
   remind:
     name: Changelog Reminder
