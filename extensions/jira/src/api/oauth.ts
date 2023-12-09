@@ -51,7 +51,8 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
   });
 
   if (!response.ok) {
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while fetching tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   const tokens = await response.json();
@@ -71,8 +72,8 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   });
 
   if (!response.ok) {
-    console.error("refresh tokens error:", await response.text());
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while refreshing tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;

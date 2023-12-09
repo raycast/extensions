@@ -29,7 +29,7 @@ export default function Fixture() {
   const matchday = groupBy(fixtures, (f) =>
     f.kickoff.label
       ? convertToLocalTime(f.kickoff.label, "EEE d MMM yyyy")
-      : "Date To Be Confirmed"
+      : "Date To Be Confirmed",
   );
 
   return (

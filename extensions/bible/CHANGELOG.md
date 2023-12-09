@@ -1,6 +1,10 @@
 # Bible Search Changelog
 
-## [Options for results and copied text] - {PR_MERGE_DATE}
+## [Update available bible versions] - 2023-12-02
+
+- Update the list of available bible translations using `scripts/updateBibleVersions.js`
+
+## [Options for results and copied text] - 2023-10-04
 
 - Add options to disable references and copyright in the search results and copied results
 
