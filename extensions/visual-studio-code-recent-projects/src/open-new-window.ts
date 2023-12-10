@@ -8,12 +8,12 @@ const makeNewWindow = async () => {
 	    activate
     end tell
     delay(0.5)
-    tell application "Code"
+    tell application "${build}"
 	    activate
     end tell
 
     tell application "System Events"
-	    tell process "Code"
+	    tell process "${build}"
 		    click menu item "New Window" of menu "File" of menu bar 1
 	    end tell
     end tell
