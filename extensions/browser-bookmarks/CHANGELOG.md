@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Brave Nightly] - 2023-12-09
+
+- Add support for `Brave Nightly` browser.
+
 ## [Support for Firefox Dev edition] - {PR_MERGE_DATE}
 
 - Add support for `Firefox Dev` browser, which uses the same profiles as `Firefox`.
