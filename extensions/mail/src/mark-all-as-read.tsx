@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, showHUD, showToast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 async function script(): Promise<void> {
@@ -16,7 +16,7 @@ async function script(): Promise<void> {
 export default async function command() {
   try {
     await script();
-    await showToast(Toast.Style.Success, "Marked all as read. Please note that it may take a while to update the UI.");
+    showHUD("Please note that it may take a while to update");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Failed to mark all as read");
     console.error(error);
