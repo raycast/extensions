@@ -1,58 +1,23 @@
 import fse from "fs-extra";
-import { BookEntry } from "../types";
+import fetch from "node-fetch";
+
+import { Toast, getPreferenceValues, open, showHUD, showInFinder, showToast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+
+import type { BookEntry } from "@/types";
+import type { LibgenPreferences } from "@/types";
+
+import { parseLowerCaseArray } from "./common";
 import { languages } from "./constants";
-import { join } from "path";
-import { homedir } from "os";
-import { runAppleScript } from "run-applescript";
-import { LibgenPreferences } from "../types";
+import { showActionToast, showFailureToast } from "./toast";
 
-import {
-  Clipboard,
-  environment,
-  getPreferenceValues,
-  open,
-  showHUD,
-  showInFinder,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import Style = Toast.Style;
-import { axiosGetImageArrayBuffer } from "./axios-utils";
-
-export const isEmpty = (string: string | null | undefined) => {
-  return !(string != null && String(string).length > 0);
-};
-
-export const formatBytes = (bytes: number, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-};
-
-export const parseLowerCaseArray = (string: string) => {
-  return string
-    .toLowerCase()
-    .split(",")
-    .map((item) => item.trim());
-};
-
-// https://stackoverflow.com/questions/10003683/how-can-i-extract-a-number-from-a-string-in-javascript
-export const extractNumber = (string: string, index = 0) => {
-  const numbers = string.match(/\d+/);
-  return numbers ? numbers[index] : string; // replace all leading non-digits with nothing
-};
-
-export const resolveHome = (filepath: string) => {
-  if (filepath[0] === "~") {
-    return join(homedir(), filepath.slice(1));
-  }
-  return filepath;
+const fetchImageArrayBuffer = async (url: string, signal?: AbortSignal): Promise<ArrayBuffer> => {
+  const res = await fetch(url, {
+    method: "GET",
+    signal: signal,
+  });
+  const buffer = await res.arrayBuffer();
+  return buffer;
 };
 
 export const sortBooksByPreferredLanguages = (books: BookEntry[], preferredLanguages: string) => {
@@ -61,7 +26,7 @@ export const sortBooksByPreferredLanguages = (books: BookEntry[], preferredLangu
 
   // keep only accept languages that are in the list of supported languages
   const filteredPreferredLanguageList = preferredLanguageList.filter((pl) =>
-    languages.map((l) => l.name.toLowerCase()).includes(pl)
+    languages.map((l) => l.name.toLowerCase()).includes(pl),
   );
 
   // generate a weight table based on the order of languages
@@ -143,12 +108,21 @@ export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) 
   const name = fileNameFromBookEntry(book);
   const extension = book.extension.toLowerCase();
 
-  const toast = await showToast(Style.Animated, "Downloading...");
+  console.log("Download", downloadPath, name, extension);
+
+  const toast = await showActionToast({
+    title: "Downloading...",
+    cancelable: true,
+  });
   try {
     const fileName = buildFileName(downloadPath, name, extension);
     const filePath = `${downloadPath}/${fileName}`;
 
-    fse.writeFileSync(filePath, Buffer.from(await axiosGetImageArrayBuffer(url)));
+    const arrayBuffer = await fetchImageArrayBuffer(url, toast.signal);
+    console.log(url, arrayBuffer.byteLength / 1024, "KB");
+
+    fse.writeFileSync(filePath, Buffer.from(arrayBuffer));
+
     const options: Toast.Options = {
       style: Toast.Style.Success,
       title: "Success!",
@@ -170,19 +144,13 @@ export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) 
     };
     await showToast(options);
   } catch (err) {
-    console.error(err);
-
-    if (toast) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Something went wrong.";
-      toast.message = "Try with a different download gateway.";
-    }
+    await showFailureToast("Download Failed", err as Error);
   }
 }
 
 export async function downloadBookToLocation(url = "", book: BookEntry) {
   const fileName = fileNameWithExtensionFromBookEntry(book);
-  await showToast(Style.Animated, "Please pick a folder...");
+  await showToast(Toast.Style.Animated, "Please pick a folder...");
   try {
     await runAppleScript(`
       set outputFolder to choose folder with prompt "Please select an output folder:"
