@@ -1,10 +1,10 @@
 import { getSelectedText, showToast, Toast, getPreferenceValues, closeMainWindow } from "@raycast/api";
 
 import { OpenAI } from "openai";
-import fs from 'fs';
-import path from 'path';
-import { exec } from 'child_process';
-import os from 'os';
+import fs from "fs";
+import path from "path";
+import { exec } from "child_process";
+import os from "os";
 
 type Voice = "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
 
@@ -23,7 +23,7 @@ async function textToSpeech() {
   const voice = preferences.defaultVoice;
   const openai = new OpenAI({
     apiKey: apiKey,
-  })
+  });
 
   try {
     const selectedText = await getSelectedText();
@@ -31,8 +31,8 @@ async function textToSpeech() {
     const mp3 = await openai.audio.speech.create({
       model: "tts-1",
       voice: voice,
-      input: selectedText
-    })
+      input: selectedText,
+    });
     console.log(speechFile);
     const buffer = Buffer.from(await mp3.arrayBuffer());
     await fs.promises.writeFile(speechFile, buffer);
@@ -50,12 +50,11 @@ async function textToSpeech() {
     });
 
     await closeMainWindow({ clearRootSearch: true });
-    
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Cannot Speak text",
-      message: String(error)
+      message: String(error),
     });
   }
 }

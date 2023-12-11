@@ -9,9 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Speak selected Text",
+      "title": "Speak Selected Text",
       "description": "TTS on selected text",
-     
       "mode": "no-view"
     }
   ],
@@ -66,7 +65,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.1",
     "typescript": "^5.2.2"
   },
   "scripts": {
