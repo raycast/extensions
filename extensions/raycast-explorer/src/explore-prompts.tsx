@@ -78,9 +78,11 @@ export default function ExplorePrompts(props: Props) {
 
     const queryString = prompts
       .map((selectedPrompt) => {
-        const { title, prompt, creativity, icon } = selectedPrompt;
+        const { title, prompt, creativity, icon, model } = selectedPrompt;
 
-        return `prompts=${encodeURIComponent(JSON.stringify({ title, prompt, creativity, icon }))}`;
+        return `prompts=${encodeURIComponent(
+          JSON.stringify({ title, prompt, creativity, icon, model: prepareModel(model) })
+        )}`;
       })
       .join("&");
 
@@ -352,4 +354,11 @@ function getCreativityIcon(creativity: Prompt["creativity"]) {
   if (creativity === "maximum") {
     return Icon.CircleProgress100;
   }
+}
+
+function prepareModel(model?: string) {
+  if (model && /^".*"$/.test(model)) {
+    return model.slice(1, model.length - 1);
+  }
+  return model || "openai_gpt35_turbo";
 }

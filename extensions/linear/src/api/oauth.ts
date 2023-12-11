@@ -48,7 +48,8 @@ export async function fetchTokens(
   });
 
   if (!response.ok) {
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while fetching tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   const tokens = await response.json();

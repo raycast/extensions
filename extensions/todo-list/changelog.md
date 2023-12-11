@@ -1,13 +1,16 @@
 # Todo List Changelog
 
+## [New Action & Fix shortcut] - 2023-11-13
+
+- Added action to clear all completed tasks
+- Fixed shortcut for "Unpin Todo" action
+
 ## [Enhancements] - 2023-10-25
 
 - Fixed typos
 - Added confirm dialog to delete all action
 
-
-
-## [Impliment Sorting] - 2023-08-11
+## [Implement Sorting] - 2023-08-11
 
 - New preference option for choose how tasks are sorted.
 - Adds priority to tasks, allowing the user to take more control of the order of tasks.

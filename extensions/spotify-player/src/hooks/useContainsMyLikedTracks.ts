@@ -14,7 +14,7 @@ export function useContainsMyLikedTracks({ trackIds, options }: UseContainsMyLik
     [trackIds],
     {
       execute: options?.execute !== false && trackIds.length > 0,
-    }
+    },
   );
 
   return {

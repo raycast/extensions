@@ -133,7 +133,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       title: deal.title as string,
       type: deal.type as string,
       stage: dealStage.name as string,
-      organization: dealOrganization.name as string,
+      organization: (dealOrganization?.name as string) ?? "",
       status: deal.status as string,
       ccEmail: deal.cc_email as string,
     };

@@ -1,0 +1,16 @@
+name: Changelog Reminder
+
+on:
+  pull_request:
+    paths: ["extensions/**"]
+permissions:
+  pull-requests: write
+  contents: read
+jobs:
+  remind:
+    name: Changelog Reminder
+    runs-on: ubuntu-latest
+    if: github.repository == 'raycast/extensions'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: mskelton/changelog-reminder-action@v3

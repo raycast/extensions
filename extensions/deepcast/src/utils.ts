@@ -38,7 +38,7 @@ function gotErrorToString(error: unknown) {
   return "Unknown error";
 }
 
-async function getSelection() {
+export async function getSelection() {
   try {
     return await getSelectedText();
   } catch (error) {
@@ -46,7 +46,11 @@ async function getSelection() {
   }
 }
 
-async function readContent(preferredSource: string) {
+// Get the text, matching preferences.
+// If selected text is the preferred source, it will try selected text but fallback to clipboard.
+// If clipboard is the preferred source, it will try clipboard but fallback to selected text.
+export async function readContent() {
+  const preferredSource = getPreferenceValues<Preferences>().source;
   const clipboard = await Clipboard.readText();
   const selected = await getSelection();
 
@@ -70,12 +74,13 @@ export async function sendTranslateRequest({
 }) {
   try {
     const prefs = getPreferenceValues<Preferences>();
-    const { key, source } = prefs;
-    onTranslateAction = onTranslateAction ?? prefs.onTranslateAction;
+    const { key } = prefs;
+    onTranslateAction ??= prefs.onTranslateAction;
 
-    const text = initialText || (await readContent(source));
+    const text = initialText || (await readContent());
 
     const toast = await showToast(Toast.Style.Animated, "Fetching translation...");
+
     try {
       const {
         translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
