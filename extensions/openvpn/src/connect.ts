@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
 import { closeMainWindow } from "@raycast/api";
-import { isRunning, startOpenVPN } from './utils';
+import { isRunning, startOpenVPN } from "./utils";
 
 export default async function Command() {
   await closeMainWindow();
@@ -18,5 +18,5 @@ export default async function Command() {
         key code 53 --escape key to close menu
       end try
     end tell
-  `)
+  `);
 }
