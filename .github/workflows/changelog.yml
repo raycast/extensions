@@ -1,0 +1,16 @@
+name: "Changelog Checker"
+on:
+  pull_request:
+      paths: ["extensions/**"]
+      types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+jobs:
+  # Enforces the update of a changelog file on every pull request 
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dangoslen/changelog-enforcer@v2
+      with:
+        changeLogPath: "extensions/**/changelog.md"
+        token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
