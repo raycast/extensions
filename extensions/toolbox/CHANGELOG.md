@@ -1,6 +1,6 @@
 # ToolBox Changelog
 
-## [More Commands] - {PR_MERGE_DATE}
+## [More Commands] - 2023-12-11
 
 - Added command to convert JavaScript object to JSON and vice versa
 - Added command to escape and unescape JSON
