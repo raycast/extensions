@@ -10,21 +10,21 @@
     {
       "name": "connect",
       "title": "WARP Connect",
-      "subtitle": "Connect to CloudFlare Warp",
+      "subtitle": "CloudFlare Warp",
       "description": "Disconnect from CloudFlare Warp",
       "mode": "no-view"
     },
     {
       "name": "disconnect",
       "title": "WARP Disconnect",
-      "subtitle": "Disconnect from CloudFlare Warp",
+      "subtitle": "CloudFlare Warp",
       "description": "Disconnect from CloudFlare Warp",
       "mode": "no-view"
     },
     {
       "name": "switch-virtual-network",
       "title": "WARP Switch Virtual Network",
-      "subtitle": "Switch Virtual Network",
+      "subtitle": "CloudFlare Warp",
       "description": "Switches between available virtual networks",
       "mode": "view"
     }
