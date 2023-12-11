@@ -42,7 +42,7 @@ const options = {
 
 const fuse = new Fuse(names, options);
 
-async function checkForResults() { 
+async function checkForResults() {
 	popToRoot();
 	await showToast({
 		title: "No entry found 🚫",
