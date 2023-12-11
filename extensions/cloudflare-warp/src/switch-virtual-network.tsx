@@ -60,18 +60,14 @@ export default () => {
   };
   if (!isLoading && items.length === 0) {
     return (
-      <List
-        navigationTitle="Switch Virtual Network"
-        searchBarPlaceholder="Search Virtual Networks"
-        isLoading={isLoading}
-      >
+      <List searchBarPlaceholder="Search Virtual Networks" isLoading={isLoading}>
         <List.EmptyView title="No Virtual Networks found" />;
       </List>
     );
   }
 
   return (
-    <List navigationTitle="Switch Virtual Network" searchBarPlaceholder="Search Virtual Networks" isLoading={isLoading}>
+    <List searchBarPlaceholder="Search Virtual Networks" isLoading={isLoading}>
       {items.map((item: VirtualNetwork) => (
         <ListItem key={item.id} virtualNetwork={item} onSwitchVirtualNetwork={onSwitchVirtualNetwork} />
       ))}
