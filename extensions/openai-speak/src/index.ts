@@ -30,8 +30,7 @@ class TextToSpeechProcessor {
 
   public async processSelectedText() {
     const selectedText = await getSelectedText();
-    this.textToSpeechQueue = selectedText.match(/[^.]+(?:\.\s|\.\n|\n|$)/g) || [];
-    console.log("Text to speech queue:", this.textToSpeechQueue);
+    this.textToSpeechQueue = selectedText.split(/(?<=\.)\s|\n/).map(s => s.endsWith('.') ? s + ' ' : s);
 
     if (!this.isConverting) {
       await this.convertTextToSpeech();
@@ -79,6 +78,7 @@ class TextToSpeechProcessor {
       this.isPlaying = true;
       const speechFile = this.playAudioQueue.shift()!;
       try {
+        console.log("Playing audio:", speechFile);
         await execAsync(`afplay ${speechFile}`);
       } catch (error) {
         await showToast({
