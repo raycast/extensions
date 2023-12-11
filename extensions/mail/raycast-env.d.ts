@@ -36,6 +36,8 @@ declare namespace Preferences {
   export type RefreshMail = ExtensionPreferences & {}
   /** Preferences accessible in the `clear-cache` command */
   export type ClearCache = ExtensionPreferences & {}
+  /** Preferences accessible in the `mark-all-as-read` command */
+  export type MarkAllAsRead = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -55,4 +57,6 @@ declare namespace Arguments {
   export type RefreshMail = {}
   /** Arguments passed to the `clear-cache` command */
   export type ClearCache = {}
+  /** Arguments passed to the `mark-all-as-read` command */
+  export type MarkAllAsRead = {}
 }
