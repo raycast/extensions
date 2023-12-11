@@ -115,6 +115,7 @@ export default function DustHistoryCommand() {
                     onAction={async () => {
                       await confirmAlert({
                         title: "Are you sure you want to remove all items in history?",
+                        icon: Icon.Trash,
                         primaryAction: {
                           title: "Clear",
                           style: Alert.ActionStyle.Destructive,
