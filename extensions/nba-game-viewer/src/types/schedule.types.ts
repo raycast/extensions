@@ -15,7 +15,9 @@ type Game = {
 
 type Competitor = {
   displayName: string;
+  abbreviation: string;
   shortName: string;
+  score: string;
   logo: string;
   home: string;
 };

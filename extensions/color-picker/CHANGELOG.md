@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Enhancements] - 2023-11-30
+
+- Now using Raycast Swift Macro instead of manually compiling
+
 ## [Enhancement] - 2023-11-17
 
 - Added HEX color to HUD when picking

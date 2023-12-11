@@ -1,5 +1,8 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Update] - 2023-11-23
+- Add support for [Cursor](http://cursor.sh)
+
 ## [Update] - 2023-04-24
 
 - Update build identifier for VSCodium. (VSCodium/vscodium#1227)

@@ -21,7 +21,9 @@
     "stevensd2m",
     "erics118",
     "hjoelh",
-    "hobhouse"
+    "hobhouse",
+    "bkeys818",
+    "jatindotdev"
   ],
   "license": "MIT",
   "preferences": [
@@ -179,6 +181,13 @@
       "description": "Dislike the current song.",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "devices",
+      "title": "Select Device",
+      "subtitle": "Spotify",
+      "description": "Select a device to play music on.",
+      "mode": "view"
     },
     {
       "name": "volume",

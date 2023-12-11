@@ -31,10 +31,10 @@ export default function Command(props: LaunchProps) {
             onAction={async () => {
               if (caffeinateStatus) {
                 // Kill caffeinate process
-                await mutate(stopCaffeinate(false), { optimisticUpdate: () => false });
+                await mutate(stopCaffeinate({ menubar: false, status: true }), { optimisticUpdate: () => false });
               } else {
                 // Spawn a new process to run caffeinate
-                await mutate(startCaffeinate(false), { optimisticUpdate: () => true });
+                await mutate(startCaffeinate({ menubar: false, status: true }), { optimisticUpdate: () => true });
               }
             }}
           />

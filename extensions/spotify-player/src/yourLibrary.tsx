@@ -26,7 +26,7 @@ function YourLibraryCommand() {
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<FilterValue>(getPreferenceValues()["Default-View"] ?? filters.all);
   const { myLibraryData, myLibraryIsLoading } = useYourLibrary({
-    options: { keepPreviousData: true },
+    keepPreviousData: true,
   });
 
   const sharedProps: ComponentProps<typeof List> = {
