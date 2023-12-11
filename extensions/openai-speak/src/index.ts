@@ -30,7 +30,7 @@ class TextToSpeechProcessor {
 
   public async processSelectedText() {
     const selectedText = await getSelectedText();
-    this.textToSpeechQueue = selectedText.split(/(?<=\.)\s|\n/).map(s => s.endsWith('.') ? s + ' ' : s);
+    this.textToSpeechQueue = selectedText.split(/(?<=\.)\s|\n/).map((s) => (s.endsWith(".") ? s + " " : s));
 
     if (!this.isConverting) {
       await this.convertTextToSpeech();
