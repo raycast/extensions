@@ -1,7 +1,7 @@
 import type { Tags } from "exifreader";
 import { type FC, useEffect, useMemo } from "react";
 
-import { Action, ActionPanel, Detail, Toast, showToast, useNavigation, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 
 import useTagsMarkdown from "@/hooks/use-tags-markdown";
 
