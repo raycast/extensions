@@ -12,7 +12,6 @@ const RawDataScreen: FC<RawDataScreenProps> = ({ tags }) => {
 
   return (
     <Detail
-      navigationTitle="Exif Tags"
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy JSON" content={tagsString} />
