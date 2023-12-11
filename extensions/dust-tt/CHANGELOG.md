@@ -1,5 +1,12 @@
 # Dust.tt Changelog
 
+## [Cleanup] - 2023-12-09
+
+* **history:**
+  * remove items older than 30 days
+  * add a confirmation step when clearing the history
+* code cleanup
+
 ## [Icons] - 2023-12-08
 
 * Add icons for managed sources in answers/source list (Notion, Slack, Google Drive, Github, Intercom etc.)

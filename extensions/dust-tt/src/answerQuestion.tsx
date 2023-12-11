@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { DustApi, DustAPICredentials, DustDocument } from "./dust_api/api";
+import { DustApi, DustAPICredentials } from "./dust_api/api";
 import { useEffect, useState } from "react";
 import { addDustHistory } from "./history";
 import { AgentType } from "./dust_api/agent";
 import { DUST_AGENT, MANAGED_SOURCES } from "./agents";
+import { DustDocument } from "./dust_api/conversation_events";
 
 async function answerQuestion({
   question,
