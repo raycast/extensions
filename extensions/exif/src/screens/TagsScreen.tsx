@@ -1,7 +1,7 @@
 import type { Tags } from "exifreader";
 import { type FC, useEffect, useMemo } from "react";
 
-import { Action, ActionPanel, Detail, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Toast, showToast, useNavigation, Icon } from "@raycast/api";
 
 import useTagsMarkdown from "@/hooks/use-tags-markdown";
 
@@ -29,7 +29,7 @@ const TagsScreen: FC<TagsScreenProps> = ({ tags, file }) => {
         <ActionPanel>
           <Action.CopyToClipboard title="Copy JSON" content={tagsString} />
           {tagsString.length < 10000 ? (
-            <Action title="View Raw Tags" onAction={() => push(<RawDataScreen tags={tags} />)} />
+            <Action title="View Raw Tags" icon={Icon.CodeBlock} onAction={() => push(<RawDataScreen tags={tags} />)} />
           ) : null}
         </ActionPanel>
       }
