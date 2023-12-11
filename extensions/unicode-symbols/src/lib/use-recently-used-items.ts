@@ -1,10 +1,12 @@
+import type { Dispatch, SetStateAction } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import { LocalStorage } from "@raycast/api";
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStateAndLocalStorage = <T, _ = void>(
   key: string,
-  initialValue: T
+  initialValue: T,
 ): [T, Dispatch<SetStateAction<T>>, boolean] => {
   const [state, setState] = useState<T>(initialValue);
   const [ready, setReady] = useState(false);
@@ -63,14 +65,34 @@ export function useRecentlyUsedItems<T>(params: UseRecentlyUsedParams<T>) {
         const isItemToAddAlreadyInRecentlyUsedList = currRecentlyUsedItems.find((existingItem) =>
           typeof comparator === "function"
             ? comparator(existingItem, itemToAdd)
-            : existingItem[comparator] === itemToAdd[comparator]
+            : existingItem[comparator] === itemToAdd[comparator],
         );
         return isItemToAddAlreadyInRecentlyUsedList
           ? currRecentlyUsedItems
           : [itemToAdd, ...currRecentlyUsedItems].slice(0, limit);
       });
     },
-    [comparator, limit]
+    [comparator, limit],
+  );
+
+  const removeFromRecentlyUsedItems = useCallback(
+    (itemToRemove: T) => {
+      setRecentlyUsedItems((currRecentlyUsedItems) => {
+        const isItemToRemoveInRecentlyUsedList = currRecentlyUsedItems.find((existingItem) =>
+          typeof comparator === "function"
+            ? comparator(existingItem, itemToRemove)
+            : existingItem[comparator] === itemToRemove[comparator],
+        );
+        return isItemToRemoveInRecentlyUsedList
+          ? currRecentlyUsedItems.filter((existingItem) =>
+              typeof comparator === "function"
+                ? !comparator(existingItem, itemToRemove)
+                : existingItem[comparator] !== itemToRemove[comparator],
+            )
+          : currRecentlyUsedItems;
+      });
+    },
+    [comparator],
   );
 
   const clearRecentlyUsedItems = useCallback(() => {
@@ -82,5 +104,6 @@ export function useRecentlyUsedItems<T>(params: UseRecentlyUsedParams<T>) {
     addToRecentlyUsedItems,
     areRecentlyUsedItemsLoaded,
     clearRecentlyUsedItems,
+    removeFromRecentlyUsedItems,
   };
 }
