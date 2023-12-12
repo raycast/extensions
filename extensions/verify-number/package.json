@@ -22,7 +22,7 @@
   "commands": [
     {
       "name": "countries",
-      "title": "Countries",
+      "title": "Search Countries",
       "subtitle": "Verify Number",
       "description": "List of supported areas, including country names and dialling codes",
       "mode": "view"
@@ -38,7 +38,7 @@
           "name": "number",
           "type": "text",
           "required": true,
-          "placeholder": "NUMBER"
+          "placeholder": "Number"
         }
       ]
     }
