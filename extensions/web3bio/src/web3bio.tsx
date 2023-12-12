@@ -15,7 +15,7 @@ export default function Command() {
   const platform = handleSearchPlatform(searchTerm);
   const [filter, setFilter] = useState("All");
 
-  const { isLoading, data, mutate } = useFetch(url, {
+  const { isLoading, data } = useFetch(url, {
     parseResponse: async (res) => {
       try {
         const rr = await res.json();
@@ -98,11 +98,6 @@ export default function Command() {
           platforms={(!profiles?.length || profiles.error ? [] : profiles)?.map((x: Profile) => x.platform)}
           onSelectChange={setFilter}
         />
-      }
-      actions={
-        <ActionPanel>
-          <Action title="Enter to Search" onAction={() => mutate()} />
-        </ActionPanel>
       }
     >
       <EmptyView />
