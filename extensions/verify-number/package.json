@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "verify-number",
   "title": "Verify Number",
-  "description": "Global Phone Number Validation & Lookup JSON API",
+  "description": "Global Phone Number Validation & Lookup JSON API from APILayer",
   "icon": "verify-number.png",
   "author": "xmok",
   "categories": [
