@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2023-12-09
+
+- Add `Open New Window` command
+
 ## [Update] - 2023-12-06
 
 - Add actions to remove one or all entries from the recent projects list
