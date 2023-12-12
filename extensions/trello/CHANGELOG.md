@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Update] - 2023-12-09
+
+Added toggle for closed boards in preferences.
+
 ## [Update] - 2023-06-23
 
 Added functionality to assign members when creating a new todo
