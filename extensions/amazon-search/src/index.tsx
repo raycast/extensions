@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface Preferences {
   top_level_domain: string;
@@ -56,9 +56,10 @@ export default function Command() {
 
   const preferences: Preferences = getPreferenceValues();
 
-  const search = async (query: string) => {
-    setSearchText(query);
-    if (query.length === 0) {
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const search = async () => {
+    if (searchText.length === 0) {
       // Clear the autocomplete results if the search text is empty
       setItems([]);
       return;
@@ -67,13 +68,29 @@ export default function Command() {
     const tld = preferences.top_level_domain;
     const mid = marketplaceIDs[tld];
 
-    const results = await autoComplete(query, tld, mid);
+    const results = await autoComplete(searchText, tld, mid);
     setItems(results);
   };
 
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      search();
+    }, 400);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchText]);
+
   return (
     <List
-      onSearchTextChange={search}
+      onSearchTextChange={setSearchText}
       isLoading={searchText.length > 0 && items.length === 0}
       searchBarPlaceholder="Search Amazon..."
     >
