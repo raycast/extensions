@@ -4,7 +4,7 @@
 
 - Add support for `Brave Nightly` browser.
 
-## [Support for Firefox Dev edition] - {PR_MERGE_DATE}
+## [Support for Firefox Dev edition] - 2023-11-24
 
 - Add support for `Firefox Dev` browser, which uses the same profiles as `Firefox`.
 
