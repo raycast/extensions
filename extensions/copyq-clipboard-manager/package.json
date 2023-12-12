@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "clipboard-manager",
+      "name": "view-clipboard-entries",
       "title": "View Clipboard",
       "description": "Lists CopyQ clipboard contents and allows the user to select a tab.",
       "mode": "view",
