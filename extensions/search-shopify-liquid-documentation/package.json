@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-shopify-liquid-documentation",
   "title": "Search Shopify Liquid Documentation",
-  "description": "Search Shopify Liquid Documentation Directly From Raycast",
+  "description": "Search Shopify's Liquid Documentation Directly From Raycast",
   "icon": "shopify-icon.png",
   "author": "maximedaraize",
   "categories": [
@@ -13,8 +13,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Shopify's Liquid Documentation",
-      "description": "Search the Shopify liquid Documentation direclty from Raycast",
+      "title": "Search Shopify Documentation",
+      "subtitle": "preview and search Shopify Liquid Documentation",
+      "description": "Search & Preview the Shopify liquid Documentation direclty from Raycast",
       "mode": "view"
     }
   ],
