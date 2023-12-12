@@ -337,6 +337,7 @@
 /extensions/everhour                                 @farisaziz12 @ahoereth
 /extensions/evm-codes                                @clabby
 /extensions/excalidraw                               @slyguy5646 @pernielsentikaer
+/extensions/exif                                     @j3lte
 /extensions/explain-command                          @maantje
 /extensions/f1-standings                             @csigritz @sxn @qeude
 /extensions/facetime                                 @ron-myers
@@ -422,7 +423,7 @@
 /extensions/go-package-search                        @bstncartwright @k8scat @BalliAsghar
 /extensions/goodreads                                @shettypuneeth
 /extensions/google-books                             @Ali-Parandeh
-/extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta
+/extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin
 /extensions/google-chrome-profiles                   @frouo @erics118
 /extensions/google-cloud-platform-search             @klaa97 @edomora97
 /extensions/google-drive                             @vishaltelangre @nametake @daniel-stoneuk
@@ -592,7 +593,7 @@
 /extensions/let-me-google-that                       @Ek2100
 /extensions/liba-ro                                  @neemspees
 /extensions/libraries-io                             @djpowers
-/extensions/library-genesis                          @yz3440
+/extensions/library-genesis                          @yz3440 @j3lte
 /extensions/lichess-org                              @ftonato
 /extensions/life-progress                            @koinzhang
 /extensions/lifx                                     @felixb1010
@@ -753,7 +754,7 @@
 /extensions/onenote                                  @alewandows
 /extensions/ones                                     @k8scat
 /extensions/open-camera-menu-bar                     @peduarte
-/extensions/open-graph                               @davidho0403
+/extensions/open-graph                               @davidho0403 @tmwrnr
 /extensions/open-in-android-studio                   @3llomi
 /extensions/open-in-json-hero                        @ericallam @ivanovart
 /extensions/open-in-visual-studio-code               @shubzkothekar @thomaspaulmann
@@ -1032,7 +1033,7 @@
 /extensions/speedtest                                @tonka3000 @koayon @pernielsentikaer @stevensd2m
 /extensions/spoiler-converter                        @Visual-Studio-Coder @varunsatish2017
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq
-/extensions/spotify-player                           @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @bkeys818
+/extensions/spotify-player                           @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @bkeys818 @jatindotdev
 /extensions/spryker-docs                             @DinisEsteves
 /extensions/ssh-manager                              @scopsy @LenoxFro @RtiM0
 /extensions/ssh-tunnel-manager                       @MinatoHikari
@@ -1121,7 +1122,7 @@
 /extensions/toggle-desktop-visibility                @Haojen
 /extensions/toggle-menu-bar                          @iamyeizi
 /extensions/toggle-scroll-bars-visibility            @danulqua
-/extensions/toolbox                                  @kkange @Saafo @pernielsentikaer
+/extensions/toolbox                                  @kkange @Saafo @pernielsentikaer @Yakitrak
 /extensions/toothpick                                @VladCuciureanu @briankosw @VladCuciureanu @sxn
 /extensions/tower                                    @tdwesten
 /extensions/trackflight                              @cojmeister
@@ -1155,7 +1156,7 @@
 /extensions/typographer                              @mikeozornin
 /extensions/ulid                                     @zephyrpathsofglory
 /extensions/ulysses                                  @praveenjuge
-/extensions/unicode-symbols                          @mmazzarolo @FezVrasta @pernielsentikaer
+/extensions/unicode-symbols                          @mmazzarolo @FezVrasta @pernielsentikaer @j3lte
 /extensions/unifi                                    @tonka3000
 /extensions/unitex                                   @jaymody
 /extensions/universities                             @alewandows

@@ -30,6 +30,14 @@
       "mode": "no-view"
     },
     {
+      "icon": "zoom-mute.png",
+      "name": "mute-toggle",
+      "title": "Toggle Mute Meeting",
+      "subtitle": "Zoom",
+      "description": "Toggles muting for current Zoom meeting",
+      "mode": "no-view"
+    },
+    {
       "icon": "zoom-video-on.png",
       "name": "video-on",
       "title": "Start Video",
@@ -43,6 +51,14 @@
       "title": "Stop Video",
       "subtitle": "Zoom",
       "description": "Stops video in current Zoom meeting",
+      "mode": "no-view"
+    },
+    {
+      "icon": "zoom-video-on.png",
+      "name": "video-toggle",
+      "title": "Toggle Video",
+      "subtitle": "Zoom",
+      "description": "Toggles video in current Zoom meeting",
       "mode": "no-view"
     }
   ],
