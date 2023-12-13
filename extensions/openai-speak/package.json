@@ -4,7 +4,9 @@
   "title": "OpenAI Speak",
   "description": "Uses the OpenAI TTS API to speak the selected text.",
   "icon": "command-icon.png",
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "author": "jian_chao_man",
   "license": "MIT",
   "commands": [

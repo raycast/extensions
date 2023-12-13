@@ -29,14 +29,20 @@ class TextToSpeechProcessor {
   }
 
   public async processSelectedText() {
-    const selectedText = await getSelectedText();
-    this.textToSpeechQueue = selectedText.split(/(?<=\.)\s|\n/).map((s) => (s.endsWith(".") ? s + " " : s));
-
-    if (!this.isConverting) {
-      await this.convertTextToSpeech();
+    try {
+      const selectedText = await getSelectedText();
+      this.textToSpeechQueue = selectedText.split(/(?<=\.)\s|\n/).map((s) => (s.endsWith(".") ? s + " " : s));
+      if (!this.isConverting) {
+        await this.convertTextToSpeech();
+      }
+      await this.waitForQueuesToEmpty();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Cannot speak selected text",
+        message: String(error),
+      });
     }
-
-    await this.waitForQueuesToEmpty();
   }
 
   private async waitForQueuesToEmpty() {
