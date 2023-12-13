@@ -16,6 +16,7 @@ import { ListObject } from "../types/list";
 import { UseCachedPromiseMutatePromise, ApiResponse } from "../types/utils";
 import SearchTasks from "./SearchTasks";
 import UpdateList from "./UpdateList";
+import { isHeightInstalled } from "../utils/application";
 
 type Props = {
   list: ListObject;
@@ -23,13 +24,18 @@ type Props = {
 };
 
 export default function ActionsList({ list, mutateList }: Props) {
+  console.log("list.url:", list.url);
   const { push } = useNavigation();
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
         <Action title="Show Tasks" icon={Icon.List} onAction={() => push(<SearchTasks listId={list.id} />)} />
-        <Action.OpenInBrowser title="Open List in Browser" url={list.url} />
+        {isHeightInstalled ? (
+          <Action.Open title="Open List in Height App" icon={Icon.Globe} target={list.url} application="Height" />
+        ) : (
+          <Action.OpenInBrowser title="Open List in Browser" icon={Icon.Globe} url={list.url} />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action

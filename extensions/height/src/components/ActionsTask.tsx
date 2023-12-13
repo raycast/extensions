@@ -22,6 +22,7 @@ import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState, getPriorityIcon } from "../utils/task";
 import DetailsTask from "./DetailsTask";
 import UpdateTask from "./UpdateTask";
+import { isHeightInstalled } from "../utils/application";
 
 type Props = {
   task: TaskObject;
@@ -63,7 +64,11 @@ export default function ActionsTask({
             onAction={() => push(<DetailsTask taskId={task.id} mutateTask={mutateTask} />)}
           />
         )}
-        <Action.OpenInBrowser title="Open Task in Browser" icon={Icon.Globe} url={task.url} />
+        {isHeightInstalled ? (
+          <Action.Open title="Open Task in Height App" icon={Icon.Globe} target={task.url} application="Height" />
+        ) : (
+          <Action.OpenInBrowser title="Open Task in Browser" icon={Icon.Globe} url={task.url} />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
