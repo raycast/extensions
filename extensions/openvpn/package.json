@@ -13,15 +13,13 @@
   "commands": [
     {
       "name": "connect",
-      "title": "Connect",
-      "subtitle": "OpenVPN",
+      "title": "Connect OpenVPN",
       "description": "Template for running a script without any view",
       "mode": "no-view"
     },
     {
       "name": "disconnect",
-      "title": "Disconnect",
-      "subtitle": "OpenVPN",
+      "title": "Disconnect OpenVPN",
       "description": "Template for running a script without any view",
       "mode": "no-view"
     }
