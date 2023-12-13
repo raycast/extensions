@@ -18,22 +18,32 @@ export default function ShortenLinkWrapper() {
 }
 function ShortenLink() {
   const [originalLink, setOriginalLink] = useState<string>("");
-  const { mutate: createShortLink } = useCreateShortLink();
+  const [lastShortenedUrl, setLastShortenedUrl] = useState<string>("");
+  const { mutate: createShortLink, isLoading } = useCreateShortLink();
 
   async function handleSubmit(values: Values) {
     const url = values.url;
     createShortLink(url, {
       onSuccess: async (shortenedLinkData) => {
         const { domain, key } = shortenedLinkData;
-        await Clipboard.copy(`https://${domain}/${key}`);
-        showToast({ title: "Shortened link", message: "See logs for submitted values" });
+        const shortenedUrl = `https://${domain}/${key}`;
+        await Clipboard.copy(shortenedUrl);
+        setLastShortenedUrl(shortenedUrl);
+        setOriginalLink("");
+        showToast({
+          title: "Shortened link and copied to clipboard",
+          message: "See logs for submitted values",
+        });
       },
-      onError: () =>
+      onError: () => {
+        setOriginalLink("");
+        setLastShortenedUrl("");
         showToast({
           title: "Failed to shorten link",
           message: "See logs for submitted values",
           style: Toast.Style.Failure,
-        }),
+        });
+      },
     });
   }
 
@@ -50,6 +60,7 @@ function ShortenLink() {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Shorten Link" icon={Icon.Link} onSubmit={handleSubmit} />
@@ -64,6 +75,12 @@ function ShortenLink() {
         value={originalLink}
         onChange={(newValue) => setOriginalLink(newValue)}
       />
+      {lastShortenedUrl !== "" && originalLink === "" && (
+        <>
+          <Form.Description text={`Shortened link (copied to clipboard):`} />
+          <Form.Description text={`${lastShortenedUrl}`} />
+        </>
+      )}
     </Form>
   );
 }

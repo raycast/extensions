@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Enhancements] - 2023-12-05
+
+- Adds Copy one-time password action.
+
 ## [Concealed copy of the password] - 2023-10-02
 
 - Copying a password will be faster while avoiding being recorded in the Clipboard History.

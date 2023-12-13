@@ -1,5 +1,17 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Update] - 2023-12-09
+
+- Add `Open New Window` command
+
+## [Update] - 2023-12-06
+
+- Add actions to remove one or all entries from the recent projects list
+
+## [Enhancements] - 2023-12-07
+
+- Added Open and close other windows action
+
 ## [Fix] - 2023-11-28
 
 - Hopefully Fix the "Open With Terminal" action by using the bundle identifier and checking that it exists

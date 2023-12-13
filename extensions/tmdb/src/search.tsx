@@ -91,6 +91,7 @@ function Movie({ movie }: { movie: MovieResponse }) {
                 text={`${rating}${movie.vote_count ? ` (${movie.vote_count} votes)` : ""}`}
                 icon={{ source: Icon.Star, tintColor: Color.Yellow }}
               />
+              <List.Item.Detail.Metadata.Label title="TMDB ID" text={movie.id ? movie.id.toString() : "Unknown"} />
             </List.Item.Detail.Metadata>
           }
         />
@@ -99,6 +100,13 @@ function Movie({ movie }: { movie: MovieResponse }) {
         <ActionPanel>
           <Action.Push title="Show Details" icon={Icon.Sidebar} target={<MovieDetail movie={movie} />} />
           <Action.OpenInBrowser title="Open in TMDB" url={`https://www.themoviedb.org/movie/${movie.id ?? 0}`} />
+          {movie.id ? (
+            <Action.CopyToClipboard
+              title={`Copy TMDB ID`}
+              content={movie.id.toString()}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />
@@ -133,6 +141,7 @@ function Show({ show }: { show: ShowResponse }) {
                 text={`${rating}${show.vote_count ? ` (${show.vote_count} votes)` : ""}`}
                 icon={{ source: Icon.Star, tintColor: Color.Yellow }}
               />
+              <List.Item.Detail.Metadata.Label title="TMDB ID" text={show.id ? show.id.toString() : "Unknown"} />
             </List.Item.Detail.Metadata>
           }
         />
