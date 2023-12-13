@@ -16,7 +16,7 @@
 
 - **Types generation**: Fixed the type of a required `appPicker` preference (even if it is `required`, the app might be undefined because it is missing).
 - **Empty View**: Fixed an issue where the Empty View might not be showing in a certain case.
-- **Menu Bar Extra**: ****icons tinted with `Icon.ColorPrimary` and `Icon.ColorSecondary` should now change based on the menu bar’s appearance.
+- **Menu Bar Extra**: ****icons tinted with `Color.PrimaryText` and `Color.SecondaryText` should now change based on the menu bar’s appearance.
 - **List Metadata:** `Link`s should be properly aligned again.
 
 ## 1.63.0 - 2023-11-29
