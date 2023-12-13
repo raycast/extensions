@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Update] - 2023-12-12
+
+Added support to open cards in Trello desktop. Thanks to the Trello support team 🥳!
+
 ## [Update] - 2023-12-09
 
 Added toggle for closed boards in preferences.
