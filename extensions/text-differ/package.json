@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "text-differ",
   "title": "Text Differ",
-  "description": "Opens Text Differ (by Noah Tran) from selected files",
+  "description": "Opens Text Differ from selected files",
   "icon": "command-icon.png",
   "author": "ErikFisher",
   "categories": [
