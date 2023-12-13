@@ -10,4 +10,4 @@ _Query Wolfram Alpha right from Raycast_
 - Enter `Raycast Extension` as the title and `Query Wolfram Alpha from Raycast` as the description, choose `Simple API` for API
 - Copy the generated AppID into the Raycast preferences
 
-![Screenshot](./Screenshot.png)
+![Screenshot](./media/Screenshot.png)
