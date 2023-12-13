@@ -1,8 +1,9 @@
 import { runAppleScript } from "@raycast/utils";
-import { buildScriptEnsuringSpotifyIsRunning, checkIfSpotifyIsInstalled } from "../helpers/applescript";
+import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 import { getMyDevices } from "./getMyDevices";
+import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
 
 type ContextTypes = "album" | "artist" | "playlist" | "track" | "show" | "episode";
 
@@ -83,7 +84,7 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
       error?.toLocaleLowerCase().includes("no active device") ||
       error?.toLocaleLowerCase().includes("restricted device")
     ) {
-      const isSpotifyInstalled = await checkIfSpotifyIsInstalled();
+      const isSpotifyInstalled = await checkSpotifyApp();
       if (!isSpotifyInstalled) {
         throw new Error("No active device found. Spotify is not installed.");
       }
@@ -103,6 +104,7 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
             play track "${uriForType[type]}${id}"`);
           await runAppleScript(script);
         }
+        return;
       } catch (error) {
         const message = getErrorMessage(error);
         throw new Error(message);
