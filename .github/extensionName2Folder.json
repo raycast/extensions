@@ -527,6 +527,7 @@
   "d2a/jellyfin": "jellyfin",
   "k8scat/jenkins": "jenkins",
   "gdsmith/jetbrains": "jetbrains",
+  "Automattic_Inc/jetpack-commands": "jetpack-commands",
   "raycast/jira": "jira",
   "sven/jira-search": "jira-search",
   "emanguy/jira-search-self-hosted": "jira-search-self-hosted",
