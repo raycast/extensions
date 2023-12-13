@@ -199,6 +199,8 @@ export default function Command(props: LaunchProps<{ draftValues: TodoValues }>)
 
 Shows a list of form items such as [Form.TextField](form.md#form.textfield), [Form.Checkbox](form.md#form.checkbox) or [Form.Dropdown](form.md#form.dropdown).
 
+Optionally add a [Form.LinkAccessory](form.md#form.linkaccessory) in the right-hand side of the navigation bar.
+
 #### Props
 
 | Prop | Description | Type | Default |
@@ -208,6 +210,7 @@ Shows a list of form items such as [Form.TextField](form.md#form.textfield), [Fo
 | enableDrafts | Defines whether the Form.Items values will be preserved when user exits the screen. | <code>boolean</code> | `false` |
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
+| searchBarAccessory | [Form.LinkAccessory](form.md#form.linkaccessory) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[Form.LinkAccessory.Props](form.md#props), string></code> | - |
 
 ### Form.TextField
 
@@ -1184,6 +1187,43 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | text<mark style="color:red;">*</mark> | Text that will be displayed in the middle. | <code>string</code> | - |
 | title | The display title of the left side from the description item. | <code>string</code> | - |
+
+### Form.LinkAccessory
+
+A link that will be shown in the right-hand side of the navigation bar.
+
+#### Example
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      searchBarAccessory={
+        <Form.LinkAccessory
+          target="https://developers.raycast.com/api-reference/user-interface/form"
+          text="Open Documentation"
+        />
+      }
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" defaultValue="Steve" />
+    </Form>
+  );
+}
+```
+
+#### Props
+
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| target<mark style="color:red;">*</mark> | The target of the link. | <code>string</code> | - |
+| text<mark style="color:red;">*</mark> | The text value of the item. | <code>string</code> | - |
 
 ## Types
 
