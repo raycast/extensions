@@ -1,4 +1,4 @@
-import { showToast, Toast, getSelectedFinderItems } from "@raycast/api";
+import { showToast, Toast, getSelectedFinderItems, closeMainWindow } from "@raycast/api";
 import { exec } from "child_process";
 import { checkTextDifferInstallation } from "./utils/checkInstall";
 
@@ -25,6 +25,7 @@ export default async function main() {
       const command = `"${textDifferPath}/Contents/MacOS/Text Differ" "${file1}" "${file2}"`;
 
       exec(command);
+      closeMainWindow({ clearRootSearch: true });
     } else {
       await showToast({
         style: Toast.Style.Failure,
