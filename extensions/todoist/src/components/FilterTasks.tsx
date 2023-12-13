@@ -21,8 +21,8 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const getFilterTasksCached = async (query: string) => {
-    const tasks = await getFilterTasks(query);
-    return tasks;
+    const filterTasks = await getFilterTasks(query);
+    return filterTasks;
   };
 
   const { isLoading, data, revalidate } = useCachedPromise(getFilterTasksCached, [query]);
@@ -39,7 +39,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
     }
   }, [data]);
 
-  const { sections, viewProps, sortedTasks } = useViewTasks(`todoist.filter${name}`, { tasks, data });
+  const { sections, viewProps, sortedTasks } = useViewTasks(`todoist.filter${name}`, { tasks });
 
   if (tasks.length === 0) {
     return (
