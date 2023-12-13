@@ -39,7 +39,7 @@ const GridItem = memo(({ item }: { item: Character }) => {
         `Name: ${upperCaseFirst(item.name)}`,
         `Dec: ${item.code}`,
         `Hex: ${numberToHex(item.code)}`,
-        item.aliases.length > 0 ? `Aliases: "${item.aliases.map(upperCaseFirst).join(", ")}"` : "",
+        item.aliases?.length ? `Aliases: "${item.aliases.map(upperCaseFirst).join(", ")}"` : "",
       ].join("\n"),
     [item],
   );
