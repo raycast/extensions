@@ -47,18 +47,18 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
     [listId, assigneeId, apiResultsLimit],
     {
       ...options,
-    }
+    },
   );
 
   const { unorderedTasks, orderedTasks } = useMemo(() => {
     const unorderedTasks = data?.list?.filter(
-      (task) => !task.deleted && (assigneeId === "all" ? task.assigneesIds.length > 0 : true)
+      (task) => !task.deleted && (assigneeId === "all" ? task.assigneesIds.length > 0 : true),
     );
 
     const orderedTasks = orderBy(
       unorderedTasks,
       [(item) => item.fields.find((field) => field.name.toLowerCase() === "due date")?.date, "createdAt"],
-      ["asc", "desc"]
+      ["asc", "desc"],
     );
 
     return { unorderedTasks, orderedTasks };

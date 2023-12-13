@@ -197,7 +197,7 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
         {tasks
           ?.filter(
             (filteredParentTask) =>
-              filteredParentTask.listIds.some((id) => values.listIds.includes(id)) && filteredParentTask.id !== task.id
+              filteredParentTask.listIds.some((id) => values.listIds.includes(id)) && filteredParentTask.id !== task.id,
           )
           ?.map((task) => {
             return (

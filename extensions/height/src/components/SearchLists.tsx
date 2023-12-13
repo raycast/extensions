@@ -22,8 +22,8 @@ export default function SearchLists() {
         (item) =>
           item?.type === listType &&
           item?.archivedAt === null &&
-          item?.name?.toLowerCase().includes(searchText?.toLowerCase())
-      ) ?? []
+          item?.name?.toLowerCase().includes(searchText?.toLowerCase()),
+      ) ?? [],
     );
   }, [searchText, listsData, listType]);
 

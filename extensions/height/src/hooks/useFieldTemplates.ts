@@ -18,7 +18,7 @@ export default function useFieldTemplates({ options }: Props = {}) {
       ?.labels?.filter((label) => !label?.deleted && !label?.archived);
 
     const prioritiesObj = data?.list?.find(
-      (fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "priority"
+      (fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "priority",
     );
 
     const priorities = prioritiesObj?.labels?.filter((label) => !label?.deleted && !label?.archived);

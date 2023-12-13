@@ -18,7 +18,7 @@ export default function useTask({ taskId, options }: Props) {
     [taskId],
     {
       ...options,
-    }
+    },
   );
 
   return {

@@ -98,7 +98,7 @@ export default function ActionsTask({
                 mutateTask={mutateTask}
                 detailsPage={detailsPage}
                 detailsTaskRevalidate={detailsTaskRevalidate}
-              />
+              />,
             )
           }
         />
@@ -228,7 +228,7 @@ export default function ActionsTask({
                         ],
                       },
                     ],
-                  })
+                  }),
                 );
                 if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
@@ -276,7 +276,7 @@ export default function ActionsTask({
                           ],
                         },
                       ],
-                    })
+                    }),
                   );
                   if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
@@ -318,7 +318,7 @@ export default function ActionsTask({
                       ],
                     },
                   ],
-                })
+                }),
               );
               if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
@@ -363,7 +363,7 @@ export default function ActionsTask({
           {tasks
             ?.filter(
               (filteredParentTask) =>
-                filteredParentTask.listIds.some((id) => task.listIds.includes(id)) && filteredParentTask.id !== task.id
+                filteredParentTask.listIds.some((id) => task.listIds.includes(id)) && filteredParentTask.id !== task.id,
             )
             ?.map((parentTask) => (
               <Action

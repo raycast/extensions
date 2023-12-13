@@ -50,8 +50,8 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
       tasks.filter(
         (task) =>
           task?.name?.toLowerCase().includes(searchText?.toLowerCase()) &&
-          (list === "all" || task?.listIds?.includes(list))
-      ) ?? []
+          (list === "all" || task?.listIds?.includes(list)),
+      ) ?? [],
     );
   }, [searchText, tasks, list]);
 
@@ -65,16 +65,16 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
         listId
           ? `${getListById(listId, lists, smartLists)?.name} – Tasks`
           : assignedTasks
-          ? `${getAssigneeFullNameById(assigneeId, users)} – Tasks`
-          : "Search Tasks"
+            ? `${getAssigneeFullNameById(assigneeId, users)} – Tasks`
+            : "Search Tasks"
       }
       searchBarPlaceholder="Search your tasks"
       searchBarAccessory={
         listId
           ? undefined
           : assignedTasks
-          ? assignedDropdownAccessory(users, setAssigneeId, theme)
-          : listDropdownAccessory(lists, smartLists, setList)
+            ? assignedDropdownAccessory(users, setAssigneeId, theme)
+            : listDropdownAccessory(lists, smartLists, setList)
       }
     >
       {fieldTemplatesStatuses?.map((status) => (
@@ -132,16 +132,16 @@ function getTaskDueDateAccessory(task: TaskObject) {
         differenceInCalendarDays(dueDate, today) <= 0 && !task.completed
           ? Color.Red
           : differenceInCalendarDays(dueDate, today) <= 2 && !task.completed
-          ? Color.Yellow
-          : Color.PrimaryText,
+            ? Color.Yellow
+            : Color.PrimaryText,
     },
     text: {
       color:
         differenceInCalendarDays(dueDate, today) <= 0 && !task.completed
           ? Color.Red
           : differenceInCalendarDays(dueDate, today) <= 2 && !task.completed
-          ? Color.Yellow
-          : Color.PrimaryText,
+            ? Color.Yellow
+            : Color.PrimaryText,
       value: format(new Date(foundDueDate.date), "MMM dd"),
     },
   };
@@ -165,7 +165,7 @@ function getTaskPriorityAccessory(task: TaskObject, theme: string) {
 function assignedDropdownAccessory(
   users: UserObject[] | undefined,
   setAssigneeId: React.Dispatch<React.SetStateAction<string | undefined>>,
-  theme: string
+  theme: string,
 ) {
   return (
     <List.Dropdown
@@ -202,7 +202,7 @@ function assignedDropdownItem(user: UserObject, theme: string): JSX.Element {
 function listDropdownAccessory(
   lists: ListObject[] | undefined,
   smartLists: ListObject[] | undefined,
-  setList: React.Dispatch<React.SetStateAction<string>>
+  setList: React.Dispatch<React.SetStateAction<string>>,
 ) {
   return (
     <List.Dropdown
