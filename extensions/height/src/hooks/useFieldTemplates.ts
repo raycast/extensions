@@ -1,14 +1,14 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { ApiFieldTemplates } from "../api/fieldTemplates";
+import { getFieldTemplates } from "../api/fieldTemplates";
 import { UseCachedPromiseOptions } from "../types/utils";
 
 type Props = {
-  options?: UseCachedPromiseOptions<typeof ApiFieldTemplates.get>;
+  options?: UseCachedPromiseOptions<typeof getFieldTemplates>;
 };
 
 export default function useFieldTemplates({ options }: Props = {}) {
-  const { data, error, isLoading, mutate } = useCachedPromise(ApiFieldTemplates.get, [], {
+  const { data, error, isLoading, mutate } = useCachedPromise(getFieldTemplates, [], {
     ...options,
   });
 

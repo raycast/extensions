@@ -1,11 +1,11 @@
 import { useCachedPromise } from "@raycast/utils";
 import { ApiUrls } from "../api/helpers";
-import { ApiTask } from "../api/task";
+import { getOneTask } from "../api/task";
 import { UseCachedPromiseOptions } from "../types/utils";
 
 type Props = {
   taskId: string;
-  options?: UseCachedPromiseOptions<typeof ApiTask.getOne>;
+  options?: UseCachedPromiseOptions<typeof getOneTask>;
 };
 
 const include = JSON.stringify(["Lists", "ParentTasks"]);
@@ -14,7 +14,7 @@ const endpoint = (taskId: Props["taskId"]) => `${ApiUrls.tasks}/${taskId}?includ
 
 export default function useTask({ taskId, options }: Props) {
   const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
-    (taskId) => ApiTask.getOne(endpoint(taskId)),
+    (taskId) => getOneTask(endpoint(taskId)),
     [taskId],
     {
       ...options,

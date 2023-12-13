@@ -1,7 +1,7 @@
 import { Action, ActionPanel, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
-import { ApiTask } from "../api/task";
+import { batchUpdateTask, updateTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
@@ -76,8 +76,8 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
       };
 
       try {
-        await mutateTask(ApiTask.update(task.id, payload));
-        await mutateTask(ApiTask.batchUpdate(batchPayload));
+        await mutateTask(updateTask(task.id, payload));
+        await mutateTask(batchUpdateTask(batchPayload));
         if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
         toast.style = Toast.Style.Success;

@@ -12,17 +12,18 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { ApiTask } from "../api/task";
+import { batchUpdateTask, updateTask } from "../api/task";
 import { FieldTemplateObject, Option } from "../types/fieldTemplate";
 import { ListObject } from "../types/list";
 import { TaskObject } from "../types/task";
 import { UserObject } from "../types/user";
 import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
+import { WorkspaceObject } from "../types/workspace";
+import { isHeightInstalled } from "../utils/application";
 import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState, getPriorityIcon } from "../utils/task";
 import DetailsTask from "./DetailsTask";
 import UpdateTask from "./UpdateTask";
-import { isHeightInstalled } from "../utils/application";
 
 type Props = {
   task: TaskObject;
@@ -34,6 +35,7 @@ type Props = {
   lists?: ListObject[];
   tasks?: TaskObject[];
   users?: UserObject[];
+  workspace?: WorkspaceObject;
   detailsTaskRevalidate?: () => void;
   detailsPage?: boolean;
 };
@@ -48,6 +50,7 @@ export default function ActionsTask({
   lists,
   tasks,
   users,
+  workspace,
   detailsPage,
   detailsTaskRevalidate,
 }: Props) {
@@ -65,7 +68,12 @@ export default function ActionsTask({
           />
         )}
         {isHeightInstalled ? (
-          <Action.Open title="Open Task in Height App" icon={Icon.Globe} target={task.url} application="Height" />
+          <Action.Open
+            title="Open Task in Height App"
+            icon={Icon.Globe}
+            target={`${workspace?.url?.replace("https", "height")}/${task.url.split("/").at(-1)}`}
+            application="Height"
+          />
         ) : (
           <Action.OpenInBrowser title="Open Task in Browser" icon={Icon.Globe} url={task.url} />
         )}
@@ -111,7 +119,7 @@ export default function ActionsTask({
                 title: "Unsetting assignee",
               });
               try {
-                await mutateTask(ApiTask.update(task.id, { assigneesIds: [] }));
+                await mutateTask(updateTask(task.id, { assigneesIds: [] }));
                 if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                 toast.style = Toast.Style.Success;
@@ -141,7 +149,7 @@ export default function ActionsTask({
                   title: "Setting assignee",
                 });
                 try {
-                  await mutateTask(ApiTask.update(task.id, { assigneesIds: [user.id] }));
+                  await mutateTask(updateTask(task.id, { assigneesIds: [user.id] }));
                   if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                   toast.style = Toast.Style.Success;
@@ -172,7 +180,7 @@ export default function ActionsTask({
                   title: "Setting status",
                 });
                 try {
-                  await mutateTask(ApiTask.update(task.id, { status: status.id }));
+                  await mutateTask(updateTask(task.id, { status: status.id }));
                   if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                   toast.style = Toast.Style.Success;
@@ -205,7 +213,7 @@ export default function ActionsTask({
 
               try {
                 await mutateTask(
-                  ApiTask.batchUpdate({
+                  batchUpdateTask({
                     patches: [
                       {
                         taskIds: [task.id],
@@ -251,7 +259,7 @@ export default function ActionsTask({
 
                 try {
                   await mutateTask(
-                    ApiTask.batchUpdate({
+                    batchUpdateTask({
                       patches: [
                         {
                           taskIds: [task.id],
@@ -295,7 +303,7 @@ export default function ActionsTask({
 
             try {
               await mutateTask(
-                ApiTask.batchUpdate({
+                batchUpdateTask({
                   patches: [
                     {
                       taskIds: [task.id],
@@ -340,7 +348,7 @@ export default function ActionsTask({
                 title: "Unsetting parent task",
               });
               try {
-                await mutateTask(ApiTask.update(task.id, { parentTaskId: null }));
+                await mutateTask(updateTask(task.id, { parentTaskId: null }));
                 if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                 toast.style = Toast.Style.Success;
@@ -371,7 +379,7 @@ export default function ActionsTask({
                     title: "Setting parent task",
                   });
                   try {
-                    await mutateTask(ApiTask.update(task.id, { parentTaskId: parentTask.id }));
+                    await mutateTask(updateTask(task.id, { parentTaskId: parentTask.id }));
                     if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                     toast.style = Toast.Style.Success;
@@ -406,7 +414,7 @@ export default function ActionsTask({
                     title: "Moving task to list",
                   });
                   try {
-                    await mutateTask(ApiTask.update(task.id, { listIds: [list.id] }));
+                    await mutateTask(updateTask(task.id, { listIds: [list.id] }));
                     if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                     toast.style = Toast.Style.Success;
@@ -439,7 +447,7 @@ export default function ActionsTask({
                 onAction: async () => {
                   const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
                   try {
-                    await mutateTask(ApiTask.update(task.id, { deleted: true }));
+                    await mutateTask(updateTask(task.id, { deleted: true }));
                     if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                     toast.style = Toast.Style.Success;

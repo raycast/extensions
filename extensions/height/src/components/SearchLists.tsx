@@ -4,12 +4,14 @@ import useLists from "../hooks/useLists";
 import { ListObject } from "../types/list";
 import { getTintColorFromHue, ListColors, ListTypes } from "../utils/list";
 import ActionsList from "./ActionsList";
+import useWorkspace from "../hooks/useWorkspace";
 
 export default function SearchLists() {
   const [searchText, setSearchText] = useState<string>("");
   const [listType, setListType] = useState("all");
   const [filteredList, filterList] = useState<ListObject[]>([]);
 
+  const { workspaceData, workspaceIsLoading } = useWorkspace();
   const { listsData, listsIsLoading, listsMutate } = useLists();
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function SearchLists() {
 
   return (
     <List
-      isLoading={listsIsLoading}
+      isLoading={listsIsLoading || workspaceIsLoading}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Lists"
       searchBarPlaceholder="Search your favorite list"
@@ -59,7 +61,7 @@ export default function SearchLists() {
             }}
             title={list.name}
             subtitle={list.description}
-            actions={<ActionsList list={list} mutateList={listsMutate} />}
+            actions={<ActionsList list={list} mutateList={listsMutate} workspace={workspaceData} />}
           />
         ))}
       </List.Section>

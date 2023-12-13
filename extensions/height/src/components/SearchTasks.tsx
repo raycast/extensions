@@ -11,6 +11,7 @@ import { UserObject } from "../types/user";
 import { getListById, getTintColorFromHue, ListColors } from "../utils/list";
 import { getAssignedUsers, getAssigneeFullNameById, getIconByStatusState, getPriorityIcon } from "../utils/task";
 import ActionsTask from "./ActionsTask";
+import useWorkspace from "../hooks/useWorkspace";
 
 type Props = {
   listId?: string;
@@ -39,6 +40,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
     fieldTemplatesIsLoading,
   } = useFieldTemplates();
   const { users, usersIsLoading } = useUsers();
+  const { workspaceData, workspaceIsLoading } = useWorkspace();
   const { tasks, tasksMutate, tasksIsLoading } = useTasks({ listId, assigneeId });
 
   useEffect(() => {
@@ -55,7 +57,9 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
 
   return (
     <List
-      isLoading={fieldTemplatesIsLoading || (!listId && listsIsLoading) || usersIsLoading || tasksIsLoading}
+      isLoading={
+        fieldTemplatesIsLoading || (!listId && listsIsLoading) || usersIsLoading || workspaceIsLoading || tasksIsLoading
+      }
       onSearchTextChange={setSearchText}
       navigationTitle={
         listId
@@ -104,6 +108,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                     lists={lists}
                     tasks={tasks}
                     users={users}
+                    workspace={workspaceData}
                   />
                 }
               />

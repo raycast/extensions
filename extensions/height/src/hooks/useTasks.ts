@@ -3,13 +3,13 @@ import { useCachedPromise } from "@raycast/utils";
 import { orderBy } from "lodash-es";
 import { useMemo } from "react";
 import { ApiUrls } from "../api/helpers";
-import { ApiTask } from "../api/task";
+import { getTask } from "../api/task";
 import { Preferences, UseCachedPromiseOptions } from "../types/utils";
 
 type Props = {
   listId?: string;
   assigneeId?: string;
-  options?: UseCachedPromiseOptions<typeof ApiTask.get>;
+  options?: UseCachedPromiseOptions<typeof getTask>;
 };
 
 type EndpointProps = Pick<Props, "listId" | "assigneeId"> & {
@@ -43,7 +43,7 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
   const { apiResultsLimit } = getPreferenceValues<Preferences>();
 
   const { data, error, isLoading, mutate } = useCachedPromise(
-    (listId, assigneeId, apiResultsLimit) => ApiTask.get(endpoint({ listId, assigneeId, apiResultsLimit })),
+    (listId, assigneeId, apiResultsLimit) => getTask(endpoint({ listId, assigneeId, apiResultsLimit })),
     [listId, assigneeId, apiResultsLimit],
     {
       ...options,

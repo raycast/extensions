@@ -1,12 +1,10 @@
-import { useEffect } from "react";
 import SearchLists from "./components/SearchLists";
-import { withHeightAuth } from "./components/withHeightAuth";
-import { checkHeightApp } from "./utils/application";
+import View from "./components/View";
 
 export default function Command() {
-  useEffect(() => {
-    checkHeightApp();
-  }, []);
-
-  return withHeightAuth(<SearchLists />);
+  return (
+    <View>
+      <SearchLists />
+    </View>
+  );
 }

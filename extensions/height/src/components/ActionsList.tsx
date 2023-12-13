@@ -1,30 +1,31 @@
 import {
-  useNavigation,
-  ActionPanel,
   Action,
-  Icon,
-  launchCommand,
-  LaunchType,
-  confirmAlert,
-  Color,
+  ActionPanel,
   Alert,
-  showToast,
+  Color,
+  Icon,
+  LaunchType,
   Toast,
+  confirmAlert,
+  launchCommand,
+  showToast,
+  useNavigation,
 } from "@raycast/api";
-import { ApiList } from "../api/list";
+import { updateList } from "../api/list";
 import { ListObject } from "../types/list";
-import { UseCachedPromiseMutatePromise, ApiResponse } from "../types/utils";
+import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
+import { WorkspaceObject } from "../types/workspace";
+import { isHeightInstalled } from "../utils/application";
 import SearchTasks from "./SearchTasks";
 import UpdateList from "./UpdateList";
-import { isHeightInstalled } from "../utils/application";
 
 type Props = {
   list: ListObject;
   mutateList: UseCachedPromiseMutatePromise<ApiResponse<ListObject[]>>;
+  workspace?: WorkspaceObject;
 };
 
-export default function ActionsList({ list, mutateList }: Props) {
-  console.log("list.url:", list.url);
+export default function ActionsList({ list, mutateList, workspace }: Props) {
   const { push } = useNavigation();
 
   return (
@@ -32,7 +33,12 @@ export default function ActionsList({ list, mutateList }: Props) {
       <ActionPanel.Section>
         <Action title="Show Tasks" icon={Icon.List} onAction={() => push(<SearchTasks listId={list.id} />)} />
         {isHeightInstalled ? (
-          <Action.Open title="Open List in Height App" icon={Icon.Globe} target={list.url} application="Height" />
+          <Action.Open
+            title="Open List in Height App"
+            icon={Icon.Globe}
+            target={`${workspace?.url?.replace("https", "height")}/${list.name}`}
+            application="Height"
+          />
         ) : (
           <Action.OpenInBrowser title="Open List in Browser" icon={Icon.Globe} url={list.url} />
         )}
@@ -71,7 +77,7 @@ export default function ActionsList({ list, mutateList }: Props) {
                 onAction: async () => {
                   const toast = await showToast({ style: Toast.Style.Animated, title: "Archiving list" });
                   try {
-                    await mutateList(ApiList.update(list.id, { archivedAt: new Date().toISOString() }));
+                    await mutateList(updateList(list.id, { archivedAt: new Date().toISOString() }));
 
                     toast.style = Toast.Style.Success;
                     toast.title = "Successfully archived list 🎉";

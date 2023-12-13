@@ -22,7 +22,7 @@ export type ListObject = {
   userId?: string;
   type: ListType;
   reserved: boolean;
-  appearance?: {
+  appearance: {
     icon: ListIcon;
     hue: number | null;
     iconUrl: string;
@@ -42,7 +42,7 @@ export type CreateListFormValues = Pick<ListObject, "name" | "description"> & {
   icon: ListObject["appearance"]["icon"];
 };
 
-export type CreateListPayload = Omit<CreateListFormValues, "hue", "icon"> & {
+export type CreateListPayload = Omit<CreateListFormValues, "hue" | "icon"> & {
   appearance?: {
     hue: ListObject["appearance"]["hue"];
     icon: ListIcon;

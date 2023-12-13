@@ -33,10 +33,7 @@ export type FieldTemplateObject = {
   defaultValue: string;
 };
 
-export type CreateFieldTemplateFormValues = Pick<
-  FieldTemplateObject,
-  "name" | "listIds" | "description" | "status" | "assigneesIds" | "parentTaskId"
->;
+export type CreateFieldTemplateFormValues = Pick<FieldTemplateObject, "name">;
 
 export type CreateFieldTemplatePayload = CreateFieldTemplateFormValues;
 

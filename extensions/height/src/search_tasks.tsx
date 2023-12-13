@@ -1,12 +1,10 @@
-import { useEffect } from "react";
 import SearchTasks from "./components/SearchTasks";
-import { withHeightAuth } from "./components/withHeightAuth";
-import { checkHeightApp } from "./utils/application";
+import View from "./components/View";
 
 export default function Command() {
-  useEffect(() => {
-    checkHeightApp();
-  }, []);
-
-  return withHeightAuth(<SearchTasks />);
+  return (
+    <View>
+      <SearchTasks />
+    </View>
+  );
 }

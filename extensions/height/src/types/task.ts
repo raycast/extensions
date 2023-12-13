@@ -18,6 +18,7 @@ export type Field = {
 
 export type TaskObject = {
   id: string;
+  appearance: string | null;
   model: "task";
   createdAt: string;
   createdUserId: string;
@@ -25,7 +26,9 @@ export type TaskObject = {
   deletedAt: string | null;
   deletedByUserId: string | null;
   name: string;
+  nameTextType: string | "markdown";
   description: string;
+  descriptionTextType: string | "markdown";
   index: number;
   assigneesIds: string[];
   status: string;
@@ -59,7 +62,7 @@ export type CreateTaskPayload = Omit<CreateTaskFormValues, "dueDate"> & {
 
 export type UpdateTaskFormValues = CreateTaskFormValues;
 
-export type UpdateTaskPayload = Omit<Partial<UpdateTaskFormValues>, "dueDate", "parentTaskId"> & {
+export type UpdateTaskPayload = Omit<Partial<UpdateTaskFormValues>, "dueDate" | "parentTaskId"> & {
   fields?: Partial<Field>[];
   deleted?: boolean;
   parentTaskId?: string | null;
