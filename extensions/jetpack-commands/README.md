@@ -6,7 +6,7 @@ The Jetpack Commands Raycast Extension authenticates with the [WordPress.com](ht
 
 When you first run a command, you'll need to connect to WordPress.com in through your web browser. Once you've connected, Raycast will store the oAuth token for future requests.
 
-![Jetpack Commands OAuth Screenshot](media/jetpack-commands-wordpress-com-oauth.png)
+![Jetpack Commands OAuth Screenshot](metadata/jetpack-commands-2.png)
 
 ## Running Jetpack Commands locally
 
@@ -30,4 +30,4 @@ npm run dev
 After running the command above, you should see the new commands listed under the "Developer" section of command list in Raycast.
 The extension will automatically reload if you make any changes to the code.
 
-![Jetpack Commands Screenshot](media/jetpack-commands-list-of-commands.png)
+![Jetpack Commands Screenshot](metadata/jetpack-commands-1.png)
