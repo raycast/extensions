@@ -1,5 +1,5 @@
 import { Toast, showHUD, showToast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 async function script(): Promise<void> {
   const script = `
@@ -13,7 +13,7 @@ async function script(): Promise<void> {
   runAppleScript(script);
 }
 
-export default async function command() {
+export default async function MarkAllAsRead() {
   try {
     await script();
     showHUD("Please note that it may take a while to update");

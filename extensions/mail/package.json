@@ -133,14 +133,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.52.1",
-    "@raycast/utils": "^1.7.1",
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1",
     "javascript-time-ago": "^2.5.9",
     "json2md": "^1.12.0",
     "juice": "^9.0.0",
     "mailparser": "^3.6.4",
     "mime-types": "^2.1.35",
-    "run-applescript": "^6.0.0",
     "turndown": "^7.1.2",
     "utf8": "^3.0.0"
   },
