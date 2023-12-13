@@ -255,6 +255,40 @@
       "description": "Use an API key from Giphy to get random images on interval completion. Get your API key here: https://developers.giphy.com/docs/api#quick-start-guide"
     },
     {
+      "name": "giphyTag",
+      "type": "textfield",
+      "required": false,
+      "title": "Giphy Tag",
+      "description": "Tag to use for Giphy API. Default is 'success'.",
+      "default": "success"
+    },
+    {
+      "name": "giphyRating",
+      "type": "dropdown",
+      "required": false,
+      "title": "Giphy Rating",
+      "description": "Rating to use for Giphy API. Default is 'g'.",
+      "default": "g",
+      "data": [
+        {
+          "value": "g",
+          "title": "G"
+        },
+        {
+          "value": "pg",
+          "title": "PG"
+        },
+        {
+          "value": "pg-13",
+          "title": "PG-13"
+        },
+        {
+          "value": "r",
+          "title": "R"
+        }
+      ]
+    },
+    {
       "name": "sound",
       "description": "Play sound",
       "type": "dropdown",

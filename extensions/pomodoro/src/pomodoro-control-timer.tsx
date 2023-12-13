@@ -115,7 +115,7 @@ const EndOfInterval = () => {
 
   if (preferences.giphyAPIKey) {
     const { isLoading, data } = useFetch(
-      `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=success&rating=pg-13`,
+      `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
       {
         keepPreviousData: true,
       }
