@@ -10,51 +10,130 @@ export type ListColor = typeof ListColors;
 
 export type ListVisualization = (typeof ListVisualizations)[number]["value"];
 
-export type ListObject = {
+export interface ListObject {
   id: string;
   model: "list";
   name: string;
-  archivedAt: string | null;
-  archivedBy: string | null;
+  archivedAt?: string;
+  archivedBy?: string;
   description: string;
+  filters: Filters;
+  fields: Field[];
+  fieldsSummaries: FieldsSummaries;
+  sortBy: SortBy;
+  viewBy?: ViewBy;
+  viewByMobile?: ViewByMobile;
   visualization: ListVisualization;
   key: string;
-  userId?: string;
+  userId: string;
   type: ListType;
   reserved: boolean;
-  appearance: {
-    icon: ListIcon;
-    hue: number | null;
-    iconUrl: string;
-  };
+  showCompletedTasks: string;
+  subtaskHierarchy: string;
+  appearance?: Appearance;
   createdAt: string;
   updatedAt: string;
+  updatedBy: string;
   defaultList: boolean;
   url: string;
-  topActiveUserIds: string[];
+  topActiveUsersIds: string[];
   totalActiveUsersCount: number;
-};
+  calendarVisualizationOptions: CalendarVisualizationOptions;
+  ganttVisualizationOptions: GanttVisualizationOptions;
+  searchTopResultCount: number;
+  searchHighlightMode: string;
+  memberAccess: string;
+}
 
-export type CreateListFormValues = Pick<ListObject, "name" | "description"> & {
+export interface CreateListFormValues extends Pick<ListObject, "name" | "description"> {
   type: string;
   visualization: string;
-  hue: ListObject["appearance"]["hue"];
-  icon: ListObject["appearance"]["icon"];
-};
+  hue: string;
+  icon: string;
+}
 
-export type CreateListPayload = Omit<CreateListFormValues, "hue" | "icon"> & {
+export interface CreateListPayload extends Omit<CreateListFormValues, "hue" | "icon"> {
   appearance?: {
-    hue: ListObject["appearance"]["hue"];
+    hue: Appearance["hue"];
     icon: ListIcon;
   };
-};
+}
 
 export type UpdateListFormValues = Omit<CreateListFormValues, "icon">;
 
-export type UpdateListPayload = Partial<Omit<UpdateListFormValues, "hue">> & {
+export interface UpdateListPayload extends Partial<Omit<UpdateListFormValues, "hue">> {
   appearance?: {
-    hue?: ListObject["appearance"]["hue"];
+    hue?: Appearance["hue"];
     icon?: ListIcon;
   };
   archivedAt?: string;
-};
+}
+
+export interface Filters {
+  listIds?: {
+    values: string[];
+  };
+  trashed?: {
+    values: boolean[];
+  };
+  assigneesIds?: {
+    values: string[];
+  };
+}
+
+export interface Field {
+  id: string;
+  format?: Format;
+}
+
+export interface Format {
+  dateTextStyle: string;
+}
+
+export interface FieldsSummaries {
+  name: {
+    type: string;
+  };
+}
+
+export interface SortBy {
+  type: string;
+  sorts?: Sort[];
+  sort?: string;
+}
+
+export interface Sort {
+  order: string;
+  fieldId: string;
+}
+
+export interface ViewBy {
+  id: string;
+  alwaysShowCurrentUser: boolean;
+  alwaysShowTodoAndDone: boolean;
+  visibility: string;
+}
+
+export interface ViewByMobile {
+  id: string;
+  alwaysShowCurrentUser: boolean;
+  alwaysShowTodoAndDone: boolean;
+  visibility: string;
+}
+
+export interface Appearance {
+  icon: ListIcon;
+  hue?: number | null;
+  iconUrl: string;
+}
+
+export interface CalendarVisualizationOptions {
+  showWeekends: boolean;
+}
+
+export interface GanttVisualizationOptions {
+  zoomLevel: number;
+  sidebarCollapsed: boolean;
+  sidebarWidth: number;
+  dateUnit: string;
+}

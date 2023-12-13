@@ -1,37 +1,40 @@
 export type StatusState = "default" | "blocked" | "started" | "canceled" | "completed";
 
-export type Option = {
+export interface Metadata {
+  dueColors?: boolean;
+  showTimerByDefault?: boolean;
+}
+
+export interface Label {
   id: string;
   model: string;
   value: string;
-  date?: string | null;
-  hue: number;
+  date: string | null;
+  hue?: number;
   deleted: boolean;
   archived: boolean;
   statusState?: StatusState;
-};
+}
 
-type Metadata = {
-  showTimerByDefault: boolean;
-  options: Option[];
-  dueColors?: boolean;
-};
-
-export type FieldTemplateObject = {
+export interface FieldTemplateObject {
   id: string;
   model: string;
   name: string;
   standardType: string;
+  defaultValue?: string;
   required: boolean;
   archived: boolean;
+  hidden: boolean;
   permissions: string;
+  redacted: unknown;
+  memberAccess: string;
+  publicAccess: string;
   type: string;
+  labelSets?: unknown[];
+  labels?: Label[];
   metadata: Metadata;
-  reverseFieldTemplateId: string;
-  labelSets: unknown[];
-  labels: Option[];
-  defaultValue: string;
-};
+  reverseFieldTemplateId?: string;
+}
 
 export type CreateFieldTemplateFormValues = Pick<FieldTemplateObject, "name">;
 

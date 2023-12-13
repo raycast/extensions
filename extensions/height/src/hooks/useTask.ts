@@ -1,11 +1,11 @@
 import { useCachedPromise } from "@raycast/utils";
 import { ApiUrls } from "../api/helpers";
 import { getOneTask } from "../api/task";
-import { UseCachedPromiseOptions } from "../types/utils";
+import { CachedPromiseOptionsType } from "../types/utils";
 
 type Props = {
   taskId: string;
-  options?: UseCachedPromiseOptions<typeof getOneTask>;
+  options?: CachedPromiseOptionsType<Awaited<ReturnType<typeof getOneTask>>>;
 };
 
 const include = JSON.stringify(["Lists", "ParentTasks"]);

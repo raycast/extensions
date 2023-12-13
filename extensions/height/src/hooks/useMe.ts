@@ -1,9 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getMe } from "../api/user";
-import { UseCachedPromiseOptions } from "../types/utils";
+import { CachedPromiseOptionsType } from "../types/utils";
 
 type Props = {
-  options?: UseCachedPromiseOptions<typeof getMe>;
+  options?: CachedPromiseOptionsType<Awaited<ReturnType<typeof getMe>>>;
 };
 
 export default function useMe({ options }: Props = {}) {

@@ -1,15 +1,15 @@
-import { useCachedPromise } from "@raycast/utils";
-import { FunctionReturningPromise } from "@raycast/utils/dist/types";
+import { CachedPromiseOptions } from "@raycast/utils";
+import { MutatePromise } from "@raycast/utils/dist/types";
 
-export type Preferences = {
+export interface Preferences {
   apiResultsLimit: string;
-};
+}
 
-export type ApiResponse<T> = {
+export interface ApiResponse<T> {
   list: T;
-};
+}
 
-export type ApiErrorResponse = {
+export interface ApiErrorResponse {
   error: {
     name: string;
     type: string;
@@ -18,13 +18,14 @@ export type ApiErrorResponse = {
     attributes: unknown[];
     raw: boolean;
   };
-};
+}
 
-export type UseCachedPromiseOptions<T extends FunctionReturningPromise> = Parameters<typeof useCachedPromise<T>>[2];
+export type CachedPromiseOptionsType<T> = CachedPromiseOptions<(...args: unknown[]) => Promise<T>, unknown>;
 
-export type UseCachedPromiseMutatePromise<T extends FunctionReturningPromise> = ReturnType<
-  typeof useCachedPromise<T>
->["mutate"];
+export type CachedPromiseMutateType<T extends (...args: string[]) => unknown> = MutatePromise<
+  Awaited<ReturnType<T>>,
+  unknown
+>;
 
 const HueArray = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,

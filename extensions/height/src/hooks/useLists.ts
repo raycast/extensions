@@ -2,10 +2,10 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { getList } from "../api/list";
 import { ListObject } from "../types/list";
-import { UseCachedPromiseOptions } from "../types/utils";
+import { CachedPromiseOptionsType } from "../types/utils";
 
 type Props = {
-  options?: UseCachedPromiseOptions<typeof getList>;
+  options?: CachedPromiseOptionsType<Awaited<ReturnType<typeof getList>>>;
 };
 
 export default function useLists({ options }: Props = {}) {

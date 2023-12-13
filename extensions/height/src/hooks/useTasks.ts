@@ -4,12 +4,12 @@ import { orderBy } from "lodash-es";
 import { useMemo } from "react";
 import { ApiUrls } from "../api/helpers";
 import { getTask } from "../api/task";
-import { Preferences, UseCachedPromiseOptions } from "../types/utils";
+import { Preferences, CachedPromiseOptionsType } from "../types/utils";
 
 type Props = {
   listId?: string;
   assigneeId?: string;
-  options?: UseCachedPromiseOptions<typeof getTask>;
+  options?: CachedPromiseOptionsType<Awaited<ReturnType<typeof getTask>>>;
 };
 
 type EndpointProps = Pick<Props, "listId" | "assigneeId"> & {

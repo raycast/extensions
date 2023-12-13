@@ -11,9 +11,9 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { updateList } from "../api/list";
+import { getList, updateList } from "../api/list";
 import { ListObject } from "../types/list";
-import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
+import { CachedPromiseMutateType } from "../types/utils";
 import { WorkspaceObject } from "../types/workspace";
 import { isHeightInstalled } from "../utils/application";
 import SearchTasks from "./SearchTasks";
@@ -21,7 +21,7 @@ import UpdateList from "./UpdateList";
 
 type Props = {
   list: ListObject;
-  mutateList: UseCachedPromiseMutatePromise<ApiResponse<ListObject[]>>;
+  mutateList: CachedPromiseMutateType<typeof getList>;
   workspace?: WorkspaceObject;
 };
 
@@ -35,7 +35,7 @@ export default function ActionsList({ list, mutateList, workspace }: Props) {
         {isHeightInstalled ? (
           <Action.Open
             title="Open List in Height App"
-            icon={Icon.Globe}
+            icon={"height-app.png"}
             target={`${workspace?.url?.replace("https", "height")}/${list.name}`}
             application="Height"
           />

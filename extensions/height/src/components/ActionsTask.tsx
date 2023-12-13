@@ -12,12 +12,12 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { batchUpdateTask, updateTask } from "../api/task";
-import { FieldTemplateObject, Option } from "../types/fieldTemplate";
+import { batchUpdateTask, getTask, updateTask } from "../api/task";
+import { FieldTemplateObject, Label } from "../types/fieldTemplate";
 import { ListObject } from "../types/list";
 import { TaskObject } from "../types/task";
 import { UserObject } from "../types/user";
-import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
+import { CachedPromiseMutateType } from "../types/utils";
 import { WorkspaceObject } from "../types/workspace";
 import { isHeightInstalled } from "../utils/application";
 import { getTintColorFromHue, ListColors } from "../utils/list";
@@ -27,9 +27,9 @@ import UpdateTask from "./UpdateTask";
 
 type Props = {
   task: TaskObject;
-  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
-  fieldTemplatesStatuses?: Option[];
-  fieldTemplatesPriorities?: Option[];
+  mutateTask: CachedPromiseMutateType<typeof getTask>;
+  fieldTemplatesStatuses?: Label[];
+  fieldTemplatesPriorities?: Label[];
   fieldTemplatesPrioritiesObj?: FieldTemplateObject;
   fieldTemplatesDueDate?: FieldTemplateObject;
   lists?: ListObject[];
@@ -70,7 +70,7 @@ export default function ActionsTask({
         {isHeightInstalled ? (
           <Action.Open
             title="Open Task in Height App"
-            icon={Icon.Globe}
+            icon={"height-app.png"}
             target={`${workspace?.url?.replace("https", "height")}/${task.url.split("/").at(-1)}`}
             application="Height"
           />

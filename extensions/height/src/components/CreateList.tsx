@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, LaunchType, Toast, launchCommand, show
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { createList } from "../api/list";
-import { CreateListFormValues, CreateListPayload } from "../types/list";
+import { CreateListFormValues, CreateListPayload, ListIcon } from "../types/list";
 import { ListColors, ListIcons, ListTypes, ListVisualizations, getTintColorFromHue } from "../utils/list";
 
 export default function CreateList({ draftValues }: { draftValues?: CreateListFormValues }) {
@@ -20,7 +20,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
         visualization: values.visualization,
         appearance: {
           hue: values.hue === "" ? null : Number(values.hue),
-          icon: values.icon,
+          icon: values.icon as ListIcon,
         },
       };
 
@@ -37,7 +37,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
             description: "",
             visualization: "list",
             hue: "",
-            icon: "",
+            icon: "list",
           });
 
           await launchCommand({ name: "search_lists", type: LaunchType.UserInitiated });
@@ -60,7 +60,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
       name: draftValues?.name ?? "",
       description: draftValues?.description ?? "",
       hue: draftValues?.hue ?? "",
-      icon: draftValues?.icon ?? "",
+      icon: draftValues?.icon ?? "list",
     },
     validation: {
       type: FormValidation.Required,

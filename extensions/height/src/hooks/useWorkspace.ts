@@ -1,9 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getWorkspace } from "../api/workspace";
-import { UseCachedPromiseOptions } from "../types/utils";
+import { CachedPromiseOptionsType } from "../types/utils";
 
 type Props = {
-  options?: UseCachedPromiseOptions<typeof getWorkspace>;
+  options?: CachedPromiseOptionsType<Awaited<ReturnType<typeof getWorkspace>>>;
 };
 
 export default function useWorkspaces({ options }: Props = {}) {

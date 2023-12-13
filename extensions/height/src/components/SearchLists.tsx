@@ -75,7 +75,7 @@ export default function SearchLists() {
             }}
             title={list.name}
             subtitle={list.description}
-            actions={<ActionsList list={list} mutateList={listsMutate} />}
+            actions={<ActionsList list={list} mutateList={listsMutate} workspace={workspaceData} />}
           />
         ))}
       </List.Section>
