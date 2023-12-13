@@ -8,15 +8,13 @@
   "contributors": [
     "pernielsentikaer"
   ],
-  "categories": [
-    "Productivity"
-  ],
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
       "name": "view-clipboard-entries",
-      "title": "View Default Tab",
-      "description": "Lists CopyQ clipboard entries and allows user to select/paste them.",
+      "title": "View Clipboard",
+      "description": "Lists CopyQ clipboard contents and allows the user to select a tab.",
       "mode": "view",
       "preferences": [
         {
@@ -27,22 +25,6 @@
           "required": true
         }
       ]
-    },
-    {
-      "name": "select-tab",
-      "title": "Select Tab",
-      "description": "Lists CopyQ tabs and allows the user to select one.",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "type": "textfield",
-      "name": "copyq_path",
-      "title": "CopyQ Path",
-      "description": "Path to CopyQ executable",
-      "default": "/usr/local/bin/copyq",
-      "required": true
     }
   ],
   "dependencies": {
