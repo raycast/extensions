@@ -1092,6 +1092,7 @@
   "yedongze/terminalfinder": "terminalfinder",
   "williamwelsh/tesla": "tesla",
   "koinzhang/text-decorator": "text-decorator",
+  "ErikFisher/text-differ": "text-differ",
   "alice.ellis/text-format-improver": "text-format-improver",
   "koinzhang/text-shortcuts": "text-shortcuts",
   "bun913/raycast-textlint-rule-aws-service-name": "textlint-rule-aws-service-name",
