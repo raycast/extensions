@@ -1,5 +1,9 @@
 # Unicode Symbols
 
+## [Minor bugfix] - 2023-12-13
+
+- Fixed a minor bug that breaks the item grid over cached items (#9664)
+
 ## [Major refactor] - 2023-12-01
 
 - Upgraded `@raycast/api@^1.63.0` and other dependencies
