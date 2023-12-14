@@ -114,7 +114,6 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/date-fns": "^2.6.0",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",

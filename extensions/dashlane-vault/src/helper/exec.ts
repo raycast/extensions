@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import util from "util";
 
-export const execPromise = util.promisify(exec);
+export const execFilePromis = util.promisify(execFile);

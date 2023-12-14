@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, LaunchProps, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps, getPreferenceValues, open, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
 type Values = {
@@ -19,7 +19,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values; argume
       open(`https://www.perplexity.ai/search?${params}`);
     },
     initialValues: {
-      query: props.draftValues?.query ?? "",
+      query: props.draftValues?.query ?? props.fallbackText ?? "",
       copilot: props.draftValues?.copilot ?? false,
       focus: props.draftValues?.focus ?? "all",
     },
@@ -32,6 +32,15 @@ export default function Command(props: LaunchProps<{ draftValues: Values; argume
     handleSubmit({
       query: props.arguments.query,
       copilot: ["y", "yes", "true"].includes(props.arguments.copilot?.toLowerCase() ?? ""),
+      focus: "all",
+    });
+    return null;
+  }
+
+  if (props.fallbackText) {
+    handleSubmit({
+      copilot: getPreferenceValues<Preferences.AskPerplexity>().fallbackCopilot,
+      query: props.fallbackText,
       focus: "all",
     });
     return null;

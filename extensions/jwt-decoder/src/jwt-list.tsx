@@ -38,7 +38,7 @@ const JwtView = () => {
 
     const markdown = showDetail
       ? [
-          `<img alt="view token" width="400" src="data:image/svg+xml,${encodeURI(
+          `<img alt="view token" width="400" src="data:image/svg+xml,${encodeURIComponent(
             renderToString(
               <TokenSvg
                 {...{

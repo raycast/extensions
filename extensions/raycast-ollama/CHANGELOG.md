@@ -1,5 +1,12 @@
 # raycast-ollama Changelog
 
+## [Fixed spelling error in extension description] - 2023-12-07
+
+## [Improvement] - 2023-11-30
+
+- [Improvement] Query you pdf or text based file with Ollama. More information on how to use is on README.md.
+- [Improvement] On Command 'Manage Models' is now possible to view all Modelfile parameters. If a specific parameter isn't set on Modelfile it display the default value.
+
 ## [BugFix] - 2023-11-5
 
 - [BugFix] Fixed error `ModelsOnRegistry.lengh undefined`.
