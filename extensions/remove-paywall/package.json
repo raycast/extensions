@@ -21,17 +21,26 @@
       "mode": "no-view",
       "arguments": [
         {
-          "name": "url",
-          "type": "text",
-          "placeholder": "URL (or selected text)"
+          "name": "service",
+          "type": "dropdown",
+          "placeholder": "Service",
+          "required": false,
+          "data": [
+            {
+              "title": "12ft.io",
+              "value": "https://12ft.io"
+            },
+            {
+              "title": "archive.is",
+              "value": "https://archive.is"
+            },
+            {
+              "title": "removepaywall.com",
+              "value": "https://www.removepaywall.com"
+            }
+          ]
         }
       ]
-    },
-    {
-      "name": "remove-paywall-using",
-      "title": "Remove Paywall Using...",
-      "description": "Remove the paywall with the specified URL using an alternative service.",
-      "mode": "view"
     }
   ],
   "preferences": [
