@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Sidekick] - {PR_MERGE_DATE}
+
+- Add support for `Sidekick` browser
+
 ## [Support for Brave Nightly] - 2023-12-09
 
 - Add support for `Brave Nightly` browser.
