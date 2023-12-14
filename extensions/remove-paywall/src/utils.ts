@@ -12,7 +12,7 @@ export async function getUrl(): Promise<string | Error> {
   try {
     // If the user has selected text, use that as the URL
     url = await getSelectedText();
-  } catch (_) {
+  } catch {
     // Otherwise, use the clipboard
     url = await Clipboard.readText();
   }

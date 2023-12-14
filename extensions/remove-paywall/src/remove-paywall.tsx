@@ -3,7 +3,6 @@ import { getUrl } from "./utils";
 
 export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
   let service;
-
   if (props.arguments.service) {
     service = props.arguments.service;
   } else {
