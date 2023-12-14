@@ -1,28 +1,21 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
 
-export function isUrl(text: string): boolean {
+export function isUrl(text: string | undefined): boolean {
+  // If there's no text, it's not a URL
+  if (!text) return false;
+
   return /^https?:\/\//.test(text);
 }
 
-export async function getExistingText(fallbackText = ""): Promise<string> {
-  let selectedText = "";
-  let clipboardText: string | undefined = "";
-  fallbackText = fallbackText?.trim() ?? "";
+export async function getUrl(): Promise<string | undefined> {
+  // If the user has selected text, use that as the URL
+  const selectedText = await getSelectedText();
+  if (selectedText) return selectedText;
 
-  // Get the selected text (if any)
-  try {
-    selectedText = (await getSelectedText()).trim();
-  } catch {
-    // Ignore errors
-  }
+  // Otherwise, use the clipboard
+  const clipboardText = await Clipboard.readText();
+  if (clipboardText) return clipboardText;
 
-  // Get the clipboard text (if any)
-  try {
-    clipboardText = await Clipboard.readText();
-    clipboardText = clipboardText ? clipboardText.trim() : "";
-  } catch {
-    // Ignore errors
-  }
-
-  return [selectedText, fallbackText, clipboardText].find((v) => !!v) ?? "";
+  // If there's no URL, return undefined
+  return undefined;
 }
