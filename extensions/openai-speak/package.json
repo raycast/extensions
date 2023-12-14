@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Speak Selected Text",
+      "subtitle": "OpenAI Speak",
       "description": "TTS on selected text",
       "mode": "no-view"
     }
