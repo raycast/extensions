@@ -164,6 +164,7 @@
   "isma/clockify": "clockify",
   "danblancas/search-clojuredocs": "clojuredocs-search",
   "destiner/cloudflare": "cloudflare",
+  "anandubajith/cloudflare-warp": "cloudflare-warp",
   "colbyfayock/cloudinary": "cloudinary",
   "aelew/cobalt": "cobalt",
   "allienx/coda-bookmarks-search": "coda-bookmarks-search",

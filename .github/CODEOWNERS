@@ -165,6 +165,7 @@
 /extensions/clockify                                 @ismamz @sxn
 /extensions/clojuredocs-search                       @edblancas
 /extensions/cloudflare                               @Destiner @niklaswa
+/extensions/cloudflare-warp                          @anandubajith
 /extensions/cloudinary                               @colbyfayock
 /extensions/cobalt                                   @aelew
 /extensions/coda-bookmarks-search                    @allienx
