@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "remove-paywall",
   "title": "Remove Paywall",
-  "description": "Remove the paywall from the specified URL.",
+  "description": "Remove the paywall from the selected or clipboard URL.",
   "icon": "command-icon.png",
   "author": "tegola",
   "contributors": [
@@ -17,7 +17,7 @@
     {
       "name": "remove-paywall",
       "title": "Remove Paywall",
-      "description": "Remove the paywall from the specified URL.",
+      "description": "Remove the paywall from the selected or clipboard URL.",
       "mode": "no-view",
       "arguments": [
         {
@@ -47,7 +47,7 @@
     {
       "name": "service",
       "title": "Service",
-      "description": "The service to use to remove the paywall.",
+      "description": "The default service to use to remove the paywall.",
       "type": "dropdown",
       "required": true,
       "data": [
