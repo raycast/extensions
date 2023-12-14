@@ -1,5 +1,12 @@
 # Dust.tt Changelog
 
+## [UX improvements] - 2023-12-14
+
+* better agent organization: sorted by name, in sections
+* changed the shortcut for "Paste in current app" to "cmd + return"
+* add a new action to edit the question on the answer screen
+* do not crash on dust API connectivity issues when getting agents
+
 ## [Cleanup] - 2023-12-09
 
 * **history:**
