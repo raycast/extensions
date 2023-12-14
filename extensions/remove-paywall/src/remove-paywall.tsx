@@ -1,8 +1,15 @@
-import { Toast, getPreferenceValues, open, showToast } from "@raycast/api";
+import { Toast, getPreferenceValues, LaunchProps, open, showToast } from "@raycast/api";
 import { getUrl } from "./utils";
 
-export default async () => {
-  const { service } = await getPreferenceValues<Preferences>();
+export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
+  let service;
+
+  if (props.arguments.service) {
+    service = props.arguments.service;
+  } else {
+    const preferences = await getPreferenceValues<Preferences>();
+    service = preferences.service;
+  }
 
   try {
     const url = await getUrl();
