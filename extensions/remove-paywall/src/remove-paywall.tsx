@@ -1,29 +1,23 @@
 import { Toast, getPreferenceValues, open, showToast } from "@raycast/api";
-import { getUrl, isUrl } from "./utils";
+import { getUrl } from "./utils";
 
 export default async () => {
   const { service } = await getPreferenceValues<Preferences>();
 
-  const url = await getUrl();
+  try {
+    const url = await getUrl();
 
-  if (url) {
-    const textIsUrl = isUrl(url);
-
-    if (!textIsUrl) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Cannot remove paywall",
-        message: "No URL found in the current selection.",
-      });
-      return;
+    if (typeof url !== "string") {
+      throw url;
     }
 
+    // Open the URL with the specified service
     open(`${service}/${url}`);
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot remove paywall",
+      message: (error as Error).message,
+    });
   }
-
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Cannot remove paywall",
-    message: "No URL provided.",
-  });
 };
