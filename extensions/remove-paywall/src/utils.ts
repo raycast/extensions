@@ -1,10 +1,12 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
 
+const urlRegex = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
+
 export function isUrl(text: string | undefined): boolean {
   // If there's no text, it's not a URL
   if (!text) return false;
 
-  return /^https?:\/\//.test(text);
+  return urlRegex.test(text);
 }
 
 export async function getUrl(): Promise<string | undefined> {
