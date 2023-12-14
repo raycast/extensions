@@ -25,7 +25,7 @@ const SLActions = ({ link }: { link: SchedulingLink }) => {
     );
 
     if (!error && oneOff) {
-      open(`https://app.reclaim.ai/scheduling-links/one-off/${oneOff.id}/edit`);
+      open(`https://app.reclaim.ai/scheduling-links?personalize=${oneOff.id}`);
     } else {
       await showToast({
         style: Toast.Style.Failure,

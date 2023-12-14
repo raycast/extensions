@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.64.0 - 2023-12-13
+
+### ✨ New
+
+- **Form**: Introduced a new component `Form.LinkAccessory` to render a link displayed in the right-hand side of the search bar.
+- **Arguments**: Introduced a new Argument type: `dropdown`. You can now [specify a list of options](https://developers.raycast.com/information/manifest#argument-properties) for the user choose from.
+- **Developer Hub**: User preferences are now included in error reports. Password and text preferences will be replaced with `[REDACTED]`, file/directory/appPicker preferences will be scrubbed of PII, and dropdown/checkbox preferences will be sent as-is.
+
+### 💎 Improvements
+
+- **Window Capture**: Added a warning when trying to take a screenshot of Raycast if that screenshot won’t match the requirement for the Store’s extensions guidelines (eg. if Raycast is too close to an edge or if the screen doesn’t have a high enough resolution).
+
+### 🐞 Fixes
+
+- **Types generation**: Fixed the type of a required `appPicker` preference (even if it is `required`, the app might be undefined because it is missing).
+- **Empty View**: Fixed an issue where the Empty View might not be showing in a certain case.
+- **Menu Bar Extra**: ****icons tinted with `Icon.ColorPrimary` and `Icon.ColorSecondary` should now change based on the menu bar’s appearance.
+- **List Metadata:** `Link`s should be properly aligned again.
+
+## 1.63.0 - 2023-11-29
+
+### 💎 Improvements
+
+- Improved runtime error handling when using a Swift project
+
+### 🐞 Fixes
+
+- **Lists**: Fixed a race condition where the selected item would not be the first one after a list items update
+
+- **MenuBarExtra:** `alternate` are no longer supported on pre-Sonoma versions of macOS, as they would often appear alongside their parent items.
+
 ## 1.62.0 - 2023-11-15
 
 ### ✨ New

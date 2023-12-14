@@ -34,7 +34,7 @@ export default function Command() {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const result = await response.text();
+        const result = (await response.text()).trim();
         uploadToast.style = Toast.Style.Success;
         uploadToast.title = "Upload successful";
         uploadToast.message = "Link copied to clipboard";
@@ -47,7 +47,7 @@ export default function Command() {
           },
         };
         setUploading(false);
-        await reset();
+        reset();
       } catch (error) {
         setUploading(false);
       }
