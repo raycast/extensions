@@ -1,4 +1,4 @@
-# OpenAI_Speak Changelog
+# OpenAI Speak Changelog
 
 ## [Updated Regex Sentence / Newline Detection] - 2023-12-11
 
