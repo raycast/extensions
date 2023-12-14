@@ -1,19 +1,21 @@
 import { Color, Detail, environment, Icon } from "@raycast/api";
 import { differenceInCalendarDays, format } from "date-fns";
+import { getTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTask from "../hooks/useTask";
 import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
 import { TaskObject } from "../types/task";
-import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
+import { CachedPromiseMutateType } from "../types/utils";
 import { getListById, getTintColorFromHue, ListColors } from "../utils/list";
 import { getAssigneeById, getIconByStatusState, getPriorityIcon, getStatusById } from "../utils/task";
 import ActionsTask from "./ActionsTask";
+import useWorkspace from "../hooks/useWorkspace";
 
 type Props = {
   taskId: string;
-  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
+  mutateTask: CachedPromiseMutateType<typeof getTask>;
 };
 
 const markdown = (task: TaskObject | undefined) => `
@@ -35,6 +37,7 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
   const { task, taskIsLoading, taskRevalidate } = useTask({ taskId });
   const { lists, smartLists, listsIsLoading } = useLists();
   const { users, usersIsLoading } = useUsers();
+  const { workspaceData, workspaceIsLoading } = useWorkspace();
 
   const status = getStatusById(task?.status, fieldTemplatesStatuses);
 
@@ -47,7 +50,14 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
 
   return (
     <Detail
-      isLoading={taskIsLoading || tasksIsLoading || fieldTemplatesIsLoading || listsIsLoading || usersIsLoading}
+      isLoading={
+        taskIsLoading ||
+        tasksIsLoading ||
+        fieldTemplatesIsLoading ||
+        listsIsLoading ||
+        usersIsLoading ||
+        workspaceIsLoading
+      }
       markdown={markdown(task)}
       navigationTitle={task?.name}
       actions={
@@ -61,6 +71,7 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
           lists={lists}
           tasks={tasks}
           users={users}
+          workspace={workspaceData}
           detailsTaskRevalidate={taskRevalidate}
           detailsPage
         />
@@ -101,8 +112,8 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
                   differenceInCalendarDays(new Date(dueDate.date), today) <= 0 && !task.completed
                     ? Color.Red
                     : differenceInCalendarDays(new Date(dueDate.date), today) <= 2 && !task.completed
-                    ? Color.Yellow
-                    : Color.PrimaryText,
+                      ? Color.Yellow
+                      : Color.PrimaryText,
               }}
             />
           ) : null}

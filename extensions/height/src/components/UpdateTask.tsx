@@ -1,19 +1,19 @@
 import { Action, ActionPanel, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
-import { ApiTask } from "../api/task";
+import { batchUpdateTask, getTask, updateTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
 import { TaskObject, UpdateBatchTaskPayload, UpdateTaskFormValues, UpdateTaskPayload } from "../types/task";
-import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
+import { CachedPromiseMutateType } from "../types/utils";
 import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState } from "../utils/task";
 
 type Props = {
   task: TaskObject;
-  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
+  mutateTask: CachedPromiseMutateType<typeof getTask>;
   detailsTaskRevalidate?: () => void;
   detailsPage?: boolean;
 };
@@ -76,8 +76,8 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
       };
 
       try {
-        await mutateTask(ApiTask.update(task.id, payload));
-        await mutateTask(ApiTask.batchUpdate(batchPayload));
+        await mutateTask(updateTask(task.id, payload));
+        await mutateTask(batchUpdateTask(batchPayload));
         if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
         toast.style = Toast.Style.Success;
@@ -197,7 +197,7 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
         {tasks
           ?.filter(
             (filteredParentTask) =>
-              filteredParentTask.listIds.some((id) => values.listIds.includes(id)) && filteredParentTask.id !== task.id
+              filteredParentTask.listIds.some((id) => values.listIds.includes(id)) && filteredParentTask.id !== task.id,
           )
           ?.map((task) => {
             return (

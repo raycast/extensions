@@ -1,4 +1,4 @@
-export type UserObject = {
+export interface UserObject {
   createdAt: string;
   id: string;
   model: "user";
@@ -16,4 +16,4 @@ export type UserObject = {
   firstname: string;
   lastname: string;
   signedUpAt: string;
-};
+}
