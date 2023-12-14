@@ -44,7 +44,8 @@
       "title": "RescueTime Today",
       "subtitle": "RescueTime",
       "description": "Gets today's RescueTime status",
-      "mode": "view"
+      "mode": "view",
+      "interval": "5m"
     },
     {
       "name": "startFocusTime",

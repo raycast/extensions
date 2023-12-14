@@ -1,5 +1,8 @@
 # RescueTime Focus Session Trigger Changelog
 
+## [Added interval to RescueTime Today Command] - 2023-12-13
+- Updated: Added an interval to the Today command so it updates in the background
+
 ## [Added Additional RescueTime functionality] - 2023-11-26
 - Added: RescueTime Today Command: Ability to see Pulse, Total Time, Productivity and Category breakdowns
 - Added: FocusTime Feed Command: Adds in a List component to pull your latest Focus sessions feed
