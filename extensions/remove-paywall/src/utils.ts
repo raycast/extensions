@@ -12,12 +12,10 @@ export async function getUrl(): Promise<string | Error> {
   try {
     // If the user has selected text, use that as the URL
     url = await getSelectedText();
-  } catch (error) {
-    // ignore error
+  } catch (_) {
+    // Otherwise, use the clipboard
+    url = await Clipboard.readText();
   }
-
-  // Otherwise, use the clipboard
-  url = await Clipboard.readText();
 
   if (!url) {
     return new Error("No URL provided.");
