@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Feature] - 2023-12-15
+
+- Added support for tcp sockets
+
 ## [Feature] - 2023-05-12
 
 - Added ability to create container from image
