@@ -1,5 +1,7 @@
 # TablePlus Changelog
 
+test
+
 ## [Update] - 2023-08-30
 
 - Refacored the extension
