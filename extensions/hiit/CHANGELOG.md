@@ -1,5 +1,7 @@
 # HIIT Changelog
 
+test
+
 ## [Fix] - 2023-02-14
 
 - Fixed a bug where warmup and cooldown could not be blank
