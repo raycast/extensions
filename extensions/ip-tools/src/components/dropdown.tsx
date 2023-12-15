@@ -4,7 +4,7 @@ type DrinkType = { id: string; name: string };
 
 export const langTypes: DrinkType[] = [
   { id: "en", name: "English" },
-  { id: "zh-CN", name: "中文简体" },
+  { id: "zh-CN", name: "Chinese" },
 ];
 
 export const drinkTypes: DrinkType[] = [
