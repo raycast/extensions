@@ -214,7 +214,7 @@ function AgentListItem({
           {selectedText ? (
             <>
               <Action.Push
-                title="Ask For Selected Text"
+                title="Ask for Selected Text"
                 icon={Icon.Message}
                 shortcut={{ key: "return", modifiers: [] }}
                 target={
