@@ -11,5 +11,5 @@ export const useDockerode = () => {
       return new Dockerode({ host: url.hostname, port: url.port || 2375 });
     }
     return new Dockerode(socketPath ? { socketPath } : undefined);
-    }, [socketPath]);
+  }, [socketPath]);
 };
