@@ -2,7 +2,7 @@
 
 ## [Feature] - 2023-12-15
 
-- Added support for tcp sockets
+- Added support for http, https, and tcp sockets
 
 ## [Feature] - 2023-05-12
 
