@@ -64,8 +64,20 @@ export default function Command() {
           </ActionPanel>
         }
       >
-        <Form.TextArea id="memo" title="MEMO" placeholder="What's on your mind?" defaultValue={text} onChange={setText} />
-        <Form.TextField id="tags" title="Tags" defaultValue={tags as string} onChange={setTags} info="Separated by space" />
+        <Form.TextArea
+          id="memo"
+          title="MEMO"
+          placeholder="What's on your mind?"
+          defaultValue={text}
+          onChange={setText}
+        />
+        <Form.TextField
+          id="tags"
+          title="Tags"
+          defaultValue={tags as string}
+          onChange={setTags}
+          info="Separated by space"
+        />
       </Form>
     </>
   );
