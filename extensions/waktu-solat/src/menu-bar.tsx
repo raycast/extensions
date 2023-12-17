@@ -6,7 +6,7 @@ import {
   LaunchType,
   LocalStorage,
   MenuBarExtra,
-  openExtensionPreferences
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { loadTodaySolat, PrayerTime } from "./lib/prayer-times";
