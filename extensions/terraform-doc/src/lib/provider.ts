@@ -6,18 +6,51 @@ import { z } from "zod";
 const providersResponseSchema = z.object({
   data: z.array(
     z.object({
-      type: z.string().optional().transform(v=>v||""),
-      id: z.string().optional().transform(v=>v||""),
+      type: z
+        .string()
+        .optional()
+        .transform((v) => v || ""),
+      id: z
+        .string()
+        .optional()
+        .transform((v) => v || ""),
       attributes: z.object({
-        downloads: z.number().optional().transform(v=>v||0),
-        "full-name": z.string().optional().transform(v=>v||""),
-        "logo-url": z.string().optional().transform(v=>v||""),
-        name: z.string().optional().transform(v=>v||""),
-        namespace: z.string().optional().transform(v=>v||""),
-        "robots-noindex": z.boolean().optional().transform(v=>v||false),
-        source: z.string().optional().transform(v=>v||""),
-        tier: z.string().optional().transform(v=>v||""),
-        warning: z.string().optional().transform(v=>v||""),
+        downloads: z
+          .number()
+          .optional()
+          .transform((v) => v || 0),
+        "full-name": z
+          .string()
+          .optional()
+          .transform((v) => v || ""),
+        "logo-url": z
+          .string()
+          .optional()
+          .transform((v) => v || ""),
+        name: z
+          .string()
+          .optional()
+          .transform((v) => v || ""),
+        namespace: z
+          .string()
+          .optional()
+          .transform((v) => v || ""),
+        "robots-noindex": z
+          .boolean()
+          .optional()
+          .transform((v) => v || false),
+        source: z
+          .string()
+          .optional()
+          .transform((v) => v || ""),
+        tier: z
+          .string()
+          .optional()
+          .transform((v) => v || ""),
+        warning: z
+          .string()
+          .optional()
+          .transform((v) => v || ""),
       }),
     }),
   ),
@@ -26,7 +59,9 @@ const providersResponseSchema = z.object({
 
 export type Provider = z.infer<typeof providersResponseSchema>["data"][0];
 
-async function getProviderListRecursiveAPI(next: string = "/v2/providers?page%5Bsize%5D=100"): Promise<Provider[]> {
+async function getProviderListRecursiveAPI(
+  next: string = "/v2/providers?page%5Bsize%5D=100",
+): Promise<Provider[]> {
   const data = await fetch(`https://registry.terraform.io${next}`);
   const res = providersResponseSchema.parse(await data.json());
   const providers: Provider[] = res.data;

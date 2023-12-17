@@ -6,7 +6,10 @@ import { useEffect } from "react";
 import { Resource, getResourceList } from "../lib/resource";
 import { hashColorizer } from "../lib/util";
 
-export default function ResourceView(prop: { provider: Provider; version: ProviderVersion }) {
+export default function ResourceView(prop: {
+  provider: Provider;
+  version: ProviderVersion;
+}) {
   const [state, setState] = useCachedState<Resource[]>(
     `${environment.extensionName}$-${prop.provider.id}-${prop.version.attributes.version}`,
     [],
@@ -33,10 +36,24 @@ export default function ResourceView(prop: { provider: Provider; version: Provid
         <List.Item
           title={r.attributes.title}
           key={r.id}
-          keywords={[r.attributes.subcategory ?? "", r.attributes.category, r.attributes.title]}
+          keywords={[
+            r.attributes.subcategory ?? "",
+            r.attributes.category,
+            r.attributes.title,
+          ]}
           accessories={[
-            { tag: { color: hashColorizer(r.attributes.subcategory ?? ""), value: r.attributes.subcategory ?? "" } },
-            { tag: { color: hashColorizer(r.attributes.category ?? ""), value: r.attributes.category ?? "" } },
+            {
+              tag: {
+                color: hashColorizer(r.attributes.subcategory ?? ""),
+                value: r.attributes.subcategory ?? "",
+              },
+            },
+            {
+              tag: {
+                color: hashColorizer(r.attributes.category ?? ""),
+                value: r.attributes.category ?? "",
+              },
+            },
           ]}
           actions={
             <ActionPanel>
