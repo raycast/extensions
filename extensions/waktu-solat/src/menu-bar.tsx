@@ -38,7 +38,6 @@ export default function Command() {
       : currentDiff < (Math.abs(afterOffset) || 30)
       ? current
       : null;
-  console.log(currentDiff, nextDiff, menuPrayer, beforeOffset, afterOffset);
   const title = menuTemplate?.replace("$name", menuPrayer?.label).replace("$time", menuPrayer?.value);
   const icon = showIcon ? "🕌 " : "";
   return (
