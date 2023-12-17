@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { htmlToMarkdown, isLoggedIn, withToast } from "./libs/utils";
+import { htmlToMarkdown, isLoggedIn, timeAgo, withToast } from "./libs/utils";
 import { createAccount, deleteAccount, getAccount, getMails, deleteMail, getMessage } from "./libs/api";
 import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, environment } from "@raycast/api";
 import { useAccount } from "./hooks/useAccount";
@@ -104,12 +104,12 @@ function Mail(): JSX.Element {
             icon={{ source: Icon.Message, tintColor: Color.Blue }}
             accessories={[
               {
-                text: `${new Date(mail.createdAt).toLocaleString()}`,
-                icon: { source: Icon.Calendar, tintColor: Color.Blue },
+                icon: { source: Icon.Person, tintColor: Color.Green },
+                tooltip: mail.from.name ?? mail.from.address ?? "",
               },
               {
-                icon: { source: Icon.Person },
-                tooltip: mail.from.name ?? mail.from.address ?? "",
+                text: `${timeAgo(mail.createdAt)}`,
+                icon: { source: Icon.Calendar, tintColor: Color.Blue },
               },
             ]}
             actions={

@@ -79,3 +79,8 @@ export interface Message extends Mail {
   text: string;
   html: string[];
 }
+
+export type Interval = {
+  label: string;
+  seconds: number;
+};
