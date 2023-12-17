@@ -4,6 +4,9 @@
   "description": "Display and filter your recent GitHub stars",
   "icon": "icon.png",
   "author": "mrmartineau",
+  "contributors": [
+    "prince_yadav"
+  ],
   "keywords": [
     "stars"
   ],

@@ -14,20 +14,51 @@ interface PackageListItemProps {
   result: Star;
 }
 
+const MAXIMUM_CHARACTERS = 100;
+
+const formatCompactNumber = (number: number): string => {
+  const fractionDigits = number >= 1000 ? 1 : 0;
+
+  const formatter = new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    compactDisplay: "short",
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  });
+
+  return formatter.format(number);
+};
+
+const calculateCharactersLeft = (name: string, stars: string): number => {
+  return MAXIMUM_CHARACTERS - name.length - stars.length - 1;
+};
+
+const getDescription = (description = "", charactersLeft = 0): string => {
+  if (description.length > charactersLeft) {
+    return `${description?.substring(0, charactersLeft - 3)}...`;
+  }
+  return description;
+};
+
 export const PackageListItem = ({ result }: PackageListItemProps): JSX.Element => {
   const descriptionAsArray = result?.description ? result.description.split(" ") : [];
   const keywords = [result.name, ...descriptionAsArray];
+
+  const stars = `★ ${formatCompactNumber(result.stargazers_count)}`;
+
+  const charactersLeftForDescription = calculateCharactersLeft(result.full_name, stars);
+  const description = getDescription(result?.description, charactersLeftForDescription);
 
   return (
     <List.Item
       id={result.node_id}
       title={result.full_name}
-      subtitle={result.description}
+      subtitle={description}
       icon={{
         source: result.owner.avatar_url,
         mask: ImageMask.Circle,
       }}
-      accessoryTitle={`★ ${result.stargazers_count}`}
+      accessoryTitle={stars}
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={result.html_url} title="Open Repository" />
