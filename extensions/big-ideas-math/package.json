@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "big-ideas-math",
+  "title": "Big Ideas Math",
+  "description": "Get the answers to all the odd problems on big ideas math.",
+  "icon": "command-icon.png",
+  "author": "Vaibhav",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-answers",
+      "title": "Check Answers",
+      "description": "Enter the section number and the problem number to receive an image pulled from bigideasmathsolutions.com",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "chapter",
+          "type": "text",
+          "description": "The chapter number of the problem",
+          "placeholder": "Chapter",
+          "required": true
+        },
+        {
+          "name": "section",
+          "type": "text",
+          "description": "The section number of the problem",
+          "placeholder": "Section",
+          "required": true
+        },
+        {
+          "name": "problem",
+          "type": "text",
+          "description": "The problem number of the problem",
+          "placeholder": "Problem",
+          "required": true
+        }
+      ]
+
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
