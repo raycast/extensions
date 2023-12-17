@@ -5,12 +5,17 @@
   "description": "terraform documentation",
   "icon": "extension_icon.png",
   "author": "shopping-jaws",
+  "categories": [
+    "Web",
+    "Developer Tools"
+  ],
   "owner": "shoppingjaws",
   "license": "MIT",
   "commands": [
     {
       "name": "list_providers",
       "title": "Terraform Doc",
+      "subtitle": "Terraform",
       "description": "Easy search terraform resource documentation",
       "mode": "view"
     }
