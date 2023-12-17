@@ -11,13 +11,15 @@ export const execp = promisify(exec);
 
 type BatteryAndCPUState = BatteryState & { cpu: CPUStats };
 
+const cacheKey = "batteryAndCPUState-V2";
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [batt, setBattState] = useCachedState<{
     prev: BatteryAndCPUState | null;
     next: BatteryAndCPUState;
     latest: BatteryAndCPUState;
-  } | null>("batteryAndCPUState", null);
+  } | null>(cacheKey, null);
 
   const { isLoading: battIsLoading } = useCachedPromise(getBatteryState, [], {
     onData(data) {
@@ -153,6 +155,18 @@ export default function Command() {
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
+              icon={{ source: Icon.Check, tintColor: iconColor }}
+              title={batt.latest.health.toFixed(2) + "%"}
+              subtitle={"Battery health"}
+              onAction={openBatterySettings}
+            />
+            <MenuBarExtra.Item
+              icon={{ source: Icon.RotateAntiClockwise, tintColor: iconColor }}
+              title={batt.latest.cycles.toFixed(0)}
+              subtitle={"Battery cycles"}
+              onAction={openBatterySettings}
+            />
+            <MenuBarExtra.Item
               icon={{
                 source: Icon.Bolt,
                 tintColor: powerColor,
@@ -161,6 +175,7 @@ export default function Command() {
               subtitle={batt.latest.charging ? "Power input (~1 min)" : "Power draw (~1 min)"}
               onAction={openBatterySettings}
             />
+
             {!batt.latest.charging && wattDiff ? (
               <MenuBarExtra.Item
                 icon={{

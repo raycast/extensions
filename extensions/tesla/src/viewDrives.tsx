@@ -1,15 +1,17 @@
 import { Color, Detail, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { Distance } from "./types/Distance";
 import { HistoricalDrive } from "./types/HistoricalDrive";
-import { getElapsedTime, getFormattedTime } from "./utils/timeUtils";
+import { getDistance, getElapsedTime, getFormattedTime } from "./utils/utils";
 
 const BASE_URL = "https://api.tessie.com";
 
 export default function Command() {
-  const preferences = getPreferenceValues<{ tessieApiKey: string; VIN: string }>();
+  const preferences = getPreferenceValues<{ tessieApiKey: string; VIN: string; distance: Distance }>();
 
   const API_KEY = preferences.tessieApiKey;
   const VIN = preferences.VIN;
+  const distanceType = preferences.distance;
 
   const { isLoading, data } = useFetch<{ results: HistoricalDrive[] }>(`${BASE_URL}/${VIN}/drives`, {
     headers: {
@@ -60,12 +62,15 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Odometer"
-                    text={drive.ending_odometer.toLocaleString("en-US") + " miles"}
+                    text={`${getDistance(drive.ending_odometer, distanceType).toLocaleString("en-US")} ${distanceType}`}
                   />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Total Range Used"
-                    text={`Used ${drive.rated_range_used} to go ${drive.odometer_distance} miles`}
+                    text={`Used ${drive.rated_range_used} to go ${getDistance(
+                      drive.odometer_distance,
+                      distanceType
+                    ).toFixed(2)} ${distanceType}`}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Range Efficiency"

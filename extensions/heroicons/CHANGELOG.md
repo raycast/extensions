@@ -1,5 +1,9 @@
 # Heroicons Changelog
 
+## [v.1.2.1] - 2023-10-31
+
+- Removed tags as some change on Tailwind's website made the tag file no longer available. This change is a hot-fix to make the extension work again, hopefully, if needed, the developer responsible for it will make a proper fix.
+
 ## [v.1.2.0] - 2023-08-15
 
 - Added a few new actions: paste or copy import declarations for React/Vue libraries. Heroicons supports two npm packages that simplify using icons in React/Vue components. However, it can be really annoying to write an import declaration for icons (you need to copy an icon name, then transform it to UpperCamelCase + Icon suffix, and then the path may be different in your project).

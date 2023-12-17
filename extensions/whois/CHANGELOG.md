@@ -1,5 +1,9 @@
 # Whois Changelog
 
+## [Handle IP Addresses] 2023-10-18
+
+- Added ability to handle both domain names and IP addresses as inputs.
+
 ## [Whois Information of Current Tab] - 2023-08-10
 
 - Made the domain argument optional

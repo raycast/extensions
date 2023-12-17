@@ -1,8 +1,7 @@
 import { ActionPanel, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 
-import { appendToPage, getPageName } from "../../utils/notion";
-import { Page } from "../../utils/types";
+import { appendToPage, getPageName, Page } from "../../utils/notion";
 
 export function AppendToPageForm(props: { page: Page; onContentUpdate?: () => void }) {
   const { page, onContentUpdate } = props;

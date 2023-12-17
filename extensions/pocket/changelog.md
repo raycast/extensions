@@ -1,5 +1,16 @@
 # Pocket Changelog
 
+## [UX, Performance & Commands] - 2023-10-15
+- Cache results for faster search
+- Use native Pocket search to avoid rate-limits
+- Add `Menu Bookmarks` command for quick access to the latest bookmarks
+- Add `Create Bookmark` command for manual creation
+- Add `Save Current Tab` command for creating bookmarks from URLs
+- Rename `Random Bookmark`, `Latest Bookmark` and `Save Clipboard` commands
+- Add confirmation modal on bookmark delete
+- Add Pocket tags filter to `Search Bookmarks` command
+- Add `Copy as Markdown URL` option in `Search Bookmarks`
+
 ## [Filters & Commands] - 2022-03-19
 - Add `All`, `Unread` and `Archived` filters for the `Search Bookmarks` command
 - Add new preference to select default read state filter

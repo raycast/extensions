@@ -1,5 +1,8 @@
 # Toggle Menu Bar Changelog
 
+## [Troubleshooting added] - 2023-1-30
+- Detailed troubleshooting steps for common errors in the readme file.
+
 ## [Improvements with some new features] - 2023-09-14
 - Optimized code for better readability.
 - Event notifications with Raycast's Toast.

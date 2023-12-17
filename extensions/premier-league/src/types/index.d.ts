@@ -45,7 +45,7 @@ export interface Content {
   extraTime: boolean;
   shootout: boolean;
   goals: Goal[];
-  penaltyShootouts: any[];
+  penaltyShootouts: unknown[];
   behindClosedDoors: boolean;
   id: number;
   altIds: AltIDS;

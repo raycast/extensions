@@ -55,7 +55,7 @@ export const runScript = (scriptID: string, input?: string) => {
     const input = argv[0]
 		okjson.runScript("${scriptID}", { with: input })
 	`,
-      [input]
+      [input],
     );
   } else {
     return executeJxa(`
@@ -72,6 +72,17 @@ export const runcURLCommand = (string: string) => {
     const text = argv[0]
 		okjson.runCURLCommand(text)
 	`,
-    [string]
+    [string],
+  );
+};
+
+export const viewFromURLScript = (string: string) => {
+  return executeJxa(
+    `
+    const okjson = Application('net.shinystone.OKJSON');
+    const text = argv[0]
+    okjson.viewFromURL(text)
+	`,
+    [string],
   );
 };

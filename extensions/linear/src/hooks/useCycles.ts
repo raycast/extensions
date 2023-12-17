@@ -12,7 +12,7 @@ export default function useCycles(teamId?: string, config?: { execute?: boolean 
       return cycles.nodes.sort((a, b) => a.number - b.number);
     },
     [teamId],
-    { execute: config?.execute !== false && !!teamId }
+    { execute: config?.execute !== false && !!teamId },
   );
 
   return { cycles: data, cyclesError: error, isLoadingCycles: (!data && !error) || isLoading };
