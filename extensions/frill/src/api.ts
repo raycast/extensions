@@ -1,12 +1,14 @@
 import { Toast, showToast } from "@raycast/api";
 import fetch, { FetchError } from "node-fetch";
-import {
-  RequestMethod,
-  BodyRequest,
-  CreateAnnouncementRequest,
-  ErrorResponse, GetAnnouncementsResponse, GetIdeasResponse, CreateAnnouncementResponse, SimpleSuccessResponse, UpdateAnnouncementRequest, UpdateAnnouncementResponse
-} from "./types"
 import { API_HEADERS, API_URL } from "./constants";
+import { CreateStatusRequest, DeleteStatusResponse, GetStatusesResponse, UpdateStatusRequest, UpdateStatusResponse } from "./types/statuses";
+import { BodyRequest, ErrorResponse, MultiErrorResponse, RequestMethod, SimpleSuccessResponse } from "./types";
+import { CreateAnnouncementRequest, CreateAnnouncementResponse, GetAnnouncementsResponse, UpdateAnnouncementRequest, UpdateAnnouncementResponse } from "./types/announcements";
+import { CreateIdeaRequest, CreateIdeaResponse, DeleteIdeaResponse, GetIdeasResponse, UpdateIdeaRequest, UpdateIdeaResponse } from "./types/ideas";
+import { GetTopicsResponse } from "./types/topics";
+import { GetFollowersResponse } from "./types/followers";
+import { GetAdminsResponse } from "./types/admin";
+import { GetAnnouncementCategoriesResponse } from "./types/announcement-categories";
 
 const callApi = async (endpoint: string, animatedToastMessage = "", method: RequestMethod = "GET", body?: BodyRequest) => {
   await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
@@ -50,6 +52,43 @@ export async function updateAnnouncement(announcementIdx: string, body: UpdateAn
 export async function deleteAnnouncement(announcementIdx: string) {
   return (await callApi(`announcements/${announcementIdx}`, "Deleting Announcement", "DELETE")) as ErrorResponse | SimpleSuccessResponse;
 }
+
 export async function getIdeas() {
   return (await callApi("ideas", "Fetching Ideas")) as ErrorResponse | GetIdeasResponse;
+}
+export async function createIdea(body: CreateIdeaRequest) {
+  return (await callApi("ideas", "Creating Idea", "POST", body)) as ErrorResponse | CreateIdeaResponse;
+}
+export async function updateIdea(ideaIdx: string, body: UpdateIdeaRequest) {
+  return (await callApi(`ideas/${ideaIdx}`, "Updating Idea", "POST", body)) as ErrorResponse | UpdateIdeaResponse;
+}
+export async function deleteIdea(ideaIdx: string) {
+  return (await callApi(`ideas/${ideaIdx}`, "Deleting Idea", "DELETE")) as ErrorResponse | DeleteIdeaResponse;
+}
+
+export async function getTopics() {
+  return (await callApi("topics", "Fetching Topics")) as ErrorResponse | GetTopicsResponse;
+}
+
+export async function getFollowers() {
+  return (await callApi("followers", "Fetching Followers")) as ErrorResponse | GetFollowersResponse;
+}
+export async function getAdmins() {
+  return (await callApi("admins", "Fetching Admins")) as ErrorResponse | GetAdminsResponse;
+}
+export async function getAnnouncementCategories() {
+  return (await callApi("announcement-categories", "Fetching Announcement Categories")) as ErrorResponse | GetAnnouncementCategoriesResponse;
+}
+
+export async function getStatuses() {
+  return (await callApi("statuses", "Fetching Statuses")) as ErrorResponse | GetStatusesResponse;
+}
+export async function deleteStatus(statusIdx: string) {
+  return (await callApi(`statuses/${statusIdx}`, "Deleting Status", "DELETE")) as ErrorResponse | DeleteStatusResponse;
+}
+export async function createStatus(body: CreateStatusRequest) {
+  return (await callApi("statuses", "Creating Status", "POST", body)) as ErrorResponse | CreateStatusRequest;
+}
+export async function updateStatus(statusIdx: string, body: UpdateStatusRequest) {
+  return (await callApi(`statuses/${statusIdx}`, "Updating Status", "POST", body)) as MultiErrorResponse | UpdateStatusResponse;
 }

@@ -3,7 +3,7 @@
   "name": "frill",
   "title": "Frill",
   "description": "Capture, organize, and announce product feedback in one place",
-  "icon": "command-icon.png",
+  "icon": "frill.png",
   "author": "xmok",
   "categories": [
     "Productivity"
@@ -17,6 +17,14 @@
       "type": "password",
       "required": true,
       "placeholder": "f273f...cdf06e7"
+    },
+    {
+      "name": "frill_url",
+      "title": "Frill URL",
+      "description": "The URL of your Frill",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://[example].frill.co"
     }
   ],
   "commands": [
@@ -30,6 +38,13 @@
     {
       "name": "ideas",
       "title": "Ideas",
+      "subtitle": "Frill",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "statuses",
+      "title": "Statuses",
       "subtitle": "Frill",
       "description": "",
       "mode": "view"

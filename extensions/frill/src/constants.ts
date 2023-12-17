@@ -8,3 +8,5 @@ export const API_HEADERS = {
     Accept: "application/json"
 }
 export const API_URL = "https://api.frill.co/v1/";
+
+export const FRILL_URL = getPreferenceValues<Preferences>().frill_url.endsWith("/") ? getPreferenceValues<Preferences>().frill_url : getPreferenceValues<Preferences>().frill_url + "/";
