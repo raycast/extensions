@@ -6,7 +6,7 @@ import {
   LaunchType,
   LocalStorage,
   MenuBarExtra,
-  openExtensionPreferences
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { loadTodaySolat, PrayerTime } from "./lib/prayer-times";
@@ -30,7 +30,7 @@ export default function Command() {
   }, []);
   const current = prayerTime?.items?.find((p) => p.isCurrent);
   const nextPrayer = prayerTime?.items?.find((p) => p.isNext);
-  const nextDiff = nextPrayer?.time.diff(now(), "minutes", true);
+  const nextDiff = Math.abs(nextPrayer?.time.diff(now(), "minutes", true) || 0);
   const currentDiff = Math.abs(current?.time.diff(now(), "minutes", true) || 0);
   const menuPrayer =
     nextDiff < (Math.abs(beforeOffset) || 30)
