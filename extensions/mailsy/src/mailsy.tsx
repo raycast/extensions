@@ -110,6 +110,7 @@ function Mail(): JSX.Element {
               {
                 text: `${timeAgo(mail.createdAt)}`,
                 icon: { source: Icon.Calendar, tintColor: Color.Blue },
+                tooltip: new Date(mail.createdAt).toLocaleString(),
               },
             ]}
             actions={
