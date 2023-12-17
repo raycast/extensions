@@ -20,7 +20,18 @@
       "name": "mute-menu-bar",
       "title": "Menubar Toggle Mute Audio Input",
       "description": "See microphone toggle on the menubar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "hideIconWhenUnmuted",
+          "description": "Hide the icon in the Menu Bar when Audio Input is unmuted",
+          "type": "checkbox",
+          "label": "Hide icon when unmuted",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "toggle-mute",
