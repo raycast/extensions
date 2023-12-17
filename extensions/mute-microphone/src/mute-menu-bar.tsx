@@ -22,6 +22,7 @@ export default function muteMenuBar() {
     }
   }, []);
 
+<<<<<<< HEAD
   const CommonMenuItems = () => (
     <MenuBarExtra icon={icon} tooltip="Audio input volume">
       <MenuBarExtra.Item
@@ -34,6 +35,44 @@ export default function muteMenuBar() {
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item title="Settings..." onAction={openCommandPreferences} />
     </MenuBarExtra>
+||||||| parent of ef1618f9 (added show menubar icon only if muted, issue #8832)
+  return (
+    <MenuBarExtra icon={icon} tooltip="Audio input volume">
+      <MenuBarExtra.Item
+        title={menuItemText}
+        onAction={async () => {
+          const newLevel = await toggleSystemAudioInputLevel(currentAudioInputLevel);
+          setCurrentAudioInputLevel(Number(newLevel));
+        }}
+      />
+    </MenuBarExtra>
+=======
+  function CommonMenuItems() {
+    return (
+      <MenuBarExtra icon={icon} tooltip="Audio input volume">
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item
+            title={menuItemText}
+            onAction={async () => {
+              const newLevel = await toggleSystemAudioInputLevel(currentAudioInputLevel);
+              setCurrentAudioInputLevel(Number(newLevel));
+            }}
+          />
+        </MenuBarExtra.Section>
+        <MenuBarExtra.Section>
+          <MenuBarExtra.Item title="Settings..." onAction={openCommandPreferences} />
+        </MenuBarExtra.Section>
+      </MenuBarExtra>
+    );
+  }
+
+  return preferences.hideIconWhenUnmuted ? (
+    currentAudioInputLevel == 0 ? (
+      <CommonMenuItems />
+    ) : null
+  ) : (
+    <CommonMenuItems />
+>>>>>>> ef1618f9 (added show menubar icon only if muted, issue #8832)
   );
 
   return preferences.hideIconWhenUnmuted ? (
