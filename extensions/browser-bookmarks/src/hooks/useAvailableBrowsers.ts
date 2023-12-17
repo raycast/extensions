@@ -5,9 +5,11 @@ export const BROWSERS_BUNDLE_ID = {
   arc: "company.thebrowser.browser",
   brave: "com.brave.browser",
   braveBeta: "com.brave.browser.beta",
+  braveNightly: "com.brave.browser.nightly",
   chrome: "com.google.chrome",
   chromeDev: "com.google.chrome.dev",
   firefox: "org.mozilla.firefox",
+  firefoxDev: "org.mozilla.firefoxdeveloperedition",
   safari: "com.apple.safari",
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",
@@ -17,7 +19,7 @@ export const BROWSERS_BUNDLE_ID = {
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);
 
-export default function useBrowsers() {
+export default function useAvailableBrowsers() {
   return useCachedPromise(async () => {
     const apps = await getApplications();
 

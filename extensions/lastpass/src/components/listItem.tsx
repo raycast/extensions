@@ -30,7 +30,7 @@ export const ListItem = (props: {
               shortcut={{ modifiers: [], key: "enter" }}
               content={props.password || ""}
             />
-            <Action.CopyToClipboard
+            <Action.Paste
               icon={Icon.Clipboard}
               title="Paste Username"
               shortcut={{ modifiers: ["shift"], key: "enter" }}

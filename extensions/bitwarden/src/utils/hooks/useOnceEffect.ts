@@ -10,19 +10,9 @@ function useOnceEffect(effect: Effect, condition?: any) {
   useEffect(() => {
     if (hasRun.current) return;
     if (!condition) return;
-
     hasRun.current = true;
-    if (isAsyncFunction(effect)) {
-      void effect();
-      return undefined;
-    }
-
-    return effect();
+    void effect();
   }, [condition]);
-}
-
-function isAsyncFunction(fn: Effect): fn is AsyncEffectCallback {
-  return fn.constructor.name === "AsyncFunction";
 }
 
 export default useOnceEffect;

@@ -36,6 +36,10 @@
 
 Fix showing the temp unit instead of wind unit.
 
+## [Fix] - 2023-10-15
+
+- Fix wrong area title when region is not present
+
 ## [Weather 0.3.0] - 2021-10-20
 
 - add multi language support for en, de and fr

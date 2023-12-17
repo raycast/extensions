@@ -1,6 +1,35 @@
 # Browser Bookmarks Changelog
 
-## [Support for Arc] - {PR_MERGE_DATE}
+## [Support for Brave Nightly] - 2023-12-09
+
+- Add support for `Brave Nightly` browser.
+
+## [Support for Firefox Dev edition] - 2023-11-24
+
+- Add support for `Firefox Dev` browser, which uses the same profiles as `Firefox`.
+
+## [Bug fixes] - 2023-11-21
+
+- Improved search results
+- Fixed `toLocaleCompare` issue
+
+## [Bug Fixes] - 2023-11-03
+
+- Fixed an issue where Chrome bookmarks with no title were not displayed.
+
+## [Bug Fixes] - 2023-10-25
+
+- Fixed an issue where Arc bookmarks could break the extension.
+
+## [Open browser bookmark preference] - 2023-10-25
+
+- Added a preference to open the browser from which the bookmark originated, instead of your default browser.
+
+## [Improvements] - 2023-10-18
+
+- Always sort the bookmarks by their frecency
+
+## [Support for Arc] - 2023-09-22
 
 - Add support for `Arc` browser
 

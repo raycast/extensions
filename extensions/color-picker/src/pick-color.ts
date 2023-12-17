@@ -1,13 +1,14 @@
 import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { addToHistory } from "./history";
-import { PickColorCommandLaunchProps } from "./types";
-import { getFormattedColor, pickColor } from "./utils";
+import { PickColorCommandLaunchProps, Color } from "./types";
+import { getFormattedColor } from "./utils";
+import { pickColor } from "swift:../swift/color-picker";
 
 export default async function command(props: PickColorCommandLaunchProps) {
   await closeMainWindow();
 
   try {
-    const pickedColor = await pickColor();
+    const pickedColor = await pickColor<Color | undefined>();
     if (!pickedColor) {
       return;
     }
@@ -21,7 +22,7 @@ export default async function command(props: PickColorCommandLaunchProps) {
 
     await Clipboard.copy(hex);
 
-    await showHUD("Copied color to clipboard");
+    await showHUD(`Copied color ${hex} to clipboard`);
     try {
       await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     } catch (e) {

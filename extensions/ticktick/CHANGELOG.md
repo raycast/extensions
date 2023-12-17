@@ -1,8 +1,14 @@
 # TickTick Changelog
 
+## [Fixed spelling error] - 2023-11-27
+
+## [Added] - 2023-11-14
+
+- Add `Default Title` preference that allows you to set a default task title from your clipboard or selection when using the `Add Task` command.
+
 ## [Added] - 2023-09-07
 
-- Add `Quick Add Task` Command
+- Add `Quick Add Task` command.
 - Add `Default Date` preference
 
 ## [Added] - 2023-07-25

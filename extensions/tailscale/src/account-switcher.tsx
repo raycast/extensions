@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { tailscale } from "./shared";
+import { ErrorDetails, getErrorDetails, tailscale } from "./shared";
 
 interface User {
   active: boolean;
@@ -42,18 +42,18 @@ function loadUsers(unparsedUsers: string[]) {
   return users;
 }
 
-function AccountSwitchList() {
+export default function AccountSwitchList() {
   const [users, setUsers] = useState<User[]>();
+  const [error, setError] = useState<ErrorDetails>();
   useEffect(() => {
     async function fetch() {
       try {
-        const ret = tailscale(`--list`);
-        const data: string[] = ret.split("\n");
-
+        const ret = tailscale(`switch --list`);
+        const data = ret.split("\n");
         const _list = loadUsers(data);
         setUsers(_list);
       } catch (error) {
-        showToast(Toast.Style.Failure, "Couldn't load users. Make sure Tailscale is connected.");
+        setError(getErrorDetails(error, "Couldn’t load users."));
       }
     }
     fetch();
@@ -65,44 +65,44 @@ function AccountSwitchList() {
   // return a list of users, starting with all of the inactive users.
   // output the active user last.
   return (
-    <List isLoading={!users}>
-      {users
-        ?.sort((a, b) => +a.active - +b.active)
-        .map((user) => (
-          <List.Item
-            title={user.name}
-            key={user.name}
-            icon={user.active ? activeUserIcon : inactiveUserIcon}
-            subtitle={user.active ? "Active user" : ""}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Switch to User"
-                  onAction={async () => {
-                    await showToast({
-                      style: Toast.Style.Animated,
-                      title: "Switching user account",
-                      message: `${user.name}`,
-                    });
-                    popToRoot();
-                    closeMainWindow();
-                    const ret = tailscale(`switch ${user.name}`);
+    <List isLoading={!users && !error}>
+      {error ? (
+        <List.EmptyView icon={Icon.Warning} title={error.title} description={error.description} />
+      ) : (
+        users
+          ?.sort((a, b) => +a.active - +b.active)
+          .map((user) => (
+            <List.Item
+              title={user.name}
+              key={user.name}
+              icon={user.active ? activeUserIcon : inactiveUserIcon}
+              subtitle={user.active ? "Active user" : ""}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Switch to User"
+                    onAction={async () => {
+                      await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Switching user account",
+                        message: `${user.name}`,
+                      });
+                      popToRoot();
+                      closeMainWindow();
+                      const ret = tailscale(`switch ${user.name}`);
 
-                    if (ret.includes("Success") || ret.includes("Already")) {
-                      showHUD(`Active Tailscale user is ${user.name}`);
-                    } else {
-                      showHUD(`Tailscale user failed to switch to ${user.name}`);
-                    }
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+                      if (ret.includes("Success") || ret.includes("Already")) {
+                        showHUD(`Active Tailscale user is ${user.name}`);
+                      } else {
+                        showHUD(`Tailscale user failed to switch to ${user.name}`);
+                      }
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+      )}
     </List>
   );
-}
-
-export default function Command() {
-  return <AccountSwitchList />;
 }

@@ -5,6 +5,9 @@
   "description": "Browse GCP Products and open them in the browser in the Google Cloud Console, or view the documentation.",
   "icon": "command-icon.png",
   "author": "klaa97",
+  "contributors": [
+    "edomora97"
+  ],
   "license": "MIT",
   "commands": [
     {

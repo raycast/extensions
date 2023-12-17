@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-03 08:28:07
- * Last modified  : 2023-09-03 13:43:49
+ * Last modified  : 2023-11-01 00:44:28
  */
 
 import path from "path";
@@ -143,7 +143,12 @@ export const addTextFragmentAccessory = (pin: Pin, accessories: List.Item.Access
  * @param accessories The list of accessories to add the sorting strategy accessory to.
  */
 export const addSortingStrategyAccessory = (group: Group, accessories: List.Item.Accessory[]) => {
-  accessories.push({ tag: { value: SORT_STRATEGY[group.sortStrategy || "Not Set"], color: Color.SecondaryText } });
+  accessories.push({
+    tag: {
+      value: SORT_STRATEGY[group.sortStrategy || ("Not Set" as keyof typeof SORT_STRATEGY)],
+      color: Color.SecondaryText,
+    },
+  });
 };
 
 /**

@@ -12,6 +12,7 @@ import {
   useObsidianVaults,
   vaultPluginCheck,
 } from "./utils/utils";
+import { clearCache } from "./utils/data/cache";
 
 interface appendTaskArgs {
   text: string;
@@ -31,8 +32,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
 
   useEffect(() => {
     async function getContent() {
-      const withTemplate = appendTemplate ? appendTemplate + text : text;
-      const content = await applyTemplates(withTemplate);
+      const content = await applyTemplates(text, appendTemplate);
       setContent(content);
     }
 
@@ -84,6 +84,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
         silent: silent,
       });
       open(target);
+      clearCache();
       popToRoot();
       closeMainWindow();
     };

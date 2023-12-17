@@ -71,9 +71,7 @@ function SearchGoogleDriveFiles() {
 
       {data?.files && data.files.length > 0 ? (
         <List.Section title="Recent Files" subtitle={`${data.files.length}`}>
-          {data.files?.map((file) => (
-            <FileListItem file={file} key={file.id} email={email} />
-          ))}
+          {data.files?.map((file) => <FileListItem file={file} key={file.id} email={email} />)}
         </List.Section>
       ) : null}
     </List>
