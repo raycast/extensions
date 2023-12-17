@@ -30,7 +30,7 @@ export default function Command() {
   }, []);
   const current = prayerTime?.items?.find((p) => p.isCurrent);
   const nextPrayer = prayerTime?.items?.find((p) => p.isNext);
-  const nextDiff = nextPrayer?.time.diff(now(), "minutes", true);
+  const nextDiff = Math.abs(nextPrayer?.time.diff(now(), "minutes", true) || 0);
   const currentDiff = Math.abs(current?.time.diff(now(), "minutes", true) || 0);
   const menuPrayer =
     nextDiff < (Math.abs(beforeOffset) || 30)
@@ -38,6 +38,7 @@ export default function Command() {
       : currentDiff < (Math.abs(afterOffset) || 30)
       ? current
       : null;
+  console.log(currentDiff, nextDiff, menuPrayer, beforeOffset, afterOffset);
   const title = menuTemplate?.replace("$name", menuPrayer?.label).replace("$time", menuPrayer?.value);
   const icon = showIcon ? "🕌 " : "";
   return (
