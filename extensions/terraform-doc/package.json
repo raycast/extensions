@@ -4,7 +4,7 @@
   "title": "Terraform Doc",
   "description": "terraform documentation",
   "icon": "extension_icon.png",
-  "author": "shoppingjaws",
+  "author": "shopping-jaws",
   "owner": "shoppingjaws",
   "license": "MIT",
   "commands": [
