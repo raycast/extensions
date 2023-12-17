@@ -144,6 +144,10 @@ function Message({ messageId }: { messageId: string }): JSX.Element {
   const fetchMessage = useCallback(() => getMessage(messageId), [messageId]);
   const { data: Message, isloading } = useAccount(fetchMessage);
 
+  if (!Message) {
+    return <></>;
+  }
+
   const path = `${environment.assetsPath}/email.html`;
 
   const navigationTitle = Message?.subject || "No Subject";
