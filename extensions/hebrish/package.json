@@ -13,13 +13,13 @@
     {
       "name": "to-english",
       "title": "To English",
-      "description": "Change English written in Hebrew to English",
+      "description": "Change English accidently written on an Hebrew keyboard to English",
       "mode": "view"
     },
     {
       "name": "to-hebrew",
       "title": "To Hebrew",
-      "description": "Change Hebrew written in English to Hebrew\n",
+      "description": "Change Hebrew accidently written on an English keyboard to Hebrew",
       "mode": "view"
     }
   ],
@@ -33,7 +33,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.1",
     "typescript": "^5.2.2"
   },
   "scripts": {
