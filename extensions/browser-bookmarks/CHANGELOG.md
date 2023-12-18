@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Support for Sidekick] - {PR_MERGE_DATE}
+## [Support for Sidekick] - 2023-12-18
 
 - Add support for `Sidekick` browser
 
