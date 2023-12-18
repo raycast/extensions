@@ -3,9 +3,11 @@ import path from "path";
 import { $ } from "zx";
 import { EspansoMatch, MultiTrigger, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import YAML from "yaml";
+$.verbose = false;
 
 function lastUpdatedDate(file: string) {
   const { mtime } = fse.statSync(file);
+
   return mtime.getTime();
 }
 
@@ -23,6 +25,7 @@ export function getAndSortTargetFiles(espansoMatchDir: string): { file: string; 
 
 export function formatMatch(espansoMatch: MultiTrigger & Replacement) {
   const triggerList = espansoMatch.triggers.map((trigger) => `"${trigger}"`).join(", ");
+
   return `
   - triggers: [${triggerList}]
     replace: "${espansoMatch.replace}"
@@ -32,6 +35,7 @@ export function formatMatch(espansoMatch: MultiTrigger & Replacement) {
 export function appendMatchToFile(fileContent: string, fileName: string, espansoMatchDir: string) {
   const filePath = path.join(espansoMatchDir, fileName);
   fse.appendFileSync(filePath, fileContent);
+
   return { fileName, filePath };
 }
 
@@ -68,6 +72,7 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
       }),
     );
   }
+
   return finalMatches;
 }
 
@@ -79,7 +84,6 @@ export async function getEspansoConfig(): Promise<EspansoConfig> {
     match: "",
   };
 
-  $.verbose = false;
   const { stdout: configString } = await $`espanso path`;
 
   configString.split("\n").forEach((item) => {
