@@ -19,6 +19,7 @@ import { DirectoryItem } from "./components/directory-item";
 import { FileItem } from "./components/file-item";
 import { SymlinkItem } from "./components/symlink-item";
 import { FileDataType, FileType } from "./types";
+import { runAppleScript } from "@raycast/utils";
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
   const options: Alert.Options = {
@@ -158,3 +159,15 @@ export function RenameForm(props: { filePath: string; refresh: () => void; typeN
     </Form>
   );
 }
+
+export function isImageFile(file: FileDataType) {
+  const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp", "heic", "heif"];
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return extension && imageExtensions.includes(extension);
+}
+
+export const handleSetWallpaper = async (filePath: string) => {
+  await runAppleScript(
+    `tell application "System Events" to tell every desktop to set picture to "${filePath}" as POSIX file`,
+  );
+};
