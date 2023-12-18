@@ -172,7 +172,7 @@ export async function getIssues({ jql } = { jql: "" }) {
     result.issues.map(async (issue) => {
       issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
       return issue;
-    })
+    }),
   );
 
   return resolvedIssues;
@@ -232,10 +232,10 @@ async function getCreateIssueMetadataWithParams(params: {
         project.issuetypes.map(async (issueType) => {
           issueType.iconUrl = await getAuthenticatedUri(issueType.iconUrl, "image/jpeg");
           return issueType;
-        })
+        }),
       );
       return { ...project, issuetypes: resolvedIssueTypes };
-    })
+    }),
   );
 
   return resolvedProjects;
@@ -337,7 +337,7 @@ export async function getIssue(issueIdOrKey: string) {
   if (issue.fields.parent) {
     issue.fields.parent.fields.issuetype.iconUrl = await getAuthenticatedUri(
       issue.fields.parent.fields.issuetype.iconUrl,
-      "image/jpeg"
+      "image/jpeg",
     );
   }
 
