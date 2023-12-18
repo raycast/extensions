@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { htmlToMarkdown, isLoggedIn, timeAgo, withToast } from "./libs/utils";
+import { handleDelete, htmlToMarkdown, isLoggedIn, timeAgo, withToast } from "./libs/utils";
 import { createAccount, deleteAccount, getAccount, getMails, deleteMail, getMessage } from "./libs/api";
 import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, environment } from "@raycast/api";
 import { useAccount } from "./hooks/useAccount";
@@ -81,15 +81,11 @@ function Mail(): JSX.Element {
                 title="Delete Account"
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 onAction={() =>
-                  withToast({
-                    action: () => deleteAccount(),
-                    onSuccess: () => {
-                      popToRoot();
-                      return "Account deleted successfully";
-                    },
-                    onFailure: () => "Account deletion failed",
-                    loadingMessage: "Deleting account...",
-                  })()
+                  handleDelete(
+                    () => deleteAccount(),
+                    () => popToRoot(),
+                    "account",
+                  )
                 }
               />
             </ActionPanel>
@@ -102,6 +98,7 @@ function Mail(): JSX.Element {
             key={mail.id}
             title={mail.subject !== "" ? mail.subject : "No Subject"}
             icon={{ source: Icon.Message, tintColor: Color.Blue }}
+            quickLook={{ path: `${environment.assetsPath}/${mail.id}.html`, name: mail.subject ?? "" }}
             accessories={[
               {
                 icon: { source: Icon.Person, tintColor: Color.Green },
@@ -115,20 +112,18 @@ function Mail(): JSX.Element {
             ]}
             actions={
               <ActionPanel>
+                <Action.ToggleQuickLook title="Quick Look" />
                 <Action.Push icon={Icon.Message} title="View Message" target={<Message messageId={mail.id} />} />
                 <Action
                   title="Delete Message"
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() =>
-                    withToast({
-                      action: () => deleteMail(mail.id),
-                      onSuccess: () => {
-                        setRefreshKey((key) => key + 1);
-                        return "Mail deleted successfully";
-                      },
-                      onFailure: () => "Mail deletion failed",
-                      loadingMessage: "Deleting mail...",
-                    })()
+                    handleDelete(
+                      () => deleteMail(mail.id),
+                      () => setRefreshKey(refreshKey + 1),
+                      "message",
+                    )
                   }
                 />
               </ActionPanel>
@@ -149,7 +144,7 @@ function Message({ messageId }: { messageId: string }): JSX.Element {
     return <></>;
   }
 
-  const path = `${environment.assetsPath}/email.html`;
+  const path = `${environment.assetsPath}/${messageId}.html`;
 
   const navigationTitle = Message?.subject || "No Subject";
   const markdownContent = Message?.html ? htmlToMarkdown(Message.html[0]) : "# No Content";
