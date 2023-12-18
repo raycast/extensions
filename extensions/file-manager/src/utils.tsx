@@ -166,8 +166,11 @@ export function isImageFile(file: FileDataType) {
   return extension && imageExtensions.includes(extension);
 }
 
-export const handleSetWallpaper = async (filePath: string) => {
+export async function handleSetWallpaper(filePath: string) {
   await runAppleScript(
-    `tell application "System Events" to tell every desktop to set picture to "${filePath}" as POSIX file`,
+    `tell application "System Events" to tell every desktop to set picture to "${filePath.replace(
+      /(["\\])/g,
+      "\\$1",
+    )}" as POSIX file`,
   );
-};
+}
