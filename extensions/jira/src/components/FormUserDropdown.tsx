@@ -28,7 +28,7 @@ const FormUserDropdown = forwardRef(
         }) as Promise<User[]>;
       },
       [autocompleteUrl, query],
-      { keepPreviousData: true }
+      { keepPreviousData: true },
     );
 
     return (
@@ -51,7 +51,7 @@ const FormUserDropdown = forwardRef(
         })}
       </Form.Dropdown>
     );
-  }
+  },
 );
 
 export default FormUserDropdown;
