@@ -41,7 +41,7 @@ export default function Command() {
   }, []);
 
   if (error) {
-    const notFound = Boolean(error.stderr.match("command not found"));
+    const notFound = Boolean(/command not found/.exec(error.stderr));
 
     return notFound ? <Detail markdown={commandNotFoundMd} /> : <Detail markdown={error.stderr} />;
   }
@@ -55,7 +55,7 @@ export default function Command() {
       {items.map(({ triggers, replace, label }, index) => (
         <List.Item
           key={index}
-          title={label || triggers.join(", ")}
+          title={label ?? triggers.join(", ")}
           subtitle={!label ? "" : triggers.join(", ")}
           detail={<List.Item.Detail markdown={replace} />}
           actions={

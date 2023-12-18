@@ -29,10 +29,6 @@ export default function Command() {
     fetchData();
   }, []);
 
-  if (error) {
-    return <Detail markdown={error.message} />;
-  }
-
   const { handleSubmit, itemProps } = useForm<Values>({
     onSubmit(values) {
       const { matchFile } = values;
@@ -56,6 +52,11 @@ export default function Command() {
       replace: FormValidation.Required,
     },
   });
+
+  if (error) {
+    return <Detail markdown={error.message} />;
+  }
+
   return (
     <Form
       actions={
