@@ -1,9 +1,3 @@
-export interface Preferences {
-  bamboo_api_key: string;
-  bamboo_subdomain: string;
-  bamboo_user_id: string;
-}
-
 export interface EmployeeType {
   id: string;
   displayName: string;
