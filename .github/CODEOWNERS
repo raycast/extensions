@@ -191,6 +191,7 @@
 /extensions/common-directory                         @koinzhang
 /extensions/comodoro                                 @jesse-c
 /extensions/compress-pdf                             @felixhaeberle
+/extensions/compressx                                @dqhieu
 /extensions/confluence-search                        @daviddkkim
 /extensions/connect-to-vpn                           @rasmusbe @sato11
 /extensions/consoledev                               @Rawnly
