@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dust-tt",
-  "title": "Ask Dust.tt",
+  "title": "Ask Dust",
   "description": "Query dust.tt AI agents",
   "icon": "dust.png",
   "author": "vineus",
@@ -13,7 +13,7 @@
     {
       "name": "apiKey",
       "description": "Your Dust API key",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "API key",
       "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxx"
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "name": "ask-gpt",
+      "name": "askGpt",
       "title": "Ask GPT-4",
       "description": "Query gpt-4 on Dust.tt",
       "mode": "view",
@@ -59,7 +59,7 @@
     {
       "name": "history",
       "title": "Questions History",
-      "description": "Show the last 10 questions and answers",
+      "description": "Show the questions and answers of the last 30 days",
       "mode": "view"
     },
     {

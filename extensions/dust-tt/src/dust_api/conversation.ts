@@ -102,12 +102,6 @@ export type AgentMessageType = {
   } | null;
 };
 
-export function isAgentMessageType(
-  arg: UserMessageType | AgentMessageType | ContentFragmentType,
-): arg is AgentMessageType {
-  return arg.type === "agent_message";
-}
-
 /**
  * Content Fragments
  */
@@ -160,27 +154,3 @@ export type ConversationType = {
   visibility: ConversationVisibility;
   content: (UserMessageType[] | AgentMessageType[] | ContentFragmentType[])[];
 };
-
-export type UserParticipant = {
-  username: string;
-  fullName: string | null;
-  pictureUrl: string | null;
-};
-export type AgentParticipant = {
-  configurationId: string;
-  name: string;
-  pictureUrl: string | null;
-};
-
-/**
- * A lighter version of Conversation without the content (for menu display).
- */
-export type ConversationWithoutContentType = {
-  id: number;
-  created: number;
-  sId: string;
-  owner: WorkspaceType;
-  title: string | null;
-};
-
-export type ParticipantActionType = "posted" | "reacted" | "subscribed";

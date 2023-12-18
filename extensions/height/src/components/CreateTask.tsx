@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
-import { ApiTask } from "../api/task";
+import { createTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
@@ -51,7 +51,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
       }
 
       try {
-        const [data, error] = await ApiTask.create(payload);
+        const [data, error] = await createTask(payload);
 
         if (data) {
           toast.style = Toast.Style.Success;

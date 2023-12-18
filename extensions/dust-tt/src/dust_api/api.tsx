@@ -2,77 +2,30 @@ import fetch from "node-fetch";
 import { createParser } from "eventsource-parser";
 import { ConversationType, UserMessageType } from "./conversation";
 import { AgentConfigurationType } from "./agent";
+import { MANAGED_SOURCES } from "../agents";
+import {
+  AgentActionSuccessEvent,
+  AgentActionType,
+  AgentErrorEvent,
+  AgentGenerationSuccessEvent,
+  DustAPIErrorResponse,
+  DustDocument,
+  GenerationTokensEvent,
+  RetrievalDocumentType,
+  UserMessageErrorEvent,
+} from "./conversation_events";
+
+const DUST_API_URL = "https://dust.tt/api/v1/w";
+
+function removeCiteMention(message: string) {
+  const regex = / ?:cite\[[a-zA-Z0-9, ]+\]/g;
+  return message.replace(regex, "");
+}
 
 export type DustAPICredentials = {
   apiKey: string;
   workspaceId: string;
 };
-
-type DustAPIErrorResponse = {
-  type: string;
-  message: string;
-};
-
-const DUST_API_URL = "https://dust.tt/api/v1/w";
-
-export type AgentActionSuccessEvent = {
-  type: "agent_action_success";
-  created: number;
-  configurationId: string;
-  messageId: string;
-};
-
-// Event sent when tokens are streamed as the the agent is generating a message.
-export type GenerationTokensEvent = {
-  type: "generation_tokens";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  text: string;
-};
-
-// Event sent once the generation is completed.
-export type AgentGenerationSuccessEvent = {
-  type: "agent_generation_success";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  text: string;
-};
-
-// Event sent when the user message is created.
-export type UserMessageErrorEvent = {
-  type: "user_message_error";
-  created: number;
-  error: {
-    code: string;
-    message: string;
-  };
-};
-
-// Generic event sent when an error occured (whether it's during the action or the message generation).
-export type AgentErrorEvent = {
-  type: "agent_error";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  error: {
-    code: string;
-    message: string;
-  };
-};
-
-export type GenerationSuccessEvent = {
-  type: "generation_success";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  text: string;
-};
-
-function cleanupEventText(text: string) {
-  return text.replace(/:cite\[[^\]]+\]/g, ""); // Remove citations
-}
 
 export class DustApi {
   _credentials: DustAPICredentials;
@@ -203,11 +156,13 @@ export class DustApi {
     message,
     setDustAnswer,
     onDone,
+    setDustDocuments,
   }: {
     conversation: ConversationType;
     message: UserMessageType;
     setDustAnswer: (answer: string) => void;
     onDone?: (answer: string) => void;
+    setDustDocuments: (documents: DustDocument[]) => void;
   }) {
     {
       const conversationId = conversation.sId;
@@ -232,6 +187,7 @@ export class DustApi {
       }
       let answer = "";
       let lastSentDate = new Date();
+      let action: AgentActionType | undefined = undefined;
       for await (const event of streamRes.eventStream) {
         if (!event) {
           continue;
@@ -245,17 +201,22 @@ export class DustApi {
             console.error(`Agent message error: code: ${event.error.code} message: ${event.error.message}`);
             return;
           }
+          case "agent_action_success": {
+            action = event.action;
+            break;
+          }
           case "generation_tokens": {
             answer += event.text;
             if (lastSentDate.getTime() + 500 > new Date().getTime()) {
               continue;
             }
+            const dustAnswer = this.processAction({ content: answer, action, setDustDocuments });
             lastSentDate = new Date();
-            setDustAnswer(cleanupEventText(answer));
+            setDustAnswer(dustAnswer + "...");
             break;
           }
           case "agent_generation_success": {
-            answer = cleanupEventText(event.text);
+            answer = this.processAction({ content: event.text, action, setDustDocuments });
             setDustAnswer(answer);
             if (onDone) {
               onDone(answer);
@@ -269,6 +230,66 @@ export class DustApi {
     }
   }
 
+  processAction({
+    content,
+    action,
+    setDustDocuments,
+  }: {
+    content: string;
+    action?: AgentActionType;
+    setDustDocuments: (documents: DustDocument[]) => void;
+  }): string {
+    const references: { [key: string]: RetrievalDocumentType } = {};
+    if (action && action.type === "retrieval_action" && action.documents) {
+      action.documents.forEach((d) => {
+        references[d.reference] = d;
+      });
+    }
+    const documents: DustDocument[] = [];
+    if (references) {
+      let counter = 0;
+      const refCounter: { [key: string]: number } = {};
+      const contentWithLinks = content.replace(/:cite\[[a-zA-Z0-9, ]+\]/g, (match) => {
+        const keys = match.slice(6, -1).split(","); // slice off ":cite[" and "]" then split by comma
+        return keys
+          .map((key) => {
+            const k = key.trim();
+            const ref = references[k];
+            if (ref) {
+              let newDoc = false;
+              if (!refCounter[k]) {
+                counter++;
+                refCounter[k] = counter;
+                newDoc = true;
+              }
+              const link = ref.sourceUrl
+                ? ref.sourceUrl
+                : `${DUST_API_URL}/${ref.dataSourceWorkspaceId}/builder/data-sources/${
+                    ref.dataSourceId
+                  }/upsert?documentId=${encodeURIComponent(ref.documentId)}`;
+              if (newDoc) {
+                documents.push({
+                  id: ref.documentId,
+                  sourceUrl: link,
+                  dataSourceId: ref.dataSourceId,
+                  score: ref.score,
+                  reference: refCounter[k],
+                });
+              }
+              const icon = ref.dataSourceId in MANAGED_SOURCES ? MANAGED_SOURCES[ref.dataSourceId].icon : undefined;
+              const markdownIcon = icon ? `<img src="${icon}" width="16" height="16"> ` : "";
+              return `[${markdownIcon}[${refCounter[k]}](${link})]`;
+            }
+            return "";
+          })
+          .join("");
+      });
+      setDustDocuments(documents);
+      return contentWithLinks;
+    }
+    return removeCiteMention(content);
+  }
+
   async getAgents(): Promise<{ agents?: AgentConfigurationType[]; error?: string }> {
     const { apiKey, workspaceId } = this._credentials;
     const agentsUrl = `${DUST_API_URL}/${workspaceId}/assistant/agent_configurations`;
@@ -279,6 +300,9 @@ export class DustApi {
         Authorization: `Bearer ${apiKey}`,
       },
     });
+    if (!response.ok) {
+      return { error: `Could not get agents: ${response.statusText}` };
+    }
     const json = (await response.json()) as {
       agentConfigurations?: AgentConfigurationType[];
       error?: DustAPIErrorResponse;

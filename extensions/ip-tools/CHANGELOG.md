@@ -1,5 +1,10 @@
 # ip-tools Changelog
 
+## [New Features ] - 2023-12-15
+
+- Upgrade Project Dependency Package Version
+- Adds a new command to query IP geolocation information
+
 ## [Fixes and Enhancements] - 2023-10-27
 
 - Updated convert number to IP address
