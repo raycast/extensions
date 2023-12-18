@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/dqhieu/compressx-raycast/blob/main/assets/command-icon.png?raw=true" width="128">
+  <img src="https://github.com/dqhieu/compressx-raycast/blob/main/assets/compressx-icon.png?raw=true" width="128">
   <h1 align="center">CompressX</h1>
 </p>
 
@@ -16,3 +16,7 @@ CompressX needs to be installed in order to use this extension
 | name             | description                             |
 | ---------------- | --------------------------------------- |
 | `Compress Video` | Compress selected video with ComprsesX. |
+
+## Screen record
+
+https://github.com/dqhieu/compressx-raycast/assets/8291457/af8d77a8-c2e7-4e69-a7e1-ce2f61b67067
