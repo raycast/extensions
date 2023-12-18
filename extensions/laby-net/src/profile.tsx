@@ -57,7 +57,7 @@ ${profile.profile.username_history
   .reverse()
   .map(
     (name) =>
-      `- ${name.name} | ${name.accurate === false ? "~" : ""}${name.changedAt ? name.changedAt.toLocaleString() : "-"}`
+      `- ${name.name} | ${name.accurate === false ? "~" : ""}${name.changedAt ? name.changedAt.toLocaleString() : "-"}`,
   )
   .join("\n")}
 
@@ -73,7 +73,7 @@ ${
   profile.profile.textures.capes
     ?.map(
       (cape) =>
-        `[![](https://skin.laby.net/api/render/texture/${cape.imageHash}.png?shadow=true&height=120&user=${profile.profile.uuid})](https://laby.net/cape/${cape.imageHash})`
+        `[![](https://skin.laby.net/api/render/texture/${cape.imageHash}.png?shadow=true&height=120&user=${profile.profile.uuid})](https://laby.net/cape/${cape.imageHash})`,
     )
     .join("\n") || "No capes"
 }
@@ -112,7 +112,10 @@ ${
         <ActionPanel>
           <Action.OpenInBrowser url={`https://laby.net/@${profile.profile.uuid}`} />
           <Action.CopyToClipboard title="Copy UUID" content={profile.profile.uuid} />
-          <Action.OpenInBrowser title="Open Mojang API" url={`https://sessionserver.mojang.com/session/minecraft/profile/${profile.profile.uuid}`} />
+          <Action.OpenInBrowser
+            title="Open Mojang API"
+            url={`https://sessionserver.mojang.com/session/minecraft/profile/${profile.profile.uuid}`}
+          />
         </ActionPanel>
       }
     />

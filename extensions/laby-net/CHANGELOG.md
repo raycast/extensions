@@ -1,6 +1,7 @@
 # Laby.net Changelog
 
 ## [Upgrade to v3 API] - {PR_MERGE_DATE}
+
 - Update laby.net api to v3
 - Remove accountType property which was removed from api
 - Fix AxiosError: Request failed with status code 504
