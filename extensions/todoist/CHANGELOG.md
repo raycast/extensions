@@ -1,7 +1,6 @@
 # Todoist Changelog
 
-
-## [Show filters and filter tasks] - 2023-11-20
+## [Show filters and filter tasks] - 2023-12-18
 
 You can now view your Todoist filters and see all tasks associated with a selected fitler. 
 
