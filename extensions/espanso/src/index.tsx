@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Application, Clipboard, Detail, List, getFrontmostApplication } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ProcessOutput } from "zx";
-import { commandNotFoundMd, noContentMd } from "./messages";
-import { NormalizedEspansoMatch } from "./types";
-import { getEspansoConfig, getMatches, sortMatches } from "./utils";
+import { commandNotFoundMd, noContentMd } from "./content/messages";
+import { NormalizedEspansoMatch } from "./lib/types";
+import { getEspansoConfig, getMatches, sortMatches } from "./lib/utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);

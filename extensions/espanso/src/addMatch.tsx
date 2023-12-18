@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Detail, Form, Toast, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { EspansoMatch } from "./types";
-import { appendMatchToFile, formatMatch, getAndSortTargetFiles, getEspansoConfig } from "./utils";
+import { EspansoMatch } from "./lib/types";
+import { appendMatchToFile, formatMatch, getAndSortTargetFiles, getEspansoConfig } from "./lib/utils";
 
 export interface Values {
   trigger: string;
