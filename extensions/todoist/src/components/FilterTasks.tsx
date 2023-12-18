@@ -28,12 +28,6 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const { isLoading, data, revalidate } = useCachedPromise(getFilterTasksCached, [query]);
 
   useEffect(() => {
-    if (query) {
-      revalidate();
-    }
-  }, [query]);
-
-  useEffect(() => {
     if (data) {
       setTasks(filterSort(data));
     }
@@ -64,6 +58,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
 
   return (
     <TaskListSections
+      isLoading={isLoading}
       mode={ViewMode.project}
       sections={viewProps.groupBy?.value === "default" ? [{ name, tasks: tasks }] : sections}
       viewProps={viewProps}
