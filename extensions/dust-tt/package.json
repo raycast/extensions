@@ -59,7 +59,7 @@
     {
       "name": "history",
       "title": "Questions History",
-      "description": "Show the last 10 questions and answers",
+      "description": "Show the questions and answers of the last 30 days",
       "mode": "view"
     },
     {

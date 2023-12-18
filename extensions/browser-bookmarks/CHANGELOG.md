@@ -1,6 +1,14 @@
 # Browser Bookmarks Changelog
 
-## [Support for Firefox Dev edition] - {PR_MERGE_DATE}
+## [Support for Sidekick] - 2023-12-18
+
+- Add support for `Sidekick` browser
+
+## [Support for Brave Nightly] - 2023-12-09
+
+- Add support for `Brave Nightly` browser.
+
+## [Support for Firefox Dev edition] - 2023-11-24
 
 - Add support for `Firefox Dev` browser, which uses the same profiles as `Firefox`.
 
