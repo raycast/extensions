@@ -12,10 +12,6 @@ After you’ve gotten set up with a Pinata account and downloaded our extension,
 
 In order to access your Pinata account you will need to paste in your Pinata API key JWT. You can follow the guide [here](https://knowledge.pinata.cloud/en/articles/6191471-how-to-create-an-pinata-api-key?utm_medium=referral&utm_source=raycast&utm_campaign=raycast_extension) to get that!
 
-## Submarine Key
-
-To use the Pinata Submarining feature you'll also need to enter your Submarine API key. A guide on how to do that can be found [here](https://knowledge.pinata.cloud/en/articles/6191471-how-to-create-an-pinata-api-key?utm_medium=referral&utm_source=raycast&utm_campaign=raycast_extension)!
-
 ## Gateway
 
 if you want to see your files or generate links for your files, you will need to enter in an IPFS Gateway of your choice. We would recommend your [Dedicated Gateway](https://www.pinata.cloud/blog/the-power-of-dedicated-gateways?utm_medium=referral&utm_source=raycast&utm_campaign=raycast_extension&utm_medium=referral&utm_source=raycast&utm_campaign=raycast_extension) if you have a paid account which can be found [here](https://app.pinata.cloud/gateway?utm_medium=referral&utm_source=raycast&utm_campaign=raycast_extension), however, you can also use a public gateway like so:
