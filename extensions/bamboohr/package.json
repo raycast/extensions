@@ -13,6 +13,7 @@
     {
       "name": "outToday",
       "title": "Who's Out Today?",
+      "subtitle": "BambooHR",
       "description": "Get a list of who is out today from BambooHR",
       "mode": "view",
       "interval": "1h"
@@ -20,12 +21,14 @@
     {
       "name": "index",
       "title": "Employee Directory",
+      "subtitle": "BambooHR",
       "description": "Look up the details of employees that work at your company",
       "mode": "view"
     },
     {
       "name": "ptoCalculator",
       "title": "PTO Calculator",
+      "subtitle": "BambooHR",
       "description": "Calculate how much PTO you have left for the year",
       "mode": "view",
       "interval": "1h"
@@ -33,6 +36,7 @@
     {
       "name": "upcomingPto",
       "title": "Upcoming PTO",
+      "subtitle": "BambooHR",
       "description": "Get PTO requests and statuses for you and your team",
       "mode": "view",
       "interval": "1h"
