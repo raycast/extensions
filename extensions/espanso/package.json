@@ -23,7 +23,7 @@
       "mode": "view"
     },
     {
-      "name": "addMatch",
+      "name": "add-match",
       "title": "Add Match",
       "subtitle": "Espanso",
       "description": "Add a match to your Espanso config",
