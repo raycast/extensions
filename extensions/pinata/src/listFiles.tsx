@@ -21,7 +21,6 @@ const preferences = getPreferenceValues<Preferences>();
 const GATEWAY = preferences.GATEWAY;
 
 export default function Command() {
-
   const { data, isLoading, mutate } = getPinned();
 
   const deleteFile = async (hash) => {
@@ -65,29 +64,34 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {data ? data?.rows &&
-        data.rows.length === 0 ? (<List.EmptyView icon={{ source: 'pinnie.png' }} title="No files currently pinned, upload something first!" />) :
-        data.rows.map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.metadata.name ? item.metadata.name : "null"}
-            subtitle={item.ipfs_pin_hash}
-            accessories={[{ text: formatBytes(item.size) }, { date: new Date(item.date_pinned) }]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`${GATEWAY}/ipfs/${item.ipfs_pin_hash}`} />
-                <Action.CopyToClipboard title="Copy CID to Clipboard" content={item.cid} icon={Icon.CopyClipboard} />
-                <Action
-                  style={Action.Style.Destructive}
-                  title="Delete File"
-                  onAction={() => deleteFile(item.ipfs_pin_hash)}
-                  icon={Icon.Trash}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
-        : <List.EmptyView title="Request failed, check API Key!" />}
+      {data ? (
+        data?.rows && data.rows.length === 0 ? (
+          <List.EmptyView icon={{ source: "pinnie.png" }} title="No files currently pinned, upload something first!" />
+        ) : (
+          data.rows.map((item) => (
+            <List.Item
+              key={item.id}
+              title={item.metadata.name ? item.metadata.name : "null"}
+              subtitle={item.ipfs_pin_hash}
+              accessories={[{ text: formatBytes(item.size) }, { date: new Date(item.date_pinned) }]}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={`${GATEWAY}/ipfs/${item.ipfs_pin_hash}`} />
+                  <Action.CopyToClipboard title="Copy CID to Clipboard" content={item.cid} icon={Icon.CopyClipboard} />
+                  <Action
+                    style={Action.Style.Destructive}
+                    title="Delete File"
+                    onAction={() => deleteFile(item.ipfs_pin_hash)}
+                    icon={Icon.Trash}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+        )
+      ) : (
+        <List.EmptyView title="Request failed, check API Key!" />
+      )}
     </List>
   );
 }

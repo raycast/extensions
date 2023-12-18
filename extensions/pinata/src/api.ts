@@ -51,7 +51,6 @@ const preferences = getPreferenceValues<Preferences>();
 const JWT = `Bearer ${preferences.PINATA_JWT}`;
 
 export function getPinned() {
-
   const data = useFetch<PinnedResponse>(
     "https://api.pinata.cloud/data/pinList?includesCount=false&status=pinned&pageLimit=100",
     {
@@ -70,9 +69,9 @@ export function getPinned() {
         });
         console.log(error);
       },
-    }
+    },
   );
-  return data
+  return data;
 }
 
 export function deleteFileByHash(hash: string) {
