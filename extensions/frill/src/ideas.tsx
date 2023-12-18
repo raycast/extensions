@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useState } from "react";
-import { CreateIdeaRequest, GetIdeasResponse, Idea, IdeaTopic, UpdateIdeaRequest } from "./types/ideas";
+import { CreateIdeaRequest, GetIdeasResponse, Idea, UpdateIdeaRequest } from "./types/ideas";
 import { createIdea, deleteIdea, getFollowers, getIdeas, getTopics, updateIdea } from "./api";
 import { Action, ActionPanel, Alert, Color, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import ErrorComponent from "./components/ErrorComponent";
 import { FRILL_URL } from "./constants";
 import { FormValidation, getAvatarIcon, useForm } from "@raycast/utils";
 import { Author } from "./types/common";
+import { Topic } from "./types/topics";
 
 export default function Ideas() {
     const [isLoading, setIsLoading] = useState(true);
@@ -123,7 +124,7 @@ export function CreateNewIdea({ onIdeaCreated }: CreateNewIdeaProps) {
 
     const [isLoading, setIsLoading] = useState(true);
     const [followers, setFollowers] = useState<Author[]>();
-    const [topics, setTopics] = useState<IdeaTopic[]>();
+    const [topics, setTopics] = useState<Topic[]>();
 
     const { handleSubmit, itemProps } = useForm<CreateIdeaRequest>({
         async onSubmit(values) {
@@ -204,7 +205,7 @@ function UpdateIdea({ initialIdea, onIdeaUpdated }: UpdateIdeaProps) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [followers, setFollowers] = useState<Author[]>();
-  const [topics, setTopics] = useState<IdeaTopic[]>();
+  const [topics, setTopics] = useState<Topic[]>();
 
   const { handleSubmit, itemProps } = useForm<UpdateIdeaRequest>({
     async onSubmit(values) {

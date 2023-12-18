@@ -1,13 +1,6 @@
 import { Author, BaseSuccessResponse } from "./common";
+import { Topic } from "./topics";
 
-export type IdeaTopic = {
-    name: string;
-    is_private: boolean;
-    order: number;
-    created_at: string;
-    updated_at: string;
-    idx: string;
-}
 export type Idea = {
     slug: string;
     name: string;
@@ -36,7 +29,7 @@ export type Idea = {
         is_completed: boolean;
         idx: string;
     }
-    topics: IdeaTopic[];
+    topics: Topic[];
 }
 export type CreateIdeaRequest = {
     name: string;

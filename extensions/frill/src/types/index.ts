@@ -11,7 +11,7 @@ export type SimpleSuccessResponse = {
     message: string;
 }
 
-export type ErrorResponse = {
+export type SingleErrorResponse = {
     error: true;
     message: string;
 }
@@ -21,6 +21,7 @@ export type MultiErrorResponse = {
         [key: string]: string[];
     }
 }
+export type ErrorResponse = SingleErrorResponse | MultiErrorResponse;
 // export type SuccessResponse = {
 //     data: Announcement[] | Idea[];
 //     meta: any;

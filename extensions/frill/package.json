@@ -48,6 +48,20 @@
       "subtitle": "Frill",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "topics",
+      "title": "Topics",
+      "subtitle": "Frill",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "followers",
+      "title": "Followers",
+      "subtitle": "Frill",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {
