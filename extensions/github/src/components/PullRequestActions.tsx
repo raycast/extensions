@@ -649,7 +649,7 @@ function OpenPreviewSubmenu({ pullRequest }: SubmenuProps) {
       const lastVercelComment = lastVercelComments.pop()?.body;
 
       const vercelPreviewUrl = lastVercelComment
-        ?.match(/\[Visit Preview\]\([^\)]+\)/)?.[0]
+        ?.match(/\[Visit Preview\]\([^)]+\)/)?.[0]
         ?.replace("[Visit Preview](", "")
         .replace(")", "");
 
