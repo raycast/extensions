@@ -242,7 +242,7 @@ class Service {
   }
 
   async search(query: string): Promise<SearchResult> {
-    const response = await this.client.get<SearchResultItem>("search/names/" + query);
+    const response = await this.client.get<SearchResultItem>("v3/search/names/" + query);
     const result: SearchResultEntry[] = response.data.results.map((entry) => {
       return {
         uuid: entry.uuid,
