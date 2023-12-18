@@ -11,10 +11,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "create-canvas",
-      "title": "Create a new canvas",
+      "name": "create-project",
+      "title": "Create a new project",
       "subtitle": "tldraw",
-      "description": "Create a new TLDraw canvas",
+      "description": "Creates a new TLDraw canvas",
       "mode": "no-view",
       "arguments": [
         {
@@ -32,10 +32,10 @@
       ]
     },
     {
-      "name": "add-existing-canvas",
-      "title": "Add an existing canvas",
+      "name": "add-existing-project",
+      "title": "Add an existing project",
       "subtitle": "tldraw",
-      "description": "Adds an existing canvas to your list of saved canvases",
+      "description": "Adds an existing TLDraw project to your list of saved projects",
       "mode": "no-view",
       "arguments": [
         {
@@ -59,10 +59,10 @@
       ]
     },
     {
-      "name": "list-canvases",
-      "title": "List canvases",
+      "name": "list-projects",
+      "title": "List projects",
       "subtitle": "tdraw",
-      "description": "List all saved TLDraw canvases",
+      "description": "List all saved TLDraw projects",
       "mode": "view"
     }
   ],
