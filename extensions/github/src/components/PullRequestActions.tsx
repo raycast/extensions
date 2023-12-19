@@ -664,7 +664,12 @@ function OpenPreviewSubmenu({ pullRequest }: SubmenuProps) {
         <Action title="Loading..." />
       ) : (
         data && (
-          <Action.OpenInBrowser title="Open Preview" shortcut={{ modifiers: ["cmd", "shift"], key: "v" }} url={data} />
+          <Action.OpenInBrowser
+            title="Open Vercel Preview"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            url={data}
+            icon={{ source: "vercel.svg", tintColor: Color.PrimaryText }}
+          />
         )
       )}
     </>
