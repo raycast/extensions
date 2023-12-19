@@ -1,6 +1,13 @@
 import axios from "axios";
 import { Domain, DomainResponse, Account, TokenResponse, Mail, MailResponse, Message } from "../types";
-import { generateEmail, generatePassword, writeMessageToFile } from "./utils";
+import {
+  deleteMessageCache,
+  generateEmail,
+  generatePassword,
+  getCacheMessage,
+  getMessageOrUseCache,
+  isNotNull,
+} from "./utils";
 import { LocalStorage } from "@raycast/api";
 
 // CONSTANTS
@@ -134,21 +141,25 @@ export const deleteAccount = async (): Promise<void> => {
 };
 
 // Get Mails
-export const getMails = async (): Promise<Mail[]> => {
-  // Get Account
+export const getMails = async (): Promise<Message[]> => {
   const account: Account = await getAccount();
 
-  // if no account, return an empty array
   if (!account) return [];
 
-  // Get Mails Request
   const mails: Mail[] = await getMailsRequest(account.token);
 
-  return mails;
+  const messages: (Message | null)[] = await Promise.all(mails.map((mail) => getMessageOrUseCache(mail)));
+
+  const filteredMessages: Message[] = messages.filter(isNotNull);
+
+  return filteredMessages;
 };
 
 // Delete Mail
-export const deleteMail = async (id: string): Promise<void> => await deleteEmailRequest(id);
+export const deleteMail = async (id: string): Promise<void> => {
+  await deleteMessageCache(id);
+  await deleteEmailRequest(id);
+};
 
 // Get Mail Request
 export const getMailRequest = async (id: string, token: string): Promise<Message> => {
@@ -167,11 +178,7 @@ export const getMessage = async (id: string): Promise<Message | null> => {
 
   if (!account) return null;
 
-  const message: Message = await getMailRequest(id, account.token);
-
-  const content = message.html ? message.html[0] : "No Content";
-
-  await writeMessageToFile(content);
+  const message = getCacheMessage(id) || (await getMailRequest(id, account.token));
 
   return message;
 };

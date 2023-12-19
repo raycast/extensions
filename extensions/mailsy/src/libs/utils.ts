@@ -1,8 +1,12 @@
-import { LocalStorage, showToast, Toast, environment } from "@raycast/api";
+import { LocalStorage, showToast, Toast, environment, Cache } from "@raycast/api";
 import { NodeHtmlMarkdown, NodeHtmlMarkdownOptions } from "node-html-markdown";
-
 import fs from "fs/promises";
-import { Interval } from "../types";
+import { Interval, Mail, Message } from "../types";
+import { getMessage } from "./api";
+
+// Cache
+const cache = new Cache();
+
 export const withToast =
   ({
     action,
@@ -89,12 +93,14 @@ export const htmlToMarkdown = (html: string): string => {
 };
 
 // Write Message to File
-export const writeMessageToFile = async (message: string): Promise<void> => {
-  // PATH
-  const path = `${environment.assetsPath}/email.html`;
+export const writeMessageToFile = async (message: Message): Promise<void> => {
+  if (!message) return;
 
-  // Write Message to File
-  await fs.writeFile(path, message, "utf-8");
+  const content = message.html ? message.html[0] : "No Content";
+
+  const path = `${environment.assetsPath}/${message.id}.html`;
+
+  await fs.writeFile(path, content, "utf-8");
 };
 
 export const timeAgo = (date: string): string => {
@@ -117,4 +123,48 @@ export const timeAgo = (date: string): string => {
   }
 
   return "just now";
+};
+
+export const handleDelete = (action: () => Promise<void>, onSuccess: () => void, loadingMessage: string) => {
+  withToast({
+    action,
+    onSuccess: () => {
+      onSuccess();
+      return `${loadingMessage} successfully`;
+    },
+    onFailure: () => `${loadingMessage} failed`,
+    loadingMessage: `Deleting ${loadingMessage}...`,
+  })();
+};
+
+// This function either gets the message from the cache or fetches it from the server
+export const getMessageOrUseCache = async (mail: Mail): Promise<Message | null> => {
+  const cachedMessage = cache.get(mail.id);
+  if (cachedMessage) return JSON.parse(cachedMessage);
+
+  const message = await getMessage(mail.id);
+
+  if (!message) return null;
+
+  writeMessageToFile(message);
+  cache.set(mail.id, JSON.stringify(message));
+  return message;
+};
+
+// This function checks if a message is not null
+export const isNotNull = (message: Message | null): message is Message => {
+  return message !== null;
+};
+
+export const getCacheMessage = (id: string): Message | null => {
+  const cachedMessage = cache.get(id);
+  if (cachedMessage) return JSON.parse(cachedMessage);
+  return null;
+};
+
+export const deleteMessageCache = async (id: string): Promise<void> => {
+  cache.remove(id);
+
+  // Delete File
+  await fs.unlink(`${environment.assetsPath}/${id}.html`);
 };

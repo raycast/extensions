@@ -1,5 +1,9 @@
 # Mailsy Changelog
 
+## [Features] - 2023-12-18
+
+- Added `Quick Look` feature to view the mail.
+
 ## [Changes] - 2023-12-16
 
 - Rewrote the entire codebase.
