@@ -69,7 +69,7 @@ export function getPinned() {
         });
         console.log(error);
       },
-    },
+    }
   );
   return data;
 }
