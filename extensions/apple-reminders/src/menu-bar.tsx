@@ -164,11 +164,9 @@ export default function Command() {
     <MenuBarExtra
       isLoading={isLoading}
       icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
-      {...(
-        displayMenuBarCount
-          ? { title: (hideMenuBarCountWhenEmpty && remindersCount === 0) ? undefined : String(remindersCount) } 
-          : {}
-      )}
+      {...(displayMenuBarCount
+        ? { title: hideMenuBarCountWhenEmpty && remindersCount === 0 ? undefined : String(remindersCount) }
+        : {})}
     >
       {sections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
