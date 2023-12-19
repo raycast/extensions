@@ -54,13 +54,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
           </ActionPanel.Section>
-          {/* <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-            />
-          </ActionPanel.Section> */}
         </ActionPanel>
       }
     />

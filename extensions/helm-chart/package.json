@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Helm chart",
+      "title": "Helm Chart",
       "description": "Search in Helm Chart.",
       "mode": "view",
       "icon": "command-icon.png"
