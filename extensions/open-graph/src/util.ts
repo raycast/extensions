@@ -9,14 +9,30 @@ export const parseOpenGraph = (htmlText: string): OpenGraph => {
   if (!description) {
     description = html.querySelector("meta[name='Description']");
   }
-  const ogTitle = html.querySelector("meta[property='og:title']");
-  const ogDescription = html.querySelector("meta[property='og:description']");
-  const ogImage = html.querySelector("meta[property='og:image']");
-  const ogUrl = html.querySelector("meta[property='og:url']");
-  const twitterTitle = html.querySelector("meta[name='twitter:title']");
-  const twitterDescription = html.querySelector("meta[name='twitter:description']");
-  const twitterImage = html.querySelector("meta[name='twitter:image']");
-  const twitterCard = html.querySelector("meta[name='twitter:card']");
+  const ogTitle = html.querySelector("meta[property='og:title']")
+    ? html.querySelector("meta[property='og:title']")
+    : html.querySelector("meta[name='og:title']");
+  const ogDescription = html.querySelector("meta[property='og:description']")
+    ? html.querySelector("meta[property='og:description']")
+    : html.querySelector("meta[name='og:description']");
+  const ogImage = html.querySelector("meta[property='og:image']")
+    ? html.querySelector("meta[property='og:image']")
+    : html.querySelector("meta[name='og:image']");
+  const ogUrl = html.querySelector("meta[property='og:url']")
+    ? html.querySelector("meta[property='og:url']")
+    : html.querySelector("meta[name='og:url']");
+  const twitterTitle = html.querySelector("meta[name='twitter:title']")
+    ? html.querySelector("meta[name='twitter:title']")
+    : html.querySelector("meta[property='twitter:title']");
+  const twitterDescription = html.querySelector("meta[name='twitter:description']")
+    ? html.querySelector("meta[name='twitter:description']")
+    : html.querySelector("meta[property='twitter:description']");
+  const twitterImage = html.querySelector("meta[name='twitter:image']")
+    ? html.querySelector("meta[name='twitter:image']")
+    : html.querySelector("meta[property='twitter:image']");
+  const twitterCard = html.querySelector("meta[name='twitter:card']")
+    ? html.querySelector("meta[name='twitter:card']")
+    : html.querySelector("meta[property='twitter:card']");
   return {
     title,
     description: description?.getAttribute("content") || NONE,
