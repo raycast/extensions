@@ -1,6 +1,6 @@
 # Laby.net Changelog
 
-## [Upgrade to v3 API] - {PR_MERGE_DATE}
+## [Upgrade to v3 API] - 2023-12-19
 
 - Update laby.net api to v3
 - Remove accountType property which was removed from api
