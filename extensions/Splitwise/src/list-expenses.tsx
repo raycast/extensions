@@ -22,7 +22,6 @@ export default function Command() {
   return (
     <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses || loadingGroups}>
       {expenses
-        .filter((expense) => expense.deleted_at === null)
         .map((expense) => (
           <List.Item
             key={expense.id}
@@ -32,7 +31,7 @@ export default function Command() {
               {
                 icon: expense.group_id ? Icon.TwoPeople : "",
                 tooltip: `Group: ${
-                  expense.group_id ? (groups.filter((group) => group.id === expense.group_id)[0]?.name || "No group found") : ""
+                  expense.group_id ? groups.filter((group) => group.id === expense.group_id)[0]?.name : ""
                 }`,
               },
               { icon: expense.payment ? Icon.BankNote : "", tooltip: "Payment" },
@@ -62,7 +61,7 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Link
                           title="Group Expense"
-                          text={`Open '${groups.filter((group) => group.id === expense.group_id)[0].name}'`}
+                          text={`Open '${groups.filter((group) => group.id === expense.group_id)[0]?.name}'`}
                           target={`https://secure.splitwise.com/#/groups/${expense.group_id}`}
                         />
                       </>
