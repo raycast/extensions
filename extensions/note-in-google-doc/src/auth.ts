@@ -16,11 +16,10 @@ export async function authorize(): Promise<void> {
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     // if token is expired, regenerate it using refreshToken
-    if (tokenSet.isExpired()) {
-      if (tokenSet.refreshToken) await client.setTokens(await refreshTokens(tokenSet.refreshToken));
-    } else {
-      return;
+    if (tokenSet.isExpired() && tokenSet.refreshToken) {
+      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
     }
+    return;
   }
 
   const authRequest = await client.authorizationRequest({
