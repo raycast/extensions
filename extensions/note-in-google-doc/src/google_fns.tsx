@@ -1,6 +1,6 @@
 import { getDateInLocaleFormat } from "./util";
 import { checkTokenValidity, client } from "./auth";
-import fetch, {Response}  from 'node-fetch';
+import fetch, { Response } from "node-fetch";
 
 export interface GoogleDoc {
   id: string;
@@ -13,7 +13,7 @@ export enum FileSearchOperator {
   "contains",
 }
 
-async function handleInvalidResponse(response:Response) {
+async function handleInvalidResponse(response: Response) {
   if (!response.ok) {
     if (response.status > 400 && response.status !== 404) {
       // this will retrigger the authentication flow for unknown errors
