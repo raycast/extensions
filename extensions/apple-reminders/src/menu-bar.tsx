@@ -37,7 +37,7 @@ import { getPriorityIcon, truncateMiddle } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 
 export default function Command() {
-  const { displayMenuBarCount, view } = getPreferenceValues<Preferences.MenuBar>();
+  const { displayMenuBarCount, hideMenuBarCountWhenEmpty, view } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
@@ -164,7 +164,11 @@ export default function Command() {
     <MenuBarExtra
       isLoading={isLoading}
       icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
-      {...(displayMenuBarCount ? { title: String(remindersCount) } : {})}
+      {...(
+        displayMenuBarCount
+          ? { title: (hideMenuBarCountWhenEmpty && remindersCount === 0) ? undefined : String(remindersCount) } 
+          : {}
+      )}
     >
       {sections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>

@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Add option to hide menu bar count when empty] - 2023-12-19
+
+- Allow to hide the menu bar count when there is zero reminders
+
 ## [Fix Create Reminder command] - 2023-12-18
 
 - Fix a bug where the priority value wouldn't be saved
