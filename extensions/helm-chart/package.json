@@ -5,7 +5,6 @@
   "description": "Search in Helm Chart",
   "icon": "command-icon.png",
   "author": "eunchurn",
-  "owner": "clev",
   "categories": [
     "Developer Tools",
     "Web"
