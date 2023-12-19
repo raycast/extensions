@@ -160,4 +160,3 @@
     "publish": "npx @raycast/api@latest publish"
   }
 }
- 
