@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { Preferences } from "./types";
 
 const preferences = getPreferenceValues<Preferences>();
 

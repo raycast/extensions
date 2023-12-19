@@ -17,3 +17,9 @@ export interface EmployeeType {
   photoUploaded: boolean;
   photoUrl: string;
 }
+
+export interface EmployeeProps {
+  key: string;
+  subtitle?: string;
+  employee: EmployeeType | null | undefined;
+}

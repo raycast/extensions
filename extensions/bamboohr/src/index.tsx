@@ -2,7 +2,6 @@ import { List, updateCommandMetadata, getPreferenceValues } from "@raycast/api";
 import { bamboo } from "./utils/bambooData";
 import Employee from "./employee";
 import { EmployeeType } from "./utils/types";
-import { Preferences } from "./utils/types";
 
 const preferences = getPreferenceValues<Preferences>();
 

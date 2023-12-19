@@ -1,7 +1,6 @@
 import { List, Detail, updateCommandMetadata, getPreferenceValues, Action, ActionPanel, Icon } from "@raycast/api";
 import { getDaysLeftInYear } from "./utils/date";
 import { bamboo } from "./utils/bambooData";
-import { Preferences } from "./utils/types";
 
 const preferences = getPreferenceValues<Preferences>();
 

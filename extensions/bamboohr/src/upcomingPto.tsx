@@ -1,7 +1,6 @@
 import { List, getPreferenceValues, Action, ActionPanel, Icon, Color, updateCommandMetadata } from "@raycast/api";
 import { getTodayDate, getLastDateOfCurrentYear } from "./utils/date";
 import { bamboo } from "./utils/bambooData";
-import { Preferences } from "./utils/types";
 
 const preferences = getPreferenceValues<Preferences>();
 
