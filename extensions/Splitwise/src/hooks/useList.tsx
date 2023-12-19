@@ -14,7 +14,7 @@ export function GetExpense(limit: string): [Expense[], boolean, any, any] {
       keepPreviousData: true,
     }
   );
-  const fetchedExpenses = data?.expenses.filter((expense) => !expense.deleted_at) || [];
+  const fetchedExpenses = data?.expenses || [];
 
   if (error) {
     console.log(`Error while fetching expenses: \n ${error}`);

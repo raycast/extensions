@@ -22,6 +22,7 @@ export default function Command() {
   return (
     <List isShowingDetail searchBarPlaceholder="Search Expenses" isLoading={loadingExpenses || loadingGroups}>
       {expenses
+        .filter((expense) => expense.deleted_at === null)
         .map((expense) => (
           <List.Item
             key={expense.id}
