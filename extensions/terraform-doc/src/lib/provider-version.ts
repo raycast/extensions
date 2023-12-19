@@ -44,7 +44,6 @@ export async function getProviderVersionList(provider: Provider) {
     const data = await fetch(
       `https://registry.terraform.io/v2/providers/${provider.attributes["full-name"]}?include=provider-versions`,
     );
-    console.log(data);
     const res = providerVersionsResponseSchema.parse(await data.json());
     return res.included.sort(
       (a, b) =>

@@ -12,17 +12,17 @@ import ProviderVersionsView from "./provider-version.view";
 import { hashColorizer } from "../lib/util";
 
 export default function ProviderView() {
-  const [state, setState] = useCachedState<Provider[]>(
-    environment.extensionName + "-providers",
-    [],
+  const [state, setState] = useCachedState<Provider[]|undefined>(
+    "providers",
+    undefined,
     {
-      cacheNamespace: environment.extensionName + "-providers",
+      cacheNamespace: environment.extensionName,
     },
   );
   useEffect(() => {
     async function updateProviders() {
       try {
-        if (state.length === 0) {
+        if (!state) {
           await showToast({
             title: "Loading Providers...",
             message: "This may take a minute.",
@@ -36,8 +36,8 @@ export default function ProviderView() {
     updateProviders();
   }, []);
   return (
-    <List isLoading={state.length === 0}>
-      {state.map((p) => (
+    <List isLoading={!!state}>
+      {state?.map((p) => (
         <List.Item
           title={p.attributes["full-name"]}
           key={p.id}
