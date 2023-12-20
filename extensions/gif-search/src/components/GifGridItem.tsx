@@ -14,7 +14,6 @@ interface GifGridItemProps {
   index: number;
   visitGifItem: (gif: IGif) => void;
   service?: ServiceName;
-  loadMoreGifs: () => void;
   section: string;
 }
 
@@ -42,7 +41,6 @@ export function GifGridItem(props: GifGridItemProps) {
           showViewDetails={true}
           service={props.service}
           visitGifItem={props.visitGifItem}
-          loadMoreGifs={props.loadMoreGifs}
         />
       }
     />
