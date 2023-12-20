@@ -24,9 +24,9 @@ const Command = () => {
         ? true
         : selectedFolder == "Top Level Bookmarks"
         ? bookmark.folder == ""
-        : bookmark.folder == selectedFolder
+        : bookmark.folder == selectedFolder,
     ),
-    ({ folder }) => folder
+    ({ folder }) => folder,
   );
 
   return (
