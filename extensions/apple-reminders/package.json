@@ -72,7 +72,7 @@
           "type": "checkbox",
           "title": "Hide count when empty",
           "label": "Hide menu bar count when empty",
-          "description": "When enabled and there are no reminders, the number of reminders will be hidden. (\"Display menu bar count\" needs to be enabled)",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
           "default": false,
           "required": false
         },
