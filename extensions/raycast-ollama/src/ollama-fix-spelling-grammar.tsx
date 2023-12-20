@@ -1,5 +1,5 @@
 import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  return AnswerView("fix");
+  return <AnswerView command="fix" />;
 }
