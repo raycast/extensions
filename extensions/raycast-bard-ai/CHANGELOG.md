@@ -1,5 +1,9 @@
 # raycast-bard-ai Changelog
 
+## [Fix] - 2023-12-20
+- Using the official API and gemini-pro model now
+- Support poxing requests through a proxy server
+
 ## [Introducing Chat] - 2023-07-14
 
 - Added a chat feature. Continue on speaking to Bard about a topic, and make/revisit conversations!
