@@ -1,15 +1,25 @@
-import fetch from "node-fetch";
-globalThis.fetch = fetch;
-
-import { useNavigation, getPreferenceValues } from "@raycast/api";
-import Bard from "bard-ai";
-
+import { useNavigation } from "@raycast/api";
 import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { List, Form, Icon, ActionPanel, Action, confirmAlert, Alert } from "@raycast/api";
 import useLocalStorage from "./api/useChatStorage";
 import { LocalStorage } from "@raycast/api";
 import { Clipboard } from "@raycast/api";
+
+import useAIModel from "./api/useAIModel";
+
+const LOADING_RESPONSE = "Loading...";
+const FAILED_RESPONSE = "Failure to fetch Bard";
+
+function formatQuestions(questions) {
+  return questions.reduce((acc, question) => {
+    if (![LOADING_RESPONSE, FAILED_RESPONSE].includes(question.response) && question.question) {
+      acc.unshift({ role: "model", parts: question.response });
+      acc.unshift({ role: "user", parts: question.question });
+    }
+    return acc;
+  }, []);
+}
 
 export default function Chat() {
   let {
@@ -20,70 +30,31 @@ export default function Chat() {
     getCurrentConversation,
   } = useLocalStorage();
 
-  let [bardWorking, setBardWorking] = useState(true);
-
   // Text that is currently searched
   let [searchText, setSearchText] = useState("");
 
   // Whether or not loading a new message
   let [loading, setLoading] = useState(false);
 
-  // Whether or not Bard is initializing
-  let [initializing, setInitializing] = useState(true);
-
-  // Whether or not Bard is trying to connect
-  let [tryingToConnect, setTryingToConnect] = useState(true);
-
-  const pref = getPreferenceValues();
-
-  useEffect(() => {
-    const initializeBard = async () => {
-      try {
-        let startTime = Date.now();
-        toast(Toast.Style.Animated, "Please wait for Bard to initialize.");
-        setInitializing(true);
-        await Bard.init(pref["__Secure-1PSID"]);
-        setInitializing(false);
-        toast(Toast.Style.Success, `Bard initialized in ${(Date.now() - startTime) / 1000} seconds.`);
-        setTryingToConnect(false);
-      } catch {
-        setBardWorking(false);
-        toast(Toast.Style.Failure, `Bard couldn't connect.`);
-        setTryingToConnect(false);
-      }
-
-      setConversationList((originalConversation) => {
-        const updatedConversation = structuredClone(originalConversation);
-
-        let currentConversation = getCurrentConversation(updatedConversation);
-        let currentQuestion = currentConversation.questions[0];
-        currentQuestion.ids = currentBard.export();
-        currentConversation.ids = currentQuestion.ids;
-        return updatedConversation;
-      });
-    };
-
-    initializeBard();
-  }, []);
+  const aiModel = useAIModel();
 
   useEffect(() => {
     let currentQuestions = getCurrentConversation().questions;
     if (typeof currentQuestions === "object") {
-      if (!initializing && isLoaded && currentQuestions.length && currentQuestions[0].response === "Loading...") {
+      if (isLoaded && currentQuestions.length > 0 && currentQuestions[0].response === LOADING_RESPONSE) {
         let startTime = Date.now();
         setLoading(true);
         toast(Toast.Style.Animated, "Getting response from Bard...");
         (async () => {
-          let response = await currentBard.ask(currentQuestions[0].question);
-          toast(Toast.Style.Success, `Response recieved in ${(Date.now() - startTime) / 1000} seconds`);
+          const result = await currentBard.sendMessage(currentQuestions[0].question);
+          const response = result.response.text();
+          toast(Toast.Style.Success, `Response received in ${(Date.now() - startTime) / 1000} seconds`);
           setConversationList((originalConversation) => {
             const updatedConversation = structuredClone(originalConversation);
 
             let currentConversation = getCurrentConversation(updatedConversation);
             let currentQuestion = currentConversation.questions[0];
             currentQuestion.response = response;
-            currentQuestion.ids = currentBard.export();
-            currentConversation.ids = currentQuestion.ids;
             setLoading(false);
 
             return updatedConversation;
@@ -91,22 +62,18 @@ export default function Chat() {
         })();
       }
     }
-  }, [isLoaded, initializing]);
+  }, [isLoaded]);
 
   // Current Bard instance being used
-  let [currentBard, setCurrentBard] = useState(new Bard.Chat());
+  let [currentBard, setCurrentBard] = useState(aiModel.startChat());
 
   // Update the current Bard chat when there is data updated about the conversation
   useEffect(() => {
-    if (typeof getCurrentConversation().ids === "object") {
-      setCurrentBard(
-        new Bard.Chat(
-          // Use IDs if possible to save data
-          getCurrentConversation().ids
-        )
-      );
+    const questions = getCurrentConversation().questions;
+    if (Array.isArray(questions) && questions.length > 0) {
+      setCurrentBard(aiModel.startChat({ history: formatQuestions(questions) }));
     } else {
-      setCurrentBard(new Bard.Chat());
+      setCurrentBard(aiModel.startChat());
     }
   }, [conversationList, conversationName]);
 
@@ -120,12 +87,7 @@ export default function Chat() {
   };
 
   const submitResponse = async () => {
-    if (initializing) {
-      toast(Toast.Style.Failure, `Bard is still initialzing.`);
-    } else if (!bardWorking) {
-      toast(Toast.Style.Failure, `Bard appears to be unavailable at this time.`);
-      return;
-    } else if (!searchText) {
+    if (!searchText) {
       toast(Toast.Style.Failure, "Cannot submit empty message.");
       return;
     } else if (loading) {
@@ -140,11 +102,9 @@ export default function Chat() {
         const updatedConversation = structuredClone(originalConversation);
 
         getCurrentConversation(updatedConversation).questions.unshift({
-          question: searchText,
-          response: "Loading...",
+          question: searchText.trim(),
+          response: LOADING_RESPONSE,
           metadata: {
-            conversationID: "Loading IDs...",
-            responseID: "Loading IDs...",
             date: new Date(),
           },
         });
@@ -153,27 +113,26 @@ export default function Chat() {
       });
 
       try {
-        let response = await currentBard.ask(searchText);
-        toast(Toast.Style.Success, `Response recieved in ${(Date.now() - startTime) / 1000} seconds`);
+        const result = await currentBard.sendMessage(searchText);
+        const response = result.response.text();
+        toast(Toast.Style.Success, `Response received in ${(Date.now() - startTime) / 1000} seconds`);
 
         setConversationList((originalConversation) => {
           const updatedConversation = structuredClone(originalConversation);
           let currentConversation = getCurrentConversation(updatedConversation);
           let currentQuestion = currentConversation.questions[0];
           currentQuestion.response = response;
-          currentQuestion.ids = currentBard.export();
-          currentConversation.ids = currentQuestion.ids;
           setLoading(false);
 
           return updatedConversation;
         });
-      } catch {
+      } catch(error) {
         toast(Toast.Style.Failure, `Bard appears to be unavailable at this time.`);
         setConversationList((originalConversation) => {
           const updatedConversation = structuredClone(originalConversation);
 
           let currentQuestion = getCurrentConversation(updatedConversation).questions[0];
-          currentQuestion.response = "Failure to fetch Bard";
+          currentQuestion.response = FAILED_RESPONSE;
 
           setLoading(false);
 
@@ -186,7 +145,7 @@ export default function Chat() {
   const deleteConversation = async () => {
     if (
       await confirmAlert({
-        title: "Confirm Rset",
+        title: "Confirm Delete",
         message: "Are you sure you want to delete this conversation? This is an irreversible action.",
         primaryAction: {
           title: "Delete",
@@ -198,7 +157,7 @@ export default function Chat() {
       setConversationList((original) => {
         let newConversation = structuredClone(original);
         if (newConversation.length === 1) {
-          newConversation[0].ids = {};
+          // newConversation[0].ids = {};
           newConversation[0].questions = [];
           newConversation[0].name = "New Conversation";
           nameToIndexMap = ["New Conversation"];
@@ -247,7 +206,7 @@ export default function Chat() {
       await confirmAlert({
         title: "Confirm Purge",
         message:
-          "Are you sure you want to completely clear all memory associated with the Google Bard extension? This is an irreversable action, and will result in the loss of all of your conversations, messages, and answers.",
+          "Are you sure you want to completely clear all memory associated with the Google Bard extension? This is an irreversible action, and will result in the loss of all of your conversations, messages, and answers.",
         primaryAction: {
           title: "Continue",
           style: Alert.ActionStyle.Destructive,
@@ -327,14 +286,6 @@ export default function Chat() {
       toast(Toast.Style.Failure, "Conversation name cannot be empty");
       success = false;
     }
-    if (!bardWorking) {
-      toast(Toast.Style.Failure, "Please wait until Bard has reconnected.");
-      success = false;
-    }
-    if (initializing) {
-      toast(Toast.Style.Failure, "Bard is still initialzing.");
-      success = false;
-    }
     return success;
   };
 
@@ -348,7 +299,7 @@ export default function Chat() {
         return;
       }
       setConversationList((original) => {
-        setCurrentBard(new Bard.Chat());
+        setCurrentBard(aiModel.startChat());
         let newList = [
           ...structuredClone(original),
           {
@@ -360,7 +311,7 @@ export default function Chat() {
         setConversationName(name);
         return newList;
       });
-      toast(Toast.Style.Success, `Sucessfully created converation "${name}"`);
+      toast(Toast.Style.Success, `Successfully created conversation "${name}"`);
       pop();
     };
 
@@ -384,7 +335,7 @@ export default function Chat() {
         setConversationName(name);
         return newList;
       });
-      toast(Toast.Style.Success, `Sucessfully renamed converation to "${name}"`);
+      toast(Toast.Style.Success, `Successfully renamed conversation to "${name}"`);
       pop();
     };
 
@@ -501,19 +452,14 @@ export default function Chat() {
       onSearchTextChange={setSearchText}
       navigationTitle="Chat With AI"
       searchBarPlaceholder="Ask Bard something..."
-      isShowingDetail={bardWorking && getCurrentConversation().questions.length !== 0}
+      isShowingDetail={getCurrentConversation().questions.length !== 0}
       actions={<BardActionPanel />}
       searchBarAccessory={<ConversationDropdown />}
     >
       {(() => {
         // If not loaded, show loading screen
-        if (!bardWorking) {
-          return <List.EmptyView icon={Icon.WifiDisabled} title={"Bard failed to connect"} />;
-        } else if (!isLoaded) {
+        if (!isLoaded) {
           return <List.EmptyView icon={Icon.Stars} title={"Bard is loading..."} />;
-        } else if (tryingToConnect && getCurrentConversation().questions.length === 0) {
-          // If loaded but no questions submitted, show ready screen
-          return <List.EmptyView icon={Icon.Clock} title={"Please wait."} />;
         } else if (getCurrentConversation().questions.length === 0) {
           // If loaded but no questions submitted, show ready screen
           return <List.EmptyView icon={Icon.Stars} title={"Ask away. Bard is ready."} />;
@@ -525,7 +471,7 @@ export default function Chat() {
               key={question + i}
               title={question}
               actions={<BardActionPanel response={response} />}
-              detail={<List.Item.Detail markdown={`**${question}**\n\n${response}`} />}
+              detail={<List.Item.Detail markdown={`**${question.trim()}**\n\n${response}`} />}
             />
           ));
         }

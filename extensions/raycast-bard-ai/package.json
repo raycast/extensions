@@ -6,7 +6,8 @@
   "icon": "bard.png",
   "author": "EvanZhouDev",
   "contributors": [
-    "Vaibhav-Satishkumar"
+    "Vaibhav-Satishkumar",
+    "xsbchen"
   ],
   "categories": [
     "Productivity"
@@ -96,17 +97,40 @@
   ],
   "preferences": [
     {
-      "description": "Google __Secure-1PSID Session Cookie Key",
-      "name": "__Secure-1PSID",
+      "description": "Google API Key. If you don't already have one, create a key in Google AI Studio.",
+      "name": "apiKey",
       "required": true,
-      "title": "Google Bard Key",
+      "title": "Google API Key",
       "type": "password"
+    },
+    {
+      "description": "The model to use.",
+      "name": "model",
+      "required": true,
+      "title": "Model",
+      "type": "dropdown",
+      "default": "gemini-pro",
+      "data": [
+        {
+          "title": "Gemini Pro",
+          "value": "gemini-pro"
+        }
+      ]
+    },
+    {
+      "description": "The proxy to use, supported protocols: http, https, socks, socks4 and socks5.",
+      "name": "proxy",
+      "required": false,
+      "title": "Proxy",
+      "type": "textfield",
+      "default": ""
     }
   ],
   "dependencies": {
+    "@google/generative-ai": "^0.1.3",
     "@raycast/api": "^1.48.5",
-    "bard-ai": "^1.5.2",
     "node-fetch": "^3.3.1",
+    "proxy-agent": "^6.3.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
