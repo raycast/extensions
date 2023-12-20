@@ -1,3 +1,3 @@
 # Mail Manager
 
-Helps to manager Apple Mail folders and messages
+Helps to manage Apple Mail folders and messages
