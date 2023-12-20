@@ -9,18 +9,10 @@ export const parseOpenGraph = (htmlText: string): OpenGraph => {
   if (!description) {
     description = html.querySelector("meta[name='Description']");
   }
-  const ogTitle = html.querySelector("meta[property='og:title']")
-    ? html.querySelector("meta[property='og:title']")
-    : html.querySelector("meta[name='og:title']");
-  const ogDescription = html.querySelector("meta[property='og:description']")
-    ? html.querySelector("meta[property='og:description']")
-    : html.querySelector("meta[name='og:description']");
-  const ogImage = html.querySelector("meta[property='og:image']")
-    ? html.querySelector("meta[property='og:image']")
-    : html.querySelector("meta[name='og:image']");
-  const ogUrl = html.querySelector("meta[property='og:url']")
-    ? html.querySelector("meta[property='og:url']")
-    : html.querySelector("meta[name='og:url']");
+  const ogTitle = html.querySelector("meta[property='og:title']");
+  const ogDescription = html.querySelector("meta[property='og:description']");
+  const ogImage = html.querySelector("meta[property='og:image']");
+  const ogUrl = html.querySelector("meta[property='og:url']");
   const twitterTitle = html.querySelector("meta[name='twitter:title']")
     ? html.querySelector("meta[name='twitter:title']")
     : html.querySelector("meta[property='twitter:title']");
