@@ -1,12 +1,4 @@
-import {
-  getSelectedText,
-  Detail,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-} from "@raycast/api";
+import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useAIModel from "./useAIModel";
 

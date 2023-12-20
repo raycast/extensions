@@ -1,8 +1,7 @@
 import { useRef } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import './fetch';
-
+import "./fetch";
 
 export default function useAIModel() {
   const modelRef = useRef(null);

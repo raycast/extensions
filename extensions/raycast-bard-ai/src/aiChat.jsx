@@ -126,7 +126,7 @@ export default function Chat() {
 
           return updatedConversation;
         });
-      } catch(error) {
+      } catch (error) {
         toast(Toast.Style.Failure, `Bard appears to be unavailable at this time.`);
         setConversationList((originalConversation) => {
           const updatedConversation = structuredClone(originalConversation);
