@@ -46,7 +46,7 @@ export type Resource = z.infer<typeof resourceSchema>["included"][0];
 export async function getResourceList(
   provider: Provider,
   version: ProviderVersion,
-): Promise<Resource[]> {
+): Promise<Resource[] | undefined> {
   try {
     const data = await fetch(
       `https://registry.terraform.io/v2/provider-versions/${version.id}?include=provider-docs%2Chas-cdktf-docs`,
@@ -54,6 +54,6 @@ export async function getResourceList(
     const resources = resourceSchema.parse(await data.json()).included;
     return resources;
   } catch (e) {
-    throw new Error(`${e}`);
+    return undefined;
   }
 }

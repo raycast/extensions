@@ -9,17 +9,17 @@ import {
 } from "../lib/provider-version";
 
 export default function ProviderVersionsView(props: { provider: Provider }) {
-  const [state, setState] = useCachedState<ProviderVersion[]>(
-    `${environment.extensionName}$-${props.provider.id}`,
-    [],
+  const [state, setState] = useCachedState<ProviderVersion[]|undefined>(
+    `provider-versions of ${props.provider.id}`,
+    undefined,
     {
-      cacheNamespace: `${environment.extensionName}$-${props.provider.id}`,
+      cacheNamespace: `${environment.extensionName}$`,
     },
   );
   useEffect(() => {
     async function updateProviderVersions() {
       try {
-        if (state.length === 0)
+        if (!state)
           setState(await getProviderVersionList(props.provider));
       } catch (err) {
         throw new Error(`${err}`);
@@ -28,8 +28,8 @@ export default function ProviderVersionsView(props: { provider: Provider }) {
     updateProviderVersions();
   }, []);
   return (
-    <List isLoading={state.length === 0}>
-      {state.map((p) => (
+    <List isLoading={!!state}>
+      {state?.map((p) => (
         <List.Item
           title={p.attributes.tag}
           key={p.id}

@@ -40,13 +40,17 @@ export type ProviderVersion = z.infer<
 >["included"][0];
 
 export async function getProviderVersionList(provider: Provider) {
-  const data = await fetch(
-    `https://registry.terraform.io/v2/providers/${provider.attributes["full-name"]}?include=provider-versions`,
-  );
-  const res = providerVersionsResponseSchema.parse(await data.json());
-  return res.included.sort(
-    (a, b) =>
-      b.attributes["published-at"].getTime() -
-      a.attributes["published-at"].getTime(),
-  );
+  try {
+    const data = await fetch(
+      `https://registry.terraform.io/v2/providers/${provider.attributes["full-name"]}?include=provider-versions`,
+    );
+    const res = providerVersionsResponseSchema.parse(await data.json());
+    return res.included.sort(
+      (a, b) =>
+        b.attributes["published-at"].getTime() -
+        a.attributes["published-at"].getTime(),
+    );
+  } catch (e) {
+    throw new Error(`${e}`);
+  }
 }
