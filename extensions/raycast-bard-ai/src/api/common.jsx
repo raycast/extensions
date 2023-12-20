@@ -1,19 +1,6 @@
-import {
-  getSelectedText,
-  Detail,
-  getPreferenceValues,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-} from "@raycast/api";
+import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-
-import fetch from "node-fetch";
-globalThis.fetch = fetch;
-
-import Bard, { askAI } from "bard-ai";
+import useAIModel from "./useAIModel";
 
 export default function ResultView(prompt, toast_title, type = "text", title, optionalSelect) {
   if (type === "text") {
@@ -24,11 +11,10 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
     prompt +=
       " Return your response in a codeblock. DO NOT ADD ANY EXTRA CODE UNLESS TOLD TO. \n\n Then add a JSON IN A SEPERATE CODEBLOCK at the end with ONE key, 'explanation'. The value associated with 'explanation' should be a string describing the code you have written, what you have changed, or WHY you wrote what you wrote. \n\n";
   }
-  const pref = getPreferenceValues();
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(true);
   const [pasteContent, setPasteContent] = useState("");
-  const [failed, setFailed] = useState(false);
+  const aiModel = useAIModel();
 
   async function getResult() {
     const now = new Date();
@@ -49,7 +35,6 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           toast.style = Toast.Style.Failure;
           setLoading(false);
           setResponse("⚠️ No input was provided.");
-          setFailed(true);
           return;
         }
         if (!optionalSelect) {
@@ -57,20 +42,18 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           toast.style = Toast.Style.Failure;
           setLoading(false);
           setResponse("⚠️ Raycast was unable to get the selected text.");
-          setFailed(true);
           return;
         }
       }
 
       try {
-        await Bard.init(pref["__Secure-1PSID"]);
-        return await askAI(`${prompt}${selectedText}`);
+        const result = await aiModel.generateContent(`${prompt}${selectedText}`);
+        return result.response.text();
       } catch (error) {
         toast.title = "Error";
         toast.style = Toast.Style.Failure;
         setLoading(false);
-        setResponse("⚠️ Unable to reach Bard at this time.");
-        setFailed(true);
+        setResponse(`⚠️ Unable to reach Bard at this time.`);
         return;
       }
     }
@@ -140,8 +123,7 @@ export default function ResultView(prompt, toast_title, type = "text", title, op
           <Detail.Metadata.Label title="Command Type" text={type.charAt(0).toUpperCase() + type.slice(1)} />
           <Detail.Metadata.Label title="Command Title" text={title} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Model" text={`PaLM 2`} />
-          <Detail.Metadata.Label title="Version" text="2023.07.13" />
+          <Detail.Metadata.Label title="Model" text={aiModel.model} />
         </Detail.Metadata>
       }
     />

@@ -27,12 +27,6 @@ export default function useLocalStorage() {
     CONV: [
       {
         name: "New Conversation",
-        ids: {
-          conversationID: undefined,
-          responseID: undefined,
-          choiceID: undefined,
-          _reqID: "0",
-        },
         questions: [],
       },
     ],
