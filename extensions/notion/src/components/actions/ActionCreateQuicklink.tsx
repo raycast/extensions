@@ -1,20 +1,18 @@
-import { Action } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, getPreferenceValues } from "@raycast/api";
 
 import { getPageName, Page } from "../../utils/notion";
-import { urlForPreferredMethod, checkedDefaultOpenMethod } from "../../utils/openPage";
 
 export default function ActionCreateQuicklink({ page }: { page: Page }) {
-  const { isLoading } = usePromise(checkedDefaultOpenMethod);
-  if (!page.url || isLoading) return null;
-  const link = urlForPreferredMethod(page.url);
+  const { open_in } = getPreferenceValues<Preferences>();
+  if (!page.url) return null;
 
   return (
     <Action.CreateQuicklink
       shortcut={{ modifiers: ["cmd"], key: "l" }}
       quicklink={{
-        link,
+        link: page.url,
         name: getPageName(page),
+        application: open_in.bundleId,
       }}
     />
   );

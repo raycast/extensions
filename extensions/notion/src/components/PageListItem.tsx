@@ -117,28 +117,27 @@ export function PageListItem({
     ),
   };
 
-  const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
-    handleOnOpenPage(page, setRecentPage),
-  );
-  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, () =>
-    handleOnOpenPage(page, setRecentPage),
-  );
-
   const { open_in } = getPreferenceValues<Preferences>();
   const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
-  let openInNotionDefaultAction;
-  let openInNotionAlternativeAction;
-  if (!isDefaultNotionActionApp) {
-    openInNotionDefaultAction = openInNotionBrowserAction;
-  } else {
-    openInNotionDefaultAction = isDefaultNotionActionApp ? openInNotionAppAction : openInNotionBrowserAction;
-    openInNotionAlternativeAction = isDefaultNotionActionApp ? openInNotionBrowserAction : openInNotionAppAction;
-  }
+
+  const openInNotion = page.url ? (
+    <Action.Open
+      title={`Open in ${open_in.name}`}
+      icon={{ fileIcon: open_in.path }}
+      target={page.url}
+      application={open_in.bundleId}
+      onOpen={() => handleOnOpenPage(page, setRecentPage)}
+    />
+  ) : null;
+
+  const openInBrowser = page.url ? (
+    <Action.OpenInBrowser url={page.url} onOpen={() => handleOnOpenPage(page, setRecentPage)} />
+  ) : null;
 
   const actions = {
     raycast: openInRaycastAction[page.object],
-    notionDefaultOpen: openInNotionDefaultAction,
-    notionAltOpen: openInNotionAlternativeAction,
+    notionDefaultOpen: openInNotion,
+    notionAlternativeOpen: isDefaultNotionActionApp ? openInBrowser : null,
   };
 
   const pageWord = capitalize(page.object);
@@ -152,7 +151,7 @@ export function PageListItem({
           <ActionPanel.Section title={title}>
             {primaryAction === "notion" ? actions["notionDefaultOpen"] : actions["raycast"]}
             {primaryAction === "notion" ? actions["raycast"] : actions["notionDefaultOpen"]}
-            {actions["notionAltOpen"]}
+            {actions["notionAlternativeOpen"]}
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
@@ -287,10 +286,6 @@ export function PageListItem({
       accessories={accessories}
     />
   );
-}
-
-function createOpenInNotionAction(title: string, icon: Image.ImageLike | string, action: () => void) {
-  return <ActionPanel.Item title={`Open in ${title}`} icon={icon} onAction={action} />;
 }
 
 function getPropertyAccessory(
