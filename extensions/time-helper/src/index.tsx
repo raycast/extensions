@@ -5,11 +5,9 @@ import { setTimeout } from "timers/promises";
 import Style = Toast.Style;
 
 export default function Command() {
-
   const [input, setInput] = useState("now");
   const [convert, setConvert] = useState<string | boolean>("");
   useEffect(() => {
-
     if (!input) {
       setConvert(false);
       return;
@@ -35,12 +33,11 @@ export default function Command() {
   }, [input]);
 
   async function handleSubmit() {
-
     if (convert) {
       await Clipboard.copy(convert as string);
       await showToast({ title: convert as string, message: "已复制到剪切板", style: Style.Success });
       await setTimeout(500);
-      await closeMainWindow({ clearRootSearch: true,popToRootType:PopToRootType.Immediate });
+      await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
     } else {
       await showToast({ title: "非法的", message: "", style: Style.Failure });
     }
@@ -54,9 +51,14 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="date" title="输入日期/时间戳" value={input} onChange={setInput}
-                      error={convert === false ? "非法数据" : ""} />
-      <Form.TextField id="convert" title="转换后时间戳/日期" value={convert === false ? "" : convert as string} />
+      <Form.TextField
+        id="date"
+        title="输入日期/时间戳"
+        value={input}
+        onChange={setInput}
+        error={convert === false ? "非法数据" : ""}
+      />
+      <Form.TextField id="convert" title="转换后时间戳/日期" value={convert === false ? "" : (convert as string)} />
     </Form>
   );
 }
