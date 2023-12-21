@@ -44,10 +44,10 @@ export async function getAnnouncements() {
   return (await callApi("announcements", "Fetching Announcements")) as SingleErrorResponse | GetAnnouncementsResponse;
 }
 export async function createAnnouncement(body: CreateAnnouncementRequest) {
-  return (await callApi("announcements", "Creating Announcement", "POST", body)) as SingleErrorResponse | CreateAnnouncementResponse;
+  return (await callApi("announcements", "Creating Announcement", "POST", body)) as ErrorResponse | CreateAnnouncementResponse;
 }
 export async function updateAnnouncement(announcementIdx: string, body: UpdateAnnouncementRequest) {
-  return (await callApi(`announcements/${announcementIdx}`, "Updating Announcement", "POST", body)) as SingleErrorResponse | UpdateAnnouncementResponse;
+  return (await callApi(`announcements/${announcementIdx}`, "Updating Announcement", "POST", body)) as ErrorResponse | UpdateAnnouncementResponse;
 }
 export async function deleteAnnouncement(announcementIdx: string) {
   return (await callApi(`announcements/${announcementIdx}`, "Deleting Announcement", "DELETE")) as SingleErrorResponse | SimpleSuccessResponse;

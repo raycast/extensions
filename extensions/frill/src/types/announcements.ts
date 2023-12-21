@@ -1,62 +1,47 @@
-// export type AnnouncementContentObject = {
-//     type: "announcement-title";
-//     children: { text: string }[];
-//     categories: string[];
-// } | {
-//     type: string;
-//     children: { text: string }[];
-// } | {
-//     alt: string;
-//     url: string;
-//     type: "image";
-//     width: number;
-//     height: number;
-//     children: { text: string }[];
-
 import { AnnouncementCategory } from "./announcement-categories";
 import { Author, BaseSuccessResponse } from "./common";
 import { Idea } from "./ideas";
+import { Descendant } from "slate";
 
-// }
-export type ImageAnnouncementContentObject = {
-    alt: string;
-    url: string;
-    type: "image";
-    width: number;
-    height: number;
-    children: { text: string }[];
-}
-export type AnnouncementContentObject = {
+type CustomHeading = {
+    type: "heading";
+    level: number;
+};
+type CustomAnnouncementTitle = {
     type: "announcement-title";
-    children: { text: string }[];
-    categories: string[];
-} | {
-    type: "paragraph";
-    children: { text: string }[];
-} | ImageAnnouncementContentObject;
-// type DefaultAnnouncementContentObject = {
-//     type: string;
-//     children: { text: string }[];
-// };
-// type TitleAnnouncementContentObject = Omit<DefaultAnnouncementContentObject, "type"> & {
-//     type: "announcement-title";
-//     categories: string[];
-// }
-// type ImageAnnouncementContentObject = Omit<DefaultAnnouncementContentObject, "type"> & {
-//     alt: string;
-//     url: string;
-//     type: "image";
-//     width: number;
-//     height: number;
-// }
-// export type AnnouncementContentObject = TitleAnnouncementContentObject | DefaultAnnouncementContentObject | ImageAnnouncementContentObject;
+}
+type CustomIdea = {
+    type: "idea";
+    ideaIdx: string;
+}
+type CustomImage = {
+    type: "image";
+    align?: "left" | "right";
+    url: string;
+    alt: string;
+}
+type CustomLink = {
+    type: "link";
+    url: string;
+}
+type CustomListItem = { type: "list-item" }
+type CustomCode = { type: "code" }
+type CustomCodeBlock = { type: "code-block" }
+type CustomElement = {
+    children: Descendant[];
+} & (CustomHeading | CustomAnnouncementTitle | CustomIdea | CustomImage | CustomLink | CustomListItem | CustomCode | CustomCodeBlock);
+//
+type CustomText = {
+    text: string;
+};
+export type CustomNode = CustomElement | CustomText;
 
 export type Announcement = {
     idx: string;
     name: string;
     slug: string;
     excerpt: string;
-    content: AnnouncementContentObject[];
+    content: CustomNode[];
     reaction_count: {
         [key: string]: number
     }
@@ -69,8 +54,7 @@ export type Announcement = {
     ideas: Idea[];
 }
 
-export type UpdateAnnouncementFormValues = CreateNewAnnouncementFormValues;
-export type CreateNewAnnouncementFormValues = {
+export type CreateOrUpdateAnnouncementFormValues = {
     name: string;
     author_idx: string;
     content: string;
@@ -89,5 +73,5 @@ export type CreateAnnouncementRequest = {
 }
 
 export type GetAnnouncementsResponse = BaseSuccessResponse & { data: Announcement[] };
-export type CreateAnnouncementResponse = Announcement;
+export type CreateAnnouncementResponse = { data: Announcement, meta: [] };
 export type UpdateAnnouncementResponse = CreateAnnouncementResponse;

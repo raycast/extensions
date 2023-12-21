@@ -10,6 +10,8 @@ export default function Topics() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [topicsResponse, setTopicsResponse] = useState<GetTopicsResponse>();
+    const [filter, setFilter] = useState("");
+    const [filteredTopics, filterTopics] = useState<Topic[]>();
 
     async function getTopicsFromApi() {
         setIsLoading(true);
@@ -27,6 +29,17 @@ export default function Topics() {
     useEffect(() => {
         getTopicsFromApi();
     }, [])
+
+    useEffect(() => {
+      (() => {
+        if (!topicsResponse) return;
+        filterTopics(topicsResponse.data.filter(topic => {
+            if (filter==="") return topic;
+            if (filter==="is_private" && topic.is_private) return topic;
+            if (filter==="is_public" && !topic.is_private) return topic;
+        }))
+      })();
+    }, [topicsResponse, filter])
 
     async function confirmAndDeleteTopic(topic: Topic) {
         if (
@@ -46,8 +59,14 @@ export default function Topics() {
         }
       }
 
-    return error ? <ErrorComponent error={error} /> : <List isLoading={isLoading} isShowingDetail>
-        {topicsResponse?.data.map(topic => <List.Item key={topic.idx} title={topic.name} icon={{ source: Icon.Hashtag, tintColor: topic.is_private ? Color.Purple : Color.Green }} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
+    return error ? <ErrorComponent error={error} /> : <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search topic" searchBarAccessory={<List.Dropdown tooltip="Filter" onChange={setFilter}>
+      <List.Dropdown.Item title="All" icon={Icon.CircleProgress100} value="" />
+      <List.Dropdown.Section title="Status">
+        <List.Dropdown.Item title="Private" icon={{ source: Icon.Hashtag, tintColor: Color.Purple }} value="is_private" />
+        <List.Dropdown.Item title="Public" icon={{ source: Icon.Hashtag, tintColor: Color.Green }} value="is_public" />
+      </List.Dropdown.Section>
+    </List.Dropdown>}>
+        {filteredTopics?.map(topic => <List.Item key={topic.idx} title={topic.name} icon={{ source: Icon.Hashtag, tintColor: topic.is_private ? Color.Purple : Color.Green }} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="IDx" text={topic.idx} />
             <List.Item.Detail.Metadata.Label title="Name" text={topic.name} />
             <List.Item.Detail.Metadata.Label title="Created At" text={topic.created_at || ""} icon={topic.created_at ? undefined : Icon.Minus} />

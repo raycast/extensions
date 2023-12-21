@@ -1,15 +1,22 @@
 import { Fragment, useEffect, useState } from "react";
 import { createAnnouncement, deleteAnnouncement, getAdmins, getAnnouncementCategories, getAnnouncements, getIdeas, updateAnnouncement } from "./api";
-import { Announcement, AnnouncementCategory, Author, CreateAnnouncementRequest, CreateNewAnnouncementFormValues, GetAnnouncementsResponse, Idea, UpdateAnnouncementFormValues, UpdateAnnouncementRequest } from "./types";
+import { Announcement, CreateAnnouncementRequest, CreateOrUpdateAnnouncementFormValues, GetAnnouncementsResponse, UpdateAnnouncementRequest } from "./types/announcements";
 import { Action, ActionPanel, Alert, Color, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import ErrorComponent from "./components/ErrorComponent";
 import { FormValidation, getAvatarIcon, useForm } from "@raycast/utils";
 import { generateAnnouncementMarkdown } from "./functions";
+import { AnnouncementCategory } from "./types/announcement-categories";
+import { Author } from "./types/common";
+import { Idea } from "./types/ideas";
+import { FRILL_URL } from "./constants";
+import { ErrorResponse } from "./types";
 
 export default function Announcements() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [announcementsResponse, setAnnouncementsResponse] = useState<GetAnnouncementsResponse>();
+    const [filter, setFilter] = useState("");
+    const [filteredAnnouncements, filterAnnouncements] = useState<Announcement[]>();
 
     async function getAnnouncementsFromApi() {
         setIsLoading(true);
@@ -27,6 +34,17 @@ export default function Announcements() {
     useEffect(() => {
         getAnnouncementsFromApi();
     }, [])
+
+    useEffect(() => {
+      (() => {
+        if (!announcementsResponse) return;
+        filterAnnouncements(announcementsResponse.data.filter(announcement => {
+            if (filter==="") return announcement;
+            if (filter==="is_published" && announcement.is_published) return announcement;
+            if (filter==="is_unpublished" && !announcement.is_published) return announcement;
+        }))
+      })();
+    }, [announcementsResponse, filter])
 
     async function confirmAndDeleteAnnouncement(announcement: Announcement) {
         if (
@@ -46,11 +64,17 @@ export default function Announcements() {
       }
     
 
-    return error ? <ErrorComponent error={error} /> : <List isLoading={isLoading} isShowingDetail>
-        {announcementsResponse?.data.map(announcement => <List.Item key={announcement.idx} title={announcement.name} icon={{ source: Icon.Megaphone, tintColor: announcement.is_published ? Color.Green : Color.Red }} detail={<List.Item.Detail markdown={generateAnnouncementMarkdown(announcement.content)} metadata={<List.Item.Detail.Metadata>
+    return error ? <ErrorComponent error={error} /> : <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search announcement" searchBarAccessory={<List.Dropdown tooltip="Filter" onChange={setFilter}>
+    <List.Dropdown.Item title="All" icon={Icon.CircleProgress100} value="" />
+    <List.Dropdown.Section title="Status">
+      <List.Dropdown.Item title="Published" icon={{ source: Icon.Megaphone, tintColor: Color.Green }} value="is_published" />
+      <List.Dropdown.Item title="Unpublished" icon={{ source: Icon.Megaphone, tintColor: Color.Red }} value="is_unpublished" />
+    </List.Dropdown.Section>
+  </List.Dropdown>}>
+        {filteredAnnouncements?.map(announcement => <List.Item key={announcement.idx} title={announcement.name} icon={{ source: Icon.Megaphone, tintColor: announcement.is_published ? Color.Green : Color.Red }} detail={<List.Item.Detail markdown={generateAnnouncementMarkdown(announcement.content)} metadata={<List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="ID" text={announcement.idx} />
             <List.Item.Detail.Metadata.Label title="Name" text={announcement.name} />
-            <List.Item.Detail.Metadata.Link title="slug" text={announcement.slug} target={announcement.slug} />
+            <List.Item.Detail.Metadata.Link title="Slug" text={announcement.slug} target={announcement.slug} />
             <List.Item.Detail.Metadata.Label title="Excerpt" text={announcement.excerpt} />
             {/* content */}
             {announcement.reaction_count ? <List.Item.Detail.Metadata.TagList title="Reaction Count">
@@ -93,143 +117,75 @@ export default function Announcements() {
                 <List.Item.Detail.Metadata.Label title="..." />
             </Fragment>)}
         </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
-            <Action.Push title="Update Announcement" icon={Icon.Pencil} target={<UpdateAnnouncement initialAnnouncement={announcement} onAnnouncementUpdated={getAnnouncementsFromApi} />} />
+            <Action.OpenInBrowser title="Open In Browser" icon={Icon.Globe} url={`${FRILL_URL}announcements/${announcement.slug}`} />
+            <Action.Push title="Update Announcement" icon={Icon.Pencil} target={<CreateOrUpdateAnnouncement initialAnnouncement={announcement} onAnnouncementCreatedOrUpdated={getAnnouncementsFromApi} />} />
             <Action title="Delete Announcement" style={Action.Style.Destructive} icon={Icon.DeleteDocument} onAction={() => confirmAndDeleteAnnouncement(announcement)} />
             <ActionPanel.Section>
-                <Action.Push title="Create New Announcement" icon={Icon.Plus} target={<CreateNewAnnouncement onAnnouncementCreated={getAnnouncementsFromApi} />} />
+                <Action.Push title="Create New Announcement" icon={Icon.Plus} target={<CreateOrUpdateAnnouncement onAnnouncementCreatedOrUpdated={getAnnouncementsFromApi} />} shortcut={{ modifiers: ["cmd"], key: "n" }} />
             </ActionPanel.Section>
         </ActionPanel>} />)}
         {!isLoading && <List.Section title="Actions">
             <List.Item title="Create New Announcement" icon={Icon.Plus} actions={<ActionPanel>
-                <Action.Push title="Create New Announcement" icon={Icon.Plus} target={<CreateNewAnnouncement onAnnouncementCreated={getAnnouncementsFromApi} />} />
+                <Action.Push title="Create New Announcement" icon={Icon.Plus} target={<CreateOrUpdateAnnouncement onAnnouncementCreatedOrUpdated={getAnnouncementsFromApi} />} shortcut={{ modifiers: ["cmd"], key: "n" }} />
             </ActionPanel>} />
         </List.Section>}
     </List>
 }
 
-type UpdateAnnouncementProps = {
-    initialAnnouncement: Announcement;
-    onAnnouncementUpdated: () => void;
+type CreateOrUpdateAnnouncementProps = {
+    initialAnnouncement?: Announcement; // if initialAnnouncement is passed, we are UPDATING
+    onAnnouncementCreatedOrUpdated: () => void
 }
-function UpdateAnnouncement({ initialAnnouncement, onAnnouncementUpdated }: UpdateAnnouncementProps) {
-    const { pop } = useNavigation();
-
-    const [isLoading, setIsLoading] = useState(true);
-    const [ideas, setIdeas] = useState<Idea[]>();
-    const [categories, setCategories] = useState<AnnouncementCategory[]>();
-
-  const { handleSubmit, itemProps } = useForm<UpdateAnnouncementFormValues>({
-    async onSubmit(values) {
-      const params = values;
-      if (!values.idea_idxs) params.idea_idxs = [null];
-      if (!values.category_idxs) delete params.category_idxs;
-
-      const response = await updateAnnouncement(initialAnnouncement.idx, params as UpdateAnnouncementRequest);
-
-      if ("data" in response) {
-        await showToast(Toast.Style.Success, "SUCCESS", "Updated Announcement");
-        onAnnouncementUpdated();
-        pop();
-      }
-    },
-    initialValues: {
-        name: initialAnnouncement.name,
-        author_idx: initialAnnouncement.author.idx,
-        content: generateAnnouncementMarkdown(initialAnnouncement.content, true),
-        published_at: !initialAnnouncement.published_at ? null : new Date(initialAnnouncement.published_at),
-        idea_idxs: initialAnnouncement.ideas.map(idea => idea.idx),
-        category_idxs: initialAnnouncement.categories.map(category => category.idx)
-    },
-    validation: {
-      name: FormValidation.Required,
-      author_idx: FormValidation.Required,
-      content: FormValidation.Required
-    },
-  });
-
-  async function getIdeasAndCategoriesFromApi() {
-    setIsLoading(true);
-    const [ideasResponse, categoriesResponse] = await Promise.all([
-      getIdeas(),
-      getAnnouncementCategories(),
-      showToast({
-        title: "PROCESSING",
-        message: "Fetching Ideas and Announcement Categories",
-        style: Toast.Style.Animated
-      })
-    ])
-    
-    let numOfIdeas = 0;
-    let numOfCategories = 0;
-    if ("data" in ideasResponse) {
-        setIdeas(ideasResponse.data);
-        numOfIdeas = ideasResponse.data.length;
-      }
-    if ("data" in categoriesResponse) {
-        setCategories(categoriesResponse.data);
-        numOfCategories = categoriesResponse.data.length;
-      }
-      await showToast({
-          title: "SUCCESS",
-          message: `Fetched ${numOfIdeas} ideas and ${numOfCategories} Announcement Categories`
-      })
-    setIsLoading(false);
-}
-
-  useEffect(() => {
-    getIdeasAndCategoriesFromApi();
-  }, [])
-
-
-    return <Form navigationTitle="Update Announcement" isLoading={isLoading} actions={<ActionPanel>
-        <Action.SubmitForm title="Submit" icon={Icon.Check} onSubmit={handleSubmit} />
-    </ActionPanel>}>
-        <Form.TextField title="Name" {...itemProps.name} info="Title of the Announcement" />
-        <Form.TextField title="Author ID" {...itemProps.author_idx} info="IDX of the author of the Announcement" />
-        <Form.TextArea title="Content" {...itemProps.content} info="Announcement content in Markdown format" placeholder={`# Idea Title
-        
-lorem ipsum`} />
-        <Form.DatePicker title="Published At" type={Form.DatePicker.Type.Date} {...itemProps.published_at} />
-        <Form.TagPicker title="Ideas" {...itemProps.idea_idxs} placeholder="Idea # 1">
-            {ideas?.map(idea => <Form.TagPicker.Item key={idea.idx} title={idea.name} value={idea.idx} />)}
-        </Form.TagPicker>
-        <Form.TagPicker title="Categories" {...itemProps.category_idxs} placeholder="Category # 1">
-            {categories?.map(category => <Form.TagPicker.Item key={category.idx} title={category.name} value={category.idx} icon={{ source: Icon.Circle, tintColor: category.color }} />)}
-        </Form.TagPicker>
-    </Form>
-}
-
-type CreateNewAnnouncementProps = {
-    onAnnouncementCreated: () => void
-}
-function CreateNewAnnouncement({ onAnnouncementCreated }: CreateNewAnnouncementProps) {
+function CreateOrUpdateAnnouncement({ initialAnnouncement, onAnnouncementCreatedOrUpdated }: CreateOrUpdateAnnouncementProps) {
     const { pop } = useNavigation();
 
     const [isLoading, setIsLoading] = useState(true);
     const [ideas, setIdeas] = useState<Idea[]>();
     const [admins, setAdmins] = useState<Author[]>();
     const [categories, setCategories] = useState<AnnouncementCategory[]>();
+    const [errorResponse, setErrorResponse] = useState<ErrorResponse>();
 
-  const { handleSubmit, itemProps } = useForm<CreateNewAnnouncementFormValues>({
+  const { handleSubmit, itemProps } = useForm<CreateOrUpdateAnnouncementFormValues>({
     async onSubmit(values) {
       const params = values;
-      if (!values.published_at) delete params.published_at;
-      if (!values.idea_idxs) delete params.idea_idxs;
-      if (!values.category_idxs) delete params.category_idxs;
-
-      const response = await createAnnouncement(params as CreateAnnouncementRequest);
-
-      if ("data" in response) {
-        await showToast(Toast.Style.Success, "SUCCESS", "Created Announcement");
-        onAnnouncementCreated();
-        pop();
+      
+      if (!initialAnnouncement) {
+        if (!values.published_at) delete params.published_at;
+        // if (!values.idea_idxs) delete params.idea_idxs;
+        // if (!values.category_idxs) delete params.category_idxs;
+      } else {
+        if (!values.idea_idxs?.length) params.idea_idxs = [""];
+        if (!values.category_idxs?.length) params.category_idxs = [""];
       }
+
+      let message = "";
+      let response;
+      if (!initialAnnouncement) {
+        response = await createAnnouncement(params as CreateAnnouncementRequest);
+        message = "Created Announcement";
+      } else {
+        response = await updateAnnouncement(initialAnnouncement.idx, params as UpdateAnnouncementRequest);
+        message = "Updated Announcement";
+      }
+      if ("data" in response) {
+        await showToast(Toast.Style.Success, "SUCCESS", message);
+        onAnnouncementCreatedOrUpdated();
+        pop();
+      } else setErrorResponse(response);
     },
     validation: {
       name: FormValidation.Required,
       author_idx: FormValidation.Required,
       content: FormValidation.Required
     },
+    initialValues: {
+      name: initialAnnouncement ? initialAnnouncement.name : undefined,
+      author_idx: initialAnnouncement ? initialAnnouncement.author.idx : undefined,
+      content: initialAnnouncement ? generateAnnouncementMarkdown(initialAnnouncement.content, true) : undefined,
+      published_at: initialAnnouncement ? !initialAnnouncement.published_at ? null : new Date(initialAnnouncement.published_at) : undefined,
+      idea_idxs: initialAnnouncement ? initialAnnouncement.ideas.map(idea => idea.idx) : undefined,
+      category_idxs: initialAnnouncement ? initialAnnouncement.categories.map(category => category.idx) : undefined,
+    }
   });
 
 
@@ -274,8 +230,9 @@ function CreateNewAnnouncement({ onAnnouncementCreated }: CreateNewAnnouncementP
     getIdeasAdminsAndAnnouncementCategoriesFromApi();
   }, [])
 
+  const navigationTitle = initialAnnouncement ? "Update Announcement" : "Create New Announcement";
 
-    return <Form navigationTitle="Create New Announcement" isLoading={isLoading} actions={<ActionPanel>
+    return errorResponse ? <ErrorComponent response={errorResponse} /> : <Form navigationTitle={navigationTitle} isLoading={isLoading} actions={<ActionPanel>
         <Action.SubmitForm title="Submit" icon={Icon.Check} onSubmit={handleSubmit} />
     </ActionPanel>}>
         <Form.TextField title="Name" {...itemProps.name} info="Title of the Announcement" />

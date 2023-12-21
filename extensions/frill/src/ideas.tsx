@@ -3,7 +3,7 @@ import { CreateIdeaRequest, GetIdeasResponse, Idea, UpdateIdeaRequest } from "./
 import { createIdea, deleteIdea, getFollowers, getIdeas, getTopics, updateIdea } from "./api";
 import { Action, ActionPanel, Alert, Color, Form, Icon, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import ErrorComponent from "./components/ErrorComponent";
-import { FRILL_URL } from "./constants";
+import { FRILL_URL, IDEA_FILTERS } from "./constants";
 import { FormValidation, getAvatarIcon, useForm } from "@raycast/utils";
 import { Author } from "./types/common";
 import { Topic } from "./types/topics";
@@ -12,6 +12,8 @@ export default function Ideas() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [ideasResponse, setIdeasResponse] = useState<GetIdeasResponse>();
+    const [filter, setFilter] = useState("");
+    const [filteredIdeas, filterIdeas] = useState<Idea[]>();
 
     async function getIdeasFromApi() {
         setIsLoading(true);
@@ -29,6 +31,17 @@ export default function Ideas() {
     useEffect(() => {
         getIdeasFromApi();
     }, [])
+
+    useEffect(() => {
+      (() => {
+        if (!ideasResponse) return;
+        filterIdeas(ideasResponse.data.filter(idea => {
+            if (filter==="") return idea;
+            if (filter==="is_public" && !idea.is_private) return idea;
+            if (idea[filter as keyof typeof idea]) return idea;
+        }))
+      })();
+    }, [ideasResponse, filter])
 
     async function confirmAndDeleteIdea(idea: Idea) {
         if (
@@ -48,8 +61,13 @@ export default function Ideas() {
         }
       }
 
-    return error ? <ErrorComponent error={error} /> : <List isLoading={isLoading} isShowingDetail>
-        {ideasResponse?.data.map(idea => <List.Item key={idea.idx} title={idea.name} icon={{ source: Icon.Circle, tintColor: idea.status?.color || undefined }} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
+    return error ? <ErrorComponent error={error} /> : <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search idea" searchBarAccessory={<List.Dropdown tooltip="Filter" onChange={setFilter}>
+    <List.Dropdown.Item title="All" icon={Icon.CircleProgress100} value="" />
+    <List.Dropdown.Section title="Status">
+      {Object.entries(IDEA_FILTERS).map(([key, val]) => <List.Dropdown.Item key={key} title={val} value={key} />)}
+    </List.Dropdown.Section>
+  </List.Dropdown>}>
+        {filteredIdeas?.map(idea => <List.Item key={idea.idx} title={idea.name} icon={{ source: Icon.Circle, tintColor: idea.status?.color || undefined }} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="IDx" text={idea.idx} />
             <List.Item.Detail.Metadata.Label title="Name" text={idea.name} />
             <List.Item.Detail.Metadata.Link title="Slug" text={idea.slug} target={`${FRILL_URL}ideas/${idea.slug}`} />

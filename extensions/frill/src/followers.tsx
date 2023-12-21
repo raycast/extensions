@@ -4,6 +4,7 @@ import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, sho
 import ErrorComponent from "./components/ErrorComponent";
 import { getAvatarIcon } from "@raycast/utils";
 import { Follower, GetFollowersResponse } from "./types/followers";
+import { FRILL_URL } from "./constants";
 
 export default function Followers() {
     const [isLoading, setIsLoading] = useState(true);
@@ -50,11 +51,14 @@ export default function Followers() {
             <List.Item.Detail.Metadata.Label title="IDx" text={follower.idx} />
             <List.Item.Detail.Metadata.Label title="Name" text={follower.name} />
             <List.Item.Detail.Metadata.Label title="Avatar" icon={follower.avatar || Icon.Minus} />
-            <List.Item.Detail.Metadata.Link title="Email" text={follower.email} target={`mailto:${follower.email}`} />
+            {follower.email ? <List.Item.Detail.Metadata.Link title="Email" text={follower.email} target={`mailto:${follower.email}`} /> : <List.Item.Detail.Metadata.Label title="Email" icon={Icon.Minus} />}
             <List.Item.Detail.Metadata.Label title="Created At" text={follower.created_at || ""} icon={follower.created_at ? undefined : Icon.Minus} />
             <List.Item.Detail.Metadata.Label title="Updated At" text={follower.updated_at || ""} icon={follower.updated_at ? undefined : Icon.Minus} />
         </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
-            <Action title="Delete Follower" style={Action.Style.Destructive} icon={Icon.DeleteDocument} onAction={() => confirmAndDeleteFollower(follower)} />
+          <Action.OpenInBrowser title="Open In Browser" url={`${FRILL_URL}dashboard/users/${follower.idx.replace("follower_", "")}`} icon={Icon.Globe} />
+            <ActionPanel.Section>
+              <Action title="Delete Follower" style={Action.Style.Destructive} icon={Icon.DeleteDocument} onAction={() => confirmAndDeleteFollower(follower)} />
+            </ActionPanel.Section>
         </ActionPanel>} />)}
     </List>      
 }

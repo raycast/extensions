@@ -10,6 +10,8 @@ export default function Statuses() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [statusesResponse, setStatusesResponse] = useState<GetStatusesResponse>();
+    const [filter, setFilter] = useState("");
+    const [filteredStatuses, filterStatuses] = useState<Status[]>();
 
     async function getStatusesFromApi() {
         setIsLoading(true);
@@ -27,6 +29,17 @@ export default function Statuses() {
     useEffect(() => {
         getStatusesFromApi();
     }, [])
+
+    useEffect(() => {
+      (() => {
+        if (!statusesResponse) return;
+        filterStatuses(statusesResponse.data.filter(status => {
+            if (filter==="") return status;
+            if (filter==="is_completed" && status.is_completed) return status;
+            if (filter==="is_incompleted" && !status.is_completed) return status;
+        }))
+      })();
+    }, [statusesResponse, filter])
 
     async function confirmAndDeleteStatus(status: Status) {
         if (
@@ -46,8 +59,14 @@ export default function Statuses() {
         }
       }
 
-    return error ? <ErrorComponent error={error} /> : <List isLoading={isLoading} isShowingDetail>
-        {statusesResponse?.data.map(status => <List.Item key={status.idx} title={status.name} icon={{ source: Icon.Circle, tintColor: status.color }} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
+    return error ? <ErrorComponent error={error} /> : <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search status" searchBarAccessory={<List.Dropdown tooltip="Filter" onChange={setFilter}>
+    <List.Dropdown.Item title="All" icon={Icon.CircleProgress100} value="" />
+    <List.Dropdown.Section title="Status">
+      <List.Dropdown.Item title="Completed" icon={{ source: Icon.Check, tintColor: Color.Green }} value="is_completed" />
+      <List.Dropdown.Item title="Incompleted" icon={{ source: Icon.Multiply, tintColor: Color.Red }} value="is_incompleted" />
+    </List.Dropdown.Section>
+  </List.Dropdown>}>
+        {filteredStatuses?.map(status => <List.Item key={status.idx} title={status.name} icon={{ source: Icon.Circle, tintColor: status.color }} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="IDx" text={status.idx} />
             <List.Item.Detail.Metadata.Label title="Name" text={status.name} />
             <List.Item.Detail.Metadata.Label title="Created At" text={status.created_at || ""} icon={status.created_at ? undefined : Icon.Minus} />
@@ -132,7 +151,10 @@ export function UpdateStatus({ initialStatus, onStatusUpdated }: UpdateStatusPro
         },
         validation: {
           name: FormValidation.Required,
-          color: FormValidation.Required
+          color(value) {
+            if (!value) return "The item is required";
+            else if (!value.includes("#") || !(value.length===7)) return "The item must be an RGB Hex";
+          },
         },
         initialValues: {
             name: initialStatus.name,
@@ -145,7 +167,7 @@ export function UpdateStatus({ initialStatus, onStatusUpdated }: UpdateStatusPro
         <Action.SubmitForm title="Submit" icon={Icon.Check} onSubmit={handleSubmit} />
       </ActionPanel>}>
         <Form.TextField title="Name" placeholder="Updated Status" {...itemProps.name} />
-        <Form.TextField title="Color" placeholder="#fff" {...itemProps.color} />
+        <Form.TextField title="Color" placeholder="#fff" {...itemProps.color} info="Please use Hex RGB format" />
         <Form.Checkbox label='Is "Completed" Status' {...itemProps.is_completed} info="Ideas with the Completed status will be hidden from the Ideas board" />
       </Form>
 }
