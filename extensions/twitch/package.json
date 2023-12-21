@@ -128,15 +128,6 @@
           "title": "Twitch Username",
           "required": true,
           "description": "Your Twitch Username, from which to read the followed channels"
-        },
-        {
-          "name": "notify",
-          "type": "checkbox",
-          "title": "Enable Notifications",
-          "default": false,
-          "required": false,
-          "description": "Show a Raycast HUD Notification when a followed channel goes live",
-          "label": "When a followed channel goes live"
         }
       ]
     }

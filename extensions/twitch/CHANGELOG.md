@@ -8,7 +8,6 @@
   - Only requires users to input their Twitch username
 - Added menubar item
   - Show how many followed channels are live
-  - Optionally send a HUD notification when a followed channel goes live
 - Re-implemented `followed` command
   - Shows all followed channels, even when they are offline
   - Shows rich results, including screenshots and stream info
