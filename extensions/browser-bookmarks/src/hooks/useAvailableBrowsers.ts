@@ -11,6 +11,7 @@ export const BROWSERS_BUNDLE_ID = {
   firefox: "org.mozilla.firefox",
   firefoxDev: "org.mozilla.firefoxdeveloperedition",
   safari: "com.apple.safari",
+  sidekick: "com.pushplaylabs.sidekick",
   edge: "com.microsoft.edgemac",
   edgeDev: "com.microsoft.edgemac.dev",
   edgeCanary: "com.microsoft.edgemac.canary",

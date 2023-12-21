@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Fix Create Reminder command] - 2023-12-18
+
+- Fix a bug where the priority value wouldn't be saved
+- Remove the minimum date constraint for the due date
+
 ## [Improve NLP in Quick Add Reminder] - 2023-12-04
 
 - Improve the NLP parsing in `Quick Add Reminder`.
