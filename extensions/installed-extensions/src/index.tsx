@@ -51,7 +51,7 @@ function OpenManifestInDefaultAppAction(props: { url: string }) {
     getDefaultApplication(props.url)
       .then((app) => setDefaultApp(app))
       .catch(() => setDefaultApp(undefined));
-  });
+  }, [props.url]);
   if (!defaultApp) {
     return null;
   }
