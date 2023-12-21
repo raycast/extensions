@@ -49,7 +49,7 @@ export default function main() {
                 }}
                 subtitle="Open in Raycast"
                 onAction={() => {
-                  launchCommand({ name: "offline", type: LaunchType.UserInitiated, fallbackText: item.user_name });
+                  launchCommand({ name: "following", type: LaunchType.UserInitiated, fallbackText: item.user_name });
                 }}
               />
             }
@@ -65,7 +65,7 @@ export default function main() {
           icon={Icon.Eye}
           title="Show All Followed Channels"
           onAction={() => {
-            launchCommand({ name: "offline", type: LaunchType.UserInitiated });
+            launchCommand({ name: "following", type: LaunchType.UserInitiated });
           }}
         />
       </MenuBarExtra.Section>
