@@ -1,4 +1,4 @@
-import { clientId } from "./auth";
+import { userName } from "./auth";
 import { useTwitchRequest } from "./useTwitchRequest";
 
 type User = {
@@ -16,10 +16,11 @@ type User = {
 
 export function useUserId() {
   const { data, isLoading } = useTwitchRequest<User | undefined>({
-    url: `https://api.twitch.tv/helix/users`,
-    cacheKey: `${clientId}_user`,
+    url: `https://api.twitch.tv/helix/users?login=${userName}`,
+    cacheKey: `${userName}_user`,
     initialData: undefined,
     select: (data) => data.data[0],
+    enabled: Boolean(userName),
   });
   return {
     data: data?.id,

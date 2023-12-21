@@ -133,7 +133,10 @@ export function useTwitchRequest<T>({
         setPrevious(replaced);
         setUpdatedAt(String(Date.now()));
       })
-      .catch();
+      .catch((e) => {
+        setIsLoading(false);
+        showToast({ title: "Error", message: e.message, style: Toast.Style.Failure });
+      });
   }, [enabled, cacheDuration, url]);
 
   return {

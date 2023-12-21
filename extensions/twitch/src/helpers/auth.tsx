@@ -1,11 +1,12 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
 import fetch from "node-fetch";
-import { randomUUID } from "node:crypto";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
-export const clientId = preferences.clientId;
-const clientSecret = preferences.clientSecret;
+const AUTH_URL = "https://twitch.oauth.raycast.com/authorize";
+const TOKEN_URL = "https://twitch.oauth.raycast.com/token";
+const CLIENT_ID = "2seilcmdzzph88cijp963sbm9485bo";
+export const userName = preferences.userName;
 
 let runningAuthPromise: Promise<string> | undefined;
 
@@ -16,7 +17,7 @@ export async function getHeaders() {
   });
   const accessToken = await promise;
   const headers = {
-    "Client-Id": clientId,
+    "Client-Id": CLIENT_ID,
     Authorization: `Bearer ${accessToken}`,
   } as const;
   return headers;
@@ -42,17 +43,16 @@ async function authorize(): Promise<string> {
     }
     return tokenSet.accessToken;
   }
-  const nonce = randomUUID();
   const authRequest = await client.authorizationRequest({
-    endpoint: "https://id.twitch.tv/oauth2/authorize",
-    clientId,
+    endpoint: AUTH_URL,
+    clientId: CLIENT_ID,
     scope: "user:read:follows",
     extraParameters: {
-      nonce,
+      response_type: "code",
     },
   });
   const { authorizationCode } = await client.authorize(authRequest);
-  const newTokenSet = await fetchTokens(authRequest, authorizationCode, nonce);
+  const newTokenSet = await fetchTokens(authRequest, authorizationCode);
   await client.setTokens(newTokenSet);
   return newTokenSet.access_token;
 }
@@ -60,26 +60,31 @@ async function authorize(): Promise<string> {
 async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
   authorizationCode: string,
-  nonce: string,
 ): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://id.twitch.tv/oauth2/token", {
+  const response = await fetch(TOKEN_URL, {
     method: "POST",
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
+    body: JSON.stringify({
+      client_id: CLIENT_ID,
       code: authorizationCode,
+      device_code: authorizationCode,
+      scope: "user:read:follows",
       code_verifier: authRequest.codeVerifier,
       grant_type: "authorization_code",
-      redirect_uri: authRequest.redirectURI,
     }),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
   if (!response.ok) {
+    try {
+      const data = await response.json();
+      console.error(data);
+    } catch (error) {
+      /**/
+    }
     throw new Error(response.statusText);
   }
-  const data = (await response.json()) as OAuth.TokenResponse & { nonce: string };
-  if (data.nonce !== nonce) {
-    throw new Error("Invalid nonce");
-  }
+  const data = (await response.json()) as OAuth.TokenResponse;
   return {
     ...data,
     scope: (data.scope as unknown as string[]).join(" "),
@@ -87,14 +92,16 @@ async function fetchTokens(
 }
 
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://id.twitch.tv/oauth2/token", {
+  const response = await fetch(TOKEN_URL, {
     method: "POST",
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
+    body: JSON.stringify({
+      client_id: CLIENT_ID,
       refresh_token: refreshToken,
       grant_type: "refresh_token",
     }),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
   if (!response.ok) {
     throw new Error(response.statusText);

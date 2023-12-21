@@ -15,20 +15,11 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "clientId",
-      "type": "password",
-      "default": "",
-      "title": "Client ID",
-      "required": true,
-      "description": "Your app’s registered client ID. Create a twitch app from https://dev.twitch.tv/docs/authentication/register-app/ and set https://www.raycast.com/redirect?packageName=Extension as the OAuth Redirect URL."
-    },
-    {
-      "name": "clientSecret",
-      "type": "password",
-      "default": "",
-      "title": "Client Secret",
-      "required": true,
-      "description": "Your app’s registered client secret associated with the Client ID."
+      "name": "userName",
+      "type": "textfield",
+      "title": "Twitch Username",
+      "required": false,
+      "description": "Your Twitch Username, from which to read the followed channels"
     },
     {
       "name": "primaryaction",
@@ -122,13 +113,6 @@
       "mode": "view"
     },
     {
-      "name": "offline",
-      "title": "Search Following Channels (offline)",
-      "description": "Search following Channels (offline)",
-      "icon": "icon.png",
-      "mode": "view"
-    },
-    {
       "name": "live",
       "title": "Display Live Followed Channels in the Menu Bar",
       "description": "Display Live Followed Channels in the Menu Bar",
@@ -138,20 +122,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.1",
+    "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.10.1",
     "millify": "^6.1.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-plugin": "^1.0.7",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3",
-    "prettier": "^3.1.0"
+    "typescript": "^4.9.5",
+    "prettier": "^3.1.1"
   },
   "scripts": {
     "build": "ray build -e dist",

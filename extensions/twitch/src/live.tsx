@@ -1,11 +1,21 @@
-import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
+import { Icon, LaunchType, MenuBarExtra, launchCommand, open, openExtensionPreferences } from "@raycast/api";
 import { formatDate } from "./helpers/datetime";
 import useFollowedStreams from "./helpers/useFollowedStreams";
 import { useUserId } from "./helpers/useUserId";
+import { userName } from "./helpers/auth";
 
 export default function main() {
   const { data: userId, isLoading: isLoadingUserId } = useUserId();
   const { data: items = [], isLoading, updatedAt } = useFollowedStreams(userId, { loadingWhileStale: true });
+
+  if (!userName) {
+    return (
+      <MenuBarExtra icon={Icon.ExclamationMark}>
+        <MenuBarExtra.Item title="Unavailable without a Username" />
+        <MenuBarExtra.Item title="Set your Twitch Username" onAction={openExtensionPreferences} />
+      </MenuBarExtra>
+    );
+  }
 
   return (
     <MenuBarExtra
@@ -16,6 +26,7 @@ export default function main() {
           : { dark: "TwitchGlitchWhite.png", light: "TwitchGlitchBlackOps.png" },
       }}
       tooltip="Live followed channels"
+      title={items.length ? String(items.length) : undefined}
     >
       <MenuBarExtra.Section>
         {items.map((item) => (
