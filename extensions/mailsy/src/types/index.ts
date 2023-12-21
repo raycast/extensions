@@ -65,17 +65,6 @@ export interface Mail {
 }
 
 export interface Message extends Mail {
-  verifications: {
-    tls: {
-      name: string;
-      standardName: string;
-      version: string;
-    };
-    spf: boolean;
-    dkim: boolean;
-  };
-  retention: boolean;
-  retentionDate: string;
   text: string;
   html: string[];
 }

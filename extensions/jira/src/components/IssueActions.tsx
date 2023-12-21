@@ -354,7 +354,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
       return autocompleteUsers(autocompleteURL, query);
     },
     [query],
-    { execute: !!autocompleteURL }
+    { execute: !!autocompleteURL },
   );
 
   async function changeAssignee(assignee: User | null) {
