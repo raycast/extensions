@@ -5,6 +5,7 @@ const preferences = getPreferenceValues<Preferences.Live | Preferences.Following
 
 const AUTH_URL = "https://twitch.oauth.raycast.com/authorize";
 const TOKEN_URL = "https://twitch.oauth.raycast.com/token";
+const REFRESH_URL = "https://twitch.oauth.raycast.com/refresh-token";
 const CLIENT_ID = "2seilcmdzzph88cijp963sbm9485bo";
 export const userName = preferences.userName;
 
@@ -79,7 +80,7 @@ async function fetchTokens(
     try {
       const data = await response.json();
       console.error(data);
-    } catch (error) {
+    } catch {
       /**/
     }
     throw new Error(response.statusText);
@@ -92,7 +93,7 @@ async function fetchTokens(
 }
 
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch(TOKEN_URL, {
+  const response = await fetch(REFRESH_URL, {
     method: "POST",
     body: JSON.stringify({
       client_id: CLIENT_ID,
@@ -104,6 +105,12 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
     },
   });
   if (!response.ok) {
+    try {
+      const data = await response.json();
+      console.error(data);
+    } catch {
+      /**/
+    }
     throw new Error(response.statusText);
   }
 
