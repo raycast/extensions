@@ -51,7 +51,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
         });
 
         const json = (await response.json()) as ProjectFiles;
-        return { name: project.name, files: (json.files ?? [])};
+        return { name: project.name, files: json.files ?? [] };
       } catch (error) {
         console.error(error);
         if (environment.launchType !== "background") {

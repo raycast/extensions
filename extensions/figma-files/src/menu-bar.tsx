@@ -84,29 +84,26 @@ export default function Command() {
       )}
       {data?.map((team) => (
         <MenuBarExtra.Section title={team.name ?? "Untitled"} key={team.name + "-team"}>
-            {team.files.map((project) => (
-              <MenuBarExtra.Submenu
-                key={team.name + project.name + "-project"}
-                title={project.name ?? "Untitled"}
-              >
-                {project.files?.length != 0 ? (
-                    project.files?.map((file) => (
-                      <MenuBarExtra.Item
-                        key={team.name + project.name + file.key + "-file"}
-                        title={file.name ?? "Untitled"}
-                        onAction={async () => {
-                          open(url + file.key);
-                          await visitFile(file);
-                        }}
-                      />
-                    ))
-                  ) : (
-                    <MenuBarExtra.Item key={team.name + project.name + "-nofile"} title="Empty project" />
-                  )}
-                </MenuBarExtra.Submenu>
-            ))}
-          </MenuBarExtra.Section>
-        ))}
+          {team.files.map((project) => (
+            <MenuBarExtra.Submenu key={team.name + project.name + "-project"} title={project.name ?? "Untitled"}>
+              {project.files?.length != 0 ? (
+                project.files?.map((file) => (
+                  <MenuBarExtra.Item
+                    key={team.name + project.name + file.key + "-file"}
+                    title={file.name ?? "Untitled"}
+                    onAction={async () => {
+                      open(url + file.key);
+                      await visitFile(file);
+                    }}
+                  />
+                ))
+              ) : (
+                <MenuBarExtra.Item key={team.name + project.name + "-nofile"} title="Empty project" />
+              )}
+            </MenuBarExtra.Submenu>
+          ))}
+        </MenuBarExtra.Section>
+      ))}
       {(isLoading || isLoadingVisitedFiles) && !data && <MenuBarExtra.Item title="Loading..." key="loadingState" />}
       {!isLoading && !data && <MenuBarExtra.Item title="No projects found" key="noProjectsFoundState" />}
     </MenuBarExtra>
