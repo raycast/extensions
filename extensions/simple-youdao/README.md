@@ -12,6 +12,8 @@ This extension is List based with single view and show result immediately after 
 
 Hope it can somehow improve your work efficiency.
 
+![](./media/simple-youdao-0.png)
+
 ![](./media/simple-youdao-1.png)
 
 ![](./media/simple-youdao-2.png)
