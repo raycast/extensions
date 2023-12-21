@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Fix] - 2023-12-19
+
+- Fixes errors on image detail view
+
 ## [Feature] - 2023-05-12
 
 - Added ability to create container from image
