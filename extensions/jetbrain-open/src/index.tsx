@@ -135,7 +135,7 @@ export default function Command() {
             onAction={() => open(SUPPORT_IDE[i].shell, path)}
           />
         ))}
-        <Action.ShowInFinder key={'finder'} path={path} title={"Show In Finder"} icon={"finder.png"} />
+        <Action.ShowInFinder key={"finder"} path={path} title={"Show In Finder"} icon={"finder.png"} />
       </ActionPanel>
     );
   };
