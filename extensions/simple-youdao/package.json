@@ -12,7 +12,16 @@
       "title": "Translate",
       "subtitle": "Youdao",
       "description": "Simple youdao with quick translation",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "default": "",
+          "placeholder": "Word/Sentence"
+        }
+      ]
     }
   ],
   "preferences": [
