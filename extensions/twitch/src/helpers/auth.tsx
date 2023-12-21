@@ -1,7 +1,7 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 
-const preferences = getPreferenceValues<ExtensionPreferences>();
+const preferences = getPreferenceValues<Preferences.Live | Preferences.Following>();
 
 const AUTH_URL = "https://twitch.oauth.raycast.com/authorize";
 const TOKEN_URL = "https://twitch.oauth.raycast.com/token";

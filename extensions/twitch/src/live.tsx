@@ -1,18 +1,45 @@
-import { Icon, LaunchType, MenuBarExtra, launchCommand, open, openExtensionPreferences } from "@raycast/api";
+import {
+  Icon,
+  LaunchType,
+  MenuBarExtra,
+  getPreferenceValues,
+  launchCommand,
+  open,
+  openCommandPreferences,
+  showHUD,
+} from "@raycast/api";
 import { formatDate } from "./helpers/datetime";
 import useFollowedStreams from "./helpers/useFollowedStreams";
 import { useUserId } from "./helpers/useUserId";
 import { userName } from "./helpers/auth";
+import { useRef } from "react";
+
+const preferences = getPreferenceValues<Preferences.Live>();
 
 export default function main() {
   const { data: userId, isLoading: isLoadingUserId } = useUserId();
   const { data: items = [], isLoading, updatedAt } = useFollowedStreams(userId, { loadingWhileStale: true });
 
+  const previous = useRef(items);
+  if (
+    preferences.notify &&
+    (previous.current.length !== items.length || previous.current.some((item) => !items.some((i) => i.id === item.id)))
+  ) {
+    const newItems = items.filter((item) => !previous.current.some((i) => i.id === item.id));
+    previous.current = items;
+
+    if (newItems.length === 1) {
+      showHUD(`${newItems[0].user_name} is live on Twitch`);
+    } else if (newItems.length > 1) {
+      showHUD(`${newItems.length} followed channels went live on Twitch`);
+    }
+  }
+
   if (!userName) {
     return (
       <MenuBarExtra icon={Icon.ExclamationMark}>
         <MenuBarExtra.Item title="Unavailable without a Username" />
-        <MenuBarExtra.Item title="Set your Twitch Username" onAction={openExtensionPreferences} />
+        <MenuBarExtra.Item title="Set your Twitch Username" onAction={openCommandPreferences} />
       </MenuBarExtra>
     );
   }

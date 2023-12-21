@@ -15,13 +15,6 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "userName",
-      "type": "textfield",
-      "title": "Twitch Username",
-      "required": false,
-      "description": "Your Twitch Username, from which to read the followed channels"
-    },
-    {
       "name": "primaryaction",
       "type": "dropdown",
       "title": "Primary Action",
@@ -110,7 +103,16 @@
       "title": "Search Following Channels",
       "description": "Search following Channels",
       "icon": "icon.png",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "userName",
+          "type": "textfield",
+          "title": "Twitch Username",
+          "required": true,
+          "description": "Your Twitch Username, from which to read the followed channels"
+        }
+      ]
     },
     {
       "name": "live",
@@ -118,7 +120,25 @@
       "description": "Display Live Followed Channels in the Menu Bar",
       "icon": "icon.png",
       "mode": "menu-bar",
-      "interval": "10m"
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "userName",
+          "type": "textfield",
+          "title": "Twitch Username",
+          "required": true,
+          "description": "Your Twitch Username, from which to read the followed channels"
+        },
+        {
+          "name": "notify",
+          "type": "checkbox",
+          "title": "Enable Notifications",
+          "default": false,
+          "required": false,
+          "description": "Show a Raycast HUD Notification when a followed channel goes live",
+          "label": "When a followed channel goes live"
+        }
+      ]
     }
   ],
   "dependencies": {

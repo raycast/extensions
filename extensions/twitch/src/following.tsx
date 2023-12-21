@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List, openExtensionPreferences, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, useNavigation } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
 import { type ComponentProps } from "react";
 
@@ -17,7 +17,6 @@ import millify from "millify";
 import { action, primaryActionStreamlink, ActionWatchStream, primaryActionBrowser } from "./helpers/action";
 import { formatDate, formatISODuration, formatLongAgo, getUpTime } from "./helpers/datetime";
 import { renderDetails } from "./helpers/renderDetails";
-import { userName } from "./helpers/auth";
 
 type ItemAccessory = Exclude<ComponentProps<typeof List.Item>["accessories"], null | undefined>[number];
 
@@ -454,21 +453,6 @@ export default function Main() {
   const { data: sortedChannels, visitItem } = useFrecencySorting(channels, {
     key: (item) => item.broadcaster_id,
   });
-
-  if (!userName) {
-    return (
-      <List searchBarPlaceholder="Unavailable without a Twitch Username">
-        <List.Item
-          title="Please set your Twitch Username in the extension preferences"
-          actions={
-            <ActionPanel>
-              <Action title="Open Preferences" onAction={openExtensionPreferences} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
 
   return (
     <List
