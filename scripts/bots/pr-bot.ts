@@ -67,7 +67,7 @@ export default async ({ github, context }: API) => {
       await comment({
         github,
         context,
-        comment: `Congratulation on your new Raycast extension! :rocket:\n\nThe team is on holiday, we'll review it once everyone is back. :christmas_tree:\n\nOnce the PR is approved and merged, the extension will be available on the Store.`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\nThe team is on holiday, we'll review it once everyone is back. :santa:\n\nThank you for your patience, will be back be back to normal availability 2nd of January :christmas_tree:`,
       });
       return;
     }
