@@ -12,7 +12,7 @@ import {
   LaunchProps,
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
-import { format, startOfDay } from "date-fns";
+import { format } from "date-fns";
 
 import { NewReminder, createReminder } from "./api";
 import { getPriorityIcon } from "./helpers";
@@ -46,12 +46,12 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     initialValues: {
       title: draftValues?.title ?? "",
       notes: draftValues?.notes ?? "",
-      dueDate: draftValues?.dueDate ?? null,
-      priority: draftValues?.priority ?? "",
+      dueDate: draftValues?.dueDate,
+      priority: draftValues?.priority,
       listId: listId ?? draftValues?.listId ?? (selectDefaultList ? defaultList?.id : ""),
       isRecurring: draftValues?.isRecurring ?? false,
-      frequency: draftValues?.frequency ?? "daily",
-      interval: draftValues?.interval ?? "1",
+      frequency: draftValues?.frequency,
+      interval: draftValues?.interval,
     },
     validation: {
       title: FormValidation.Required,
@@ -172,7 +172,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Add some notes" />
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due Date" min={startOfDay(new Date())} />
+      <Form.DatePicker {...itemProps.dueDate} title="Due Date" />
       {values.dueDate ? (
         <>
           <Form.Checkbox {...itemProps.isRecurring} label="Is Recurring" />
@@ -184,7 +184,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
                 <Form.Dropdown.Item title="Monthly" value="monthly" />
                 <Form.Dropdown.Item title="Yearly" value="yearly" />
               </Form.Dropdown>
-              <Form.TextField {...itemProps.interval} title="Interval" />
+              <Form.TextField {...itemProps.interval} title="Interval" placeholder="1" />
               <Form.Description text={recurrenceDescription} />
               <Form.Separator />
             </>

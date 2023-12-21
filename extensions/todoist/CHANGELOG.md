@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Show filters and filter tasks] - 2023-12-18
+
+You can now view your Todoist filters and see all tasks associated with a selected fitler. 
+
 ## [Focused task] - 2023-10-30
 
 You can now directly open the focused task via a Raycast command.

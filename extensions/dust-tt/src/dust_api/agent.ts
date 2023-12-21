@@ -14,11 +14,6 @@ export type AgentConfigurationStatus = AgentStatus | GlobalAgentStatus;
 
 export type AgentConfigurationScope = "global" | "workspace" | "published" | "private";
 
-/* By default, agents with scope 'workspace' are in users' assistants list, whereeas agents with
- * scope 'published' aren't. But a user can override the default behaviour, as per the type below */
-
-export type AgentVisibilityOverrideType = "workspace-unlisted" | "published-listed";
-
 export interface AgentType {
   sId: string;
   name: string;

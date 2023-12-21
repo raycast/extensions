@@ -1,5 +1,9 @@
 # Mute microphone Changelog
 
+## [Improvements] - 2023-12-08
+
+- Muted icon more noticeable
+
 ## [Improvements] - 2023-10-17
 
 - Using a Toast instead of a HUD message

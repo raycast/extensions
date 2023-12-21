@@ -199,6 +199,8 @@ export default function Command(props: LaunchProps<{ draftValues: TodoValues }>)
 
 Shows a list of form items such as [Form.TextField](form.md#form.textfield), [Form.Checkbox](form.md#form.checkbox) or [Form.Dropdown](form.md#form.dropdown).
 
+Optionally add a [Form.LinkAccessory](form.md#form.linkaccessory) in the right-hand side of the navigation bar.
+
 #### Props
 
 <PropsTableFromJSDoc component="Form" />
@@ -1047,6 +1049,40 @@ export default function Command() {
 #### Props
 
 <PropsTableFromJSDoc component="Form.Description" />
+
+### Form.LinkAccessory
+
+A link that will be shown in the right-hand side of the navigation bar.
+
+#### Example
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      searchBarAccessory={
+        <Form.LinkAccessory
+          target="https://developers.raycast.com/api-reference/user-interface/form"
+          text="Open Documentation"
+        />
+      }
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" defaultValue="Steve" />
+    </Form>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Form.LinkAccessory" />
 
 ## Types
 

@@ -10,8 +10,7 @@ function getBaseQuery() {
   const preferences = getPreferenceValues<Preferences>();
   const lookBackDays = parseInt(preferences?.lookBackDays || "1") || 1;
   const lookBackMinutes = lookBackDays * 24 * 60;
-  const ignoreRead = preferences.ignoreRead ? 0 : 1;
-  return `
+  let baseQuery = `
     select
       message.guid,
       message.rowid,
@@ -27,8 +26,9 @@ function getBaseQuery() {
       and message.text is not null
       and length(message.text) > 0
       and datetime(message.date / 1000000000 + strftime('%s', '2001-01-01'), 'unixepoch', 'localtime') >= datetime('now', '-${lookBackMinutes} minutes', 'localtime')
-	  and message.is_read = ${ignoreRead}
-  `;
+	`;
+  if (preferences.ignoreRead) baseQuery += " and message.is_read = 0";
+  return baseQuery;
 }
 
 function getQuery(options: { searchText?: string; searchType: SearchType }) {

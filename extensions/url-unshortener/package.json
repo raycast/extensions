@@ -5,6 +5,9 @@
   "description": "Unshorten/expand those pesky short links in your clipboard or text selection, enhancing your privacy and security.",
   "icon": "icon.png",
   "author": "SebDanielsson",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Web"
   ],
