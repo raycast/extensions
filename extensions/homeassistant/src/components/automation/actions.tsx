@@ -3,6 +3,7 @@ import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { EntityStandardActionSections } from "@components/entity";
 import { callAutomationTriggerService, callAutomationTurnOffService, callAutomationTurnOnService } from "./utils";
+import { HAOpenUrlInAction } from "@components/actions";
 
 export function AutomationTriggerAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
@@ -53,7 +54,7 @@ export function AutomationEditInBrowserAction(props: { state: State }): JSX.Elem
     if (id !== undefined) {
       const url = ha.navigateUrl(`config/automation/edit/${id}`);
       return (
-        <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+        <HAOpenUrlInAction url={url} action="Edit In" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} />
       );
     }
   }
@@ -66,9 +67,7 @@ export function AutomationDebugInBrowserAction(props: { state: State }): JSX.Ele
     const id = props.state.attributes.id as number | undefined;
     if (id !== undefined) {
       const url = ha.navigateUrl(`config/automation/trace/${id}`);
-      return (
-        <Action.OpenInBrowser url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["cmd"], key: "d" }} />
-      );
+      return <HAOpenUrlInAction url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["cmd"], key: "d" }} />;
     }
   }
   return null;

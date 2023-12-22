@@ -58,7 +58,7 @@ export class HomeAssistant {
     token: string,
     ignoreCerts: boolean,
     options: HomeAssistantOptions | undefined = undefined,
-    useLocalApp = false,
+    useLocalApp = true,
   ) {
     this.token = token;
     this.url = url;
@@ -91,6 +91,10 @@ export class HomeAssistant {
       return urljoin("homeassistant://navigate", text);
     }
     return this.urlJoin(text);
+  }
+
+  public isCompanionUrl(url: string) {
+    return url.startsWith("homeassistant://");
   }
 
   private isHomeSSIDActive(): boolean {
