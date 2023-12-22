@@ -17,6 +17,7 @@ import { setTimeout } from "timers/promises";
 
 interface Preference {
   apiKey: string | null | undefined;
+  team_ids: string | null | undefined;
 }
 
 interface UpdateIncidentResponse {
@@ -130,7 +131,8 @@ export default function Command() {
   useEffect(() => {
     async function fetchIncidents() {
       try {
-        const { data: response } = await pagerDutyClient.get<ListIncidentsResponse>("/incidents", {
+        const preference = getPreferenceValues<Preference>();
+        const { data: response } = await pagerDutyClient.get<ListIncidentsResponse>("/incidents?team_ids[]=" + preference.team_ids + "&", {
           params: {
             sort_by: "created_at:desc",
           },

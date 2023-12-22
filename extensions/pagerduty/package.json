@@ -5,6 +5,9 @@
   "description": "Display PagerDuty incidents and helps updating status.",
   "icon": "command-icon.png",
   "author": "horimislime",
+  "contributors": [
+    "syuraj"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -27,6 +30,14 @@
       "title": "User API Token",
       "placeholder": "PagerDuty API token",
       "description": "Generate your user API token (not account token) on User Settings page. For more detail, see https://support.pagerduty.com/docs/api-access-keys#section-generate-a-user-token-rest-api-key"
+    },
+    {
+      "name": "team_ids",
+      "type": "textfield",
+      "required": true,
+      "title": "Team Id",
+      "placeholder": "Team Id",
+      "description": "Team Id from pagerduty url"
     }
   ],
   "dependencies": {
