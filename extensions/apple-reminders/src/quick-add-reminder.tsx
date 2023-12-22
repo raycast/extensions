@@ -93,6 +93,7 @@ Here are some examples to help you out:
 - Monthly breakfast with friends Saturday: {"title":"Monthly breakfast with friends","description":"'Monthly breakfast with friends' recurring monthly starting ${saturday} to default list","dueDate":"${saturday}","recurrence":{"frequency":"monthly","interval":1}}
 - Review budget every 2 months starting from tomorrow: {"title":"Review budget","description":"'Review budget' every 2 months starting ${tomorrow} to default list","dueDate":"${tomorrow}", "recurrence":{"frequency":"monthly","interval":2}}
 - Water the flowers every day from tomorrow until ${upcomingDateWeekday}: {"title":"Water the flowers","description":"'Water the flowers' every day from ${tomorrow} until ${upcomingDate} to default list","dueDate":"${tomorrow}","recurrence":{"frequency":"daily","interval":1,"endDate":"${upcomingDate}"}}
+- Cook meals until ${upcomingDateWeekday}: {"title":"Cook meals","description":"'Cook meals' every day until ${upcomingDate} to default list","dueDate":"${today}","recurrence":{"frequency":"daily","interval":1,"endDate":"${upcomingDate}"}}
 
 Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
