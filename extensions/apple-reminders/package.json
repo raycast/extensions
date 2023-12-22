@@ -6,13 +6,11 @@
   "icon": "icon.png",
   "author": "thomaslombart",
   "contributors": [
-    "tm.wrnr"
+    "tm.wrnr",
+    "ir4n"
   ],
   "owner": "raycast",
   "access": "public",
-  "contributors": [
-    "ir4n"
-  ],
   "categories": [
     "Productivity",
     "Applications"
