@@ -2,7 +2,7 @@ import { closeMainWindow, getPreferenceValues, getApplications, open } from "@ra
 
 import { Page } from "./notion/page";
 
-let openIn = getPreferenceValues<Preferences>().open_in;
+const openIn = getPreferenceValues<Preferences>().open_in;
 
 let hasCheckedDefault = false;
 export async function checkedDefaultOpenMethod() {
@@ -10,7 +10,8 @@ export async function checkedDefaultOpenMethod() {
   hasCheckedDefault = true;
   const apps = await getApplications();
   const defaultApp = apps.find((app) => app.name === "Notion");
-  if (defaultApp) openIn = defaultApp;
+  if (defaultApp) return defaultApp;
+  return openIn;
 }
 
 export async function handleOnOpenPage(page: Page, setRecentPage: (page: Page) => Promise<void>): Promise<void> {
