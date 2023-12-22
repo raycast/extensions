@@ -455,6 +455,23 @@
       "title": "Camera Refresh Interval (ms)",
       "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
       "placeholder": "3000"
+    },
+    {
+      "name": "preferredapp",
+      "description": "Preferred Application to Open",
+      "type": "dropdown",
+      "required": false,
+      "title": "Preferred Application",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Companion",
+          "value": "companion"
+        }
+      ]
     }
   ],
   "categories": [
