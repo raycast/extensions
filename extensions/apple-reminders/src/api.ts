@@ -6,6 +6,7 @@ export async function getData() {
   return await reminders.get<{ reminders: Reminder[]; lists: List[] }>();
 }
 
+export type Frequency = "daily" | "weekly" | "monthly" | "yearly";
 export type NewReminder = {
   title: string;
   listId?: string;
@@ -13,7 +14,7 @@ export type NewReminder = {
   dueDate?: string;
   priority?: string;
   recurrence?: {
-    frequency: string;
+    frequency: Frequency;
     interval: number;
     endDate?: string;
   };

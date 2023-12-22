@@ -14,7 +14,7 @@ import {
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
 
-import { NewReminder, createReminder } from "./api";
+import { Frequency, NewReminder, createReminder } from "./api";
 import { getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
 
@@ -80,7 +80,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
         if (values.isRecurring) {
           payload.recurrence = {
-            frequency: values.frequency,
+            frequency: values.frequency as Frequency,
             interval: Number(values.interval),
           };
         }
