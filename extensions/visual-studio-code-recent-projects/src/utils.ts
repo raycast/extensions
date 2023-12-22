@@ -71,6 +71,22 @@ export function isRemoteWorkspaceEntry(entry: EntryLike): entry is RemoteWorkspa
   return workspace !== undefined && remoteAuthority !== undefined;
 }
 
+export function isSameEntry(a: EntryLike, b: EntryLike) {
+  if ("fileUri" in a && "fileUri" in b) {
+    return a.fileUri === b.fileUri;
+  }
+
+  if ("folderUri" in a && "folderUri" in b) {
+    return a.folderUri === b.folderUri;
+  }
+
+  if ("workspace" in a && "workspace" in b) {
+    return a.workspace.configPath === b.workspace.configPath;
+  }
+
+  return false;
+}
+
 // Filters
 
 export function filterEntriesByType(filter: EntryType | null) {

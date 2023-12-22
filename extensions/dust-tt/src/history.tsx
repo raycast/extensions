@@ -1,6 +1,18 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+
 import { DustAPICredentials } from "./dust_api/api";
 
 export interface DustHistory {
@@ -16,10 +28,16 @@ export async function getDustHistory(): Promise<DustHistory[]> {
   if (!history) {
     return [];
   }
+  const now = new Date();
   const parsed_history = JSON.parse(history) as DustHistory[];
-  return parsed_history.map((h) => {
-    return { ...h, date: new Date(h.date) };
-  });
+  return parsed_history
+    .map((h) => {
+      return { ...h, date: new Date(h.date) };
+    })
+    .filter((h) => {
+      // remove items older than 30 days
+      return now.getTime() - h.date.getTime() < 30 * 24 * 60 * 60 * 1000;
+    });
 }
 
 export async function addDustHistory(history: DustHistory) {
@@ -95,8 +113,19 @@ export default function DustHistoryCommand() {
                     icon={Icon.Trash}
                     title="Clear All History"
                     onAction={async () => {
-                      await LocalStorage.setItem("dust_history", JSON.stringify([]));
-                      setHistory([]);
+                      await confirmAlert({
+                        title: "Are you sure you want to remove all items in history?",
+                        icon: Icon.Trash,
+                        primaryAction: {
+                          title: "Clear",
+                          style: Alert.ActionStyle.Destructive,
+                          onAction: async () => {
+                            await LocalStorage.setItem("dust_history", JSON.stringify([]));
+                            setHistory([]);
+                            await showToast(Toast.Style.Success, "History cleared");
+                          },
+                        },
+                      });
                     }}
                     style={Action.Style.Destructive}
                   />

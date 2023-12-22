@@ -1,9 +1,11 @@
 import { Action, ActionPanel, Color, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { DustApi, DustAPICredentials, DustDocument } from "./dust_api/api";
+import { DustApi, DustAPICredentials } from "./dust_api/api";
 import { useEffect, useState } from "react";
 import { addDustHistory } from "./history";
 import { AgentType } from "./dust_api/agent";
 import { DUST_AGENT, MANAGED_SOURCES } from "./agents";
+import { DustDocument } from "./dust_api/conversation_events";
+import { AskAgentQuestionForm } from "./askAgent";
 
 async function answerQuestion({
   question,
@@ -85,8 +87,14 @@ export function AskDustQuestion({ question, agent = DUST_AGENT }: { question: st
           />
           {dustAnswer && (
             <>
-              <Action.Paste content={dustAnswer} shortcut={{ modifiers: ["cmd"], key: ";" }} />
+              <Action.Paste content={dustAnswer} shortcut={{ modifiers: ["cmd"], key: "return" }} />
               <Action.CopyToClipboard content={dustAnswer} shortcut={{ modifiers: ["cmd"], key: "." }} />
+              <Action.Push
+                title="Edit Question"
+                icon={Icon.Pencil}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                target={<AskAgentQuestionForm agent={agent} initialQuestion={question} />}
+              />
             </>
           )}
           {dustDocuments && dustDocuments.length > 0 && (

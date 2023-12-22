@@ -1,4 +1,3 @@
-import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { exec } from "./utils";
 
@@ -13,11 +12,10 @@ type Entry = {
 
 export async function isDayOneInstalled(): Promise<boolean> {
   try {
-    const result = await exec("dayone2");
-    const commandExists = !result.includes("command not found");
-
-    return commandExists;
+    await exec("dayone2 --version");
+    return true;
   } catch (error) {
+    // This being caught means the CLI is available
     return false;
   }
 }
@@ -30,8 +28,8 @@ async function addEntry(entry: Entry) {
     command = `${command} --journal ${entry.journal}`;
   }
 
-  const result = await exec(command);
-  const match = /uuid: (\w+)/.exec(result);
+  const { stdout } = await exec(command);
+  const match = /uuid: (\w+)/.exec(stdout);
   const uuid = match?.[1];
 
   if (uuid === undefined) throw Error("Failed to parse entry id from Day One CLI");
@@ -46,7 +44,7 @@ type DayOneHook = () => {
 };
 
 export const useDayOneIntegration: DayOneHook = () => {
-  const [installed, setInstalled] = useCachedState("installed", false);
+  const [installed, setInstalled] = useState(false);
   const [loading, setIsLoading] = useState(true);
 
   useEffect(() => {

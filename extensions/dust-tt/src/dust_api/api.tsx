@@ -3,130 +3,29 @@ import { createParser } from "eventsource-parser";
 import { ConversationType, UserMessageType } from "./conversation";
 import { AgentConfigurationType } from "./agent";
 import { MANAGED_SOURCES } from "../agents";
-export type AgentActionType = RetrievalActionType | DustAppRunActionType;
-
-type RetrievalActionType = {
-  id: number;
-  type: "retrieval_action";
-  documents: RetrievalDocumentType[] | null;
-};
-
-type RetrievalDocumentType = {
-  id: number;
-  dataSourceWorkspaceId: string;
-  dataSourceId: string;
-  sourceUrl: string | null;
-  documentId: string;
-  reference: string; // Short random string so that the model can refer to the document.
-  timestamp: number;
-  tags: string[];
-  score: number | null;
-  chunks: {
-    text: string;
-    offset: number;
-    score: number | null;
-  }[];
-};
-
-type DustAppParameters = {
-  [key: string]: string | number | boolean;
-};
-
-type DustAppRunActionType = {
-  id: number;
-  type: "dust_app_run_action";
-  appWorkspaceId: string;
-  appId: string;
-  appName: string;
-  params: DustAppParameters;
-  runningBlock: {
-    type: string;
-    name: string;
-    status: "running" | "succeeded" | "errored";
-  } | null;
-  output: unknown | null;
-};
-
-export type DustAPICredentials = {
-  apiKey: string;
-  workspaceId: string;
-};
-
-type DustAPIErrorResponse = {
-  type: string;
-  message: string;
-};
-
-export type DustDocument = {
-  id: string;
-  sourceUrl: string;
-  dataSourceId: string;
-  score: number | null;
-  reference: number;
-};
+import {
+  AgentActionSuccessEvent,
+  AgentActionType,
+  AgentErrorEvent,
+  AgentGenerationSuccessEvent,
+  DustAPIErrorResponse,
+  DustDocument,
+  GenerationTokensEvent,
+  RetrievalDocumentType,
+  UserMessageErrorEvent,
+} from "./conversation_events";
 
 const DUST_API_URL = "https://dust.tt/api/v1/w";
-
-export type AgentActionSuccessEvent = {
-  type: "agent_action_success";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  action: AgentActionType;
-};
-
-// Event sent when tokens are streamed as the the agent is generating a message.
-export type GenerationTokensEvent = {
-  type: "generation_tokens";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  text: string;
-};
-
-// Event sent once the generation is completed.
-export type AgentGenerationSuccessEvent = {
-  type: "agent_generation_success";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  text: string;
-};
-
-// Event sent when the user message is created.
-export type UserMessageErrorEvent = {
-  type: "user_message_error";
-  created: number;
-  error: {
-    code: string;
-    message: string;
-  };
-};
-
-// Generic event sent when an error occured (whether it's during the action or the message generation).
-export type AgentErrorEvent = {
-  type: "agent_error";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  error: {
-    code: string;
-    message: string;
-  };
-};
-
-export type GenerationSuccessEvent = {
-  type: "generation_success";
-  created: number;
-  configurationId: string;
-  messageId: string;
-  text: string;
-};
 
 function removeCiteMention(message: string) {
   const regex = / ?:cite\[[a-zA-Z0-9, ]+\]/g;
   return message.replace(regex, "");
 }
+
+export type DustAPICredentials = {
+  apiKey: string;
+  workspaceId: string;
+};
 
 export class DustApi {
   _credentials: DustAPICredentials;
@@ -379,7 +278,6 @@ export class DustApi {
               }
               const icon = ref.dataSourceId in MANAGED_SOURCES ? MANAGED_SOURCES[ref.dataSourceId].icon : undefined;
               const markdownIcon = icon ? `<img src="${icon}" width="16" height="16"> ` : "";
-              console.log("markdownIcon", markdownIcon);
               return `[${markdownIcon}[${refCounter[k]}](${link})]`;
             }
             return "";
@@ -402,6 +300,9 @@ export class DustApi {
         Authorization: `Bearer ${apiKey}`,
       },
     });
+    if (!response.ok) {
+      return { error: `Could not get agents: ${response.statusText}` };
+    }
     const json = (await response.json()) as {
       agentConfigurations?: AgentConfigurationType[];
       error?: DustAPIErrorResponse;

@@ -22,8 +22,3 @@ export type UserType = {
   image: string | null;
   workspaces: WorkspaceType[];
 };
-
-export type UserMetadataType = {
-  key: string;
-  value: string;
-};
