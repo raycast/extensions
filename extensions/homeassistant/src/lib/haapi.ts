@@ -51,14 +51,22 @@ export class HomeAssistant {
   public wifiSSIDs: string[] | undefined;
   private usePing = true;
   private messageSubscription?: object | null;
+  private useLocalApp = false;
 
-  constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
+  constructor(
+    url: string,
+    token: string,
+    ignoreCerts: boolean,
+    options: HomeAssistantOptions | undefined = undefined,
+    useLocalApp = false,
+  ) {
     this.token = token;
     this.url = url;
     this.urlInternal = options?.urlInternal;
     this.wifiSSIDs = options?.wifiSSIDs;
     this.usePing = options?.usePing ?? true;
     this._ignoreCerts = ignoreCerts;
+    this.useLocalApp = useLocalApp;
   }
 
   private httpsAgent(url: string): Agent | undefined {
@@ -76,6 +84,13 @@ export class HomeAssistant {
   public urlJoin(text: string): string {
     const url = this._nearestURL && this._nearestURL.length > 0 ? this._nearestURL : this.url;
     return urljoin(url, text);
+  }
+
+  public navigateUrl(text: string) {
+    if (this.useLocalApp) {
+      return urljoin("homeassistant://navigate", text);
+    }
+    return this.urlJoin(text);
   }
 
   private isHomeSSIDActive(): boolean {

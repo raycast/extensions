@@ -23,7 +23,7 @@ export function SceneEditInBrowserAction(props: { state: State }): JSX.Element |
   if (s.entity_id.startsWith("scene")) {
     const id = props.state.attributes.id as number | undefined;
     if (id !== undefined) {
-      const url = ha.urlJoin(`config/scene/edit/${id}`);
+      const url = ha.navigateUrl(`config/scene/edit/${id}`);
       return (
         <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} />
       );
