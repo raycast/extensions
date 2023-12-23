@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yabai",
+  "title": "Yabai",
+  "description": "Control Yabai using Raycast. Requires yabai to be installed.",
+  "icon": "yabai-icon-512px.png",
+  "author": "krzysztoff1",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "custom-yabai-command",
+      "title": "Run Custom Yabai Command",
+      "description": "Run custom Yabai command",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "Command",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "start",
+      "title": "Start Yabai",
+      "description": "This command will start Yabai using `yabai --start-service`.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Yabai",
+      "description": "This command will stop Yabai using `yabai --stop-service`.",
+      "mode": "no-view"
+    },
+    {
+      "name": "rotate",
+      "title": "Rotate",
+      "description": "Rotate the tree 90 degrees clockwise.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mirror-x",
+      "title": "Mirror X",
+      "description": "Mirror the tree on the X axis.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mirror-y",
+      "title": "Mirror Y",
+      "description": "Mirror the tree on the Y axis.",
+      "mode": "no-view"
+    },
+    {
+      "name": "balance",
+      "title": "Balance",
+      "description": "Balance the windows.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "yabaiExecutablePath",
+      "description": "Path to the yabai executable.",
+      "type": "textfield",
+      "required": false,
+      "default": "./opt/homebrew/bin/yabai",
+      "title": "Path to the yabai executable",
+      "placeholder": "./opt/homebrew/bin/yabai",
+      "label": "By default, the extension will use the yabai executable from the homebrew installation. If you have yabai installed in a different location, you can specify it here."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "execa": "^8.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.10.5",
+    "@types/react": "18.2.45",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
