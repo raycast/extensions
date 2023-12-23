@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec } from "child_process";
 
 exec('open -na "Vivaldi" --args -incognito "duckduckgo.com"', (error, stdout, stderr) => {
   if (error) {
@@ -11,4 +11,3 @@ exec('open -na "Vivaldi" --args -incognito "duckduckgo.com"', (error, stdout, st
   }
   console.log(`Command executed successfully: ${stdout}`);
 });
-   
