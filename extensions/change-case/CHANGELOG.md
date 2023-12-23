@@ -1,7 +1,13 @@
 # Change Case Changelog
 
+## [Manual Refresh] - 2023-11-27
+- Added a manual refresh action to refresh the selected text/clipboard
+
+## [Add Keywords] - 2023-11-13
+- Added a few keywords to make searching in the store easier
+
 ## [Update Dependencies] - 2023-10-18
-- switch to ESM-only packages because they are now supported
+- Switch to ESM-only packages because they are now supported
 
 ## [Update] - 2023-10-03
 - Support unicode characters

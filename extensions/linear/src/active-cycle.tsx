@@ -18,7 +18,7 @@ import View from "./components/View";
 function ActiveCycle() {
   const { teamsWithCycles, isLoadingTeams } = useTeams();
   const [selectedTeam, setSelectedTeam] = useState<string | undefined>(
-    teamsWithCycles && teamsWithCycles.length === 1 ? teamsWithCycles[0].id : undefined
+    teamsWithCycles && teamsWithCycles.length === 1 ? teamsWithCycles[0].id : undefined,
   );
 
   const { priorities, isLoadingPriorities } = usePriorities();
@@ -37,7 +37,7 @@ function ActiveCycle() {
   const { issues, isLoadingIssues, mutateList } = useIssues(
     (cycleId: string | undefined) => getActiveCycleIssues(cycleId),
     [cycleId],
-    { execute: !!cycleId }
+    { execute: !!cycleId },
   );
 
   useEffect(() => {

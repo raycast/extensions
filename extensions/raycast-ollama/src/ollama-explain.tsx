@@ -1,7 +1,5 @@
-import { ResultView } from "./api/main";
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const systemPrompt =
-    "Act as a writer. Explain the following text in simple and concise terms.\n\nOutput only with the modified text.\n";
-  return ResultView("explain", systemPrompt);
+  return <AnswerView command="explain" />;
 }

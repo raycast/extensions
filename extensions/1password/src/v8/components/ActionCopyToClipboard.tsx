@@ -17,11 +17,13 @@ export function CopyToClipboard({
   vault_id,
   shortcut,
   field = "password",
+  attribute,
 }: {
   id: string;
   field?: string;
   shortcut: Keyboard.Shortcut;
   vault_id: string;
+  attribute?: string;
 }) {
   return (
     <Action
@@ -34,7 +36,9 @@ export function CopyToClipboard({
           title: `Copying ${field}...`,
         });
         try {
-          const stdout = execFileSync(CLI_PATH!, ["read", `op://${vault_id}/${id}/${field}`]);
+          const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
+          const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
+          const stdout = execFileSync(CLI_PATH!, ["read", uri]);
           await Clipboard.copy(stdout.toString().trim(), { concealed: true });
 
           toast.style = Toast.Style.Success;

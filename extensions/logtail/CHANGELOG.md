@@ -1,5 +1,10 @@
 # Logtail Changelog
 
+## [Fix Crash] - 2023-11-08
+
+- Filter logs that don't have a message body
+- Coalesce nullable string on ansi strip as a fallback
+
 ## [Initial Version] - 2023-05-23
 
 - Added Query Logs Command

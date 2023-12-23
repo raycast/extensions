@@ -5,6 +5,9 @@
   "description": "Search the Astro Documentation right from Raycast",
   "icon": "astro-search-icon.png",
   "author": "ElianCodes",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Documentation",
     "Developer Tools"
@@ -88,7 +91,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0"
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

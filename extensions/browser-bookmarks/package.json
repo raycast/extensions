@@ -10,7 +10,10 @@
   "contributors": [
     "sasivarnan",
     "ahp",
-    "danulqua"
+    "danulqua",
+    "juang970",
+    "tleo19",
+    "jum8ys"
   ],
   "categories": [
     "Web"
@@ -22,6 +25,14 @@
       "label": "Show Bookmark Domain",
       "name": "showDomain",
       "description": "When enabled, the domain of the bookmark will be displayed as a subtitle.",
+      "default": true,
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Open Bookmark's Browser",
+      "name": "openBookmarkBrowser",
+      "description": "When enabled, the extension will open the browser from which the bookmark originated, instead of your default browser.",
       "default": true,
       "required": false
     }
@@ -38,7 +49,7 @@
   "dependencies": {
     "@raycast/api": "^1.60.1",
     "@raycast/utils": "^1.10.0",
-    "fuse.js": "^6.6.2",
+    "fuse.js": "^7.0.0",
     "ini": "^4.1.1",
     "simple-plist": "^1.4.0-0",
     "sql.js": "^1.8.0"

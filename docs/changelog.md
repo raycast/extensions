@@ -1,5 +1,65 @@
 # Changelog
 
+## 1.64.0 - 2023-12-13
+
+### ✨ New
+
+- **Form**: Introduced a new component `Form.LinkAccessory` to render a link displayed in the right-hand side of the search bar.
+- **Arguments**: Introduced a new Argument type: `dropdown`. You can now [specify a list of options](https://developers.raycast.com/information/manifest#argument-properties) for the user choose from.
+- **Developer Hub**: User preferences are now included in error reports. Password and text preferences will be replaced with `[REDACTED]`, file/directory/appPicker preferences will be scrubbed of PII, and dropdown/checkbox preferences will be sent as-is.
+
+### 💎 Improvements
+
+- **Window Capture**: Added a warning when trying to take a screenshot of Raycast if that screenshot won’t match the requirement for the Store’s extensions guidelines (eg. if Raycast is too close to an edge or if the screen doesn’t have a high enough resolution).
+
+### 🐞 Fixes
+
+- **Types generation**: Fixed the type of a required `appPicker` preference (even if it is `required`, the app might be undefined because it is missing).
+- **Empty View**: Fixed an issue where the Empty View might not be showing in a certain case.
+- **Menu Bar Extra**: ****icons tinted with `Icon.ColorPrimary` and `Icon.ColorSecondary` should now change based on the menu bar’s appearance.
+- **List Metadata:** `Link`s should be properly aligned again.
+
+## 1.63.0 - 2023-11-29
+
+### 💎 Improvements
+
+- Improved runtime error handling when using a Swift project
+
+### 🐞 Fixes
+
+- **Lists**: Fixed a race condition where the selected item would not be the first one after a list items update
+
+- **MenuBarExtra:** `alternate` are no longer supported on pre-Sonoma versions of macOS, as they would often appear alongside their parent items.
+
+## 1.62.0 - 2023-11-15
+
+### ✨ New
+
+- **Menu Bar:** `MenuBarExtra.Item`s have a new prop, `alternate`. If an `alternate` is defined, it will replace its parent `MenuBarExtra.Item` when the user presses the ⌥ (option) key.
+- The Node runtime has been updated to [Node 20](https://nodejs.org/en/blog/announcements/v20-release-announce/), the [current](https://github.com/nodejs/Release#release-schedule) Long-term Support (LTS) release.
+- **AI**: You can now use the `gpt-4` model with `AI.ask`. If a user does not have access to this model, it will gracefully fall back to an available model. You can check if a user has access using `environment.canAccess('gpt-4')`.
+
+### 💎 Improvements
+
+- **Error Handling:** `Could not communicate with command worker` errors should not be reported anymore.
+
+### 🐞 Fixes
+
+- **Toast:** Fixed an issue that caused toast actions to not work after a toast was updated.
+- **Error Handling:** Fixed an edge case that could cause an out-of-memory error while an uncaught exception was processed, obfuscating the original error.
+- **Performance**: Fixed an issue where some keyboard events would be dropped while an extension was loading.
+- **Markdown**: Fixed a regression where HTML comments would show up in the rendered Markdown.
+
+## 1.61.0 - 2023-11-02
+
+### 💎 Improvements
+
+- **Date Picker**: When specifying a min and/or max date, the suggestion will now always be within those bounds
+
+### 🐞 Fixes
+
+- Fixed a bug that previously could cause a `no-view` command to display an error icon in the root search, with no means of removing the error.
+
 ## 1.60.0 - 2023-10-18
 
 ## Introducing the Extension Issues Dashboard

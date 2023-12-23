@@ -205,12 +205,25 @@
       "mode": "view"
     },
     {
+      "name": "show-filters",
+      "title": "Show Filters",
+      "description": "Show your Todoist filters.",
+      "mode": "view"
+    },
+    {
       "name": "unfocus-current-task",
       "title": "Unfocus Current Task",
       "subtitle": "Todoist",
       "description": "Unfocus the current task in the menu bar.",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "open-focused-task",
+      "title": "Open Focus Task",
+      "subtitle": "Todoist",
+      "description": "When a task is chosen as the focused one, you can open it directly using this command.",
+      "mode": "no-view"
     }
   ],
   "preferences": [

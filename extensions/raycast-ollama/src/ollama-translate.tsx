@@ -1,6 +1,5 @@
-import { ResultView } from "./api/main";
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const systemPrompt = "Act as a translator. Translate the following text.\n\nOutput only with the translated text.\n";
-  return ResultView("translate", systemPrompt);
+  return <AnswerView command="translate" />;
 }

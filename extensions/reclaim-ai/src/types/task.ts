@@ -22,6 +22,8 @@ export interface Task {
   snoozeUntil: string;
   adjusted: boolean;
   atRisk: boolean;
+  priority: string;
+  onDeck: boolean;
   instances: Array<{
     taskId: number;
     eventId: string;

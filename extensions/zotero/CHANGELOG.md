@@ -1,5 +1,9 @@
 # Zotero Changelog
 
+## [Enhancements] - 2023-11-21
+
+- Add action to copy PDF URL
+
 ## [Enhancements] - 2023-08-11
 
 - Add icons for preprints and patents

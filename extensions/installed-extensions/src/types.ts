@@ -1,15 +1,15 @@
-export type dataType = {
-  [key: string]: any;
+export type ExtensionMetadata = {
   path: string;
   name: string;
   icon: string;
   title: string;
   author: string;
-  owner: string;
-  commands: string;
+  owner?: string; // only exists for organizations
+  access?: string; // only exists for organizations
+  commandCount: number;
+  created: Date;
   isLocalExtension: boolean;
-  isOrganization: boolean;
   link: string;
 };
 
-export type optionType = { id: string; name: string };
+export type Option = { id: string; name: string };

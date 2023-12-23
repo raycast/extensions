@@ -10,7 +10,7 @@ function getTaskPath(task: Task): string {
 
 function StartTrackerForTask() {
   // Get all tasks
-  const { data: tasks, isLoading: tasksIsLoading } = useCachedPromise(() => getTasks(), [], {
+  const { data: tasks, isLoading: tasksIsLoading } = useCachedPromise(getTasks, [], {
     keepPreviousData: true,
   });
 

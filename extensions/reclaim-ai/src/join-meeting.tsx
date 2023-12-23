@@ -1,11 +1,50 @@
 import { closeMainWindow, getPreferenceValues, open, showHUD } from "@raycast/api";
-import { addDays, differenceInHours, format, isAfter, startOfDay } from "date-fns";
-import { ApiResponseEvents } from "./hooks/useEvent.types";
-import { ApiResponseUser } from "./hooks/useUser.types";
-import { CalendarAccount } from "./types/account";
+import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
 import { NativePreferences } from "./types/preferences";
 import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
-import { filterMultipleOutDuplicateEvents } from "./utils/events";
+import { getOriginalEventIDFromSyncEvent } from "./utils/events";
+/**
+ * This function is used to join a meeting.
+ * If it succeeds, it returns true.
+ * It first checks if the event has a meeting URL, if it does, it opens it.
+ * If not, it checks if the event is a synced event and gets the original event id.
+ * It then tries to fetch the original event.
+ * If the original event has a meeting URL, it opens it.
+ * If not, it returns false.
+ *
+ * @param {ApiResponseMoment["event"] | ApiResponseMoment["nextEvent"]} event - The event to join.
+ * @returns {Promise<boolean>} - Returns a promise that resolves to a boolean indicating whether the meeting was joined successfully.
+ */
+const joinMeeting = async (event: ApiResponseMoment["event"] | ApiResponseMoment["nextEvent"]) => {
+  const { apiUrl } = getPreferenceValues<NativePreferences>();
+  if (!event) return false;
+
+  // If event has a meeting URL, open it
+  if (event.onlineMeetingUrl) {
+    await open(event.onlineMeetingUrl);
+    return true;
+  } else {
+    // Check if event is a synced event and get the original event id
+    const id = getOriginalEventIDFromSyncEvent(event);
+    if (!id) return false;
+
+    // try fetching original event
+    const [eventRequest, eventError] = await axiosPromiseData<ApiResponseEvents[number]>(
+      fetcher(`${apiUrl}/events/${id}`)
+    );
+
+    if (eventError || !eventRequest) {
+      console.error(eventError);
+      return false;
+    }
+
+    if (eventRequest.onlineMeetingUrl) {
+      await open(eventRequest.onlineMeetingUrl);
+      return true;
+    }
+  }
+  return false;
+};
 
 export default async function Command() {
   const { apiUrl } = getPreferenceValues<NativePreferences>();
@@ -13,73 +52,16 @@ export default async function Command() {
   await closeMainWindow();
   await showHUD("Joining meeting...");
 
-  const [accountsResponse, accountsError] = await axiosPromiseData<CalendarAccount[]>(
-    fetcher(`${apiUrl}/accounts`, {
-      method: "GET",
-    })
-  );
+  const [momentRequest, momentError] = await axiosPromiseData<ApiResponseMoment>(fetcher(`${apiUrl}/moment/next`));
 
-  if (!accountsResponse || accountsError) {
-    console.error(accountsError);
+  if (momentError || !momentRequest) {
+    console.error(momentError);
     await showHUD("Error getting the next event");
     return;
   }
-
-  const now = new Date();
-
-  const [eventsResponse, eventsError] = await axiosPromiseData<ApiResponseEvents>(
-    fetcher(`${apiUrl}/events?sourceDetails=true`, {
-      method: "GET",
-      params: {
-        start: format(startOfDay(now), "yyyy-MM-dd"),
-        end: format(addDays(now, 1), "yyyy-MM-dd"),
-        calendarIds: accountsResponse
-          .flatMap(({ connectedCalendars }) => connectedCalendars.map(({ id }) => id))
-          .join(","),
-      },
-    })
-  );
-
-  if (eventsError || !eventsResponse) {
-    console.error(eventsResponse);
-    await showHUD("Error getting the next event");
-    return;
-  }
-
-  const [currentUser, userError] = await axiosPromiseData<ApiResponseUser>(fetcher(`${apiUrl}/users/current`));
-
-  if (userError) {
-    console.error(eventsError);
-    await showHUD("Error getting the next event");
-    return;
-  }
-
-  const showDeclinedEvents = !!currentUser?.settings.showDeclinedEvents;
-
-  // Filter out events that are synced, managed by Reclaim and part of multiple calendars
-  const eventsData = filterMultipleOutDuplicateEvents(eventsResponse);
-
-  const events = eventsData
-    ?.filter((event) => {
-      return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
-    })
-    .filter((event) => {
-      return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
-    })
-    .filter((event) => isAfter(new Date(event.eventEnd), now))
-    .filter((event) => {
-      return !(differenceInHours(new Date(event.eventEnd), new Date(event.eventStart)) >= 24);
-    });
-
-  const event = events?.at(0);
-  const nextEvent = events?.at(1);
-
-  if (event?.onlineMeetingUrl) {
-    await open(event.onlineMeetingUrl);
-  } else {
-    if (nextEvent?.onlineMeetingUrl) {
-      await open(nextEvent.onlineMeetingUrl);
-    } else {
+  // if event does not succeed, try next event
+  if (!(await joinMeeting(momentRequest.event))) {
+    if (!(await joinMeeting(momentRequest.nextEvent))) {
       await showHUD("No meetings found.");
     }
   }

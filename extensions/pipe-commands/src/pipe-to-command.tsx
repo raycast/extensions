@@ -116,8 +116,14 @@ async function getInput(inputType: InputType) {
           return selection;
         }
       } catch (e: any) {
-        // if there was an intermittent error copying text, let's pull from clipboard instead
-        if (e.message != "Cannot copy selected text from frontmost application.") {
+        const selectionErrors = [
+          "Unable to get selected text from frontmost application",
+          "Cannot copy selected text from frontmost application.",
+        ];
+
+        // if there was an error copying text, let's pull from clipboard instead
+        // most likely no text was selected!
+        if (!selectionErrors.includes(e.message)) {
           throw e;
         }
       }

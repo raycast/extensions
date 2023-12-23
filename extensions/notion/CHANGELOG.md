@@ -1,5 +1,19 @@
 # Notion Changelog
 
+## [Add alternate open action] - 2023-12-03
+
+- Add an action that alternates with the primary open action. For example, if the primary action is set to open in Notion, the alternate action will open in the browser, and vice versa.
+
+## [Fixes] - 2023-10-12
+
+- Fix duplicated recent and searched pages sometimes showing
+- Modify how recent pages are stored
+- Fix last edited time showing as the current time
+- Fix duped recent pages after page title changed
+- Allow selecting just a date without a time
+- Support quick edit status property
+- Fix not being able to create a page with an empty select property
+
 ## [Deep links] - 2023-09-29
 
 - New action to `Create Database Page` that copies a [deeplink](https://manual.raycast.com/deeplink) to open the command as configured.
@@ -59,3 +73,4 @@ The extension has also been revamped under the hood to improve maintainability a
 
 - Added an Action to open the Notion Page after creating it
 - Added a TextArea to add some content to the page directly
+

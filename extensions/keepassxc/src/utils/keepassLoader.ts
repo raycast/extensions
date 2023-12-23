@@ -43,7 +43,7 @@ const keepassxcCli = path.join(preferences.keepassxcRootPath.path, "Contents/Mac
 const getSearchEntryCommand = async () => ((await getKeepassXCVersion()) >= 2.7 ? "search" : "locate");
 const keyFileOption = keyFile != "" && keyFile != null ? ["-k", `${keyFile}`] : [];
 // cli options
-const cliOptions = [...keyFileOption, "-q", "-a"];
+const cliOptions = [...keyFileOption, "-q"];
 const entryFilter = (entryStr: string) => {
   return entryStr
     .split("\n")
@@ -114,15 +114,21 @@ const refreshEntriesCache = async () =>
     });
 
 const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
-  if (data.toString().indexOf("Enter password to unlock") != -1 || data.toString().trim().length == 0) {
+  if (
+    data.toString().indexOf("Enter password to unlock") != -1 ||
+    data.toString().indexOf("Maximum depth of replacement has been reached") != -1 ||
+    data.toString().trim().length == 0
+  ) {
     return;
   }
   reject(new Error(data.toString()));
 };
 
-const getPassword = (entry: string) => execKeepassXCCli(["show", ...cliOptions, "Password", `${database}`, `${entry}`]);
+const getPassword = (entry: string) =>
+  execKeepassXCCli(["show", ...cliOptions, "-a", "Password", `${database}`, `${entry}`]);
 
-const getUsername = (entry: string) => execKeepassXCCli(["show", ...cliOptions, "Username", `${database}`, `${entry}`]);
+const getUsername = (entry: string) =>
+  execKeepassXCCli(["show", ...cliOptions, "-a", "Username", `${database}`, `${entry}`]);
 
 const pastePassword = async (entry: string) => {
   console.log("paste password of entry:", entry);
@@ -163,11 +169,9 @@ const copyTOTP = async (entry: string) =>
     return Clipboard.copy(otp, { concealed: true }).then(() => otp);
   });
 
-const getTOTP = (entry: string) =>
-  execKeepassXCCli(["show", ...cliOptions.filter((x) => x != "-a"), "-t", `${database}`, `${entry}`]);
+const getTOTP = (entry: string) => execKeepassXCCli(["show", ...cliOptions, "-t", `${database}`, `${entry}`]);
 
-const getURL = (entry: string) =>
-  execKeepassXCCli(["show", ...cliOptions.filter((x) => x != "-a"), "-a", "URL", `${database}`, `${entry}`]);
+const getURL = (entry: string) => execKeepassXCCli(["show", ...cliOptions, "-a", "URL", `${database}`, `${entry}`]);
 
 export {
   loadEntriesCache,
