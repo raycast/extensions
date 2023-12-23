@@ -10,12 +10,37 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultBibleVersion",
+      "title": "Default Bible Version",
+      "description": "The default bible version to use when searching. Defaults to \"NLT\".",
+      "type": "textfield",
+      "required": false,
+      "default": "NLT",
+      "placeholder": "Version"
+    }
+  ],
   "commands": [
     {
       "name": "bibleSearch",
       "title": "Bible Search",
       "description": "Search for, display, copy and paste bible passages. Configure whether to include verse numbers or show one verse per line.",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "ref",
+          "placeholder": "Reference(s)",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "version",
+          "placeholder": "Version",
+          "required": false,
+          "type": "text"
+        }
+      ],
       "preferences": [
         {
           "name": "enterToSearch",
