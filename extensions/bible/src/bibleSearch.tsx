@@ -5,13 +5,7 @@ import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 
 const DEFAULT_BIBLE_VERSION_ABBR = "NLT";
 
-type Preferences = {
-  enterToSearch: boolean;
-  oneVersePerLine: boolean;
-  includeVerseNumbers: boolean;
-  includeCopyright: boolean;
-  includeReferences: boolean;
-};
+type Preferences = Preferences.BibleSearch;
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
@@ -76,8 +70,8 @@ export default function Command() {
           storeValue
           defaultValue={query.version}
         >
-          {bibleVersions.map((v) => (
-            <List.Dropdown.Item title={v[0]} value={v[1]} key={v[1]} />
+          {bibleVersions.map(([name, abbreviation]) => (
+            <List.Dropdown.Item title={name} value={abbreviation} key={abbreviation} />
           ))}
         </List.Dropdown>
       }
