@@ -1,6 +1,6 @@
 # Twitch Changelog
 
-## [Oauth & Rich Results] - 2023-12-21
+## [OAuth & Rich Results] - 2023-12-21
 
 - Added Twitch Oauth support
   - Uses the Twitch Oauth API instead of 3rd party services
