@@ -1,11 +1,10 @@
-import { Application, getApplications, Grid } from "@raycast/api";
+import { Application, getApplications, Grid, getPreferenceValues } from "@raycast/api";
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
 import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
 
@@ -135,8 +134,8 @@ export default function Command() {
               extraKey={file.key + "-recent-file-item"}
               revalidate={revalidateStarredFiles}
               onVisit={visitFile}
-              starredFiles={starredFiles || []}
-              starredFilesCount={starredFiles?.length || 0}
+              starredFiles={starredFiles ?? []}
+              starredFilesCount={starredFiles?.length ?? 0}
             />
           ))}
         </Grid.Section>
@@ -162,8 +161,8 @@ export default function Command() {
                   file={file}
                   desktopApp={desktopApp}
                   onVisit={visitFile}
-                  starredFiles={starredFiles || []}
-                  starredFilesCount={starredFiles?.length || 0}
+                  starredFiles={starredFiles ?? []}
+                  starredFilesCount={starredFiles?.length ?? 0}
                 />
               ))}
             </Grid.Section>

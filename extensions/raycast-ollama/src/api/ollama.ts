@@ -6,6 +6,9 @@ import {
   OllamaApiPullResponse,
   OllamaApiShowResponse,
   OllamaApiShowModelfile,
+  OllamaApiChatRequestBody,
+  OllamaApiChatResponse,
+  OllamaApiVersionResponse,
 } from "./types";
 import {
   ErrorOllamaCustomModel,
@@ -13,6 +16,7 @@ import {
   ErrorOllamaNotInstalledOrRunning,
   ErrorOllamaModelRegistryUnreachable,
   MessageOllamaModelNotInstalled,
+  ErrorOllamaVersion,
 } from "./errors";
 import fetch from "node-fetch";
 import { EventEmitter } from "stream";
@@ -70,6 +74,28 @@ export async function OllamaAvailableModelsOnRegistry(): Promise<string[]> {
     });
 
   return data;
+}
+
+/**
+ * Get Ollama Version.
+ * @returns {Promise<string>} Ollama Version.
+ */
+export async function OllamaApiVersion(): Promise<string> {
+  const host = parseOllamaHostUrl();
+  const url = `${host}api/version`;
+
+  const data = await fetch(url)
+    .then((response) => response.json())
+    .then((output): OllamaApiVersionResponse => {
+      return output as OllamaApiVersionResponse;
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.type && err.type === "ECONNREFUSED") throw ErrorOllamaNotInstalledOrRunning;
+      throw ErrorOllamaVersion;
+    });
+
+  return data.version;
 }
 
 /**
@@ -363,6 +389,66 @@ export async function OllamaApiGenerate(body: OllamaApiGenerateRequestBody): Pro
             switch (json.done) {
               case false:
                 e.emit("data", json.response);
+                break;
+              case true:
+                e.emit("done", json);
+            }
+          }
+        });
+
+        return e;
+      })
+      .catch((err) => {
+        if (err instanceof ErrorOllamaModelNotInstalled) {
+          throw err;
+        } else if (err instanceof ErrorOllamaCustomModel) {
+          throw err;
+        }
+        console.error(err);
+        throw ErrorOllamaNotInstalledOrRunning;
+      });
+  }
+  return emitter;
+}
+
+/**
+ * Perform conversation with the selected model.
+ * @param {OllamaApiChatRequestBody} body - Ollama Chat Body Request.
+ * @returns {Promise<EventEmitter>} Response from the Ollama API with an EventEmitter with two event: `data` where all generated text is passed on `string` format and `done` when inference is finished returning a `OllamaApiChatResponse` object contains all metadata of inference.
+ */
+export async function OllamaApiChat(body: OllamaApiChatRequestBody): Promise<EventEmitter> {
+  const host = parseOllamaHostUrl();
+  const url = `${host}api/chat`;
+  let emitter: EventEmitter | undefined;
+
+  while (emitter === undefined) {
+    emitter = await fetch(url, {
+      method: "POST",
+      body: JSON.stringify(body),
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          return response.body;
+        }
+
+        if (response.status === 400) {
+          throw new ErrorOllamaModelNotInstalled(MessageOllamaModelNotInstalled.message, body.model);
+        }
+      })
+      .then((body) => {
+        if (body === undefined) {
+          return undefined;
+        }
+
+        const e = new EventEmitter();
+
+        body?.on("data", (chunk) => {
+          if (chunk !== undefined) {
+            const buffer = Buffer.from(chunk);
+            const json: OllamaApiChatResponse = JSON.parse(buffer.toString());
+            switch (json.done) {
+              case false:
+                json.message && e.emit("data", json.message.content);
                 break;
               case true:
                 e.emit("done", json);
