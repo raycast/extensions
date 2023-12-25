@@ -7,6 +7,9 @@
   "author": "thomaslombart",
   "owner": "raycast",
   "access": "public",
+  "contributors": [
+    "ir4n"
+  ],
   "categories": [
     "Productivity",
     "Applications"
@@ -58,10 +61,19 @@
         {
           "name": "displayMenuBarCount",
           "type": "checkbox",
-          "title": "Count",
+          "title": "Display count",
           "label": "Display menu bar count",
           "description": "When enabled, the number of reminders in the menu bar will be displayed",
           "default": true,
+          "required": false
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
+          "type": "checkbox",
+          "title": "Hide count when empty",
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
           "required": false
         },
         {
