@@ -12,7 +12,7 @@ import ProviderVersionsView from "./provider-version.view";
 import { hashColorizer } from "../lib/util";
 
 export default function ProviderView() {
-  const [state, setState] = useCachedState<Provider[]|undefined>(
+  const [state, setState] = useCachedState<Provider[] | undefined>(
     "providers",
     undefined,
     {

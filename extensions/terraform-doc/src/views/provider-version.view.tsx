@@ -9,7 +9,7 @@ import {
 } from "../lib/provider-version";
 
 export default function ProviderVersionsView(props: { provider: Provider }) {
-  const [state, setState] = useCachedState<ProviderVersion[]|undefined>(
+  const [state, setState] = useCachedState<ProviderVersion[] | undefined>(
     `provider-versions of ${props.provider.id}`,
     undefined,
     {
@@ -19,8 +19,7 @@ export default function ProviderVersionsView(props: { provider: Provider }) {
   useEffect(() => {
     async function updateProviderVersions() {
       try {
-        if (!state)
-          setState(await getProviderVersionList(props.provider));
+        if (!state) setState(await getProviderVersionList(props.provider));
       } catch (err) {
         throw new Error(`${err}`);
       }
