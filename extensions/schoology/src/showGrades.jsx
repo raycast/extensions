@@ -136,7 +136,7 @@ export default function Command() {
         .map((course) => (
           <List.Item
             title={coursesHashmap2[course] || course}
-            icon={getIconBasedOnNumber(coursesIconHashmap2[course]) || Icon.Text}
+            icon={Icon.CircleProgress100}
             accessories={[
               {
                 tag: {
