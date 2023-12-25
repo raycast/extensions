@@ -2,8 +2,8 @@ import { homedir } from "os";
 import { URL } from "url";
 import { HistoryItem, Tab } from "src/types";
 import { join } from "path";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import osascript from "osascript-tag";
+import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
 export function extractDomainName(urlString: string) {
   try {
@@ -38,16 +38,35 @@ export function groupHistoryByDay(groups: Map<string, HistoryItem[]>, entry: His
 }
 
 export function getOrionBasePath() {
-  return join(homedir(), "/Library/Application Support", getOrionAppIdentifier());
+  return join(homedir(), "Library", "Application Support", getOrionAppIdentifier());
 }
 
 export function getOrionAppIdentifier() {
   return getPreferenceValues()["orion-rc"] ? "Orion RC" : "Orion";
 }
 
+export function getFavoritesPath(profile: string) {
+  const profileFolder = profile;
+  return join(getOrionBasePath(), profileFolder, "favourites.plist");
+}
+
+export function getHistoryPath(profile: string) {
+  const profileFolder = profile;
+  return join(getOrionBasePath(), profileFolder, "history");
+}
+
+export function getReadingListPath(profile: string) {
+  const profileFolder = profile;
+  return join(getOrionBasePath(), profileFolder, "reading_list.plist");
+}
+
+export function getProfilesPath() {
+  return join(getOrionBasePath(), "profiles");
+}
+
 export const executeJxa = async (script: string) => {
   try {
-    return await osascript.jxa({ parse: true })`${script}`;
+    return await runAppleScript(script, { language: "JavaScript", humanReadableOutput: false });
   } catch (err: unknown) {
     console.log(err);
     if (typeof err === "string") {
@@ -77,7 +96,7 @@ const normalizeText = (text: string) =>
 
 export function search<T extends object>(collection: T[], keys: string[], searchText: string): T[] {
   return collection.filter((item) =>
-    keys.some((key) => normalizeText((item as Record<string, string>)[key]).includes(normalizeText(searchText)))
+    keys.some((key) => normalizeText((item as Record<string, string>)[key]).includes(normalizeText(searchText))),
   );
 }
 
@@ -96,10 +115,32 @@ export const getUrlDomain = (url: string) => {
   }
 };
 
-const parseUrl = (url: string) => {
+export const parseUrl = (url: string) => {
   try {
     return new URL(url);
   } catch (err) {
     return null;
   }
+};
+
+export const idToColor = (id: number) => {
+  switch (id) {
+    case 0:
+      return "#98989D";
+    case 1:
+      return "#CC66FF";
+    case 2:
+      return "#F7509E";
+    case 3:
+      return "#FF5045";
+    case 4:
+      return "#FFA915";
+    case 5:
+      return "#FFE018";
+    case 6:
+      return "#3EFD56";
+    case 7:
+      return "#A2A2A7";
+  }
+  return Color.PrimaryText;
 };

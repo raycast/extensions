@@ -1,4 +1,4 @@
-import { List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { GMailMessageListItem } from "./message/list";
 import { useState } from "react";
 import { generateQuery, getGMailMessages } from "../lib/gmail";
@@ -8,6 +8,7 @@ import { useLabels } from "../components/message/hooks";
 import { GMailContext } from "../components/context";
 import { getGMailClient } from "../lib/withGmailClient";
 import { useMessageListSelection } from "./selection/hooks";
+import { MessagesRefreshAction } from "./message/actions";
 
 export function ListQueryCommand(props: {
   baseQuery?: string[] | undefined;
@@ -65,6 +66,11 @@ export function ListQueryCommand(props: {
               : "No Mails found matching your Criteria"
           }
           icon="gmail.svg"
+          actions={
+            <ActionPanel>
+              <MessagesRefreshAction onRevalidate={revalidate} />
+            </ActionPanel>
+          }
         />
       </List>
     </GMailContext.Provider>

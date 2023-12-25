@@ -10,6 +10,13 @@ export class DisplayableError extends ManuallyThrownError {
   }
 }
 
+export function getDisplayableErrorMessage(error: any) {
+  if (error instanceof DisplayableError) return error.message;
+  return undefined;
+}
+
+/* -- specific errors below -- */
+
 export class CLINotFoundError extends DisplayableError {
   constructor(message: string) {
     super(message ?? "Bitwarden CLI not found");
@@ -31,14 +38,16 @@ export class VaultIsLockedError extends DisplayableError {
   }
 }
 
+export class NotLoggedInError extends ManuallyThrownError {
+  constructor(message: string) {
+    super(message ?? "Not logged in");
+    this.name = "NotLoggedInError";
+  }
+}
+
 export class EnsureCliBinError extends DisplayableError {
   constructor(message?: string) {
     super(message ?? "Failed do download Bitwarden CLI");
     this.name = "EnsureCliBinError";
   }
-}
-
-export function getDisplayableErrorMessage(error: any) {
-  if (error instanceof DisplayableError) return error.message;
-  return undefined;
 }

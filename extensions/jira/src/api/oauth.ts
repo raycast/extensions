@@ -25,7 +25,7 @@ export async function authorize() {
   }
 
   const authRequest = await oauthClient.authorizationRequest({
-    endpoint: "https://jira.oauth-proxy.raycast.com/authorize",
+    endpoint: "https://jira.oauth.raycast.com/authorize",
     clientId,
     scope: "read:jira-user read:jira-work write:jira-work offline_access read:sprint:jira-software",
   });
@@ -38,7 +38,7 @@ export async function authorize() {
 }
 
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://jira.oauth-proxy.raycast.com/token", {
+  const response = await fetch("https://jira.oauth.raycast.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -51,7 +51,8 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
   });
 
   if (!response.ok) {
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while fetching tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   const tokens = await response.json();
@@ -60,7 +61,7 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
 }
 
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://jira.oauth-proxy.raycast.com/refresh-token", {
+  const response = await fetch("https://jira.oauth.raycast.com/refresh-token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -71,8 +72,8 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   });
 
   if (!response.ok) {
-    console.error("refresh tokens error:", await response.text());
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while refreshing tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;

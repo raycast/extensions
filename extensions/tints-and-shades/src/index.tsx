@@ -1,30 +1,37 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, Grid } from "@raycast/api";
 import { useState } from "react";
 
-type ApiResponse = { [colorName: string]: ColorObject | null };
-
 interface ColorObject {
   tints: { [key: string]: string };
   shades: { [key: string]: string };
 }
 
-interface RGB {
-  r: number;
-  g: number;
-  b: number;
-  hex?: string;
-}
+type ApiResponse = { [colorName: string]: ColorObject };
 
-type GridItemProps = {
+interface GridItemProps {
   colorKey: string;
   shade: string;
   hexCode: string;
   index: number;
   type: "tints" | "shades";
-  apiResponse: object;
-};
+  apiResponse: ApiResponse;
+}
 
 const CustomGridItem: React.FC<GridItemProps> = ({ colorKey, shade, hexCode, index, type, apiResponse }) => {
+  let titleSuffix;
+  let subtitle;
+  const gridTitle = hexCode.toUpperCase();
+
+  if (type === "tints") {
+    titleSuffix = (10 - index) * 10;
+    subtitle = `+${titleSuffix}%`;
+    if (titleSuffix === 0) subtitle = "Base Color";
+  } else {
+    titleSuffix = index * 10;
+    subtitle = `-${titleSuffix}%`;
+    if (titleSuffix === 0) subtitle = "Base Color";
+  }
+
   return (
     <Grid.Item
       key={`${colorKey}-${type}-${shade}`}
@@ -35,7 +42,8 @@ const CustomGridItem: React.FC<GridItemProps> = ({ colorKey, shade, hexCode, ind
           adjustContrast: false,
         },
       }}
-      title={`${colorKey}-${type.slice(0, -1)}-${index}`}
+      title={`${gridTitle}`}
+      subtitle={subtitle}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Hex Value" icon={Icon.Hashtag} content={hexCode} />
@@ -48,11 +56,11 @@ const CustomGridItem: React.FC<GridItemProps> = ({ colorKey, shade, hexCode, ind
 
 export default function Command() {
   const [showForm, setShowForm] = useState<boolean>(true);
-  const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
+  const [apiResponse, setApiResponse] = useState<ApiResponse>({});
 
   async function handleSubmit({ name, hex }: { name: string; hex: string }) {
-    const cleanedName = name.replace(/[\s_]/g, "");
-    const cleanedHex = hex.replace(/#/g, "");
+    const cleanedName = name.trim();
+    let cleanedHex = hex.trim().replace(/\s+/g, "").replace(/#/g, "");
 
     if (!cleanedName || !cleanedHex) {
       showToast({
@@ -61,11 +69,19 @@ export default function Command() {
       });
       return;
     }
+    if (cleanedHex.length > 6) {
+      cleanedHex = cleanedHex.substring(0, 6);
+    } else if (cleanedHex.length < 6) {
+      cleanedHex = cleanedHex.padEnd(6, "f");
+    }
 
     try {
       const colorObject = generateTintsAndShades(cleanedHex);
-      const response: ApiResponse = { [cleanedName]: colorObject };
+      if (!colorObject) {
+        throw new Error("Invalid color hex value");
+      }
 
+      const response: ApiResponse = { [cleanedName]: colorObject };
       setApiResponse(response);
       setShowForm(false);
 
@@ -97,38 +113,37 @@ export default function Command() {
           <Form.TextArea id="hex" title="Hex" placeholder="Enter a hex value" storeValue />
         </Form>
       ) : (
-        apiResponse && <RenderNewUI apiResponse={apiResponse as unknown as ColorObject} />
+        <RenderNewUI apiResponse={apiResponse} />
       )}
     </>
   );
 }
 
-function RenderNewUI({ apiResponse }: { apiResponse: ColorObject }) {
-  console.log(apiResponse);
+function RenderNewUI({ apiResponse }: { apiResponse: ApiResponse }) {
   return (
     <>
       {Object.entries(apiResponse).map(([colorKey, colorValues]) => (
         <Grid key={colorKey}>
-          <Grid.Section title="Tints" columns={6}>
+          <Grid.Section title="Tints" columns={7}>
             {Object.entries(colorValues.tints).map(([shade, hexCode], index) => (
               <CustomGridItem
                 key={shade}
                 colorKey={colorKey}
                 shade={shade}
-                hexCode={hexCode as string}
+                hexCode={hexCode}
                 index={index}
                 type="tints"
                 apiResponse={apiResponse}
               />
             ))}
           </Grid.Section>
-          <Grid.Section title="Shades" columns={6}>
+          <Grid.Section title="Shades" columns={7}>
             {Object.entries(colorValues.shades).map(([shade, hexCode], index) => (
               <CustomGridItem
                 key={shade}
                 colorKey={colorKey}
                 shade={shade}
-                hexCode={hexCode as string}
+                hexCode={hexCode}
                 index={index}
                 type="shades"
                 apiResponse={apiResponse}
@@ -145,14 +160,14 @@ function RenderNewUI({ apiResponse }: { apiResponse: ColorObject }) {
 
 const componentToHex = (c: number): string => {
   const hex = c.toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
+  return hex.length === 1 ? "0" + hex : hex;
 };
 
 const rgbToHex = (r: number, g: number, b: number): string => {
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 };
 
-const hexToRgb = (hex: string): RGB | null => {
+const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
@@ -164,7 +179,7 @@ const hexToRgb = (hex: string): RGB | null => {
 };
 
 const getTint = (color: number, factor: number): number => {
-  return Math.round(color + (255 - color) * 1 * factor);
+  return Math.round(color + (255 - color) * factor);
 };
 
 const getShade = (color: number, factor: number): number => {
@@ -173,35 +188,23 @@ const getShade = (color: number, factor: number): number => {
 
 const generateTintsAndShades = (colorHex: string): ColorObject | null => {
   const color = hexToRgb(colorHex);
-
-  if (color === null) return null;
+  if (!color) return null;
 
   const colorObject: ColorObject = { tints: {}, shades: {} };
-  let j = 0;
+  for (let i = 0; i <= 10; i++) {
+    const factor = i / 10;
 
-  for (let i = 0; i <= 1; i += 0.1) {
-    j = Math.round(j * 10) / 10;
+    colorObject.tints[`${(10 - i) * 10}`] = rgbToHex(
+      getTint(color.r, factor),
+      getTint(color.g, factor),
+      getTint(color.b, factor)
+    );
 
-    const rgb: { tint: RGB; shade: RGB } = {
-      tint: {
-        r: getTint(color.r, j),
-        g: getTint(color.g, j),
-        b: getTint(color.b, j),
-      },
-      shade: {
-        r: getShade(color.r, j),
-        g: getShade(color.g, j),
-        b: getShade(color.b, j),
-      },
-    };
-
-    rgb.tint.hex = rgbToHex(rgb.tint.r, rgb.tint.g, rgb.tint.b);
-    rgb.shade.hex = rgbToHex(rgb.shade.r, rgb.shade.g, rgb.shade.b);
-
-    colorObject.tints[`${j * 10}`] = rgb.tint.hex;
-    colorObject.shades[`${j * 10}`] = rgb.shade.hex;
-
-    j += 0.1;
+    colorObject.shades[`${(10 - i) * 10}`] = rgbToHex(
+      getShade(color.r, factor),
+      getShade(color.g, factor),
+      getShade(color.b, factor)
+    );
   }
 
   return colorObject;

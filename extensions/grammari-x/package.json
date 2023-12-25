@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "grammari-x",
   "title": "GrammariX",
-  "description": "Your Writing's Best Friend. In this extension, you can fix your grammar and paraphrase your sentences more effectively.",
+  "description": "Your Writing's Best Friend. In this extension, you can fix your grammar and paraphrase your sentences more effectively. If you have a Raycast Pro subscription, you don't need to provide openAI key.",
   "icon": "icon.png",
   "author": "hakob_nersesian",
   "categories": [
@@ -34,10 +34,10 @@
   "preferences": [
     {
       "default": "",
-      "description": "Enter the OpenAI access token",
+      "description": "Enter the OpenAI access token, if you have a Raycast Pro subscription, you don't need to provide it.",
       "name": "openaiAccessToken",
       "placeholder": "[Enter Your Access Token]",
-      "required": true,
+      "required": false,
       "title": "OpenAI access token",
       "type": "textfield"
     },

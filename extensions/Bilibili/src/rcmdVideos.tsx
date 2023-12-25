@@ -29,6 +29,8 @@ export default function Command() {
           title={item.title}
           cover={item.pic}
           url={item.uri}
+          bvid={item.bvid}
+          cid={item.cid}
           uploader={{
             mid: item.owner.mid,
             name: item.owner.name,

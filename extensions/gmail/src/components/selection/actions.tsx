@@ -3,7 +3,7 @@ import { gmail_v1 } from "googleapis";
 import { ListSelectionController } from "./utils";
 import { markMessagesAsRead, markMessagesAsUnread, moveMessagesToTrash } from "../../lib/gmail";
 import { getErrorMessage } from "../../lib/utils";
-import { isMailUnread } from "../message/utils";
+import { isMailUnread, sendUpdateRequestToMenus } from "../message/utils";
 
 export function ToggleSelectedStateAction(props: {
   message: gmail_v1.Schema$Message;
@@ -94,6 +94,7 @@ export function MessageMarkSelectedAsReadAction(props: {
           await markMessagesAsRead(messages);
           toast.style = Toast.Style.Success;
           toast.title = `Marked ${messages.length} selected Mails as Read`;
+          sendUpdateRequestToMenus();
 
           props.selectionController.deselectAll();
           if (props.onRevalidate) {
@@ -135,6 +136,7 @@ export function MessageMarkSelectedAsUnreadAction(props: {
           await markMessagesAsUnread(messages);
           toast.style = Toast.Style.Success;
           toast.title = `Marked ${messages.length} selected Mails as Unread`;
+          sendUpdateRequestToMenus();
 
           props.selectionController.deselectAll();
           if (props.onRevalidate) {
@@ -178,6 +180,7 @@ export function MessageDeleteSelectedAction(props: {
           await moveMessagesToTrash(messages);
           toast.style = Toast.Style.Success;
           toast.title = `Moved ${messages.length} selected Mails to Trash`;
+          sendUpdateRequestToMenus();
 
           props.selectionController.deselectAll();
           if (props.onRevalidate) {

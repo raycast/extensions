@@ -35,7 +35,7 @@ export function ProjectList() {
     showToast(
       ToastStyle.Failure,
       "Could not fetch updated projects, check your internet and setup the GCloud CLI!",
-      error.message
+      error.message,
     );
   }
 
@@ -44,10 +44,8 @@ export function ProjectList() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search projects by name...">
-      {data?.map((project) => (
-        <ProjectListItem key={project.projectId} project={project} />
-      ))}
+    <List isLoading={isLoading} searchBarPlaceholder="Search projects by name or id...">
+      {data?.map((project) => <ProjectListItem key={project.projectId} project={project} />)}
     </List>
   );
 }
@@ -68,6 +66,7 @@ function ProjectListItem(props: { project: Project }) {
   return (
     <List.Item
       title={props.project.displayName ?? props.project.projectId}
+      keywords={[props.project.projectId]}
       accessoryTitle={props.project.projectId}
       icon="command-icon.png"
       actions={<ProductActions project={props.project} />}

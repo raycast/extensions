@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import sound from "sound-play";
 
 export default function Command(props: LaunchProps) {
-  const { bpm, group } = props.arguments;
+  const { bpm, group = 1 } = props.arguments; // Set default value for group
   const [taps, setTaps] = useState<number>(0);
   const groupPositionRef = useRef<number>(1);
   const [isRunning, setIsRunning] = useState(true); // Added state variable for metronome status
@@ -32,10 +32,8 @@ export default function Command(props: LaunchProps) {
 
     function handleClick() {
       if (groupPositionRef.current === 1) {
-        console.log("click");
         sound.play(environment.assetsPath + "/sfx/" + "metronome-click.wav");
       } else {
-        console.log("click_lower");
         sound.play(environment.assetsPath + "/sfx/" + "metronome-click_lower.wav");
       }
 
@@ -60,18 +58,19 @@ export default function Command(props: LaunchProps) {
   }, [bpm, group, isRunning]);
 
   if (
-    Number.isInteger(Number(bpm)) &&
+    !isNaN(Number(bpm)) &&
     Number(bpm) > 0 &&
-    Number(bpm) < 700 &&
-    Number.isInteger(Number(group)) &&
-    Number(group) > 0 &&
-    Number(group) < 700
+    Number(bpm) < 500 &&
+    !isNaN(Number(group) || 1) &&
+    Number(group || 1) > 0 &&
+    Number(group || 1) < 500
   ) {
-    const description = isRunning ? "Click ↵ to stop the timer." : "Click ↵ to start the timer.";
+    const description = isRunning ? "Click ↵ to pause" : "Click ↵ to play";
+
     return (
       <List searchBarPlaceholder="" searchText="">
         <List.EmptyView
-          title={`BPM: ${bpm} | Accents: Per ${group} Clicks | Clicks: ${taps}`}
+          title={`BPM: ${bpm} | Accents: Per ${group || 1} ${group == 1 ? "Click" : "Clicks"} | Clicks: ${taps}`}
           description={description}
           icon={taps % 2 === 0 ? "metronome-left.png" : "metronome-right.png"}
           actions={
@@ -90,7 +89,7 @@ export default function Command(props: LaunchProps) {
     showToast({
       style: Toast.Style.Failure,
       title: "Invalid Inputs",
-      message: "Inputs must be positive integers below 700",
+      message: "Inputs must be positive numbers below 500",
     });
     popToRoot();
     return null;

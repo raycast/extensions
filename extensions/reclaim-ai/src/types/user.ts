@@ -170,6 +170,7 @@ export interface UserFeatures {
     enabled: boolean;
     note: string;
     remindersMigrated: boolean;
+    shareTimesEnabled: boolean;
   };
   eventStorage: {
     enabled: boolean;

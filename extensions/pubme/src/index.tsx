@@ -669,7 +669,7 @@ function EntryActions(
             icon={Icon.Globe}
             title="Open Article in Browser"
             target={article.url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
           <Action.Open
             icon={Icon.MagnifyingGlass}
@@ -681,13 +681,13 @@ function EntryActions(
             icon={Icon.LockUnlocked}
             title="Open Article on Sci-Hub in Browser"
             target={preferences.scihubinstance.value + encodeURI(article.doi)}
-            shortcut={{ modifiers: ["opt"], key: "enter" }}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
           <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
           <Action.CopyToClipboard
             title="Copy PMID"
             content={article.pmid}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
           />
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
@@ -727,7 +727,7 @@ function EntryActions(
             icon={Icon.Globe}
             title="Open Article in Browser"
             target={article.url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
           <Action.Open
             icon={Icon.MagnifyingGlass}
@@ -739,7 +739,7 @@ function EntryActions(
           <Action.CopyToClipboard
             title="Copy PMID"
             content={article.pmid}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
           />
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
@@ -779,7 +779,7 @@ function EntryActions(
             icon={Icon.Globe}
             title="Open Article in Browser"
             target={article.url}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
           <Action.Open
             icon={Icon.MagnifyingGlass}
@@ -790,7 +790,7 @@ function EntryActions(
           <Action.CopyToClipboard
             title="Copy PMID"
             content={article.pmid}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
           />
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
@@ -813,67 +813,219 @@ function EntryActions(
       );
     }
   } else if (preferences.scihubinstance.value != undefined && preferences.scihubinstance.value != "" && article.doi) {
-    return (
-      <ActionPanel>
-        <Action.Push
-          icon={Icon.Book}
-          title="Read Abstract"
-          target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
-          shortcut={{ modifiers: [], key: "arrowRight" }}
-        />
-        <Action.Open
-          icon={Icon.Globe}
-          title="Open Article in Browser"
-          target={article.url}
-          shortcut={{ modifiers: ["cmd"], key: "enter" }}
-        />
-        <Action.Open
-          icon={Icon.MagnifyingGlass}
-          title="Open Search in Browser"
-          target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-        />
-        <Action.Open
-          icon={Icon.LockUnlocked}
-          title="Open Article on Sci-Hub in Browser"
-          target={preferences.scihubinstance.value + encodeURI(article.doi)}
-          shortcut={{ modifiers: ["opt"], key: "enter" }}
-        />
-        <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
-        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
-        <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
-        <Action
-          icon={Icon.ArrowClockwise}
-          title={"Reload Trending Articles"}
-          onAction={() => reloadArticles(fetchData)}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-        />
-        <Action
-          icon={Icon.Trash}
-          title={"Clear All History"}
-          onAction={() => clearAllHistory(fetchData, getHistoryAndFavourites)}
-        />
-        <Action
-          icon={Icon.Trash}
-          title={"Clear All Favourites"}
-          onAction={() => clearAllFavourites(fetchData, getHistoryAndFavourites)}
-        />
-      </ActionPanel>
-    );
+    if (query) {
+      return (
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Book}
+            title="Read Abstract"
+            target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
+            // shortcut={{ modifiers: [], key: "arrowRight" }}
+          />
+          <Action.Open
+            icon={Icon.Globe}
+            title="Open Article in Browser"
+            target={article.url}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+          />
+          <Action.Open
+            icon={Icon.MagnifyingGlass}
+            title="Open Search in Browser"
+            target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          />
+          <Action.Open
+            icon={Icon.LockUnlocked}
+            title="Open Article on Sci-Hub in Browser"
+            target={preferences.scihubinstance.value + encodeURI(article.doi)}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+          />
+          <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+          <Action.CopyToClipboard
+            title="Copy PMID"
+            content={article.pmid}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
+          />
+          <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+          <Action
+            icon={Icon.ArrowClockwise}
+            title={"Reload Trending Articles"}
+            onAction={() => reloadArticles(fetchData)}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action
+            icon={Icon.Trash}
+            title={"Clear All History"}
+            onAction={() => clearAllHistory(fetchData, getHistoryAndFavourites)}
+          />
+          <Action
+            icon={Icon.Trash}
+            title={"Clear All Favourites"}
+            onAction={() => clearAllFavourites(fetchData, getHistoryAndFavourites)}
+          />
+        </ActionPanel>
+      );
+    } else {
+      return (
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Book}
+            title="Read Abstract"
+            target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
+            shortcut={{ modifiers: [], key: "arrowRight" }}
+          />
+          <Action.Open
+            icon={Icon.Globe}
+            title="Open Article in Browser"
+            target={article.url}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+          />
+          <Action.Open
+            icon={Icon.MagnifyingGlass}
+            title="Open Search in Browser"
+            target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          />
+          <Action.Open
+            icon={Icon.LockUnlocked}
+            title="Open Article on Sci-Hub in Browser"
+            target={preferences.scihubinstance.value + encodeURI(article.doi)}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+          />
+          <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+          <Action.CopyToClipboard
+            title="Copy PMID"
+            content={article.pmid}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
+          />
+          <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+          <Action
+            icon={Icon.ArrowClockwise}
+            title={"Reload Trending Articles"}
+            onAction={() => reloadArticles(fetchData)}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action
+            icon={Icon.Trash}
+            title={"Clear All History"}
+            onAction={() => clearAllHistory(fetchData, getHistoryAndFavourites)}
+          />
+          <Action
+            icon={Icon.Trash}
+            title={"Clear All Favourites"}
+            onAction={() => clearAllFavourites(fetchData, getHistoryAndFavourites)}
+          />
+        </ActionPanel>
+      );
+    }
   } else if (article.doi) {
+    if (query) {
+      return (
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Book}
+            title="Read Abstract"
+            target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
+            // shortcut={{ modifiers: [], key: "arrowRight" }}
+          />
+          <Action.Open
+            icon={Icon.Globe}
+            title="Open Article in Browser"
+            target={article.url}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+          />
+          <Action.Open
+            icon={Icon.MagnifyingGlass}
+            title="Open Search in Browser"
+            target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          />
+          <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+          <Action.CopyToClipboard
+            title="Copy PMID"
+            content={article.pmid}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
+          />
+          <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+          <Action
+            icon={Icon.ArrowClockwise}
+            title={"Reload Trending Articles"}
+            onAction={() => reloadArticles(fetchData)}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action
+            icon={Icon.Trash}
+            title={"Clear All History"}
+            onAction={() => clearAllHistory(fetchData, getHistoryAndFavourites)}
+          />
+          <Action
+            icon={Icon.Trash}
+            title={"Clear All Favourites"}
+            onAction={() => clearAllFavourites(fetchData, getHistoryAndFavourites)}
+          />
+        </ActionPanel>
+      );
+    } else {
+      return (
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Book}
+            title="Read Abstract"
+            target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
+            shortcut={{ modifiers: [], key: "arrowRight" }}
+          />
+          <Action.Open
+            icon={Icon.Globe}
+            title="Open Article in Browser"
+            target={article.url}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+          />
+          <Action.Open
+            icon={Icon.MagnifyingGlass}
+            title="Open Search in Browser"
+            target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          />
+          <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
+          <Action.CopyToClipboard
+            title="Copy PMID"
+            content={article.pmid}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
+          />
+          <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
+          <Action
+            icon={Icon.ArrowClockwise}
+            title={"Reload Trending Articles"}
+            onAction={() => reloadArticles(fetchData)}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
+          <Action
+            icon={Icon.Trash}
+            title={"Clear All History"}
+            onAction={() => clearAllHistory(fetchData, getHistoryAndFavourites)}
+          />
+          <Action
+            icon={Icon.Trash}
+            title={"Clear All Favourites"}
+            onAction={() => clearAllFavourites(fetchData, getHistoryAndFavourites)}
+          />
+        </ActionPanel>
+      );
+    }
+  } else if (query) {
     return (
       <ActionPanel>
         <Action.Push
           icon={Icon.Book}
           title="Read Abstract"
           target={<Details article={article} query={query} onDetailViewPop={getHistoryAndFavourites} />}
-          shortcut={{ modifiers: [], key: "arrowRight" }}
+          // shortcut={{ modifiers: [], key: "arrowRight" }}
         />
         <Action.Open
           icon={Icon.Globe}
           title="Open Article in Browser"
           target={article.url}
-          shortcut={{ modifiers: ["cmd"], key: "enter" }}
+          shortcut={{ modifiers: ["shift"], key: "enter" }}
         />
         <Action.Open
           icon={Icon.MagnifyingGlass}
@@ -881,8 +1033,11 @@ function EntryActions(
           target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
-        <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
-        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard
+          title="Copy PMID"
+          content={article.pmid}
+          shortcut={{ modifiers: ["shift"], key: "p" }}
+        />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowClockwise}
@@ -915,7 +1070,7 @@ function EntryActions(
           icon={Icon.Globe}
           title="Open Article in Browser"
           target={article.url}
-          shortcut={{ modifiers: ["cmd"], key: "enter" }}
+          shortcut={{ modifiers: ["shift"], key: "enter" }}
         />
         <Action.Open
           icon={Icon.MagnifyingGlass}
@@ -923,7 +1078,11 @@ function EntryActions(
           target={"https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURI(query!) + "&sort=" + encodeURI(sortBy!)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
         />
-        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard
+          title="Copy PMID"
+          content={article.pmid}
+          shortcut={{ modifiers: ["shift"], key: "p" }}
+        />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowClockwise}
@@ -957,10 +1116,14 @@ function EntryActionsDetail(article: Article, query: string) {
           icon={Icon.LockUnlocked}
           title="Open article on Sci-Hub in Browser"
           target={preferences.scihubinstance.value + encodeURI(article.doi)}
-          shortcut={{ modifiers: ["opt"], key: "enter" }}
+          shortcut={{ modifiers: ["shift"], key: "enter" }}
         />
         <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
-        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard
+          title="Copy PMID"
+          content={article.pmid}
+          shortcut={{ modifiers: ["shift"], key: "p" }}
+        />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowLeftCircleFilled}
@@ -975,7 +1138,11 @@ function EntryActionsDetail(article: Article, query: string) {
       <ActionPanel>
         <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
         <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
-        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard
+          title="Copy PMID"
+          content={article.pmid}
+          shortcut={{ modifiers: ["shift"], key: "p" }}
+        />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowLeftCircleFilled}
@@ -989,7 +1156,11 @@ function EntryActionsDetail(article: Article, query: string) {
     return (
       <ActionPanel>
         <Action.Open icon={Icon.Globe} title="Open Article in Browser" target={article.url} />
-        <Action.CopyToClipboard title="Copy PMID" content={article.pmid} shortcut={{ modifiers: ["cmd"], key: "p" }} />
+        <Action.CopyToClipboard
+          title="Copy PMID"
+          content={article.pmid}
+          shortcut={{ modifiers: ["shift"], key: "p" }}
+        />
         <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
         <Action
           icon={Icon.ArrowLeftCircleFilled}
@@ -1305,13 +1476,13 @@ const Details = (props: { article: Article; query: string; onDetailViewPop: () =
             icon={Icon.LockUnlocked}
             title="Open Article on Sci-Hub in Browser"
             target={preferences.scihubinstance.value + encodeURI(article.doi)}
-            shortcut={{ modifiers: ["opt"], key: "enter" }}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
           <Action.CopyToClipboard title="Copy DOI" content={article.doi} shortcut={{ modifiers: ["cmd"], key: "d" }} />
           <Action.CopyToClipboard
             title="Copy PMID"
             content={article.pmid}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
           />
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
@@ -1336,7 +1507,7 @@ const Details = (props: { article: Article; query: string; onDetailViewPop: () =
           <Action.CopyToClipboard
             title="Copy PMID"
             content={article.pmid}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
           />
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action
@@ -1360,7 +1531,7 @@ const Details = (props: { article: Article; query: string; onDetailViewPop: () =
           <Action.CopyToClipboard
             title="Copy PMID"
             content={article.pmid}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ["shift"], key: "p" }}
           />
           <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
           <Action

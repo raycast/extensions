@@ -1,5 +1,20 @@
 # GitLab Changelog
 
+## [Fix] - 2023-10-21
+
+- Fix possible crash in todo commands if the title is empty
+
+## [Fix] - 2023-10-15
+
+- Fix possible crashes in menubar items
+- Fix possible crashes in label lists
+- Catch error if launchCommand fails
+- Fix menubar icon color on dark theme
+
+## [Fixed unicode chars in title] - 2023-09-21
+
+- Fixed an error with unicode chars in titles
+
 ## [Fixed menubar colors] - 2023-08-08
 
 - Fixes the dynamic color for the GitLab Menu Bar command icons, specifically the Merge Request one.

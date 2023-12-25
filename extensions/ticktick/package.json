@@ -14,12 +14,56 @@
   ],
   "preferences": [
     {
-      "name": "autoFillEnabled",
-      "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
-      "type": "checkbox",
-      "defaultValue": false,
-      "label": "Auto Fill with AI",
-      "required": false
+      "name": "defaultTitle",
+      "description": "Default title for new task.",
+      "defaultValue": "none",
+      "title": "Default Title",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "Selection",
+          "value": "selection"
+        }
+      ]
+    },
+    {
+      "name": "defaultDate",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Today",
+          "value": "today"
+        },
+        {
+          "title": "Tomorrow",
+          "value": "tomorrow"
+        },
+        {
+          "title": "Day after Tomorrow",
+          "value": "dayAfterTomorrow"
+        },
+        {
+          "title": "Next Week",
+          "value": "nextWeek"
+        }
+      ],
+      "default": "none",
+      "required": false,
+      "title": "Default Date",
+      "description": "Default date for new task."
     }
   ],
   "commands": [
@@ -55,8 +99,38 @@
       "name": "create",
       "title": "Add Task",
       "subtitle": "TickTick",
-      "description": "Convenient way to easily add new task.",
-      "mode": "view"
+      "description": "Add task in TickTick.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoFillEnabled",
+          "description": "Automatically fill the task fields using Raycast AI (Requires Pro)",
+          "type": "checkbox",
+          "defaultValue": false,
+          "label": "Auto Fill with AI",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quickAdd",
+      "title": "Quick Add Task",
+      "subtitle": "TickTick",
+      "description": "Quick way to add task in TickTick.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {

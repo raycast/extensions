@@ -7,3 +7,5 @@
 .DS_Store
 
 scripts/*
+
+raycast-env.d.ts

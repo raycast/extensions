@@ -27,6 +27,7 @@ import {
   CreateQueryQuickLinkAction,
   MessageMarkAsArchived,
   FilterMessagesLikeGivenAction,
+  MessageCopyWebUrlAction,
 } from "./actions";
 import { getFirstValidLetter } from "../../lib/utils";
 import { useContext } from "react";
@@ -197,6 +198,7 @@ export function GMailMessageListItem(props: {
           <ActionPanel.Section>
             <CreateQueryQuickLinkAction searchText={props.searchText} />
             <MessageCopyIdAction message={data} />
+            <MessageCopyWebUrlAction message={data} />
           </ActionPanel.Section>
           <MessageDebugActionPanelSection message={data} query={props.query} />
         </ActionPanel>

@@ -1,6 +1,10 @@
 # `useExec`
 
-Hook that executes a command and returns the [AsyncState](#asyncstate) corresponding to the execution of the command. The last value will be kept between command runs.
+Hook that executes a command and returns the [AsyncState](#asyncstate) corresponding to the execution of the command.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useExec` first returns the data from cache (stale), then executes the command (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
 
 ## Signature
 

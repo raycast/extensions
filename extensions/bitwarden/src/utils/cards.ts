@@ -38,6 +38,7 @@ ${Object.entries(card)
 
     return `| ${shortcutKey ? `${shortcutKey}.` : "&nbsp;"}\t**${label}** | ${getCardValue(key, value)} |`;
   })
+  .filter(Boolean)
   .join("\n")}
 `;
 }

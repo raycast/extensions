@@ -28,7 +28,7 @@ export async function getLabels(teamId?: string) {
         }
       }
     `,
-    { teamId }
+    { teamId },
   );
 
   return data?.team.labels.nodes;

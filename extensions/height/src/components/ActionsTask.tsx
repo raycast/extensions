@@ -12,12 +12,14 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { ApiTask } from "../api/task";
-import { FieldTemplateObject, Option } from "../types/fieldTemplate";
+import { batchUpdateTask, getTask, updateTask } from "../api/task";
+import { FieldTemplateObject, Label } from "../types/fieldTemplate";
 import { ListObject } from "../types/list";
 import { TaskObject } from "../types/task";
 import { UserObject } from "../types/user";
-import { ApiResponse, UseCachedPromiseMutatePromise } from "../types/utils";
+import { CachedPromiseMutateType } from "../types/utils";
+import { WorkspaceObject } from "../types/workspace";
+import { isHeightInstalled } from "../utils/application";
 import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState, getPriorityIcon } from "../utils/task";
 import DetailsTask from "./DetailsTask";
@@ -25,14 +27,15 @@ import UpdateTask from "./UpdateTask";
 
 type Props = {
   task: TaskObject;
-  mutateTask: UseCachedPromiseMutatePromise<ApiResponse<TaskObject[]>>;
-  fieldTemplatesStatuses?: Option[];
-  fieldTemplatesPriorities?: Option[];
+  mutateTask: CachedPromiseMutateType<typeof getTask>;
+  fieldTemplatesStatuses?: Label[];
+  fieldTemplatesPriorities?: Label[];
   fieldTemplatesPrioritiesObj?: FieldTemplateObject;
   fieldTemplatesDueDate?: FieldTemplateObject;
   lists?: ListObject[];
   tasks?: TaskObject[];
   users?: UserObject[];
+  workspace?: WorkspaceObject;
   detailsTaskRevalidate?: () => void;
   detailsPage?: boolean;
 };
@@ -47,6 +50,7 @@ export default function ActionsTask({
   lists,
   tasks,
   users,
+  workspace,
   detailsPage,
   detailsTaskRevalidate,
 }: Props) {
@@ -63,7 +67,16 @@ export default function ActionsTask({
             onAction={() => push(<DetailsTask taskId={task.id} mutateTask={mutateTask} />)}
           />
         )}
-        <Action.OpenInBrowser title="Open Task in Browser" icon={Icon.Globe} url={task.url} />
+        {isHeightInstalled ? (
+          <Action.Open
+            title="Open Task in Height App"
+            icon={"height-app.png"}
+            target={`${workspace?.url?.replace("https", "height")}/${task.url.split("/").at(-1)}`}
+            application="Height"
+          />
+        ) : (
+          <Action.OpenInBrowser title="Open Task in Browser" icon={Icon.Globe} url={task.url} />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
@@ -85,7 +98,7 @@ export default function ActionsTask({
                 mutateTask={mutateTask}
                 detailsPage={detailsPage}
                 detailsTaskRevalidate={detailsTaskRevalidate}
-              />
+              />,
             )
           }
         />
@@ -106,7 +119,7 @@ export default function ActionsTask({
                 title: "Unsetting assignee",
               });
               try {
-                await mutateTask(ApiTask.update(task.id, { assigneesIds: [] }));
+                await mutateTask(updateTask(task.id, { assigneesIds: [] }));
                 if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                 toast.style = Toast.Style.Success;
@@ -136,7 +149,7 @@ export default function ActionsTask({
                   title: "Setting assignee",
                 });
                 try {
-                  await mutateTask(ApiTask.update(task.id, { assigneesIds: [user.id] }));
+                  await mutateTask(updateTask(task.id, { assigneesIds: [user.id] }));
                   if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                   toast.style = Toast.Style.Success;
@@ -167,7 +180,7 @@ export default function ActionsTask({
                   title: "Setting status",
                 });
                 try {
-                  await mutateTask(ApiTask.update(task.id, { status: status.id }));
+                  await mutateTask(updateTask(task.id, { status: status.id }));
                   if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                   toast.style = Toast.Style.Success;
@@ -200,7 +213,7 @@ export default function ActionsTask({
 
               try {
                 await mutateTask(
-                  ApiTask.batchUpdate({
+                  batchUpdateTask({
                     patches: [
                       {
                         taskIds: [task.id],
@@ -215,7 +228,7 @@ export default function ActionsTask({
                         ],
                       },
                     ],
-                  })
+                  }),
                 );
                 if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
@@ -246,7 +259,7 @@ export default function ActionsTask({
 
                 try {
                   await mutateTask(
-                    ApiTask.batchUpdate({
+                    batchUpdateTask({
                       patches: [
                         {
                           taskIds: [task.id],
@@ -263,7 +276,7 @@ export default function ActionsTask({
                           ],
                         },
                       ],
-                    })
+                    }),
                   );
                   if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
@@ -290,7 +303,7 @@ export default function ActionsTask({
 
             try {
               await mutateTask(
-                ApiTask.batchUpdate({
+                batchUpdateTask({
                   patches: [
                     {
                       taskIds: [task.id],
@@ -305,7 +318,7 @@ export default function ActionsTask({
                       ],
                     },
                   ],
-                })
+                }),
               );
               if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
@@ -335,7 +348,7 @@ export default function ActionsTask({
                 title: "Unsetting parent task",
               });
               try {
-                await mutateTask(ApiTask.update(task.id, { parentTaskId: null }));
+                await mutateTask(updateTask(task.id, { parentTaskId: null }));
                 if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                 toast.style = Toast.Style.Success;
@@ -350,7 +363,7 @@ export default function ActionsTask({
           {tasks
             ?.filter(
               (filteredParentTask) =>
-                filteredParentTask.listIds.some((id) => task.listIds.includes(id)) && filteredParentTask.id !== task.id
+                filteredParentTask.listIds.some((id) => task.listIds.includes(id)) && filteredParentTask.id !== task.id,
             )
             ?.map((parentTask) => (
               <Action
@@ -366,7 +379,7 @@ export default function ActionsTask({
                     title: "Setting parent task",
                   });
                   try {
-                    await mutateTask(ApiTask.update(task.id, { parentTaskId: parentTask.id }));
+                    await mutateTask(updateTask(task.id, { parentTaskId: parentTask.id }));
                     if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                     toast.style = Toast.Style.Success;
@@ -401,7 +414,7 @@ export default function ActionsTask({
                     title: "Moving task to list",
                   });
                   try {
-                    await mutateTask(ApiTask.update(task.id, { listIds: [list.id] }));
+                    await mutateTask(updateTask(task.id, { listIds: [list.id] }));
                     if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                     toast.style = Toast.Style.Success;
@@ -434,7 +447,7 @@ export default function ActionsTask({
                 onAction: async () => {
                   const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
                   try {
-                    await mutateTask(ApiTask.update(task.id, { deleted: true }));
+                    await mutateTask(updateTask(task.id, { deleted: true }));
                     if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
                     toast.style = Toast.Style.Success;

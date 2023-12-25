@@ -83,7 +83,11 @@ export function LaunchCommandMenubarItem(props: {
   type: LaunchType;
 }) {
   const launch = async () => {
-    return launchCommand({ name: props.name, type: props.type });
+    try {
+      return await launchCommand({ name: props.name, type: props.type });
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) || "Internal Error" });
+    }
   };
   return (
     <MenuBarExtra.Item

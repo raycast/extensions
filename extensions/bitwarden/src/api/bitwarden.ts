@@ -8,11 +8,35 @@ import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
-import { EnsureCliBinError, CLINotFoundError, VaultIsLockedError } from "~/utils/errors";
+import { CLINotFoundError, EnsureCliBinError, ManuallyThrownError, NotLoggedInError, VaultIsLockedError } from "~/utils/errors";
 import { join } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, waitForFileAvailable } from "~/utils/fs";
 import { getFileSha256 } from "~/utils/crypto";
+
+type Env = {
+  BITWARDENCLI_APPDATA_DIR: string;
+  BW_CLIENTSECRET: string;
+  BW_CLIENTID: string;
+  PATH: string;
+  NODE_EXTRA_CA_CERTS?: string;
+  BW_SESSION?: string;
+};
+
+type ActionCallbacks = {
+  login?: () => MaybePromise<void>;
+  logout?: () => MaybePromise<void>;
+  lock?: (reason?: string) => MaybePromise<void>;
+  unlock?: (password: string, sessionToken: string) => MaybePromise<void>;
+};
+
+type MaybeError<T = undefined> = { result: T; error?: undefined } | { result?: undefined; error: ManuallyThrownError };
+
+type ExecProps = {
+  abortController?: AbortController;
+  skipLastActivityUpdate?: boolean;
+  input?: string;
+};
 
 const cliInfo = {
   version: "2023.8.2",
@@ -201,62 +225,120 @@ export class Bitwarden {
     return result;
   }
 
-  async sync(): Promise<void> {
-    await this.exec(["sync"]);
-  }
-
-  async login(): Promise<void> {
-    await this.exec(["login", "--apikey"]);
-    await this.clearLockReason();
-    await this.callbacks.login?.();
-  }
-
-  async logout(): Promise<void> {
-    await this.exec(["logout"]);
-    this.clearSessionToken();
-    await this.callbacks.logout?.();
-  }
-
-  async lock(reason?: string, shouldCheckVaultStatus?: boolean): Promise<void> {
-    if (shouldCheckVaultStatus) {
-      const isAuthenticated = (await this.status()).status !== "unauthenticated";
-      if (!isAuthenticated) return;
+  async login(): Promise<MaybeError> {
+    try {
+      await this.exec(["login", "--apikey"]);
+      await this.clearLockReason();
+      await this.callbacks.login?.();
+      return { result: undefined };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
     }
-
-    if (reason) await this.setLockReason(reason);
-    await this.exec(["lock"]);
-    await this.callbacks.lock?.(reason);
   }
 
-  async unlock(password: string): Promise<string> {
-    const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"]);
-    this.setSessionToken(sessionToken);
-    await this.clearLockReason();
-    await this.callbacks.unlock?.(password, sessionToken);
-    return sessionToken;
+  async logout(): Promise<MaybeError> {
+    try {
+      await this.exec(["logout"]);
+      await this.handlePostLogout();
+      return { result: undefined };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
-  async listItems(): Promise<Item[]> {
-    const { stdout } = await this.exec(["list", "items"]);
-    const items = JSON.parse<Item[]>(stdout);
-    // Filter out items without a name property (they are not displayed in the bitwarden app)
-    return items.filter((item: Item) => !!item.name);
+  async lock(reason?: string, shouldCheckVaultStatus?: boolean): Promise<MaybeError> {
+    try {
+      if (shouldCheckVaultStatus) {
+        const { error, result } = await this.status();
+        if (error) throw error;
+        if (result.status !== "unauthenticated") return { error: new NotLoggedInError("Not logged in") };
+      }
+
+      if (reason) await this.setLockReason(reason);
+      await this.exec(["lock"]);
+      await this.callbacks.lock?.(reason);
+      return { result: undefined };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
-  async listFolders(): Promise<Folder[]> {
-    const { stdout } = await this.exec(["list", "folders"]);
-    return JSON.parse<Folder[]>(stdout);
+  async unlock(password: string): Promise<MaybeError<string>> {
+    try {
+      const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"]);
+      this.setSessionToken(sessionToken);
+      await this.clearLockReason();
+      await this.callbacks.unlock?.(password, sessionToken);
+      return { result: sessionToken };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
-  async getTotp(id: string): Promise<string> {
-    // this could return something like "Not found." but checks for totp code are done before calling this function
-    const { stdout } = await this.exec(["get", "totp", id]);
-    return stdout;
+  async sync(): Promise<MaybeError> {
+    try {
+      await this.exec(["sync"]);
+      return { result: undefined };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
-  async status(): Promise<VaultState> {
-    const { stdout } = await this.exec(["status"]);
-    return JSON.parse(stdout);
+  async listItems(): Promise<MaybeError<Item[]>> {
+    try {
+      const { stdout } = await this.exec(["list", "items"]);
+      const items = JSON.parse<Item[]>(stdout);
+      // Filter out items without a name property (they are not displayed in the bitwarden app)
+      return { result: items.filter((item: Item) => !!item.name) };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async listFolders(): Promise<MaybeError<Folder[]>> {
+    try {
+      const { stdout } = await this.exec(["list", "folders"]);
+      return { result: JSON.parse<Folder[]>(stdout) };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async getTotp(id: string): Promise<MaybeError<string>> {
+    try {
+      // this could return something like "Not found." but checks for totp code are done before calling this function
+      const { stdout } = await this.exec(["get", "totp", id]);
+      return { result: stdout };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async status(): Promise<MaybeError<VaultState>> {
+    try {
+      const { stdout } = await this.exec(["status"]);
+      return { result: JSON.parse<VaultState>(stdout) };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
   async checkLockStatus(): Promise<VaultStatus> {
@@ -279,26 +361,20 @@ export class Bitwarden {
   private isPromptWaitingForMasterPassword(result: ExecaReturnValue): boolean {
     return !!(result.stderr && result.stderr.includes("Master password"));
   }
+
+  private async handlePostLogout() {
+    this.clearSessionToken();
+    await this.callbacks.logout?.();
+  }
+
+  private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
+    const errorMessage = (error as ExecaError).stderr;
+    if (!errorMessage) return {};
+
+    if (/not logged in/i.test(errorMessage)) {
+      await this.handlePostLogout();
+      return { error: new NotLoggedInError("Not logged in") };
+    }
+    return {};
+  }
 }
-
-type Env = {
-  BITWARDENCLI_APPDATA_DIR: string;
-  BW_CLIENTSECRET: string;
-  BW_CLIENTID: string;
-  PATH: string;
-  NODE_EXTRA_CA_CERTS?: string;
-  BW_SESSION?: string;
-};
-
-type ActionCallbacks = {
-  login?: () => MaybePromise<void>;
-  logout?: () => MaybePromise<void>;
-  lock?: (reason?: string) => MaybePromise<void>;
-  unlock?: (password: string, sessionToken: string) => MaybePromise<void>;
-};
-
-type ExecProps = {
-  abortController?: AbortController;
-  skipLastActivityUpdate?: boolean;
-  input?: string;
-};

@@ -33,7 +33,7 @@ jobs:
                   replacement=$(date '+%Y-%m-%d')
                   if grep -q $pattern $changelog; then
                       echo "  pattern found"
-                      sed -i "" "s/$pattern/$replacement/g" $changelog 
+                      sed -i "" "s/$pattern/$replacement/g" $changelog
                       # ubuntu: sed -i "s/$pattern/$replacement/g" $changelog
                       echo "  updated to $replacement"
                   else
@@ -64,10 +64,15 @@ jobs:
       - name: Commit changes
         id: commit_changes
         run: |
+          pr_info=$(gh pr view ${{ github.event.inputs.pr_number }} --json headRefName,headRepository,headRepositoryOwner,maintainerCanModify,url)
+          echo $pr_info
+
+          can_modify=$(echo $pr_info | jq -r .maintainerCanModify)
+          pr_branch=$(echo $pr_info | jq -r .headRefName)
+          pr_repo_name=$(echo $pr_info | jq -r .headRepository.name)
+          pr_repo_owner=$(echo $pr_info | jq -r .headRepositoryOwner.login)
+
           if ! [[ -z $(git status -s .) ]] ; then
-            pr_info=$(gh pr view ${{ github.event.inputs.pr_number }} --json headRefName,headRepository,headRepositoryOwner,maintainerCanModify,url)
-            echo $pr_info
-            can_modify=$(echo $pr_info | jq -r .maintainerCanModify)
             if [[ "$can_modify" == "false" ]]; then
               error="Edits from maintainers are disabled."
               echo $error
@@ -78,13 +83,10 @@ jobs:
             git status .
             git commit --message "Update CHANGELOG.md and optimise images"
 
-            pr_branch=$(echo $pr_info | jq -r .headRefName)
-            pr_repo_name=$(echo $pr_info | jq -r .headRepository.name)
-            pr_repo_owner=$(echo $pr_info | jq -r .headRepositoryOwner.login)
-
             git push https://${{ env.GITHUB_TOKEN }}@github.com/$pr_repo_owner/$pr_repo_name.git HEAD:$pr_branch
+            echo "Pushed changes."
           else
-            echo "No changes, skipping sync."
+            echo "No changes."
           fi
       - name: Sleep for 30 seconds
         run: sleep 30 # sleep 30s for ubuntu

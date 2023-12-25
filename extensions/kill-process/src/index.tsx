@@ -1,4 +1,14 @@
-import { Action, ActionPanel, clearSearchBar, getPreferenceValues, Icon, List, showHUD, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  clearSearchBar,
+  closeMainWindow,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { exec } from "child_process";
 import { useState, useEffect } from "react";
 import prettyBytes from "pretty-bytes";
@@ -7,17 +17,19 @@ import useInterval from "./hooks/use-interval";
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
   const [state, setState] = useState<Process[]>([]);
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const [query, setQuery] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
-  const shouldIncludePaths = preferences.shouldSearchInPaths ?? false;
-  const shouldIncludePid = preferences.shouldSearchInPid ?? false;
-  const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering ?? false;
-  const shouldShowPID = preferences.shouldShowPID ?? false;
-  const shouldShowPath = preferences.shouldShowPath ?? false;
+  const shouldIncludePaths = preferences.shouldSearchInPaths;
+  const shouldIncludePid = preferences.shouldSearchInPid;
+  const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering;
+  const shouldShowPID = preferences.shouldShowPID;
+  const shouldShowPath = preferences.shouldShowPath;
   const refreshDuration = +preferences.refreshDuration;
-  const [sortByMem, setSortByMem] = useState<boolean>(preferences.sortByMem ?? false);
-  const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps ?? false);
+  const closeWindowAfterKill = preferences.closeWindowAfterKill;
+  const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
+  const [sortByMem, setSortByMem] = useState<boolean>(preferences.sortByMem);
+  const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
   const fetchProcesses = () => {
     exec(`ps -eo pid,ppid,pcpu,rss,comm`, (err, stdout) => {
@@ -82,8 +94,16 @@ export default function ProcessList() {
   const killProcess = (process: Process) => {
     exec(`kill -9 ${process.id}`);
     setFetchResult(state.filter((p) => p.id !== process.id));
-    clearSearchBar({ forceScrollToTop: true });
-    showHUD(`✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`);
+    if (closeWindowAfterKill) {
+      closeMainWindow();
+    }
+    if (clearSearchBarAfterKill) {
+      clearSearchBar({ forceScrollToTop: true });
+    }
+    showToast({
+      title: `✅ Killed ${process.processName === "-" ? `process ${process.id}` : process.processName}`,
+      style: Toast.Style.Success,
+    });
   };
 
   const subtitleString = (process: Process) => {
@@ -186,7 +206,7 @@ export default function ProcessList() {
     >
       {state
         .filter((process) => {
-          if (query === "" || query == null) {
+          if (query === "") {
             return true;
           }
           const nameMatches = process.processName.toLowerCase().includes(query.toLowerCase());
@@ -201,7 +221,7 @@ export default function ProcessList() {
         })
         .sort((a, b) => {
           // If this flag is true, we bring apps to the top, but only if we have a query.
-          if (query != null && shouldPrioritizeAppsWhenFiltering) {
+          if (shouldPrioritizeAppsWhenFiltering) {
             const appTypes = ["app", "aggregatedApp"];
             if (appTypes.includes(a.type) && !appTypes.includes(b.type)) {
               return -1;

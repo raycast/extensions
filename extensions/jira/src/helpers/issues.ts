@@ -64,9 +64,9 @@ export function getIssueListSections(issues?: Issue[]) {
     });
 }
 
-export function getIssueDescription(description: string) {
+export function getMarkdownFromHtml(description: string) {
   const nodeToMarkdown = new NodeHtmlMarkdown(
-    {},
+    { keepDataImages: true },
     // For some reasons, Jira doesn't wrap code blocks within a <code> block
     // but only within a <pre> block which is not recognized by NodeHtmlMarkdown.
     {
@@ -74,7 +74,7 @@ export function getIssueDescription(description: string) {
         prefix: "```\n",
         postfix: "\n```",
       },
-    }
+    },
   );
 
   return nodeToMarkdown.translate(description);
@@ -138,14 +138,14 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
   // Jira's textareas are shown in the markdown field of the Detail screen
   const [markdownFieldsKeys, metadataFieldsKeys] = partition(
     customFieldsWithValueKeys,
-    (key) => issue.schema[key].custom === CustomFieldSchema.textarea
+    (key) => issue.schema[key].custom === CustomFieldSchema.textarea,
   );
 
   const customMarkdownFields = markdownFieldsKeys.map((key) => {
     const name = issue.names[key];
     const value = issue.renderedFields[key];
 
-    return value ? `\n\n## ${name}\n\n${getIssueDescription(value)}` : null;
+    return value ? `\n\n## ${name}\n\n${getMarkdownFromHtml(value)}` : null;
   });
 
   const customMetadataFields = metadataFieldsKeys

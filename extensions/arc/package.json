@@ -3,7 +3,7 @@
   "name": "arc",
   "title": "Arc",
   "description": "Search and quickly navigate Arc's history and open tabs.",
-  "icon": "icon-dark.png",
+  "icon": "icon.png",
   "author": "thomas",
   "owner": "the-browser-company",
   "access": "public",
@@ -12,6 +12,16 @@
     "Applications",
     "Productivity"
   ],
+  "keywords": [
+    "browser",
+    "arc",
+    "history",
+    "search",
+    "tabs",
+    "open",
+    "windows",
+    "web"
+  ],
   "license": "MIT",
   "contributors": [
     "pomdtr",
@@ -19,8 +29,9 @@
     "ankitchouhan1020",
     "pernielsentikaer",
     "danpalmer",
-    "hugivar",
-    "danulqua"
+    "danulqua",
+    "rgrunberg",
+    "tleo19"
   ],
   "commands": [
     {
@@ -34,6 +45,13 @@
       "name": "new-window",
       "title": "Open New Window",
       "description": "Create and open a new window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "description": "Create and open a new blank window",
       "mode": "no-view",
       "subtitle": "Arc"
     },
@@ -81,7 +99,24 @@
       "title": "Open New Incognito Window",
       "subtitle": "Arc",
       "description": "Create and open a new incognito window",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new window",
+          "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "new-tab",
@@ -210,6 +245,20 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "release-notes",
+      "title": "Open Arc Release Notes",
+      "subtitle": "Arc",
+      "description": "Open the Arc release notes",
+      "mode": "no-view"
+    },
+    {
+      "name": "boost-gallery",
+      "title": "Open Arc Boost Gallery",
+      "subtitle": "Arc",
+      "description": "Open the Arc Boost Gallery",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

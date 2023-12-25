@@ -19,7 +19,7 @@ export async function authorize() {
   }
 
   const authRequest = await oauthClient.authorizationRequest({
-    endpoint: "https://github.oauth-proxy.raycast.com/authorize",
+    endpoint: "https://github.oauth.raycast.com/authorize",
     clientId,
     scope: "repo read:org user",
   });
@@ -35,7 +35,7 @@ export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
   authCode: string
 ): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://github.oauth-proxy.raycast.com/token", {
+  const response = await fetch("https://github.oauth.raycast.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

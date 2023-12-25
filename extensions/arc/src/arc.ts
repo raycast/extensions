@@ -122,6 +122,10 @@ export async function reloadTab(tab: Tab) {
 export async function makeNewTab(url: string) {
   await runAppleScript(`
     tell application "Arc"
+      if (count of windows) is 0 then
+        make new window
+      end if
+
       tell front window
         make new tab with properties {URL:"${url}"}
       end tell
@@ -145,6 +149,23 @@ export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise
       activate
 
       ${options.url ? `tell front window to make new tab with properties {URL:"${options.url}"}` : ""}
+    end tell
+  `);
+}
+export async function makeNewBlankWindow(): Promise<void> {
+  await runAppleScript(`
+    tell application "Arc"
+	    activate
+    end tell
+    delay(0.5)
+    tell application "Arc"
+	    activate
+    end tell
+
+    tell application "System Events"
+	    tell process "Arc"
+		    click menu item "Blank window" of menu "File" of menu bar 1
+	    end tell
     end tell
   `);
 }
