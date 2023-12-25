@@ -61,6 +61,13 @@
       "mode": "view"
     },
     {
+      "name": "services",
+      "title": "Services",
+      "subtitle": "BMW",
+      "description": "Check the due dates for your next services",
+      "mode": "view"
+    },
+    {
       "name": "changeImage",
       "title": "Change Car Image",
       "subtitle": "BMW",

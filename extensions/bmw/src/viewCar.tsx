@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Color,
   Detail,
   Icon,
@@ -55,7 +54,6 @@ export default function ViewCar(props: ViewCarProps) {
 
       if (vehiclesResp.length > 0) {
         const statusResp = await api.current.getVehicleStatus(vehiclesResp[0].vin);
-        Clipboard.copy(JSON.stringify(vehiclesResp[0]));
         setVIN(vehiclesResp[0].vin);
         setStatus(statusResp);
       }

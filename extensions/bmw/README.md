@@ -15,7 +15,8 @@ To get started you will need to provide your Connected Drive username and passwo
 - Unlock your doors
 - View tire pressuer
 - View your car
+- View next services
 
 ## Acknowledgment
 
-- [nodejs-connected-drive](https://github.com/jorgenkg/nodejs-connected-drive)
+- [bmw-connected-drive](https://github.com/lsiddiquee/bmw-connected-drive)
