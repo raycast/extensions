@@ -324,6 +324,13 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "subtitle": "Spotify",
+      "description": "See your queue and remove any tracks or episodes from it.",
+      "mode": "view"
     }
   ],
   "dependencies": {
