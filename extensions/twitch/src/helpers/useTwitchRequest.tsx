@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- we should allow `any` as the network response, otherwise we're getting into @tanstack/query territory and it gets complicated fast */
 
-import { Toast, showToast } from "@raycast/api";
+import { LaunchType, Toast, environment, showToast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { CACHE_PREFIX, zeroDate } from "./cache";
 import { getHeaders } from "./auth";
@@ -126,7 +126,8 @@ export function useTwitchRequest<T>({
           return;
         }
         if (data.message) {
-          showToast({ title: "Error", message: data.message, style: Toast.Style.Failure });
+          if (environment.launchType === LaunchType.Background) console.error("Error", data.message);
+          else showToast({ title: "Error", message: data.message, style: Toast.Style.Failure });
         }
         const replaced = replaceEqualDeep(prevRef.current, initialData);
         if (replaced === initialData) return;
@@ -135,7 +136,8 @@ export function useTwitchRequest<T>({
       })
       .catch((e) => {
         setIsLoading(false);
-        showToast({ title: "Error", message: e.message, style: Toast.Style.Failure });
+        if (environment.launchType === LaunchType.Background) console.error("Error", e.message);
+        else showToast({ title: "Error", message: e.message, style: Toast.Style.Failure });
       });
   }, [enabled, cacheDuration, url]);
 
