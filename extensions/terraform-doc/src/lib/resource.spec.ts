@@ -31,6 +31,6 @@ describe("provider", () => {
       },
     };
     const res = await getResourceList(provider, version);
-    expect(res.length).toBeGreaterThan(0);
+    expect(res?.length).toBeGreaterThan(0);
   });
 });
