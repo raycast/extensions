@@ -17,7 +17,7 @@ export default function ResourceView(props: {
     undefined,
     {
       cacheNamespace: `${environment.extensionName}`,
-    }
+    },
   );
   useEffect(() => {
     async function updateResouceList() {
@@ -27,7 +27,9 @@ export default function ResourceView(props: {
           : await getResourceList(props.provider, props.version);
         setResources(res);
         setFilteredResources(res);
-        setResourceTypeListState([...new Set(res?.map((r) => r.attributes.category))]);
+        setResourceTypeListState([
+          ...new Set(res?.map((r) => r.attributes.category)),
+        ]);
       } catch (err) {
         throw new Error(`${err}`);
       }
@@ -42,7 +44,7 @@ export default function ResourceView(props: {
     filter === "all"
       ? setFilteredResources(resources)
       : setFilteredResources(
-          resources?.filter((r) => r.attributes.category === filter)
+          resources?.filter((r) => r.attributes.category === filter),
         );
   };
   return (
