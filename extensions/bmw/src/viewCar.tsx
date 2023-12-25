@@ -167,7 +167,7 @@ Last Update: ${timeAgo.format(lastUpdatedAt)}
           />
           <Detail.Metadata.Link
             title={"Location"}
-            text={'One Apple Park Way, Cupertino, CA 95014, United States'}
+            text={location.address.formatted}
             target={`https://www.google.com/maps/search/?api=1&query=${location.coordinates.latitude}%2C${location.coordinates.longitude}`}
           />
           <Detail.Metadata.Label title={"Millage"} text={`${currentMileage} km`} />
