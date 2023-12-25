@@ -67,7 +67,7 @@ export default async ({ github, context }: API) => {
       await comment({
         github,
         context,
-        comment: `Congratulation on your new Raycast extension! :rocket:\n\nWe will review it shortly. Once the PR is approved and merged, the extension will be available on the Store.`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\nThe team is currently on holiday, but we will be back to normal availability on the 2nd of January :christmas_tree:\n\nThank you for your patience.`,
       });
       return;
     }
@@ -104,7 +104,7 @@ export default async ({ github, context }: API) => {
       comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:\n\n🔔 ${owners
         .filter((x) => x !== sender)
         .map((x) => `@${x}`)
-        .join(" ")} you might want to have a look.`,
+        .join(" ")} you might want to have a look.\n\nThe team is on holiday, we'll review it once everyone is back. :christmas_tree:`,
     });
 
     return;

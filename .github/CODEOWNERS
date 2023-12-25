@@ -47,7 +47,7 @@
 /extensions/apple-devices                            @madza91
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince
-/extensions/apple-reminders                          @thomaslombart
+/extensions/apple-reminders                          @thomaslombart @irangarcia
 /extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19
 /extensions/archiver                                 @404J
 /extensions/arxiv                                    @koayon @pernielsentikaer
@@ -100,7 +100,7 @@
 /extensions/bonk-price                               @AnishDe12020
 /extensions/braid                                    @felixhabib
 /extensions/brasileirao-serie-a                      @willianhf
-/extensions/brave                                    @ron-myers @rgomezcasas @crisboarna
+/extensions/brave                                    @ron-myers @rgomezcasas @crisboarna @tleo19
 /extensions/brave-search                             @VishwasShashidhar @Spl0itable @Justiniscoding
 /extensions/brawlstars                               @MaximeGuiliani
 /extensions/brew                                     @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare
@@ -278,6 +278,7 @@
 /extensions/display-modes                            @codifilo
 /extensions/displayplacer                            @eluce2
 /extensions/dlmoji                                   @Hydrapse
+/extensions/do-not-disturb                           @Yakitrak
 /extensions/doccheck                                 @justspacedog
 /extensions/dock                                     @pradeepb28
 /extensions/dock-tinker                              @koinzhang @garrucho
@@ -426,7 +427,7 @@
 /extensions/go-package-search                        @bstncartwright @k8scat @BalliAsghar
 /extensions/goodreads                                @shettypuneeth
 /extensions/google-books                             @Ali-Parandeh
-/extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin
+/extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin @tleo19
 /extensions/google-chrome-profiles                   @frouo @erics118
 /extensions/google-cloud-platform-search             @klaa97 @edomora97
 /extensions/google-drive                             @vishaltelangre @nametake @daniel-stoneuk
@@ -542,7 +543,7 @@
 /extensions/json-format                              @Destiner @Aayush9029 @devloos @lacherogwu @AlexIsMaking
 /extensions/json-to-go                               @chyroc
 /extensions/json2ts                                  @gon250
-/extensions/jump                                     @SKaplanOfficial
+/extensions/jump                                     @SKaplanOfficial @j3lte
 /extensions/jupiter-aggregator                       @stevedsimkins
 /extensions/just-delete-me                           @andreaselia @pernielsentikaer
 /extensions/just-focus                               @koinzhang
