@@ -50,11 +50,12 @@ const { supportPath } = environment;
 const cliInfo = {
   version: "2023.10.0",
   sha256: "9bd011ef98bee098206a6242f7e4f5ed923062ea6eefaee28015c3616a90d166",
-  getBinFilename: function () {
+  downloadPage: "https://github.com/bitwarden/clients/releases",
+  get binFilename() {
     return `bw-${this.version}`;
   },
-  getDownloadUrl: function () {
-    return `https://github.com/bitwarden/clients/releases/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
+  get downloadUrl() {
+    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
   },
   checkHashMatchesFile: async function (filePath: string) {
     return getFileSha256(filePath) === this.sha256;
@@ -88,7 +89,7 @@ export class Bitwarden {
     const serverUrl = getServerUrlPreference();
 
     if (!BinDownloadLogger.hasError()) {
-      this.cliPath = cliPathPref || join(environment.supportPath, cliInfo.getBinFilename());
+      this.cliPath = cliPathPref || join(environment.supportPath, cliInfo.binFilename);
     } else {
       this.cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw";
     }
@@ -129,7 +130,7 @@ export class Bitwarden {
     try {
       try {
         toast.message = "Downloading...";
-        await download(cliInfo.getDownloadUrl(), supportPath, { filename: tmpFileName });
+        await download(cliInfo.downloadUrl, supportPath, { filename: tmpFileName });
         if (!cliInfo.checkHashMatchesFile(zipPath)) throw new EnsureCliBinError("File hash does not match");
       } catch (downloadError) {
         toast.title = "Failed to download Bitwarden CLI";
