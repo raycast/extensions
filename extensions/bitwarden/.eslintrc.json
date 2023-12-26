@@ -15,7 +15,8 @@
     "@typescript-eslint/no-floating-promises": ["error"],
     "react-hooks/rules-of-hooks": "error",
     "@typescript-eslint/ban-ts-comment": "off",
-    "promise/always-return": "off"
+    "promise/always-return": "off",
+    "require-await": "error"
   },
   "ignorePatterns": ["raycast-env.d.ts"]  
 }

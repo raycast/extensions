@@ -49,7 +49,7 @@ const { supportPath } = environment;
 
 const cliInfo = {
   version: "2023.10.0",
-  sha256: "9bd011ef98bee098206a6242f7e4f5ed923062ea6eefaee28015c3616a90d166",
+  sha256: "c129b1806bb00806676298198fb54d540561e2c06d66016f0836e31b1bd65e72",
   downloadPage: "https://github.com/bitwarden/clients/releases",
   get binFilename() {
     return `bw-${this.version}`;
@@ -57,7 +57,7 @@ const cliInfo = {
   get downloadUrl() {
     return `${this.downloadPage}/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
   },
-  checkHashMatchesFile: async function (filePath: string) {
+  checkHashMatchesFile: function (filePath: string) {
     return getFileSha256(filePath) === this.sha256;
   },
 } as const;
