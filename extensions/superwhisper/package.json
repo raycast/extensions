@@ -5,7 +5,6 @@
   "description": "Start a recording, change Modes and open settings. Requires installing superwhisper.",
   "icon": "superwhisper-light-icon.png",
   "author": "nchudleigh",
-  "owner": "nchudleigh",
   "categories": [
     "Productivity"
   ],
