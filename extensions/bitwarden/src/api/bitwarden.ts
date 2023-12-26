@@ -102,7 +102,7 @@ export class Bitwarden {
       ...(serverUrl && serverCertsPath ? { NODE_EXTRA_CA_CERTS: serverCertsPath } : {}),
     };
 
-    this.initPromise = (async () => {
+    this.initPromise = (async (): Promise<void> => {
       await this.ensureCliBinary();
       await this.checkServerUrl(serverUrl);
       this.lockReason = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
@@ -219,7 +219,7 @@ export class Bitwarden {
     }
   }
 
-  private async setLockReason(reason: string) {
+  private async setLockReason(reason: string): Promise<void> {
     this.lockReason = reason;
     await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
   }
@@ -390,7 +390,7 @@ export class Bitwarden {
     return !!(result.stderr && result.stderr.includes("Master password"));
   }
 
-  private async handlePostLogout() {
+  private async handlePostLogout(): Promise<void> {
     this.clearSessionToken();
     await this.callbacks.logout?.();
   }
