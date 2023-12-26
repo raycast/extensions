@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Detail, List, Toast, getPreferenceValues, showToast } from '@raycast/api';
-import { useFetch } from '@raycast/utils';
+import { Action, ActionPanel, Detail, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
-const API_BASE_URL = 'https://connect.mailerlite.com/api';
+const API_BASE_URL = "https://connect.mailerlite.com/api";
 
 interface CampaignStats {
   sent: number;
@@ -34,11 +34,15 @@ interface CampaignDetailResponse {
 
 const CampaignList = () => {
   const { mailerliteApiKey } = getPreferenceValues();
-  const { data: campaignListData, isLoading, error } = useFetch<CampaignListResponse>(`${API_BASE_URL}/campaigns?filter[status]=sent`, {
+  const {
+    data: campaignListData,
+    isLoading,
+    error,
+  } = useFetch<CampaignListResponse>(`${API_BASE_URL}/campaigns?filter[status]=sent`, {
     headers: {
-      'Authorization': `Bearer ${mailerliteApiKey}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${mailerliteApiKey}`,
+      "Content-Type": "application/json",
+    },
   });
 
   if (isLoading) {
@@ -62,10 +66,7 @@ const CampaignList = () => {
           keywords={[`Sent: ${campaign.scheduled_for}`]}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Details"
-                target={<CampaignDetails campaignId={campaign.id} />}
-              />
+              <Action.Push title="View Details" target={<CampaignDetails campaignId={campaign.id} />} />
             </ActionPanel>
           }
         />
@@ -76,11 +77,15 @@ const CampaignList = () => {
 
 const CampaignDetails = ({ campaignId }: { campaignId: string }) => {
   const { mailerliteApiKey } = getPreferenceValues();
-  const { data: campaignData, isLoading, error } = useFetch<CampaignDetailResponse>(`${API_BASE_URL}/campaigns/${campaignId}`, {
+  const {
+    data: campaignData,
+    isLoading,
+    error,
+  } = useFetch<CampaignDetailResponse>(`${API_BASE_URL}/campaigns/${campaignId}`, {
     headers: {
-      'Authorization': `Bearer ${mailerliteApiKey}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${mailerliteApiKey}`,
+      "Content-Type": "application/json",
+    },
   });
 
   if (isLoading) {
@@ -99,7 +104,7 @@ const CampaignDetails = ({ campaignId }: { campaignId: string }) => {
   const stats = campaign.stats;
   const screenshotURL = campaign.emails[0]?.screenshot_url;
 
-  const markdown = `# ${campaign.name}\n${screenshotURL ? `![](${screenshotURL})` : ''}`;
+  const markdown = `# ${campaign.name}\n${screenshotURL ? `![](${screenshotURL})` : ""}`;
 
   return (
     <Detail

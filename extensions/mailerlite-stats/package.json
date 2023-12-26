@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mailerlite-stats",
   "title": "MailerLite Stats",
-  "description": "",
+  "description": "MailerLite Stats Raycast extension",
   "icon": "icon.png",
   "author": "nkl",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "mailerlite",
       "title": "MailerLite",
-      "description": "",
+      "description": "MailerLite Stats Raycast extension",
       "mode": "view"
     }
   ],
