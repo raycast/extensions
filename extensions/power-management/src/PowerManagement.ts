@@ -50,4 +50,4 @@ class PowerManagement {
   }
 }
 
-export default PowerManagement;
+export const powerManagement = new PowerManagement();

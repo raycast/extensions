@@ -1,6 +1,4 @@
-import PowerManagement from "./class/PowerManagement";
-
-const powerManagement = new PowerManagement();
+import { powerManagement } from "./PowerManagement";
 
 export default async function main() {
   await powerManagement.toggleLowPowerMode();
