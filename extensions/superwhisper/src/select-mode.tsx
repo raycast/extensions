@@ -1,17 +1,23 @@
-import { Action, ActionPanel, Icon, Image, List, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { readdirSync } from "fs";
 import { homedir } from "os";
+import fs from "fs";
 
 interface State {
-  items?: any[];
+  items?: Mode[];
   error?: Error;
 }
 
-function handleSelection(item: any) {
-  let modeKey = item.key;
-  const url = `superwhisper://mode?key=${modeKey}`
-  open(url, "com.superduper.superwhisper")
+interface Mode {
+  key: string;
+  name: string;
+}
+
+function handleSelection(item: Mode) {
+  const modeKey = item.key;
+  const url = `superwhisper://mode?key=${modeKey}`;
+  open(url, "com.superduper.superwhisper");
 }
 
 export default function Command() {
@@ -22,19 +28,19 @@ export default function Command() {
       try {
         // read mode json files from Documents/superwhisper/modes folder
 
-        let modes: any[] = []
-        const modeDirURL = `${homedir()}/Documents/superwhisper/modes`
-        await readdirSync(modeDirURL).forEach(file => {
-            // make sure its a json file
-            if (file.indexOf(".json") == -1) {
-                return
-            }
-            // read json file
-            const data = require(`${modeDirURL}/${file}`)
-            // add to modes array
-            modes.push(data);
+        const modes: Mode[] = [];
+        const modeDirURL = `${homedir()}/Documents/superwhisper/modes`;
+        await readdirSync(modeDirURL).forEach((file) => {
+          // make sure its a json file
+          if (file.indexOf(".json") == -1) {
+            return;
+          }
+          // read json file
+          const data = JSON.parse(fs.readFileSync(`${modeDirURL}/${file}`, 'utf8'));
+          // add to modes array
+          modes.push(data);
         });
-        setState({ items:  modes});
+        setState({ items: modes });
       } catch (error) {
         setState({
           error: error instanceof Error ? error : new Error("Something went wrong"),
@@ -46,25 +52,24 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={!state.items && !state.error} >
+    <List isLoading={!state.items && !state.error}>
       {state.items?.map((item, index) => (
         <List.Item
-        key={item.key}
-        icon={getIcon(index + 1)}
-        title={item.name || "Default"}
-        subtitle={`⌘${index + 1}`}
-        // accessories={}
-        actions={<Actions item={item} />}
-      />
+          key={item.key}
+          icon={getIcon(index + 1)}
+          title={item.name || "Default"}
+          subtitle={`⌘${index + 1}`}
+          // accessories={}
+          actions={<Actions item={item} />}
+        />
       ))}
     </List>
   );
-;
 }
 
-function Actions(props: { item: any }) {
+function Actions(props: { item: Mode }) {
   return (
-    <ActionPanel title={props.item.title}>
+    <ActionPanel title={props.item.name}>
       <ActionPanel.Section>
         <SelectModeAction item={props.item} onSelect={() => handleSelection(props.item)} />
       </ActionPanel.Section>
@@ -72,17 +77,9 @@ function Actions(props: { item: any }) {
   );
 }
 
-function SelectModeAction(props: { item: any; onSelect: () => void }) {
-  return (
-    <Action
-      icon={Icon.Circle}
-      title={`Select ${props.item.name} Mode`}
-      onAction={props.onSelect}
-    />
-  );
+function SelectModeAction(props: { item: Mode; onSelect: () => void }) {
+  return <Action icon={Icon.Circle} title={`Select ${props.item.name} Mode`} onAction={props.onSelect} />;
 }
-
-
 
 function getIcon(index: number): Image.ImageLike {
   const svg = `
@@ -103,5 +100,3 @@ function getIcon(index: number): Image.ImageLike {
     source: `data:image/svg+xml,${svg}`,
   };
 }
-
-
