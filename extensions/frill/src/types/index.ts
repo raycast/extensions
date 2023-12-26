@@ -7,29 +7,18 @@ export type BodyRequest = CreateAnnouncementRequest | CreateIdeaRequest | Create
 export type RequestMethod = "GET" | "POST" | "DELETE";
 
 export type SimpleSuccessResponse = {
-    success: true;
-    message: string;
-}
+  success: true;
+  message: string;
+};
 
 export type SingleErrorResponse = {
-    error: true;
-    message: string;
-}
+  error: true;
+  message: string;
+};
 export type MultiErrorResponse = {
-    message: string;
-    errors: {
-        [key: string]: string[];
-    }
-}
+  message: string;
+  errors: {
+    [key: string]: string[];
+  };
+};
 export type ErrorResponse = SingleErrorResponse | MultiErrorResponse;
-// export type SuccessResponse = {
-//     data: Announcement[] | Idea[];
-//     meta: any;
-//     pagination?: {
-//         total: number;
-//         count: number;
-//         hasNextPage: boolean;
-//         startCursor: string;
-//         endCursor: string;
-//     };
-// }

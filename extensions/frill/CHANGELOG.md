@@ -1,3 +1,3 @@
 # Frill Changelog
 
-## [Initial Version] - 2023-12-11
+## [Initial Version] - {PR_MERGE_DATE}

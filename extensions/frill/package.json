@@ -32,35 +32,35 @@
       "name": "announcements",
       "title": "Announcements",
       "subtitle": "Frill",
-      "description": "",
+      "description": "Manage Announcements",
       "mode": "view"
     },
     {
       "name": "ideas",
       "title": "Ideas",
       "subtitle": "Frill",
-      "description": "",
+      "description": "Manage Ideas",
       "mode": "view"
     },
     {
       "name": "statuses",
       "title": "Statuses",
       "subtitle": "Frill",
-      "description": "",
+      "description": "Manage Statuses",
       "mode": "view"
     },
     {
       "name": "topics",
       "title": "Topics",
       "subtitle": "Frill",
-      "description": "",
+      "description": "Manage Topics",
       "mode": "view"
     },
     {
       "name": "followers",
       "title": "Followers",
       "subtitle": "Frill",
-      "description": "",
+      "description": "Manage Followers",
       "mode": "view"
     }
   ],
