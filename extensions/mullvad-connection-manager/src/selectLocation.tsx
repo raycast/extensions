@@ -16,23 +16,19 @@ type Location = {
 
 const countryRegex = /^(?<country>.+)\s\((?<countryCode>.+)\)/;
 const cityRegex = /^(?<city>.+)\s\((?<cityCode>.+)\)/;
+const mullvadNotInstalledHint = `
+# Mullvad is not installed 
+  
+You can install it from [https://mullvad.net/download/](https://mullvad.net/download/)
+`;
 
 export default function Command() {
   const isMullvadInstalled = useExec("which", ["mullvad"]);
-  const rawLocationList = useExec("mullvad", ["relay", "list"], { execute: false });
+  const rawLocationList = useExec("mullvad", ["relay", "list"], { execute: !!isMullvadInstalled.data });
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
   if (rawLocationList.isLoading || isMullvadInstalled.isLoading) return <List isLoading={true} />;
-  if (!isMullvadInstalled.data || isMullvadInstalled.error)
-    return (
-      <Detail
-        markdown={`
-# Mullvad is not installed 
-      
-You can install it from [https://mullvad.net/download/](https://mullvad.net/download/)
-    `}
-      />
-    );
+  if (!isMullvadInstalled.data || isMullvadInstalled.error) return <Detail markdown={mullvadNotInstalledHint} />;
   if (rawLocationList.error) return <Detail markdown={rawLocationList.error.message} />;
 
   async function setLocation() {
@@ -51,31 +47,32 @@ You can install it from [https://mullvad.net/download/](https://mullvad.net/down
   const locations: Location[] = [];
   let currentCountry;
   let currentCountryCode;
-  for (const line of rawLocationList.data!.split("\n")) {
-    if (line.startsWith("\t\t")) continue;
+  if (rawLocationList.data)
+    for (const line of rawLocationList.data.split("\n")) {
+      if (line.startsWith("\t\t")) continue;
 
-    if (line.startsWith("\t")) {
-      const cityMatch = line.trim().match(cityRegex);
-      if (cityMatch) {
-        const { city, cityCode } = cityMatch.groups!;
-        locations.push({
-          country: currentCountry!,
-          countryCode: currentCountryCode!,
-          city,
-          cityCode,
-          id: `${currentCountryCode!}/${cityCode}`,
-        });
+      if (line.startsWith("\t")) {
+        const cityMatch = line.trim().match(cityRegex);
+        if (cityMatch) {
+          const { city, cityCode } = cityMatch.groups!;
+          locations.push({
+            country: currentCountry!,
+            countryCode: currentCountryCode!,
+            city,
+            cityCode,
+            id: `${currentCountryCode!}/${cityCode}`,
+          });
+        }
+        continue;
       }
-      continue;
-    }
 
-    const countryMatch = line.match(countryRegex);
-    if (countryMatch) {
-      const { country, countryCode } = countryMatch.groups!;
-      currentCountry = country;
-      currentCountryCode = countryCode;
+      const countryMatch = line.match(countryRegex);
+      if (countryMatch) {
+        const { country, countryCode } = countryMatch.groups!;
+        currentCountry = country;
+        currentCountryCode = countryCode;
+      }
     }
-  }
 
   return (
     <List onSelectionChange={setSelectedLocation}>
