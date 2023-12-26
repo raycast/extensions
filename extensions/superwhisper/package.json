@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "superwhisper",
-  "title": "superwhisper - Offline voice to text",
+  "title": "Superwhisper - Offline Voice to Text",
   "description": "Start a recording, change Modes and open settings. Requires installing superwhisper.",
   "icon": "superwhisper-light-icon.png",
   "author": "nchudleigh",
@@ -43,7 +43,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.1",
     "typescript": "^5.2.2"
   },
   "scripts": {
