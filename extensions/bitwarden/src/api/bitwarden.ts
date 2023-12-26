@@ -48,19 +48,18 @@ type ExecProps = {
 const { supportPath } = environment;
 
 const cliInfo = {
-  version: "2023.8.2",
+  version: "2023.10.0",
   sha256: "9bd011ef98bee098206a6242f7e4f5ed923062ea6eefaee28015c3616a90d166",
-  downloadPage: "https://github.com/bitwarden/clients/releases",
   getBinFilename: function () {
     return `bw-${this.version}`;
   },
   getDownloadUrl: function () {
-    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
+    return `https://github.com/bitwarden/clients/releases/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
   },
   checkHashMatchesFile: async function (filePath: string) {
     return getFileSha256(filePath) === this.sha256;
   },
-};
+} as const;
 
 const BinDownloadLogger = (() => {
   // The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
