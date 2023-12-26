@@ -7,7 +7,7 @@ export const execAsync = promisify(exec);
 
 export async function verifyIsMullvadInstalled() {
   try {
-    // For some reason `which mullvad` throws
+    // Weirdly, `which` is not available here
     await execAsync("mullvad version");
     return true;
   } catch (e) {

@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import { closeMainWindow, PopToRootType, showToast, Toast } from "@raycast/api";
+import { PopToRootType, showHUD } from "@raycast/api";
 import { verifyIsMullvadInstalled } from "./utils";
 import { promisify } from "node:util";
 
@@ -10,10 +10,5 @@ export default async function Command() {
   if (!isMullvadInstalled) return;
 
   await execAsync("mullvad connect");
-  await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Connected",
-  });
+  await showHUD("Connected", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
 }

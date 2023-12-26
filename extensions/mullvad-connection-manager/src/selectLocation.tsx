@@ -1,5 +1,5 @@
-import { Action, ActionPanel, closeMainWindow, Detail, List, PopToRootType, showToast, Toast } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { Action, ActionPanel, Detail, List, PopToRootType, showHUD } from "@raycast/api";
+import { showFailureToast, useExec } from "@raycast/utils";
 import { exec } from "child_process";
 import { useState } from "react";
 import { promisify } from "node:util";
@@ -19,11 +19,11 @@ const cityRegex = /^(?<city>.+)\s\((?<cityCode>.+)\)/;
 const mullvadNotInstalledHint = `
 # Mullvad is not installed 
   
-You can install it from [https://mullvad.net/download/](https://mullvad.net/download/)
+Please install it from [https://mullvad.net/download/](https://mullvad.net/download/)
 `;
 
 export default function Command() {
-  const isMullvadInstalled = useExec("which", ["mullvad"]);
+  const isMullvadInstalled = useExec("mullvad", ["version"]);
   const rawLocationList = useExec("mullvad", ["relay", "list"], { execute: !!isMullvadInstalled.data });
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
@@ -37,11 +37,7 @@ export default function Command() {
 
     await execAsync(`mullvad relay set location ${countryCode} ${cityCode}`);
 
-    await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Location changed",
-    });
+    await showHUD("Location changed", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   }
 
   const locations: Location[] = [];
@@ -95,7 +91,7 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action title="Switch Location" onAction={() => setLocation()} />
+              <Action title="Switch Location" onAction={() => setLocation().catch(showFailureToast)} />
             </ActionPanel>
           }
         />
