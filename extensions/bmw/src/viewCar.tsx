@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  Toast,
-  confirmAlert,
-  getPreferenceValues,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { ConnectedDrive, Regions, RemoteServices, Vehicle, VehicleStatus } from "bmw-connected-drive";
 import { useCachedState } from "@raycast/utils";
@@ -17,6 +7,8 @@ import { ViewDirection } from "./types/ViewDirection";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import ChangeImage from "./changeImage";
+import { executeCommand } from "./utils/executeCommand";
+import { getCommandDetails } from "./utils/getCommandsdDetail";
 
 TimeAgo.addDefaultLocale(en);
 
@@ -24,11 +16,12 @@ TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
 export interface ViewCarProps {
-  command?: RemoteServices;
-  loadingMessage?: string;
+  command: RemoteServices;
+  loadingMessage: string;
+  commandName: string;
 }
 
-export default function ViewCar(props: ViewCarProps) {
+export default function ViewCar(props: { command: RemoteServices }) {
   const [vehicles, setVehicles] = useCachedState<Vehicle[]>("vehicles", []);
   const [status, setStatus] = useCachedState<VehicleStatus>("status");
   const [VIN, setVIN] = useState<string>();
@@ -63,6 +56,24 @@ export default function ViewCar(props: ViewCarProps) {
     })();
   }, []);
 
+  function renderCommand(): React.ReactNode {
+    if (!VIN) return null;
+    if (!api.current) return null;
+
+    return (Object.keys(RemoteServices) as (keyof typeof RemoteServices)[]).map((key, index) => {
+      const { command, commandName, icon } = getCommandDetails(RemoteServices[key]);
+      if (commandName === "") return null;
+      return (
+        <Action
+          key={index}
+          icon={icon}
+          title={commandName.replace(/\b\w/g, (c) => c.toUpperCase())}
+          onAction={async () => await executeCommand(command, api.current, VIN)}
+        />
+      );
+    });
+  }
+
   useEffect(() => {
     if (!VIN) return;
 
@@ -74,52 +85,8 @@ export default function ViewCar(props: ViewCarProps) {
         setImage({ view: image.view, image: imageResp });
       }
 
-      if (!props.command || !props.loadingMessage || !VIN) return;
-
-      if (await confirmAlert({ title: `Are you sure you want to ${props.command}?` })) {
-        const toast = await showToast({
-          style: Toast.Style.Animated,
-          title: props.loadingMessage,
-        });
-
-        console.log(VIN);
-
-        try {
-          let result;
-          switch (props.command) {
-            case "climate-now":
-              result = await api.current?.startClimateControl(VIN);
-              break;
-            case "door-lock":
-              result = await api.current?.lockDoors(VIN);
-              break;
-            case "door-unlock":
-              result = await api.current?.unlockDoors(VIN);
-              break;
-            case "horn-blow":
-              result = await api.current?.blowHorn(VIN);
-              break;
-            case "light-flash":
-              result = await api.current?.flashLights(VIN);
-              break;
-            default:
-              toast.style = Toast.Style.Failure;
-              toast.title = "Unknown command";
-              break;
-          }
-
-          console.log(props.command, result);
-
-          if (result) {
-            toast.style = Toast.Style.Success;
-            toast.title = "Done!";
-          }
-        } catch (err) {
-          console.log(err);
-          toast.style = Toast.Style.Failure;
-          toast.title = "Failed";
-        }
-        // do something
+      if (api.current && props.command) {
+        executeCommand(props.command, api.current, VIN);
       }
     })();
   }, [VIN]);
@@ -181,7 +148,8 @@ Last Update: ${timeAgo.format(lastUpdatedAt)}
       }
       actions={
         <ActionPanel>
-          <Action.Push title="Change Image" target={<ChangeImage />} />
+          <Action.Push icon={Icon.Image} title="Change Image" target={<ChangeImage />} />
+          <ActionPanel.Section title="Remote Services">{renderCommand()}</ActionPanel.Section>
         </ActionPanel>
       }
     />

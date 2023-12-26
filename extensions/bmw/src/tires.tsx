@@ -45,7 +45,7 @@ export default function ViewTirePressure() {
 
   return (
     <List isLoading={isLoading} filtering={false}>
-      <List.Section title="Tire Pressure" subtitle={timeAgo.format(lastUpdatedAt)}>
+      <List.Section title="Tire Pressure" subtitle={"Updated " + timeAgo.format(lastUpdatedAt)}>
         <List.Item title="Front Left" subtitle={`${tireState.frontLeft.status.currentPressure / 100} bar`} />
         <List.Item title="Front Right" subtitle={`${tireState.frontRight.status.currentPressure / 100} bar`} />
         <List.Item title="Rear Left" subtitle={`${tireState.rearLeft.status.currentPressure / 100} bar`} />

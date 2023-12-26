@@ -59,7 +59,7 @@ export default function ViewTirePressure() {
 
   return (
     <List isLoading={isLoading} filtering={false}>
-      <List.Section title="Services" subtitle={timeAgo.format(lastUpdatedAt)}>
+      <List.Section title="Next Services" subtitle={"Updated " + timeAgo.format(lastUpdatedAt)}>
         {requiredServices.map((item, index) => (
           <List.Item
             key={index}
