@@ -15,7 +15,7 @@ export const ListItemNote = ({ note }: Props) => {
 
   return (
     <List.Item
-      title={note.title}
+      title={note.title ?? "Untitled Note"}
       detail={
         <List.Item.Detail
           markdown={isInitialLoaded ? note.content : undefined}
