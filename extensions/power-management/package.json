@@ -14,7 +14,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "toggle-low-power-mode",
       "title": "Toggle Low Power Mode",
       "description": "Toggle Low Power Mode of the System",
       "mode": "no-view"
