@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [New Command] - 2023-12-26
+
+- New `Queue` command allowing the user to view songs/epsiodes in the queue.
+
 ## [Feature & Optimisation] - 2023-12-02
 
 - Added `Select Device` command to select the device to play music on.
