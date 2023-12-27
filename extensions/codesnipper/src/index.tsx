@@ -61,7 +61,7 @@ export default function Command() {
     } else {
       showToast({
         style: Toast.Style.Failure,
-        title: "Cannot search notes",
+        title: "Cannot search snippets",
         message: sqlState.error.message,
       }); // Show a failure toast with error message
     }
