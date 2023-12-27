@@ -1,5 +1,16 @@
 import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { Action, ActionPanel, Color, confirmAlert, getPreferenceValues, Icon, Image, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  open,
+  Image,
+  List,
+} from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
 import {
@@ -120,9 +131,11 @@ export function PageListItem({
   const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
     handleOnOpenPage(page, setRecentPage),
   );
-  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, () =>
-    handleOnOpenPage(page, setRecentPage),
-  );
+  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, async () => {
+    open(page.url);
+    await setRecentPage(page);
+    closeMainWindow();
+  });
 
   const { open_in } = getPreferenceValues<Preferences>();
   const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
