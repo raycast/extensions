@@ -346,7 +346,7 @@ function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
     <ActionPanel.Section>
       <Action
         icon={Icon.Trash}
-        title="Remove from Recent Projects"
+        title="Remove From Recent Projects"
         style={Action.Style.Destructive}
         onAction={() => props.removeEntry(props.entry)}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
