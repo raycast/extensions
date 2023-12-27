@@ -132,6 +132,7 @@ export function PageListItem({
     handleOnOpenPage(page, setRecentPage),
   );
   const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, async () => {
+    if (!page.url) return;
     open(page.url);
     await setRecentPage(page);
     closeMainWindow();
