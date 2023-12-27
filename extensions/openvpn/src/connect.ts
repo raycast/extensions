@@ -35,7 +35,7 @@ export default async function Command() {
     on error
       return "error"
     end try
-  `)
+  `);
 
   if (result === "error") {
     await showToast({
