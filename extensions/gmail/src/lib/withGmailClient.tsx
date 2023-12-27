@@ -15,7 +15,7 @@ export function withGmailClient(component: JSX.Element) {
         gmail = await getAuthorizedGmailClient();
       } catch (error) {
         if (environment.launchType === LaunchType.Background) {
-          console.log(error);
+          console.error(error);
         } else {
           showFailureToast(error);
         }
