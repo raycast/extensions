@@ -42,6 +42,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         setLoadedStorage(storage);
         const projectGroups = generateProjectGroups(storage.projects, storage.workspaces, storage.clients);
         setProjectGroups(projectGroups);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (e.message.includes("403")) {
           LocalStorage.clear();
