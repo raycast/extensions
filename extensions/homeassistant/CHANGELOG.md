@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Companion] - 2023-12-22
+
+- Add support for Home Assistant Companion app
+
 ## [New Logo] - 2023-09-30
 
 - Use the new Home Assistant logo
