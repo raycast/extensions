@@ -1,14 +1,18 @@
-import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
+import { ActionPanel, Grid, getPreferenceValues } from "@raycast/api";
 import { ComponentPropsWithoutRef } from "react";
 
 import { PopiconLogo } from "../../enums/popicon-logo";
 import { PopiconVariant } from "../../enums/popicon-variant";
+import { getColumnAmount } from "../../helpers/get-column-amount";
 import { getVariantName } from "../../helpers/get-variant-name";
 import { usePopiconVariant } from "../../hooks/use-popicon-variant";
 import { type Prettify } from "../../utilities/types/prettify";
 import { PopiconGridContext } from "./popicon-grid-context";
 import { PopiconGridItem } from "./popicon-grid-item";
+import { PopiconGridPromoActions } from "./popicon-grid-promo-actions";
 import { PopiconGridSection } from "./popicon-grid-section";
+
+const preferences = getPreferenceValues<ExtensionPreferences>();
 
 type PopiconGridProps = Prettify<
   Omit<ComponentPropsWithoutRef<typeof Grid>, "searchBarAccessory" | "columns" | "inset" | "searchBarPlaceholder">
@@ -22,7 +26,7 @@ function PopiconGrid(props: PopiconGridProps) {
       {...props}
       searchBarPlaceholder="Search icons..."
       inset={Grid.Inset.Large}
-      columns={6}
+      columns={getColumnAmount(preferences.iconPreviewSize)}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Style"
@@ -39,26 +43,10 @@ function PopiconGrid(props: PopiconGridProps) {
       <Grid.EmptyView
         icon={{ source: { light: PopiconLogo.Light, dark: PopiconLogo.Dark } }}
         title="Icons Not Found"
-        description="Press enter to request new icons"
+        description="Press enter to get the icon set from the Popicon website."
         actions={
           <ActionPanel>
-            <ActionPanel.Section>
-              <Action.OpenInBrowser
-                icon={Icon.Cart}
-                title="Request Icon"
-                url="https://popicons.lemonsqueezy.com/checkout/buy/422a00c5-611d-46fc-aa4c-8d6176347fd1"
-              />
-              <Action.OpenInBrowser
-                icon={Icon.Phone}
-                title="Request Custom Icon Set"
-                url="https://cal.com/uxthings/popicons"
-              />
-              <Action.OpenInBrowser
-                icon={Icon.Download}
-                title="Get Popicons"
-                url="https://popicons.lemonsqueezy.com/checkout/buy/f9a7311c-34ad-4258-a351-32a464122b1c"
-              />
-            </ActionPanel.Section>
+            <PopiconGridPromoActions />
           </ActionPanel>
         }
       />

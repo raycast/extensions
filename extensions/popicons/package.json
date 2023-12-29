@@ -55,6 +55,28 @@
       "title": "Color",
       "default": "currentColor",
       "placeholder": "currentColor"
+    },
+    {
+      "name": "iconPreviewSize",
+      "description": "Size of the icons in the grid",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "title": "Icon Preview Size",
+      "data": [
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        }
+      ]
     }
   ]
 }
