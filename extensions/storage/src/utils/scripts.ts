@@ -30,7 +30,7 @@ tell application "Finder"
 	
 	return appList
 end tell
-`;
+`
 
 export const DISK_SPACE_SCRIPT = `tell application "System Events"
 set startupDisk to name of startup disk
@@ -49,4 +49,4 @@ tell application "Finder"
 	return free_space_formatted & " GB available of " & total_space_formatted & " GB"
 end tell
 end tell
-`;
+`
