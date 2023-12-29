@@ -1,63 +1,35 @@
-import { getApplications, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { getSelectedFinderItems, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  getAndroidStudioApp,
+  getSelectedFinderWindow,
+  isValidDirectoryPath,
+  showAndroidStudioAppNotInstalled,
+} from "./common/util";
 
-const asPackageName = "com.google.android.studio";
-
-/**
- * Gets the selected Finder window.
- * @throws — An error when Finder is not the frontmost application.
- * @returns A Promise that resolves with the selected Finder window's path.
- */
-const getSelectedFinderWindow = (): Promise<string> => {
-  const appleScript = `
-  if application "Finder" is running and frontmost of application "Finder" then
-    tell app "Finder"
-      set finderWindow to window 1
-      set finderWindowPath to (POSIX path of (target of finderWindow as alias))
-      return finderWindowPath
-    end tell
-  else 
-    error "Could not get the selected Finder window"
-  end if
- `;
-  return new Promise((resolve, reject) => {
-    const child = exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
-      if (error || stderr) reject(Error("Could not get the selected Finder window"));
-      resolve(stdout.trim());
-    });
-
-    child.on("close", () => {
-      child.kill();
-    });
-  });
-};
-
-export default async () => {
-  const applications = await getApplications();
-  const androidStudioApplication = applications.find((app) => app.bundleId === asPackageName);
-
-  if (!androidStudioApplication) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Android Studio is not installed",
-      primaryAction: {
-        title: "Install Android Studio",
-        onAction: () => open("https://developer.android.com/studio"),
-      },
-    });
+export default async ({ launchContext }: { launchContext?: { defaultValue: string } }) => {
+  const androidStudioApp = await getAndroidStudioApp();
+  if (!androidStudioApp) {
+    await showAndroidStudioAppNotInstalled();
     return;
   }
-
   try {
+    if (launchContext?.defaultValue) {
+      if (isValidDirectoryPath(launchContext.defaultValue)) {
+        await open(launchContext.defaultValue, androidStudioApp);
+      } else {
+        await showHUD("Invalid Path ❌");
+      }
+      return;
+    }
     const selectedFinderItems = await getSelectedFinderItems();
     if (selectedFinderItems.length) {
       for (const finderItem of selectedFinderItems) {
-        await open(finderItem.path, androidStudioApplication);
+        await open(finderItem.path, androidStudioApp);
       }
       return;
     }
     const selectedFinderWindow = await getSelectedFinderWindow();
-    await open(selectedFinderWindow, androidStudioApplication);
+    await open(selectedFinderWindow, androidStudioApp);
     return;
   } catch (error: any) {
     await showToast({

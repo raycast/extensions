@@ -1,5 +1,20 @@
 # GIF Search Changelog
 
+## [Infinite Scroll] - 2023-12-02
+
+- Add infinite scroll to the Trending and Search sections
+
+## [Catch error when returning to Gif Details after Copy GIF] - 2023-10-18
+- Catches `TypeError: dispatch is not a function` error that was displayed to the user
+
+## [GIF Search Improvements] - 2023-10-02
+
+- Remove the list layout to simplify both the extension's user experience and developer experience.
+- Add "frecency" sorting to recents and favorites so that often-used GIFs come first.
+- Add support for Giphy Clips
+- Add download GIF action
+- Add action to load more GIFs
+
 ## [Add preference for Grid trending item size] - 2022-07-07
 - Adds a new preference to control the size of grid items in the Trending view
 

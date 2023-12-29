@@ -1,3 +1,4 @@
+import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/function";
 import * as R from "fp-ts/Reader";
 import * as RTE from "fp-ts/ReaderTaskEither";
@@ -7,10 +8,18 @@ import { match } from "ts-pattern";
 import { getLibraryName } from "./general";
 import { createQueryString, parseQueryString, runScript, tell } from "../apple-script";
 import { STAR_VALUE } from "../costants";
+import { getMacosVersion } from "../get-macos-version";
 import { ScriptError, Track } from "../models";
 
 export const reveal = tell("Music", "reveal current track");
-export const love = tell("Music", "set loved of current track to true");
+export const favorite = pipe(
+  TE.tryCatch(() => getMacosVersion(), E.toError),
+  TE.chainW((version) =>
+    version.major >= 14
+      ? tell("Music", "set favorited of current track to true")
+      : tell("Music", "set loved of current track to true")
+  )
+);
 export const dislike = tell("Music", "set disliked of current track to true");
 export const addToLibrary = pipe(
   tell("Music", `duplicate current track to source 1`),

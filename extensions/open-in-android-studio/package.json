@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-in-android-studio",
   "title": "Open in Android Studio",
-  "description": "Open current Finder directory, selected folder in Android Studio.",
+  "description": "Open current Finder directory, selected folder in Android Studio, Add your favorite projects for quick access.",
   "icon": "icon.png",
   "author": "3llomi",
   "categories": [
@@ -16,6 +16,18 @@
       "title": "Open in Android Studio",
       "description": "Open the selected folder or current folder in Finder in Android Studio",
       "mode": "no-view"
+    },
+    {
+      "name": "add-favorite-project",
+      "title": "Add Android Project to Favorites",
+      "description": "Add Android Project to Favorites",
+      "mode": "view"
+    },
+    {
+      "name": "show-favorite-projects",
+      "title": "Show Favorite Android Projects",
+      "description": "Show Favorite Android Studio Projects",
+      "mode": "view"
     }
   ],
   "dependencies": {

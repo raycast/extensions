@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { getIssue, Issue } from "../api/issues";
 import { getAuthenticatedUri, getBaseUrl } from "../api/request";
 import { getProjectAvatar, getUserAvatar } from "../helpers/avatars";
-import { formatDate, getCustomFieldsForDetail, getIssueDescription, getStatusColor } from "../helpers/issues";
+import { formatDate, getCustomFieldsForDetail, getMarkdownFromHtml, getStatusColor } from "../helpers/issues";
 import { replaceAsync } from "../helpers/string";
 
 import IssueActions from "./IssueActions";
@@ -42,7 +42,7 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
       return issue;
     },
     [issueKey],
-    { initialData: initialIssue }
+    { initialData: initialIssue },
   );
 
   const attachments = issue?.fields.attachment;
@@ -60,7 +60,7 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
     const description = issue.renderedFields?.description;
 
     if (description) {
-      markdown += `\n\n${getIssueDescription(description)}`;
+      markdown += `\n\n${getMarkdownFromHtml(description)}`;
     }
 
     customMarkdownFields.forEach((markdownField) => {

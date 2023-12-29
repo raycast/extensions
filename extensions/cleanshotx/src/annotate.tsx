@@ -7,6 +7,6 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     url += `?filepath=${encodeURIComponent(props.arguments.filepath)}`;
   }
 
-  open(url);
   await closeMainWindow();
+  open(url);
 }

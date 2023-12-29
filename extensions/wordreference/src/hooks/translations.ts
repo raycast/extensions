@@ -3,8 +3,9 @@ import usePreferences from "./preferences";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { Alert, Color, Icon, LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 
-export function useSearchTranslations() {
-  const [searchText, setSearchText] = useState("");
+export function useSearchTranslations({ initialSearch = "" }: { initialSearch?: string }) {
+  const [searchText, setSearchText] = useState(initialSearch);
+
   const { preferences } = usePreferences();
 
   const { data, isLoading } = useFetch<{ word: string; lang: string }[]>(

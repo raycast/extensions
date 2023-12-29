@@ -70,6 +70,21 @@
           "placeholder": "1"
         }
       ]
+    },
+    {
+      "name": "ai-generate",
+      "title": "Generate with AI",
+      "subtitle": "Lorem Ipsum",
+      "description": "Use AI to generate some placeholder text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "topic",
+          "type": "text",
+          "required": false,
+          "placeholder": "any topic"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -92,7 +107,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
+    "@raycast/api": "^1.61.2",
     "lorem-ipsum": "^2.0.8",
     "node-fetch": "^3.2.10"
   },

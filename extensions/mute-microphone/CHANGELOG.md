@@ -1,5 +1,13 @@
 # Mute microphone Changelog
 
+## [Improvements] - 2023-12-08
+
+- Muted icon more noticeable
+
+## [Improvements] - 2023-10-17
+
+- Using a Toast instead of a HUD message
+
 ## [Fixes] - 2023-09-04
 
 - Fix issue where the extension may not work on Macs with Intel processors

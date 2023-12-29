@@ -1,7 +1,3 @@
-export type Preferences = {
-  api_token: string;
-};
-
 export type Domain = {
   name: string;
   allowAccountReset: boolean;
@@ -63,6 +59,16 @@ export type UpdateDomainSettingsRequest = {
 type DeleteDomainRequest = {
   name: string;
 };
+
+export type CreateAppPasswordRequest = {
+  userHandle: string;
+  name: string;
+};
+export type DeleteAppPasswordRequest = {
+  userName: string;
+  appPassword: string;
+};
+
 export type RequestBody =
   | CreateUserRequest
   | DeleteUserRequest
@@ -72,6 +78,8 @@ export type RequestBody =
   | ListDomainsRequest
   | UpdateDomainSettingsRequest
   | DeleteDomainRequest
+  | CreateAppPasswordRequest
+  | DeleteAppPasswordRequest
   | Record<string, never>;
 
 type SuccessResponse = {
@@ -80,6 +88,8 @@ type SuccessResponse = {
     domains?: Domain[];
     rules?: Rule[];
     code?: string;
+    credit?: string;
+    appPassword?: string;
   };
 };
 export type ErrorResponse = {

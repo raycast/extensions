@@ -7,7 +7,7 @@ export async function disconnectDevice(device: Device) {
   const devicesService = getDevicesService(bluetoothBackend);
 
   await showToast({ style: Toast.Style.Animated, title: "Disconnecting..." });
-  const result = devicesService.disconnectDevice(device.macAddress);
+  const result = devicesService?.disconnectDevice(device.macAddress);
   if (result) {
     await showToast({ style: Toast.Style.Success, title: "Device disconnected successfully." });
   } else {

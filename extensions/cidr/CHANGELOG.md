@@ -1,5 +1,9 @@
 # CIDR Changelog
 
+## [Third Version] - 2023-09-16
+
+- Support IP to CIDR range ability
+
 ## [Second Version] - 2023-06-16
 
 - Downgrade the raycast version to 1.47.3

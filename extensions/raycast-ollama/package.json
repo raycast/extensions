@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-ollama",
   "title": "Ollama AI",
-  "description": "Performe Local Inference with Ollama",
+  "description": "Perform Local Inference with Ollama",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
   "categories": [
@@ -15,124 +15,46 @@
   },
   "preferences": [
     {
-      "name": "ollamaShowMetadata",
-      "description": "Show inference statistics",
+      "name": "ollamaHost",
+      "description": "Ollama API route",
+      "type": "textfield",
+      "required": false,
+      "title": "Ollama Host",
+      "default": "http://127.0.0.1:11434/"
+    },
+    {
+      "name": "ollamaResultViewInput",
+      "description": "Choose preferred input source",
+      "type": "dropdown",
+      "required": false,
+      "title": "Input Source",
+      "data": [
+        {
+          "title": "Selected Text",
+          "value": "SelectedText"
+        },
+        {
+          "title": "Clipboard",
+          "value": "Clipboard"
+        }
+      ],
+      "default": "SelectedText"
+    },
+    {
+      "name": "ollamaResultViewInputFallback",
+      "description": "If there isn't text on main input source enable this option permit to fallback to other input source",
       "type": "checkbox",
       "required": false,
-      "title": "Show Inference Statistics",
-      "label": "Check for showing inference statistics"
+      "title": "Enable Input Source Fallback",
+      "label": "Check for enable input fallback"
     },
     {
-      "name": "ollamaChatModel",
-      "description": "Select model used for perform 'Chat With Ollama'",
+      "name": "ollamaChatHistoryMessagesNumber",
+      "description": "Number of last messages to use as memory",
       "type": "textfield",
-      "required": true,
-      "title": "Model - Chat whit Ollama",
-      "default": "llama2:latest"
-    },
-    {
-      "name": "ollamaAskModel",
-      "description": "Select model used for perform 'Ask Ollama'",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Ask Ollama",
-      "default": "llama2:latest"
-    },
-    {
-      "name": "ollamaCasualModel",
-      "description": "Select model used for perform 'Change Tone to Casual' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Change Tone to Casual",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaCodeExplain",
-      "description": "Select model used for perform 'Explain Code Step by Step' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Explain Code Step by Step",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaConfidentModel",
-      "description": "Select model used for perform 'Change Tone to Confident' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Change Tone to Confident",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaExplainSimpleTerms",
-      "description": "Select model used for perform 'Explain This in Simple Terms' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Explain This in Simple Terms",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaFixSpellingGrammar",
-      "description": "Select model used for perform 'Fix Spelling and Grammar' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Fix Spelling and Grammar",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaFriendlyModel",
-      "description": "Select model used for perform 'Change Tone to Friendly' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Change Tone to Friendly",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaImproveWriting",
-      "description": "Select model used for perform 'Improve Writing' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Improve Writing",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaLongerModel",
-      "description": "Select model used for perform 'Make Longer' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Make Longer",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaProfessionalModel",
-      "description": "Select model used for perform 'Change Tone to Professional' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Change Tone to Professional",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaShorterModel",
-      "description": "Select model used for perform 'Make Shorter' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Make Shorter",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaTranslateModel",
-      "description": "Select model used for perform 'Translate' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Translate",
-      "default": "orca:latest"
-    },
-    {
-      "name": "ollamaRephraseAsTweetModel",
-      "description": "Select model used for perform 'Rephrase as Tweet' task",
-      "type": "textfield",
-      "required": true,
-      "title": "Model - Rephrase as Tweet",
-      "default": "orca:latest"
+      "required": false,
+      "title": "Chat Memory Messages",
+      "default": "20"
     }
   ],
   "commands": [
@@ -142,21 +64,6 @@
       "subtitle": "Ollama",
       "description": "Chat with Ollama",
       "mode": "view"
-    },
-    {
-      "name": "ollama-ask",
-      "title": "Ask Ollama",
-      "subtitle": "Ollama",
-      "description": "Ask ollama any question",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": true
-        }
-      ]
     },
     {
       "name": "ollama-casual",
@@ -198,6 +105,20 @@
       "title": "Change Tone to Friendly",
       "subtitle": "Ollama",
       "description": "Make selected text more friendly",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-image-describe",
+      "title": "Describe Content of Image",
+      "subtitle": "Ollama",
+      "description": "Describe content of the image on the clipboard or selected from finder",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-image-to-text",
+      "title": "Get Text From Image",
+      "subtitle": "Ollama",
+      "description": "Get text from image on the clipboard or selected from finder",
       "mode": "view"
     },
     {
@@ -257,21 +178,6 @@
       "mode": "view"
     },
     {
-      "name": "ollama-custom-chat",
-      "title": "Custom Chat",
-      "subtitle": "Ollama",
-      "description": "Create a custom chatbot using a quicklinks",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "model",
-          "placeholder": "Model",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
       "name": "ollama-custom-command",
       "title": "Custom Command",
       "subtitle": "Ollama",
@@ -279,31 +185,32 @@
       "mode": "view",
       "arguments": [
         {
-          "name": "model",
-          "placeholder": "Model",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "ollama-custom-ask",
-      "title": "Custom Ask Command",
-      "subtitle": "Ollama",
-      "description": "Create a custom ask command using a quicklinks",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "model",
-          "placeholder": "Model",
+          "name": "prompt",
+          "placeholder": "Prompt",
           "type": "text",
           "required": true
         },
         {
-          "name": "query",
-          "placeholder": "Query",
+          "name": "image",
+          "placeholder": "Use Image",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Yes",
+              "value": "yes"
+            },
+            {
+              "title": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "model",
+          "placeholder": "Model",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }
@@ -311,14 +218,18 @@
   "dependencies": {
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",
-    "node-fetch": "^3.3.2"
+    "langchain": "^0.0.183",
+    "mime-types": "^2.1.35",
+    "node-fetch": "^3.3.2",
+    "pdf-parse": "^1.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {

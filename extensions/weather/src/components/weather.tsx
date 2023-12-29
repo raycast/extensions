@@ -128,7 +128,11 @@ export function getMetaData(data: Weather | undefined): {
   const area = data.nearest_area[0];
   const curcon = data.current_condition[0];
 
-  const title = `${area.areaName[0].value}, ${area.region[0].value}, ${area.country[0].value}`;
+  const names = [area.areaName[0].value, area.region[0].value, area.country[0].value];
+  const title = names
+    .filter((n) => n && n.trim().length > 0)
+    .map((n) => n.trim())
+    .join(", ");
   const weatherDesc = curcon ? curcon.weatherDesc[0].value : undefined;
   return { title, curcon, weatherDesc, area };
 }

@@ -1,15 +1,37 @@
-import { Action, ActionPanel, Icon, List, openExtensionPreferences, useNavigation } from "@raycast/api";
-import { Fragment } from "react";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  LaunchProps,
+  List,
+  openExtensionPreferences,
+  updateCommandMetadata,
+  useNavigation,
+} from "@raycast/api";
+import { Fragment, useEffect } from "react";
+import useInitialValues from "./hooks/initialValues";
 import usePreferences from "./hooks/preferences";
 import { useRecentSearches, useSearchTranslations } from "./hooks/translations";
 import PreferencesTranslationDropdown from "./preferencesTranslationDropdown";
 import { WordTranslation } from "./translationDetails";
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchTranslations }>) {
+  const { word } = useInitialValues({ commandProps: props });
   const { preferences, translation } = usePreferences();
-  const { searchText, setSearchText, data, isLoading } = useSearchTranslations();
-
+  const { searchText, setSearchText, data, isLoading } = useSearchTranslations({
+    initialSearch: word,
+  });
   const { clearRecentSearches, recentSearches, removeRecentSearch } = useRecentSearches();
+
+  useEffect(() => {
+    updateCommandMetadata({ subtitle: `Translate from ${translation.from} to ${translation.to}` });
+  }, [translation]);
+
+  useEffect(() => {
+    if (word) {
+      setSearchText(word);
+    }
+  }, [word]);
 
   return (
     <List
@@ -23,6 +45,7 @@ export default function Command() {
       filtering={false}
       isLoading={isLoading}
       searchBarPlaceholder={`Search ${translation.from} to ${translation.to} translations...`}
+      searchText={searchText}
     >
       {searchText ? (
         <List.Section title="Results">

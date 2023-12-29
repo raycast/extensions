@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import React from "react";
 import { ReactNode } from "react";
+import { showErrorToast, getErrorMessage } from "../utils";
 
 function clipText(text: string) {
   const maxLength = 100;
@@ -29,9 +30,13 @@ export function MenuBarRoot(props: {
   error?: string | undefined;
 }): JSX.Element {
   const error = props.error;
-  const reloadMenu = () => {
+  const reloadMenu = async () => {
     environment.commandName;
-    launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Could not open Command");
+    }
   };
   return (
     <MenuBarExtra icon={props.icon} isLoading={props.isLoading} title={props.title} tooltip={props.tooltip}>
@@ -54,7 +59,7 @@ export function MenuBarItem(props: {
 }): JSX.Element {
   return (
     <MenuBarExtra.Item
-      title={clipText(props.title)}
+      title={props.title ? clipText(props.title) : "?"}
       icon={props.icon}
       subtitle={props.subtitle}
       shortcut={props.shortcut}

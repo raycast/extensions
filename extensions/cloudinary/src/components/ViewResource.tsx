@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action } from "@raycast/api";
 
 import { getImageUrl } from "../lib/cloudinary";
+import { getOtherResolutions } from "../lib/extension";
 import type { Asset } from "../types/asset";
 
 interface ViewResourceProps {
@@ -36,6 +37,10 @@ function ViewResource({ resource, isLoading }: ViewResourceProps) {
       previewUrl: optimizedUrl,
       detail: `![Uploaded Image Raw](${optimizedUrl})`,
     });
+  }
+
+  if (resource && optimizedUrl) {
+    listItems.push(...getOtherResolutions(resource, optimizedUrl));
   }
 
   return (

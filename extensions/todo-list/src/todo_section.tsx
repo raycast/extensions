@@ -10,7 +10,7 @@ const TodoSection = ({ sectionKey }: { sectionKey: keyof TodoSections }) => {
   return (
     <List.Section title={SECTIONS_DATA[sectionKey].name}>
       {todoSections[sectionKey].sort(sortTodoItem).map((item, i) => (
-        <SingleTodoItem item={item} key={i} idx={i} sectionKey={sectionKey} />
+        <SingleTodoItem idx={i} item={item} key={i} sectionKey={sectionKey} />
       ))}
     </List.Section>
   );

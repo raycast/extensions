@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, environment } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
 
@@ -36,7 +36,7 @@ export function usePages(file: File) {
   return pages;
 }
 
-async function fetchPages(file: File, signal: any): Promise<Node[]> {
+async function fetchPages(file: File, signal: AbortSignal | undefined): Promise<Node[]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
 
   try {
@@ -57,7 +57,9 @@ async function fetchPages(file: File, signal: any): Promise<Node[]> {
     }
 
     console.error(error);
-    showToast(Toast.Style.Failure, "Could not load pages");
+    if (environment.launchType !== "background") {
+      showToast(Toast.Style.Failure, "Could not load pages");
+    }
     return Promise.resolve([]);
   }
 }

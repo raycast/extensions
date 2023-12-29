@@ -5,7 +5,7 @@ export function validatePort(value: string | undefined) {
 }
 
 export function validateLabel(value: string | undefined) {
-  if (value && value.length > 32) {
-    return "Allowed up to 32 characters.";
+  if (value && value.length > 24) {
+    return "Allowed up to 24 characters.";
   }
 }

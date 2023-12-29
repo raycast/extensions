@@ -1,52 +1,25 @@
 import {
+  Action,
   ActionPanel,
-  List,
+  Application,
+  Cache,
+  Clipboard,
+  closeMainWindow,
+  Color,
+  environment,
+  getFrontmostApplication,
   getPreferenceValues,
   getSelectedText,
-  Action,
   Icon,
-  Color,
-  Clipboard,
+  LaunchProps,
+  List,
+  popToRoot,
   showHUD,
-  closeMainWindow,
   showToast,
   Toast,
-  Cache,
-  Application,
-  getFrontmostApplication,
-  environment,
-  LaunchProps,
-  popToRoot,
 } from "@raycast/api";
-import * as changeCase from "change-case-all";
 import { useEffect, useState } from "react";
-const cases = [
-  "Camel Case",
-  "Capital Case",
-  "Constant Case",
-  "Dot Case",
-  "Header Case",
-  "Kebab Case",
-  "Lower Case",
-  "Lower First",
-  "Macro Case",
-  "No Case",
-  "Param Case",
-  "Pascal Case",
-  "Path Case",
-  "Random Case",
-  "Sentence Case",
-  "Slug Case",
-  "Snake Case",
-  "Swap Case",
-  "Title Case",
-  "Upper Case",
-  "Upper First",
-  "Sponge Case",
-] as const;
-
-type CaseType = (typeof cases)[number];
-type Cases = { [key: string]: (input: string, options?: object) => string };
+import { CaseFunction, CaseType, functions } from "./types.js";
 
 class NoTextError extends Error {
   constructor() {
@@ -78,6 +51,15 @@ async function readContent(preferredSource: string) {
   throw new NoTextError();
 }
 
+function modifyCasesWrapper(input: string, case_: CaseFunction) {
+  const modifiedArr: string[] = [];
+  const lines = input.split("\n");
+  for (const line of lines) {
+    modifiedArr.push(case_(line));
+  }
+  return modifiedArr.join("\n");
+}
+
 const cache = new Cache();
 
 const getPinnedCases = (): CaseType[] => {
@@ -98,34 +80,10 @@ const setRecentCases = (recent: CaseType[]) => {
   cache.set("recent", JSON.stringify(recent));
 };
 
-const functions: Cases = {
-  "Camel Case": changeCase.camelCase,
-  "Capital Case": changeCase.capitalCase,
-  "Constant Case": changeCase.constantCase,
-  "Dot Case": changeCase.dotCase,
-  "Header Case": changeCase.headerCase,
-  "Kebab Case": changeCase.paramCase,
-  "Lower Case": changeCase.lowerCase,
-  "Lower First": changeCase.lowerCaseFirst,
-  "Macro Case": changeCase.constantCase,
-  "No Case": changeCase.noCase,
-  "Param Case": changeCase.paramCase,
-  "Pascal Case": changeCase.pascalCase,
-  "Path Case": changeCase.pathCase,
-  "Random Case": changeCase.spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
-  "Slug Case": changeCase.paramCase,
-  "Snake Case": changeCase.snakeCase,
-  "Swap Case": changeCase.swapCase,
-  "Title Case": changeCase.titleCase,
-  "Upper Case": changeCase.upperCase,
-  "Upper First": changeCase.upperCaseFirst,
-  "Sponge Case": changeCase.spongeCase,
-};
-
 export default function Command(props: LaunchProps) {
   const preferences = getPreferenceValues();
   const preferredSource = preferences["source"];
+  const preferredAction = preferences["action"];
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
@@ -133,7 +91,11 @@ export default function Command(props: LaunchProps) {
       const content = await readContent(preferredSource);
       const converted = functions[immediatelyConvertToCase](content);
 
-      Clipboard.copy(converted);
+      if (preferredAction === "paste") {
+        Clipboard.paste(converted);
+      } else {
+        Clipboard.copy(converted);
+      }
 
       showHUD(`Converted to ${immediatelyConvertToCase}`);
       popToRoot();
@@ -141,7 +103,7 @@ export default function Command(props: LaunchProps) {
     return;
   }
 
-  const [clipboard, setClipboard] = useState<string>("");
+  const [content, setContent] = useState<string>("");
   const [frontmostApp, setFrontmostApp] = useState<Application>();
 
   const [pinned, setPinned] = useState<CaseType[]>([]);
@@ -161,19 +123,23 @@ export default function Command(props: LaunchProps) {
     setRecentCases(recent);
   }, [recent]);
 
+  const refreshContent = async () => {
+    try {
+      setContent(await readContent(preferredSource));
+    } catch (error) {
+      if (error instanceof NoTextError) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to convert",
+          message: "Please ensure that text is either selected or copied",
+        });
+      }
+    }
+  };
+
   useEffect(() => {
-    readContent(preferredSource)
-      .then((c) => setClipboard(c))
-      .catch((error) => {
-        if (error instanceof NoTextError) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Nothing to convert",
-            message: "Please ensure that text is either selected or copied",
-          });
-        }
-      });
-  }, [preferredSource]);
+    refreshContent();
+  }, []);
 
   const CopyToClipboard = (props: {
     case: CaseType;
@@ -232,16 +198,16 @@ export default function Command(props: LaunchProps) {
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              {preferences["action"] === "paste" && <PasteToActiveApp {...props} />}
+              {preferredAction === "paste" && <PasteToActiveApp {...props} />}
               <CopyToClipboard {...props} />
-              {preferences["action"] === "copy" && <PasteToActiveApp {...props} />}
+              {preferredAction === "copy" && <PasteToActiveApp {...props} />}
             </ActionPanel.Section>
             <ActionPanel.Section>
               {!props.pinned ? (
                 <Action
                   title="Pin Case"
                   icon={Icon.Pin}
-                  shortcut={{ key: "p", modifiers: ["cmd"] }}
+                  shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
                   onAction={() => {
                     setPinned([props.case, ...pinned]);
                     if (props.recent) {
@@ -294,6 +260,14 @@ export default function Command(props: LaunchProps) {
                 quicklink={{ name: `Convert to ${props.case}`, link: deeplink }}
               />
             </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action
+                title="Refresh Content"
+                icon={Icon.RotateAntiClockwise}
+                shortcut={{ key: "r", modifiers: ["cmd"] }}
+                onAction={refreshContent}
+              />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />
@@ -304,24 +278,34 @@ export default function Command(props: LaunchProps) {
     <List isShowingDetail={true}>
       <List.Section title="Pinned">
         {pinned?.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} pinned={true} />
+          <CaseItem
+            key={key}
+            case={key as CaseType}
+            modified={modifyCasesWrapper(content, functions[key])}
+            pinned={true}
+          />
         ))}
       </List.Section>
       <List.Section title="Recent">
         {recent.map((key) => (
-          <CaseItem key={key} case={key as CaseType} modified={functions[key](clipboard)} recent={true} />
+          <CaseItem
+            key={key}
+            case={key as CaseType}
+            modified={modifyCasesWrapper(content, functions[key])}
+            recent={true}
+          />
         ))}
       </List.Section>
       <List.Section title="All Cases">
         {Object.entries(functions)
           .filter(
-            ([key, _]) =>
+            ([key]) =>
               preferences[key.replace(/ +/g, "")] &&
               !recent.includes(key as CaseType) &&
-              !pinned.includes(key as CaseType)
+              !pinned.includes(key as CaseType),
           )
           .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={func(clipboard)} />
+            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(content, func)} />
           ))}
       </List.Section>
     </List>

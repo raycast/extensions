@@ -30,7 +30,7 @@ export function NewFileHereGridLayout(props: {
         description={"You can add template from the Action Panel"}
         setRefresh={setRefresh}
       />
-      <Grid.Section title={"Template"} subtitle={templateFiles.length + ""}>
+      <Grid.Section title={"Template"}>
         {templateFiles.map((template, index) => {
           return (
             <Grid.Item
@@ -56,7 +56,7 @@ export function NewFileHereGridLayout(props: {
         })}
       </Grid.Section>
       {!isLoading && showDocument && (
-        <Grid.Section title={"Document"} subtitle={documentFileTypes.length + ""}>
+        <Grid.Section title={"Document"}>
           {documentFileTypes.map((fileType, index) => {
             return (
               <NewFileHereItem
@@ -72,7 +72,7 @@ export function NewFileHereGridLayout(props: {
         </Grid.Section>
       )}
       {!isLoading && showCode && (
-        <Grid.Section title={"Code"} subtitle={codeFileTypes.length + ""}>
+        <Grid.Section title={"Code"}>
           {codeFileTypes.map((fileType, index) => {
             return (
               <NewFileHereItem
@@ -88,7 +88,7 @@ export function NewFileHereGridLayout(props: {
         </Grid.Section>
       )}
       {!isLoading && showScript && (
-        <Grid.Section title={"Script"} subtitle={scriptFileTypes.length + ""}>
+        <Grid.Section title={"Script"}>
           {scriptFileTypes.map((fileType, index) => {
             return (
               <NewFileHereItem

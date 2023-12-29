@@ -28,7 +28,11 @@ export default function Command() {
         }
       });
 
-      await startCaffeinate(true, `Caffeinating your Mac for ${caffeinateString}`, `-t ${seconds}`);
+      await startCaffeinate(
+        { menubar: true, status: true },
+        `Caffeinating your Mac for ${caffeinateString}`,
+        `-t ${seconds}`,
+      );
       await popToRoot();
     },
     validation: {

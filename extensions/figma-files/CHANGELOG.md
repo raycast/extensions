@@ -1,5 +1,15 @@
 # Figma Files Changelog
 
+## [End of the year clean up] - 2023-12-20
+
+- Updates dependencies
+- Fixes several small issues found using Raycast Issues
+
+## [Improved search and filter options] - 2023-10-02
+
+- You can now search for projects.
+- The dropdown filter now lists all projects inside a team even when multiple teams are configured.
+
 ## [Support for starring files, Grid UX improvements] - 2023-08-31
 
 - Added support for starring frequently accessed figma files. Max starred files limit is 10.

@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2023-11-15
+
+ - Added Copy Pronunciation keyboard shortcut
+
 ## [Enhancement] - 2023-08-31
 
  - Added pronunciation for Translate and Translate Form
