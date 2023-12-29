@@ -1,6 +1,7 @@
 import got from "got";
 import useSWR from "swr";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { lowerCaseKeys } from "./utils/lowerCaseKeys";
 
 type FirewallProps = { url: string };
 
@@ -23,11 +24,13 @@ export function Firewall({ url }: FirewallProps) {
 }
 
 async function isFirewallEnabled(url: string): Promise<{ enabled: boolean; name?: string; reason?: string }> {
-  const headers = await got(url).then((res) => res.headers);
+  const headers = await got(url).then((res) => lowerCaseKeys(res.headers));
 
   for (const [headerName, headerCheck, wafName] of headerChecks) {
-    const headerValue = String(headers[headerName]);
-    if (headerValue && new RegExp(headerCheck, "i").test(headerValue)) {
+    const headerValue = headers[headerName];
+    if (!headerValue) continue;
+
+    if (headerValue && new RegExp(headerCheck, "i").test(String(headerValue))) {
       return {
         enabled: true,
         name: wafName,

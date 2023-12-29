@@ -1,6 +1,7 @@
 import got from "got";
 import useSWR from "swr";
-import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { lowerCaseKeys } from "./utils/lowerCaseKeys";
 
 type HeadersProps = { url: string };
 
@@ -12,7 +13,7 @@ export function Headers({ url }: HeadersProps) {
   return (
     <List.Item
       title="HTTP Headers"
-      keywords={["HTTP Headers"]}
+      keywords={["HTTP Headers", "CSP"]}
       actions={
         <ActionPanel>
           <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
@@ -27,6 +28,23 @@ export function Headers({ url }: HeadersProps) {
           metadata={
             data && (
               <List.Item.Detail.Metadata>
+                {/* Security-related headers */}
+                <List.Item.Detail.Metadata.Label title="Security Headers" />
+                {SECURITY_HEADERS.map((headerName) => {
+                  const headerValue = data[headerName];
+
+                  return (
+                    <List.Item.Detail.Metadata.Label
+                      key={headerName}
+                      title={headerName}
+                      text={headerValue ? String(headerValue) : undefined}
+                      icon={headerValue ? Icon.CheckCircle : Icon.XMarkCircle}
+                    />
+                  );
+                })}
+                <List.Item.Detail.Metadata.Separator />
+
+                {/* All headers */}
                 {items.map(([key, value]) => (
                   <List.Item.Detail.Metadata.Label key={key} title={key} text={value} />
                 ))}
@@ -39,8 +57,16 @@ export function Headers({ url }: HeadersProps) {
   );
 }
 
+const SECURITY_HEADERS = [
+  "strict-transport-security",
+  "content-security-policy",
+  "x-frame-options",
+  "x-content-type-options",
+  "x-xss-protection",
+];
+
 async function getHeaders(url: string) {
-  return got(url).then((res) => res.headers);
+  return got(url).then((res) => lowerCaseKeys(res.headers));
 }
 
 const INFO = `
