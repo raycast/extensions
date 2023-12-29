@@ -128,17 +128,20 @@ export function PageListItem({
     ),
   };
 
+  const { open_in } = getPreferenceValues<Preferences>();
+
   const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
     handleOnOpenPage(page, setRecentPage),
   );
   const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, async () => {
     if (!page.url) return;
-    open(page.url);
+    if (open_in?.name === "Notion") {
+      open(page.url);
+    } else open(page.url, open_in);
     await setRecentPage(page);
     closeMainWindow();
   });
 
-  const { open_in } = getPreferenceValues<Preferences>();
   const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
   let openInNotionDefaultAction;
   let openInNotionAlternativeAction;
