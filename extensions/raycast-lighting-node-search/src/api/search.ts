@@ -1,4 +1,5 @@
 import axios from "axios";
+import { SearchResult } from "./types";
 
 export const search = async (alias: string) => {
   const res = await axios("https://api.amboss.space/graphql", {
@@ -36,5 +37,5 @@ export const search = async (alias: string) => {
     }),
   });
   const { data } = res.data;
-  return data;
+  return data as SearchResult["data"];
 };

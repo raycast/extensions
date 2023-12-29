@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
+import { NodeResult } from "./api/types";
 
-export default function NodeList(props: { nodes }) {
+export default function NodeList(props: { nodes: Array<NodeResult> }) {
   return (
     <List>
       {props.nodes.map((node) => (
