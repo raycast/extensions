@@ -15,30 +15,84 @@ import { ErrorDetails, getErrorDetails, tailscale } from "./shared";
 
 interface User {
   active: boolean;
+  account: string;
+  id: string;
+  tailnet: string;
+
+  // display only property
   name: string;
 }
 
 function loadUsers(unparsedUsers: string[]) {
   const users: User[] = [];
 
-  for (const unparsedUser of unparsedUsers as string[]) {
-    const unparsedUserList: string[] = unparsedUser.split(" ");
-    let user = {} as User;
+  // Assuming the first entry is the header row
+  const headerRow = unparsedUsers[0];
 
-    if (unparsedUserList.length == 2) {
-      user = {
-        active: true,
-        name: unparsedUserList[0],
-      };
-    } else if (unparsedUserList.length == 1) {
-      user = {
-        active: false,
-        name: unparsedUserList[0],
-      };
+  // Calculate column widths based on the header row
+  const columnWidths = [];
+  const headerColumns = headerRow.split(/\s\s+/); // Split by two or more spaces
+
+  // determine each column widthh
+  for (const headerColumn of headerColumns) {
+    const regex = new RegExp(`${headerColumn}\\s*`);
+    const match = headerRow.match(regex);
+
+    columnWidths.push(match?.[0].length ?? 0);
+  }
+
+  for (const unparsedUser of unparsedUsers.slice(1)) {
+    const user: User = {
+      active: false,
+      account: "",
+      id: "",
+      tailnet: "",
+      name: "",
+    };
+
+    // split the user by the column widths
+    let start = 0;
+    let end = 0;
+    for (let i = 0; i < columnWidths.length; i++) {
+      end += columnWidths[i];
+
+      const isLastColumn = i === columnWidths.length - 1;
+
+      let column;
+      if (isLastColumn) {
+        column = unparsedUser.substring(start).trim();
+      } else {
+        column = unparsedUser.substring(start, end).trim();
+      }
+
+      switch (i) {
+        case 0:
+          user.id = column;
+          break;
+        case 1:
+          user.tailnet = column;
+          break;
+        case 2: {
+          const active = column.match(/\*$/);
+          let account = column;
+          if (active) {
+            account = column.replace(/\*$/, "");
+            user.active = true;
+          }
+
+          user.account = account;
+          break;
+        }
+      }
+
+      start = end;
     }
+
+    user.name = `${user.account} (${user.tailnet})`;
 
     users.push(user);
   }
+
   return users;
 }
 
@@ -73,10 +127,15 @@ export default function AccountSwitchList() {
           ?.sort((a, b) => +a.active - +b.active)
           .map((user) => (
             <List.Item
-              title={user.name}
-              key={user.name}
+              title={user.account}
+              key={user.id}
               icon={user.active ? activeUserIcon : inactiveUserIcon}
-              subtitle={user.active ? "Active user" : ""}
+              subtitle={user.tailnet}
+              accessories={[
+                {
+                  icon: user.active ? Icon.Checkmark : undefined,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <Action
@@ -89,7 +148,7 @@ export default function AccountSwitchList() {
                       });
                       popToRoot();
                       closeMainWindow();
-                      const ret = tailscale(`switch ${user.name}`);
+                      const ret = tailscale(`switch ${user.id}`);
 
                       if (ret.includes("Success") || ret.includes("Already")) {
                         showHUD(`Active Tailscale user is ${user.name}`);
