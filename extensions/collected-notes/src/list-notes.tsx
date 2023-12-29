@@ -34,12 +34,7 @@ export default function Command() {
 					onChange={setCurrentSite}
 				>
 					{sites?.map((site) => (
-						<List.Dropdown.Item
-							key={site.id}
-							title={site.name}
-							value={site.site_path}
-							keywords={[site.site_path]}
-						/>
+						<List.Dropdown.Item key={site.id} title={site.name} value={site.site_path} keywords={[site.site_path]} />
 					))}
 				</List.Dropdown>
 			}
@@ -115,14 +110,8 @@ function NoteActionsPanel(params: {
 						metadata={
 							<Detail.Metadata>
 								<Detail.Metadata.Label title="Visibility" text={note.visibility} />
-								<Detail.Metadata.Label
-									title="Created at"
-									text={new Date(note.created_at).toLocaleDateString()}
-								/>
-								<Detail.Metadata.Label
-									title="Updated at"
-									text={new Date(note.updated_at).toLocaleDateString()}
-								/>
+								<Detail.Metadata.Label title="Created at" text={new Date(note.created_at).toLocaleDateString()} />
+								<Detail.Metadata.Label title="Updated at" text={new Date(note.updated_at).toLocaleDateString()} />
 								{/* // TODO: Add Metadata from frontmatter (tags, etc.) */}
 							</Detail.Metadata>
 						}
@@ -164,11 +153,7 @@ function DetailActions(params: {
 				content={note.url}
 				shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
 			/>
-			<ActionPanel.Submenu
-				title="Set Visibility"
-				icon={Icon.Eye}
-				shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-			>
+			<ActionPanel.Submenu title="Set Visibility" icon={Icon.Eye} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
 				<Action
 					icon={{
 						source: visibility === "public_site" ? Icon.CircleFilled : Icon.Circle,
@@ -204,12 +189,7 @@ function DetailActions(params: {
 					}}
 				/>
 			</ActionPanel.Submenu>
-			<Action
-				title="Delete Note"
-				icon={Icon.Trash}
-				shortcut={{ modifiers: ["ctrl"], key: "x" }}
-				onAction={onDelete}
-			/>
+			<Action title="Delete Note" icon={Icon.Trash} shortcut={{ modifiers: ["ctrl"], key: "x" }} onAction={onDelete} />
 		</>
 	);
 }

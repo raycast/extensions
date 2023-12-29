@@ -520,7 +520,7 @@ export function collectedNotes(email: Email, token: string) {
 			: `https://collectednotes.com/sites/${sitePath}/notes?page=${page}`;
 
 		const response = await fetch(url, { headers });
-		return await response.json() as Note[];
+		return (await response.json()) as Note[];
 	}
 
 	/**
@@ -537,7 +537,7 @@ export function collectedNotes(email: Email, token: string) {
 
 		if (response.status === 401) throw new Error("Invalid credentials");
 
-		return await response.json() as Site[];
+		return (await response.json()) as Site[];
 	}
 
 	/**
@@ -557,9 +557,7 @@ export function collectedNotes(email: Email, token: string) {
 		siteId?: number,
 	): Promise<Note> {
 		const { body, visibility } = note;
-		const url = siteId
-			? `https://collectednotes.com/sites/${siteId}/notes`
-			: "https://collectednotes.com/notes/add";
+		const url = siteId ? `https://collectednotes.com/sites/${siteId}/notes` : "https://collectednotes.com/notes/add";
 
 		const response = await fetch(url, {
 			method: "POST",
@@ -572,7 +570,7 @@ export function collectedNotes(email: Email, token: string) {
 			}),
 		});
 
-		return await response.json() as Note;
+		return (await response.json()) as Note;
 	}
 
 	/**
@@ -606,7 +604,7 @@ export function collectedNotes(email: Email, token: string) {
 				},
 			}),
 		});
-		return await response.json() as Note;
+		return (await response.json()) as Note;
 	}
 
 	/**
@@ -636,7 +634,7 @@ export function collectedNotes(email: Email, token: string) {
 		const response = await fetch("https://collectednotes.com/accounts/me", {
 			headers,
 		});
-		return await response.json() as User;
+		return (await response.json()) as User;
 	}
 
 	/**
@@ -656,7 +654,7 @@ export function collectedNotes(email: Email, token: string) {
 				ids: noteIdList,
 			}),
 		});
-		return await response.json() as number[];
+		return (await response.json()) as number[];
 	}
 
 	/**
@@ -688,7 +686,7 @@ export function collectedNotes(email: Email, token: string) {
 			method: "GET",
 			headers,
 		});
-		return await response.json() as Note[];
+		return (await response.json()) as Note[];
 	}
 
 	/**
@@ -711,7 +709,7 @@ export function collectedNotes(email: Email, token: string) {
 			method: "GET",
 			headers,
 		});
-		return await response.json() as { note: Note; body: HTML };
+		return (await response.json()) as { note: Note; body: HTML };
 	}
 
 	/**
@@ -734,7 +732,7 @@ export function collectedNotes(email: Email, token: string) {
 				headers,
 			},
 		);
-		return await response.json() as Link[] | HTML;
+		return (await response.json()) as Link[] | HTML;
 	}
 
 	/**
@@ -764,7 +762,7 @@ export function collectedNotes(email: Email, token: string) {
 			method: "GET",
 			headers,
 		});
-		return await response.json() as { site: Site; notes: Note[] };
+		return (await response.json()) as { site: Site; notes: Note[] };
 	}
 
 	/**
@@ -832,7 +830,7 @@ export function collectedNotes(email: Email, token: string) {
         <lastBuildDate>${new Date().toString()}</lastBuildDate>
         <pubDate>${new Date().toString()}</pubDate>
         ${feed.items.map((item) => {
-			return `
+					return `
             <item>
               <title>${item.title}</title>
               <link>${item.url}</link>
@@ -840,7 +838,7 @@ export function collectedNotes(email: Email, token: string) {
               <description>${item.summary}</description>
             </item>
           `;
-		})}
+				})}
       </channel>
     </rss>
     `;
@@ -878,7 +876,7 @@ export function collectedNotes(email: Email, token: string) {
 export async function site(sitePath: string, page: number = 1): Promise<{ site: Site; notes: Note[] }> {
 	const url = `https://collectednotes.com/${sitePath}.json?page=${page}`;
 	const response = await fetch(url, { headers: basicHeaders });
-	return await response.json() as { site: Site; notes: Note[] };
+	return (await response.json()) as { site: Site; notes: Note[] };
 }
 
 /**
@@ -906,7 +904,7 @@ export async function read(
 	switch (format) {
 		case "json": {
 			const response = await fetch(`https://collectednotes.com/${sitePath}/${notePath}.json`);
-			return await response.json() as Note;
+			return (await response.json()) as Note;
 		}
 		case "md": {
 			const response = await fetch(`https://collectednotes.com/${sitePath}/${notePath}.md`);
@@ -931,7 +929,7 @@ export async function read(
  */
 export async function body(sitePath: string, notePath: string): Promise<{ note: Note; body: HTML }> {
 	const response = await fetch(`https://collectednotes.com/${sitePath}/${notePath}/body`, { headers: basicHeaders });
-	return await response.json() as { note: Note; body: HTML };
+	return (await response.json()) as { note: Note; body: HTML };
 }
 
 export const cn = collectedNotes(getPreferenceValues().email, getPreferenceValues().apiKey);

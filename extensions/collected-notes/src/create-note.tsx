@@ -89,13 +89,7 @@ export default function Command() {
 				/>
 			</Form.Dropdown>
 
-			<Form.Dropdown
-				id="site_id"
-				title="Site"
-				storeValue={true}
-				isLoading={sitesAreLoading}
-				defaultValue={currentSite}
-			>
+			<Form.Dropdown id="site_id" title="Site" storeValue={true} isLoading={sitesAreLoading} defaultValue={currentSite}>
 				{sites?.map((site) => <Form.Dropdown.Item key={site.id} value={String(site.id)} title={site.name} />)}
 			</Form.Dropdown>
 
