@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## Fix Switch Account command - 2023-12-29
+
+- Fixed a bug that prevented the "Switch Account" command from working
+
 ## [Improved error handling] - 2023-09-30
 
 - Added more explicit error views for when Tailscale isn't running, isn't connected, or isn't installed
