@@ -1,0 +1,120 @@
+import { Action, ActionPanel, Form, List, Toast, showToast } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
+
+interface CepResponse {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+}
+
+const STATE_CODES = [
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
+];
+
+export default function Command() {
+  const [formValues, setFormValues] = useState<{ uf: string; city: string; streetName: string } | null>(null);
+
+  const { data, isLoading, error } = useFetch<CepResponse[]>(
+    formValues ? `https://viacep.com.br/ws/${formValues.uf}/${formValues.city}/${formValues.streetName}/json/` : "",
+    {
+      execute: formValues !== null,
+    },
+  );
+
+  const handleSubmit = (values: { uf: string; city: string; streetName: string }) => {
+    if (!values.uf || !values.city || !values.streetName) {
+      showToast(Toast.Style.Failure, "Please enter street name, city, and state code");
+      return;
+    }
+
+    if (!STATE_CODES.includes(values.uf.toUpperCase())) {
+      showToast(Toast.Style.Failure, "Invalid state code");
+      return;
+    }
+
+    setFormValues(values);
+  };
+
+  if (error) {
+    showToast(Toast.Style.Failure, "Failed to fetch CEP");
+    console.error("Fetch error:", error);
+  }
+
+  return data ? (
+    <CepResults cepData={data} isLoading={isLoading} />
+  ) : (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Find CEP" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="streetName" title="Street Name" placeholder="Avenida Paulista" />
+      <Form.TextField id="city" title="City" placeholder="São Paulo" />
+      <Form.TextField id="uf" title="State Code" placeholder="SP" />
+    </Form>
+  );
+}
+
+function CepResults({ cepData, isLoading }: { cepData: CepResponse[]; isLoading: boolean }) {
+  return (
+    <List isLoading={isLoading}>
+      <List.Section title="Results" subtitle={`${cepData.length}`}>
+        {cepData.map((data, index) => {
+          const subtitle = data.complemento
+            ? `${data.logradouro}, ${data.complemento}, ${data.bairro}, ${data.localidade}/${data.uf}`
+            : `${data.logradouro}, ${data.bairro}, ${data.localidade}/${data.uf}`;
+
+          return (
+            <List.Item
+              key={index}
+              id={data.cep}
+              title={data.cep}
+              subtitle={subtitle}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard title="Copy CEP" content={data.cep} />
+                  <Action.OpenInBrowser
+                    title="Open in Maps"
+                    url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.cep)}`}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+    </List>
+  );
+}
