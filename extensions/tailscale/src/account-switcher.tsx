@@ -21,19 +21,16 @@ interface User {
 function loadUsers(unparsedUsers: string[]) {
   const users: User[] = [];
 
+  unparsedUsers = unparsedUsers.slice(1); // skip 'ID Tailnet Account' header
+
   for (const unparsedUser of unparsedUsers as string[]) {
-    const unparsedUserList: string[] = unparsedUser.split(" ");
+    const unparsedUserList: string[] = unparsedUser.split(" ").filter(Boolean);
     let user = {} as User;
 
-    if (unparsedUserList.length == 2) {
+    if (unparsedUserList.length == 3) {
       user = {
-        active: true,
-        name: unparsedUserList[0],
-      };
-    } else if (unparsedUserList.length == 1) {
-      user = {
-        active: false,
-        name: unparsedUserList[0],
+        active: unparsedUserList[2].includes('*'),
+        name: unparsedUserList[1],
       };
     }
 
