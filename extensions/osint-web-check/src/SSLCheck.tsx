@@ -1,6 +1,6 @@
 import { connect, type PeerCertificate } from "node:tls";
 import useSWR from "swr";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { Fragment } from "react";
 
 type SSLCheckProps = { url: string };
@@ -24,15 +24,14 @@ export function SSLCheck({ url }: SSLCheckProps) {
 
   return (
     <List.Item
-      title="SSL Info"
+      title="SSL Certificate"
       actions={
-        data && (
-          <ActionPanel>
-            {items.map(([key, value]) => (
-              <Action.CopyToClipboard key={key} title={`Copy ${key} To Clipboard`} content={value} />
-            ))}
-          </ActionPanel>
-        )
+        <ActionPanel>
+          <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
+          {items.map(([key, value]) => (
+            <Action.CopyToClipboard key={key} title={`Copy ${key} To Clipboard`} content={value} />
+          ))}
+        </ActionPanel>
       }
       detail={
         <List.Item.Detail
@@ -102,3 +101,12 @@ const OID_MAP: { [key: string]: string } = {
   "1.3.6.1.4.1.311.10.3.12": "Microsoft Document Signing",
   "0.9.2342.19200300.100.1.3": "Email Address (in Subject Alternative Name)",
 };
+
+const INFO = `
+## SSL Certificates
+
+SSL certificates are cryptographic credentials that ensure secure communication between a website and its users by encrypting data transmissions. They validate and authenticate the identity of a website, providing a trust indicator to users that their information is protected.
+
+SSL certificate information can be used for OSINT by identifying legitimate websites, gathering metadata about security practices, monitoring certificate changes through Certificate Transparency logs, uncovering domain connections, and investigating phishing attacks. It provides valuable insights into websites' authenticity, infrastructure, and potential malicious activities when combined with other OSINT techniques.
+...
+`.trim();

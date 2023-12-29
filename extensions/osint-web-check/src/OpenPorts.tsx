@@ -1,6 +1,6 @@
 import * as net from "node:net";
 import useSWR from "swr";
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { Fragment } from "react";
 
 type OpenPortsProps = { url: string };
@@ -11,6 +11,11 @@ export function OpenPorts({ url }: OpenPortsProps) {
   return (
     <List.Item
       title="Open Ports"
+      actions={
+        <ActionPanel>
+          <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
+        </ActionPanel>
+      }
       detail={
         <List.Item.Detail
           isLoading={isLoading}
@@ -76,3 +81,16 @@ const PORTS_TO_CHECK = [
   20, 21, 22, 23, 25, 53, 80, 67, 68, 69, 110, 119, 123, 143, 156, 161, 162, 179, 194, 389, 443, 587, 993, 995, 3000,
   3306, 3389, 5060, 5900, 8000, 8080, 8888,
 ];
+
+const INFO = `
+## Ports
+
+In networking, a port is a numbered endpoint that allows multiple services or applications to run simultaneously on a single device, facilitating communication and data exchange between computers over a network.
+
+The following are commonly-used port numbers and use-cases:
+
+- Port 80: incoming HTTP traffic (unencrypted).
+- Port 443: incoming HTTPS traffic (encrypted).
+- Port 21: FTP (File Transfer Protocol), transferring files (unencrypted).
+- Port 22: SSH, remote-access of a machine.
+`.trim();

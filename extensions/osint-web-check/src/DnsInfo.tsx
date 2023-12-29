@@ -1,22 +1,24 @@
 import * as React from "react";
 import * as dns from "node:dns/promises";
 import useSWR from "swr";
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { Fragment } from "react";
 
 type DnsInfoProps = {
   url: string;
 };
 
-/**
- * TODO: Action list
- */
 export function DnsInfo({ url }: DnsInfoProps) {
   const { data, isLoading } = useSWR(["dns-info", url], ([, url]) => getDnsInfo(url));
 
   return (
     <List.Item
-      title="DNS Info"
+      title="DNS Records"
+      actions={
+        <ActionPanel>
+          <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
+        </ActionPanel>
+      }
       detail={
         <List.Item.Detail
           isLoading={isLoading}
@@ -82,3 +84,9 @@ async function getDnsInfo(url: string) {
 }
 
 const safe = <T,>(prom: Promise<T>): Promise<T | undefined> => prom.catch(() => undefined);
+
+const INFO = `
+## DNS Records
+
+DNS (Domain Name System) records are like an address book for the internet, providing essential information about a domain. They include records such as A, CNAME, MX, TXT, and NS. A records map domain names to IP addresses, CNAME records provide aliases for domains, MX records specify mail servers for domain emails, TXT records hold additional text information, and NS records indicate the authoritative name servers handling DNS queries for a domain. These records are crucial for routing internet traffic, managing emails, verifying domain ownership, and implementing various services and security measures.
+`.trim();

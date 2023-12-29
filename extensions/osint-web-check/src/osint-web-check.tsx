@@ -6,7 +6,11 @@ import { Headers } from "./Headers";
 import { DnsInfo } from "./DnsInfo";
 import { OpenPorts } from "./OpenPorts";
 import { DnsSec } from "./DnsSec";
-import { TxtRecords } from "./TxtRecords";
+import { CrawlRules } from "./CrawlRules";
+import { Hsts } from "./Hsts";
+import { Redirects } from "./Redirects";
+import { Firewall } from "./Firewall";
+import { WhoIs } from "./WhoIs";
 
 export default function OsintWebCheck() {
   const navigation = useNavigation();
@@ -24,13 +28,16 @@ function CheckDetails({ url }: { url: string }) {
   return (
     <List isShowingDetail>
       <UrlIp url={url} />
+      <WhoIs url={url} />
       <Headers url={url} />
       <SSLCheck url={url} />
       <DnsInfo url={url} />
-      <TxtRecords url={url} />
       <DnsSec url={url} />
-      {/*<WhoIs url={url} />*/}
       <OpenPorts url={url} />
+      <CrawlRules url={url} />
+      <Hsts url={url} />
+      <Redirects url={url} />
+      <Firewall url={url} />
     </List>
   );
 }

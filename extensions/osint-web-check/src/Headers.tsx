@@ -1,6 +1,6 @@
 import got from "got";
 import useSWR from "swr";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, List } from "@raycast/api";
 
 type HeadersProps = { url: string };
 
@@ -14,13 +14,12 @@ export function Headers({ url }: HeadersProps) {
       title="HTTP Headers"
       keywords={["HTTP Headers"]}
       actions={
-        data && (
-          <ActionPanel>
-            {items.map(([key, value]) => (
-              <Action.CopyToClipboard key={key} title={`Copy ${key} To Clipboard`} content={value} />
-            ))}
-          </ActionPanel>
-        )
+        <ActionPanel>
+          <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
+          {items.map(([key, value]) => (
+            <Action.CopyToClipboard key={key} title={`Copy ${key} To Clipboard`} content={value} />
+          ))}
+        </ActionPanel>
       }
       detail={
         <List.Item.Detail
@@ -43,3 +42,11 @@ export function Headers({ url }: HeadersProps) {
 async function getHeaders(url: string) {
   return got(url).then((res) => res.headers);
 }
+
+const INFO = `
+## HTTP Headers
+
+HTTP headers are often used for various purposes like controlling caching behavior, handling cookies, securing connections, and providing additional information about the request or response. They help in the proper communication and functioning of the HTTP protocol between clients and servers.
+
+HTTP headers in OSINT are used for tasks such as analyzing website information, identifying vulnerabilities and misconfigurations, tracking redirection and user-agent details, providing insights into a website's security posture, and gathering intelligence about a target. They offer valuable information about servers, technologies, and website behavior, aiding OSINT analysts in their investigations.
+`.trim();

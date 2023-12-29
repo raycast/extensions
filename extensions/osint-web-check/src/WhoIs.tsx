@@ -14,10 +14,46 @@ export function WhoIs({ url }: WhoIsProps) {
       detail={
         <List.Item.Detail
           isLoading={isLoading}
+          markdown={data && `\`\`\`${data.raw}\`\`\``}
           metadata={
             data && (
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Domain Name" text={data["Domain Name"]} />
+                {data.parsed["Domain Name"] && (
+                  <List.Item.Detail.Metadata.Label title="Domain Name" text={data.parsed["Domain Name"]} />
+                )}
+                {data.parsed["Name Server"] && (
+                  <List.Item.Detail.Metadata.Label title="Name Server" text={data.parsed["Name Server"]} />
+                )}
+                {data.parsed["Creation Date"] && (
+                  <List.Item.Detail.Metadata.Label title="Creation Date" text={data.parsed["Creation Date"]} />
+                )}
+                {data.parsed["Updated Date"] && (
+                  <List.Item.Detail.Metadata.Label title="Updated Date" text={data.parsed["Updated Date"]} />
+                )}
+                {data.parsed["Registry Expiry Date"] && (
+                  <List.Item.Detail.Metadata.Label
+                    title="Registry Expiry Date"
+                    text={data.parsed["Registry Expiry Date"]}
+                  />
+                )}
+                {data.parsed["Registry Domain ID"] && (
+                  <List.Item.Detail.Metadata.Label
+                    title="Registry Domain ID"
+                    text={data.parsed["Registry Domain ID"]}
+                  />
+                )}
+                {data.parsed["Registrar"] && (
+                  <List.Item.Detail.Metadata.Label title="Registrar" text={data.parsed["Registrar"]} />
+                )}
+                {data.parsed["Registrar IANA ID"] && (
+                  <List.Item.Detail.Metadata.Label title="Registrar IANA ID" text={data.parsed["Registrar IANA ID"]} />
+                )}
+                {data.parsed["Domain Status"] && (
+                  <List.Item.Detail.Metadata.Label title="Domain Status" text={data.parsed["Domain Status"]} />
+                )}
+                {data.parsed["DNSSEC"] && (
+                  <List.Item.Detail.Metadata.Label title="DNSSEC" text={data.parsed["DNSSEC"]} />
+                )}
               </List.Item.Detail.Metadata>
             )
           }
@@ -25,24 +61,14 @@ export function WhoIs({ url }: WhoIsProps) {
       }
     />
   );
-
-  /**
-   * <div>Domain Name: {data["Domain Name"]}</div>
-      <div>Creation Date: {data["Creation Date"]}</div>
-      <div>Updated Date: {data["Updated Date"]}</div>
-      <div>Registry Expiry Date: {data["Registry Expiry Date"]}</div>
-      <div>Registry Domain ID: {data["Registry Domain ID"]}</div>
-      <div>Registrar: {data["Registrar"]}</div>
-      <div>Registrar IANA ID: {data["Registrar IANA ID"]}</div>
-   */
 }
 
 async function getWhoIs(url: string) {
-  const hostname = new URL(url).hostname;
+  const domain = new URL(url).host;
 
   const data = await new Promise<string>((resolve, reject) => {
     const client = net.createConnection({ port: 43, host: "whois.internic.net" }, () => {
-      client.write(`${hostname}\r\n`);
+      client.write(`${domain}\r\n`);
     });
 
     let buffer = "";
@@ -66,22 +92,16 @@ function parseWhoIsData(data: string) {
   const lines = data.split("\n");
   const result: Record<string, string> = {};
 
-  let lastKey = "";
   for (const line of lines) {
-    const [key, value] = line.split(":").map((s) => s.trim());
+    const match = line.match(/(.*?):(.*)/);
 
-    if (!value) {
-      result[lastKey] += line;
-      continue;
-    }
+    if (!match) continue;
 
-    lastKey = key;
-    result[key] = value;
+    const [, key, value] = match;
+    result[key.trim()] = value.trim();
   }
 
-  console.log(Object.keys(result));
-
-  return result as WhoIsSchema;
+  return { raw: data, parsed: result as WhoIsSchema };
 }
 
 type WhoIsSchema = {
