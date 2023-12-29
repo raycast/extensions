@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useMemo, useRef, useState } from "react";
 import { getProjectNameById } from "../service/project";
 import { Task } from "../service/task";
@@ -14,9 +14,12 @@ const TaskItem: React.FC<{
   actionType: "today" | "week" | "project";
   detailMarkdown: string;
   copyContent: string;
+  dueDate?: Task["dueDate"];
+  startDate?: Task["startDate"];
   refresh: () => void;
 }> = (props) => {
-  const { id, title, priority, projectId, actionType, detailMarkdown, tags, copyContent, refresh } = props;
+  const { id, title, priority, projectId, actionType, dueDate, startDate, detailMarkdown, tags, copyContent, refresh } =
+    props;
 
   const projectName = useMemo(() => {
     return getProjectNameById(projectId) || "";
@@ -103,6 +106,19 @@ const TaskItem: React.FC<{
                 icon={{ source: Icon.Dot, tintColor: checkboxColor }}
               />
               <List.Item.Detail.Metadata.Separator />
+              {startDate ? (
+                <>
+                  <List.Item.Detail.Metadata.Label title="Start Date" text={startDate} />
+                  <List.Item.Detail.Metadata.Separator />
+                </>
+              ) : null}
+              {dueDate ? (
+                <>
+                  <List.Item.Detail.Metadata.Label title="Due Date" text={dueDate} />
+                  <List.Item.Detail.Metadata.Separator />
+                </>
+              ) : null}
+
               {tags.length ? (
                 <>
                   <List.Item.Detail.Metadata.Label title="Tags" text={tags.join(", ")} />

@@ -32,3 +32,8 @@ export const formatToServerDate = (date: Date | moment.Moment | null | undefined
   if (date) return moment(date).utc().millisecond(0).format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
   return undefined;
 };
+
+export const formatPrettyDateTime = (date: string) => {
+  if (!date) return "";
+  return moment(date).format("MMM Do, h:mm a");
+};

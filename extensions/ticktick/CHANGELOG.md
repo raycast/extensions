@@ -1,5 +1,8 @@
 # TickTick Changelog
 
+## [Added] - {PR_MERGE_DATE}
+- Add `dueDate` and `startDate` to task detail view.
+
 ## [Fixed spelling error] - 2023-11-27
 
 ## [Added] - 2023-11-14

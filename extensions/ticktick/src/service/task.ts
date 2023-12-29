@@ -10,6 +10,8 @@ export interface Task {
   items?: ChecklistItem[];
   kind?: TaskKind;
   tags: string[];
+  dueDate?: string;
+  startDate?: string;
 }
 
 export interface ChecklistItem {

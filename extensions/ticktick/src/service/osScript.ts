@@ -2,7 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { Project } from "./project";
 import { Section, Task } from "./task";
 import { runAppleScript } from "run-applescript";
-import { convertMacTime2JSTime, getSectionNameByDate } from "../utils/date";
+import { convertMacTime2JSTime, formatPrettyDateTime, getSectionNameByDate } from "../utils/date";
 
 const taskObject2Task = (object: Record<string, unknown>): Task => {
   return {
@@ -15,6 +15,8 @@ const taskObject2Task = (object: Record<string, unknown>): Task => {
     items: object.items as Task["items"],
     kind: object.kind as Task["kind"],
     tags: (object.tags || []) as Task["tags"],
+    startDate: formatPrettyDateTime(object.startDate as string) as Task["startDate"],
+    dueDate: formatPrettyDateTime(object.dueDate as string) as Task["dueDate"],
   };
 };
 
