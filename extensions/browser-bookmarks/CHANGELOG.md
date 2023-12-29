@@ -2,7 +2,7 @@
 
 ## [Bug Fixes] - 2023-12-29
 
-- Fixed a issue where the selected item would not be the first one after the search text changed
+- Fixed an issue where the selected item would not be the first one after the search text changed
 
 ## [Support for Sidekick] - 2023-12-18
 
