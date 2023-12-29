@@ -3,6 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 
 interface ValidCepResponse {
+  cep: string;
   logradouro: string;
   bairro: string;
   localidade: string;
@@ -50,6 +51,7 @@ export default function Command(props: { arguments: Arguments.FindAddress }) {
                 title="Copy Address"
                 content={`${data.logradouro}, ${data.bairro}, ${data.localidade}/${data.uf}`}
               />
+              <Action.OpenInBrowser title="Open in Maps" url={`maps://?q=${data.cep}`} />
             </ActionPanel>
           }
         />

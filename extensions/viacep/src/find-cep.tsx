@@ -105,10 +105,7 @@ function CepResults({ cepData, isLoading }: { cepData: CepResponse[]; isLoading:
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy CEP" content={data.cep} />
-                  <Action.OpenInBrowser
-                    title="Open in Maps"
-                    url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.cep)}`}
-                  />
+                  <Action.OpenInBrowser title="Open in Maps" url={`maps://?q=${data.cep}`} />
                 </ActionPanel>
               }
             />
