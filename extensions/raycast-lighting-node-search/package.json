@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "search-node",
-      "title": "Search node",
+      "title": "Search Node",
       "description": "Search for a Lightning Node",
       "mode": "view"
     }
