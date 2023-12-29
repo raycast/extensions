@@ -29,7 +29,7 @@ function loadUsers(unparsedUsers: string[]) {
 
     if (unparsedUserList.length == 3) {
       user = {
-        active: unparsedUserList[2].includes('*'),
+        active: unparsedUserList[2].includes("*"),
         name: unparsedUserList[1],
       };
     }
