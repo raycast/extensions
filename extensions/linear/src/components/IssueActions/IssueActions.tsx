@@ -4,7 +4,7 @@ import { IssuePriorityValue, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
 import { format } from "date-fns";
 
-import { IssueResult, IssueDetailResult } from "../../api/getIssues";
+import { IssueResult, IssueDetailResult, Attachment } from "../../api/getIssues";
 
 import { getLinearClient } from "../../helpers/withLinearClient";
 import { isLinearInstalled } from "../../helpers/isLinearInstalled";
@@ -24,6 +24,7 @@ import StateSubmenu from "./StateSubmenu";
 import EditIssueForm from "../EditIssueForm";
 import IssueComments from "../IssueComments";
 import IssueCommentForm from "../IssueCommentForm";
+import IssueAttachments from "../IssueAttachments";
 import CreateSubIssues from "../CreateSubIssues";
 import MilestoneSubmenu from "./MilestoneSubmenu";
 
@@ -32,6 +33,8 @@ type IssueActionsProps = {
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   mutateDetail?: MutatePromise<IssueDetailResult>;
   mutateSubIssues?: MutatePromise<IssueResult[] | undefined>;
+  showAttachmentsAction?: boolean;
+  attachments?: Attachment[];
   priorities: IssuePriorityValue[] | undefined;
   users: User[] | undefined;
   me: User | undefined;
@@ -52,6 +55,8 @@ export default function IssueActions({
   mutateList,
   mutateSubIssues,
   mutateDetail,
+  showAttachmentsAction,
+  attachments,
   priorities,
   users,
   me,
@@ -491,6 +496,15 @@ export default function IssueActions({
           target={<CreateSubIssues issue={issue} />}
           shortcut={{ modifiers: ["opt", "shift"], key: "m" }}
         />
+
+        {showAttachmentsAction ? (
+          <Action.Push
+            title="Show Issue Links"
+            icon={Icon.Link}
+            target={<IssueAttachments attachments={attachments ?? []} />}
+            shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
+          />
+        ) : null}
 
         <Action.Push
           title="Add Comment"
