@@ -1,5 +1,5 @@
 import { ActionPanel, Grid, getPreferenceValues } from "@raycast/api";
-import { ComponentPropsWithoutRef } from "react";
+import { ComponentPropsWithoutRef, useState } from "react";
 
 import { PopiconLogo } from "../../enums/popicon-logo";
 import { PopiconVariant } from "../../enums/popicon-variant";
@@ -15,17 +15,24 @@ import { PopiconGridSection } from "./popicon-grid-section";
 const preferences = getPreferenceValues<ExtensionPreferences>();
 
 type PopiconGridProps = Prettify<
-  Omit<ComponentPropsWithoutRef<typeof Grid>, "searchBarAccessory" | "columns" | "inset" | "searchBarPlaceholder">
+  Omit<
+    ComponentPropsWithoutRef<typeof Grid>,
+    "searchBarAccessory" | "onSelectionChange" | "columns" | "inset" | "searchBarPlaceholder"
+  >
 >;
 
 function PopiconGrid(props: PopiconGridProps) {
   const [variant, setVariant] = usePopiconVariant(PopiconVariant.Line);
+
+  const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
 
   return (
     <Grid
       {...props}
       searchBarPlaceholder="Search icons..."
       inset={Grid.Inset.Large}
+      navigationTitle={`Popicons${selectedIconId ? ` - ${selectedIconId}` : ""}`}
+      onSelectionChange={setSelectedIconId}
       columns={getColumnAmount(preferences.iconPreviewSize)}
       searchBarAccessory={
         <Grid.Dropdown

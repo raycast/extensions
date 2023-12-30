@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Grid,
-  Icon,
-  Toast,
-  environment,
-  getPreferenceValues,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Grid, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import svgtojsx from "svg-to-jsx";
 import { changeColor } from "../../helpers/change-color";
 import { getSvg } from "../../helpers/get-svg";
@@ -26,18 +16,14 @@ type PopiconGridItemProps = {
 };
 
 function PopiconGridItem(props: PopiconGridItemProps) {
-  const isDarkMode = environment.appearance === "dark";
   const { variant } = usePopiconGridContext(displayName);
 
   return (
     <Grid.Item
       key={props.icon.name}
-      title={props.icon.name}
+      id={props.icon.name}
       keywords={[props.icon.name, ...props.icon.tags]}
-      content={`data:image/svg+xml,${changeColor(
-        getSvg(props.icon, variant),
-        isDarkMode ? "#ebebeb" : "#0D0D0D"
-      ).replaceAll("\n", "")}`}
+      content={`data:image/svg+xml,${changeColor(getSvg(props.icon, variant), Color.PrimaryText).replaceAll("\n", "")}`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

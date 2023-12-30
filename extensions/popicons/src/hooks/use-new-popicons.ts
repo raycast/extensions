@@ -3,7 +3,6 @@ import { useCallback, useMemo } from "react";
 
 import { PopIconCategory } from "../helpers/get-popicon-categories";
 import { Popicon } from "../schemas/popicon";
-import omit from "../utilities/omit";
 
 function useNewPopicons(): readonly [PopIconCategory | undefined, (newIcons: Array<Popicon>) => void] {
   const [newIconsState, setNewIconsState] = useCachedState<PopIconCategory & { timestamp: Date }>("new-icons");
@@ -17,7 +16,11 @@ function useNewPopicons(): readonly [PopIconCategory | undefined, (newIcons: Arr
       return undefined;
     }
 
-    return omit(newIconsState, ["timestamp"]);
+    return {
+      title: newIconsState.title,
+      keywords: newIconsState.keywords,
+      icons: newIconsState.icons.map((i) => ({ ...i, name: `${i.name} ` })),
+    } satisfies PopIconCategory;
   }, [newIconsState]);
 
   const setNewIcons = useCallback(
