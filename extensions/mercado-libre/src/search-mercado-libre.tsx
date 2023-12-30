@@ -65,20 +65,22 @@ export default function Command() {
       onSearchTextChange={setSearchQuery}
       throttle
     >
-      {data?.map((item) => (
-        <Grid.Item
-          key={item.id}
-          content={item.thumbnail.replace(/^http:/, "https:")}
-          title={item.title}
-          subtitle={formatPrice(item.price, item.currency_id)}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={`${item.permalink}`} />
-            </ActionPanel>
-          }
-        />
-      ))}
-      {(!data || data.length === 0) && <Grid.EmptyView icon="mercado-libre-emptyview.png" title="No Results" />}
+      <Grid.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
+        {data?.map((item) => (
+          <Grid.Item
+            key={item.id}
+            content={item.thumbnail.replace(/^http:/, "https:")}
+            title={item.title}
+            subtitle={formatPrice(item.price, item.currency_id)}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={`${item.permalink}`} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </Grid.Section>
+      <Grid.EmptyView icon="mercado-libre-emptyview.png" title="No Results" />
     </Grid>
   ) : (
     <List
@@ -87,20 +89,22 @@ export default function Command() {
       onSearchTextChange={setSearchQuery}
       throttle
     >
-      {data?.map((item) => (
-        <List.Item
-          key={item.id}
-          title={item.title}
-          accessories={[{ text: formatPrice(item.price, item.currency_id) }]}
-          icon={item.thumbnail.replace(/^http:/, "https:")}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={`${item.permalink}`} />
-            </ActionPanel>
-          }
-        />
-      ))}
-      {(!data || data.length === 0) && <List.EmptyView icon="mercado-libre-emptyview.png" title="No Results" />}
+      <List.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
+        {data?.map((item) => (
+          <List.Item
+            key={item.id}
+            title={item.title}
+            accessories={[{ text: formatPrice(item.price, item.currency_id) }]}
+            icon={item.thumbnail.replace(/^http:/, "https:")}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={`${item.permalink}`} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+      <List.EmptyView icon="mercado-libre-emptyview.png" title="No Results" />
     </List>
   );
 }
