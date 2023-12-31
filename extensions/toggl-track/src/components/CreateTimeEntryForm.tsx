@@ -1,5 +1,5 @@
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
-import toggl from "../api";
+import { createTimeEntry } from "../api";
 import { storage } from "../storage";
 import { Project, Task } from "../api/types";
 import { useAppContext } from "../context";
@@ -22,7 +22,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
     }
 
     try {
-      await toggl.createTimeEntry({
+      await createTimeEntry({
         projectId: selectedProject?.id,
         workspaceId,
         description: values.description,

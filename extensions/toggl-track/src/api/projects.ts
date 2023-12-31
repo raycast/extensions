@@ -1,0 +1,17 @@
+import { get } from "./toggleClient";
+import { Project } from "./types";
+import { hideArchivedProjects } from "../helpers/preferences";
+
+export async function getWorkspaceProjects(workspaceId: number): Promise<Project[] | null> {
+  const projects = (await get<Project[] | null>(`/workspaces/${workspaceId}/projects?per_page=500`)) || [];
+  projects.push({
+    id: -1,
+    workspace_id: workspaceId,
+    client_id: -1,
+    name: "No project",
+    billable: false,
+    color: "",
+    active: true,
+  });
+  return hideArchivedProjects ? projects.filter((p) => p.active) : projects;
+}

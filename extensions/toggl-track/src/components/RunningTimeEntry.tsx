@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { TimeEntry } from "../api/types";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { storage } from "../storage";
-import toggl from "../api";
+import * as api from "../api";
 import { useAppContext } from "../context";
 
 function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry }) {
@@ -14,7 +14,7 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
   const stopTimeEntry = async () => {
     await showToast(Toast.Style.Animated, "Stopping time entry...");
     try {
-      await toggl.stopTimeEntry({ id: runningTimeEntry.id, workspaceId: runningTimeEntry.workspace_id });
+      await api.stopTimeEntry({ id: runningTimeEntry.id, workspaceId: runningTimeEntry.workspace_id });
       await storage.runningTimeEntry.refresh();
       await storage.timeEntries.refresh();
       await showToast(Toast.Style.Success, `Stopped time entry`);

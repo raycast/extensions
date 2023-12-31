@@ -4,7 +4,7 @@ import { AppContextProvider, useAppContext } from "./context";
 import RunningTimeEntry from "./components/RunningTimeEntry";
 import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
 import { TimeEntry } from "./api/types";
-import toggl from "./api";
+import { createTimeEntry } from "./api";
 import { storage, refreshStorage } from "./storage";
 import ProjectListItem from "./components/ProjectListItem";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
@@ -43,7 +43,7 @@ function ListView() {
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
     try {
-      await toggl.createTimeEntry({
+      await createTimeEntry({
         projectId: timeEntry.project_id,
         workspaceId: timeEntry.workspace_id,
         description: timeEntry.description,
