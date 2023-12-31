@@ -1,6 +1,4 @@
-# Raycast extension - Text Differ (by Noah Tran)
+# Raycast extension - Kaleidoscope
 
-Opens Text Differ from selected files
-
-Download Text Differ here:
-https://proxymanstore.gumroad.com/l/textdiffer
+Opens Kaleidoscope from selected files
+https://kaleidoscope.app/download
