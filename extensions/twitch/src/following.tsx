@@ -193,7 +193,7 @@ function VideoList({
         <List.Item
           title={isLoading ? "Loading..." : "Load more"}
           accessories={[
-            isLoading ? { icon: { source: Icon.CircleEllipsis } } : { icon: { source: Icon.ArrowDownCircle } },
+            isLoading ? { icon: Icon.CircleEllipsis } : { icon: Icon.ArrowDownCircle },
           ]}
           actions={
             <ActionPanel>
