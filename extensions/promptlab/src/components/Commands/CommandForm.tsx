@@ -85,7 +85,7 @@ export default function CommandForm(props: {
   const [showAddPlaceholderAction, setShowAddPlaceholderAction] = useState<boolean>(false);
   const [prompt, setPrompt] = useState<string>(oldData != undefined ? oldData.prompt : "");
   const [showResponse, setShowResponse] = useState<boolean>(
-    oldData != undefined && oldData.showResponse != undefined ? oldData.showResponse : true
+    oldData != undefined && oldData.showResponse != undefined ? oldData.showResponse : true,
   );
   const models = useModels();
   const { pop } = useNavigation();
@@ -123,7 +123,7 @@ export default function CommandForm(props: {
   const getDefaultValues = () => {
     try {
       const advancedSettingsValues = JSON.parse(
-        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8")
+        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8"),
       );
       if ("commandDefaults" in advancedSettingsValues) {
         return advancedSettingsValues.commandDefaults;
@@ -171,31 +171,33 @@ export default function CommandForm(props: {
   useEffect(() => {
     if (oldData) {
       loadCustomPlaceholders(advancedSettings).then((customPlaceholders) => {
-      PLChecker.checkForPlaceholders(oldData.prompt, {
-        customPlaceholders,
-        defaultPlaceholders: PromptLabPlaceholders,
-      }).then((includedPlaceholders) => {
-        let newPromptInfo = defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
-        includedPlaceholders.forEach((placeholder) => {
-          newPromptInfo =
-            newPromptInfo +
-            `\n\n${placeholder.hintRepresentation || ""}: ${placeholder.description}\nExample: ${placeholder.example}`;
-        });
-        setPromptInfo(newPromptInfo);
-
-        PLChecker.checkForPlaceholders(oldData.actionScript || "").then((includedPlaceholders) => {
-          let newScriptInfo = includedPlaceholders.length > 0 ? "Detected Placeholders:" : "";
+        PLChecker.checkForPlaceholders(oldData.prompt, {
+          customPlaceholders,
+          defaultPlaceholders: PromptLabPlaceholders,
+        }).then((includedPlaceholders) => {
+          let newPromptInfo = defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
           includedPlaceholders.forEach((placeholder) => {
-            newScriptInfo =
-              newScriptInfo +
+            newPromptInfo =
+              newPromptInfo +
               `\n\n${placeholder.hintRepresentation || ""}: ${placeholder.description}\nExample: ${
                 placeholder.example
               }`;
           });
-          setScriptInfo(newScriptInfo);
+          setPromptInfo(newPromptInfo);
+
+          PLChecker.checkForPlaceholders(oldData.actionScript || "").then((includedPlaceholders) => {
+            let newScriptInfo = includedPlaceholders.length > 0 ? "Detected Placeholders:" : "";
+            includedPlaceholders.forEach((placeholder) => {
+              newScriptInfo =
+                newScriptInfo +
+                `\n\n${placeholder.hintRepresentation || ""}: ${placeholder.description}\nExample: ${
+                  placeholder.example
+                }`;
+            });
+            setScriptInfo(newScriptInfo);
+          });
         });
       });
-    });
     }
 
     if (oldData && oldData.setupConfig) {
@@ -315,7 +317,7 @@ export default function CommandForm(props: {
       if (minNumFiles == "0") {
         if (
           values.prompt.match(
-            /{{(imageText|imageFaces|imageAnimals|imageSubjects|imageSaliency|imageBarcodes|imageRectangles|pdfRawText|pdfOCRText|contents)}}/g
+            /{{(imageText|imageFaces|imageAnimals|imageSubjects|imageSaliency|imageBarcodes|imageRectangles|pdfRawText|pdfOCRText|contents)}}/g,
           ) != null
         ) {
           minNumFiles = "1";
@@ -414,7 +416,7 @@ export default function CommandForm(props: {
             });
             if (oldData && oldData.setupConfig) {
               const oldField = oldData.setupConfig.fields.find(
-                (field) => field.name == (newField as NumberConfigField | BooleanConfigField | StringConfigField).name
+                (field) => field.name == (newField as NumberConfigField | BooleanConfigField | StringConfigField).name,
               );
               if (oldField) {
                 (newField as NumberConfigField | BooleanConfigField | StringConfigField).value = oldField.value;
@@ -479,14 +481,13 @@ export default function CommandForm(props: {
           />
           {showAddPlaceholderAction ? (
             <ActionPanel.Submenu title="Add Placeholder..." icon={Icon.Plus}>
-              {PromptLabPlaceholders
-                .filter(
-                  (placeholder) =>
-                    !placeholder.name.startsWith("textfile:") &&
-                    !placeholder.name.startsWith("video:") &&
-                    !placeholder.name.startsWith("audio:") &&
-                    !placeholder.name.startsWith("image:")
-                )
+              {PromptLabPlaceholders.filter(
+                (placeholder) =>
+                  !placeholder.name.startsWith("textfile:") &&
+                  !placeholder.name.startsWith("video:") &&
+                  !placeholder.name.startsWith("audio:") &&
+                  !placeholder.name.startsWith("image:"),
+              )
                 .sort((a, b) => (a.fullRepresentation > b.fullRepresentation ? 1 : -1))
                 .map((placeholder) => (
                   <Action
@@ -705,7 +706,7 @@ export default function CommandForm(props: {
                         key={`removeField-${sectionName}`}
                         onAction={async () => {
                           const fields = [...setupFields.map((field) => ({ ...field }))].filter(
-                            (field) => field.associatedConfigField != section[1]
+                            (field) => field.associatedConfigField != section[1],
                           );
                           setSetupFields(fields);
                           setCurrentFieldFocus(-1);

@@ -30,7 +30,7 @@ export const logDebug = (data: unknown, style = DebugStyle.Info) => {
           compact: false,
           maxArrayLength: null,
           maxStringLength: null,
-        })}`
+        })}`,
       );
       break;
     case DebugStyle.Warn:
@@ -41,7 +41,7 @@ export const logDebug = (data: unknown, style = DebugStyle.Info) => {
           compact: false,
           maxArrayLength: null,
           maxStringLength: null,
-        })}`
+        })}`,
       );
       break;
     case DebugStyle.Error:
@@ -52,7 +52,7 @@ export const logDebug = (data: unknown, style = DebugStyle.Info) => {
           compact: false,
           maxArrayLength: null,
           maxStringLength: null,
-        })}`
+        })}`,
       );
       break;
     case DebugStyle.Trace:

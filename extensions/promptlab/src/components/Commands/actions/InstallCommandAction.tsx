@@ -80,7 +80,7 @@ export default function InstallCommandAction(props: {
           Promise.resolve(LocalStorage.allItems()).then((commandData) => {
             const commandDataFiltered = Object.values(commandData).filter(
               (cmd, index) =>
-                !Object.keys(commandData)[index].startsWith("--") && !Object.keys(cmd)[index].startsWith("id-")
+                !Object.keys(commandData)[index].startsWith("--") && !Object.keys(cmd)[index].startsWith("id-"),
             );
             setCommands(commandDataFiltered.map((data) => JSON.parse(data)));
           });

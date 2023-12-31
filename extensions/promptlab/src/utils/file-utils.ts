@@ -80,7 +80,7 @@ export const getImageDetails = async (filePath: string, options: CommandOptions)
     options.useFaceDetection || false,
     options.useRectangleDetection || false,
     options.useSaliencyAnalysis || false,
-    options.useHorizonDetection || false
+    options.useHorizonDetection || false,
   );
   const imageVisionInstructions = filterString(imageDetails.stringValue);
   const exifData =

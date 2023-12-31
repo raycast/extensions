@@ -19,7 +19,7 @@ export default function useModel(
   input: string,
   temperature: string,
   execute: boolean,
-  modelOverride?: Model
+  modelOverride?: Model,
 ) {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const [data, setData] = useState<string>("");
@@ -142,18 +142,18 @@ export default function useModel(
             "{prompt}",
             preferences.promptPrefix +
               prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') +
-              preferences.promptSuffix
+              preferences.promptSuffix,
           )
           .replace(
             "{basePrompt}",
-            preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')
+            preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"'),
           )
           .replace(
             "{input}",
             targetModel.inputSchema.includes("{prompt") && prompt == input
               ? ""
-              : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix
-          )
+              : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix,
+          ),
       );
   if (preferences.includeTemperature) {
     modelSchema["temperature"] = temp;
@@ -173,17 +173,17 @@ export default function useModel(
             "{prompt}",
             preferences.promptPrefix +
               prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') +
-              preferences.promptSuffix
+              preferences.promptSuffix,
           )
           .replace(
             "{basePrompt}",
-            preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')
+            preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"'),
           )
           .replace(
             "{input}",
             targetModel.inputSchema.includes("{prompt") && prompt == input
               ? ""
-              : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix
+              : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix,
           ),
       });
       const tag = basePrompt + prompt + input;

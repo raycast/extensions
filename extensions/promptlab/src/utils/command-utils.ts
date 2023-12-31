@@ -26,7 +26,7 @@ export const runActionScript = async (
   prompt: string,
   input: string,
   response: string,
-  type?: string
+  type?: string,
 ) => {
   const settings = loadAdvancedSettingsSync();
   const customPlaceholders = await loadCustomPlaceholders(settings);
@@ -34,7 +34,8 @@ export const runActionScript = async (
   try {
     if (type == "applescript" || type == undefined) {
       await runAppleScript(
-        await PLApplicator.bulkApply(`${objcImports}
+        await PLApplicator.bulkApply(
+          `${objcImports}
       ${splitHandler}
       ${trimHandler}
       ${replaceAllHandler}
@@ -42,10 +43,12 @@ export const runActionScript = async (
       set prompt to "${prompt.replaceAll('"', '\\"')}"
       set input to "${input.replaceAll('"', '\\"')}"
       set response to "${response.replaceAll('"', '\\"')}"
-      ${script}`, {
-        customPlaceholders,
-        defaultPlaceholders: PromptLabPlaceholders,
-      })
+      ${script}`,
+          {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          },
+        ),
       );
     } else if (type == "zsh") {
       const runScript = (script: string): Promise<string> => {
@@ -56,16 +59,19 @@ export const runActionScript = async (
 
         return new Promise((resolve, reject) => {
           loadCustomPlaceholders(settings).then((customPlaceholders) => {
-          PLApplicator.bulkApply(shellScript).then((subbedScript) => {
-            exec(subbedScript, (error, stdout) => {
-              if (error) {
-                reject(error);
-                return;
-              }
-              resolve(stdout);
+            PLApplicator.bulkApply(shellScript, {
+              customPlaceholders,
+              defaultPlaceholders: PromptLabPlaceholders,
+            }).then((subbedScript) => {
+              exec(subbedScript, (error, stdout) => {
+                if (error) {
+                  reject(error);
+                  return;
+                }
+                resolve(stdout);
+              });
             });
           });
-        });
         });
       };
       await runScript(script);
@@ -103,7 +109,7 @@ export const runReplacements = async (
   prompt: string,
   context: { [key: string]: string },
   disallowedCommands: string[],
-  options?: CommandOptions
+  options?: CommandOptions,
 ): Promise<string> => {
   let subbedPrompt = prompt;
   const settings = loadAdvancedSettingsSync();
@@ -134,7 +140,7 @@ export const runReplacements = async (
       (subbedPrompt.includes(`{{${cmd.name}}}`) || subbedPrompt.includes(`{{${cmd.id}}}`))
     ) {
       const cmdResponse = await AI.ask(
-        await runReplacements(cmd.prompt, context, [cmd.name, cmd.id, ...disallowedCommands])
+        await runReplacements(cmd.prompt, context, [cmd.name, cmd.id, ...disallowedCommands]),
       );
       if (cmd.actionScript != undefined && cmd.actionScript.trim().length > 0 && cmd.actionScript != "None") {
         await runActionScript(cmd.actionScript, cmd.prompt, "", cmdResponse, cmd.scriptKind);
@@ -156,7 +162,7 @@ export const runReplacements = async (
 export const updateCommand = async (
   oldCommandData: Command | undefined,
   newCommandData: Command,
-  setCommands?: React.Dispatch<React.SetStateAction<Command[]>>
+  setCommands?: React.Dispatch<React.SetStateAction<Command[]>>,
 ) => {
   const commandData = await LocalStorage.allItems();
   const commandDataFiltered = Object.values(commandData).filter((cmd, index) => {
@@ -168,7 +174,7 @@ export const updateCommand = async (
   });
 
   if (setCommands != undefined) {
-    setCommands([...commandDataFiltered?.map((data) => JSON.parse(data)), newCommandData]);
+    setCommands([...commandDataFiltered.map((data) => JSON.parse(data)), newCommandData]);
   }
 
   if (oldCommandData != undefined && oldCommandData.name != newCommandData.name) {
