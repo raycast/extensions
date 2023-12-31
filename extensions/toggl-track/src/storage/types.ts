@@ -1,4 +1,4 @@
-import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "../toggl/types";
+import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "../api/types";
 
 export type Refreshable<T> = {
   lastRefresh: string | null;

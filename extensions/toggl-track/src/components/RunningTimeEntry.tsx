@@ -1,9 +1,9 @@
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
-import { TimeEntry } from "../toggl/types";
+import { TimeEntry } from "../api/types";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { storage } from "../storage";
-import toggl from "../toggl";
+import toggl from "../api";
 import { useAppContext } from "../context";
 
 function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry }) {

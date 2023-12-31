@@ -1,7 +1,7 @@
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
-import toggl from "../toggl";
+import toggl from "../api";
 import { storage } from "../storage";
-import { Project, Task } from "../toggl/types";
+import { Project, Task } from "../api/types";
 import { useAppContext } from "../context";
 import { useMemo, useState } from "react";
 

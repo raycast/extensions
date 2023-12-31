@@ -1,6 +1,6 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { AppContextProvider } from "../context";
-import { Project } from "../toggl/types";
+import { Project } from "../api/types";
 import CreateTimeEntryForm from "./CreateTimeEntryForm";
 
 export default function ProjectListItem({

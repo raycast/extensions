@@ -1,4 +1,4 @@
-import { Client, Workspace, Project } from "../toggl/types";
+import { Client, Workspace, Project } from "../api/types";
 
 export type ProjectGroup = {
   client?: Client;

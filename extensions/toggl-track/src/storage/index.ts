@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
-import api from "../toggl";
-import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "../toggl/types";
+import api from "../api";
+import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "../api/types";
 import persistedStorage from "./persistedStorage";
 import { TogglStorage } from "./types";
 
