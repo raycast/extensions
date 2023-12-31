@@ -247,6 +247,10 @@
         {
           "title": "Never",
           "value": "-1"
+        },
+        {
+          "title": "On Screen Lock (slow initial load)",
+          "value": "-2"
         }
       ]
     },
