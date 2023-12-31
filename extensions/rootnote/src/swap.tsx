@@ -48,7 +48,7 @@ export default function Command() {
   );
 }
 
-function swapSong(uri: any, name: any) {
+function swapSong(uri: string, name: string) {
   axios
     .get("/api/raycast/swap/set/", { params: { uri: uri } })
     .then(() => {
