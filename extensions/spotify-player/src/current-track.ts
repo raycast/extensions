@@ -4,7 +4,7 @@ import { getSpotifyClient, setSpotifyClient } from "./helpers/withSpotifyClient"
 import { containsMySavedTracks } from "./api/containsMySavedTrack";
 
 async function getIsLiked(id: string): Promise<boolean> {
-  let res = await containsMySavedTracks({ trackIds: [id] });
+  const res = await containsMySavedTracks({ trackIds: [id] });
   return res[0];
 }
 
