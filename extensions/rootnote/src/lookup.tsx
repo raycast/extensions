@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Action, ActionPanel, List, showHUD, popToRoot, Detail, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, List, Detail, getPreferenceValues } from "@raycast/api";
 import { Suggestion } from './types';
 import { getBaseURL, configureAxios } from "./utils";
 import axios from 'axios';
-import { showFailureToast } from "@raycast/utils";
+
 
 
 
@@ -55,7 +55,7 @@ export default function Command() {
             isShowingDetail={true}
             searchBarPlaceholder="Search songs..."
         >
-            {suggestions.map((suggestion : Suggestion, index) => {
+            {suggestions.map((suggestion: Suggestion, index) => {
 
 
 

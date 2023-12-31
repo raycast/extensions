@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Action, ActionPanel, List, showHUD, popToRoot, getPreferenceValues} from "@raycast/api";
-import { getBaseURL, configureAxios} from './utils';
+import { Action, ActionPanel, List, showHUD, popToRoot, getPreferenceValues } from "@raycast/api";
+import { configureAxios } from './utils';
 import { Suggestion } from './types';
 import axios from 'axios';
 
@@ -20,7 +20,7 @@ export default function Command() {
   useEffect(() => {
     axios.get('/api/raycast/swap/suggestions/')
       .then(response => {
-        setSuggestions(response.data); 
+        setSuggestions(response.data);
         setIsLoading(false);
       })
       .catch(error => {
@@ -31,19 +31,19 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {suggestions.map((suggestion : Suggestion) => (
+      {suggestions.map((suggestion: Suggestion) => (
         <List.Item
           key={suggestion.id}
           title={suggestion.name}
           subtitle={`${suggestion.artist.name}`}
           icon={{
             source: suggestion.master_child_song.album.image.px64,
-         
+
           }}
-   
+
           actions={
             <ActionPanel>
-              <Action title="Choose Song"  onAction={() => swapSong(suggestion.master_child_song.uri, suggestion.name)} />
+              <Action title="Choose Song" onAction={() => swapSong(suggestion.master_child_song.uri, suggestion.name)} />
             </ActionPanel>
           }
         />
@@ -53,7 +53,7 @@ export default function Command() {
 }
 
 function swapSong(uri: any, name: any) {
-  axios.get('/api/raycast/swap/set/', {params: {uri: uri}})
+  axios.get('/api/raycast/swap/set/', { params: { uri: uri } })
     .then(response => {
       showHUD(`Playing ${name}`);
       popToRoot();
