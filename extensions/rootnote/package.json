@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rootnote",
   "title": "Rootnote",
-  "description": "Personalized Music Controls",
+  "description": "Personalized Music Controls. Powered by Rootnote.",
   "icon": "rootnote-icon.png",
   "author": "matserdkamp",
   "license": "MIT",
@@ -26,7 +26,7 @@
     {
       "name": "lookup",
       "title": "Get Listening Insights",
-      "description": "Swap the current song with another song from the same artist",
+      "description": "Get your total number of streams for a song and more",
       "mode": "view"
     }
   ],
