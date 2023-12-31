@@ -391,7 +391,7 @@
     "node-fetch": "^3.3.2",
     "pptx-text-parser": "^1.1.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz",
-    "placeholders-toolkit": "^0.1.3"
+    "placeholders-toolkit": "^0.1.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
