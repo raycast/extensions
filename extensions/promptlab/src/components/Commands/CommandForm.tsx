@@ -22,7 +22,6 @@ import {
 import { Fragment, useEffect, useState } from "react";
 import * as crypto from "crypto";
 import { useRef } from "react";
-import { Placeholders, checkForPlaceholders } from "../../utils/placeholders";
 import {
   EditCustomPlaceholdersAction,
   OpenAdvancedSettingsAction,
@@ -34,6 +33,8 @@ import path from "path";
 import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../utils/constants";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
 import { isActionEnabled } from "../../utils/action-utils";
+import { PLChecker } from "placeholders-toolkit";
+import { PromptLabPlaceholders, loadCustomPlaceholders } from "../../lib/placeholders";
 
 interface CommandFormValues {
   name: string;
@@ -169,7 +170,11 @@ export default function CommandForm(props: {
 
   useEffect(() => {
     if (oldData) {
-      checkForPlaceholders(oldData.prompt).then((includedPlaceholders) => {
+      loadCustomPlaceholders(advancedSettings).then((customPlaceholders) => {
+      PLChecker.checkForPlaceholders(oldData.prompt, {
+        customPlaceholders,
+        defaultPlaceholders: PromptLabPlaceholders,
+      }).then((includedPlaceholders) => {
         let newPromptInfo = defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
         includedPlaceholders.forEach((placeholder) => {
           newPromptInfo =
@@ -178,7 +183,7 @@ export default function CommandForm(props: {
         });
         setPromptInfo(newPromptInfo);
 
-        checkForPlaceholders(oldData.actionScript || "").then((includedPlaceholders) => {
+        PLChecker.checkForPlaceholders(oldData.actionScript || "").then((includedPlaceholders) => {
           let newScriptInfo = includedPlaceholders.length > 0 ? "Detected Placeholders:" : "";
           includedPlaceholders.forEach((placeholder) => {
             newScriptInfo =
@@ -190,6 +195,7 @@ export default function CommandForm(props: {
           setScriptInfo(newScriptInfo);
         });
       });
+    });
     }
 
     if (oldData && oldData.setupConfig) {
@@ -473,7 +479,7 @@ export default function CommandForm(props: {
           />
           {showAddPlaceholderAction ? (
             <ActionPanel.Submenu title="Add Placeholder..." icon={Icon.Plus}>
-              {Object.values(Placeholders.allPlaceholders)
+              {PromptLabPlaceholders
                 .filter(
                   (placeholder) =>
                     !placeholder.name.startsWith("textfile:") &&
@@ -809,7 +815,11 @@ export default function CommandForm(props: {
         onChange={async (value) => {
           itemProps.prompt.onChange?.(value);
           setPrompt(value);
-          const includedPlaceholders = await checkForPlaceholders(value);
+          const customPlaceholders = await loadCustomPlaceholders(advancedSettings);
+          const includedPlaceholders = await PLChecker.checkForPlaceholders(value, {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          });
           let newPromptInfo = defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
           includedPlaceholders.forEach((placeholder) => {
             newPromptInfo =
@@ -833,7 +843,11 @@ export default function CommandForm(props: {
         {...itemProps.actionScript}
         onChange={async (value) => {
           itemProps.actionScript.onChange?.(value);
-          const includedPlaceholders = await checkForPlaceholders(value);
+          const customPlaceholders = await loadCustomPlaceholders(advancedSettings);
+          const includedPlaceholders = await PLChecker.checkForPlaceholders(value, {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          });
           let newScriptInfo = includedPlaceholders.length > 0 ? "Detected Placeholders:" : "";
           includedPlaceholders.forEach((placeholder) => {
             newScriptInfo =

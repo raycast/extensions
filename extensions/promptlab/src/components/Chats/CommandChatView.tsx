@@ -8,8 +8,9 @@ import runModel from "../../utils/runModel";
 import { useFiles as useFileContents } from "../../hooks/useFiles";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
 import { ChatActionPanel } from "./actions/ChatActionPanel";
-import { checkForPlaceholders } from "../../utils/placeholders";
 import { useCachedState } from "@raycast/utils";
+import { PLChecker } from "placeholders-toolkit";
+import { PromptLabPlaceholders, loadCustomPlaceholders } from "../../lib/placeholders";
 
 interface CommandPreferences {
   useSelectedFiles: boolean;
@@ -461,8 +462,11 @@ export default function CommandChatView(props: {
         info={promptInfo}
         onChange={(value) => {
           setQuery(value);
-
-          checkForPlaceholders(value).then((includedPlaceholders) => {
+          loadCustomPlaceholders(advancedSettings).then((customPlaceholders) => {
+          PLChecker.checkForPlaceholders(value, {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          }).then((includedPlaceholders) => {
             let newPromptInfo =
               defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
             includedPlaceholders.forEach((placeholder) => {
@@ -474,6 +478,7 @@ export default function CommandChatView(props: {
             });
             setPromptInfo(newPromptInfo);
           });
+        });
         }}
         autoFocus={true}
       />

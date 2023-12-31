@@ -2,8 +2,10 @@ import { objcImports, replaceAllHandler, rselectHandler, splitHandler, trimHandl
 import { exec } from "child_process";
 import { Command, CommandOptions, StoreCommand } from "./types";
 import { LocalStorage, AI } from "@raycast/api";
-import { Placeholders } from "./placeholders";
 import { runAppleScript } from "@raycast/utils";
+import { PLApplicator } from "placeholders-toolkit";
+import { PromptLabPlaceholders, loadCustomPlaceholders } from "../lib/placeholders";
+import { loadAdvancedSettingsSync } from "./storage-utils";
 
 /**
  * Runs the action script of a PromptLab command, providing the AI response as the `response` variable.
@@ -26,10 +28,13 @@ export const runActionScript = async (
   response: string,
   type?: string
 ) => {
+  const settings = loadAdvancedSettingsSync();
+  const customPlaceholders = await loadCustomPlaceholders(settings);
+
   try {
     if (type == "applescript" || type == undefined) {
       await runAppleScript(
-        await Placeholders.bulkApply(`${objcImports}
+        await PLApplicator.bulkApply(`${objcImports}
       ${splitHandler}
       ${trimHandler}
       ${replaceAllHandler}
@@ -37,7 +42,10 @@ export const runActionScript = async (
       set prompt to "${prompt.replaceAll('"', '\\"')}"
       set input to "${input.replaceAll('"', '\\"')}"
       set response to "${response.replaceAll('"', '\\"')}"
-      ${script}`)
+      ${script}`, {
+        customPlaceholders,
+        defaultPlaceholders: PromptLabPlaceholders,
+      })
       );
     } else if (type == "zsh") {
       const runScript = (script: string): Promise<string> => {
@@ -47,7 +55,8 @@ export const runActionScript = async (
         ${script.replaceAll("\n", " && ")}`;
 
         return new Promise((resolve, reject) => {
-          Placeholders.bulkApply(shellScript).then((subbedScript) => {
+          loadCustomPlaceholders(settings).then((customPlaceholders) => {
+          PLApplicator.bulkApply(shellScript).then((subbedScript) => {
             exec(subbedScript, (error, stdout) => {
               if (error) {
                 reject(error);
@@ -56,6 +65,7 @@ export const runActionScript = async (
               resolve(stdout);
             });
           });
+        });
         });
       };
       await runScript(script);
@@ -96,6 +106,8 @@ export const runReplacements = async (
   options?: CommandOptions
 ): Promise<string> => {
   let subbedPrompt = prompt;
+  const settings = loadAdvancedSettingsSync();
+  const customPlaceholders = await loadCustomPlaceholders(settings);
 
   // Replace config placeholders
   if (options != undefined && options.setupConfig != undefined) {
@@ -108,7 +120,11 @@ export const runReplacements = async (
     }
   }
 
-  subbedPrompt = await Placeholders.bulkApply(subbedPrompt, context);
+  subbedPrompt = await PLApplicator.bulkApply(subbedPrompt, {
+    customPlaceholders,
+    defaultPlaceholders: PromptLabPlaceholders,
+    context,
+  });
 
   // Replace command placeholders
   for (const cmdString of Object.values(await LocalStorage.allItems())) {
