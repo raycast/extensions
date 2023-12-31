@@ -1,5 +1,4 @@
 import { get, post, patch } from "./toggleClient";
-import { TimeEntry } from "./types";
 
 export function getTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
   return get<TimeEntry[]>(`/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`);
@@ -42,4 +41,17 @@ export function createTimeEntry({
 
 export function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: number }) {
   return patch<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries/${id}/stop`, {});
+}
+
+// https://developers.track.toggl.com/docs/api/time_entries#response
+export interface TimeEntry {
+  at: string;
+  billable: boolean;
+  description: string;
+  id: number;
+  project_id: number;
+  start: string;
+  duration: number;
+  tags: string[];
+  workspace_id: number;
 }

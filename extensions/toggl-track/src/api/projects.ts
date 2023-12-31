@@ -1,5 +1,4 @@
 import { get } from "./toggleClient";
-import { Project } from "./types";
 import { hideArchivedProjects } from "../helpers/preferences";
 
 export async function getWorkspaceProjects(workspaceId: number): Promise<Project[] | null> {
@@ -14,4 +13,15 @@ export async function getWorkspaceProjects(workspaceId: number): Promise<Project
     active: true,
   });
   return hideArchivedProjects ? projects.filter((p) => p.active) : projects;
+}
+
+// https://developers.track.toggl.com/docs/api/projects/index.html#response-8
+export interface Project {
+  active: boolean;
+  billable: boolean;
+  client_id: number;
+  color: string;
+  id: number;
+  name: string;
+  workspace_id: number;
 }

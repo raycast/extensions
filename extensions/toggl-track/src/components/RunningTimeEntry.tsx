@@ -1,12 +1,11 @@
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
-import { TimeEntry } from "../api/types";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { storage } from "../storage";
 import * as api from "../api";
 import { useAppContext } from "../context";
 
-function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry }) {
+function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: api.TimeEntry }) {
   const currentTime = useCurrentTime();
   const { projects } = useAppContext();
   const getProjectById = (id: number) => projects.find((p) => p.id === id);

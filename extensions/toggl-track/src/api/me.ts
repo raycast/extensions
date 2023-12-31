@@ -1,6 +1,9 @@
 import { get } from "./toggleClient";
-import { Me } from "./types";
 
 export function getMe() {
   return get<Me>("/me");
+}
+
+export interface Me {
+  default_workspace_id: number;
 }

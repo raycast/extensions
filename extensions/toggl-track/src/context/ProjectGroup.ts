@@ -1,4 +1,4 @@
-import { Client, Workspace, Project } from "../api/types";
+import { Client, Workspace, Project } from "../api";
 
 export type ProjectGroup = {
   client?: Client;

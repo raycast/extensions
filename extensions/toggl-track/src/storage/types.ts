@@ -1,4 +1,4 @@
-import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "../api/types";
+import { Me, Workspace, Project, Client, Tag, Task, TimeEntry } from "../api";
 
 export type Refreshable<T> = {
   lastRefresh: string | null;

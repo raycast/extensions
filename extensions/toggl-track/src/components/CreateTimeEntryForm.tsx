@@ -1,7 +1,6 @@
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
-import { createTimeEntry } from "../api";
+import { createTimeEntry, Project, Task } from "../api";
 import { storage } from "../storage";
-import { Project, Task } from "../api/types";
 import { useAppContext } from "../context";
 import { useMemo, useState } from "react";
 

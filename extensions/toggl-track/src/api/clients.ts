@@ -1,6 +1,11 @@
 import { get } from "./toggleClient";
-import { Client } from "./types";
 
 export function getWorkspaceClients(workspaceId: number) {
   return get<Client[] | null>(`/workspaces/${workspaceId}/clients`);
+}
+
+// https://developers.track.toggl.com/docs/api/clients#response
+export interface Client {
+  id: number;
+  name: string;
 }
