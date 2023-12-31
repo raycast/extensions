@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rootnote",
+  "title": "Rootnote",
+  "description": "Personalized Music Controls",
+  "icon": "rootnote-icon.png",
+  "author": "matserdkamp",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "Your Rootnote API key",
+      "type": "textfield",
+      "title": "API Key",
+      "placeholder": "Enter your API key here",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "swap",
+      "title": "Swap Song - Same Artist",
+      "description": "Swap the current song with another song from the same artist",
+      "mode": "view"
+    },
+    {
+      "name": "lookup",
+      "title": "Get Listening Insights",
+      "description": "Swap the current song with another song from the same artist",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "axios": "^1.6.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
