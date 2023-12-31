@@ -32,7 +32,7 @@ export default async function runModel(basePrompt: string, prompt: string, input
     outputTiming: "async",
     lengthLimit: "2500",
     temperature: temperature,
-    name: "Text-Davinci-003 Via Raycast AI",
+    name: "GPT-3.5 Turbo Instruct Via Raycast AI",
     description: "",
     favorited: false,
     id: "",

@@ -50,7 +50,7 @@ export default function useModel(
     outputTiming: "async",
     lengthLimit: "2500",
     temperature: "1.0",
-    name: "Text-Davinci-003 Via Raycast AI",
+    name: "GPT-3.5 Turbo Instruct Via Raycast AI",
     description: "",
     favorited: false,
     id: "",
@@ -279,7 +279,7 @@ export default function useModel(
         ...useAI(filterString(preferences.promptPrefix + prompt + preferences.promptSuffix, 5000), {
           execute: execute,
           creativity: temp,
-          model: targetModel.endpoint == "Raycast AI 3.5" ? "gpt-3.5-turbo" : "text-davinci-003",
+          model: targetModel.endpoint == "Raycast AI 3.5" ? "gpt-3.5-turbo" : "gpt-3.5-turbo-instruct",
         }),
         dataTag: basePrompt + prompt + input,
         stopModel: stopModel,
