@@ -10,8 +10,8 @@
     {
       "name": "aranet",
       "title": "Aranet",
-      "subtitle": "Display Aranet4 Data",
-      "description": "Display Aranet4 Data",
+      "subtitle": "Display CO₂ and other Aranet Data",
+      "description": "Display CO₂ and other Aranet Data",
       "mode": "view"
     },
     {
@@ -21,6 +21,25 @@
       "description": "Display CO₂ in your menu bar",
       "mode": "menu-bar",
       "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "temperature",
+      "type": "dropdown",
+      "required": true,
+      "title": "Temperature Type",
+      "description": "Fahrenheit or Celsius",
+      "data": [
+        {
+          "title": "Fahrenheit",
+          "value": "fahrenheit"
+        },
+        {
+          "title": "Celsius",
+          "value": "celsius"
+        }
+      ]
     }
   ],
   "dependencies": {

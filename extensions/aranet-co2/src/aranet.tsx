@@ -1,4 +1,4 @@
-import { Color, List } from "@raycast/api";
+import { Color, List, getPreferenceValues } from "@raycast/api";
 import useGetData from "./useGetData";
 
 const getCO2Color = (co2: number) => {
@@ -14,21 +14,43 @@ const getCO2Color = (co2: number) => {
   }
 };
 
+type TemperatureType = "fahrenheit" | "celsius";
+
+const tempConversion = (celsius: number, tempType: TemperatureType) => {
+  if (tempType === "fahrenheit") {
+    return Math.round((celsius * 9) / 5 + 32);
+  } else {
+    return celsius;
+  }
+};
+
 export default function AranetCommand() {
   const data = useGetData();
+
+  const tempType = getPreferenceValues<{
+    temperature: TemperatureType;
+  }>().temperature;
 
   if (data == null) return <List isLoading={true} />;
 
   return (
     <List>
+      <List.Item title="Device" accessories={[{ tag: { value: data.name, color: Color.PrimaryText } }]} />
       <List.Item
         title="CO₂"
         subtitle="Carbon Dioxide"
-        accessories={[{ tag: { value: data.co2.toString(), color: getCO2Color(data.co2) } }]}
+        accessories={[{ tag: { value: `${data.co2} ppm`, color: getCO2Color(data.co2) } }]}
       />
       <List.Item
         title="Temperature"
-        accessories={[{ tag: { value: data.temperature.toString(), color: Color.PrimaryText } }]}
+        accessories={[
+          {
+            tag: {
+              value: `${tempConversion(data.temperature, tempType)} °${tempType == "celsius" ? "C" : "F"}`,
+              color: Color.PrimaryText,
+            },
+          },
+        ]}
       />
       <List.Item
         title="Humidity"
