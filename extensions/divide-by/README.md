@@ -1,3 +1,5 @@
-# DivBy
+# Divide By
 
-Divide by number
+## Description
+
+Quickly perform division operations with a saved divisor by using shortcuts.
