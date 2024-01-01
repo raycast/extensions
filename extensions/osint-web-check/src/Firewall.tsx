@@ -39,7 +39,7 @@ async function isFirewallEnabled(url: string): Promise<{ enabled: boolean; name?
     }
   }
 
-  return { enabled: false };
+  return { enabled: false, reason: "No firewall detected using HTTP response headers." };
 }
 
 // Based on this: https://github.com/Lissy93/web-check/blob/e44f8e73aa61558519e4a5fc849aec7d94752366/api/firewall.js#L18

@@ -1,12 +1,27 @@
 import got from "got";
 import useSWR from "swr";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 type CrawlRulesProps = { url: string };
 
 export function CrawlRules({ url }: CrawlRulesProps) {
   const { data, isLoading } = useSWR(["crawl-rules", url], ([, url]) => getRobotsTxt(url));
+  const [showAllInfo, setShowAllInfo] = useState(false);
+
+  const allowedItems = (data?.allowed ?? []).slice(0, showAllInfo ? undefined : MAX_SHOWN);
+  const disallowedItems = (data?.disallowed ?? []).slice(0, showAllInfo ? undefined : MAX_SHOWN);
+  const body = showAllInfo
+    ? data?.body
+    : (data?.body ?? "")
+        .split("\n")
+        .slice(0, 2 * MAX_SHOWN + 10)
+        .join("\n");
+  const bodyMarkdown =
+    Number(body?.length) < Number(data?.body?.length) ? `${body}\n(Use "Show All Items" action to show more)` : body;
+
+  const isHidingItems =
+    !showAllInfo && (Number(data?.allowed?.length) > MAX_SHOWN || Number(data?.disallowed?.length) > MAX_SHOWN);
 
   return (
     <List.Item
@@ -14,16 +29,16 @@ export function CrawlRules({ url }: CrawlRulesProps) {
       actions={
         <ActionPanel>
           <Action.Push title="More Info" target={<Detail markdown={INFO} />} />
+          {isHidingItems && <Action title="Show All Items" onAction={() => setShowAllInfo(true)} />}
           {data?.body && <Action.CopyToClipboard title="Copy robots.txt Content To Clipboard" content={data.body} />}
         </ActionPanel>
       }
       detail={
         <List.Item.Detail
           isLoading={isLoading}
-          markdown={data && (data.body ? `\`\`\`\n${data.body}\`\`\`` : "### `/robots.txt` not found")}
+          markdown={data && (body ? `\`\`\`\n${bodyMarkdown}\n\`\`\`` : "### `/robots.txt` not found")}
           metadata={
-            data &&
-            data.body && (
+            data && (
               <List.Item.Detail.Metadata>
                 {data.sitemap && (
                   <Fragment>
@@ -32,19 +47,31 @@ export function CrawlRules({ url }: CrawlRulesProps) {
                   </Fragment>
                 )}
 
-                {data.allowed.length > 0 && (
+                {allowedItems.length > 0 && (
                   <Fragment>
-                    {data.allowed.map((item) => (
+                    {allowedItems.map((item) => (
                       <List.Item.Detail.Metadata.Label key={item} title="Allowed" text={item} />
                     ))}
+                    {allowedItems.length < data.allowed.length && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Allowed"
+                        text={`${data.allowed.length - allowedItems.length} more`}
+                      />
+                    )}
                     <List.Item.Detail.Metadata.Separator />
                   </Fragment>
                 )}
 
-                {data.disallowed.length > 0 &&
-                  data.disallowed.map((item) => (
+                {disallowedItems.length > 0 &&
+                  disallowedItems.map((item) => (
                     <List.Item.Detail.Metadata.Label key={item} title="Disallowed" text={item} />
                   ))}
+                {disallowedItems.length < data.disallowed.length && (
+                  <List.Item.Detail.Metadata.Label
+                    title="Disallowed"
+                    text={`${data.disallowed.length - disallowedItems.length} more`}
+                  />
+                )}
               </List.Item.Detail.Metadata>
             )
           }
@@ -53,6 +80,8 @@ export function CrawlRules({ url }: CrawlRulesProps) {
     />
   );
 }
+
+const MAX_SHOWN = 25;
 
 async function getRobotsTxt(url: string) {
   const u = new URL(url);
@@ -76,7 +105,7 @@ async function getRobotsTxt(url: string) {
     } else if (/^disallow/i.test(line)) {
       disallowed.push(line.replace(/^disallow:\s*/i, ""));
     } else {
-      allowed.push(line);
+      allowed.push(line.replace(/^allow:\s*/i, ""));
     }
   }
 
