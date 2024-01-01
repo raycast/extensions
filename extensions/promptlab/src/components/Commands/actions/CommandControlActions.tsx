@@ -34,7 +34,7 @@ export const CommandControlsActionsSection = (props: {
         "DeleteAllCommandsAction",
         "InstallAllCommandsAction",
       ],
-      settings
+      settings,
     )
   ) {
     return null;
@@ -403,7 +403,7 @@ export const InstallAllCommandsAction = (props: {
           const filteredCommands = Object.values(allCommands).filter(
             (cmd, index) =>
               Object.keys(allCommands)[index] != "--defaults-installed" &&
-              !Object.keys(allCommands)[index].startsWith("id-")
+              !Object.keys(allCommands)[index].startsWith("id-"),
           );
           setCommands(filteredCommands.map((data) => JSON.parse(data)));
         }

@@ -81,7 +81,7 @@ export async function getFileContent(
   options?: CommandOptions,
   index?: number,
   maxCharacters?: number,
-  settings?: typeof defaultAdvancedSettings
+  settings?: typeof defaultAdvancedSettings,
 ) {
   const options_ =
     options == undefined
@@ -169,7 +169,7 @@ export const useFiles = (options: CommandOptions) => {
         }
         return acc;
       },
-      { paths: [] as string[], csv: "" }
+      { paths: [] as string[], csv: "" },
     );
 
     maxCharacters = maxCharacters / selection.paths.length;
@@ -245,7 +245,7 @@ const addPagesDetails = async (filepath: string, currentData: { [key: string]: s
 const addKeynoteDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  settings: typeof defaultAdvancedSettings
+  settings: typeof defaultAdvancedSettings,
 ) => {
   currentData.contents += `<This is a Keynote slideshow. Here are details about it.>`;
   const zipPath = path.join(os.tmpdir(), `${path.basename(filepath, ".key")}.zip`);
@@ -298,7 +298,7 @@ const addDirectoryDetails = (filepath: string, currentData: { [key: string]: str
 const addAppDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
 ) => {
   /* Gets the metadata, plist, and scripting dictionary information about an application (.app). */
   let appDetails = "";
@@ -332,7 +332,7 @@ const addAppDetails = async (
 const addPDFDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
 ) => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const pdfText = await ScriptRunner.PDFTextExtractor(filepath, preferences.pdfOCR, 3, options.useMetadata || false);
@@ -345,7 +345,7 @@ const addVideoDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
   options: CommandOptions,
-  settings: typeof defaultAdvancedSettings
+  settings: typeof defaultAdvancedSettings,
 ) => {
   const videoFeatureExtractor = path.resolve(environment.assetsPath, "scripts", "VideoFeatureExtractor.scpt");
   const videoDetails = await execScript(
@@ -359,7 +359,7 @@ const addVideoDetails = async (
       options.useHorizonDetection || false,
       settings.fileAnalysisSettings.videoSampleCount,
     ],
-    "JavaScript"
+    "JavaScript",
   ).data;
   currentData.contents += videoDetails;
 };
@@ -367,7 +367,7 @@ const addVideoDetails = async (
 const addAudioDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
 ) => {
   if (options.useAudioDetails) {
     const transcription = await ScriptRunner.AudioTranscriber(filepath, 5000);
@@ -384,7 +384,7 @@ const addAudioDetails = async (
 const addImageDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
 ) => {
   const imageDetails = await getImageDetails(filepath, options);
   const imageVisionInstructions = imageDetails.stringValue;

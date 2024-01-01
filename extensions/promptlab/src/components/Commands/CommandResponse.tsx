@@ -75,7 +75,7 @@ export default function CommandResponse(props: {
   const contentPromptString = fileContents?.contents || "";
   const fullPrompt = (substitutedPrompt.replaceAll("{{contents}}", contentPromptString) + contentPromptString).replace(
     /{{END}}(\n|.)*/,
-    ""
+    "",
   );
 
   const { data, isLoading, revalidate, error } = useModel(
@@ -88,7 +88,7 @@ export default function CommandResponse(props: {
       (!options.minNumFiles || (fileContents?.contents?.length != undefined && fileContents.contents.length > 0)) &&
       !shouldCancel &&
       (!options.useSpeech || (speechInput != "" && speechInput != undefined)),
-    models.models.find((model) => model.id == options.model)
+    models.models.find((model) => model.id == options.model),
   );
 
   useEffect(() => {
@@ -106,8 +106,8 @@ export default function CommandResponse(props: {
           substitutedPrompt.replaceAll("{{contents}}", contentPromptString),
           input || contentPromptString,
           data,
-          options.scriptKind
-        )
+          options.scriptKind,
+        ),
       );
     }
 

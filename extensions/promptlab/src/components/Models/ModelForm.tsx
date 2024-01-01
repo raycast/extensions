@@ -44,7 +44,7 @@ export default function ModelForm(props: { models: ModelManager; currentModel?: 
   const getDefaultValues = () => {
     try {
       const advancedSettingsValues = JSON.parse(
-        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8")
+        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8"),
       );
       if ("modelDefaults" in advancedSettingsValues) {
         return advancedSettingsValues.modelDefaults;
