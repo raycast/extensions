@@ -3,6 +3,7 @@ import { showFailureToast, useExec } from "@raycast/utils";
 import { exec } from "child_process";
 import { useState } from "react";
 import { promisify } from "node:util";
+import { mullvadNotInstalledHint } from "./utils";
 
 const execAsync = promisify(exec);
 
@@ -16,11 +17,6 @@ type Location = {
 
 const countryRegex = /^(?<country>.+)\s\((?<countryCode>.+)\)/;
 const cityRegex = /^(?<city>.+)\s\((?<cityCode>.+)\)/;
-const mullvadNotInstalledHint = `
-# Mullvad is not installed 
-  
-Please install it from [https://mullvad.net/download/](https://mullvad.net/download/)
-`;
 
 export default function Command() {
   const isMullvadInstalled = useExec("mullvad", ["version"]);

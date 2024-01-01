@@ -16,3 +16,9 @@ export async function verifyIsMullvadInstalled() {
     return false;
   }
 }
+
+export const mullvadNotInstalledHint = `
+# Mullvad is not installed 
+  
+Please install it from [https://mullvad.net/download/](https://mullvad.net/download/)
+`;

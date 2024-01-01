@@ -18,20 +18,26 @@
       "mode": "view"
     },
     {
+      "name": "status",
+      "title": "Connection Status",
+      "subtitle": "Mullvad",
+      "description": "Displays whether the VPN is currently connected and the connected relay.",
+      "mode": "view"
+    },
+    {
       "name": "connect",
       "title": "Connect",
       "subtitle": "Mullvad",
       "description": "Activates the VPN connection.",
       "mode": "no-view"
     },
-        {
+    {
       "name": "disconnect",
       "title": "Disconnect",
       "subtitle": "Mullvad",
       "description": "Deactivates the VPN connection.",
       "mode": "no-view"
     }
-
   ],
   "dependencies": {
     "@raycast/api": "^1.64.4",
