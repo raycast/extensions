@@ -203,7 +203,10 @@ function Contest(name) {
           title={item.contestName}
           actions={
             <ActionPanel title="Participated Contests">
-              <Action.Push title="Get Submissions Details" target={<Submissions id={item.contestId} handle={userHandle} />} />
+              <Action.Push
+                title="Get Submissions Details"
+                target={<Submissions id={item.contestId} handle={userHandle} />}
+              />
               <Action.OpenInBrowser url={`${CODEFORCES_BASE}contest/${item.contestId}`} />
             </ActionPanel>
           }
@@ -341,80 +344,80 @@ function Submissions(values) {
 
   function getExecutionStatusString(status) {
     switch (status) {
-      case 'FAILED':
-        return 'Failed';
-      case 'OK':
-        return 'Correct';
-      case 'PARTIAL':
-        return 'Partial Success';
-      case 'COMPILATION_ERROR':
-        return 'Compilation Error';
-      case 'RUNTIME_ERROR':
-        return 'Runtime Error';
-      case 'WRONG_ANSWER':
-        return 'Wrong Answer';
-      case 'PRESENTATION_ERROR':
-        return 'Presentation Error';
-      case 'TIME_LIMIT_EXCEEDED':
-        return 'Time Limit Exceeded';
-      case 'MEMORY_LIMIT_EXCEEDED':
-        return 'Memory Limit Exceeded';
-      case 'IDLENESS_LIMIT_EXCEEDED':
-        return 'Idleness Limit Exceeded';
-      case 'SECURITY_VIOLATED':
-        return 'Security Violated';
-      case 'CRASHED':
-        return 'Crashed';
-      case 'INPUT_PREPARATION_CRASHED':
-        return 'Input Preparation Crashed';
-      case 'CHALLENGED':
-        return 'Challenged';
-      case 'SKIPPED':
-        return 'Skipped';
-      case 'TESTING':
-        return 'Testing';
-      case 'REJECTED':
-        return 'Rejected';
+      case "FAILED":
+        return "Failed";
+      case "OK":
+        return "Correct";
+      case "PARTIAL":
+        return "Partial Success";
+      case "COMPILATION_ERROR":
+        return "Compilation Error";
+      case "RUNTIME_ERROR":
+        return "Runtime Error";
+      case "WRONG_ANSWER":
+        return "Wrong Answer";
+      case "PRESENTATION_ERROR":
+        return "Presentation Error";
+      case "TIME_LIMIT_EXCEEDED":
+        return "Time Limit Exceeded";
+      case "MEMORY_LIMIT_EXCEEDED":
+        return "Memory Limit Exceeded";
+      case "IDLENESS_LIMIT_EXCEEDED":
+        return "Idleness Limit Exceeded";
+      case "SECURITY_VIOLATED":
+        return "Security Violated";
+      case "CRASHED":
+        return "Crashed";
+      case "INPUT_PREPARATION_CRASHED":
+        return "Input Preparation Crashed";
+      case "CHALLENGED":
+        return "Challenged";
+      case "SKIPPED":
+        return "Skipped";
+      case "TESTING":
+        return "Testing";
+      case "REJECTED":
+        return "Rejected";
       default:
-        return 'Unknown Status';
+        return "Unknown Status";
     }
   }
-  
+
   function getExecutionStatusColor(status) {
     switch (status) {
-      case 'FAILED':
+      case "FAILED":
         return Color.Red;
-      case 'OK':
+      case "OK":
         return Color.Green;
-      case 'PARTIAL':
+      case "PARTIAL":
         return Color.Yellow;
-      case 'COMPILATION_ERROR':
+      case "COMPILATION_ERROR":
         return Color.Red;
-      case 'RUNTIME_ERROR':
+      case "RUNTIME_ERROR":
         return Color.Red;
-      case 'WRONG_ANSWER':
+      case "WRONG_ANSWER":
         return Color.Red;
-      case 'PRESENTATION_ERROR':
+      case "PRESENTATION_ERROR":
         return Color.Yellow;
-      case 'TIME_LIMIT_EXCEEDED':
+      case "TIME_LIMIT_EXCEEDED":
         return Color.Red;
-      case 'MEMORY_LIMIT_EXCEEDED':
+      case "MEMORY_LIMIT_EXCEEDED":
         return Color.Orange;
-      case 'IDLENESS_LIMIT_EXCEEDED':
+      case "IDLENESS_LIMIT_EXCEEDED":
         return Color.Orange;
-      case 'SECURITY_VIOLATED':
+      case "SECURITY_VIOLATED":
         return Color.Red;
-      case 'CRASHED':
+      case "CRASHED":
         return Color.Red;
-      case 'INPUT_PREPARATION_CRASHED':
+      case "INPUT_PREPARATION_CRASHED":
         return Color.Orange;
-      case 'CHALLENGED':
+      case "CHALLENGED":
         return Color.Blue;
-      case 'SKIPPED':
+      case "SKIPPED":
         return Color.Yellow;
-      case 'TESTING':
+      case "TESTING":
         return Color.Magenta;
-      case 'REJECTED':
+      case "REJECTED":
         return Color.Red;
       default:
         return Color.PrimaryText;
