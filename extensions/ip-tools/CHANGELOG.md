@@ -1,5 +1,9 @@
 # ip-tools Changelog
 
+## [Update Doc ] - 2024-01-02
+
+- Update package.json description
+
 ## [New Features ] - 2023-12-15
 
 - Upgrade Project Dependency Package Version
