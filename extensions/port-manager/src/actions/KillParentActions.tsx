@@ -28,7 +28,6 @@ export default function KillParentActions(props: {
           if (await confirmAlert(Alerts.KillParentProcess(props.process))) {
             await killProcess(props.process, {
               killSignal: preferences.killSignal,
-              useSudo: preferences.sudo,
               killParent: true,
               onKilled: props.onKilled,
               onError: props.onError,
@@ -53,7 +52,7 @@ export default function KillParentActions(props: {
           if (await confirmAlert(Alerts.KillParentProcess(props.process))) {
             await killProcess(props.process, {
               killSignal: KillSignal.TERM,
-              useSudo: preferences.sudo,
+
               killParent: true,
               onKilled: props.onKilled,
               onError: props.onError,
@@ -69,7 +68,6 @@ export default function KillParentActions(props: {
           if (await confirmAlert(Alerts.KillParentProcess(props.process))) {
             await killProcess(props.process, {
               killSignal: KillSignal.KILL,
-              useSudo: preferences.sudo,
               killParent: true,
               onKilled: props.onKilled,
               onError: props.onError,

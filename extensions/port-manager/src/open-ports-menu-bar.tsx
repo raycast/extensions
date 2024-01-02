@@ -1,11 +1,15 @@
-import { MenuBarExtra, getPreferenceValues, showHUD } from "@raycast/api";
-import { useEffect, useState } from "react";
+import {
+  MenuBarExtra,
+  getPreferenceValues,
+  openCommandPreferences,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
+import Huds from "./feedback/Huds";
+import useLoadingTimeout from "./hooks/useLoadingTimeout";
 import useProcesses from "./hooks/useProcesses";
 import { KillSignal, killProcess } from "./utilities/killProcess";
-
-function removeDuplicates<T>(array: T[], key: keyof T) {
-  return array.filter((v, i, a) => a.findIndex((t) => t[key] === v[key]) === i);
-}
+import removeDuplicates from "./utilities/removeDuplicates";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -18,52 +22,74 @@ export default function Command() {
       .filter((p) => p.portInfo !== undefined && p.portInfo.length > 0)
       .flatMap((p) => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return p.portInfo!.map((info) => ({ port: `${info.port}`, process: p }));
+        return p.portInfo!.map((info) => ({ port: `${info.port}`, name: info.name, process: p }));
       }),
     "port"
-  );
+  ).sort((a, b) => parseInt(a.port) - parseInt(b.port));
 
   return (
     <MenuBarExtra
       isLoading={isLoading}
       icon={{ source: { light: "menu-bar-icon-light.png", dark: "menu-bar-icon-dark.png" } }}
     >
-      {openPorts.map((openPort) => (
-        <MenuBarExtra.Submenu key={openPort.port} title={openPort.port}>
-          <MenuBarExtra.Section title={openPort.process.name ?? "Untitled Process"}>
-            <MenuBarExtra.Item
-              title="Kill"
-              onAction={async () => {
-                await killProcess(openPort.process, {
-                  onError() {
-                    showHUD("⚠️ Failed to kill process");
-                  },
-                  onKilled() {
-                    reload();
-                  },
-                  killSignal: preferences.killSignal === "ask" ? KillSignal.TERM : preferences.killSignal,
-                });
-              }}
-            />
-          </MenuBarExtra.Section>
-        </MenuBarExtra.Submenu>
-      ))}
+      <MenuBarExtra.Section title="Open Ports">
+        {openPorts.map((openPort) => (
+          <MenuBarExtra.Submenu
+            key={openPort.port}
+            title={`${openPort.port}${openPort.name ? ` (${openPort.name})` : ""} ⋅ ${
+              openPort.process.name ?? "Untitled Process"
+            }`}
+          >
+            <MenuBarExtra.Section title={openPort.process.name ?? "Untitled Process"}>
+              <MenuBarExtra.Item
+                title={`Kill Process (PID ${openPort.process.pid})`}
+                onAction={async () => {
+                  await killProcess(openPort.process, {
+                    onError() {
+                      showHUD(Huds.KillProcess.Error({ name: openPort.process.name, port: openPort.port }));
+                    },
+                    onKilled() {
+                      showHUD(Huds.KillProcess.Success({ name: openPort.process.name, port: openPort.port }));
+                      reload();
+                    },
+                    killSignal: preferences.killSignal === "ask" ? KillSignal.TERM : preferences.killSignal,
+                  });
+                }}
+              />
+              <MenuBarExtra.Item
+                title={`Killall Process (PID ${openPort.process.pid})`}
+                onAction={async () => {
+                  await killProcess(openPort.process, {
+                    killAll: true,
+                    onError() {
+                      showHUD(Huds.KillProcess.Error({ name: openPort.process.name, port: openPort.port }));
+                    },
+                    onKilled() {
+                      showHUD(Huds.KillProcess.Success({ name: openPort.process.name, port: openPort.port }));
+                      reload();
+                    },
+                    killSignal: preferences.killSignal === "ask" ? KillSignal.TERM : preferences.killSignal,
+                  });
+                }}
+              />
+            </MenuBarExtra.Section>
+          </MenuBarExtra.Submenu>
+        ))}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Preferences">
+        <MenuBarExtra.Item
+          title="Command Preferences"
+          onAction={async () => {
+            await openCommandPreferences();
+          }}
+        />
+        <MenuBarExtra.Item
+          title="Extension Preferences"
+          onAction={async () => {
+            await openExtensionPreferences();
+          }}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
-}
-
-function useLoadingTimeout(current: boolean, timeout: number) {
-  const [isLoading, setIsLoading] = useState(current);
-
-  useEffect(() => {
-    if (current) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, timeout);
-      return () => clearTimeout(timer);
-    }
-  }, [current, timeout]);
-
-  return isLoading;
 }

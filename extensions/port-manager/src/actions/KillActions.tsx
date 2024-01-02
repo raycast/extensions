@@ -17,7 +17,6 @@ export default function KillActions(props: {
         onAction={async () =>
           await killProcess(props.process, {
             killSignal: preferences.killSignal,
-            useSudo: preferences.sudo,
             onKilled: props.onKilled,
             onError: props.onError,
           })
@@ -33,7 +32,6 @@ export default function KillActions(props: {
         onAction={async () =>
           await killProcess(props.process, {
             killSignal: KillSignal.TERM,
-            useSudo: preferences.sudo,
             onKilled: props.onKilled,
             onError: props.onError,
           })
@@ -44,7 +42,6 @@ export default function KillActions(props: {
         onAction={async () =>
           await killProcess(props.process, {
             killSignal: KillSignal.KILL,
-            useSudo: preferences.sudo,
             onKilled: props.onKilled,
             onError: props.onError,
           })
