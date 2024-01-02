@@ -21,7 +21,8 @@ interface User {
 function loadUsers(unparsedUsers: string[]) {
   const users: User[] = [];
 
-  if (unparsedUsers[0]?.startsWith('ID')) { // skip 'ID Tailnet Account' header if present
+  if (unparsedUsers[0]?.startsWith("ID")) {
+    // skip 'ID Tailnet Account' header if present
     unparsedUsers = unparsedUsers.slice(1);
   }
 
@@ -29,21 +30,23 @@ function loadUsers(unparsedUsers: string[]) {
     const unparsedUserList: string[] = unparsedUser.split(" ").filter(Boolean);
     let user = {} as User;
 
-    if (unparsedUserList.length == 3) { // accounts with 'ID Tailnet Account'
+    if (unparsedUserList.length == 3) {
+      // accounts with 'ID Tailnet Account'
       user = {
         name: unparsedUserList[1],
         active: unparsedUserList[2].includes("*"),
       };
-    }
-    else if (unparsedUserList.length == 2) { // accounts with empty tailnet name
+    } else if (unparsedUserList.length == 2) {
+      // accounts with empty tailnet name
       user = {
-        name: unparsedUserList[1].replace(/\*$/, ''),
+        name: unparsedUserList[1].replace(/\*$/, ""),
         active: unparsedUserList[1].includes("*"),
       };
     }
-    if (unparsedUserList.length == 1) { // older clients
+    if (unparsedUserList.length == 1) {
+      // older clients
       user = {
-        name: unparsedUserList[0].replace(/\*$/, ''),
+        name: unparsedUserList[0].replace(/\*$/, ""),
         active: unparsedUserList[0].includes("*"),
       };
     }
