@@ -34,7 +34,6 @@ export default function ViewCar(props: { command: RemoteServices | undefined }) 
   const api = useRef<ConnectedDrive | null>(null);
 
   useEffect(() => {
-
     (async () => {
       const { username, password, region } = getPreferenceValues<{
         username: string;
@@ -46,7 +45,6 @@ export default function ViewCar(props: { command: RemoteServices | undefined }) 
       api.current = new ConnectedDrive(username, password, region); // Initialize the api
 
       try {
-
         const vehiclesResp = await api.current.getVehicles();
 
         if (vehiclesResp.length > 0) {
@@ -63,7 +61,6 @@ export default function ViewCar(props: { command: RemoteServices | undefined }) 
         setIsLoading(false);
       }
     })();
-
   }, []);
 
   function renderCommand(): React.ReactNode {
