@@ -65,7 +65,11 @@ export async function addNotesToFile(noteContent: string, fileId: string) {
     },
     method: "post",
     body: JSON.stringify({
-      requests: [{ insertText: { endOfSegmentLocation: { segmentId: "" }, text: formatTextToUpdate(noteContent) } }],
+      requests: [
+        {
+          insertText: { endOfSegmentLocation: { segmentId: "" }, text: formatTextToUpdate(noteContent) },
+        },
+      ],
     }),
   });
   await handleInvalidResponse(response);

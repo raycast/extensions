@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Raycast extension seamlessly integrates with Google Docs, allowing users to effortlessly manage and send notes right from their Raycast interface. This makes it super easy to store quick notes on the cloud, making it convenient to have persistent notes.
+This Raycast extension seamlessly integrates with Google Docs, allowing users to effortlessly manage and send notes right from their Raycast interface to a persistent storage.
 
 Note: This extension requires an internet connection and a Google account to function.
 
@@ -15,20 +15,17 @@ Note: This extension requires an internet connection and a Google account to fun
 
 ## Features
 
-**Post notes:**
+### Post notes
 
 - Enter your text in the text area.
-- Click "Send" to post the text to the currently selected document.
+- Click **Send** to post the text to the currently selected document.
 - A notification will inform you whether the post was successful.
-- You can select and change the file for your notes by using the "Current File" action in the Action Menu.
+- You can select and change the file for your notes by using the "Change location for this note" action from the Action Menu.
+- Using **All Docs** action from action menu you can see list of all the docs that are associated with this extension.
 
-**Default document:**
+### All Docs
 
-- The extension will use the "My Raycast Notes" document by default.
-- You can change the default document through the "Change Default File" action on the main screen.
-- The selected document will be indicated with "(Current)" next to its name.
-
-**Show All Docs:**
-
-- Use this action to list all the files that you have created using this extension
-- You can "Open the file in Browser" to view your notes or you can "Copy the URL" and open it manually.
+- Use this action to list all the files that you have created using this extension, it also shows timestamp for last update operation for each doc.
+- You can use **Open in Browser** action to view your associated Google doc
+- You can also select/change default by using **Set as Default** action from action menu
+- You can create new file by using **Create New Doc** action from action menu

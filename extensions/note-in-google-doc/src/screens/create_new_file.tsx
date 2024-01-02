@@ -1,5 +1,4 @@
 import { Form, showToast, Toast, ActionPanel, Action } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { useState, useRef } from "react";
 import { GoogleDoc, createDocument } from "../google_fns";
 import { getUniqueNameForDoc } from "../util";
@@ -20,10 +19,9 @@ export async function createDocumentWithName(fileName: string) {
   }
 }
 
-export function CreateNewFileForm() {
+export function CreateNewFileForm(props: { onNewFileCreation: (file: GoogleDoc) => void }) {
   const [noFileNameError, setNoFileNameError] = useState<string | undefined>();
   const fileNameTextFieldRef = useRef<Form.TextArea>(null);
-  const [raycastFiles, setRaycastFiles] = useCachedState<Array<GoogleDoc>>("raycast-notes-files", []);
 
   function dropFileNameError() {
     if (noFileNameError && noFileNameError.length > 0) {
@@ -39,7 +37,7 @@ export function CreateNewFileForm() {
         const newDoc = await createDocumentWithName(createFileValues.fileName.trim());
         if (newDoc) {
           fileNameTextFieldRef.current?.reset();
-          setRaycastFiles([...(raycastFiles ?? []), newDoc]);
+          props.onNewFileCreation(newDoc);
           showToast({ style: Toast.Style.Success, title: "File creation successful!" });
         } else {
           showToast({ style: Toast.Style.Failure, title: String("File creation failed!") });
