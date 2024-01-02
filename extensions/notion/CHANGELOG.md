@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Enhancement] - 2023-12-08
+## [Open Notion page improvement] - 2024-01-02
 
 - Add the ability to open Notion in the browser of your choice or in the Notion app.
 
