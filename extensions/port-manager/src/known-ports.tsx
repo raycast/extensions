@@ -37,7 +37,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Submit Answer"
+            title="Submit List"
             onSubmit={() => {
               if (!data) {
                 LocalStorage.removeItem(STORAGE_KEY);
