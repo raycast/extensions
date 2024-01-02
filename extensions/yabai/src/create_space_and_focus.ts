@@ -15,13 +15,13 @@ export default async function main() {
     await execYabaiCommand(`-m space --focus ${lastSpaceIndex}`);
 
     // Show HUD notification
-    await showHUD(`Created space: ${lastSpaceIndex}`);
+    showHUD(`Created space: ${lastSpaceIndex}`);
   } catch (error) {
     console.error("Error executing yabai commands", error);
     if (error instanceof Error) {
-      await showHUD(`Error: ${error.message}`);
+      showHUD(`Error: ${error.message}`);
     } else {
-      await showHUD(`Error: ${error}`);
+      showHUD(`Error: ${error}`);
     }
   }
 }

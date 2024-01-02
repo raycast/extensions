@@ -4,11 +4,11 @@ import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
-function yabaiPath(){
+function yabaiPath() {
     return process.arch === "arm64" ? "/opt/homebrew/bin/yabai" : "/usr/local/bin/yabai";
 }
 
-export async function execYabaiCommand(flags: string, callback?: (error: Error | null, stdout: string, stderr: string) => void){
+export async function execYabaiCommand(flags: string) {
     // Get current user's username
     const username = os.userInfo().username;
 

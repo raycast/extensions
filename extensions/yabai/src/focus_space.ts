@@ -17,9 +17,9 @@ export default async function main(args: LaunchProps) {
                 return;
             }
             console.error("Error executing yabai commands", error);
-            await showHUD(`Error: ${error.message}`);
+            showHUD(`Error: ${error.message}`);
             return;
         }
-        await showHUD(`Error: ${error}`);
+        showHUD(`Error: ${error}`);
     }
 }
