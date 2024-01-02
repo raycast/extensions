@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment-timezone";
 
 export const convertMacTime2JSTime = (time: number) => {
   return time * 1000;
@@ -33,7 +33,13 @@ export const formatToServerDate = (date: Date | moment.Moment | null | undefined
   return undefined;
 };
 
-export const formatPrettyDateTime = (date: string) => {
+export const formatPrettyDateTime = (date: string, timezone: string, isFloating: boolean, isAllDay: boolean) => {
   if (!date) return "";
-  return moment(date).format("MMM Do, h:mm a");
+  else if (isAllDay) {
+    return moment(date).format("MMM Do");
+  } else if (isFloating) {
+    return moment(date).format("MMM Do, h:mm a");
+  } else {
+    return moment.tz(date, timezone).format("MMM Do, h:mm a");
+  }
 };

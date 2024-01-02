@@ -5,6 +5,11 @@ import { runAppleScript } from "run-applescript";
 import { convertMacTime2JSTime, formatPrettyDateTime, getSectionNameByDate } from "../utils/date";
 
 const taskObject2Task = (object: Record<string, unknown>): Task => {
+  const isAllDay = object.isAllDay as boolean;
+  const isFloating = object.isFloating as boolean;
+  const timeZone = object.timeZone as string;
+  const startDate = formatPrettyDateTime(object.startDate as string, timeZone, isFloating, isAllDay);
+  const dueDate = formatPrettyDateTime(object.dueDate as string, timeZone, isFloating, isAllDay);
   return {
     id: object.id as Task["id"],
     title: object.title as Task["title"],
@@ -15,8 +20,8 @@ const taskObject2Task = (object: Record<string, unknown>): Task => {
     items: object.items as Task["items"],
     kind: object.kind as Task["kind"],
     tags: (object.tags || []) as Task["tags"],
-    startDate: formatPrettyDateTime(object.startDate as string) as Task["startDate"],
-    dueDate: formatPrettyDateTime(object.dueDate as string) as Task["dueDate"],
+    startDate: startDate as Task["startDate"],
+    dueDate: dueDate as Task["dueDate"],
   };
 };
 

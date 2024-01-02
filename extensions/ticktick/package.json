@@ -139,6 +139,7 @@
     "@raycast/utils": "^1.8.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
+    "moment-timezone": "^0.5.44",
     "run-applescript": "^6.0.0",
     "similarity": "^1.2.1"
   },
