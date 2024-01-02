@@ -1,6 +1,5 @@
 import { Cache, LocalStorage, showToast, Toast } from "@raycast/api";
-import { execFileSync } from "child_process";
-import { scriptPath } from "./constants";
+import { runAppleScript } from "run-applescript";
 
 export async function toggleSystemAudioInputLevel(currentAudioInputLevel: number) {
   const toast = await showToast({
@@ -18,7 +17,7 @@ export async function toggleSystemAudioInputLevel(currentAudioInputLevel: number
   const nonZeroAudioVolume = savedNonZeroAudioVolume === undefined ? 1 : savedNonZeroAudioVolume;
   const newLevel = currentAudioInputLevel == 0 ? nonZeroAudioVolume : 0;
 
-  execFileSync(scriptPath, ["set", newLevel.toString()]);
+  await set(Number(newLevel));
 
   if (newLevel == 0) {
     toast.title = "Audio input muted";
@@ -32,7 +31,18 @@ export async function toggleSystemAudioInputLevel(currentAudioInputLevel: number
   return newLevel;
 }
 
-export function getCurrentAudioInputLevel() {
-  const result = execFileSync(scriptPath, ["get"]);
-  return Number(result.toString());
+export async function get() {
+  const result = await runAppleScript(`
+      set result to (input volume of (get volume settings))
+      return result
+    `);
+  return result.trim();
+}
+
+export async function set(option: number) {
+  if (option == 0) {
+    const result = await runAppleScript(`set volume input volume 0`);
+  } else {
+    const result = await runAppleScript(`set volume input volume 100`);
+  }
 }
