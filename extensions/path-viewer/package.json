@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "path-viewer",
+  "title": "Path Viewer",
+  "description": "To view files and folders on your mac",
+  "icon": "extension_icon@1024px.png",
+  "author": "iewnfod",
+  "owner": "ienwfod",
+  "version": "0.0.3",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-dir",
+      "title": "View Directory",
+      "description": "View all files and folders in the target folder",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "path",
+          "placeholder": "path",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "type": "directory",
+      "name": "defaultPath",
+      "title": "Default View Path",
+      "description": "The path that will be viewed when no path entered",
+      "required": true,
+      "default": "~/"
+    },
+    {
+      "type": "textfield",
+      "name": "ignoreName",
+      "title": "Ignore Names (use `,` to split names)",
+      "description": "Names that need to be ignored when viewing",
+      "required": false,
+      "default": "",
+      "placeholder": "Example: Thumbs.db, desktop.ini"
+    },
+    {
+      "type": "checkbox",
+      "name": "showHidden",
+      "title": "Advanced Setting",
+      "description": "Show hidden files and folders",
+      "required": false,
+      "default": false,
+      "label": "Show Hidden Files and Folders"
+    },
+    {
+      "type": "checkbox",
+      "name": "appAsFile",
+      "title": "",
+      "description": "Handle app as a file instead of a folder",
+      "required": false,
+      "default": true,
+      "label": "Handle App as a File Instead of a Folder"
+    },
+    {
+      "type": "dropdown",
+      "name": "sortType",
+      "title": "Sort Type",
+      "description": "Sort type when displaying files and folders",
+      "required": false,
+      "default": "System Default",
+      "data": [
+        {
+          "title": "System Default",
+          "value": "0"
+        },
+        {
+          "title": "Name A-Z",
+          "value": "na"
+        },
+        {
+          "title": "Name Z-A",
+          "value": "nd"
+        },
+        {
+          "title": "Extension A-Z",
+          "value": "ea"
+        },
+        {
+          "title": "Extension Z-A",
+          "value": "ed"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.3",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
