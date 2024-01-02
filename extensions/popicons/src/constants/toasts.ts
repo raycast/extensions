@@ -1,6 +1,6 @@
 import { Toast, open } from "@raycast/api";
 import { FetchPopiconsError } from "../errors/fetch-popicons-error";
-import { getApiErrorIssueUrl } from "../helpers/get-api-error-issue-url";
+import { getNewIssueUrl } from "../helpers/get-new-issue-url";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DynamicToastOptions = (...args: Array<any>) => Toast.Options;
@@ -40,7 +40,7 @@ const Toasts = {
         secondaryAction: {
           title: "Report Issue",
           onAction: (toast) => {
-            open(getApiErrorIssueUrl(err.reason).toString());
+            open(getNewIssueUrl().toString());
             toast.hide();
           },
         },
