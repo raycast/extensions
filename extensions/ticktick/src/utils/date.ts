@@ -34,12 +34,15 @@ export const formatToServerDate = (date: Date | moment.Moment | null | undefined
 };
 
 export const formatPrettyDateTime = (date: string, timezone: string, isFloating: boolean, isAllDay: boolean) => {
+  const datetimeInOriginalTimezone = moment.tz(date, timezone);
+
   if (!date) return "";
   else if (isAllDay) {
-    return moment(date).format("MMM Do");
+    return datetimeInOriginalTimezone.format("MMM Do");
   } else if (isFloating) {
     return moment(date).format("MMM Do, h:mm a");
   } else {
-    return moment.tz(date, timezone).format("MMM Do, h:mm a");
+    const datetimeInLocalTimezone = datetimeInOriginalTimezone.clone().local();
+    return datetimeInLocalTimezone.format("MMM Do, h:mm a");
   }
 };
