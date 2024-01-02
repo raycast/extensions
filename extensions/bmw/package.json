@@ -12,42 +12,42 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "viewCar",
+      "name": "view-car",
       "title": "View Car",
       "subtitle": "BMW",
       "description": "View information about your BMW",
       "mode": "view"
     },
     {
-      "name": "unlockDoor",
+      "name": "door-unlock",
       "title": "Unlock Door",
       "subtitle": "BMW",
       "description": "Unlock your BMW",
       "mode": "view"
     },
     {
-      "name": "lockDoor",
+      "name": "door-lock",
       "title": "Lock Door",
       "subtitle": "BMW",
       "description": "Lock your BMW",
       "mode": "view"
     },
     {
-      "name": "climateNow",
+      "name": "climate-now",
       "title": "Turn Climate On",
       "subtitle": "BMW",
       "description": "Turn your AC on",
       "mode": "view"
     },
     {
-      "name": "honk",
+      "name": "horn-blow",
       "title": "Honk",
       "subtitle": "BMW",
       "description": "Honk the horn",
       "mode": "view"
     },
     {
-      "name": "flashLights",
+      "name": "light-flash",
       "title": "Flash Lights",
       "subtitle": "BMW",
       "description": "Flash the lights",
@@ -68,11 +68,18 @@
       "mode": "view"
     },
     {
-      "name": "changeImage",
+      "name": "change-image",
       "title": "Change Car Image",
       "subtitle": "BMW",
       "description": "Change the car image displayed",
       "mode": "view"
+    },
+    {
+      "name": "car-overview",
+      "title": "Car Overview",
+      "subtitle": "BMW",
+      "description": "View your car at a glance",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [

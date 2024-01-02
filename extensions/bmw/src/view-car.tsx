@@ -6,7 +6,7 @@ import { getImage } from "./utils/getImage";
 import { ViewDirection } from "./types/ViewDirection";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import ChangeImage from "./changeImage";
+import ChangeImage from "./change-image";
 import { executeCommand } from "./utils/executeCommand";
 import { getCommandDetails } from "./utils/getCommandsdDetail";
 
@@ -69,6 +69,7 @@ export default function ViewCar(props: { command: RemoteServices | undefined }) 
 
     return (Object.keys(RemoteServices) as (keyof typeof RemoteServices)[]).map((key, index) => {
       const { command, commandName, icon } = getCommandDetails(RemoteServices[key]);
+      console.log(command);
       if (commandName === "") return null;
       return (
         <Action

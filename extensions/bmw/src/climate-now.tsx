@@ -1,6 +1,6 @@
 import { RemoteServices } from "bmw-connected-drive";
-import ViewCar from "./viewCar";
+import ViewCar from "./view-car";
 
 export default function Command() {
-  return <ViewCar command={RemoteServices.BlowHorn} />;
+  return <ViewCar command={RemoteServices.ClimateNow} />;
 }

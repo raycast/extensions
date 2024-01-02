@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import ViewCar from "./viewCar";
+import ViewCar from "./view-car";
 import { ViewDirection } from "./types/ViewDirection";
 import { useCachedState } from "@raycast/utils";
 import { ConnectedDrive, Regions } from "bmw-connected-drive";
