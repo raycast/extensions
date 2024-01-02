@@ -54,7 +54,7 @@ async function harvestAPI<T = AxiosResponse>({ method = "GET", ...props }: Axios
       console.log(`Hit a rate-limit. Retrying after ${data.retry_after} seconds`);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Rate-limited by Harvest, please wait..." });
       await new Promise((resolve) => setTimeout(resolve, data.retry_after * 1000));
-      const result = (await harvestAPI<T>({ method, ...props })) as Promise<T>;
+      const result = (await harvestAPI<T>({ method, ...props })) as T;
       toast.hide();
       return result;
     }
