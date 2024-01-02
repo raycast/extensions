@@ -13,9 +13,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Search",
-      "description": "Provides details about a codeforces handle",
+      "name": "search-handle",
+      "title": "Search Handle",
+      "subtitle": "Search handle",
+      "description": "Search handle",
+      "mode": "view"
+    },
+    {
+      "name": "search-contest",
+      "title": "Search Contest",
+      "subtitle": "Search Contest",
+      "description": "Search Contest",
       "mode": "view"
     }
   ],

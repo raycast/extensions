@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Action, ActionPanel, Color, Detail, Form, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
@@ -11,7 +12,7 @@ export default function Command() {
     <Form
       navigationTitle="Seach Codeforces Handle"
       actions={
-        <ActionPanel>
+        <ActionPanel title="Search Codeforces Handle">
           <Action.Push title="Search Handle" icon={{ source: Icon.MagnifyingGlass }} target={<User value={name} />} />
         </ActionPanel>
       }
@@ -82,7 +83,6 @@ function User(name) {
 
   useEffect(() => {
     if (!isLoading) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setUserData((data as any).result[0]);
     }
   }, [isLoading]);
@@ -175,9 +175,7 @@ function Contest(name) {
 
   useEffect(() => {
     if (!isLoading) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setItems((data as any).result);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filterList((data as any).result);
     }
   }, [isLoading]);
@@ -204,8 +202,8 @@ function Contest(name) {
           key={item.contestId}
           title={item.contestName}
           actions={
-            <ActionPanel>
-              <Action.Push title="Get Submissions Details" target={<Pong id={item.contestId} handle={userHandle} />} />
+            <ActionPanel title="Participated Contests">
+              <Action.Push title="Get Submissions Details" target={<Submissions id={item.contestId} handle={userHandle} />} />
               <Action.OpenInBrowser url={`${CODEFORCES_BASE}contest/${item.contestId}`} />
             </ActionPanel>
           }
@@ -256,7 +254,7 @@ function Contest(name) {
   );
 }
 
-function Pong(values) {
+function Submissions(values) {
   interface Problem {
     contestId: number;
     index: string;
@@ -337,10 +335,91 @@ function Pong(values) {
 
   useEffect(() => {
     if (!isLoading) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setConData((data as any).result);
     }
   }, [isLoading]);
+
+  function getExecutionStatusString(status) {
+    switch (status) {
+      case 'FAILED':
+        return 'Failed';
+      case 'OK':
+        return 'Correct';
+      case 'PARTIAL':
+        return 'Partial Success';
+      case 'COMPILATION_ERROR':
+        return 'Compilation Error';
+      case 'RUNTIME_ERROR':
+        return 'Runtime Error';
+      case 'WRONG_ANSWER':
+        return 'Wrong Answer';
+      case 'PRESENTATION_ERROR':
+        return 'Presentation Error';
+      case 'TIME_LIMIT_EXCEEDED':
+        return 'Time Limit Exceeded';
+      case 'MEMORY_LIMIT_EXCEEDED':
+        return 'Memory Limit Exceeded';
+      case 'IDLENESS_LIMIT_EXCEEDED':
+        return 'Idleness Limit Exceeded';
+      case 'SECURITY_VIOLATED':
+        return 'Security Violated';
+      case 'CRASHED':
+        return 'Crashed';
+      case 'INPUT_PREPARATION_CRASHED':
+        return 'Input Preparation Crashed';
+      case 'CHALLENGED':
+        return 'Challenged';
+      case 'SKIPPED':
+        return 'Skipped';
+      case 'TESTING':
+        return 'Testing';
+      case 'REJECTED':
+        return 'Rejected';
+      default:
+        return 'Unknown Status';
+    }
+  }
+  
+  function getExecutionStatusColor(status) {
+    switch (status) {
+      case 'FAILED':
+        return Color.Red;
+      case 'OK':
+        return Color.Green;
+      case 'PARTIAL':
+        return Color.Yellow;
+      case 'COMPILATION_ERROR':
+        return Color.Red;
+      case 'RUNTIME_ERROR':
+        return Color.Red;
+      case 'WRONG_ANSWER':
+        return Color.Red;
+      case 'PRESENTATION_ERROR':
+        return Color.Yellow;
+      case 'TIME_LIMIT_EXCEEDED':
+        return Color.Red;
+      case 'MEMORY_LIMIT_EXCEEDED':
+        return Color.Orange;
+      case 'IDLENESS_LIMIT_EXCEEDED':
+        return Color.Orange;
+      case 'SECURITY_VIOLATED':
+        return Color.Red;
+      case 'CRASHED':
+        return Color.Red;
+      case 'INPUT_PREPARATION_CRASHED':
+        return Color.Orange;
+      case 'CHALLENGED':
+        return Color.Blue;
+      case 'SKIPPED':
+        return Color.Yellow;
+      case 'TESTING':
+        return Color.Magenta;
+      case 'REJECTED':
+        return Color.Red;
+      default:
+        return Color.PrimaryText;
+    }
+  }
 
   return (
     <List isLoading={isLoading} navigationTitle="Search Submissions" searchBarPlaceholder="Search Submissions">
@@ -349,7 +428,7 @@ function Pong(values) {
           key={item.id}
           title={`${item.problem.index}. ${item.problem.name}`}
           actions={
-            <ActionPanel>
+            <ActionPanel title="Submissions">
               <Action.OpenInBrowser
                 title="Open Submission in Browser"
                 url={`${CODEFORCES_BASE}contest/${item.contestId}/submission/${item.id}`}
@@ -368,7 +447,7 @@ function Pong(values) {
             { text: `${item.problem.rating}`, icon: Icon.BarChart },
             { text: `${item.programmingLanguage}` },
             { date: new Date(item.creationTimeSeconds * 1000) },
-            { tag: { value: `${item.verdict}`, color: item.verdict === "OK" ? Color.Green : Color.Red } },
+            { tag: { value: getExecutionStatusString(item.verdict), color: getExecutionStatusColor(item.verdict) } },
           ]}
         />
       ))}
