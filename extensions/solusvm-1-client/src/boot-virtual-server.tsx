@@ -7,7 +7,7 @@ export default async function BootVirtualServer() {
     if (
       await confirmAlert({
         title: `Boot Virtual Server?`,
-    icon: Icon.Power,
+        icon: Icon.Power,
       })
     ) {
       const response = await bootVirtualServer();
