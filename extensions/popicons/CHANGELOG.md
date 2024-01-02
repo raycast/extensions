@@ -1,9 +1,10 @@
 # Popicons Changelog
 
-## [Bug Fixes and Updated Store Images] - 2024-01-03
+## [Bug Fixes and Small Improvements] - 2024-01-03
 
-- Fixed: Use currect url to create GitHub issue when an error occurs during the icons update
-- New store images which reflect the removal of the grid item titles
+- Use the correct URL to create a GitHub issue when an error occurs during the icons update.
+- Added new store images that reflect the removal of the grid item titles.
+- Enhanced toast messages.
 
 ## [Released Popicons Extension] - 2023-12-27
 

@@ -21,8 +21,7 @@ const Toasts = {
     SuccessNewIcons: (count: number) => {
       return {
         style: Toast.Style.Success,
-        title: "🎉 New Icons Added",
-        message: `${count} new Popicons were added to the extension.`,
+        title: `🎉 ${count} new Popicons added`,
       };
     },
     FetchError: (err: FetchPopiconsError, retry: () => void) => {
@@ -49,8 +48,8 @@ const Toasts = {
     OfflineError: (retry: () => void) => {
       return {
         style: Toast.Style.Failure,
-        title: "Update Failed",
-        message: "No internet connection available. The icons will be updated the next time the extension is openend.",
+        title: "You Are Offline",
+        message: "The icons will be updated the next time the extension is openend.",
         primaryAction: {
           title: "Retry Loading Popicons",
           onAction: (toast) => {
