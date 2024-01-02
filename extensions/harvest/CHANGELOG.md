@@ -1,5 +1,10 @@
 # Harvest Changelog
 
+## [Toggle Timer Entry Command] - 2024-01-02
+
+- Added: New command to toggle the timer on the most recent time entry
+- Fixed: Check for when the extentions is rate-limited by Harvest and automatically retry after the timeout
+
 ## [Menu Bar Fixes] - 2023-07-24
 
 - Fix: Menu bar widget snows the running timer in the format based on the user's preference

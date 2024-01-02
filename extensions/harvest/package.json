@@ -71,6 +71,14 @@
       "mode": "no-view"
     },
     {
+      "name": "toggleTimer",
+      "icon": "toggle.png",
+      "title": "Toggle Timer",
+      "subtitle": "Harvest",
+      "description": "Toggles the most recently used Harvest Timer",
+      "mode": "no-view"
+    },
+    {
       "name": "menu-bar",
       "title": "Running Timer",
       "subtitle": "Harvest",
