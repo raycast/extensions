@@ -41,7 +41,7 @@ export function SetModelView(props: props): JSX.Element {
     [props.Families],
     {
       onData: async (InstalledModels) => {
-        if (InstalledModels.length == 0) {
+        if (!InstalledModels.length || InstalledModels.length == 0) {
           await showToast({
             style: Toast.Style.Failure,
             title: "No installed models",
@@ -91,7 +91,7 @@ export function SetModelView(props: props): JSX.Element {
    * @param {string[]} families - Filter Installed Models by Families.
    * @returns {Promise<string[]>} Installed models as an array of string.
    */
-  async function getInstalledModels(families: string[] | undefined): Promise<OllamaApiTagsResponseModel[]> {
+  async function getInstalledModels(families?: string[]): Promise<OllamaApiTagsResponseModel[]> {
     const InstalledModels = await OllamaApiTags();
     if (families)
       return InstalledModels.models.filter((t) => {
