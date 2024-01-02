@@ -1,3 +1,3 @@
 # SolusVM 1 Client Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-01-02
