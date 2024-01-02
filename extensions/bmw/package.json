@@ -93,14 +93,6 @@
       "placeholder": "Enter your password"
     },
     {
-      "name": "VIN",
-      "type": "password",
-      "required": false,
-      "title": "VIN",
-      "description": "Your Car's VIN",
-      "placeholder": "VIN"
-    },
-    {
       "name": "region",
       "type": "dropdown",
       "required": true,

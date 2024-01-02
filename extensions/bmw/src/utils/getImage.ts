@@ -42,13 +42,10 @@ export async function getImage(vin: string, direction: ViewDirection, account: A
 
   try {
     const response = await axios.get(url, { headers: headers, responseType: "arraybuffer" });
-    console.log(response.headers);
-
     const data = Buffer.from(response.data, "binary").toString("base64");
     const image = `data:${response.headers["content-type"]};base64,${data}`;
     return image;
   } catch (error) {
-    console.log(direction);
     throw new Error(error as string);
   }
 }

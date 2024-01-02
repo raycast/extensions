@@ -4,7 +4,6 @@ import { getCommandDetails } from "./getCommandsdDetail";
 
 export async function executeCommand(command: RemoteServices, api: ConnectedDrive | null, VIN: string) {
   if (!api) {
-    console.log("api not initialized");
     return;
   }
 
@@ -20,8 +19,6 @@ export async function executeCommand(command: RemoteServices, api: ConnectedDriv
       style: Toast.Style.Animated,
       title: loadingMessage,
     });
-
-    console.log(VIN);
 
     try {
       let result;
@@ -47,14 +44,11 @@ export async function executeCommand(command: RemoteServices, api: ConnectedDriv
           break;
       }
 
-      console.log(commandType, result);
-
       if (result) {
         toast.style = Toast.Style.Success;
         toast.title = "Done!";
       }
     } catch (err) {
-      console.log(err);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed";
     }

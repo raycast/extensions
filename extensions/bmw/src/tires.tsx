@@ -1,4 +1,4 @@
-import { Detail, getPreferenceValues, List } from "@raycast/api";
+import { Detail, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { ConnectedDrive, Regions, VehicleStatus } from "bmw-connected-drive";
 import { useEffect, useRef, useState } from "react";
@@ -26,14 +26,21 @@ export default function ViewTirePressure() {
       }>();
 
       api.current = new ConnectedDrive(username, password, region); // Initialize the api
-      const vehiclesResp = await api.current.getVehicles();
 
-      if (vehiclesResp.length > 0) {
-        const statusResp = await api.current.getVehicleStatus(vehiclesResp[0].vin);
-        setStatus(statusResp);
+      try {
+        const vehiclesResp = await api.current.getVehicles();
+
+        if (vehiclesResp.length > 0) {
+          const statusResp = await api.current.getVehicleStatus(vehiclesResp[0].vin);
+          setStatus(statusResp);
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          showToast({ style: Toast.Style.Failure, title: e.message });
+        }
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     })();
   }, []);
 

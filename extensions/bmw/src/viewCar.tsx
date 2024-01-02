@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { ConnectedDrive, Regions, RemoteServices, Vehicle, VehicleStatus } from "bmw-connected-drive";
 import { useCachedState } from "@raycast/utils";
@@ -21,7 +21,7 @@ export interface ViewCarProps {
   commandName: string;
 }
 
-export default function ViewCar(props: { command: RemoteServices }) {
+export default function ViewCar(props: { command: RemoteServices | undefined }) {
   const [vehicles, setVehicles] = useCachedState<Vehicle[]>("vehicles", []);
   const [status, setStatus] = useCachedState<VehicleStatus>("status");
   const [VIN, setVIN] = useState<string>();
@@ -34,6 +34,7 @@ export default function ViewCar(props: { command: RemoteServices }) {
   const api = useRef<ConnectedDrive | null>(null);
 
   useEffect(() => {
+
     (async () => {
       const { username, password, region } = getPreferenceValues<{
         username: string;
@@ -43,17 +44,26 @@ export default function ViewCar(props: { command: RemoteServices }) {
       }>();
 
       api.current = new ConnectedDrive(username, password, region); // Initialize the api
-      const vehiclesResp = await api.current.getVehicles();
 
-      if (vehiclesResp.length > 0) {
-        const statusResp = await api.current.getVehicleStatus(vehiclesResp[0].vin);
-        setVIN(vehiclesResp[0].vin);
-        setStatus(statusResp);
+      try {
+
+        const vehiclesResp = await api.current.getVehicles();
+
+        if (vehiclesResp.length > 0) {
+          const statusResp = await api.current.getVehicleStatus(vehiclesResp[0].vin);
+          setVIN(vehiclesResp[0].vin);
+          setStatus(statusResp);
+        }
+        setVehicles(vehiclesResp);
+      } catch (e) {
+        if (e instanceof Error) {
+          showToast({ style: Toast.Style.Failure, title: e.message });
+        }
+      } finally {
+        setIsLoading(false);
       }
-      setVehicles(vehiclesResp);
-
-      setIsLoading(false);
     })();
+
   }, []);
 
   function renderCommand(): React.ReactNode {
@@ -79,9 +89,7 @@ export default function ViewCar(props: { command: RemoteServices }) {
 
     (async () => {
       if (api.current) {
-        console.log("Getting image");
         const imageResp = await getImage(VIN, image.view, api.current?.account);
-        console.log(imageResp);
         setImage({ view: image.view, image: imageResp });
       }
 

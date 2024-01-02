@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Grid, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import ViewCar from "./viewCar";
 import { ViewDirection } from "./types/ViewDirection";
@@ -10,8 +10,6 @@ export default function ChangeImage() {
   const [changedImage, setChanged] = useState(false);
 
   const [images, setImages] = useCachedState<{ view: ViewDirection; image: string }[]>("images", []);
-
-  console.log(images.length);
 
   const [isLoading, setIsLoading] = useState(true);
   const [, setImage] = useCachedState<{ view: ViewDirection; image: string }>("image", {
@@ -34,22 +32,27 @@ export default function ChangeImage() {
 
       api.current = new ConnectedDrive(username, password, region);
 
-      const vehiclesResp = await api.current.getVehicles();
-      const VIN = vehiclesResp[0].vin;
+      try {
+        const vehiclesResp = await api.current.getVehicles();
+        const VIN = vehiclesResp[0].vin;
 
-      for (const view of Object.values(ViewDirection)) {
-        console.log(view);
-        const imageResp = await getImage(VIN, view, api.current?.account);
-        const imageObj = {
-          view: view,
-          image: imageResp,
-        };
-        imagesArray.push(imageObj);
+        for (const view of Object.values(ViewDirection)) {
+          const imageResp = await getImage(VIN, view, api.current?.account);
+          const imageObj = {
+            view: view,
+            image: imageResp,
+          };
+          imagesArray.push(imageObj);
+        }
+
+        setImages(imagesArray);
+      } catch (e) {
+        if (e instanceof Error) {
+          showToast({ style: Toast.Style.Failure, title: e.message });
+        }
+      } finally {
+        setIsLoading(false);
       }
-
-      setImages(imagesArray);
-
-      setIsLoading(false);
     })();
   }, []);
 
@@ -59,7 +62,7 @@ export default function ChangeImage() {
   };
 
   return changedImage ? (
-    <ViewCar />
+    <ViewCar command={undefined} />
   ) : (
     <Grid
       isLoading={isLoading}
