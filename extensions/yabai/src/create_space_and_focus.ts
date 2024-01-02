@@ -9,7 +9,7 @@ export default async function main() {
     // Get the last space index that is not native fullscreen
     const { stdout: spacesOutput } = await execYabaiCommand(`-m query --spaces`);
     const spaces = JSON.parse(spacesOutput);
-    const lastSpaceIndex = spaces.filter((space: { [x: string]: any; }) => !space["is-native-fullscreen"]).pop().index;
+    const lastSpaceIndex = spaces.filter((space: { [x: string]: never }) => !space["is-native-fullscreen"]).pop().index;
 
     // Focus the last space
     await execYabaiCommand(`-m space --focus ${lastSpaceIndex}`);
