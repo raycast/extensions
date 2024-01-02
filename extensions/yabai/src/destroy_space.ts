@@ -3,10 +3,18 @@ import { execYabaiCommand } from "./utils";
 
 export default async function main() {
   try {
-    // Create a new space
+    // Get the index of the recent space
+    const { stdout: rawRecentSpace } = await execYabaiCommand(`-m query --spaces --space recent`);
+    const recentSpace = JSON.parse(rawRecentSpace);
+    const lastSpaceIndex = recentSpace.index;
+
+    // Destroy the current space
     await execYabaiCommand(`-m space --destroy`);
-    showHUD(`Destroyed Space`);
-    execYabaiCommand(`-m space --focus recent`);
+
+    // Focus the last space used before destroying the current space
+    await execYabaiCommand(`-m space --focus ${lastSpaceIndex}`);
+
+    await showHUD(`Destroyed Space`);
   } catch (error) {
     console.error("Error executing yabai commands", error);
     showHUD(`Error: ${error}`);
