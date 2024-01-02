@@ -163,6 +163,7 @@
 /extensions/clickup                                  @Ali-Parandeh @aesadde
 /extensions/clipboard-editor                         @pomdtr
 /extensions/clipboard-formatter                      @joshtemple
+/extensions/clipmenu                                 @Envl
 /extensions/clockify                                 @ismamz @sxn
 /extensions/clojuredocs-search                       @edblancas
 /extensions/cloudflare                               @Destiner @niklaswa
@@ -1216,7 +1217,7 @@
 /extensions/weather                                  @tonka3000
 /extensions/web-audit                                @floriandwt
 /extensions/web3-profile                             @peduarte
-/extensions/web3bio                                  
+/extensions/web3bio                                  @picturepan2
 /extensions/webflow-sites                            @vurhd @pernielsentikaer
 /extensions/webkit-developer-docs                    @KevinBatdorf
 /extensions/websocket-debugging                      @RhysLees
