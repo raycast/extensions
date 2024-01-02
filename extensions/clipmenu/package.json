@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipmenu",
-  "title": "ClipMenu - Show Current Clipboard Content on Menu Bar",
-  "description": "Show clipboard content in menu bar",
+  "title": "ClipMenu",
+  "description": "Show Current Clipboard Content on Menu Bar",
   "icon": "command-icon.png",
   "author": "Envl",
   "categories": [
@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Clipboard Content",
-      "description": "show latest clipboard content in menu bar",
+      "title": "Show Clipboard Content",
+      "description": "Show latest clipboard content in menu bar",
       "mode": "menu-bar",
       "interval": "1m"
     }
@@ -34,15 +34,15 @@
     {
       "name": "preview",
       "label": "Preview current content in menu bar",
-      "description": "show what's currently in clipboard",
+      "description": "Show what's currently in the clipboard",
       "required": false,
       "type": "checkbox",
       "default": true
     },
     {
       "name": "truncate",
-      "title": "Limit visible text length",
-      "description": "how many characters to show in menu bar",
+      "title": "Limit Visible Text Length",
+      "description": "How many characters to show in menu bar",
       "required": false,
       "type": "dropdown",
       "default": "60",
