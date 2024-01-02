@@ -11,8 +11,12 @@ export default async function main() {
     // Destroy the current space
     await execYabaiCommand(`-m space --destroy`);
 
-    // Focus the last space used before destroying the current space
-    await execYabaiCommand(`-m space --focus ${lastSpaceIndex}`);
+    try {
+      // Focus the last space used before destroying the current space
+      await execYabaiCommand(`-m space --focus ${lastSpaceIndex}`);
+    } catch (error) {
+      // ignored
+    }
 
     await showHUD(`Destroyed Space`);
   } catch (error) {
