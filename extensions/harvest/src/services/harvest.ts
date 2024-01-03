@@ -10,7 +10,16 @@ import {
   HarvestUserResponse,
   HarvestCompany,
 } from "./responseTypes";
-import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  Cache,
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
@@ -51,11 +60,18 @@ async function harvestAPI<T = AxiosResponse>({ method = "GET", ...props }: Axios
       const data = error.response?.data as { retry_after: number; message: string };
 
       // try again after the retry_after time
-      console.log(`Hit a rate-limit. Retrying after ${data.retry_after} seconds`);
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Rate-limited by Harvest, please wait..." });
+      console.log(`Hit a rate-limit. Retrying after ${data.retry_after} seconds`, environment.launchType);
+
+      const toast =
+        environment.launchType === LaunchType.UserInitiated
+          ? await showToast({
+              style: Toast.Style.Animated,
+              title: "Rate-limited by Harvest, please wait...",
+            })
+          : null;
       await new Promise((resolve) => setTimeout(resolve, data.retry_after * 1000));
       const result = (await harvestAPI<T>({ method, ...props })) as T;
-      toast.hide();
+      await toast?.hide();
       return result;
     }
     throw error;

@@ -109,6 +109,15 @@
           "description": "URL to open when a running timer stops. See README for more info.",
           "type": "textfield",
           "required": false
+        },
+        {
+          "name": "statusFolder",
+          "title": "Status Folder",
+          "type": "directory",
+          "description": "Folder to write status files to. See README for more info.",
+          "required": false,
+          "label": "Status Folder",
+          "placeholder": "Select a directory"
         }
       ]
     }
