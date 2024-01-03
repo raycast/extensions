@@ -225,8 +225,6 @@ function CourseDetail({ sectionID, courseTitle }) {
                     : `Assignment ID: ${grade.assignment_id}`
                 }
                 accessories={[
-                  ...(grade.comment ? [{ icon: Icon.Bubble, tooltip: grade.comment }] : []),
-                  { text: `${((grade.grade / grade.max_points) * 100).toFixed(1).replace(/\.0$/, "")}%` },
                   {
                     ...((grade.grade / grade.max_points) * 100 > 100 && {
                       tag: {
@@ -235,6 +233,8 @@ function CourseDetail({ sectionID, courseTitle }) {
                       },
                     }),
                   },
+                  ...(grade.comment ? [{ icon: Icon.Bubble, tooltip: grade.comment }] : []),
+                  { text: `${((grade.grade / grade.max_points) * 100).toFixed(1).replace(/\.0$/, "")}%` },
                   {
                     tag: {
                       value: `${grade.grade}/${grade.max_points}`,
