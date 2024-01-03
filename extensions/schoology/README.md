@@ -4,7 +4,7 @@ This extension will help you view your grades quickly using Raycast.
 Here's an image with some example courses (I used a schoology dev account to test it which is why there are weird icons and titles):
 ![README Preview](README-schoology.png)
 - This extension will only show a course in the `Show Grades` command if it has received at least one grade.
-- As of right now, the only thing you can do is view your grades
+- As of right now, the only thing you can do is view your course overall grades, and individual assigments grades and their comments if they exist
     - Feel free to reach out if you want to suggest features or even just contribute to the extension yourself!
 ## How to obtain Schoology Key and secret
 - Head to https://[district].schoology.com/api
