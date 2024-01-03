@@ -121,44 +121,46 @@ export default function RecordList() {
       ) : (
         records.map((record, index) => {
           const used = record.usage.usedCharacters / record.usage.totalCharacters;
-          return (<List.Item
-            key={index}
-            title={record.title}
-            accessories={[
-              { text: `used: ${record.usage.usedCharacters}` },
-              { text: `total: ${record.usage.totalCharacters}` },
-              {
-                text: {
-                  value: `${getUsagePercentage(record.usage)}%`,
-                  color: colorMapper(used),
+          return (
+            <List.Item
+              key={index}
+              title={record.title}
+              accessories={[
+                { text: `used: ${record.usage.usedCharacters}` },
+                { text: `total: ${record.usage.totalCharacters}` },
+                {
+                  text: {
+                    value: `${getUsagePercentage(record.usage)}%`,
+                    color: colorMapper(used),
+                  },
                 },
-              },
-            ]}
-            icon={getProgressIcon(used, colorMapper(used))}
-            actions={
-              <ActionPanel>
-                <Action.Push icon={Icon.Eye} title="View Details" target={<RecordDetail record={record} />} />
-                <Action.Push
-                  title="Modify Record"
-                  icon={Icon.Pencil}
-                  target={
-                    <EditRecordForm
-                      record={record}
-                      onConfirm={async (record) => {
-                        const updatedRecords = records.map((r) => (r.id === record!.id ? record : r));
-                        await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
-                        showToast(Toast.Style.Success, "Record Modified");
-                        loadRecords();
-                      }}
-                    />
-                  }
-                />
-                {addRecordNode}
-                <Action icon={Icon.Trash} title="Delete Record" onAction={() => handleDelete(record.id)} />
-                {refreshNode}
-              </ActionPanel>
-            }
-          />)
+              ]}
+              icon={getProgressIcon(used, colorMapper(used))}
+              actions={
+                <ActionPanel>
+                  <Action.Push icon={Icon.Eye} title="View Details" target={<RecordDetail record={record} />} />
+                  <Action.Push
+                    title="Modify Record"
+                    icon={Icon.Pencil}
+                    target={
+                      <EditRecordForm
+                        record={record}
+                        onConfirm={async (record) => {
+                          const updatedRecords = records.map((r) => (r.id === record!.id ? record : r));
+                          await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
+                          showToast(Toast.Style.Success, "Record Modified");
+                          loadRecords();
+                        }}
+                      />
+                    }
+                  />
+                  {addRecordNode}
+                  <Action icon={Icon.Trash} title="Delete Record" onAction={() => handleDelete(record.id)} />
+                  {refreshNode}
+                </ActionPanel>
+              }
+            />
+          );
         })
       )}
     </List>
