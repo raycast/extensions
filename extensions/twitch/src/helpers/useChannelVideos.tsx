@@ -7,7 +7,6 @@ export default function useChannelVideos(channelId: string | undefined) {
     isLoading,
   } = useTwitchRequest({
     url: `https://api.twitch.tv/helix/videos?user_id=${channelId}`,
-    cacheKey: `channel_videos_${channelId}`,
     initialData: { cursor: undefined, videos: [] as Video[] },
     enabled: Boolean(channelId),
     select: (data) => ({

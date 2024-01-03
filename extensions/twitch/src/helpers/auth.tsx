@@ -8,10 +8,18 @@ const TOKEN_URL = "https://twitch.oauth.raycast.com/token";
 const REFRESH_URL = "https://twitch.oauth.raycast.com/refresh-token";
 const CLIENT_ID = "2seilcmdzzph88cijp963sbm9485bo";
 export const userName = preferences.userName;
+export const IS_DEPRECATED_AUTH = preferences.clientId && preferences.authorization;
 
 let runningAuthPromise: Promise<string> | undefined;
 
 export async function getHeaders() {
+  if (IS_DEPRECATED_AUTH) {
+    return {
+      "Client-Id": preferences.clientId,
+      Authorization: `Bearer ${preferences.authorization}`,
+    } as const;
+  }
+
   const promise = (runningAuthPromise ??= authorize());
   promise.then(() => {
     if (runningAuthPromise === promise) runningAuthPromise = undefined;

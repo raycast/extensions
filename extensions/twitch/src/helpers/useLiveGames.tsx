@@ -4,9 +4,7 @@ import { useTwitchRequest } from "./useTwitchRequest";
 export default function useLiveGames(query: string | undefined) {
   return useTwitchRequest<Game[]>({
     url: `https://api.twitch.tv/helix/search/categories?query=${query}&live_only=true`,
-    cacheKey: `live_games_${query}`,
     initialData: [] as Game[],
     enabled: Boolean(query),
-    cacheDuration: 10_000,
   });
 }

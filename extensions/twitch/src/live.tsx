@@ -2,13 +2,13 @@ import { Icon, LaunchType, MenuBarExtra, launchCommand, open, openCommandPrefere
 import { formatDate } from "./helpers/datetime";
 import useFollowedStreams from "./helpers/useFollowedStreams";
 import { useUserId } from "./helpers/useUserId";
-import { userName } from "./helpers/auth";
+import { IS_DEPRECATED_AUTH, userName } from "./helpers/auth";
 
 export default function main() {
   const { data: userId, isLoading: isLoadingUserId } = useUserId();
   const { data: items = [], isLoading, updatedAt } = useFollowedStreams(userId, { loadingWhileStale: true });
 
-  if (!userName) {
+  if (!userName && !IS_DEPRECATED_AUTH) {
     return (
       <MenuBarExtra icon={Icon.ExclamationMark}>
         <MenuBarExtra.Item title="Unavailable without a Username" />

@@ -81,6 +81,22 @@
           "value": "worst"
         }
       ]
+    },
+    {
+      "name": "clientId",
+      "type": "password",
+      "default": "",
+      "title": "Client ID (deprecated)",
+      "required": false,
+      "description": "Twitch ClientId https://twitchapps.com/tokengen/"
+    },
+    {
+      "name": "authorization",
+      "type": "password",
+      "default": "",
+      "title": "Authorization Token (deprecated)",
+      "required": false,
+      "description": "Twitch Bearer Token (Must be matching with ClientId) https://twitchapps.com/tokengen/"
     }
   ],
   "commands": [

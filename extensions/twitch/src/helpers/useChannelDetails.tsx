@@ -8,7 +8,6 @@ export default function useChannelDetails(channelId: string | undefined) {
     updatedAt,
   } = useTwitchRequest<Partial<ChannelDetails>[]>({
     url: `https://api.twitch.tv/helix/channels?broadcaster_id=${channelId}`,
-    cacheKey: `channel_details_${channelId}`,
     initialData: [{}] as Partial<ChannelDetails>[],
     enabled: Boolean(channelId),
   });
