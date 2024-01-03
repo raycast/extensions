@@ -6,6 +6,7 @@ import {
   confirmAlert,
   Icon,
   LaunchProps,
+  LaunchType,
   List,
   showHUD,
   showToast,
@@ -13,7 +14,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { deleteSnippetFile, loadAllSnippets } from "./utils/snippets";
-import { Location, Snippet, snippetTypesMap, zLaunchContext } from "./utils/types";
+import { Location, Snippet, snippetTypesMap, zLaunchContext, ZSnippet } from "./utils/types";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import CreateSnippet from "./create-snippet";
 import { XMLToFMObjects } from "./utils/FmClipTools";
@@ -23,6 +24,7 @@ import { uniqBy } from "lodash";
 import EditSnippetXML from "./components/edit-snippet-xml";
 import DynamicFieldsList from "./components/dynamic-fields-list";
 import DynamicSnippetForm from "./components/dynamic-snippet.form";
+import CreateDeeplinkForm from "./create-deeplink";
 
 export default function Command(props: LaunchProps) {
   const [locations] = useCachedState<Location[]>("locations", []);
@@ -43,15 +45,27 @@ export default function Command(props: LaunchProps) {
   const [pathFilter, setPathFilter] = useState<"all" | "default" | Location>("all");
   const { pop } = useNavigation();
 
-  useEffect(() => {
-    if (loadedContext) return;
-    if (isLoading) return;
-    if (snippets.length === 0) return;
-    if (props.launchContext === undefined) return;
-
-    // only run the rest of this function once
-    setLoadedContext(true);
-
+  function copySnippet(snippet: Omit<Snippet, "locId">) {
+    if (snippet.dynamicFields.length > 0) {
+      // dynamic snippet, must show form
+      push(<DynamicSnippetForm snippet={snippet} />);
+    } else {
+      // static snippet, just copy
+      XMLToFMObjects(snippet.snippet)
+        .then(() => {
+          closeMainWindow();
+          showHUD(`Copied ${snippet.type} to Clipboard`);
+        })
+        .catch((e) => {
+          showToast({
+            title: "Error",
+            style: Toast.Style.Failure,
+            message: e instanceof Error ? e.message : "Unknown error",
+          });
+        });
+    }
+  }
+  async function loadContext() {
     // try to get info from launch context
     const parsed = zLaunchContext.safeParse(props.launchContext);
     if (!parsed.success) {
@@ -60,26 +74,63 @@ export default function Command(props: LaunchProps) {
     }
 
     const ctx = parsed.data;
-    const snippet = snippets.find((o) => o.id === ctx.id);
-    if (!snippet) {
-      console.error("Failed to find snippet for launch context", ctx);
-      return;
+    if (ctx.type === "my") {
+      const snippet = snippets.find((o) => o.id === ctx.id);
+      if (!snippet) {
+        console.error("Failed to find snippet for launch context", ctx);
+        showHUD("Failed to find snippet");
+        return;
+      }
+
+      // inject the values into the snippet's default values
+      Object.entries(ctx.values).forEach(([key, value]) => {
+        const i = snippet.dynamicFields.findIndex((f) => f.name === key);
+        if (i < 0) return;
+        snippet.dynamicFields[i].default = value;
+      });
+
+      if (ctx.showForm) {
+        push(<DynamicSnippetForm snippet={snippet} />);
+      } else {
+        console.log("copying snippet in background", snippet.dynamicFields);
+        copySnippet(snippet);
+      }
+    } else if (ctx.type === "import") {
+      if (typeof ctx.snippet === "string") {
+        console.log("importing snippet from string", ctx.snippet);
+        await showToast({
+          title: "Downloading Snippet",
+          message: "This may take a few seconds",
+          style: Toast.Style.Animated,
+        });
+        ctx.snippet = await fetch(ctx.snippet)
+          .then((r) => r.json())
+          .then((r) => ZSnippet.parse(r));
+      }
+      if (!ctx.snippet || typeof ctx.snippet !== "object") {
+        console.error("Failed to find snippet for launch context", ctx);
+        showHUD("Failed to load snippet");
+        return;
+      }
+
+      if (ctx.action === "import") {
+        push(<EditSnippet snippet={ctx.snippet} onSubmit={() => console.log("submited")} />);
+      } else if (ctx.action === "copy") {
+        // directly copy the snippet
+        copySnippet(ctx.snippet);
+      }
     }
+  }
 
-    // inject the values into the snippet's default values
-    Object.entries(ctx.values).forEach(([key, value]) => {
-      const i = snippet.dynamicFields.findIndex((f) => f.name === key);
-      if (i < 0) return;
-      snippet.dynamicFields[i].default = value;
-    });
+  useEffect(() => {
+    if (loadedContext) return;
+    if (isLoading) return;
+    if (snippets.length === 0) return;
+    if (props.launchContext === undefined) return;
 
-    if (ctx.showForm) {
-      push(<DynamicSnippetForm snippet={snippet} />);
-    } else {
-      console.log("copying snippet in background", snippet.dynamicFields);
-    }
-
-    // console.log("Launching snippet", snippet.dynamicFields);
+    // only run the rest of this function once
+    setLoadedContext(true);
+    loadContext();
   }, [snippets, isLoading, loadedContext]);
 
   function CreateSnippetAction() {
@@ -261,6 +312,12 @@ ${snippet.snippet}`}
                     title="Reveal in Finder"
                     icon={Icon.Finder}
                     shortcut={{ key: "r", modifiers: ["cmd", "opt"] }}
+                  />
+
+                  <Action.Push
+                    title="Create Deeplink..."
+                    target={<CreateDeeplinkForm snippet={snippet} />}
+                    icon={Icon.Link}
                   />
                   <Action.CopyToClipboard content={snippet.id} title="Copy Snippet ID" icon={Icon.Clipboard} />
                   {locationMap[snippet.locId]?.git || (

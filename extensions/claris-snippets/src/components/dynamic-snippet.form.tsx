@@ -10,12 +10,11 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import React from "react";
 import { XMLToFMObjects } from "../utils/FmClipTools";
-import { SnippetWithPath } from "../utils/types";
+import { Snippet } from "../utils/types";
 
 type DynamicSnippetFormProps = {
-  snippet: SnippetWithPath;
+  snippet: Omit<Snippet, "locId">;
 };
 export default function DynamicSnippetForm(props: DynamicSnippetFormProps) {
   const { snippet } = props;
