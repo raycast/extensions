@@ -247,7 +247,10 @@ function CourseDetail({ sectionID, courseTitle }) {
       searchBarPlaceholder={`Search for graded assignments`}
     >
       {categories.map((category, index) => (
-        <List.Section key={index} title={capitalizeFirstLetter(category.title)}>
+        <List.Section
+          key={index}
+          title={`${capitalizeFirstLetter(category.title)}${category.weight ? ` (Weight: ${category.weight}%)` : ""}`}
+        >
           {grades
             .filter((grade) => grade.category_id === category.id)
             .map((grade, index) => (
