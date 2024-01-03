@@ -169,7 +169,6 @@ export default function Command() {
 
 function CourseDetail({ sectionID, courseTitle }) {
   const [grades, setGrades] = useState([]);
-  const [assignments, setAssignments] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
