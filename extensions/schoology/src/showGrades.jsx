@@ -65,15 +65,20 @@ function getRelativeTime(epoch) {
   if (elapsed < 60000) {
     return "just now";
   } else if (elapsed < 3600000) {
-    return `${Math.round(elapsed / 60000)} minutes ago`;
+    const minutes = Math.round(elapsed / 60000);
+    return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
   } else if (elapsed < 86400000) {
-    return `${Math.round(elapsed / 3600000)} hours ago`;
+    const hours = Math.round(elapsed / 3600000);
+    return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   } else if (elapsed < 2592000000) {
-    return `${Math.round(elapsed / 86400000)} days ago`;
+    const days = Math.round(elapsed / 86400000);
+    return `${days} day${days === 1 ? "" : "s"} ago`;
   } else if (elapsed < 31536000000) {
-    return `${Math.round(elapsed / 2592000000)} months ago`;
+    const months = Math.round(elapsed / 2592000000);
+    return `${months} month${months === 1 ? "" : "s"} ago`;
   } else {
-    return `${Math.round(elapsed / 31536000000)} years ago`;
+    const years = Math.round(elapsed / 31536000000);
+    return `${years} year${years === 1 ? "" : "s"} ago`;
   }
 }
 
