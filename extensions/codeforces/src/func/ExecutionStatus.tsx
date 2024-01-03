@@ -45,7 +45,7 @@ export function getExecutionStatusString(status) {
     case "FAILED":
       return "Failed";
     case "OK":
-      return "Correct";
+      return "Accepted";
     case "PARTIAL":
       return "Partial Success";
     case "COMPILATION_ERROR":
