@@ -58,11 +58,31 @@ function getColorBasedOnGrade(letterGrade) {
   return color;
 }
 
+function getRelativeTime(epoch) {
+  const now = Date.now();
+  const elapsed = now - epoch * 1000; // time elapsed in milliseconds
+
+  if (elapsed < 60000) {
+    return "just now";
+  } else if (elapsed < 3600000) {
+    return `${Math.round(elapsed / 60000)} minutes ago`;
+  } else if (elapsed < 86400000) {
+    return `${Math.round(elapsed / 3600000)} hours ago`;
+  } else if (elapsed < 2592000000) {
+    return `${Math.round(elapsed / 86400000)} days ago`;
+  } else if (elapsed < 31536000000) {
+    return `${Math.round(elapsed / 2592000000)} months ago`;
+  } else {
+    return `${Math.round(elapsed / 31536000000)} years ago`;
+  }
+}
+
 export default function Command() {
   const [coursesText, setCoursesText] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [gradesArr, setGradesArr] = useState([]);
   const [coursesHashmap2, setCoursesHashmap2] = useState({});
+  const [latestTimestamps, setLatestTimestamps] = useState({});
 
   useEffect(() => {
     const fetchCoursesText = async () => {
@@ -75,6 +95,7 @@ export default function Command() {
 
         const coursesHashmap = {};
         const gradesMap = {};
+        const latestTimestampsMap = {};
 
         const gradePromises = course_data.section.map(async (course) => {
           try {
@@ -104,10 +125,21 @@ export default function Command() {
         grades.forEach(({ id, user_grades }) => {
           const grade = user_grades.section[0].final_grade[1].grade;
           gradesMap[id] = grade;
+
+          // Iterate over the assignments for this grade
+          user_grades.section[0].period[0].assignment.forEach((assignment) => {
+            const timestamp = assignment.timestamp;
+
+            // Update the latest timestamp for this course if this assignment's timestamp is more recent
+            if (timestamp && (!latestTimestampsMap[id] || timestamp > latestTimestampsMap[id])) {
+              latestTimestampsMap[id] = timestamp;
+            }
+          });
         });
 
         setCoursesHashmap2(coursesHashmap);
         setGradesArr(gradesMap);
+        setLatestTimestamps(latestTimestampsMap);
         setCoursesText(Object.keys(gradesMap));
       } catch (error) {
         popToRoot();
@@ -132,6 +164,7 @@ export default function Command() {
         .map((course) => (
           <List.Item
             title={coursesHashmap2[course] || course}
+            subtitle={`Updated ${getRelativeTime(latestTimestamps[course])}`}
             icon={Icon.CircleProgress100}
             accessories={[
               {
@@ -140,7 +173,6 @@ export default function Command() {
                   color: getColorBasedOnGrade(getLetterGrade(Number(gradesArr[course]))),
                 },
               },
-
               { text: `${gradesArr[course]}%` },
             ]}
             actions={
@@ -154,7 +186,6 @@ export default function Command() {
                   title="Paste Grade"
                   content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[course]}%`}
                 />
-
                 <Action.CopyToClipboard
                   title="Copy Grade"
                   content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[course]}%`}
@@ -166,7 +197,6 @@ export default function Command() {
     </List>
   );
 }
-
 function CourseDetail({ sectionID, courseTitle }) {
   const [grades, setGrades] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -224,6 +254,15 @@ function CourseDetail({ sectionID, courseTitle }) {
                     ? capitalizeFirstLetter(grade.assignment.title)
                     : `Assignment ID: ${grade.assignment_id}`
                 }
+                subtitle={
+                  grade.timestamp
+                    ? new Date(grade.timestamp * 1000).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : undefined
+                }
                 accessories={[
                   {
                     ...((grade.grade / grade.max_points) * 100 > 100 && {
@@ -234,7 +273,10 @@ function CourseDetail({ sectionID, courseTitle }) {
                     }),
                   },
                   ...(grade.comment ? [{ icon: Icon.Bubble, tooltip: grade.comment }] : []),
-                  { text: `${((grade.grade / grade.max_points) * 100).toFixed(1).replace(/\.0$/, "")}%` },
+                  {
+                    text: `${((grade.grade / grade.max_points) * 100).toFixed(1).replace(/\.0$/, "")}%`,
+                  },
+
                   {
                     tag: {
                       value: `${grade.grade}/${grade.max_points}`,
