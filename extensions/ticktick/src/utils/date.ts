@@ -37,11 +37,11 @@ export const formatPrettyDateTime = (date: string, timezone: string, isFloating:
   if (!date) return "";
   const dateInUTC = moment.utc(date);
   if (!dateInUTC.isValid()) return "";
-  else if (isAllDay) {
-    const datetimeInOriginalTimezone = moment.tz(dateInUTC, timezone);
+  const datetimeInOriginalTimezone = moment.tz(dateInUTC, timezone);
+  if (isAllDay) {
     return datetimeInOriginalTimezone.format("MMM Do");
   } else if (isFloating) {
-    return moment(dateInUTC).format("MMM Do, h:mm a");
+    return datetimeInOriginalTimezone.format("MMM Do, h:mm a");
   } else {
     const datetimeInLocalTimezone = dateInUTC.clone().local();
     return datetimeInLocalTimezone.format("MMM Do, h:mm a");
