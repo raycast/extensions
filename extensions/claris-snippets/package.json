@@ -1,10 +1,17 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claris-snippets",
-  "title": "Claris Snippets",
-  "description": "Create and use snippets for Claris (FileMaker) Pro",
+  "title": "FileMaker Snippets",
+  "description": "Create and use snippets for FileMaker Pro",
   "icon": "command-icon.png",
   "author": "eluce2",
+  "keywords": [
+    "FileMaker",
+    "filemaker",
+    "filemaker pro",
+    "fm",
+    "Claris"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -14,27 +21,27 @@
     {
       "name": "view-snippets",
       "title": "View Snippets",
-      "subtitle": "Claris Snippets",
+      "subtitle": "FileMaker Snippets",
       "description": "View and use your saved snippets",
       "mode": "view"
     },
     {
       "name": "create-snippet",
       "title": "Create Snippet",
-      "subtitle": "Claris Snippets",
+      "subtitle": "FileMaker Snippets",
       "description": "Create a new snippet",
       "mode": "view"
     },
     {
       "name": "manage-locations",
       "title": "Manage Snippet Locations",
-      "subtitle": "Claris Snippets",
+      "subtitle": "FileMaker Snippets",
       "description": "Manage where your snippets are stored",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.62.0",
     "@raycast/utils": "^1.4.8",
     "@total-typescript/ts-reset": "^0.4.2",
     "lodash": "^4.17.21",
@@ -46,10 +53,13 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash": "^4.14.185",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "@types/uuid": "^8.3.4",
     "@types/xml2js": "^0.4.11",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
