@@ -1,25 +1,30 @@
+import { useMemo } from "react";
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 import useCurrentTime from "../hooks/useCurrentTime";
-import { storage } from "../storage";
-import * as api from "../api";
-import { useAppContext } from "../context";
+import { stopTimeEntry, TimeEntry } from "../api";
+import { useTimeEntryContext } from "../context/TimeEntryContext";
 
-function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: api.TimeEntry }) {
+function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry }) {
+  const { projects, revalidateRunningTimeEntry, revalidateTimeEntries } = useTimeEntryContext();
+
+  const project = useMemo(() => {
+    return projects.find((project) => project.id == runningTimeEntry.project_id);
+  }, [runningTimeEntry, projects]);
+
   const currentTime = useCurrentTime();
-  const { projects } = useAppContext();
-  const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
-  const stopTimeEntry = async () => {
+  const stopRunningTimeEntry = async () => {
     await showToast(Toast.Style.Animated, "Stopping time entry...");
     try {
-      await api.stopTimeEntry({ id: runningTimeEntry.id, workspaceId: runningTimeEntry.workspace_id });
-      await storage.runningTimeEntry.refresh();
-      await storage.timeEntries.refresh();
+      await stopTimeEntry({ id: runningTimeEntry.id, workspaceId: runningTimeEntry.workspace_id });
       await showToast(Toast.Style.Success, `Stopped time entry`);
     } catch (e) {
       await showToast(Toast.Style.Failure, "Failed to stop time entry");
+      return;
     }
+    revalidateRunningTimeEntry();
+    revalidateTimeEntries();
   };
 
   return (
@@ -30,12 +35,12 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: api.TimeEntr
           (runningTimeEntry.billable ? "$  " : "") +
           dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
         }
-        accessoryTitle={getProjectById(runningTimeEntry?.project_id)?.name}
-        accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(runningTimeEntry?.project_id)?.color }}
-        icon={{ source: Icon.Clock, tintColor: getProjectById(runningTimeEntry?.project_id)?.color }}
+        accessoryTitle={project?.name}
+        accessoryIcon={{ source: Icon.Dot, tintColor: project?.color }}
+        icon={{ source: Icon.Clock, tintColor: project?.color }}
         actions={
           <ActionPanel>
-            <Action.SubmitForm icon={{ source: Icon.Clock }} onSubmit={stopTimeEntry} title="Stop Time Entry" />
+            <Action.SubmitForm icon={{ source: Icon.Clock }} onSubmit={stopRunningTimeEntry} title="Stop Time Entry" />
           </ActionPanel>
         }
       />
