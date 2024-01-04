@@ -1,6 +1,6 @@
 # Scaleway Changelog
 
-## [chore] - 2023-12-20
+## [Chore] - 2023-12-20
 
 - Update header used by the client, update dependencies
 
