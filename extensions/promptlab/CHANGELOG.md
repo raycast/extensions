@@ -1,5 +1,11 @@
 # PromptLab Changelog
 
+## [PromptLab 1.2.1] - 2023-12-31
+
+- Added transparency to the menu bar icon.
+- Updated default Raycast AI model to GPT-3.5 Turbo Instruct.
+- Updated dependencies, now using placeholders-toolkit package.
+
 ## [PromptLab 1.2.0] - 2023-08-15
 
 - Added support for several new browsers

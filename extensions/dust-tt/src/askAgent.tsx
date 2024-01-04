@@ -23,6 +23,7 @@ interface AskAgentQuestionFormValues {
 
 export function useGetSelectedText() {
   const [selectedText, setSelectedText] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     async function fetchHighlightedText() {
       let text: string | undefined;
@@ -36,10 +37,11 @@ export function useGetSelectedText() {
         await showToast(Toast.Style.Success, "Used highlighted text as question.");
         setSelectedText(text);
       }
+      setIsLoading(false);
     }
     fetchHighlightedText();
   }, []);
-  return selectedText;
+  return { selectedText: selectedText, isLoading: isLoading };
 }
 
 export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentType; initialQuestion?: string }) {
@@ -83,10 +85,10 @@ export function AskAgentQuestionForm({ agent, initialQuestion }: { agent: AgentT
 const QUICK_AGENT_KEY = "dust_favorite_agent";
 
 export default function AskDustAgentCommand() {
-  const { agents, isLoading, error } = useAgents();
+  const { agents, error, isLoading: isLoadingAgents } = useAgents();
   const [favoriteAgentId, setFavoriteAgentId] = useState<string | undefined>(undefined);
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(true);
-  const selectedText = useGetSelectedText();
+  const { selectedText, isLoading: isLoadingSelectedText } = useGetSelectedText();
 
   useEffect(() => {
     async function fetchFavoriteAgent() {
@@ -107,7 +109,7 @@ export default function AskDustAgentCommand() {
       title: `Could not refresh agents list: ${error}`,
     });
   }
-  if (!isLoading && agents) {
+  if (!isLoadingAgents && agents) {
     showToast({
       style: Toast.Style.Success,
       title: `Loaded ${Object.values(agents).length} agents`,
@@ -152,9 +154,10 @@ export default function AskDustAgentCommand() {
       })
     : undefined;
 
+  const isLoading = isLoadingAgents || isLoadingSelectedText || isLoadingFavorite;
   return (
-    <List isLoading={isLoading && isLoadingFavorite}>
-      {!agents && <List.EmptyView icon={Icon.XMarkCircle} title="No Dust agents loaded" />}
+    <List isLoading={isLoading}>
+      {(!agents || isLoading) && <List.EmptyView icon={Icon.XMarkCircle} title="No Dust agents loaded" />}
       {agents && favoriteAgentId && (
         <AgentListItem
           agent={agents[favoriteAgentId]}

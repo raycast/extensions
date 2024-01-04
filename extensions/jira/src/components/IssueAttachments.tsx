@@ -30,7 +30,7 @@ export default function IssueAttachments({ attachments }: IssueAttachmentsProps)
         }
 
         return Promise.resolve({ ...attachment, thumbnailImage: null });
-      })
+      }),
     );
   });
 

@@ -32,7 +32,7 @@ export default async function runModel(basePrompt: string, prompt: string, input
     outputTiming: "async",
     lengthLimit: "2500",
     temperature: temperature,
-    name: "Text-Davinci-003 Via Raycast AI",
+    name: "GPT-3.5 Turbo Instruct Via Raycast AI",
     description: "",
     favorited: false,
     id: "",
@@ -130,18 +130,18 @@ export default async function runModel(basePrompt: string, prompt: string, input
               "{prompt}",
               preferences.promptPrefix +
                 prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') +
-                preferences.promptSuffix
+                preferences.promptSuffix,
             )
             .replace(
               "{basePrompt}",
-              preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')
+              preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"'),
             )
             .replace(
               "{input}",
               targetModel.inputSchema.includes("{prompt") && prompt == input
                 ? ""
-                : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix
-            )
+                : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix,
+            ),
         );
 
     if (preferences.includeTemperature) {

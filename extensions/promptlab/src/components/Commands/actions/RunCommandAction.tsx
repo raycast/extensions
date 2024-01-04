@@ -52,8 +52,8 @@ export default function RunCommandAction(props: {
             setupConfig: isCommand(command)
               ? command.setupConfig
               : command.setupConfig
-              ? JSON.parse(command.setupConfig)
-              : undefined,
+                ? JSON.parse(command.setupConfig)
+                : undefined,
             useSpeech: isTrueStr(command.useSpeech),
             speakResponse: isTrueStr(command.speakResponse),
           }}

@@ -1,5 +1,12 @@
 # Remove Paywall Changelog
 
+## [Service option in standard command] - 2023-12-14
+
+- Removed the "Remove Paywall Using" command
+- Added a service option to the "Remove Paywall" command using the new dropdown argument API
+- Make Service the first argument in the command
+- Improved url validation
+
 ## [Specify paywall remover] - 2023-07-24
 
 - New command: "Remove Paywall Using"

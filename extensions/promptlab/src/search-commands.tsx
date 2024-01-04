@@ -20,7 +20,7 @@ export default function SearchCommand(props: { arguments: { commandName: string;
   const [previousCommand] = useCachedState<string>("promptlab-previous-command", "");
   const [targetCategory, setTargetCategory] = useState<string>("All");
   const [searchText, setSearchText] = useState<string | undefined>(
-    commandName == undefined || queryInput ? undefined : commandName.trim()
+    commandName == undefined || queryInput ? undefined : commandName.trim(),
   );
   const { advancedSettings } = useAdvancedSettings();
   const preferences = getPreferenceValues<searchPreferences & ExtensionPreferences>();
@@ -128,7 +128,7 @@ export default function SearchCommand(props: { arguments: { commandName: string;
         acc.push(
           <List.Section title={category.name} key={category.name}>
             {categoryListItems}
-          </List.Section>
+          </List.Section>,
         );
       }
       return acc;
@@ -143,7 +143,7 @@ export default function SearchCommand(props: { arguments: { commandName: string;
       command.favorited ? acc[0].push(command) : acc[1].push(command);
       return acc;
     },
-    [[], []] as [Command[], Command[]]
+    [[], []] as [Command[], Command[]],
   );
 
   return (
