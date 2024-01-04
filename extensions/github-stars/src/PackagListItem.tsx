@@ -6,6 +6,7 @@ import {
   PushAction,
   ImageMask,
   CopyToClipboardAction,
+  environment,
 } from "@raycast/api";
 import { Readme } from "./Readme";
 import { Star } from "./response.model";
@@ -14,7 +15,7 @@ interface PackageListItemProps {
   result: Star;
 }
 
-const MAXIMUM_CHARACTERS = 100;
+const MAXIMUM_CHARACTERS = environment.textSize === "large" ? 85 : 100;
 
 const formatCompactNumber = (number: number): string => {
   const fractionDigits = number >= 1000 ? 1 : 0;
