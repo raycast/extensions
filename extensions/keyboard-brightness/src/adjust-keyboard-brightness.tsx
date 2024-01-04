@@ -10,22 +10,24 @@ export default function Command() {
       <List.Item
         id="brightness"
         title="Keyboard Brightness"
-        accessories={brightness !== null ? [{ text: `${brightness! * 100}%` }] : undefined}
+        accessories={
+          brightness !== null ? [{ text: `${brightness! * 100}%` }] : undefined
+        }
         actions={
           <ActionPanel>
             <Action
               title="Increase Brightness"
-              onAction={async () => { 
-                await adjustBrightness(brightness!, "increase")
-                revalidate()
-            }}
+              onAction={async () => {
+                await adjustBrightness(brightness!, "increase");
+                revalidate();
+              }}
             />
             <Action
               title="Decrease Brightness"
-              onAction={async () => { 
-                await adjustBrightness(brightness!, "decrease")
-                revalidate()
-            }}
+              onAction={async () => {
+                await adjustBrightness(brightness!, "decrease");
+                revalidate();
+              }}
             />
           </ActionPanel>
         }

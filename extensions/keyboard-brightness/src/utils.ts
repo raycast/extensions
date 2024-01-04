@@ -45,8 +45,10 @@ const setStoredBrightness = async (brightness: number) => {
   await LocalStorage.setItem("brightness", brightness);
 };
 
-
-const adjustBrightness = async (brightness: number, direction: "increase" | "decrease") => {
+const adjustBrightness = async (
+  brightness: number,
+  direction: "increase" | "decrease",
+) => {
   try {
     const adjustment = direction === "increase" ? 0.1 : -0.1;
 
@@ -58,7 +60,9 @@ const adjustBrightness = async (brightness: number, direction: "increase" | "dec
 
     showToast({
       style: direction === "increase" ? Toast.Style.Success : Toast.Style.Failure,
-      title: `Keyboard Brightness ${direction === "increase" ? "increased" : "decreased"}!`,
+      title: `Keyboard Brightness ${
+        direction === "increase" ? "increased" : "decreased"
+      }!`,
     });
   } catch (e) {
     showToast({
@@ -74,5 +78,5 @@ export {
   adjustBrightness,
   setSystemBrightness,
   getStoredBrightness,
-  setStoredBrightness
+  setStoredBrightness,
 };

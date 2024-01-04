@@ -1,6 +1,10 @@
-
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { getStoredBrightness, getSystemBrightness, setStoredBrightness, setSystemBrightness } from "./utils";
+import {
+  getStoredBrightness,
+  getSystemBrightness,
+  setStoredBrightness,
+  setSystemBrightness,
+} from "./utils";
 
 export default async function command() {
   await closeMainWindow();
