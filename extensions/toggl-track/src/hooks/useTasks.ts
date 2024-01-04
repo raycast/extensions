@@ -1,9 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getTasks, Workspace } from "../api";
+import { getWorkspaceTasks, Workspace } from "../api";
 import { allWorkspacesFetch } from "../helpers/allWorkspacesFetch";
 
 export function useTasks(workspaces: Workspace[], initialExecute = true) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(allWorkspacesFetch(getTasks), [workspaces], {
+  const { data, error, isLoading, revalidate } = useCachedPromise(allWorkspacesFetch(getWorkspaceTasks), [workspaces], {
     initialData: [],
     execute: initialExecute,
   });
