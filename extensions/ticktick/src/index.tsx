@@ -54,6 +54,10 @@ const TickTickToday: React.FC<Record<string, never>> = () => {
               title={task.title}
               projectId={task.projectId}
               priority={task.priority}
+              startDate={task.startDate}
+              isFloating={task.isFloating}
+              isAllDay={task.isAllDay}
+              timeZone={task.timeZone}
               detailMarkdown={getTaskDetailMarkdownContent(task)}
               tags={task.tags}
               copyContent={getTaskCopyContent(task)}

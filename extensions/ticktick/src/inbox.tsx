@@ -60,6 +60,10 @@ const TickTickInbox: React.FC<Record<string, never>> = () => {
               projectId={task.projectId}
               priority={task.priority}
               detailMarkdown={getTaskDetailMarkdownContent(task)}
+              startDate={task.startDate}
+              isFloating={task.isFloating}
+              isAllDay={task.isAllDay}
+              timeZone={task.timeZone}
               tags={task.tags}
               copyContent={getTaskCopyContent(task)}
               refresh={refresh}
