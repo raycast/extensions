@@ -1,0 +1,3 @@
+# macOS Utilities
+
+A group of command items that are accessed via the command line like toggling clamshell mode, seeing your history and many many more...
