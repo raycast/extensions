@@ -2,7 +2,7 @@
 
 ## [chore] - 2023-12-20
 
-- update header used by client, update dependencies
+- Update header used by the client, update dependencies
 
 ## [Improvement] - 2023-10-24
 
