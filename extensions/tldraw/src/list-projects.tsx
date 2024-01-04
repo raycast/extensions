@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, LocalStorage, Form, showHUD, PopToRootType } from "@raycast/api";
+import { ActionPanel, List, Action, LocalStorage, Form, showHUD, PopToRootType, Icon } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { CanvasValues } from "./shared";
 
@@ -24,6 +24,7 @@ export default function Command() {
                 <Action.CopyToClipboard title="Copy Canvas URL" content={url} />
                 <Action.Push
                   title="Edit Canvas Details"
+                  icon={Icon.Pencil}
                   target={
                     <Form
                       actions={
@@ -59,6 +60,7 @@ export default function Command() {
                 />
                 <Action
                   title="Delete Canvas"
+                  style={Action.Style.Destructive}
                   onAction={async () => {
                     await Promise.all([
                       LocalStorage.removeItem(name),
