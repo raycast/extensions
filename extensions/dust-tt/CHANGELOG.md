@@ -1,5 +1,9 @@
 # Dust.tt Changelog
 
+## [Selected text fix] - 2023-12-17
+
+* fix a bug where the selected text was not properly detected in same cases
+
 ## [UX improvements] - 2023-12-14
 
 * better agent organization: sorted by name, in sections

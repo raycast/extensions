@@ -11,8 +11,9 @@
 import { environment, showHUD, showToast } from "@raycast/api";
 
 import { StorageKey } from "./constants";
-import { Placeholders } from "./placeholders";
 import { getStorage, setStorage } from "./utils";
+import { PLApplicator } from "placeholders-toolkit";
+import PinsPlaceholders from "./placeholders";
 
 /**
  * A scheduled execution of a placeholder. These are stored in the extension's persistent local storage.
@@ -69,7 +70,7 @@ export const checkDelayedExecutions = async () => {
   const now = new Date();
   for (const execution of delayedExecutions) {
     if (new Date(execution.dueDate) <= now) {
-      await Placeholders.applyToString(execution.target);
+      await PLApplicator.applyToString(execution.target, { allPlaceholders: PinsPlaceholders });
     }
   }
   await setStorage(

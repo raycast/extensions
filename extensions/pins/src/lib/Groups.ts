@@ -55,8 +55,18 @@ export type Group = {
   dateCreated?: string;
 };
 
-export const isGroup = (item: object): boolean => {
-  return (item as Pin).url == undefined;
+/**
+ * The keys of an {@link Group} object.
+ */
+export const GroupKeys = ["name", "icon", "id", "parent", "sortStrategy", "iconColor", "dateCreated"];
+
+/**
+ * Checks if an object is a group.
+ * @param obj The item to check.
+ * @returns Whether or not the item is a group.
+ */
+export const isGroup = (obj: object): boolean => {
+  return (obj as Pin).url == undefined;
 };
 
 /**

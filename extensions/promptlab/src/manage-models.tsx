@@ -36,7 +36,7 @@ export default function ManageModels() {
       model.favorited ? acc[0].push(model) : acc[1].push(model);
       return acc;
     },
-    [[], []] as [Model[], Model[]]
+    [[], []] as [Model[], Model[]],
   );
 
   return (
