@@ -165,6 +165,7 @@
   "Envl/clipmenu": "clipmenu",
   "isma/clockify": "clockify",
   "danblancas/search-clojuredocs": "clojuredocs-search",
+  "qeude/close-finder": "close-finder",
   "destiner/cloudflare": "cloudflare",
   "anandubajith/cloudflare-warp": "cloudflare-warp",
   "colbyfayock/cloudinary": "cloudinary",
