@@ -1,5 +1,9 @@
 # Splitwise Changelog
 
+## [Fixed Bug] - 2024-01-04
+
+- Updated `Add Expense` command to work with supported API endpoint
+
 ## [Fixed Bugs] - 2023-12-19
 
 - Fixed issue: `TypeError: Cannot read properties of undefined (reading 'name')`.
