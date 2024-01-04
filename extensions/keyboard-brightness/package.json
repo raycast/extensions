@@ -31,10 +31,18 @@
       "description": "Sync Keyboard Brightness",
       "mode": "no-view",
       "interval": "4h"
+    },
+    {
+      "name": "menubar-keyboard-brightness",
+      "title": "Enable Keyboard Brightness Menubar",
+      "subtitle": "Enable Keyboard Brightness Menubar",
+      "description": "Enable Keyboard Brightness Menubar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.1",
     "execa": "^8.0.1"
   },
   "devDependencies": {
