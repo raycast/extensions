@@ -130,7 +130,7 @@ function FillForm(props: FriendOrGroupProps) {
         title={`${props.friend ? "Friend" : "Group"}`}
         text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
       />
-      <Form.TextField title="Description" placeholder="Movie tickets" {...itemProps.description} />
+      <Form.TextField title="Description" placeholder="Grocery run" {...itemProps.description} />
       <Form.TextField
         title="Cost"
         placeholder="0.00"
