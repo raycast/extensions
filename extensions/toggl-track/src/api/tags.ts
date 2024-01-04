@@ -1,4 +1,4 @@
-import { get } from "./toggleClient";
+import { get } from "./togglClient";
 
 export function getWorkspaceTags(workspaceId: number) {
   return get<Tag[] | null>(`/workspaces/${workspaceId}/tags`);

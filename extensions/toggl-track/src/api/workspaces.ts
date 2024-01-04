@@ -1,4 +1,4 @@
-import { get } from "./toggleClient";
+import { get } from "./togglClient";
 
 export function getWorkspaces() {
   return get<Workspace[]>("/workspaces");

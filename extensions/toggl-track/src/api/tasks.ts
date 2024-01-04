@@ -1,4 +1,4 @@
-import { get } from "./toggleClient";
+import { get } from "./togglClient";
 
 export function getWorkspaceTasks(workspaceId: number) {
   return get<Task[]>(`/workspaces/${workspaceId}/tasks`);

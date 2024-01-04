@@ -1,4 +1,4 @@
-import { get, post, patch } from "./toggleClient";
+import { get, post, patch } from "./togglClient";
 
 export function getTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
   return get<TimeEntry[]>(`/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`);

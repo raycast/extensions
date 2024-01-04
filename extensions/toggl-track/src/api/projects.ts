@@ -1,4 +1,4 @@
-import { get } from "./toggleClient";
+import { get } from "./togglClient";
 import { hideArchivedProjects } from "../helpers/preferences";
 
 export async function getWorkspaceProjects(workspaceId: number): Promise<Project[] | null> {
