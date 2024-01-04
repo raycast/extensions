@@ -11,14 +11,14 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "close-windows",
-      "title": "Close Windows",
+      "name": "close-windows"
+      "title": "Close Finder Windows",
       "description": "Closes all opened Finder windows without quitting the app.",
       "mode": "no-view"
     },
     {
       "name": "kill-finder",
-      "title": "Kill",
+      "title": "Kill Finder ",
       "description": "Kill Finder.",
       "mode": "no-view"
     }
