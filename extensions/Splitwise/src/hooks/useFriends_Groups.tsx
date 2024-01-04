@@ -56,7 +56,9 @@ export async function postExpense(paramsJson: ExpenseParams) {
       showToast({
         style: Toast.Style.Success,
         title: "Yay!",
-        message: `Added "${responseSubmit.data.expenses[0].description}" worth ${responseSubmit.data.expenses[0].cost} ${responseSubmit.data.expenses[0].currency_code}!`,
+        message: `Added "${responseSubmit.data.expenses[0].description}" worth ${Number(
+          responseSubmit.data.expenses[0].cost
+        ).toFixed(2)} ${responseSubmit.data.expenses[0].currency_code}!`,
       });
     } else {
       showToast({
