@@ -14,8 +14,8 @@ export function genMap() {
       enRuMap += '["' + e + '","' + r + '"],\n';
     }
   }
-  console.log("RU -> EN map", ruEnMap);
-  console.log("EN -> RU map", enRuMap);
+  //console.log("RU -> EN map", ruEnMap);
+  //console.log("EN -> RU map", enRuMap);
 }
 
 export const ru_en = new Map([
@@ -25,7 +25,7 @@ export const ru_en = new Map([
   ["№", "#"],
   ["%", "$"],
   [":", "%"],
-  [",", "^"],
+  [",", "б"],
   [".", "&"],
   [";", "*"],
   ["й", "q"],
@@ -103,7 +103,7 @@ export const en_ru = new Map([
   ["#", "№"],
   ["$", "%"],
   ["%", ":"],
-  ["^", ","],
+  ["?", ","],
   ["&", "."],
   ["*", ";"],
   ["q", "й"],
@@ -161,7 +161,7 @@ export const en_ru = new Map([
   ["b", "и"],
   ["n", "т"],
   ["m", "ь"],
-  [",", "б"],
+  [",", "?"],
   [".", "ю"],
   ["Z", "Я"],
   ["X", "Ч"],

@@ -1,9 +1,10 @@
-import { showHUD, Clipboard, getSelectedText, environment } from "@raycast/api";
+import { showHUD, Clipboard, getPreferenceValues, getSelectedText, environment } from "@raycast/api";
 import { en_ru, ru_en } from "./Dict";
 import { exec as Exec } from "child_process";
 import { promisify } from "util";
 
 const exec = promisify(Exec);
+const { layoutEN, layoutRU } = getPreferenceValues();
 
 export default async function main() {
   // genMap();
@@ -36,7 +37,7 @@ function switchStringLayout(string: string): string {
   return chars.map((ch) => switchCharacterLayout(ch)).join("");
 }
 
-// supports ABC, Russian
+// supports ABC, Russian, Ilya Birman Typography
 async function switchLayout(target: string): Promise<void> {
   await exec(`/bin/chmod u+x ${environment.assetsPath}/keyboardSwitcher`);
   const result = await exec(
@@ -55,9 +56,9 @@ function detectLayout(input: string): string {
   const ruChars = array.filter((c) => ru_en.has(c)).length;
   let targetLayout = "";
   if (enChars > ruChars) {
-    targetLayout = "ABC";
+    targetLayout = layoutEN;
   } else {
-    targetLayout = "Russian";
+    targetLayout = layoutRU;
   }
   // console.log("Layout detected: " + targetLayout);
   return targetLayout;
@@ -66,11 +67,11 @@ function detectLayout(input: string): string {
 function switchCharacterLayout(char: string): string {
   if (en_ru.has(char)) {
     // console.log(char + " detected in en dict")
-    switchLayout("Russian");
+    // switchLayout("Russian");
     return en_ru.get(char) ?? char;
   } else {
     // console.log(char + " is probably detected in ru dict")
-    switchLayout("ABC");
+    // switchLayout("ABC");
     return ru_en.get(char) ?? char;
   }
 }
