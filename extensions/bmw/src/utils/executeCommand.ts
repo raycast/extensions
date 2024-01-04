@@ -38,6 +38,12 @@ export async function executeCommand(command: RemoteServices, api: ConnectedDriv
         case RemoteServices.FlashLight:
           result = await api.flashLights(VIN);
           break;
+        case RemoteServices.ChargeStart:
+          result = await api.startCharging(VIN);
+          break;
+        case RemoteServices.ChargeStop:
+          result = await api.stopCharging(VIN);
+          break;
         default:
           toast.style = Toast.Style.Failure;
           toast.title = "Unknown command";
@@ -49,8 +55,11 @@ export async function executeCommand(command: RemoteServices, api: ConnectedDriv
         toast.title = "Done!";
       }
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed";
+      if (err instanceof Error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed";
+        toast.message = err.message;
+      }
     }
   }
 }

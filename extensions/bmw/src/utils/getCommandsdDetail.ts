@@ -56,6 +56,22 @@ export function getCommandDetails(command: RemoteServices) {
         loadingMessage: "Flashing lights",
       };
       break;
+    case RemoteServices.ChargeStart:
+      commandObj = {
+        icon: Icon.Bolt,
+        command: command,
+        commandName: "start charging",
+        loadingMessage: "Starting charge",
+      };
+      break;
+    case RemoteServices.ChargeStop:
+      commandObj = {
+        icon: Icon.BoltDisabled,
+        command: command,
+        commandName: "stop charging",
+        loadingMessage: "Stopping charge",
+      };
+      break;
     default:
       break;
   }

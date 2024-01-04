@@ -54,6 +54,20 @@
       "mode": "view"
     },
     {
+      "name": "charge-start",
+      "title": "Charge Start",
+      "subtitle": "BMW",
+      "description": "Start charging your BMW",
+      "mode": "view"
+    },
+    {
+      "name": "charge-stop",
+      "title": "Charge Stop",
+      "subtitle": "BMW",
+      "description": "Stop charging your BMW",
+      "mode": "view"
+    },
+    {
       "name": "tires",
       "title": "Tire Pressure",
       "subtitle": "BMW",
@@ -125,17 +139,17 @@
     "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.9.1",
     "axios": "^1.6.2",
-    "bmw-connected-drive": "^2.0.4",
+    "bmw-connected-drive": "^2.1.0",
     "javascript-time-ago": "^2.5.9",
     "moment": "^2.29.4",
     "node-fetch": "^3.3.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.7",
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "18.18.4",
     "@types/react": "18.2.36",
+    "@types/uuid": "^9.0.7",
     "eslint": "^8.53.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
