@@ -73,6 +73,9 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
                     priority={task.priority}
                     dueDate={task.dueDate}
                     startDate={task.startDate}
+                    isFloating={task.isFloating}
+                    isAllDay={task.isAllDay}
+                    timeZone={task.timeZone}
                     tags={task.tags}
                     detailMarkdown={getTaskDetailMarkdownContent(task)}
                     copyContent={getTaskCopyContent(task)}

@@ -4,6 +4,7 @@ import { getProjectNameById } from "../service/project";
 import { Task } from "../service/task";
 import { addSpaceBetweenEmojiAndText } from "../utils/text";
 import { toggleTask } from "../service/osScript";
+import { formatPrettyDateTime } from "../utils/date";
 
 const TaskItem: React.FC<{
   id: Task["id"];
@@ -16,10 +17,27 @@ const TaskItem: React.FC<{
   copyContent: string;
   dueDate?: Task["dueDate"];
   startDate?: Task["startDate"];
+  isAllDay: Task["isAllDay"];
+  isFloating: Task["isFloating"];
+  timeZone: Task["timeZone"];
   refresh: () => void;
 }> = (props) => {
-  const { id, title, priority, projectId, actionType, dueDate, startDate, detailMarkdown, tags, copyContent, refresh } =
-    props;
+  const {
+    id,
+    title,
+    priority,
+    projectId,
+    actionType,
+    dueDate,
+    startDate,
+    isFloating,
+    isAllDay,
+    timeZone,
+    detailMarkdown,
+    tags,
+    copyContent,
+    refresh,
+  } = props;
 
   const projectName = useMemo(() => {
     return getProjectNameById(projectId) || "";
@@ -108,13 +126,19 @@ const TaskItem: React.FC<{
               <List.Item.Detail.Metadata.Separator />
               {startDate ? (
                 <>
-                  <List.Item.Detail.Metadata.Label title="Start Date" text={startDate} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Start Date"
+                    text={formatPrettyDateTime(startDate, timeZone, isFloating, isAllDay)}
+                  />
                   <List.Item.Detail.Metadata.Separator />
                 </>
               ) : null}
               {dueDate ? (
                 <>
-                  <List.Item.Detail.Metadata.Label title="Due Date" text={dueDate} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Due Date"
+                    text={formatPrettyDateTime(dueDate, timeZone, isFloating, isAllDay)}
+                  />
                   <List.Item.Detail.Metadata.Separator />
                 </>
               ) : null}
