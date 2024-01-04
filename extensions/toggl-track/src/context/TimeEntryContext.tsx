@@ -11,7 +11,7 @@ import {
   useTags,
   useTasks,
 } from "../hooks";
-import { generateProjectGroups, ProjectGroup } from "./ProjectGroup";
+import { createProjectGroups, ProjectGroup } from "../helpers/createProjectGroups";
 import { useExtensionContext } from "./ExtensionContext";
 
 interface TimeEntryContextProps {
@@ -79,7 +79,7 @@ export function TimeEntryContextProvider({ children }: { children: JSX.Element }
   const [projectGroups, setProjectGroups] = useCachedState<ProjectGroup[]>("projectGroups", []);
 
   useEffect(() => {
-    const projectGroups = generateProjectGroups(projects, workspaces, clients);
+    const projectGroups = createProjectGroups(projects, workspaces, clients);
     setProjectGroups(projectGroups);
   }, [projects, workspaces, clients]);
 
