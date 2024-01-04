@@ -1,4 +1,15 @@
-import { ActionPanel, Action, Icon, List, getPreferenceValues, Color, showToast, Toast, popToRoot } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  getPreferenceValues,
+  Form,
+  Color,
+  showToast,
+  Toast,
+  popToRoot,
+} from "@raycast/api";
 import SchoologyAPI from "schoologyapi";
 import { useEffect, useState } from "react";
 
@@ -207,6 +218,11 @@ function CourseDetail({ sectionID, courseTitle }) {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  function validateFraction(value) {
+    const [numerator, denominator] = value.split("/");
+    return Number(numerator) && Number(denominator);
+  } //to be used for the edit form
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -240,20 +256,60 @@ function CourseDetail({ sectionID, courseTitle }) {
     return string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
   }
 
+  // Calculate the overall grade for the course
+  const overallGrade = categories.reduce((total, category) => {
+    const categoryGrades = grades.filter((grade) => grade.category_id === category.id);
+    const totalPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
+    const totalMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
+    return total + totalPoints / totalMaxPoints;
+  }, 0);
+
+  const totalPoints = grades.reduce((total, grade) => total + grade.grade, 0);
+  const totalMaxPoints = grades.reduce((total, grade) => total + grade.max_points, 0);
+
   return (
     <List
       isLoading={isLoading}
       navigationTitle={`${courseTitle}`}
       searchBarPlaceholder={`Search for graded assignments`}
     >
-      {categories.map((category, index) => (
-        <List.Section
-          key={index}
-          title={`${capitalizeFirstLetter(category.title)}${category.weight ? ` (Weight: ${category.weight}%)` : ""}`}
-        >
-          {grades
-            .filter((grade) => grade.category_id === category.id)
-            .map((grade, index) => (
+      {!isLoading && (
+        <List.Item
+          title="Overall Grade for this Course"
+          accessories={[
+            {
+              text: `${((totalPoints / totalMaxPoints) * 100).toFixed(2)}%`,
+            },
+            {
+              tag: {
+                value: `${totalPoints}/${totalMaxPoints}`,
+                color: Color.PrimaryText,
+              },
+              tooltip: "Total Points Earned / Total Points Possible",
+            },
+            {
+              tag: {
+                value: `${getLetterGrade(overallGrade * 100)}`,
+                color: getColorBasedOnGrade(getLetterGrade(overallGrade * 100)),
+              },
+            },
+          ]}
+        />
+      )}
+      {categories.map((category, index) => {
+        const categoryGrades = grades.filter((grade) => grade.category_id === category.id);
+        const categoryTotalPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
+        const categoryTotalMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
+        return (
+          <List.Section
+            key={index}
+            title={`${capitalizeFirstLetter(
+              category.title
+            )} (Points Earned: ${categoryTotalPoints}/${categoryTotalMaxPoints})${
+              category.weight ? ` (Weight: ${category.weight}%)` : ""
+            }`}
+          >
+            {categoryGrades.map((grade, index) => (
               <List.Item
                 key={index}
                 icon={Icon.Checkmark}
@@ -282,9 +338,8 @@ function CourseDetail({ sectionID, courseTitle }) {
                   },
                   ...(grade.comment ? [{ icon: Icon.Bubble, tooltip: grade.comment }] : []),
                   {
-                    text: `${((grade.grade / grade.max_points) * 100).toFixed(1).replace(/\.0$/, "")}%`,
+                    text: `${((grade.grade / grade.max_points) * 100).toFixed(2)}%`,
                   },
-
                   {
                     tag: {
                       value: `${grade.grade}/${grade.max_points}`,
@@ -305,20 +360,10 @@ function CourseDetail({ sectionID, courseTitle }) {
                       icon={Icon.Clipboard}
                       content={`Course: ${courseTitle}\nPercentage: ${(grade.grade / grade.max_points) * 100}%`}
                     />
-                    <Action.Paste
-                      title="Copy Grade"
-                      icon={Icon.Clipboard}
-                      content={`Course: ${courseTitle}\nPercentage: ${(grade.grade / grade.max_points) * 100}%`}
-                    />
                     {grade.comment && (
                       <>
                         <Action.CopyToClipboard
                           title="Copy Comment"
-                          icon={Icon.Message}
-                          content={`Course: ${courseTitle}\nComments: ${grade.comment}`}
-                        />
-                        <Action.Paste
-                          title="Paste Comment"
                           icon={Icon.Message}
                           content={`Course: ${courseTitle}\nComments: ${grade.comment}`}
                         />
@@ -328,8 +373,9 @@ function CourseDetail({ sectionID, courseTitle }) {
                 }
               />
             ))}
-        </List.Section>
-      ))}
+          </List.Section>
+        );
+      })}
     </List>
   );
 }
