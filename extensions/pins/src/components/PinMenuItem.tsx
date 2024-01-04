@@ -1,7 +1,7 @@
-import { MenuBarExtra } from "@raycast/api";
+import { Clipboard, LaunchType, MenuBarExtra, launchCommand, showToast } from "@raycast/api";
 import { getPinIcon } from "../lib/icons";
 import { Pin, deletePin, openPin } from "../lib/Pins";
-import { ExtensionPreferences } from "../lib/preferences";
+import { ExtensionPreferences, PinsMenubarPreferences, RightClickAction } from "../lib/preferences";
 import { LocalDataObject } from "../lib/LocalData";
 
 /**
@@ -15,7 +15,7 @@ import { LocalDataObject } from "../lib/LocalData";
  */
 export default function PinMenuItem(props: {
   pin: Pin;
-  preferences: ExtensionPreferences & { rightClickAction: "open" | "delete" };
+  preferences: ExtensionPreferences & PinsMenubarPreferences;
   relevant: boolean;
   localData: LocalDataObject;
   setPins: React.Dispatch<React.SetStateAction<Pin[]>>;
@@ -30,15 +30,22 @@ export default function PinMenuItem(props: {
       shortcut={pin.shortcut}
       onAction={async (event) => {
         if (event.type == "left-click") {
-          await openPin(pin, preferences, localData);
+          await openPin(pin, preferences, localData as unknown as { [key: string]: string });
         } else {
           // Handle right-click based on user's preferences
           switch (preferences.rightClickAction) {
-            case "open":
-              await openPin(pin, preferences, localData);
+            case RightClickAction.Open:
+              await openPin(pin, preferences, localData as unknown as { [key: string]: string });
               break;
-            case "delete":
+            case RightClickAction.Delete:
               await deletePin(pin, setPins);
+              break;
+            case RightClickAction.Copy:
+              await Clipboard.copy(pin.url);
+              await showToast({ title: "Copied to Clipboard" });
+              break;
+            case RightClickAction.Edit:
+              launchCommand({ name: "view-pins", type: LaunchType.UserInitiated, context: { pinID: pin.id } });
               break;
           }
         }

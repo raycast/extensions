@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { Card } from "./types";
 import ViewCardAction from "./view-card";
 import DeleteCardAction from "./delete-card";
 import EditCardAction from "./edit-card";
 import { getCards, saveCards } from "./storage";
+import CreateCardAction from "./create-card";
 
 export default function ViewAllCards() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -81,6 +82,15 @@ export default function ViewAllCards() {
           }
         />
       ))}
+      <List.Item
+        title="Create Card"
+        icon={Icon.Plus}
+        actions={
+          <ActionPanel>
+            <Action.Push icon={Icon.Plus} title="Create Card" target={<CreateCardAction setCards={setCards} />} />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }

@@ -32,7 +32,7 @@ export default function ManageModelsActionPanel(props: {
           "DeleteModelAction",
           "DeleteAllModelsAction",
         ],
-        settings
+        settings,
       ) ? (
         <ActionPanel.Section title="Model Actions">
           <EditModelAction model={model} models={models} settings={settings} />

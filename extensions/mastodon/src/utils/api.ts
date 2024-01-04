@@ -33,7 +33,7 @@ const requestApi = async <T>(
   endpoint: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any,
-  isFormData?: boolean
+  isFormData?: boolean,
 ): Promise<T> => {
   const { instance }: Preferences = getPreferenceValues();
 

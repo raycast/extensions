@@ -1,5 +1,10 @@
 # Figma Files Changelog
 
+## [End of the year clean up] - 2023-12-20
+
+- Updates dependencies
+- Fixes several small issues found using Raycast Issues
+
 ## [Improved search and filter options] - 2023-10-02
 
 - You can now search for projects.
