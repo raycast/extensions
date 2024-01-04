@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, environment } from "@raycast/api";
+import { Action, ActionPanel, List, environment } from "@raycast/api";
 import { Provider } from "../lib/provider";
 import { ProviderVersion } from "../lib/provider-version";
 import { useCachedState } from "@raycast/utils";
@@ -19,6 +19,7 @@ export default function ResourceView(props: {
       cacheNamespace: `${environment.extensionName}`,
     },
   );
+
   useEffect(() => {
     async function updateResouceList() {
       try {
@@ -49,7 +50,7 @@ export default function ResourceView(props: {
   };
   return (
     <List
-      isLoading={!!filteredResources}
+      isLoading={!(resources && resources.length > 0)}
       searchBarAccessory={
         <List.Dropdown
           tooltip="filter"
@@ -68,7 +69,7 @@ export default function ResourceView(props: {
         </List.Dropdown>
       }
     >
-      {filteredResources ? (
+      {(
         filteredResources?.map((r) => (
           <List.Item
             title={r.attributes.title}
@@ -105,6 +106,7 @@ export default function ResourceView(props: {
                       resource={r}
                     />
                   }
+                  onPush={()=>{}}
                 ></Action.Push>
                 <Action.OpenInBrowser
                   title={`Open in Browser`}
@@ -120,11 +122,6 @@ export default function ResourceView(props: {
             }
           ></List.Item>
         ))
-      ) : (
-        <List.Item
-          title="Oops, it looks like the documentation doesn't exist"
-          icon={Icon.Info}
-        ></List.Item>
       )}
     </List>
   );

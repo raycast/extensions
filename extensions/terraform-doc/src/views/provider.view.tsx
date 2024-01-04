@@ -36,7 +36,7 @@ export default function ProviderView() {
     updateProviders();
   }, []);
   return (
-    <List isLoading={!!state}>
+    <List isLoading={!(state && state.length > 0)}>
       {state?.map((p) => (
         <List.Item
           title={p.attributes["full-name"]}
@@ -53,7 +53,7 @@ export default function ProviderView() {
           actions={
             <ActionPanel>
               <Action.Push
-                title={`Navigate to ${p.id}`}
+                title={`Navigate to ${p.attributes["full-name"]}`}
                 target={<ProviderVersionsView provider={p} />}
               />
             </ActionPanel>

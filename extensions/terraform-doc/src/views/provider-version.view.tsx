@@ -27,7 +27,7 @@ export default function ProviderVersionsView(props: { provider: Provider }) {
     updateProviderVersions();
   }, []);
   return (
-    <List isLoading={!!state}>
+    <List isLoading={!(state && state.length > 0)}>
       {state?.map((p) => (
         <List.Item
           title={p.attributes.tag}
@@ -43,7 +43,7 @@ export default function ProviderVersionsView(props: { provider: Provider }) {
           actions={
             <ActionPanel>
               <Action.Push
-                title={`Navigate to ${p.id}`}
+                title={`Navigate to ${p.attributes.tag}`}
                 target={<ResourceView provider={props.provider} version={p} />}
               />
             </ActionPanel>
