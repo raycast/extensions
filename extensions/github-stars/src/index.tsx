@@ -23,10 +23,10 @@ export default function PackageList() {
 
   useEffect(() => {
     const fetchPackages = async (): Promise<void> => {
-      const storedItems = await LocalStorage.getItem("github-star-items");
+      const storedItems = await LocalStorage.getItem<string>("github-star-items");
 
       if (storedItems) {
-        setState({ items: JSON.parse(storedItems.toString()) as Response });
+        setState({ items: JSON.parse(storedItems) as Response });
       }
 
       try {
