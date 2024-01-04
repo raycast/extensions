@@ -47,22 +47,22 @@ export async function postExpense(paramsJson: ExpenseParams) {
   try {
     const responseSubmit = await axios({
       method: "post",
-      url: `https://secure.splitwise.com/api/v3.0/parse_sentence`,
+      url: `https://secure.splitwise.com/api/v3.0/create_expense`,
       ...HEADER,
       data: paramsJson,
     });
 
-    if (responseSubmit.data.valid === true) {
+    if (responseSubmit.statusText === "OK") {
       showToast({
         style: Toast.Style.Success,
         title: "Yay!",
-        message: `Added "${responseSubmit.data.expense.description}" worth ${responseSubmit.data.expense.cost} ${responseSubmit.data.expense.currency_code}!`,
+        message: `Added "${responseSubmit.data.expenses[0].description}" worth ${responseSubmit.data.expenses[0].cost} ${responseSubmit.data.expenses[0].currency_code}!`,
       });
     } else {
       showToast({
         style: Toast.Style.Failure,
         title: "D'oh! Invalid input!",
-        message: Object.entries(responseSubmit.data.expense.errors).join("\n"),
+        message: Object.entries(responseSubmit.data.errors).join("\n"),
       });
     }
   } catch (error: any) {
