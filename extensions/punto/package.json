@@ -5,9 +5,6 @@
   "description": "Changes the layout of selected text",
   "icon": "punto-icon.png",
   "author": "red.avtovo",
-  "contributors": [
-    "archibasov"
-  ],
   "categories": [
     "Productivity",
     "System"

@@ -1,4 +1,10 @@
-import { showHUD, Clipboard, getPreferenceValues, getSelectedText, environment } from "@raycast/api";
+import {
+  showHUD,
+  Clipboard,
+  getPreferenceValues,
+  getSelectedText,
+  environment,
+} from "@raycast/api";
 import { en_ru, ru_en } from "./Dict";
 import { exec as Exec } from "child_process";
 import { promisify } from "util";
