@@ -13,7 +13,7 @@ export default function ResourceView(props: {
   version: ProviderVersion;
 }) {
   const [resources, setResources] = useCachedState<Resource[] | undefined>(
-    `resources of ${props.version.attributes.version}`,
+    `resources of ${props.provider.id}/${props.version.id}`,
     undefined,
     {
       cacheNamespace: `${environment.extensionName}`,

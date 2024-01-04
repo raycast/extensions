@@ -17,7 +17,7 @@ export default function ResourceDetailView(props: {
   resource: Resource;
 }) {
   const [state, setState] = useCachedState<string | undefined>(
-    `resource details of ${props.resource.attributes.title}`,
+    `resource details of ${props.provider.id}/${props.version.id}/${props.resource.attributes.title}`,
     undefined,
     {
       cacheNamespace: `${environment.extensionName}`,
@@ -46,7 +46,7 @@ export default function ResourceDetailView(props: {
   }, []);
   return (
     <Detail
-      markdown={state ?? "404 Not found"}
+      markdown={state}
       navigationTitle={props.resource.attributes.title}
       actions={
         <ActionPanel>
