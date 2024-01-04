@@ -289,8 +289,8 @@ function CourseDetail({ sectionID, courseTitle }) {
             },
             {
               tag: {
-                value: `${getLetterGrade(overallGrade * 100)}`,
-                color: getColorBasedOnGrade(getLetterGrade(overallGrade * 100)),
+                value: `${getLetterGrade((totalPoints / totalMaxPoints) * 100)}`,
+                color: getColorBasedOnGrade(getLetterGrade((totalPoints / totalMaxPoints) * 100)),
               },
             },
           ]}
