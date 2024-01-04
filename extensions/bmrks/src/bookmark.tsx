@@ -1,10 +1,10 @@
 import * as React from "react";
 import { runAppleScript, getFavicon } from "@raycast/utils";
 import { Action, ActionPanel, Detail, Form, PopToRootType, openExtensionPreferences, showHUD } from "@raycast/api";
-import { useUser } from "@supabase/auth-helpers-react";
 import { useAuth } from "./use-auth";
 import { useGroups } from "./use-groups";
 import * as db from "./db";
+import { useUser } from "./use-user";
 
 export default function Bookmark() {
   const [activeGroupId, setActiveGroupId] = React.useState<string | undefined>();
@@ -69,7 +69,7 @@ export default function Bookmark() {
           <Action.SubmitForm title="Save Bookmark" onSubmit={onSubmit} />
           {activeGroup && user && (
             <Action.OpenInBrowser
-              url={`https://bmrks.com/${user.app_metadata["username"]}/${activeGroup.name.toLowerCase()}`}
+              url={`https://bmrks.com/${user.user_metadata["username"]}/${activeGroup.name.toLowerCase()}`}
             />
           )}
         </ActionPanel>

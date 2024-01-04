@@ -39,7 +39,6 @@
   "dependencies": {
     "@raycast/api": "^1.60.1",
     "@raycast/utils": "^1.10.0",
-    "@supabase/auth-helpers-react": "^0.4.2",
     "@supabase/supabase-js": "^2.39.1"
   },
   "devDependencies": {
