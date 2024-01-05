@@ -9,7 +9,9 @@ import {
   showToast,
   Toast,
   popToRoot,
+  Image,
 } from "@raycast/api";
+import fs from "fs";
 import SchoologyAPI from "schoologyapi";
 import { useEffect, useState } from "react";
 
@@ -94,11 +96,8 @@ function getRelativeTime(epoch) {
 }
 
 export default function Command() {
-  const [coursesText, setCoursesText] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const [gradesArr, setGradesArr] = useState([]);
-  const [coursesHashmap2, setCoursesHashmap2] = useState({});
-  const [latestTimestamps, setLatestTimestamps] = useState({});
 
   useEffect(() => {
     const fetchCoursesText = async () => {
@@ -109,54 +108,55 @@ export default function Command() {
         const course_response = await client.request("GET", `/users/${uid}/sections`);
         const course_data = await course_response;
 
-        const coursesHashmap = {};
-        const gradesMap = {};
-        const latestTimestampsMap = {};
+        let maxTimestamp = 0;
 
-        const gradePromises = course_data.section.map(async (course) => {
-          try {
-            const id = course.id;
-            const courseTitle = course.course_title;
+        const courses = await Promise.all(
+          course_data.section.map(async (course) => {
+            try {
+              const id = course.id;
+              const courseTitle = course.course_title;
+              const profileUrl = course.profile_url;
 
-            coursesHashmap[id] = courseTitle;
+              // Fetch the grades for this course
+              const grades_response = await client.request("GET", `/users/${uid}/grades/?section_id=${id}`);
 
-            const user_grades = await client.request("GET", `/users/${uid}/grades/?section_id=${id}`);
+              if (
+                grades_response &&
+                grades_response.section &&
+                grades_response.section.length > 0 &&
+                grades_response.section[0].final_grade &&
+                grades_response.section[0].final_grade.length > 1
+              ) {
+                const grade = grades_response.section[0].final_grade[1].grade;
+                let latestTimestamp = 0;
 
-            if (
-              user_grades &&
-              user_grades.section &&
-              user_grades.section.length > 0 &&
-              user_grades.section[0].final_grade &&
-              user_grades.section[0].final_grade.length > 1
-            ) {
-              return { id, user_grades };
+                // Iterate over all periods of this section
+                grades_response.section[0].period.forEach((period) => {
+                  // Iterate over the assignments for this period
+                  period.assignment.forEach((assignment) => {
+                    const timestamp = assignment.timestamp;
+
+                    // Update the latest timestamp for this course if this assignment's timestamp is more recent
+                    if (timestamp && timestamp > latestTimestamp) {
+                      latestTimestamp = timestamp;
+                    }
+
+                    // Update the maxTimestamp if this timestamp is greater
+                    if (timestamp && timestamp > maxTimestamp) {
+                      maxTimestamp = timestamp;
+                    }
+                  });
+                });
+
+                return { id, courseTitle, grade, latestTimestamp, profileUrl };
+              }
+            } catch (error) {
+              console.error(`Failed to fetch grade for course ${course.course_title}: ${error}`);
             }
-          } catch (error) {
-            console.error(`Failed to fetch grade for course ${course.course_title}: ${error}`);
-          }
-        });
+          })
+        );
 
-        const grades = (await Promise.all(gradePromises)).filter(Boolean);
-
-        grades.forEach(({ id, user_grades }) => {
-          const grade = user_grades.section[0].final_grade[1].grade;
-          gradesMap[id] = grade;
-
-          // Iterate over the assignments for this grade
-          user_grades.section[0].period[0].assignment.forEach((assignment) => {
-            const timestamp = assignment.timestamp;
-
-            // Update the latest timestamp for this course if this assignment's timestamp is more recent
-            if (timestamp && (!latestTimestampsMap[id] || timestamp > latestTimestampsMap[id])) {
-              latestTimestampsMap[id] = timestamp;
-            }
-          });
-        });
-
-        setCoursesHashmap2(coursesHashmap);
-        setGradesArr(gradesMap);
-        setLatestTimestamps(latestTimestampsMap);
-        setCoursesText(Object.keys(gradesMap));
+        setCourses(courses.filter(Boolean));
       } catch (error) {
         popToRoot();
         showToast({
@@ -165,7 +165,7 @@ export default function Command() {
           message:
             "Head to [district].schoology.com/api and paste in your newly generated key and secret into this extension's preferences.",
         });
-        setCoursesText([]);
+        setCourses([]);
         console.error(error);
       }
     };
@@ -174,46 +174,51 @@ export default function Command() {
   }, []);
 
   return (
-    <List navigationTitle="Show Grades" searchBarPlaceholder="Search your courses" isLoading={coursesText.length === 0}>
-      {coursesText
-        .filter((course) => course.includes(searchText))
-        .map((course) => (
-          <List.Item
-            title={coursesHashmap2[course] || course}
-            subtitle={`Updated ${getRelativeTime(latestTimestamps[course])}`}
-            icon={Icon.CircleProgress100}
-            accessories={[
-              {
-                tag: {
-                  value: getLetterGrade(gradesArr[course]),
-                  color: getColorBasedOnGrade(getLetterGrade(Number(gradesArr[course]))),
+    <List navigationTitle="Show Grades" searchBarPlaceholder="Search your courses" isLoading={courses.length === 0}>
+      {courses
+        .filter((course) => course.courseTitle.includes(searchText))
+        .map((course) => {
+          return (
+            <List.Item
+              title={course.courseTitle}
+              subtitle={`Updated ${getRelativeTime(course.latestTimestamp)}`}
+              icon={{ source: course.profileUrl, mask: Image.Mask.Circle }}
+              accessories={[
+                {
+                  tag: {
+                    value: getLetterGrade(course.grade),
+                    color: getColorBasedOnGrade(getLetterGrade(Number(course.grade))),
+                  },
                 },
-              },
-              { text: `${gradesArr[course]}%` },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  icon={Icon.List}
-                  title="View Graded Assignments"
-                  target={<CourseDetail sectionID={course.split(":")[0]} courseTitle={coursesHashmap2[course]} />}
-                />
-                <Action.Paste
-                  title="Paste Grade"
-                  content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[course]}%`}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Grade"
-                  content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[course]}%`}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+                { text: `${course.grade}%` },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    icon={Icon.List}
+                    title="View Graded Assignments"
+                    target={
+                      <CourseDetail
+                        sectionID={course.id}
+                        courseTitle={course.courseTitle}
+                        profileUrl={course.profileUrl}
+                      />
+                    }
+                  />
+                  <Action.Paste title="Paste Grade" content={`${course.courseTitle}:\nPercentage: ${course.grade}%`} />
+                  <Action.CopyToClipboard
+                    title="Copy Grade"
+                    content={`${course.courseTitle}:\nPercentage: ${course.grade}%`}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 }
-function CourseDetail({ sectionID, courseTitle }) {
+function CourseDetail({ sectionID, courseTitle, profileUrl }) {
   const [grades, setGrades] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -230,6 +235,7 @@ function CourseDetail({ sectionID, courseTitle }) {
         const users_response = await client.request("GET", "/app-user-info");
         const uid = users_response.api_uid.toString();
         const grades_response = await client.request("GET", `/users/${uid}/grades/?section_id=${sectionID}`);
+
         const grades_data = grades_response.section[0].period[0].assignment;
         setCategories(grades_response.section[0].grading_category);
 
@@ -257,12 +263,21 @@ function CourseDetail({ sectionID, courseTitle }) {
   }
 
   // Calculate the overall grade for the course
-  const overallGrade = categories.reduce((total, category) => {
-    const categoryGrades = grades.filter((grade) => grade.category_id === category.id);
-    const totalPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
-    const totalMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
-    return total + totalPoints / totalMaxPoints;
-  }, 0);
+  let overallGrade = 0;
+
+  if (categories.every((category) => category.weight === undefined)) {
+    const totalPoints = grades.reduce((total, grade) => total + grade.grade, 0);
+    const totalMaxPoints = grades.reduce((total, grade) => total + grade.max_points, 0);
+    overallGrade = totalPoints / totalMaxPoints;
+  } else {
+    overallGrade = categories.reduce((total, category) => {
+      const categoryGrades = grades.filter((grade) => grade.category_id === category.id);
+      const totalPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
+      const totalMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
+      const categoryWeight = category.weight ? category.weight / 100 : 1 / categories.length;
+      return total + (totalPoints / totalMaxPoints) * categoryWeight;
+    }, 0);
+  }
 
   const totalPoints = grades.reduce((total, grade) => total + grade.grade, 0);
   const totalMaxPoints = grades.reduce((total, grade) => total + grade.max_points, 0);
@@ -276,9 +291,10 @@ function CourseDetail({ sectionID, courseTitle }) {
       {!isLoading && (
         <List.Item
           title="Overall Grade for this Course"
+          icon={{ source: profileUrl, mask: Image.Mask.Circle }}
           accessories={[
             {
-              text: `${((totalPoints / totalMaxPoints) * 100).toFixed(2)}%`,
+              text: `${(overallGrade * 100).toFixed(2)}%`,
             },
             {
               tag: {
@@ -289,15 +305,17 @@ function CourseDetail({ sectionID, courseTitle }) {
             },
             {
               tag: {
-                value: `${getLetterGrade((totalPoints / totalMaxPoints) * 100)}`,
-                color: getColorBasedOnGrade(getLetterGrade((totalPoints / totalMaxPoints) * 100)),
+                value: `${getLetterGrade(overallGrade * 100)}`,
+                color: getColorBasedOnGrade(getLetterGrade(overallGrade * 100)),
               },
             },
           ]}
         />
       )}
       {categories.map((category, index) => {
-        const categoryGrades = grades.filter((grade) => grade.category_id === category.id);
+        const categoryGrades = grades
+          .filter((grade) => grade.category_id === category.id)
+          .sort((b, a) => a.timestamp - b.timestamp); // Sort grades by timestamp
         const categoryTotalPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
         const categoryTotalMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
         return (
@@ -361,13 +379,11 @@ function CourseDetail({ sectionID, courseTitle }) {
                       content={`Course: ${courseTitle}\nPercentage: ${(grade.grade / grade.max_points) * 100}%`}
                     />
                     {grade.comment && (
-                      <>
-                        <Action.CopyToClipboard
-                          title="Copy Comment"
-                          icon={Icon.Message}
-                          content={`Course: ${courseTitle}\nComments: ${grade.comment}`}
-                        />
-                      </>
+                      <Action.CopyToClipboard
+                        title="Copy Comment"
+                        icon={Icon.Message}
+                        content={`Course: ${courseTitle}\nComments: ${grade.comment}`}
+                      />
                     )}
                   </ActionPanel>
                 }
