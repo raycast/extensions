@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 
