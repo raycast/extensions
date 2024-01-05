@@ -1,46 +1,30 @@
-import { ActionPanel, Action, Icon, Color, List, confirmAlert, Alert, showHUD } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { execSync } from "child_process";
-import os from "os";
-import { createRaySoLink, getHistory, restoreHistory, saveFile } from "./utils";
+import { ActionPanel, Action, Alert, Cache, Color, confirmAlert, Icon, List } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { shellHistory, shellHistoryPath } from "shell-history";
 
-let history: string[] = [];
+const backupLocation = "/tmp/terminal-history-backup.file.txt";
+const cache = new Cache();
+const pathKey = "shell-history-path";
 
 export default function Command() {
-  const [loading, setLoading] = useState(true);
+  const [history, setHistory] = useState<string[]>([]);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
+    const path = shellHistoryPath();
+    setHistory(path ? shellHistory() : []);
     setLoading(false);
-  }, [loading]);
-
-  history = getHistory();
-
-  const length = history.length;
-
-  if (length === 0) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
-          title="You have no history. Run some commands to see them here."
-          actions={
-            <ActionPanel>
-              <RestoreHistoryPanel />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
+  }, [isLoading]);
 
   return (
-    <List searchBarPlaceholder="Filter commands by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter commands by name...">
       {history.reverse().map((command, index) => (
         <List.Item
           key={index}
           title={`${command}`}
           icon={{ source: Icon.Terminal, tintColor: Color.Green }}
-          accessories={[{ text: { value: `${length - index + 1}`, color: Color.PrimaryText } }]}
+          accessories={[{ text: { value: `${history.length - index + 1} `, color: Color.PrimaryText } }]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
@@ -51,12 +35,12 @@ export default function Command() {
                 />
                 <Action.CopyToClipboard
                   title="Copy Ray.so link"
-                  content={createRaySoLink(command)}
+                  content={createLink(command)}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
                 <Action.OpenInBrowser
                   title="Open in Ray.so"
-                  url={createRaySoLink(command)}
+                  url={createLink(command)}
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
               </ActionPanel.Section>
@@ -74,6 +58,15 @@ export default function Command() {
           }
         />
       ))}
+      <List.EmptyView
+        icon={{ source: Icon.Terminal }}
+        title="You have no history. Run some commands, here."
+        actions={
+          <ActionPanel>
+            <RestoreHistoryPanel />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 
@@ -87,19 +80,11 @@ export default function Command() {
       },
     }).then((confirmed) => {
       if (confirmed) {
-        saveFile();
-        // Check if path exists for zsh or bash
-        if (os.userInfo().shell === "/bin/zsh") {
-          execSync("rm ~/.zsh_history");
-        } else if (os.userInfo().shell === "/bin/bash") {
-          execSync("rm ~/.bash_history");
-        } else {
-          console.log("Shell not supported");
-          showHUD("Shell not supported");
-          return;
-        }
-        execSync("history -c");
-        setLoading(true);
+        save();
+
+        const path = cache.get(pathKey);
+        execSync(`rm ${path}`);
+        setHistory([]);
       }
     });
   }
@@ -113,7 +98,7 @@ export default function Command() {
       },
     }).then((confirmed) => {
       if (confirmed) {
-        restoreHistory();
+        restore();
         setLoading(true);
       }
     });
@@ -122,12 +107,38 @@ export default function Command() {
   // The restore history panel
   function RestoreHistoryPanel() {
     return (
-      <Action
-        title="Restore"
-        icon={{ source: Icon.Redo }}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-        onAction={onRestorePressed}
-      />
+      cache.get(pathKey) && (
+        <Action
+          title="Restore"
+          icon={{ source: Icon.Redo }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          onAction={onRestorePressed}
+        />
+      )
     );
+  }
+}
+
+/// Restore the history file from a backup location
+function restore() {
+  const cachedPath = cache.get(pathKey);
+  execSync(`cp ${backupLocation} ${cachedPath}`);
+}
+
+/// Save the history file to a backup location
+function save() {
+  const path = shellHistoryPath() ?? "";
+  cache.set(pathKey, path);
+  execSync(`cp ${path} ${backupLocation}`);
+}
+/// Create a ray.so link
+/// - Parameter command: The command to encode
+/// - Returns: A ray.so link
+function createLink(command: string): string {
+  try {
+    // eslint-disable-next-line no-undef
+    return `https://ray.so/#language=shell&code=${btoa(command)}`;
+  } catch (error) {
+    return "";
   }
 }

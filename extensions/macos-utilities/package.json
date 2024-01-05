@@ -14,7 +14,8 @@
   "commands": [
     {
       "name": "terminal-history",
-      "title": "Search Terminal History",
+      "title": "Search History",
+      "subtitle": "Terminal",
       "description": "Search your terminal history, copy and paste the command into your terminal",
       "mode": "view"
     }
