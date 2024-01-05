@@ -101,8 +101,12 @@ function SimpleProposalList(props: { proposal: ProposalViewModel; toggleDetails:
             onAction={() => push(<ProposalGithubPage markdownUrl={proposal.markdownLink} prUrl={proposal.link} />)}
           />
           <Action title="Toggle Details" icon={Icon.AlignLeft} onAction={props.toggleDetails} />
-          <Action.OpenInBrowser url={proposal.link} />
-          <Action.CopyToClipboard title="Copy URL" content={proposal.link} />
+          <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={proposal.link} />
+          <Action.CopyToClipboard
+            title="Copy URL"
+            content={proposal.link}
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
         </ActionPanel>
       }
     />
