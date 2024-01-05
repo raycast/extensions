@@ -100,18 +100,15 @@ interface StandingsResponse {
 
 
 export default function Command() {
+
     const [metropolitanStandings, setMetropolitanStandings] = useState<StandingsEntry[]>([]);
     const [atlanticStandings, setAtlanticStandings] = useState<StandingsEntry[]>([]);
     const [centralStandings, setCentralStandings] = useState<StandingsEntry[]>([]);
     const [pacificStandings, setPacificStandings] = useState<StandingsEntry[]>([]);
+
     const { isLoading, data } = useFetch("https://api-web.nhle.com/v1/standings/now") as { isLoading: boolean; data: StandingsResponse;};
-    // We need to sort the standings by conference, division and points
 
-    // Iterate over the list and create a dictionary that has the conference and division as the key, then the StandingsEntry as the value
-    // Then iterate over the dictionary and sort the teams by points
-
-    console.log("Standings Data", data);
-    var standings: any = {};
+    var standings: Record<string, StandingsEntry[]> = {}; 
     (data && data.standings || []).forEach((entry: StandingsEntry) => {
         if (!standings[entry.divisionName]) {
             standings[entry.divisionName] = [];
@@ -121,6 +118,7 @@ export default function Command() {
             return b.points - a.points;
         });
     });
+
     if (metropolitanStandings.length === 0 && standings["Metropolitan"]) {
         setMetropolitanStandings(standings["Metropolitan"]);
     }
@@ -133,28 +131,26 @@ export default function Command() {
     if (pacificStandings.length === 0 && standings["Pacific"]) {
         setPacificStandings(standings["Pacific"]);
     }
-
-
-
+    
     return (
         <List isLoading={isLoading}>
             <List.Section title="Metropolitan">
-                {(metropolitanStandings || []).map((team: any) => (
+                {(metropolitanStandings || []).map((team: StandingsEntry) => (
                     <List.Item key={team.teamAbbrev.default} title={`${team.teamName.default} (${team.points})`} subtitle={`${team.wins} - ${team.losses} - ${team.otLosses}`}/>
                 ))}
             </List.Section>
             <List.Section title="Atlantic">
-                {(atlanticStandings || []).map((team: any) => (
+                {(atlanticStandings || []).map((team: StandingsEntry) => (
                     <List.Item key={team.teamAbbrev.default} title={team.teamName.default} subtitle={`${team.wins} - ${team.losses} - ${team.otLosses}`}/>
                 ))}
             </List.Section>
             <List.Section title="Central">
-                {(centralStandings || []).map((team: any) => (
+                {(centralStandings || []).map((team: StandingsEntry) => (
                     <List.Item key={team.teamAbbrev.default} title={team.teamName.default} subtitle={`${team.wins} - ${team.losses} - ${team.otLosses}`}/>
                 ))}
             </List.Section>
             <List.Section title="Pacific">
-                {(pacificStandings || []).map((team: any) => (
+                {(pacificStandings || []).map((team: StandingsEntry) => (
                     <List.Item key={team.teamAbbrev.default} title={team.teamName.default} subtitle={`${team.wins} - ${team.losses} - ${team.otLosses}`}/>
                 ))}
             </List.Section>
