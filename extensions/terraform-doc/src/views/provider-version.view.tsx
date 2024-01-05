@@ -43,6 +43,7 @@ export default function ProviderVersionsView(props: { provider: Provider }) {
           actions={
             <ActionPanel>
               <Action.Push
+                icon={Icon.Hourglass}
                 title={`Navigate to ${p.attributes.tag}`}
                 target={<ResourceView provider={props.provider} version={p} />}
               />

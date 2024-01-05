@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Icon,
   List,
   environment,
   showToast,
@@ -53,6 +54,7 @@ export default function ProviderView() {
           actions={
             <ActionPanel>
               <Action.Push
+                icon={Icon.Rocket}
                 title={`Navigate to ${p.attributes["full-name"]}`}
                 target={<ProviderVersionsView provider={p} />}
               />

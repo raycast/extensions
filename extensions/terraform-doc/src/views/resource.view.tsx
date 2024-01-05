@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, environment } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, environment } from "@raycast/api";
 import { Provider } from "../lib/provider";
 import { ProviderVersion } from "../lib/provider-version";
 import { useCachedState } from "@raycast/utils";
@@ -98,6 +98,7 @@ export default function ResourceView(props: {
           actions={
             <ActionPanel>
               <Action.Push
+              icon={Icon.Book}
                 title={`Navigate to ${r.attributes.title}`}
                 target={
                   <ResourceDetailView
