@@ -108,7 +108,7 @@ export default function Command() {
 
     const { isLoading, data } = useFetch("https://api-web.nhle.com/v1/standings/now") as { isLoading: boolean; data: StandingsResponse;};
 
-    var standings: Record<string, StandingsEntry[]> = {}; 
+    const standings: Record<string, StandingsEntry[]> = {}; 
     (data && data.standings || []).forEach((entry: StandingsEntry) => {
         if (!standings[entry.divisionName]) {
             standings[entry.divisionName] = [];
@@ -131,7 +131,7 @@ export default function Command() {
     if (pacificStandings.length === 0 && standings["Pacific"]) {
         setPacificStandings(standings["Pacific"]);
     }
-    
+
     return (
         <List isLoading={isLoading}>
             <List.Section title="Metropolitan">
