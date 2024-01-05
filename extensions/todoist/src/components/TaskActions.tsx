@@ -254,7 +254,7 @@ export default function TaskActions({
 
         <Action.PickDate
           title="Schedule Task"
-          type={Action.PickDate.Type.Date}
+          type={Action.PickDate.Type.DateTime}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onChange={(date) =>
             updateTask({ id: task.id, due: date ? { date: getAPIDate(date) } : { string: "no due date" } })

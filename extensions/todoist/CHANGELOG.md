@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Duration Support for Schedule Tasks] - 2024-01-05
+
+You can specify minutes and hours when scheduling tasks
+
 ## [Show filters and filter tasks] - 2023-12-18
 
 You can now view your Todoist filters and see all tasks associated with a selected fitler. 
