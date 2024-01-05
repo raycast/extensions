@@ -4,14 +4,12 @@ import {
   Icon,
   List,
   getPreferenceValues,
-  Form,
   Color,
   showToast,
   Toast,
   popToRoot,
   Image,
 } from "@raycast/api";
-import fs from "fs";
 import SchoologyAPI from "schoologyapi";
 import { useEffect, useState } from "react";
 
@@ -223,10 +221,10 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  function validateFraction(value) {
-    const [numerator, denominator] = value.split("/");
-    return Number(numerator) && Number(denominator);
-  } //to be used for the edit form
+  function formatPercentage(value) {
+    const percentage = (value * 100).toFixed(2);
+    return percentage.endsWith(".00") ? percentage.slice(0, -3) : percentage;
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -356,7 +354,7 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
                   },
                   ...(grade.comment ? [{ icon: Icon.Bubble, tooltip: grade.comment }] : []),
                   {
-                    text: `${((grade.grade / grade.max_points) * 100).toFixed(2)}%`,
+                    text: `${formatPercentage(grade.grade / grade.max_points)}%`,
                   },
                   {
                     tag: {
@@ -376,7 +374,9 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
                     <Action.CopyToClipboard
                       title="Copy Grade"
                       icon={Icon.Clipboard}
-                      content={`Course: ${courseTitle}\nPercentage: ${(grade.grade / grade.max_points) * 100}%`}
+                      content={`Course: ${courseTitle}\nPercentage: ${formatPercentage(
+                        grade.grade / grade.max_points
+                      )}%`}
                     />
                     {grade.comment && (
                       <Action.CopyToClipboard
