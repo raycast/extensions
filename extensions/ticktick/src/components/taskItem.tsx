@@ -82,6 +82,37 @@ const TaskItem: React.FC<{
     return `ticktick://widget.view.task.in.smartproject/${actionType}/${id}`;
   }, [actionType, id, projectId]);
 
+  const dateSections = useMemo(() => {
+    if (!startDate) {
+      return null;
+    } else if (!dueDate || startDate === dueDate) {
+      return (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="Date"
+            text={formatPrettyDateTime(startDate, timeZone, isFloating, isAllDay)}
+          />
+          <List.Item.Detail.Metadata.Separator />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="Start"
+            text={formatPrettyDateTime(startDate, timeZone, isFloating, isAllDay)}
+          />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="End"
+            text={formatPrettyDateTime(dueDate, timeZone, isFloating, isAllDay)}
+          />
+          <List.Item.Detail.Metadata.Separator />
+        </>
+      );
+    }
+  }, [startDate, dueDate, timeZone, isFloating, isAllDay]);
+
   return (
     <List.Item
       title={title || "Untitled"}
@@ -124,25 +155,7 @@ const TaskItem: React.FC<{
                 icon={{ source: Icon.Dot, tintColor: checkboxColor }}
               />
               <List.Item.Detail.Metadata.Separator />
-              {startDate ? (
-                <>
-                  <List.Item.Detail.Metadata.Label
-                    title="Start Date"
-                    text={formatPrettyDateTime(startDate, timeZone, isFloating, isAllDay)}
-                  />
-                  <List.Item.Detail.Metadata.Separator />
-                </>
-              ) : null}
-              {dueDate ? (
-                <>
-                  <List.Item.Detail.Metadata.Label
-                    title="Due Date"
-                    text={formatPrettyDateTime(dueDate, timeZone, isFloating, isAllDay)}
-                  />
-                  <List.Item.Detail.Metadata.Separator />
-                </>
-              ) : null}
-
+              {dateSections}
               {tags.length ? (
                 <>
                   <List.Item.Detail.Metadata.Label title="Tags" text={tags.join(", ")} />
