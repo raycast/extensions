@@ -9,6 +9,8 @@ import { getGroups } from "./hooks/useFriends_Groups";
 import { getCurrency_code, getColor, expenseSplitEqually } from "./utils/utils";
 
 export default function Command() {
+  useOAuth(true);
+
   const [expenses, loadingExpenses, revalidate, Mutate] = GetExpense(loadingLimit); // FETCH EXPENSES
 
   const currentUser = GetCurrentUser(); // FETCH CURRENT USER
@@ -211,6 +213,7 @@ function ReceiptDetail(handedOverValues: { expense: Expense }) {
 // ------------ FORM ------------
 import { useForm, FormValidation } from "@raycast/utils";
 import { getFriends } from "./hooks/useFriends_Groups";
+import { useOAuth } from "./hooks/useOAuth";
 
 function ChangeValues(handedOverValues: { expense: Expense }) {
   const { expense } = handedOverValues;

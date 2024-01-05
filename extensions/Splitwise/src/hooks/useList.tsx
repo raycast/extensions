@@ -1,17 +1,22 @@
-import { GetExpenses, Expense } from "../types/get_expenses.types"; // Types
-import { showToast, Toast } from "@raycast/api";
-import { HEADER } from "./userPreferences";
-
-import { useFetch } from "@raycast/utils";
 import axios from "axios";
+import { useFetch } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
+
+import { GetExpenses, Expense } from "../types/get_expenses.types"; // Types
+import { getTokens, useOAuth } from "./useOAuth";
 
 export function GetExpense(limit: string): [Expense[], boolean, any, any] {
+  const tokenSet = useOAuth();
+
   const { isLoading, data, error, revalidate, mutate } = useFetch<GetExpenses>(
     `https://secure.splitwise.com/api/v3.0/get_expenses?limit=${limit}`,
     {
       method: "GET",
-      ...HEADER,
+      headers: {
+        Authorization: `Bearer ${tokenSet?.accessToken}`,
+      },
       keepPreviousData: true,
+      execute: !!tokenSet,
     }
   );
   const fetchedExpenses = data?.expenses || [];
@@ -25,8 +30,13 @@ export function GetExpense(limit: string): [Expense[], boolean, any, any] {
 export const DeleteExpense = async (id: number, mutate: any) => {
   await showToast({ style: Toast.Style.Animated, title: "Deleting Expense" });
   try {
+    const tokenSet = await getTokens();
     const responseDelete = await mutate(
-      await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, HEADER),
+      await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, {
+        headers: {
+          Authorization: `Bearer ${tokenSet?.accessToken}`,
+        },
+      }),
       {
         optimisticUpdate(expenses: Expense[]) {
           const { [id]: _, ...remainingExpenses } = expenses;
@@ -56,10 +66,13 @@ export const DeleteExpense = async (id: number, mutate: any) => {
 export async function UpdateExpense(expenseID: number, values: any) {
   await showToast({ style: Toast.Style.Animated, title: "Updating Expense" });
   try {
+    const tokenSet = await getTokens();
     const responseSubmit = await axios({
       method: "post",
       url: `https://secure.splitwise.com/api/v3.0/update_expense/${expenseID}`,
-      ...HEADER,
+      headers: {
+        Authorization: `Bearer ${tokenSet?.accessToken}`,
+      },
       data: values,
     });
 

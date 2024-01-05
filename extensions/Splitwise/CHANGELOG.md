@@ -1,5 +1,9 @@
 # Splitwise Changelog
 
+## [New Features] - 2024-01-04
+
+- Added support for OAuth sign-ins, removing the need for OAuth client setup by users.
+
 ## [Fixed Bug] - 2024-01-04
 
 - Updated `Add Expense` command to work with supported API endpoint

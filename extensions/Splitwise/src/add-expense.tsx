@@ -5,8 +5,11 @@ import { Entity, ExpenseParams, FriendOrGroupProps } from "./types/friends_group
 import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
 
 import { getCurrency_code } from "./utils/utils";
+import { useOAuth } from "./hooks/useOAuth";
 
 export default function Command() {
+  useOAuth(true);
+
   const [friends, loadingFriends, revalidateFriends] = getFriends();
   const [groups, loadingGroups, revalidateGroups] = getGroups();
 
