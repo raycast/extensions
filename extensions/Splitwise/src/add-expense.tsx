@@ -136,7 +136,7 @@ function FillForm(props: FriendOrGroupProps) {
         title={`${props.friend ? "Friend" : "Group"}`}
         text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
       />
-      <Form.TextField title="Description" placeholder="Grocery run" {...itemProps.description} />
+      <Form.TextField title="Description" {...itemProps.description} />
       <Form.DatePicker title="Date of Expense" {...itemProps.date} />
       <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
         <Form.Dropdown.Item value="USD" title={`USD (${getCurrency_code("USD")})`} icon="💵" />
