@@ -18,6 +18,13 @@
       "subtitle": "Terraform",
       "description": "Easy search terraform resource documentation",
       "mode": "view"
+    },
+    {
+      "name": "list_history",
+      "title": "Terraform Doc History",
+      "subtitle": "Terraform",
+      "description": "History of accessing terraform resource documentation",
+      "mode": "view"
     }
   ],
   "dependencies": {

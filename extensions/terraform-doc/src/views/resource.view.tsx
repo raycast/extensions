@@ -7,6 +7,10 @@ import { Resource, getResourceList } from "../lib/resource";
 import { hashColorizer } from "../lib/util";
 import ResourceDetailView from "./resource-detail.view";
 import { toResourceRawDocUrl, toResourceDocUrl } from "../lib/resource-detail";
+import {
+  useResourceHistoriesState,
+  updateHistories,
+} from "../lib/history";
 
 export default function ResourceView(props: {
   provider: Provider;
@@ -17,9 +21,9 @@ export default function ResourceView(props: {
     undefined,
     {
       cacheNamespace: `${environment.extensionName}`,
-    },
+    }
   );
-
+  const [resHistories,setResHistories] = useResourceHistoriesState()
   useEffect(() => {
     async function updateResouceList() {
       try {
@@ -45,7 +49,7 @@ export default function ResourceView(props: {
     filter === "all"
       ? setFilteredResources(resources)
       : setFilteredResources(
-          resources?.filter((r) => r.attributes.category === filter),
+          resources?.filter((r) => r.attributes.category === filter)
         );
   };
   return (
@@ -69,60 +73,67 @@ export default function ResourceView(props: {
         </List.Dropdown>
       }
     >
-      {(
-        filteredResources?.map((r) => (
-          <List.Item
-            title={r.attributes.title}
-            key={r.id}
-            keywords={[
-              r.attributes.subcategory ?? "",
-              r.attributes.category,
-              r.attributes.title,
-            ]}
-            accessories={[
-              {
-                tag: {
-                  color: hashColorizer(r.attributes.subcategory ?? ""),
-                  value: r.attributes.subcategory ?? "default",
-                },
-                tooltip: "Category",
+      {filteredResources?.map((r) => (
+        <List.Item
+          title={r.attributes.title}
+          key={r.id}
+          keywords={[
+            r.attributes.subcategory ?? "",
+            r.attributes.category,
+            r.attributes.title,
+          ]}
+          accessories={[
+            {
+              tag: {
+                color: hashColorizer(r.attributes.subcategory ?? ""),
+                value: r.attributes.subcategory ?? "default",
               },
-              {
-                tag: {
-                  color: hashColorizer(r.attributes.category ?? ""),
-                  value: r.attributes.category ?? "default",
-                },
-                tooltip: "Resource Type",
+              tooltip: "Category",
+            },
+            {
+              tag: {
+                color: hashColorizer(r.attributes.category ?? ""),
+                value: r.attributes.category ?? "default",
               },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title={`Navigate to ${r.attributes.title}`}
-                  target={
-                    <ResourceDetailView
-                      provider={props.provider}
-                      version={props.version}
-                      resource={r}
-                    />
-                  }
-                  onPush={()=>{}}
-                ></Action.Push>
-                <Action.OpenInBrowser
-                  title={`Open in Browser`}
-                  url={toResourceDocUrl(props.provider, props.version, r)}
-                  shortcut={{ modifiers: ["shift"], key: "enter" }}
-                />
-                <Action.OpenInBrowser
-                  title={`Open Raw Doc in Browser`}
-                  url={toResourceRawDocUrl(props.provider, props.version, r)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                />
-              </ActionPanel>
-            }
-          ></List.Item>
-        ))
-      )}
+              tooltip: "Resource Type",
+            },
+          ]}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title={`Navigate to ${r.attributes.title}`}
+                target={
+                  <ResourceDetailView
+                    provider={props.provider}
+                    version={props.version}
+                    resource={r}
+                  />
+                }
+                onPush={() => {
+                  updateHistories(
+                    {
+                      provider: props.provider,
+                      version: props.version,
+                      resource: r,
+                    },
+                    resHistories,setResHistories
+                  );
+                }}
+              ></Action.Push>
+              <Action.OpenInBrowser
+                title={`Open in Browser`}
+                url={toResourceDocUrl(props.provider, props.version, r)}
+                shortcut={{ modifiers: ["shift"], key: "enter" }}
+              />
+              <Action.OpenInBrowser
+                title={`Open Raw Doc in Browser`}
+                url={toResourceRawDocUrl(props.provider, props.version, r)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              />
+            </ActionPanel>
+          }
+        ></List.Item>
+      ))}
     </List>
   );
 }
