@@ -40,6 +40,8 @@ export function getOpenedUrlForArc() {
       delay 1
 
       tell application "System Events"
+        keystroke "l" using {command down}
+        delay 1
         keystroke "c" using {command down, shift down}
         delay 1
         set copiedURL to the clipboard as text
