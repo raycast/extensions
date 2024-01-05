@@ -95,12 +95,18 @@ export default function Command() {
 function FillForm(props: FriendOrGroupProps) {
   const { pop } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<{ description: string; cost: string; date: Date | null }>({
+  const { handleSubmit, itemProps } = useForm<{
+    description: string;
+    date: Date | null;
+    cost: string;
+    currency_code: string;
+  }>({
     onSubmit: (values) => {
       const paramsJson: ExpenseParams = {
         description: values.description,
-        cost: values.cost,
         date: values.date,
+        cost: values.cost,
+        currency_code: values.currency_code,
         split_equally: true,
       };
       props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
@@ -131,13 +137,19 @@ function FillForm(props: FriendOrGroupProps) {
         text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
       />
       <Form.TextField title="Description" placeholder="Grocery run" {...itemProps.description} />
+      <Form.DatePicker title="Date of Expense" {...itemProps.date} />
+      <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
+        <Form.Dropdown.Item value="USD" title={`USD (${getCurrency_code("USD")})`} icon="💵" />
+        <Form.Dropdown.Item value="EUR" title={`EUR (${getCurrency_code("EUR")})`} icon="💶" />
+        <Form.Dropdown.Item value="GBP" title={`GBP (${getCurrency_code("GBP")})`} icon="💷" />
+        <Form.Dropdown.Item value="JPY" title={`JPY (${getCurrency_code("JPY")})`} icon="💴" />
+      </Form.Dropdown>
       <Form.TextField
         title="Cost"
         placeholder="0.00"
         {...itemProps.cost}
         info="Expense will be split equally; assumes you are the payer."
       />
-      <Form.DatePicker title="Date" {...itemProps.date} />
     </Form>
   );
 }

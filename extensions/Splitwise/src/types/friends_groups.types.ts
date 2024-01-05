@@ -42,8 +42,9 @@ export type Picture = {
 
 export type ExpenseParams = {
   description: string;
-  cost: string;
   date: Date | null;
+  cost: string;
+  currency_code: string;
   friend_id?: number;
   group_id?: number;
   split_equally: boolean;
