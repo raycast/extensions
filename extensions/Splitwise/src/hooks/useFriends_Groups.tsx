@@ -52,19 +52,19 @@ export async function postExpense(paramsJson: ExpenseParams) {
       data: paramsJson,
     });
 
-    if (responseSubmit.statusText === "OK") {
+    if (Object.keys(responseSubmit.data.errors).length) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "D'oh! Invalid input!",
+        message: Object.entries(responseSubmit.data.errors).join("\n"),
+      });
+    } else {
       showToast({
         style: Toast.Style.Success,
         title: "Yay!",
         message: `Added "${responseSubmit.data.expenses[0].description}" worth ${Number(
           responseSubmit.data.expenses[0].cost
         ).toFixed(2)} ${responseSubmit.data.expenses[0].currency_code}!`,
-      });
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "D'oh! Invalid input!",
-        message: Object.entries(responseSubmit.data.errors).join("\n"),
       });
     }
   } catch (error: any) {
