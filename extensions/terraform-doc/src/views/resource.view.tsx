@@ -98,7 +98,7 @@ export default function ResourceView(props: {
           actions={
             <ActionPanel>
               <Action.Push
-              icon={Icon.Book}
+                icon={Icon.Book}
                 title={`Navigate to ${r.attributes.title}`}
                 target={
                   <ResourceDetailView
