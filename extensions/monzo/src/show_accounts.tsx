@@ -19,7 +19,7 @@ export default function Command() {
 
   return (
     <List
-      enableFiltering
+      filtering={true}
       isLoading={isLoading}
       searchBarPlaceholder="Search accounts and pots"
       isShowingDetail={!showNoAccess}
@@ -32,7 +32,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Show transactions"
+                  title="View transactions"
                   target={<TransactionsList account={account} />}
                 />
               </ActionPanel>

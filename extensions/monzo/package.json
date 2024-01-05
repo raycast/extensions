@@ -12,10 +12,13 @@
   "commands": [
     {
       "name": "show_accounts",
-      "title": "Show Accounts",
+      "title": "View Accounts",
       "subtitle": "Monzo",
       "description": "View accounts, pots, and transactions on Monzo.\n\nThis extension requires a few setup steps, read the documentation for a full walkthrough.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "show"
+      ]
     },
     {
       "name": "transfer_money",
