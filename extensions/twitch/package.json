@@ -119,16 +119,7 @@
       "title": "Search Following Channels",
       "description": "Search following Channels",
       "icon": "icon.png",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "userName",
-          "type": "textfield",
-          "title": "Twitch Username",
-          "required": true,
-          "description": "Your Twitch Username, from which to read the followed channels"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "live",
@@ -136,16 +127,7 @@
       "description": "Display Live Followed Channels in the Menu Bar",
       "icon": "icon.png",
       "mode": "menu-bar",
-      "interval": "10m",
-      "preferences": [
-        {
-          "name": "userName",
-          "type": "textfield",
-          "title": "Twitch Username",
-          "required": true,
-          "description": "Your Twitch Username, from which to read the followed channels"
-        }
-      ]
+      "interval": "10m"
     }
   ],
   "dependencies": {

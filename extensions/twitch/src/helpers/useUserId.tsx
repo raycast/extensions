@@ -1,4 +1,3 @@
-import { IS_DEPRECATED_AUTH, userName } from "./auth";
 import { useTwitchRequest } from "./useTwitchRequest";
 
 type User = {
@@ -16,12 +15,9 @@ type User = {
 
 export function useUserId() {
   const { data, isLoading } = useTwitchRequest<User | undefined>({
-    url: IS_DEPRECATED_AUTH
-      ? `https://api.twitch.tv/helix/users`
-      : `https://api.twitch.tv/helix/users?login=${userName}`,
+    url: `https://api.twitch.tv/helix/users`,
     initialData: undefined,
     select: (data) => data.data[0],
-    enabled: IS_DEPRECATED_AUTH ? true : Boolean(userName),
   });
   return {
     data: data?.id,

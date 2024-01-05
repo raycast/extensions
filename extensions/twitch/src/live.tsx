@@ -1,21 +1,11 @@
-import { Icon, LaunchType, MenuBarExtra, launchCommand, open, openCommandPreferences } from "@raycast/api";
+import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
 import { formatDate } from "./helpers/datetime";
 import useFollowedStreams from "./helpers/useFollowedStreams";
 import { useUserId } from "./helpers/useUserId";
-import { IS_DEPRECATED_AUTH, userName } from "./helpers/auth";
 
 export default function main() {
   const { data: userId, isLoading: isLoadingUserId } = useUserId();
   const { data: items = [], isLoading, updatedAt } = useFollowedStreams(userId, { loadingWhileStale: true });
-
-  if (!userName && !IS_DEPRECATED_AUTH) {
-    return (
-      <MenuBarExtra icon={Icon.ExclamationMark}>
-        <MenuBarExtra.Item title="Unavailable without a Username" />
-        <MenuBarExtra.Item title="Set your Twitch Username" onAction={openCommandPreferences} />
-      </MenuBarExtra>
-    );
-  }
 
   return (
     <MenuBarExtra
