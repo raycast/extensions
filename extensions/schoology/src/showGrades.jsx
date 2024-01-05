@@ -10,6 +10,7 @@ import {
   popToRoot,
   Image,
 } from "@raycast/api";
+import fs from "fs";
 import SchoologyAPI from "schoologyapi";
 import { useEffect, useState } from "react";
 
@@ -226,6 +227,19 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
     return percentage.endsWith(".00") ? percentage.slice(0, -3) : percentage;
   }
 
+  function getExceptionText(exception) {
+    switch (exception) {
+      case 1:
+        return "Excused";
+      case 2:
+        return "Incomplete";
+      case 3:
+        return "Missing";
+      default:
+        return "";
+    }
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -264,12 +278,16 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
   let overallGrade = 0;
 
   if (categories.every((category) => category.weight === undefined)) {
-    const totalPoints = grades.reduce((total, grade) => total + grade.grade, 0);
-    const totalMaxPoints = grades.reduce((total, grade) => total + grade.max_points, 0);
+    const totalPoints = grades
+      .filter((grade) => grade.exception !== 1)
+      .reduce((total, grade) => total + grade.grade, 0);
+    const totalMaxPoints = grades
+      .filter((grade) => grade.exception !== 1)
+      .reduce((total, grade) => total + grade.max_points, 0);
     overallGrade = totalPoints / totalMaxPoints;
   } else {
     overallGrade = categories.reduce((total, category) => {
-      const categoryGrades = grades.filter((grade) => grade.category_id === category.id);
+      const categoryGrades = grades.filter((grade) => grade.category_id === category.id && grade.exception !== 1);
       const totalPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
       const totalMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
       const categoryWeight = category.weight ? category.weight / 100 : 1 / categories.length;
@@ -277,8 +295,10 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
     }, 0);
   }
 
-  const totalPoints = grades.reduce((total, grade) => total + grade.grade, 0);
-  const totalMaxPoints = grades.reduce((total, grade) => total + grade.max_points, 0);
+  const totalPoints = grades.filter((grade) => grade.exception !== 1).reduce((total, grade) => total + grade.grade, 0);
+  const totalMaxPoints = grades
+    .filter((grade) => grade.exception !== 1)
+    .reduce((total, grade) => total + grade.max_points, 0);
 
   return (
     <List
@@ -292,7 +312,7 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
           icon={{ source: profileUrl, mask: Image.Mask.Circle }}
           accessories={[
             {
-              text: `${(overallGrade * 100).toFixed(2)}%`,
+              text: `${formatPercentage(overallGrade)}%`,
             },
             {
               tag: {
@@ -352,22 +372,36 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
                       },
                     }),
                   },
+                  ...(grade.exception
+                    ? [
+                        {
+                          tag: {
+                            value: getExceptionText(grade.exception),
+                            color: grade.exception === 1 ? Color.Green : Color.Red,
+                          },
+                        },
+                      ]
+                    : []),
                   ...(grade.comment ? [{ icon: Icon.Bubble, tooltip: grade.comment }] : []),
-                  {
-                    text: `${formatPercentage(grade.grade / grade.max_points)}%`,
-                  },
-                  {
-                    tag: {
-                      value: `${grade.grade}/${grade.max_points}`,
-                      color: Color.PrimaryText,
-                    },
-                  },
-                  {
-                    tag: {
-                      value: `${getLetterGrade((grade.grade / grade.max_points) * 100)}`,
-                      color: getColorBasedOnGrade(getLetterGrade((grade.grade / grade.max_points) * 100)),
-                    },
-                  },
+                  ...(grade.exception !== 1
+                    ? [
+                        {
+                          text: `${formatPercentage(grade.grade / grade.max_points)}%`,
+                        },
+                        {
+                          tag: {
+                            value: `${grade.grade}/${grade.max_points}`,
+                            color: Color.PrimaryText,
+                          },
+                        },
+                        {
+                          tag: {
+                            value: `${getLetterGrade((grade.grade / grade.max_points) * 100)}`,
+                            color: getColorBasedOnGrade(getLetterGrade((grade.grade / grade.max_points) * 100)),
+                          },
+                        },
+                      ]
+                    : []),
                 ]}
                 actions={
                   <ActionPanel title="Assignment Actions">

@@ -3,6 +3,7 @@
 ## [View Individual Assignments Grades] - 2024-1-02
 - You can now see individual assignments, comments, grades, and even when they were graded!
 - You can see the categories for those assignments with their weightage percentages.
+- You can see assignment exceptions (excused, missing, or incomplete)
 - You can also see when the grade for a course was last updated for increased convenience.
 - You can see the ACTUAL icon that your course is using in Raycast!
 
