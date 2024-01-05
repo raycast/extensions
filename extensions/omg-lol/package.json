@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omg-lol",
+  "title": "omg.lol",
+  "description": "Create, read, and update data in your omg.lol account.",
+  "icon": "omg.lol.png",
+  "author": "danpalmer",
+  "categories": [
+    "Communication",
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-paste",
+      "title": "Create Paste",
+      "description": "Create a new paste in your omg.lol pastebin with a given title and content.",
+      "mode": "view",
+      "icon": "pastebin.png"
+    },
+    {
+      "name": "create-paste-clipboard",
+      "title": "Create Paste from Clipboard",
+      "description": "Create a new paste in your omg.lol pastebin with the current clipboard content and a random title.",
+      "mode": "no-view",
+      "icon": "pastebin.png"
+    },
+    {
+      "name": "view-pastebin",
+      "title": "View Pastebin",
+      "description": "View items in your omg.lol pastebin, and copy or delete them.",
+      "mode": "view",
+      "icon": "pastebin.png"
+    },
+    {
+      "name": "create-purl",
+      "title": "Create PURL",
+      "description": "Create a new PURL in your omg.lol account.",
+      "mode": "view",
+      "icon": "purl.png"
+    },
+    {
+      "name": "view-purls",
+      "title": "View PURLs",
+      "description": "View PURLs in your omg.lol account.",
+      "mode": "view",
+      "icon": "purl.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "required": true,
+      "title": "Username",
+      "description": "Your omg.lol username, the first part of your @omg.lol email address",
+      "type": "textfield"
+    },
+    {
+      "name": "apiKey",
+      "required": true,
+      "title": "API Key",
+      "description": "Your omg.lol API key, found at https://home.omg.lol/account",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
