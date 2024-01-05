@@ -16,6 +16,20 @@
       "subtitle": "Fetch Today's Games",
       "description": "Fetches today's NHL games",
       "mode": "view"
+    },
+    {
+      "name": "team-schedule",
+      "title": "NHL Team Schedules",
+      "subtitle": "Fetch a team's schedule",
+      "description": "Fetches a team's schedule",
+      "mode": "view"
+    },
+    {
+      "name": "standings",
+      "title": "NHL Standings",
+      "subtitle": "Fetch current standings",
+      "description": "Fetches current standings",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -28,6 +42,7 @@
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
+    "react-devtools": "^4.28.4",
     "typescript": "^5.2.2"
   },
   "scripts": {
