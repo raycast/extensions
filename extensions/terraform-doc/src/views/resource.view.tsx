@@ -7,10 +7,7 @@ import { Resource, getResourceList } from "../lib/resource";
 import { hashColorizer } from "../lib/util";
 import ResourceDetailView from "./resource-detail.view";
 import { toResourceRawDocUrl, toResourceDocUrl } from "../lib/resource-detail";
-import {
-  useResourceHistoriesState,
-  updateHistories,
-} from "../lib/history";
+import { useResourceHistoriesState, updateHistories } from "../lib/history";
 
 export default function ResourceView(props: {
   provider: Provider;
@@ -21,9 +18,9 @@ export default function ResourceView(props: {
     undefined,
     {
       cacheNamespace: `${environment.extensionName}`,
-    }
+    },
   );
-  const [resHistories,setResHistories] = useResourceHistoriesState()
+  const [resHistories, setResHistories] = useResourceHistoriesState();
   useEffect(() => {
     async function updateResouceList() {
       try {
@@ -49,7 +46,7 @@ export default function ResourceView(props: {
     filter === "all"
       ? setFilteredResources(resources)
       : setFilteredResources(
-          resources?.filter((r) => r.attributes.category === filter)
+          resources?.filter((r) => r.attributes.category === filter),
         );
   };
   return (
@@ -116,7 +113,8 @@ export default function ResourceView(props: {
                       version: props.version,
                       resource: r,
                     },
-                    resHistories,setResHistories
+                    resHistories,
+                    setResHistories,
                   );
                 }}
               ></Action.Push>

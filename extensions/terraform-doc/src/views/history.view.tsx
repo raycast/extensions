@@ -56,7 +56,7 @@ export default function HistoryView() {
                       resource: r.resource,
                     },
                     resHistories,
-                    setResHistories
+                    setResHistories,
                   );
                 }}
                 title={`Navigate to ${r.resource.attributes.title}`}

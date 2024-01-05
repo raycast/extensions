@@ -31,12 +31,12 @@ export function useResourceHistoriesState(): [
 export function updateHistories(
   input: ResourceHistory,
   res: ResourceHistory[],
-  setState: React.Dispatch<React.SetStateAction<ResourceHistory[]>>
+  setState: React.Dispatch<React.SetStateAction<ResourceHistory[]>>,
 ) {
   const dupIndex = res.findIndex(
     (r) =>
       `${r.provider.id}/${r.version.id}/${r.resource.id}` ===
-      `${input.provider.id}/${input.version.id}/${input.resource.id}`
+      `${input.provider.id}/${input.version.id}/${input.resource.id}`,
   );
   if (dupIndex > -1) res.splice(dupIndex, 1);
   res.unshift(input);
