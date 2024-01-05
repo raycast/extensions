@@ -5,7 +5,7 @@ import {
   getSelectedText,
   environment,
 } from "@raycast/api";
-import { en_ru, ru_en } from "./Dict";
+import { en_ru, ru_en, initMap } from "./Dict";
 import { exec as Exec } from "child_process";
 import { promisify } from "util";
 
@@ -13,8 +13,8 @@ const exec = promisify(Exec);
 const { layoutEN, layoutRU } = getPreferenceValues();
 
 export default async function main() {
-  // genMap();
-  // return;
+  initMap(layoutRU !== "Russian");
+
   let input = "";
   try {
     input = await getSelectedText();
@@ -30,6 +30,7 @@ export default async function main() {
     await showHUD("Nothing to switch");
     return;
   }
+
   const switched = switchStringLayout(input);
   switchLayout(detectLayout(switched));
   // console.log(switched);
