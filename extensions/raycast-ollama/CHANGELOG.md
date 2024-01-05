@@ -1,5 +1,11 @@
 # raycast-ollama Changelog
 
+## [BugFix] 2024-01-02
+
+- **Command 'Manage Models'**: fixed bug that cause error `ollama-models | TypeError: Cannot read properties of undefined (reading 'split')` when model show information was undefined.
+- **Command 'Chat With Ollama'**: fixed bug that cause error `ollama-chat | SyntaxError: Expected ',' or '}' after property value in JSON at position 97` when Ollama chat api response with an unformatted JSON response.
+- **Command 'Manage Models'**: fixed bug that cause error `ollama-models | SyntaxError: Unexpected non-whitespace character after JSON at position 30` when Ollama pull api response with an unformatted JSON response.
+
 ## [Improvement and BugFix] 2023-12-20
 
 - [Improvement] **Command 'Chat With Ollama'**: implemented the new Ollama chat feature, for use this command is now required at least Ollama v0.1.14.

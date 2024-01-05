@@ -83,7 +83,7 @@ export const ChatActionPanel = (props: {
           "DeleteChatAction",
           "DeleteAllChatsAction",
         ],
-        settings
+        settings,
       ) ? (
         <ActionPanel.Section title="Chat Actions">
           {chat && isActionEnabled("ChatSettingsAction", settings) ? (

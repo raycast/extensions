@@ -118,9 +118,10 @@ export function ModelView(): JSX.Element {
     tag: OllamaApiTagsResponseModel;
     show: Map<string, OllamaApiShowResponse> | undefined;
   }): JSX.Element {
-    const show = prop.show?.get(prop.tag.name);
-
+    let show: OllamaApiShowResponse | undefined = undefined;
     let modelfile: OllamaApiShowModelfile | undefined;
+
+    if (prop.show) show = prop.show.get(prop.tag.name);
     if (show) modelfile = OllamaApiShowParseModelfile(show);
 
     return (

@@ -50,7 +50,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Note" placeholder="Enter note" {...itemProps.note} />
+      <Form.TextField title="Note" placeholder="Enter note" {...itemProps.note} />
     </Form>
   );
 }

@@ -20,7 +20,7 @@ export const execScript = (
   script: string,
   args: (string | boolean | number)[],
   language = "AppleScript",
-  stderrCallback?: (data: string) => void
+  stderrCallback?: (data: string) => void,
 ): { data: Promise<string>; sendMessage: (msg: string) => void } => {
   let data = "";
   let sendMessage: (msg: string) => void = (msg: string) => {
@@ -41,7 +41,7 @@ export const execScript = (
       "-l",
       language,
       ...args.map((x) => x.toString()),
-    ].join(" ")}"`
+    ].join(" ")}"`,
   );
 
   proc.stdout?.on("data", (chunk) => {
@@ -191,7 +191,7 @@ export const searchNearbyLocations = async (query: string) => {
  */
 export const showDialog = async (title: string, content: string) => {
   return runAppleScript(
-    `display dialog "${content.replaceAll('"', '\\"')}" with title "${title.replaceAll('"', '\\"')}"`
+    `display dialog "${content.replaceAll('"', '\\"')}" with title "${title.replaceAll('"', '\\"')}"`,
   );
 };
 
@@ -288,7 +288,7 @@ export const ScriptRunner = {
     useRectangleDetection: boolean,
     useSaliencyAnalysis: boolean,
     useHorizonDetection: boolean,
-    confidenceThreshold = 0.7
+    confidenceThreshold = 0.7,
   ) =>
     runScript(
       "ImageFeatureExtractor",
@@ -301,7 +301,7 @@ export const ScriptRunner = {
       useRectangleDetection,
       useSaliencyAnalysis,
       useHorizonDetection,
-      confidenceThreshold
+      confidenceThreshold,
     ) as Promise<ImageData>,
 
   /**
@@ -320,7 +320,7 @@ export const ScriptRunner = {
       filePath,
       useOCR,
       pageLimit,
-      useMetadata
+      useMetadata,
     ) as Promise<PDFData>,
 
   /**
