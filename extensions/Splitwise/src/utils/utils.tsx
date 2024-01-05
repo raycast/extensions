@@ -11,6 +11,8 @@ export function getCurrency_code(currency_code: string) {
       return { symbol: "£", emoji: "💷" };
     case "JPY":
       return { symbol: "¥", emoji: "💴" };
+    case "AUD":
+      return { symbol: "A$", emoji: "💷" };
     default:
       return { symbol: currency_code, emoji: "💸" };
   }

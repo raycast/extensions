@@ -1,16 +1,22 @@
-import { useFetch } from "@raycast/utils";
-import { HEADER } from "./userPreferences";
-import { GetFriends, GetGroups, Friend, Group, ExpenseParams } from "../types/friends_groups.types";
 import axios from "axios";
+import { useFetch } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
 
+import { GetFriends, GetGroups, Friend, Group, ExpenseParams } from "../types/friends_groups.types";
+import { getTokens, useOAuth } from "./useOAuth";
+
 export function getFriends(): [Friend[], boolean, any] {
+  const tokenSet = useOAuth();
+
   const { isLoading, data, error, revalidate } = useFetch<GetFriends>(
     "https://secure.splitwise.com/api/v3.0/get_friends",
     {
       method: "GET",
-      ...HEADER,
+      headers: {
+        Authorization: `Bearer ${tokenSet?.accessToken}`,
+      },
       keepPreviousData: true,
+      execute: !!tokenSet,
     }
   );
 
@@ -24,12 +30,17 @@ export function getFriends(): [Friend[], boolean, any] {
 }
 
 export function getGroups(): [Group[], boolean, any] {
+  const tokenSet = useOAuth();
+
   const { isLoading, data, error, revalidate } = useFetch<GetGroups>(
     "https://secure.splitwise.com/api/v3.0/get_groups",
     {
       method: "GET",
-      ...HEADER,
+      headers: {
+        Authorization: `Bearer ${tokenSet?.accessToken}`,
+      },
       keepPreviousData: true,
+      execute: !!tokenSet,
     }
   );
 
@@ -45,10 +56,13 @@ export function getGroups(): [Group[], boolean, any] {
 export async function postExpense(paramsJson: ExpenseParams) {
   await showToast({ style: Toast.Style.Animated, title: "Adding Expense" });
   try {
+    const tokenSet = await getTokens();
     const responseSubmit = await axios({
       method: "post",
       url: `https://secure.splitwise.com/api/v3.0/create_expense`,
-      ...HEADER,
+      headers: {
+        Authorization: `Bearer ${tokenSet.accessToken}`,
+      },
       data: paramsJson,
     });
 

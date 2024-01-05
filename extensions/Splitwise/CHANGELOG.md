@@ -1,5 +1,10 @@
 # Splitwise Changelog
 
+## [New Features] - 2024-04-01
+
+- Added support for OAuth sign-ins, removing the need for OAuth client setup by users
+- Added support for AUD
+
 ## [Fixed Bug] - 2024-02-06
 
 - Fixed issue when adding expense to friends

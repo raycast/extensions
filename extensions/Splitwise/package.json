@@ -5,8 +5,14 @@
   "description": "View the balances and add expenses to Splitwise",
   "icon": "command-icon.png",
   "author": "ilian",
-  "contributors": ["diogo_ferrer", "djpowers"],
-  "categories": ["Finance"],
+  "contributors": [
+    "diogo_ferrer",
+    "djpowers",
+    "danpalmer"
+  ],
+  "categories": [
+    "Finance"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,14 +31,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "personalAccessToken",
-      "title": "Personal Access Token",
-      "placeholder": "API Key",
-      "description": "See the extension's README for instructions about how to create a token",
-      "type": "password",
-      "required": true
-    },
     {
       "name": "loadingLimit",
       "title": "Loading Limit",
@@ -61,18 +59,19 @@
       ],
       "description": "Limits the number of expenses to load",
       "type": "dropdown",
-      "required": true
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.47.2",
     "@raycast/utils": "^1.4.16",
     "axios": "^1.5.0",
-    "got": "^12.5.3"
+    "got": "^12.5.3",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "^18.2.46",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
