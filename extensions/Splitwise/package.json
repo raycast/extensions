@@ -60,6 +60,32 @@
       "description": "Limits the number of expenses to load",
       "type": "dropdown",
       "required": false
+    },
+    {
+      "name": "defaultCurrency",
+      "title": "Default Currency",
+      "default": "USD",
+      "data": [
+        {
+          "value": "USD",
+          "title": "USD"
+        },
+        {
+          "value": "EUR",
+          "title": "EUR"
+        },
+        {
+          "value": "GBP",
+          "title": "GBP"
+        },
+        {
+          "value": "JPY",
+          "title": "JPY"
+        }
+      ],
+      "description": "Sets the default currency for new expenses",
+      "type": "dropdown",
+      "required": false
     }
   ],
   "dependencies": {

@@ -6,6 +6,7 @@ import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
 
 import { getCurrency_code } from "./utils/utils";
 import { useOAuth } from "./hooks/useOAuth";
+import { defaultCurrency } from "./hooks/userPreferences";
 
 export default function Command() {
   useOAuth(true);
@@ -141,7 +142,7 @@ function FillForm(props: FriendOrGroupProps) {
       />
       <Form.TextField title="Description" {...itemProps.description} />
       <Form.DatePicker title="Date of Expense" {...itemProps.date} />
-      <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
+      <Form.Dropdown title="Currency Code" defaultValue={defaultCurrency} {...itemProps.currency_code}>
         <Form.Dropdown.Item value="USD" title={`USD (${getCurrency_code("USD")})`} icon="💵" />
         <Form.Dropdown.Item value="EUR" title={`EUR (${getCurrency_code("EUR")})`} icon="💶" />
         <Form.Dropdown.Item value="GBP" title={`GBP (${getCurrency_code("GBP")})`} icon="💷" />
