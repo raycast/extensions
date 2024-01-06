@@ -11,6 +11,8 @@ export function getCurrency_code(currency_code: string) {
       return "£";
     case "JPY":
       return "¥";
+    case "AUD":
+      return "A$";
     default:
       return currency_code;
   }

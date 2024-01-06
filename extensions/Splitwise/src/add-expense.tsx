@@ -142,11 +142,12 @@ function FillForm(props: FriendOrGroupProps) {
       />
       <Form.TextField title="Description" {...itemProps.description} />
       <Form.DatePicker title="Date of Expense" {...itemProps.date} />
-      <Form.Dropdown title="Currency Code" defaultValue={defaultCurrency} {...itemProps.currency_code}>
+      <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
         <Form.Dropdown.Item value="USD" title={`USD (${getCurrency_code("USD")})`} icon="💵" />
         <Form.Dropdown.Item value="EUR" title={`EUR (${getCurrency_code("EUR")})`} icon="💶" />
         <Form.Dropdown.Item value="GBP" title={`GBP (${getCurrency_code("GBP")})`} icon="💷" />
         <Form.Dropdown.Item value="JPY" title={`JPY (${getCurrency_code("JPY")})`} icon="💴" />
+        <Form.Dropdown.Item value="AUD" title={`JPY (${getCurrency_code("AUD")})`} icon="💵" />
       </Form.Dropdown>
       <Form.TextField
         title="Cost"

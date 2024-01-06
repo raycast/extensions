@@ -81,6 +81,10 @@
         {
           "value": "JPY",
           "title": "JPY"
+        },
+        {
+          "value": "AUD",
+          "title": "AUD"
         }
       ],
       "description": "Sets the default currency for new expenses",
