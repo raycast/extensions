@@ -14,7 +14,7 @@ import fetch from "node-fetch-polyfill";
 import Gemini from "gemini-ai";
 import fs from "fs";
 
-export default (props, context) => {
+export default (props, context, allowPaste = false) => {
   const Pages = {
     Form: 0,
     Detail: 1,
@@ -88,7 +88,18 @@ export default (props, context) => {
   }, []);
 
   return page === Pages.Detail ? (
-    <Detail isLoading={isLoading} markdown={markdown} />
+    <Detail
+      actions={
+        !isLoading && (
+          <ActionPanel>
+            {allowPaste && <Action.Paste content={markdown} />}
+            <Action.CopyToClipboard content={markdown} />
+          </ActionPanel>
+        )
+      }
+      isLoading={isLoading}
+      markdown={markdown}
+    />
   ) : (
     <Form
       actions={
