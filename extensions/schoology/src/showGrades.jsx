@@ -244,26 +244,73 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        console.log("Fetching user info...");
         const users_response = await client.request("GET", "/app-user-info");
         const uid = users_response.api_uid.toString();
+        console.log("Fetching grades...");
         const grades_response = await client.request("GET", `/users/${uid}/grades/?section_id=${sectionID}`);
 
         const grades_data = grades_response.section[0].period[0].assignment;
         setCategories(grades_response.section[0].grading_category);
 
-        const assignmentPromises = grades_data.map((grade) =>
-          client.request("GET", `/sections/${sectionID}/grade_items/${grade.assignment_id}`)
-        );
-        const assignments_data = await Promise.all(assignmentPromises);
-        const gradesWithAssignments = grades_data.map((grade, index) => ({
+        const assignmentPromises = grades_data.map((grade) => {
+          console.log(`Fetching assignment ${grade.assignment_id}...`);
+          return client.request("GET", `/sections/${sectionID}/grade_items/${grade.assignment_id}`);
+        });
+
+        const assignments_data = await Promise.allSettled(assignmentPromises);
+        const assignments = assignments_data.map((result) => (result.status === "fulfilled" ? result.value : null));
+
+        let gradesWithAssignments = grades_data.map((grade, index) => ({
           ...grade,
-          assignment: assignments_data[index],
+          assignment: assignments[index],
         }));
         setGrades(gradesWithAssignments);
+
+        // After all assignments have been fetched, fetch again the ones with a broken title
+        const fetchBrokenTitles = async () => {
+          let brokenTitlesExist = false;
+          console.log("Checking for broken titles...");
+          for (let i = 0; i < gradesWithAssignments.length; i++) {
+            if (!gradesWithAssignments[i].assignment || !gradesWithAssignments[i].assignment.title) {
+              brokenTitlesExist = true;
+              console.log(`Fetching broken title for assignment ${gradesWithAssignments[i].assignment_id}...`);
+              try {
+                const assignment = await client.request(
+                  "GET",
+                  `/sections/${sectionID}/grade_items/${gradesWithAssignments[i].assignment_id}`
+                );
+                if (!assignment || !assignment.title) {
+                  if (assignment !== "You have reached Schoology's api request limit of 50 requests per 5 seconds") {
+                    console.log(
+                      `Title for assignment ${gradesWithAssignments[i].assignment_id} is still broken. Removing it from the list.`
+                    );
+                    gradesWithAssignments.splice(i, 1); // Remove the assignment from the list
+                    i--; // Decrement the index to account for the removed element
+                  } else {
+                    console.log(`Title for assignment ${gradesWithAssignments[i].assignment_id} is still broken.`);
+                  }
+                } else {
+                  console.log(`Successfully fetched title for assignment ${gradesWithAssignments[i].assignment_id}.`);
+                  gradesWithAssignments[i].assignment = assignment;
+                }
+              } catch (error) {
+                console.error(`Failed to fetch assignment ${gradesWithAssignments[i].assignment_id}: ${error}`);
+              }
+            }
+          }
+          setGrades([...gradesWithAssignments]); // Update the state with the latest data
+          if (brokenTitlesExist) {
+            console.log("Waiting for 5 seconds before the next check...");
+            setTimeout(fetchBrokenTitles, 5000); // Wait for 5 seconds before the next check
+          } else {
+            setIsLoading(false); // All assignments have been fetched successfully or removed, stop the loading indicator
+          }
+        };
+        setIsLoading(true); // Start the loading indicator
+        fetchBrokenTitles();
       } catch (error) {
         console.error(`Failed to fetch data: ${error}`);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -345,84 +392,82 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
               category.weight ? ` (Weight: ${category.weight}%)` : ""
             }`}
           >
-            {categoryGrades.map((grade, index) => (
-              <List.Item
-                key={index}
-                icon={Icon.Checkmark}
-                title={
-                  grade.assignment && grade.assignment.title
-                    ? capitalizeFirstLetter(grade.assignment.title)
-                    : `Assignment ID: ${grade.assignment_id}`
-                }
-                subtitle={
-                  grade.timestamp
-                    ? new Date(grade.timestamp * 1000).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                    : undefined
-                }
-                accessories={[
-                  {
-                    ...((grade.grade / grade.max_points) * 100 > 100 && {
-                      tag: {
-                        value: "Extra Credit",
-                        color: Color.Yellow,
-                      },
-                    }),
-                  },
-                  ...(grade.exception
-                    ? [
-                        {
-                          tag: {
-                            value: getExceptionText(grade.exception),
-                            color: grade.exception === 1 ? Color.Green : Color.Red,
+            {categoryGrades.map((grade, index) =>
+              grade.assignment && grade.assignment.title ? (
+                <List.Item
+                  key={index}
+                  icon={Icon.Checkmark}
+                  title={capitalizeFirstLetter(grade.assignment.title)}
+                  subtitle={
+                    grade.timestamp
+                      ? new Date(grade.timestamp * 1000).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : undefined
+                  }
+                  accessories={[
+                    {
+                      ...((grade.grade / grade.max_points) * 100 > 100 && {
+                        tag: {
+                          value: "Extra Credit",
+                          color: Color.Yellow,
+                        },
+                      }),
+                    },
+                    ...(grade.exception
+                      ? [
+                          {
+                            tag: {
+                              value: getExceptionText(grade.exception),
+                              color: grade.exception === 1 ? Color.Green : Color.Red,
+                            },
                           },
-                        },
-                      ]
-                    : []),
-                  ...(grade.comment ? [{ icon: Icon.Bubble, tooltip: grade.comment }] : []),
-                  ...(grade.exception !== 1
-                    ? [
-                        {
-                          text: `${formatPercentage(grade.grade / grade.max_points)}%`,
-                        },
-                        {
-                          tag: {
-                            value: `${grade.grade}/${grade.max_points}`,
-                            color: Color.PrimaryText,
+                        ]
+                      : []),
+                    ...(grade.comment ? [{ icon: Icon.Bubble, tooltip: grade.comment }] : []),
+                    ...(grade.exception !== 1
+                      ? [
+                          {
+                            text: `${formatPercentage(grade.grade / grade.max_points)}%`,
                           },
-                        },
-                        {
-                          tag: {
-                            value: `${getLetterGrade((grade.grade / grade.max_points) * 100)}`,
-                            color: getColorBasedOnGrade(getLetterGrade((grade.grade / grade.max_points) * 100)),
+                          {
+                            tag: {
+                              value: `${grade.grade}/${grade.max_points}`,
+                              color: Color.PrimaryText,
+                            },
                           },
-                        },
-                      ]
-                    : []),
-                ]}
-                actions={
-                  <ActionPanel title="Assignment Actions">
-                    <Action.CopyToClipboard
-                      title="Copy Grade"
-                      icon={Icon.Clipboard}
-                      content={`Course: ${courseTitle}\nPercentage: ${formatPercentage(
-                        grade.grade / grade.max_points
-                      )}%`}
-                    />
-                    {grade.comment && (
+                          {
+                            tag: {
+                              value: `${getLetterGrade((grade.grade / grade.max_points) * 100)}`,
+                              color: getColorBasedOnGrade(getLetterGrade((grade.grade / grade.max_points) * 100)),
+                            },
+                          },
+                        ]
+                      : []),
+                  ]}
+                  actions={
+                    <ActionPanel title="Assignment Actions">
                       <Action.CopyToClipboard
-                        title="Copy Comment"
-                        icon={Icon.Message}
-                        content={`Course: ${courseTitle}\nComments: ${grade.comment}`}
+                        title="Copy Grade"
+                        icon={Icon.Clipboard}
+                        content={`Course: ${courseTitle}\nPercentage: ${formatPercentage(
+                          grade.grade / grade.max_points
+                        )}%`}
                       />
-                    )}
-                  </ActionPanel>
-                }
-              />
-            ))}
+                      {grade.comment && (
+                        <Action.CopyToClipboard
+                          title="Copy Comment"
+                          icon={Icon.Message}
+                          content={`Course: ${courseTitle}\nComments: ${grade.comment}`}
+                        />
+                      )}
+                    </ActionPanel>
+                  }
+                />
+              ) : null
+            )}
           </List.Section>
         );
       })}
