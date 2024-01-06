@@ -47,7 +47,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessories={[{ text: searchResult.username }]}
+      accessories={[{ text: searchResult.username, tooltip: searchResult.username }]}
       icon={{ source: searchResult.icon }}
       actions={
         <ActionPanel>
