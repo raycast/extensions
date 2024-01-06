@@ -265,6 +265,18 @@ function CourseDetail({ sectionID, courseTitle, profileUrl }) {
           ...grade,
           assignment: assignments[index],
         }));
+
+        // Filter out invalid grades
+        const invalidResponse =
+          "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n";
+        gradesWithAssignments = gradesWithAssignments.filter((grade, index) => {
+          if (grade.assignment === invalidResponse) {
+            console.log(`Invalid grade found at index ${index}, removing it from the list.`);
+            return false;
+          }
+          return true;
+        });
+
         setGrades(gradesWithAssignments);
 
         // After all assignments have been fetched, fetch again the ones with a broken title

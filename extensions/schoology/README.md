@@ -16,3 +16,9 @@ Here's an image with some example courses (I used a schoology dev account to tes
     - You should now have access to both your `key` and `secret`, which you can use to provide the Schoology extension with access to your grades.
         - You can do this by heading to the extension preferences `⌘ + shift + ,` and entering the credentials
 - Enjoy!
+## FAQ
+- Why is it occasionally so slow when checking the assignments?
+    - unfortunately, schoology imposes a 50 requests per 5 second limit, which means that classes with MORE than 50 assignments will likely take more than 5 seconds to fully load
+    - I haven't figured out anything to fix this *yet*, but please contribute if you think you know a way to fix it
+- When are what-if grades coming? Is that a planned feature?
+    - Its a lot of work, but I will get to it soon. (as someone who uses this product, it does feel like something missing, and it'll definitely be a feature sometime in the near future)
