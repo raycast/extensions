@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Add Favorites command] - 2024-01-05
+
+- Add `Favorites` command to browse your Linear favorites right from Raycast.
+
 ## [Add issue links] - 2023-12-29
 
 - Add support for issue links. It is now possible to see the number of links an issue has from the detail view. You can also browse them in a dedicated view.

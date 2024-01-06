@@ -398,7 +398,7 @@ export const getTextOfWebpage = async (URL: string): Promise<string> => {
     .replaceAll(/(<br ?\/?>|[\n\r]+)/g, "\n")
     .replaceAll(
       /(<script[\s\S\n\r]+?<\/script>|<style[\s\S\n\r]+?<\/style>|<nav[\s\S\n\r]+?<\/nav>|<link[\s\S\n\r]+?<\/link>|<form[\s\S\n\r]+?<\/form>|<button[\s\S\n\r]+?<\/button>|<!--[\s\S\n\r]+?-->|<select[\s\S\n\r]+?<\/select>|<[\s\n\r\S]+?>)/g,
-      "\t"
+      "\t",
     )
     .replaceAll(/([\t ]*[\n\r][\t ]*)+/g, "\r")
     .replaceAll(/(\([^A-Za-z0-9\n]*\)|(?<=[,.!?%*])[,.!?%*]*?\s*[,.!?%*])/g, " ")
@@ -585,7 +585,7 @@ export const getWeatherData = async (days: number): Promise<JSONObject> => {
   const longitude = jsonObj["longitude"];
   const timezone = (jsonObj["timezone"] as string).replace("/", "%2F");
   return getJSONResponse(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,rain_sum,snowfall_sum,precipitation_hours&current_weather=true&windspeed_unit=ms&forecast_days=${days.toString()}&timezone=${timezone}`
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,rain_sum,snowfall_sum,precipitation_hours&current_weather=true&windspeed_unit=ms&forecast_days=${days.toString()}&timezone=${timezone}`,
   );
 };
 
@@ -615,7 +615,7 @@ export const getCurrentDirectory = async () => {
  * @returns A promise resolving to the name of the application as a string, or an object containing the name and path if includePaths is true.
  */
 export const getMenubarOwningApplication = async (
-  includePaths?: boolean
+  includePaths?: boolean,
 ): Promise<string | { name: string; path: string }> => {
   const app = await runAppleScript(`use framework "Foundation"
   use scripting additions
