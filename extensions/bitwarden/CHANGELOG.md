@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Command] - 2024-01-06
+
+- Adds Create Folder command
+
 ## [Error handling] - 2023-11-30
 
 - Improved error handling
