@@ -44,7 +44,7 @@ const STATE_CODES = [
 export default function Command() {
   const [formValues, setFormValues] = useState<{ uf: string; city: string; streetName: string } | null>(null);
 
-  const { data, isLoading, error } = useFetch<CepResponse[]>(
+  const { data, isLoading } = useFetch<CepResponse[]>(
     formValues ? `https://viacep.com.br/ws/${formValues.uf}/${formValues.city}/${formValues.streetName}/json/` : "",
     {
       execute: formValues !== null,
@@ -64,11 +64,6 @@ export default function Command() {
 
     setFormValues(values);
   };
-
-  if (error) {
-    showToast(Toast.Style.Failure, "Failed to fetch CEP");
-    console.error("Fetch error:", error);
-  }
 
   return data ? (
     <CepResults cepData={data} isLoading={isLoading} />
@@ -105,7 +100,8 @@ function CepResults({ cepData, isLoading }: { cepData: CepResponse[]; isLoading:
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy CEP" content={data.cep} />
-                  <Action.OpenInBrowser title="Open in Maps" url={`maps://?q=${data.cep}`} />
+                  <Action.OpenInBrowser title="Open in Apple Maps" url={`maps://?q=${data.cep}`} />
+                  <Action.OpenInBrowser title="Open in Google Maps" url={`https://www.google.com/maps?q=${data.cep}`} />
                 </ActionPanel>
               }
             />

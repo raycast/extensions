@@ -22,16 +22,9 @@ export default function Command(props: { arguments: Arguments.FindAddress }) {
   const cepRegex = /^[0-9]{5}-?[0-9]{3}$/;
   const isValidCep = cepRegex.test(cep);
 
-  const { data, isLoading, error } = useFetch<ApiResponse>(isValidCep ? `https://viacep.com.br/ws/${cep}/json/` : "", {
+  const { data, isLoading } = useFetch<ApiResponse>(isValidCep ? `https://viacep.com.br/ws/${cep}/json/` : "", {
     execute: isValidCep,
   });
-
-  if (error) {
-    console.error("Fetch error:", error);
-    return null;
-  }
-
-  console.log("Fetched data:", data);
 
   return (
     <List
@@ -51,7 +44,8 @@ export default function Command(props: { arguments: Arguments.FindAddress }) {
                 title="Copy Address"
                 content={`${data.logradouro}, ${data.bairro}, ${data.localidade}/${data.uf}`}
               />
-              <Action.OpenInBrowser title="Open in Maps" url={`maps://?q=${data.cep}`} />
+              <Action.OpenInBrowser title="Open in Apple Maps" url={`maps://?q=${data.cep}`} />
+              <Action.OpenInBrowser title="Open in Google Maps" url={`https://www.google.com/maps?q=${data.cep}`} />
             </ActionPanel>
           }
         />
