@@ -1,5 +1,5 @@
-import useQuickAI from "./api/quickAI";
+import useGemini from "./api/gemini";
 
 export default function Friendly(props) {
-  return useQuickAI(props, "Make the following text seem more friendly.");
+  return useGemini(props, "Make the following text seem more friendly.");
 }

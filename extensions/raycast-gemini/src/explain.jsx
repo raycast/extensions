@@ -1,5 +1,5 @@
-import useQuickAI from "./api/quickAI";
+import useGemini from "./api/gemini";
 
 export default function Explain(props) {
-  return useQuickAI(props, "Explain the following text as best as you can.");
+  return useGemini(props, "Explain the following text as best as you can.");
 }

@@ -1,5 +1,5 @@
-import useQuickAI from "./api/quickAI";
+import useGemini from "./api/gemini";
 
 export default function Summarize(props) {
-  return useQuickAI(props, "Summarize the given text.");
+  return useGemini(props, "Summarize the given text.");
 }

@@ -1,5 +1,5 @@
-import useQuickAI from "./api/quickAI";
+import useGemini from "./api/gemini";
 
 export default function Comment(props) {
-  return useQuickAI(props, "Add comments to the given code.");
+  return useGemini(props, "Add comments to the given code.");
 }

@@ -1,5 +1,5 @@
-import useQuickAI from "./api/quickAI";
+import useGemini from "./api/gemini";
 
 export default function Longer(props) {
-  return useQuickAI(props, "Make the following text longer without providing any extra information than what's given.");
+  return useGemini(props, "Make the following text longer without providing any extra information than what's given.");
 }
