@@ -116,6 +116,9 @@ function FillForm(props: FriendOrGroupProps) {
       props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
       postExpense(paramsJson).then(() => pop());
     },
+    initialValues: {
+      currency_code: defaultCurrency,
+    },
     validation: {
       description: FormValidation.Required,
       cost: (input) => {
