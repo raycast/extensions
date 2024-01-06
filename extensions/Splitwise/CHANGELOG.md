@@ -2,7 +2,9 @@
 
 ## [New Features] - 2024-01-04
 
-- Added support for OAuth sign-ins, removing the need for OAuth client setup by users.
+- Added support for OAuth sign-ins, removing the need for OAuth client setup by users
+- Added support for AUD
+- Added preference for default currency
 
 ## [Fixed Bug] - 2024-01-04
 
