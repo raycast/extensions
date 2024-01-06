@@ -56,7 +56,7 @@ function CreateFolderComponent() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleCreateFolder} />
+          <Action.SubmitForm title="Create Folder" onSubmit={handleCreateFolder} />
         </ActionPanel>
       }
     >
