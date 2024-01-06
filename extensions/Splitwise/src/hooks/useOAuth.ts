@@ -4,8 +4,8 @@ import { useRef } from "react";
 import { usePromise } from "@raycast/utils";
 
 const clientId = "T1iAo3TazydG1xjfyURTWGiUVj0x1KOAIeGNQQND";
-const tokenURL = "https://secure.splitwise.com/oauth/token";
-const authorizeURL = "https://secure.splitwise.com/oauth/authorize";
+const tokenURL = "https://raycast-pkce-proxy-splitwise.fly.dev/token";
+const authorizeURL = "https://raycast-pkce-proxy-splitwise.fly.dev/authorize";
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -62,36 +62,38 @@ async function authorize(): Promise<void> {
 }
 
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
-  console.log("fetch tokens");
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("code", authCode);
-  params.append("code_verifier", authRequest.codeVerifier);
-  params.append("grant_type", "authorization_code");
-  params.append("redirect_uri", authRequest.redirectURI);
-
   const response = await fetch(tokenURL, {
     method: "POST",
-    body: params,
+    body: JSON.stringify({
+      client_id: clientId,
+      code: authCode,
+      code_verifier: authRequest.codeVerifier,
+      grant_type: "authorization_code",
+      redirect_uri: authRequest.redirectURI,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
-  console.log(response);
-  console.log(response.text);
   if (!response.ok) {
     console.error("fetch tokens error:", await response.text());
     throw new Error(response.statusText);
   }
+
   return (await response.json()) as OAuth.TokenResponse;
 }
 
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const params = new URLSearchParams();
-  params.append("client_id", clientId);
-  params.append("refresh_token", refreshToken);
-  params.append("grant_type", "refresh_token");
-
   const response = await fetch(tokenURL, {
     method: "POST",
-    body: params,
+    body: JSON.stringify({
+      client_id: clientId,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
   if (!response.ok) {
     console.error("refresh tokens error:", await response.text());
