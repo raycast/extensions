@@ -8,7 +8,9 @@ const exec = promisify(childProcess.exec);
 // Find all of the repos in searchDir
 export async function findRepos(searchDir: string): Promise<string[]> {
   // Use fd if possible and fallback to find
-  const { stdout } = await exec(`fd -pgH '**/.git' '${searchDir}'`).catch((err) => {
+  const { stdout } = await exec(
+    `fd --glob --hidden --no-ignore --max-depth=2 --type=directory '.git' '${searchDir}'`
+  ).catch((err) => {
     if (err instanceof Error && (err as Error & { code: number }).code === 127) {
       return exec(`find '${searchDir}' -type d -path '*/.git' -maxdepth 2`);
     }
@@ -24,7 +26,7 @@ export async function findRepos(searchDir: string): Promise<string[]> {
 // Find all of the repos in searchDir that contain worktrees
 async function findReposWithWorktrees(searchDir: string): Promise<string[]> {
   // Use fd if possible and fallback to find
-  const { stdout } = await exec(`fd -pgH '**/.git/worktrees' '${searchDir}'`).catch((err) => {
+  const { stdout } = await exec(`fd --glob --full-path --hidden --no-ignore --max-depth=3 --type=directory '**/.git/worktrees' '${searchDir}'`).catch((err) => {
     if (err instanceof Error && (err as Error & { code: number }).code === 127) {
       return exec(`find '${searchDir}' -type d -path '*/.git/worktrees' -maxdepth 3`);
     }
@@ -75,7 +77,7 @@ async function getRepoWorktrees(repoDir: string): Promise<Worktree[]> {
       };
     })
     .filter(({ path }) => path !== repoDir);
-  return await Promise.all(
+  return Promise.all(
     worktrees.map(async (worktree) => {
       const { stdout } = await exec(`git -C '${worktree.path}' status -s`);
       return {
