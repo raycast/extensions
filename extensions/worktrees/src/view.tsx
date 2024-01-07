@@ -73,11 +73,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push title="Add Worktree" icon={Icon.Plus} target={<AddCommand />} />
-              <Action
-                title="Open Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
