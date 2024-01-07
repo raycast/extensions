@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codeforces-extension",
+  "title": "Codeforces-Extension",
+  "description": "Gives details about latest contests and details about any handle",
+  "icon": "command-icon.png",
+  "author": "harsh_varshney",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-handle",
+      "title": "Search Handle",
+      "subtitle": "Search a handle",
+      "description": "Provides details about a handle",
+      "mode": "view"
+    },
+    {
+      "name": "search-contest",
+      "title": "Search Contest",
+      "subtitle": "Seach Upcoming and Completed Contests",
+      "description": "Lists upcoming and completed contests",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
