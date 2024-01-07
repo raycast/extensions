@@ -95,17 +95,31 @@ export default function Command() {
 function FillForm(props: FriendOrGroupProps) {
   const { pop } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<{ input: string }>({
+  const { handleSubmit, itemProps } = useForm<{
+    description: string;
+    date: Date | null;
+    cost: string;
+    currency_code: string;
+  }>({
     onSubmit: (values) => {
       const paramsJson: ExpenseParams = {
-        input: `${values.input}`,
-        autosave: true,
+        description: values.description,
+        date: values.date,
+        cost: values.cost,
+        currency_code: values.currency_code,
+        split_equally: true,
       };
       props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
       postExpense(paramsJson).then(() => pop());
     },
     validation: {
-      input: FormValidation.Required,
+      description: FormValidation.Required,
+      cost: (input) => {
+        // check if input is integer or float with 1 or 2 decimal places
+        if (!input?.match(/^\d+(\.\d{1,2})?$/)) {
+          return "Decimal value (2 places)";
+        }
+      },
     },
   });
 
@@ -122,11 +136,19 @@ function FillForm(props: FriendOrGroupProps) {
         title={`${props.friend ? "Friend" : "Group"}`}
         text={props.friend ? [props.friend.first_name, props.friend.last_name].join(" ") : props.group.name}
       />
-      <Form.TextArea
-        title="Natural Language Input"
-        placeholder={props.friend ? `I owe ${props.friend.first_name} 12.82 for movie tickets` : `I paid 23 for pizza`}
-        {...itemProps.input}
-        info="Enter a description of the expense in plain English. We'll do the rest!"
+      <Form.TextField title="Description" {...itemProps.description} />
+      <Form.DatePicker title="Date of Expense" {...itemProps.date} />
+      <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
+        <Form.Dropdown.Item value="USD" title={`USD (${getCurrency_code("USD")})`} icon="💵" />
+        <Form.Dropdown.Item value="EUR" title={`EUR (${getCurrency_code("EUR")})`} icon="💶" />
+        <Form.Dropdown.Item value="GBP" title={`GBP (${getCurrency_code("GBP")})`} icon="💷" />
+        <Form.Dropdown.Item value="JPY" title={`JPY (${getCurrency_code("JPY")})`} icon="💴" />
+      </Form.Dropdown>
+      <Form.TextField
+        title="Cost"
+        placeholder="0.00"
+        {...itemProps.cost}
+        info="Expense will be split equally; assumes you are the payer."
       />
     </Form>
   );

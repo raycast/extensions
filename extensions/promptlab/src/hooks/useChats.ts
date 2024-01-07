@@ -50,7 +50,7 @@ export function useChats(): ChatManager {
 
     try {
       const advancedSettingsValues = JSON.parse(
-        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8")
+        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8"),
       );
       if ("chatDefaults" in advancedSettingsValues) {
         newChat = { ...advancedSettingsValues.chatDefaults, name: name, basePrompt: basePrompt, contextData: [] };

@@ -94,8 +94,8 @@ ${
         command.minNumFiles == "0"
           ? "N/A"
           : command.acceptedFileExtensions?.length && command.acceptedFileExtensions !== "None"
-          ? command.acceptedFileExtensions
-          : "Any"
+            ? command.acceptedFileExtensions
+            : "Any"
       } |
 | Creativity | ${command.temperature == undefined || command.temperature == "" ? "1.0" : command.temperature} |
 | Use File Metadata? | ${isTrueStr(command.useMetadata) ? "Yes" : "No"} |
@@ -120,7 +120,7 @@ ${(isCommand(command) ? command.setupConfig : JSON.parse(command.setupConfig)).f
     (field: NumberConfigField | BooleanConfigField | StringConfigField) =>
       `| ${field.name} | ${
         field.description == undefined || field.description.trim().length == 0 ? "None" : field.description
-      } | ${field.value == undefined || field.value.toString().trim().length == 0 ? "None" : field.value} |`
+      } | ${field.value == undefined || field.value.toString().trim().length == 0 ? "None" : field.value} |`,
   )
   .join("\n")}
 `

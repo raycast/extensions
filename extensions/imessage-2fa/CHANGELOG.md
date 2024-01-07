@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - 2023-12-13
+
+- Resolves an issue where only "read" messages are shown when `ignoreRead` option is disabled
+
 ## [Update] - 2023-11-14
 
 - Add option to ignore messages that have been read

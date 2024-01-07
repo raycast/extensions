@@ -77,3 +77,13 @@ export const runCommandInTerminal = async (command: string): Promise<string> => 
 export const cutoff = (str: string, cutoff: number) => {
   return `${str.substring(0, cutoff)}${str.length > cutoff ? "..." : ""}`;
 };
+
+/**
+ * Pluralizes a string based on a count.
+ * @param str The string to pluralize.
+ * @param count The count to base the pluralization on.
+ * @returns The pluralized string.
+ */
+export const pluralize = (str: string, count: number) => {
+  return `${str}${count === 1 ? "" : "s"}`;
+};

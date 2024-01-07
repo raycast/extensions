@@ -1,4 +1,4 @@
-import { Detail, LaunchProps, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Keyboard, LaunchProps, Toast, popToRoot, showToast } from "@raycast/api";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 import { OpenGraph } from "./type";
@@ -54,6 +54,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
   ${openGraph.description}
   `;
 
+  const ogKeys = Object.keys(openGraph.og) as (keyof typeof openGraph.og)[];
+  const twitterKeys = Object.keys(openGraph.twitter) as (keyof typeof openGraph.twitter)[];
+
   return (
     <Detail
       markdown={markdown}
@@ -96,6 +99,40 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.OpenGr
             <Detail.Metadata.Label title="twitter:image" text={openGraph.twitter.image} />
           )}
         </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard title="Copy Title" content={openGraph.title} />
+            <Action.CopyToClipboard title="Copy Description" content={openGraph.description} />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Open Graph">
+            {ogKeys.map((key) =>
+              openGraph.og[key] !== "none" ? (
+                <Action.CopyToClipboard
+                  key={key}
+                  title={`Copy og:${key}`}
+                  content={openGraph.og[key]}
+                  shortcut={{ modifiers: ["cmd"], key: key[0] as Keyboard.KeyEquivalent }}
+                />
+              ) : null,
+            )}
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Twitter">
+            {twitterKeys.map((key) =>
+              openGraph.twitter[key] !== "none" ? (
+                <Action.CopyToClipboard
+                  key={key}
+                  title={`Copy twitter:${key}`}
+                  content={openGraph.twitter[key]}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: key[0] as Keyboard.KeyEquivalent }}
+                />
+              ) : null,
+            )}
+          </ActionPanel.Section>
+        </ActionPanel>
       }
     />
   );
