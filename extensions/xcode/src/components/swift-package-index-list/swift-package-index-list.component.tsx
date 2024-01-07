@@ -10,7 +10,7 @@ import { XcodeService } from "../../services/xcode.service";
 /**
  * Swift Package Index List
  */
-export function SwiftPackageIndexList(): JSX.Element {
+export function SwiftPackageIndexList() {
   // Use is Xcode installed Promise
   const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled, [], {
     onError: () => Promise.resolve(),

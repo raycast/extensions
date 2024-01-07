@@ -9,7 +9,7 @@ import { XcodeAddSwiftPackage } from "../xcode-add-swift-package/xcode-add-swift
 export function SwiftPackageIndexListItem(props: {
   searchResult: SwiftPackageIndexSearchResult;
   isAddToXcodeActionVisible: boolean;
-}): JSX.Element {
+}) {
   return (
     <List.Item
       id={props.searchResult.id}

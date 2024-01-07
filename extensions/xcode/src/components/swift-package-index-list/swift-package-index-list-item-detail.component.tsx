@@ -6,7 +6,7 @@ import { fetchOpenGraphImageUrl } from "../../shared/fetch-open-graph-image-url"
 /**
  * Swift Package Index List Item
  */
-export function SwiftPackageIndexListItemDetail(props: { searchResult: SwiftPackageIndexSearchResult }): JSX.Element {
+export function SwiftPackageIndexListItemDetail(props: { searchResult: SwiftPackageIndexSearchResult }) {
   const imageUrl = usePromise(() => fetchOpenGraphImageUrl(props.searchResult.url), [], {
     onError: () => Promise.resolve(),
   });
