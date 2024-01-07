@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useCachedState, useForm, usePromise } from "@raycast/utils";
 import { addWorktree, findRepos, formatPath, getBranches, getRootDir } from "./helpers";
@@ -24,6 +24,7 @@ export default function Command() {
   const rootDir = getRootDir();
   const { data: repos, isLoading: isLoadingRepos } = useCachedPromise((searchDir) => findRepos(searchDir), [rootDir]);
   const [repoConfig, setRepoConfig] = useCachedState<Record<string, RepoConfig>>("repoConfig", {});
+  const submitting = useRef(false);
 
   const {
     values: { repo, prefix, branch, startBranch },
@@ -43,11 +44,21 @@ export default function Command() {
       startBranch: FormValidation.Required,
     },
     async onSubmit({ repo, prefix, branch, startBranch }) {
+      if (submitting.current) {
+        return;
+      }
+
+      submitting.current = true;
+
       setRepoConfig({ ...repoConfig, [repo]: { prefix, startBranch } });
 
       const path = getPath(repo, prefix, branch);
 
       try {
+        await showToast({
+          title: "Adding worktree...",
+          style: Toast.Style.Animated,
+        });
         await addWorktree(repo, path, branch, startBranch);
         await open(path, getPreferenceValues<ExtensionPreferences>().editorApp.bundleId);
         await popToRoot();
@@ -57,6 +68,8 @@ export default function Command() {
           message: err instanceof Error ? err.message : undefined,
           style: Toast.Style.Failure,
         });
+      } finally {
+        submitting.current = false;
       }
     },
   });
