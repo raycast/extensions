@@ -53,12 +53,7 @@ export default function Command() {
 
   const handleSubmit = (values: { uf: string; city: string; streetName: string }) => {
     if (!values.uf || !values.city || !values.streetName) {
-      showToast(Toast.Style.Failure, "Please enter street name, city, and state code");
-      return;
-    }
-
-    if (!STATE_CODES.includes(values.uf.toUpperCase())) {
-      showToast(Toast.Style.Failure, "Invalid state code");
+      showToast(Toast.Style.Failure, "Please enter street name and city");
       return;
     }
 
@@ -77,7 +72,11 @@ export default function Command() {
     >
       <Form.TextField id="streetName" title="Street Name" placeholder="Avenida Paulista" />
       <Form.TextField id="city" title="City" placeholder="São Paulo" />
-      <Form.TextField id="uf" title="State Code" placeholder="SP" />
+      <Form.Dropdown id="uf" title="State Code" placeholder="Select a state code" defaultValue="SP">
+        {STATE_CODES.map((code) => (
+          <Form.Dropdown.Item key={code} value={code} title={code} />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }
