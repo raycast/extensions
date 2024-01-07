@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { RequestInit } from "node-fetch";
+import { getTokens } from "./oauth";
 import { getPrefs } from "./prefs";
 
 const API_BASE = "https://api.omg.lol/";
@@ -29,11 +30,11 @@ async function request<T>(
   path: string,
   body: object | undefined = undefined,
 ): Promise<T> {
-  const prefs = getPrefs();
-  const accountBase = `address/${prefs.username}/`;
+  const tokenSet = await getTokens();
+  const accountBase = `address/${getPrefs().username}/`;
   const request: RequestInit = {
     headers: {
-      Authorization: `Bearer ${prefs.apiKey}`,
+      Authorization: `Bearer ${tokenSet.accessToken}`,
     },
     method: method,
   };
@@ -43,6 +44,7 @@ async function request<T>(
 
   const response = await fetch(API_BASE + accountBase + path, request);
   if (!response.ok) {
+    console.log(await response.text());
     throw new Error("Request failed");
   }
 

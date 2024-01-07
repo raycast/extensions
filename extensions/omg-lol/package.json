@@ -55,13 +55,6 @@
       "title": "Username",
       "description": "Your omg.lol username, the first part of your @omg.lol email address",
       "type": "textfield"
-    },
-    {
-      "name": "apiKey",
-      "required": true,
-      "title": "API Key",
-      "description": "Your omg.lol API key, found at https://home.omg.lol/account",
-      "type": "password"
     }
   ],
   "dependencies": {
