@@ -25,11 +25,8 @@ const calculateCharactersLeft = (name: string, stars: string): number => {
   return MAXIMUM_CHARACTERS - name.length - stars.length - 1;
 };
 
-const getDescription = (description = "", charactersLeft = 0): string => {
-  if (description.length > charactersLeft) {
-    return `${description?.substring(0, charactersLeft - 3)}...`;
-  }
-  return description;
+const getDescription = (description = "", charactersLeft = 0) => {
+  return description?.length > charactersLeft ? `${description.substring(0, charactersLeft - 3)}...` : description;
 };
 
 export const PackageListItem = ({ result }: PackageListItemProps): JSX.Element => {
@@ -39,7 +36,7 @@ export const PackageListItem = ({ result }: PackageListItemProps): JSX.Element =
   const stars = `★ ${formatCompactNumber(result.stargazers_count)}`;
 
   const charactersLeftForDescription = calculateCharactersLeft(result.full_name, stars);
-  const description = getDescription(result?.description, charactersLeftForDescription);
+  const description = getDescription(result?.description || "", charactersLeftForDescription);
 
   return (
     <List.Item
