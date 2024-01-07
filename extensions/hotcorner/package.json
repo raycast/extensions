@@ -4,7 +4,7 @@
   "title": "HotCorner",
   "description": "macOS Hot Corners quick settings",
   "icon": "hc.png",
-  "author": "MarcusFei",
+  "author": "mmmarcus",
   "categories": ["System"],
   "license": "MIT",
   "commands": [
