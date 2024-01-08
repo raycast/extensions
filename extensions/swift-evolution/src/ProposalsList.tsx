@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { fetchProposals } from "./domain";
 import ProposalGithubPage from "./ProposalGithubPage";
@@ -48,7 +49,7 @@ function mapStatusColorToRaycastColor(color: ViewModelStatusColor): Color {
 
 export default function ProposalsList() {
   const [state, setState] = useState<{ proposals: ProposalViewModel[] }>({ proposals: [] });
-  const [showsDetails, setShowDetails] = useState<boolean>(true);
+  const [showsDetails, setShowDetails] = useCachedState<boolean>("showDetails", true);
   const ListItem = showsDetails ? DetailedProposalList : SimpleProposalList;
 
   useEffect(() => {
@@ -84,14 +85,17 @@ export default function ProposalsList() {
 function SimpleProposalList(props: { proposal: ProposalViewModel; toggleDetails: () => void }) {
   const proposal = props.proposal;
   const { push } = useNavigation();
+  const accessories: List.Item.Accessory[] = [
+    { tag: { value: proposal.status, color: mapStatusColorToRaycastColor(proposal.statusColor) } },
+  ];
+  if (proposal.swiftVersion) {
+    accessories.push({ tag: { value: proposal.swiftVersion, color: Color.Orange } });
+  }
   return (
     <List.Item
       title={proposal.id}
       subtitle={proposal.title}
-      accessories={[
-        { tag: { value: proposal.status, color: mapStatusColorToRaycastColor(proposal.statusColor) } },
-        { tag: { value: proposal.swiftVersion, color: Color.Orange } },
-      ]}
+      accessories={accessories}
       keywords={proposal.keywords}
       actions={
         <ActionPanel>
@@ -101,11 +105,11 @@ function SimpleProposalList(props: { proposal: ProposalViewModel; toggleDetails:
             onAction={() => push(<ProposalGithubPage markdownUrl={proposal.markdownLink} prUrl={proposal.link} />)}
           />
           <Action title="Toggle Details" icon={Icon.AlignLeft} onAction={props.toggleDetails} />
-          <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={proposal.link} />
+          <Action.OpenInBrowser shortcut={Keyboard.Shortcut.Common.Open} url={proposal.link} />
           <Action.CopyToClipboard
             title="Copy URL"
             content={proposal.link}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
           />
         </ActionPanel>
       }
@@ -128,8 +132,12 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
             onAction={() => push(<ProposalGithubPage markdownUrl={proposal.markdownLink} prUrl={proposal.link} />)}
           />
           <Action title="Toggle Details" icon={Icon.AlignLeft} onAction={props.toggleDetails} />
-          <Action.OpenInBrowser url={proposal.link} />
-          <Action.CopyToClipboard title="Copy URL" content={proposal.link} />
+          <Action.OpenInBrowser shortcut={Keyboard.Shortcut.Common.Open} url={proposal.link} />
+          <Action.CopyToClipboard
+            title="Copy URL"
+            content={proposal.link}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
         </ActionPanel>
       }
       detail={
@@ -161,14 +169,12 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
               <List.Item.Detail.Metadata.Separator />
               {proposal.authors.map((author, index) => {
                 return (
-                  <>
-                    <List.Item.Detail.Metadata.Link
-                      title={index === 0 ? `Author${proposal.authors.length > 1 ? "s" : ""}` : ""}
-                      target={author.link}
-                      text={author.name}
-                      key={author.name}
-                    />
-                  </>
+                  <List.Item.Detail.Metadata.Link
+                    title={index === 0 ? `Author${proposal.authors.length > 1 ? "s" : ""}` : ""}
+                    target={author.link}
+                    text={author.name}
+                    key={author.name}
+                  />
                 );
               })}
               <List.Item.Detail.Metadata.Link
@@ -181,14 +187,12 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
                 <>
                   {proposal.implementations.map((implementation, index) => {
                     return (
-                      <>
-                        <List.Item.Detail.Metadata.Link
-                          title={index === 0 ? `Implementation${proposal.implementations.length > 1 ? "s" : ""}` : ""}
-                          target={implementation.url}
-                          text={implementation.title}
-                          key={implementation.url}
-                        />
-                      </>
+                      <List.Item.Detail.Metadata.Link
+                        title={index === 0 ? `Implementation${proposal.implementations.length > 1 ? "s" : ""}` : ""}
+                        target={implementation.url}
+                        text={implementation.title}
+                        key={implementation.url}
+                      />
                     );
                   })}
                 </>
