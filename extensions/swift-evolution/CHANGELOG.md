@@ -1,5 +1,13 @@
 # Swift-evolution Changelog
 
+## [Minor fixes] - 2024-01-08
+
+- Migrated to newest Raycast API version.
+- Fix React warnings for list items generated in loops.
+- Don't include accessory item if the Swift version is unknown.
+- Remember the state of the last opened list (whether simple or detailed).
+- Add standard keyboard shortcuts to open in browser and copy proposal URL.
+
 ## [Minor UI update] - 2023-02-02
 
 - Add a 🆕 emoji to proposal younger than 7 days
