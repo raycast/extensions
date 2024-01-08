@@ -82,6 +82,7 @@
     "@types/play-sound": "^1.1.0",
     "@types/qs": "^6.9.7",
     "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.18.0",
     "eslint": "^8.36.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.3",
