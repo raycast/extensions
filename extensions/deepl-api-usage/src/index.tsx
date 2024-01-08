@@ -10,6 +10,7 @@ import {
   LocalStorage,
   Color,
   Icon,
+  confirmAlert,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getProgressIcon } from "@raycast/utils";
@@ -39,8 +40,6 @@ const colorMapper = cond([
 
 export default function RecordList() {
   const [records, setRecords] = useState<Record[]>([]);
-
-  // const [forceUpdateKey, setForceUpdateKey] = useState(0);
 
   useEffect(() => {
     loadRecords();
@@ -155,7 +154,20 @@ export default function RecordList() {
                     }
                   />
                   {addRecordNode}
-                  <Action icon={Icon.Trash} title="Delete Record" onAction={() => handleDelete(record.id)} />
+                  <Action
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
+                    title="Delete Record"
+                    onAction={async () => {
+                      const flag = await confirmAlert({
+                        title: "Delete Record",
+                        message: "Confirm delete the record permanently?",
+                      });
+                      if (flag) {
+                        handleDelete(record.id);
+                      }
+                    }}
+                  />
                   {refreshNode}
                 </ActionPanel>
               }
