@@ -254,7 +254,15 @@ function ListItem({
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Team Time">
-            <Action.Push title="Add Teammember" icon={Icon.AddPerson} target={<AddTime onAdd={revalidate} />} />
+            <Action.Push
+              title="Add Teammember"
+              icon={Icon.AddPerson}
+              shortcut={{
+                modifiers: ["cmd"],
+                key: "n",
+              }}
+              target={<AddTime onAdd={revalidate} />}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
