@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo } from "react";
 import { useCachedState } from "@raycast/utils";
 import { Me, Workspace, TimeEntry, Project, Client, Tag, Task } from "../api";
 import {
+  useEffectWithCachedDeps,
   useMe,
   useWorkspaces,
   useTimeEntries,
@@ -69,19 +70,27 @@ export function TimeEntryContextProvider({ children }: { children: JSX.Element }
   const { tags, tagsError, isLoadingTags, revalidateTags } = useTags(workspaces);
   const { tasks, tasksError, isLoadingTasks, revalidateTasks } = useTasks(workspaces);
 
-  useEffect(() => {
-    revalidateProjects();
-    revalidateClients();
-    revalidateTags();
-    revalidateTasks();
-  }, [workspaces]);
+  useEffectWithCachedDeps(
+    () => {
+      revalidateProjects();
+      revalidateClients();
+      revalidateTags();
+      revalidateTasks();
+    },
+    [workspaces],
+    toggleArrayIsEqual,
+  );
 
   const [projectGroups, setProjectGroups] = useCachedState<ProjectGroup[]>("projectGroups", []);
 
-  useEffect(() => {
-    const projectGroups = createProjectGroups(projects, workspaces, clients);
-    setProjectGroups(projectGroups);
-  }, [projects, workspaces, clients]);
+  useEffectWithCachedDeps(
+    () => {
+      const projectGroups = createProjectGroups(projects, workspaces, clients);
+      setProjectGroups(projectGroups);
+    },
+    [projects, workspaces, clients],
+    toggleArrayIsEqual,
+  );
 
   const isLoadingArray = [
     isLoadingMe,
@@ -136,4 +145,8 @@ export function TimeEntryContextProvider({ children }: { children: JSX.Element }
       {children}
     </TimeEntryContext.Provider>
   );
+}
+
+function toggleArrayIsEqual<T extends { id: number }[]>(original: T, updated: T) {
+  return original.length === updated.length && original.every((item, i) => item.id == updated[i].id);
 }
