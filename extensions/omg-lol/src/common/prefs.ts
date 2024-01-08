@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
-  username: string;
+  username?: string;
 }
 
 export function getPrefs(): Preferences {

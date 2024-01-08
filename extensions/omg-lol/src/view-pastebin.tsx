@@ -7,9 +7,10 @@ import {
   showToast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import React, { useState } from "react";
+
 import { GET, DELETE } from "./common/api";
 import { PasteListResponse } from "./common/types";
-import { useState } from "react";
 import { getPrefs } from "./common/prefs";
 
 export default function Command() {

@@ -51,9 +51,9 @@
   "preferences": [
     {
       "name": "username",
-      "required": true,
-      "title": "Username",
-      "description": "Your omg.lol username, the first part of your @omg.lol email address",
+      "required": false,
+      "title": "Override username",
+      "description": "The omg.lol account name to use. If not specified, the earliest name in your omg.lol account will be used.",
       "type": "textfield"
     }
   ],

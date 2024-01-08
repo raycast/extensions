@@ -7,7 +7,8 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState } from "react";
+import React, { useState } from "react";
+
 import { POST } from "./common/api";
 import { PasteCreateResponse } from "./common/types";
 import { getPrefs } from "./common/prefs";

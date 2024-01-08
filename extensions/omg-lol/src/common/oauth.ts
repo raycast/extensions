@@ -1,5 +1,8 @@
 import fetch from "node-fetch";
 import { OAuth } from "@raycast/api";
+import { GET } from "./api";
+import { Account } from "./types";
+import { setAccountFromResponse } from "./account";
 
 const clientId = "5d01ff82a327f8edb8fb5c7839069300";
 const tokenURL = "https://raycast-pkce-proxy-omg-lol.fly.dev/token";
@@ -26,6 +29,7 @@ async function authorize(): Promise<void> {
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
       await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+      await updateAccountName();
     }
     return;
   }
@@ -38,6 +42,7 @@ async function authorize(): Promise<void> {
 
   const { authorizationCode } = await client.authorize(authRequest);
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));
+  await updateAccountName();
 }
 
 async function fetchTokens(
@@ -91,4 +96,9 @@ async function refreshTokens(
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
   return tokenResponse;
+}
+
+async function updateAccountName(): Promise<void> {
+  const accounts = (await GET("account/list/addresses", true)) as Account[];
+  await setAccountFromResponse(accounts);
 }

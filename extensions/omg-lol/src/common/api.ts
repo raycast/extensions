@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { RequestInit } from "node-fetch";
 import { getTokens } from "./oauth";
-import { getPrefs } from "./prefs";
+import { getAccount } from "./account";
 
 const API_BASE = "https://api.omg.lol/";
 
@@ -13,8 +13,11 @@ interface Response<T> {
   response: T;
 }
 
-export async function GET<T>(path: string): Promise<T> {
-  return request("GET", path);
+export async function GET<T>(
+  path: string,
+  account: boolean = false,
+): Promise<T> {
+  return request("GET", path, undefined, account);
 }
 
 export async function POST<T>(path: string, body: object): Promise<T> {
@@ -29,9 +32,10 @@ async function request<T>(
   method: string,
   path: string,
   body: object | undefined = undefined,
+  account: boolean = false,
 ): Promise<T> {
   const tokenSet = await getTokens();
-  const accountBase = `address/${getPrefs().username}/`;
+  const accountBase = account ? "" : `address/${await getAccount()}/`;
   const request: RequestInit = {
     headers: {
       Authorization: `Bearer ${tokenSet.accessToken}`,

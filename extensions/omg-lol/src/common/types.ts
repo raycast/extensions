@@ -18,6 +18,13 @@ export interface PURL {
   listed: number | undefined;
 }
 
+export interface Account {
+  address: string;
+  registration: {
+    unix_epoch_time: number;
+  };
+}
+
 // Request types
 export interface PasteCreateResponse extends WithMessage {
   title: string;
