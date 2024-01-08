@@ -1,5 +1,9 @@
 # Type Snob Changelog
 
+## 2024-01-08
+
+- Added zero-width space character
+
 ## 2023-04-01
 
 - Added more characters (fractions, daggers, and other marks).
