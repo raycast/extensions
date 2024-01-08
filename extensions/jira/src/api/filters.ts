@@ -12,12 +12,8 @@ type GetFiltersResponse = {
   values: Filter[];
 };
 
-type Preferences = {
-  sortByFavourite: boolean;
-};
-
 export async function getFilters(query: string) {
-  const { sortByFavourite } = getPreferenceValues<Preferences>();
+  const { sortByFavourite } = getPreferenceValues<Preferences.MyFilters>();
 
   const params = {
     maxResults: "100",
