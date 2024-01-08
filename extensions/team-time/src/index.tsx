@@ -1,4 +1,14 @@
-import { ActionPanel, List, Action, Icon, LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  LocalStorage,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Image,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { AddTime } from "./views/add-time";
 import { EditTime } from "./views/edit-time";
@@ -121,6 +131,7 @@ function ListItem({
       id={time.name}
       title={time.name}
       subtitle={differenceText}
+      icon={{ source: time.profileImage ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
       accessories={[
         {
           text: `Current time: ${timeTz.format(formatString)}`,
@@ -243,7 +254,7 @@ function ListItem({
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Team Time">
-            <Action.Push title="Add New Time" icon={Icon.AddPerson} target={<AddTime onAdd={revalidate} />} />
+            <Action.Push title="Add Teammember" icon={Icon.AddPerson} target={<AddTime onAdd={revalidate} />} />
           </ActionPanel.Section>
         </ActionPanel>
       }

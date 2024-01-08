@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import spacetime from "spacetime";
 
 export type TimeEntry = {
@@ -7,15 +7,25 @@ export type TimeEntry = {
   timezone: string;
   favorite: boolean;
   favoritePosition: number;
+  profileImage?: string;
 };
 
 interface TimeEntryFormProps {
   entry?: TimeEntry;
-  errors?: Record<string, string>;
   handleSubmit: (entry: TimeEntry) => void;
 }
 
-export function TimeEntryForm({ entry, errors, handleSubmit }: TimeEntryFormProps) {
+export function TimeEntryForm({ entry, handleSubmit }: TimeEntryFormProps) {
+  const [nameError, setNameError] = useState<string | undefined>();
+
+  function validateName(name: string) {
+    if (name.length == 0) {
+      setNameError("The field should't be empty!");
+    } else if (nameError && nameError.length > 0) {
+      setNameError(undefined);
+    }
+  }
+
   const timezonesByCountry = useMemo(() => {
     const timezones = Intl.supportedValuesOf("timeZone");
     return timezones.reduce((acc: Record<string, string[]>, tz) => {
@@ -35,24 +45,44 @@ export function TimeEntryForm({ entry, errors, handleSubmit }: TimeEntryFormProp
           <Action.SubmitForm
             title="Save"
             onSubmit={(changedValue) => {
+              if (nameError && nameError.length > 0) {
+                return;
+              }
+
+              console.log(changedValue.profileImage[0]);
+
               handleSubmit({
                 name: changedValue.name,
                 timezone: changedValue.timezone,
                 favorite: entry?.favorite ?? false,
                 favoritePosition: entry?.favoritePosition ?? 0,
+                profileImage: changedValue.profileImage[0],
               });
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Name" error={errors?.name} defaultValue={entry?.name} />
-      <Form.Dropdown
-        id="timezone"
-        title="Timezone"
-        error={errors?.timezone}
-        defaultValue={entry?.timezone ?? "Europe/Amsterdam"}
-      >
+      <Form.FilePicker
+        id="profileImage"
+        title="Profile Image"
+        info="If you move the image to a different location, you will need to reselect it."
+        defaultValue={entry?.profileImage ? [entry?.profileImage] : []}
+        allowMultipleSelection={false}
+      />
+      <Form.TextField
+        id="name"
+        title="Name"
+        error={nameError}
+        onChange={(value) => {
+          validateName(value);
+        }}
+        onBlur={(event) => {
+          validateName(event.target.value ?? "");
+        }}
+        defaultValue={entry?.name}
+      />
+      <Form.Dropdown id="timezone" title="Timezone" defaultValue={entry?.timezone ?? "Europe/Amsterdam"}>
         {Object.keys(timezonesByCountry).map((country) => (
           <Form.Dropdown.Section key={country} title={country}>
             {timezonesByCountry[country].map((tz) => {
