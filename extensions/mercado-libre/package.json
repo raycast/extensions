@@ -13,7 +13,6 @@
     {
       "name": "search-mercado-libre",
       "title": "Search Mercado Libre",
-      "subtitle": "Mercado Libre",
       "description": "Search Mercado Libre listings",
       "mode": "view"
     }
