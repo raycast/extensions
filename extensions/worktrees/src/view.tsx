@@ -89,18 +89,22 @@ export default function Command() {
                 accessories={worktree.dirty ? [{ text: { value: "Dirty", color: Color.Yellow } }] : undefined}
                 actions={
                   <ActionPanel>
-                    <Action.Open
-                      title={`Open in ${editorApp.name}`}
-                      icon={{ fileIcon: editorApp.path }}
-                      target={worktree.path}
-                      application={editorApp.bundleId}
-                    />
-                    <Action.Open
-                      title={`Open in ${terminalApp.name}`}
-                      icon={{ fileIcon: terminalApp.path }}
-                      target={worktree.path}
-                      application={terminalApp.bundleId}
-                    />
+                    {editorApp && (
+                      <Action.Open
+                        title={`Open in ${editorApp.name}`}
+                        icon={{ fileIcon: editorApp.path }}
+                        target={worktree.path}
+                        application={editorApp.bundleId}
+                      />
+                    )}
+                    {terminalApp && (
+                      <Action.Open
+                        title={`Open in ${terminalApp.name}`}
+                        icon={{ fileIcon: terminalApp.path }}
+                        target={worktree.path}
+                        application={terminalApp.bundleId}
+                      />
+                    )}
                     {!worktree.dirty && (
                       <Action
                         title="Remove Worktree"

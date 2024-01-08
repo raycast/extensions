@@ -60,7 +60,10 @@ export default function Command() {
           style: Toast.Style.Animated,
         });
         await addWorktree(repo, path, branch, startBranch);
-        await open(path, getPreferenceValues<ExtensionPreferences>().editorApp.bundleId);
+        const editor = getPreferenceValues<ExtensionPreferences>().editorApp;
+        if (editor) {
+          await open(path, editor.bundleId);
+        }
         await popToRoot();
       } catch (err) {
         await showToast({
