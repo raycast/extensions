@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { readdirSync } from "fs";
 import { homedir } from "os";
 import fs from "fs";
+import { SUPERWHISPER_BUNDLE_ID, checkSuperwhisperInstallation } from "./utils";
 
 interface State {
   items?: Mode[];
@@ -17,7 +18,7 @@ interface Mode {
 function handleSelection(item: Mode) {
   const modeKey = item.key;
   const url = `superwhisper://mode?key=${modeKey}`;
-  open(url, "com.superduper.superwhisper");
+  open(url, SUPERWHISPER_BUNDLE_ID);
 }
 
 export default function Command() {
@@ -25,6 +26,11 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchModes() {
+      const isInstalled = await checkSuperwhisperInstallation();
+      if (!isInstalled) {
+        return;
+      }
+
       try {
         // read mode json files from Documents/superwhisper/modes folder
 
