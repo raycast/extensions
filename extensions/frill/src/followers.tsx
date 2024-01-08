@@ -89,7 +89,7 @@ export default function Followers() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Open In Browser"
+                title="Open in Browser"
                 url={`${FRILL_URL}dashboard/users/${follower.idx.replace("follower_", "")}`}
                 icon={Icon.Globe}
               />
