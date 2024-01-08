@@ -13,6 +13,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "show-hide-dock",
+      "title": "Toggle Dock",
+      "description": "Show or hide the dock",
+      "mode": "no-view"
+    },
+    {
       "name": "terminal-history",
       "title": "Search History",
       "subtitle": "Terminal",
