@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "项目已进入慢维护状态，只接受 PR"
+    url: "https://github.com/tisfeng/Raycast-Easydict/issues/44"
+    about: "欢迎尝试我另一个词典翻译项目 Easydict"
