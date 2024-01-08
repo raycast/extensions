@@ -9,10 +9,20 @@ enum EventType {
 }
 
 type SportMonksPlayerStatsDetail = {
+  team_id: string;
   season: {
     name: string;
     pending: boolean;
     is_current: boolean;
+    league: {
+      sub_type:
+        | "domestic"
+        | "domestic_cup"
+        | "international"
+        | "cup_international"
+        | "play-offs"
+        | "friendly";
+    };
   };
   details: {
     id: string;
@@ -48,13 +58,19 @@ const useFetchPlayerStats = ({
 }) => {
   const { data, isLoading, revalidate } = useSportMonksClient({
     method: "get",
-    path: `/players/${id}?include=statistics.season;statistics.details&filters=playerStatisticDetailTypes:${formatEvents()};team=${teamId}`,
+    path: `/players/${id}?include=statistics.season.league;statistics.details&filters=playerStatisticDetailTypes:${formatEvents()};team=${teamId}`,
   });
 
   const response: SportMonksPlayerStatsDetail[] = data?.data?.statistics;
 
-  const stats = response?.map(
-    ({ season, details }: SportMonksPlayerStatsDetail) => {
+  const stats = response
+    ?.filter(
+      ({ team_id, details, season: { league } }) =>
+        team_id === teamId &&
+        details.length > 0 &&
+        league.sub_type === "domestic",
+    )
+    ?.map(({ season, details }: SportMonksPlayerStatsDetail) => {
       const { name } = season;
       const goals = details.find(isEvent(EventType.GOALS))?.value.total ?? 0;
       const assists =
@@ -66,8 +82,7 @@ const useFetchPlayerStats = ({
       const redCards =
         details.find(isEvent(EventType.RED_CARDS))?.value.total ?? 0;
       return [name, goals, assists, appearances, yellowCards, redCards];
-    },
-  );
+    });
 
   return { data: stats, isLoading, revalidate };
 };

@@ -5,6 +5,9 @@ import { Category, Team } from "@src/types";
 import { useState, ComponentProps } from "react";
 import { useFetchFixtures } from "@src/hooks";
 
+const MAX_LIST_SIZE = 6;
+const MAX_GRID_SIZE = 50;
+
 const TeamDetails = ({ team }: { team: Team }) => {
   const [category, setCategory] = useState<Category>(Category.All);
   const { data, isLoading } = useFetchFixtures(team.id, {
@@ -58,16 +61,16 @@ const TeamDetails = ({ team }: { team: Team }) => {
         <>
           {category === Category.All && (
             <>
-              <Fixtures {...upcomingProps} limit={6} />
-              <Fixtures {...prevProps} limit={6} />
-              <Squad type="list" team={team} limit={6} />
+              <Fixtures {...upcomingProps} limit={MAX_LIST_SIZE} />
+              <Fixtures {...prevProps} limit={MAX_LIST_SIZE} />
+              <Squad type="list" team={team} limit={MAX_LIST_SIZE} />
             </>
           )}
           {category === Category.UpcomingMatches && (
-            <Fixtures {...upcomingProps} limit={6} />
+            <Fixtures {...upcomingProps} limit={MAX_LIST_SIZE} />
           )}
           {category === Category.PrevFixtures && (
-            <Fixtures {...prevProps} limit={6} />
+            <Fixtures {...prevProps} limit={MAX_LIST_SIZE} />
           )}
         </>
       </List>
@@ -96,7 +99,7 @@ const TeamDetails = ({ team }: { team: Team }) => {
         </Grid.Dropdown>
       }
     >
-      <Squad type="grid" team={team} limit={20} />
+      <Squad type="grid" team={team} limit={MAX_GRID_SIZE} />
     </Grid>
   );
 };

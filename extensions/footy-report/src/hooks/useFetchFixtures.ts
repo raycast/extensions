@@ -43,6 +43,7 @@ type SportMonksVenueField = {
 };
 
 type SportMonksFixturesByRange = {
+  id: string;
   name: string;
   result_info: string;
   starting_at: string;
@@ -75,6 +76,7 @@ const useFetchFixtures = (teamId: string, selectFields: SelectFields) => {
     ?.map(({ league, participants, scores, tvstations, ...fixtureData }) => {
       const [host, away] = participants;
       return {
+        id: fixtureData.id,
         name: fixtureData.name,
         starting_at: new Date(fixtureData.starting_at),
         league: {

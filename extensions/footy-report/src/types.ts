@@ -15,7 +15,7 @@ export type Player = {
   name: string;
   date_of_birth: string;
   image_path: string;
-  jersey_number: number;
+  jersey_number: number | null;
   position?: string;
   country: Country;
 };
@@ -49,6 +49,7 @@ export enum Result {
 }
 
 export type Fixture = {
+  id: string;
   name: string;
   starting_at: Date;
   league: League;

@@ -61,7 +61,7 @@ const Squad = ({
                   <Grid.Item
                     {...sharedProps(player)}
                     content={{ source: player.image_path }}
-                    subtitle={player.jersey_number.toString()}
+                    subtitle={player.jersey_number?.toString() || "N/A"}
                     accessory={{ icon: { source: player.country.image_path } }}
                   />
                 );

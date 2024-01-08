@@ -9,7 +9,7 @@ type SelectFields = {
 };
 
 type SportMonksPlayerField = {
-  jersey_number: number;
+  jersey_number: number | null;
   player: {
     id: string;
     date_of_birth: string;

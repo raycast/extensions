@@ -2,6 +2,7 @@ import { Detail } from "@raycast/api";
 import { useFetchPlayerStats } from "@src/hooks";
 import { Player } from "@src/types";
 import { createMarkdownTable } from "@src/utils";
+import { differenceInCalendarYears, parse } from "date-fns";
 
 const PlayerDetails = ({
   player,
@@ -26,6 +27,11 @@ const PlayerDetails = ({
       : "Loading...."
   }
   `;
+  const date = parse(player.date_of_birth, "yyyy-dd-mm", new Date());
+  const age = differenceInCalendarYears(new Date(), date);
+  const dobLabel = player.date_of_birth
+    ? `${player.date_of_birth} (${age} years)`
+    : "N/A";
   return (
     <Detail
       isLoading={isLoading}
@@ -39,10 +45,7 @@ const PlayerDetails = ({
             text={`${player.country.name}`}
             icon={`${player.country.image_path}`}
           />
-          <Detail.Metadata.Label
-            title="Date of Birth"
-            text={`${player.date_of_birth}`}
-          />
+          <Detail.Metadata.Label title="Date of Birth" text={dobLabel} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Club Team"

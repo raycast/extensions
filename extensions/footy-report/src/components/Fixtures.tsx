@@ -49,7 +49,7 @@ const Fixtures = ({
           <List.Item
             icon={resultIcon}
             title={`${resultPrefix} ${fixture.name}`}
-            key={fixture.name}
+            key={fixture.id}
             subtitle={`${fixture.venue}`}
             actions={
               resultIcon === Icon.Calendar && (
