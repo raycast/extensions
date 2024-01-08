@@ -12,8 +12,15 @@ import { revalidateStorage } from "./helpers/revalidateStorage";
 dayjs.extend(duration);
 
 function ListView() {
-  const { isLoading, timeEntries, runningTimeEntry, projects, projectGroups, revalidateRunningTimeEntry } =
-    useTimeEntryContext();
+  const {
+    isLoading,
+    timeEntries,
+    runningTimeEntry,
+    projects,
+    projectGroups,
+    revalidateRunningTimeEntry,
+    revalidateTimeEntries,
+  } = useTimeEntryContext();
 
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
@@ -66,7 +73,12 @@ function ListView() {
       throttle
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
-      {runningTimeEntry && <RunningTimeEntry {...{ runningTimeEntry }} />}
+      {runningTimeEntry && (
+        <RunningTimeEntry
+          project={projects.find(({ id }) => runningTimeEntry.project_id === id)}
+          {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }}
+        />
+      )}
       <List.Section title="Actions">
         <List.Item
           title="Create a new time entry"

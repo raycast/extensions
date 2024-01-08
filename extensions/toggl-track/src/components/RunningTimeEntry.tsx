@@ -1,17 +1,21 @@
-import { useMemo } from "react";
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 import useCurrentTime from "../hooks/useCurrentTime";
-import { stopTimeEntry, TimeEntry } from "../api";
-import { useTimeEntryContext } from "../context/TimeEntryContext";
+import { stopTimeEntry, TimeEntry, Project } from "../api";
 
-function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry }) {
-  const { projects, revalidateRunningTimeEntry, revalidateTimeEntries } = useTimeEntryContext();
+interface RunningTimeEntryProps {
+  runningTimeEntry: TimeEntry;
+  project?: Project;
+  revalidateRunningTimeEntry: () => void;
+  revalidateTimeEntries: () => void;
+}
 
-  const project = useMemo(() => {
-    return projects.find((project) => project.id == runningTimeEntry.project_id);
-  }, [runningTimeEntry, projects]);
-
+function RunningTimeEntry({
+  runningTimeEntry,
+  project,
+  revalidateRunningTimeEntry,
+  revalidateTimeEntries,
+}: RunningTimeEntryProps) {
   const currentTime = useCurrentTime();
 
   const stopRunningTimeEntry = async () => {
