@@ -45,11 +45,14 @@ export function TimeEntryForm({ entry, handleSubmit }: TimeEntryFormProps) {
           <Action.SubmitForm
             title="Save"
             onSubmit={(changedValue) => {
-              if (nameError && nameError.length > 0) {
+              if (changedValue.name.length == 0) {
+                setNameError("The field should't be empty!");
                 return;
               }
 
-              console.log(changedValue.profileImage[0]);
+              if (nameError && nameError.length > 0) {
+                return;
+              }
 
               handleSubmit({
                 name: changedValue.name,
@@ -63,13 +66,13 @@ export function TimeEntryForm({ entry, handleSubmit }: TimeEntryFormProps) {
         </ActionPanel>
       }
     >
-      <Form.FilePicker
+      {/* <Form.FilePicker
         id="profileImage"
         title="Profile Image"
         info="If you move the image to a different location, you will need to reselect it."
         defaultValue={entry?.profileImage ? [entry?.profileImage] : []}
         allowMultipleSelection={false}
-      />
+      /> */}
       <Form.TextField
         id="name"
         title="Name"

@@ -131,7 +131,7 @@ function ListItem({
       id={time.name}
       title={time.name}
       subtitle={differenceText}
-      icon={{ source: time.profileImage ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
+      // icon={{ source: time.profileImage ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
       accessories={[
         {
           text: `Current time: ${timeTz.format(formatString)}`,

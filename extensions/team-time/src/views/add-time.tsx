@@ -13,6 +13,7 @@ export function AddTime({ onAdd }: AddTimeProps) {
     const newTimes = times ? JSON.parse(times) : [];
 
     newTimes.push({
+      profileImage: entry.profileImage,
       name: entry.name,
       timezone: entry.timezone,
       favorite: false,
