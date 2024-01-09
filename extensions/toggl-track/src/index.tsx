@@ -24,9 +24,7 @@ function ListView() {
 
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
-  const timeEntriesWithUniqueProjectAndDescription = timeEntries
-    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
-    .reduce(
+  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
       (acc, timeEntry) =>
         acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
           ? acc

@@ -1,7 +1,8 @@
 import { get, post, patch } from "./togglClient";
 
-export function getTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
-  return get<TimeEntry[]>(`/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`);
+export async function getTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
+  const timeEntries = await get<TimeEntry[]>(`/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`);
+  return timeEntries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
 }
 
 export function getRunningTimeEntry() {
