@@ -150,7 +150,7 @@ function FillForm(props: FriendOrGroupProps) {
         <Form.Dropdown.Item value="EUR" title={`EUR (${getCurrency_code("EUR")})`} icon="💶" />
         <Form.Dropdown.Item value="GBP" title={`GBP (${getCurrency_code("GBP")})`} icon="💷" />
         <Form.Dropdown.Item value="JPY" title={`JPY (${getCurrency_code("JPY")})`} icon="💴" />
-        <Form.Dropdown.Item value="AUD" title={`JPY (${getCurrency_code("AUD")})`} icon="💵" />
+        <Form.Dropdown.Item value="AUD" title={`AUD (${getCurrency_code("AUD")})`} icon="💵" />
       </Form.Dropdown>
       <Form.TextField
         title="Cost"
