@@ -1,0 +1,23 @@
+# Ignore build output
+build/
+
+# Ignore dependencies
+node_modules/
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Ignore compiled binaries
+*.exe
+*.dll
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.bak
+
+# Ignore MacSystem File
+.DS_Store
