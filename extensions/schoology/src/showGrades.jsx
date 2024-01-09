@@ -16,42 +16,37 @@ export default function Command() {
     const fetchCoursesText = async () => {
       try {
         const users_response = await client.request("GET", "/app-user-info");
-        const users_data = await users_response;
         const uid = users_response.api_uid.toString();
-
-        const user_grades = await client.request("GET", `/users/${uid}/grades`);
-        const user_grades_data = await user_grades;
-        const finalGradesSet = new Set();
-
-        user_grades_data.section.forEach((section) => {
-          section.final_grade.forEach((gradeObj) => {
-            finalGradesSet.add(gradeObj.grade);
-          });
-        });
-
-        const finalGrades = Array.from(finalGradesSet);
-        setGradesArr(finalGrades);
 
         const course_response = await client.request("GET", `/users/${uid}/sections`);
         const course_data = await course_response;
-        const courses_sections = course_data.section.map((course) => course.id);
 
         const coursesHashmap = {};
         const coursesIconHashmap = {};
+        const gradesMap = {};
 
-        course_data.section.forEach((course, index) => {
-          coursesHashmap[courses_sections[index]] = course.course_title;
-          coursesIconHashmap[courses_sections[index]] = course.subject_area;
-        });
+        for (let course of course_data.section) {
+          try {
+            const id = course.id;
+            const courseTitle = course.course_title;
+            const subjectArea = course.subject_area;
+
+            coursesHashmap[id] = courseTitle;
+            coursesIconHashmap[id] = subjectArea;
+
+            const user_grades = await client.request("GET", `/users/${uid}/grades/?section_id=${id}`);
+            const grade = user_grades.section[0].final_grade[1].grade;
+
+            gradesMap[id] = grade;
+          } catch (error) {
+            console.error(`Failed to fetch grade for course ${course.course_title}: ${error}`);
+          }
+        }
 
         setCoursesIconHashmap2(coursesIconHashmap);
         setCoursesHashmap2(coursesHashmap);
-
-        const course_grades = await client.request("GET", `/users/${uid}/grades`);
-        const course_grades_data = await course_grades;
-        const course_grades_ids = course_grades_data.section.map((course) => course.section_id);
-
-        setCoursesText(course_grades_ids);
+        setGradesArr(gradesMap);
+        setCoursesText(Object.keys(gradesMap));
       } catch (error) {
         popToRoot();
         showToast({
@@ -61,6 +56,7 @@ export default function Command() {
             "Head to [district].schoology.com/api and paste in your newly generated key and secret into this extension's preferences.",
         });
         setCoursesText([]);
+        console.error(error);
       }
     };
 
@@ -140,27 +136,27 @@ export default function Command() {
         .map((course) => (
           <List.Item
             title={coursesHashmap2[course] || course}
-            icon={getIconBasedOnNumber(coursesIconHashmap2[course]) || Icon.Text}
+            icon={Icon.CircleProgress100}
             accessories={[
               {
                 tag: {
-                  value: getLetterGrade(gradesArr[coursesText.indexOf(course)]),
-                  color: getColorBasedOnGrade(getLetterGrade(Number(gradesArr[coursesText.indexOf(course)]))),
+                  value: getLetterGrade(gradesArr[course]),
+                  color: getColorBasedOnGrade(getLetterGrade(Number(gradesArr[course]))),
                 },
               },
 
-              { text: `${gradesArr[coursesText.indexOf(course)] + "%"}` },
+              { text: `${gradesArr[course]}%` },
             ]}
             actions={
               <ActionPanel>
                 <Action.Paste
                   title="Paste Grade"
-                  content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[coursesText.indexOf(course)]}%`}
+                  content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[course]}%`}
                 />
 
                 <Action.CopyToClipboard
                   title="Copy Grade"
-                  content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[coursesText.indexOf(course)]}%`}
+                  content={`${coursesHashmap2[course]}:\nPercentage: ${gradesArr[course]}%`}
                 />
               </ActionPanel>
             }

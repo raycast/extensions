@@ -133,6 +133,8 @@ const importCSVData = async (data: string[][], importMethod: string) => {
       const timesOpenedIndex = fieldNames.indexOf("timesOpened");
       const dateCreatedIndex = fieldNames.indexOf("dateCreated");
       const iconColorIndex = fieldNames.indexOf("iconColor");
+      const tagsIndex = fieldNames.indexOf("tags");
+      const notesIndex = fieldNames.indexOf("notes");
       const averageExecutionTimeIndex = fieldNames.indexOf("averageExecutionTime");
 
       return {
@@ -148,6 +150,14 @@ const importCSVData = async (data: string[][], importMethod: string) => {
         timesOpened: timesOpenedIndex == -1 ? undefined : parseInt(row[timesOpenedIndex]),
         dateCreated: dateCreatedIndex == -1 ? undefined : row[dateCreatedIndex],
         iconColor: iconColorIndex == -1 ? undefined : row[iconColorIndex],
+        tags:
+          tagsIndex == -1
+            ? undefined
+            : row[tagsIndex]
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter((tag) => tag.length > 0),
+        notes: notesIndex == -1 ? undefined : row[notesIndex],
         averageExecutionTime: averageExecutionTimeIndex == -1 ? undefined : parseInt(row[averageExecutionTimeIndex]),
       };
     });
