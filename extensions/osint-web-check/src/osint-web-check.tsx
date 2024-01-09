@@ -1,4 +1,3 @@
-import * as React from "react";
 import { List, useNavigation } from "@raycast/api";
 import { UrlInput } from "./UrlInput";
 import { UrlIp } from "./UrlIp";
@@ -26,7 +25,7 @@ export default function OsintWebCheck() {
 }
 
 function CheckDetails({ url }: { url: string }) {
-  const hostname = React.useMemo(() => new URL(url).hostname, [url]);
+  const hostname = new URL(url).hostname;
 
   return (
     <List isShowingDetail navigationTitle={`Web Check for ${hostname}`}>
