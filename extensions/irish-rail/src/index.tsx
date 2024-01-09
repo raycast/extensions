@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, List } from "@raycast/api";
+import { Action, ActionPanel, Form, List } from "@raycast/api";
 import { Train, getTrains } from "./trains";
 import { useState, useEffect } from "react";
 
