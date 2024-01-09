@@ -19,34 +19,41 @@ function GetTimesForm() {
   }
 
   function formView() {
-    return <Form
-      actions={<ActionPanel>
-        <Action.SubmitForm title="Get Times" onSubmit={handleSubmit} />
-      </ActionPanel>}
-    >
-      <Form.Dropdown id="origin" title="Origin">
-        {options()}
-      </Form.Dropdown>
-      <Form.Dropdown id="destination" title="Destination">
-        <Form.Dropdown.Item value="" title="Select..." />
-        {options()}
-      </Form.Dropdown>
-    </Form>;
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm title="Get Times" onSubmit={handleSubmit} />
+          </ActionPanel>
+        }
+      >
+        <Form.Dropdown id="origin" title="Origin">
+          {options()}
+        </Form.Dropdown>
+        <Form.Dropdown id="destination" title="Destination">
+          <Form.Dropdown.Item value="" title="Select..." />
+          {options()}
+        </Form.Dropdown>
+      </Form>
+    );
   }
-  
+
   function trainsView() {
-    return <List isLoading={false}>
-      <List.Section title={`Station: ${origin ?? 'Trains'}`}>
-      {trainsData?.map((train, index) => (
-        <List.Item
-          key={index}
-          id={train.Traincode}
-          title={`${train.Duein} minutes`}
-          subtitle={`Origin: ${train.Origin}`}
-          accessories={[{ tag: `Destination: ${train.Destination}` }, { text: `ETA: ${train.Destinationtime}` }]} />
-      ))}
-      </List.Section>
-    </List>;
+    return (
+      <List isLoading={false}>
+        <List.Section title={`Station: ${origin ?? "Trains"}`}>
+          {trainsData?.map((train, index) => (
+            <List.Item
+              key={index}
+              id={train.Traincode}
+              title={`${train.Duein} minutes`}
+              subtitle={`Origin: ${train.Origin}`}
+              accessories={[{ tag: `Destination: ${train.Destination}` }, { text: `ETA: ${train.Destinationtime}` }]}
+            />
+          ))}
+        </List.Section>
+      </List>
+    );
   }
 
   useEffect(() => {
