@@ -1,10 +1,10 @@
 import { Color, Form, Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useModel from "../../hooks/useModel";
-import { Chat, CommandOptions, ExtensionPreferences } from "../../utils/types";
-import { runActionScript, runReplacements } from "../../utils/command-utils";
+import { Chat, CommandOptions, ExtensionPreferences } from "../../lib/types";
+import { runActionScript, runReplacements } from "../../lib/command-utils";
 import { useChats } from "../../hooks/useChats";
-import runModel from "../../utils/runModel";
+import runModel from "../../lib/runModel";
 import { useFiles as useFileContents } from "../../hooks/useFiles";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
 import { ChatActionPanel } from "./actions/ChatActionPanel";

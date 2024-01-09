@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { getCommandJSON } from "../../../utils/command-utils";
-import { Command, ExtensionPreferences, StoreCommand, isCommand } from "../../../utils/types";
+import { getCommandJSON } from "../../../lib/command-utils";
+import { Command, ExtensionPreferences, StoreCommand, isCommand } from "../../../lib/types";
 import path from "path";
 import * as fs from "fs";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../lib/action-utils";
 
 /**
  * Action panel section for actions related to copying command data to the clipboard.

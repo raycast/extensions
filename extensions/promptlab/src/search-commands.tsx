@@ -1,7 +1,7 @@
 import { ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import CommandResponse from "./components/Commands/CommandResponse";
-import { Command, ExtensionPreferences, searchPreferences } from "./utils/types";
+import { Command, ExtensionPreferences, searchPreferences } from "./lib/types";
 import CategoryDropdown from "./components/CategoryDropdown";
 import { useCommands } from "./hooks/useCommands";
 import CommandListDetail from "./components/Commands/CommandListDetail";
@@ -12,7 +12,7 @@ import { CommandControlsActionsSection } from "./components/Commands/actions/Com
 import { useAdvancedSettings } from "./hooks/useAdvancedSettings";
 import { useCachedState } from "@raycast/utils";
 import { AdvancedActionSubmenu } from "./components/actions/AdvancedActionSubmenu";
-import { COMMAND_CATEGORIES } from "./utils/constants";
+import { COMMAND_CATEGORIES } from "./lib/constants";
 
 export default function SearchCommand(props: { arguments: { commandName: string; queryInput: string } }) {
   const { commandName, queryInput } = props.arguments;

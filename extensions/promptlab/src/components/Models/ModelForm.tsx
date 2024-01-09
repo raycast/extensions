@@ -9,11 +9,11 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { Model, ModelManager } from "../../utils/types";
+import { Model, ModelManager } from "../../lib/types";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { randomUUID } from "crypto";
-import { ADVANCED_SETTINGS_FILENAME } from "../../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME } from "../../lib/constants";
 import path from "path";
 import fs from "fs";
 

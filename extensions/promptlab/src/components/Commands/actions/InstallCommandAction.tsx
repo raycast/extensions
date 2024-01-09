@@ -1,7 +1,7 @@
 import { Action, Icon, LocalStorage, Toast, showToast } from "@raycast/api";
-import { Command, StoreCommand } from "../../../utils/types";
+import { Command, StoreCommand } from "../../../lib/types";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../lib/action-utils";
 
 /**
  * Action to install a command from the PromptLab store.

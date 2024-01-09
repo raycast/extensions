@@ -1,4 +1,4 @@
-import { CustomPlaceholder } from "../utils/types";
+import { CustomPlaceholder } from "../lib/types";
 
 /**
  * Default custom placeholders that are included with the extension as examples.

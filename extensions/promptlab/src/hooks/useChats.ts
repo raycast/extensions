@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Chat, ChatManager, ChatStatistics, ExtensionPreferences } from "../utils/types";
+import { Chat, ChatManager, ChatStatistics, ExtensionPreferences } from "../lib/types";
 import * as fs from "fs";
 import { Color, Icon, LocalStorage, environment, getPreferenceValues } from "@raycast/api";
-import { installDefaults } from "../utils/file-utils";
+import { installDefaults } from "../lib/file-utils";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME } from "../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME } from "../lib/constants";
 
 export function useChats(): ChatManager {
   const [chats, setChats] = useState<Chat[]>([]);

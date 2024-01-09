@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Alert, Icon, LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
-import { Command, StoreCommand, isCommand, isStoreCommand, isTrueStr } from "../../../utils/types";
+import { Command, StoreCommand, isCommand, isStoreCommand, isTrueStr } from "../../../lib/types";
 import CommandForm from "../CommandForm";
-import { QUICKLINK_URL_BASE } from "../../../utils/constants";
-import { updateCommand } from "../../../utils/command-utils";
+import { QUICKLINK_URL_BASE } from "../../../lib/constants";
+import { updateCommand } from "../../../lib/command-utils";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { anyActionsEnabled, getActionShortcut } from "../../../utils/action-utils";
+import { anyActionsEnabled, getActionShortcut } from "../../../lib/action-utils";
 
 /**
  * Section for actions related to modifying commands (editing, deleting, etc.).

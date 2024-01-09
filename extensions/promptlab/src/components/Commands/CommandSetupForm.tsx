@@ -6,7 +6,7 @@ import {
   CommandOptions,
   NumberConfigField,
   StringConfigField,
-} from "../../utils/types";
+} from "../../lib/types";
 import { Fragment, useEffect, useState } from "react";
 
 export default function CommandSetupForm(props: {

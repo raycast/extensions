@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, showToast, Icon, useNavigation, Color, environment, Toast } from "@raycast/api";
-import { Chat, ChatManager, ChatStatistics } from "../../utils/types";
+import { Chat, ChatManager, ChatStatistics } from "../../lib/types";
 import { useEffect, useState } from "react";
-import { filterString, getTextOfWebpage } from "../../utils/context-utils";
-import runModel from "../../utils/runModel";
+import { filterString, getTextOfWebpage } from "../../lib/context-utils";
+import runModel from "../../lib/runModel";
 import { getFileContent } from "../../hooks/useFiles";
 import { AdvancedActionSubmenu } from "../actions/AdvancedActionSubmenu";
 import { defaultAdvancedSettings } from "../../data/default-advanced-settings";

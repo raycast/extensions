@@ -8,9 +8,9 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useEffect } from "react";
-import { Command } from "./utils/types";
+import { Command } from "./lib/types";
 import { useCachedState } from "@raycast/utils";
-import { installDefaults } from "./utils/file-utils";
+import { installDefaults } from "./lib/file-utils";
 
 interface CommandPreferences {
   showNewChatShortcut: boolean;

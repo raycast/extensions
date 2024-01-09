@@ -8,7 +8,7 @@ import {
   StringConfigField,
   isStoreCommand,
   isTrueStr,
-} from "../../utils/types";
+} from "../../lib/types";
 
 export default function CommandListDetail(props: { command: Command | StoreCommand }) {
   const { command } = props;

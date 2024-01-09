@@ -1,10 +1,10 @@
 import { AI, environment, getPreferenceValues } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-import { ExtensionPreferences, Model, JSONObject } from "../utils/types";
+import { ExtensionPreferences, Model, JSONObject } from "../lib/types";
 import { useEffect, useRef, useState } from "react";
 import fetch, { Response } from "node-fetch";
 import { useModels } from "./useModels";
-import { filterString } from "../utils/context-utils";
+import { filterString } from "../lib/context-utils";
 
 /**
  * Gets the text response from the model endpoint.

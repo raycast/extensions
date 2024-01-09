@@ -1,5 +1,5 @@
 import { AI, LocalStorage, environment, getPreferenceValues } from "@raycast/api";
-import { ExtensionPreferences, JSONObject, Model } from "../utils/types";
+import { ExtensionPreferences, JSONObject, Model } from "./types";
 import fetch from "node-fetch";
 
 /**
