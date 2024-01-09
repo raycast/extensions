@@ -3,16 +3,16 @@ import { useFetch } from "@raycast/utils";
 import { parse } from "valibot";
 import { response_schema } from "./schema";
 import type { ResponseType } from "./schema";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 function Docs({
   docs_map,
   base_url,
-  base_title,
+  icon,
 }: {
   docs_map: Map<string, (ResponseType & object)["blocks"]>;
   base_url: string;
-  base_title: string;
+  icon: string;
 }) {
   return [...docs_map.entries()].map(([key, block]) => {
     return (
@@ -23,8 +23,8 @@ function Docs({
           if (!title) return null;
           return (
             <List.Item
-              icon="svelte-logo-square.png"
-              title={`[${base_title}] ${title}`}
+              icon={icon}
+              title={title}
               key={JSON.stringify(sublink)}
               subtitle={sublink.content}
               actions={
@@ -51,21 +51,27 @@ export default function Command() {
   const svelte_items = parse(response_schema, unparsed_svelte_items);
   const sveltekit_items = parse(response_schema, unparsed_sveltekit_items);
 
-  const svelte_mapped = new Map();
-  for (const block of svelte_items?.blocks ?? []) {
-    if (!svelte_mapped.has(block.breadcrumbs[0])) {
-      svelte_mapped.set(block.breadcrumbs[0], []);
+  const svelte_mapped = useMemo(() => {
+    const svelte_mapped = new Map();
+    for (const block of svelte_items?.blocks ?? []) {
+      if (!svelte_mapped.has(block.breadcrumbs[0])) {
+        svelte_mapped.set(block.breadcrumbs[0], []);
+      }
+      svelte_mapped.get(block.breadcrumbs[0]).push(block);
     }
-    svelte_mapped.get(block.breadcrumbs[0]).push(block);
-  }
+    return svelte_mapped;
+  }, [svelte_items]);
 
-  const sveltekit_mapped = new Map();
-  for (const block of sveltekit_items?.blocks ?? []) {
-    if (!sveltekit_mapped.has(block.breadcrumbs[0])) {
-      sveltekit_mapped.set(block.breadcrumbs[0], []);
+  const sveltekit_mapped = useMemo(() => {
+    const sveltekit_mapped = new Map();
+    for (const block of sveltekit_items?.blocks ?? []) {
+      if (!sveltekit_mapped.has(block.breadcrumbs[0])) {
+        sveltekit_mapped.set(block.breadcrumbs[0], []);
+      }
+      sveltekit_mapped.get(block.breadcrumbs[0]).push(block);
     }
-    sveltekit_mapped.get(block.breadcrumbs[0]).push(block);
-  }
+    return sveltekit_mapped;
+  }, [sveltekit_items]);
 
   return (
     <List
@@ -83,8 +89,12 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filter !== "kit" && <Docs docs_map={svelte_mapped} base_url="https://svelte.dev" base_title="Svelte" />}
-      {filter !== "svelte" && <Docs docs_map={sveltekit_mapped} base_url="https://kit.svelte.dev" base_title="Kit" />}
+      {filter !== "kit" && (
+        <Docs docs_map={svelte_mapped} base_url="https://svelte.dev" icon={"svelte-logo-square.png"} />
+      )}
+      {filter !== "svelte" && (
+        <Docs docs_map={sveltekit_mapped} base_url="https://kit.svelte.dev" icon="sveltekit-logo-square.png" />
+      )}
     </List>
   );
 }
