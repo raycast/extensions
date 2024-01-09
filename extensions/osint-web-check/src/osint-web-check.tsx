@@ -25,7 +25,14 @@ export default function OsintWebCheck() {
 }
 
 function CheckDetails({ url }: { url: string }) {
-  const hostname = new URL(url).hostname;
+  // safely parse out just hostname, fallback to full url in the unexpected case of URL construction failure
+  const hostname = (() => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return url;
+    }
+  })();
 
   return (
     <List isShowingDetail navigationTitle={`Web Check for ${hostname}`}>
