@@ -61,7 +61,6 @@ export default function Command() {
     fetchModes();
   }, []);
 
-  console.log(state);
   return (
     <List isLoading={state?.loading}>
       {state?.items &&
