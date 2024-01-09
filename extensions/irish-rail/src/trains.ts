@@ -1,50 +1,38 @@
-import { XMLParser } from "fast-xml-parser";
-import axios from "axios";
-import crypto from "crypto";
-import https from "https";
-
-const allowLegacyRenegotiationforNodeJsOptions = {
-  httpsAgent: new https.Agent({
-    secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
-  }),
-};
-
-function makeRequest(url: string) {
-  return axios({
-    ...allowLegacyRenegotiationforNodeJsOptions,
-    url,
-    headers: {
-      Accept: "application/xml",
-    },
-    method: "GET",
-  });
-}
+import { makeRequest } from "./request";
+import { parseXML } from "./xml";
 
 const apiUrl = (origin: string) =>
   `https://api.irishrail.ie/realtime/realtime.asmx/getStationDataByNameXML?StationDesc=${origin}`;
 
 export interface Train {
-  Traincode: string;
-  Origin: string;
-  Duein: string;
-  Destination: string;
-  Destinationtime: string;
+  trainCode: string;
+  origin: string;
+  dueIn: string;
+  destination: string;
+  destinationTime: string;
 }
 
-function dueAsc(a: Train, b: Train) {
+export type TrainData = {
+  [P in keyof Train as Capitalize<Lowercase<P>>]: string;
+}
+
+function dueAsc(a: TrainData, b: TrainData) {
   const aDueIn = parseInt(a.Duein);
   const bDueIn = parseInt(b.Duein);
   if (aDueIn < bDueIn) return -1;
 }
 
-export async function getTrains(origin: string, destination?: string): Promise<Train[]> {
+export async function getTrains(origin: string, destination?: string): Promise<TrainData[]> {
   const result = await makeRequest(apiUrl(origin));
-  const body = result.data;
-  const parser = new XMLParser();
-  const parsedJson = parser.parse(body);
+  const parsed = parseXML(result.data);
+
+  if (!parsed?.ArrayOfObjStationData?.objStationData?.length) {
+    return [];
+  }
+
   const destinationTrains = destination
-    ? parsedJson.ArrayOfObjStationData.objStationData.filter((train: Train) => train.Destination === destination)
-    : parsedJson.ArrayOfObjStationData.objStationData;
+    ? parsed.ArrayOfObjStationData.objStationData.filter((train: TrainData) => train.Destination === destination)
+    : parsed.ArrayOfObjStationData.objStationData;
 
   if (!destinationTrains?.length) {
     return [];
