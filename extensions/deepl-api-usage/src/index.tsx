@@ -108,7 +108,7 @@ export default function RecordList() {
       ) : (
         <>
           {inUsedRecords.length > 0 && (
-            <List.Section title="In Used Keys" >
+            <List.Section title="In Used Keys">
               {inUsedRecords.map((record, index) => {
                 return (
                   <RecordItem
@@ -126,7 +126,7 @@ export default function RecordList() {
             </List.Section>
           )}
           {unusedRecords.length > 0 && (
-            <List.Section title="Unused Keys" >
+            <List.Section title="Unused Keys">
               {unusedRecords.map((record, index) => {
                 return (
                   <RecordItem
