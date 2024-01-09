@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Irish Rail Departures",
-      "description": "",
+      "description": "Queries the Irish Rail API for trains due in the next 90 minutes by station and destination.",
       "mode": "view"
     }
   ],

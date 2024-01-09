@@ -24,12 +24,11 @@ function GetTimesForm() {
           id={train.Traincode}
           title={`${train.Duein} minutes`}
           subtitle={`From: ${train.Origin}`}
-          accessories={[ { tag: `Destination: ${train.Destination}` }, { text: `ETA: ${train.Destinationtime}` } ]}
+          accessories={[{ tag: `Destination: ${train.Destination}` }, { text: `ETA: ${train.Destinationtime}` }]}
         />
       ))}
     </List>
-  )
-   : (
+  ) : (
     <Form
       actions={
         <ActionPanel>
@@ -37,8 +36,8 @@ function GetTimesForm() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="origin" title="Origin" defaultValue="Dublin Pearse"/>
-      <Form.TextField id="destination" title="Destination" defaultValue="Maynooth"/>       
+      <Form.TextField id="origin" title="Origin" defaultValue="Dublin Pearse" />
+      <Form.TextField id="destination" title="Destination" defaultValue="Maynooth" />
     </Form>
   );
 }
