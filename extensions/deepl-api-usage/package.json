@@ -5,6 +5,9 @@
   "description": "Manage your DeepL API usage with ease.",
   "icon": "logo.png",
   "author": "jaredliu233",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data",
     "Productivity"
