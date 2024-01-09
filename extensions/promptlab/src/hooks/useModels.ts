@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Model } from "../lib/types";
 import { Color, Icon, LocalStorage } from "@raycast/api";
-import { installDefaults } from "../lib/file-utils";
+import { installDefaults } from "../lib/files/file-utils";
 
 export function useModels() {
   const [models, setModels] = useState<Model[]>([]);

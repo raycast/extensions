@@ -1,7 +1,7 @@
 import { closeMainWindow, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Command, CommandOptions, ERRORTYPE } from "../../lib/types";
-import { runActionScript, runReplacements } from "../../lib/command-utils";
+import { runActionScript, runReplacements } from "../../lib/commands/command-utils";
 import useModel from "../../hooks/useModel";
 import CommandDetailView from "./CommandDetailView";
 import CommandChatView from "../Chats/CommandChatView";

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Alert, Icon, LocalStorage, Toast, confirmAlert, sh
 import { Command, StoreCommand, isCommand, isStoreCommand, isTrueStr } from "../../../lib/types";
 import CommandForm from "../CommandForm";
 import { QUICKLINK_URL_BASE } from "../../../lib/constants";
-import { updateCommand } from "../../../lib/command-utils";
+import { updateCommand } from "../../../lib/commands/command-utils";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import { anyActionsEnabled, getActionShortcut } from "../../../lib/action-utils";
 

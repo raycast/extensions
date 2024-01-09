@@ -1,5 +1,5 @@
 import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-toolkit";
-import runModel from "../../../../lib/runModel";
+import runModel from "../../../models/runModel";
 
 /**
  * Replaces prompt placeholders with the response to the prompt.

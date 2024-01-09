@@ -118,31 +118,31 @@ export type CommandOptions = {
   speakResponse?: boolean;
 };
 
-interface ConfigField {
+type ConfigField = {
   name: string;
   description: string;
   guideText: string;
-}
+};
 
-export interface StringConfigField extends ConfigField {
+export type StringConfigField = ConfigField & {
   defaultValue: string;
   maxLength: string;
   minLength: string;
   regex: string;
   value?: string;
-}
+};
 
-export interface BooleanConfigField extends ConfigField {
+export type BooleanConfigField = ConfigField & {
   defaultValue: boolean;
   value?: boolean;
-}
+};
 
-export interface NumberConfigField extends ConfigField {
+export type NumberConfigField = ConfigField & {
   defaultValue: string;
   min: string;
   max: string;
   value?: string;
-}
+};
 
 /**
  * A PromptLab command setup configuration.
@@ -990,17 +990,17 @@ export type PersistentVariable = {
 /**
  * The output of a data provider such as a script or fetch request.
  */
-export interface DataProviderOutput {
+export type DataProviderOutput = {
   /**
    * The full text of the data provider's output.
    */
   stringValue: string;
-}
+};
 
 /**
  * The output of an image data provider.
  */
-export interface ImageData extends DataProviderOutput {
+export type ImageData = DataProviderOutput & {
   /**
    * Text extracted from the image.
    */
@@ -1045,12 +1045,12 @@ export interface ImageData extends DataProviderOutput {
    * The EXIF data of the image in JSON string format.
    */
   imageEXIFData?: string;
-}
+};
 
 /**
  * The output of a PDF data provider.
  */
-export interface PDFData extends DataProviderOutput {
+export type PDFData = DataProviderOutput & {
   /**
    * Text extracted from the PDF without using OCR.
    */
@@ -1060,14 +1060,14 @@ export interface PDFData extends DataProviderOutput {
    * Text extracted from the PDF using OCR.
    */
   pdfOCRText: string;
-}
+};
 
 /**
  * The output of an audio data provider.
  */
-export interface AudioData extends DataProviderOutput {
+export type AudioData = DataProviderOutput & {
   /**
    * Labels for sounds identified in the audio.
    */
   soundClassifications: string;
-}
+};

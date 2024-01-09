@@ -10,7 +10,7 @@ import {
 import { useEffect } from "react";
 import { Command } from "./lib/types";
 import { useCachedState } from "@raycast/utils";
-import { installDefaults } from "./lib/file-utils";
+import { installDefaults } from "./lib/files/file-utils";
 
 interface CommandPreferences {
   showNewChatShortcut: boolean;

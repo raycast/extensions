@@ -11,7 +11,7 @@ import {
   spreadsheetFileExtensions,
 } from "../data/file-extensions";
 import { ScriptRunner, execScript } from "../lib/scripts";
-import { getAudioDetails, getImageDetails, unzipToTemp } from "../lib/file-utils";
+import { getAudioDetails, getImageDetails, unzipToTemp } from "../lib/files/file-utils";
 import { filterString } from "../lib/context-utils";
 import mammoth from "mammoth";
 import xlsx from "xlsx";

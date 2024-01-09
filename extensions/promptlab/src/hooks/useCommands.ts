@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Command } from "../lib/types";
 import { Color, Icon, LocalStorage } from "@raycast/api";
-import { installDefaults } from "../lib/file-utils";
+import { installDefaults } from "../lib/files/file-utils";
 import crypto from "crypto";
 
 export function useCommands() {

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { getCommandJSON } from "../../../lib/command-utils";
+import { getCommandJSON } from "../../../lib/commands/command-utils";
 import { Command, ExtensionPreferences, StoreCommand, isCommand } from "../../../lib/types";
 import path from "path";
 import * as fs from "fs";

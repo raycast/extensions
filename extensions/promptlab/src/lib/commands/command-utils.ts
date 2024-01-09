@@ -1,11 +1,11 @@
-import { objcImports, replaceAllHandler, rselectHandler, splitHandler, trimHandler } from "./scripts";
+import { objcImports, replaceAllHandler, rselectHandler, splitHandler, trimHandler } from "../scripts";
 import { exec } from "child_process";
-import { Command, CommandOptions, StoreCommand } from "./types";
+import { Command, CommandOptions, StoreCommand } from "../types";
 import { LocalStorage, AI } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { PLApplicator } from "placeholders-toolkit";
-import { PromptLabPlaceholders, loadCustomPlaceholders } from "../lib/placeholders";
-import { loadAdvancedSettingsSync } from "./storage-utils";
+import { PromptLabPlaceholders, loadCustomPlaceholders } from "../placeholders";
+import { loadAdvancedSettingsSync } from "../storage-utils";
 
 /**
  * Runs the action script of a PromptLab command, providing the AI response as the `response` variable.

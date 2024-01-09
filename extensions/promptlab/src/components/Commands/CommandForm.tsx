@@ -27,7 +27,7 @@ import {
   OpenAdvancedSettingsAction,
   OpenPlaceholdersGuideAction,
 } from "../actions/OpenFileActions";
-import { updateCommand } from "../../lib/command-utils";
+import { updateCommand } from "../../lib/commands/command-utils";
 import * as fs from "fs";
 import path from "path";
 import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../lib/constants";

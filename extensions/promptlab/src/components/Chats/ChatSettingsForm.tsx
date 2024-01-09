@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, showToast, Icon, useNavigation, Color, envir
 import { Chat, ChatManager, ChatStatistics } from "../../lib/types";
 import { useEffect, useState } from "react";
 import { filterString, getTextOfWebpage } from "../../lib/context-utils";
-import runModel from "../../lib/runModel";
+import runModel from "../../lib/models/runModel";
 import { getFileContent } from "../../hooks/useFiles";
 import { AdvancedActionSubmenu } from "../actions/AdvancedActionSubmenu";
 import { defaultAdvancedSettings } from "../../data/default-advanced-settings";
