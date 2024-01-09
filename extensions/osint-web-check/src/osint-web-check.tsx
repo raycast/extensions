@@ -1,4 +1,4 @@
-import { List, useNavigation } from "@raycast/api";
+import { Detail, LaunchProps, List, useNavigation } from "@raycast/api";
 import { UrlInput } from "./UrlInput";
 import { UrlIp } from "./UrlIp";
 import { SSLCheck } from "./SSLCheck";
@@ -11,9 +11,27 @@ import { Hsts } from "./Hsts";
 import { Redirects } from "./Redirects";
 import { Firewall } from "./Firewall";
 import { WhoIs } from "./WhoIs";
+import useSWR from "swr";
+import { checkUrl } from "./utils/checkUrl";
+import { addHttps } from "./utils/addHttps";
 
-export default function OsintWebCheck() {
+export default function OsintWebCheck({
+  arguments: { url: consumerUrl },
+}: LaunchProps<{ arguments: { url: string } }>) {
+  const url = addHttps(consumerUrl);
+  // Artificially throttle so UI isn't jarring
+  const { isLoading, data } = useSWR(["validate-url", url], ([, url]) => Promise.all([checkUrl(url), wait(300)]));
+  const isUrlValid = data?.[0];
+
   const navigation = useNavigation();
+
+  if (isLoading) {
+    return <Detail markdown={`## Validating ${url}...`} isLoading={true} />;
+  }
+
+  if (isUrlValid) {
+    return <CheckDetails url={url} />;
+  }
 
   return (
     <UrlInput
@@ -50,3 +68,5 @@ function CheckDetails({ url }: { url: string }) {
     </List>
   );
 }
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
