@@ -32,7 +32,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="View transactions"
+                  title="View Transactions"
                   target={<TransactionsList account={account} />}
                 />
               </ActionPanel>
@@ -46,7 +46,7 @@ export default function Command() {
       {showNoAccess && (
         <List.EmptyView
           icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
-          title="No Monzo access"
+          title="No Monzo Access"
           description="Open the Monzo app to allow Raycast to access your accounts."
         />
       )}
