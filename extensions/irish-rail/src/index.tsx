@@ -18,6 +18,19 @@ function GetTimesForm() {
     return stations?.map((station, index) => <Form.Dropdown.Item key={index} value={station} title={station} />);
   }
 
+  function trainInfoView(train: TrainData, index: number) {
+    const { Destination, Traincode, Destinationtime, Duein, Origin } = train;
+    return (
+      <List.Item
+        key={index}
+        id={Traincode}
+        title={`${Duein} minutes`}
+        subtitle={`Origin: ${Origin}`}
+        accessories={[{ tag: `Destination: ${Destination}` }, { text: `ETA: ${Destinationtime}` }]}
+      />
+    );
+  }
+
   function formView() {
     return (
       <Form
@@ -42,15 +55,9 @@ function GetTimesForm() {
     return (
       <List isLoading={false}>
         <List.Section title={`Station: ${origin ?? "Trains"}`}>
-          {trainsData?.map((train, index) => (
-            <List.Item
-              key={index}
-              id={train.Traincode}
-              title={`${train.Duein} minutes`}
-              subtitle={`Origin: ${train.Origin}`}
-              accessories={[{ tag: `Destination: ${train.Destination}` }, { text: `ETA: ${train.Destinationtime}` }]}
-            />
-          ))}
+          {trainsData?.map((train, index) => {
+            return trainInfoView(train, index);
+          })}
         </List.Section>
       </List>
     );
