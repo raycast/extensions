@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Chek API Usage",
+      "title": "Check API Usage",
       "description": "Check your DeepL API usage",
       "mode": "view"
     }
