@@ -128,14 +128,12 @@ export default function Command() {
         <Form.Description
           title="Summary"
           text={`A new worktree will be added to ${formatPath(repo)} at ${formatPath(
-            getPath(repo, prefix, branch)
+            getPath(repo, prefix, branch),
           )} with the branch ${branch} off of ${startBranch}`}
         />
       )}
       <Form.Dropdown title="Repo" isLoading={isLoadingRepos} storeValue {...itemProps.repo}>
-        {repos?.map((repo) => (
-          <Form.Dropdown.Item key={repo} value={repo} title={formatPath(repo)} />
-        ))}
+        {repos?.map((repo) => <Form.Dropdown.Item key={repo} value={repo} title={formatPath(repo)} />)}
       </Form.Dropdown>
       <Form.TextField
         title="Directory Prefix"
