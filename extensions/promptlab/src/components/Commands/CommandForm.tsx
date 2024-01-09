@@ -11,14 +11,14 @@ import {
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useModels } from "../../hooks/useModels";
+import { Command } from "../../lib/commands/types";
 import {
   BooleanConfigField,
-  Command,
   CommandConfig,
-  ExtensionPreferences,
   NumberConfigField,
   StringConfigField,
-} from "../../utils/types";
+} from "../../lib/commands/config/types";
+import { ExtensionPreferences } from "../../lib/preferences/types";
 import { Fragment, useEffect, useState } from "react";
 import * as crypto from "crypto";
 import { useRef } from "react";
@@ -27,12 +27,12 @@ import {
   OpenAdvancedSettingsAction,
   OpenPlaceholdersGuideAction,
 } from "../actions/OpenFileActions";
-import { updateCommand } from "../../utils/command-utils";
+import { updateCommand } from "../../lib/commands/command-utils";
 import * as fs from "fs";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../lib/constants";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
-import { isActionEnabled } from "../../utils/action-utils";
+import { isActionEnabled } from "../../lib/action-utils";
 import { PLChecker } from "placeholders-toolkit";
 import { PromptLabPlaceholders, loadCustomPlaceholders } from "../../lib/placeholders";
 

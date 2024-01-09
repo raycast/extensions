@@ -3,7 +3,7 @@ import { useModels } from "./hooks/useModels";
 import ModelForm from "./components/Models/ModelForm";
 import { useAdvancedSettings } from "./hooks/useAdvancedSettings";
 import ManageModelsActionPanel from "./components/Models/actions/ManageModelsActionsPanel";
-import { Model } from "./utils/types";
+import { Model } from "./lib/models/types";
 
 export default function ManageModels() {
   const models = useModels();

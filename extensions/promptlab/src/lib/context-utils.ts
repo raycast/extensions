@@ -1,6 +1,7 @@
 import * as os from "os";
 import { getPreferenceValues } from "@raycast/api";
-import { ExtensionPreferences, JSONObject } from "./types";
+import { JSONObject } from "./common/types";
+import { ExtensionPreferences } from "./preferences/types";
 import fetch from "node-fetch";
 import { runAppleScript } from "@raycast/utils";
 

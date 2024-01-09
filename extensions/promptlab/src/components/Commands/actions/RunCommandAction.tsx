@@ -1,8 +1,9 @@
 import { Action, Icon } from "@raycast/api";
-import { Command, StoreCommand, isCommand, isTrueStr } from "../../../utils/types";
+import { isTrueStr } from "../../../lib/common/types";
+import { Command, StoreCommand, isCommand } from "../../../lib/commands/types";
 import CommandResponse from "../CommandResponse";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../lib/action-utils";
 
 /**
  * Action to run a command.
