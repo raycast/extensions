@@ -9,7 +9,7 @@ const exec = promisify(childProcess.exec);
 export async function findRepos(searchDir: string): Promise<string[]> {
   // Use fd if possible and fallback to find
   const { stdout } = await exec(
-    `fd --glob --hidden --no-ignore --max-depth=2 --type=directory '.git' '${searchDir}'`
+    `fd --glob --hidden --no-ignore --max-depth=2 --type=directory '.git' '${searchDir}'`,
   ).catch((err) => {
     if (err instanceof Error && (err as Error & { code: number }).code === 127) {
       return exec(`find '${searchDir}' -type d -path '*/.git' -maxdepth 2`);
@@ -27,7 +27,7 @@ export async function findRepos(searchDir: string): Promise<string[]> {
 async function findReposWithWorktrees(searchDir: string): Promise<string[]> {
   // Use fd if possible and fallback to find
   const { stdout } = await exec(
-    `fd --glob --full-path --hidden --no-ignore --max-depth=3 --type=directory '**/.git/worktrees' '${searchDir}'`
+    `fd --glob --full-path --hidden --no-ignore --max-depth=3 --type=directory '**/.git/worktrees' '${searchDir}'`,
   ).catch((err) => {
     if (err instanceof Error && (err as Error & { code: number }).code === 127) {
       return exec(`find '${searchDir}' -type d -path '*/.git/worktrees' -maxdepth 3`);
@@ -86,7 +86,7 @@ async function getRepoWorktrees(repoDir: string): Promise<Worktree[]> {
         ...worktree,
         dirty: stdout.trim().length > 0,
       };
-    })
+    }),
   );
 }
 
@@ -104,7 +104,7 @@ export async function addWorktree(
   repoDir: string,
   worktreeDir: string,
   branch: string,
-  defaultBranch: string
+  defaultBranch: string,
 ): Promise<void> {
   await exec(`git -C '${repoDir}' worktree add '${worktreeDir}' -b '${branch}' '${defaultBranch}'`);
 }
