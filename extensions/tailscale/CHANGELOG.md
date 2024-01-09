@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Fixes] - 2023-12-29
+
+- Fix account switcher command ([#9916](https://github.com/raycast/extensions/issues/9916))
+
 ## [Improved error handling] - 2023-09-30
 
 - Added more explicit error views for when Tailscale isn't running, isn't connected, or isn't installed

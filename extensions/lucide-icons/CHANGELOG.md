@@ -1,5 +1,10 @@
 # Lucide Icons Changelog
 
+## [Update] - 2023-12-27
+
+- Updated extension
+- Updated to latest Lucide Icons version
+
 ## [Update] - 2023-04-12
 
 - Updated extension
