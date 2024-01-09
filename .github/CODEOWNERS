@@ -447,6 +447,7 @@
 /extensions/google-trends                            @kkange
 /extensions/google-workspace                         @thomaslombart @mathieudutour
 /extensions/gopass                                   @bake
+/extensions/gradle-plugins                           @alex-w0
 /extensions/grafana                                  @Lp-Francois
 /extensions/grafbase                                 @mlafeldt @notrab
 /extensions/grammari-x                               @hakob8956
@@ -1125,7 +1126,7 @@
 /extensions/thesaurus                                @ABukSwienty
 /extensions/things                                   @loris @andreaselia @thomaslombart
 /extensions/thrasher-magazine                        @whitespacecode
-/extensions/ticktick                                 @viduycheung @viduycheung @Alireza29675
+/extensions/ticktick                                 @viduycheung @viduycheung @Alireza29675 @Yakitrak
 /extensions/tim                                      @tmwrnr
 /extensions/time-logger                              @aramikuto
 /extensions/time-traveling-world-clock               @himarky
@@ -1210,6 +1211,7 @@
 /extensions/vc-ru-news                               @khlebobul
 /extensions/vercast                                  @MaxLeiter @gleich @dgrcode
 /extensions/verify-number                            @xmok
+/extensions/viacep                                   @xilopaint
 /extensions/vim-bro                                  @ajaypremshankar
 /extensions/virtualbox-power-switch                  @DiogoFerrer
 /extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very @theherk @TobiasYin @yossizahn @eduwass
