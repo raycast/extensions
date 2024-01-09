@@ -20,12 +20,16 @@ export default function RecordItem({
   onModify,
   onDelete,
   onRefresh,
+  onMarkInUse,
+  onMarkUnused,
 }: {
   record: Record;
   onCreate: (record: Record) => void;
   onModify: (record: Record) => void;
   onDelete: (id: string) => void;
   onRefresh: () => void;
+  onMarkInUse: (id: string) => void;
+  onMarkUnused: (id: string) => void;
 }) {
   const used = record.usage.usedCharacters / record.usage.totalCharacters;
 
@@ -52,6 +56,23 @@ export default function RecordItem({
       actions={
         <ActionPanel>
           <Action.Push icon={Icon.Eye} title="View Details" target={<RecordDetail record={record} />} />
+          {record.inUse ? (
+            <Action
+              icon={Icon.Xmark}
+              title="Mark As Unused"
+              onAction={() => {
+                onMarkUnused(record.id);
+              }}
+            />
+          ) : (
+            <Action
+              icon={Icon.Check}
+              title="Mark As In Use"
+              onAction={() => {
+                onMarkInUse(record.id);
+              }}
+            />
+          )}
           <Action.Push
             title="Modify Record"
             icon={Icon.Pencil}

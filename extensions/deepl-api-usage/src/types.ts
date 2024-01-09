@@ -10,6 +10,7 @@ export interface Record {
   description: string;
   apiKey: string;
   usage: Usage;
+  inUse?: boolean;
 }
 
 export interface FormValues {

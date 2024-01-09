@@ -5,6 +5,7 @@ import { Record } from "./types";
 import RecordItem from "./components/RecordItem";
 import { fetchUsage, getRecordsFromStorage } from "./util";
 import EditRecordForm from "./components/EditRecordForm";
+import { partition } from "lodash";
 
 export default function RecordList() {
   const [records, setRecords] = useState<Record[]>([]);
@@ -43,22 +44,42 @@ export default function RecordList() {
     loadRecords();
   };
 
+  const onModify = async (record: Record) => {
+    const updatedRecords = records.map((r) => (r.id === record!.id ? record : r));
+    await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
+    showToast(Toast.Style.Success, "Record Modified");
+    loadRecords();
+  };
+
+  const onCreate = async (newRecord: Record) => {
+    const updatedRecords = [...records, newRecord];
+    await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
+    showToast(Toast.Style.Success, "Record added");
+    loadRecords();
+  };
+
+  const onMarkInUse = async (id: string) => {
+    const updatedRecords = records.map((record) => ({
+      ...record,
+      inUse: record.id === id ? true : record.inUse,
+    }));
+    await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
+    showToast(Toast.Style.Success, "Record Marked In Use");
+    setRecords(updatedRecords);
+  };
+
+  const onMarkUnused = async (id: string) => {
+    const updatedRecords = records.map((record) => ({
+      ...record,
+      inUse: record.id === id ? false : record.inUse,
+    }));
+    await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
+    showToast(Toast.Style.Success, "Record Marked Unused");
+    setRecords(updatedRecords);
+  };
+
   const addRecordNode = (
-    <Action.Push
-      title="Add Record"
-      icon={Icon.Plus}
-      target={
-        <EditRecordForm
-          onConfirm={async (newRecord) => {
-            const updatedRecords = [...records, newRecord];
-            await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
-            showToast(Toast.Style.Success, "Record added");
-            loadRecords();
-          }}
-          isNew
-        />
-      }
-    />
+    <Action.Push title="Add Record" icon={Icon.Plus} target={<EditRecordForm onConfirm={onCreate} isNew />} />
   );
 
   const refreshNode = (
@@ -70,6 +91,8 @@ export default function RecordList() {
       }}
     />
   );
+
+  const [inUsedRecords, unusedRecords] = partition(records, (record) => record.inUse);
 
   return (
     <List
@@ -83,28 +106,44 @@ export default function RecordList() {
       {records.length === 0 ? (
         <List.EmptyView title="No Records Found" description="Add your first DeepL API Key record" />
       ) : (
-        records.map((record, index) => {
-          return (
-            <RecordItem
-              key={index}
-              record={record}
-              onModify={async (record) => {
-                const updatedRecords = records.map((r) => (r.id === record!.id ? record : r));
-                await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
-                showToast(Toast.Style.Success, "Record Modified");
-                loadRecords();
-              }}
-              onCreate={async (newRecord) => {
-                const updatedRecords = [...records, newRecord];
-                await LocalStorage.setItem("records", JSON.stringify(updatedRecords));
-                showToast(Toast.Style.Success, "Record added");
-                loadRecords();
-              }}
-              onDelete={handleDelete}
-              onRefresh={loadRecords}
-            ></RecordItem>
-          );
-        })
+        <>
+          {inUsedRecords.length > 0 && (
+            <List.Section title="In Used Keys" >
+              {inUsedRecords.map((record, index) => {
+                return (
+                  <RecordItem
+                    key={index}
+                    record={record}
+                    onModify={onModify}
+                    onCreate={onCreate}
+                    onDelete={handleDelete}
+                    onRefresh={loadRecords}
+                    onMarkInUse={onMarkInUse}
+                    onMarkUnused={onMarkUnused}
+                  />
+                );
+              })}
+            </List.Section>
+          )}
+          {unusedRecords.length > 0 && (
+            <List.Section title="Unused Keys" >
+              {unusedRecords.map((record, index) => {
+                return (
+                  <RecordItem
+                    key={index}
+                    record={record}
+                    onModify={onModify}
+                    onCreate={onCreate}
+                    onDelete={handleDelete}
+                    onRefresh={loadRecords}
+                    onMarkInUse={onMarkInUse}
+                    onMarkUnused={onMarkUnused}
+                  />
+                );
+              })}
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );
