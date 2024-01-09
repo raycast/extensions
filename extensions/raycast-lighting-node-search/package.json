@@ -11,11 +11,20 @@
       "name": "search-node",
       "title": "Search Node",
       "description": "Search for a Lightning Node",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "alias",
+          "placeholder": "Alias",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
     "axios": "^1.6.3",
     "node-fetch": "2.6.12"
   },

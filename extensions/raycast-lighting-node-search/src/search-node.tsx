@@ -1,31 +1,27 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, LaunchProps, List } from "@raycast/api";
 import { search } from "./api/search";
-import NodeList from "./node-list";
+import { usePromise } from "@raycast/utils";
 
-export default function SearchNode() {
-  const { push } = useNavigation();
-
-  async function handleSubmit(values: { alias: string }) {
-    const nodes = await searchNode(values.alias);
-    push(<NodeList nodes={nodes} />);
-  }
-
-  async function searchNode(alias: string) {
-    const result = await search(alias);
+export default function SearchNode(props: LaunchProps<{ arguments: Arguments.SearchNode }>) {
+  const { isLoading, data } = usePromise(async () => {
+    const result = await search(props.arguments.alias);
     return result.search.node_results.results;
-  }
+  });
 
   return (
-    <>
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm onSubmit={handleSubmit} />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField id="alias" title="Alias" />
-      </Form>
-    </>
+    <List isLoading={isLoading}>
+      {data?.map((node) => (
+        <List.Item
+          key={node.pubkey}
+          title={node.alias}
+          subtitle={`Channels: ${node.channel_amount}, Capacity: ${node.capacity / 100_000_000} `}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url={`https://amboss.space/node/${node.pubkey}`} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }
