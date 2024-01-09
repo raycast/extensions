@@ -14,7 +14,7 @@ import {
   Alert,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getProgressIcon } from "@raycast/utils";
+import { FormValidation, getProgressIcon, useForm } from "@raycast/utils";
 import fetch from "node-fetch";
 import { cond, stubTrue } from "lodash";
 
@@ -222,42 +222,52 @@ function EditRecordForm({
   onConfirm: (record: Record) => void;
 }) {
   const { pop } = useNavigation();
-  const handleSubmit = async (values: { title: string; description: string; apiKey: string }) => {
-    // 校验 Title
-    if (!values.title) {
-      showToast(Toast.Style.Failure, "Validation Error", "Title is required.");
-      return;
-    } else if (values.title.length > 20) {
-      showToast(Toast.Style.Failure, "Validation Error", "Max 20 characters for title.");
-      return;
-    }
 
-    // 校验 API Key
-    if (!values.apiKey) {
-      showToast(Toast.Style.Failure, "Validation Error", "API Key is required.");
-      return;
-    }
+  interface FormValues {
+    title: string;
+    description: string;
+    apiKey: string;
+  }
 
-    let usage: Usage;
-    try {
-      showToast(Toast.Style.Animated, "validating API Key...");
-      usage = await fetchUsage(values.apiKey);
-    } catch (err: any) {
-      showToast(Toast.Style.Failure, "Invalid API Key", err);
-      return;
-    }
+  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
+    async onSubmit(values) {
+      let usage: Usage;
+      try {
+        showToast(Toast.Style.Animated, "validating API Key...");
+        usage = await fetchUsage(values.apiKey);
+      } catch (err: any) {
+        showToast(Toast.Style.Failure, "Invalid API Key", err);
+        return;
+      }
 
-    const newRecord: Record = {
-      id: isNew ? Date.now().toString() : record!.id,
-      title: values.title,
-      description: values.description,
-      apiKey: values.apiKey,
-      usage: usage!,
-    };
+      const newRecord: Record = {
+        id: isNew ? Date.now().toString() : record!.id,
+        title: values.title,
+        description: values.description,
+        apiKey: values.apiKey,
+        usage: usage!,
+      };
 
-    onConfirm(newRecord);
-    pop();
-  };
+      onConfirm(newRecord);
+      pop();
+    },
+    validation: {
+      title: (value) => {
+        if (value && value.length > 20) {
+          return "Max 20 characters";
+        } else if (!value) {
+          return "The field is required";
+        }
+      },
+      apiKey: FormValidation.Required,
+    },
+  });
+
+  if (record) {
+    setValue("title", record.title);
+    setValue("title", record.description);
+    setValue("title", record.apiKey);
+  }
 
   return (
     <Form
@@ -267,20 +277,12 @@ function EditRecordForm({
         </ActionPanel>
       }
     >
-      <Form.TextField placeholder="such as: Key1" id="title" title="Title" defaultValue={record?.title || ""} />
+      <Form.TextField placeholder="such as: Key1" {...itemProps.title} />
       <Form.TextArea
         info="You can store your account or password here, it's safe, but not necessary."
-        id="description"
-        title="Description"
-        defaultValue={record?.description || ""}
+        {...itemProps.description}
       />
-      <Form.PasswordField
-        placeholder="DeepL Free API Key"
-        id="apiKey"
-        title="API Key"
-        defaultValue={record?.apiKey || ""}
-        info="Only support Free API Key now"
-      />
+      <Form.PasswordField placeholder="DeepL Free API Key" info="Only support Free API Key now" {...itemProps.apiKey} />
     </Form>
   );
 }
@@ -304,7 +306,6 @@ async function fetchUsage(apiKey: string): Promise<Usage> {
   };
 }
 
-// 保留两位小数
 function getUsagePercentage(usage: Usage): string {
   const percentage = (usage.usedCharacters / usage.totalCharacters) * 100;
   return percentage.toFixed(2);
