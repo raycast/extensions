@@ -9,7 +9,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { Model, ModelManager } from "../../lib/types";
+import { Model, ModelManager } from "../../lib/models/types";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { randomUUID } from "crypto";

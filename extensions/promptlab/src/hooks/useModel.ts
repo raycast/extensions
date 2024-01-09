@@ -1,6 +1,8 @@
 import { AI, environment, getPreferenceValues } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-import { ExtensionPreferences, Model, JSONObject } from "../lib/types";
+import { JSONObject } from "../lib/common/types";
+import { Model } from "../lib/models/types";
+import { ExtensionPreferences } from "../lib/preferences/types";
 import { useEffect, useRef, useState } from "react";
 import fetch, { Response } from "node-fetch";
 import { useModels } from "./useModels";

@@ -1,7 +1,8 @@
 import { ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import CommandResponse from "./components/Commands/CommandResponse";
-import { Command, ExtensionPreferences, searchPreferences } from "./lib/types";
+import { Command } from "./lib/commands/types";
+import { ExtensionPreferences, searchPreferences } from "./lib/preferences/types";
 import CategoryDropdown from "./components/CategoryDropdown";
 import { useCommands } from "./hooks/useCommands";
 import CommandListDetail from "./components/Commands/CommandListDetail";

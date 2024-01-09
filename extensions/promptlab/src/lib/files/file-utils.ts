@@ -1,7 +1,9 @@
 import { LocalStorage, environment } from "@raycast/api";
 import * as fs from "fs";
 import { defaultCommands } from "../../data/default-commands";
-import { AudioData, CommandOptions, Extension, ExtensionCommand, ImageData } from "../types";
+import { Extension, ExtensionCommand } from "../common/types";
+import { AudioData, ImageData } from "../scripts/types";
+import { CommandOptions } from "../commands/types";
 import { defaultModels } from "../../data/default-models";
 import { randomUUID } from "crypto";
 import path from "path";

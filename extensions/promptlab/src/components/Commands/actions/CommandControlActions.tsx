@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Alert, Icon, LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
-import { Command, StoreCommand, isCommand, isStoreCommand, isTrueStr } from "../../../lib/types";
+import { isTrueStr } from "../../../lib/common/types";
+import { Command, StoreCommand, isCommand, isStoreCommand } from "../../../lib/commands/types";
 import CommandForm from "../CommandForm";
 import { QUICKLINK_URL_BASE } from "../../../lib/constants";
 import { updateCommand } from "../../../lib/commands/command-utils";

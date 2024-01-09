@@ -3,7 +3,7 @@ import { defaultAdvancedSettings } from "../../data/default-advanced-settings";
 import path from "path";
 import { Placeholder, PLLoader } from "placeholders-toolkit";
 import * as fs from "fs";
-import { ExtensionPreferences } from "../../lib/types";
+import { ExtensionPreferences } from "../preferences/types";
 import { CUSTOM_PLACEHOLDERS_FILENAME } from "../../lib/constants";
 
 /**

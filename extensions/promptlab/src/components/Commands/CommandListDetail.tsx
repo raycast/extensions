@@ -1,14 +1,18 @@
 import { List } from "@raycast/api";
 import {
+  isTrueStr,
+} from "../../lib/common/types";
+import {
   Command,
   StoreCommand,
   isCommand,
+  isStoreCommand
+} from "../../lib/commands/types";
+import {
   NumberConfigField,
   BooleanConfigField,
-  StringConfigField,
-  isStoreCommand,
-  isTrueStr,
-} from "../../lib/types";
+  StringConfigField
+} from "../../lib/commands/config/types";
 
 export default function CommandListDetail(props: { command: Command | StoreCommand }) {
   const { command } = props;

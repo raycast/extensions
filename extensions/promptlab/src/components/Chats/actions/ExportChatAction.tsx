@@ -1,5 +1,6 @@
 import { Action, Icon, Toast, confirmAlert, getPreferenceValues, showInFinder, showToast } from "@raycast/api";
-import { Chat, ChatManager, ExtensionPreferences } from "../../../lib/types";
+import { Chat, ChatManager } from "../../../lib/chats/types";
+import { ExtensionPreferences } from "../../../lib/preferences/types";
 import path from "path";
 import * as fs from "fs";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";

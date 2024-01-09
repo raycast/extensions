@@ -8,7 +8,7 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useEffect } from "react";
-import { Command } from "./lib/types";
+import { Command } from "./lib/commands/types";
 import { useCachedState } from "@raycast/utils";
 import { installDefaults } from "./lib/files/file-utils";
 

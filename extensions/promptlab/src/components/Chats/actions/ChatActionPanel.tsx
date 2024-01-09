@@ -8,7 +8,7 @@ import { CopyChatActionsSection } from "./CopyChatActions";
 import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../lib/action-utils";
 import { AdvancedActionSubmenu } from "../../actions/AdvancedActionSubmenu";
 import ContextSettingsActionSection from "./ContextSettingsActionSection";
-import { Chat, ChatManager } from "../../../lib/types";
+import { Chat, ChatManager } from "../../../lib/chats/types";
 
 /**
  * Actions panel for the Chat command.

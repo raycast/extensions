@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Model } from "../lib/types";
+import { Model } from "../lib/models/types";
 import { Color, Icon, LocalStorage } from "@raycast/api";
 import { installDefaults } from "../lib/files/file-utils";
 

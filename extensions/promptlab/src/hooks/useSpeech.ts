@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CommandOptions } from "../lib/types";
+import { CommandOptions } from "../lib/commands/types";
 import { execScript } from "../lib/scripts";
 import path from "path";
 import { environment } from "@raycast/api";

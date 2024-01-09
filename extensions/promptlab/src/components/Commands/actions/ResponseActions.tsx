@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import CommandChatView from "../../Chats/CommandChatView";
-import { CommandOptions, ExtensionPreferences } from "../../../lib/types";
+import { CommandOptions } from "../../../lib/commands/types";
+import { ExtensionPreferences } from "../../../lib/preferences/types";
 import { getMenubarOwningApplication } from "../../../lib/context-utils";
 import { useEffect, useState } from "react";
 import { logDebug } from "../../../lib/dev-utils";

@@ -1,5 +1,5 @@
 import { Color, Icon } from "@raycast/api";
-import { Model } from "../lib/types";
+import { Model } from "../lib/models/types";
 
 /**
  * Default models included with the extension.

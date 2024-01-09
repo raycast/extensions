@@ -1,5 +1,5 @@
 import { Action, Icon, Toast, showToast } from "@raycast/api";
-import { Command, StoreCommand } from "../../../lib/types";
+import { Command, StoreCommand } from "../../../lib/commands/types";
 import { STORE_ENDPOINT, STORE_KEY } from "../../../lib/constants";
 import fetch from "node-fetch";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";

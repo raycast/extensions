@@ -1,6 +1,6 @@
 import { objcImports, replaceAllHandler, rselectHandler, splitHandler, trimHandler } from "../scripts";
 import { exec } from "child_process";
-import { Command, CommandOptions, StoreCommand } from "../types";
+import { Command, CommandOptions, StoreCommand } from "./types";
 import { LocalStorage, AI } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { PLApplicator } from "placeholders-toolkit";

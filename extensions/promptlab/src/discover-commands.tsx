@@ -1,6 +1,6 @@
 import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { StoreCommand } from "./lib/types";
+import { StoreCommand } from "./lib/commands/types";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { STORE_ENDPOINT, STORE_KEY } from "./lib/constants";
 import CategoryDropdown from "./components/CategoryDropdown";

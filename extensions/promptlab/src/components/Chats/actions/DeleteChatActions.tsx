@@ -1,5 +1,5 @@
 import { Action, Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
-import { Chat, ChatManager } from "../../../lib/types";
+import { Chat, ChatManager } from "../../../lib/chats/types";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import { getActionShortcut } from "../../../lib/action-utils";
 

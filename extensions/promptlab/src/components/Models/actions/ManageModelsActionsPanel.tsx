@@ -9,7 +9,7 @@ import { DeleteAllModelsAction, DeleteModelAction } from "./DeleteModelActions";
 import { AdvancedActionSubmenu } from "../../actions/AdvancedActionSubmenu";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import { anyActionsEnabled } from "../../../lib/action-utils";
-import { Model, ModelManager } from "../../../lib/types";
+import { Model, ModelManager } from "../../../lib/models/types";
 
 export default function ManageModelsActionPanel(props: {
   model: Model;

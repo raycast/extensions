@@ -1,10 +1,11 @@
 import { spawn } from "child_process";
 import * as util from "util";
-import { DebugStyle, logDebug } from "./dev-utils";
-import { CalendarDuration, EventType, ImageData, PDFData, ReturnType } from "./types";
+import { DebugStyle, logDebug } from "../dev-utils";
+import { ImageData, PDFData } from "./types";
+import { CalendarDuration, EventType, ReturnType } from "./types";
 import { environment } from "@raycast/api";
 import path from "path";
-import { filterString } from "./context-utils";
+import { filterString } from "../context-utils";
 import * as fs from "fs";
 import * as os from "os";
 import { runAppleScript } from "@raycast/utils";

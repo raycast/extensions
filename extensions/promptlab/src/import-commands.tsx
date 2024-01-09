@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, launchCommand, LaunchType, LocalStorage, showToast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { Command } from "./lib/types";
+import { Command } from "./lib/commands/types";
 
 interface ImportFormValues {
   json: string;
