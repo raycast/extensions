@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Form, showToast, LocalStorage, useNavigation } from "@raycast/api";
+import { Command, CommandOptions } from "../../lib/commands/types";
 import {
-  Command,
-  CommandOptions
-} from "../../lib/commands/types";
-import {
-  BooleanConfigField, CommandConfig, NumberConfigField,
-  StringConfigField
+  BooleanConfigField,
+  CommandConfig,
+  NumberConfigField,
+  StringConfigField,
 } from "../../lib/commands/config/types";
 import { Fragment, useEffect, useState } from "react";
 

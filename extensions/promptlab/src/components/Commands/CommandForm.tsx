@@ -13,9 +13,10 @@ import { useForm, FormValidation } from "@raycast/utils";
 import { useModels } from "../../hooks/useModels";
 import { Command } from "../../lib/commands/types";
 import {
-  BooleanConfigField, CommandConfig,
+  BooleanConfigField,
+  CommandConfig,
   NumberConfigField,
-  StringConfigField
+  StringConfigField,
 } from "../../lib/commands/config/types";
 import { ExtensionPreferences } from "../../lib/preferences/types";
 import { Fragment, useEffect, useState } from "react";

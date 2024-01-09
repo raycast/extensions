@@ -43,7 +43,7 @@ export type ModelManager = {
   createModel: (
     newData: Model & {
       [key: string]: string | boolean;
-    }
+    },
   ) => Promise<false | Model>;
 
   /**

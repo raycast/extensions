@@ -1,4 +1,3 @@
-
 type ConfigField = {
   name: string;
   description: string;
