@@ -17,7 +17,7 @@ const checkNvmIsInstalled = () => {
 const formatVersions = (versions: string[]): NodeVersionsInfo[] => {
   const regex = /v\d+\.\d+\.\d+|system/g;
   const result = versions
-    .map(version => {
+    .map((version) => {
       const matches = version.match(regex);
       if (!matches) {
         return null;
@@ -26,7 +26,8 @@ const formatVersions = (versions: string[]): NodeVersionsInfo[] => {
       const type = version.includes('->') ? 'default' : null;
       const group = title.startsWith('v') ? `v${title.split('.')[0].slice(1)}.x` : title;
       return { title, type, group };
-    }).filter(item => item !== null);
+    })
+    .filter((item) => item !== null);
 
   return result as NodeVersionsInfo[];
 };
@@ -35,9 +36,9 @@ const nvmList = (): NodeVersionsInfo[] => {
   const { stdout, stderr } = spawnSync('source ~/.zshrc; nvm ls --no-alias', { shell: '/bin/zsh' });
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
-    return []
+    return [];
   }
   const output = stdout.toString().trim();
 
@@ -55,9 +56,9 @@ const nvmListRemote = (): NodeVersionsInfo[] => {
   const { stdout, stderr } = spawnSync('source ~/.zshrc; nvm ls-remote', { shell: '/bin/zsh' });
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
-    return []
+    return [];
   }
   const output = stdout.toString().trim();
   if (output) {
@@ -74,9 +75,9 @@ const nvmInstall = (version: string) => {
   const { stdout, stderr } = spawnSync(`source ~/.zshrc; nvm install ${version}`, { shell: '/bin/zsh' });
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
-    if (error.includes("Setting locale failed.")) {
+    if (error.includes('Setting locale failed.')) {
       return '';
     }
     throw new Error(error);
@@ -90,9 +91,9 @@ const nvmUninstall = (version: string) => {
   const { stdout, stderr } = spawnSync(`source ~/.zshrc; nvm uninstall ${version}`, { shell: '/bin/zsh' });
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
-    return ''
+    return '';
   }
 
   const output = stdout.toString().trim();
@@ -103,7 +104,7 @@ const nvmDefault = (version: string) => {
   const { stdout, stderr } = spawnSync(`source ~/.zshrc; nvm alias default ${version}`, { shell: '/bin/zsh' });
 
   if (stderr.length > 0) {
-    const error = stderr.toString().trim()
+    const error = stderr.toString().trim();
     console.error(error);
     throw new Error(error);
   }

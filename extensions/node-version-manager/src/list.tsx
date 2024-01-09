@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useCachedState } from "@raycast/utils";
+import { useCachedState } from '@raycast/utils';
 import versionManager from './utils/versionManager';
 import ListView from './components/lists/list';
 import EmptyView from './components/lists/EmptyView';
@@ -38,16 +38,14 @@ export default function Command() {
   };
 
   if (!isVersionManagerInstalled) {
-    return (
-      <EmptyView versionManagerName={versionManagerName} />
-    )
+    return <EmptyView versionManagerName={versionManagerName} />;
   }
 
   return (
     <ListView
       versions={versionsGrouped}
       isLoading={isLoading}
-      versionManagerName={versionManagerName} 
+      versionManagerName={versionManagerName}
       onUpdateList={onUpdateList}
     />
   );

@@ -1,7 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import preferences from '../preferences';
 
-
 import { NodeVersionsInfo } from '../../types';
 
 function env() {
@@ -15,9 +14,9 @@ const getFnmPath = () => {
     });
 
     if (stderr.length > 0) {
-      const error = stderr.toString()
+      const error = stderr.toString();
       console.error(error);
-      return ''
+      return '';
     }
 
     const output = stdout.toString().trim();
@@ -43,9 +42,9 @@ const fnmList = (): NodeVersionsInfo[] => {
   const { stdout, stderr } = spawnSync(fnmPath, ['list']);
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
-    return []
+    return [];
   }
 
   const output = stdout.toString().trim();
@@ -71,9 +70,9 @@ const fnmListRemote = (): NodeVersionsInfo[] => {
   const { stdout, stderr } = spawnSync(fnmPath, ['list-remote']);
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
-    return []
+    return [];
   }
 
   const output = stdout.toString().trim();
@@ -97,7 +96,7 @@ const fnmInstall = (version: string) => {
   const { stdout, stderr } = spawnSync(fnmPath, ['install', version]);
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
     throw new Error(error);
   }
@@ -110,7 +109,7 @@ const fnmUninstall = (version: string) => {
   const { stdout, stderr } = spawnSync(fnmPath, ['uninstall', version]);
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
     throw new Error(error);
   }
@@ -120,11 +119,11 @@ const fnmUninstall = (version: string) => {
 };
 
 const fnmDefault = (version: string) => {
-  const { stdout, error, output: _output, stderr } = spawnSync(fnmPath, ['default', version]);
+  const { stdout, stderr } = spawnSync(fnmPath, ['default', version]);
   console.log(stderr.toString());
 
   if (stderr.length > 0) {
-    const error = stderr.toString()
+    const error = stderr.toString();
     console.error(error);
     throw new Error(error);
   }

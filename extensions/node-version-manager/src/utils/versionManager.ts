@@ -16,9 +16,15 @@ const getVersionManager = () => {
         name: '',
         list: (): NodeVersionsInfo[] => [],
         listRemote: (): NodeVersionsInfo[] => [],
-        install: (version: string) => { console.log('install', version) },
-        uninstall: (version: string) => { console.log('uninstall', version) },
-        default: (version: string) => { console.log('default', version) },
+        install: (version: string) => {
+          console.log('install', version);
+        },
+        uninstall: (version: string) => {
+          console.log('uninstall', version);
+        },
+        default: (version: string) => {
+          console.log('default', version);
+        },
         isInstalled: false,
       };
   }

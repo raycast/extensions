@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "list",
-      "title": "Search installed NodeJS Versions",
+      "title": "Search Installed NodeJS Versions",
       "description": "List Node.JS versions installed",
       "mode": "view"
     },
@@ -25,14 +25,14 @@
     },
     {
       "name": "install",
-      "title": "Install a new NodeJS Version",
+      "title": "Install A New NodeJS Version",
       "description": "Install a new Node.JS version",
       "mode": "view"
     },
     {
       "name": "default",
-      "title": "Make default a NodeJS Version",
-      "description": "Make default a Node.JS version",
+      "title": "Make Default A New NodeJS Version",
+      "description": "Make default a new Node.JS version",
       "mode": "no-view",
       "arguments": [
         {

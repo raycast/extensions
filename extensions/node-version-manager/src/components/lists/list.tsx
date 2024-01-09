@@ -24,15 +24,12 @@ const ListView: FC<Props> = ({
   isInstallView = false,
   showCustomAction = true,
 }) => {
-
   return (
     <List isLoading={isLoading} isShowingDetail>
       <List.EmptyView
         icon={{ source: './nodedotjs.svg', tintColor: '#339933' }}
         title={'No installed node versions'}
-        description={
-          `Use ${versionManagerName} install command or ${versionManagerName} install [version] to install node versions`
-        }
+        description={`Use ${versionManagerName} install command or ${versionManagerName} install [version] to install node versions`}
       />
       {Object.keys(versions).map((group) => (
         <List.Section title={group} key={group}>
