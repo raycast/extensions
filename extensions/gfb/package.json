@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gfb",
+  "title": "Get FotMob Fixtures",
+  "description": "Returns football results from FotMob's API for specific leagues and teams for 7 days in the past and 30 days in the future.",
+  "icon": "extension_icon.png",
+  "categories": [
+    "News",
+    "Communication"
+  ],
+  "author": "jamtur01",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Football Fixtures",
+      "description": "Returns football fixtures from the FotMob API",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "leagueTeamPairs",
+      "required": false,
+      "type": "textfield",
+      "title": "League and Team ID Pairs",
+      "description": "Enter league and team ID pairs separated by a comma. Format: leagueID1:teamID1, leagueID2:teamID2. E.g., '9134:189397, 9907:401657'. You can find the IDs in the URL paths at the FotMob site: https://www.fotmob.com/."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5",
+    "fotmob": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "husky": "^8.0.3",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
