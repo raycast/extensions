@@ -11,6 +11,7 @@ import {
   Color,
   Icon,
   confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getProgressIcon } from "@raycast/utils";
@@ -161,6 +162,11 @@ export default function RecordList() {
                     onAction={async () => {
                       const flag = await confirmAlert({
                         title: "Delete Record",
+                        icon: Icon.Trash,
+                        primaryAction: {
+                          style: Alert.ActionStyle.Destructive,
+                          title: "Delete",
+                        },
                         message: "Confirm delete the record permanently?",
                       });
                       if (flag) {
