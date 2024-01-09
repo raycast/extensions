@@ -1,3 +1,3 @@
 # Kaleidoscope Changelog
 
-## [Initial Version] - 31.12.2023
+## [Initial Version] - 31-12-2023
