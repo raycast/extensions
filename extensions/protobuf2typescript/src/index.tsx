@@ -78,7 +78,7 @@ export default function Command() {
       case "}":
         return "}";
       case "message":
-        return "interface " + tokens[1] + " {";
+        return "interface " + tokens[1] + (tokens?.[2] === "{}" ? " {}" : " {");
       case "repeated":
         isRepeated = true;
         tokens.shift();

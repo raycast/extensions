@@ -5,7 +5,6 @@
   "description": "A script which help front-end devloper to convert *.protobuf file into *.d.ts file.",
   "icon": "command-icon.png",
   "author": "7gugu",
-  "owner": "gustudio",
   "keywords": ["protobuf", "protocol buffer", "typescript"],
   "categories": [
     "Developer Tools",
