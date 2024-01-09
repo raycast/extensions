@@ -40,6 +40,7 @@ export default function EditRecordForm({
         description: values.description,
         apiKey: values.apiKey,
         usage: usage!,
+        inUse: isNew ? false : record!.inUse,
       };
 
       onConfirm(newRecord);

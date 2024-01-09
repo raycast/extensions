@@ -34,7 +34,12 @@ export default function RecordItem({
   const used = record.usage.usedCharacters / record.usage.totalCharacters;
 
   const addRecordNode = (
-    <Action.Push title="Add Record" icon={Icon.Plus} target={<EditRecordForm onConfirm={onCreate} isNew />} />
+    <Action.Push
+      title="Add Record"
+      icon={Icon.Plus}
+      target={<EditRecordForm onConfirm={onCreate} isNew />}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+    />
   );
 
   const refreshNode = <Action title="Refresh Usage" icon={Icon.Repeat} onAction={onRefresh} />;
@@ -76,12 +81,14 @@ export default function RecordItem({
           <Action.Push
             title="Modify Record"
             icon={Icon.Pencil}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
             target={<EditRecordForm record={record} onConfirm={onModify} />}
           />
           {addRecordNode}
           <Action
             style={Action.Style.Destructive}
             icon={Icon.Trash}
+            shortcut={{ modifiers: ["cmd"], key: "x" }}
             title="Delete Record"
             onAction={async () => {
               const flag = await confirmAlert({
