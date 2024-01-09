@@ -18,7 +18,7 @@ export default function Command() {
 
   useAsyncEffect(async () => {
     // Check if PrismLauncher is installed
-    setIsPrismInstalled(await fs.pathExists(prismLauncherPath) && await fs.pathExists(instancesPath));
+    setIsPrismInstalled((await fs.pathExists(prismLauncherPath)) && (await fs.pathExists(instancesPath)));
 
     // Get all folders in instances folder
     const instanceFolders = await async.asyncFilter(await fs.readdir(instancesPath), async (instanceId) => {
@@ -46,35 +46,44 @@ export default function Command() {
   }, []);
 
   return (
-    <List navigationTitle={"Prism Launcher instances"} searchBarPlaceholder={"Search by instance name"} {...isPrismInstalled ? {} : {isLoading: instances === undefined}}>
+    <List
+      navigationTitle={"Prism Launcher instances"}
+      searchBarPlaceholder={"Search by instance name"}
+      {...(isPrismInstalled ? {} : { isLoading: instances === undefined })}
+    >
       <When condition={isPrismInstalled}>
-        {instances && instances.map((instance, index) => (
-          <List.Item
-            key={`instance-${index}`}
-            title={instance.name}
-            icon={{
-              source: instance.icon ?? path.join(environment.assetsPath, "instance-icon.png"),
-            }}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Launch Instance"
-                  icon={"app-window-16"}
-                  onAction={async () => {
-                    child_process.exec(`open -a "PrismLauncher" --args --launch "${instance.id}"`);
-                    await closeMainWindow({
-                      popToRootType: PopToRootType.Immediate,
-                      clearRootSearch: true
-                    });
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {instances &&
+          instances.map((instance, index) => (
+            <List.Item
+              key={`instance-${index}`}
+              title={instance.name}
+              icon={{
+                source: instance.icon ?? path.join(environment.assetsPath, "instance-icon.png"),
+              }}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Launch Instance"
+                    icon={"app-window-16"}
+                    onAction={async () => {
+                      child_process.exec(`open -a "PrismLauncher" --args --launch "${instance.id}"`);
+                      await closeMainWindow({
+                        popToRootType: PopToRootType.Immediate,
+                        clearRootSearch: true,
+                      });
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
       </When>
       <Unless condition={isPrismInstalled}>
-        <List.EmptyView icon={'x-mark-circle-16'} title={"Prism Launcher is not installed"} description={`/Applications/PrismLauncher.app or ${instancesPath} is not present`} />
+        <List.EmptyView
+          icon={"x-mark-circle-16"}
+          title={"Prism Launcher is not installed"}
+          description={`/Applications/PrismLauncher.app or ${instancesPath} is not present`}
+        />
       </Unless>
     </List>
   );
