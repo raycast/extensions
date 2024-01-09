@@ -14,12 +14,14 @@
     {
       "name": "list-notes",
       "title": "Collected Notes",
+      "subtitle": "Collected Notes",
       "description": "Manage your Collected Notes posts",
       "mode": "view"
     },
     {
       "name": "create-note",
       "title": "Create Note",
+      "subtitle": "Collected Notes",
       "description": "Create a new Note",
       "mode": "view",
       "icon": "command-icon.png"
