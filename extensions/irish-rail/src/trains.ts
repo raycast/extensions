@@ -14,7 +14,7 @@ export interface Train {
 
 export type TrainData = {
   [P in keyof Train as Capitalize<Lowercase<P>>]: string;
-}
+};
 
 function dueAsc(a: TrainData, b: TrainData) {
   const aDueIn = parseInt(a.Duein);

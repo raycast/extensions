@@ -13,9 +13,7 @@ function GetTimesForm() {
   }
 
   function options() {
-    return stations?.map((station, index) => (
-      <Form.Dropdown.Item key={index} value={station} title={station} />
-    ))
+    return stations?.map((station, index) => <Form.Dropdown.Item key={index} value={station} title={station} />);
   }
 
   useEffect(() => {
@@ -23,7 +21,7 @@ function GetTimesForm() {
       const stations = await getStations();
       setStations(stations);
     }
-    
+
     fetchStations();
 
     if (trainsData !== null) {
@@ -60,5 +58,5 @@ function GetTimesForm() {
     </Form>
   );
 }
- 
+
 export default GetTimesForm;
