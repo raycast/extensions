@@ -21,7 +21,11 @@ export function DnsSec({ url }: DnsSecProps) {
                   <Fragment key={type}>
                     <List.Item.Detail.Metadata.Label
                       title={type}
-                      icon={values?.Status ? Icon.CheckCircle : Icon.XMarkCircle}
+                      icon={
+                        values?.Status
+                          ? { source: Icon.CheckCircle, tintColor: "raycast-green" }
+                          : { source: Icon.XMarkCircle, tintColor: "raycast-red" }
+                      }
                     />
                     <List.Item.Detail.Metadata.Label title="Recursion Desired (RD)" text={values?.RD ? "Yes" : "No"} />
                     <List.Item.Detail.Metadata.Label

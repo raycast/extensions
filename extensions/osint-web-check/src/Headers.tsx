@@ -38,7 +38,11 @@ export function Headers({ url }: HeadersProps) {
                       key={headerName}
                       title={headerName}
                       text={headerValue ? String(headerValue) : undefined}
-                      icon={headerValue ? Icon.CheckCircle : Icon.XMarkCircle}
+                      icon={
+                        headerValue
+                          ? { source: Icon.CheckCircle, tintColor: "raycast-green" }
+                          : { source: Icon.XMarkCircle, tintColor: "raycast-red" }
+                      }
                     />
                   );
                 })}
