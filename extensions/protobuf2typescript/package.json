@@ -15,13 +15,13 @@
   "commands": [
     {
       "name": "index",
-      "title": "Convert ProtoBuf to dTs",
+      "title": "Convert ProtoBuf to DTs",
       "description": "Convert protobuf to d.ts",
       "mode": "view"
     },
     {
       "name": "clipboard",
-      "title": "Convert ProtoBuf to dTs from clipboard",
+      "title": "Convert ProtoBuf to DTs from clipboard",
       "description": "Convert protobuf to d.ts",
       "mode": "no-view"
     }

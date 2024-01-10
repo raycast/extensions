@@ -9,8 +9,6 @@ type Values = {
 export default function Command() {
   const [dts, setDts] = useState<string>();
 
-
-
   function handleSubmit(values: Values) {
     try {
       parseProtobuf(values.protocol_buffer);

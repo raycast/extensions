@@ -1,7 +1,6 @@
 import { Clipboard, showHUD } from "@raycast/api";
 
 export default async function Command() {
-
   const TYPE_MAPPING: Record<string, string> = {
     double: "number",
     float: "number",
