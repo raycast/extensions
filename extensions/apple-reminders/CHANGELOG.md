@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Menu Bar improvement] - 2024-01-11
+
+- Add an option to display the title of the first reminder next to the menu bar icon
+
 ## [Improve NLP in Quick Add Reminder] - 2023-12-08
 
 - Improve NLP parsing in the `Quick Add Reminder` command by adding an endDate for recurring reminders.
