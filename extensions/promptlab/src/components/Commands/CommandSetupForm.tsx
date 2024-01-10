@@ -1,12 +1,11 @@
 import { Action, ActionPanel, Form, showToast, LocalStorage, useNavigation } from "@raycast/api";
+import { Command, CommandOptions } from "../../lib/commands/types";
 import {
   BooleanConfigField,
-  Command,
   CommandConfig,
-  CommandOptions,
   NumberConfigField,
   StringConfigField,
-} from "../../utils/types";
+} from "../../lib/commands/config/types";
 import { Fragment, useEffect, useState } from "react";
 
 export default function CommandSetupForm(props: {
