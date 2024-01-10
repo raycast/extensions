@@ -10,6 +10,7 @@ export interface Train {
   dueIn: string;
   destination: string;
   destinationTime: string;
+  expDepart: string;
 }
 
 type TrainDto = {
@@ -29,6 +30,7 @@ function mapDto(train: TrainDto) {
     dueIn: train.Duein,
     destination: train.Destination,
     destinationTime: train.Destinationtime,
+    expDepart: train.Expdepart,
   };
 }
 

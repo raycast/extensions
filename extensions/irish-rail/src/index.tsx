@@ -18,6 +18,19 @@ function GetTimesForm() {
     return stations?.map((station, index) => <Form.Dropdown.Item key={index} value={station} title={station} />);
   };
 
+  const dueTime = (train: Train) => {
+    const now = new Date();
+    const dueInMinutes = parseInt(train.dueIn);
+    return (
+      new Date(now.getTime() + dueInMinutes * 60000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) +
+      " (est)"
+    );
+  };
+
+  const friendlyTime = (train: Train) => {
+    return train.expDepart === "00:00" ? dueTime(train) : train.expDepart;
+  };
+
   const getIcon = (dueIn: string) => {
     const dueInInt = parseInt(dueIn);
     if (dueInInt <= 2) {
@@ -38,7 +51,11 @@ function GetTimesForm() {
         id={trainCode}
         title={`Due: ${dueIn} minute` + (Number(dueIn) === 1 ? "" : "s")}
         subtitle={`Origin: ${origin}`}
-        accessories={[{ tag: `Destination: ${destination}` }, { text: `ETA: ${destinationTime}` }]}
+        accessories={[
+          { tag: `Destination: ${destination}` },
+          { text: `Departure: ${friendlyTime(train)}` },
+          { text: `ETA: ${destinationTime}` },
+        ]}
       />
     );
   };
