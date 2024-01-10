@@ -116,7 +116,8 @@ export default function Command() {
   };
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {(data.gameWeek || []).map((date: GameDay) => (
+      
+      {(data && data.gameWeek || []).map((date: GameDay) => (
         <List.Section title={date.date}>
           {(date.games || []).map((game: Game) => (
             <List.Item
