@@ -1,6 +1,6 @@
 # Parallels Virtual Machines Changelog
 
-## 2024-01-05
+## [Update] - 2024-01-05
 
 - Added error handling for when AppleScript can't launch VM.
 - Updated Raycast API version and dependencies.
