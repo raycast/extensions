@@ -106,7 +106,12 @@ export default function Command(props: LaunchProps<{ draftValues: Memo }>) {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Memo" {...itemProps.memo} defaultValue={draftValues?.memo} />
+      <Form.TextArea
+        title="Memo"
+        {...itemProps.memo}
+        placeholder="Whats on your mind..."
+        defaultValue={draftValues?.memo}
+      />
     </Form>
   );
 }
