@@ -23,8 +23,8 @@ export const defaultModels: { [key: string]: Model } = {
     isDefault: false,
     temperature: "1.0",
   },
-  "--model-GPT-3.5-Turbo-Instruct Via Raycast AI": {
-    name: "GPT-3.5-Turbo-Instruct Via Raycast AI",
+  "--model-Text-Davinci-003 Via Raycast AI": {
+    name: "Text-Davinci-003 Via Raycast AI",
     description:
       "Can do any language task with better quality, longer output, and consistent instruction-following than the curie, babbage, or ada models.",
     endpoint: "Raycast AI",
@@ -42,7 +42,7 @@ export const defaultModels: { [key: string]: Model } = {
     isDefault: true,
     temperature: "1.0",
   },
-  "--model-claude-instant-1-100k": {
+  "--model-claude-instant-1": {
     authType: "x-api-key",
     id: "",
     favorited: false,
@@ -54,10 +54,10 @@ export const defaultModels: { [key: string]: Model } = {
     apiKey: "",
     endpoint: "https://api.anthropic.com/v1/complete",
     isDefault: false,
-    name: "claude-instant-1-100k",
+    name: "claude-instant-1",
     lengthLimit: "95000",
     inputSchema:
-      '{"prompt": "\\n\\nHuman: {{prompt}} \\n\\nAssistant:", "model": "claude-instant-1-100k", "max_tokens_to_sample": 3000, "stream": true }',
+      '{"prompt": "\\n\\nHuman: {{prompt}} \\n\\nAssistant:", "model": "claude-instant-1", "max_tokens_to_sample": 3000, "stream": true }',
     description:
       "An enhanced version of claude-instant-v1 with a 100,000 token context window that retains its performance. Well-suited for high throughput use cases needing both speed and additional context, allowing deeper understanding from extended conversations and documents.",
     temperature: "1.0",
