@@ -18,7 +18,9 @@ export default function Command() {
 
   useAsyncEffect(async () => {
     // Check if PrismLauncher is installed
-    setIsPrismInstalled((await fs.pathExists(prismLauncherPath)) && (await fs.pathExists(instancesPath)));
+    const installed = (await fs.pathExists(prismLauncherPath)) && (await fs.pathExists(instancesPath));
+    setIsPrismInstalled(installed);
+    if (!installed) return;
 
     // Get all folders in instances folder
     const instanceFolders = await async.asyncFilter(await fs.readdir(instancesPath), async (instanceId) => {
