@@ -36,7 +36,7 @@
     }, 
     {
       "name": "clipboard",
-      "title": "Search using clipboard",
+      "title": "Search Using Clipboard",
       "description": "Generates answer to your question with GPT-3.5",
       "mode": "view",
       "keywords": [
