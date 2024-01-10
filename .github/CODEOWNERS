@@ -107,6 +107,7 @@
 /extensions/brew                                     @nhojb @Aayush9029 @mathieudutour @urwrstkn8mare
 /extensions/brew-services                            @erics118
 /extensions/brightness-control                       @CaliCastle
+/extensions/bring                                    @amuelli
 /extensions/browser-bookmarks                        @thomaslombart @sasivarnan @ahpatel @danulqua @chupi33 @tleo19 @jum8ys
 /extensions/browser-history                          @crisboarna
 /extensions/browsers-profiles                        @skydiver
@@ -562,6 +563,7 @@
 /extensions/kafka                                    @fonimus
 /extensions/kagi-fastgpt                             @httpjamesm
 /extensions/kagi-search                              @fearoffish
+/extensions/kaleidoscope                             @anfalas
 /extensions/kaomoji-search                           @allexks
 /extensions/karabiner-profile-switcher               @lucaschultz @erics118
 /extensions/keepassxc                                @zkytech @Sulfyderz
@@ -630,6 +632,7 @@
 /extensions/logtail                                  @Cavallando
 /extensions/looksee                                  @olavgjerde @pernielsentikaer
 /extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek @enkia
+/extensions/lorem-picsum                             @MichaelFarquhar
 /extensions/lucide-icons                             @gBasil @aeither
 /extensions/lunatask                                 @posthardcode
 /extensions/lyrics                                   @ajzbc
@@ -761,6 +764,7 @@
 /extensions/ohmyzsh-git-alias                        @yufeikang
 /extensions/ohmyzsh-plugins                          @k8scat
 /extensions/ok-json                                  @francisfeng
+/extensions/omg-lol                                  @danpalmer
 /extensions/omni-news                                @danielkastberg
 /extensions/omnivore                                 @KarolusD
 /extensions/one-tab-group                            @xiaoluoboding
@@ -773,6 +777,7 @@
 /extensions/open-graph                               @davidho0403 @ridemountainpig @tmwrnr
 /extensions/open-in-android-studio                   @3llomi
 /extensions/open-in-json-hero                        @ericallam @ivanovart
+/extensions/open-in-sublime-text                     @anfalas
 /extensions/open-in-visual-studio-code               @shubzkothekar @thomaspaulmann
 /extensions/open-link-in-specific-browser            @koinzhang
 /extensions/open-path                                @koinzhang
@@ -905,8 +910,10 @@
 /extensions/raycast-bard-ai                          @EvanZhouDev @Visual-Studio-Coder
 /extensions/raycast-create-remix                     @nuno
 /extensions/raycast-explorer                         @thomaslombart @EvanZhouDev @mil3na
+/extensions/raycast-gemini                           @EvanZhouDev
 /extensions/raycast-google-palm                      @EvanZhouDev
 /extensions/raycast-icons                            @PitNikola @peduarte
+/extensions/raycast-lighting-node-search             @bufo24
 /extensions/raycast-link-lock                        @EvanZhouDev @pernielsentikaer
 /extensions/raycast-nrm                              @lihaizhong
 /extensions/raycast-ollama                           @MassimilianoPasquini97
