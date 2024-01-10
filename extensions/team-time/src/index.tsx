@@ -171,7 +171,7 @@ function ListItem({
             )}
             {time.favorite && (
               <Action
-                title="Remove From Favorites"
+                title="Remove from Favorites"
                 icon={Icon.StarDisabled}
                 shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
                 onAction={async () => {
