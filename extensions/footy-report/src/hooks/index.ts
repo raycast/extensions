@@ -3,3 +3,4 @@ export { default as useSportMonksClient } from "@src/hooks/useSportMonksClient";
 export { default as useFetchTeams } from "@src/hooks/useFetchTeams";
 export { default as useFetchFixtures } from "@src/hooks/useFetchFixtures";
 export { default as useFetchPlayerStats } from "@src/hooks/useFetchPlayerStats";
+export { default as useErrorToast } from "@src/hooks/useErrorToast";

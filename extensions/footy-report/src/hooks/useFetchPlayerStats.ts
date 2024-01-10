@@ -1,4 +1,5 @@
-import useSportMonksClient from "./useSportMonksClient";
+import { HookResponse } from "@src/types";
+import useSportMonksClient from "@src/hooks/useSportMonksClient";
 
 enum EventType {
   GOALS = 52,
@@ -61,8 +62,18 @@ const useFetchPlayerStats = ({
     path: `/players/${id}?include=statistics.season.league;statistics.details&filters=playerStatisticDetailTypes:${formatEvents()};team=${teamId}`,
   });
 
-  const response: SportMonksPlayerStatsDetail[] = data?.data?.statistics;
+  const hookResponse: HookResponse<(string | number)[], typeof revalidate> = {
+    data: [],
+    error: null,
+    isLoading,
+    revalidate,
+  };
 
+  if (data?.status === 401) {
+    return { ...hookResponse, error: "Invalid API Token" };
+  }
+
+  const response: SportMonksPlayerStatsDetail[] = data?.data?.statistics;
   const stats = response
     ?.filter(
       ({ team_id, details, season: { league } }) =>
@@ -84,7 +95,7 @@ const useFetchPlayerStats = ({
       return [name, goals, assists, appearances, yellowCards, redCards];
     });
 
-  return { data: stats, isLoading, revalidate };
+  return { ...hookResponse, data: stats };
 };
 
 export default useFetchPlayerStats;

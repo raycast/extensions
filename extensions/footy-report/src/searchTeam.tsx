@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import TeamDetails from "@src/components/TeamDetails";
-import { useFetchTeams } from "@src/hooks";
+import { useErrorToast, useFetchTeams } from "@src/hooks";
 import { Team } from "@src/types";
 import { useState } from "react";
 
@@ -25,12 +25,15 @@ export default (props: LaunchProps<{ arguments: Arguments.SearchTeam }>) => {
   } = useCachedPromise(async () => {
     return LocalStorage.getItem<string>("favorite-teams");
   });
-  const { data: teamsFound, isLoading: teamsLoading } = useFetchTeams(
-    searchText,
-    {
-      image_path: true,
-    },
-  );
+  const {
+    data: teamsFound,
+    isLoading: teamsLoading,
+    error,
+  } = useFetchTeams(searchText, {
+    image_path: true,
+  });
+
+  useErrorToast(error);
 
   const favoriteTeams: Team[] = favoritesCached
     ? JSON.parse(favoritesCached)

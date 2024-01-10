@@ -69,3 +69,10 @@ export type Fixture = {
     url: string;
   }[];
 };
+
+export type HookResponse<T, K> = {
+  data: T[];
+  error: string | null;
+  isLoading: boolean;
+  revalidate: K;
+};

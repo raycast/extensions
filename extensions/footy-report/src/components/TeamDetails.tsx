@@ -3,14 +3,14 @@ import Squad from "@src/components/Squad";
 import { Grid, List } from "@raycast/api";
 import { Category, Team } from "@src/types";
 import { useState, ComponentProps } from "react";
-import { useFetchFixtures } from "@src/hooks";
+import { useErrorToast, useFetchFixtures } from "@src/hooks";
 
 const MAX_LIST_SIZE = 6;
 const MAX_GRID_SIZE = 50;
 
 const TeamDetails = ({ team }: { team: Team }) => {
   const [category, setCategory] = useState<Category>(Category.All);
-  const { data, isLoading } = useFetchFixtures(team.id, {
+  const { data, isLoading, error } = useFetchFixtures(team.id, {
     result_info: true,
     starting_at: true,
   });
@@ -26,6 +26,8 @@ const TeamDetails = ({ team }: { team: Team }) => {
     title: "Previous Fixtures",
     fixtures: prevFixtures,
   };
+
+  useErrorToast(error);
 
   if (
     category === Category.All ||

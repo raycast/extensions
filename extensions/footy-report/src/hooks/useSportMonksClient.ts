@@ -12,7 +12,7 @@ type Params = {
 
 const useSportMonksClient = ({ path, method, params, execute }: Params) => {
   const apiKey = useAPIKey();
-  const { data, revalidate, isLoading } = usePromise(
+  const { data, isLoading, error, revalidate } = usePromise(
     async (path: string) => {
       try {
         const {
@@ -42,7 +42,7 @@ const useSportMonksClient = ({ path, method, params, execute }: Params) => {
       execute,
     },
   );
-  return { data, revalidate, isLoading };
+  return { data, revalidate, isLoading, error };
 };
 
 export default useSportMonksClient;
