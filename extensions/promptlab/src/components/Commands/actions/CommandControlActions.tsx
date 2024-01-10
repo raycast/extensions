@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { Command, StoreCommand, isCommand, isStoreCommand } from "../../../lib/commands/types";
 import CommandForm from "../CommandForm";
-import { QUICKLINK_URL_BASE } from "../../../lib/constants";
+import { QUICKLINK_URL_BASE } from "../../../lib/common/constants";
 import { loadCommands } from "../../../lib/commands";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { anyActionsEnabled, getActionShortcut } from "../../../lib/action-utils";
+import { anyActionsEnabled, getActionShortcut } from "../../../lib/actions";
 import { commandDataForEditing } from "../../../lib/commands";
 import { installAllCommands } from "../../../lib/commands/StoreCommand";
 import ToggleFavoriteAction from "../../actions/ToggleFavoriteAction";

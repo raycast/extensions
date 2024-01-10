@@ -1,7 +1,7 @@
 import { Action, Icon, LocalStorage, Toast, showToast } from "@raycast/api";
 import { Command, StoreCommand } from "../../../lib/commands/types";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../../lib/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../lib/actions";
 import { commandFromStoreCommand } from "../../../lib/commands";
 
 /**

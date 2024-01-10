@@ -1,11 +1,10 @@
-
-interface ConfigField {
+type ConfigField = {
   name: string;
   description: string;
   guideText: string;
 }
 
-export interface StringConfigField extends ConfigField {
+export type StringConfigField = ConfigField & {
   defaultValue: string;
   maxLength: string;
   minLength: string;
@@ -13,12 +12,12 @@ export interface StringConfigField extends ConfigField {
   value?: string;
 }
 
-export interface BooleanConfigField extends ConfigField {
+export type BooleanConfigField = ConfigField & {
   defaultValue: boolean;
   value?: boolean;
 }
 
-export interface NumberConfigField extends ConfigField {
+export type NumberConfigField = ConfigField & {
   defaultValue: string;
   min: string;
   max: string;

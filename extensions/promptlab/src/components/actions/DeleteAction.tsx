@@ -1,5 +1,5 @@
 import { Action, Alert, Icon, confirmAlert, showToast } from "@raycast/api";
-import { getActionShortcut, isActionEnabled } from "../../lib/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../lib/actions";
 import { AdvancedSettings } from "../../data/default-advanced-settings";
 import { IdentifiableObject, NamedObject } from "../../lib/common/types";
 import { isCommand, isCommandRun } from "../../lib/commands/types";

@@ -3,7 +3,7 @@ import { ExportChatAction } from "./ExportChatAction";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import ChatSettingsForm from "../ChatSettingsForm";
 import { CopyChatActionsSection } from "./CopyChatActions";
-import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../lib/action-utils";
+import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../lib/actions";
 import { AdvancedActionSubmenu } from "../../actions/AdvancedActionSubmenu";
 import ContextSettingsActionSection from "./ContextSettingsActionSection";
 import { Chat, ChatManager } from "../../../lib/chats/types";

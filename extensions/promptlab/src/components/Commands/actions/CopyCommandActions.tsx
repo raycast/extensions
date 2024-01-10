@@ -4,7 +4,7 @@ import { Command, StoreCommand, isCommand } from "../../../lib/commands/types";
 import path from "path";
 import * as fs from "fs";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../lib/action-utils";
+import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../lib/actions";
 import CopyJSONAction from "../../actions/CopyJSONAction";
 import CopyIDAction from "../../actions/CopyIDAction";
 

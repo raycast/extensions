@@ -1,5 +1,5 @@
 import { Action, Icon, showToast } from "@raycast/api";
-import { getActionShortcut, isActionEnabled } from "../../lib/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../lib/actions";
 import { AdvancedSettings } from "../../data/default-advanced-settings";
 import { FavoritableObject } from "../../lib/common/types";
 import { Command, isCommand } from "../../lib/commands/types";

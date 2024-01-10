@@ -5,7 +5,7 @@ import ToggleModelDefaultAction from "./ToggleModelDefaultAction";
 import CreateModelDerivativeAction from "./CreateModelDerivativeAction";
 import { AdvancedActionSubmenu } from "../../actions/AdvancedActionSubmenu";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { anyActionsEnabled } from "../../../lib/action-utils";
+import { anyActionsEnabled } from "../../../lib/actions";
 import { Model, ModelManager } from "../../../lib/models/types";
 import CopyJSONAction from "../../actions/CopyJSONAction";
 import CopyIDAction from "../../actions/CopyIDAction";
