@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, popToRoot } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { FileSearchOperator, GoogleDoc, addNotesToFile, searchForFileByTitle } from "./google_fns";
@@ -24,6 +24,7 @@ export default function Command() {
   const [, setIsAuthorized] = useState<boolean>(false);
   const [contentError, setContentError] = useState<string | undefined>();
   const noteContentRef = useRef<Form.TextArea>(null);
+  const [submissionInProgress, setSubmissionInProgress] = useState<boolean>(false);
 
   function handleDefaultDocChange(doc: GoogleDoc) {
     setDefaultDoc(doc);
@@ -77,6 +78,7 @@ export default function Command() {
   }
 
   async function handleSubmit(values: Values) {
+    setSubmissionInProgress(true);
     try {
       if (values.noteContent.trim().length === 0) {
         setContentError(CONTENT_ERROR_STRING);
@@ -87,8 +89,9 @@ export default function Command() {
           if (files.length > 0) {
             const { documentId } = await addNotesToFile(values.noteContent, currentDoc.id);
             if (documentId) {
-              showToast({ style: Toast.Style.Success, title: "Posted!" });
+              await showToast({ style: Toast.Style.Success, title: "Posted!" });
               noteContentRef.current?.reset();
+              setTimeout(() => popToRoot(), 500);
             } else {
               showToast({ style: Toast.Style.Failure, title: String("Failed!") });
             }
@@ -100,6 +103,7 @@ export default function Command() {
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: String(error) });
     }
+    setSubmissionInProgress(false);
   }
 
   useEffect(() => {
@@ -153,7 +157,7 @@ export default function Command() {
             <CurrentNoteSelectionAction></CurrentNoteSelectionAction>
           </ActionPanel>
         }
-        isLoading={currentDoc === undefined}
+        isLoading={currentDoc === undefined || submissionInProgress}
       >
         <Form.TextArea
           error={contentError}
@@ -173,13 +177,13 @@ export default function Command() {
         {currentDoc && (
           <Form.Description
             key={`current: ${currentDoc.id}`}
-            text={`Send this note to: ${currentDoc ? getOriginalNoteName(currentDoc?.name) : "UNKNOWN"}`}
+            text={`Send This Note To: ${currentDoc ? getOriginalNoteName(currentDoc?.name) : "UNKNOWN"}`}
           />
         )}
         {defaultDoc && (
           <Form.Description
             key={`default: ${defaultDoc.id}`}
-            text={`Default notes location: ${defaultDoc ? getOriginalNoteName(defaultDoc?.name) : "UNKNOWN"}`}
+            text={`Default Notes Location: ${defaultDoc ? getOriginalNoteName(defaultDoc?.name) : "UNKNOWN"}`}
           />
         )}
       </Form>

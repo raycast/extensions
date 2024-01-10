@@ -1,4 +1,4 @@
-import { Form, showToast, Toast, ActionPanel, Action } from "@raycast/api";
+import { Form, showToast, Toast, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { useState, useRef } from "react";
 import { GoogleDoc, createDocument } from "../google_fns";
 import { getUniqueNameForDoc } from "../util";
@@ -12,7 +12,6 @@ interface CreateFileForm {
 export async function createDocumentWithName(fileName: string) {
   try {
     const newDoc = await createDocument(getUniqueNameForDoc(fileName));
-    showToast({ style: Toast.Style.Success, title: String("Doc creation successful!") });
     return newDoc;
   } catch (error) {
     showToast({ style: Toast.Style.Failure, title: String(error) });
@@ -22,6 +21,8 @@ export async function createDocumentWithName(fileName: string) {
 export function CreateNewFileForm(props: { onNewFileCreation: (file: GoogleDoc) => void }) {
   const [noFileNameError, setNoFileNameError] = useState<string | undefined>();
   const fileNameTextFieldRef = useRef<Form.TextArea>(null);
+  const { pop } = useNavigation();
+  const [fileCreationInProgress, setFileCreationInProgress] = useState<boolean>(false);
 
   function dropFileNameError() {
     if (noFileNameError && noFileNameError.length > 0) {
@@ -30,6 +31,7 @@ export function CreateNewFileForm(props: { onNewFileCreation: (file: GoogleDoc) 
   }
 
   async function onFileCreate(createFileValues: CreateFileForm) {
+    setFileCreationInProgress(true);
     try {
       if (createFileValues.fileName.trim().length === 0) {
         setNoFileNameError(FILE_NAME_ERROR);
@@ -38,7 +40,8 @@ export function CreateNewFileForm(props: { onNewFileCreation: (file: GoogleDoc) 
         if (newDoc) {
           fileNameTextFieldRef.current?.reset();
           props.onNewFileCreation(newDoc);
-          showToast({ style: Toast.Style.Success, title: "File creation successful!" });
+          await showToast({ style: Toast.Style.Success, title: "File creation successful!" });
+          setTimeout(() => pop(), 1000);
         } else {
           showToast({ style: Toast.Style.Failure, title: String("File creation failed!") });
         }
@@ -46,13 +49,15 @@ export function CreateNewFileForm(props: { onNewFileCreation: (file: GoogleDoc) 
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: String(error) });
     }
+    setFileCreationInProgress(false);
   }
 
   return (
     <Form
+      isLoading={fileCreationInProgress}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create" onSubmit={onFileCreate} />
+          <Action.SubmitForm icon={Icon.NewDocument} title="Create" onSubmit={onFileCreate} />
         </ActionPanel>
       }
     >
@@ -67,7 +72,7 @@ export function CreateNewFileForm(props: { onNewFileCreation: (file: GoogleDoc) 
         }}
         error={noFileNameError}
         onChange={dropFileNameError}
-        title="File name"
+        title="File Name"
         placeholder="Enter file name"
         ref={fileNameTextFieldRef}
       />
