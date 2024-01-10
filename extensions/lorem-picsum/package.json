@@ -16,8 +16,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Lorem Picsum",
-      "subtitle": "Get a random image",
+      "title": "Lorem Picsum Image",
       "description": "Get a random image given the dimensions.",
       "keywords": [
         "lorem",
