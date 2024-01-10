@@ -15,6 +15,7 @@
     {
       "name": "create-paste",
       "title": "Create Paste",
+      "subtitle": "omg.lol",
       "description": "Create a new paste in your omg.lol pastebin with a given title and content.",
       "mode": "view",
       "icon": "pastebin.png"
@@ -22,6 +23,7 @@
     {
       "name": "create-paste-clipboard",
       "title": "Create Paste from Clipboard",
+      "subtitle": "omg.lol",
       "description": "Create a new paste in your omg.lol pastebin with the current clipboard content and a random title.",
       "mode": "no-view",
       "icon": "pastebin.png"
@@ -29,6 +31,7 @@
     {
       "name": "view-pastebin",
       "title": "View Pastebin",
+      "subtitle": "omg.lol",
       "description": "View items in your omg.lol pastebin, and copy or delete them.",
       "mode": "view",
       "icon": "pastebin.png"
@@ -36,6 +39,7 @@
     {
       "name": "create-purl",
       "title": "Create PURL",
+      "subtitle": "omg.lol",
       "description": "Create a new PURL in your omg.lol account.",
       "mode": "view",
       "icon": "purl.png"
@@ -43,6 +47,7 @@
     {
       "name": "view-purls",
       "title": "View PURLs",
+      "subtitle": "omg.lol",
       "description": "View PURLs in your omg.lol account.",
       "mode": "view",
       "icon": "purl.png"
