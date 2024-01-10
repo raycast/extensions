@@ -1,0 +1,174 @@
+[
+    {
+        "jira": {
+            "key": "ACME-123",
+            "webUrl": "https://gitlab.zenith.igzdev.com/zenith-platform/domain-programs/prog-mic-core/-/merge_requests/196"
+        },
+        "approvedBy": [],
+        "comments": [
+            {
+                "id": "string;",
+                "body": "string;",
+                "author": {
+                    "teamUsername": "Claire"
+                },
+                "updatedAt": "string;",
+                "isUnresolved": true,
+                "webUrl": "string;"
+            }
+        ],
+        "unresolvedCommentsCount": 1,
+        "hasUpdates": false,
+        "hasApprovers": false,
+        "hasComments": false,
+        "hasConflicts": false,
+        "webUrl": "https://gitlab.zenith.igzdev.com/zenith-platform/domain-programs/prog-mic-core/-/merge_requests/196",
+        "sourceBranch": "feat/ZDPM-255-list-change-requests",
+        "id": "gid://gitlab/MergeRequest/5077",
+        "iid": "196",
+        "state": "opened",
+        "sha": "b146f4a02b23cb1eefc70ecd19c9fe7bff882aee",
+        "draft": true,
+        "author": {
+            "name": "David Clemente",
+            "username": "david.clemente",
+            "teamUsername": "David"
+        },
+        "createdAt": "2024-01-01:10:11Z",
+        "project": {
+            "fullPath": "zenith-platform/domain-programs/prog-mic-core"
+        },
+        "title": "Draft: feat: [ACME-123] Add user authentication functionality"
+    },
+    {
+        "jira": {
+            "key": "ACME-156",
+            "webUrl": "https://gitlab.zenith.igzdev.com/zenith-platform/domain-programs/prog-mic-core/-/merge_requests/196"
+        },
+        "approvedBy": [],
+        "comments": [
+            {
+                "id": "string;",
+                "body": "string;",
+                "author": {
+                    "teamUsername": "Claire"
+                },
+                "updatedAt": "string;",
+                "isUnresolved": true,
+                "webUrl": "string;"
+            }
+        ],
+        "unresolvedCommentsCount": 1,
+        "hasUpdates": false,
+        "hasApprovers": false,
+        "hasComments": false,
+        "hasConflicts": false,
+        "webUrl": "https://gitlab.zenith.igzdev.com/zenith-platform/domain-programs/prog-mic-core/-/merge_requests/196",
+        "sourceBranch": "feat/ZDPM-255-list-change-requests",
+        "id": "gid://gitlab/MergeRequest/5177",
+        "iid": "196",
+        "state": "merged",
+        "sha": "b146f4a02b23cb1eefc70ecd19c9fe7bff882aee",
+        "draft": false,
+        "author": {
+            "name": "David Clemente",
+            "username": "david.clemente",
+            "teamUsername": "Claire"
+        },
+        "createdAt": "2024-01-08:10:11Z",
+        "project": {
+            "fullPath": "zenith-platform/domain-programs/prog-mic-core"
+        },
+        "title": "feat: [ACME-156] Integrate payment gateway for online transactions"
+    },
+    {
+        "jira": {
+            "key": "ACME-101",
+            "webUrl": "https://gitlab.zenith.igzdev.com/zenith-platform/domain-programs/prog-mic-core/-/merge_requests/196"
+        },
+        "approvedBy": [
+            {
+                "teamUsername": "Victor"
+            }
+        ],
+        "comments": [],
+        "unresolvedCommentsCount": 0,
+        "hasUpdates": false,
+        "hasApprovers": true,
+        "hasComments": false,
+        "hasConflicts": false,
+        "webUrl": "https://gitlab.zenith.igzdev.com/zenith-platform/domain-programs/prog-mic-core/-/merge_requests/196",
+        "sourceBranch": "feat/ZDPM-255-list-change-requests",
+        "id": "gid://gitlab/MergeRequest/5076",
+        "iid": "196",
+        "state": "opened",
+        "sha": "b146f4a02b23cb1eefc70ecd19c9fe7bff882aee",
+        "draft": false,
+        "author": {
+            "name": "David Clemente",
+            "username": "david.clemente",
+            "teamUsername": "me",
+            "isMe": true
+        },
+        "latestPipeline": {
+            "status": "running",
+            "updatedAt": "2023-12-29T12:16:22Z",
+            "hasRunningJobs": true,
+            "runningJobs": [
+                {
+                    "name": "build_with_gradle",
+                    "stage": "build",
+                    "web_url": "https://raycastcommunity.slack.com/?redir=%2Fgantry%2Fclient"
+                }
+            ]
+        },
+        "createdAt": "2024-01-05:10:11Z",
+        "project": {
+            "fullPath": "zenith-platform/domain-programs/prog-mic-core"
+        },
+        "title": "fix: [ACME-101] User profile picture not displaying"
+    },
+    {
+        "jira": {
+            "key": "ACME-99",
+            "webUrl": "https://gitlab.zenith.igzdev.com/zenith-platform/domain-programs/prog-mic-core/-/merge_requests/196"
+        },
+        "approvedBy": [],
+        "comments": [],
+        "unresolvedCommentsCount": 0,
+        "hasUpdates": false,
+        "hasApprovers": false,
+        "hasComments": false,
+        "hasConflicts": false,
+        "webUrl": "https://gitlab.zenith.igzdev.com/zenith-platform/domain-programs/prog-mic-core/-/merge_requests/196",
+        "sourceBranch": "feat/ZDPM-255-list-change-requests",
+        "id": "gid://gitlab/MergeRequest/5176",
+        "iid": "196",
+        "state": "opened",
+        "sha": "b146f4a02b23cb1eefc70ecd19c9fe7bff882aee",
+        "draft": false,
+        "author": {
+            "name": "David Clemente",
+            "username": "david.clemente",
+            "teamUsername": "Arthur",
+            "isMe": false
+        },
+        "latestPipeline": {
+            "status": "failed",
+            "updatedAt": "2023-12-29T12:16:22Z",
+            "hasFailedJobs": true,
+            "failedJobs": [
+                {
+                    "name": "build_with_gradle",
+                    "stage": "build",
+                    "web_url": "https://raycastcommunity.slack.com/?redir=%2Fgantry%2Fclient"
+                }
+            ]
+        },
+        "createdAt": "2024-01-09:10:11Z",
+        "project": {
+            "fullPath": "zenith-platform/domain-programs/prog-mic-core"
+        },
+        "title": "Release v1.0: [ACME-99] Bug fixes and performance improvements"
+    }
+]

@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "my-gitlab-dashboard",
+  "title": "My GitLab Dashboard",
+  "description": "Get all MRs and pipelines of your projects together in a single view",
+  "icon": "gitlab.png",
+  "author": "mikybars",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "dashboardCommand",
+      "title": "Dashboard",
+      "description": "All MRs and pipelines of your projects at a glance",
+      "mode": "view"
+    },
+    {
+      "name": "selectProjectsCommand",
+      "title": "Select My Projects",
+      "description": "Choose which projects to include in the dashboard",
+      "mode": "view"
+    }
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
+    "dayjs": "^1.11.10",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "gitlabInstance",
+      "type": "textfield",
+      "required": true,
+      "title": "GitLab URL",
+      "description": "URL of your GitLab instance",
+      "placeholder": "URL of your GitLab instance e.g. https://gitlab.com"
+    },
+    {
+      "name": "gitlabToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your GitLab API token. `api` scope for read and write operations, `read_api` when you just want to read only commands.",
+      "link": "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
+      "placeholder": "Enter your GitLab API token."
+    },
+    {
+      "name": "jiraInstance",
+      "type": "textfield",
+      "required": false,
+      "title": "Jira URL",
+      "description": "URL of your Jira instance",
+      "placeholder": "URL of your Jira instance e.g. https://jira.com"
+    },
+    {
+      "name": "softWarningDateThreshold",
+      "type": "textfield",
+      "required": false,
+      "title": "Soft warning threshold for dates",
+      "description": "Creation and modification times that are past this value will be displayed in a different colour",
+      "placeholder": "1d"
+    },
+    {
+      "name": "hardWarningDateThreshold",
+      "type": "textfield",
+      "required": false,
+      "title": "Hard warning threshold for dates",
+      "description": "Creation and modification times that are past this value will be displayed in a different colour and show an alert icon",
+      "placeholder": "2d"
+    },
+    {
+      "name": "colorizedDatesForPipelines",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Dates",
+      "label": "Colorized dates for pipelines",
+      "description": "Show colorized dates for pipelines last runs depending on the thresholds defined above"
+    },
+    {
+      "name": "colorizedDatesForMergeRequests",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Colorized dates for MRs",
+      "description": "Show colorized dates for MRs creation dates depending on the thresholds defined above"
+    },
+    {
+      "name": "colorizedDatesForComments",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Colorized dates for comments",
+      "description": "Show colorized dates for MRs unresolved comments depending on the thresholds defined above"
+    }
+  ]
+}

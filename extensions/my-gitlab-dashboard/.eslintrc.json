@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "extends": ["@raycast"],
+  "overrides": [
+    {
+      "files": ["src/**/*.ts?"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+[
+    {
+        "id": "string;",
+        "name": "my-awesome-project",
+        "fullPath": "zenith-platform/domain-programs/prog-mic-core",
+        "defaultBranch": "develop"
+    },
+    {
+        "id": "string",
+        "name": "neptune-analytics-dashboard",
+        "fullPath": "zenith-platform/domain-programs/prog-spec-core",
+        "defaultBranch": "main"
+    }
+]
