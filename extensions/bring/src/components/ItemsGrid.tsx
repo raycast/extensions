@@ -66,7 +66,7 @@ export const ItemsGrid = ({
               </ActionPanel.Section>
             ) : (
               <ActionPanel.Section>
-                <Action title="Remove From List" onAction={() => onRemoveAction(item)} />
+                <Action title="Remove from List" onAction={() => onRemoveAction(item)} />
                 {/* <Action title="Edit Specification" onAction={() => addWithSpecification(name)} /> */}
               </ActionPanel.Section>
             )}
