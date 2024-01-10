@@ -64,7 +64,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle="Create PURL"
       isLoading={isLoading}
       actions={
         <ActionPanel>

@@ -65,7 +65,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle="Create Paste"
       isLoading={isLoading}
       actions={
         <ActionPanel>
