@@ -59,7 +59,7 @@ export function TimeEntryForm({ entry, handleSubmit }: TimeEntryFormProps) {
                 timezone: changedValue.timezone,
                 favorite: entry?.favorite ?? false,
                 favoritePosition: entry?.favoritePosition ?? 0,
-                profileImage: changedValue.profileImage[0],
+                // profileImage: changedValue?.profileImage[0],
               });
             }}
           />

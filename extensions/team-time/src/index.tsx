@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  Action,
-  Icon,
-  LocalStorage,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  Image,
-} from "@raycast/api";
+import { ActionPanel, List, Action, Icon, LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { AddTime } from "./views/add-time";
 import { EditTime } from "./views/edit-time";
@@ -18,11 +8,6 @@ import timezoneSoft from "timezone-soft";
 import { TimeEntry } from "./components/time-entry-form";
 
 spacetime.extend(timezoneSoft);
-
-interface Preferences {
-  timezone?: string;
-  timeformat?: "12" | "24";
-}
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -57,7 +42,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.Push title="Add Time" icon={Icon.AddPerson} target={<AddTime onAdd={revalidate} />} />
+          <Action.Push title="Add Teammember" icon={Icon.AddPerson} target={<AddTime onAdd={revalidate} />} />
         </ActionPanel>
       }
     >
@@ -186,7 +171,7 @@ function ListItem({
             )}
             {time.favorite && (
               <Action
-                title="Remove from Favorites"
+                title="Remove From Favorites"
                 icon={Icon.StarDisabled}
                 shortcut={{ modifiers: ["shift", "cmd"], key: "f" }}
                 onAction={async () => {
@@ -233,7 +218,7 @@ function ListItem({
             )}
             {time.favorite && time.favoritePosition < times.filter((t: TimeEntry) => t.favorite).length && (
               <Action
-                title="Move down in Favorites"
+                title="Move Down in Favorites"
                 icon={Icon.ArrowDown}
                 shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
                 onAction={async () => {
