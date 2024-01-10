@@ -6,11 +6,13 @@ import { checkUrl } from "./utils/checkUrl";
 type UrlInputValues = { url: string };
 
 type UrlInputProps = {
+  initialUrl: string;
   onSubmit: (url: string) => void;
 };
 
-export function UrlInput({ onSubmit }: UrlInputProps) {
-  const [urlError, setUrlError] = useState<string | undefined>(undefined);
+export function UrlInput({ onSubmit, initialUrl }: UrlInputProps) {
+  const [urlError, setUrlError] = useState<string | undefined>("Enter a valid http(s) URL.");
+  const [input, setInput] = useState(initialUrl);
 
   return (
     <Form
@@ -38,10 +40,12 @@ export function UrlInput({ onSubmit }: UrlInputProps) {
       <Form.TextField
         id="url"
         title="URL"
-        placeholder="google.com"
+        placeholder="site.com"
+        value={input}
         error={urlError}
-        onChange={() => {
-          setUrlError(undefined);
+        onChange={(value) => {
+          if (value !== input) setUrlError(undefined);
+          setInput(value);
         }}
       />
     </Form>

@@ -35,6 +35,7 @@ export default function OsintWebCheck({
 
   return (
     <UrlInput
+      initialUrl={url}
       onSubmit={(url) => {
         navigation.push(<CheckDetails url={url} />);
       }}
