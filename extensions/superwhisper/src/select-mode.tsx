@@ -8,7 +8,6 @@ import { SUPERWHISPER_BUNDLE_ID, checkSuperwhisperInstallation } from "./utils";
 interface State {
   items?: Mode[];
   error?: Error;
-  loading: boolean;
 }
 
 interface Mode {
@@ -23,14 +22,12 @@ function handleSelection(item: Mode) {
 }
 
 export default function Command() {
-  const [state, setState] = useState<State>();
+  const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function fetchModes() {
-      setState({ loading: true });
       const isInstalled = await checkSuperwhisperInstallation();
       if (!isInstalled) {
-        setState({ loading: false });
         return;
       }
 
@@ -49,10 +46,9 @@ export default function Command() {
           // add to modes array
           modes.push(data);
         });
-        setState({ items: modes, loading: false });
+        setState({ items: modes });
       } catch (error) {
         setState({
-          loading: false,
           error: error instanceof Error ? error : new Error("Something went wrong"),
         });
       }
@@ -62,18 +58,17 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={state?.loading}>
-      {state?.items &&
-        state.items.map((item, index) => (
-          <List.Item
-            key={item.key}
-            icon={getIcon(index + 1)}
-            title={item.name || "Default"}
-            subtitle={`⌘${index + 1}`}
-            // accessories={}
-            actions={<Actions item={item} />}
-          />
-        ))}
+    <List isLoading={!state.items && !state.error}>
+      {state.items?.map((item, index) => (
+        <List.Item
+          key={item.key}
+          icon={getIcon(index + 1)}
+          title={item.name || "Default"}
+          subtitle={`⌘${index + 1}`}
+          // accessories={}
+          actions={<Actions item={item} />}
+        />
+      ))}
     </List>
   );
 }
