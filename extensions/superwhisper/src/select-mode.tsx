@@ -28,7 +28,7 @@ export default function Command() {
     async function fetchModes() {
       const isInstalled = await checkSuperwhisperInstallation();
       if (!isInstalled) {
-        setState({ error: new Error("Superwhisper is not installed")});
+        setState({ error: new Error("Superwhisper is not installed") });
         return;
       }
 
