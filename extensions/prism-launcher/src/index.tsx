@@ -7,14 +7,14 @@ import fs from "fs-extra";
 import * as async from "modern-async";
 import * as path from "path";
 import * as child_process from "child_process";
-import { Unless, When } from "react-if";
+import { When } from "react-if";
 
 const instancesPath = path.join(process.env.HOME!, "Library", "Application Support", "PrismLauncher", "instances");
 const prismLauncherPath = path.join("/Applications", "PrismLauncher.app");
 
 export default function Command() {
   const [instances, setInstances] = useState<Instance[]>();
-  const [isPrismInstalled, setIsPrismInstalled] = useState(false);
+  const [isPrismInstalled, setIsPrismInstalled] = useState<boolean>();
 
   useAsyncEffect(async () => {
     // Check if PrismLauncher is installed
@@ -51,7 +51,7 @@ export default function Command() {
     <List
       navigationTitle={"Prism Launcher instances"}
       searchBarPlaceholder={"Search by instance name"}
-      {...(isPrismInstalled ? {} : { isLoading: instances === undefined })}
+      {...(isPrismInstalled ? { isLoading: instances === undefined } : {})}
     >
       <When condition={isPrismInstalled}>
         {instances &&
@@ -80,13 +80,13 @@ export default function Command() {
             />
           ))}
       </When>
-      <Unless condition={isPrismInstalled}>
+      <When condition={isPrismInstalled == false}>
         <List.EmptyView
           icon={"x-mark-circle-16"}
           title={"Prism Launcher is not installed"}
           description={`/Applications/PrismLauncher.app or ${instancesPath} is not present`}
         />
-      </Unless>
+      </When>
     </List>
   );
 }
