@@ -14,6 +14,7 @@ export default async function PicsumCommand(props: { arguments: PicsumArguments 
   // Arguements error check
   if (!validateArguments(width, height)) {
     await showHUD("❌ Invalid image dimensions.");
+    return;
   }
 
   // Copy or paste image url based on preference
