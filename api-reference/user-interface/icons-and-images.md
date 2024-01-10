@@ -190,7 +190,7 @@ const icon = Icon.Eye;
 const tintedIcon = { source: Icon.Bubble, tintColor: Color.Red };
 
 // Bundled asset with circular mask
-const avatar = { source: "avatar.png", mask: ImageMask.Circle };
+const avatar = { source: "avatar.png", mask: Image.Mask.Circle };
 
 // Implicit theme-aware icon
 // with 'icon.png' and 'icon@dark.png' in the `assets` folder
