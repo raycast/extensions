@@ -14,7 +14,7 @@ export async function checkSuperwhisperInstallation() {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "Superwhisper is not installed.",
-      message: "Install it from: superwhisper.com",
+      message: "Install from superwhisper.com",
       primaryAction: {
         title: "Go to superwhisper.com",
         onAction: (toast) => {

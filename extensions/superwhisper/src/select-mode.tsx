@@ -28,12 +28,12 @@ export default function Command() {
     async function fetchModes() {
       const isInstalled = await checkSuperwhisperInstallation();
       if (!isInstalled) {
+        setState({ error: new Error("Superwhisper is not installed")});
         return;
       }
 
       try {
         // read mode json files from Documents/superwhisper/modes folder
-
         const modes: Mode[] = [];
         const modeDirURL = `${homedir()}/Documents/superwhisper/modes`;
         await readdirSync(modeDirURL).forEach((file) => {
