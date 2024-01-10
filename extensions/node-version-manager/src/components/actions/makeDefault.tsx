@@ -21,7 +21,7 @@ const MakeDefaultAction: FC<Props> = ({ version, onUpdateList }) => {
           await showToast(Toast.Style.Failure, `Failed to set up ${version}`);
         }
       }}
-      icon={Icon.Trash}
+      icon={Icon.Star}
       shortcut={{ modifiers: ['cmd'], key: 'd' }}
     />
   );
