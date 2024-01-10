@@ -1,37 +1,49 @@
 import { Action, ActionPanel, Form, List } from "@raycast/api";
-import { TrainData, getTrains } from "./trains";
+import { Train, getTrains } from "./trains";
 import { getStations } from "./stations";
 import { useState, useEffect } from "react";
 
 function GetTimesForm() {
-  const [trainsData, setTrainsData] = useState<TrainData[] | null>(null);
+  const [trainsData, setTrainsData] = useState<Train[] | null>(null);
   const [stations, setStations] = useState<string[] | null>(null);
   const [origin, setOrigin] = useState<string | null>(null);
 
-  async function handleSubmit(values: { origin: string; destination: string }) {
+  const handleSubmit = async (values: { origin: string; destination: string }) => {
+    setOrigin(values.origin);
     const trains = await getTrains(values.origin, values.destination);
     setTrainsData(trains);
-    setOrigin(values.origin);
-  }
+  };
 
-  function options() {
+  const options = () => {
     return stations?.map((station, index) => <Form.Dropdown.Item key={index} value={station} title={station} />);
-  }
+  };
 
-  function trainInfoView(train: TrainData, index: number) {
-    const { Destination, Traincode, Destinationtime, Duein, Origin } = train;
+  const getIcon = (dueIn: string) => {
+    const dueInInt = parseInt(dueIn);
+    if (dueInInt <= 2) {
+      return { source: "red-warning.png" };
+    } else if (dueInInt <= 5) {
+      return { source: "orange-warning.png" };
+    } else {
+      return { source: "green-clock.png" };
+    }
+  };
+
+  const trainInfoView = (train: Train, index: number) => {
+    const { destination, trainCode, destinationTime, dueIn, origin } = train;
     return (
       <List.Item
+        icon={getIcon(train.dueIn)}
         key={index}
-        id={Traincode}
-        title={`${Duein} minutes`}
-        subtitle={`Origin: ${Origin}`}
-        accessories={[{ tag: `Destination: ${Destination}` }, { text: `ETA: ${Destinationtime}` }]}
+        id={trainCode}
+        title={`Due: ${dueIn} minute` + (Number(dueIn) === 1 ? "" : "s")}
+        subtitle={`Origin: ${origin}`}
+        accessories={[{ tag: `Destination: ${destination}` }, { text: `ETA: ${destinationTime}` }]}
       />
     );
-  }
+  };
 
-  function formView() {
+  const formView = () => {
     return (
       <Form
         actions={
@@ -49,19 +61,17 @@ function GetTimesForm() {
         </Form.Dropdown>
       </Form>
     );
-  }
+  };
 
-  function trainsView() {
+  const trainsView = () => {
     return (
       <List isLoading={false}>
         <List.Section title={`Station: ${origin ?? "Trains"}`}>
-          {trainsData?.map((train, index) => {
-            return trainInfoView(train, index);
-          })}
+          {trainsData?.map((train, index) => trainInfoView(train, index))}
         </List.Section>
       </List>
     );
-  }
+  };
 
   useEffect(() => {
     async function fetchStations() {

@@ -12,17 +12,27 @@ export interface Train {
   destinationTime: string;
 }
 
-export type TrainData = {
+type TrainDto = {
   [P in keyof Train as Capitalize<Lowercase<P>>]: string;
 };
 
-function dueAsc(a: TrainData, b: TrainData) {
-  const aDueIn = parseInt(a.Duein);
-  const bDueIn = parseInt(b.Duein);
+function dueAsc(a: Train, b: Train) {
+  const aDueIn = parseInt(a.dueIn);
+  const bDueIn = parseInt(b.dueIn);
   if (aDueIn < bDueIn) return -1;
 }
 
-export async function getTrains(origin: string, destination?: string): Promise<TrainData[]> {
+function mapDto(train: TrainDto) {
+  return {
+    trainCode: train.Traincode,
+    origin: train.Origin,
+    dueIn: train.Duein,
+    destination: train.Destination,
+    destinationTime: train.Destinationtime,
+  };
+}
+
+export async function getTrains(origin: string, destination?: string): Promise<Train[]> {
   const result = await makeRequest(apiUrl(origin));
   const parsed = parseXML(result.data);
 
@@ -31,12 +41,12 @@ export async function getTrains(origin: string, destination?: string): Promise<T
   }
 
   const destinationTrains = destination
-    ? parsed.ArrayOfObjStationData.objStationData.filter((train: TrainData) => train.Destination === destination)
+    ? parsed.ArrayOfObjStationData.objStationData.filter((train: TrainDto) => train.Destination === destination)
     : parsed.ArrayOfObjStationData.objStationData;
 
   if (!destinationTrains?.length) {
     return [];
   }
 
-  return [...destinationTrains.sort(dueAsc)];
+  return destinationTrains.map(mapDto).sort(dueAsc);
 }
