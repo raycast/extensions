@@ -119,7 +119,7 @@ export default (props, context, allowPaste = false) => {
       }
     >
       <Form.TextArea title="Prompt" id="query" />
-      <Form.Description title="Files" text="Images that you want Gemini to analyze along with your prompt." />
+      <Form.Description title="Image" text="Image that you want Gemini to analyze along with your prompt." />
       <Form.FilePicker id="files" title="" allowMultipleSelection={false} />
     </Form>
   );
