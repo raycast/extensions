@@ -1,27 +1,20 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
-import { useBranches, useDatabases, useSelectedDatabase, useSelectedOrganization } from "./utils/hooks";
+import { useBranches, useSelectedDatabase, useSelectedOrganization } from "./utils/hooks";
 import { CreateDeployRequest } from "./create-deploy-request";
 import { ListDatabaseDropdown, View } from "./utils/components";
 import { PlanetScaleColor } from "./utils/colors";
 import { CreateBranch } from "./create-branch";
-import ActionStyle = Alert.ActionStyle;
-import Shortcut = Keyboard.Shortcut;
 
 function SearchBranches() {
   const [organization, setOrganization] = useSelectedOrganization();
   const [database, setDatabase] = useSelectedDatabase();
-  const { databases } = useDatabases({ organization });
   const { branches, refreshBranches, deleteBranch, branchesLoading } = useBranches({ organization, database });
-
-  const selectedDatabase = databases?.find((db) => db.name === database);
-  const databaseSleeping = selectedDatabase?.state === "sleeping";
 
   return (
     <List
       isLoading={branchesLoading}
       searchBarPlaceholder="Search branches"
-      throttle
       searchBarAccessory={
         <ListDatabaseDropdown
           onChange={(value) => {
@@ -75,7 +68,7 @@ function SearchBranches() {
                 <Action.OpenInBrowser title="Open in Browser" url={branch.html_url} />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                {database && organization && branch && !databaseSleeping && !branch.production ? (
+                {database && organization && branch && !branch.production ? (
                   <Action.Push
                     icon={{
                       source: "deploy-open.svg",
@@ -99,7 +92,7 @@ function SearchBranches() {
                     shortcut={Keyboard.Shortcut.Common.New}
                   />
                 ) : null}
-                {!branch.production && !databaseSleeping ? (
+                {!branch.production ? (
                   <Action
                     title="Delete Branch"
                     shortcut={Keyboard.Shortcut.Common.Remove}
@@ -109,7 +102,7 @@ function SearchBranches() {
                       const confirmed = await confirmAlert({
                         primaryAction: {
                           title: "Confirm",
-                          style: ActionStyle.Destructive,
+                          style: Alert.ActionStyle.Destructive,
                         },
                         icon: Icon.Trash,
                         title: "Delete Branch",
@@ -137,11 +130,18 @@ function SearchBranches() {
                 {branch.access_host_url && (
                   <Action.CopyToClipboard title="Copy Access Host URL" content={branch.access_host_url} />
                 )}
+                {branch.region ? (
+                  <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Region Public IP">
+                    {branch.region.public_ip_addresses.map((ip) => (
+                      <Action.CopyToClipboard title={ip} content={ip} concealed />
+                    ))}
+                  </ActionPanel.Submenu>
+                ) : null}
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action
                   title="Refresh"
-                  shortcut={Shortcut.Common.Refresh}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   icon={Icon.ArrowClockwise}
                   onAction={refreshBranches}
                 />

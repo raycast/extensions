@@ -123,10 +123,6 @@ export function useBranches(args: { organization?: string; database?: string }) 
           { name: values.name, parent_branch: values.parent },
           { database: values.database, organization: values.organization },
         ),
-        {
-          shouldRevalidateAfter: true,
-          optimisticUpdate: () => [],
-        },
       );
 
       toast.title = "Branch created";

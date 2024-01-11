@@ -13,6 +13,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search-databases",
+      "title": "Search Databases",
+      "subtitle": "PlanetScale",
+      "description": "Search PlanetScale databases",
+      "mode": "view"
+    },
+    {
       "name": "search-branches",
       "title": "Search Branches",
       "subtitle": "PlanetScale",
@@ -43,8 +50,8 @@
   ],
   "dependencies": {
     "@api/pscale": "file:./src/generated/apis/pscale",
-    "@raycast/api": "^1.60.1",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
     "api": "^6.1.1",
     "date-fns": "^2.30.0",
     "lodash": "^4.17.21"
