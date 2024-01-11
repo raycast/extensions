@@ -123,11 +123,7 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action.CopyToClipboard content={shortenUrl} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-                      <Action
-                        icon={{ source: Icon.Eye }}
-                        title="Toggle Detail"
-                        onAction={() => console.log("Toggle Detail")}
-                      />
+                      <Action icon={{ source: Icon.Eye }} title="Toggle Detail" onAction={() => setSearchText(url)} />
                       <Action
                         icon={{ source: Icon.Trash }}
                         title="Remove From History"
