@@ -26,18 +26,7 @@ export default function Command() {
     relativeTimeSeconds: number;
   }
 
-  const emptyContest = {
-    id: 0,
-    name: "",
-    type: "",
-    phase: "",
-    frozen: false,
-    durationSeconds: 0,
-    startTimeSeconds: 0,
-    relativeTimeSeconds: 0,
-  };
-
-  const [contests, setContests] = useState<Contest[]>([emptyContest]);
+  const [contests, setContests] = useState<Contest[]>([]);
   const [filteredList, filterList] = useState(contests);
   const [searchText, setSearchText] = useState("");
 
@@ -92,7 +81,9 @@ export default function Command() {
               ) : (
                 <></>
               )}
-              <Action.OpenInBrowser url={`${CODEFORCES_BASE}contest/${contest.id}`} />
+              <Action.OpenInBrowser
+                url={`${CODEFORCES_BASE}${contest.phase === "BEFORE" ? "contests" : `contest/${contest.id}`}`}
+              />
               <Action.CopyToClipboard
                 title="Copy Contest URL"
                 shortcut={{ modifiers: ["ctrl"], key: "enter" }}

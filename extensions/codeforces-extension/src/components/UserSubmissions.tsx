@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFetch } from "@raycast/utils";
-import { Result, emptyResult } from "../interface/Result";
+import { Result } from "../interface/Result";
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getExecutionStatusColor, getExecutionStatusString } from "../func/ExecutionStatus";
 import { CODEFORCES_API_BASE, CODEFORCES_BASE } from "../constants";
 
-export function UserSubmissions(value: { value: { name: { value: any; }; comp: any; }; }) {
-  const results: Result[] = [emptyResult];
+export function UserSubmissions(value: { value: { name: { value: any }; comp: any } }) {
+  const results: Result[] = [];
   const userHandle = value.value.name.value;
   const han = value.value.comp;
   const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}user.${han}?handle=${userHandle}`, {

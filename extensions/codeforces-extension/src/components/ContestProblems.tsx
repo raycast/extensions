@@ -4,7 +4,7 @@ import { CODEFORCES_API_BASE, CODEFORCES_BASE } from "../constants";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
-export function ContestProblems(id: { value: any; }) {
+export function ContestProblems(id: { value: any }) {
   const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}contest.standings?contestId=${id.value}&count=1`, {
     keepPreviousData: true,
     keepalive: true,
@@ -23,17 +23,7 @@ export function ContestProblems(id: { value: any; }) {
     tags: string[];
   }
 
-  const emptyProblem = {
-    contestId: 0,
-    index: "",
-    name: "",
-    type: "",
-    points: 0,
-    rating: 0,
-    tags: [],
-  };
-
-  const [problems, setProblems] = useState<Problem[]>([emptyProblem]);
+  const [problems, setProblems] = useState<Problem[]>([]);
   const [filteredList, filterList] = useState(problems);
   const [searchText, setSearchText] = useState("");
 

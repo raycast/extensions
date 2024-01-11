@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "codeforces-extension",
-  "title": "Codeforces-Extension",
+  "title": "Codeforces",
   "description": "Gives details about latest contests and details about any handle",
   "icon": "command-icon.png",
   "author": "harsh_varshney",
@@ -13,14 +13,14 @@
     {
       "name": "search-handle",
       "title": "Search Handle",
-      "subtitle": "Search a handle",
+      "subtitle": "Codeforces",
       "description": "Provides details about a handle",
       "mode": "view"
     },
     {
       "name": "search-contest",
       "title": "Search Contest",
-      "subtitle": "Seach Upcoming and Completed Contests",
+      "subtitle": "Codeforces",
       "description": "Lists upcoming and completed contests",
       "mode": "view"
     }

@@ -6,7 +6,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getColorHexCode } from "../func/HexCode";
 import { ContestSubmissions } from "./ContestSubmissions";
 
-export function Contest(value: { value: { value: any; }; }) {
+export function Contest(value: { value: { value: any } }) {
   const userHandle = value.value.value;
   const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}user.rating?handle=${userHandle}`, {
     keepPreviousData: true,
@@ -22,17 +22,6 @@ export function Contest(value: { value: { value: any; }; }) {
     newRating: number;
   }
 
-  const emptyContestDetails = {
-    contestId: 0,
-    contestName: "",
-    handle: "",
-    rank: 0,
-    ratingUpdateTimeSeconds: 0,
-    oldRating: 0,
-    newRating: 0,
-  };
-
-
   if (error) {
     console.log(`Error while fetching constests: \n ${error}`);
   }
@@ -44,7 +33,7 @@ export function Contest(value: { value: { value: any; }; }) {
     }
   }, [isLoading]);
 
-  const [items, setItems] = useState<ContestDetails[]>([emptyContestDetails]);
+  const [items, setItems] = useState<ContestDetails[]>([]);
   const [searchText, setSearchText] = useState("");
   const [filteredList, filterList] = useState<ContestDetails[]>([]);
 

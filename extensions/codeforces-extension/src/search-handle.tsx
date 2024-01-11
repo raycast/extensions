@@ -28,7 +28,7 @@ function unString(str: string) {
   return str || "Not Found";
 }
 
-function User(name: { value: any; }) {
+function User(name: { value: any }) {
   const userHandle = name.value;
   const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}user.info?handles=${userHandle}`, {
     keepPreviousData: true,
@@ -92,22 +92,22 @@ function User(name: { value: any; }) {
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Max Rating">
             <Detail.Metadata.TagList.Item
-              text={convertToTitleCase(`${(userData.maxRating)}`)}
-              color={getColorHexCode((userData.maxRating))}
+              text={convertToTitleCase(`${userData.maxRating}`)}
+              color={getColorHexCode(userData.maxRating)}
             />
             <Detail.Metadata.TagList.Item
               text={convertToTitleCase(`${unString(userData.maxRank)}`)}
-              color={getColorHexCode((userData.maxRating))}
+              color={getColorHexCode(userData.maxRating)}
             />
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Current Rank">
             <Detail.Metadata.TagList.Item
-              text={convertToTitleCase(`${(userData.rating)}`)}
-              color={getColorHexCode((userData.rating))}
+              text={convertToTitleCase(`${userData.rating}`)}
+              color={getColorHexCode(userData.rating)}
             />
             <Detail.Metadata.TagList.Item
               text={convertToTitleCase(`${unString(userData.rank)}`)}
-              color={getColorHexCode((userData.rating))}
+              color={getColorHexCode(userData.rating)}
             />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
