@@ -3,7 +3,7 @@ import { getWorkspaceTasks, Workspace } from "../api";
 import { allWorkspacesFetch } from "../helpers/allWorkspacesFetch";
 
 export function useTasks(workspaces: Workspace[], initialExecute = true) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(allWorkspacesFetch(getWorkspaceTasks), [workspaces], {
+  const { data, error, isLoading, revalidate } = useCachedPromise(getTasks, [workspaces], {
     initialData: [],
     execute: initialExecute,
   });
@@ -13,4 +13,8 @@ export function useTasks(workspaces: Workspace[], initialExecute = true) {
     isLoadingTasks: isLoading,
     revalidateTasks: revalidate,
   };
+}
+
+function getTasks(workspaces: Workspace[]) {
+  return allWorkspacesFetch(getWorkspaceTasks, workspaces);
 }
