@@ -20,6 +20,13 @@
       "mode": "view"
     },
     {
+      "name": "create-branch",
+      "title": "Create Branch",
+      "subtitle": "PlanetScale",
+      "description": "Create a branch in PlanetScale",
+      "mode": "view"
+    },
+    {
       "name": "create-deploy-request",
       "title": "Create Deploy Request",
       "subtitle": "PlanetScale",
@@ -32,15 +39,6 @@
       "subtitle": "PlanetScale",
       "description": "Search PlanetScale deploy requests",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "title": "Service Token",
-      "description": "PlanetScale service token",
-      "name": "serviceToken",
-      "type": "password",
-      "required": true
     }
   ],
   "dependencies": {

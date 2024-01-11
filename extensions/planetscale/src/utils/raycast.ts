@@ -1,8 +1,8 @@
 import { Clipboard, open, Toast } from "@raycast/api";
 
-export function enrichToastWithURL(toast: Toast, url: string) {
+export function enrichToastWithURL(toast: Toast, { resource, url }: { resource: string; url: string }) {
   toast.primaryAction = {
-    title: "Open Deploy Request",
+    title: `Open ${resource}`,
     shortcut: { modifiers: ["shift", "cmd"], key: "o" },
     onAction: () => open(url),
   };

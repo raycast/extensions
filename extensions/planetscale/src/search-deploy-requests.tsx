@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Color, Keyboard, List } from "@raycast/api";
-import { getAvatarIcon } from "@raycast/utils";
+import { Action, ActionPanel, Image, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
 import { useDeployRequests, useSelectedDatabase, useSelectedOrganization } from "./utils/hooks";
-import { DatabaseDropdown } from "./utils/components";
+import { View, ListDatabaseDropdown } from "./utils/components";
+import { PlanetScaleColor } from "./utils/colors";
 
-export default function SearchDeployRequests() {
+function SearchDeployRequests() {
   const [organization, setOrganization] = useSelectedOrganization();
   const [database, setDatabase] = useSelectedDatabase();
   const { deployRequests, deployRequestsLoading } = useDeployRequests({ organization, database });
@@ -15,7 +15,7 @@ export default function SearchDeployRequests() {
       searchBarPlaceholder="Search deploy requests"
       throttle
       searchBarAccessory={
-        <DatabaseDropdown
+        <ListDatabaseDropdown
           onChange={(value) => {
             setOrganization(value.organization);
             setDatabase(value.database);
@@ -33,25 +33,28 @@ export default function SearchDeployRequests() {
             icon={
               {
                 open: {
-                  source: "pull-request.svg",
-                  tintColor: Color.Green,
+                  source: "deploy-open.svg",
+                  tintColor: PlanetScaleColor.Green,
+                  tooltip: "Open",
                 },
                 closed: {
-                  source: "pull-request.svg",
-                  tintColor: Color.Red,
+                  source: "deploy-closed.svg",
+                  tintColor: PlanetScaleColor.Red,
+                  tooltip: "Closed",
                 },
                 deployed: {
-                  source: "merge.svg",
-                  tintColor: Color.Purple,
+                  source: "deploy-deployed.svg",
+                  tintColor: PlanetScaleColor.Purple,
+                  tooltip: "Deployed",
                 },
-              }[deployRequest.deployed_at ? "deployed" : deployRequest.state]
+              }[deployRequest.deployment_state === "complete" ? "deployed" : deployRequest.state]
             }
             accessories={[
               deployRequest.approved
                 ? {
                     tag: {
                       value: "Approved",
-                      color: Color.Green,
+                      color: PlanetScaleColor.Green,
                     },
                   }
                 : {},
@@ -65,7 +68,10 @@ export default function SearchDeployRequests() {
               deployRequest.actor
                 ? {
                     tooltip: deployRequest.actor.display_name,
-                    icon: getAvatarIcon(deployRequest.actor.display_name),
+                    icon: {
+                      source: deployRequest.actor.avatar_url,
+                      mask: Image.Mask.Circle,
+                    },
                   }
                 : {},
             ]}
@@ -97,5 +103,12 @@ export default function SearchDeployRequests() {
         );
       })}
     </List>
+  );
+}
+export default function Command() {
+  return (
+    <View>
+      <SearchDeployRequests />
+    </View>
   );
 }

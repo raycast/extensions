@@ -1,14 +1,20 @@
-import { Action, ActionPanel, Color, Image, Keyboard, List } from "@raycast/api";
-import { getAvatarIcon } from "@raycast/utils";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
-import { useBranches, useSelectedDatabase, useSelectedOrganization } from "./utils/hooks";
-import CreateDeployRequest from "./create-deploy-request";
-import { DatabaseDropdown } from "./utils/components";
+import { useBranches, useDatabases, useSelectedDatabase, useSelectedOrganization } from "./utils/hooks";
+import { CreateDeployRequest } from "./create-deploy-request";
+import { ListDatabaseDropdown, View } from "./utils/components";
+import { PlanetScaleColor } from "./utils/colors";
+import ActionStyle = Alert.ActionStyle;
+import { CreateBranch } from "./create-branch";
 
-export default function SearchBranches() {
+function SearchBranches() {
   const [organization, setOrganization] = useSelectedOrganization();
   const [database, setDatabase] = useSelectedDatabase();
-  const { branches, branchesLoading } = useBranches({ organization, database });
+  const { databases } = useDatabases({ organization });
+  const { branches, deleteBranch, branchesLoading } = useBranches({ organization, database });
+
+  const selectedDatabase = databases?.find((db) => db.name === database);
+  const databaseSleeping = selectedDatabase?.state === "sleeping";
 
   return (
     <List
@@ -16,7 +22,7 @@ export default function SearchBranches() {
       searchBarPlaceholder="Search branches"
       throttle
       searchBarAccessory={
-        <DatabaseDropdown
+        <ListDatabaseDropdown
           onChange={(value) => {
             setOrganization(value.organization);
             setDatabase(value.database);
@@ -28,10 +34,17 @@ export default function SearchBranches() {
         <List.Item
           key={branch.id}
           title={branch.name}
-          icon={{
-            source: "branch.svg",
-            tintColor: Color.SecondaryText,
-          }}
+          icon={
+            (branch as any).state === "sleeping"
+              ? {
+                  source: "branch-sleep.svg",
+                  tintColor: Color.SecondaryText,
+                }
+              : {
+                  source: "branch.svg",
+                  tintColor: PlanetScaleColor.Blue,
+                }
+          }
           accessories={[
             branch.production
               ? {
@@ -48,7 +61,10 @@ export default function SearchBranches() {
             branch.actor
               ? {
                   tooltip: branch.actor.display_name,
-                  icon: getAvatarIcon(branch.actor.display_name),
+                  icon: {
+                    source: branch.actor.avatar_url,
+                    mask: Image.Mask.Circle,
+                  },
                 }
               : {},
           ]}
@@ -56,17 +72,53 @@ export default function SearchBranches() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.OpenInBrowser title="Open in Browser" url={branch.html_url} />
-                {database && organization && branch && !branch.production ? (
+                {database && organization && branch && !databaseSleeping && !branch.production ? (
                   <Action.Push
                     icon={{
-                      source: "pull-request.svg",
+                      source: "deploy-open.svg",
                       tintColor: Color.PrimaryText,
                     }}
                     title="Create Deploy Request"
                     target={
-                      <CreateDeployRequest database={database} organization={organization} branch={branch.name} />
+                      <CreateDeployRequest organization={organization} database={database} branch={branch.name} />
                     }
                     shortcut={Keyboard.Shortcut.Common.OpenWith}
+                  />
+                ) : null}
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                {database && organization ? (
+                  <Action.Push
+                    icon={{
+                      source: "branch.svg",
+                      tintColor: Color.PrimaryText,
+                    }}
+                    title="Create Branch"
+                    target={<CreateBranch organization={organization} database={database} branch={branch.name} />}
+                    shortcut={Keyboard.Shortcut.Common.New}
+                  />
+                ) : null}
+                {!branch.production && !databaseSleeping ? (
+                  <Action
+                    title="Delete Branch"
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
+                    onAction={async () => {
+                      const confirmed = await confirmAlert({
+                        primaryAction: {
+                          title: "Confirm",
+                          style: ActionStyle.Destructive,
+                        },
+                        icon: Icon.Trash,
+                        title: "Delete Branch",
+                        message: `Are you sure you want to delete branch ${branch.name}?`,
+                      });
+
+                      if (confirmed) {
+                        await deleteBranch(branch.name);
+                      }
+                    }}
                   />
                 ) : null}
               </ActionPanel.Section>
@@ -81,11 +133,22 @@ export default function SearchBranches() {
                   content={branch.html_url}
                   shortcut={Keyboard.Shortcut.Common.CopyPath}
                 />
+                {branch.access_host_url && (
+                  <Action.CopyToClipboard title="Copy Access Host URL" content={branch.access_host_url} />
+                )}
               </ActionPanel.Section>
             </ActionPanel>
           }
         />
       ))}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <SearchBranches />
+    </View>
   );
 }

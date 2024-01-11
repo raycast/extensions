@@ -1,8 +1,10 @@
 import pscale from "@api/pscale";
-import { getPreferenceValues } from "@raycast/api";
+import FetchError from "api/dist/core/errors/fetchError";
 
-const preferences = getPreferenceValues();
+export function createPlanetScaleClient(accessToken: string) {
+  return pscale.auth(accessToken);
+}
 
-pscale.auth(preferences.serviceToken);
+export type PlanetScaleClient = ReturnType<typeof createPlanetScaleClient>;
 
-export { pscale };
+export const PlanetScaleError = FetchError;
