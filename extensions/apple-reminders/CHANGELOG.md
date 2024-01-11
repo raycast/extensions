@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Improve NLP in Quick Add Reminder] - 2023-12-08
+
+- Improve NLP parsing in the `Quick Add Reminder` command by adding an endDate for recurring reminders.
+
 ## [Add option to hide menu bar count when empty] - 2023-12-20
 
 - Allow hiding the menu bar count when there are zero reminders.

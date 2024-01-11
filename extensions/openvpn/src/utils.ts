@@ -19,3 +19,14 @@ export const startOpenVPN = async () => {
     console.error(e);
   }
 };
+
+export const oneConfig = async () => {
+  try {
+    const { stdout } = await execAsync(
+      '"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect" --list-profiles',
+    );
+    return JSON.parse(stdout).length === 1;
+  } catch (e) {
+    return false;
+  }
+};

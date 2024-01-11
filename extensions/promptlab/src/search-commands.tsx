@@ -1,7 +1,8 @@
 import { ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import CommandResponse from "./components/Commands/CommandResponse";
-import { Command, ExtensionPreferences, searchPreferences } from "./utils/types";
+import { Command } from "./lib/commands/types";
+import { ExtensionPreferences, searchPreferences } from "./lib/preferences/types";
 import CategoryDropdown from "./components/CategoryDropdown";
 import { useCommands } from "./hooks/useCommands";
 import CommandListDetail from "./components/Commands/CommandListDetail";
@@ -12,7 +13,7 @@ import { CommandControlsActionsSection } from "./components/Commands/actions/Com
 import { useAdvancedSettings } from "./hooks/useAdvancedSettings";
 import { useCachedState } from "@raycast/utils";
 import { AdvancedActionSubmenu } from "./components/actions/AdvancedActionSubmenu";
-import { COMMAND_CATEGORIES } from "./utils/constants";
+import { COMMAND_CATEGORIES } from "./lib/constants";
 
 export default function SearchCommand(props: { arguments: { commandName: string; queryInput: string } }) {
   const { commandName, queryInput } = props.arguments;
@@ -20,7 +21,7 @@ export default function SearchCommand(props: { arguments: { commandName: string;
   const [previousCommand] = useCachedState<string>("promptlab-previous-command", "");
   const [targetCategory, setTargetCategory] = useState<string>("All");
   const [searchText, setSearchText] = useState<string | undefined>(
-    commandName == undefined || queryInput ? undefined : commandName.trim()
+    commandName == undefined || queryInput ? undefined : commandName.trim(),
   );
   const { advancedSettings } = useAdvancedSettings();
   const preferences = getPreferenceValues<searchPreferences & ExtensionPreferences>();
@@ -128,7 +129,7 @@ export default function SearchCommand(props: { arguments: { commandName: string;
         acc.push(
           <List.Section title={category.name} key={category.name}>
             {categoryListItems}
-          </List.Section>
+          </List.Section>,
         );
       }
       return acc;
@@ -143,7 +144,7 @@ export default function SearchCommand(props: { arguments: { commandName: string;
       command.favorited ? acc[0].push(command) : acc[1].push(command);
       return acc;
     },
-    [[], []] as [Command[], Command[]]
+    [[], []] as [Command[], Command[]],
   );
 
   return (

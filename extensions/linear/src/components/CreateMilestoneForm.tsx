@@ -24,16 +24,14 @@ export default function CreateMilestoneForm({ projectId }: { projectId?: string 
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating Milestone" });
 
       try {
-        const { success, projectMilestone } = await linearClient.createProjectMilestone({
+        const { success } = await linearClient.createProjectMilestone({
           projectId: values.projectId,
           name: values.name,
           description: values.description,
           ...(values.targetDate ? { targetDate: values.targetDate } : {}),
         });
 
-        const milestoneResult = await projectMilestone;
-
-        if (success && milestoneResult) {
+        if (success) {
           toast.style = Toast.Style.Success;
           toast.title = `Created Milestone`;
 
