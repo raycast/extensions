@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Toast,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import axios from "axios";
 import { useState } from "react";
@@ -8,12 +16,13 @@ import APIResult from "@src/components/APIResult";
 export default () => {
   const { push } = useNavigation();
   const apiKey = useAPIKey();
-  const [nameError, setNameError] = useState<string | undefined>();
-  const dropNameErrorIfNeeded = () => {
-    if (nameError && nameError.length > 0) {
-      setNameError(undefined);
+  const [endpointError, setEndpointError] = useState<string | undefined>();
+  const dropEndpointErrorIfNeeded = () => {
+    if (endpointError && endpointError.length > 0) {
+      setEndpointError(undefined);
     }
   };
+
   return (
     <Form
       navigationTitle="Test SportMonks API"
@@ -30,6 +39,11 @@ export default () => {
                   url,
                   headers: { Authorization: apiKey },
                 });
+                await showToast({
+                  title: "Success!",
+                  message: "Rendering Response...",
+                  style: Toast.Style.Success,
+                });
                 push(<APIResult response={response} url={url} />);
               } catch (error) {
                 showFailureToast(error);
@@ -44,16 +58,18 @@ export default () => {
         text="To test the validity of your access token, make an API call using a SportMonks API endpoint (V3). For documentation on endpoints please visit https://docs.sportmonks.com/football/welcome/getting-started"
       />
       <Form.TextField
+        autoFocus
         id="url"
         title="URL"
         placeholder="https://api.sportmonks.com/v3/some_path_here"
-        error={nameError}
-        onChange={dropNameErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length === 0) {
-            setNameError("URL should not be empty!");
+        error={endpointError}
+        onChange={(endpoint) => {
+          const endpointRegex =
+            /^https:\/\/api\.sportmonks\.com\/v3\/football\/.*/g;
+          if (!endpoint.match(endpointRegex)) {
+            setEndpointError("SportMonks URL not valid!");
           } else {
-            dropNameErrorIfNeeded();
+            dropEndpointErrorIfNeeded();
           }
         }}
       />
