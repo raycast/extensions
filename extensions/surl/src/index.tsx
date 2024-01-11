@@ -5,7 +5,7 @@ import fetch from "node-fetch";
 const FRONTEND_ENDPOINT = "https://surlapp.uk";
 const BACKEND_ENDPOINT = "https://surlapp.uk";
 const CACHE_KEY = "surl-history";
-const MAX_HISTORY_COUNT = 7;
+const MAX_HISTORY_COUNT = 15;
 
 type Item = {
   key: string;
@@ -15,11 +15,18 @@ type Item = {
 export default function Command() {
   const cache = new Cache();
   const cachedData = cache.get(CACHE_KEY);
-  const items: Item[] = cachedData ? JSON.parse(cachedData) : [];
-  const itemsCount = items.length;
+  const cachedItems: Item[] = cachedData ? JSON.parse(cachedData) : [];
+  const itemsCount = cachedItems.length;
 
   const [searchText, setSearchText] = useState("");
   const [shortenUrl, setShortenUrl] = useState("");
+  const [items, setItems] = useState<Item[]>(cachedItems);
+
+  const handleChangeText = (text: string) => {
+    setSearchText(text);
+    const filteredItems = cachedItems.filter((item) => item.url.includes(text));
+    setItems(filteredItems);
+  };
 
   const handleSubmit = async () => {
     if (!searchText) {
@@ -66,7 +73,7 @@ export default function Command() {
       searchBarPlaceholder="Please enter the URL you want to shorten"
       isLoading={false}
       searchText={searchText}
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={handleChangeText}
       isShowingDetail={false}
       throttle
     >
