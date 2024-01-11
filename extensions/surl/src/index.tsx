@@ -50,6 +50,7 @@ export default function Command() {
 
       setShortenUrl(`${FRONTEND_ENDPOINT}/${json.key}`);
       setSearchText("");
+      setItems(cachedItems);
       Clipboard.copy(`${FRONTEND_ENDPOINT}/${json.key}`);
       showToast({ title: "", message: "Created Successfully. Copied to clipboard." });
 
