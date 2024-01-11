@@ -24,9 +24,10 @@ export function useModel(): ModelHook {
   useEffect(() => {
     if (!useAzure) {
       gpt
-        .listModels()
+        .models
+        .list()
         .then((res) => {
-          const models = res.data.data;
+          const models = res.data;
           setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
         })
         .catch(async (err) => {

@@ -1,8 +1,8 @@
-import type { ChatCompletionRequestMessage } from "openai";
+import { ChatCompletionMessageParam } from "openai/src/resources/chat/completions";
 
 export type Set<T> = React.Dispatch<React.SetStateAction<T>>;
 
-export type Message = ChatCompletionRequestMessage;
+export type Message = ChatCompletionMessageParam;
 
 export interface Question {
   id: string;
@@ -98,23 +98,6 @@ export interface ChatViewProps extends ChangeModelProp {
   conversation: Conversation;
   setConversation: Set<Conversation>;
   use: { chats: ChatHook; conversations: ConversationsHook; savedChats: SavedChatHook };
-}
-
-export interface CreateChatCompletionDeltaResponse {
-  id: string;
-  object: "chat.completion.chunk";
-  created: number;
-  model: string;
-  choices: [
-    {
-      delta: {
-        role: "user" | "assistant" | "system";
-        content?: string;
-      };
-      index: number;
-      finish_reason: string | null;
-    }
-  ];
 }
 
 export interface ConfigurationPreferences {
