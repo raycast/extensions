@@ -75,7 +75,7 @@ export default function Command() {
               {contest.phase !== "BEFORE" ? (
                 <Action.Push
                   icon={Icon.AppWindowList}
-                  target={<ContestProblems id={contest.id} name_value={contest.name}  />}
+                  target={<ContestProblems id={contest.id} name_value={contest.name} />}
                   title="View Problems"
                 />
               ) : (

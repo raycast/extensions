@@ -4,11 +4,9 @@ import { CODEFORCES_API_BASE, CODEFORCES_BASE } from "../constants";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
-export function ContestProblems(value: {
-  name_value: any; id: any; 
-}) {
-  const id = value.id
-  const name_value = value.name_value
+export function ContestProblems(value: { name_value: any; id: any }) {
+  const id = value.id;
+  const name_value = value.name_value;
   const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}contest.standings?contestId=${id}&count=1`, {
     keepPreviousData: true,
     keepalive: true,
