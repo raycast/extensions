@@ -24,7 +24,7 @@ export default function Command() {
 
   const handleChangeText = (text: string) => {
     setSearchText(text);
-    const filteredItems = cachedItems.filter((item) => item.url.includes(text));
+    const filteredItems = cachedItems.filter((item) => item.url.toLowerCase().includes(text.toLowerCase()));
     setItems(filteredItems);
   };
 
