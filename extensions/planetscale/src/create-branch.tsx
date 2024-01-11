@@ -1,11 +1,8 @@
 import { useBranches } from "./utils/hooks";
 import { FormValidation, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Color, Form, showToast, Toast } from "@raycast/api";
-import { enrichToastWithURL } from "./utils/raycast";
-import { getPlanetScaleClient } from "./utils/client";
+import { Action, ActionPanel, Color, Form } from "@raycast/api";
 import { FormDatabaseDropdown, View } from "./utils/components";
 import { PlanetScaleColor } from "./utils/colors";
-import { PlanetScaleError } from "./utils/api";
 import { isEmpty, sample } from "lodash";
 import { useState } from "react";
 
@@ -41,39 +38,25 @@ export function CreateBranch(
     },
     initialValues: {
       name: "",
+      parent: "branch" in props ? props.branch : "",
       database: "organization" in props ? `${props.organization}-${props.database}` : "",
     },
     async onSubmit(values) {
-      const pscale = getPlanetScaleClient();
-
       const [organization, database] = values.database.split("-");
 
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating branch", message: values.name });
-
-      try {
-        const branchResponse = await pscale.createABranch(
-          { name: values.name, parent_branch: values.parent },
-          { database, organization },
-        );
-        toast.title = "Branch created";
-        toast.style = Toast.Style.Success;
-        enrichToastWithURL(toast, { resource: "Branch", url: branchResponse.data.html_url });
-      } catch (error) {
-        if (error instanceof PlanetScaleError) {
-          toast.title = "Failed to create deploy request";
-          toast.message = error.data.message;
-          toast.style = Toast.Style.Failure;
-        } else {
-          throw error;
-        }
-      }
+      await createBranch({
+        name: values.name,
+        parent: values.parent,
+        database,
+        organization,
+      });
 
       reset({ name: "", database: values.database, parent: values.parent });
     },
   });
 
   const [organization, database] = values.database.split("-");
-  const { branches, branchesLoading } = useBranches({ organization, database });
+  const { branches, branchesLoading, createBranch } = useBranches({ organization, database });
 
   return (
     <Form
@@ -87,7 +70,7 @@ export function CreateBranch(
       }
     >
       <FormDatabaseDropdown storeValue title="Database" autoFocus={isEmpty(props)} {...itemProps.database} />
-      <Form.Dropdown title="Parent" {...itemProps.parent} autoFocus={!isEmpty(props)}>
+      <Form.Dropdown title="Parent" {...itemProps.parent}>
         {branches.map((branch) => (
           <Form.Dropdown.Item
             key={branch.name}
@@ -107,7 +90,15 @@ export function CreateBranch(
           />
         ))}
       </Form.Dropdown>
-      <Form.TextField title="Name" placeholder={placeholderBranchName} {...itemProps.name} />
+      <Form.TextField
+        title="Name"
+        autoFocus={!isEmpty(props)}
+        placeholder={placeholderBranchName}
+        {...itemProps.name}
+        onChange={(value) => {
+          itemProps.name.onChange?.(value.replace(" ", "-"));
+        }}
+      />
     </Form>
   );
 }

@@ -7,7 +7,7 @@ import { PlanetScaleColor } from "./utils/colors";
 function SearchDeployRequests() {
   const [organization, setOrganization] = useSelectedOrganization();
   const [database, setDatabase] = useSelectedDatabase();
-  const { deployRequests, deployRequestsLoading } = useDeployRequests({ organization, database });
+  const { deployRequests, closeDeployRequest, deployRequestsLoading } = useDeployRequests({ organization, database });
 
   return (
     <List
@@ -79,6 +79,14 @@ function SearchDeployRequests() {
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action.OpenInBrowser title="Open in Browser" url={deployRequest.html_url} />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Close Deploy Request"
+                    onAction={async () => {
+                      await closeDeployRequest(deployRequest.id);
+                    }}
+                  />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.CopyToClipboard

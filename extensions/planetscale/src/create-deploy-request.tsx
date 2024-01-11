@@ -1,12 +1,9 @@
-import { useBranches } from "./utils/hooks";
+import { useBranches, useDeployRequests } from "./utils/hooks";
 import { FormValidation, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { useEffect } from "react";
-import { enrichToastWithURL } from "./utils/raycast";
-import { getPlanetScaleClient } from "./utils/client";
 import { FormDatabaseDropdown, View } from "./utils/components";
 import { isEmpty } from "lodash";
-import { PlanetScaleError } from "./utils/api";
 
 interface CreateDeployRequestForm {
   branch: string;
@@ -32,40 +29,23 @@ export function CreateDeployRequest(props: CreateDeployRequestProps | object) {
       database: "organization" in props ? `${props.organization}-${props.database}` : undefined,
     },
     async onSubmit(values) {
-      const pscale = getPlanetScaleClient();
-
       const [organization, database] = values.database.split("-");
 
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating deploy request" });
+      await createDeployRequest({
+        organization,
+        database,
+        branch: values.branch,
+        deploy: values.deploy,
+        notes: values.notes,
+      });
 
-      try {
-        const deployRequest = await pscale.createADeployRequest(
-          {
-            branch: values.branch,
-            into_branch: values.deploy,
-            notes: values.notes,
-          },
-          { database, organization },
-        );
-        toast.title = "Deploy request created";
-        toast.style = Toast.Style.Success;
-        enrichToastWithURL(toast, { resource: "Deploy Request", url: deployRequest.data.html_url });
-
-        reset({ notes: "", branch: values.branch, database: values.database });
-      } catch (error) {
-        if (error instanceof PlanetScaleError) {
-          toast.title = "Failed to create deploy request";
-          toast.message = error.data.message;
-          toast.style = Toast.Style.Failure;
-        } else {
-          throw error;
-        }
-      }
+      reset({ notes: "", branch: values.branch, database: values.database });
     },
   });
 
   const [organization, database] = values.database ? values.database.split("-") : [undefined, undefined];
   const { branches, branchesLoading } = useBranches({ organization, database });
+  const { createDeployRequest } = useDeployRequests({ organization, database });
 
   useEffect(() => {
     if (!branchesLoading && !values.branch) {

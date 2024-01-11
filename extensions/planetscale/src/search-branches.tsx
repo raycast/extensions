@@ -4,14 +4,15 @@ import { useBranches, useDatabases, useSelectedDatabase, useSelectedOrganization
 import { CreateDeployRequest } from "./create-deploy-request";
 import { ListDatabaseDropdown, View } from "./utils/components";
 import { PlanetScaleColor } from "./utils/colors";
-import ActionStyle = Alert.ActionStyle;
 import { CreateBranch } from "./create-branch";
+import ActionStyle = Alert.ActionStyle;
+import Shortcut = Keyboard.Shortcut;
 
 function SearchBranches() {
   const [organization, setOrganization] = useSelectedOrganization();
   const [database, setDatabase] = useSelectedDatabase();
   const { databases } = useDatabases({ organization });
-  const { branches, deleteBranch, branchesLoading } = useBranches({ organization, database });
+  const { branches, refreshBranches, deleteBranch, branchesLoading } = useBranches({ organization, database });
 
   const selectedDatabase = databases?.find((db) => db.name === database);
   const databaseSleeping = selectedDatabase?.state === "sleeping";
@@ -72,6 +73,8 @@ function SearchBranches() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.OpenInBrowser title="Open in Browser" url={branch.html_url} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
                 {database && organization && branch && !databaseSleeping && !branch.production ? (
                   <Action.Push
                     icon={{
@@ -85,8 +88,6 @@ function SearchBranches() {
                     shortcut={Keyboard.Shortcut.Common.OpenWith}
                   />
                 ) : null}
-              </ActionPanel.Section>
-              <ActionPanel.Section>
                 {database && organization ? (
                   <Action.Push
                     icon={{
@@ -136,6 +137,14 @@ function SearchBranches() {
                 {branch.access_host_url && (
                   <Action.CopyToClipboard title="Copy Access Host URL" content={branch.access_host_url} />
                 )}
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
+                  title="Refresh"
+                  shortcut={Shortcut.Common.Refresh}
+                  icon={Icon.ArrowClockwise}
+                  onAction={refreshBranches}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }
