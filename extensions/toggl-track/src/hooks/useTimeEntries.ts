@@ -7,8 +7,8 @@ export function useTimeEntries(initialExecute = true) {
   const startDateRef = useRef(dayjs().subtract(1, "week").toDate());
   const endDateRef = useRef(dayjs().toDate());
   const { data, error, isLoading, revalidate } = useCachedPromise(
-    getTimeEntries,
-    [{ startDate: startDateRef.current, endDate: endDateRef.current }],
+    () => getTimeEntries({ startDate: startDateRef.current, endDate: endDateRef.current }),
+    [],
     { initialData: [], execute: initialExecute },
   );
   return {
