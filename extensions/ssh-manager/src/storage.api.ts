@@ -21,11 +21,11 @@ function parseSSHConfig(configFilePath: string): ISSHConnection[] {
 
     if (trimmedLine.startsWith("Host ") && trimmedLine !== "Host *") {
       if (currentConnection !== null) {
-          connections.push(currentConnection);
+        connections.push(currentConnection);
       }
       currentConnection = { id: connections.length.toString(), address: "", name: trimmedLine.substring(5), user: "" };
     } else if (currentConnection !== null) {
-      const firstSpaceIndex = trimmedLine.indexOf(' ');
+      const firstSpaceIndex = trimmedLine.indexOf(" ");
       const key = trimmedLine.substring(0, firstSpaceIndex);
       const value = trimmedLine.substring(firstSpaceIndex + 1);
 
