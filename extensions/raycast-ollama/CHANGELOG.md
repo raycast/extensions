@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Improvement] 2024-01-11
+
+- **Command 'Translate'**: now is required to specify the destination language.
+
 ## [BugFix] 2024-01-02
 
 - **Command 'Manage Models'**: fixed bug that cause error `ollama-models | TypeError: Cannot read properties of undefined (reading 'split')` when model show information was undefined.
