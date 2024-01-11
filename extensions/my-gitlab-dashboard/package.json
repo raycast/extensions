@@ -81,7 +81,8 @@
       "required": false,
       "title": "Soft warning threshold for dates",
       "description": "Creation and modification times that are past this value will be displayed in a different colour",
-      "placeholder": "1d"
+      "placeholder": "1d",
+      "default": "1d"
     },
     {
       "name": "hardWarningDateThreshold",
@@ -89,7 +90,8 @@
       "required": false,
       "title": "Hard warning threshold for dates",
       "description": "Creation and modification times that are past this value will be displayed in a different colour and show an alert icon",
-      "placeholder": "2d"
+      "placeholder": "2d",
+      "default": "2d"
     },
     {
       "name": "colorizedDatesForPipelines",
