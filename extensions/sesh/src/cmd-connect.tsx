@@ -6,20 +6,19 @@ import { openApp } from "./app";
 
 export default function ConnectCommand() {
   const [sessions, setSessions] = useState<Array<string>>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   async function getAndSetSessions() {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "" });
-    setIsLoading(true);
     try {
       const sessions = await getSessions();
       setSessions(sessions);
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't get sessions";
-      toast.message = typeof error === "string" ? error : "Unknown reason";
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't get sessions",
+        message: typeof error === "string" ? error : "Unknown reason",
+      });
     } finally {
-      console.log("finally");
       setIsLoading(false);
     }
   }
@@ -31,7 +30,6 @@ export default function ConnectCommand() {
   }, []);
 
   async function connect(session: string) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "" });
     try {
       setIsLoading(true);
       await connectToSession(session);
@@ -39,9 +37,11 @@ export default function ConnectCommand() {
       await closeMainWindow();
       await clearSearchBar();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't connect to session";
-      toast.message = typeof error === "string" ? error : "Unknown reason";
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't connect to session",
+        message: typeof error === "string" ? error : "Unknown reason",
+      });
     } finally {
       setIsLoading(false);
     }

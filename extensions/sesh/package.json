@@ -14,7 +14,7 @@
     {
       "name": "cmd-connect",
       "title": "Connect To Session",
-      "description": "Connect to a session",
+      "description": "Connect to a terminal session from the smart list.",
       "icon": "command-icon.png",
       "mode": "view",
       "preferences": [
