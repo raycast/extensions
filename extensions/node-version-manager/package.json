@@ -13,25 +13,29 @@
   "commands": [
     {
       "name": "list",
-      "title": "Search Installed NodeJS Versions",
+      "title": "Search Installed Versions",
+      "subtitle": "Node Version Manager",
       "description": "List Node.JS versions installed",
       "mode": "view"
     },
     {
       "name": "list-remote",
-      "title": "Search Remote NodeJS Versions",
+      "title": "Search Remote Versions",
+      "subtitle": "Node Version Manager",
       "description": "List Remote Node.JS versions",
       "mode": "view"
     },
     {
       "name": "install",
-      "title": "Install A New NodeJS Version",
+      "title": "Install New Version",
+      "subtitle": "Node Version Manager",
       "description": "Install a new Node.JS version",
       "mode": "view"
     },
     {
       "name": "default",
-      "title": "Make Default A New NodeJS Version",
+      "title": "Make Default New NodeJS Version",
+      "subtitle": "Node Version Manager",
       "description": "Make default a new Node.JS version",
       "mode": "no-view",
       "arguments": [
