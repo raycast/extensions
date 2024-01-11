@@ -31,7 +31,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List navigationTitle="Search Beers" searchBarPlaceholder="Search your favorite beer">
+    <List navigationTitle="Choose options" searchBarPlaceholder="What to do with clipboard text?">
       {items.map((item) => (
         <List.Item
           key={item.title}
