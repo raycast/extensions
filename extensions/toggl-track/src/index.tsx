@@ -25,12 +25,12 @@ function ListView() {
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
-      (acc, timeEntry) =>
-        acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
-          ? acc
-          : [...acc, timeEntry],
-      [] as TimeEntry[],
-    );
+    (acc, timeEntry) =>
+      acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
+        ? acc
+        : [...acc, timeEntry],
+    [] as TimeEntry[],
+  );
 
   const totalDurationToday =
     timeEntries
