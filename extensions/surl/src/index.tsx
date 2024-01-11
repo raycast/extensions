@@ -55,11 +55,11 @@ export default function Command() {
 
       if (itemsCount >= MAX_HISTORY_COUNT) {
         // MEMO: remove last item and store in cache
-        const newItems = [{ key: json.key, url: json.url }, ...items.slice(0, MAX_HISTORY_COUNT - 1)];
+        const newItems = [{ key: json.key, url: json.url }, ...cachedItems.slice(0, MAX_HISTORY_COUNT - 1)];
         cache.set(CACHE_KEY, JSON.stringify(newItems));
       } else {
         // MEMO: store in cache
-        const newItems = [{ key: json.key, url: json.url }, ...items];
+        const newItems = [{ key: json.key, url: json.url }, ...cachedItems];
         cache.set(CACHE_KEY, JSON.stringify(newItems));
       }
     } catch (e) {
