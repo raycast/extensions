@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sesh",
   "title": "Sesh",
-  "description": "Smart, instant terminal sessions",
+  "description": "Smart, instant terminal session management.",
   "icon": "command-icon.png",
   "author": "joshmedeski",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "cmd-connect",
       "title": "Connect To Session",
-      "description": "Connect to a terminal session from the smart list.",
+      "description": "Smart terminal session manager.",
       "icon": "command-icon.png",
       "mode": "view",
       "preferences": [
