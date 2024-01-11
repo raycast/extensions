@@ -1,51 +1,67 @@
 import { useState, useEffect } from "react";
 
-import { List, Action, ActionPanel, closeMainWindow, clearSearchBar } from "@raycast/api";
-import { listSessions, connectToSession } from "./sesh";
+import { List, Action, ActionPanel, closeMainWindow, clearSearchBar, showToast, Toast } from "@raycast/api";
+import { getSessions, connectToSession } from "./sesh";
 import { openApp } from "./app";
 
 export default function ConnectCommand() {
   const [sessions, setSessions] = useState<Array<string>>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function getAndSetSessions() {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "" });
+    setIsLoading(true);
+    try {
+      const sessions = await getSessions();
+      setSessions(sessions);
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Couldn't get sessions";
+      toast.message = typeof error === "string" ? error : "Unknown reason";
+    } finally {
+      console.log("finally");
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     (async () => {
-      setIsLoading(true);
-      listSessions((error, stdout) => {
-        if (error) {
-          setIsLoading(false);
-          return;
-        }
-        const sessions = stdout.trim().split("\n");
-        if (sessions?.length > 0) {
-          setSessions(sessions);
-        }
-        setIsLoading(false);
-      });
+      await getAndSetSessions();
     })();
   }, []);
 
+  async function connect(session: string) {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "" });
+    try {
+      setIsLoading(true);
+      await connectToSession(session);
+      await openApp();
+      await closeMainWindow();
+      await clearSearchBar();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Couldn't connect to session";
+      toast.message = typeof error === "string" ? error : "Unknown reason";
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
-    <List isLoading={isLoading}>
-      {sessions.map((session, index) => (
-        <List.Item
-          key={index}
-          title={session}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Connect to Session"
-                onAction={async () => {
-                  await connectToSession(session, setIsLoading);
-                  openApp();
-                  await closeMainWindow();
-                  await clearSearchBar();
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
+    <>
+      <List isLoading={isLoading}>
+        {sessions.map((session, index) => (
+          <List.Item
+            key={index}
+            title={session}
+            actions={
+              <ActionPanel>
+                <Action title="Connect to Session" onAction={() => connect(session)} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import { Application, getPreferenceValues } from "@raycast/api";
-import { execSync } from "child_process";
+import { exec } from "child_process";
+import { env } from "./env";
 
 interface Preferences {
   openWithApp: Application;
@@ -7,6 +8,10 @@ interface Preferences {
 
 export function openApp() {
   const { openWithApp } = getPreferenceValues<Preferences>();
-  console.log("openWithApp", openWithApp);
-  execSync(`open -a ${openWithApp.name}`);
+  return new Promise<void>((resolve, reject) => {
+    exec(`open -a ${openWithApp.name}`, { env }, (error, _, stderr) => {
+      if (error || stderr) return reject(error?.message ?? stderr);
+      return resolve();
+    });
+  });
 }

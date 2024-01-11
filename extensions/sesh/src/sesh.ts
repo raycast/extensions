@@ -1,24 +1,27 @@
-import { showToast, Toast } from "@raycast/api";
-import type { ChildProcess, ExecException } from "child_process";
 import { exec } from "child_process";
 import { env } from "./env";
 
-export function listSessions(
-  callback: (error: ExecException | null, stdout: string, stderr: string) => void
-): ChildProcess {
-  return exec(`sesh list`, { env }, callback);
+export function getSessions() {
+  return new Promise<string[]>((resolve, reject) => {
+    exec(`sesh list`, { env }, (error, stdout, stderr) => {
+      if (error || stderr) {
+        return reject(error?.message ?? stderr);
+      }
+      const sessions = stdout.trim().split("\n");
+      return resolve(sessions ?? []);
+    });
+  });
 }
 
-export async function connectToSession(session: string, setLoading: (value: boolean) => void) {
-  const toast = await showToast({ style: Toast.Style.Animated, title: "" });
-  setLoading(true);
-
-  exec(`sesh connect ${session}`, { env }, async (error, _, stderr) => {
-    if (error || stderr) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `🚨 Could not connect to "${session}"`;
-      toast.message = error?.message ?? stderr;
-    }
-    setLoading(false);
+export function connectToSession(session: string): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    exec(`sesh connect --switch ${session}`, { env }, (error, _, stderr) => {
+      if (error || stderr) {
+        console.error("error ", error);
+        console.error("stderr ", stderr);
+        return reject(error?.message ?? stderr);
+      }
+      return resolve();
+    });
   });
 }
