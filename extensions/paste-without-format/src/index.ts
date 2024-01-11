@@ -2,7 +2,7 @@ import { showHUD, Clipboard, Toast, showToast } from "@raycast/api";
 
 export default async function main() {
   try {
-    let plainText = await Clipboard.readText();
+    const plainText = await Clipboard.readText();
     if (plainText) {
       await Clipboard.paste(plainText);
       await Clipboard.copy(plainText);
