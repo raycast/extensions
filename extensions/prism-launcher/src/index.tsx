@@ -49,7 +49,6 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle={"Prism Launcher instances"}
       searchBarPlaceholder={"Search by instance name"}
       {...(isPrismInstalled ? { isLoading: instances === undefined } : {})}
     >
