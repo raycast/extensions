@@ -1,0 +1,44 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "args": [],
+      "cwd": "${workspaceFolder:docsearch}",
+      "name": "Debug docsearch",
+      "program": "${workspaceFolder:docsearch}/.build/debug/docsearch",
+      "preLaunchTask": "swift: Build Debug docsearch"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "args": [],
+      "cwd": "${workspaceFolder:docsearch}",
+      "name": "Release docsearch",
+      "program": "${workspaceFolder:docsearch}/.build/release/docsearch",
+      "preLaunchTask": "swift: Build Release docsearch"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "args": [],
+      "cwd": "${workspaceFolder:docsearch}",
+      "name": "Debug parse-file",
+      "program": "${workspaceFolder:docsearch}/.build/debug/parse-file",
+      "preLaunchTask": "swift: Build Debug parse-file"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": ["swift"],
+      "args": [],
+      "cwd": "${workspaceFolder:docsearch}",
+      "name": "Release parse-file",
+      "program": "${workspaceFolder:docsearch}/.build/release/parse-file",
+      "preLaunchTask": "swift: Build Release parse-file"
+    }
+  ]
+}
