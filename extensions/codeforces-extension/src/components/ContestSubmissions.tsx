@@ -8,7 +8,6 @@ import { getExecutionStatusColor, getExecutionStatusString } from "../func/Execu
 
 export function ContestSubmissions(values: { id: any; handle: any; name: any }) {
   const results: Result[] = [];
-
   const { isLoading, data, error } = useFetch(
     `${CODEFORCES_API_BASE}contest.status?contestId=${values.id}&handle=${values.handle}`,
     {
@@ -30,7 +29,7 @@ export function ContestSubmissions(values: { id: any; handle: any; name: any }) 
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={`Search ${values.name} Submissions`}
+      navigationTitle={`${values.name} Submissions`}
       searchBarPlaceholder="Search Submissions By Problem"
     >
       {conData.reverse().map((item) => (

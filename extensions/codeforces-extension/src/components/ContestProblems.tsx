@@ -46,7 +46,7 @@ export function ContestProblems(value: { name_value: any; id: any }) {
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      navigationTitle={`Search ${name_value} Problems`}
+      navigationTitle={`${name_value} Problems`}
       searchBarPlaceholder="Search By Name"
     >
       {filteredList.map((problem) => (

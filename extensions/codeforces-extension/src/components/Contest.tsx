@@ -6,8 +6,8 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getColorHexCode } from "../func/HexCode";
 import { ContestSubmissions } from "./ContestSubmissions";
 
-export function Contest(value: { value: { value: any } }) {
-  const userHandle = value.value.value;
+export function Contest(value: { name: any }) {
+  const userHandle = value.name;
   const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}user.rating?handle=${userHandle}`, {
     keepPreviousData: true,
   });
@@ -46,7 +46,7 @@ export function Contest(value: { value: { value: any } }) {
       isLoading={isLoading}
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Contest"
+      navigationTitle={`${userHandle}'s Participated Contests`}
       searchBarPlaceholder="Search Contest By Name or Number"
       isShowingDetail
     >

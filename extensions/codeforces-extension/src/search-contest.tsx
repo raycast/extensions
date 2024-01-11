@@ -48,7 +48,7 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Contests"
-      searchBarPlaceholder="Search By Name"
+      searchBarPlaceholder="Search By Name or Number"
     >
       {filteredList.slice(0, 49).map((contest) => (
         <List.Item

@@ -69,13 +69,13 @@ function User(name: { value: any }) {
           <Action.Push
             title="Contest Histroy"
             icon={{ source: Icon.AppWindowList }}
-            target={<Contest value={name} />}
+            target={<Contest name={name.value} />}
           />
           <Action.Push
             title="User Submissions"
             shortcut={{ modifiers: ["shift"], key: "enter" }}
             icon={{ source: Icon.AppWindowList }}
-            target={<UserSubmissions value={{ name, comp: "status" }} />}
+            target={<UserSubmissions name={name.value} comp={"status"} />}
           />
           <Action.OpenInBrowser
             shortcut={{ modifiers: ["ctrl"], key: "enter" }}
