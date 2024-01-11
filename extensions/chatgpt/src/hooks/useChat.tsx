@@ -68,11 +68,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       };
     };
 
-    await chatGPT
-      .chat
-      .completions
-      .create
-      (
+    await chatGPT.chat.completions
+      .create(
         {
           model: model.option,
           temperature: Number(model.temperature),
@@ -88,7 +85,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       )
       .then(async (res) => {
         if (useStream) {
-
           const stream = res as Stream<ChatCompletionChunk>;
 
           for await (const chunk of stream) {
@@ -100,9 +96,8 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
                 setStreamData({ ...chat, answer: chat.answer });
               }
             } catch (error) {
-
               toast.title = "Error";
-              toast.message = `Couldn't stream message: ${ error }`;
+              toast.message = `Couldn't stream message: ${error}`;
               toast.style = Toast.Style.Failure;
               setLoading(false);
             }
@@ -111,7 +106,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           setTimeout(async () => {
             setStreamData(undefined);
           }, 5);
-
         } else {
           const completion = res as ChatCompletion;
           chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
@@ -120,7 +114,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
             say.stop();
             say.speak(chat.answer);
           }
-
         }
         setLoading(false);
         toast.title = "Got your answer!";

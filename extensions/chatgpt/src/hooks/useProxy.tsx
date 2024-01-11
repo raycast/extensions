@@ -18,7 +18,7 @@ export function useProxy(): Agent | undefined {
 
   let url = `${prefs.proxyProtocol}://${prefs.proxyHost}:${prefs.proxyPort}`;
 
-  if (prefs.proxyUsername && prefs.proxyPassword) { 
+  if (prefs.proxyUsername && prefs.proxyPassword) {
     url = `${prefs.proxyProtocol}://${prefs.proxyUsername}:${prefs.proxyPassword}@${prefs.proxyHost}:${prefs.proxyPort}`;
   }
   return new HttpsProxyAgent(url);
