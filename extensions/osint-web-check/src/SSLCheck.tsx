@@ -1,12 +1,11 @@
 import { connect, type PeerCertificate } from "node:tls";
-import useSWR from "swr";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { Fragment } from "react";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type SSLCheckProps = { url: string };
-
-export function SSLCheck({ url }: SSLCheckProps) {
-  const { data, isLoading } = useSWR(["ssl-check", url], ([, url]) => getSSLInformation(url));
+export function SSLCheck({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "ssl-check", url, enabled, fetcher: getSSLInformation });
 
   const extKeyUsage = data?.ext_key_usage?.map((oid) => OID_MAP[oid]) ?? [];
 

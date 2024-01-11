@@ -1,11 +1,10 @@
 import got from "got";
-import useSWR from "swr";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type RedirectsProps = { url: string };
-
-export function Redirects({ url }: RedirectsProps) {
-  const { data, isLoading } = useSWR(["redirects", url], ([, url]) => getRedirects(url));
+export function Redirects({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "redirects", url, enabled, fetcher: getRedirects });
 
   const content = (() => {
     if (!data || data.length === 0) return "## No Redirects";

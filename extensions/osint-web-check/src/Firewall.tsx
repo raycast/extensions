@@ -1,12 +1,11 @@
 import got from "got";
-import useSWR from "swr";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { lowerCaseKeys } from "./utils/lowerCaseKeys";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type FirewallProps = { url: string };
-
-export function Firewall({ url }: FirewallProps) {
-  const { data, isLoading } = useSWR(["firewall", url], ([, url]) => isFirewallEnabled(url));
+export function Firewall({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "firewall", enabled, url, fetcher: isFirewallEnabled });
 
   const content = data ? `## Firewall ${data.enabled ? "Enabled" : "Not Detected"}\n ${data.reason}` : "";
 

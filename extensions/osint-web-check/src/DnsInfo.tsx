@@ -1,15 +1,12 @@
 import * as React from "react";
-import * as dns from "node:dns/promises";
-import useSWR from "swr";
-import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { Fragment } from "react";
+import * as dns from "node:dns/promises";
+import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type DnsInfoProps = {
-  url: string;
-};
-
-export function DnsInfo({ url }: DnsInfoProps) {
-  const { data, isLoading } = useSWR(["dns-info", url], ([, url]) => getDnsInfo(url));
+export function DnsInfo({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "dns-info", enabled, url, fetcher: getDnsInfo });
 
   return (
     <List.Item

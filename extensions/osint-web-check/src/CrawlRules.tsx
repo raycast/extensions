@@ -1,12 +1,11 @@
 import got from "got";
-import useSWR from "swr";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { Fragment, useState } from "react";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type CrawlRulesProps = { url: string };
-
-export function CrawlRules({ url }: CrawlRulesProps) {
-  const { data, isLoading } = useSWR(["crawl-rules", url], ([, url]) => getRobotsTxt(url));
+export function CrawlRules({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "crawl-rules", url, enabled, fetcher: getRobotsTxt });
   const [showAllInfo, setShowAllInfo] = useState(false);
 
   const allowedItems = (data?.allowed ?? []).slice(0, showAllInfo ? undefined : MAX_SHOWN);

@@ -1,4 +1,4 @@
-import { Detail, LaunchProps, List, useNavigation } from "@raycast/api";
+import { LaunchProps, List, useNavigation } from "@raycast/api";
 import { UrlInput } from "./UrlInput";
 import { UrlIp } from "./UrlIp";
 import { SSLCheck } from "./SSLCheck";
@@ -14,33 +14,14 @@ import { WhoIs } from "./WhoIs";
 import useSWR from "swr";
 import { checkUrl } from "./utils/checkUrl";
 import { addHttps } from "./utils/addHttps";
+import { useEffect } from "react";
 
 export default function OsintWebCheck({
   arguments: { url: consumerUrl },
 }: LaunchProps<{ arguments: { url: string } }>) {
   const url = addHttps(consumerUrl);
-  // Artificially throttle so UI isn't jarring
-  const { isLoading, data } = useSWR(["validate-url", url], ([, url]) => Promise.all([checkUrl(url), wait(300)]));
-  const isUrlValid = data?.[0];
 
-  const navigation = useNavigation();
-
-  if (isLoading) {
-    return <Detail markdown={`## Validating ${url}...`} isLoading={true} />;
-  }
-
-  if (isUrlValid) {
-    return <CheckDetails url={url} />;
-  }
-
-  return (
-    <UrlInput
-      initialUrl={url}
-      onSubmit={(url) => {
-        navigation.push(<CheckDetails url={url} />);
-      }}
-    />
-  );
+  return <CheckDetails url={url} />;
 }
 
 function CheckDetails({ url }: { url: string }) {
@@ -53,19 +34,39 @@ function CheckDetails({ url }: { url: string }) {
     }
   })();
 
+  const { isLoading, data } = useSWR(["validate-url", url], ([, url]) => Promise.all([checkUrl(url), wait(300)]));
+  const isUrlValid = data?.[0];
+
+  const navigation = useNavigation();
+  useEffect(() => {
+    if (!isLoading && !isUrlValid) {
+      navigation.pop();
+      navigation.push(
+        <UrlInput
+          initialUrl={url}
+          onSubmit={(url) => {
+            navigation.push(<CheckDetails url={url} />);
+          }}
+        />,
+      );
+    }
+  }, [isLoading, isUrlValid, navigation]);
+
+  const sharedProps = { url, enabled: !!isUrlValid };
+
   return (
     <List isShowingDetail navigationTitle={`Web Check for ${hostname}`}>
-      <UrlIp url={url} />
-      <WhoIs url={url} />
-      <Headers url={url} />
-      <SSLCheck url={url} />
-      <DnsInfo url={url} />
-      <DnsSec url={url} />
-      <OpenPorts url={url} />
-      <CrawlRules url={url} />
-      <Hsts url={url} />
-      <Redirects url={url} />
-      <Firewall url={url} />
+      <UrlIp {...sharedProps} />
+      <WhoIs {...sharedProps} />
+      <Headers {...sharedProps} />
+      <SSLCheck {...sharedProps} />
+      <DnsInfo {...sharedProps} />
+      <DnsSec {...sharedProps} />
+      <OpenPorts {...sharedProps} />
+      <CrawlRules {...sharedProps} />
+      <Hsts {...sharedProps} />
+      <Redirects {...sharedProps} />
+      <Firewall {...sharedProps} />
     </List>
   );
 }

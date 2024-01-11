@@ -1,12 +1,11 @@
 import got from "got";
-import useSWR from "swr";
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { lowerCaseKeys } from "./utils/lowerCaseKeys";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type HeadersProps = { url: string };
-
-export function Headers({ url }: HeadersProps) {
-  const { data, isLoading } = useSWR(["headers", url], ([, url]) => getHeaders(url));
+export function Headers({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "headers", url, enabled, fetcher: getHeaders });
 
   const items = Object.entries(data ?? {}).map(([key, value]) => [key, String(value)]);
 

@@ -1,12 +1,11 @@
 import got from "got";
-import useSWR from "swr";
 import { Icon, List } from "@raycast/api";
 import { Fragment } from "react";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type DnsSecProps = { url: string };
-
-export function DnsSec({ url }: DnsSecProps) {
-  const { data, isLoading } = useSWR(["dns-sec", url], ([, url]) => getDnsSecInfo(url));
+export function DnsSec({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "dnssec", url, enabled, fetcher: getDnsSecInfo });
 
   return (
     <List.Item

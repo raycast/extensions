@@ -1,11 +1,10 @@
 import got from "got";
-import useSWR from "swr";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type HstsProps = { url: string };
-
-export function Hsts({ url }: HstsProps) {
-  const { data, isLoading } = useSWR(["hsts", url], ([, url]) => getHsts(url));
+export function Hsts({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "hsts", enabled, url, fetcher: getHsts });
 
   const detailContent = !data
     ? ""

@@ -1,12 +1,10 @@
 import * as net from "node:net";
-import useSWR from "swr";
 import { List } from "@raycast/api";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type WhoIsProps = { url: string };
-
-// TODO: this isn't working...
-export function WhoIs({ url }: WhoIsProps) {
-  const { data, isLoading } = useSWR(["who-is", url], ([, url]) => getWhoIs(url));
+export function WhoIs({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "whois", url, enabled, fetcher: getWhoIs });
 
   return (
     <List.Item

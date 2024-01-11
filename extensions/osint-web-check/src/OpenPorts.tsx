@@ -1,12 +1,11 @@
 import * as net from "node:net";
-import useSWR from "swr";
 import { Action, ActionPanel, Detail, List } from "@raycast/api";
 import { Fragment } from "react";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type OpenPortsProps = { url: string };
-
-export function OpenPorts({ url }: OpenPortsProps) {
-  const { data, isLoading } = useSWR(["open-ports", url], ([, url]) => checkPorts(url));
+export function OpenPorts({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "open-ports", url, enabled, fetcher: checkPorts });
 
   return (
     <List.Item

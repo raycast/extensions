@@ -1,11 +1,10 @@
 import { lookup } from "node:dns/promises";
-import useSWR from "swr";
 import { Action, ActionPanel, List } from "@raycast/api";
+import { WebCheckComponentProps } from "./utils/types";
+import { useCheckDetail } from "./utils/useCheckDetail";
 
-type UrlIpProps = { url: string };
-
-export function UrlIp({ url }: UrlIpProps) {
-  const { data, isLoading } = useSWR(["url-ip", url], ([, url]) => getUrlIP(url));
+export function UrlIp({ url, enabled }: WebCheckComponentProps) {
+  const { data, isLoading } = useCheckDetail({ keyPrefix: "url-ip", url, enabled, fetcher: getUrlIP });
 
   return (
     <List.Item
