@@ -70,17 +70,6 @@ export function TimeEntryContextProvider({ children }: { children: JSX.Element }
   const { tags, tagsError, isLoadingTags, revalidateTags } = useTags(workspaces);
   const { tasks, tasksError, isLoadingTasks, revalidateTasks } = useTasks(workspaces);
 
-  useEffectWithCachedDeps(
-    () => {
-      revalidateProjects();
-      revalidateClients();
-      revalidateTags();
-      revalidateTasks();
-    },
-    [workspaces],
-    toggleArrayIsEqual,
-  );
-
   const [projectGroups, setProjectGroups] = useCachedState<ProjectGroup[]>("projectGroups", []);
 
   useEffectWithCachedDeps(
