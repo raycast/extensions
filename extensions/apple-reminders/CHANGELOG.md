@@ -1,8 +1,10 @@
 # Apple Reminders Changelog
 
-## [Menu Bar improvement] - 2024-01-11
+## [Improvements and bug fixes] - 2024-01-11
 
-- Add an option to display the title of the first reminder next to the menu bar icon
+- Add an option to display the title of the first reminder next to the menu bar icon.
+- Fix a bug where an overdue reminder wouldn't be updated in the native app when changing the due date from Raycast.
+- Fix a bug where setting a due date from Raycast wouldn't add any notifications to it.
 
 ## [Improve NLP in Quick Add Reminder] - 2023-12-08
 

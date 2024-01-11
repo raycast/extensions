@@ -59,6 +59,7 @@ export default function Command() {
           section.reminders.length > 0 && (
             <List.Section key={section.title} title={section.title} subtitle={section.subtitle}>
               {section.reminders.map((reminder) => {
+                console.log(reminder.title, reminder.dueDate);
                 return (
                   <ReminderListItem
                     key={reminder.id}
