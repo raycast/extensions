@@ -16,65 +16,15 @@ import {
 import { OllamaApiGenerate, OllamaApiVersion } from "../ollama";
 import { SetModelView } from "./SetModelView";
 import * as React from "react";
-import { Action, ActionPanel, Detail, Icon, LocalStorage, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/api";
 import { getSelectedText, Clipboard, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { GetImage, GetModel, VerifyOllamaVersion } from "../common";
 
 const preferences = getPreferenceValues();
 
-const defaultPrompt = new Map([
-  [
-    "casual",
-    "Act as a writer. Make the following text more casual while keeping the core idea.\n\nOutput only with the modified text.\n",
-  ],
-  [
-    "codeexplain",
-    "Act as a developer. Explain the following code block step by step.\n\nOutput only with the commented code.\n",
-  ],
-  [
-    "confident",
-    "Act as a writer. Make the following text more confident while keeping the core idea.\n\nOutput only with the modified text.\n",
-  ],
-  [
-    "explain",
-    "Act as a writer. Explain the following text in simple and concise terms.\n\nOutput only with the modified text.\n",
-  ],
-  [
-    "fix",
-    "Act as a writer. Fix the following text from spelling and grammar error.\n\nOutput only with the fixed text.\n",
-  ],
-  [
-    "friendly",
-    "Act as a writer. Make the following text more friendly while keeping the core idea.\n\nOutput only with the modified text.\n",
-  ],
-  ["image-describe", "Describe the content on the following images.\n"],
-  ["image-to-text", "Extract all the text from the following images.\n"],
-  [
-    "improve",
-    "Act as a writer. Improve the writing of the following text while keeping the core idea.\n\nOutput only with the modified text.\n",
-  ],
-  [
-    "longher",
-    "Act as a writer. Make the following text longer and more rich while keeping the core idea.\n\nOutput only with the modified text.\n",
-  ],
-  [
-    "professional",
-    "Act as a writer. Make the following text more professional while keeping the core idea.\n\nOutput only with the modified text.\n",
-  ],
-  [
-    "shorter",
-    "Act as a writer. Make the following text shorter while keeping the core idea.\n\nOutput only with the modified text.\n",
-  ],
-  ["translate", "Act as a translator. Translate the following text.\n\nOutput only with the translated text.\n"],
-  [
-    "tweet",
-    "You are a content marketer who needs to come up with a short but succinct tweet. Make sure to include the appropriate hashtags and links. All answers should be in the form of a tweet which has a max size of 280 characters. Every instruction will be the topic to create a tweet about.\n\nOutput only with the modified text.\n",
-  ],
-]);
-
 interface props {
-  prompt?: string;
+  prompt: string;
   command?: string;
   image?: boolean;
   model?: string;
@@ -82,9 +32,9 @@ interface props {
 
 /**
  * Return JSX element with generated text and relative metadata.
- * @param {string} command - Command name.
- * @param {string | undefined} systemPrompt - System Prompt.
- * @param {string | undefined} model - Model used for inference.
+ * @param {string} props.command - Command name.
+ * @param {string | undefined} props.systemPrompt - System Prompt.
+ * @param {string | undefined} props.model - Model used for inference.
  * @returns {JSX.Element} Raycast Answer View.
  */
 export function AnswerView(props: props): JSX.Element {
@@ -150,8 +100,7 @@ export function AnswerView(props: props): JSX.Element {
       prompt: query,
       images: images,
     } as OllamaApiGenerateRequestBody;
-    if (props.command) body.system = defaultPrompt.get(props.command);
-    if (props.prompt) body.system = props.prompt;
+    body.system = props.prompt;
     OllamaApiGenerate(body)
       .then(async (emiter) => {
         emiter.on("data", (data) => {

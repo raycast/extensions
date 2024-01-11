@@ -108,7 +108,6 @@ export function ChatView(): JSX.Element {
   /**
    * Handle Error from Ollama API.
    * @param {Error} err - Error object.
-   * @returns {Promise<void>}
    */
   async function HandleError(err: Error) {
     if (err instanceof ErrorOllamaModelNotInstalled) {
@@ -385,7 +384,7 @@ export function ChatView(): JSX.Element {
 
   /**
    * Action Panel for  Message
-   * @param {RaycastChatMessage} message - Selected Message
+   * @param {RaycastChatMessage} props.message - Selected Message
    * @returns {JSX.Element}
    */
   function ActionMessage(props: { message?: RaycastChatMessage }): JSX.Element {
@@ -459,7 +458,7 @@ export function ChatView(): JSX.Element {
 
   /**
    * Raycast Detail Metadata for Ollama Message
-   * @param {RaycastChatMessage} message
+   * @param {RaycastChatMessage} props.message
    * @returns {JSX.Element}
    */
   function DetailMetadataMessage(props: { message: RaycastChatMessage }): JSX.Element {
