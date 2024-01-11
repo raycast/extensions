@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "my-gitlab-dashboard",
   "title": "My GitLab Dashboard",
-  "description": "Get all MRs and pipelines of your projects together in a single view",
+  "description": "Track merge requests and pipelines from all your projects in one single place",
   "icon": "gitlab.png",
   "author": "mikybars",
   "license": "MIT",
