@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getExecutionStatusColor, getExecutionStatusString } from "../func/ExecutionStatus";
 
-export function ContestSubmissions(values: { id: any; handle: any }) {
+export function ContestSubmissions(values: { id: any; handle: any; name: any }) {
   const results: Result[] = [];
 
   const { isLoading, data, error } = useFetch(
@@ -30,7 +30,7 @@ export function ContestSubmissions(values: { id: any; handle: any }) {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Search Submissions"
+      navigationTitle={`Search ${values.name} Submissions`}
       searchBarPlaceholder="Search Submissions By Problem"
     >
       {conData.reverse().map((item) => (

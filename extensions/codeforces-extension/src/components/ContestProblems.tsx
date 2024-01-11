@@ -4,8 +4,12 @@ import { CODEFORCES_API_BASE, CODEFORCES_BASE } from "../constants";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
-export function ContestProblems(id: { value: any }) {
-  const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}contest.standings?contestId=${id.value}&count=1`, {
+export function ContestProblems(value: {
+  name_value: any; id: any; 
+}) {
+  const id = value.id
+  const name_value = value.name_value
+  const { isLoading, data, error } = useFetch(`${CODEFORCES_API_BASE}contest.standings?contestId=${id}&count=1`, {
     keepPreviousData: true,
     keepalive: true,
   });
@@ -44,7 +48,7 @@ export function ContestProblems(id: { value: any }) {
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Problems"
+      navigationTitle={`Search ${name_value} Problems`}
       searchBarPlaceholder="Search By Name"
     >
       {filteredList.map((problem) => (

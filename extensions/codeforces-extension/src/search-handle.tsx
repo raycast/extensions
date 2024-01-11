@@ -116,19 +116,27 @@ function User(name: { value: any }) {
           <Detail.Metadata.Label title="Organisation" text={`${unString(userData.organization)}`} />
           <Detail.Metadata.Label
             title="Last Online"
-            text={`${new Date(userData.lastOnlineTimeSeconds * 1000).toLocaleString("en-US", {
+            text={`${new Date(userData.lastOnlineTimeSeconds * 1000).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })} ${new Date(userData.lastOnlineTimeSeconds * 1000).toLocaleDateString([], {
               weekday: "short",
-            })} ${new Date(userData.lastOnlineTimeSeconds * 1000).toLocaleDateString()} ${new Date(
-              userData.lastOnlineTimeSeconds * 1000,
-            ).toLocaleTimeString()}`}
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}`}
           />
           <Detail.Metadata.Label
             title="Registered On"
-            text={`${new Date(userData.registrationTimeSeconds * 1000).toLocaleString("en-US", {
+            text={`${new Date(userData.registrationTimeSeconds * 1000).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })} ${new Date(userData.registrationTimeSeconds * 1000).toLocaleDateString([], {
               weekday: "short",
-            })} ${new Date(userData.registrationTimeSeconds * 1000).toLocaleDateString()} ${new Date(
-              userData.registrationTimeSeconds * 1000,
-            ).toLocaleTimeString()}`}
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}`}
           />
         </Detail.Metadata>
       }

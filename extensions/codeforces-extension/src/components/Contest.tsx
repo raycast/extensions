@@ -59,7 +59,7 @@ export function Contest(value: { value: { value: any } }) {
               <Action.Push
                 title="Get Submissions Details"
                 icon={Icon.List}
-                target={<ContestSubmissions id={item.contestId} handle={userHandle} />}
+                target={<ContestSubmissions id={item.contestId} handle={userHandle} name={item.contestName} />}
               />
               <Action.OpenInBrowser url={`${CODEFORCES_BASE}contest/${item.contestId}`} />
             </ActionPanel>
@@ -95,11 +95,15 @@ export function Contest(value: { value: { value: any } }) {
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Rating Last Updated"
-                    text={`${new Date(item.ratingUpdateTimeSeconds * 1000).toLocaleString("en-US", {
+                    text={`${new Date(item.ratingUpdateTimeSeconds * 1000).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })} ${new Date(item.ratingUpdateTimeSeconds * 1000).toLocaleDateString([], {
                       weekday: "short",
-                    })} ${new Date(item.ratingUpdateTimeSeconds * 1000).toLocaleDateString()} ${new Date(
-                      item.ratingUpdateTimeSeconds * 1000,
-                    ).toLocaleTimeString()}`}
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}`}
                   />
                 </List.Item.Detail.Metadata>
               }
