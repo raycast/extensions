@@ -69,6 +69,12 @@ export default function Command() {
     }
   };
 
+  const handleRemoveCache = (url: string) => {
+    const newItems = cachedItems.filter((item) => item.url !== url);
+    setItems(newItems);
+    cache.set(CACHE_KEY, JSON.stringify(newItems));
+  };
+
   return (
     <List
       searchBarPlaceholder="Please enter the URL you want to shorten"
@@ -121,6 +127,12 @@ export default function Command() {
                         icon={{ source: Icon.Eye }}
                         title="Toggle Detail"
                         onAction={() => console.log("Toggle Detail")}
+                      />
+                      <Action
+                        icon={{ source: Icon.Trash }}
+                        title="Remove From History"
+                        onAction={() => handleRemoveCache(url)}
+                        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                       />
                     </ActionPanel>
                   }
