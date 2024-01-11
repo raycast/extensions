@@ -16,7 +16,6 @@
     {
       "name": "index",
       "title": "Search Svelte Docs",
-      "subtitle": "Search the svelte docs directly in Raycast",
       "description": "Search the svelte docs directly in Raycast",
       "mode": "view"
     }
