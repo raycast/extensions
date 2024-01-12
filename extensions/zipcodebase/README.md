@@ -18,6 +18,7 @@ This is a Raycast extension for [Zipcodebase](https://zipcodebase.com/). With th
 
 ## ⚙️ Preferences
 - You can set the _DEFAULT_UNIT_ as either "km" or "miles".
+- You can set the _DEFAULT_LIMIT_ as a positive number
 
 ## 🗒️ NOTES (as of *Initial Version*)
 

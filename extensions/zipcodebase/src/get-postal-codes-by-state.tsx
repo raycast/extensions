@@ -6,14 +6,14 @@ import { useEffect, useState } from "react";
 import { getPostalCodesByState } from "./utils/api";
 
 export default function GetPostalCodesByState(props: LaunchProps<{ arguments: Arguments.GetPostalCodesByState }>) {
-  const { state_name, country, limit } = props.arguments;
+  const { state_name, country } = props.arguments;
 
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<ErrorResponse | GetPostalCodesByStateResponse>();
 
   async function getFromApi() {
     setIsLoading(true);
-    const response = await getPostalCodesByState(state_name, country, limit || DEFAULT_LIMIT);
+    const response = await getPostalCodesByState(state_name, country);
     if ("results" in response) {
       showToast({
         title: "SUCCESS",
