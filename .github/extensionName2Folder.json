@@ -739,6 +739,7 @@
   "aiotter/nixpkgs-search": "nixpkgs-search",
   "Samuel3865/nmbs-planner": "nmbs-planner",
   "Selfish/node-js-evaluate": "node-js-evaluate",
+  "andresmorelos/node-version-manager": "node-version-manager",
   "jorandob/nos-nieuws": "nos-news",
   "shakedlokits/noteplan-3": "noteplan-3",
   "notion/notion": "notion",
