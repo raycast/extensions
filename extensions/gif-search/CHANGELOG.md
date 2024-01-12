@@ -1,12 +1,12 @@
 # GIF Search Changelog
 
+## [Fix GIFS downloaded from Giphy at lower quality] - 2024-12-01
+
+- Fixes a bug where GIFs downloaded from Giphy were of a lower quality than the original
+
 ## [Infinite Scroll] - 2023-12-02
 
 - Add infinite scroll to the Trending and Search sections
-
-## [Fix GIFS downloaded from Giphy at lower quality] - 2023-12-01
-
-- Fixes bug where GIFs downloaded from Giphy were at a lower quality than the original
 
 ## [Catch error when returning to Gif Details after Copy GIF] - 2023-10-18
 - Catches `TypeError: dispatch is not a function` error that was displayed to the user
