@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.65.0 - 2024-01-10
+
+### ✨ New
+
+- **Developer Tools**: we've introduced a new developer option, `Use file logging instead of OSLog`, to work around an OS issue that causes some users to not see any extension logs in the terminal during development.
+
+### 💎 Improvements
+
+- **Form's Date Picker:** Future dates will be prioritised when parsing the date, f.e. if you type "8am" and itrs already "10am", then the parsed date will be "tomorrow 8am".
+
+### 🐞 Fixes
+
+- Fixed an issue where the `ray` CLI could not communicate with the app.
+- Fixed an issue where an OAuth authorization session triggered by a menu bar command would not be able to complete if a `background` launch was triggered between authorization starting and completing.
+- Fixed an issue on multi-monitor setups, where sometimes MenuBarExtra icons would not appear dimmed on inactive displays.
+
+## 1.64.0 - 2023-12-13
+
+### ✨ New
+
+- **Form**: Introduced a new component `Form.LinkAccessory` to render a link displayed in the right-hand side of the search bar.
+- **Arguments**: Introduced a new Argument type: `dropdown`. You can now [specify a list of options](https://developers.raycast.com/information/manifest#argument-properties) for the user choose from.
+- **Developer Hub**: User preferences are now included in error reports. Password and text preferences will be replaced with `[REDACTED]`, file/directory/appPicker preferences will be scrubbed of PII, and dropdown/checkbox preferences will be sent as-is.
+
+### 💎 Improvements
+
+- **Window Capture**: Added a warning when trying to take a screenshot of Raycast if that screenshot won’t match the requirement for the Store’s extensions guidelines (eg. if Raycast is too close to an edge or if the screen doesn’t have a high enough resolution).
+
+### 🐞 Fixes
+
+- **Types generation**: Fixed the type of a required `appPicker` preference (even if it is `required`, the app might be undefined because it is missing).
+- **Empty View**: Fixed an issue where the Empty View might not be showing in a certain case.
+- **Menu Bar Extra**: ****icons tinted with `Color.PrimaryText` and `Color.SecondaryText` should now change based on the menu bar’s appearance.
+- **List Metadata:** `Link`s should be properly aligned again.
+
 ## 1.63.0 - 2023-11-29
 
 ### 💎 Improvements

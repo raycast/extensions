@@ -13,7 +13,7 @@ const PLIST_PATH = `${homedir()}/Library/Safari/Bookmarks.plist`;
 
 const extractReadingListBookmarks = (
   bookmarks: BookmarkPListResult,
-  readingListOnly?: boolean
+  readingListOnly?: boolean,
 ): (ReadingListBookmark | GeneralBookmark)[] => {
   if (readingListOnly) {
     return _.chain(bookmarks.Children)
@@ -23,7 +23,7 @@ const extractReadingListBookmarks = (
         uuid: res.WebBookmarkUUID,
         url: res.URLString,
         domain: getUrlDomain(res.URLString),
-        title: res.ReadingListNonSync.Title || res.URIDictionary.title,
+        title: res.ReadingListNonSync?.Title || res.URIDictionary.title,
         dateAdded: res.ReadingList.DateAdded,
         dateLastViewed: res.ReadingList.DateLastViewed,
         description: res.ReadingList.PreviewText || "",
@@ -44,7 +44,7 @@ const extractReadingListBookmarks = (
       | {
           Title: string;
           Children: Bookmark[] | BookmarkPListResult;
-        }
+        },
   ) => {
     const arr: GeneralBookmark[] = [];
     if ("Title" in node && node.Title == "com.apple.ReadingList") {

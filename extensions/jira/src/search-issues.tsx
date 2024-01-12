@@ -19,7 +19,7 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   const isSearching = projectQuery !== "";
@@ -31,7 +31,7 @@ export function SearchIssues({ query: initialQuery }: SearchIssuesProps) {
   const jql = useMemo(() => {
     let jql = "";
     if (cachedProject) {
-      jql += `project = ${cachedProject.key} ${query !== "" ? "AND" : ""} `;
+      jql += `project = '${cachedProject.key}' ${query !== "" ? "AND" : ""} `;
     }
 
     if (query === "") {

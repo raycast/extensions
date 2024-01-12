@@ -6,13 +6,21 @@ export async function getData() {
   return await reminders.get<{ reminders: Reminder[]; lists: List[] }>();
 }
 
-export async function createReminder(reminder: {
+export type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+export type NewReminder = {
   title: string;
   listId?: string;
   notes?: string;
   dueDate?: string;
   priority?: string;
-}): Promise<Reminder> {
+  recurrence?: {
+    frequency: Frequency;
+    interval: number;
+    endDate?: string;
+  };
+};
+
+export async function createReminder(reminder: NewReminder): Promise<Reminder> {
   const result = await reminders.create<Reminder>(reminder);
   return result;
 }

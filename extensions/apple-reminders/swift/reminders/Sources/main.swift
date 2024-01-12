@@ -248,12 +248,20 @@ func setDueDate(_ values: [String: String]) throws {
     throw "No reminder found with the provided id"
   }
 
+  // Remove all alarms, otherwise overdue reminders won't be properly updated natively
+  if let alarms = item.alarms {
+    for alarm in alarms {
+      item.removeAlarm(alarm)
+    }
+  }
+
   if let dueDateString = values["dueDate"] {
     if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
       item.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day, .hour, .minute, .second],
         from: dueDate
       )
+      item.addAlarm(EKAlarm(absoluteDate: dueDate))
     } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
       item.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day],

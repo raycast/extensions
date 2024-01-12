@@ -1,5 +1,18 @@
 # Pins Changelog
 
+## [Tooltips, Tag Filtering, and New Placeholders] - 2023-12-29
+
+- Now using the placeholders-toolkit package.
+- Added pin tags and tag filtering.
+- Added ability to edit or copy placeholders by right-clicking on them in the menu bar dropdown. Configured in the extension settings.
+- Added placeholder tooltips when editing a pin target.
+- Added `{{write to="[path]":...}}` placeholder for writing text to a file.
+- Added `{{chooseFile}}`, `{{chooseFolder}}`, and `{{chooseApplication}}` placeholders.
+- Added optional `offsets` parameter to the `{{clipboardText}}` placeholder.
+- Added ability to use Pin keyboard shortcuts within the 'View Pins' command.
+- Added link to the Placeholders Guide in the edit pin form header.
+- Adjusted behavior of `{{selectedText}}` placeholder to avoid triggering alert sounds each time the menu is opened.
+
 ## [Bug fixes] - 2023-11-06
 
 - Fixed bug where pins with corrupted data from previous versions would cause themselves and others to disappear after editing. (Resolve SKaplanOfficial/Raycast-Pins4)

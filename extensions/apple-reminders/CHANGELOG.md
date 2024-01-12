@@ -1,5 +1,28 @@
 # Apple Reminders Changelog
 
+## [Improvements and bug fixes] - 2024-01-11
+
+- Add an option to display the title of the first reminder next to the menu bar icon.
+- Fix a bug where an overdue reminder wouldn't be updated in the native app when changing the due date from Raycast.
+- Fix a bug where setting a due date from Raycast wouldn't add any notifications to it.
+
+## [Improve NLP in Quick Add Reminder] - 2023-12-08
+
+- Improve NLP parsing in the `Quick Add Reminder` command by adding an endDate for recurring reminders.
+
+## [Add option to hide menu bar count when empty] - 2023-12-20
+
+- Allow hiding the menu bar count when there are zero reminders.
+
+## [Fix Create Reminder command] - 2023-12-18
+
+- Fix a bug where the priority value wouldn't be saved
+- Remove the minimum date constraint for the due date
+
+## [Improve NLP in Quick Add Reminder] - 2023-12-04
+
+- Improve the NLP parsing in `Quick Add Reminder`.
+
 ## [Date display bug] - 2023-12-01
 
 - Fix a bug that displays full-day dates with time in the tooltips of reminder items.

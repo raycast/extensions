@@ -2,6 +2,7 @@ import { Image, Icon, Color, Grid } from "@raycast/api";
 import { GIF_SERVICE, GRID_COLUMNS } from "../preferences";
 
 import { GifGridSection, GifGridSectionProps } from "./GifGridSection";
+import { shouldLoadMore } from "../lib/infiniteScroll";
 
 export interface GifGridProps {
   isLoading?: boolean;
@@ -20,9 +21,17 @@ export interface GifGridProps {
 }
 
 export function GifGrid(props: GifGridProps) {
+  const columns = GRID_COLUMNS[props.itemSize];
+
+  function handleSelect(selectedItemId: string | null) {
+    if (selectedItemId && shouldLoadMore(selectedItemId, props.sections, columns)) {
+      props.loadMoreGifs();
+    }
+  }
+
   return (
     <Grid
-      columns={GRID_COLUMNS[props.itemSize]}
+      columns={columns}
       searchBarAccessory={
         props.showDropdown ? (
           <Grid.Dropdown tooltip="Change GIF Provider" storeValue={true} onChange={props.onDropdownChange}>
@@ -64,6 +73,7 @@ export function GifGrid(props: GifGridProps) {
       throttle={true}
       searchBarPlaceholder={props.searchBarPlaceholder}
       onSearchTextChange={props.onSearchTextChange}
+      onSelectionChange={handleSelect}
     >
       {props.showEmpty ? (
         <Grid.EmptyView title={props.emptyStateText} icon={props.emptyStateIcon} />
@@ -77,7 +87,6 @@ export function GifGrid(props: GifGridProps) {
             hide={sProps.hide}
             service={sProps.service}
             isLocalGifSection={sProps.isLocalGifSection}
-            loadMoreGifs={props.loadMoreGifs}
           />
         ))
       )}

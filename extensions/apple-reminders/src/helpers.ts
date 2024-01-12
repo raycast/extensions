@@ -80,13 +80,10 @@ export function getPriorityIcon(priority: Priority) {
   return undefined;
 }
 
-export function truncateMiddle(str: string, maxLength = 45): string {
+export function truncate(str: string, maxLength = 45): string {
   if (str.length <= maxLength) {
     return str;
   }
 
-  const startIndex = Math.ceil(maxLength / 2) - 2;
-  const endIndex = str.length - (maxLength - startIndex - 3);
-
-  return str.substring(0, startIndex) + "…" + str.substring(endIndex);
+  return str.substring(0, maxLength) + "…";
 }

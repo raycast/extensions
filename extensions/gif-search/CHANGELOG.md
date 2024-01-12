@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Infinite Scroll] - 2023-12-02
+
+- Add infinite scroll to the Trending and Search sections
+
 ## [Fix GIFS downloaded from Giphy at lower quality] - 2023-12-01
 
 - Fixes bug where GIFs downloaded from Giphy were at a lower quality than the original

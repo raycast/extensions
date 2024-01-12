@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Chat, ChatManager, ChatStatistics, ExtensionPreferences } from "../utils/types";
+import { Chat, ChatManager, ChatStatistics } from "../lib/chats/types";
+import { ExtensionPreferences } from "../lib/preferences/types";
 import * as fs from "fs";
 import { Color, Icon, LocalStorage, environment, getPreferenceValues } from "@raycast/api";
-import { installDefaults } from "../utils/file-utils";
+import { installDefaults } from "../lib/files/file-utils";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME } from "../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME } from "../lib/constants";
 
 export function useChats(): ChatManager {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -50,7 +51,7 @@ export function useChats(): ChatManager {
 
     try {
       const advancedSettingsValues = JSON.parse(
-        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8")
+        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8"),
       );
       if ("chatDefaults" in advancedSettingsValues) {
         newChat = { ...advancedSettingsValues.chatDefaults, name: name, basePrompt: basePrompt, contextData: [] };

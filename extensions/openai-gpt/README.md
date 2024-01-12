@@ -62,3 +62,13 @@ OpenAI API charges based on the number of total tokens, i.e., the number of toke
 Tokens represent the length of your prompt. For English text, 1 token is approximately 4 characters or 0.75 words. As a point of reference, the collected works of Shakespeare are about 900,000 words or 1.2M tokens.
 
 Extension dynamically calculates the number of tokens your prompt has based on [open source GPT3 Encoder library](https://github.com/latitudegames/GPT-3-Encoder). After the answer has been received, the `Prompt token count` is updated directly with the token usage from the OpenAI API response and represents an accurate count of tokens OpenAI is charging you.
+
+# Preferences
+
+All preferences properties list that can be customize through `Raycast Settings > Extensions > Query OpenAI GPT`
+
+| Properties               | Label                  | Value                               | Required | Default                     | Description                                                                                                      |
+| ------------------------ | ---------------------- | ----------------------------------- | -------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `openAiApiKey`           | OpenAI API Key         | `string`                            | `true`   | `empty`                     | Your personal OpenAI API key                                                                                     |    
+| `openAiBasePath`         | OpenAI Base Path       | `string`                            | `false`  | `empty`                     | Custom API basepath                                                                                              |
+
