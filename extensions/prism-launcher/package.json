@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Launch A Prism Launcher Instance",
+      "title": "Launch Instance",
+      "subtitle": "Prism Launcher",
       "description": "Action for launching a Prism Launcher instance",
       "mode": "view"
     }
