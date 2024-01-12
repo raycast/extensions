@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { ActionPanel, List, showToast, Action, Toast, Detail, open } from "@raycast/api";
 import { exec } from "child_process";
 
 export default function Command() {
-  
   return (
     <List>
       <List.Item
@@ -232,7 +230,6 @@ Since restarting the "dock" process is required to apply changes, a brief screen
 If you encounter any issues or have feature requests, please feel free to send an email to me at: makiclin@gmail.com
 
   `;
-  
 
   return (
     <Detail
