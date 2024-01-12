@@ -54,6 +54,13 @@ export default function Command() {
                           {icon.guidelines && (
                             <Detail.Metadata.Link title="Guidelines" target={icon.guidelines} text={icon.guidelines} />
                           )}
+                          {icon.license && (
+                            <Detail.Metadata.Link
+                              title="License"
+                              target={icon.license.url as string}
+                              text={icon.license.type === "custom" ? (icon.license.url as string) : icon.license.type}
+                            />
+                          )}
                         </Detail.Metadata>
                       }
                       actions={
