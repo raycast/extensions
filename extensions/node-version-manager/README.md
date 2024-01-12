@@ -18,13 +18,9 @@
   </ol>
 </details>
 
-<!-- BUILT WITH -->
-
 <!-- GETTING STARTED -->
 
 ## Getting Started
-
-Starting the Development Environment
 
 ### Prerequisites
 
