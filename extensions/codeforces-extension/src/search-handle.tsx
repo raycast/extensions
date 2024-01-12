@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Action, ActionPanel, Detail, Form, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
 import { getColorHexCode } from "./func/HexCode";
@@ -8,20 +8,8 @@ import { CODEFORCES_API_BASE, CODEFORCES_BASE } from "./constants";
 import { UserSubmissions } from "./components/UserSubmissions";
 import { Contest } from "./components/Contest";
 
-export default function Command() {
-  const [name, setName] = useState<string>("");
-  return (
-    <Form
-      navigationTitle="Seach Codeforces Handle"
-      actions={
-        <ActionPanel title="Codeforces Handle">
-          <Action.Push title="Search Handle" icon={{ source: Icon.MagnifyingGlass }} target={<User value={name} />} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="name" value={name} onChange={setName} title="Enter Handle" />
-    </Form>
-  );
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchHandle }>) {
+  return <User value={props.arguments.handle} />;
 }
 
 function unString(str: string) {

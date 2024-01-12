@@ -15,7 +15,15 @@
       "title": "Search Handle",
       "subtitle": "Codeforces",
       "description": "Provides details about a handle",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "handle",
+          "placeholder": "Handle...",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "search-contest",
