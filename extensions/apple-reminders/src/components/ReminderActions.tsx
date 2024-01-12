@@ -9,6 +9,7 @@ import { Priority, Reminder, List as TList } from "../hooks/useData";
 import { ViewProps } from "../hooks/useViewReminders";
 
 import EditReminder from "./EditReminder";
+import SetLocationReminder from "./SetLocationReminder";
 
 type ReminderActionsProps = {
   reminder: Reminder;
@@ -203,6 +204,13 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           icon={Icon.Clock}
           shortcut={{ modifiers: ["cmd"], key: "d" }}
           onChange={setDueDate}
+        />
+
+        <Action.Push
+          title="Set Location"
+          icon={Icon.Pin}
+          shortcut={{ modifiers: ["cmd"], key: "l" }}
+          target={<SetLocationReminder reminder={reminder} mutate={mutate} />}
         />
 
         <Action

@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Add location-based reminders] - 2024-01-12
+
+- Add support for location-based reminders. You can now see which reminders have locations and easily create new ones with locations.
+
 ## [Improvements and bug fixes] - 2024-01-11
 
 - Add an option to display the title of the first reminder next to the menu bar icon.
