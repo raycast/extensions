@@ -61,10 +61,9 @@
     "@types/react": "^18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.1.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^5.2.2"
   },
-"scripts": {
+  "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
