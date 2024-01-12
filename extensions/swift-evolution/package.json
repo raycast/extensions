@@ -5,6 +5,10 @@
   "description": "Search and see details for the Swift language proposals from swift evolution web page https://apple.github.io/swift-evolution/",
   "icon": "swift.png",
   "author": "BProg",
+  "contributors": [
+    "dehesa",
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools",
