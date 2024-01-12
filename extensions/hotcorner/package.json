@@ -10,8 +10,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Config Hot Corners",
-      "description": "Config Hot Corners",
+      "title": "Configure",
+      "description": "Configure Hot Corners",
       "mode": "view"
     }
   ],

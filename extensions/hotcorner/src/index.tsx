@@ -1,7 +1,9 @@
-import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
+import { useState } from 'react';
+import { ActionPanel, List, showToast, Action, Toast, Detail, open } from "@raycast/api";
 import { exec } from "child_process";
 
 export default function Command() {
+  
   return (
     <List>
       <List.Item
@@ -9,7 +11,7 @@ export default function Command() {
         icon="TL.png"
         actions={
           <ActionPanel>
-            <Action.Push title="Config This Corner" target={<CornerSettings corner="TL" />} />
+            <Action.Push title="Configure This Corner" target={<CornerSettings corner="TL" />} />
           </ActionPanel>
         }
       />
@@ -18,7 +20,7 @@ export default function Command() {
         icon="TR.png"
         actions={
           <ActionPanel>
-            <Action.Push title="Config This Corner" target={<CornerSettings corner="TR" />} />
+            <Action.Push title="Configure This Corner" target={<CornerSettings corner="TR" />} />
           </ActionPanel>
         }
       />
@@ -27,7 +29,7 @@ export default function Command() {
         icon="BL.png"
         actions={
           <ActionPanel>
-            <Action.Push title="Config This Corner" target={<CornerSettings corner="BL" />} />
+            <Action.Push title="Configure This Corner" target={<CornerSettings corner="BL" />} />
           </ActionPanel>
         }
       />
@@ -36,7 +38,7 @@ export default function Command() {
         icon="BR.png"
         actions={
           <ActionPanel>
-            <Action.Push title="Config This Corner" target={<CornerSettings corner="BR" />} />
+            <Action.Push title="Configure This Corner" target={<CornerSettings corner="BR" />} />
           </ActionPanel>
         }
       />
@@ -46,6 +48,15 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action title="Disable All" onAction={disableAllHotcorners} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Help"
+        icon="help.png"
+        actions={
+          <ActionPanel>
+            <Action.Push title="Show Help" target={<HelpView />} />
           </ActionPanel>
         }
       />
@@ -198,4 +209,49 @@ function disableAllHotcorners() {
     }
     await showToast(Toast.Style.Success, "All Hot Corners Disabled");
   });
+}
+
+// 新增帮助视图组件
+function HelpView() {
+  const markdownContent = `
+# HotCorner Help
+
+## If the extension doesn't work
+HotCorner requires Automation permission enable for Raycast to function properly.
+Here is how to enable:
+
+1.Open Security & Privacy Panel in System Preference  
+You can hit ENTER now to open the System Preference panel or navigate manually to System Preferences -> Security & Privacy -> Privacy -> Automation.  
+2.Enable the toggle for "System Events" under Raycast.
+![System Preference](SystemPreference.png)
+
+## Screen Blinking
+Since restarting the "dock" process is required to apply changes, a brief screen blinking may occur. This is normal and poses no harm to your device.
+
+## Contact for help
+If you encounter any issues or have feature requests, please feel free to send an email to me at: makiclin@gmail.com
+
+  `;
+  
+
+  return (
+    <Detail
+      markdown={markdownContent}
+      actions={
+        <ActionPanel>
+          <Action title="Open System Preference" onAction={OpenSecurityPrivacyAction} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+//打开系统设置
+function OpenSecurityPrivacyAction() {
+  const handleOpenSecurityPrivacy = () => {
+    // macOS URL 方案用于打开安全性与隐私设置
+    open("x-apple.systempreferences:com.apple.preference.security");
+  };
+
+  handleOpenSecurityPrivacy();
 }
