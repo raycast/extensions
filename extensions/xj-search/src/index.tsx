@@ -4,12 +4,29 @@ import { readdirSync, readFileSync } from "fs";
 import { useState, useEffect } from "react";
 import path from "path";
 import { Fzf } from "fzf";
+import fs from "fs";
 
 const raycastKey = "raycast_search";
 
 function fzfSearch(data: UrlInfo[], query: string): UrlInfo[] {
   const fzf = new Fzf(data, {
-    selector: (item) => `${item.title} ${item.description}`,
+    selector: (item) => {
+      // Normalize and split title
+      const titleParts = item.title?.toLowerCase().split(/\s+|:/).join(" ") || "";
+
+      // Normalize and split description
+      const descriptionParts = item.description?.toLowerCase().split(/\s+|:/).join(" ") || "";
+
+      // Normalize URL and split into parts
+      const url = item.url?.toLowerCase() || "";
+      const urlWithoutProtocol = url.replace(/^(https?:\/\/)?(www\.)?/, "");
+      const urlParts = urlWithoutProtocol.split(/[\s\/\?&=.]+/).join(" ");
+
+      // Combine all parts
+      const combinedString = `${titleParts} ${descriptionParts} ${urlParts}`.trim();
+
+      return combinedString;
+    },
   });
 
   return fzf.find(query).map((result) => result.item);
@@ -20,6 +37,15 @@ interface Task {
   vars: { [key: string]: string };
   desc: string;
   cmd: string;
+}
+function readAndParseYaml(filePath: string): YamlFile | undefined {
+  try {
+    const yamlContent = readFileSync(filePath, "utf8");
+    return yaml.load(yamlContent) as YamlFile;
+  } catch (error) {
+    console.warn(`Error reading YAML file: ${filePath}`, error);
+    return undefined;
+  }
 }
 
 interface YamlFile {
@@ -40,14 +66,16 @@ function getYamlFiles(folderPath: string): string[] {
   return readdirSync(folderPath).filter((file) => file.endsWith(END_WITH));
 }
 
-function readAndParseYaml(filePath: string): YamlFile | undefined {
-  try {
-    const yamlContent = readFileSync(filePath, "utf8");
-    return yaml.load(yamlContent) as YamlFile;
-  } catch (error) {
-    console.warn(`Error reading YAML file: ${filePath}`, error);
-    return undefined;
-  }
+function convertToUrlData(namespace2task: { [key: string]: { [key: string]: Task } }): unknown[] {
+  return Object.entries(namespace2task).map(([namespace, tasks]) => ({
+    namespace,
+    urlsData: Object.entries(tasks).map(([taskName, task]) => ({
+      title: taskName,
+      description: task.desc || null,
+      icon: task.vars?.icon || "🔍",
+      url: task.vars?.URL,
+    })),
+  }));
 }
 
 function processYamlFile(
@@ -65,18 +93,6 @@ function processYamlFile(
 
   const namespace = parsedYaml.vars.namespace || fileName.replace(END_WITH, "");
   accumulator[namespace] = { ...accumulator[namespace], ...parsedYaml.tasks };
-}
-
-function convertToUrlData(namespace2task: { [key: string]: { [key: string]: Task } }): unknown[] {
-  return Object.entries(namespace2task).map(([namespace, tasks]) => ({
-    namespace,
-    urlsData: Object.entries(tasks).map(([taskName, task]) => ({
-      title: taskName,
-      description: task.desc || null,
-      icon: task.vars?.icon || "🔍",
-      url: task.vars?.URL,
-    })),
-  }));
 }
 
 function convertYamlToJson(folderPath: string): string {
@@ -120,10 +136,29 @@ function useRaycastData() {
   return { data, loading, forceReloadData };
 }
 
+async function saveJSONDataAsFile(data: string, filePath: string) {
+  // save the data as new file use fs.writeFile
+  fs.writeFile(filePath, data, (err: any) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log("File written successfully");
+  });
+}
+
 // Function to download and save data
 async function downloadAndSaveData(folderPath: string) {
   try {
     const jsonData = convertYamlToJson(folderPath);
+    // cache file path: folderPath + "/.cache/urls.json"
+    const cacheFilePath = path.join(folderPath, ".cache/urls.json");
+    // create cache folder if not exist
+    if (!fs.existsSync(path.join(folderPath, ".cache"))) {
+      fs.mkdirSync(path.join(folderPath, ".cache"));
+    }
+    // save the data as new file use fs.writeFile
+    saveJSONDataAsFile(jsonData, cacheFilePath);
     await LocalStorage.setItem(raycastKey, jsonData);
     return jsonData;
   } catch (error) {
@@ -174,7 +209,7 @@ export default function Command() {
           key={index}
           icon={urlInfo.icon || "🐷"}
           title={urlInfo.title}
-          subtitle={urlInfo.description || ""}
+          subtitle={`${urlInfo.description || ""} ${urlInfo.url}` || ""}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={urlInfo.url} title="Open URL in Browser" />
