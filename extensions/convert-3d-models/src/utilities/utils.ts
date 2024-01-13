@@ -98,17 +98,17 @@ const getSelectedPathFinderModels = async (): Promise<string> => {
 export const cleanup = async () => {
   // Get the list of items to remove from local storage
   const itemsToRemove = (await LocalStorage.getItem("itemsToRemove")) ?? "";
-  
+
   // Split the list into an array of items
   const itemsToRemoveArray = itemsToRemove.toString().split(", ");
-  
+
   // Iterate over each item and remove it if it exists
   for (const item of itemsToRemoveArray) {
     if (fs.existsSync(item)) {
       await fs.promises.rm(item);
     }
   }
-  
+
   // Remove the list of items from local storage
   await LocalStorage.removeItem("itemsToRemove");
 };
@@ -145,7 +145,7 @@ export const getSelectedModels = async (): Promise<string[]> => {
         selectedModels.push(...pathFinderModels);
       }
       break;
-    case "Finder":
+    case "Finder": {
       // If the active application is Finder,
       // retrieve the selected models using the appropriate function and add them to the selectedModels array
       const finderModels = (await getSelectedFinderModels()).split(", ");
@@ -161,6 +161,7 @@ export const getSelectedModels = async (): Promise<string[]> => {
         });
       }
       break;
+    }
   }
 
   // Return the list of selected model paths

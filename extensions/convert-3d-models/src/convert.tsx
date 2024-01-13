@@ -43,7 +43,7 @@ export default function Command() {
   const preferences = getPreferenceValues<ConvertPreferences & ExtensionPreferences>();
 
   // Filter the enabled formats based on the preferences
-  const enabledFormats = FORMATS.filter(format => preferences[`show${format}`]);
+  const enabledFormats = FORMATS.filter((format) => preferences[`show${format}`]);
 
   /**
    * Performs the conversion to the desired type.
@@ -92,7 +92,6 @@ export default function Command() {
   return (
     // JSX element representing a list with search functionality
     <List searchBarPlaceholder="Search model formats...">
-
       {/* JSX element representing an empty view when no formats are enabled */}
       <List.EmptyView
         title="No Formats Enabled"
@@ -112,7 +111,7 @@ export default function Command() {
       />
 
       {/* JSX elements representing the list items for each enabled format */}
-      {enabledFormats.map(format => (
+      {enabledFormats.map((format) => (
         <List.Item
           title={format}
           key={format}
