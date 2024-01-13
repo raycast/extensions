@@ -26,15 +26,7 @@ import { ConvertPreferences, ExtensionPreferences } from "./utilities/preference
 /**
  * All supported model formats for conversion.
  */
-const FORMATS = [
-  "STEP",
-  "STL", 
-  "OBJ", 
-  "3MF", 
-  "IGS", 
-  "X3D", 
-  "X3DZ"
-];
+const FORMATS = ["STEP", "STL", "OBJ", "3MF", "IGS", "X3D", "X3DZ"];
 
 export default function Command() {
   const preferences = getPreferenceValues<ConvertPreferences & ExtensionPreferences>();

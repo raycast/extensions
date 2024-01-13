@@ -54,5 +54,4 @@ export default async function convert(sourcePaths: string[], desiredType: string
 
     resultPaths.push(newPath);
   }
-
 }

@@ -8,20 +8,11 @@
  * Last modified  : 2024-01-12 17:00:00
  */
 
-
 import * as fs from "fs";
-
 
 import { runAppleScript } from "run-applescript";
 
-import {
-  Clipboard,
-  getFrontmostApplication,
-  getPreferenceValues,
-  LocalStorage,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Clipboard, getFrontmostApplication, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 
 import { ModelResultHandling } from "./enums";
 
