@@ -174,9 +174,7 @@
   "dependencies": {
     "@raycast/api": "^1.65.0",
     "@raycast/utils": "^1.4.18",
-    "mathjs": "^11.8.2",
-    "run-applescript": "^6.1.0",
-    "svgo": "^3.0.2"
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
@@ -185,7 +183,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {
