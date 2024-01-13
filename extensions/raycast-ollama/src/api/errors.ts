@@ -2,7 +2,7 @@ export const ErrorRaycastApiNoTextSelectedOrCopied = new Error(
   "You Need to Select a Text or Copied on Clipboard for This Command."
 );
 export const ErrorRaycastModelNotConfiguredOnLocalStorage = new Error(
-  "Prefered model is not configured on LocalStorage."
+  "Preferred model is not configured on LocalStorage."
 );
 export const ErrorRaycastApiNoTextSelected = new Error("You Need to Select a Text for This Command.");
 export const ErrorRaycastApiNoTextCopied = new Error("You Need to Copy Text on Clipboard for This Command.");
