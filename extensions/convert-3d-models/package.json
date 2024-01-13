@@ -71,7 +71,55 @@
       "mode": "view",
       "preferences": [
         {
-          "title": "Enabled Formats",
+          "title": "Enabled Export Formats",
+          "label": "AMF",
+          "name": "showAMF",
+          "description": "Whether to show AMF as a conversion option. Export only.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "BREP/BRP",
+          "name": "showBRP",
+          "description": "Whether to show BREP/BRP as a conversion option. Export only.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "IGS",
+          "name": "showIGS",
+          "description": "Whether to show IGS as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "OBJ",
+          "name": "showOBJ",
+          "description": "Whether to show OBJ as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "OFF",
+          "name": "showOFF",
+          "description": "Whether to show OFF as a conversion option. Export only.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "SMF",
+          "name": "showSMF",
+          "description": "Whether to show SMF as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
           "label": "STEP",
           "name": "showSTEP",
           "description": "Whether to show STEP as a conversion option.",
@@ -88,14 +136,7 @@
           "required": false
         },
         {
-          "label": "OBJ",
-          "name": "showOBJ",
-          "description": "Whether to show OBJ as a conversion option.",
-          "type": "checkbox",
-          "default": true,
-          "required": false
-        },
-        {
+          "title": "Experimental Formats",
           "label": "3MF (Not recommended)",
           "name": "show3MF",
           "description": "Whether to show 3MF as a conversion option. Results may be subpar.",
@@ -104,11 +145,11 @@
           "required": false
         },
         {
-          "label": "IGS",
-          "name": "showIGS",
-          "description": "Whether to show IGS as a conversion option.",
+          "label": "PLY",
+          "name": "showPLY",
+          "description": "Whether to show PLY as a conversion option. Results may be subpar.",
           "type": "checkbox",
-          "default": true,
+          "default": false,
           "required": false
         },
         {

@@ -28,11 +28,16 @@ export interface ExtensionPreferences {
  * Preferences for the convert command. Specifies which model formats to show in the conversion formats list.
  */
 export interface ConvertPreferences {
-  showSTEP: boolean;
-  showSTL: boolean;
-  showOBJ: boolean;
   show3MF: boolean;
+  showAMF: boolean;
+  showBRP: boolean;
   showIGS: boolean;
+  showOBJ: boolean;
+  showOFF: boolean;
+  showPLY: boolean;
+  showSMF: boolean;
+  showSTL: boolean;
+  showSTEP: boolean;
   showX3D: boolean;
   showX3DZ: boolean;
   [key: string]: boolean;

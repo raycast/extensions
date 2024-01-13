@@ -14,7 +14,7 @@ import { runAppleScript } from "run-applescript";
 
 import { Clipboard, getFrontmostApplication, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 
-import { ModelResultHandling } from "./enums";
+// import { ModelResultHandling } from "./enums";
 
 import { ExtensionPreferences } from "./preferences";
 
@@ -25,7 +25,7 @@ import { ExtensionPreferences } from "./preferences";
  */
 const getSelectedFinderModels = async (): Promise<string> => {
   return runAppleScript(
-    `set modelTypes to {"STEP", "Standard Tesselated Geometry File Format", "Geometry Definition File Format", "IGES", "IGS", "X3D", "X3DZ"}
+    `set modelTypes to {"step", "stp", "stl", "obj", "off", "iges", "igs", "x3d", "x3dz", "amf", "3mf", "brep", "brp", "smf", "ply"}
 
     tell application "Finder"
       set theSelection to selection
@@ -33,7 +33,7 @@ const getSelectedFinderModels = async (): Promise<string> => {
         return
       else if (theSelection count) is equal to 1 then
         repeat with modelType in modelTypes
-          if (kind of the first item of theSelection) contains modelType then
+          if (name extension of the first item of theSelection) contains modelType then
             return the POSIX path of (theSelection as alias)
             exit repeat
           end if
@@ -42,7 +42,7 @@ const getSelectedFinderModels = async (): Promise<string> => {
         set thePaths to {}
         repeat with i from 1 to (theSelection count)
           repeat with modelType in modelTypes
-            if (kind of (item i of theSelection)) contains modelType then
+            if (name extension of (item i of theSelection)) contains modelType then
               copy (POSIX path of (item i of theSelection as alias)) to end of thePaths
               exit repeat
             end if
@@ -55,13 +55,13 @@ const getSelectedFinderModels = async (): Promise<string> => {
 };
 
 /**
- * Gets currently selected models in Path Finder.
+ * Gets currently selected models in Path Finder. Untested, but pulled from SIPS so presumed working.
  *
  * @returns A promise resolving to the comma-separated list of models as a string.
  */
 const getSelectedPathFinderModels = async (): Promise<string> => {
   return runAppleScript(
-    `set modelTypes to {"STEP", "Standard Tesselated Geometry File Format", "Geometry Definition File Format", "IGES", "IGS", "X3D", "X3DZ"}
+    `set modelTypes to {"step", "stp", "stl", "obj", "off", "iges", "igs", "x3d", "x3dz", "amf", "3mf", "brep", "brp", "smf", "ply"}
 
     tell application "Path Finder"
       set theSelection to selection
@@ -69,7 +69,7 @@ const getSelectedPathFinderModels = async (): Promise<string> => {
         return
       else if (theSelection count) is equal to 1 then
         repeat with modelType in modelTypes
-          if (kind of the first item of theSelection) contains modelType then
+          if (name extension of the first item of theSelection) contains modelType then
             return the POSIX path of first item of theSelection
             exit repeat
           end if
@@ -78,7 +78,7 @@ const getSelectedPathFinderModels = async (): Promise<string> => {
         set thePaths to {}
         repeat with i from 1 to (theSelection count)
           repeat with modelType in modelTypes
-            if (kind of (item i of theSelection)) contains modelType then
+            if (name extension of (item i of theSelection)) contains modelType then
               copy (POSIX path of (item i of theSelection)) to end of thePaths
               exit repeat
             end if
@@ -93,16 +93,23 @@ const getSelectedPathFinderModels = async (): Promise<string> => {
 /**
  * Cleans up temporary files created by the extension.
  *
- * @returns A promise resolving when the cleanup is complete.
+ * @returns {Promise<void>} A promise resolving when the cleanup is complete.
  */
 export const cleanup = async () => {
+  // Get the list of items to remove from local storage
   const itemsToRemove = (await LocalStorage.getItem("itemsToRemove")) ?? "";
+  
+  // Split the list into an array of items
   const itemsToRemoveArray = itemsToRemove.toString().split(", ");
+  
+  // Iterate over each item and remove it if it exists
   for (const item of itemsToRemoveArray) {
     if (fs.existsSync(item)) {
       await fs.promises.rm(item);
     }
   }
+  
+  // Remove the list of items from local storage
   await LocalStorage.removeItem("itemsToRemove");
 };
 
@@ -112,14 +119,14 @@ export const cleanup = async () => {
  * @returns A promise resolving to the list of selected model paths.
  */
 export const getSelectedModels = async (): Promise<string[]> => {
+  // Initialize an empty array to store the selected model paths
   const selectedModels: string[] = [];
 
-  // Get name of preferred file manager
-  const extensionPreferences = getPreferenceValues<ExtensionPreferences>();
-  const inputMethod = extensionPreferences.inputMethod;
-  let inputMethodError = false;
+  // Get the preferences from the extension
+  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const inputMethod = preferences.inputMethod;
 
-  // Get name of frontmost application
+  // Get the name of the frontmost application
   let activeApp = inputMethod;
   try {
     activeApp = (await getFrontmostApplication()).name;
@@ -127,36 +134,36 @@ export const getSelectedModels = async (): Promise<string[]> => {
     console.error("Couldn't get frontmost application");
   }
 
-  // Attempt to get selected models from Path Finder
-  try {
-    if (activeApp == "Path Finder" && inputMethod == "Path Finder") {
-      const pathFinderModels = (await getSelectedPathFinderModels()).split(", ");
-      pathFinderModels.forEach((imgPath) => {
-        if (!selectedModels.includes(imgPath)) {
-          selectedModels.push(imgPath);
-        }
-      });
-      return selectedModels;
-    }
-  } catch (error) {
-    // Error getting models from Path Finder, fall back to Finder
-    console.error("Couldn't get models from Path Finder");
-    inputMethodError = true;
-  }
-
-  // Get selected models from Finder -- use as fallback for desktop selections & on error
-  const finderModels = (await getSelectedFinderModels()).split(", ");
-  if (activeApp == "Finder" || inputMethod == "Finder" || inputMethodError) {
-    selectedModels.push(...finderModels);
-  } else {
-    // Add desktop selections
-    finderModels.forEach((imgPath) => {
-      if (imgPath.split("/").at(-2) == "Desktop" && !selectedModels.includes(imgPath)) {
-        selectedModels.push(imgPath);
+  // Check the active application and retrieve the selected models accordingly
+  switch (activeApp) {
+    case "Path Finder":
+      // Untested because I don't use Path Finder
+      // If the active application is Path Finder and the input method is also Path Finder,
+      // retrieve the selected models using the appropriate function and add them to the selectedModels array
+      if (inputMethod === "Path Finder") {
+        const pathFinderModels = (await getSelectedPathFinderModels()).split(", ");
+        selectedModels.push(...pathFinderModels);
       }
-    });
+      break;
+    case "Finder":
+      // If the active application is Finder,
+      // retrieve the selected models using the appropriate function and add them to the selectedModels array
+      const finderModels = (await getSelectedFinderModels()).split(", ");
+      selectedModels.push(...finderModels);
+
+      // If the input method is not Finder,
+      // check if the model path belongs to the Desktop directory and add it to the selectedModels array if it's not already included
+      if (inputMethod !== "Finder") {
+        finderModels.forEach((modelPath) => {
+          if (modelPath.split("/").at(-2) === "Desktop" && !selectedModels.includes(modelPath)) {
+            selectedModels.push(modelPath);
+          }
+        });
+      }
+      break;
   }
 
+  // Return the list of selected model paths
   return selectedModels;
 };
 

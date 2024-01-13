@@ -1,74 +1,65 @@
-#!/usr/bin/freecadcmd
-#!/Applications/FreeCAD.app/Contents/MacOS/FreeCADCmd
-
-
-
 import sys
 
-FREECAD_LIB_PATH = sys.argv[1] + "Contents/Resources/lib"
-print(FREECAD_LIB_PATH)
-sys.path.append(FREECAD_LIB_PATH) #<-- added, otherwise FreeCAD is not found
+# Import FreeCAD library
+freecad_lib_path = sys.argv[1] + "Contents/Resources/lib"
+print(freecad_lib_path)
+sys.path.append(freecad_lib_path) 
 
 import os
 import FreeCAD
 import Part
 import Mesh
 
-#import Blender                 #<-- kept as a reminder for how well those two open source gems interact
+input_file, output_file = sys.argv[2], sys.argv[3] # python3 freecad_convert.py <path> <in> <out>
+input_filename, input_ext = os.path.splitext(input_file)
+output_filename, output_ext = os.path.splitext(output_file)
+print(input_ext, " -> ", output_ext)
 
-
-# The original author wrote this script. The syntax was figured out by recording and evaluating some macros in FreeCAD. Thanks open source movement.
-
-
-in_f, out_f = sys.argv[2], sys.argv[3]  #<-- repaired, out of bounds
-in_fn,in_ext = os.path.splitext(in_f)
-out_fn,out_ext = os.path.splitext(out_f)
-print(in_ext, " -> ", out_ext)
-
-mesh_formats = ['.stl', '.obj', '.3mf', '.x3d', '.x3dz']
+mesh_formats = ['.3mf', '.amf', '.obj', '.off', '.ply', '.smf', '.stl', '.x3d', '.x3dz'] # Define the formats that this script will attempt to do mesh-to-mesh conversion on. Not all formats are supported by FreeCAD
 
 def main():
     shape = Part.Shape()
     #shape_formats = ['.brp', '.igs', '.stp']
-    if in_ext in mesh_formats:
-        print("Opening mesh file: ", in_f)
-        Mesh.open(in_f)
-        o = FreeCAD.getDocument("Unnamed").findObjects()[0]
-        #print("dir: ", dir(o))
-        if out_ext in mesh_formats:
-            print("Exporting to mesh file: ", out_f)
-            Mesh.export([o], out_f)
+    if input_ext in mesh_formats:
+        # Input is a Mesh format
+        print("Opening mesh file: ", input_file)
+        Mesh.open(input_file)
+        mesh_object = FreeCAD.getDocument("Unnamed").findObjects()[0]
+        if output_ext in mesh_formats:
+            # Mesh -> Mesh
+            print("Exporting to mesh file: ", output_file)
+            Mesh.export([mesh_object], output_file)
         else:
+            # Mesh -> Parametric
             # TODO This is not optimizing the resulting amount of faces!
             # see http://www.freecadweb.org/wiki/index.php?title=Mesh_to_Part
-            shape.makeShapeFromMesh(o.Mesh.Topology, 0.05)  # tolerance for sewing
-            exportParametric(shape, out_f, out_ext)
-    elif out_ext in mesh_formats:
-        print("Opening parametric file: ", in_f)
-        Part.open(in_f)
-        o = FreeCAD.getDocument("Unnamed").findObjects()[0]
-        print("Exporting to mesh file: ", out_f)
-        Mesh.export([o], out_f)
+            shape.makeShapeFromMesh(mesh_object.Mesh.Topology, 0.08)  # tolerance for sewing
+            export_parametric(shape, output_file, output_ext)
+    elif output_ext in mesh_formats:
+        # Parametric -> Mesh
+        print("Opening parametric file: ", input_file)
+        Part.open(input_file)
+        parametric_object = FreeCAD.getDocument("Unnamed").findObjects()[0]
+        print("Exporting to mesh file: ", output_file)
+        Mesh.export([parametric_object], output_file)
     else:
         # Parametric -> Parametric
-        print("Opening parametric file: ", in_f)
-        shape.read(in_f)
-        exportParametric(shape, out_f, out_ext)
+        print("Opening parametric file: ", input_file)
+        shape.read(input_file)
+        export_parametric(shape, output_file, output_ext)
 
-
-
-def exportParametric(shape, out_f, out_ext):
-    print("Exporting to parametric file: ", out_f)
-    if out_ext == '.brp':
-        shape.exportBrep(out_f)
-    elif out_ext == '.igs':
-        shape.exportIges(out_f)
-    elif out_ext == '.stl':
-        shape.exportStl(out_f)
-    elif out_ext == '.stp':
-        shape.exportStep(out_f)
+def export_parametric(shape, output_file, output_ext):
+    print("Exporting to parametric file: ", output_file)
+    if output_ext == '.brp':
+        shape.exportBrep(output_file)
+    elif output_ext == '.igs':
+        shape.exportIges(output_file)
+    elif output_ext == '.stl':
+        shape.exportStl(output_file)
+    elif output_ext == '.stp':
+        shape.exportStep(output_file)
     else:
-        print("Export to '%s' not supported." % (out_ext))
+        print("Export to '%s' not supported." % (output_ext))
 
 main()
 
