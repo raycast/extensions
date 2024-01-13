@@ -22,6 +22,7 @@ import {
 import convert from "./operations/convertOperation";
 import { cleanup, getSelectedModels, showErrorToast } from "./utilities/utils";
 import { ConvertPreferences, ExtensionPreferences } from "./utilities/preferences";
+import { checkFreeCADInstallation } from "./utilities/checkinstall";
 
 /**
  * All supported model formats for conversion.
@@ -29,6 +30,9 @@ import { ConvertPreferences, ExtensionPreferences } from "./utilities/preference
 const FORMATS = ["STEP", "STL", "OBJ", "3MF", "IGS", "X3D", "X3DZ"];
 
 export default function Command() {
+  
+  checkFreeCADInstallation();
+
   const preferences = getPreferenceValues<ConvertPreferences & ExtensionPreferences>();
   const enabledFormats = FORMATS.filter((format) => preferences[`show${format}`]);
 

@@ -14,6 +14,8 @@ Convert between various NURBS and mesh 3D model formats, such as STEP, STL, OBJ,
 
 This extension relies on having [FreeCAD](https://www.freecad.org/) installed on the machine. You will be prompted to specify the path that FreeCAD is installed.
 
+It's recommended to open FreeCAD at least once after installation so that MacOS can verify the installation.
+
 ![Image](metadata/1.png)
 
 ### Installation through Web
