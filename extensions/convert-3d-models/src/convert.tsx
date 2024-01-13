@@ -91,7 +91,7 @@ export default function Command() {
 
   return (
     // JSX element representing a list with search functionality
-    <List searchBarPlaceholder="Search model conversions...">
+    <List searchBarPlaceholder="Search model formats...">
 
       {/* JSX element representing an empty view when no formats are enabled */}
       <List.EmptyView
