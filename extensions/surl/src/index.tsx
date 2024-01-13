@@ -1,4 +1,4 @@
-import { ActionPanel, Action, showToast, List, Icon, Toast, Cache, closeMainWindow, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, showToast, List, Toast, Cache, Clipboard } from "@raycast/api";
 import { useState } from "react";
 import fetch from "node-fetch";
 import { isValidUrl } from "./util";
@@ -6,7 +6,7 @@ import { isValidUrl } from "./util";
 const FRONTEND_ENDPOINT = "https://surlapp.uk";
 const BACKEND_ENDPOINT = "https://surlapp.uk";
 const CACHE_KEY = "surl-history";
-const MAX_HISTORY_COUNT = 15;
+const MAX_HISTORY_COUNT = 20;
 
 type Item = {
   key: string;
@@ -15,19 +15,13 @@ type Item = {
 
 export default function Command() {
   const cache = new Cache();
+  // const isEmpty = cache.isEmpty;
   const cachedData = cache.get(CACHE_KEY);
   const cachedItems: Item[] = cachedData ? JSON.parse(cachedData) : [];
   const itemsCount = cachedItems.length;
 
   const [searchText, setSearchText] = useState("");
   const [shortenUrl, setShortenUrl] = useState("");
-  const [items, setItems] = useState<Item[]>(cachedItems);
-
-  const handleChangeText = (text: string) => {
-    setSearchText(text);
-    const filteredItems = cachedItems.filter((item) => item.url.toLowerCase().includes(text.toLowerCase()));
-    setItems(filteredItems);
-  };
 
   const handleSubmit = async () => {
     if (!searchText) {
@@ -55,8 +49,6 @@ export default function Command() {
       const json = (await res.json()) as { key: string; url: string };
 
       setShortenUrl(`${FRONTEND_ENDPOINT}/${json.key}`);
-      setSearchText("");
-      setItems(cachedItems);
       Clipboard.copy(`${FRONTEND_ENDPOINT}/${json.key}`);
       showToast({ title: "", message: "Created Successfully. Copied to clipboard." });
 
@@ -75,18 +67,12 @@ export default function Command() {
     }
   };
 
-  const handleRemoveCache = (url: string) => {
-    const newItems = cachedItems.filter((item) => item.url !== url);
-    setItems(newItems);
-    cache.set(CACHE_KEY, JSON.stringify(newItems));
-  };
-
   return (
     <List
       searchBarPlaceholder="Please enter the URL you want to shorten"
       isLoading={false}
       searchText={searchText}
-      onSearchTextChange={handleChangeText}
+      onSearchTextChange={setSearchText}
       isShowingDetail={false}
       throttle
     >
@@ -103,7 +89,7 @@ export default function Command() {
       ) : (
         <List.Item
           title="URL:"
-          subtitle={searchText ? searchText : "Your URL will be showed here"}
+          subtitle={searchText ? searchText : "Short URL will be showed here"}
           actions={
             <ActionPanel>
               <Action
@@ -115,45 +101,6 @@ export default function Command() {
           }
         />
       )}
-      <List.Section title="History">
-        {itemsCount > 0 ? (
-          <>
-            {items.map(({ key, url }) => {
-              const shortenUrl = `${FRONTEND_ENDPOINT}/${key}`;
-              return (
-                <List.Item
-                  key={key}
-                  icon={{ source: Icon.SaveDocument }}
-                  title={url}
-                  accessories={[{ icon: Icon.CopyClipboard, text: `/${key}` }]}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard content={shortenUrl} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-                      <Action icon={{ source: Icon.Eye }} title="Toggle Detail" onAction={() => setSearchText(url)} />
-                      <Action
-                        icon={{ source: Icon.Trash }}
-                        title="Remove From History"
-                        onAction={() => handleRemoveCache(url)}
-                        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </>
-        ) : (
-          <List.Item
-            title="No history"
-            subtitle="Please shorten the URL"
-            actions={
-              <ActionPanel>
-                <Action title="Close" icon={{ source: Icon.Check }} onAction={() => closeMainWindow()} />
-              </ActionPanel>
-            }
-          />
-        )}
-      </List.Section>
     </List>
   );
 }

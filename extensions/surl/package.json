@@ -17,6 +17,13 @@
       "subtitle": "Shorten Your URL",
       "description": "Make Your URL Shorten",
       "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Surl",
+      "description": "History of Surl",
+      "mode": "view"
     }
   ],
   "dependencies": {
