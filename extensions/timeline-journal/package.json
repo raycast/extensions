@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timeline-journal",
+  "title": "Timeline Journal",
+  "description": "Put your thoughts on a timeline.",
+  "icon": "timeline-logo.png",
+  "author": "longy2k",
+  "categories": ["Applications", "Productivity"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "folderPath",
+      "title": "Folder Path",
+      "type": "directory",
+      "description": "Insert a folder path for your daily timelines.",
+      "required": true
+    },
+    {
+      "name": "dateFormat",
+      "title": "Date Format",
+      "type": "dropdown",
+      "description": "Date format for timeline.",
+      "required": false,
+      "data": [
+        {
+          "value": "YYYY-MM-DD",
+          "title": "YYYY-MM-DD"
+        },
+        {
+          "value": "MM-DD-YYYY",
+          "title": "MM-DD-YYYY"
+        },
+        {
+          "value": "DD-MM-YYYY",
+          "title": "DD-MM-YYYY"
+        },
+        {
+          "value": "YYYYMMDD",
+          "title": "YYYYMMDD"
+        },
+        {
+          "value": "MMDDYYYY",
+          "title": "MMDDYYYY"
+        },
+        {
+          "value": "DDMMYYYY",
+          "title": "DDMMYYYY"
+        }
+      ]
+    },
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "type": "dropdown",
+      "description": "Time format for timeline.",
+      "required": false,
+      "data": [
+        {
+          "value": "24h",
+          "title": "24h"
+        },
+        {
+          "value": "12h",
+          "title": "12h"
+        }]
+    },
+    {
+      "name": "insertPosition",
+      "title": "Insert Position",
+      "type": "dropdown",
+      "description": "Append or preprend to daily timeline.",
+      "required": false,
+      "data": [
+        {
+          "value": "append",
+          "title": "Append"
+        },
+        {
+          "value": "preprend",
+          "title": "Preprend"
+        }]
+    }
+  ],
+  "commands": [
+    {
+      "name": "dailyTimeline",
+      "title": "Today's Timeline",
+      "description": "Search or add to today's timeline.",
+      "mode": "view"
+    },
+    {
+      "name": "addTimeline",
+      "title": "Add to Timeline",
+      "description": "Add to today's timeline (longform).",
+      "mode": "view"
+    },
+    {
+      "name": "listFiles",
+      "title": "Search Timelines",
+      "description": "Search timelines from specified folder.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
