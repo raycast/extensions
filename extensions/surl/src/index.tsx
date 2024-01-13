@@ -1,6 +1,7 @@
 import { ActionPanel, Action, showToast, List, Icon, Toast, Cache, closeMainWindow, Clipboard } from "@raycast/api";
 import { useState } from "react";
 import fetch from "node-fetch";
+import { isValidUrl } from "./util";
 
 const FRONTEND_ENDPOINT = "https://surlapp.uk";
 const BACKEND_ENDPOINT = "https://surlapp.uk";
@@ -36,6 +37,11 @@ export default function Command() {
 
     console.log(searchText);
     try {
+      if (!isValidUrl(searchText)) {
+        showToast(Toast.Style.Failure, "", "Please enter valid URL");
+        return;
+      }
+
       const res = await fetch(BACKEND_ENDPOINT, {
         method: "POST",
         headers: {
