@@ -6,7 +6,7 @@ import { dateFormat, timeFormat } from "./utils/dateAndTime";
 export default function Command() {
   const { folderPath, insertPosition } = getPreferenceValues<Preferences>();
   const filePath = `${folderPath}/${dateFormat()}.md`;
-  
+
   // Create file if it doesn't exist
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, "");
@@ -23,22 +23,21 @@ export default function Command() {
     const formattedTime = timeFormat();
     const newBulletPoint = `- ${formattedTime} - ${searchText}`;
     const currentContent = fs.readFileSync(filePath, "utf-8");
-    const updatedContent = operation === "append"
-      ? `${currentContent}\n${newBulletPoint}`
-      : `${newBulletPoint}\n${currentContent}`;
+    const updatedContent =
+      operation === "append" ? `${currentContent}\n${newBulletPoint}` : `${newBulletPoint}\n${currentContent}`;
 
     updateFileContent(updatedContent);
-  }
+  };
 
   const updateFileContent = (newContent: string | NodeJS.ArrayBufferView) => {
     fs.writeFileSync(filePath, newContent);
     setBulletPoints(getBulletPoints(newContent, insertPosition));
     setSearchText("");
-  }
+  };
 
   // Delete bullet point at the specified index
   const deleteTimestamp = (index: number) => {
-    const originalBulletPoints = fileContent.split("\n").filter(line => line.startsWith("- "));
+    const originalBulletPoints = fileContent.split("\n").filter((line) => line.startsWith("- "));
     const actualIndex = insertPosition === "append" ? originalBulletPoints.length - 1 - index : index;
     if (actualIndex < 0 || actualIndex >= originalBulletPoints.length) {
       showToast(Toast.Style.Failure, "Error: Invalid index");
@@ -49,10 +48,12 @@ export default function Command() {
     const updatedContent = originalBulletPoints.join("\n");
     updateFileContent(updatedContent);
     showToast(Toast.Style.Success, "Timestamp deleted");
-  }
+  };
 
   // Filter bullet points based on search text
-  const filteredBulletPoints = bulletPoints.filter((point: string) => point.toLowerCase().includes(searchText.toLowerCase()));
+  const filteredBulletPoints = bulletPoints.filter((point: string) =>
+    point.toLowerCase().includes(searchText.toLowerCase()),
+  );
 
   return (
     <List
@@ -67,35 +68,32 @@ export default function Command() {
         ) : undefined
       }
     >
-      {filteredBulletPoints.length > 0 ? (
-        filteredBulletPoints.map((point, index) => (
-          <List.Item
-            key={index}
-            title={point.replace("- ", "")}
-            actions={
-              <ActionPanel>
-                <Action.Push title="Show Details" target={<Detail markdown={point.replace("- ", "")} />} />
-                <Action title="Delete Timestamp" onAction={() => deleteTimestamp(index)} />
-                <Action.Open title="Open File" target={filePath} />
-              </ActionPanel>
-            }
-          />
-        ))
-      ) : (
-        searchText.trim() && (
-          <List.Item
-            title="Add to Timeline"
-            actions={
-              <ActionPanel>
-                <Action title="Add to Timeline" onAction={() => appendOrPrependBulletPoint(insertPosition)} />
-              </ActionPanel>
-            }
-          />
-        )
-      )}
+      {filteredBulletPoints.length > 0
+        ? filteredBulletPoints.map((point, index) => (
+            <List.Item
+              key={index}
+              title={point.replace("- ", "")}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="Show Details" target={<Detail markdown={point.replace("- ", "")} />} />
+                  <Action title="Delete Timestamp" onAction={() => deleteTimestamp(index)} />
+                  <Action.Open title="Open File" target={filePath} />
+                </ActionPanel>
+              }
+            />
+          ))
+        : searchText.trim() && (
+            <List.Item
+              title="Add to Timeline"
+              actions={
+                <ActionPanel>
+                  <Action title="Add to Timeline" onAction={() => appendOrPrependBulletPoint(insertPosition)} />
+                </ActionPanel>
+              }
+            />
+          )}
     </List>
   );
-
 }
 
 // Helper function to get bullet points from file content

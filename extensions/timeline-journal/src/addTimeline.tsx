@@ -1,7 +1,7 @@
 import { ActionPanel, Form, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import { useState } from "react";
-import {dateFormat, timeFormat} from "./utils/dateAndTime";
+import { dateFormat, timeFormat } from "./utils/dateAndTime";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -19,8 +19,8 @@ export default function Command() {
   const formatBulletPoint = (text: string) => `- ${getFormattedTime} - ${text}`;
   const updateFileContent = (newContent: string | NodeJS.ArrayBufferView) => {
     fs.writeFileSync(filePath, newContent);
-  }
-  
+  };
+
   const [textareaValue, setTextareaValue] = useState("");
 
   const handleFormSubmit = (values: { addTimeline: string }) => {
@@ -38,7 +38,7 @@ export default function Command() {
     }
     showToast(Toast.Style.Success, "Added to Today's Timeline");
     setTextareaValue("");
-  }
+  };
 
   return (
     <Form
@@ -48,11 +48,11 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea 
-        id="addTimeline" 
-        title="Add to Timeline" 
-        placeholder="Share your thoughts" 
-        value={textareaValue} 
+      <Form.TextArea
+        id="addTimeline"
+        title="Add to Timeline"
+        placeholder="Share your thoughts"
+        value={textareaValue}
         onChange={setTextareaValue}
       />
     </Form>
