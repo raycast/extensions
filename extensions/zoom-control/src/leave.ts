@@ -1,6 +1,6 @@
 import { showHUD } from "@raycast/api";
-import { ZoomMenuResult, zoomMenuIcon, showNoZoomMeeting } from "./zoom-meeting";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { runAS, ZoomMenuResult, zoomMenuIcon, showNoZoomMeeting } from "./zoom-meeting";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function main() {
   // Prefer to leave via the Zoom icon in the menubar, since it shows
@@ -40,7 +40,7 @@ tell application "System Events"
 end tell
 `;
 
-  const res = await runAppleScript<string>(script);
+  const res = await runAS(script);
   if (res == "zoom-meeting-window-closed") {
     showHUD("Leaving zoom meeting");
   } else {
