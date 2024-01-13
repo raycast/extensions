@@ -79,14 +79,6 @@ function CornerSettings({ corner }: CornerSettingsProps) {
           title="Disable"
           actions={
             <ActionPanel>
-              <Action title="Confirm" onAction={() => setCorner(corner, 0)} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="ScreenSaver"
-          actions={
-            <ActionPanel>
               <Action title="Confirm" onAction={() => setCorner(corner, 1)} />
             </ActionPanel>
           }
@@ -100,7 +92,7 @@ function CornerSettings({ corner }: CornerSettingsProps) {
           }
         />
         <List.Item
-          title="App Expose"
+          title="Application Windows"
           actions={
             <ActionPanel>
               <Action title="Confirm" onAction={() => setCorner(corner, 3)} />
@@ -116,7 +108,31 @@ function CornerSettings({ corner }: CornerSettingsProps) {
           }
         />
         <List.Item
+          title="Notification Center"
+          actions={
+            <ActionPanel>
+              <Action title="Confirm" onAction={() => setCorner(corner, 12)} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
           title="Launchpad"
+          actions={
+            <ActionPanel>
+              <Action title="Confirm" onAction={() => setCorner(corner, 11)} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Quick Note"
+          actions={
+            <ActionPanel>
+              <Action title="Confirm" onAction={() => setCorner(corner, 14)} />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          title="Start ScreenSaver"
           actions={
             <ActionPanel>
               <Action title="Confirm" onAction={() => setCorner(corner, 5)} />
@@ -124,7 +140,7 @@ function CornerSettings({ corner }: CornerSettingsProps) {
           }
         />
         <List.Item
-          title="Notification Center"
+          title="Disable ScreenSaver"
           actions={
             <ActionPanel>
               <Action title="Confirm" onAction={() => setCorner(corner, 6)} />
@@ -132,18 +148,18 @@ function CornerSettings({ corner }: CornerSettingsProps) {
           }
         />
         <List.Item
-          title="Sleep"
+          title="Put Display to Sleep"
           actions={
             <ActionPanel>
-              <Action title="Confirm" onAction={() => setCorner(corner, 7)} />
+              <Action title="Confirm" onAction={() => setCorner(corner, 10)} />
             </ActionPanel>
           }
         />
         <List.Item
-          title="Lock"
+          title="Lock Screen"
           actions={
             <ActionPanel>
-              <Action title="Confirm" onAction={() => setCorner(corner, 8)} />
+              <Action title="Confirm" onAction={() => setCorner(corner, 13)} />
             </ActionPanel>
           }
         />
@@ -212,15 +228,18 @@ function disableAllHotcorners() {
 // 新增帮助视图组件
 function HelpView() {
   const markdownContent = `
-# HotCorner Help
+# Help
+## System requirements
+HotCorner only works on macOS Sonama for now. 
 
-## If the extension doesn't work
+## If HotCorner doesn't work
 HotCorner requires Automation permission enable for Raycast to function properly.
 Here is how to enable:
 
-1.Open Security & Privacy Panel in System Preference  
-You can hit ENTER now to open the System Preference panel or navigate manually to System Preferences -> Security & Privacy -> Privacy -> Automation.  
-2.Enable the toggle for "System Events" under Raycast.
+**STEP1** Open Security & Privacy Panel in System Preference  
+Hit ENTER now to open the System Preference panel or navigate manually to System Preferences -> Security & Privacy -> Privacy -> Automation.  
+  
+**STEP2** Enable the toggle for "System Events" under Raycast.
 ![System Preference](SystemPreference.png)
 
 ## Screen Blinking
