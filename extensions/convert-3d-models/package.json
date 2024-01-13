@@ -131,7 +131,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.65.0",
     "@raycast/utils": "^1.4.18",
     "mathjs": "^11.8.2",
     "run-applescript": "^6.1.0",
