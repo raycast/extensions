@@ -4,7 +4,7 @@ import Parser from "rss-parser";
 
 const parser = new Parser({
   headers: {
-    "User-Agent": `Hacker News Extension, Raycast/${environment.raycastVersion} (${os.type()} ${os.release()})`,
+    "User-Agent": `Ars Technica Extension, Raycast/${environment.raycastVersion} (${os.type()} ${os.release()})`,
   },
 });
 
