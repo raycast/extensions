@@ -31,7 +31,7 @@ export default function Command() {
         Object.entries(simpleIcons).map(([name, icon]) => (
           <Grid.Item
             key={name}
-            content={{ value: { source: `icons/${icon.slug}.svg` }, tooltip: name }}
+            content={{ value: { source: `icons/${icon.slug}.svg`, tintColor: Color.PrimaryText }, tooltip: name }}
             title={icon.title}
             actions={
               <ActionPanel>
