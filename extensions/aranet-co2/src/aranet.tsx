@@ -1,5 +1,6 @@
 import { Color, List, getPreferenceValues } from "@raycast/api";
 import useGetData from "./useGetData";
+import { checkAranetHomeInstallation } from "./utils";
 
 const getCO2Color = (co2: number) => {
   // < 1000 = Green
@@ -30,6 +31,8 @@ export default function AranetCommand() {
   const tempType = getPreferenceValues<{
     temperature: TemperatureType;
   }>().temperature;
+
+  checkAranetHomeInstallation();
 
   if (data == null) return <List isLoading={true} />;
 

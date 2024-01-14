@@ -1,6 +1,7 @@
 import { ChildProcess, exec } from "child_process";
 import { useEffect, useState } from "react";
 import { shellEnv } from "shell-env";
+import { showClaranet4Error } from "./utils";
 
 interface EnvType {
   env: Record<string, string>;
@@ -80,8 +81,13 @@ export default function useGetData() {
   useEffect(() => {
     if (!finished) return;
 
-    const jsonData = output.slice(output.indexOf("{"), output.indexOf("}") + 1);
-    setData(JSON.parse(jsonData) as AranetData);
+    try {
+      const jsonData = output.slice(output.indexOf("{"), output.indexOf("}") + 1);
+      setData(JSON.parse(jsonData) as AranetData);
+    } catch (e) {
+      console.error(e);
+      showClaranet4Error();
+    }
   }, [output, finished]);
 
   return data;
