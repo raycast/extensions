@@ -37,9 +37,30 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://lucide.dev/icon/${name}`} />
-              <Action.CopyToClipboard content={name} title="Copy Name to Clipboard" />
-              <Action.CopyToClipboard content={readFileSync(path, "utf8")} title="Copy SVG to Clipboard" />
-              <Action.CopyToClipboard content={`<${toPascalCase(name)} />`} title="Copy Component to Clipboard" />
+              <Action.CopyToClipboard
+                shortcut={{
+                  modifiers: ["cmd"],
+                  key: "n"
+                }}
+                content={name}
+                title="Copy Name to Clipboard"
+              />
+              <Action.CopyToClipboard
+                shortcut={{
+                  modifiers: ["cmd"],
+                  key: "s"
+                }}
+                content={readFileSync(path, "utf8")}
+                title="Copy SVG to Clipboard"
+              />
+              <Action.CopyToClipboard
+                shortcut={{
+                  modifiers: ["cmd"],
+                  key: "r"
+                }}
+                content={`<${toPascalCase(name)} />`}
+                title="Copy Component to Clipboard"
+              />
               <ActionPanel.Section title="Preferences">
                 <ActionPanel.Submenu title="Change Size…" icon={Icon.MagnifyingGlass}>
                   {[4, 6, 8].map((columns) => (

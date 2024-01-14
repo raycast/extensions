@@ -5,6 +5,7 @@
 - Removed stroke red color to mantain the icons as unchanged as possible
 - Updated to latest Lucide Icons version
 - Updated dependencies
+- Added new keyboard shortcuts to `Copy Name to Clipboard`, `Copy SVG to Clipboard` and `Copy Component to Clipboard`
 
 ## [Update] - 2023-12-27
 
