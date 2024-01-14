@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tomito-controls",
+  "title": "Tomito Controls",
+  "description": "A set of commands to control Tomito, a Pomodoro app",
+  "icon": "tomito-icon.png",
+  "author": "elyse",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start",
+      "title": "Start/Pause/Resume",
+      "description": "Start, pause, or resume current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart",
+      "title": "Restart",
+      "description": "Restarts current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "finish",
+      "title": "Finish",
+      "description": "Finish current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-next",
+      "title": "Finish and Start Next",
+      "description": "Finish current interval and start next",
+      "mode": "no-view"
+    },
+    {
+      "name": "skip",
+      "title": "Skip",
+      "description": "Skip current interval",
+      "mode": "no-view"
+    },
+    {
+      "name": "hide",
+      "title": "Hide Window",
+      "description": "Hide timer window",
+      "mode": "no-view"
+    },
+    {
+      "name": "show",
+      "title": "Show Window",
+      "description": "Show timer window",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
