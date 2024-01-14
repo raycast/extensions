@@ -8,6 +8,6 @@ This extension integrates with Sage HR to provide a searchable list of employees
 
 ## Configuration Required
 - Sage HR Access Token: This is required for authentication with the Sage HR API. You can obtain your access token by following the instructions [here](https://support.sage.hr/en/articles/3246469-how-does-sage-hr-api-work).
-- Sage HR Subdomain Name: Your organization's specific subdomain name for Sage HR.
+- Sage HR Subdomain Name: Your organization's specific subdomain name for Sage HR. For example, for `https://acme.sage.hr` it is `acme`.
 
 

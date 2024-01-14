@@ -19,14 +19,16 @@
       "name": "accessToken",
       "type": "password",
       "title": "Access Token",
-      "description": "SageHR API access token",
+      "placeholder": "Enter your SageHR's API access token",
+      "description": "Required for Sage HR API access. See the README for the official documentation link",
       "required": true
     },
     {
       "name": "subdomain",
       "type": "textfield",
       "title": "Subdomain",
-      "description": "SageHR Subdomain",
+      "placeholder": "Enter your SageHR's subdomain name",
+      "description": "SageHR Subdomain, e.g. in `https://acme.sage.hr` it is `acme`",
       "required": true
     }
   ],
@@ -38,7 +40,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Get List of Absent Employees",
+      "title": "List Absent Employees",
+      "subtitle": "Sage HR",
       "description": "Get a searchable list on who is out today",
       "mode": "view"
     }

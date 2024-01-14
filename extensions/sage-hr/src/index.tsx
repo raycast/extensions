@@ -32,7 +32,12 @@ export default function Command() {
   }, [searchText, data]);
 
   return (
-    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText}>
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      searchBarPlaceholder="Enter the name"
+      onSearchTextChange={setSearchText}
+    >
       {filteredList.map((item) => {
         const fullName = getEmployeeFullname(item.employee);
         const copyContent = item.employee.email || fullName;
