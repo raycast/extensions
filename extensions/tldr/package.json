@@ -1,38 +1,68 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tldr",
-  "title": "tldr",
-  "author": "pomdtr",
+  "title": "TL;DR 太长不想读",
+  "description": "让 AI 帮你阅读微信公众号的文章（只支持微信公众号）",
+  "icon": "command-icon.png",
+  "author": "chessjoe",
   "license": "MIT",
-  "description": "Search tldr Pages - Command Cheatsheet",
-  "icon": "tldr.png",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Fun",
+    "Finance",
+    "Other"
+  ],
   "commands": [
     {
       "name": "index",
-      "title": "Search Pages",
-      "subtitle": "tldr",
-      "description": "Search Commands Cheatsheets.",
+      "title": "微信文章摘要",
+      "description": "使用智谱大模型对微信公众文章进行总结",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "zhipuApiKey",
+      "description": "The format of the API Key is `xxx.yy`. Get your key from https://open.bigmodel.cn/usercenter/apikeys.",
+      "type": "textfield",
+      "title": "ZHIPU API Key",
+      "placeholder": "xxx.yy",
+      "required": true
+    },
+    {
+      "name": "useStream",
+      "label": "Enable streaming completions",
+      "description": "Stream the completions of the generated answer",
+      "type": "checkbox",
+      "title": "Stream Completion",
+      "default": true,
+      "required": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
-    "degit": "^2.8.4",
-    "globby": "^12.0.2"
+    "@raycast/api": "^1.65.0",
+    "axios": "^1.6.5",
+    "cheerio": "^1.0.0-rc.12",
+    "env-cmd": "^10.1.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "@types/degit": "^2.8.3",
-    "@types/node": "^16.4.3",
-    "@types/react": "^17.0.15",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.3.5"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

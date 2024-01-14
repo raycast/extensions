@@ -1,190 +1,85 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  environment,
-  Icon,
-  List,
-  popToRoot,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import degit from "degit";
-import fs, { existsSync, readdirSync } from "fs";
-import { rm } from "fs/promises";
-import { globby } from "globby";
-import { parse, resolve } from "path";
+import { Detail, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { Icon, ActionPanel, Action, List } from "@raycast/api";
+import { useChat } from "./hook/useChat";
+import { ChatBox, InputBox, Message } from "./type";
+import { isKeyReady } from "./utils/jwt";
 
-const CACHE_DIR = resolve(environment.supportPath, "pages");
+let globalId = 1;
+export default function Command(props: {messages?: Message[]}) {
+  const [chatbox, setChatBox] = useState<ChatBox>({messages: props.messages?props.messages:[], boxId: ++globalId})
+  const chat = useChat(chatbox)
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [input, setInput] = useState<InputBox>({text: ""})
 
-async function refreshPages() {
-  await rm(resolve(CACHE_DIR), { recursive: true, force: true });
-  await showToast(Toast.Style.Animated, "Fetching TLDR Pages...");
-  try {
-    await degit("tldr-pages/tldr/pages").clone(CACHE_DIR);
-    await showToast(Toast.Style.Success, "TLDR pages fetched!");
-  } catch (error) {
-    await showToast(Toast.Style.Failure, "Download Failed!", "Please check your internet connexion.");
+  if (!isKeyReady()){
+    return <Detail markdown={`# Welcome \n 
+    
+    
+You are missing the ZHIPU API key. Please use \`↩︎\` to start setting it up. \n  
+If you don't have a key yet, please go to [https://open.bigmodel.cn/usercenter/apikeys](https://open.bigmodel.cn/usercenter/apikeys) to apply for one for free.`} actions={
+      <ActionPanel>
+      <Action title="Configure Extension" onAction={openExtensionPreferences} />
+    </ActionPanel>
+    } />;
   }
-}
 
-async function readPages() {
-  const platformNames = ["osx", "common", "linux", "windows", "sunos", "android"];
-  return await Promise.all(
-    platformNames.map(async (platformName) => {
-      const filepaths = await globby(`${CACHE_DIR}/${platformName}/*`);
-      const pages = await Promise.all(filepaths.map((filepath) => parsePage(filepath)));
-      return {
-        name: platformName,
-        pages: pages,
-      };
-    })
-  );
-}
-
-export default function TLDRList(): JSX.Element {
-  const [platforms, setPlatforms] = useState<Record<string, Platform>>();
-  const [selectedPlatformName, setSelectedPlatformName] = useState<string>("osx");
-
-  const selectedPlatforms = platforms ? [platforms[selectedPlatformName], platforms["common"]] : undefined;
-
-  async function loadPages(options?: { forceRefresh?: boolean }) {
-    if (!existsSync(CACHE_DIR) || readdirSync(CACHE_DIR).length === 0 || options?.forceRefresh) {
-      await refreshPages();
-    }
-    const platforms = await readPages();
-    setPlatforms(Object.fromEntries(platforms.map((platform) => [platform.name, platform])));
-  }
 
   useEffect(() => {
-    loadPages();
-  }, []);
+    setChatBox({...chatbox, messages: chat.messages});
+  }, [chat.messages])
 
-  return (
-    <List
-      isShowingDetail
-      searchBarAccessory={
-        <List.Dropdown tooltip="Platform" storeValue onChange={setSelectedPlatformName}>
-          <List.Dropdown.Section>
-            {["osx", "linux", "windows", "sunos", "android"].map((platform) => (
-              <List.Dropdown.Item title={platform} value={platform} key={platform} />
-            ))}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+  // update load from ask
+  useEffect(() => {
+    setLoading(chat.isLoading);
+  }, [chat.isLoading])
+  // const question = useQuestion({ initialQuestion: "", disableAutoLoad: true });
+ 
+  const getActionPanel = () => (
+    <ActionPanel>
+      <Action title={"生成摘要"} icon={Icon.ArrowRight} onAction={async () => {
+              await chat.ask(input.text)
+            }} />
+      <Action title="Configure Extension" onAction={openExtensionPreferences} />
+    </ActionPanel>
+  )
+
+  const sortedMessages = chatbox.messages.sort((a, b)=>b.timestamp - a.timestamp);
+
+  return <List
+      searchText={input.text}
+      isShowingDetail={true}
+      filtering={false}
+      isLoading={isLoading}
+      onSearchTextChange={(input) => {
+        setInput({
+          text: input,
+        })
+      }}
+      throttle={false}
+      navigationTitle={"TL;DR 太长不想读"}
+      actions={
+        getActionPanel()
       }
-      isLoading={!platforms}
+      selectedItemId={`${sortedMessages.length > 0 ? sortedMessages[0].id : undefined}`}
+      onSelectionChange={(id) => {}}
+      searchBarPlaceholder={chatbox.messages.length > 0 ? "请对文章提问" : "请粘贴文章链接"}
     >
-      {selectedPlatforms?.map((platform) => (
-        <List.Section title={platform.name} key={platform.name}>
-          {platform.pages
-            .sort((a, b) => a.command.localeCompare(b.command))
-            .map((page) => (
-              <List.Item
-                title={page.command}
-                detail={<List.Item.Detail markdown={page.markdown} />}
-                key={page.filename}
-                actions={
-                  <ActionPanel>
-                    <Action.Push title="Browse Examples" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
-                    <OpenCommandWebsiteAction page={page} />
-                    <Action
-                      title="Refresh Pages"
-                      icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      onAction={async () => {
-                        await loadPages({ forceRefresh: true });
-                      }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            ))}
-        </List.Section>
-      ))}
+      { chatbox.messages.length == 0 ? (<List.EmptyView/>)
+      : (<List.Section title="Result" subtitle={`${chatbox.messages.length}`}>
+      {sortedMessages.map((msg: Message, i)=> {
+        return (
+        // <List.Item title="摘要" detail={<List.Item.Detail markdown={`# Hello World \n ${33}`}></List.Item.Detail>}/>
+        <List.Item
+          id={`${msg.id}`}
+          key={`${i}`}
+          actions={isLoading ? undefined : getActionPanel()}
+          title={`${msg.question.slice(0,20)}`}
+          detail={<List.Item.Detail markdown={`${msg.answer}`}></List.Item.Detail>}
+        />)
+      })}
+      </List.Section>)}
+      
     </List>
-  );
-}
-
-function OpenCommandWebsiteAction(props: { page: Page }) {
-  const page = props.page;
-  return page.url ? <Action.OpenInBrowser title="Open Command Website" url={page.url} /> : null;
-}
-
-function CommandList(props: { page: Page }) {
-  const page = props.page;
-  return (
-    <List navigationTitle={page.command}>
-      {page.items?.map((item) => (
-        <List.Section key={item.description} title={item.description}>
-          <List.Item
-            title={item.command}
-            key={item.command}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  content={item.command}
-                  onCopy={async () => {
-                    await closeMainWindow();
-                    await popToRoot();
-                  }}
-                />
-                <OpenCommandWebsiteAction page={page} />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      ))}
-    </List>
-  );
-}
-
-interface Platform {
-  name: string;
-  pages: Page[];
-}
-
-interface Page {
-  command: string;
-  filename: string;
-  subtitle: string;
-  markdown: string;
-  url?: string;
-  items: { description: string; command: string }[];
-}
-
-async function parsePage(path: string): Promise<Page> {
-  const markdown = await fs.promises.readFile(path).then((buffer) => buffer.toString());
-
-  const subtitle = [];
-  const commands = [];
-  const descriptions = [];
-  const lines = markdown.split("\n");
-
-  for (const line of lines) {
-    if (line.startsWith(">")) subtitle.push(line.slice(2));
-    else if (line.startsWith("`")) commands.push(line.slice(1, -1));
-    else if (line.startsWith("-")) descriptions.push(line.slice(2));
-  }
-
-  const match = markdown.match(
-    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/
-  );
-  const url = match ? match[0] : undefined;
-
-  return {
-    command: lines[0].slice(2),
-    filename: parse(path).name,
-    subtitle: subtitle[0],
-    markdown: markdown,
-    url,
-    items: zip(commands, descriptions).map(([command, description]) => ({
-      command: command as string,
-      description: description as string,
-    })),
-  };
-}
-
-function zip(arr1: string[], arr2: string[]) {
-  return arr1.map((value, index) => [value, arr2[index]]);
+  
 }
