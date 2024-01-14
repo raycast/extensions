@@ -5,16 +5,19 @@ import { AxiosResponse } from "axios/index";
 import { ChatGlmOptions, ChatGlmResponse } from "../type";
 import { ZHIPU } from "./keys";
 import { environment } from "@raycast/api";
+import { Readable } from "stream";
 
 const ignoreSSL = axios.create({
   httpsAgent: new https.Agent({
     rejectUnauthorized: environment.isDevelopment ? false : true,
   }),
 });
-const proxy = environment.isDevelopment ? {
-  host: "127.0.0.1",
-  port: 9090,
-}: undefined;
+const proxy = environment.isDevelopment
+  ? {
+      host: "127.0.0.1",
+      port: 9090,
+    }
+  : undefined;
 
 export async function chatCompletion(
   messages: Array<{ role: string; content: string }>,
@@ -38,19 +41,19 @@ export async function chatCompletion(
     .then((response: AxiosResponse<ChatGlmResponse>) => {
       if (opt.useStream) {
         let output = "";
-        (response.data as any).on("data", (chunk: any) => {
+        (response.data as Readable).on("data", (chunk: string) => {
           chunk = chunk.toString();
           chunk.split("\n").forEach((line: string) => {
             if (line.startsWith("data:")) {
-              let data = line.replace(/^data:/, "")
-              if (data == ""){
-                data = "\n"
+              let data = line.replace(/^data:/, "");
+              if (data == "") {
+                data = "\n";
               }
               output += data;
             }
-          })
+          });
           let isFinish = false;
-          if (chunk.startsWith('event:finish')) {
+          if (chunk.startsWith("event:finish")) {
             isFinish = true;
           }
           // console.info(chunk.toString());
@@ -58,7 +61,7 @@ export async function chatCompletion(
             // end
             // console.info(output)
           }
-          opt.streamListener && opt.streamListener(output, isFinish)
+          opt.streamListener && opt.streamListener(output, isFinish);
         });
         return "流式输出中";
       } else {
