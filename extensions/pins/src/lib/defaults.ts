@@ -13,7 +13,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { StorageKey } from "./constants";
 import { getNextGroupID, Group } from "./Groups";
 import { getNextPinID, Pin } from "./Pins";
-import { getStorage, setStorage } from "./utils";
+import { getStorage, setStorage } from "./storage";
 
 /**
  * A set of example pins and groups to help users get started.

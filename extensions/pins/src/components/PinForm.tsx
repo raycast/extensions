@@ -66,6 +66,13 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
     let [app, apps] = [values.application as string, [] as Application[]];
     try {
       apps = await getApplications(target);
+      if (!apps.find((app) => app.name === "Terminal")) {
+        apps.push({
+          name: "Terminal",
+          path: "/System/Applications/Utilities/Terminal.app",
+          bundleId: "com.apple.Terminal",
+        });
+      }
     } catch (error) {
       const allApplications = await getApplications();
       if (target.match(/^[a-zA-Z0-9]*?:.*/g)) {
@@ -174,6 +181,7 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                     .map((tag) => tag.trim())
                     .filter((tag) => tag.length > 0),
                   values.notesField,
+                  values.tooltipField,
                   pin.averageExecutionTime,
                   pop,
                   setPins,
@@ -377,6 +385,13 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
       />
 
       <Form.Separator />
+
+      <Form.TextField
+        id="tooltipField"
+        title="Tooltip"
+        info="The tooltip that is displayed when hovering over the pin in the menu bar dropdown."
+        defaultValue={pin ? pin.tooltip : undefined}
+      />
 
       <Form.TextArea
         id="notesField"
