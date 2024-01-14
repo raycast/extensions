@@ -1,5 +1,9 @@
 # PromptLab Changelog
 
+## [PromptLab 1.2.2] - 2024-01-09
+
+- Code cleanup. No user-facing changes.
+
 ## [PromptLab 1.2.1] - 2023-12-31
 
 - Added transparency to the menu bar icon.

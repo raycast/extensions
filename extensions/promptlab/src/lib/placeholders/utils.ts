@@ -3,8 +3,8 @@ import { defaultAdvancedSettings } from "../../data/default-advanced-settings";
 import path from "path";
 import { Placeholder, PLLoader } from "placeholders-toolkit";
 import * as fs from "fs";
-import { ExtensionPreferences } from "../../utils/types";
-import { CUSTOM_PLACEHOLDERS_FILENAME } from "../../utils/constants";
+import { ExtensionPreferences } from "../preferences/types";
+import { CUSTOM_PLACEHOLDERS_FILENAME } from "../../lib/constants";
 
 /**
  * Loads custom placeholders from the custom-placeholders.json file in the support directory.

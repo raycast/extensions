@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Maintenance] - 2024-01-09
+
+- Add better error messages for reporting.
+
 ## [Save multiple links, create collections]
 
 - Save multiple links to a collection at once. This is useful in saving entire browsing sessions or folders in Arc browser.

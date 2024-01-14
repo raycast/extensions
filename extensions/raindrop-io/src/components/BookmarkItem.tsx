@@ -61,7 +61,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                 revalidate();
                 return res.json();
               } else {
-                throw new Error("Error deleting link");
+                throw new Error(res.statusText);
               }
             });
           } catch (error) {

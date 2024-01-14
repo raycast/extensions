@@ -1,5 +1,13 @@
 # Pins Changelog
 
+## [Target Groups, Media Track Quick Pins, and Bug Fixes] - 2024-01-12
+
+- Added ability to quick-add pins to a target group from the menu bar dropdown.
+- Added ability to quick-pin tracks in Music, TV, and Spotify.
+- Added support for pin tooltips in the menu bar dropdown. (Does not work in current version of Raycast.)
+- Use gpt-3.5-turbo-instruct instead of text-davinci-003 for AI placeholder.
+- Fixed bug where non-document-based applications that expose an Applescript API could yield an error.
+
 ## [Tooltips, Tag Filtering, and New Placeholders] - 2023-12-29
 
 - Now using the placeholders-toolkit package.
