@@ -2,10 +2,6 @@
 
 A Raycast script which help front-end devloper to convert *.protobuf file into *.d.ts file.
 
-## Installtion Link
-
-[https://www.raycast.com/gustudio/protobuf2typescript](https://www.raycast.com/gustudio/protobuf2typescript)
-
 ## Screenshots
 
 ![protobuf2typescript-1](https://github.com/7gugu/protobuf2typescript/assets/8674852/1bbdbb94-6fef-4a92-9a81-c445ff65358e)
