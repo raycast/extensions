@@ -1,8 +1,8 @@
 import { Clipboard, LaunchType, MenuBarExtra, launchCommand, showToast } from "@raycast/api";
-import { getPinIcon } from "../lib/icons";
-import { Pin, deletePin, openPin } from "../lib/Pins";
-import { ExtensionPreferences, PinsMenubarPreferences, RightClickAction } from "../lib/preferences";
-import { LocalDataObject } from "../lib/LocalData";
+import { getPinIcon } from "../../lib/icons";
+import { Pin, deletePin, openPin } from "../../lib/Pins";
+import { ExtensionPreferences, PinsMenubarPreferences, RightClickAction } from "../../lib/preferences";
+import { LocalDataObject } from "../../lib/LocalData";
 
 /**
  * A menu item for a pin.
@@ -27,6 +27,7 @@ export default function PinMenuItem(props: {
       icon={getPinIcon(pin)}
       title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
       subtitle={relevant ? "  ✧" : ""}
+      tooltip={pin.tooltip}
       shortcut={pin.shortcut}
       onAction={async (event) => {
         if (event.type == "left-click") {
@@ -50,6 +51,18 @@ export default function PinMenuItem(props: {
           }
         }
       }}
+      alternate={
+        <MenuBarExtra.Item
+          key={pin.id}
+          icon={getPinIcon(pin)}
+          title={`Edit '${pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}'`}
+          tooltip={pin.tooltip}
+          shortcut={pin.shortcut}
+          onAction={async () =>
+            launchCommand({ name: "view-pins", type: LaunchType.UserInitiated, context: { pinID: pin.id } })
+          }
+        />
+      }
     />
   );
 }
