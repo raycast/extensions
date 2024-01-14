@@ -5,15 +5,14 @@ const files = readdirSync("node_modules/lucide-static/icons");
 
 if (existsSync("assets/icons"))
   rmSync("assets/icons", {
-    recursive: true,
+    recursive: true
   });
 
 mkdirSync("assets/icons");
 
-files.forEach((file) => {
+files.forEach(async (file) => {
   if (file.endsWith(".svg")) {
     let content = readFileSync(join("node_modules/lucide-static/icons", file), "utf8");
-    content = content.replace(/currentColor/g, "#F56565");
 
     writeFileSync(join("assets/icons", file), content);
   }

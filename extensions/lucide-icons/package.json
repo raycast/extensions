@@ -11,7 +11,8 @@
   ],
   "license": "MIT",
   "contributors": [
-    "lin"
+    "lin",
+    "Sn0wye"
   ],
   "commands": [
     {
@@ -23,23 +24,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2"
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.55.0",
-    "@typescript-eslint/parser": "^5.55.0",
-    "eslint": "^8.36.0",
-    "eslint-config-prettier": "^8.7.0",
-    "lucide-static": "0.298.0",
-    "prettier": "^2.8.4",
-    "typescript": "^5.0.2"
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "lucide-static": "0.309.0",
+    "prettier": "^3.2.1",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "prebuild": "node prebuild.js",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "format": "prettier --write ."
   }
 }
