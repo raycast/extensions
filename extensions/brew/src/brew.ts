@@ -265,7 +265,7 @@ export async function brewSearch(
 
 export async function brewInstall(installable: Cask | Formula, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execBrew(`install ${brewCaskOption(installable)} ${identifier}`, cancel);
+  await execBrew(`install --no-quarantine ${brewCaskOption(installable)} ${identifier}`, cancel);
   if (isCask(installable)) {
     installable.installed = installable.version;
   } else {
