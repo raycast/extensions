@@ -9,15 +9,13 @@
   "commands": [
     {
       "name": "aranet",
-      "title": "Aranet",
-      "subtitle": "Display CO₂ and other Aranet Data",
+      "title": "Show Aranet Data",
       "description": "Display CO₂ and other Aranet Data",
       "mode": "view"
     },
     {
       "name": "aranet-co2-menu-bar",
-      "title": "CO₂",
-      "subtitle": "Display CO₂ in your menu bar",
+      "title": "Aranet Menu Bar",
       "description": "Display CO₂ in your menu bar",
       "mode": "menu-bar",
       "interval": "5m"
