@@ -1,5 +1,9 @@
 # Zoom Meeting Control Changelog
 
+## [Extension Improvement] - 2024-01-14
+
+- Improve handling of accessibility permissions errors.
+
 ## [New Commands] - 2024-01-13
 
 Added the following commands:
