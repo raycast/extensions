@@ -1,13 +1,9 @@
-import { usePromise } from "@raycast/utils";
-import { cn } from "../utils/collected-notes";
-import { InvalidCredentials } from "./InvalidCredentials";
 import { Toast, showToast } from "@raycast/api";
+import { useValidation } from "../hooks/use-validation";
+import { InvalidCredentials } from "./InvalidCredentials";
 
 export function Validation({ children }: { children: React.ReactNode }) {
-	const { isLoading, error, data } = usePromise(() => cn.me(), []);
-
-	// @ts-expect-error For some reason error is in data
-	const hasError = error || data?.error;
+	const { hasError, isLoading } = useValidation();
 
 	if (hasError && !isLoading) {
 		showToast(Toast.Style.Failure, "Error", "Failed to validate credentials");
