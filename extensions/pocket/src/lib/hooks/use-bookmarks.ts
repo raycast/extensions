@@ -1,44 +1,41 @@
+import { usePocketClient } from "../oauth/view";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchBookmarks, fetchTags, sendAction } from "./api";
-import { ReadState } from "./types";
 import { showToast, Toast } from "@raycast/api";
-import { HTTPError } from "got";
+import { ReadState } from "../api";
 import { capitalize } from "lodash";
+import { useTags } from "./use-tags";
 
 interface UseBookmarksOptions {
   state: ReadState;
   count?: number;
   search?: string;
+  contentType?: string;
   tag?: string;
 }
 
-export function useBookmarks({ state, tag: selectedTag, search, count }: UseBookmarksOptions) {
+export function useBookmarks({ state, tag: selectedTag, contentType, search, count }: UseBookmarksOptions) {
+  const pocket = usePocketClient();
+
+  const { refreshTags } = useTags();
+
   const { data, isLoading, mutate, revalidate } = useCachedPromise(
-    async (url, options) => fetchBookmarks(options),
-    ["v3/get", { state, tag: selectedTag, count, search }],
+    async (url, options) => pocket.getBookmarks(options),
+    ["bookmarks", { state, tag: selectedTag, contentType, count, search }],
     {
       initialData: [],
       keepPreviousData: true,
-      onError: (error) => {
-        if (error && error instanceof HTTPError) {
-          if (error.response.statusCode === 401 || error.response.statusCode === 403) {
-            showToast(Toast.Style.Failure, "Invalid Credentials", "Check you Pocket extension preferences");
-          } else {
-            throw error;
-          }
-        }
-      },
-    }
+    },
   );
 
   async function toggleFavorite(id: string) {
+    const pocket = usePocketClient();
+
     const bookmark = data?.find((bookmark) => bookmark.id === id);
-    const toast = new Toast({
+    const toast = await showToast({
       title: bookmark?.favorite ? "Removing from favorites" : "Adding to favorites",
       style: Toast.Style.Animated,
     });
-    toast.show();
-    await mutate(sendAction({ id, action: bookmark?.favorite ? "unfavorite" : "favorite" }), {
+    await mutate(bookmark?.favorite ? pocket.unfavoriteBookmark(id) : pocket.favoriteBookmark(id), {
       optimisticUpdate: (bookmarks) => bookmarks.map((b) => (b.id === id ? { ...b, favorite: !b.favorite } : b)),
     });
     toast.title = bookmark?.favorite ? "Removed from favorites" : "Added to favorites";
@@ -48,12 +45,11 @@ export function useBookmarks({ state, tag: selectedTag, search, count }: UseBook
 
   async function deleteBookmark(id: string) {
     const bookmark = data?.find((bookmark) => bookmark.id === id);
-    const toast = new Toast({
+    const toast = await showToast({
       title: "Deleting bookmark",
       style: Toast.Style.Animated,
     });
-    toast.show();
-    await mutate(sendAction({ id, action: "delete" }), {
+    await mutate(pocket.deleteBookmark(id), {
       optimisticUpdate: (bookmarks) => bookmarks.filter((bookmark) => bookmark.id !== id),
     });
     toast.title = "Deleted successfully";
@@ -63,12 +59,11 @@ export function useBookmarks({ state, tag: selectedTag, search, count }: UseBook
 
   async function archiveBookmark(id: string) {
     const bookmark = data?.find((bookmark) => bookmark.id === id);
-    const toast = new Toast({
+    const toast = await showToast({
       title: "Archiving bookmark",
       style: Toast.Style.Animated,
     });
-    toast.show();
-    await mutate(sendAction({ id, action: "archive" }), {
+    await mutate(pocket.archiveBookmark(id), {
       optimisticUpdate: (bookmarks) => {
         if (state === ReadState.All) {
           return bookmarks.map((b) => (b.id === id ? { ...b, archived: true } : b));
@@ -84,12 +79,11 @@ export function useBookmarks({ state, tag: selectedTag, search, count }: UseBook
 
   async function reAddBookmark(id: string) {
     const bookmark = data?.find((bookmark) => bookmark.id === id);
-    const toast = new Toast({
+    const toast = await showToast({
       title: "Re-adding bookmark",
       style: Toast.Style.Animated,
     });
-    toast.show();
-    await mutate(sendAction({ id, action: "readd" }), {
+    await mutate(pocket.reAddBookmark(id), {
       optimisticUpdate: (bookmarks) => {
         if (state === ReadState.All) {
           return bookmarks.map((b) => (b.id === id ? { ...b, archived: false } : b));
@@ -104,29 +98,28 @@ export function useBookmarks({ state, tag: selectedTag, search, count }: UseBook
   }
 
   async function addTag(id: string, tag: string) {
-    const toast = new Toast({
+    const toast = await showToast({
       title: "Tagging bookmark",
       message: capitalize(tag),
       style: Toast.Style.Animated,
     });
-    toast.show();
-    await mutate(sendAction({ id, action: "tags_add", tags: tag }), {
+    await mutate(pocket.addTag(id, tag), {
       optimisticUpdate: (bookmarks) => {
         return bookmarks.map((b) => (b.id === id ? { ...b, tags: [...b.tags, tag] } : b));
       },
     });
     toast.title = "Tag added correctly";
     toast.style = Toast.Style.Success;
+    await refreshTags();
   }
 
   async function removeTag(id: string, tag: string) {
-    const toast = new Toast({
+    const toast = await showToast({
       title: "Removing tag",
       message: capitalize(tag),
       style: Toast.Style.Animated,
     });
-    toast.show();
-    await mutate(sendAction({ id, action: "tags_remove", tags: tag }), {
+    await mutate(pocket.removeTag(id, tag), {
       optimisticUpdate: (bookmarks) => {
         if (selectedTag === tag) {
           return bookmarks.filter((b) => b.id !== id);
@@ -137,6 +130,7 @@ export function useBookmarks({ state, tag: selectedTag, search, count }: UseBook
     });
     toast.title = "Tag removed correctly";
     toast.style = Toast.Style.Success;
+    await refreshTags();
   }
 
   return {
@@ -150,22 +144,4 @@ export function useBookmarks({ state, tag: selectedTag, search, count }: UseBook
     addTag,
     removeTag,
   };
-}
-
-export function useTags() {
-  const { data } = useCachedPromise(async (key) => fetchTags(), ["v3/tags"], {
-    initialData: [],
-    keepPreviousData: true,
-    onError: (error) => {
-      if (error && error instanceof HTTPError) {
-        if (error.response.statusCode === 401 || error.response.statusCode === 403) {
-          showToast(Toast.Style.Failure, "Invalid Credentials", "Check you Pocket extension preferences");
-        } else {
-          throw error;
-        }
-      }
-    },
-  });
-
-  return data;
 }
