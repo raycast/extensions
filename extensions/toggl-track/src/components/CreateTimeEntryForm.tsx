@@ -71,9 +71,10 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
       <Form.Dropdown
         id="project"
         title="Project"
-        defaultValue={selectedProject?.id.toString()}
+        defaultValue={selectedProject?.id.toString() ?? "-1"}
         onChange={onProjectChange}
       >
+        <Form.Dropdown.Item key="-1" value="-1" title={"No Project"} icon={{ source: Icon.Circle }} />
         {projectGroups.map((group) => (
           <Form.Dropdown.Section
             key={group.key}
