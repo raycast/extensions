@@ -1,10 +1,10 @@
 <p align="center">
-  <img width=100 src="./assets/extension.png">
+  <img width=100 src="./images/icon.png">
 </p>
 
 <h1 align="center">Splatoon</h1>
 
-![Header](metadata/splatoon-1.png)
+![Header](./images/header.png)
 
 View Splatoon’s current schedules.
 
