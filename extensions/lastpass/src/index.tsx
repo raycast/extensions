@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { lastPass } from "./cli";
 import { EmptyListView, ErrorDetails, ListItem } from "./components";
@@ -43,24 +43,11 @@ export default function Command() {
   }, []);
 
   if (error) {
-    return <ErrorDetails error={error} />;
+    return <ErrorDetails maskPattern={password} error={error} />;
   }
 
-  const actions = (
-    <ActionPanel>
-      <ActionPanel.Section>
-        <Action
-          icon={Icon.ArrowClockwise}
-          title="Manual Sync"
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
-          onAction={() => api.export({ sync: "now" }).then(setAccounts, setError)}
-        />
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
-
   return (
-    <List isLoading={isLoading} isShowingDetail actions={actions}>
+    <List isLoading={isLoading} isShowingDetail>
       {!accounts.length ? (
         <EmptyListView />
       ) : (

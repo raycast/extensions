@@ -23,6 +23,32 @@
       "default": "http://127.0.0.1:11434/"
     },
     {
+      "name": "ollamaResultViewInput",
+      "description": "Choose preferred input source",
+      "type": "dropdown",
+      "required": false,
+      "title": "Input Source",
+      "data": [
+        {
+          "title": "Selected Text",
+          "value": "SelectedText"
+        },
+        {
+          "title": "Clipboard",
+          "value": "Clipboard"
+        }
+      ],
+      "default": "SelectedText"
+    },
+    {
+      "name": "ollamaResultViewInputFallback",
+      "description": "If there isn't text on main input source enable this option permit to fallback to other input source",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Input Source Fallback",
+      "label": "Check for enable input fallback"
+    },
+    {
       "name": "ollamaShowMetadata",
       "description": "Show inference statistics",
       "type": "checkbox",

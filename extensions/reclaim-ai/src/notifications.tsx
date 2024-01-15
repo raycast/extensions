@@ -14,7 +14,6 @@ import { useMemo } from "react";
 import { useEvent } from "./hooks/useEvent";
 import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
 import { useUser } from "./hooks/useUser";
-import { CalendarAccount } from "./types/account";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
@@ -77,28 +76,19 @@ export default function Command() {
     Accept: "application/json",
   };
 
-  const { data: accountData, isLoading: isLoadingAccounts } = useFetch<CalendarAccount[]>(`${apiUrl}/accounts`, {
-    headers: fetchHeaders,
-    keepPreviousData: true,
-  });
-
   const { data: eventsResponse, isLoading: isLoadingEvents } = useFetch<ApiResponseEvents>(
     `${apiUrl}/events?${new URLSearchParams({
       sourceDetails: "true",
       start: format(startOfDay(new Date()), "yyyy-MM-dd"),
       end: format(addDays(new Date(), 2), "yyyy-MM-dd"),
-      ...(accountData && {
-        calendarIds: accountData.flatMap(({ connectedCalendars }) => connectedCalendars.map(({ id }) => id)).join(","),
-      }),
+      allConnected: "true",
     }).toString()}`,
     {
-      execute: !!accountData && !isLoadingAccounts,
       headers: fetchHeaders,
       keepPreviousData: true,
     }
   );
 
-  // Filter out events that are synced, managed by Reclaim and part of multiple calendars
   const eventData = filterMultipleOutDuplicateEvents(eventsResponse);
 
   const showDeclinedEvents = useMemo(() => {

@@ -1,16 +1,23 @@
 import React from "react";
-import { handleLiveTemplate, runShortcut, Taction } from "../util/shortcut";
+import { handleLiveTemplate, runShortcut, Shortcut } from "../util/shortcut";
 import { Action, Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { fetchItemInput } from "../util/input";
 
-export function ActionRunShortcut(props: { primaryAction: string; closeMainWindow: boolean; tactions: Taction[] }) {
-  const { primaryAction, closeMainWindow, tactions } = props;
+export function ActionRunShortcut(props: {
+  primaryAction: string;
+  closeMainWindow: boolean;
+  shortcut: Shortcut;
+  visitItem: (item: Shortcut) => void;
+}) {
+  const { primaryAction, closeMainWindow, shortcut, visitItem } = props;
+  const tactions = shortcut.tactions;
   return (
     <>
       <Action
         title={primaryAction === "Paste" ? "Paste to Active App" : "Copy to Clipboard"}
         icon={primaryAction === "Paste" ? Icon.Window : Icon.Clipboard}
         onAction={async () => {
+          visitItem(shortcut);
           const _runShortcut = runShortcut(await fetchItemInput(), handleLiveTemplate(tactions));
           if (primaryAction === "Paste") {
             await Clipboard.paste(_runShortcut);
@@ -33,6 +40,7 @@ export function ActionRunShortcut(props: { primaryAction: string; closeMainWindo
         title={primaryAction === "Copy" ? "Paste to Active App" : "Copy to Clipboard"}
         icon={primaryAction === "Copy" ? Icon.Window : Icon.Clipboard}
         onAction={async () => {
+          visitItem(shortcut);
           const _runShortcut = runShortcut(await fetchItemInput(), handleLiveTemplate(tactions));
           if (primaryAction === "Copy") {
             await Clipboard.paste(_runShortcut);

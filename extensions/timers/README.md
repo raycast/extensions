@@ -21,8 +21,9 @@ _Note: if you do not receive notifications from the timer completion, you may ne
 - [x] Manage Timers (view/rename/start/stop running or preset countdown timers)
 - [x] Start Stopwatch
 - [x] Manage Stopwatches (view/start/stop running stopwatches)
-- [x] Dismiss Timer (stop a ringing alert for a finished timer, if you've checked the Ring Continously setting)
+- [x] Dismiss Ringing Timer (stop a ringing alert for a finished timer, if you've checked the Ring Continously setting)
 - [x] Preview Alert Sounds (test out the bundled timer alert sounds before selecting one in settings)
+- [x] Stop Running Timer (stop the running timer closest to completion)
 
 ### Not Yet Implemented
 

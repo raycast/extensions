@@ -12,7 +12,7 @@ import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
 
 const spotifyContentLinksTitles = {
-  [SpotifyContentLinkType.Youtube]: "YouTube",
+  [SpotifyContentLinkType.YouTube]: "YouTube",
   [SpotifyContentLinkType.Deezer]: "Deezer",
   [SpotifyContentLinkType.AppleMusic]: "Apple Music",
   [SpotifyContentLinkType.Tidal]: "Tidal",
@@ -37,18 +37,27 @@ export default function Command() {
     async (spotifyLink: string) => {
       setSearchText(spotifyLink);
 
-      if (!spotifyLink) {
+      if (!SPOTIFY_LINK_REGEX.test(spotifyLink)) {
         return;
       }
 
       setIsLoading(true);
 
       try {
-        const request = await fetch(`${API_URL}?spotifyLink=${spotifyLink}&v=2`);
+        const request = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            spotifyLink,
+          }),
+        });
+
         const spotifyContent = (await request.json()) as SpotifyContent & ApiError;
 
         if (request.status !== 200) {
-          throw new Error(spotifyContent.error);
+          throw new Error(spotifyContent.message);
         }
 
         setSpotifyContent(spotifyContent);
