@@ -94,7 +94,7 @@ function GetTimesForm() {
         <Form.Dropdown id="origin" title="Origin">
           {options()}
         </Form.Dropdown>
-        <Form.Dropdown id="destination" title="Destination">
+        <Form.Dropdown id="destination" title="Destination (Optional)">
           <Form.Dropdown.Item value="" title="Select..." />
           {options()}
         </Form.Dropdown>
