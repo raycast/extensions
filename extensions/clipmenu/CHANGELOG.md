@@ -1,6 +1,6 @@
 # ClipMenu Changelog
 
-## 2024-01-15
+## [Enhancement] - 2024-01-15
 - fix: check for empty clipboard history array
 - wrap multi-line to one line in contextmenu item
 - add truncate option: 45 characters
