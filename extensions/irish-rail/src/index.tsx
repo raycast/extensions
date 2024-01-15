@@ -8,7 +8,7 @@ function GetTimesForm() {
   const [stations, setStations] = useState<string[] | null>(null);
   const [origin, setOrigin] = useState<string | null>(null);
   const [destination, setDestination] = useState<string | null>(null);
-  const [searchString, setSearchString] = useState<string>('');
+  const [searchString, setSearchString] = useState<string>("");
 
   const handleSubmit = async (values: { origin: string; destination: string }) => {
     setOrigin(values.origin);
@@ -63,23 +63,21 @@ function GetTimesForm() {
     );
   };
 
-  
-  const searchTrain = (train: Train) => {;
+  const searchTrain = (train: Train) => {
     const match = (data: string) => {
       return data.toLowerCase().includes(searchString.toLowerCase());
-    }
-  
-    const matchingDestinations = match(train.destination)
-    const matchingTrainCode = match(train.trainCode)
+    };
+
+    const matchingDestinations = match(train.destination);
+    const matchingTrainCode = match(train.trainCode);
     const matchingTime = match(train.expDepart);
-    
+
     return matchingDestinations || matchingTrainCode || matchingTime;
-  }
-  
+  };
 
   const search = async (text: string) => {
-    setSearchString(text === '' ? searchString.slice(0, -1) : text);
-    const trains = await getTrains(origin ?? '', destination ?? '');
+    setSearchString(text === "" ? searchString.slice(0, -1) : text);
+    const trains = await getTrains(origin ?? "", destination ?? "");
     const filteredTrains = trains?.filter((train) => searchTrain(train));
     setTrainsData(filteredTrains ?? null);
   };
@@ -127,4 +125,3 @@ function GetTimesForm() {
 }
 
 export default GetTimesForm;
-
