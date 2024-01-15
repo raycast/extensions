@@ -35,14 +35,16 @@ export default function Command() {
         (site) =>
           simplifyString(site.name) == simplifyString(word) ||
           simplifyString(site.id) == simplifyString(word) ||
-          simplifyString(site.domain) == simplifyString(word),
+          simplifyString(site.domain) == simplifyString(word) ||
+          site.alias?.find((a) => simplifyString(a) === simplifyString(word)),
       )
     ) {
       var site = compatibleSites.find(
         (site) =>
           simplifyString(site.name) == simplifyString(word) ||
           simplifyString(site.id) == simplifyString(word) ||
-          simplifyString(site.domain) == simplifyString(word),
+          simplifyString(site.domain) == simplifyString(word) ||
+          site.alias?.find((a) => simplifyString(a) === simplifyString(word)),
       );
       sites.push(site.id);
       splitQuery.splice(index, 1);
