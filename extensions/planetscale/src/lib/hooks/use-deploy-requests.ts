@@ -2,7 +2,6 @@ import { getPlanetScaleClient } from "../oauth/view";
 import { useCachedPromise } from "@raycast/utils";
 import { mutation } from "../error";
 import { showToast, Toast } from "@raycast/api";
-import { PlanetScaleError } from "../api";
 import { enrichToastWithURL } from "../raycast";
 
 export function useDeployRequests(args: { organization?: string; database?: string }) {

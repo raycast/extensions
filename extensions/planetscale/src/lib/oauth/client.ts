@@ -54,9 +54,9 @@ export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
   authCode: string,
 ): Promise<OAuth.TokenResponse> {
-  const serviceTokenId = "";
-  const serviceToken = "";
-  const clientSecret = "";
+  const serviceTokenId = "k7fl3o905dmy";
+  const serviceToken = "pscale_tkn_8xsiIJI3fiS82TcAMfMw0V0S9l2unn-bWI2CL5_DZlI";
+  const clientSecret = "pscale_app_secret_XyCDRd6aPXsu8nK7bEwfmk_WiQdvv2GZyiw_y8753r4";
 
   const pscale = createPlanetScaleClient(`${serviceTokenId}:${serviceToken}`);
 

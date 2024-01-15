@@ -1,8 +1,8 @@
-import type * as types from "./types";
-import type { ConfigOptions, FetchResponse } from "api/dist/core";
-import Oas from "oas";
-import APICore from "api/dist/core";
-import definition from "./openapi.json";
+import type * as types from './types';
+import type { ConfigOptions, FetchResponse } from 'api/dist/core'
+import Oas from 'oas';
+import APICore from 'api/dist/core';
+import definition from './openapi.json';
 
 class SDK {
   spec: Oas;
@@ -10,7 +10,7 @@ class SDK {
 
   constructor() {
     this.spec = Oas.init(definition);
-    this.core = new APICore(this.spec, "pscale/v1 (api/6.1.1)");
+    this.core = new APICore(this.spec, 'pscale/v1 (api/6.1.1)');
   }
 
   /**
@@ -89,10 +89,8 @@ class SDK {
    *
    * @summary List organizations
    */
-  listOrganizations(
-    metadata?: types.ListOrganizationsMetadataParam,
-  ): Promise<FetchResponse<200, types.ListOrganizationsResponse200>> {
-    return this.core.fetch("/organizations", "get", metadata);
+  listOrganizations(metadata?: types.ListOrganizationsMetadataParam): Promise<FetchResponse<200, types.ListOrganizationsResponse200>> {
+    return this.core.fetch('/organizations', 'get', metadata);
   }
 
   /**
@@ -112,10 +110,8 @@ class SDK {
    *
    * @summary Get an organization
    */
-  getAnOrganization(
-    metadata: types.GetAnOrganizationMetadataParam,
-  ): Promise<FetchResponse<200, types.GetAnOrganizationResponse200>> {
-    return this.core.fetch("/organizations/{name}", "get", metadata);
+  getAnOrganization(metadata: types.GetAnOrganizationMetadataParam): Promise<FetchResponse<200, types.GetAnOrganizationResponse200>> {
+    return this.core.fetch('/organizations/{name}', 'get', metadata);
   }
 
   /**
@@ -131,18 +127,10 @@ class SDK {
    *
    * @summary Update an organization
    */
-  updateAnOrganization(
-    body: types.UpdateAnOrganizationBodyParam,
-    metadata: types.UpdateAnOrganizationMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateAnOrganizationResponse200>>;
-  updateAnOrganization(
-    metadata: types.UpdateAnOrganizationMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateAnOrganizationResponse200>>;
-  updateAnOrganization(
-    body?: types.UpdateAnOrganizationBodyParam | types.UpdateAnOrganizationMetadataParam,
-    metadata?: types.UpdateAnOrganizationMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateAnOrganizationResponse200>> {
-    return this.core.fetch("/organizations/{name}", "patch", body, metadata);
+  updateAnOrganization(body: types.UpdateAnOrganizationBodyParam, metadata: types.UpdateAnOrganizationMetadataParam): Promise<FetchResponse<200, types.UpdateAnOrganizationResponse200>>;
+  updateAnOrganization(metadata: types.UpdateAnOrganizationMetadataParam): Promise<FetchResponse<200, types.UpdateAnOrganizationResponse200>>;
+  updateAnOrganization(body?: types.UpdateAnOrganizationBodyParam | types.UpdateAnOrganizationMetadataParam, metadata?: types.UpdateAnOrganizationMetadataParam): Promise<FetchResponse<200, types.UpdateAnOrganizationResponse200>> {
+    return this.core.fetch('/organizations/{name}', 'patch', body, metadata);
   }
 
   /**
@@ -162,10 +150,8 @@ class SDK {
    *
    * @summary List regions for an organization
    */
-  listRegionsForAnOrganization(
-    metadata: types.ListRegionsForAnOrganizationMetadataParam,
-  ): Promise<FetchResponse<200, types.ListRegionsForAnOrganizationResponse200>> {
-    return this.core.fetch("/organizations/{name}/regions", "get", metadata);
+  listRegionsForAnOrganization(metadata: types.ListRegionsForAnOrganizationMetadataParam): Promise<FetchResponse<200, types.ListRegionsForAnOrganizationResponse200>> {
+    return this.core.fetch('/organizations/{name}/regions', 'get', metadata);
   }
 
   /**
@@ -178,9 +164,9 @@ class SDK {
    * `create_branch`, `delete_production_branch`, `connect_branch`,
    * `connect_production_branch`, `delete_branch_password`,
    * `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`,
-   * `approve_deploy_request`, `read_comment`, `create_comment`, `restore_backup`,
-   * `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`,
-   * `delete_production_branch_backups`
+   * `approve_deploy_request`, `read_schema_recommendations`, `close_schema_recommendations`,
+   * `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`,
+   * `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`
    *
    * **OAuth Scopes**
    *
@@ -190,10 +176,8 @@ class SDK {
    *
    * @summary List databases
    */
-  listDatabases(
-    metadata: types.ListDatabasesMetadataParam,
-  ): Promise<FetchResponse<200, types.ListDatabasesResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases", "get", metadata);
+  listDatabases(metadata: types.ListDatabasesMetadataParam): Promise<FetchResponse<200, types.ListDatabasesResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases', 'get', metadata);
   }
 
   /**
@@ -212,11 +196,8 @@ class SDK {
    *
    * @summary Create a database
    */
-  createADatabase(
-    body: types.CreateADatabaseBodyParam,
-    metadata: types.CreateADatabaseMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateADatabaseResponse201>> {
-    return this.core.fetch("/organizations/{organization}/databases", "post", body, metadata);
+  createADatabase(body: types.CreateADatabaseBodyParam, metadata: types.CreateADatabaseMetadataParam): Promise<FetchResponse<201, types.CreateADatabaseResponse201>> {
+    return this.core.fetch('/organizations/{organization}/databases', 'post', body, metadata);
   }
 
   /**
@@ -239,7 +220,7 @@ class SDK {
    * @summary List branches
    */
   listBranches(metadata: types.ListBranchesMetadataParam): Promise<FetchResponse<200, types.ListBranchesResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases/{database}/branches", "get", metadata);
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches', 'get', metadata);
   }
 
   /**
@@ -261,11 +242,8 @@ class SDK {
    *
    * @summary Create a branch
    */
-  createABranch(
-    body: types.CreateABranchBodyParam,
-    metadata: types.CreateABranchMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateABranchResponse201>> {
-    return this.core.fetch("/organizations/{organization}/databases/{database}/branches", "post", body, metadata);
+  createABranch(body: types.CreateABranchBodyParam, metadata: types.CreateABranchMetadataParam): Promise<FetchResponse<201, types.CreateABranchResponse201>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches', 'post', body, metadata);
   }
 
   /**
@@ -287,11 +265,7 @@ class SDK {
    * @summary List backups
    */
   listBackups(metadata: types.ListBackupsMetadataParam): Promise<FetchResponse<200, types.ListBackupsResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/backups",
-      "get",
-      metadata,
-    );
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/backups', 'get', metadata);
   }
 
   /**
@@ -312,23 +286,10 @@ class SDK {
    *
    * @summary Create a backup
    */
-  createABackup(
-    body: types.CreateABackupBodyParam,
-    metadata: types.CreateABackupMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateABackupResponse201>>;
-  createABackup(
-    metadata: types.CreateABackupMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateABackupResponse201>>;
-  createABackup(
-    body?: types.CreateABackupBodyParam | types.CreateABackupMetadataParam,
-    metadata?: types.CreateABackupMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateABackupResponse201>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/backups",
-      "post",
-      body,
-      metadata,
-    );
+  createABackup(body: types.CreateABackupBodyParam, metadata: types.CreateABackupMetadataParam): Promise<FetchResponse<201, types.CreateABackupResponse201>>;
+  createABackup(metadata: types.CreateABackupMetadataParam): Promise<FetchResponse<201, types.CreateABackupResponse201>>;
+  createABackup(body?: types.CreateABackupBodyParam | types.CreateABackupMetadataParam, metadata?: types.CreateABackupMetadataParam): Promise<FetchResponse<201, types.CreateABackupResponse201>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/backups', 'post', body, metadata);
   }
 
   /**
@@ -350,11 +311,7 @@ class SDK {
    * @summary Get a backup
    */
   getABackup(metadata: types.GetABackupMetadataParam): Promise<FetchResponse<200, types.GetABackupResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/backups/{id}",
-      "get",
-      metadata,
-    );
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/backups/{id}', 'get', metadata);
   }
 
   /**
@@ -376,11 +333,7 @@ class SDK {
    * @summary Delete a backup
    */
   deleteABackup(metadata: types.DeleteABackupMetadataParam): Promise<FetchResponse<number, unknown>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/backups/{id}",
-      "delete",
-      metadata,
-    );
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/backups/{id}', 'delete', metadata);
   }
 
   /**
@@ -402,14 +355,8 @@ class SDK {
    *
    * @summary List passwords
    */
-  listPasswords(
-    metadata: types.ListPasswordsMetadataParam,
-  ): Promise<FetchResponse<200, types.ListPasswordsResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/passwords",
-      "get",
-      metadata,
-    );
+  listPasswords(metadata: types.ListPasswordsMetadataParam): Promise<FetchResponse<200, types.ListPasswordsResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/passwords', 'get', metadata);
   }
 
   /**
@@ -430,23 +377,10 @@ class SDK {
    *
    * @summary Create a password
    */
-  createAPassword(
-    body: types.CreateAPasswordBodyParam,
-    metadata: types.CreateAPasswordMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateAPasswordResponse201>>;
-  createAPassword(
-    metadata: types.CreateAPasswordMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateAPasswordResponse201>>;
-  createAPassword(
-    body?: types.CreateAPasswordBodyParam | types.CreateAPasswordMetadataParam,
-    metadata?: types.CreateAPasswordMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateAPasswordResponse201>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/passwords",
-      "post",
-      body,
-      metadata,
-    );
+  createAPassword(body: types.CreateAPasswordBodyParam, metadata: types.CreateAPasswordMetadataParam): Promise<FetchResponse<201, types.CreateAPasswordResponse201>>;
+  createAPassword(metadata: types.CreateAPasswordMetadataParam): Promise<FetchResponse<201, types.CreateAPasswordResponse201>>;
+  createAPassword(body?: types.CreateAPasswordBodyParam | types.CreateAPasswordMetadataParam, metadata?: types.CreateAPasswordMetadataParam): Promise<FetchResponse<201, types.CreateAPasswordResponse201>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/passwords', 'post', body, metadata);
   }
 
   /**
@@ -469,11 +403,7 @@ class SDK {
    * @summary Get a password
    */
   getAPassword(metadata: types.GetAPasswordMetadataParam): Promise<FetchResponse<200, types.GetAPasswordResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}",
-      "get",
-      metadata,
-    );
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}', 'get', metadata);
   }
 
   /**
@@ -494,16 +424,8 @@ class SDK {
    *
    * @summary Update a password
    */
-  updateAPassword(
-    body: types.UpdateAPasswordBodyParam,
-    metadata: types.UpdateAPasswordMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateAPasswordResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}",
-      "patch",
-      body,
-      metadata,
-    );
+  updateAPassword(body: types.UpdateAPasswordBodyParam, metadata: types.UpdateAPasswordMetadataParam): Promise<FetchResponse<200, types.UpdateAPasswordResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}', 'patch', body, metadata);
   }
 
   /**
@@ -525,11 +447,7 @@ class SDK {
    * @summary Delete a password
    */
   deleteAPassword(metadata: types.DeleteAPasswordMetadataParam): Promise<FetchResponse<number, unknown>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}",
-      "delete",
-      metadata,
-    );
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}', 'delete', metadata);
   }
 
   /**
@@ -550,14 +468,8 @@ class SDK {
    *
    * @summary Renew a password
    */
-  renewAPassword(
-    metadata: types.RenewAPasswordMetadataParam,
-  ): Promise<FetchResponse<200, types.RenewAPasswordResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}/renew",
-      "post",
-      metadata,
-    );
+  renewAPassword(metadata: types.RenewAPasswordMetadataParam): Promise<FetchResponse<200, types.RenewAPasswordResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}/renew', 'post', metadata);
   }
 
   /**
@@ -580,7 +492,7 @@ class SDK {
    * @summary Get a branch
    */
   getABranch(metadata: types.GetABranchMetadataParam): Promise<FetchResponse<200, types.GetABranchResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases/{database}/branches/{name}", "get", metadata);
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{name}', 'get', metadata);
   }
 
   /**
@@ -602,7 +514,7 @@ class SDK {
    * @summary Delete a branch
    */
   deleteABranch(metadata: types.DeleteABranchMetadataParam): Promise<FetchResponse<number, unknown>> {
-    return this.core.fetch("/organizations/{organization}/databases/{database}/branches/{name}", "delete", metadata);
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{name}', 'delete', metadata);
   }
 
   /**
@@ -620,14 +532,8 @@ class SDK {
    *
    * @summary Demote a branch
    */
-  demoteABranch(
-    metadata: types.DemoteABranchMetadataParam,
-  ): Promise<FetchResponse<200, types.DemoteABranchResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{name}/demote",
-      "post",
-      metadata,
-    );
+  demoteABranch(metadata: types.DemoteABranchMetadataParam): Promise<FetchResponse<200, types.DemoteABranchResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{name}/demote', 'post', metadata);
   }
 
   /**
@@ -648,14 +554,8 @@ class SDK {
    *
    * @summary Promote a branch
    */
-  promoteABranch(
-    metadata: types.PromoteABranchMetadataParam,
-  ): Promise<FetchResponse<200, types.PromoteABranchResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{name}/promote",
-      "post",
-      metadata,
-    );
+  promoteABranch(metadata: types.PromoteABranchMetadataParam): Promise<FetchResponse<200, types.PromoteABranchResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{name}/promote', 'post', metadata);
   }
 
   /**
@@ -663,14 +563,8 @@ class SDK {
    *
    * @summary Enable safe migrations for a branch
    */
-  enableSafeMigrationsForABranch(
-    metadata: types.EnableSafeMigrationsForABranchMetadataParam,
-  ): Promise<FetchResponse<200, types.EnableSafeMigrationsForABranchResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{name}/safe-migrations",
-      "post",
-      metadata,
-    );
+  enableSafeMigrationsForABranch(metadata: types.EnableSafeMigrationsForABranchMetadataParam): Promise<FetchResponse<200, types.EnableSafeMigrationsForABranchResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{name}/safe-migrations', 'post', metadata);
   }
 
   /**
@@ -678,14 +572,8 @@ class SDK {
    *
    * @summary Disable safe migrations for a branch
    */
-  disableSafeMigrationsForABranch(
-    metadata: types.DisableSafeMigrationsForABranchMetadataParam,
-  ): Promise<FetchResponse<200, types.DisableSafeMigrationsForABranchResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{name}/safe-migrations",
-      "delete",
-      metadata,
-    );
+  disableSafeMigrationsForABranch(metadata: types.DisableSafeMigrationsForABranchMetadataParam): Promise<FetchResponse<200, types.DisableSafeMigrationsForABranchResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{name}/safe-migrations', 'delete', metadata);
   }
 
   /**
@@ -707,14 +595,8 @@ class SDK {
    *
    * @summary Get a branch schema
    */
-  getABranchSchema(
-    metadata: types.GetABranchSchemaMetadataParam,
-  ): Promise<FetchResponse<200, types.GetABranchSchemaResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{name}/schema",
-      "get",
-      metadata,
-    );
+  getABranchSchema(metadata: types.GetABranchSchemaMetadataParam): Promise<FetchResponse<200, types.GetABranchSchemaResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{name}/schema', 'get', metadata);
   }
 
   /**
@@ -736,14 +618,8 @@ class SDK {
    *
    * @summary Lint a branch schema
    */
-  lintABranchSchema(
-    metadata: types.LintABranchSchemaMetadataParam,
-  ): Promise<FetchResponse<200, types.LintABranchSchemaResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/branches/{name}/schema/lint",
-      "get",
-      metadata,
-    );
+  lintABranchSchema(metadata: types.LintABranchSchemaMetadataParam): Promise<FetchResponse<200, types.LintABranchSchemaResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/branches/{name}/schema/lint', 'get', metadata);
   }
 
   /**
@@ -753,10 +629,8 @@ class SDK {
    *
    * @summary Get the deploy queue
    */
-  getTheDeployQueue(
-    metadata: types.GetTheDeployQueueMetadataParam,
-  ): Promise<FetchResponse<200, types.GetTheDeployQueueResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases/{database}/deploy-queue", "get", metadata);
+  getTheDeployQueue(metadata: types.GetTheDeployQueueMetadataParam): Promise<FetchResponse<200, types.GetTheDeployQueueResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-queue', 'get', metadata);
   }
 
   /**
@@ -777,10 +651,8 @@ class SDK {
    *
    * @summary List deploy requests
    */
-  listDeployRequests(
-    metadata: types.ListDeployRequestsMetadataParam,
-  ): Promise<FetchResponse<200, types.ListDeployRequestsResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases/{database}/deploy-requests", "get", metadata);
+  listDeployRequests(metadata: types.ListDeployRequestsMetadataParam): Promise<FetchResponse<200, types.ListDeployRequestsResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests', 'get', metadata);
   }
 
   /**
@@ -800,23 +672,10 @@ class SDK {
    *
    * @summary Create a deploy request
    */
-  createADeployRequest(
-    body: types.CreateADeployRequestBodyParam,
-    metadata: types.CreateADeployRequestMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateADeployRequestResponse201>>;
-  createADeployRequest(
-    metadata: types.CreateADeployRequestMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateADeployRequestResponse201>>;
-  createADeployRequest(
-    body?: types.CreateADeployRequestBodyParam | types.CreateADeployRequestMetadataParam,
-    metadata?: types.CreateADeployRequestMetadataParam,
-  ): Promise<FetchResponse<201, types.CreateADeployRequestResponse201>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests",
-      "post",
-      body,
-      metadata,
-    );
+  createADeployRequest(body: types.CreateADeployRequestBodyParam, metadata: types.CreateADeployRequestMetadataParam): Promise<FetchResponse<201, types.CreateADeployRequestResponse201>>;
+  createADeployRequest(metadata: types.CreateADeployRequestMetadataParam): Promise<FetchResponse<201, types.CreateADeployRequestResponse201>>;
+  createADeployRequest(body?: types.CreateADeployRequestBodyParam | types.CreateADeployRequestMetadataParam, metadata?: types.CreateADeployRequestMetadataParam): Promise<FetchResponse<201, types.CreateADeployRequestResponse201>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests', 'post', body, metadata);
   }
 
   /**
@@ -836,14 +695,8 @@ class SDK {
    *
    * @summary Get a deploy request
    */
-  getADeployRequest(
-    metadata: types.GetADeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.GetADeployRequestResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}",
-      "get",
-      metadata,
-    );
+  getADeployRequest(metadata: types.GetADeployRequestMetadataParam): Promise<FetchResponse<200, types.GetADeployRequestResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}', 'get', metadata);
   }
 
   /**
@@ -863,23 +716,10 @@ class SDK {
    *
    * @summary Close a deploy request
    */
-  closeADeployRequest(
-    body: types.CloseADeployRequestBodyParam,
-    metadata: types.CloseADeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.CloseADeployRequestResponse200>>;
-  closeADeployRequest(
-    metadata: types.CloseADeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.CloseADeployRequestResponse200>>;
-  closeADeployRequest(
-    body?: types.CloseADeployRequestBodyParam | types.CloseADeployRequestMetadataParam,
-    metadata?: types.CloseADeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.CloseADeployRequestResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}",
-      "patch",
-      body,
-      metadata,
-    );
+  closeADeployRequest(body: types.CloseADeployRequestBodyParam, metadata: types.CloseADeployRequestMetadataParam): Promise<FetchResponse<200, types.CloseADeployRequestResponse200>>;
+  closeADeployRequest(metadata: types.CloseADeployRequestMetadataParam): Promise<FetchResponse<200, types.CloseADeployRequestResponse200>>;
+  closeADeployRequest(body?: types.CloseADeployRequestBodyParam | types.CloseADeployRequestMetadataParam, metadata?: types.CloseADeployRequestMetadataParam): Promise<FetchResponse<200, types.CloseADeployRequestResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}', 'patch', body, metadata);
   }
 
   /**
@@ -899,14 +739,8 @@ class SDK {
    *
    * @summary Complete a gated deploy request
    */
-  completeAGatedDeployRequest(
-    metadata: types.CompleteAGatedDeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.CompleteAGatedDeployRequestResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/apply-deploy",
-      "post",
-      metadata,
-    );
+  completeAGatedDeployRequest(metadata: types.CompleteAGatedDeployRequestMetadataParam): Promise<FetchResponse<200, types.CompleteAGatedDeployRequestResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/apply-deploy', 'post', metadata);
   }
 
   /**
@@ -927,23 +761,10 @@ class SDK {
    *
    * @summary Update auto-apply for deploy request
    */
-  updateAutoApplyForDeployRequest(
-    body: types.UpdateAutoApplyForDeployRequestBodyParam,
-    metadata: types.UpdateAutoApplyForDeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateAutoApplyForDeployRequestResponse200>>;
-  updateAutoApplyForDeployRequest(
-    metadata: types.UpdateAutoApplyForDeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateAutoApplyForDeployRequestResponse200>>;
-  updateAutoApplyForDeployRequest(
-    body?: types.UpdateAutoApplyForDeployRequestBodyParam | types.UpdateAutoApplyForDeployRequestMetadataParam,
-    metadata?: types.UpdateAutoApplyForDeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateAutoApplyForDeployRequestResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/auto-apply",
-      "put",
-      body,
-      metadata,
-    );
+  updateAutoApplyForDeployRequest(body: types.UpdateAutoApplyForDeployRequestBodyParam, metadata: types.UpdateAutoApplyForDeployRequestMetadataParam): Promise<FetchResponse<200, types.UpdateAutoApplyForDeployRequestResponse200>>;
+  updateAutoApplyForDeployRequest(metadata: types.UpdateAutoApplyForDeployRequestMetadataParam): Promise<FetchResponse<200, types.UpdateAutoApplyForDeployRequestResponse200>>;
+  updateAutoApplyForDeployRequest(body?: types.UpdateAutoApplyForDeployRequestBodyParam | types.UpdateAutoApplyForDeployRequestMetadataParam, metadata?: types.UpdateAutoApplyForDeployRequestMetadataParam): Promise<FetchResponse<200, types.UpdateAutoApplyForDeployRequestResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/auto-apply', 'put', body, metadata);
   }
 
   /**
@@ -963,14 +784,8 @@ class SDK {
    *
    * @summary Cancel a queued deploy request
    */
-  cancelAQueuedDeployRequest(
-    metadata: types.CancelAQueuedDeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.CancelAQueuedDeployRequestResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/cancel",
-      "post",
-      metadata,
-    );
+  cancelAQueuedDeployRequest(metadata: types.CancelAQueuedDeployRequestMetadataParam): Promise<FetchResponse<200, types.CancelAQueuedDeployRequestResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/cancel', 'post', metadata);
   }
 
   /**
@@ -990,14 +805,8 @@ class SDK {
    *
    * @summary Complete an errored deploy
    */
-  completeAnErroredDeploy(
-    metadata: types.CompleteAnErroredDeployMetadataParam,
-  ): Promise<FetchResponse<200, types.CompleteAnErroredDeployResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/complete-deploy",
-      "post",
-      metadata,
-    );
+  completeAnErroredDeploy(metadata: types.CompleteAnErroredDeployMetadataParam): Promise<FetchResponse<200, types.CompleteAnErroredDeployResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/complete-deploy', 'post', metadata);
   }
 
   /**
@@ -1017,14 +826,8 @@ class SDK {
    *
    * @summary Queue a deploy request
    */
-  queueADeployRequest(
-    metadata: types.QueueADeployRequestMetadataParam,
-  ): Promise<FetchResponse<200, types.QueueADeployRequestResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/deploy",
-      "post",
-      metadata,
-    );
+  queueADeployRequest(metadata: types.QueueADeployRequestMetadataParam): Promise<FetchResponse<200, types.QueueADeployRequestResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/deploy', 'post', metadata);
   }
 
   /**
@@ -1045,14 +848,8 @@ class SDK {
    *
    * @summary Get a deployment
    */
-  getADeployment(
-    metadata: types.GetADeploymentMetadataParam,
-  ): Promise<FetchResponse<200, types.GetADeploymentResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/deployment",
-      "get",
-      metadata,
-    );
+  getADeployment(metadata: types.GetADeploymentMetadataParam): Promise<FetchResponse<200, types.GetADeploymentResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/deployment', 'get', metadata);
   }
 
   /**
@@ -1073,14 +870,8 @@ class SDK {
    *
    * @summary List deploy operations
    */
-  listDeployOperations(
-    metadata: types.ListDeployOperationsMetadataParam,
-  ): Promise<FetchResponse<200, types.ListDeployOperationsResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/operations",
-      "get",
-      metadata,
-    );
+  listDeployOperations(metadata: types.ListDeployOperationsMetadataParam): Promise<FetchResponse<200, types.ListDeployOperationsResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/operations', 'get', metadata);
   }
 
   /**
@@ -1100,14 +891,8 @@ class SDK {
    *
    * @summary Complete a revert
    */
-  completeARevert(
-    metadata: types.CompleteARevertMetadataParam,
-  ): Promise<FetchResponse<200, types.CompleteARevertResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/revert",
-      "post",
-      metadata,
-    );
+  completeARevert(metadata: types.CompleteARevertMetadataParam): Promise<FetchResponse<200, types.CompleteARevertResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/revert', 'post', metadata);
   }
 
   /**
@@ -1127,14 +912,8 @@ class SDK {
    *
    * @summary List deploy request reviews
    */
-  listDeployRequestReviews(
-    metadata: types.ListDeployRequestReviewsMetadataParam,
-  ): Promise<FetchResponse<200, types.ListDeployRequestReviewsResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/reviews",
-      "get",
-      metadata,
-    );
+  listDeployRequestReviews(metadata: types.ListDeployRequestReviewsMetadataParam): Promise<FetchResponse<200, types.ListDeployRequestReviewsResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/reviews', 'get', metadata);
   }
 
   /**
@@ -1155,23 +934,10 @@ class SDK {
    *
    * @summary Review a deploy request
    */
-  reviewADeployRequest(
-    body: types.ReviewADeployRequestBodyParam,
-    metadata: types.ReviewADeployRequestMetadataParam,
-  ): Promise<FetchResponse<201, types.ReviewADeployRequestResponse201>>;
-  reviewADeployRequest(
-    metadata: types.ReviewADeployRequestMetadataParam,
-  ): Promise<FetchResponse<201, types.ReviewADeployRequestResponse201>>;
-  reviewADeployRequest(
-    body?: types.ReviewADeployRequestBodyParam | types.ReviewADeployRequestMetadataParam,
-    metadata?: types.ReviewADeployRequestMetadataParam,
-  ): Promise<FetchResponse<201, types.ReviewADeployRequestResponse201>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/reviews",
-      "post",
-      body,
-      metadata,
-    );
+  reviewADeployRequest(body: types.ReviewADeployRequestBodyParam, metadata: types.ReviewADeployRequestMetadataParam): Promise<FetchResponse<201, types.ReviewADeployRequestResponse201>>;
+  reviewADeployRequest(metadata: types.ReviewADeployRequestMetadataParam): Promise<FetchResponse<201, types.ReviewADeployRequestResponse201>>;
+  reviewADeployRequest(body?: types.ReviewADeployRequestBodyParam | types.ReviewADeployRequestMetadataParam, metadata?: types.ReviewADeployRequestMetadataParam): Promise<FetchResponse<201, types.ReviewADeployRequestResponse201>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/reviews', 'post', body, metadata);
   }
 
   /**
@@ -1192,14 +958,8 @@ class SDK {
    *
    * @summary Skip revert period
    */
-  skipRevertPeriod(
-    metadata: types.SkipRevertPeriodMetadataParam,
-  ): Promise<FetchResponse<200, types.SkipRevertPeriodResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/databases/{database}/deploy-requests/{number}/skip-revert",
-      "post",
-      metadata,
-    );
+  skipRevertPeriod(metadata: types.SkipRevertPeriodMetadataParam): Promise<FetchResponse<200, types.SkipRevertPeriodResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{database}/deploy-requests/{number}/skip-revert', 'post', metadata);
   }
 
   /**
@@ -1212,9 +972,9 @@ class SDK {
    * `create_branch`, `delete_production_branch`, `connect_branch`,
    * `connect_production_branch`, `delete_branch_password`,
    * `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`,
-   * `approve_deploy_request`, `read_comment`, `create_comment`, `restore_backup`,
-   * `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`,
-   * `delete_production_branch_backups`
+   * `approve_deploy_request`, `read_schema_recommendations`, `close_schema_recommendations`,
+   * `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`,
+   * `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`
    *
    * **OAuth Scopes**
    *
@@ -1226,7 +986,7 @@ class SDK {
    * @summary Get a database
    */
   getADatabase(metadata: types.GetADatabaseMetadataParam): Promise<FetchResponse<200, types.GetADatabaseResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases/{name}", "get", metadata);
+    return this.core.fetch('/organizations/{organization}/databases/{name}', 'get', metadata);
   }
 
   /**
@@ -1246,18 +1006,10 @@ class SDK {
    *
    * @summary Update database settings
    */
-  updateDatabaseSettings(
-    body: types.UpdateDatabaseSettingsBodyParam,
-    metadata: types.UpdateDatabaseSettingsMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateDatabaseSettingsResponse200>>;
-  updateDatabaseSettings(
-    metadata: types.UpdateDatabaseSettingsMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateDatabaseSettingsResponse200>>;
-  updateDatabaseSettings(
-    body?: types.UpdateDatabaseSettingsBodyParam | types.UpdateDatabaseSettingsMetadataParam,
-    metadata?: types.UpdateDatabaseSettingsMetadataParam,
-  ): Promise<FetchResponse<200, types.UpdateDatabaseSettingsResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases/{name}", "patch", body, metadata);
+  updateDatabaseSettings(body: types.UpdateDatabaseSettingsBodyParam, metadata: types.UpdateDatabaseSettingsMetadataParam): Promise<FetchResponse<200, types.UpdateDatabaseSettingsResponse200>>;
+  updateDatabaseSettings(metadata: types.UpdateDatabaseSettingsMetadataParam): Promise<FetchResponse<200, types.UpdateDatabaseSettingsResponse200>>;
+  updateDatabaseSettings(body?: types.UpdateDatabaseSettingsBodyParam | types.UpdateDatabaseSettingsMetadataParam, metadata?: types.UpdateDatabaseSettingsMetadataParam): Promise<FetchResponse<200, types.UpdateDatabaseSettingsResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{name}', 'patch', body, metadata);
   }
 
   /**
@@ -1278,7 +1030,7 @@ class SDK {
    * @summary Delete a database
    */
   deleteADatabase(metadata: types.DeleteADatabaseMetadataParam): Promise<FetchResponse<number, unknown>> {
-    return this.core.fetch("/organizations/{organization}/databases/{name}", "delete", metadata);
+    return this.core.fetch('/organizations/{organization}/databases/{name}', 'delete', metadata);
   }
 
   /**
@@ -1292,9 +1044,9 @@ class SDK {
    * `create_branch`, `delete_production_branch`, `connect_branch`,
    * `connect_production_branch`, `delete_branch_password`,
    * `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`,
-   * `approve_deploy_request`, `read_comment`, `create_comment`, `restore_backup`,
-   * `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`,
-   * `delete_production_branch_backups`
+   * `approve_deploy_request`, `read_schema_recommendations`, `close_schema_recommendations`,
+   * `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`,
+   * `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`
    *
    * **OAuth Scopes**
    *
@@ -1305,10 +1057,8 @@ class SDK {
    *
    * @summary List read-only regions
    */
-  listReadOnlyRegions(
-    metadata: types.ListReadOnlyRegionsMetadataParam,
-  ): Promise<FetchResponse<200, types.ListReadOnlyRegionsResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases/{name}/read-only-regions", "get", metadata);
+  listReadOnlyRegions(metadata: types.ListReadOnlyRegionsMetadataParam): Promise<FetchResponse<200, types.ListReadOnlyRegionsResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{name}/read-only-regions', 'get', metadata);
   }
 
   /**
@@ -1321,9 +1071,9 @@ class SDK {
    * `create_branch`, `delete_production_branch`, `connect_branch`,
    * `connect_production_branch`, `delete_branch_password`,
    * `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`,
-   * `approve_deploy_request`, `read_comment`, `create_comment`, `restore_backup`,
-   * `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`,
-   * `delete_production_branch_backups`
+   * `approve_deploy_request`, `read_schema_recommendations`, `close_schema_recommendations`,
+   * `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`,
+   * `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`
    *
    * **OAuth Scopes**
    *
@@ -1334,10 +1084,8 @@ class SDK {
    *
    * @summary List database regions
    */
-  listDatabaseRegions(
-    metadata: types.ListDatabaseRegionsMetadataParam,
-  ): Promise<FetchResponse<200, types.ListDatabaseRegionsResponse200>> {
-    return this.core.fetch("/organizations/{organization}/databases/{name}/regions", "get", metadata);
+  listDatabaseRegions(metadata: types.ListDatabaseRegionsMetadataParam): Promise<FetchResponse<200, types.ListDatabaseRegionsResponse200>> {
+    return this.core.fetch('/organizations/{organization}/databases/{name}/regions', 'get', metadata);
   }
 
   /**
@@ -1352,10 +1100,8 @@ class SDK {
    *
    * @summary List OAuth applications
    */
-  listOauthApplications(
-    metadata: types.ListOauthApplicationsMetadataParam,
-  ): Promise<FetchResponse<200, types.ListOauthApplicationsResponse200>> {
-    return this.core.fetch("/organizations/{organization}/oauth-applications", "get", metadata);
+  listOauthApplications(metadata: types.ListOauthApplicationsMetadataParam): Promise<FetchResponse<200, types.ListOauthApplicationsResponse200>> {
+    return this.core.fetch('/organizations/{organization}/oauth-applications', 'get', metadata);
   }
 
   /**
@@ -1370,10 +1116,8 @@ class SDK {
    *
    * @summary Get an OAuth application
    */
-  getAnOauthApplication(
-    metadata: types.GetAnOauthApplicationMetadataParam,
-  ): Promise<FetchResponse<200, types.GetAnOauthApplicationResponse200>> {
-    return this.core.fetch("/organizations/{organization}/oauth-applications/{application_id}", "get", metadata);
+  getAnOauthApplication(metadata: types.GetAnOauthApplicationMetadataParam): Promise<FetchResponse<200, types.GetAnOauthApplicationResponse200>> {
+    return this.core.fetch('/organizations/{organization}/oauth-applications/{application_id}', 'get', metadata);
   }
 
   /**
@@ -1389,10 +1133,8 @@ class SDK {
    *
    * @summary List OAuth tokens
    */
-  listOauthTokens(
-    metadata: types.ListOauthTokensMetadataParam,
-  ): Promise<FetchResponse<200, types.ListOauthTokensResponse200>> {
-    return this.core.fetch("/organizations/{organization}/oauth-applications/{application_id}/tokens", "get", metadata);
+  listOauthTokens(metadata: types.ListOauthTokensMetadataParam): Promise<FetchResponse<200, types.ListOauthTokensResponse200>> {
+    return this.core.fetch('/organizations/{organization}/oauth-applications/{application_id}/tokens', 'get', metadata);
   }
 
   /**
@@ -1407,14 +1149,8 @@ class SDK {
    *
    * @summary Get an OAuth token
    */
-  getAnOauthToken(
-    metadata: types.GetAnOauthTokenMetadataParam,
-  ): Promise<FetchResponse<200, types.GetAnOauthTokenResponse200>> {
-    return this.core.fetch(
-      "/organizations/{organization}/oauth-applications/{application_id}/tokens/{token_id}",
-      "get",
-      metadata,
-    );
+  getAnOauthToken(metadata: types.GetAnOauthTokenMetadataParam): Promise<FetchResponse<200, types.GetAnOauthTokenResponse200>> {
+    return this.core.fetch('/organizations/{organization}/oauth-applications/{application_id}/tokens/{token_id}', 'get', metadata);
   }
 
   /**
@@ -1430,11 +1166,7 @@ class SDK {
    * @summary Delete an OAuth token
    */
   deleteAnOauthToken(metadata: types.DeleteAnOauthTokenMetadataParam): Promise<FetchResponse<number, unknown>> {
-    return this.core.fetch(
-      "/organizations/{organization}/oauth-applications/{application_id}/tokens/{token_id}",
-      "delete",
-      metadata,
-    );
+    return this.core.fetch('/organizations/{organization}/oauth-applications/{application_id}/tokens/{token_id}', 'delete', metadata);
   }
 
   /**
@@ -1451,11 +1183,18 @@ class SDK {
    *
    * @summary Create or renew an OAuth token
    */
-  createOrRenewAnOauthToken(
-    body: types.CreateOrRenewAnOauthTokenBodyParam,
-    metadata: types.CreateOrRenewAnOauthTokenMetadataParam,
-  ): Promise<FetchResponse<200, types.CreateOrRenewAnOauthTokenResponse200>> {
-    return this.core.fetch("/organizations/{organization}/oauth-applications/{id}/token", "post", body, metadata);
+  createOrRenewAnOauthToken(body: types.CreateOrRenewAnOauthTokenBodyParam, metadata: types.CreateOrRenewAnOauthTokenMetadataParam): Promise<FetchResponse<200, types.CreateOrRenewAnOauthTokenResponse200>> {
+    return this.core.fetch('/organizations/{organization}/oauth-applications/{id}/token', 'post', body, metadata);
+  }
+
+  /**
+   * Endpoint is available without authentication.
+   *
+   *
+   * @summary List public regions
+   */
+  listPublicRegions(metadata?: types.ListPublicRegionsMetadataParam): Promise<FetchResponse<200, types.ListPublicRegionsResponse200>> {
+    return this.core.fetch('/regions', 'get', metadata);
   }
 
   /**
@@ -1473,128 +1212,13 @@ class SDK {
    * @summary Get current user
    */
   getCurrentUser(): Promise<FetchResponse<200, types.GetCurrentUserResponse200>> {
-    return this.core.fetch("/user", "get");
+    return this.core.fetch('/user', 'get');
   }
 }
 
-const createSDK = (() => {
-  return new SDK();
-})();
+const createSDK = (() => { return new SDK(); })()
+;
+
 export default createSDK;
 
-export type {
-  CancelAQueuedDeployRequestMetadataParam,
-  CancelAQueuedDeployRequestResponse200,
-  CloseADeployRequestBodyParam,
-  CloseADeployRequestMetadataParam,
-  CloseADeployRequestResponse200,
-  CompleteAGatedDeployRequestMetadataParam,
-  CompleteAGatedDeployRequestResponse200,
-  CompleteARevertMetadataParam,
-  CompleteARevertResponse200,
-  CompleteAnErroredDeployMetadataParam,
-  CompleteAnErroredDeployResponse200,
-  CreateABackupBodyParam,
-  CreateABackupMetadataParam,
-  CreateABackupResponse201,
-  CreateABranchBodyParam,
-  CreateABranchMetadataParam,
-  CreateABranchResponse201,
-  CreateADatabaseBodyParam,
-  CreateADatabaseMetadataParam,
-  CreateADatabaseResponse201,
-  CreateADeployRequestBodyParam,
-  CreateADeployRequestMetadataParam,
-  CreateADeployRequestResponse201,
-  CreateAPasswordBodyParam,
-  CreateAPasswordMetadataParam,
-  CreateAPasswordResponse201,
-  CreateOrRenewAnOauthTokenBodyParam,
-  CreateOrRenewAnOauthTokenMetadataParam,
-  CreateOrRenewAnOauthTokenResponse200,
-  DeleteABackupMetadataParam,
-  DeleteABranchMetadataParam,
-  DeleteADatabaseMetadataParam,
-  DeleteAPasswordMetadataParam,
-  DeleteAnOauthTokenMetadataParam,
-  DemoteABranchMetadataParam,
-  DemoteABranchResponse200,
-  DisableSafeMigrationsForABranchMetadataParam,
-  DisableSafeMigrationsForABranchResponse200,
-  EnableSafeMigrationsForABranchMetadataParam,
-  EnableSafeMigrationsForABranchResponse200,
-  GetABackupMetadataParam,
-  GetABackupResponse200,
-  GetABranchMetadataParam,
-  GetABranchResponse200,
-  GetABranchSchemaMetadataParam,
-  GetABranchSchemaResponse200,
-  GetADatabaseMetadataParam,
-  GetADatabaseResponse200,
-  GetADeployRequestMetadataParam,
-  GetADeployRequestResponse200,
-  GetADeploymentMetadataParam,
-  GetADeploymentResponse200,
-  GetAPasswordMetadataParam,
-  GetAPasswordResponse200,
-  GetAnOauthApplicationMetadataParam,
-  GetAnOauthApplicationResponse200,
-  GetAnOauthTokenMetadataParam,
-  GetAnOauthTokenResponse200,
-  GetAnOrganizationMetadataParam,
-  GetAnOrganizationResponse200,
-  GetCurrentUserResponse200,
-  GetTheDeployQueueMetadataParam,
-  GetTheDeployQueueResponse200,
-  LintABranchSchemaMetadataParam,
-  LintABranchSchemaResponse200,
-  ListBackupsMetadataParam,
-  ListBackupsResponse200,
-  ListBranchesMetadataParam,
-  ListBranchesResponse200,
-  ListDatabaseRegionsMetadataParam,
-  ListDatabaseRegionsResponse200,
-  ListDatabasesMetadataParam,
-  ListDatabasesResponse200,
-  ListDeployOperationsMetadataParam,
-  ListDeployOperationsResponse200,
-  ListDeployRequestReviewsMetadataParam,
-  ListDeployRequestReviewsResponse200,
-  ListDeployRequestsMetadataParam,
-  ListDeployRequestsResponse200,
-  ListOauthApplicationsMetadataParam,
-  ListOauthApplicationsResponse200,
-  ListOauthTokensMetadataParam,
-  ListOauthTokensResponse200,
-  ListOrganizationsMetadataParam,
-  ListOrganizationsResponse200,
-  ListPasswordsMetadataParam,
-  ListPasswordsResponse200,
-  ListReadOnlyRegionsMetadataParam,
-  ListReadOnlyRegionsResponse200,
-  ListRegionsForAnOrganizationMetadataParam,
-  ListRegionsForAnOrganizationResponse200,
-  PromoteABranchMetadataParam,
-  PromoteABranchResponse200,
-  QueueADeployRequestMetadataParam,
-  QueueADeployRequestResponse200,
-  RenewAPasswordMetadataParam,
-  RenewAPasswordResponse200,
-  ReviewADeployRequestBodyParam,
-  ReviewADeployRequestMetadataParam,
-  ReviewADeployRequestResponse201,
-  SkipRevertPeriodMetadataParam,
-  SkipRevertPeriodResponse200,
-  UpdateAPasswordBodyParam,
-  UpdateAPasswordMetadataParam,
-  UpdateAPasswordResponse200,
-  UpdateAnOrganizationBodyParam,
-  UpdateAnOrganizationMetadataParam,
-  UpdateAnOrganizationResponse200,
-  UpdateAutoApplyForDeployRequestBodyParam,
-  UpdateAutoApplyForDeployRequestMetadataParam,
-  UpdateAutoApplyForDeployRequestResponse200,
-  UpdateDatabaseSettingsBodyParam,
-  UpdateDatabaseSettingsMetadataParam,
-  UpdateDatabaseSettingsResponse200,
-} from "./types";
+export type { CancelAQueuedDeployRequestMetadataParam, CancelAQueuedDeployRequestResponse200, CloseADeployRequestBodyParam, CloseADeployRequestMetadataParam, CloseADeployRequestResponse200, CompleteAGatedDeployRequestMetadataParam, CompleteAGatedDeployRequestResponse200, CompleteARevertMetadataParam, CompleteARevertResponse200, CompleteAnErroredDeployMetadataParam, CompleteAnErroredDeployResponse200, CreateABackupBodyParam, CreateABackupMetadataParam, CreateABackupResponse201, CreateABranchBodyParam, CreateABranchMetadataParam, CreateABranchResponse201, CreateADatabaseBodyParam, CreateADatabaseMetadataParam, CreateADatabaseResponse201, CreateADeployRequestBodyParam, CreateADeployRequestMetadataParam, CreateADeployRequestResponse201, CreateAPasswordBodyParam, CreateAPasswordMetadataParam, CreateAPasswordResponse201, CreateOrRenewAnOauthTokenBodyParam, CreateOrRenewAnOauthTokenMetadataParam, CreateOrRenewAnOauthTokenResponse200, DeleteABackupMetadataParam, DeleteABranchMetadataParam, DeleteADatabaseMetadataParam, DeleteAPasswordMetadataParam, DeleteAnOauthTokenMetadataParam, DemoteABranchMetadataParam, DemoteABranchResponse200, DisableSafeMigrationsForABranchMetadataParam, DisableSafeMigrationsForABranchResponse200, EnableSafeMigrationsForABranchMetadataParam, EnableSafeMigrationsForABranchResponse200, GetABackupMetadataParam, GetABackupResponse200, GetABranchMetadataParam, GetABranchResponse200, GetABranchSchemaMetadataParam, GetABranchSchemaResponse200, GetADatabaseMetadataParam, GetADatabaseResponse200, GetADeployRequestMetadataParam, GetADeployRequestResponse200, GetADeploymentMetadataParam, GetADeploymentResponse200, GetAPasswordMetadataParam, GetAPasswordResponse200, GetAnOauthApplicationMetadataParam, GetAnOauthApplicationResponse200, GetAnOauthTokenMetadataParam, GetAnOauthTokenResponse200, GetAnOrganizationMetadataParam, GetAnOrganizationResponse200, GetCurrentUserResponse200, GetTheDeployQueueMetadataParam, GetTheDeployQueueResponse200, LintABranchSchemaMetadataParam, LintABranchSchemaResponse200, ListBackupsMetadataParam, ListBackupsResponse200, ListBranchesMetadataParam, ListBranchesResponse200, ListDatabaseRegionsMetadataParam, ListDatabaseRegionsResponse200, ListDatabasesMetadataParam, ListDatabasesResponse200, ListDeployOperationsMetadataParam, ListDeployOperationsResponse200, ListDeployRequestReviewsMetadataParam, ListDeployRequestReviewsResponse200, ListDeployRequestsMetadataParam, ListDeployRequestsResponse200, ListOauthApplicationsMetadataParam, ListOauthApplicationsResponse200, ListOauthTokensMetadataParam, ListOauthTokensResponse200, ListOrganizationsMetadataParam, ListOrganizationsResponse200, ListPasswordsMetadataParam, ListPasswordsResponse200, ListPublicRegionsMetadataParam, ListPublicRegionsResponse200, ListReadOnlyRegionsMetadataParam, ListReadOnlyRegionsResponse200, ListRegionsForAnOrganizationMetadataParam, ListRegionsForAnOrganizationResponse200, PromoteABranchMetadataParam, PromoteABranchResponse200, QueueADeployRequestMetadataParam, QueueADeployRequestResponse200, RenewAPasswordMetadataParam, RenewAPasswordResponse200, ReviewADeployRequestBodyParam, ReviewADeployRequestMetadataParam, ReviewADeployRequestResponse201, SkipRevertPeriodMetadataParam, SkipRevertPeriodResponse200, UpdateAPasswordBodyParam, UpdateAPasswordMetadataParam, UpdateAPasswordResponse200, UpdateAnOrganizationBodyParam, UpdateAnOrganizationMetadataParam, UpdateAnOrganizationResponse200, UpdateAutoApplyForDeployRequestBodyParam, UpdateAutoApplyForDeployRequestMetadataParam, UpdateAutoApplyForDeployRequestResponse200, UpdateDatabaseSettingsBodyParam, UpdateDatabaseSettingsMetadataParam, UpdateDatabaseSettingsResponse200 } from './types';

@@ -2,14 +2,16 @@
   "openapi": "3.0.0",
   "info": {
     "title": "PlanetScale API",
-    "description": "\n<p>PlanetScale API</p>\n&copy; 2023 PlanetScale, Inc.",
+    "description": "\n<p>PlanetScale API</p>\n&copy; 2024 PlanetScale, Inc.",
     "version": "v1",
-    "x-copyright": "&copy; 2023 PlanetScale, Inc."
+    "x-copyright": "&copy; 2024 PlanetScale, Inc."
   },
   "paths": {
     "/organizations": {
       "get": {
-        "tags": ["Organizations"],
+        "tags": [
+          "Organizations"
+        ],
         "operationId": "list-organizations",
         "summary": "List organizations",
         "parameters": [
@@ -105,10 +107,6 @@
                             "type": "number",
                             "description": "The number of sleeping databases in the organization"
                           },
-                          "admin_only_production_access": {
-                            "type": "boolean",
-                            "description": "Whether or not only administrators can access production branches in the organization"
-                          },
                           "sso_portal_url": {
                             "type": "string",
                             "description": "The URL of the organization's SSO portal"
@@ -118,7 +116,10 @@
                             "properties": {
                               "example_flag": {
                                 "type": "string",
-                                "enum": ["full", "on"]
+                                "enum": [
+                                  "full",
+                                  "on"
+                                ]
                               }
                             },
                             "additionalProperties": false
@@ -159,14 +160,15 @@
                           "free_databases_remaining",
                           "database_count",
                           "sleeping_database_count",
-                          "admin_only_production_access",
                           "idp_managed_roles"
                         ]
                       }
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -189,7 +191,9 @@
     },
     "/organizations/{name}": {
       "get": {
-        "tags": ["Organizations"],
+        "tags": [
+          "Organizations"
+        ],
         "operationId": "get-an-organization",
         "summary": "Get an organization",
         "parameters": [
@@ -271,10 +275,6 @@
                       "type": "number",
                       "description": "The number of sleeping databases in the organization"
                     },
-                    "admin_only_production_access": {
-                      "type": "boolean",
-                      "description": "Whether or not only administrators can access production branches in the organization"
-                    },
                     "sso_portal_url": {
                       "type": "string",
                       "description": "The URL of the organization's SSO portal"
@@ -284,7 +284,10 @@
                       "properties": {
                         "example_flag": {
                           "type": "string",
-                          "enum": ["full", "on"]
+                          "enum": [
+                            "full",
+                            "on"
+                          ]
                         }
                       },
                       "additionalProperties": false
@@ -325,7 +328,6 @@
                     "free_databases_remaining",
                     "database_count",
                     "sleeping_database_count",
-                    "admin_only_production_access",
                     "idp_managed_roles"
                   ]
                 }
@@ -348,7 +350,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_organization`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| User | `read_organizations` |\n| Organization | `read_organization` |"
       },
       "patch": {
-        "tags": ["Organizations"],
+        "tags": [
+          "Organizations"
+        ],
         "operationId": "update-an-organization",
         "summary": "Update an organization",
         "parameters": [
@@ -371,10 +375,6 @@
                   "billing_email": {
                     "type": "string",
                     "description": "The billing email for the organization"
-                  },
-                  "require_admin_for_production_access": {
-                    "type": "boolean",
-                    "description": "Whether or not only admins can access production"
                   },
                   "idp_managed_roles": {
                     "type": "boolean",
@@ -454,10 +454,6 @@
                       "type": "number",
                       "description": "The number of sleeping databases in the organization"
                     },
-                    "admin_only_production_access": {
-                      "type": "boolean",
-                      "description": "Whether or not only administrators can access production branches in the organization"
-                    },
                     "sso_portal_url": {
                       "type": "string",
                       "description": "The URL of the organization's SSO portal"
@@ -467,7 +463,10 @@
                       "properties": {
                         "example_flag": {
                           "type": "string",
-                          "enum": ["full", "on"]
+                          "enum": [
+                            "full",
+                            "on"
+                          ]
                         }
                       },
                       "additionalProperties": false
@@ -508,7 +507,6 @@
                     "free_databases_remaining",
                     "database_count",
                     "sleeping_database_count",
-                    "admin_only_production_access",
                     "idp_managed_roles"
                   ]
                 }
@@ -533,7 +531,9 @@
     },
     "/organizations/{name}/regions": {
       "get": {
-        "tags": ["Organizations"],
+        "tags": [
+          "Organizations"
+        ],
         "operationId": "list-regions-for-an-organization",
         "summary": "List regions for an organization",
         "parameters": [
@@ -624,7 +624,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -647,7 +649,9 @@
     },
     "/organizations/{organization}/databases": {
       "get": {
-        "tags": ["Databases"],
+        "tags": [
+          "Databases"
+        ],
         "operationId": "list-databases",
         "summary": "List databases",
         "parameters": [
@@ -765,11 +769,21 @@
                                   }
                                 },
                                 "additionalProperties": false,
-                                "required": ["hostname", "port", "database"]
+                                "required": [
+                                  "hostname",
+                                  "port",
+                                  "database"
+                                ]
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["state", "import_check_errors", "started_at", "finished_at", "data_source"]
+                            "required": [
+                              "state",
+                              "import_check_errors",
+                              "started_at",
+                              "finished_at",
+                              "data_source"
+                            ]
                           },
                           "region": {
                             "type": "object",
@@ -931,7 +945,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -949,10 +965,12 @@
             "description": "Internal Server Error"
           }
         },
-        "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_database`, `delete_database`, `write_database`, `read_branch`, `delete_branch`, `create_branch`, `delete_production_branch`, `connect_branch`, `connect_production_branch`, `delete_branch_password`, `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`, `approve_deploy_request`, `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_databases` |"
+        "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_database`, `delete_database`, `write_database`, `read_branch`, `delete_branch`, `create_branch`, `delete_production_branch`, `connect_branch`, `connect_production_branch`, `delete_branch_password`, `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`, `approve_deploy_request`, `read_schema_recommendations`, `close_schema_recommendations`, `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_databases` |"
       },
       "post": {
-        "tags": ["Databases"],
+        "tags": [
+          "Databases"
+        ],
         "operationId": "create-a-database",
         "summary": "Create a database",
         "parameters": [
@@ -990,7 +1008,9 @@
                   }
                 },
                 "additionalProperties": false,
-                "required": ["name"]
+                "required": [
+                  "name"
+                ]
               }
             }
           }
@@ -1076,11 +1096,21 @@
                             }
                           },
                           "additionalProperties": false,
-                          "required": ["hostname", "port", "database"]
+                          "required": [
+                            "hostname",
+                            "port",
+                            "database"
+                          ]
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["state", "import_check_errors", "started_at", "finished_at", "data_source"]
+                      "required": [
+                        "state",
+                        "import_check_errors",
+                        "started_at",
+                        "finished_at",
+                        "data_source"
+                      ]
                     },
                     "region": {
                       "type": "object",
@@ -1260,7 +1290,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches": {
       "get": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "list-branches",
         "summary": "List branches",
         "parameters": [
@@ -1387,7 +1419,11 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "display_name", "avatar_url"]
+                            "required": [
+                              "id",
+                              "display_name",
+                              "avatar_url"
+                            ]
                           },
                           "restored_from_branch": {
                             "type": "object",
@@ -1414,7 +1450,13 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "name", "created_at", "updated_at", "deleted_at"]
+                            "required": [
+                              "id",
+                              "name",
+                              "created_at",
+                              "updated_at",
+                              "deleted_at"
+                            ]
                           },
                           "html_url": {
                             "type": "string",
@@ -1499,7 +1541,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -1520,7 +1564,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_branch`, `delete_branch`, `create_branch`, `connect_production_branch`, `connect_branch`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_branches` |\n| Database | `read_branches` |\n| Branch | `read_branch` |"
       },
       "post": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "create-a-branch",
         "summary": "Create a branch",
         "parameters": [
@@ -1563,7 +1609,10 @@
                   }
                 },
                 "additionalProperties": false,
-                "required": ["name", "parent_branch"]
+                "required": [
+                  "name",
+                  "parent_branch"
+                ]
               }
             }
           }
@@ -1649,7 +1698,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "restored_from_branch": {
                       "type": "object",
@@ -1676,7 +1729,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "name", "created_at", "updated_at", "deleted_at"]
+                      "required": [
+                        "id",
+                        "name",
+                        "created_at",
+                        "updated_at",
+                        "deleted_at"
+                      ]
                     },
                     "html_url": {
                       "type": "string",
@@ -1779,7 +1838,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{branch}/backups": {
       "get": {
-        "tags": ["Backups"],
+        "tags": [
+          "Backups"
+        ],
         "operationId": "list-backups",
         "summary": "List backups",
         "parameters": [
@@ -1863,7 +1924,11 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "display_name", "avatar_url"]
+                            "required": [
+                              "id",
+                              "display_name",
+                              "avatar_url"
+                            ]
                           },
                           "name": {
                             "type": "string",
@@ -1871,7 +1936,14 @@
                           },
                           "state": {
                             "type": "string",
-                            "enum": ["pending", "running", "success", "failed", "canceled", "ignored"],
+                            "enum": [
+                              "pending",
+                              "running",
+                              "success",
+                              "failed",
+                              "canceled",
+                              "ignored"
+                            ],
                             "description": "The current state of the backup"
                           },
                           "size": {
@@ -1914,7 +1986,11 @@
                               },
                               "target": {
                                 "type": "string",
-                                "enum": ["production", "development", "branch"],
+                                "enum": [
+                                  "production",
+                                  "development",
+                                  "branch"
+                                ],
                                 "description": "Whether the backup policy is for a production or development database, or for a database branch"
                               },
                               "retention_value": {
@@ -1935,12 +2011,16 @@
                               },
                               "schedule_day": {
                                 "type": "string",
-                                "enum": ["0..6"],
+                                "enum": [
+                                  "0..6"
+                                ],
                                 "description": "Day of the week that the backup is scheduled"
                               },
                               "schedule_week": {
                                 "type": "string",
-                                "enum": ["0..3"],
+                                "enum": [
+                                  "0..3"
+                                ],
                                 "description": "Week of the month that the backup is scheduled"
                               },
                               "created_at": {
@@ -2002,7 +2082,13 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "url", "name", "created_at", "updated_at"]
+                            "required": [
+                              "id",
+                              "url",
+                              "name",
+                              "created_at",
+                              "updated_at"
+                            ]
                           }
                         },
                         "additionalProperties": false,
@@ -2021,7 +2107,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -2042,7 +2130,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_backups` |\n| Database | `read_backups` |\n| Branch | `read_backups` |"
       },
       "post": {
-        "tags": ["Backups"],
+        "tags": [
+          "Backups"
+        ],
         "operationId": "create-a-backup",
         "summary": "Create a backup",
         "parameters": [
@@ -2086,7 +2176,13 @@
                   },
                   "retention_unit": {
                     "type": "string",
-                    "enum": ["hour", "day", "week", "month", "year"],
+                    "enum": [
+                      "hour",
+                      "day",
+                      "week",
+                      "month",
+                      "year"
+                    ],
                     "description": "Unit for the retention period of the backup"
                   },
                   "retention_value": {
@@ -2128,7 +2224,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "name": {
                       "type": "string",
@@ -2136,7 +2236,14 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["pending", "running", "success", "failed", "canceled", "ignored"],
+                      "enum": [
+                        "pending",
+                        "running",
+                        "success",
+                        "failed",
+                        "canceled",
+                        "ignored"
+                      ],
                       "description": "The current state of the backup"
                     },
                     "size": {
@@ -2179,7 +2286,11 @@
                         },
                         "target": {
                           "type": "string",
-                          "enum": ["production", "development", "branch"],
+                          "enum": [
+                            "production",
+                            "development",
+                            "branch"
+                          ],
                           "description": "Whether the backup policy is for a production or development database, or for a database branch"
                         },
                         "retention_value": {
@@ -2200,12 +2311,16 @@
                         },
                         "schedule_day": {
                           "type": "string",
-                          "enum": ["0..6"],
+                          "enum": [
+                            "0..6"
+                          ],
                           "description": "Day of the week that the backup is scheduled"
                         },
                         "schedule_week": {
                           "type": "string",
-                          "enum": ["0..3"],
+                          "enum": [
+                            "0..3"
+                          ],
                           "description": "Week of the month that the backup is scheduled"
                         },
                         "created_at": {
@@ -2267,7 +2382,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "url", "name", "created_at", "updated_at"]
+                      "required": [
+                        "id",
+                        "url",
+                        "name",
+                        "created_at",
+                        "updated_at"
+                      ]
                     }
                   },
                   "additionalProperties": false,
@@ -2304,7 +2425,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{branch}/backups/{id}": {
       "get": {
-        "tags": ["Backups"],
+        "tags": [
+          "Backups"
+        ],
         "operationId": "get-a-backup",
         "summary": "Get a backup",
         "parameters": [
@@ -2374,7 +2497,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "name": {
                       "type": "string",
@@ -2382,7 +2509,14 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["pending", "running", "success", "failed", "canceled", "ignored"],
+                      "enum": [
+                        "pending",
+                        "running",
+                        "success",
+                        "failed",
+                        "canceled",
+                        "ignored"
+                      ],
                       "description": "The current state of the backup"
                     },
                     "size": {
@@ -2425,7 +2559,11 @@
                         },
                         "target": {
                           "type": "string",
-                          "enum": ["production", "development", "branch"],
+                          "enum": [
+                            "production",
+                            "development",
+                            "branch"
+                          ],
                           "description": "Whether the backup policy is for a production or development database, or for a database branch"
                         },
                         "retention_value": {
@@ -2446,12 +2584,16 @@
                         },
                         "schedule_day": {
                           "type": "string",
-                          "enum": ["0..6"],
+                          "enum": [
+                            "0..6"
+                          ],
                           "description": "Day of the week that the backup is scheduled"
                         },
                         "schedule_week": {
                           "type": "string",
-                          "enum": ["0..3"],
+                          "enum": [
+                            "0..3"
+                          ],
                           "description": "Week of the month that the backup is scheduled"
                         },
                         "created_at": {
@@ -2513,7 +2655,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "url", "name", "created_at", "updated_at"]
+                      "required": [
+                        "id",
+                        "url",
+                        "name",
+                        "created_at",
+                        "updated_at"
+                      ]
                     }
                   },
                   "additionalProperties": false,
@@ -2548,7 +2696,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_backups` |\n| Database | `read_backups` |\n| Branch | `read_backups` |"
       },
       "delete": {
-        "tags": ["Backups"],
+        "tags": [
+          "Backups"
+        ],
         "operationId": "delete-a-backup",
         "summary": "Delete a backup",
         "parameters": [
@@ -2611,7 +2761,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{branch}/passwords": {
       "get": {
-        "tags": ["Database branch passwords"],
+        "tags": [
+          "Database branch passwords"
+        ],
         "operationId": "list-passwords",
         "summary": "List passwords",
         "parameters": [
@@ -2731,7 +2883,11 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "display_name", "avatar_url"]
+                            "required": [
+                              "id",
+                              "display_name",
+                              "avatar_url"
+                            ]
                           },
                           "region": {
                             "type": "object",
@@ -2812,7 +2968,13 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["name", "id", "production", "access_host_url", "mysql_edge_address"]
+                            "required": [
+                              "name",
+                              "id",
+                              "production",
+                              "access_host_url",
+                              "mysql_edge_address"
+                            ]
                           }
                         },
                         "additionalProperties": false,
@@ -2830,7 +2992,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -2851,7 +3015,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_branch`, `delete_branch`, `create_branch`, `connect_production_branch`, `connect_branch`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `manage_passwords`, `manage_production_branch_passwords` |\n| Database | `manage_passwords`, `manage_production_branch_passwords` |\n| Branch | `manage_passwords` |"
       },
       "post": {
-        "tags": ["Database branch passwords"],
+        "tags": [
+          "Database branch passwords"
+        ],
         "operationId": "create-a-password",
         "summary": "Create a password",
         "parameters": [
@@ -2895,7 +3061,12 @@
                   },
                   "role": {
                     "type": "string",
-                    "enum": ["reader", "writer", "admin", "readwriter"],
+                    "enum": [
+                      "reader",
+                      "writer",
+                      "admin",
+                      "readwriter"
+                    ],
                     "description": "The database role of the password (i.e. admin)"
                   },
                   "ttl": {
@@ -2965,7 +3136,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "region": {
                       "type": "object",
@@ -3046,7 +3221,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["name", "id", "production", "access_host_url", "mysql_edge_address"]
+                      "required": [
+                        "name",
+                        "id",
+                        "production",
+                        "access_host_url",
+                        "mysql_edge_address"
+                      ]
                     },
                     "plain_text": {
                       "type": "string",
@@ -3090,7 +3271,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}": {
       "get": {
-        "tags": ["Database branch passwords"],
+        "tags": [
+          "Database branch passwords"
+        ],
         "operationId": "get-a-password",
         "summary": "Get a password",
         "parameters": [
@@ -3188,7 +3371,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "region": {
                       "type": "object",
@@ -3269,7 +3456,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["name", "id", "production", "access_host_url", "mysql_edge_address"]
+                      "required": [
+                        "name",
+                        "id",
+                        "production",
+                        "access_host_url",
+                        "mysql_edge_address"
+                      ]
                     }
                   },
                   "additionalProperties": false,
@@ -3303,7 +3496,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_branch`, `delete_branch`, `create_branch`, `connect_production_branch`, `connect_branch`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `manage_passwords`, `manage_production_branch_passwords` |\n| Database | `manage_passwords`, `manage_production_branch_passwords` |\n| Branch | `manage_passwords` |"
       },
       "patch": {
-        "tags": ["Database branch passwords"],
+        "tags": [
+          "Database branch passwords"
+        ],
         "operationId": "update-a-password",
         "summary": "Update a password",
         "parameters": [
@@ -3356,7 +3551,9 @@
                   }
                 },
                 "additionalProperties": false,
-                "required": ["name"]
+                "required": [
+                  "name"
+                ]
               }
             }
           }
@@ -3418,7 +3615,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "region": {
                       "type": "object",
@@ -3499,7 +3700,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["name", "id", "production", "access_host_url", "mysql_edge_address"]
+                      "required": [
+                        "name",
+                        "id",
+                        "production",
+                        "access_host_url",
+                        "mysql_edge_address"
+                      ]
                     }
                   },
                   "additionalProperties": false,
@@ -3533,7 +3740,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `connect_production_branch`, `create_branch_password`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `manage_passwords`, `manage_production_branch_passwords` |\n| Database | `manage_passwords`, `manage_production_branch_passwords` |\n| Branch | `manage_passwords` |"
       },
       "delete": {
-        "tags": ["Database branch passwords"],
+        "tags": [
+          "Database branch passwords"
+        ],
         "operationId": "delete-a-password",
         "summary": "Delete a password",
         "parameters": [
@@ -3596,7 +3805,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{branch}/passwords/{id}/renew": {
       "post": {
-        "tags": ["Database branch passwords"],
+        "tags": [
+          "Database branch passwords"
+        ],
         "operationId": "renew-a-password",
         "summary": "Renew a password",
         "parameters": [
@@ -3694,7 +3905,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "region": {
                       "type": "object",
@@ -3775,7 +3990,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["name", "id", "production", "access_host_url", "mysql_edge_address"]
+                      "required": [
+                        "name",
+                        "id",
+                        "production",
+                        "access_host_url",
+                        "mysql_edge_address"
+                      ]
                     },
                     "plain_text": {
                       "type": "string",
@@ -3816,7 +4037,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{name}": {
       "get": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "get-a-branch",
         "summary": "Get a branch",
         "parameters": [
@@ -3929,7 +4152,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "restored_from_branch": {
                       "type": "object",
@@ -3956,7 +4183,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "name", "created_at", "updated_at", "deleted_at"]
+                      "required": [
+                        "id",
+                        "name",
+                        "created_at",
+                        "updated_at",
+                        "deleted_at"
+                      ]
                     },
                     "html_url": {
                       "type": "string",
@@ -4057,7 +4290,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_branch`, `delete_branch`, `create_branch`, `connect_production_branch`, `connect_branch`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_branches` |\n| Database | `read_branches` |\n| Branch | `read_branch` |"
       },
       "delete": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "delete-a-branch",
         "summary": "Delete a branch",
         "parameters": [
@@ -4111,7 +4346,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{name}/demote": {
       "post": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "demote-a-branch",
         "summary": "Demote a branch",
         "parameters": [
@@ -4224,7 +4461,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "restored_from_branch": {
                       "type": "object",
@@ -4251,7 +4492,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "name", "created_at", "updated_at", "deleted_at"]
+                      "required": [
+                        "id",
+                        "name",
+                        "created_at",
+                        "updated_at",
+                        "deleted_at"
+                      ]
                     },
                     "html_url": {
                       "type": "string",
@@ -4354,7 +4601,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{name}/promote": {
       "post": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "promote-a-branch",
         "summary": "Promote a branch",
         "parameters": [
@@ -4467,7 +4716,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "restored_from_branch": {
                       "type": "object",
@@ -4494,7 +4747,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "name", "created_at", "updated_at", "deleted_at"]
+                      "required": [
+                        "id",
+                        "name",
+                        "created_at",
+                        "updated_at",
+                        "deleted_at"
+                      ]
                     },
                     "html_url": {
                       "type": "string",
@@ -4597,7 +4856,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{name}/safe-migrations": {
       "post": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "enable-safe-migrations-for-a-branch",
         "summary": "Enable safe migrations for a branch",
         "parameters": [
@@ -4710,7 +4971,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "restored_from_branch": {
                       "type": "object",
@@ -4737,7 +5002,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "name", "created_at", "updated_at", "deleted_at"]
+                      "required": [
+                        "id",
+                        "name",
+                        "created_at",
+                        "updated_at",
+                        "deleted_at"
+                      ]
                     },
                     "html_url": {
                       "type": "string",
@@ -4838,7 +5109,9 @@
         "description": "\n"
       },
       "delete": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "disable-safe-migrations-for-a-branch",
         "summary": "Disable safe migrations for a branch",
         "parameters": [
@@ -4951,7 +5224,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "restored_from_branch": {
                       "type": "object",
@@ -4978,7 +5255,13 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "name", "created_at", "updated_at", "deleted_at"]
+                      "required": [
+                        "id",
+                        "name",
+                        "created_at",
+                        "updated_at",
+                        "deleted_at"
+                      ]
                     },
                     "html_url": {
                       "type": "string",
@@ -5081,7 +5364,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{name}/schema": {
       "get": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "get-a-branch-schema",
         "summary": "Get a branch schema",
         "parameters": [
@@ -5148,12 +5433,18 @@
                           }
                         },
                         "additionalProperties": false,
-                        "required": ["name", "html", "raw"]
+                        "required": [
+                          "name",
+                          "html",
+                          "raw"
+                        ]
                       }
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -5176,7 +5467,9 @@
     },
     "/organizations/{organization}/databases/{database}/branches/{name}/schema/lint": {
       "get": {
-        "tags": ["Database branches"],
+        "tags": [
+          "Database branches"
+        ],
         "operationId": "lint-a-branch-schema",
         "summary": "Lint a branch schema",
         "parameters": [
@@ -5245,7 +5538,11 @@
                           },
                           "subject_type": {
                             "type": "string",
-                            "enum": ["table", "vschema", "routing_rules"],
+                            "enum": [
+                              "table",
+                              "vschema",
+                              "routing_rules"
+                            ],
                             "description": "The subject for the errors"
                           },
                           "keyspace_name": {
@@ -5339,7 +5636,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -5362,7 +5661,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-queue": {
       "get": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "get-the-deploy-queue",
         "summary": "Get the deploy queue",
         "parameters": [
@@ -5486,7 +5787,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -5497,7 +5800,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests": {
       "get": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "list-deploy-requests",
         "summary": "List deploy requests",
         "parameters": [
@@ -5600,7 +5905,11 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "display_name", "avatar_url"]
+                            "required": [
+                              "id",
+                              "display_name",
+                              "avatar_url"
+                            ]
                           },
                           "closed_by": {
                             "type": "object",
@@ -5619,7 +5928,11 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "display_name", "avatar_url"]
+                            "required": [
+                              "id",
+                              "display_name",
+                              "avatar_url"
+                            ]
                           },
                           "branch": {
                             "type": "string",
@@ -5646,7 +5959,11 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "display_name", "avatar_url"]
+                            "required": [
+                              "id",
+                              "display_name",
+                              "avatar_url"
+                            ]
                           },
                           "branch_deleted_at": {
                             "type": "string",
@@ -5670,7 +5987,10 @@
                           },
                           "state": {
                             "type": "string",
-                            "enum": ["open", "closed"],
+                            "enum": [
+                              "open",
+                              "closed"
+                            ],
                             "description": "Whether the deploy request is open or closed"
                           },
                           "deployment_state": {
@@ -5755,7 +6075,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -5764,7 +6086,9 @@
         "description": "List deploy requests for a database\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_deploy_request`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_deploy_requests` |\n| Database | `read_deploy_requests` |"
       },
       "post": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "create-a-deploy-request",
         "summary": "Create a deploy request",
         "parameters": [
@@ -5844,7 +6168,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -5863,7 +6191,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -5890,7 +6222,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -5914,7 +6250,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -6094,7 +6433,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}": {
       "get": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "get-a-deploy-request",
         "summary": "Get a deploy request",
         "parameters": [
@@ -6159,7 +6500,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -6178,7 +6523,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -6205,7 +6554,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -6229,7 +6582,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -6407,7 +6763,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_deploy_request`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_deploy_requests` |\n| Database | `read_deploy_requests` |"
       },
       "patch": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "close-a-deploy-request",
         "summary": "Close a deploy request",
         "parameters": [
@@ -6447,7 +6805,9 @@
                 "properties": {
                   "state": {
                     "type": "string",
-                    "enum": ["closed"],
+                    "enum": [
+                      "closed"
+                    ],
                     "description": "The deploy request will be updated to this state"
                   }
                 },
@@ -6489,7 +6849,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -6508,7 +6872,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -6535,7 +6903,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -6559,7 +6931,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -6739,7 +7114,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/apply-deploy": {
       "post": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "complete-a-gated-deploy-request",
         "summary": "Complete a gated deploy request",
         "parameters": [
@@ -6804,7 +7181,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -6823,7 +7204,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -6850,7 +7235,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -6874,7 +7263,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -6965,7 +7357,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/auto-apply": {
       "put": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "update-auto-apply-for-deploy-request",
         "summary": "Update auto-apply for deploy request",
         "parameters": [
@@ -7046,7 +7440,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -7065,7 +7463,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -7092,7 +7494,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -7116,7 +7522,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -7207,7 +7616,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/cancel": {
       "post": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "cancel-a-queued-deploy-request",
         "summary": "Cancel a queued deploy request",
         "parameters": [
@@ -7272,7 +7683,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -7291,7 +7706,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -7318,7 +7737,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -7342,7 +7765,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -7433,7 +7859,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/complete-deploy": {
       "post": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "complete-an-errored-deploy",
         "summary": "Complete an errored deploy",
         "parameters": [
@@ -7498,7 +7926,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -7517,7 +7949,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -7544,7 +7980,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -7568,7 +8008,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -7659,7 +8102,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/deploy": {
       "post": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "queue-a-deploy-request",
         "summary": "Queue a deploy request",
         "parameters": [
@@ -7724,7 +8169,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -7743,7 +8192,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -7770,7 +8223,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -7794,7 +8251,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -7885,7 +8345,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/deployment": {
       "get": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "get-a-deployment",
         "summary": "Get a deployment",
         "parameters": [
@@ -8019,7 +8481,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/operations": {
       "get": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "list-deploy-operations",
         "summary": "List deploy operations",
         "parameters": [
@@ -8088,7 +8552,14 @@
                           },
                           "state": {
                             "type": "string",
-                            "enum": ["pending", "queued", "in_progress", "complete", "cancelled", "error"],
+                            "enum": [
+                              "pending",
+                              "queued",
+                              "in_progress",
+                              "complete",
+                              "cancelled",
+                              "error"
+                            ],
                             "description": "The state of the deploy operation"
                           },
                           "keyspace_name": {
@@ -8174,7 +8645,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -8185,7 +8658,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/revert": {
       "post": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "complete-a-revert",
         "summary": "Complete a revert",
         "parameters": [
@@ -8250,7 +8725,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -8269,7 +8748,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -8296,7 +8779,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -8320,7 +8807,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -8411,7 +8901,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/reviews": {
       "get": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "list-deploy-request-reviews",
         "summary": "List deploy request reviews",
         "parameters": [
@@ -8477,7 +8969,11 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "display_name", "avatar_url"]
+                            "required": [
+                              "id",
+                              "display_name",
+                              "avatar_url"
+                            ]
                           },
                           "body": {
                             "type": "string",
@@ -8489,7 +8985,10 @@
                           },
                           "state": {
                             "type": "string",
-                            "enum": ["commented", "approved"],
+                            "enum": [
+                              "commented",
+                              "approved"
+                            ],
                             "description": "Whether the review is a comment or approval"
                           },
                           "created_at": {
@@ -8502,12 +9001,22 @@
                           }
                         },
                         "additionalProperties": false,
-                        "required": ["id", "actor", "body", "html_body", "state", "created_at", "updated_at"]
+                        "required": [
+                          "id",
+                          "actor",
+                          "body",
+                          "html_body",
+                          "state",
+                          "created_at",
+                          "updated_at"
+                        ]
                       }
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -8516,7 +9025,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_deploy_request`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_deploy_requests` |\n| Database | `read_deploy_requests` |"
       },
       "post": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "review-a-deploy-request",
         "summary": "Review a deploy request",
         "parameters": [
@@ -8556,7 +9067,10 @@
                 "properties": {
                   "state": {
                     "type": "string",
-                    "enum": ["commented", "approved"],
+                    "enum": [
+                      "commented",
+                      "approved"
+                    ],
                     "description": "Whether the review is a comment or approval. Service tokens must have corresponding access (either `approve_deploy_request` or `review_deploy_request`)"
                   },
                   "body": {
@@ -8598,7 +9112,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "body": {
                       "type": "string",
@@ -8610,7 +9128,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["commented", "approved"],
+                      "enum": [
+                        "commented",
+                        "approved"
+                      ],
                       "description": "Whether the review is a comment or approval"
                     },
                     "created_at": {
@@ -8623,7 +9144,15 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["id", "actor", "body", "html_body", "state", "created_at", "updated_at"]
+                  "required": [
+                    "id",
+                    "actor",
+                    "body",
+                    "html_body",
+                    "state",
+                    "created_at",
+                    "updated_at"
+                  ]
                 }
               }
             }
@@ -8634,7 +9163,9 @@
     },
     "/organizations/{organization}/databases/{database}/deploy-requests/{number}/skip-revert": {
       "post": {
-        "tags": ["Deploy requests"],
+        "tags": [
+          "Deploy requests"
+        ],
         "operationId": "skip-revert-period",
         "summary": "Skip revert period",
         "parameters": [
@@ -8699,7 +9230,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "closed_by": {
                       "type": "object",
@@ -8718,7 +9253,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch": {
                       "type": "string",
@@ -8745,7 +9284,11 @@
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["id", "display_name", "avatar_url"]
+                      "required": [
+                        "id",
+                        "display_name",
+                        "avatar_url"
+                      ]
                     },
                     "branch_deleted_at": {
                       "type": "string",
@@ -8769,7 +9312,10 @@
                     },
                     "state": {
                       "type": "string",
-                      "enum": ["open", "closed"],
+                      "enum": [
+                        "open",
+                        "closed"
+                      ],
                       "description": "Whether the deploy request is open or closed"
                     },
                     "deployment_state": {
@@ -8860,7 +9406,9 @@
     },
     "/organizations/{organization}/databases/{name}": {
       "get": {
-        "tags": ["Databases"],
+        "tags": [
+          "Databases"
+        ],
         "operationId": "get-a-database",
         "summary": "Get a database",
         "parameters": [
@@ -8964,11 +9512,21 @@
                             }
                           },
                           "additionalProperties": false,
-                          "required": ["hostname", "port", "database"]
+                          "required": [
+                            "hostname",
+                            "port",
+                            "database"
+                          ]
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["state", "import_check_errors", "started_at", "finished_at", "data_source"]
+                      "required": [
+                        "state",
+                        "import_check_errors",
+                        "started_at",
+                        "finished_at",
+                        "data_source"
+                      ]
                     },
                     "region": {
                       "type": "object",
@@ -9143,10 +9701,12 @@
             "description": "Internal Server Error"
           }
         },
-        "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_database`, `delete_database`, `write_database`, `read_branch`, `delete_branch`, `create_branch`, `delete_production_branch`, `connect_branch`, `connect_production_branch`, `delete_branch_password`, `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`, `approve_deploy_request`, `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_databases` |\n| Database | `read_database` |"
+        "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_database`, `delete_database`, `write_database`, `read_branch`, `delete_branch`, `create_branch`, `delete_production_branch`, `connect_branch`, `connect_production_branch`, `delete_branch_password`, `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`, `approve_deploy_request`, `read_schema_recommendations`, `close_schema_recommendations`, `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_databases` |\n| Database | `read_database` |"
       },
       "patch": {
-        "tags": ["Databases"],
+        "tags": [
+          "Databases"
+        ],
         "operationId": "update-database-settings",
         "summary": "Update database settings",
         "parameters": [
@@ -9298,11 +9858,21 @@
                             }
                           },
                           "additionalProperties": false,
-                          "required": ["hostname", "port", "database"]
+                          "required": [
+                            "hostname",
+                            "port",
+                            "database"
+                          ]
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["state", "import_check_errors", "started_at", "finished_at", "data_source"]
+                      "required": [
+                        "state",
+                        "import_check_errors",
+                        "started_at",
+                        "finished_at",
+                        "data_source"
+                      ]
                     },
                     "region": {
                       "type": "object",
@@ -9480,7 +10050,9 @@
         "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `write_database`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `write_databases` |\n| Database | `write_database` |"
       },
       "delete": {
-        "tags": ["Databases"],
+        "tags": [
+          "Databases"
+        ],
         "operationId": "delete-a-database",
         "summary": "Delete a database",
         "parameters": [
@@ -9525,7 +10097,9 @@
     },
     "/organizations/{organization}/databases/{name}/read-only-regions": {
       "get": {
-        "tags": ["Databases"],
+        "tags": [
+          "Databases"
+        ],
         "operationId": "list-read-only-regions",
         "summary": "List read-only regions",
         "parameters": [
@@ -9620,7 +10194,11 @@
                               }
                             },
                             "additionalProperties": false,
-                            "required": ["id", "display_name", "avatar_url"]
+                            "required": [
+                              "id",
+                              "display_name",
+                              "avatar_url"
+                            ]
                           },
                           "region": {
                             "type": "object",
@@ -9684,7 +10262,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -9702,12 +10282,14 @@
             "description": "Internal Server Error"
           }
         },
-        "description": "List read-only regions for the database's default branch\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_database`, `delete_database`, `write_database`, `read_branch`, `delete_branch`, `create_branch`, `delete_production_branch`, `connect_branch`, `connect_production_branch`, `delete_branch_password`, `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`, `approve_deploy_request`, `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_branches` |\n| Database | `read_branches` |"
+        "description": "List read-only regions for the database's default branch\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_database`, `delete_database`, `write_database`, `read_branch`, `delete_branch`, `create_branch`, `delete_production_branch`, `connect_branch`, `connect_production_branch`, `delete_branch_password`, `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`, `approve_deploy_request`, `read_schema_recommendations`, `close_schema_recommendations`, `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_branches` |\n| Database | `read_branches` |"
       }
     },
     "/organizations/{organization}/databases/{name}/regions": {
       "get": {
-        "tags": ["Databases"],
+        "tags": [
+          "Databases"
+        ],
         "operationId": "list-database-regions",
         "summary": "List database regions",
         "parameters": [
@@ -9807,7 +10389,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -9825,12 +10409,14 @@
             "description": "Internal Server Error"
           }
         },
-        "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_database`, `delete_database`, `write_database`, `read_branch`, `delete_branch`, `create_branch`, `delete_production_branch`, `connect_branch`, `connect_production_branch`, `delete_branch_password`, `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`, `approve_deploy_request`, `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_databases` |\n| Database | `read_database` |"
+        "description": "\n### Authorization\nA service token or OAuth token must have at least one of the following access or scopes in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_database`, `delete_database`, `write_database`, `read_branch`, `delete_branch`, `create_branch`, `delete_production_branch`, `connect_branch`, `connect_production_branch`, `delete_branch_password`, `delete_production_branch_password`, `read_deploy_request`, `create_deploy_request`, `approve_deploy_request`, `read_schema_recommendations`, `close_schema_recommendations`, `read_comment`, `create_comment`, `restore_backup`, `restore_production_branch_backup`, `read_backups`, `write_backups`, `delete_backups`, `delete_production_branch_backups`\n\n**OAuth Scopes**\n\n | Resource | Scopes |\n| :------- | :---------- |\n| Organization | `read_databases` |\n| Database | `read_database` |"
       }
     },
     "/organizations/{organization}/oauth-applications": {
       "get": {
-        "tags": ["OAuth applications"],
+        "tags": [
+          "OAuth applications"
+        ],
         "operationId": "list-oauth-applications",
         "summary": "List OAuth applications",
         "parameters": [
@@ -9935,7 +10521,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -9958,7 +10546,9 @@
     },
     "/organizations/{organization}/oauth-applications/{application_id}": {
       "get": {
-        "tags": ["OAuth applications"],
+        "tags": [
+          "OAuth applications"
+        ],
         "operationId": "get-an-oauth-application",
         "summary": "Get an OAuth application",
         "parameters": [
@@ -10067,7 +10657,9 @@
     },
     "/organizations/{organization}/oauth-applications/{application_id}/tokens": {
       "get": {
-        "tags": ["OAuth applications"],
+        "tags": [
+          "OAuth applications"
+        ],
         "operationId": "list-oauth-tokens",
         "summary": "List OAuth tokens",
         "parameters": [
@@ -10184,7 +10776,9 @@
                     }
                   },
                   "additionalProperties": false,
-                  "required": ["data"]
+                  "required": [
+                    "data"
+                  ]
                 }
               }
             }
@@ -10207,7 +10801,9 @@
     },
     "/organizations/{organization}/oauth-applications/{application_id}/tokens/{token_id}": {
       "get": {
-        "tags": ["OAuth applications"],
+        "tags": [
+          "OAuth applications"
+        ],
         "operationId": "get-an-oauth-token",
         "summary": "Get an OAuth token",
         "parameters": [
@@ -10313,7 +10909,10 @@
                             }
                           },
                           "additionalProperties": false,
-                          "required": ["users", "accesses"]
+                          "required": [
+                            "users",
+                            "accesses"
+                          ]
                         },
                         "organization": {
                           "type": "object",
@@ -10334,7 +10933,10 @@
                             }
                           },
                           "additionalProperties": false,
-                          "required": ["organizations", "accesses"]
+                          "required": [
+                            "organizations",
+                            "accesses"
+                          ]
                         },
                         "database": {
                           "type": "object",
@@ -10355,7 +10957,10 @@
                             }
                           },
                           "additionalProperties": false,
-                          "required": ["databases", "accesses"]
+                          "required": [
+                            "databases",
+                            "accesses"
+                          ]
                         },
                         "branch": {
                           "type": "object",
@@ -10376,11 +10981,19 @@
                             }
                           },
                           "additionalProperties": false,
-                          "required": ["branches", "accesses"]
+                          "required": [
+                            "branches",
+                            "accesses"
+                          ]
                         }
                       },
                       "additionalProperties": false,
-                      "required": ["user", "organization", "database", "branch"]
+                      "required": [
+                        "user",
+                        "organization",
+                        "database",
+                        "branch"
+                      ]
                     }
                   },
                   "additionalProperties": false,
@@ -10418,7 +11031,9 @@
         "description": "\n### Authorization\nA service token   must have at least one of the following access   in order to use this API endpoint:\n\n**Service Token Accesses**\n `read_oauth_tokens`\n\n"
       },
       "delete": {
-        "tags": ["OAuth applications"],
+        "tags": [
+          "OAuth applications"
+        ],
         "operationId": "delete-an-oauth-token",
         "summary": "Delete an OAuth token",
         "parameters": [
@@ -10472,7 +11087,9 @@
     },
     "/organizations/{organization}/oauth-applications/{id}/token": {
       "post": {
-        "tags": ["OAuth tokens"],
+        "tags": [
+          "OAuth tokens"
+        ],
         "operationId": "create-or-renew-an-oauth-token",
         "summary": "Create or renew an OAuth token",
         "parameters": [
@@ -10511,7 +11128,10 @@
                   },
                   "grant_type": {
                     "type": "string",
-                    "enum": ["authorization_code", "refresh_token"],
+                    "enum": [
+                      "authorization_code",
+                      "refresh_token"
+                    ],
                     "description": "Whether an OAuth grant code or a refresh token is being exchanged for an OAuth token"
                   },
                   "code": {
@@ -10528,7 +11148,11 @@
                   }
                 },
                 "additionalProperties": false,
-                "required": ["client_id", "client_secret", "grant_type"]
+                "required": [
+                  "client_id",
+                  "client_secret",
+                  "grant_type"
+                ]
               }
             }
           }
@@ -10594,9 +11218,115 @@
         "description": "Create an OAuth token from an authorization grant code, or refresh an OAuth token from a refresh token\n### Authorization\nA service token   must have at least one of the following access   in order to use this API endpoint:\n\n**Service Token Accesses**\n `write_oauth_tokens`\n\n"
       }
     },
+    "/regions": {
+      "get": {
+        "tags": [
+          "Regions"
+        ],
+        "operationId": "list-public-regions",
+        "summary": "List public regions",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "If provided, specifies the page offset of returned results",
+            "schema": {
+              "type": "number",
+              "default": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "If provided, specifies the number of returned results",
+            "schema": {
+              "type": "number",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the available public PlanetScale regions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The ID of the region"
+                          },
+                          "provider": {
+                            "type": "string",
+                            "description": "Provider for the region (ex. AWS)"
+                          },
+                          "public_ip_addresses": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Public IP addresses for the region"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Name of the region"
+                          },
+                          "location": {
+                            "type": "string",
+                            "description": "Location of the region"
+                          },
+                          "slug": {
+                            "type": "string",
+                            "description": "The slug of the region"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "required": [
+                          "id",
+                          "provider",
+                          "public_ip_addresses",
+                          "display_name",
+                          "location",
+                          "slug"
+                        ]
+                      }
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "description": "Endpoint is available without authentication.\n"
+      }
+    },
     "/user": {
       "get": {
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "operationId": "get-current-user",
         "summary": "Get current user",
         "responses": {
@@ -10688,12 +11418,12 @@
       "description": "          API endpoints for managing database branch backups.\n"
     },
     {
-      "name": "Databases",
-      "description": "          API endpoints for managing databases within an organization.\n"
-    },
-    {
       "name": "Database branch passwords",
       "description": "          API endpoints for managing database branch passwords.\n"
+    },
+    {
+      "name": "Databases",
+      "description": "          API endpoints for managing databases within an organization.\n"
     },
     {
       "name": "OAuth applications",
@@ -10714,11 +11444,17 @@
     {
       "name": "Deploy requests",
       "description": "            API endpoints for managing database deploy requests.\n"
+    },
+    {
+      "name": "Invoices",
+      "description": "          API endpoints for fetching invoice information.\n"
     }
   ],
   "security": [
     {
-      "ApiKeyHeader": ["Authorization"]
+      "ApiKeyHeader": [
+        "Authorization"
+      ]
     }
   ],
   "x-readme": {
