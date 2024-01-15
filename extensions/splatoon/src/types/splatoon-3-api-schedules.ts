@@ -51,7 +51,7 @@ export interface MatchSetting {
 }
 
 export interface BankaraMatchSetting extends MatchSetting {
-  mode: "CHALLENGE" | "OPEN";
+  bankaraMode: "CHALLENGE" | "OPEN";
 }
 
 export interface CoopSetting {

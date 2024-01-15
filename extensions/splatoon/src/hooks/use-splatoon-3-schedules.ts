@@ -14,7 +14,7 @@ function getGames(data: Splatoon3Api.Data, mode: Splatoon3Api.Mode) {
         .map((schedule) => ({
           ...schedule,
           bankaraMatchSetting: schedule.bankaraMatchSettings.find(
-            (setting) => setting.mode === "OPEN",
+            (setting) => setting.bankaraMode === "OPEN",
           ) as Splatoon3Api.BankaraMatchSetting,
         })) as Splatoon3Api.BankaraScheduleSingleNode[];
     }
@@ -24,7 +24,7 @@ function getGames(data: Splatoon3Api.Data, mode: Splatoon3Api.Mode) {
         .map((schedule) => ({
           ...schedule,
           bankaraMatchSetting: schedule.bankaraMatchSettings.find(
-            (setting) => setting.mode === "CHALLENGE",
+            (setting) => setting.bankaraMode === "CHALLENGE",
           ) as Splatoon3Api.BankaraMatchSetting,
         })) as Splatoon3Api.BankaraScheduleSingleNode[];
     }
