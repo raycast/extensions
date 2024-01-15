@@ -1,7 +1,8 @@
 import { closeMainWindow, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Command, CommandOptions, ERRORTYPE } from "../../utils/types";
-import { runActionScript, runReplacements } from "../../utils/command-utils";
+import { ERRORTYPE } from "../../lib/common/types";
+import { Command, CommandOptions } from "../../lib/commands/types";
+import { runActionScript, runReplacements } from "../../lib/commands/command-utils";
 import useModel from "../../hooks/useModel";
 import CommandDetailView from "./CommandDetailView";
 import CommandChatView from "../Chats/CommandChatView";
@@ -12,7 +13,7 @@ import { useModels } from "../../hooks/useModels";
 import CommandSetupForm from "./CommandSetupForm";
 import SpeechInputView from "./SpeechInputView";
 import { useFiles } from "../../hooks/useFiles";
-import { showDialog } from "../../utils/scripts";
+import { showDialog } from "../../lib/scripts";
 
 export default function CommandResponse(props: {
   commandName: string;
@@ -75,7 +76,7 @@ export default function CommandResponse(props: {
   const contentPromptString = fileContents?.contents || "";
   const fullPrompt = (substitutedPrompt.replaceAll("{{contents}}", contentPromptString) + contentPromptString).replace(
     /{{END}}(\n|.)*/,
-    ""
+    "",
   );
 
   const { data, isLoading, revalidate, error } = useModel(
@@ -88,7 +89,7 @@ export default function CommandResponse(props: {
       (!options.minNumFiles || (fileContents?.contents?.length != undefined && fileContents.contents.length > 0)) &&
       !shouldCancel &&
       (!options.useSpeech || (speechInput != "" && speechInput != undefined)),
-    models.models.find((model) => model.id == options.model)
+    models.models.find((model) => model.id == options.model),
   );
 
   useEffect(() => {
@@ -106,8 +107,8 @@ export default function CommandResponse(props: {
           substitutedPrompt.replaceAll("{{contents}}", contentPromptString),
           input || contentPromptString,
           data,
-          options.scriptKind
-        )
+          options.scriptKind,
+        ),
       );
     }
 

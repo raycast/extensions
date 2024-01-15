@@ -239,7 +239,7 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
             return;
           }
 
-          return data.filter((t) => !(t.windowId === props.tab.windowId && t.tabId === props.tab.tabId));
+          return data.filter((t) => !(t.id === props.tab.id));
         },
       });
 

@@ -5,10 +5,10 @@ import { DeleteAllChatsAction, DeleteChatAction } from "./DeleteChatActions";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import ChatSettingsForm from "../ChatSettingsForm";
 import { CopyChatActionsSection } from "./CopyChatActions";
-import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../lib/action-utils";
 import { AdvancedActionSubmenu } from "../../actions/AdvancedActionSubmenu";
 import ContextSettingsActionSection from "./ContextSettingsActionSection";
-import { Chat, ChatManager } from "../../../utils/types";
+import { Chat, ChatManager } from "../../../lib/chats/types";
 
 /**
  * Actions panel for the Chat command.
@@ -83,7 +83,7 @@ export const ChatActionPanel = (props: {
           "DeleteChatAction",
           "DeleteAllChatsAction",
         ],
-        settings
+        settings,
       ) ? (
         <ActionPanel.Section title="Chat Actions">
           {chat && isActionEnabled("ChatSettingsAction", settings) ? (

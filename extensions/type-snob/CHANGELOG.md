@@ -1,6 +1,10 @@
 # Type Snob Changelog
 
-## 2023-04-01
+## [Update] - 2024-01-08
+
+- Added zero-width space character
+
+## [Update] - 2023-04-01
 
 - Added more characters (fractions, daggers, and other marks).
 - Added HTML entities for each character, with a keyboard shortcut for copying it.

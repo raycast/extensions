@@ -6,14 +6,13 @@ import {
   resetInterval,
   pauseInterval,
   continueInterval,
-  IntervalType,
-  Interval,
   isPaused,
   duration,
   preferences,
   progress,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
+import { Interval, IntervalType } from "../lib/types";
 
 const IconTint: Color.Dynamic = {
   light: "#000000",

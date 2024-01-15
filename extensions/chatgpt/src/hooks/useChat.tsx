@@ -125,8 +125,15 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
                   setStreamData({ ...chat, answer: chat.answer });
                 }
               } catch (error) {
+                // if streaming is enabled, ignore syntax error
+                // from json parser to prevent output with markdown being
+                // truncated.
+                if (error instanceof SyntaxError) {
+                  continue;
+                }
+
                 toast.title = "Error";
-                toast.message = `Couldn't stream message`;
+                toast.message = `Couldn't stream message: ${error}`;
                 toast.style = Toast.Style.Failure;
                 setLoading(false);
               }
