@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import RunningTimeEntry from "./components/RunningTimeEntry";
@@ -31,11 +32,14 @@ function ListView() {
     [] as TimeEntry[],
   );
 
-  const totalDurationToday =
-    timeEntries
+  const totalDurationToday = useMemo(() => {
+    let seconds = timeEntries
+      .slice(runningTimeEntry ? 1 : 0)
       .filter((timeEntry) => dayjs(timeEntry.start).isSame(dayjs(), "day"))
-      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0) +
-    (runningTimeEntry ? dayjs().diff(runningTimeEntry.start, "second") : 0);
+      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0);
+    if (runningTimeEntry) seconds += dayjs().diff(dayjs(runningTimeEntry.start), "second");
+    return seconds;
+  }, [timeEntries, runningTimeEntry]);
 
   function formatSeconds(seconds: number) {
     const h = Math.floor(seconds / 3600);
