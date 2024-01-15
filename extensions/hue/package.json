@@ -89,8 +89,8 @@
     },
     {
       "name": "bridgeUsername",
-      "title": "Bridge Username (manual)",
-      "description": "The username for your Hue bridge. Use this if you have already created a username you want to use.",
+      "title": "Bridge Username (manual, optional)",
+      "description": "The username for your Hue bridge. Use this if you have already created a username you want to use. Leave this empty to automatically request a new username.",
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       "type": "textfield",
       "default": "",
