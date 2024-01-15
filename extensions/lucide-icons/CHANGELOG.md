@@ -1,5 +1,12 @@
 # Lucide Icons Changelog
 
+## [Update] - 2024-01-14
+
+- Removed stroke red color to mantain the icons as unchanged as possible
+- Updated logic to fetch latest Lucide Icons
+- Updated dependencies
+- Added new keyboard shortcuts to `Copy Name to Clipboard`, `Copy SVG to Clipboard` and `Copy Component to Clipboard`
+
 ## [Update] - 2023-12-27
 
 - Updated extension

@@ -5,7 +5,7 @@ import fetch from "node-fetch";
 // Lucide's toPascalCase function
 export const toPascalCase = (string: string) => {
   const camelCase = string.replace(/^([A-Z])|[\s-_]+(\w)/g, (_match, p1, p2) =>
-    p2 ? p2.toUpperCase() : p1.toLowerCase()
+    p2 ? p2.toUpperCase() : p1.toLowerCase(),
   );
 
   return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
@@ -43,7 +43,7 @@ export default function Command() {
     ["https://lucide.dev/api/icon-nodes"],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const [icons, setIcons] = useCachedState<LucideIcon[] | null>("icons", null);
@@ -72,9 +72,30 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://lucide.dev/icon/${icon.name}`} />
-              <Action.CopyToClipboard content={icon.name} title="Copy Name to Clipboard" />
-              <Action.CopyToClipboard content={icon.content} title="Copy SVG to Clipboard" />
-              <Action.CopyToClipboard content={`<${toPascalCase(icon.name)} />`} title="Copy Component to Clipboard" />
+              <Action.CopyToClipboard
+                shortcut={{
+                  modifiers: ["cmd"],
+                  key: "n",
+                }}
+                content={icon.name}
+                title="Copy Name to Clipboard"
+              />
+              <Action.CopyToClipboard
+                shortcut={{
+                  modifiers: ["cmd"],
+                  key: "s",
+                }}
+                content={icon.content}
+                title="Copy SVG to Clipboard"
+              />
+              <Action.CopyToClipboard
+                shortcut={{
+                  modifiers: ["cmd", "shift"],
+                  key: "r",
+                }}
+                content={`<${toPascalCase(icon.name)} />`}
+                title="Copy Component to Clipboard"
+              />
               <ActionPanel.Section title="Preferences">
                 <ActionPanel.Submenu title="Change Size…" icon={Icon.MagnifyingGlass}>
                   {[4, 6, 8].map((columns) => (
