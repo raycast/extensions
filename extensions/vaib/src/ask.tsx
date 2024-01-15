@@ -9,7 +9,5 @@ interface AskArgs {
 export default function Ask(props: LaunchProps<AskArgs>) {
   const { question } = props.arguments;
 
-  return (
-    <Answer question={question} />
-  );
+  return <Answer question={question} />;
 }
