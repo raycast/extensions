@@ -1,5 +1,6 @@
+import fs from "fs";
 import { useMemo, useState } from "react";
-import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import type { Domain } from "./interface";
 import { databasePath, listQuery } from "./constants";
@@ -18,6 +19,11 @@ function ActiveDropdown(props: { onSelectionChange: (newValue: string) => void }
 }
 
 export default function Command() {
+  if (!fs.existsSync(databasePath)) {
+    showToast(Toast.Style.Failure, "Error loading domains", "LocalCan database not found");
+    return;
+  }
+
   const [filter, setFilter] = useState<string>("all");
 
   const { data: domains, isLoading } = useSQL<Domain>(databasePath, listQuery);
