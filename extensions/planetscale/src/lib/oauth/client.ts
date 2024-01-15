@@ -1,5 +1,5 @@
 import { LocalStorage, OAuth, popToRoot, showToast, Toast } from "@raycast/api";
-import { createPlanetScaleClient } from "./api";
+import { createPlanetScaleClient } from "../api";
 
 const clientId = "pscale_app_f0abb01c616a75cbaf2655be98e08e0a";
 const applicationId = "or9t9ym9hocx";
@@ -54,6 +54,10 @@ export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
   authCode: string,
 ): Promise<OAuth.TokenResponse> {
+  const serviceTokenId = "";
+  const serviceToken = "";
+  const clientSecret = "";
+
   const pscale = createPlanetScaleClient(`${serviceTokenId}:${serviceToken}`);
 
   const tokens = await oauthClient.getTokens();

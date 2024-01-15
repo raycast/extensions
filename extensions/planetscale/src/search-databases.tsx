@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
-import { useDatabases, useOrganizations } from "./utils/hooks";
-import { View } from "./utils/components";
-import { PlanetScaleColor } from "./utils/colors";
+import { PlanetScaleColor } from "./lib/colors";
 import { format } from "date-fns";
+import { View } from "./lib/oauth/view";
+import { useOrganizations } from "./lib/hooks/use-organizations";
+import { useDatabases } from "./lib/hooks/use-databases";
 
 function ListSection({ organization }: { organization: string }) {
   const { databases } = useDatabases({ organization });

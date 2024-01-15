@@ -1,10 +1,11 @@
-import { useBranches } from "./utils/hooks";
 import { FormValidation, useForm } from "@raycast/utils";
 import { Action, ActionPanel, Color, Form } from "@raycast/api";
-import { FormDatabaseDropdown, View } from "./utils/components";
-import { PlanetScaleColor } from "./utils/colors";
+import { PlanetScaleColor } from "./lib/colors";
 import { isEmpty, sample } from "lodash";
 import { useState } from "react";
+import { View } from "./lib/oauth/view";
+import { FormDatabaseDropdown } from "./lib/components/form-database-dropdown";
+import { useBranches } from "./lib/hooks/use-branches";
 
 interface CreateBranchForm {
   name: string;

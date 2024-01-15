@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { Detail, environment, MenuBarExtra } from "@raycast/api";
 
-import { createPlanetScaleClient, PlanetScaleClient } from "./api";
-import { authorize } from "./oauth";
+import { createPlanetScaleClient, PlanetScaleClient } from "../api";
+import { authorize } from "./client";
 
 let planetScaleClient: PlanetScaleClient | null = null;
 
@@ -38,4 +38,11 @@ export function getPlanetScaleClient(): PlanetScaleClient {
     throw new Error("getLinearClient must be used when authenticated");
   }
   return planetScaleClient;
+}
+
+/**
+ * Makes sure that we have a authenticated PlanetScale client available in the children
+ */
+export function View({ children }: { children: JSX.Element }) {
+  return withPlanetScaleClient(children);
 }

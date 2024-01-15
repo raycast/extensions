@@ -1,8 +1,11 @@
 import { Action, ActionPanel, Image, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
-import { useDeployRequests, useSelectedDatabase, useSelectedOrganization } from "./utils/hooks";
-import { ListDatabaseDropdown, View } from "./utils/components";
-import { PlanetScaleColor } from "./utils/colors";
+import { PlanetScaleColor } from "./lib/colors";
+import { View } from "./lib/oauth/view";
+import { ListDatabaseDropdown } from "./lib/components/list-database-dropdown";
+import { useDeployRequests } from "./lib/hooks/use-deploy-requests";
+import { useSelectedOrganization } from "./lib/hooks/use-selected-organization";
+import { useSelectedDatabase } from "./lib/hooks/use-selected-database";
 
 function SearchDeployRequests() {
   const [organization, setOrganization] = useSelectedOrganization();

@@ -1,10 +1,13 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
-import { useBranches, useSelectedDatabase, useSelectedOrganization } from "./utils/hooks";
 import { CreateDeployRequest } from "./create-deploy-request";
-import { ListDatabaseDropdown, View } from "./utils/components";
-import { PlanetScaleColor } from "./utils/colors";
+import { PlanetScaleColor } from "./lib/colors";
 import { CreateBranch } from "./create-branch";
+import { View } from "./lib/oauth/view";
+import { ListDatabaseDropdown } from "./lib/components/list-database-dropdown";
+import { useBranches } from "./lib/hooks/use-branches";
+import { useSelectedOrganization } from "./lib/hooks/use-selected-organization";
+import { useSelectedDatabase } from "./lib/hooks/use-selected-database";
 
 function SearchBranches() {
   const [organization, setOrganization] = useSelectedOrganization();

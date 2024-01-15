@@ -1,9 +1,11 @@
-import { useBranches, useDeployRequests } from "./utils/hooks";
 import { FormValidation, useForm } from "@raycast/utils";
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { useEffect } from "react";
-import { FormDatabaseDropdown, View } from "./utils/components";
 import { isEmpty } from "lodash";
+import { View } from "./lib/oauth/view";
+import { FormDatabaseDropdown } from "./lib/components/form-database-dropdown";
+import { useBranches } from "./lib/hooks/use-branches";
+import { useDeployRequests } from "./lib/hooks/use-deploy-requests";
 
 interface CreateDeployRequestForm {
   branch: string;
