@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sage-hr",
-  "title": "Search SageHR",
+  "title": "Sage HR",
   "description": "Integration with Sage HR to get a searchable list on who is out today",
   "keywords": [
     "SageHR Integration",
