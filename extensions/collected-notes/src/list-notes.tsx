@@ -1,50 +1,47 @@
-import {
-	Action,
-	ActionPanel,
-	Alert,
-	Color,
-	Detail,
-	Icon,
-	List,
-	confirmAlert,
-	openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Detail, Icon, List, confirmAlert } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
 import { useSites } from "./hooks/use-sites";
+import { Validation } from "./layouts/Validation";
 import { NoteVisibility, cn, type Note } from "./utils/collected-notes";
 
 export default function Command() {
-	const { currentSite, setCurrentSite, sites, sitesAreLoading } = useSites();
+	const { currentSite, setCurrentSite, sites, sitesAreLoading, getSiteById } = useSites();
 
 	const [listIsLoading, setListIsLoading] = useState(false);
 
 	return (
-		<List
-			isLoading={sitesAreLoading || listIsLoading || !currentSite}
-			navigationTitle="Collected Notes"
-			searchBarPlaceholder="Search Posts"
-			searchBarAccessory={
-				<List.Dropdown
-					placeholder="Select site"
-					tooltip="Select site"
-					storeValue={true}
-					isLoading={sitesAreLoading}
-					onChange={setCurrentSite}
-				>
-					{sites?.map((site) => (
-						<List.Dropdown.Item key={site.id} title={site.name} value={site.site_path} keywords={[site.site_path]} />
-					))}
-				</List.Dropdown>
-			}
-		>
-			{currentSite && <SiteNotesList site={currentSite} setListIsLoading={setListIsLoading} />}
-		</List>
+		<Validation>
+			<List
+				isLoading={sitesAreLoading || listIsLoading || !currentSite}
+				navigationTitle="Collected Notes"
+				searchBarPlaceholder="Search Posts"
+				searchBarAccessory={
+					<List.Dropdown
+						placeholder="Select site"
+						tooltip="Select site"
+						storeValue={true}
+						isLoading={sitesAreLoading}
+						onChange={setCurrentSite}
+					>
+						{sites?.map((site) => (
+							<List.Dropdown.Item key={site.id} title={site.name} value={String(site.id)} keywords={[site.site_path]} />
+						))}
+					</List.Dropdown>
+				}
+			>
+				{currentSite && (
+					<SiteNotesList site={getSiteById(currentSite)?.site_path} setListIsLoading={setListIsLoading} />
+				)}
+			</List>
+		</Validation>
 	);
 }
 
-function SiteNotesList({ site, setListIsLoading }: { site: string; setListIsLoading: (isLoading: boolean) => void }) {
+function SiteNotesList({ site, setListIsLoading }: { site?: string; setListIsLoading: (isLoading: boolean) => void }) {
+	if (!site) return null;
+
 	const { data, isLoading, revalidate } = usePromise<(site_path: string) => ReturnType<typeof cn.site>>(
 		(s) => cn.site(s),
 		[site],
@@ -191,20 +188,5 @@ function DetailActions(params: {
 			</ActionPanel.Submenu>
 			<Action title="Delete Note" icon={Icon.Trash} shortcut={{ modifiers: ["ctrl"], key: "x" }} onAction={onDelete} />
 		</>
-	);
-}
-
-export function InvalidCredentials({ message }: { message?: string }) {
-	const markdown = "API key incorrect. Please update it in extension preferences and try again.";
-
-	return (
-		<Detail
-			markdown={message ?? markdown}
-			actions={
-				<ActionPanel>
-					<Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-				</ActionPanel>
-			}
-		/>
 	);
 }
