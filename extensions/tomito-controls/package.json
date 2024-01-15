@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tomito-controls",
   "title": "Tomito Controls",
-  "description": "A set of commands to control Tomito, a Pomodoro app",
+  "description": "Control the Tomito app, a Pomodoro timer for macOS",
   "icon": "tomito-icon.png",
   "author": "elyse",
   "categories": [
@@ -19,7 +19,7 @@
     {
       "name": "restart",
       "title": "Restart",
-      "description": "Restarts current interval",
+      "description": "Restart current interval",
       "mode": "no-view"
     },
     {
