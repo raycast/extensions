@@ -147,19 +147,3 @@ export default function Command() {
     </ExtensionContextProvider>
   );
 }
-
-// function useTraceUpdate(props: any) {
-//   const prev = useRef(props);
-//   useEffect(() => {
-//     const changedProps = Object.entries(props).reduce((ps: any, [k, v]) => {
-//       if (prev.current[k] !== v) {
-//         ps[k] = [prev.current[k], v];
-//       }
-//       return ps;
-//     }, {});
-//     if (Object.keys(changedProps).length > 0) {
-//       appendFileSync("/Users/benkeys/Desktop/data2.jsonc", JSON.stringify(changedProps))
-//     }
-//     prev.current = props;
-//   });
-// }
