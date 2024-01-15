@@ -160,11 +160,18 @@ export interface LeadersItem {
   displayName?: string;
   shortDisplayName?: string;
   abbreviation?: string;
-  leaders?: LeadersItem[];
-  displayValue?: string;
-  value?: number;
-  athlete?: Athlete;
-  team?: Team;
+  leaders: LeaderInnerItem[];
+}
+
+export interface LeaderInnerItem {
+  displayValue: string;
+  value: number;
+  athlete: Athlete;
+  team: InnerTeam;
+}
+
+export interface InnerTeam {
+  id: string;
 }
 
 export interface Athlete {

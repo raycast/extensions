@@ -73,8 +73,8 @@ function formatGameToMarkdown(gameInfo: EventsItem) {
    * formatGameToMarkdown(gameInfo)
    */
 
-  const homeTeam: CompetitorsItem = gameInfo.competitions[0].competitors[0];
-  const awayTeam: CompetitorsItem = gameInfo.competitions[0].competitors[1];
+  const homeTeam: CompetitorsItem = gameInfo.competitions[0]?.competitors[0];
+  const awayTeam: CompetitorsItem = gameInfo.competitions[0]?.competitors[1];
 
   let markdownText = ``;
   markdownText += `## ![Team Logo](${awayTeam.team.logo}?raycast-width=150&raycast-height=150)`;
@@ -87,28 +87,27 @@ function formatGameToMarkdown(gameInfo: EventsItem) {
     markdownText += `- [${link.text}](${link.href})\n`;
   });
 
-  /// Only show if it is defined for the leaders
-  const awayPassingLeader = awayTeam.leaders[0]?.leaders[0];
-  const awayRushingLeader = awayTeam.leaders[1]?.leaders[0];
-  const awayReceivingLeader = awayTeam.leaders[2]?.leaders[0];
+  const awayPassingLeader = awayTeam.leaders[0].leaders[0];
+  const awayRushingLeader = awayTeam.leaders[1].leaders[0];
+  const awayReceivingLeader = awayTeam.leaders[2].leaders[0];
 
-  const homePassingLeader = homeTeam.leaders[0]?.leaders[0];
-  const homeRushingLeader = homeTeam.leaders[1]?.leaders[0];
-  const homeReceivingLeader = homeTeam.leaders[2]?.leaders[0];
+  const homePassingLeader = homeTeam?.leaders[0].leaders[0];
+  const homeRushingLeader = homeTeam?.leaders[1].leaders[0];
+  const homeReceivingLeader = homeTeam?.leaders[2].leaders[0];
 
-  if (awayPassingLeader && homePassingLeader) {
+  if (awayPassingLeader && homePassingLeader && awayPassingLeader.athlete && homePassingLeader.athlete) {
     markdownText += `### Passing Leaders\n\n`;
     markdownText += `#### [${awayPassingLeader.athlete.displayName}](${awayPassingLeader.athlete.links[0].href}) (${awayPassingLeader.athlete.position.abbreviation}) (${awayPassingLeader.displayValue})\n\n`;
     markdownText += `#### [${homePassingLeader.athlete.displayName}](${homePassingLeader.athlete.links[0].href}) (${homePassingLeader.athlete.position.abbreviation}) (${homePassingLeader.displayValue})\n\n`;
   }
 
-  if (awayRushingLeader && homeRushingLeader) {
+  if (awayRushingLeader && homeRushingLeader && awayRushingLeader.athlete && homeRushingLeader.athlete) {
     markdownText += `### Rushing Leaders\n\n`;
     markdownText += `#### [${awayRushingLeader.athlete.displayName}](${awayRushingLeader.athlete.links[0].href}) (${awayRushingLeader.athlete.position.abbreviation}) (${awayRushingLeader.displayValue})\n\n`;
     markdownText += `#### [${homeRushingLeader.athlete.displayName}](${homeRushingLeader.athlete.links[0].href}) (${homeRushingLeader.athlete.position.abbreviation}) (${homeRushingLeader.displayValue})\n\n`;
   }
 
-  if (awayReceivingLeader && homeReceivingLeader) {
+  if (awayReceivingLeader && homeReceivingLeader && awayReceivingLeader.athlete && homeReceivingLeader.athlete) {
     markdownText += `### Receiving Leaders\n\n`;
     markdownText += `#### [${awayReceivingLeader.athlete.displayName}](${awayReceivingLeader.athlete.links[0].href}) (${awayReceivingLeader.athlete.position.abbreviation}) (${awayReceivingLeader.displayValue})\n\n`;
     markdownText += `#### [${homeReceivingLeader.athlete.displayName}](${homeReceivingLeader.athlete.links[0].href}) (${homeReceivingLeader.athlete.position.abbreviation}) (${homeReceivingLeader.displayValue})\n\n`;
@@ -125,7 +124,12 @@ function formatGameToMarkdown(gameInfo: EventsItem) {
   return markdownText;
 }
 
-function Section(props: { date: string; eventsByDay: [string: EventsItem]; timeOptions: Intl.DateTimeFormatOptions }) {
+// inputDictionary: { [key: string]: number }
+function Section(props: {
+  date: string;
+  eventsByDay: { [key: string]: EventsItem[] };
+  timeOptions: Intl.DateTimeFormatOptions;
+}) {
   /**
    * Show a list section for a specific day
    * @param props

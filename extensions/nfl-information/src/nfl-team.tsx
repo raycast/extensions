@@ -1,8 +1,8 @@
 import { ActionPanel, List, Action, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { TeamResponse, TeamsItem } from "./model/team-response";
+import { TeamResponse, Team } from "./model/team-response";
 
-function formatTeamToMarkdown(team: TeamsItem) {
+function formatTeamToMarkdown(team: Team) {
   /**
    * Format the team information to markdown
    * @param team - The team information to format
@@ -21,7 +21,7 @@ function formatTeamToMarkdown(team: TeamsItem) {
   return markdownText;
 }
 
-function DetailsView(props: { teamInfo: TeamsItem }) {
+function DetailsView(props: { teamInfo: Team }) {
   /**
    * Show the team details for a specific team
    * @param props
