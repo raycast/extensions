@@ -1,8 +1,9 @@
 # Toggl Track Changelog
 
-## [Refactor] - 2024-01-16
+## [Enhancements] - 2024-01-16
 
 - Rename main command to "Start/Stop Time Entry".
+- Remove projects from list view.
 
 ## [Bug Fixes] - 2024-01-15
 
