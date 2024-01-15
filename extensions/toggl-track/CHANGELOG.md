@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Refactor] - 2024-01-04
+
+- Refactor extension to use updated Raycast utilities.
+
 ## [New Feature] - 2023-02-28
 
 - Add ability to choose a [project task](https://support.toggl.com/en/articles/2220738-tasks) when creating a new time entry.

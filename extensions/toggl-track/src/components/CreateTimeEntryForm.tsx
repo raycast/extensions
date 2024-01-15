@@ -1,13 +1,11 @@
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
-import toggl from "../toggl";
-import { storage } from "../storage";
-import { Project, Task } from "../toggl/types";
-import { useAppContext } from "../context";
+import { createTimeEntry, Project, Task } from "../api";
+import { useTimeEntryContext } from "../context/TimeEntryContext";
 import { useMemo, useState } from "react";
 
 function CreateTimeEntryForm({ project, description }: { project?: Project; description?: string }) {
   const navigation = useNavigation();
-  const { projects, tags, tasks, isLoading, projectGroups, me } = useAppContext();
+  const { me, isLoading, projects, tags, tasks, projectGroups, revalidateRunningTimeEntry } = useTimeEntryContext();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
@@ -22,7 +20,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
     }
 
     try {
-      await toggl.createTimeEntry({
+      await createTimeEntry({
         projectId: selectedProject?.id,
         workspaceId,
         description: values.description,
@@ -31,7 +29,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         billable,
       });
       await showToast(Toast.Style.Animated, "Starting time entry...");
-      await storage.runningTimeEntry.refresh();
+      revalidateRunningTimeEntry();
       await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
       await clearSearchBar();
