@@ -4,6 +4,7 @@
 
 - Remove `refresh` action.
 - Fix project dropdown in time entry form.
+- Fix today's duration timer.
 
 ## [Refactor] - 2024-01-04
 
