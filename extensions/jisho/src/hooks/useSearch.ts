@@ -11,6 +11,9 @@ const useSearch = (initialSearchText: string) => {
   const [searchText, setSearchText] = useState<string>(initialSearchText);
 
   const { isLoading, data } = useFetch(`https://jisho.org/api/v1/search/words?keyword=${searchText}`, {
+    headers: {
+      "User-Agent": "Raycast Jisho Extension",
+    },
     parseResponse: parseResponse,
     initialData: [],
     keepPreviousData: true,

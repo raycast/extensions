@@ -4,7 +4,6 @@ import {
   ErrorLoadingNotification,
   LoadingNotificationContent,
   MarkNotificationsAsRead,
-  MarkNotificationsAsReadAlert,
   NewNotification,
   NewNotifications,
   NoNewNotifications,
@@ -18,7 +17,7 @@ import {
   ViewNotificationsSearchBarPlaceholder,
   ViewingNotification,
 } from "./utils/constants";
-import { buildTitle, showLoadingToast, showSuccessToast } from "./utils/common";
+import { buildTitle, getAccountName, showLoadingToast, showSuccessToast } from "./utils/common";
 import { getFormattedDateTime, getRelativeDateTime } from "./utils/date";
 import { getNotifications, getPostThread, getUnreadNotificationCount, markNotificationsAsRead } from "./libs/atp";
 import { getPostMarkdownView, parseNotifications } from "./utils/parser";
@@ -58,6 +57,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
       const data = await getNotifications(notificationCursor, ExtensionConfig.notificationRequestLimit);
 
       if (!data) {
+        setNotificationsLoaded(false);
         return;
       }
 
@@ -175,10 +175,10 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
       <List.Item
         key={notification.id}
         id={notification.id}
-        icon={{ source: notification.author.avatarUrl }}
+        icon={{ source: notification.author.avatarUrl ? notification.author.avatarUrl : Icon.ChessPiece }}
         detail={<List.Item.Detail markdown={detailsText} />}
         accessories={getNotificationAccessory(notification)}
-        title={`${notification.author.displayName} ${notification.text}`}
+        title={`${getAccountName(notification.author)} ${notification.text}`}
         actions={
           <ActionPanel>
             <Action

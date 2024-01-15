@@ -2,6 +2,8 @@ import { List } from "@raycast/api";
 import { random } from "lodash";
 import { useMemo } from "react";
 
+import { GitpodIcons } from "../../constants";
+
 const sampleQueries = [
   "apollo-11",
   "rails",
@@ -24,8 +26,8 @@ export default function RepositoryListEmptyView({ searchText, isLoading }: Repos
   const example = useMemo(() => sampleQueries[random(0, sampleQueries.length - 1)], []);
 
   if (searchText.length > 0 && !isLoading) {
-    return <List.EmptyView title="No repositories found" />;
+    return <List.EmptyView icon={GitpodIcons.gitpod_logo_secondary} title="No repositories found" />;
   }
 
-  return <List.EmptyView title={`Type query e.g "${example}"`} />;
+  return <List.EmptyView icon={GitpodIcons.gitpod_logo_secondary} title={`Type query e.g "${example}"`} />;
 }

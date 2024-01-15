@@ -8,7 +8,8 @@
   "contributors": [
     "GastroGeek",
     "pernielsentikaer",
-    "LunaticMuch"
+    "LunaticMuch",
+    "hmarr"
   ],
   "license": "MIT",
   "commands": [
@@ -56,6 +57,34 @@
           "description": "The namespace for UUID v5"
         }
       ]
+    },
+    {
+      "name": "generateV7",
+      "title": "Generate V7 UUIDs",
+      "description": "Copy generated UUIDs V7 to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "generateUlid",
+      "title": "Generate ULIDs",
+      "description": "Copy generated ULIDs to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfULIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -88,17 +117,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.2",
-    "uuid": "^9.0.0"
+    "@raycast/api": "^1.55.0",
+    "ulidx": "^2.0.0",
+    "uuid": "^9.0.0",
+    "uuidv7": "^0.6.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.8.3",
-    "@types/uuid": "^9.0.1",
-    "eslint": "^8.38.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.4.2",
+    "@types/uuid": "^9.0.2",
+    "eslint": "^8.45.0",
     "eslint-plugin-import": "^2.27.5",
-    "react-devtools": "^4.27.4",
-    "typescript": "^5.0.4"
+    "react-devtools": "^4.28.0",
+    "typescript": "^5.1.6"
   },
   "scripts": {
     "build": "ray build -e dist",

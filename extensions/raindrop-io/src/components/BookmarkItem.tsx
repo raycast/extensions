@@ -31,7 +31,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
     if (bookmark.highlights.length) {
       md += `## Highlights\n`;
       bookmark.highlights.map((hl) => {
-        md += `> ${hl.text}${hl.note ? ` (Note: ${hl.note})` : ""}`;
+        md += `> ${hl.text}${hl.note ? ` (Note: ${hl.note})` : ""}\n\n`;
       });
       md += "\n\n";
     }
@@ -61,7 +61,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
                 revalidate();
                 return res.json();
               } else {
-                throw new Error("Error deleting link");
+                throw new Error(res.statusText);
               }
             });
           } catch (error) {

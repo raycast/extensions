@@ -1,116 +1,90 @@
-import { List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List } from "@raycast/api";
 import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace, getMemoryUsage } from "./MemoryUtils";
 import { useInterval } from "usehooks-ts";
-import { MemoryMonitorState } from "../Interfaces";
-import { ExecError } from "../Interfaces";
 import { Actions } from "../components/Actions";
+import { usePromise } from "@raycast/utils";
 
 export default function MemoryMonitor() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<ExecError>();
-  const [state, setState] = useState<MemoryMonitorState>({
-    freeDisk: "Loading...",
-    totalDisk: "Loading...",
-    totalMem: "Loading...",
-    freeMem: "Loading...",
-    freeMemPercentage: "Loading...",
-    topProcess: [],
+  const { data, revalidate } = usePromise(async () => {
+    const memoryUsage = await getMemoryUsage();
+    const memTotal = memoryUsage.memTotal;
+    const memUsed = memoryUsage.memUsed;
+    const freeMem = memTotal - memUsed;
+
+    return {
+      totalMem: Math.round(memTotal / 1024).toString(),
+      freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
+      freeMem: Math.round(freeMem / 1024).toString(),
+    };
   });
 
-  useInterval(() => {
-    getTopRamProcess()
-      .then((newTopProcess) => {
-        getFreeDiskSpace()
-          .then((newFreeDisk) => {
-            getMemoryUsage().then((memoryUsage) => {
-              const memTotal: number = memoryUsage.memTotal;
-              const memUsed: number = memoryUsage.memUsed;
-              const freeMem: number = memTotal - memUsed;
-
-              setState((prevState) => {
-                return {
-                  ...prevState,
-                  freeDisk: newFreeDisk,
-                  totalMem: Math.round(memTotal / 1024).toString(),
-                  freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-                  freeMem: Math.round(freeMem / 1024).toString(),
-                  topProcess: newTopProcess,
-                };
-              });
-              setIsLoading(false);
-            });
-          })
-          .catch((error: ExecError) => {
-            setError(error);
-          });
-      })
-      .catch((err: ExecError) => {
-        setError(err);
-      });
-  }, 1000);
-
-  useEffect(() => {
-    const permData = () => {
-      getTotalDiskSpace()
-        .then((newTotalDisk) => {
-          setState((prevState) => {
-            return {
-              ...prevState,
-              totalDisk: newTotalDisk,
-            };
-          });
-        })
-        .catch((error: ExecError) => {
-          setError(error);
-        });
-    };
-    permData();
-  }, []);
-
-  useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Fetch Memory info [Error Code: " + error.code + "]",
-        message: error.stderr,
-      });
-    }
-  }, [error]);
+  useInterval(revalidate, 1000);
 
   return (
     <>
       <List.Item
+        id="memory"
         title="📝  Memory"
-        accessories={[{ text: isLoading ? "Loading..." : `${state.freeMemPercentage}% (~ ${state.freeMem} GB)` }]}
+        accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage}% (~ ${data.freeMem} GB)` }]}
         detail={
-          <List.Item.Detail
-            metadata={
-              <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Total Disk Space" text={state.totalDisk} />
-                <List.Item.Detail.Metadata.Label title="Free Disk Space" text={state.freeDisk} />
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Total RAM" text={`${state.totalMem} GB`} />
-                <List.Item.Detail.Metadata.Label title="Free RAM" text={`${state.freeMem} GB`} />
-                <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${state.freeMemPercentage} %`} />
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
-                {state.topProcess.length > 0 &&
-                  state.topProcess.map((element, index) => {
-                    return (
-                      <List.Item.Detail.Metadata.Label
-                        key={index}
-                        title={index + 1 + ".    " + element[0]}
-                        text={element[1]}
-                      />
-                    );
-                  })}
-              </List.Item.Detail.Metadata>
-            }
+          <MemoryMonitorDetail
+            freeMem={data?.freeMem || ""}
+            freeMemPercentage={data?.freeMemPercentage || ""}
+            totalMem={data?.totalMem || ""}
           />
         }
         actions={<Actions />}
       />
     </>
+  );
+}
+
+function MemoryMonitorDetail({
+  freeMemPercentage,
+  freeMem,
+  totalMem,
+}: {
+  freeMemPercentage: string;
+  freeMem: string;
+  totalMem: string;
+}) {
+  const { data: totalDisk, isLoading: isLoadingTotalDisk } = usePromise(getTotalDiskSpace);
+  const {
+    data: topProcess,
+    isLoading: isLoadingTopProcess,
+    revalidate: revalidateTopProcess,
+  } = usePromise(getTopRamProcess);
+  useInterval(revalidateTopProcess, 5000);
+
+  const { data: freeDisk, isLoading: isLoadingFreeDisk, revalidate: revalidateFreeDisk } = usePromise(getFreeDiskSpace);
+  useInterval(revalidateFreeDisk, 1000 * 60);
+
+  return (
+    <List.Item.Detail
+      isLoading={isLoadingTotalDisk || isLoadingTopProcess || isLoadingFreeDisk}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Total Disk Space" text={totalDisk} />
+          <List.Item.Detail.Metadata.Label title="Free Disk Space" text={freeDisk} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Total RAM" text={`${totalMem} GB`} />
+          <List.Item.Detail.Metadata.Label title="Free RAM" text={`${freeMem} GB`} />
+          <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${freeMemPercentage} %`} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Process Name" text="RAM" />
+          {topProcess &&
+            topProcess.length > 0 &&
+            topProcess.map((element, index) => {
+              return (
+                <List.Item.Detail.Metadata.Label
+                  key={index}
+                  title={index + 1 + ".    " + element[0]}
+                  text={element[1]}
+                />
+              );
+            })}
+        </List.Item.Detail.Metadata>
+      }
+    />
   );
 }

@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "json-format",
   "title": "Format JSON",
-  "description": "Formats a JSON file with a selected indentation.",
+  "description": "Formats a JSON file with a selected indentation. If the JSON is stringified, it will be parsed before formatting.",
   "icon": "command-icon.png",
   "author": "destiner",
   "contributors": [
     "Aayush9029",
     "devlos",
-    "lachero"
+    "lachero",
+    "alexs"
   ],
   "categories": [
     "Data",

@@ -4,7 +4,7 @@ import { useCachedPromise, MutatePromise } from "@raycast/utils";
 export default function useIssues<T>(
   fetcher: (...args: T[]) => Promise<IssueResult[] | undefined>,
   args: T[] = [],
-  config?: { execute?: boolean; keepPreviousData?: boolean }
+  config?: { execute?: boolean; keepPreviousData?: boolean },
 ): {
   issues: IssueResult[] | undefined;
   issuesError: Error | undefined;

@@ -97,7 +97,7 @@ function trigger(randName: string, preferences: Preferences, displayNumber = 1) 
   });
 }
 
-export default async function main() {
+export default function main() {
   const randName = randomInt(100, 999).toString();
   const preferences = getPreferenceValues<Preferences>();
   trigger(randName, preferences);

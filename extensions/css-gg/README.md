@@ -5,10 +5,11 @@
   />
 
   <h1>
-    CSS.GG
+    CSS.GG 
   </h1>
 
-Open-source CSS, SVG and Figma UI Icons — Available in SVG Sprite, styled-components, NPM & API
+Open-source icon library available in SVG, Pure CSS, PNG version. And a collection of 6k glyphs
+<br><br>
 
   <p>
     <a href="https://www.raycast.com/astrit/css-gg">
@@ -24,20 +25,16 @@ Open-source CSS, SVG and Figma UI Icons — Available in SVG Sprite, styled-comp
         alt="raycast-extensions is released under the MIT license."
       />
     </a>
-    <img
-      src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
-      alt="PRs welcome!"
-    />
     <a href="https://twitter.com/intent/follow?screen_name=astritmalsija">
       <img
         src="https://img.shields.io/twitter/follow/astritmalsija.svg?label=Follow%20@astritmalsija"
         alt="Follow @astritmalsija"
       />
     </a>
-    <a href="https://open.vscode.dev/raycast/extensions">
+    <a href="https://www.youtube.com/c/astrit?sub_confirmation=1">
       <img
-        src="https://open.vscode.dev/badges/open-in-vscode.svg"
-        alt="Open in Visual Studio Code"
+        src="https://img.shields.io/youtube/channel/subscribers/UCHcZvp39InNTwh3eJh1C2eg"
+        alt="subscribe"
       />
     </a>
   </p>
@@ -45,16 +42,8 @@ Open-source CSS, SVG and Figma UI Icons — Available in SVG Sprite, styled-comp
 
 ## Features
 
-- Copy `SVG` to Clipboard
-- Open in Browser
-- Copy as inline `CSS` or `TSX`
-- Copy Markup: `CSS Markup` or `SVG Sprite` Markup
-- Include as `Stylesheet`, `CSS @import`, `JSON` or `XML`
-- Download single icon as `.CSS`, `SVG`, `.SCSS`, White or Black `.PNG`
-- Open in `Figma` or `Adobe XD`
-- Download all 704 icons package as `SVG Sprite`, `.JSON`, `.CSS`, `.SCSS`
-- Copy NPM command: `npm i css.gg`
-
-## Showcases
-
-https://user-images.githubusercontent.com/2398447/142506444-abb942e7-715f-4101-90a6-a7f633199f4d.mp4
+- Search 700+ icons and 6k glyphs
+- Paste in active app
+- Copy icons as `SVG` to clipboard `cmd + c`
+- Open in Browser `shift + enter`
+- Filter through categories

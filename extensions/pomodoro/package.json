@@ -7,7 +7,9 @@
   "author": "asubbotin",
   "contributors": [
     "pernielsentikaer",
-    "brodelp"
+    "brodelp",
+    "susan_thapa",
+    "mikikiv"
   ],
   "keywords": [
     "pomodoro",
@@ -241,9 +243,50 @@
       "name": "completionImage",
       "type": "textfield",
       "required": false,
-      "title": "Image Markdown Link",
+      "title": "Default Image Link",
       "description": "Image on interval completion, URL",
-      "default": "![The Best Thank You GIF by SWR3](https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif)"
+      "default": "https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif"
+    },
+    {
+      "name": "giphyAPIKey",
+      "type": "textfield",
+      "required": false,
+      "title": "Giphy API Key",
+      "description": "Use an API key from Giphy to get random images on interval completion. Get your API key here: https://developers.giphy.com/docs/api#quick-start-guide"
+    },
+    {
+      "name": "giphyTag",
+      "type": "textfield",
+      "required": false,
+      "title": "Giphy Tag",
+      "description": "Tag to use for Giphy API. Default is 'success'.",
+      "default": "success"
+    },
+    {
+      "name": "giphyRating",
+      "type": "dropdown",
+      "required": false,
+      "title": "Giphy Rating",
+      "description": "Rating to use for Giphy API. Default is 'g'.",
+      "default": "g",
+      "data": [
+        {
+          "value": "g",
+          "title": "G"
+        },
+        {
+          "value": "pg",
+          "title": "PG"
+        },
+        {
+          "value": "pg-13",
+          "title": "PG-13"
+        },
+        {
+          "value": "r",
+          "title": "R"
+        }
+      ]
     },
     {
       "name": "sound",
@@ -270,17 +313,28 @@
           "value": "Ping"
         }
       ]
+    },
+    {
+      "name": "enableTimeOnMenuBar",
+      "type": "checkbox",
+      "required": false,
+      "title": "Menu Bar Time",
+      "description": "Shows time on the Menu Bar",
+      "default": true,
+      "label": "Show time on Menu Bar"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8"
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

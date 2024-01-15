@@ -20,3 +20,7 @@ export interface Device {
   scale_factor: string;
   color_profile: string | null;
 }
+
+interface Preferences {
+  device: string;
+}

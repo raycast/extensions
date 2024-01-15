@@ -17,7 +17,7 @@ export function ItemDetail({
   const createdBy = snippetCreatedBy(snippet);
   const createdAt = snippetCreatedAt(snippet);
 
-  const markdown = file.filetype === "markdown" ? file.content : `\`\`\`\\n${file.content}\n\`\`\``;
+  const markdown = file.filetype === "markdown" ? file.content : `\`\`\`\\\n${file.content}\n\`\`\``;
 
   return (
     <List.Item.Detail

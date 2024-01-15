@@ -1,6 +1,7 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getReferencesMatchingPhrase } from "youversion-suggest";
+import { getPreferredLanguage, getPreferredVersion } from "./preferences";
 import ReferenceActions from "./reference-actions";
 import { BibleReference } from "./types";
 
@@ -59,7 +60,7 @@ function useSearch() {
         showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
       }
     },
-    [setState]
+    [setState],
   );
 
   useEffect(() => {
@@ -75,7 +76,10 @@ function useSearch() {
 async function getSearchResults(searchText: string): Promise<BibleReference[]> {
   // Do not call out to YouVersion's servers if the search text is empty
   if (searchText.trim()) {
-    return getReferencesMatchingPhrase(searchText);
+    return getReferencesMatchingPhrase(searchText, {
+      language: await getPreferredLanguage(),
+      version: await getPreferredVersion(),
+    });
   } else {
     return [];
   }

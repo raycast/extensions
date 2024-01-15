@@ -12,7 +12,7 @@ export function SearchVideoList({ channelId, searchQuery }: { channelId?: string
   const [searchText, setSearchText] = useState<string>(searchQuery || "");
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(
     async () => (searchText ? await searchVideos(searchText, channelId) : undefined),
-    [searchText]
+    [searchText],
   );
   if (error) {
     showToast(Toast.Style.Failure, "Could Not Search Videos", getErrorMessage(error));

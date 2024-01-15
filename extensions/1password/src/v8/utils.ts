@@ -6,14 +6,7 @@ import { useEffect, useState } from "react";
 
 import { CategoryName, Item } from "./types";
 
-export type ActionID = "open-in-1password" | "open-in-browser" | "copy-username" | "copy-password";
-
-export type Preferences = {
-  cliPath: string;
-  version: "v7" | "v8";
-  primaryAction: ActionID;
-  secondaryAction: ActionID;
-};
+export type ActionID = Preferences["primaryAction"];
 
 export const cache = new Cache();
 
@@ -35,7 +28,13 @@ export function hrefToOpenInBrowser(item: Item): string | undefined {
 
 export function actionsForItem(item: Item): ActionID[] {
   // all actions in the default order
-  const defaultActions: ActionID[] = ["open-in-1password", "open-in-browser", "copy-username", "copy-password"];
+  const defaultActions: ActionID[] = [
+    "open-in-1password",
+    "open-in-browser",
+    "copy-username",
+    "copy-password",
+    "copy-one-time-password",
+  ];
   // prioritize primary and secondary actions, then append the rest and remove duplicates
   const deduplicatedActions = [
     ...new Set<ActionID>([preferences.primaryAction, preferences.secondaryAction, ...defaultActions]),

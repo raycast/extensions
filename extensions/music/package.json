@@ -7,7 +7,9 @@
   "author": "fedevitaledev",
   "contributors": [
     "peterdev22",
-    "danpalmer"
+    "danpalmer",
+    "itsjustxan",
+    "Shpigford"
   ],
   "license": "MIT",
   "keywords": [
@@ -103,10 +105,10 @@
       "mode": "no-view"
     },
     {
-      "name": "love",
-      "title": "Love Track",
+      "name": "favorite",
+      "title": "Favorite Track",
       "subtitle": "Apple Music",
-      "description": "Love currently playing track.",
+      "description": "Favorite currently playing track.",
       "mode": "no-view"
     },
     {
@@ -117,6 +119,13 @@
       "mode": "no-view"
     },
     {
+      "name": "dislike-skip",
+      "title": "Dislike and Skip Track",
+      "subtitle": "Apple Music",
+      "description": "Dislike and skip currently playing track.",
+      "mode": "no-view"
+    },
+    {
       "name": "add-to-library",
       "title": "Add to Library",
       "subtitle": "Apple Music",
@@ -124,10 +133,10 @@
       "mode": "no-view"
     },
     {
-      "name": "love-and-add-to-library",
-      "title": "Love and Add to Library",
+      "name": "favorite-and-add-to-library",
+      "title": "Favorite and Add to Library",
       "subtitle": "Apple Music",
-      "description": "Love and add currently playing track to your library.",
+      "description": "Favorite and add currently playing track to your library.",
       "mode": "no-view"
     },
     {
@@ -226,7 +235,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.2",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
     "run-applescript": "^6.0.0",
@@ -234,13 +244,13 @@
   },
   "devDependencies": {
     "@rawnly/eslint-config-ts": "^0.0.2",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^20.3.0",
+    "@types/react": "^18.2.11",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^5.1.3"
   }
 }

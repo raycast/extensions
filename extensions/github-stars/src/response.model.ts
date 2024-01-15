@@ -65,7 +65,7 @@ export interface Star {
   has_wiki: boolean;
   has_pages: boolean;
   forks_count: number;
-  mirror_url: any;
+  mirror_url: string;
   archived: boolean;
   disabled: boolean;
   open_issues_count: number;

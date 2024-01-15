@@ -140,7 +140,7 @@ export default function NotificationActions({ notification, userId, mutateList }
 
         <Action.CopyToClipboard
           content={notification.subject.title}
-          title={`Copy ${notification.subject.type} Title`}
+          title={`Copy ${getNotificationTypeTitle(notification)} Title`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>

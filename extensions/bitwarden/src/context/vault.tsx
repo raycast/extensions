@@ -21,6 +21,7 @@ export type VaultContextType = VaultState & {
   loadItems: () => Promise<void>;
   currentFolderId: Nullable<string>;
   setCurrentFolder: (folderOrId: Nullable<string | Folder>) => void;
+  updateState: (next: React.SetStateAction<VaultState>) => void;
 };
 
 const VaultContext = createContext<VaultContextType | null>(null);
@@ -59,7 +60,11 @@ export function VaultProvider(props: VaultProviderProps) {
       let items: Item[] = [];
       let folders: Folder[] = [];
       try {
-        [items, folders] = await Promise.all([bitwarden.listItems(), bitwarden.listFolders()]);
+        const [itemsResult, foldersResult] = await Promise.all([bitwarden.listItems(), bitwarden.listFolders()]);
+        if (itemsResult.error) throw itemsResult.error;
+        if (foldersResult.error) throw foldersResult.error;
+        items = itemsResult.result;
+        folders = foldersResult.result;
         items.sort(favoriteItemsFirstSorter);
       } catch (error) {
         publishItems(new FailedToLoadVaultItemsError());
@@ -95,6 +100,12 @@ export function VaultProvider(props: VaultProviderProps) {
     setCurrentFolderId(typeof folderOrId === "string" ? folderOrId : folderOrId?.id);
   }
 
+  function updateState(next: React.SetStateAction<VaultState>) {
+    const newState = typeof next === "function" ? next(state) : next;
+    setState(newState);
+    cacheVault(newState.items, newState.folders);
+  }
+
   const memoizedValue: VaultContextType = useMemo(
     () => ({
       ...state,
@@ -105,8 +116,9 @@ export function VaultProvider(props: VaultProviderProps) {
       syncItems,
       loadItems,
       setCurrentFolder,
+      updateState,
     }),
-    [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder]
+    [state, session.isLoading, currentFolderId, syncItems, loadItems, setCurrentFolder, updateState]
   );
 
   return <VaultContext.Provider value={memoizedValue}>{children}</VaultContext.Provider>;

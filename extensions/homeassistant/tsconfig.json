@@ -6,6 +6,11 @@
     "raycast-env.d.ts"
   ],
   "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@lib/*" : ["lib/*"],
+      "@components/*" : ["components/*"]
+    },
     "lib": [
       "es2020"
     ],

@@ -2,7 +2,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 
 export async function checkTerminalSetup(callback: (isTerminalSetup: boolean) => void): Promise<boolean> {
-  const localTerminalAppName = await LocalStorage.getItem<string>("terminalAppName");
+  const localTerminalAppName = await LocalStorage.getItem<string>("terminalAppBundleId");
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -24,6 +24,6 @@ export async function checkTerminalSetup(callback: (isTerminalSetup: boolean) =>
 }
 
 export async function openTerminal() {
-  const localTerminalAppName = await LocalStorage.getItem<string>("terminalAppName");
-  execSync(`open -a ${localTerminalAppName}`);
+  const localTerminalAppBundleId = await LocalStorage.getItem<string>("terminalAppBundleId");
+  execSync(`open -b ${localTerminalAppBundleId}`);
 }

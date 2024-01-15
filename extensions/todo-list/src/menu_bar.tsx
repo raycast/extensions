@@ -1,13 +1,9 @@
 import { TodoItem, TodoSections, todoAtom } from "./atoms";
-
-import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra } from "@raycast/api";
 import MenuBarTodoItem from "./menu_bar_todo_item";
-import { SECTIONS_DATA } from "./config";
+import { SECTIONS_DATA, preferences } from "./config";
 import { useAtom } from "jotai";
-
-interface Preferences {
-  completed: string;
-}
+import { sortTodoItem } from "./utils";
 
 const CompletedLimit: { [key: string]: number | undefined } = {
   latest: 3,
@@ -17,7 +13,6 @@ const CompletedLimit: { [key: string]: number | undefined } = {
 
 export default function MenuBar() {
   const [todoSections] = useAtom(todoAtom);
-  const preferences = getPreferenceValues<Preferences>();
 
   const todoLength = Object.values(todoSections).reduce((acc, section) => acc + section.length, 0);
   const completedLimit = CompletedLimit[preferences.completed];
@@ -33,7 +28,7 @@ export default function MenuBar() {
         <>
           <TodoList sectionKey="pinned" todos={todoSections["pinned"]} />
           <TodoList sectionKey="todo" todos={todoSections["todo"]} />
-          <TodoList sectionKey="completed" todos={todoSections["completed"]} limit={completedLimit} />
+          <TodoList limit={completedLimit} sectionKey="completed" todos={todoSections["completed"]} />
         </>
       ) : (
         <MenuBarExtra.Item title="No Todos" />
@@ -61,8 +56,8 @@ const TodoList = ({
     <>
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item title={SECTIONS_DATA[sectionKey].name} />
-      {todos.map((todo, idx) => (
-        <MenuBarTodoItem key={idx} item={todo} idx={idx} sectionKey={sectionKey} />
+      {todos.sort(sortTodoItem).map((todo, idx) => (
+        <MenuBarTodoItem idx={idx} item={todo} key={idx} sectionKey={sectionKey} />
       ))}
     </>
   );

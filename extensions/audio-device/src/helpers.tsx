@@ -24,6 +24,7 @@ import {
   setDefaultSystemDevice,
   TransportType,
 } from "./audio-device";
+import { createDeepLink, setOutputDevice } from "./utils";
 
 type UseAudioDevicesResponse = {
   isLoading: boolean;
@@ -62,12 +63,38 @@ export function useAudioDevices(type: "input" | "output") {
 
 type DeviceListProps = {
   type: "input" | "output";
+  deviceId?: string;
 };
 
-export function DeviceList({ type }: DeviceListProps) {
+export function DeviceList({ type, deviceId }: DeviceListProps) {
   const { isLoading, data } = useAudioDevices(type);
   const subtitle = (device: AudioDevice) =>
     Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0];
+
+  useEffect(() => {
+    if (!deviceId || !data?.devices) return;
+    const device = data.devices.find((d) => d.id === deviceId);
+    if (!device) {
+      showToast(Toast.Style.Failure, "Error!", `The device with id ${deviceId} was not found.`);
+      return;
+    }
+
+    (async function () {
+      try {
+        await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
+        closeMainWindow({ clearRootSearch: true });
+        popToRoot({ clearSearchBar: true });
+        showHUD(`Active ${type} audio device set to ${device.name}`);
+      } catch (e) {
+        console.log(e);
+        showToast(
+          Toast.Style.Failure,
+          `Error!`,
+          `There was an error setting the active ${type} audio device to ${device.name}`
+        );
+      }
+    })();
+  }, [deviceId, data, type]);
 
   return (
     <List isLoading={isLoading}>
@@ -81,6 +108,15 @@ export function DeviceList({ type }: DeviceListProps) {
             actions={
               <ActionPanel>
                 <SetAudioDeviceAction device={d} type={type} />
+                <Action.CreateQuicklink
+                  title="Create quicklink"
+                  quicklink={{
+                    name: `Set ${d.isOutput ? "Output" : "Input"} Device to ${d.name}`,
+                    link: createDeepLink(d.isOutput ? "set-output-device" : "set-input-device", {
+                      deviceId: d.id,
+                    }),
+                  }}
+                />
                 <Action
                   title={`Copy Device Name to Clipboard`}
                   onAction={async () => {

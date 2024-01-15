@@ -1,5 +1,5 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { PreferenceValues } from "@raycast/api/types/api/environment/preferences";
+import { PreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export async function showPreviousTrackNotification() {

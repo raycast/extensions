@@ -8,6 +8,9 @@ We're still figuring things out and updating our guidelines. If at any point som
 
 ---
 
-### Wallpapers
+### Updating the Spotify Client
 
-Screenshots are taken with the "[Moonrise](https://www.raycast.com/uploads/wallpapers/moonrise.png)" background from https://www.raycast.com/wallpapers
+The Spotify Client (`spotify.api.ts`) is generated using [OpenAPI Generator](https://openapi-generator.tech/). To update the client, follow these steps:
+
+- Update `fixed-spotify-open-api.yml`
+- Run `npm run generate-spotify-client`

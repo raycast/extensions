@@ -5,7 +5,7 @@ import { XcodeReleaseListItemDetail } from "./xcode-release-list-item-detail.com
 /**
  * Xcode Release List Item
  */
-export function XcodeReleaseListItem(props: { release: XcodeRelease }): JSX.Element {
+export function XcodeReleaseListItem(props: { release: XcodeRelease }) {
   return (
     <List.Item
       icon={icon(props.release)}
@@ -37,9 +37,14 @@ export function XcodeReleaseListItem(props: { release: XcodeRelease }): JSX.Elem
 function icon(xcodeRelease: XcodeRelease): Image {
   // Initialize image source components
   const imageSourceComponents = ["xcode"];
+  // Initialize version number
+  const versionNumber = Number(xcodeRelease.versionNumber.split(".").at(0));
   // Check if version number is greater or equal 13
-  if (Number(xcodeRelease.versionNumber.split(".").at(0)) >= 13) {
-    // Push 13
+  if (versionNumber >= 15) {
+    // Use 15
+    imageSourceComponents.push("15");
+  } else if (versionNumber >= 13) {
+    // Use 13
     imageSourceComponents.push("13");
   } else {
     // Otherwise, always use 12

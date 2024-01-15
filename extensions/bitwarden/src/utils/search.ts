@@ -7,15 +7,6 @@ export function extractKeywords(item: Item): string[] {
   const keywords: string[] = [item.name, ITEM_TYPE_TO_LABEL[item.type]];
 
   if (item.type === ItemType.LOGIN) {
-    const { brand, number } = item.card ?? {};
-
-    if (brand) keywords.push(brand);
-    if (number) {
-      // Similar to Bitwarden, use the last 5 digits if the card is Amex
-      const isAmex = /^3[47]/.test(number);
-      keywords.push(number.substring(number.length - (isAmex ? 5 : 4), number.length));
-    }
-  } else if (item.type === ItemType.IDENTITY) {
     const { username, uris } = item.login ?? {};
 
     if (username) keywords.push(username);
@@ -29,6 +20,15 @@ export function extractKeywords(item: Item): string[] {
           }
         }
       }
+    }
+  } else if (item.type === ItemType.CARD) {
+    const { brand, number } = item.card ?? {};
+
+    if (brand) keywords.push(brand);
+    if (number) {
+      // Similar to Bitwarden, use the last 5 digits if the card is Amex
+      const isAmex = /^3[47]/.test(number);
+      keywords.push(number.substring(number.length - (isAmex ? 5 : 4), number.length));
     }
   }
 

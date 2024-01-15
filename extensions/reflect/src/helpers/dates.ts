@@ -7,11 +7,12 @@ export function getTodaysDateAsISOString() {
 
 interface Preferences {
   prependTimestamp?: boolean;
+  timestampFormat?: "12" | "24";
 }
 
 export function prependTimestampIfSelected(text: string, preferences: Preferences) {
   if (preferences.prependTimestamp) {
-    const timestamp = format(new Date(), "h:maaa");
+    const timestamp = format(new Date(), preferences.timestampFormat === "24" ? "HH:mm" : "h:mmaaa");
     text = `${timestamp} ${text}`;
   }
   return text;

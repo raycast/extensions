@@ -1,25 +1,19 @@
-import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast, Color } from "@raycast/api";
+import { Form, ActionPanel, Icon, showToast, useNavigation, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
-import { fetchDatabaseProperties, notionColorToTintColor, fetchDatabases } from "../../utils/notion";
-import { DatabaseView, DatabaseProperty, DatabasePropertyOption } from "../../utils/types";
-import { databasesAtom, databasePropertiesAtom } from "../../utils/state";
 
-/**
- * A Form to determine how to display a Database
- */
+import { useDatabaseProperties, useDatabases } from "../../hooks";
+import { notionColorToTintColor, DatabaseProperty, DatabasePropertyOption } from "../../utils/notion";
+import { DatabaseView } from "../../utils/types";
+
 export function DatabaseViewForm(props: {
   databaseId: string;
   databaseView?: DatabaseView;
-  saveDatabaseView: (newDatabaseView: DatabaseView) => void;
-  isDefaultView: boolean;
-}): JSX.Element {
-  const { databaseId: presetDatabaseId, databaseView, saveDatabaseView, isDefaultView } = props;
+  setDatabaseView: (databaseView: DatabaseView) => Promise<void>;
+}) {
+  const { databaseId: presetDatabaseId, databaseView, setDatabaseView } = props;
 
-  const currentViewName = databaseView?.name ? databaseView.name : null;
-
-  // On form submit function
   const { pop } = useNavigation();
+
   async function handleSubmit(values: Form.Values) {
     const newDatabaseView = {
       properties: databaseView?.properties ? databaseView.properties : {},
@@ -39,66 +33,25 @@ export function DatabaseViewForm(props: {
       };
     }
 
-    saveDatabaseView(newDatabaseView);
+    setDatabaseView(newDatabaseView);
 
-    showToast({
-      title: "View Updated",
-    });
     pop();
   }
 
-  const [{ value: databases }, storeDatabases] = useAtom(databasesAtom);
+  const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const [databaseId, setDatabaseId] = useState(presetDatabaseId);
-  const [{ value: databaseProperties }, setDatabaseProperties] = useAtom(databasePropertiesAtom(databaseId));
   const [viewType, setViewType] = useState<"kanban" | "list">(databaseView?.type ? databaseView.type : "list");
-  const [isLoadingDatabases, setIsLoadingDatadases] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: databaseProperties, isLoading: isLoadingDatabaseProperties } = useDatabaseProperties(databaseId);
 
-  // Fetch databases
-  useEffect(() => {
-    const fetchData = async () => {
-      if (isDefaultView) {
-        setIsLoadingDatadases(false);
-        return;
-      }
-
-      const fetchedDatabases = await fetchDatabases();
-
-      if (fetchedDatabases.length) {
-        await storeDatabases(fetchedDatabases);
-      }
-      setIsLoadingDatadases(false);
-    };
-    fetchData();
-  }, []);
-
-  // Fetch selected database properties
-  useEffect(() => {
-    const fetchData = async () => {
-      if (databaseId) {
-        setIsLoading(true);
-
-        const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId);
-        if (fetchedDatabaseProperties.length) {
-          setDatabaseProperties(fetchedDatabaseProperties);
-        }
-
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [databaseId]);
-
-  // Set selected view form
   useEffect(() => {
     if (databaseProperties && viewType === "kanban") {
-      const hasSelect = databaseProperties.some((dp) => dp.type === "select");
+      const hasSelect = databaseProperties.some((dp) => dp.type === "select" || dp.type === "status");
 
       if (!hasSelect) {
         showToast({
           style: Toast.Style.Failure,
           title: "Select Property Required",
-          message: 'Kanban view requires a "Select" type property.',
+          message: 'Kanban view requires a "Select" or "Status" type property.',
         });
         setViewType("list");
       }
@@ -107,7 +60,7 @@ export function DatabaseViewForm(props: {
 
   return (
     <Form
-      isLoading={isLoading || isLoadingDatabases}
+      isLoading={isLoadingDatabaseProperties || isLoadingDatabases}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -118,7 +71,7 @@ export function DatabaseViewForm(props: {
     >
       {!presetDatabaseId
         ? [
-            <Form.Dropdown key="view-database" id="database_id" title={"Database"} onChange={setDatabaseId}>
+            <Form.Dropdown id="database_id" title={"Database"} onChange={setDatabaseId}>
               {databases?.map((d) => {
                 return (
                   <Form.Dropdown.Item
@@ -141,41 +94,21 @@ export function DatabaseViewForm(props: {
             <Form.Separator key="separator" />,
           ]
         : null}
-      {!isDefaultView ? (
-        <Form.TextField
-          key="view-name"
-          id="name"
-          title="View Name"
-          defaultValue={currentViewName ? currentViewName : undefined}
-          placeholder="My List View"
-        />
-      ) : null}
       <Form.Dropdown
-        key="view-type"
         id="type"
         title="View Type"
         value={viewType}
         // @ts-expect-error string instead of 'list' | 'kanban'
         onChange={setViewType}
       >
-        <Form.Dropdown.Item
-          key="view-type-list"
-          value="list"
-          title="List"
-          icon={{ source: "./icon/view_list.png", tintColor: Color.PrimaryText }}
-        />
-        <Form.Dropdown.Item
-          key="view-type-kanban"
-          value="kanban"
-          title="Kanban"
-          icon={{ source: "./icon/view_kanban.png", tintColor: Color.PrimaryText }}
-        />
+        <Form.Dropdown.Item value="list" title="List" icon="./icon/view_list.png" />
+        <Form.Dropdown.Item value="kanban" title="Kanban" icon="./icon/view_kanban.png" />
       </Form.Dropdown>
       <Form.Separator />
       {databaseProperties && viewType === "kanban" ? (
         <KanbanViewFormItem
           databaseView={databaseView}
-          selectProperties={databaseProperties.filter((dp) => dp.type === "select")}
+          properties={databaseProperties.filter((dp) => dp.type === "select" || dp.type === "status")}
         />
       ) : null}
     </Form>
@@ -190,24 +123,21 @@ const statusTypes: { [key: string]: string } = {
   canceled: "Canceled",
 };
 
-function KanbanViewFormItem(props: {
-  selectProperties: DatabaseProperty[];
-  databaseView?: DatabaseView;
-}): JSX.Element | null {
-  const { selectProperties, databaseView } = props;
+function KanbanViewFormItem(props: { properties: DatabaseProperty[]; databaseView?: DatabaseView }) {
+  const { properties, databaseView } = props;
 
   const [statusPropertyId, setStatusPropertyId] = useState<string | undefined>(
-    databaseView?.kanban?.property_id ? databaseView?.kanban?.property_id : selectProperties[0]?.id
+    databaseView?.kanban?.property_id ? databaseView?.kanban?.property_id : properties[0]?.id,
   );
 
-  const statusProperty = selectProperties.find((dp) => dp.id === statusPropertyId);
+  const statusProperty = properties.find((dp) => dp.id === statusPropertyId);
 
   function getStatusState(statusProperty: DatabaseProperty | undefined) {
     if (statusProperty && statusProperty.options) {
       const currentConfig = databaseView?.kanban;
 
       const statusOptions = (statusProperty.options as DatabasePropertyOption[]).filter(
-        (o) => o.id !== "_select_null_"
+        (o) => o.id !== "_select_null_",
       );
 
       const defaultBacklogOpts = currentConfig ? currentConfig.backlog_ids : ["_select_null_"];
@@ -245,12 +175,12 @@ function KanbanViewFormItem(props: {
       started: [],
       completed: [],
       canceled: [],
-    }
+    },
   );
 
   function updateStatusPropertyId(statusPropertyId: string) {
     setStatusPropertyId(statusPropertyId);
-    const statusProperty = selectProperties.find((dp) => dp.id === statusPropertyId);
+    const statusProperty = properties.find((dp) => dp.id === statusPropertyId);
     const newStatusState = getStatusState(statusProperty);
     if (newStatusState) {
       setStatusState(newStatusState);
@@ -259,18 +189,17 @@ function KanbanViewFormItem(props: {
 
   return [
     <Form.Dropdown
-      key="kanban-property-id"
       id="kanban::property_id"
       title="Kanban Status"
       value={statusPropertyId}
       onChange={updateStatusPropertyId}
     >
-      {selectProperties.map((dp) => (
+      {properties.map((dp) => (
         <Form.Dropdown.Item
           key={`kanban-status-property-${dp.id}`}
           value={dp.id}
           title={dp.name ? dp.name : "Untitled"}
-          icon={{ source: "./icon/select.png", tintColor: Color.PrimaryText }}
+          icon={Icon.ArrowDownCircle}
         />
       ))}
     </Form.Dropdown>,
@@ -286,7 +215,7 @@ function KanbanViewFormItem(props: {
             onChange={(newValue: string[]) => setStatusState((x) => ({ ...x, [statusTypeId]: newValue }))}
           />
         ))
-      : []
+      : [],
   ) as unknown as JSX.Element;
 }
 
@@ -296,7 +225,7 @@ function StatusTagPicker(props: {
   value: string[];
   onChange: (newValue: string[]) => void;
   statusProperty: DatabaseProperty;
-}): JSX.Element {
+}) {
   const { id, title, statusProperty, value, onChange } = props;
 
   return (

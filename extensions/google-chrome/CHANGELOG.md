@@ -1,5 +1,24 @@
 # Google Chrome Changelog
 
+## [Fix Search History window] - 2023-12-19
+
+- Fix Search History window not opening when the app is open but no window is opened.
+
+## [Multi-word tab search enhancements and vulnerability fixes] - 2023-12-08
+
+- Order-insensitivity: search "foo bar" now works with title/url "bar foo" or "foo bar".
+- Spacing-insensitivity: search "foo bar" and "foo bar" now work with title/url "foo bar".
+- URL-title-insensitivity: search "foo bar" now works for title "bar" on url "foo.com"
+- Updated dependent packages to resolve vulnerabilities listed in npm audit
+
+## [New shortcut] - 2023-09-18
+
+- Add shortcut for make quick quicklinks when searching tabs.
+
+## [New shortcut] - 2023-08-21
+
+- Changed shortcut for Close Tab in the Search Tab command.
+
 ## [Added better debug] - 2023-04-25
 
 - Increase exception message to diagnose issues

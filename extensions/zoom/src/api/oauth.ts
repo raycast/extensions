@@ -24,7 +24,7 @@ export async function authorize(): Promise<string> {
 
   const authRequest = await client.authorizationRequest({
     clientId,
-    endpoint: "https://zoom.oauth-proxy.raycast.com/authorize",
+    endpoint: "https://zoom.oauth.raycast.com/authorize",
     scope: "",
   });
   const { authorizationCode } = await client.authorize(authRequest);
@@ -35,7 +35,7 @@ export async function authorize(): Promise<string> {
 }
 
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://zoom.oauth-proxy.raycast.com/token", {
+  const response = await fetch("https://zoom.oauth.raycast.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -48,15 +48,15 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
   });
 
   if (!response.ok) {
-    console.error("fetch tokens error:", await response.text());
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while fetching tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   return (await response.json()) as OAuth.TokenResponse;
 }
 
 async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://zoom.oauth-proxy.raycast.com/refresh-token", {
+  const response = await fetch("https://zoom.oauth.raycast.com/refresh-token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -67,8 +67,8 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   });
 
   if (!response.ok) {
-    console.error("refresh tokens error:", await response.text());
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while refreshing tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;

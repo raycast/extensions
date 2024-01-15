@@ -46,7 +46,7 @@ export async function getNotifications() {
           urlKey
         }
       }
-    `
+    `,
   );
 
   return { notifications: data?.notifications.nodes, urlKey: data?.organization.urlKey };

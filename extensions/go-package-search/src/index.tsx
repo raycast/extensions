@@ -28,6 +28,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           icon: searchResult.standardLibrary ? Icon.CheckCircle : undefined,
           tooltip: searchResult.standardLibrary ? "Standard Library" : "",
         },
+        {
+          text: searchResult.version,
+          tooltip: searchResult.version,
+        },
       ]}
       actions={
         <ActionPanel>
@@ -142,6 +146,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     const description = item.querySelector('[data-test-id="snippet-synopsis"]')?.text?.trim();
     const url = `https://pkg.go.dev/${path}`;
     const standardLibrary = !!item.querySelector("span.go-Chip");
+    const version = item.querySelector("div.SearchSnippet-infoLabel > span:nth-child(3) > strong")?.text?.trim();
 
     results.push({
       name,
@@ -149,6 +154,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       standardLibrary,
       description,
       url,
+      version,
       search: false,
     });
   });
@@ -167,4 +173,5 @@ interface SearchResult {
   search: boolean;
   description?: string;
   url: string;
+  version?: string;
 }

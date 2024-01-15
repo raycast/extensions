@@ -59,6 +59,7 @@ export default function Countries() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Official Name" text={entry.name.official} />
                     <List.Item.Detail.Metadata.Label title="Country Code" text={entry.cca2} />
+                    {entry.cca3 && <List.Item.Detail.Metadata.Label title="Country Alpha3 Code" text={entry.cca3} />}
                     {entry.capital && (
                       <List.Item.Detail.Metadata.Label
                         title={`Capital${entry.capital.length > 1 ? "s" : ""}`}

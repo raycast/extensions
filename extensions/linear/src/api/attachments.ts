@@ -31,7 +31,7 @@ export async function uploadFile(filePath: string) {
           }
         }
       }
-    `
+    `,
   );
 
   const uploadFile = data?.fileUpload.uploadFile;
@@ -84,7 +84,7 @@ export async function createAttachment(payload: CreateAttachmentPayload) {
           }
         }
       }
-    `
+    `,
   );
 
   return { success: data?.attachmentCreate.success, id: data?.attachmentCreate.attachment.id };

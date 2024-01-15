@@ -1,5 +1,15 @@
 # Changelog
 
+## [Fix] - 2024-01-01
+
+- Fix: Markdown output being truncated when streaming enabled with json parse error
+- Fix: Display question improperly in markdown with trailing whitespace
+- Fix: Showing error message when throwing Can't stream message error
+
+## [Fix] - 2023-08-23
+
+- Fixed an authentication error when listing models which caused a crash
+
 ## [Fix & Feature] - May, 18 2023
 
 - Feature: Custom API Endpoint

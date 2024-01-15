@@ -1,7 +1,8 @@
 import React from "react";
 import { Cache, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { stopTimer, useMyTimeEntries } from "./services/harvest";
+import { formatHours, useCompany, useMyTimeEntries } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
+import { writeFileSync, rmSync, existsSync, mkdirSync } from "fs";
 
 const cache = new Cache();
 
@@ -12,16 +13,21 @@ export function getCurrentTimerFromCache() {
 }
 
 export default function MenuBar() {
-  const { data, isLoading, revalidate } = useMyTimeEntries();
+  const { data, isLoading } = useMyTimeEntries();
   const [cacheLoading, setCacheLoading] = React.useState(true);
+  const { data: company, isLoading: companyLoading } = useCompany();
 
   const runningTimer = getCurrentTimerFromCache();
-  const { callbackURLStart, callbackURLStop } = getPreferenceValues<{
+  const {
+    callbackURLStart,
+    callbackURLStop,
+    showTimerInMenuBar = true,
+  } = getPreferenceValues<{
     callbackURLStart?: string;
     callbackURLStop?: string;
+    showTimerInMenuBar?: boolean;
+    statusFolder?: string;
   }>();
-
-  //   console.log({ isLoading, cacheLoading });
 
   React.useEffect(() => {
     if (data && !isLoading) {
@@ -32,8 +38,10 @@ export default function MenuBar() {
       }
       if (found) {
         cache.set("running", JSON.stringify(found));
+        setStatusFile(found);
       } else {
         cache.remove("running");
+        setStatusFile(null);
       }
       setCacheLoading(false);
     }
@@ -58,8 +66,8 @@ export default function MenuBar() {
   return (
     <MenuBarExtra
       icon={{ source: "../assets/harvest-logo-icon.png" }}
-      title={runningTimer.hours.toString()}
-      isLoading={isLoading || cacheLoading}
+      title={showTimerInMenuBar ? formatHours(runningTimer.hours.toString(), company) : undefined}
+      isLoading={isLoading || cacheLoading || companyLoading}
     >
       <MenuBarExtra.Item title={`${runningTimer.project.name} - ${runningTimer.task.name}`} />
       {runningTimer.notes && runningTimer.notes.length > 0 && <MenuBarExtra.Item title={`${runningTimer.notes}`} />}
@@ -83,4 +91,17 @@ export default function MenuBar() {
       /> */}
     </MenuBarExtra>
   );
+}
+
+function setStatusFile(timeEntry: HarvestTimeEntry | null) {
+  const { statusFolder } = getPreferenceValues<{ statusFolder?: string }>();
+  if (!statusFolder) return;
+  if (!existsSync(statusFolder)) mkdirSync(statusFolder);
+  const statusFile = `${statusFolder}/currentTimer.json`;
+
+  if (timeEntry) {
+    writeFileSync(statusFile, JSON.stringify(timeEntry));
+  } else {
+    if (existsSync(statusFile)) rmSync(statusFile);
+  }
 }

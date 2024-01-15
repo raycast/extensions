@@ -16,9 +16,9 @@ The running time entry is always visible on the top of the window with its durat
 
 <img width="600" alt="Screenshot 2022-01-23 at 01 55 14" src="https://user-images.githubusercontent.com/22563154/150660414-b551e659-64c3-4033-a289-ff8fa895d0b4.png">
 
-* Add project
-* Add description
-* Add tags
+- Add project
+- Add description
+- Add tags
 
 ### Resume a recent time entry
 
@@ -36,6 +36,6 @@ The extension caches projects, workspaces, tags and recent projects from Toggl T
 
 ## Planned features
 
-* Edit the ongoing time entry
-* Weekly report
-* Project stats
+- Edit the ongoing time entry
+- Weekly report
+- Project stats

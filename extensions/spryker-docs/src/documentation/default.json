@@ -1,0 +1,48 @@
+{
+  "Developer guides": [
+    {
+      "title": "Quick installation guides",
+      "url": "/docs/scos/dev/set-up-spryker-locally/quickstart-guides-install-spryker/quickstart-guides-install-spryker.html"
+    },
+    {
+      "title": "SCOS developer guides",
+      "url": "/docs/scos/dev/developer-getting-started-guide.html"
+    },
+    {
+      "title": "Marketplace developer guides",
+      "url": "/docs/marketplace/dev/setup/system-requirements.html"
+    },
+    {
+      "title": "Spryker SDK developer guides",
+      "url": "/docs/sdk/dev/spryker-sdk.html"
+    },
+    {
+      "title": "Spryker Code Upgrader developer guides",
+      "url": "/docs/scu/dev/spryker-code-upgrader.html"
+    },
+    {
+      "title": "PBC guides",
+      "url": "/docs/pbc/all/pbc.html"
+    }
+  ],
+  "Business User guides": [
+    {
+      "title": "SCOS user guides",
+      "url": "/docs/scos/user/intro-to-spryker/intro-to-spryker.html"
+    },
+    {
+      "title": "Marketplace user guides",
+      "url": "/docs/marketplace/user/intro-to-spryker-marketplace/marketplace-concept.html"
+    },
+    {
+      "title": "App Composition Platform user guides",
+      "url": "/docs/acp/user/intro-to-acp/acp-overview.html"
+    }
+  ],
+  "Cloud Engineer guides": [
+    {
+      "title": "SCCOS Engineer guides",
+      "url": "/docs/cloud/dev/spryker-cloud-commerce-os/getting-started-with-the-spryker-cloud-commerce-os.html"
+    }
+  ]
+}

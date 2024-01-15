@@ -2,8 +2,11 @@ import { Color, getPreferenceValues, Icon, MenuBarExtra, openCommandPreferences 
 import { differenceInMinutes, isWeekend } from "date-fns";
 
 function getRemainingTime(now: Date) {
-  const { endHour } = getPreferenceValues();
-  const endOfWorkday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHour);
+  const getEndHour = () => {
+    const { endHour } = getPreferenceValues();
+    return endHour.split(":").map((i: string) => Number(i));
+  };
+  const endOfWorkday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...getEndHour());
 
   const difference = differenceInMinutes(endOfWorkday, now, { roundingMethod: "floor" });
   const hours = Math.floor(difference / 60);

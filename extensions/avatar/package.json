@@ -5,6 +5,9 @@
   "description": "An avatar library for designers and developers. You can choose between simple identicons and lovely designed characters.",
   "icon": "avatar-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "madza"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools",
@@ -45,7 +48,7 @@
       "type": "dropdown",
       "description": "Set the number of columns of the avatar items. (Only works with Grid layout)",
       "required": false,
-      "title": "Avatar Item Coloums",
+      "title": "Avatar Item Columns",
       "default": "7",
       "data": [
         {

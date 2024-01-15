@@ -22,6 +22,7 @@ import {
   ShowProjectLabels,
 } from "./project_actions";
 import { CacheActionPanelSection } from "./cache_actions";
+import { ProjectListEmptyView } from "./project";
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
@@ -88,14 +89,17 @@ export function ProjectSearchList(): JSX.Element {
 
   return (
     <List
-      searchBarPlaceholder="Filter Projects by name..."
+      searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
     >
-      {projects?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+      <List.Section title="Projects" subtitle={`${projects?.length}`}>
+        {projects?.map((project) => (
+          <ProjectListItem key={project.id} project={project} />
+        ))}
+      </List.Section>
+      <ProjectListEmptyView />
     </List>
   );
 }

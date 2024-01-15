@@ -24,12 +24,13 @@ export type ATSessionResponse = {
   message?: string;
 };
 
-export type User = {
+export type Account = {
   did: string;
   handle: string;
   displayName: string;
   avatarUrl: string;
   muted?: boolean;
+  blockedUri: string | null;
   following?: boolean;
   description?: string;
 };
@@ -56,12 +57,18 @@ export type QuotePostReference = {
 
 export type PostReference = ReplyToReference | QuotePostReference;
 
+export type SearchPostResult = {
+  createdAt: string;
+  user: { did: string };
+  tid: string;
+};
+
 export type Post = {
   uri: string;
   cid: string;
   text: string;
   createdAt: string;
-  createdByUser: User;
+  createdByUser: Account;
   metrics: PostMetrics;
   viewer?: ViewerState;
   markdownView: string;
@@ -74,13 +81,15 @@ export type CredentialsHashStore = {
   key: string;
 };
 
+export type RestrictionType = "block" | "mute";
+
 export type Notification = {
   uri: string;
   id: string;
   text: string;
   reason: string;
   isRead: boolean;
-  author: User;
+  author: Account;
   indexedAtDate: string;
   targetPostUri: string | null;
 };
@@ -121,11 +130,13 @@ export type AllowedActionKeys =
   | "unmute"
   | "like"
   | "unlike"
+  | "block"
+  | "unblock"
   | "repost"
   | "quote"
   | "reply"
   | "switchToHomeView"
-  | "openUserLikes"
+  | "openAccountLikes"
   | "openProfile";
 
 export type ActionsDictionary = {

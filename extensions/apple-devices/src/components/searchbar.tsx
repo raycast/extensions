@@ -1,9 +1,18 @@
-import { Grid } from "@raycast/api";
+import { getPreferenceValues, Grid } from "@raycast/api";
+import { Preferences } from "../types";
 import React from "react";
 
-export default function SearchBar(props: { onChange: (value: string) => void }) {
+function SearchBar(props: { onChange: (value: string) => void }) {
+  const preferences = getPreferenceValues<Preferences>();
+  const isLatest = preferences.device === "latest";
+
   return (
-    <Grid.Dropdown onChange={props.onChange} tooltip="Devices">
+    <Grid.Dropdown
+      tooltip="Devices"
+      onChange={props.onChange}
+      storeValue={isLatest}
+      defaultValue={!isLatest ? preferences.device : undefined}
+    >
       <Grid.Dropdown.Item title="All" value="all" />
       <Grid.Dropdown.Item title="iPhone" value="iPhone" />
       <Grid.Dropdown.Item title="iPad" value="iPad" />
@@ -12,3 +21,5 @@ export default function SearchBar(props: { onChange: (value: string) => void }) 
     </Grid.Dropdown>
   );
 }
+
+export default React.memo(SearchBar);

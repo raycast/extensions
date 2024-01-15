@@ -22,7 +22,7 @@ function ListView() {
         acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
           ? acc
           : [...acc, timeEntry],
-      [] as TimeEntry[]
+      [] as TimeEntry[],
     );
 
   const totalDurationToday =
@@ -134,7 +134,7 @@ function ListView() {
                       subtitle={group.client?.name}
                       accessoryTitle={group.workspace.name}
                     />
-                  ))
+                  )),
                 )}
             </List.Section>
           </>

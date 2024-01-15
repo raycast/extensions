@@ -73,7 +73,7 @@ async function fetchParameters(
   search: string,
   threshold: number,
   token?: string,
-  accParameters?: ParameterMetadata[]
+  accParameters?: ParameterMetadata[],
 ): Promise<ParameterMetadata[]> {
   if (search.length < threshold) return [];
   if (!isReadyToFetch()) return [];
@@ -82,7 +82,7 @@ async function fetchParameters(
     new DescribeParametersCommand({
       NextToken: token,
       ParameterFilters: search ? [{ Key: "Name", Option: "Contains", Values: [search] }] : undefined,
-    })
+    }),
   );
 
   const combinedLogGroups = [...(accParameters || []), ...(Parameters || [])];

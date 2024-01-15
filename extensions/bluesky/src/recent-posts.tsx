@@ -1,5 +1,5 @@
 import { LaunchProps, useNavigation } from "@raycast/api";
-import { getSignedInUserHandle, resolveHandle } from "./libs/atp";
+import { getSignedInAccountHandle, resolveHandle } from "./libs/atp";
 import { useEffect, useState } from "react";
 
 import AuthorFeed from "./components/feed/AuthorFeed";
@@ -13,8 +13,8 @@ interface RecentPostsProps {
 }
 
 export default function RecentPosts(props: LaunchProps<{ arguments: RecentPostsProps }> | null) {
-  const userHandle = props && props.arguments && props.arguments.handle ? props.arguments.handle : null;
-  const [handle, setHandle] = useState<string | null>(userHandle);
+  const accountHandle = props && props.arguments && props.arguments.handle ? props.arguments.handle : null;
+  const [handle, setHandle] = useState<string | null>(accountHandle);
   const { push } = useNavigation();
   const [sessionStarted, sessionStartFailed, errorMessage] = useStartATSession(() => push(<Onboard />));
   const [isValidHandle, setIsValidHandle] = useState(false);
@@ -31,8 +31,8 @@ export default function RecentPosts(props: LaunchProps<{ arguments: RecentPostsP
       }
     };
 
-    const fetchSignedInUserHandle = async () => {
-      const handle = await getSignedInUserHandle();
+    const fetchSignedInAccountHandle = async () => {
+      const handle = await getSignedInAccountHandle();
 
       if (handle) {
         setHandle(handle);
@@ -41,7 +41,7 @@ export default function RecentPosts(props: LaunchProps<{ arguments: RecentPostsP
     };
 
     if (sessionStarted && !handle) {
-      fetchSignedInUserHandle();
+      fetchSignedInAccountHandle();
     }
 
     if (sessionStarted && handle) {

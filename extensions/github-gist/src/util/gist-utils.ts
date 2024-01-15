@@ -53,11 +53,13 @@ export async function requestGist(route: string, page: number, perPage: number) 
       file: [],
     };
     for (const value of Object.values(_data.files)) {
-      _gist.file.push({
-        filename: String(value.filename),
-        language: String(value.language),
-        raw_url: String(value.raw_url),
-      });
+      if (value !== undefined) {
+        _gist.file.push({
+          filename: String(value.filename),
+          language: String(value.language),
+          raw_url: String(value.raw_url),
+        });
+      }
     }
     _gists.push(_gist);
   });

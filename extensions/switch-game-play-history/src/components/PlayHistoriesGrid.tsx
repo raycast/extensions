@@ -47,8 +47,8 @@ export const PlayHistoriesGrid = () => {
         <Grid.Section title={sectionTitle} subtitle={sectionSubtitle}>
           {history.data?.playHistories
             .sort((a, b) => (a[sortKey] > b[sortKey] ? -1 : 1))
-            .map((item) => (
-              <PlayHistoriesGridItem history={item} />
+            .map((data) => (
+              <PlayHistoriesGridItem data={data} />
             ))}
         </Grid.Section>
       </SessionTokenGuard>

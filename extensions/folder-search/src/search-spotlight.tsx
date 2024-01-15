@@ -13,6 +13,7 @@ const folderSpotlightSearchAttributes = [
   "kMDItemPath",
   "kMDItemContentModificationDate",
   "kMDItemKind",
+  "kMDItemContentType",
   "kMDItemLastUsedDate",
   "kMDItemUseCount",
 ];
@@ -30,20 +31,13 @@ const searchSpotlight = (
   return new Promise((resolve, reject) => {
     const spotlightSearchAttributes: string[] = folderSpotlightSearchAttributes;
     const searchFilter = isExactSearch
-      ? ["kMDItemKind==Folder", `kMDItemDisplayName == '${search.replace(/[[|\]]/gi, "")}'`]
-      : ["kind:folder"];
+      ? ["kMDItemContentType=='public.folder'", `kMDItemDisplayName == '${search.replace(/[[|\]]/gi, "")}'`]
+      : ["kMDItemContentType=='public.folder'", `kMDItemDisplayName = "*${search}*"cd`];
 
     let resultsCount = 0;
 
     // folder hard-coded into search
-    spotlight(
-      search,
-      isExactSearch,
-      safeSearchScope(searchScope),
-      searchFilter,
-      spotlightSearchAttributes as [],
-      abortable
-    )
+    spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
       .on("data", (result: SpotlightSearchResult) => {
         if (resultsCount < maxResults) {
           // keep emitting the match and

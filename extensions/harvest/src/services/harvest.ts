@@ -8,8 +8,18 @@ import {
   HarvestTimeEntry,
   HarvestProjectAssignment,
   HarvestUserResponse,
+  HarvestCompany,
 } from "./responseTypes";
-import { Cache, getPreferenceValues, launchCommand, LaunchType, LocalStorage } from "@raycast/api";
+import {
+  Cache,
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
@@ -26,6 +36,7 @@ export function isAxiosError(error: any): error is AxiosError {
 interface Preferences {
   token: string;
   accountID: string;
+  timeFormat: "hours_minutes" | "decimal" | "company";
 }
 
 const { token, accountID }: Preferences = getPreferenceValues();
@@ -40,8 +51,31 @@ const api = axios.create({
 });
 
 async function harvestAPI<T = AxiosResponse>({ method = "GET", ...props }: AxiosRequestConfig) {
-  const resp = await api.request<unknown, T>({ method, ...props });
-  return resp;
+  try {
+    const resp = await api.request<unknown, T>({ method, ...props });
+    return resp;
+  } catch (error) {
+    if (!isAxiosError(error)) throw error;
+    if (error.response?.status === 429) {
+      const data = error.response?.data as { retry_after: number; message: string };
+
+      // try again after the retry_after time
+      console.log(`Hit a rate-limit. Retrying after ${data.retry_after} seconds`, environment.launchType);
+
+      const toast =
+        environment.launchType === LaunchType.UserInitiated
+          ? await showToast({
+              style: Toast.Style.Animated,
+              title: "Rate-limited by Harvest, please wait...",
+            })
+          : null;
+      await new Promise((resolve) => setTimeout(resolve, data.retry_after * 1000));
+      const result = (await harvestAPI<T>({ method, ...props })) as T;
+      await toast?.hide();
+      return result;
+    }
+    throw error;
+  }
 }
 
 export function useCompany() {
@@ -179,5 +213,40 @@ export async function refreshMenuBar() {
     await launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background });
   } catch {
     console.log("failed to refresh menu bar");
+  }
+}
+
+export function formatHours(hours: string | undefined, company: HarvestCompany | undefined): string {
+  if (!hours) return "";
+  const { timeFormat }: Preferences = getPreferenceValues();
+
+  if (timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes")) {
+    const time = hours.split(".");
+    const hour = time[0];
+    const minute = parseFloat(`0.${time[1]}`) * 60;
+    return `${hour}:${minute < 10 ? "0" : ""}${minute.toFixed(0)}`;
+  }
+  return hours;
+}
+
+export async function toggleTimer(): Promise<{ action: "started" | "stopped" | "failed" }> {
+  const timeEntries = await getMyTimeEntries();
+  const runningEntry = timeEntries.find((o) => o.is_running);
+  if (runningEntry) {
+    // stop the running timer
+    await stopTimer(runningEntry);
+    return { action: "stopped" };
+  } else if (timeEntries.length > 0) {
+    // re-start the most recent timer
+    const sortedEntries = timeEntries.sort((a, b) => {
+      if (dayjs(a.updated_at).isSame(dayjs(b.updated_at))) {
+        return b.is_running ? 1 : -1;
+      }
+      return dayjs(a.updated_at).isAfter(dayjs(b.updated_at)) ? -1 : 1;
+    });
+    await restartTimer(sortedEntries[0]);
+    return { action: "started" };
+  } else {
+    return { action: "failed" };
   }
 }

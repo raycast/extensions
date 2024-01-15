@@ -1,5 +1,34 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2023-11-15
+
+ - Added Copy Pronunciation keyboard shortcut
+
+## [Enhancement] - 2023-08-31
+
+ - Added pronunciation for Translate and Translate Form
+
+## [Fix] - 2023-08-16
+
+ - Fixed case when autodetect language name is not found in our supported languages list
+
+## [Fix] - 2023-08-09
+
+- Fixed auto language detect when detected language is not in the available list
+- Added Latin
+
+## [Fix] - 2023-06-21
+
+- Supplementary change for zh-TW info to match Google Translate
+
+## [Fix] - 2023-06-21
+
+- Changed zh-TW info to match Google Translate
+
+## [Fix] - 2023-06-15
+
+- Fixed language code for Hebrew
+
 ## [Enhancement] - 2023-05-30
 
 - Added ability to translate selected text
@@ -17,7 +46,7 @@
 
 ## [Enhancements] - 2023-02-09
 
-- Retuned back LangTo -> LangFrom translation
+- Returned back LangTo -> LangFrom translation
 - Improved auto-detect translation in Translate Form
 
 ## [Add auto-detect option] - 2023-02-07
