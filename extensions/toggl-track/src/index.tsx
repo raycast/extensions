@@ -7,7 +7,6 @@ import ProjectListItem from "./components/ProjectListItem";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { TimeEntryContextProvider, useTimeEntryContext } from "./context/TimeEntryContext";
-import { revalidateStorage } from "./helpers/revalidateStorage";
 
 dayjs.extend(duration);
 
@@ -94,14 +93,6 @@ function ListView() {
                   </ExtensionContextProvider>
                 }
               />
-              <ActionPanel.Section>
-                <Action.SubmitForm
-                  title="Refresh"
-                  icon={{ source: Icon.RotateClockwise }}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onSubmit={revalidateStorage}
-                />
-              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -123,11 +114,6 @@ function ListView() {
                     title="Resume Time Entry"
                     onSubmit={() => resumeTimeEntry(timeEntry)}
                     icon={{ source: Icon.Clock }}
-                  />
-                  <Action.SubmitForm
-                    title="Refresh"
-                    icon={{ source: Icon.RotateClockwise }}
-                    onSubmit={revalidateStorage}
                   />
                 </ActionPanel>
               }
