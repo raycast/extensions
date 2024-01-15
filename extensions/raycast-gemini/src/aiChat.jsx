@@ -15,7 +15,7 @@ import Gemini from "gemini-ai";
 import fetch from "node-fetch-polyfill";
 import { LocalStorage } from "@raycast/api";
 
-export default function Chat() {
+export default function Chat({ launchContext }) {
   let toast = async (style, title, message) => {
     await showToast({
       style,
@@ -309,6 +309,38 @@ export default function Chat() {
         };
         await LocalStorage.setItem("chatData", JSON.stringify(newChatData));
         setChatData(newChatData);
+      }
+
+      if (launchContext?.query) {
+        setChatData((oldData) => {
+          let newChatData = structuredClone(oldData);
+          newChatData.chats.push({
+            name: `From Quick AI at ${new Date().toLocaleString("en-US", {
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })}`,
+            creationDate: new Date(),
+            messages: [
+              {
+                prompt: launchContext.query,
+                answer: launchContext.response,
+                creationDate: new Date().toISOString(),
+                finished: true,
+              },
+            ],
+          });
+          newChatData.currentChat = `From Quick AI at ${new Date().toLocaleString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })}`;
+          return newChatData;
+        });
       }
     })();
   }, []);
