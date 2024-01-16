@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import RunningTimeEntry from "./components/RunningTimeEntry";
@@ -7,7 +8,6 @@ import ProjectListItem from "./components/ProjectListItem";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { TimeEntryContextProvider, useTimeEntryContext } from "./context/TimeEntryContext";
-import { revalidateStorage } from "./helpers/revalidateStorage";
 
 dayjs.extend(duration);
 
@@ -32,11 +32,14 @@ function ListView() {
     [] as TimeEntry[],
   );
 
-  const totalDurationToday =
-    timeEntries
+  const totalDurationToday = useMemo(() => {
+    let seconds = timeEntries
+      .slice(runningTimeEntry ? 1 : 0)
       .filter((timeEntry) => dayjs(timeEntry.start).isSame(dayjs(), "day"))
-      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0) +
-    (runningTimeEntry ? dayjs().diff(runningTimeEntry.start, "second") : 0);
+      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0);
+    if (runningTimeEntry) seconds += dayjs().diff(dayjs(runningTimeEntry.start), "second");
+    return seconds;
+  }, [timeEntries, runningTimeEntry]);
 
   function formatSeconds(seconds: number) {
     const h = Math.floor(seconds / 3600);
@@ -94,14 +97,6 @@ function ListView() {
                   </ExtensionContextProvider>
                 }
               />
-              <ActionPanel.Section>
-                <Action.SubmitForm
-                  title="Refresh"
-                  icon={{ source: Icon.RotateClockwise }}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onSubmit={revalidateStorage}
-                />
-              </ActionPanel.Section>
             </ActionPanel>
           }
         />
@@ -123,11 +118,6 @@ function ListView() {
                     title="Resume Time Entry"
                     onSubmit={() => resumeTimeEntry(timeEntry)}
                     icon={{ source: Icon.Clock }}
-                  />
-                  <Action.SubmitForm
-                    title="Refresh"
-                    icon={{ source: Icon.RotateClockwise }}
-                    onSubmit={revalidateStorage}
                   />
                 </ActionPanel>
               }
@@ -161,19 +151,3 @@ export default function Command() {
     </ExtensionContextProvider>
   );
 }
-
-// function useTraceUpdate(props: any) {
-//   const prev = useRef(props);
-//   useEffect(() => {
-//     const changedProps = Object.entries(props).reduce((ps: any, [k, v]) => {
-//       if (prev.current[k] !== v) {
-//         ps[k] = [prev.current[k], v];
-//       }
-//       return ps;
-//     }, {});
-//     if (Object.keys(changedProps).length > 0) {
-//       appendFileSync("/Users/benkeys/Desktop/data2.jsonc", JSON.stringify(changedProps))
-//     }
-//     prev.current = props;
-//   });
-// }

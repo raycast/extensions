@@ -1,5 +1,11 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2024-01-15
+
+- Remove `refresh` action.
+- Fix project dropdown in time entry form.
+- Fix today's duration timer.
+
 ## [Refactor] - 2024-01-04
 
 - Refactor extension to use updated Raycast utilities.
