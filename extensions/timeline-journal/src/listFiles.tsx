@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, getPreferenceValues, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues, Detail, Icon } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import { useState } from "react";
@@ -60,7 +60,11 @@ function ShowTimeline(props: ShowTimelineProps) {
           title={point.replace("- ", "")}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" target={<Detail markdown={point.replace("- ", "")} />} />
+              <Action.Push
+                title="Show Details"
+                icon={Icon.Circle}
+                target={<Detail markdown={point.replace("- ", "")} />}
+              />
               <Action.Open title="Open File" target={props.filePath} />
             </ActionPanel>
           }

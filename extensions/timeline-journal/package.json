@@ -5,7 +5,10 @@
   "description": "Put your thoughts on a timeline.",
   "icon": "timeline-logo.png",
   "author": "longy2k",
-  "categories": ["Applications", "Productivity"],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -62,7 +65,8 @@
         {
           "value": "12h",
           "title": "12h"
-        }]
+        }
+      ]
     },
     {
       "name": "insertPosition",
@@ -78,12 +82,13 @@
         {
           "value": "preprend",
           "title": "Preprend"
-        }]
+        }
+      ]
     }
   ],
   "commands": [
     {
-      "name": "dailyTimeline",
+      "name": "todayTimeline",
       "title": "Today's Timeline",
       "description": "Search or add to today's timeline.",
       "mode": "view"
@@ -102,7 +107,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.5"
+    "@raycast/api": "^1.64.5",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

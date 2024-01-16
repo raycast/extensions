@@ -1,8 +1,11 @@
-import { ActionPanel, Form, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Form, Action, Icon, showToast, Toast, popToRoot, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
-import { useState } from "react";
 import { dateFormat, timeFormat } from "./utils/dateAndTime";
+import { useForm, FormValidation } from "@raycast/utils";
 
+interface TimelineFormValues {
+  addTimeline: string;
+}
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const folderPath = preferences.folderPath + "/";
@@ -21,40 +24,37 @@ export default function Command() {
     fs.writeFileSync(filePath, newContent);
   };
 
-  const [textareaValue, setTextareaValue] = useState("");
+  const { handleSubmit, itemProps } = useForm<TimelineFormValues>({
+    onSubmit(values) {
+      const newText = values.addTimeline.trim();
+      if (newText === "") return;
 
-  const handleFormSubmit = (values: { addTimeline: string }) => {
-    const newText = values.addTimeline.trim();
-    if (newText === "") return;
+      const newBulletPoint = formatBulletPoint(newText);
+      const currentContent = fs.readFileSync(filePath, "utf-8");
 
-    const newBulletPoint = formatBulletPoint(newText);
-    const currentContent = fs.readFileSync(filePath, "utf-8");
-
-    // Insert new bullet point at the top or bottom of the file
-    if (preferences.insertPosition === "append") {
-      updateFileContent(currentContent + `\n${newBulletPoint}`);
-    } else {
-      updateFileContent(`${newBulletPoint}\n${currentContent}`);
-    }
-    showToast(Toast.Style.Success, "Added to Today's Timeline");
-    setTextareaValue("");
-  };
+      // Insert new bullet point at the top or bottom of the file
+      if (preferences.insertPosition === "append") {
+        updateFileContent(currentContent + `\n${newBulletPoint}`);
+      } else {
+        updateFileContent(`${newBulletPoint}\n${currentContent}`);
+      }
+      showToast(Toast.Style.Success, "Added to Today's Timeline.");
+      popToRoot({ clearSearchBar: true });
+    },
+    validation: {
+      addTimeline: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add to Timeline" onSubmit={handleFormSubmit} />
+          <Action.SubmitForm title="Add to Timeline" icon={Icon.PlusCircle} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="addTimeline"
-        title="Add to Timeline"
-        placeholder="Share your thoughts"
-        value={textareaValue}
-        onChange={setTextareaValue}
-      />
+      <Form.TextArea title="Add to Timeline" placeholder="Share your thoughts" {...itemProps.addTimeline} />
     </Form>
   );
 }

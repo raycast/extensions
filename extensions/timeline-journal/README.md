@@ -2,7 +2,7 @@
 
 Put your thoughts on a timeline.
 
-### Daily Timeline
+### Today's Timeline
 
 ![](media/timeline-journal-1.png)
 
