@@ -107,7 +107,10 @@ function SearchBranches() {
                           title: "Confirm",
                           style: Alert.ActionStyle.Destructive,
                         },
-                        icon: Icon.Trash,
+                        icon: {
+                          source: Icon.Trash,
+                          tintColor: Color.Red,
+                        },
                         title: "Delete Branch",
                         message: `Are you sure you want to delete branch ${branch.name}?`,
                       });

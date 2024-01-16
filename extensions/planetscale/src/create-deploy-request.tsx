@@ -17,7 +17,7 @@ interface CreateDeployRequestForm {
 interface CreateDeployRequestProps {
   organization: string;
   database: string;
-  branch: string;
+  branch?: string;
 }
 
 export function CreateDeployRequest(props: CreateDeployRequestProps | object) {

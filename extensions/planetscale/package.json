@@ -54,7 +54,8 @@
     "@raycast/utils": "^1.10.1",
     "api": "^6.1.1",
     "date-fns": "^2.30.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "sql-formatter": "^15.0.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

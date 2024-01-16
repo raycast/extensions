@@ -15,4 +15,8 @@ export const PlanetScaleColor = {
     light: "#d92038",
     dark: "#ff7082",
   },
+  Yellow: {
+    light: "#7d5903",
+    dark: "#d19f03",
+  },
 };

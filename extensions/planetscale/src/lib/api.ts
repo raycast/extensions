@@ -1,4 +1,4 @@
-import pscale from "@api/pscale";
+import pscale, { ListDeployRequestsResponse200 } from "@api/pscale";
 import FetchError from "api/dist/core/errors/fetchError";
 
 export function createPlanetScaleClient(accessToken: string) {
@@ -8,3 +8,5 @@ export function createPlanetScaleClient(accessToken: string) {
 export type PlanetScaleClient = ReturnType<typeof createPlanetScaleClient>;
 
 export const PlanetScaleError = FetchError;
+
+export type DeployRequest = ListDeployRequestsResponse200["data"][0];

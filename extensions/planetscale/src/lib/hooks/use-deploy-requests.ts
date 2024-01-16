@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { mutation } from "../error";
 import { showToast, Toast } from "@raycast/api";
 import { enrichToastWithURL } from "../raycast";
+import { range } from "lodash";
 
 export function useDeployRequests(args: { organization?: string; database?: string }) {
   const pscale = getPlanetScaleClient();
@@ -13,17 +14,17 @@ export function useDeployRequests(args: { organization?: string; database?: stri
     mutate,
   } = useCachedPromise(
     async (key, { organization, database }) => {
-      if (!organization || !database) {
-        return [];
-      }
-      const response = await pscale.listDeployRequests({
-        page: 1,
-        per_page: 100,
-        organization,
-        database,
-      });
-
-      return response.data.data;
+      // Fetch multiple pages of deploy requests
+      const jobs = range(1, 4).map((page) =>
+        pscale.listDeployRequests({
+          page,
+          per_page: 100,
+          organization,
+          database,
+        }),
+      );
+      const responses = await Promise.all(jobs);
+      return responses.map((job) => job.data.data).flat();
     },
     ["deploy-requests", args],
     {
@@ -41,11 +42,16 @@ export function useDeployRequests(args: { organization?: string; database?: stri
     });
 
     await mutate(
-      pscale.closeADeployRequest({
-        organization: args.organization!,
-        database: args.database!,
-        number: deployRequest.number.toString(),
-      }),
+      pscale.closeADeployRequest(
+        {
+          state: "closed",
+        },
+        {
+          database: args.database!,
+          organization: args.organization!,
+          number: deployRequest.number.toString(),
+        },
+      ),
       {
         optimisticUpdate: (deployRequests) => {
           return deployRequests.map((r) => {
@@ -60,7 +66,6 @@ export function useDeployRequests(args: { organization?: string; database?: stri
         },
       },
     );
-
     toast.style = Toast.Style.Success;
     toast.title = "Deploy request closed";
   });
@@ -83,5 +88,9 @@ export function useDeployRequests(args: { organization?: string; database?: stri
     },
   );
 
-  return { deployRequests, createDeployRequest, closeDeployRequest, deployRequestsLoading };
+  const refreshDeployRequests = async () => {
+    await mutate();
+  };
+
+  return { deployRequests, createDeployRequest, closeDeployRequest, deployRequestsLoading, refreshDeployRequests };
 }
