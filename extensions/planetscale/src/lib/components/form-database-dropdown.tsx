@@ -3,6 +3,7 @@ import { PlanetScaleColor } from "../colors";
 import { forwardRef } from "react";
 import { useOrganizations } from "../hooks/use-organizations";
 import { useDatabases } from "../hooks/use-databases";
+import { getDatabaseIcon } from "../icons";
 
 function FormDatabaseDropdownSection({ organization }: { organization: string }) {
   const { databases } = useDatabases({ organization });
@@ -11,10 +12,7 @@ function FormDatabaseDropdownSection({ organization }: { organization: string })
       {databases?.map((database) => (
         <Form.Dropdown.Item
           key={database.id}
-          icon={{
-            source: "database.svg",
-            tintColor: PlanetScaleColor.Blue,
-          }}
+          icon={getDatabaseIcon(database)}
           title={database.name}
           value={`${organization}-${database.name}`}
         />

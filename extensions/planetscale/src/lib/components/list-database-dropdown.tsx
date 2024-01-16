@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
-import { PlanetScaleColor } from "../colors";
 import { useOrganizations } from "../hooks/use-organizations";
 import { useDatabases } from "../hooks/use-databases";
+import { getDatabaseIcon } from "../icons";
 
 function ListDatabaseDropdownSection({ organization }: { organization: string }) {
   const { databases } = useDatabases({ organization });
@@ -10,10 +10,7 @@ function ListDatabaseDropdownSection({ organization }: { organization: string })
       {databases?.map((database) => (
         <List.Dropdown.Item
           key={database.id}
-          icon={{
-            source: database.state === "sleeping" ? "database-sleep.svg" : "database.svg",
-            tintColor: PlanetScaleColor.Blue,
-          }}
+          icon={getDatabaseIcon(database)}
           title={database.name}
           value={`${organization}-${database.name}`}
         />

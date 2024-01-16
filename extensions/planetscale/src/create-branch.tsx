@@ -1,11 +1,11 @@
 import { FormValidation, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Color, Form } from "@raycast/api";
-import { PlanetScaleColor } from "./lib/colors";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { isEmpty, sample } from "lodash";
 import { useState } from "react";
 import { View } from "./lib/oauth/view";
 import { FormDatabaseDropdown } from "./lib/components/form-database-dropdown";
 import { useBranches } from "./lib/hooks/use-branches";
+import { getBranchIcon } from "./lib/icons";
 
 interface CreateBranchForm {
   name: string;
@@ -73,22 +73,7 @@ export function CreateBranch(
       <FormDatabaseDropdown storeValue title="Database" autoFocus={isEmpty(props)} {...itemProps.database} />
       <Form.Dropdown title="Parent" {...itemProps.parent}>
         {branches.map((branch) => (
-          <Form.Dropdown.Item
-            key={branch.name}
-            icon={
-              (branch as any).state === "sleeping"
-                ? {
-                    source: "branch-sleep.svg",
-                    tintColor: Color.SecondaryText,
-                  }
-                : {
-                    source: "branch.svg",
-                    tintColor: PlanetScaleColor.Blue,
-                  }
-            }
-            title={branch.name}
-            value={branch.name}
-          />
+          <Form.Dropdown.Item key={branch.name} icon={getBranchIcon(branch)} title={branch.name} value={branch.name} />
         ))}
       </Form.Dropdown>
       <Form.TextField

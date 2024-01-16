@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
 import { CreateDeployRequest } from "./create-deploy-request";
-import { PlanetScaleColor } from "./lib/colors";
 import { CreateBranch } from "./create-branch";
 import { View } from "./lib/oauth/view";
 import { ListDatabaseDropdown } from "./lib/components/list-database-dropdown";
 import { useBranches } from "./lib/hooks/use-branches";
 import { useSelectedOrganization } from "./lib/hooks/use-selected-organization";
 import { useSelectedDatabase } from "./lib/hooks/use-selected-database";
+import { getBranchIcon, getUserIcon } from "./lib/icons";
 
 function SearchBranches() {
   const [organization, setOrganization] = useSelectedOrganization();
@@ -31,17 +31,7 @@ function SearchBranches() {
         <List.Item
           key={branch.id}
           title={branch.name}
-          icon={
-            (branch as any).state === "sleeping"
-              ? {
-                  source: "branch-sleep.svg",
-                  tintColor: Color.SecondaryText,
-                }
-              : {
-                  source: "branch.svg",
-                  tintColor: PlanetScaleColor.Blue,
-                }
-          }
+          icon={getBranchIcon(branch)}
           accessories={[
             branch.production
               ? {
@@ -58,10 +48,7 @@ function SearchBranches() {
             branch.actor
               ? {
                   tooltip: branch.actor.display_name,
-                  icon: {
-                    source: branch.actor.avatar_url,
-                    mask: Image.Mask.Circle,
-                  },
+                  icon: getUserIcon(branch.actor),
                 }
               : {},
           ]}

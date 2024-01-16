@@ -1,4 +1,5 @@
 import { Clipboard, open, Toast } from "@raycast/api";
+import { capitalize } from "lodash";
 
 export function enrichToastWithURL(toast: Toast, { resource, url }: { resource: string; url: string }) {
   toast.primaryAction = {
@@ -12,4 +13,8 @@ export function enrichToastWithURL(toast: Toast, { resource, url }: { resource: 
     shortcut: { modifiers: ["shift", "cmd"], key: "c" },
     onAction: () => Clipboard.copy(url),
   };
+}
+
+export function titleCase(str: string) {
+  return capitalize(str.replace(/_/g, " "));
 }

@@ -6,6 +6,7 @@ import { View } from "./lib/oauth/view";
 import { FormDatabaseDropdown } from "./lib/components/form-database-dropdown";
 import { useBranches } from "./lib/hooks/use-branches";
 import { useDeployRequests } from "./lib/hooks/use-deploy-requests";
+import { getBranchIcon } from "./lib/icons";
 
 interface CreateDeployRequestForm {
   branch: string;
@@ -78,12 +79,26 @@ export function CreateDeployRequest(props: CreateDeployRequestProps | object) {
       <Form.Dropdown autoFocus={!isEmpty(props)} title="Origin" {...itemProps.branch}>
         {branches
           ?.filter((branch) => !branch.production)
-          .map((branch) => <Form.Dropdown.Item key={branch.name} title={branch.name} value={branch.name} />)}
+          .map((branch) => (
+            <Form.Dropdown.Item
+              key={branch.name}
+              icon={getBranchIcon(branch)}
+              title={branch.name}
+              value={branch.name}
+            />
+          ))}
       </Form.Dropdown>
       <Form.Dropdown title="Target" {...itemProps.deploy}>
         {branches
           ?.filter((branch) => branch.name !== values.branch)
-          .map((branch) => <Form.Dropdown.Item key={branch.name} title={branch.name} value={branch.name} />)}
+          .map((branch) => (
+            <Form.Dropdown.Item
+              key={branch.name}
+              icon={getBranchIcon(branch)}
+              title={branch.name}
+              value={branch.name}
+            />
+          ))}
       </Form.Dropdown>
       <Form.Separator />
       <Form.TextArea title="Notes" placeholder="Optional information about your deploy request" {...itemProps.notes} />

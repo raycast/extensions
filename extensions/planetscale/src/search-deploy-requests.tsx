@@ -7,7 +7,7 @@ import { useDeployRequests } from "./lib/hooks/use-deploy-requests";
 import { useSelectedOrganization } from "./lib/hooks/use-selected-organization";
 import { useSelectedDatabase } from "./lib/hooks/use-selected-database";
 import { CreateDeployRequest } from "./create-deploy-request";
-import { getDeployRequestIcon } from "./lib/components/icons";
+import { getDeployRequestIcon, getUserIcon } from "./lib/icons";
 import { useCachedState } from "@raycast/utils";
 import { DeployRequestDetail } from "./lib/components/deploy-request-detail";
 
@@ -38,7 +38,7 @@ function SearchDeployRequests() {
         <List.Item
           key={deployRequest.id}
           title={`#${deployRequest.number}`}
-          keywords={[deployRequest.notes]}
+          keywords={[deployRequest.notes, deployRequest.branch, deployRequest.into_branch]}
           subtitle={showDeployRequestDetail ? "" : deployRequest.notes}
           icon={getDeployRequestIcon(deployRequest)}
           detail={
@@ -68,10 +68,7 @@ function SearchDeployRequests() {
                   deployRequest.actor
                     ? {
                         tooltip: deployRequest.actor.display_name,
-                        icon: {
-                          source: deployRequest.actor.avatar_url,
-                          mask: Image.Mask.Circle,
-                        },
+                        icon: getUserIcon(deployRequest.actor),
                       }
                     : {},
                 ]),

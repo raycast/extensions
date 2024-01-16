@@ -1,10 +1,11 @@
 import { DeployRequest } from "../api";
-import { Icon, Image, List } from "@raycast/api";
-import { getDeployRequestIcon } from "./icons";
-import { capitalize } from "lodash";
+import { Color, Icon, List } from "@raycast/api";
+import { getDeployRequestIcon, getUserIcon } from "../icons";
 import { useDeployOperations } from "../hooks/use-deploy-operations";
 import { format as formatSQL } from "sql-formatter";
 import { PlanetScaleColor } from "../colors";
+import { titleCase } from "../raycast";
+import { countBy } from "lodash";
 
 export function DeployRequestDetail({
   deployRequest,
@@ -21,11 +22,21 @@ export function DeployRequestDetail({
     number: deployRequest.number.toString(),
   });
 
+  const schemaChanges = countBy(deployOperations, (d) => d.operation_name.toLowerCase());
+
   const sql = deployOperations
     ?.map((deployOperation) => "```sql\n" + formatSQL(deployOperation.ddl_statement, { language: "mysql" }) + "\n```")
     .join("\n\n");
-
-  const markdown = `${deployRequest.notes}\n\n${sql ? sql : "```sql\n\n\n\n```"}`;
+  let markdown = "";
+  markdown += `### Summary\n\n${deployRequest.notes || `*No summary found*`}\n\n`;
+  markdown += `### Schema changes\n\n`;
+  if (sql) {
+    markdown += `\n\n${sql}`;
+  } else if (deployOperationsLoading) {
+    markdown += "\n\n```sql\n\n\n\n```";
+  } else {
+    markdown += "*No schema changes*";
+  }
 
   return (
     <List.Item.Detail
@@ -35,23 +46,46 @@ export function DeployRequestDetail({
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.TagList title="Status">
             <List.Item.Detail.Metadata.TagList.Item
-              text={capitalize(deployRequest.state)}
+              text={titleCase(deployRequest.state)}
               color={getDeployRequestIcon(deployRequest).tintColor}
             />
             {deployRequest.state === "open" ? (
               <List.Item.Detail.Metadata.TagList.Item
-                text={capitalize(deployRequest.deployment_state)}
+                text={titleCase(deployRequest.deployment_state)}
                 color={getDeployRequestIcon(deployRequest).tintColor}
               />
             ) : null}
           </List.Item.Detail.Metadata.TagList>
+          <List.Item.Detail.Metadata.TagList title="Schema changes">
+            <List.Item.Detail.Metadata.TagList.Item
+              icon={{
+                source: "table-add.svg",
+                tintColor: schemaChanges.create ? PlanetScaleColor.Green : Color.SecondaryText,
+              }}
+              text={(schemaChanges.create ?? 0).toString()}
+              color={schemaChanges.create ? PlanetScaleColor.Green : Color.SecondaryText}
+            />
+            <List.Item.Detail.Metadata.TagList.Item
+              icon={{
+                source: "table-edit.svg",
+                tintColor: schemaChanges.alter ? PlanetScaleColor.Yellow : Color.SecondaryText,
+              }}
+              text={(schemaChanges.alter ?? 0).toString()}
+              color={schemaChanges.alter ? PlanetScaleColor.Yellow : Color.SecondaryText}
+            />
+            <List.Item.Detail.Metadata.TagList.Item
+              icon={{
+                source: "table-delete.svg",
+                tintColor: schemaChanges.delete ? PlanetScaleColor.Red : Color.SecondaryText,
+              }}
+              text={(schemaChanges.delete ?? 0).toString()}
+              color={schemaChanges.delete ? PlanetScaleColor.Red : Color.SecondaryText}
+            />
+          </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Label
             title="Author"
             text={deployRequest.actor.display_name}
-            icon={{
-              source: deployRequest.actor.avatar_url,
-              mask: Image.Mask.Circle,
-            }}
+            icon={getUserIcon(deployRequest.actor)}
           />
           {deployRequest.approved ? (
             <List.Item.Detail.Metadata.Label
@@ -62,7 +96,6 @@ export function DeployRequestDetail({
               }}
             />
           ) : null}
-          <List.Item.Detail.Metadata.Separator />
           {deployRequest.deployed_at ? (
             <List.Item.Detail.Metadata.Label
               title="Deployed at"
