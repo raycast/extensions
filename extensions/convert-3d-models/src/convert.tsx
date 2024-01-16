@@ -81,7 +81,7 @@ export default function Command() {
       await showErrorToast(
         `Failed to convert ${selectedModels.length} ${pluralized} to ${desiredType}`,
         error as Error,
-        toast
+        toast,
       );
     } finally {
       // Perform cleanup operations
@@ -96,7 +96,7 @@ export default function Command() {
       <List.EmptyView
         title="No Formats Enabled"
         description="Enable formats in the command preferences (⌘⇧,)"
-        icon={Icon.Model}
+        icon={Icon.Document}
         actions={
           // JSX element representing a panel of actions
           <ActionPanel>
@@ -109,7 +109,6 @@ export default function Command() {
           </ActionPanel>
         }
       />
-
       {/* JSX elements representing the list items for each enabled format */}
       {enabledFormats.map((format) => (
         <List.Item

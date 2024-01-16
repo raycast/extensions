@@ -10,7 +10,7 @@
 
 import * as fs from "fs";
 
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 import { Clipboard, getFrontmostApplication, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 
@@ -50,7 +50,7 @@ const getSelectedFinderModels = async (): Promise<string> => {
         end repeat
         return thePaths
       end if
-    end tell`
+    end tell`,
   );
 };
 
@@ -86,7 +86,7 @@ const getSelectedPathFinderModels = async (): Promise<string> => {
         end repeat
         return thePaths
       end if
-    end tell`
+    end tell`,
   );
 };
 

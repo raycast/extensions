@@ -44,7 +44,7 @@ export default async function convert(sourcePaths: string[], desiredType: string
     while (fs.existsSync(newPath) && os.tmpdir() != path.dirname(newPath)) {
       newPath = path.join(
         path.dirname(newPath),
-        path.basename(newPath, `.${desiredType.toLowerCase()}`) + ` (${iter})${path.extname(newPath)}`
+        path.basename(newPath, `.${desiredType.toLowerCase()}`) + ` (${iter})${path.extname(newPath)}`,
       );
       iter++;
     }
