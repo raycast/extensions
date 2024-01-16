@@ -1,6 +1,6 @@
 import { LaunchProps, closeMainWindow, showHUD, getSelectedText } from "@raycast/api";
 import { makeNewLittleArcWindow } from "./arc";
-import { newLittleArcPreferences, searchArcPreferences } from "./preferences";
+import { newLittleArcPreferences } from "./preferences";
 import { NewTabSearchConfigs, URLArguments } from "./types";
 import { isURL, validateURL } from "./utils";
 
@@ -27,7 +27,7 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
   const { fallbackText } = props;
   const selectedText = await getSelectedText();
 
-  const selectedTextAsSearch = `${config[searchArcPreferences.engine].search}${encodeURIComponent(selectedText)}`;
+  const selectedTextAsSearch = `${config[newLittleArcPreferences.engine].search}${encodeURIComponent(selectedText)}`;
 
   const newTabUrl =
     url || selectedText
