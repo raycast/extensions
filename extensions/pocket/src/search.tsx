@@ -143,14 +143,11 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   onAction={() => {
                     return confirmAlert({
+                      icon: { source: Icon.Trash, tintColor: Color.Red },
                       title: "Delete Bookmark",
                       message: bookmark.title || bookmark.originalUrl,
-                      icon: {
-                        source: Icon.Trash,
-                        tintColor: Color.Red,
-                      },
                       primaryAction: {
-                        title: "Delete",
+                        title: "Confirm",
                         style: Alert.ActionStyle.Destructive,
                         onAction: () => deleteBookmark(bookmark.id),
                       },
@@ -185,14 +182,6 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
                   title="Copy URL as Markdown"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                   content={`[${bookmark.title}](${bookmark.originalUrl})`}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={() => refreshBookmarks()}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -233,6 +222,14 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
                     />
                   ))}
                 </ActionPanel.Submenu>
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={() => refreshBookmarks()}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }
