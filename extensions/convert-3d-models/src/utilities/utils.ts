@@ -125,7 +125,7 @@ export const getSelectedModels = async (): Promise<string[]> => {
   // Get the name of the frontmost application
   let activeApp = inputMethod;
   try {
-    let activeApp = (await getFrontmostApplication()).name;
+    activeApp = (await getFrontmostApplication()).name;
   } catch {
     console.error("Couldn't get frontmost application");
   }
