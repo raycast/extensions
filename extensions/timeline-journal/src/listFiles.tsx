@@ -34,7 +34,11 @@ export default function Command() {
           title={file.name}
           actions={
             <ActionPanel>
-              <Action.Push title="View Content" target={<ShowTimeline filePath={file.path} />} />
+              <Action.Push
+                title="View Content"
+                icon={Icon.ChevronRight}
+                target={<ShowTimeline filePath={file.path} />}
+              />
             </ActionPanel>
           }
         />
