@@ -29,6 +29,8 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            title="Create Note"
+            icon={Icon.Pencil}
             onSubmit={async (values) => {
               if (hasError) {
                 showToast(Toast.Style.Failure, "Check your credentials before publishing");
