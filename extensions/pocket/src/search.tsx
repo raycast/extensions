@@ -92,6 +92,13 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
           accessories={[
             { icon: bookmark.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined },
             { icon: bookmark.archived ? { source: Icon.Checkmark, tintColor: Color.Green } : undefined },
+            bookmark.tags.length > 0
+              ? {
+                  icon: Icon.Tag,
+                  text: bookmark.tags.length.toString(),
+                  tooltip: bookmark.tags.map(capitalize).join(", "),
+                }
+              : {},
             { text: new Date(bookmark.updatedAt)?.toDateString().replace(/^\w+\s/, "") },
           ]}
           actions={
@@ -136,8 +143,8 @@ function SearchBookmarks(props: { arguments?: SearchArguments }) {
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   onAction={() => {
                     return confirmAlert({
-                      title: "Do you want to delete it?",
-                      message: bookmark.title,
+                      title: "Delete Bookmark",
+                      message: bookmark.title || bookmark.originalUrl,
                       icon: {
                         source: Icon.Trash,
                         tintColor: Color.Red,
