@@ -16,7 +16,7 @@ interface UseBookmarksOptions {
 export function useBookmarks({ state, tag: selectedTag, contentType, search, count }: UseBookmarksOptions) {
   const pocket = usePocketClient();
 
-  const { refreshTags } = useTags();
+  const { registerTag } = useTags();
 
   const { data, isLoading, mutate, revalidate } = useCachedPromise(
     async (url, options) => pocket.getBookmarks(options),
@@ -98,6 +98,7 @@ export function useBookmarks({ state, tag: selectedTag, contentType, search, cou
   }
 
   async function addTag(id: string, tag: string) {
+    registerTag(tag);
     const toast = await showToast({
       title: "Tagging bookmark",
       message: capitalize(tag),
@@ -110,7 +111,6 @@ export function useBookmarks({ state, tag: selectedTag, contentType, search, cou
     });
     toast.title = "Tag added correctly";
     toast.style = Toast.Style.Success;
-    await refreshTags();
   }
 
   async function removeTag(id: string, tag: string) {
@@ -130,7 +130,6 @@ export function useBookmarks({ state, tag: selectedTag, contentType, search, cou
     });
     toast.title = "Tag removed correctly";
     toast.style = Toast.Style.Success;
-    await refreshTags();
   }
 
   return {
