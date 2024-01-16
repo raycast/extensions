@@ -17,7 +17,7 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
   const { fallbackText } = props;
   const selectedText = await getSelectedText();
 
-  const selectedTextAsSearch = `${config[newLittleArcPreferences.engine].search}${encodeURIComponent(selectedText)}`;
+  const selectedTextAsSearch = `${config[newLittleArcPreferences.engine]}${encodeURIComponent(selectedText)}`;
 
   const newTabUrl =
     url || selectedText
