@@ -18,6 +18,11 @@ export default function SearchNode(props: LaunchProps<{ arguments: Arguments.Sea
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://amboss.space/node/${node.pubkey}`} />
+              <Action.CopyToClipboard
+                title="Copy Pubkey to Clipboard"
+                content={node.pubkey}
+                shortcut={{ modifiers: ["cmd"], key: "." }}
+              />
             </ActionPanel>
           }
         />
