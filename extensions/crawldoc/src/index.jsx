@@ -18,6 +18,9 @@ if (!compatibleSites.length) {
     res.on("end", () => {
       compatibleSites = JSON.parse(data);
       compatibleSites = compatibleSites.compatibleSites;
+      compatibleSites = compatibleSites.sort((a, b) => {
+        return simplifyString(a.name).localeCompare(simplifyString(b.name));
+      });
       cache.set("compatibleSites", JSON.stringify(compatibleSites));
     });
   });
@@ -25,32 +28,10 @@ if (!compatibleSites.length) {
 
 export default function Command() {
   var [searchText, setSearchText] = useState(null);
-  var splitQuery = searchText?.split(/\s+/).filter((word) => word !== "");
-  var sites = [];
+  var [sites, setSites] = useState([]);
 
-  splitQuery?.forEach((word, index) => {
-    // If the user wants to search on a specific site
-    if (
-      compatibleSites.find(
-        (site) =>
-          simplifyString(site.name) == simplifyString(word) ||
-          simplifyString(site.id) == simplifyString(word) ||
-          simplifyString(site.domain) == simplifyString(word) ||
-          site.alias?.find((a) => simplifyString(a) === simplifyString(word)),
-      )
-    ) {
-      var site = compatibleSites.find(
-        (site) =>
-          simplifyString(site.name) == simplifyString(word) ||
-          simplifyString(site.id) == simplifyString(word) ||
-          simplifyString(site.domain) == simplifyString(word) ||
-          site.alias?.find((a) => simplifyString(a) === simplifyString(word)),
-      );
-      sites.push(site.id);
-      splitQuery.splice(index, 1);
-      searchText = splitQuery.join(" ");
-    }
-  });
+  // Wait for compatibleSites to be loaded
+  if (!compatibleSites.length) return <List isLoading />;
 
   // Remove all spaces at end of query
   while (searchText?.endsWith(" "))
@@ -88,22 +69,19 @@ export default function Command() {
       searchBarPlaceholder="Search with CrawlDoc..."
       throttle
       isShowingDetail={!!searchText && !!sites.length}
+      searchBarAccessory={
+        <Dropdown
+          types={compatibleSites.map((site) => {
+            return { id: site.id, name: site.name };
+          })}
+          onTypeChange={(newValue) => {
+            setSites([newValue]);
+          }}
+        />
+      }
     >
       {!searchText && !isLoading ? (
         <List.EmptyView title="Type something to get started" />
-      ) : !sites.length && !isLoading ? (
-        <List.EmptyView
-          title="Unsupported docs services"
-          description="Start your query by entering the name of the site you want to search"
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open Supported Sites"
-                url="https://crawldoc.johanstick.fr/listes#services-compatibles"
-              />
-            </ActionPanel>
-          }
-        />
       ) : (
         <List.Section title="Results" subtitle={data?.length + ""}>
           {data?.map((searchResult, index) => (
@@ -115,6 +93,24 @@ export default function Command() {
         </List.Section>
       )}
     </List>
+  );
+}
+
+function Dropdown(props) {
+  const { types, onTypeChange } = props;
+
+  return (
+    <List.Dropdown
+      tooltip="Select Documentation"
+      storeValue={true}
+      onChange={(newValue) => {
+        onTypeChange(newValue);
+      }}
+    >
+      {types.map((type) => (
+        <List.Dropdown.Item key={type.id} title={type.name} value={type.id} />
+      ))}
+    </List.Dropdown>
   );
 }
 
