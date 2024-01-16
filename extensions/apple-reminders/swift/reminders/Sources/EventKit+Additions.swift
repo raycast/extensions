@@ -216,7 +216,37 @@ extension EKReminder {
       ]
     }
 
+    if let locationAlarm = self.alarms?.first(where: { $0.isLocationAlarm }) {
+      var locationDict: [String: Any] = [
+        "address": locationAlarm.structuredLocation?.title ?? "Unknown address"
+      ]
+
+      let proximity = locationAlarm.proximity
+      switch proximity {
+      case .enter:
+        locationDict["proximity"] = "enter"
+      case .leave:
+        locationDict["proximity"] = "leave"
+      case .none:
+        locationDict["proximity"] = nil
+      @unknown default:
+        locationDict["proximity"] = nil
+      }
+
+      locationDict["radius"] =
+        locationAlarm.structuredLocation?.radius == 0
+        ? nil : locationAlarm.structuredLocation?.radius
+
+      reminderDict["location"] = locationDict
+    }
+
     return reminderDict
+  }
+}
+
+extension EKAlarm {
+  var isLocationAlarm: Bool {
+    return self.structuredLocation != nil
   }
 }
 

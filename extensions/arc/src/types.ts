@@ -6,8 +6,7 @@ export type HistoryEntry = {
 };
 
 export type Tab = {
-  windowId: number;
-  tabId: number;
+  id: string;
   url: string;
   title: string;
   location: TabLocation;

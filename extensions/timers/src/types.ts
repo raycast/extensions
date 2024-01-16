@@ -71,3 +71,7 @@ export interface SoundData {
   icon: Icon;
   value: string;
 }
+
+export interface CommandLinkParams {
+  timerID: string;
+}

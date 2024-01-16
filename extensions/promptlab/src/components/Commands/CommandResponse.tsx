@@ -1,7 +1,9 @@
 import { closeMainWindow, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Command, CommandOptions, ERRORTYPE } from "../../utils/types";
-import { runActionScript, runReplacements } from "../../utils/command-utils";
+import { ERRORTYPE } from "../../lib/common/types";
+import { Command, CommandOptions, PLCommandRunProperties } from "../../lib/commands/types";
+import { runActionScript, runReplacements } from "../../lib/commands/command-utils";
+import { updateCommand } from "../../lib/commands";
 import useModel from "../../hooks/useModel";
 import CommandDetailView from "./CommandDetailView";
 import CommandChatView from "../Chats/CommandChatView";
@@ -12,16 +14,18 @@ import { useModels } from "../../hooks/useModels";
 import CommandSetupForm from "./CommandSetupForm";
 import SpeechInputView from "./SpeechInputView";
 import { useFiles } from "../../hooks/useFiles";
-import { showDialog } from "../../utils/scripts";
+import { showDialog } from "../../lib/scripts";
+import { createCommandRun } from "../../lib/commands";
 
 export default function CommandResponse(props: {
-  commandName: string;
+  command: Command;
   prompt: string;
   input?: string;
   options: CommandOptions;
-  setCommands?: React.Dispatch<React.SetStateAction<Command[]>>;
+  setCommands?: (commands: Command[]) => void;
+  onCompletion?: (newRun: PLCommandRunProperties) => void;
 }) {
-  const { commandName, prompt, input, setCommands } = props;
+  const { command, prompt, input, setCommands, onCompletion } = props;
   const [substitutedPrompt, setSubstitutedPrompt] = useState<string>(prompt);
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [shouldCancel, setShouldCancel] = useState<boolean>(false);
@@ -51,14 +55,15 @@ export default function CommandResponse(props: {
 
     const context = {
       ...fileContents,
-      input: options.useSpeech != undefined || speechInput?.length ? speechInput || "" : input || "",
+      input: options.useSpeech == true || speechInput?.length ? speechInput || "" : input || "",
       selectedFiles: selectedFiles?.csv || "",
       previousCommand: previousCommand,
       previousResponse: previousResponse,
       previousPrompt: previousPrompt,
+      lastRun: command.runs?.[0]?.response || "",
     };
 
-    Promise.resolve(runReplacements(prompt, context, [commandName], options)).then((subbedPrompt) => {
+    Promise.resolve(runReplacements(prompt, context, [command.name], options)).then((subbedPrompt) => {
       if (options.outputKind == "list" && subbedPrompt.trim().length > 0) {
         subbedPrompt +=
           "\n\n<Format the output as a single list with each item separated by '~~~'. Do not provide any other commentary, headings, or data.>";
@@ -75,7 +80,7 @@ export default function CommandResponse(props: {
   const contentPromptString = fileContents?.contents || "";
   const fullPrompt = (substitutedPrompt.replaceAll("{{contents}}", contentPromptString) + contentPromptString).replace(
     /{{END}}(\n|.)*/,
-    ""
+    "",
   );
 
   const { data, isLoading, revalidate, error } = useModel(
@@ -88,7 +93,7 @@ export default function CommandResponse(props: {
       (!options.minNumFiles || (fileContents?.contents?.length != undefined && fileContents.contents.length > 0)) &&
       !shouldCancel &&
       (!options.useSpeech || (speechInput != "" && speechInput != undefined)),
-    models.models.find((model) => model.id == options.model)
+    models.models.find((model) => model.id == options.model),
   );
 
   useEffect(() => {
@@ -106,17 +111,34 @@ export default function CommandResponse(props: {
           substitutedPrompt.replaceAll("{{contents}}", contentPromptString),
           input || contentPromptString,
           data,
-          options.scriptKind
-        )
+          options.scriptKind,
+        ),
       );
+    }
+
+    // Update command run history
+    if (command.recordRuns && data && !isLoading && !loadingData && !shouldCancel && command.id != undefined) {
+      const newRun = createCommandRun(command, {
+        prompt: substitutedPrompt.replaceAll("{{contents}}", contentPromptString),
+        response: data,
+        error: error ? error.toString() : undefined,
+      });
+
+      const updatedCommand: Command = {
+        ...command,
+        timesExecuted: command.timesExecuted ? command.timesExecuted + 1 : 1,
+        runs: command.runs ? [newRun, ...command.runs] : [newRun],
+      };
+      updateCommand(command, updatedCommand, setCommands);
+      onCompletion?.(newRun);
     }
 
     // Update previous command placeholders
     if (!loadingData && !loading && !isLoading && data.length) {
       if (options.outputKind == "dialogWindow") {
-        Promise.resolve(showDialog(commandName, text));
+        Promise.resolve(showDialog(command.name, text));
       }
-      setPreviousCommand(commandName);
+      setPreviousCommand(command.name);
       setPreviousResponse(text);
       setPreviousPrompt(fullPrompt);
     }
@@ -158,7 +180,12 @@ export default function CommandResponse(props: {
     !options.setupConfig.fields.every((field) => field.value != undefined && field.value.toString().length > 0)
   ) {
     return (
-      <CommandSetupForm commandName={commandName} options={options} setCommands={setCommands} setOptions={setOptions} />
+      <CommandSetupForm
+        commandName={command.name}
+        options={options}
+        setCommands={setCommands}
+        setOptions={setOptions}
+      />
     );
   }
 
@@ -169,10 +196,10 @@ export default function CommandResponse(props: {
     (!loadingData && substitutedPrompt == "")
   ) {
     if (options.showResponse == false || options.outputKind == "dialogWindow") {
-      Promise.resolve(showHUD(`Running '${commandName}'...`));
+      Promise.resolve(showHUD(`Running '${command.name}'...`));
     }
 
-    if (!loadingData && !loading && !isLoading && data.length) {
+    if (!loadingData && !loading && !isLoading && (data.length || substitutedPrompt == "")) {
       if (options.showResponse == false) {
         Promise.resolve(showHUD("Done!"));
       }
@@ -194,7 +221,7 @@ export default function CommandResponse(props: {
           loadingData ||
           (options.minNumFiles != undefined && options.minNumFiles != 0 && fileContents?.contents.length == 0)
         }
-        commandName={commandName}
+        commandName={command.name}
         options={options}
         prompt={fullPrompt}
         response={text}
@@ -212,7 +239,7 @@ export default function CommandResponse(props: {
           loadingData ||
           (options.minNumFiles != undefined && options.minNumFiles != 0 && fileContents?.contents.length == 0)
         }
-        commandName={commandName}
+        commandName={command.name}
         options={options}
         prompt={fullPrompt}
         response={text}
@@ -230,7 +257,7 @@ export default function CommandResponse(props: {
           loadingData ||
           (options.minNumFiles != undefined && options.minNumFiles != 0 && fileContents?.contents.length == 0)
         }
-        commandName={commandName}
+        commandName={command.name}
         options={options}
         prompt={fullPrompt}
         response={text}
@@ -248,7 +275,7 @@ export default function CommandResponse(props: {
         loadingData ||
         (options.minNumFiles != undefined && options.minNumFiles != 0 && fileContents?.contents.length == 0)
       }
-      commandName={commandName}
+      commandName={command.name}
       options={options}
       prompt={fullPrompt}
       response={text}
