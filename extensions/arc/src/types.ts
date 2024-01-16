@@ -19,16 +19,12 @@ export type Space = {
   title?: string;
 };
 
-export type NewTabSearchConfig = {
-  search: string;
-};
-
 export type NewTabSearchConfigs = {
-  google: NewTabSearchConfig;
-  duckduckgo: NewTabSearchConfig;
-  bing: NewTabSearchConfig;
-  yahoo: NewTabSearchConfig;
-  ecosia: NewTabSearchConfig;
+  google: string;
+  duckduckgo: string;
+  bing: string;
+  yahoo: string;
+  ecosia: string;
 };
 
 export type SearchConfig = {

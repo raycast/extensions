@@ -5,21 +5,11 @@ import { NewTabSearchConfigs, URLArguments } from "./types";
 import { isURL, validateURL } from "./utils";
 
 export const config: NewTabSearchConfigs = {
-  google: {
-    search: "https://www.google.com/search?q=",
-  },
-  duckduckgo: {
-    search: "https://www.duckduckgo.com?q=",
-  },
-  bing: {
-    search: "https://www.bing.com/search?q=",
-  },
-  yahoo: {
-    search: "https://search.yahoo.com/search?p=",
-  },
-  ecosia: {
-    search: "https://www.ecosia.org/search?q=",
-  },
+  google: "https://www.google.com/search?q=",
+  duckduckgo: "https://www.duckduckgo.com?q=",
+  bing: "https://www.bing.com/search?q=",
+  yahoo: "https://search.yahoo.com/search?p=",
+  ecosia: "https://www.ecosia.org/search?q=",
 };
 
 export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {
