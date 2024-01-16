@@ -5,6 +5,9 @@
   "description": "A Raycast extension for searching Lightning Nodes",
   "icon": "command-icon.png",
   "author": "bufo24",
+  "contributors": [
+    "Djo1e"
+  ],
   "license": "MIT",
   "commands": [
     {
