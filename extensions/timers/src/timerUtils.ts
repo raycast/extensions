@@ -23,6 +23,7 @@ const checkForOverlyLoudAlert = (launchedFromMenuBar = false) => {
 };
 
 async function startTimer(timeInSeconds: number, timerName = "Untitled", selectedSound = "default") {
+  popToRoot();
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
   const masterName = fileName.replace(/:/g, "__");
   writeFileSync(masterName, timerName);
@@ -33,7 +34,7 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
   }`;
   const cmdParts = [`sleep ${timeInSeconds}`];
   cmdParts.push(
-    `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`
+    `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`,
   );
   const afplayString = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
   if (prefs.selectedSound === "speak_timer_name") {
@@ -57,7 +58,6 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
       return;
     }
   });
-  popToRoot();
   await showHUD(`Timer "${timerName}" started for ${formatTime(timeInSeconds)}! 🎉`);
 }
 
