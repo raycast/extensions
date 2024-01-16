@@ -1,5 +1,11 @@
 # Arc Changelog
 
+## [Improvements] - 2024-01-16
+
+- If text is selected, the command `Open New Little Arc Window` will now open in a search for the selected text.
+- If an URL is selected, the command `Open New Little Arc Window` will now open in the selected URL.
+- The command `Open New Little Arc Window` now accepts a preference for which engine to use when searching.
+
 ## [Fixes] - 2024-01-05
 
 - Fixed an issue (#8189) where a wrong tab could be randomly opened instead of the one selected
