@@ -16,7 +16,15 @@
       "title": "Surl",
       "subtitle": "Shorten Your URL",
       "description": "Make Your URL Shorten",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://example.com",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "history",
