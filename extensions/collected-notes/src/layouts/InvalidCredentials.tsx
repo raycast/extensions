@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 
 export function InvalidCredentials({ message }: { message?: string }) {
 	const markdown = "API key incorrect. Please update it in extension preferences and try again.";
@@ -8,7 +8,7 @@ export function InvalidCredentials({ message }: { message?: string }) {
 			markdown={message ?? markdown}
 			actions={
 				<ActionPanel>
-					<Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+					<Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
 				</ActionPanel>
 			}
 		/>
