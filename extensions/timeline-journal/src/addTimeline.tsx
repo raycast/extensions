@@ -27,9 +27,10 @@ export default function Command() {
   const { handleSubmit, itemProps } = useForm<TimelineFormValues>({
     onSubmit(values) {
       const newText = values.addTimeline.trim();
+
       if (newText === "") return;
 
-      const newBulletPoint = formatBulletPoint(newText);
+      const newBulletPoint = formatBulletPoint(newText).replace(/\n/g, " ");
       const currentContent = fs.readFileSync(filePath, "utf-8");
 
       // Insert new bullet point at the top or bottom of the file
