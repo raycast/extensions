@@ -1,4 +1,4 @@
 {
-	"root": true,
-	"extends": ["@raycast", "prettier/prettier"]
+  "root": true,
+  "extends": ["@raycast", "prettier/prettier"]
 }
