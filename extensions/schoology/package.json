@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "schoology",
   "title": "Schoology",
-  "description": "This extension will help you view your grades and course lists quickly using Raycast.",
+  "description": "View your courselists, grades, and individual assignments quickly using Raycast.",
   "icon": "command-icon.png",
   "author": "Vaibhav-Satishkumar",
   "categories": [
