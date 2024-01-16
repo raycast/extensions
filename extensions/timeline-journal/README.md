@@ -4,15 +4,15 @@ Put your thoughts on a timeline.
 
 ### Today's Timeline
 
-![](media/timeline-journal-1.png)
+![](metadata/timeline-journal-1.png)
 
 ### Add to Timeline (Longform)
 
-![](media/timeline-journal-2.png)
+![](metadata/timeline-journal-2.png)
 
 ### Search Your Previous Timelines
 
-![](media/timeline-journal-3.png)
+![](metadata/timeline-journal-3.png)
 
 ## Setup
 Provide a folder path to store all your timelines in markdown format. Then start journaling!
