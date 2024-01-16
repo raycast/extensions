@@ -1,8 +1,14 @@
-import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
+import { getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
+  decimalPlaces: string;
+}
 
 export default function Command() {
-
+  
+  const preferences = getPreferenceValues<Preferences>();
   const [firstNumberError, setFirstNumberError] = useState<string | undefined>();
   const [secondNumberError, setSecondNumberError] = useState<string | undefined>();
 
@@ -40,8 +46,17 @@ export default function Command() {
     const oldValue = parseFloat(values.firstNumber);
     const newValue = parseFloat(values.secondNumber);
 
+    let decimalPlaces = parseInt(preferences.decimalPlaces);
+
+    // Validate decimalPlaces to be within the range 0-20
+    if (isNaN(decimalPlaces) || decimalPlaces < 0 || decimalPlaces > 20) {
+      decimalPlaces = 2; // Set a sensible default
+    }
+
     const percentageChange = ((newValue - oldValue) / oldValue) * 100;
-    const formattedResult = new Intl.NumberFormat('en-US', { style: 'decimal', maximumFractionDigits: 4 }).format(percentageChange);
+    const formattedResult = new Intl.NumberFormat("en-US", { style: "decimal", maximumFractionDigits: decimalPlaces }).format(
+      percentageChange,
+    );
     const resultText = `${formattedResult}%`;
 
     await Clipboard.copy(resultText);
@@ -53,12 +68,14 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Calculate and Copy" onSubmit={handleSubmit} />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
       <Form.Description text="Enter two numbers to calculate the percentage change and copy it to the clipboard." />
       <Form.TextField
         id="firstNumber"
+        autoFocus={true}
         title="Old Value"
         placeholder="Enter old value"
         defaultValue=""
@@ -85,7 +102,13 @@ export default function Command() {
         placeholder="Enter new value"
         defaultValue=""
         error={secondNumberError}
-        onChange={dropSecondNumberErrorIfNeeded}
+        onChange={(newValue) => {
+          if (newValue !== undefined && validateNumber(newValue)) {
+            dropSecondNumberErrorIfNeeded();
+          } else {
+            setSecondNumberError("Please enter a valid number");
+          }
+        }}
         onBlur={(event) => {
           const value = event.target.value;
           if (value !== undefined && !validateNumber(value)) {

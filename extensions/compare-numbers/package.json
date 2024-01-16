@@ -5,7 +5,9 @@
   "description": "Compare two numbers.",
   "icon": "extension_icon.png",
   "author": "bailey_jennings",
-  "categories": ["Data"],
+  "categories": [
+    "Data"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -13,6 +15,18 @@
       "title": "Caculate Percentage Difference",
       "description": "Caculate the percentage difference of two numbers.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "decimalPlaces",
+      "type": "textfield",
+      "key": "decimalPlaces",
+      "title": "Number of Decimal Places",
+      "placeholder": "Enter a number (e.g., 2 for two decimal places)",
+      "defaultValue": "2",
+      "required": false,
+      "description": "Control the precision of your calculations by setting the preferred number of decimal places for the results. This preference allows you to specify how many decimal places will be used when rounding the output of the percentage change calculation."
     }
   ],
   "dependencies": {
@@ -23,7 +37,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.2.2",
     "typescript": "^5.2.2"
   },
   "scripts": {
