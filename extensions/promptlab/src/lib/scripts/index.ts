@@ -233,7 +233,7 @@ export const runScript = async (
 ): Promise<string | object> => {
   const scriptPath = path.resolve(environment.assetsPath, "scripts", `${scriptName}.scpt`);
   const script = await execScript(scriptPath, args, language).data;
-  if (returnType === ReturnType.JSON) return JSON.parse(script);
+  if (returnType === ReturnType.JSON && script.trim().length != 0) return JSON.parse(script);
   return script;
 };
 
