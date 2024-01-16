@@ -43,6 +43,7 @@ export default function Command() {
     fs.writeFileSync(filePath, newContent);
     setBulletPoints(getBulletPoints(newContent, insertPosition));
     setSearchText("");
+    showToast(Toast.Style.Success, "Added to Today's Timeline.");
   };
 
   // Delete bullet point at the specified index
