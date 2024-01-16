@@ -31,6 +31,8 @@ function GameDetailView(props: { gameInfo: EventsItem }) {
   const gameTime = gameDate.toLocaleDateString([], dateOption) + " " + gameDate.toLocaleTimeString([], timeOptions);
   const gameScore = awayTeam.score + "-" + homeTeam.score;
   const networks = game.broadcasts.map((broadcast: BroadcastsItem) => broadcast.names).join(", ");
+  const weather =
+    gameInfo.weather && gameInfo ? `${gameInfo.weather.temperature}°F - ${gameInfo.weather.displayValue}` : undefined;
 
   return (
     <Detail
@@ -47,10 +49,7 @@ function GameDetailView(props: { gameInfo: EventsItem }) {
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Networks" text={networks} />
 
-          <Detail.Metadata.Label
-            title="Weather"
-            text={`${gameInfo.weather.temperature}°F - ${gameInfo.weather.displayValue} `}
-          />
+          {weather && <Detail.Metadata.Label title="Weather" text={weather} />}
           <Detail.Metadata.Separator />
 
           <Detail.Metadata.Label
@@ -87,40 +86,43 @@ function formatGameToMarkdown(gameInfo: EventsItem) {
     markdownText += `- [${link.text}](${link.href})\n`;
   });
 
-  const awayPassingLeader = awayTeam.leaders[0].leaders[0];
-  const awayRushingLeader = awayTeam.leaders[1].leaders[0];
-  const awayReceivingLeader = awayTeam.leaders[2].leaders[0];
+  if (awayTeam.leaders && homeTeam.leaders) {
+    const awayPassingLeader = awayTeam.leaders[0].leaders[0];
+    const awayRushingLeader = awayTeam.leaders[1].leaders[0];
+    const awayReceivingLeader = awayTeam.leaders[2].leaders[0];
 
-  const homePassingLeader = homeTeam?.leaders[0].leaders[0];
-  const homeRushingLeader = homeTeam?.leaders[1].leaders[0];
-  const homeReceivingLeader = homeTeam?.leaders[2].leaders[0];
+    const homePassingLeader = homeTeam?.leaders[0].leaders[0];
+    const homeRushingLeader = homeTeam?.leaders[1].leaders[0];
+    const homeReceivingLeader = homeTeam?.leaders[2].leaders[0];
 
-  if (awayPassingLeader && homePassingLeader && awayPassingLeader.athlete && homePassingLeader.athlete) {
-    markdownText += `### Passing Leaders\n\n`;
-    markdownText += `#### [${awayPassingLeader.athlete.displayName}](${awayPassingLeader.athlete.links[0].href}) (${awayPassingLeader.athlete.position.abbreviation}) (${awayPassingLeader.displayValue})\n\n`;
-    markdownText += `#### [${homePassingLeader.athlete.displayName}](${homePassingLeader.athlete.links[0].href}) (${homePassingLeader.athlete.position.abbreviation}) (${homePassingLeader.displayValue})\n\n`;
+    if (awayPassingLeader && homePassingLeader && awayPassingLeader.athlete && homePassingLeader.athlete) {
+      markdownText += `### Passing Leaders\n\n`;
+      markdownText += `#### [${awayPassingLeader.athlete.displayName}](${awayPassingLeader.athlete.links[0].href}) (${awayPassingLeader.athlete.position.abbreviation}) (${awayPassingLeader.displayValue})\n\n`;
+      markdownText += `#### [${homePassingLeader.athlete.displayName}](${homePassingLeader.athlete.links[0].href}) (${homePassingLeader.athlete.position.abbreviation}) (${homePassingLeader.displayValue})\n\n`;
+    }
+
+    if (awayRushingLeader && homeRushingLeader && awayRushingLeader.athlete && homeRushingLeader.athlete) {
+      markdownText += `### Rushing Leaders\n\n`;
+      markdownText += `#### [${awayRushingLeader.athlete.displayName}](${awayRushingLeader.athlete.links[0].href}) (${awayRushingLeader.athlete.position.abbreviation}) (${awayRushingLeader.displayValue})\n\n`;
+      markdownText += `#### [${homeRushingLeader.athlete.displayName}](${homeRushingLeader.athlete.links[0].href}) (${homeRushingLeader.athlete.position.abbreviation}) (${homeRushingLeader.displayValue})\n\n`;
+    }
+
+    if (awayReceivingLeader && homeReceivingLeader && awayReceivingLeader.athlete && homeReceivingLeader.athlete) {
+      markdownText += `### Receiving Leaders\n\n`;
+      markdownText += `#### [${awayReceivingLeader.athlete.displayName}](${awayReceivingLeader.athlete.links[0].href}) (${awayReceivingLeader.athlete.position.abbreviation}) (${awayReceivingLeader.displayValue})\n\n`;
+      markdownText += `#### [${homeReceivingLeader.athlete.displayName}](${homeReceivingLeader.athlete.links[0].href}) (${homeReceivingLeader.athlete.position.abbreviation}) (${homeReceivingLeader.displayValue})\n\n`;
+    }
   }
-
-  if (awayRushingLeader && homeRushingLeader && awayRushingLeader.athlete && homeRushingLeader.athlete) {
-    markdownText += `### Rushing Leaders\n\n`;
-    markdownText += `#### [${awayRushingLeader.athlete.displayName}](${awayRushingLeader.athlete.links[0].href}) (${awayRushingLeader.athlete.position.abbreviation}) (${awayRushingLeader.displayValue})\n\n`;
-    markdownText += `#### [${homeRushingLeader.athlete.displayName}](${homeRushingLeader.athlete.links[0].href}) (${homeRushingLeader.athlete.position.abbreviation}) (${homeRushingLeader.displayValue})\n\n`;
-  }
-
-  if (awayReceivingLeader && homeReceivingLeader && awayReceivingLeader.athlete && homeReceivingLeader.athlete) {
-    markdownText += `### Receiving Leaders\n\n`;
-    markdownText += `#### [${awayReceivingLeader.athlete.displayName}](${awayReceivingLeader.athlete.links[0].href}) (${awayReceivingLeader.athlete.position.abbreviation}) (${awayReceivingLeader.displayValue})\n\n`;
-    markdownText += `#### [${homeReceivingLeader.athlete.displayName}](${homeReceivingLeader.athlete.links[0].href}) (${homeReceivingLeader.athlete.position.abbreviation}) (${homeReceivingLeader.displayValue})\n\n`;
-  }
-
   // Notes
   markdownText += `### Notes\n\n`;
   markdownText += `#### ${gameInfo.competitions[0].notes[0].headline}\n\n`;
 
   // Tickets
-  const tickets = gameInfo.competitions[0].tickets;
-  markdownText += `#### ${tickets[0].summary}`;
-  markdownText += ` [Buy Tickets](${tickets[0].links[0].href})\n\n`;
+  if (gameInfo.competitions[0].tickets) {
+    const tickets = gameInfo.competitions[0].tickets;
+    markdownText += `#### ${tickets[0].summary}`;
+    markdownText += ` [Buy Tickets](${tickets[0].links[0].href})\n\n`;
+  }
   return markdownText;
 }
 
