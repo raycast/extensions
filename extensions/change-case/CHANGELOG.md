@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Fix Quicklink]
+- Fixed quicklinks not respecting the `Primary Action` preference.
+
 ## [Manual Refresh] - 2023-11-27
 - Added a manual refresh action to refresh the selected text/clipboard
 

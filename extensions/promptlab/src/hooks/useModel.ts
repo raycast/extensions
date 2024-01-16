@@ -1,10 +1,19 @@
 import { AI, environment, getPreferenceValues } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-import { ExtensionPreferences, Model, JSONObject } from "../utils/types";
+import { JSONObject } from "../lib/common/types";
+import { Model } from "../lib/models/types";
+import { ExtensionPreferences } from "../lib/preferences/types";
 import { useEffect, useRef, useState } from "react";
 import fetch, { Response } from "node-fetch";
 import { useModels } from "./useModels";
-import { filterString } from "../utils/context-utils";
+import { filterString } from "../lib/context-utils";
+import {
+  RAYCAST_AI_FALLBACK_MODEL,
+  RAYCAST_AI_REPRESENTATIONS,
+  RaycastAIRepresentation,
+  getFinalSchema,
+  valueForKeyPath,
+} from "../lib/models/model-utils";
 
 /**
  * Gets the text response from the model endpoint.
@@ -19,7 +28,7 @@ export default function useModel(
   input: string,
   temperature: string,
   execute: boolean,
-  modelOverride?: Model
+  modelOverride?: Model,
 ) {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const [data, setData] = useState<string>("");
@@ -30,35 +39,6 @@ export default function useModel(
   const models = useModels();
   const AIRef = useRef<{ fetch: Promise<Response>; tag: string; forceStop: () => void }>();
 
-  // We can be a little forgiving of how users specify Raycast AI
-  const validRaycastAIReps = [
-    "raycast ai",
-    "raycastai",
-    "raycast",
-    "raycast-ai",
-    "raycast ai 3.5",
-    "raycast gpt 4",
-    "raycast 4",
-    "raycast ai 4",
-  ];
-  const fallbackModel: Model = {
-    endpoint: "Raycast AI",
-    authType: "",
-    apiKey: "",
-    inputSchema: "",
-    outputKeyPath: "",
-    outputTiming: "async",
-    lengthLimit: "2500",
-    temperature: "1.0",
-    name: "Text-Davinci-003 Via Raycast AI",
-    description: "",
-    favorited: false,
-    id: "",
-    icon: "",
-    iconColor: "",
-    notes: "",
-    isDefault: false,
-  };
   const preferenceModel: Model = {
     endpoint: preferences.modelEndpoint,
     authType: preferences.authType,
@@ -79,43 +59,18 @@ export default function useModel(
   };
   const defaultModel = models.models.find((model) => model.isDefault);
   const targetModel =
-    modelOverride || defaultModel || (preferenceModel.endpoint == "" ? fallbackModel : preferenceModel);
+    modelOverride || defaultModel || (preferenceModel.endpoint == "" ? RAYCAST_AI_FALLBACK_MODEL : preferenceModel);
   const raycastModel =
-    validRaycastAIReps.includes(targetModel.endpoint.toLowerCase()) ||
+    RAYCAST_AI_REPRESENTATIONS.includes(targetModel.endpoint.toLowerCase() as RaycastAIRepresentation) ||
     targetModel.endpoint == "" ||
-    (models.isLoading && !modelOverride && preferenceModel.endpoint == "");
+    targetModel.apiKey == "N/A";
+  models.isLoading && !modelOverride && preferenceModel.endpoint == "";
 
   const temp = preferences.includeTemperature
     ? parseFloat(temperature) == undefined
       ? 1.0
       : parseFloat(temperature)
     : 1.0;
-
-  // Get the value at the specified key path
-  const get = (obj: JSONObject | string | string[] | JSONObject[], pathString: string, def?: string) => {
-    const path: string[] = [];
-
-    // Split the key path string into an array of keys
-    pathString
-      .trim()
-      .split(".")
-      .forEach(function (item) {
-        item.split(/\[([^}]+)\]/g).forEach(function (key) {
-          if (key.length > 0) {
-            path.push(key);
-          }
-        });
-      });
-
-    let current = obj;
-    if (typeof current == "object") {
-      for (let i = 0; i < path.length; i++) {
-        if (!(current as JSONObject)[path[i]]) return def;
-        current = (current as JSONObject)[path[i]];
-      }
-    }
-    return current;
-  };
 
   // If the endpoint is a URL, use the fetch hook
   const headers: { [key: string]: string } = {
@@ -134,27 +89,7 @@ export default function useModel(
     }
   }
 
-  const modelSchema = raycastModel
-    ? {}
-    : JSON.parse(
-        targetModel.inputSchema
-          .replace(
-            "{prompt}",
-            preferences.promptPrefix +
-              prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') +
-              preferences.promptSuffix
-          )
-          .replace(
-            "{basePrompt}",
-            preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')
-          )
-          .replace(
-            "{input}",
-            targetModel.inputSchema.includes("{prompt") && prompt == input
-              ? ""
-              : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix
-          )
-      );
+  const modelSchema = raycastModel ? {} : getFinalSchema(targetModel, prompt, basePrompt, input, preferences);
   if (preferences.includeTemperature) {
     modelSchema["temperature"] = temp;
   }
@@ -173,17 +108,17 @@ export default function useModel(
             "{prompt}",
             preferences.promptPrefix +
               prompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') +
-              preferences.promptSuffix
+              preferences.promptSuffix,
           )
           .replace(
             "{basePrompt}",
-            preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"')
+            preferences.promptPrefix + basePrompt.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"'),
           )
           .replace(
             "{input}",
             targetModel.inputSchema.includes("{prompt") && prompt == input
               ? ""
-              : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix
+              : input.replaceAll(/[\n\r\s]+/g, " ").replaceAll('"', '\\"') + preferences.promptSuffix,
           ),
       });
       const tag = basePrompt + prompt + input;
@@ -201,7 +136,7 @@ export default function useModel(
       ?.then((response) => {
         if (response.ok && targetModel.outputTiming == "sync") {
           response.json().then((json) => {
-            const output = get(json as JSONObject, targetModel.outputKeyPath) as string;
+            const output = valueForKeyPath(json as JSONObject, targetModel.outputKeyPath) as string;
             setData(output);
           });
         } else if (response.ok && targetModel.outputTiming == "async") {
@@ -223,7 +158,7 @@ export default function useModel(
               } else if (line.startsWith("data: ")) {
                 try {
                   const jsonData = JSON.parse(line.substring(5));
-                  const output = get(jsonData, targetModel.outputKeyPath) || "";
+                  const output = valueForKeyPath(jsonData, targetModel.outputKeyPath) || "";
                   if (output.toString().includes(text)) {
                     text = output.toString();
                   } else {
@@ -238,7 +173,7 @@ export default function useModel(
               } else {
                 try {
                   const jsonData = JSON.parse(line);
-                  const output = get(jsonData, targetModel.outputKeyPath) || "";
+                  const output = valueForKeyPath(jsonData, targetModel.outputKeyPath) || "";
                   if (output.toString().includes(text)) {
                     text = output.toString();
                   } else {
@@ -279,7 +214,7 @@ export default function useModel(
         ...useAI(filterString(preferences.promptPrefix + prompt + preferences.promptSuffix, 5000), {
           execute: execute,
           creativity: temp,
-          model: targetModel.endpoint == "Raycast AI 3.5" ? "gpt-3.5-turbo" : "text-davinci-003",
+          model: targetModel.endpoint == "Raycast AI 4" ? "gpt-4" : "gpt-3.5-turbo",
         }),
         dataTag: basePrompt + prompt + input,
         stopModel: stopModel,
@@ -313,7 +248,10 @@ export default function useModel(
     setAttempt(attempt + 1);
   };
 
-  if (validRaycastAIReps.includes(targetModel.endpoint.toLowerCase()) || models.isLoading) {
+  if (
+    RAYCAST_AI_REPRESENTATIONS.includes(targetModel.endpoint.toLowerCase() as RaycastAIRepresentation) ||
+    models.isLoading
+  ) {
     // If the endpoint is Raycast AI, use the AI hook
     if (models.isLoading) {
       return {

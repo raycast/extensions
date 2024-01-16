@@ -23,7 +23,15 @@ function findVMs(): SearchState {
 
 function openVM(vm: VM): void {
   closeMainWindow();
-  runAppleScript(`tell application "${vm.name}"\n activate\n end tell`);
+  try {
+    runAppleScript(`tell application "${vm.name}"\n activate\n end tell`);
+  } catch {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not open virtual machine",
+      message: "Unable to run AppleScript to launch VM, has the VM application been removed or renamed?",
+    });
+  }
 }
 
 function runVMAction(vm: VM, action: VMAction): void {

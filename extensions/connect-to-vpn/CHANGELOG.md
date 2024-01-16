@@ -1,5 +1,9 @@
 # Connect to VPN Changelog
 
+## [Bug fix] - 2024-01-15
+
+- Escape network names with quotes
+
 ## [New Additions] - 2023-08-23
 
 - Sort network services based on availability.

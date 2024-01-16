@@ -1,5 +1,8 @@
 # TickTick Changelog
 
+## [Added] - 2024-01-09
+- Add `dueDate` and `startDate` to task detail view.
+
 ## [Fixed spelling error] - 2023-11-27
 
 ## [Added] - 2023-11-14

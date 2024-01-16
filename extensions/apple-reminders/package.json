@@ -5,6 +5,10 @@
   "description": "Manage Apple Reminders.",
   "icon": "icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "tm.wrnr",
+    "ir4n"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": [
@@ -56,12 +60,34 @@
       "mode": "menu-bar",
       "preferences": [
         {
-          "name": "displayMenuBarCount",
+          "name": "titleType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Nothing",
+              "value": "nothing"
+            },
+            {
+              "title": "Count",
+              "value": "count"
+            },
+            {
+              "title": "First Reminder",
+              "value": "firstReminder"
+            }
+          ],
+          "default": "count",
+          "required": false,
+          "title": "Title",
+          "description": "Choose what you want to see next to the menu bar icon."
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
           "type": "checkbox",
           "title": "Count",
-          "label": "Display menu bar count",
-          "description": "When enabled, the number of reminders in the menu bar will be displayed",
-          "default": true,
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
           "required": false
         },
         {
@@ -84,7 +110,7 @@
           "default": "today",
           "required": false,
           "title": "View",
-          "description": "Indicates which view you want to see in your menu bar."
+          "description": "Choose which view you want to see in your menu bar."
         }
       ],
       "interval": "10m"

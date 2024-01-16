@@ -1,4 +1,4 @@
-import { Detail, environment, MenuBarExtra } from "@raycast/api";
+import { Detail, environment, LaunchType, MenuBarExtra } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { getAuthorizedGmailClient } from "./gmail";
 import { gmail_v1 } from "@googleapis/gmail";
@@ -14,7 +14,11 @@ export function withGmailClient(component: JSX.Element) {
       try {
         gmail = await getAuthorizedGmailClient();
       } catch (error) {
-        showFailureToast(error);
+        if (environment.launchType === LaunchType.Background) {
+          console.error(error);
+        } else {
+          showFailureToast(error);
+        }
       }
 
       forceRerender(x + 1);

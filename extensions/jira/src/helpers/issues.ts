@@ -74,7 +74,7 @@ export function getMarkdownFromHtml(description: string) {
         prefix: "```\n",
         postfix: "\n```",
       },
-    }
+    },
   );
 
   return nodeToMarkdown.translate(description);
@@ -138,7 +138,7 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
   // Jira's textareas are shown in the markdown field of the Detail screen
   const [markdownFieldsKeys, metadataFieldsKeys] = partition(
     customFieldsWithValueKeys,
-    (key) => issue.schema[key].custom === CustomFieldSchema.textarea
+    (key) => issue.schema[key].custom === CustomFieldSchema.textarea,
   );
 
   const customMarkdownFields = markdownFieldsKeys.map((key) => {

@@ -2,7 +2,17 @@ import { appendToDailyNote, getGraphs, Graph, ReflectApiError } from "./helpers/
 import { authorize } from "./helpers/oauth";
 import { prependTimestampIfSelected } from "./helpers/dates";
 
-import { Action, ActionPanel, closeMainWindow, Form, popToRoot, showToast, Toast, LocalStorage } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  popToRoot,
+  showToast,
+  Toast,
+  LocalStorage,
+  getPreferenceValues,
+} from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
@@ -68,6 +78,10 @@ export default function Command() {
 
   const showTimestampFormat: boolean = itemProps.prependTimestamp.value ?? false;
 
+  const { parentLists = "" } = getPreferenceValues<ExtensionPreferences>();
+
+  const parentListOptions = parentLists.split(",").map((item) => item.trim());
+
   return (
     <Form
       actions={
@@ -84,12 +98,14 @@ export default function Command() {
           <Form.Dropdown.Item value="24" title="24 hour" />
         </Form.Dropdown>
       ) : null}
-      <Form.TextField
-        {...itemProps.parentList}
-        title="Parent List (Optional)"
-        placeholder="i.e. 🗓 Daily Log"
-        storeValue={true}
-      />
+      {parentListOptions.length > 0 ? (
+        <Form.Dropdown storeValue={true} title="Parent List (Optional)" {...itemProps.parentList}>
+          <Form.Dropdown.Item value="" title="-" />
+          {parentListOptions.map((opt) => {
+            return <Form.Dropdown.Item key={opt} value={opt} title={opt.replaceAll("[", "").replaceAll("]", "")} />;
+          })}
+        </Form.Dropdown>
+      ) : null}
       <Form.Separator />
       <Form.Dropdown {...itemProps.graphId} title="Graph" value={graphId} onChange={setGraphId}>
         {graphs.map((graph) => (

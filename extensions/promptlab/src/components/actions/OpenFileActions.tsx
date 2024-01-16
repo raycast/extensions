@@ -3,10 +3,10 @@ import {
   ADVANCED_SETTINGS_FILENAME,
   CUSTOM_PLACEHOLDERS_FILENAME,
   PLACEHOLDERS_GUIDE_FILENAME,
-} from "../../utils/constants";
+} from "../../lib/common/constants";
 import path from "path";
 import { defaultAdvancedSettings } from "../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../lib/actions";
 
 /**
  * Action to open the placeholders guide in the default markdown text editor.

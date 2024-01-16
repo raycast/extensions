@@ -1,5 +1,10 @@
 # Timers Changelog
 
+## [Deeplinks, add preset to root search via quicklink, keywords] - 2024-01-15
+- Add action to "Manage Timers" command that lets you add presets to root search via deeplinks + quicklinks
+- Add deletion confirmation to custom timer presets
+- Add keywords to make the extension more discoverable
+
 ## [Fix bug where stopping a timer did not stop the alert due to incorrect .dismiss path] - 2023-11-08
 - Fix bug where the `.dismiss` file wasn't being deleted when a timer was stopped, leading to a perpetually ringing timer (thanks to @atuooo for the contribution)
 

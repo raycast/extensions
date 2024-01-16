@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fix] - 2023-12-27
+
+- Fix crash when there is no `metadata` in an extension manifest
+
 ## [Update] - 2023-12-09
 
 - Add `Open New Window` command
