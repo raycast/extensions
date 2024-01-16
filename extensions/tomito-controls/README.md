@@ -14,7 +14,7 @@ A set of commands to control Tomito, a Pomodoro app.
 
 **Skip**: Skips the current interval
 
-_\*Only necessary if "Manually finish sessions and breaks" is selected in preferences_
+_\*Only use if "Manually finish sessions and breaks" is selected in preferences_
 
 **Hide**: Hides the timer window
 
