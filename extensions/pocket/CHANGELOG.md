@@ -1,5 +1,12 @@
 # Pocket Changelog
 
+## [OAuth & Improvements] - 2024-01-14
+- Add OAuth integration for Pocket
+- Improve titles for specific open commands
+- Add content type filter for the `Search Bookmarks` command
+- Update extension icon to a rounded version
+- Deprecate browser app and other settings
+
 ## [UX, Performance & Commands] - 2023-10-15
 - Cache results for faster search
 - Use native Pocket search to avoid rate-limits

@@ -1,8 +1,8 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 const supportedBrowsers = ["com.google.Chrome", "com.apple.Safari", "company.thebrowser.Browser"] as const;
 
-type Browser = typeof supportedBrowsers[number];
+type Browser = (typeof supportedBrowsers)[number];
 
 export function isSupportedBrowser(browser?: string): browser is Browser {
   return supportedBrowsers.some((b) => b === browser);
