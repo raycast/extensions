@@ -1,13 +1,40 @@
-import { LaunchProps, closeMainWindow, showHUD } from "@raycast/api";
+import { LaunchProps, closeMainWindow, showHUD, getSelectedText } from "@raycast/api";
 import { makeNewLittleArcWindow } from "./arc";
-import { newLittleArcPreferences } from "./preferences";
-import { URLArguments } from "./types";
-import { validateURL } from "./utils";
+import { newLittleArcPreferences, searchArcPreferences } from "./preferences";
+import { NewTabSearchConfigs, URLArguments } from "./types";
+import { isURL, validateURL } from "./utils";
+
+export const config: NewTabSearchConfigs = {
+  google: {
+    search: "https://www.google.com/search?q=",
+  },
+  duckduckgo: {
+    search: "https://www.duckduckgo.com?q=",
+  },
+  bing: {
+    search: "https://www.bing.com/search?q=",
+  },
+  yahoo: {
+    search: "https://search.yahoo.com/search?p=",
+  },
+  ecosia: {
+    search: "https://www.ecosia.org/search?q=",
+  },
+};
 
 export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {
   const { url } = props.arguments;
   const { fallbackText } = props;
-  const newTabUrl = url || fallbackText || newLittleArcPreferences.url;
+  const selectedText = await getSelectedText();
+
+  const selectedTextAsSearch = `${config[searchArcPreferences.engine].search}${encodeURIComponent(selectedText)}`;
+
+  const newTabUrl =
+    url || selectedText
+      ? isURL(selectedText)
+        ? selectedText
+        : selectedTextAsSearch
+      : fallbackText || newLittleArcPreferences.url;
 
   try {
     if (await validateURL(newTabUrl)) {
