@@ -1,41 +1,33 @@
 import { ActionPanel, List, Action } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import React from "react";
+import { useCachedPromise } from "@raycast/utils";
 import Parser from "rss-parser";
 import getStories from "./arsTechnica";
 
 export default function Command() {
-  const { data, isLoading } = usePromise(getStories);
+  const { data, isLoading } = useCachedPromise(getStories);
 
   return (
-    <List>
-      isLoading={isLoading}
+    <List isLoading={isLoading}>
       {data?.map((item, index) => <StoryListItem key={item.guid} item={item} index={index} />)}
     </List>
   );
 }
 
 function StoryListItem(props: { item: Parser.Item; index: number }) {
-  return (
-    <List.Item
-      title={props.item.title as string}
-      subtitle={props.item.creator}
-      actions={<Actions item={props.item} />}
-    />
-  );
+  const { item } = props;
+  return <List.Item title={item.title as string} subtitle={item.creator} actions={<Actions item={item} />} />;
 }
 
 function Actions(props: { item: Parser.Item }) {
+  const { title, link } = props.item;
   return (
-    <ActionPanel title={props.item.title}>
-      <ActionPanel.Section>{props.item.link && <Action.OpenInBrowser url={props.item.link} />}</ActionPanel.Section>
+    <ActionPanel title={title}>
       <ActionPanel.Section>
-        {props.item.link && (
-          <Action.CopyToClipboard
-            content={props.item.link}
-            title="Copy Link"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
+        {link && (
+          <>
+            <Action.OpenInBrowser url={link} />
+            <Action.CopyToClipboard content={link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />
+          </>
         )}
       </ActionPanel.Section>
     </ActionPanel>
