@@ -1,5 +1,5 @@
 import { Keyboard, environment } from "@raycast/api";
-import { defaultAdvancedSettings } from "../data/default-advanced-settings";
+import { defaultAdvancedSettings } from "../../data/default-advanced-settings";
 
 /**
  * Checks if the specified action is enabled for the current command.
@@ -10,8 +10,10 @@ import { defaultAdvancedSettings } from "../data/default-advanced-settings";
  */
 export const isActionEnabled = (actionName: string, advancedSettings: typeof defaultAdvancedSettings): boolean => {
   const cmdName = environment.commandName;
-  return (advancedSettings.actionSettings as { [key: string]: { enabled: string[] } })[actionName].enabled.includes(
-    cmdName,
+  return (
+    (advancedSettings.actionSettings as { [key: string]: { enabled: string[] } })[actionName]?.enabled.includes(
+      cmdName,
+    ) ?? true
   );
 };
 
@@ -24,8 +26,11 @@ export const isActionEnabled = (actionName: string, advancedSettings: typeof def
  */
 export const anyActionsEnabled = (actionNames: string[], advancedSettings: typeof defaultAdvancedSettings): boolean => {
   const cmdName = environment.commandName;
-  return actionNames.some((actionName) =>
-    (advancedSettings.actionSettings as { [key: string]: { enabled: string[] } })[actionName].enabled.includes(cmdName),
+  return actionNames.some(
+    (actionName) =>
+      (advancedSettings.actionSettings as { [key: string]: { enabled: string[] } })[actionName]?.enabled.includes(
+        cmdName,
+      ) ?? true,
   );
 };
 
@@ -38,8 +43,11 @@ export const anyActionsEnabled = (actionNames: string[], advancedSettings: typeo
  */
 export const allActionsEnabled = (actionNames: string[], advancedSettings: typeof defaultAdvancedSettings): boolean => {
   const cmdName = environment.commandName;
-  return actionNames.every((actionName) =>
-    (advancedSettings.actionSettings as { [key: string]: { enabled: string[] } })[actionName].enabled.includes(cmdName),
+  return actionNames.every(
+    (actionName) =>
+      (advancedSettings.actionSettings as { [key: string]: { enabled: string[] } })[actionName]?.enabled.includes(
+        cmdName,
+      ) ?? true,
   );
 };
 
@@ -52,22 +60,25 @@ export const allActionsEnabled = (actionNames: string[], advancedSettings: typeo
 export const getActionShortcut = (
   actionName: string,
   advancedSettings: typeof defaultAdvancedSettings,
-): Keyboard.Shortcut => {
+): Keyboard.Shortcut | undefined => {
   const defaultActionSettings = defaultAdvancedSettings.actionSettings as {
     [key: string]: { shortcut: Keyboard.Shortcut };
   };
 
   const customActionSettings = advancedSettings.actionSettings as { [key: string]: { shortcut: Keyboard.Shortcut } };
 
-  const shortcut = {
-    modifiers: defaultActionSettings[actionName].shortcut.modifiers,
-    key: defaultActionSettings[actionName].shortcut.key,
-  };
+  const shortcut = defaultActionSettings[actionName]
+    ? {
+        modifiers: defaultActionSettings[actionName].shortcut.modifiers,
+        key: defaultActionSettings[actionName].shortcut.key,
+      }
+    : undefined;
 
   if (
     advancedSettings.actionSettings &&
     actionName in customActionSettings &&
-    customActionSettings[actionName].shortcut
+    shortcut &&
+    customActionSettings[actionName]?.shortcut
   ) {
     shortcut.modifiers = customActionSettings[actionName].shortcut.modifiers ?? shortcut.modifiers;
     shortcut.key = customActionSettings[actionName].shortcut.key ?? shortcut.key;
