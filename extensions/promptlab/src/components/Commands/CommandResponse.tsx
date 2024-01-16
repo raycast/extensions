@@ -199,7 +199,7 @@ export default function CommandResponse(props: {
       Promise.resolve(showHUD(`Running '${command.name}'...`));
     }
 
-    if (!loadingData && !loading && !isLoading && data.length) {
+    if (!loadingData && !loading && !isLoading && (data.length || substitutedPrompt == "")) {
       if (options.showResponse == false) {
         Promise.resolve(showHUD("Done!"));
       }

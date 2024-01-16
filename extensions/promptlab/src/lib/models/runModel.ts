@@ -57,6 +57,7 @@ export default async function runModel(basePrompt: string, prompt: string, input
     const raycastModel =
       RAYCAST_AI_REPRESENTATIONS.includes(targetModel.endpoint.toLowerCase() as RaycastAIRepresentation) ||
       targetModel.endpoint == "" ||
+      targetModel.apiKey == "N/A" ||
       preferenceModel.endpoint == "";
 
     // If the endpoint is a URL, use the fetch hook

@@ -63,7 +63,8 @@ export default function useModel(
   const raycastModel =
     RAYCAST_AI_REPRESENTATIONS.includes(targetModel.endpoint.toLowerCase() as RaycastAIRepresentation) ||
     targetModel.endpoint == "" ||
-    (models.isLoading && !modelOverride && preferenceModel.endpoint == "");
+    targetModel.apiKey == "N/A";
+  models.isLoading && !modelOverride && preferenceModel.endpoint == "";
 
   const temp = preferences.includeTemperature
     ? parseFloat(temperature) == undefined
