@@ -8,6 +8,8 @@ import {
   Toast,
   Icon,
   confirmAlert,
+  Alert,
+  Color,
 } from "@raycast/api";
 import fs from "fs";
 import { useState } from "react";
@@ -50,9 +52,11 @@ export default function Command() {
   const deleteEntry = async (index: number) => {
     const isConfirmed = await confirmAlert({
       title: "Confirm Deletion",
+      icon: { source: Icon.MinusCircle, tintColor: Color.Red },
       message: "Are you sure you want to delete this entry?",
       primaryAction: {
         title: "Delete",
+        style: Alert.ActionStyle.Destructive,
       },
     });
 
