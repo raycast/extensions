@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Ars Technica",
+      "title": "Read Stories",
+      "subtitle": "Ars Technica",
       "description": "Get the latest Ars Technica stories.",
       "mode": "view"
     }
