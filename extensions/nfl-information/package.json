@@ -14,18 +14,21 @@
     {
       "name": "nfl-schedule",
       "title": "Weekly Schedule",
+      "subtitle": "NFL",
       "description": "Fetches the schedule for the NFL Week",
       "mode": "view"
     },
     {
       "name": "nfl-news",
       "title": "Latest News",
+      "subtitle": "NFL",
       "description": "Fetches the latest NFL News",
       "mode": "view"
     },
     {
       "name": "nfl-team",
       "title": "Team Information",
+      "subtitle": "NFL",
       "description": "Fetches the latest news for a specific NFL Team",
       "mode": "view"
     }
