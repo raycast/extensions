@@ -1,12 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
 import { useState } from "react";
 
-// Define a type for the form values
-type Values = {
-  firstNumber: string;
-  secondNumber: string;
-};
-
 export default function Command() {
 
   const [firstNumberError, setFirstNumberError] = useState<string | undefined>();
@@ -49,7 +43,7 @@ export default function Command() {
     const percentageChange = ((newValue - oldValue) / oldValue) * 100;
     const formattedResult = new Intl.NumberFormat('en-US', { style: 'decimal', maximumFractionDigits: 4 }).format(percentageChange);
     const resultText = `${formattedResult}%`;
-    
+
     await Clipboard.copy(resultText);
     showToast({ title: "Copied", message: "The percentage change is: " + resultText });
   }
@@ -69,9 +63,16 @@ export default function Command() {
         placeholder="Enter old value"
         defaultValue=""
         error={firstNumberError}
-        onChange={dropFirstNumberErrorIfNeeded}
+        onChange={(newValue) => {
+          if (newValue !== undefined && validateNumber(newValue)) {
+            dropFirstNumberErrorIfNeeded();
+          } else {
+            setFirstNumberError("Please enter a valid number");
+          }
+        }}
         onBlur={(event) => {
-          if (!validateNumber(event.target.value)) {
+          const value = event.target.value;
+          if (value !== undefined && !validateNumber(value)) {
             setFirstNumberError("Please enter a valid number");
           } else {
             dropFirstNumberErrorIfNeeded();
@@ -86,7 +87,8 @@ export default function Command() {
         error={secondNumberError}
         onChange={dropSecondNumberErrorIfNeeded}
         onBlur={(event) => {
-          if (!validateNumber(event.target.value)) {
+          const value = event.target.value;
+          if (value !== undefined && !validateNumber(value)) {
             setSecondNumberError("Please enter a valid number");
           } else {
             dropSecondNumberErrorIfNeeded();
