@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "merge-pdf",
+  "title": "Merge PDF",
+  "description": "Merge the selected PDF files into one.",
+  "icon": "icon.png",
+  "author": "Valde",
+  "contributors": [
+    "Valde"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Merge PDF",
+      "description": "Merge the selected PDF files into one.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "arguments": [
+        {
+          "name": "fileName",
+          "placeholder": "merged.pdf",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "deleteOriginalFiles",
+          "placeholder": "Delete original files",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Keep original files",
+              "value": "false"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
