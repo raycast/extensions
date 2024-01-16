@@ -27,9 +27,17 @@ export type Team = {
   players: Player[];
 };
 
+export type Season = {
+  id: string;
+  name: string;
+  is_active: boolean;
+};
+
 export type League = {
+  id: string;
   name: string;
   image_path: string;
+  season?: Season;
 };
 
 export type Participant = {
