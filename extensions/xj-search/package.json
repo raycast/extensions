@@ -1,17 +1,12 @@
 {
     "$schema": "https://www.raycast.com/schemas/extension.json",
-    "name": "xj-search",
-    "title": "xj_search",
-    "description": "",
-    "icon": "🔍",
     "author": "xiangjun_ma",
-    "license": "MIT",
     "commands": [
         {
-            "name": "index",
-            "title": "xj bytedance search",
             "description": "quick lookup bytedance resource and open url",
-            "mode": "view"
+            "mode": "view",
+            "name": "index",
+            "title": "xj bytedance search"
         }
     ],
     "dependencies": {
@@ -19,6 +14,7 @@
         "js-yaml": "^4.1.0",
         "node-fetch": "^3.3.2"
     },
+    "description": "",
     "devDependencies": {
         "@raycast/eslint-config": "^1.0.6",
         "@types/js-yaml": "^4.0.9",
@@ -28,6 +24,20 @@
         "prettier": "^3.0.3",
         "typescript": "^5.2.2"
     },
+    "icon": "🔍",
+    "license": "MIT",
+    "name": "xj-search",
+    "preferences": [
+        {
+            "description": "YAML File Paths",
+            "key": "yamlFolderPath",
+            "name": "yamlFolderPath",
+            "placeholder": "Enter the path to the folder containing YAML files",
+            "required": true,
+            "title": "YAML Folder Path",
+            "type": "directory"
+        }
+    ],
     "scripts": {
         "build": "ray build -e dist",
         "dev": "ray develop",
@@ -35,15 +45,5 @@
         "lint": "ray lint",
         "publish": "npx @raycast/api@latest publish"
     },
-    "preferences": [
-        {
-            "name": "yamlFolderPath",
-            "required": true,
-            "description": "YAML File Paths",
-            "type": "directory",
-            "key": "yamlFolderPath",
-            "title": "YAML Folder Path",
-            "placeholder": "Enter the path to the folder containing YAML files"
-        }
-    ]
+    "title": "xj_search"
 }
