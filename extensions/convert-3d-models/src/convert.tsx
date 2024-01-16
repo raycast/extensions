@@ -21,7 +21,7 @@ import {
 
 import convert from "./operations/convertOperation";
 import { cleanup, getSelectedModels, showErrorToast } from "./utilities/utils";
-import { ConvertPreferences, ExtensionPreferences } from "./utilities/preferences";
+import { ConvertPreferences } from "./utilities/preferences";
 import { checkFreeCADInstallation } from "./utilities/checkinstall";
 
 /**

@@ -15,7 +15,6 @@ import path from "path";
 
 import { environment, getPreferenceValues } from "@raycast/api";
 
-import { ExtensionPreferences } from "../utilities/preferences";
 import { ModelResultHandling } from "../utilities/enums";
 
 /**

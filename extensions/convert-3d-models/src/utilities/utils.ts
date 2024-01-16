@@ -14,10 +14,6 @@ import { runAppleScript } from "@raycast/utils";
 
 import { Clipboard, getFrontmostApplication, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 
-// import { ModelResultHandling } from "./enums";
-
-import { ExtensionPreferences } from "./preferences";
-
 /**
  * Gets currently selected models in Finder.
  *

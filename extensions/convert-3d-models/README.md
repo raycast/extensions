@@ -1,6 +1,6 @@
 # Convert 3D Models
 
-Convert between various NURBS and mesh 3D model formats, such as STEP, STL, OBJ, and others.
+Convert between various NURBS/Parametric and mesh 3D model formats, such as STEP, STL, OBJ, and others.
 
 ## Features
 
@@ -35,10 +35,6 @@ You do **not** need FreeCAD open to use this extension, as it relies on FreeCAD'
 You can also use a package manager such as HomeBrew to keep your software updated. Instructions to install HomeBrew can be seen [here](https://brew.sh/). When HomeBrew installed you can simply install FreeCAD through your bash terminal with:
 
 ```brew install freecad```
-
-## Warnings
-
-Warning: This extension is not compliant with the Terms of Service of FreeCAD. Use at your own risk.
 
 ## Thanks
 
