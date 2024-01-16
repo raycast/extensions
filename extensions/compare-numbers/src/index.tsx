@@ -7,11 +7,9 @@ interface Preferences {
 }
 
 export default function Command() {
-  
   const preferences = getPreferenceValues<Preferences>();
   const [firstNumberError, setFirstNumberError] = useState<string | undefined>();
   const [secondNumberError, setSecondNumberError] = useState<string | undefined>();
-
 
   function dropFirstNumberErrorIfNeeded() {
     if (firstNumberError) {
@@ -54,9 +52,10 @@ export default function Command() {
     }
 
     const percentageChange = ((newValue - oldValue) / oldValue) * 100;
-    const formattedResult = new Intl.NumberFormat("en-US", { style: "decimal", maximumFractionDigits: decimalPlaces }).format(
-      percentageChange,
-    );
+    const formattedResult = new Intl.NumberFormat("en-US", {
+      style: "decimal",
+      maximumFractionDigits: decimalPlaces,
+    }).format(percentageChange);
     const resultText = `${formattedResult}%`;
 
     await Clipboard.copy(resultText);
