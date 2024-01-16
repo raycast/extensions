@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "md5",
   "title": "MD5",
-  "description": "Turn strings into secret codes with a sprinkle of MD5 magic! This Raycast extension lets you create MD5 hashes in the blink of an eye.\n",
+  "description": "Turn strings into secret codes with a sprinkle of MD5 magic! This Raycast extension lets you create MD5 hashes in the blink of an eye.",
   "icon": "command-icon.png",
   "author": "oscarrg",
   "categories": [
