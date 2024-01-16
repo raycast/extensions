@@ -51,7 +51,7 @@ const getSelectedFinderModels = async (): Promise<string> => {
 };
 
 /**
- * Gets currently selected models in Path Finder. Untested, but pulled from SIPS so presumed working.
+ * Gets currently selected models in Path Finder.
  *
  * @returns A promise resolving to the comma-separated list of models as a string.
  */
@@ -133,7 +133,6 @@ export const getSelectedModels = async (): Promise<string[]> => {
   // Check the active application and retrieve the selected models accordingly
   switch (activeApp) {
     case "Path Finder":
-      // Untested because I don't use Path Finder
       // If the active application is Path Finder and the input method is also Path Finder,
       // retrieve the selected models using the appropriate function and add them to the selectedModels array
       if (inputMethod === "Path Finder") {
