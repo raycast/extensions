@@ -29,9 +29,9 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         billable,
       });
       await showToast(Toast.Style.Animated, "Starting time entry...");
-      revalidateRunningTimeEntry();
       await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
+      revalidateRunningTimeEntry();
       await clearSearchBar();
     } catch (e) {
       await showToast(Toast.Style.Failure, "Failed to start time entry");
