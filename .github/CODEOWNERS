@@ -50,6 +50,7 @@
 /extensions/apple-reminders                          @thomaslombart @tmwrnr @irangarcia
 /extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19 @loris @bdsqqq
 /extensions/archiver                                 @404J
+/extensions/ars-technica                             @edwin-dd-ong
 /extensions/arxiv                                    @koayon @pernielsentikaer
 /extensions/asana                                    @thomaslombart
 /extensions/associated-press                         @Dammmien
@@ -186,6 +187,7 @@
 /extensions/coingecko                                @Destiner @mike182uk
 /extensions/coinmarketcap-crypto-crawler             @moojing
 /extensions/coinpaprika                              @gumbleliks
+/extensions/collected-notes                          @txemaleon
 /extensions/color-casket                             @slavarazum @fe9lix @pernielsentikaer @fengtianze
 /extensions/color-picker                             @thomaspaulmann @otakustay @EmersonEmerson @pernielsentikaer @arronhunt @kvdo2
 /extensions/color-shades                             @qeude
@@ -220,6 +222,7 @@
 /extensions/craftdocs                                @kudrykv @mafredri @0x77dev
 /extensions/cran-e-search                            @flaming-codes
 /extensions/cratecast                                @gleich @BalliAsghar
+/extensions/crawldoc                                 @johan-perso
 /extensions/create-t3-app                            @mozzius
 /extensions/cricketcast                              @sampoder
 /extensions/cron-description                         @niall-maloney
@@ -645,6 +648,7 @@
 /extensions/macupdater                               @karlsander
 /extensions/mail                                     @yug2005 @ikupenov @pernielsentikaer @fengtianze @tleo19
 /extensions/mailboxlayer                             @xmok
+/extensions/mailerlite-stats                         @nklmilojevic
 /extensions/mailsy                                   @BalliAsghar
 /extensions/mailtrap                                 @samjwillis97
 /extensions/mailwip                                  @xmok
@@ -1169,6 +1173,7 @@
 /extensions/toggle-desktop-visibility                @Haojen
 /extensions/toggle-menu-bar                          @iamyeizi
 /extensions/toggle-scroll-bars-visibility            @danulqua
+/extensions/tomito-controls                          @elyyyse
 /extensions/toolbox                                  @kkange @Saafo @pernielsentikaer @Yakitrak
 /extensions/toothpick                                @VladCuciureanu @briankosw @VladCuciureanu @sxn
 /extensions/tower                                    @tdwesten @sebduggan
