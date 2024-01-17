@@ -10,6 +10,13 @@ Convert between various NURBS/Parametric and mesh 3D model formats, such as STEP
 
 ![Image](metadata/2.png)
 
+## Commands
+
+* Convert Models...
+  * Convert selected 3D model files from one format to another
+* Quick Convert to STL
+  * Quickly convert the selected 3D models to STL
+
 ## Installation
 
 This extension relies on having [FreeCAD](https://www.freecad.org/) installed on the machine. You will be prompted to specify the path that FreeCAD is installed.
