@@ -18,6 +18,8 @@ const debounce = (fn: (...args: any[]) => void, wait: number) => {
 };
 
 export default function Command() {
+  const [loading, setLoading] = useState(false);
+  const [hasSelectedText, setHasSelectedText] = useState(false);
   const [src, setSrc] = useState("");
   const [metadata, setMetadata] = useState({
     width: 0,
@@ -29,10 +31,13 @@ export default function Command() {
     const getText = async () => {
       try {
         const text = await getSelectedText();
+        setHasSelectedText(!!text.trim());
         const isImage = await checkImageByUrl(text);
 
         if (isImage) {
           setSrc(text);
+        } else {
+          setHasSelectedText(false);
         }
       } catch (err) {
         setSrc("");
@@ -56,21 +61,29 @@ export default function Command() {
 
   useEffect(() => {
     const fetchMetadata = async () => {
-      const res = await axios.get(src, {
-        responseType: "arraybuffer",
-      });
+      try {
+        setLoading(true);
 
-      const size = sizeOf(new Uint8Array(res.data));
+        const res = await axios.get(src, {
+          responseType: "arraybuffer",
+        });
 
-      setMetadata(
-        size as {
-          width: number;
-          height: number;
-          type: string;
-        },
-      );
+        const size = sizeOf(new Uint8Array(res.data));
+
+        setMetadata(
+          size as {
+            width: number;
+            height: number;
+            type: string;
+          },
+        );
+      } catch (err) {
+        console.error("fetch image metadata error");
+      }
+
+      setLoading(false);
     };
-
+    
     if (src) {
       fetchMetadata();
     }
@@ -79,6 +92,7 @@ export default function Command() {
   return src ? (
     <Detail
       markdown={`![image](${src})`}
+      isLoading={loading}
       actions={
         <ActionPanel>
           <Action
@@ -104,7 +118,9 @@ export default function Command() {
       }
     />
   ) : (
+    // If there is no selected image URL, you can also enter it actively.
     <List
+      isLoading={hasSelectedText}
       searchBarPlaceholder="Input image url"
       onSearchTextChange={debounce((value: string) => setSrc(value), 500)}
     ></List>

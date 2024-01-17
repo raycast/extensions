@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imagepreview",
-  "title": "preview image for selected url",
+  "title": "Preview Image For Selected Url",
   "description": "Preview image for selected url",
   "icon": "appicon.png",
   "author": "kgaikj",
