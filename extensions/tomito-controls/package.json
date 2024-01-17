@@ -13,14 +13,14 @@
     {
       "name": "start",
       "title": "Start/Pause/Resume",
-"subtitle": "Tomito",
+      "subtitle": "Tomito",
       "description": "Start, pause, or resume current interval",
       "mode": "no-view"
     },
     {
       "name": "restart",
       "title": "Restart",
-"subtitle": "Tomito",
+      "subtitle": "Tomito",
       "description": "Restart current interval",
       "mode": "no-view"
     },
@@ -39,21 +39,21 @@
     {
       "name": "skip",
       "title": "Skip",
-"subtitle": "Tomito",
+      "subtitle": "Tomito",
       "description": "Skip current interval",
       "mode": "no-view"
     },
     {
       "name": "hide",
       "title": "Hide Window",
-"subtitle": "Tomito",
+      "subtitle": "Tomito",
       "description": "Hide timer window",
       "mode": "no-view"
     },
     {
       "name": "show",
       "title": "Show Window",
-"subtitle": "Tomito",
+      "subtitle": "Tomito",
       "description": "Show timer window",
       "mode": "no-view"
     }
