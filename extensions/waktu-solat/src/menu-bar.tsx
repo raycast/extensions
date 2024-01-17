@@ -39,8 +39,8 @@ export default function Command() {
     nextDiff < (Math.abs(beforeOffset) || 30)
       ? nextPrayer
       : currentDiff < (Math.abs(afterOffset) || 30)
-      ? current
-      : null;
+        ? current
+        : null;
   const title = menuTemplate?.replace("$name", menuPrayer?.label).replace("$time", menuPrayer?.value);
   // const icon = showIcon ? "🕌 " : "";
   const _title = (!isLoading || undefined) && menuPrayer && `${title}`;
@@ -49,7 +49,7 @@ export default function Command() {
   const pastPrayers = prayerTime?.items?.filter((p) => p.time.isBefore(current.time));
   return (
     <MenuBarExtra
-      icon={(!_title && showIcon && "mosque01.svg") || undefined}
+      icon={(showIcon && "mosque01.svg") || undefined}
       title={_title}
       tooltip={`${current?.label} since ${current?.value}, Next: ${nextPrayer?.label} at ${nextPrayer?.value}`}
       isLoading={isLoading || shouldHide}
