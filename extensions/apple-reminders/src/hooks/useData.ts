@@ -4,6 +4,12 @@ import { getData } from "../api";
 
 export type Priority = "low" | "medium" | "high" | null;
 
+export type Location = {
+  address: string;
+  proximity: string;
+  radius?: number;
+};
+
 export type Reminder = {
   id: string;
   openUrl: string;
@@ -16,6 +22,7 @@ export type Reminder = {
   isRecurring: string;
   recurrenceRule: string;
   list: { id: string; title: string; color: string } | null;
+  location?: Location;
 };
 
 export type List = { id: string; title: string; color: string; isDefault: boolean };

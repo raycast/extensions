@@ -1,5 +1,10 @@
 # Brave Changelog
 
+## [Brave Nightly and Brave Beta support] - 2023-12-07
+
+- Added support for Brave Nightly and Brave Beta for all commands
+- New `Brave Browser Option` Dropwdown to select which Brave Browser to use in the preferences
+
 ## [Bug Fixes & New Actions] - 2023-03-28
 
 - Fix errors caused by inconsistent number of hooks
@@ -21,4 +26,5 @@
 - Refactored code to use new useSQL hook
 
 ## Added Brave - (2022-03-18)
+
 Initial version code

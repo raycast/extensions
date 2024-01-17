@@ -1,7 +1,9 @@
 # Amazon Search Changelog
 
-## [Initial Version] - 2023-12-02
+## [Enhancement] - 2023-12-30
 
-### Added
+- List section with suggestions count.
+
+## [Initial Version] - 2023-12-02
 
 - Initial version code.

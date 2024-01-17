@@ -2,7 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
-import { getPriorityIcon, isFullDay, isOverdue } from "../helpers";
+import { getLocationDescription, getPriorityIcon, isFullDay, isOverdue } from "../helpers";
 import { Reminder, List as TList } from "../hooks/useData";
 import { ViewProps } from "../hooks/useViewReminders";
 
@@ -59,6 +59,16 @@ export default function ReminderListItem({
     });
 
     keywords.push(format(dueDate, "dd"), format(dueDate, "MMMM"));
+  }
+
+  if (reminder.location) {
+    accessories.push({
+      icon: Icon.Pin,
+      text: reminder.location.address,
+      tooltip: getLocationDescription(reminder.location),
+    });
+
+    keywords.push(reminder.location.address);
   }
 
   if (reminder.priority) {

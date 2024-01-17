@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 import { getErrorMessage } from "@lib/utils";
 import { ReactNode } from "react";
+import { ha } from "@lib/common";
 
 export function MenuBarItemConfigureCommand(): JSX.Element {
   return (
@@ -99,18 +100,25 @@ export function LaunchCommandMenubarItem(props: {
   );
 }
 
-export function OpenInBrowserMenubarItem(props: {
+export function OpenInMenubarItem(props: {
   url: string;
   shortcut?: Keyboard.Shortcut;
   title?: string;
   icon?: Image.ImageLike;
+  action?: string;
 }) {
+  const url = props.url;
+  const isCompanion = ha.isCompanionUrl(url);
+  const app = isCompanion ? "Companion" : "Browser";
+  const action = props.action ? props.action : "Open In";
+  const title = `${action} ${app}`;
+  const icon = isCompanion ? "home-assistant.png" : Icon.Globe;
   return (
     <MenuBarExtra.Item
-      title={props.title ? props.title : "Open in Browser"}
+      title={props.title ? props.title : title}
       shortcut={props.shortcut}
-      onAction={() => open(props.url)}
-      icon={props.icon ? props.icon : Icon.Globe}
+      onAction={() => open(url)}
+      icon={props.icon ? props.icon : icon}
     />
   );
 }

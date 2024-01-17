@@ -18,15 +18,15 @@ export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
   const gpt = useChatGPT();
-  const { useAzure, azureDeployment } = getConfiguration();
+  const { useAzure } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
 
   useEffect(() => {
     if (!useAzure) {
-      gpt
-        .listModels()
+      gpt.models
+        .list()
         .then((res) => {
-          const models = res.data.data;
+          const models = res.data;
           setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
         })
         .catch(async (err) => {
