@@ -83,7 +83,7 @@ export default function Command() {
 
       setLoading(false);
     };
-    
+
     if (src) {
       fetchMetadata();
     }
