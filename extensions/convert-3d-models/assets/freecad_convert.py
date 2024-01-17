@@ -2,7 +2,6 @@ import sys
 
 # Import FreeCAD library
 freecad_lib_path = sys.argv[1] + "Contents/Resources/lib"
-print(freecad_lib_path)
 sys.path.append(freecad_lib_path) 
 
 import os

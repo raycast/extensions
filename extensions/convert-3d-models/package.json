@@ -169,6 +169,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "quickConvertSTL",
+      "title": "Quick Convert to STL",
+      "description": "Quickly convert selected models to STL",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
