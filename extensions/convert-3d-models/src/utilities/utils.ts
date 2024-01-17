@@ -120,7 +120,7 @@ export const getSelectedModels = async (): Promise<string[]> => {
 
   // Get the preferences from the extension
   const preferences = getPreferenceValues<ExtensionPreferences>();
-  const inputMethod = preferences.inputMethod;
+  const inputMethod = preferences.inputMethod.toString();
 
   // Get the name of the frontmost application
   let activeApp = inputMethod;
