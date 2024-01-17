@@ -101,8 +101,10 @@ function ListView() {
               keywords={[timeEntry.description, getProjectById(timeEntry.project_id)?.name || ""]}
               title={timeEntry.description || "No description"}
               subtitle={timeEntry.billable ? "$" : ""}
-              accessoryTitle={getProjectById(timeEntry?.project_id)?.name}
-              accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color }}
+              accessories={[
+                { text: getProjectById(timeEntry?.project_id)?.name },
+                { icon: { source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color } },
+              ]}
               icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.project_id)?.color }}
               actions={
                 <ActionPanel>
