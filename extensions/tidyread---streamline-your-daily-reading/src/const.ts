@@ -1,0 +1,18 @@
+export const CATEGORIES = [
+  "Technology",
+  "Programming",
+  "AI",
+  "Education",
+  "Culture",
+  "Current Events",
+  "Business",
+  "Economics",
+  "Startup",
+  "Language",
+  "Science",
+  "Health",
+  "Politics",
+  "Arts",
+  "Travel",
+  "Other",
+];

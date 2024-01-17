@@ -1,0 +1,290 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tidyread---streamline-your-daily-reading",
+  "title": "TidyRead - Streamline Your Daily Reading",
+  "description": "Schedule your daily feeds and use AI summaries for concise, efficient reading.",
+  "icon": "logo.png",
+  "author": "jaredliu233",
+  "categories": [
+    "Productivity",
+    "News",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-source-list.command",
+      "title": "Manage Source List",
+      "subtitle": "manage your read sources",
+      "description": "Manage your read sources, including adding, editing, deleting, and scheduling.",
+      "mode": "view"
+    },
+    {
+      "name": "daily-read.command",
+      "title": "Daily Read",
+      "subtitle": "show your daily reading list and digest",
+      "description": "Show your daily reading list and digest.",
+      "mode": "view"
+    },
+    {
+      "name": "add-source.command",
+      "title": "Add Source",
+      "subtitle": "create and schedule your read source",
+      "description": "Create and schedule your read source.",
+      "mode": "view"
+    },
+    {
+      "name": "digest-list.command",
+      "title": "Digest List",
+      "subtitle": "manage your digest list",
+      "description": "Manage your digest list.",
+      "mode": "view"
+    },
+    {
+      "name": "auto-digest.command",
+      "title": "Auto Digest",
+      "description": "Enable the auto digest feature to receive daily digest notifications at the `notificationTime` specified in the extension preferences panel.",
+      "mode": "no-view",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
+    "cheerio": "^1.0.0-rc.12",
+    "chrono-node": "^2.7.4",
+    "date-fns": "^3.2.0",
+    "dayjs": "^1.11.10",
+    "eventsource-parser": "^1.1.1",
+    "got-scraping": "^4.0.3",
+    "gpt3-tokenizer": "^1.1.5",
+    "https-proxy-agent": "^7.0.2",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "node-html-parser": "^6.1.12",
+    "openai": "^4.24.2",
+    "p-limit": "^4.0.0",
+    "rss-parser": "^3.13.0",
+    "url-metadata": "^3.3.1",
+    "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/validator": "^13.11.8",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "provider",
+      "type": "dropdown",
+      "required": false,
+      "title": "AI Provider",
+      "default": "openai",
+      "description": "Choice Summarize API Provider",
+      "data": [
+        {
+          "value": "openai",
+          "title": "OpenAI"
+        },
+        {
+          "value": "raycast",
+          "title": "Raycast AI"
+        },
+        {
+          "value": "moonshot",
+          "title": "Moonshot AI"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "description": "Enter your API Key for your provider",
+      "type": "password",
+      "title": "API Key",
+      "required": false
+    },
+    {
+      "name": "apiModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "API Model",
+      "default": "gpt-3.5-turbo-16k",
+      "description": "Choose an API model for your provider",
+      "data": [
+        {
+          "value": "gpt-3.5-turbo",
+          "title": "gpt-3.5-turbo"
+        },
+        {
+          "value": "gpt-3.5-turbo-0301",
+          "title": "gpt-3.5-turbo-0301"
+        },
+        {
+          "value": "gpt-3.5-turbo-0613",
+          "title": "gpt-3.5-turbo-0613"
+        },
+        {
+          "value": "gpt-3.5-turbo-1106",
+          "title": "gpt-3.5-turbo-1106"
+        },
+        {
+          "value": "gpt-3.5-turbo-16k",
+          "title": "gpt-3.5-turbo-16k"
+        },
+        {
+          "value": "gpt-3.5-turbo-16k-0613",
+          "title": "gpt-3.5-turbo-16k-0613"
+        },
+        {
+          "value": "gpt-4",
+          "title": "gpt-4"
+        },
+        {
+          "value": "gpt-4-0314",
+          "title": "gpt-4-0314"
+        },
+        {
+          "value": "gpt-4-0613",
+          "title": "gpt-4-0613"
+        },
+        {
+          "value": "gpt-4-1106-preview",
+          "title": "gpt-4-1106-preview"
+        },
+        {
+          "value": "gpt-4-32k",
+          "title": "gpt-4-32k"
+        },
+        {
+          "value": "gpt-4-32k-0314",
+          "title": "gpt-4-32k-0314"
+        },
+        {
+          "value": "gpt-4-32k-0613",
+          "title": "gpt-4-32k-0613"
+        },
+        {
+          "value": "gpt-3.5-turbo-instruct",
+          "title": "raycast gpt-3.5-turbo-instruct"
+        },
+        {
+          "value": "gpt-3.5-turbo",
+          "title": "raycast gpt-3.5-turbo-instruct"
+        },
+        {
+          "value": "gpt-4",
+          "title": "raycast gpt-4"
+        },
+        {
+          "value": "moonshot-v1-8k",
+          "title": "moonshot-v1-8k"
+        },
+        {
+          "value": "moonshot-v1-32k",
+          "title": "moonshot-v1-32k"
+        },
+        {
+          "value": "moonshot-v1-128k",
+          "title": "moonshot-v1-128k"
+        }
+      ]
+    },
+    {
+      "name": "notificationTime",
+      "description": "Notification time for daily digest, e.g.: 9am, 10:30pm.",
+      "type": "textfield",
+      "title": "Notification Time",
+      "default": "9am",
+      "required": false
+    },
+    {
+      "name": "apiHost",
+      "description": "If you deploy your own api proxy, you can fill in the host of the api proxy here, including the https prefix, e.g.: https://gpt.yourdomain.com",
+      "type": "textfield",
+      "title": "API Host",
+      "required": false
+    },
+    {
+      "name": "httpProxy",
+      "description": "Proxy for each request, e.g.: http://127.0.0.1:33210",
+      "type": "textfield",
+      "title": "Http Proxy",
+      "required": false
+    },
+    {
+      "name": "summarizePrompt",
+      "description": "For each RSS item, it will be summarized by the provider, and you can customize the summarize prompt",
+      "type": "textfield",
+      "title": "Summarize Prompt",
+      "default": "## Target\n\nsummarize the contents\n\n## Requirements\n\n* Output a minimum of 50 characters, maximum of 200 characters\n\n* Remove from the summary any references to author publicity and promotion.\n\n* Output the summarized content in a straightforward manner, without restating the requirements.\n\n## Respond Language\n\nRespond in the language of the user input content, not the language of the prompt itself.",
+      "required": false
+    },
+    {
+      "name": "maxItemsPerFeed",
+      "description": "Maximum number of item pulls per RSS feed",
+      "type": "textfield",
+      "title": "Max Items Per RSS Feed",
+      "default": "10",
+      "required": false
+    },
+    {
+      "name": "maxApiConcurrency",
+      "description": "Maximum number of concurrent calls to the AI api for summarizing, default is 3",
+      "type": "textfield",
+      "title": "Max Summarize API Concurrency",
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "requestTimeout",
+      "description": "Timeout for each request, default is 20 seconds",
+      "type": "textfield",
+      "title": "Request Timeout",
+      "default": "20",
+      "required": false
+    },
+    {
+      "name": "writeFreelyEndpoint",
+      "description": "For generating shareable digest link. If you deploy your own writefreely instance, or use a community instance, you can fill in the endpoint of the writefreely instance here, including the https prefix, e.g.: https://writefreely.yourdomain.com",
+      "type": "textfield",
+      "title": "WriteFreely endpoint",
+      "default": "https://paper.wf",
+      "required": false
+    },
+    {
+      "name": "writeFreelyAccount",
+      "type": "textfield",
+      "description": "Any WriteFreely instance account name",
+      "title": "WriteFreely account",
+      "required": false
+    },
+    {
+      "name": "writeFreelyPassword",
+      "type": "password",
+      "description": "Any WriteFreely instance account password",
+      "title": "WriteFreely password",
+      "required": false
+    },
+    {
+      "name": "enableItemLinkProxy",
+      "description": "The article links in digest will be redirected to the official website of tidyread by default, for the purpose of usage statistics and the possible addition of structured reading features in the future. If you think this affects your normal use, you can disable it.",
+      "type": "checkbox",
+      "title": "Enable Article Link Proxy",
+      "label": "Enable",
+      "default": true,
+      "required": false
+    }
+  ]
+}
