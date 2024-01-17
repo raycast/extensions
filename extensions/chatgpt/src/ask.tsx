@@ -1,12 +1,12 @@
 import { ActionPanel, getPreferenceValues, List, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { PrimaryAction } from "./actions";
 import { FormInputActionSection } from "./actions/form-input";
 import { PreferencesActionSection } from "./actions/preferences";
 import { useAutoSaveConversation } from "./hooks/useAutoSaveConversation";
 import { useChat } from "./hooks/useChat";
-import { useConversations } from "./hooks/useConversations";
+import { ConversationContext, useConversations } from "./hooks/useConversations";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { useQuestion } from "./hooks/useQuestion";
 import { useSavedChat } from "./hooks/useSavedChat";
@@ -15,8 +15,18 @@ import { ChatView } from "./views/chat";
 import { ModelDropdown } from "./views/model/dropdown";
 import { QuestionForm } from "./views/question/form";
 
-export default function Ask(props: { conversation?: Conversation }) {
+export default function Ask() {
   const conversations = useConversations();
+
+  return (
+    <ConversationContext.Provider value={conversations}>
+      <InnerAsk />
+    </ConversationContext.Provider>
+  );
+}
+
+export function InnerAsk(props: { conversation?: Conversation }) {
+  const conversations = useContext(ConversationContext)!;
   const models = useModel();
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();

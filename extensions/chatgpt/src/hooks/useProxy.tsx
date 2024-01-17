@@ -1,6 +1,16 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Agent } from "http";
+import { SocksProxyAgent } from "socks-proxy-agent";
 import { HttpsProxyAgent } from "https-proxy-agent";
+
+type AgentConstructor = new (uri: string) => Agent;
+
+const proxies: Record<string, AgentConstructor> = {
+  http: HttpsProxyAgent,
+  https: HttpsProxyAgent,
+  socks: SocksProxyAgent,
+  socks4: SocksProxyAgent,
+};
 
 export function useProxy(): Agent | undefined {
   const prefs = getPreferenceValues<{
@@ -16,10 +26,12 @@ export function useProxy(): Agent | undefined {
     return undefined;
   }
 
-  let url = `${prefs.proxyProtocol}://${prefs.proxyHost}:${prefs.proxyPort}`;
+  let proxy_url = `${prefs.proxyProtocol}://${prefs.proxyHost}:${prefs.proxyPort}`;
 
   if (prefs.proxyUsername && prefs.proxyPassword) {
-    url = `${prefs.proxyProtocol}://${prefs.proxyUsername}:${prefs.proxyPassword}@${prefs.proxyHost}:${prefs.proxyPort}`;
+    proxy_url = `${prefs.proxyProtocol}://${prefs.proxyUsername}:${prefs.proxyPassword}@${prefs.proxyHost}:${prefs.proxyPort}`;
   }
-  return new HttpsProxyAgent(url);
+
+  const actor = proxies[prefs.proxyProtocol];
+  return new actor(proxy_url);
 }

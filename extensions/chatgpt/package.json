@@ -172,7 +172,7 @@
         },
         {
           "title": "Socks5",
-          "value": "socks5"
+          "value": "socks"
         }
       ],
       "required": false,
@@ -237,6 +237,7 @@
     "https-proxy-agent": "^7.0.2",
     "openai": "^4.24.3",
     "say": "^0.16.0",
+    "socks-proxy-agent": "^8.0.2",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -245,6 +246,7 @@
     "@types/react": "18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react-devtools": "^4.28.4",
     "typescript": "^4.4.3"
   },
   "scripts": {

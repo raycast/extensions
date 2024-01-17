@@ -2,8 +2,8 @@ import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
-import Ask from "./ask";
-import { useConversations } from "./hooks/useConversations";
+import { InnerAsk } from "./ask";
+import { ConversationContext, useConversations } from "./hooks/useConversations";
 import { Conversation } from "./type";
 import { ConversationListView } from "./views/conversation-list";
 
@@ -50,7 +50,16 @@ export default function Conversation() {
 
   const getActionPanel = (conversation: Conversation) => (
     <ActionPanel>
-      <PrimaryAction title="Continue Ask" onAction={() => push(<Ask conversation={conversation} />)} />
+      <PrimaryAction
+        title="Continue Ask"
+        onAction={() =>
+          push(
+            <ConversationContext.Provider value={conversations}>
+              <InnerAsk conversation={conversation} />
+            </ConversationContext.Provider>
+          )
+        }
+      />
       <PinAction
         title={conversation.pinned ? "Unpin Conversation" : "Pin Conversation"}
         isPinned={conversation.pinned}

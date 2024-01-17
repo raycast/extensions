@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix] - 2024-01-18
+
+- Fix: Conversation data not right when the Ask component unmount
+- Fix: Socket proxy not working
+
 ## [Chore] - 2024-01-11
 
 - Migrate openai v3 to v4
