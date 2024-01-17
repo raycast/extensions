@@ -34,33 +34,22 @@ export default function Command() {
   if (!compatibleSites.length) return <List isLoading />;
 
   // Remove all spaces at end of query
-  while (searchText?.endsWith(" "))
-    searchText = searchText.substring(0, searchText.length - 1);
+  while (searchText?.endsWith(" ")) searchText = searchText.substring(0, searchText.length - 1);
 
-  const { data, isLoading } = useFetch(
-    "https://crawldoc-api.johanstick.fr/search",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        sites,
-        query: searchText,
-        limit: 30,
-        toReturn: [
-          "title",
-          "source",
-          "resultScore",
-          "tags",
-          "lastUpdated",
-          "lang",
-        ],
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      execute: !!searchText,
-      parseResponse: parseFetchResponse,
+  const { data, isLoading } = useFetch("https://crawldoc-api.johanstick.fr/search", {
+    method: "POST",
+    body: JSON.stringify({
+      sites,
+      query: searchText,
+      limit: 30,
+      toReturn: ["title", "source", "resultScore", "tags", "lastUpdated", "lang"],
+    }),
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    execute: !!searchText,
+    parseResponse: parseFetchResponse,
+  });
 
   return (
     <List
@@ -85,10 +74,7 @@ export default function Command() {
       ) : (
         <List.Section title="Results" subtitle={data?.length + ""}>
           {data?.map((searchResult, index) => (
-            <SearchListItem
-              key={index + "" + Date.now()}
-              searchResult={searchResult}
-            />
+            <SearchListItem key={index + "" + Date.now()} searchResult={searchResult} />
           ))}
         </List.Section>
       )}
@@ -116,8 +102,7 @@ function Dropdown(props) {
 
 function SearchListItem({ searchResult }) {
   var content = `## ${searchResult?.source?.tree?.join(" → ")}\n---\n${
-    escapeMarkdown(searchResult?.source?.content?.join("\n\n")) ||
-    "No content found :("
+    escapeMarkdown(searchResult?.source?.content?.join("\n\n")) || "No content found :("
   }`;
 
   return (
@@ -125,17 +110,10 @@ function SearchListItem({ searchResult }) {
       title={searchResult?.source?.tree?.join(" → ") || "Loading..."}
       detail={
         <List.Item.Detail
-          markdown={
-            content.substring(0, 10000) != content
-              ? content.substring(0, 10000) + "..."
-              : content
-          }
+          markdown={content.substring(0, 10000) != content ? content.substring(0, 10000) + "..." : content}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Title"
-                text={searchResult.title}
-              />
+              <List.Item.Detail.Metadata.Label title="Title" text={searchResult.title} />
               {searchResult.tags.length ? (
                 <List.Item.Detail.Metadata.Label
                   title="Tag"
@@ -150,10 +128,7 @@ function SearchListItem({ searchResult }) {
                 title="Language"
                 text={searchResult?.lang?.flag + " " + searchResult?.lang?.code}
               />
-              <List.Item.Detail.Metadata.Label
-                title="Score"
-                text={"" + searchResult.resultScore}
-              />
+              <List.Item.Detail.Metadata.Label title="Score" text={"" + searchResult.resultScore} />
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label
                 title="Latest check"
@@ -176,9 +151,7 @@ function SearchListItem({ searchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
-              url={searchResult?.source?.href || searchResult.url}
-            />
+            <Action.OpenInBrowser url={searchResult?.source?.href || searchResult.url} />
             <Action.CopyToClipboard
               content={searchResult?.source?.href || searchResult.url}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
@@ -201,8 +174,7 @@ async function parseFetchResponse(response) {
 }
 
 function getDomain(url) {
-  if (!url?.startsWith("http://") && !url?.startsWith("https://"))
-    url = `https://${url}`;
+  if (!url?.startsWith("http://") && !url?.startsWith("https://")) url = `https://${url}`;
   return new URL(url).hostname;
 }
 
