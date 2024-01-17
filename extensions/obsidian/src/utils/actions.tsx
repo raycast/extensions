@@ -99,11 +99,7 @@ export function CopyNoteAction(props: { note: Note }) {
 export function CopyNoteTitleAction(props: { note: Note }) {
   const { note } = props;
   return (
-    <Action.CopyToClipboard
-      title="Copy Note Title"
-      content={note.title}
-      shortcut={{ modifiers: ["opt"], key: "t" }}
-    />
+    <Action.CopyToClipboard title="Copy Note Title" content={note.title} shortcut={{ modifiers: ["opt"], key: "t" }} />
   );
 }
 
