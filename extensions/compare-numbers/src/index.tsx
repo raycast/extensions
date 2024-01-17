@@ -79,13 +79,7 @@ export default function Command() {
         placeholder="Enter old value"
         defaultValue=""
         error={firstNumberError}
-        onChange={(newValue) => {
-          if (newValue !== undefined && validateNumber(newValue)) {
-            dropFirstNumberErrorIfNeeded();
-          } else {
-            setFirstNumberError("Please enter a valid number");
-          }
-        }}
+        onChange={dropFirstNumberErrorIfNeeded}
         onBlur={(event) => {
           const value = event.target.value;
           if (value !== undefined && !validateNumber(value)) {
@@ -101,13 +95,7 @@ export default function Command() {
         placeholder="Enter new value"
         defaultValue=""
         error={secondNumberError}
-        onChange={(newValue) => {
-          if (newValue !== undefined && validateNumber(newValue)) {
-            dropSecondNumberErrorIfNeeded();
-          } else {
-            setSecondNumberError("Please enter a valid number");
-          }
-        }}
+        onChange={dropSecondNumberErrorIfNeeded}
         onBlur={(event) => {
           const value = event.target.value;
           if (value !== undefined && !validateNumber(value)) {
