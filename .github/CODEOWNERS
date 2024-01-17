@@ -221,6 +221,7 @@
 /extensions/craftdocs                                @kudrykv @mafredri @0x77dev
 /extensions/cran-e-search                            @flaming-codes
 /extensions/cratecast                                @gleich @BalliAsghar
+/extensions/crawldoc                                 @johan-perso
 /extensions/create-t3-app                            @mozzius
 /extensions/cricketcast                              @sampoder
 /extensions/cron-description                         @niall-maloney
