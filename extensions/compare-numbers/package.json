@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Caculate Percentage Difference",
-      "description": "Caculate the percentage difference of two numbers.",
+      "title": "Calculate Percentage Difference",
+      "description": "Calculate the percentage difference of two numbers.",
       "mode": "view"
     }
   ],
