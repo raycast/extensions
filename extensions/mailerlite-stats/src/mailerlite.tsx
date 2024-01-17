@@ -107,7 +107,7 @@ const CampaignDetails = ({ campaignId }: { campaignId: string }) => {
   const { mailerliteApiKey } = getPreferenceValues();
   const [campaignData, setCampaignData] = useState<CampaignDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
