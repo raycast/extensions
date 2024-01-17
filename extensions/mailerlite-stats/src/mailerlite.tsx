@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 
 const API_BASE_URL = "https://connect.mailerlite.com/api";
@@ -122,7 +122,7 @@ const CampaignDetails = ({ campaignId }: { campaignId: string }) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json() as CampaignDetailResponse;
+        const data = (await response.json()) as CampaignDetailResponse;
         setCampaignData(data);
       } catch (e) {
         setError(e as Error);
