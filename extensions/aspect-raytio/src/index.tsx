@@ -3,6 +3,7 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import DimensionsDropdown from "./dimensions-dropdown";
 import CreateCustomRatio from "./create-custom-ratio";
 import AspectRatiosList from "./aspect-ratios-list";
+import { useAllCustomRatios } from "../hooks/useCustomRatios";
 import { defaultRatios } from "../lib/default-ratios";
 
 export enum BasedDimensions {
@@ -16,6 +17,7 @@ export enum Orientations {
 }
 
 export type RatioType = {
+  key?: string;
   width: number;
   height: number;
 };
@@ -26,6 +28,7 @@ export default function Command() {
   const [sizeValue, setSizeValue] = useState(defaultSize);
   const [basedDimension, setBasedDimension] = useState<BasedDimensions>(BasedDimensions.BASED_WIDTH);
   const [orientation, setOrientation] = useState<Orientations>(Orientations.LANDSCAPE);
+  const [customRatios, setCustomRatios] = useState<RatioType[]>([]);
 
   function handleDimensionChange(value: BasedDimensions) {
     setBasedDimension(value);
@@ -38,6 +41,21 @@ export default function Command() {
       setOrientation(Orientations.LANDSCAPE);
     }
   }
+
+  async function fetchCustomRatios() {
+    const customAspectRatios = await useAllCustomRatios();
+    setCustomRatios(customAspectRatios);
+  }
+
+  useEffect(() => {
+    fetchCustomRatios();
+  }, []);
+
+  useEffect(() => {
+    if (sizeValue === 0) {
+      setSizeValue(defaultSize);
+    }
+  }, [sizeValue]);
 
   return (
     <List
@@ -55,6 +73,20 @@ export default function Command() {
             basedDimension={basedDimension}
             orientation={orientation}
             handleOrientationChange={handleOrientationChange}
+          />
+          <AspectRatiosList
+            title="Custom"
+            list={customRatios}
+            sizeValue={sizeValue}
+            basedDimension={basedDimension}
+            orientation={orientation}
+            handleOrientationChange={handleOrientationChange}
+            handleDeleteItem={(id: string) => {
+              setCustomRatios(customRatios.filter((ratio: RatioType) => ratio.key !== id));
+            }}
+            handleDeleteAll={() => {
+              setCustomRatios([]);
+            }}
           />
           <List.Section title="Configuration">
             <List.Item
