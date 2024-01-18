@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ReadItem } from "./types";
+import { Source } from "./types";
 import { filterByShownStatus, shell } from "./utils/util";
 import {
   Action,
@@ -16,17 +16,17 @@ import {
 } from "@raycast/api";
 import { bizGenDigest, categorizeReadItems } from "./utils/biz";
 import { NO_API_KEY, NO_FEEDS, matchError } from "./utils/error";
-import { getReadItems, getTodaysDigest } from "./store";
+import { getSources, getTodaysDigest } from "./store";
 import { capitalize } from "lodash";
 import { usePromise } from "@raycast/utils";
 import DigestListItem from "./components/DigestListItem";
 import DigestDetail from "./components/DigestDetail";
-import SharableDigestAction from "./components/SharableDigestAction";
+import SharableLinkAction from "./components/SharableLinkAction";
 import CustomActionPanel from "./components/CustomActionPanel";
 
 export default function DailyReadCommand() {
-  const [todayItems, setTodayItems] = useState<ReadItem[]>([]);
-  const [otherItems, setOtherItems] = useState<ReadItem[]>([]);
+  const [todayItems, setTodayItems] = useState<Source[]>([]);
+  const [otherItems, setOtherItems] = useState<Source[]>([]);
   const itemsLength = todayItems.length + otherItems.length;
   const { data: todaysDigest = false, revalidate } = usePromise(getTodaysDigest);
 
@@ -37,13 +37,13 @@ export default function DailyReadCommand() {
   }, []);
 
   const loadReadItems = async () => {
-    const items = await getReadItems();
+    const items = await getSources();
     const { todayItems, otherItems } = categorizeReadItems(items);
     setTodayItems(todayItems);
     setOtherItems(otherItems);
   };
 
-  const openMultipleUrls = async (items: ReadItem[]) => {
+  const openMultipleUrls = async (items: Source[]) => {
     const urls = items.map((item) => item.url);
     await shell(`open ${urls.join(" ")}`);
   };
@@ -137,7 +137,11 @@ export default function DailyReadCommand() {
                         target={<DigestDetail digest={todaysDigest} />}
                       />
                       {generateDigestActionNode}
-                      <SharableDigestAction digest={todaysDigest} />
+                      <SharableLinkAction
+                        actionTitle="Share This Digest"
+                        articleTitle={todaysDigest.title}
+                        articleContent={todaysDigest.content}
+                      />
                     </CustomActionPanel>
                   ),
                 }}

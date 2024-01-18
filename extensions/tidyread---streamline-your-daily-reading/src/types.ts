@@ -1,4 +1,4 @@
-export interface ReadItem {
+export interface Source {
   id: string;
   url: string;
   title: string;

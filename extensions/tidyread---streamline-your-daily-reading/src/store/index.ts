@@ -1,13 +1,13 @@
 import { LocalStorage } from "@raycast/api";
-import { Digest, ReadItem } from "../types";
+import { Digest, Source } from "../types";
 import dayjs from "dayjs";
 
-export const getReadItems = async (): Promise<ReadItem[]> => {
+export const getSources = async (): Promise<Source[]> => {
   const itemsJson = await LocalStorage.getItem<string>("readItems");
   return itemsJson ? JSON.parse(itemsJson) : [];
 };
 
-export const saveReadItems = async (items: ReadItem[]) => {
+export const saveSources = async (items: Source[]) => {
   await LocalStorage.setItem("readItems", JSON.stringify(items));
 };
 

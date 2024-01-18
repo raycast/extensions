@@ -136,7 +136,7 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
     : `> **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the original excerpts.\n\n`;
   let digest = `${prefix}`;
 
-  digest += `## Introduction\nBelow is a flat summary of the content from all the sources today. **Only sources that have the RSS Link field filled out** can be summarized.\nThe content pulled by rss will be filtered according to the time span you provide, keeping only the content in the time span.\n\n## Summary\n`;
+  digest += `## Introduction\n[Tidyread](https://tidyread.info) generated a flat summary of the content from all the sources today. **Only sources that have the RSS Link field filled out** can be summarized.\nThe content pulled by rss will be filtered according to the time span you provide, keeping only the content in the time span.\n\n## Summary\n`;
 
   if (items.length === 0) {
     return `${digest}No RSS items remain after filtering.`;

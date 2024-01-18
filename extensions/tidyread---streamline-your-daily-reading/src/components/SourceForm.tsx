@@ -1,38 +1,38 @@
 import { Action, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ReadItem } from "../types";
+import { Source } from "../types";
 import { useForm, usePromise } from "@raycast/utils";
 import { isURL, withTimeout } from "../utils/util";
 import { CATEGORIES } from "../const";
-import { getReadItems, saveReadItems } from "../store";
+import { getSources, saveSources } from "../store";
 import { normalizePreference } from "../utils/preference";
 import { fetchMetadata, isValidRSSLink } from "../utils/request";
 import CustomActionPanel from "./CustomActionPanel";
 
 export default function ReadForm(props: { id?: string; navigationTitle?: string; onSuccess?: () => void }) {
   const { id, ...otherProps } = props;
-  const { isLoading, data: readItems } = usePromise(getReadItems);
+  const { isLoading, data: sources } = usePromise(getSources);
 
   if (!id) {
     return <InnerReadForm {...otherProps} />;
   }
 
-  if (!isLoading && readItems) {
-    const targetItem = readItems.find((item) => item.id === id);
+  if (!isLoading && sources) {
+    const targetItem = sources.find((item) => item.id === id);
     return <InnerReadForm defaultValues={targetItem} {...otherProps} />;
   }
 
   return null;
 }
 
-function InnerReadForm(props: { defaultValues?: ReadItem; navigationTitle?: string; onSuccess?: () => void }) {
+function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string; onSuccess?: () => void }) {
   const { defaultValues, navigationTitle, onSuccess } = props;
   const { pop } = useNavigation();
   const id = defaultValues?.id;
   // useForm 的favicon没有实体表单项，onSubmit的值里面取不到，所以需要单独维护状态
   const [favicon, setFavicon] = useState("");
 
-  const { handleSubmit, itemProps, setValue, values } = useForm<ReadItem>({
+  const { handleSubmit, itemProps, setValue, values } = useForm<Source>({
     // 如果编辑用setValue赋值，可能会遇到两个坑：
     // 1. 必须setTimeout
     // 2. dropdown赋值后，没法改变
@@ -61,16 +61,16 @@ function InnerReadForm(props: { defaultValues?: ReadItem; navigationTitle?: stri
           }
         }
 
-        const readItems = await getReadItems();
+        const sources = await getSources();
 
         if (id) {
-          const index = readItems.findIndex((item) => item.id === id);
-          readItems[index] = { ...readItems[index], ...newReadItem };
+          const index = sources.findIndex((item) => item.id === id);
+          sources[index] = { ...sources[index], ...newReadItem };
         } else {
-          readItems.push({ ...newReadItem, favicon });
+          sources.push({ ...newReadItem, favicon });
         }
 
-        saveReadItems(readItems);
+        saveSources(sources);
         showToast(Toast.Style.Success, `Source ${id ? "updated" : "added"}`);
         onSuccess?.();
         pop();

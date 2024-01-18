@@ -19,7 +19,7 @@ import {
 } from "./store";
 import DigestDetail from "./components/DigestDetail";
 import DigestListItem from "./components/DigestListItem";
-import SharableDigestAction from "./components/SharableDigestAction";
+import SharableLinkAction from "./components/SharableLinkAction";
 import CustomActionPanel from "./components/CustomActionPanel";
 
 export default function DigestList() {
@@ -82,7 +82,11 @@ export default function DigestList() {
                 actions: (
                   <CustomActionPanel>
                     <Action.Push icon={Icon.Eye} title="View Detail" target={<DigestDetail digest={digest} />} />
-                    <SharableDigestAction digest={digest} />
+                    <SharableLinkAction
+                      actionTitle="Share This Digest"
+                      articleTitle={digest.title}
+                      articleContent={digest.content}
+                    />
                     <Action
                       style={Action.Style.Destructive}
                       icon={Icon.Trash}

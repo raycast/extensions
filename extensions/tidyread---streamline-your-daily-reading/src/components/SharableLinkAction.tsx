@@ -1,5 +1,4 @@
 import { Action, Detail, Icon, Toast, showToast, useNavigation } from "@raycast/api";
-import { Digest } from "../types";
 import { shell } from "../utils/util";
 import { showFailureToast } from "@raycast/utils";
 import { normalizePreference } from "../utils/preference";
@@ -13,13 +12,17 @@ function handleSuccess(endpoint: string, id: string) {
   showToast(Toast.Style.Success, "Generating Success");
 }
 
-export default function SharableDigestAction(props: { digest: Digest }) {
-  const { digest } = props;
+export default function SharableLinkAction(props: {
+  actionTitle: string;
+  articleTitle: string;
+  articleContent: string | (() => string);
+}) {
+  const { actionTitle, articleContent, articleTitle } = props;
   const { push } = useNavigation();
 
   return (
     <Action
-      title="Generate A Sharable Link"
+      title={actionTitle}
       icon={Icon.Link}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       onAction={async () => {
@@ -44,11 +47,13 @@ export default function SharableDigestAction(props: { digest: Digest }) {
           await saveWriteFreelyAccessToken(accessToken);
         }
 
+        const content = typeof articleContent === "function" ? articleContent() : articleContent;
+
         try {
           const resp = await createPost({
             endpoint: writeFreelyEndpoint,
-            title: digest.title,
-            content: digest.content,
+            title: articleTitle,
+            content,
             accessToken,
           });
 
@@ -60,8 +65,8 @@ export default function SharableDigestAction(props: { digest: Digest }) {
 
             const resp = await createPost({
               endpoint: writeFreelyEndpoint,
-              title: digest.title,
-              content: digest.content,
+              title: articleTitle,
+              content,
               accessToken,
             });
 

@@ -1,17 +1,17 @@
 import { isAfter, subHours } from "date-fns";
 import { RSSItem, genDigest } from "../digest";
 import { PROVIDERS_MAP } from "../providers";
-import { Digest, ReadItem } from "../types";
+import { Digest, Source } from "../types";
 import { normalizePreference } from "./preference";
 import { isToday } from "./util";
 import { NO_FEEDS } from "./error";
 import dayjs from "dayjs";
-import { addOrUpdateDigest, getReadItems } from "../store";
+import { addOrUpdateDigest, getSources } from "../store";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { RequestOptions } from "http";
 import { request } from "./request";
 
-export const categorizeReadItems = (items: ReadItem[]): { todayItems: ReadItem[]; otherItems: ReadItem[] } => {
+export const categorizeReadItems = (items: Source[]): { todayItems: Source[]; otherItems: Source[] } => {
   const today = new Date();
 
   const todayItems = items.filter(
@@ -53,8 +53,8 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     summarizePrompt,
   });
 
-  const readItems = await getReadItems();
-  const { todayItems } = categorizeReadItems(readItems);
+  const sources = await getSources();
+  const { todayItems } = categorizeReadItems(sources);
 
   const feeds = todayItems
     .filter((item) => !!item.rssLink)

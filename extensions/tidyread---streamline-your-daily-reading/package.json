@@ -83,10 +83,12 @@
     "node-fetch": "^3.3.2",
     "node-html-parser": "^6.1.12",
     "openai": "^4.24.2",
+    "ordinal": "^1.0.3",
     "p-limit": "^4.0.0",
     "rss-parser": "^3.13.0",
     "url-metadata": "^3.3.1",
-    "validator": "^13.11.0"
+    "validator": "^13.11.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

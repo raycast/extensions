@@ -6,7 +6,7 @@ import { bizGenDigest, categorizeReadItems, isValidNotificationTime } from "./ut
 import { isAfter, subMinutes } from "date-fns";
 import { NO_API_KEY, NO_FEEDS, matchError } from "./utils/error";
 import { retry } from "./utils/util";
-import { getLastNotifyTime, getReadItems, checkTodaysDigestExist, saveLastNotifyTime } from "./store";
+import { getLastNotifyTime, getSources, checkTodaysDigestExist, saveLastNotifyTime } from "./store";
 import dayjs from "dayjs";
 
 async function handleGenDigest(onSuccess: () => void = () => {}, enableError: boolean = false) {
@@ -68,8 +68,8 @@ async function handleSuccess() {
 }
 
 export default async function Command() {
-  const readItems = await getReadItems();
-  const { todayItems } = categorizeReadItems(readItems);
+  const sources = await getSources();
+  const { todayItems } = categorizeReadItems(sources);
 
   // 若没有当日read，则无需通知
   if (todayItems.length === 0) return;
