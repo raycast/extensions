@@ -12,23 +12,9 @@
   "commands": [
     {
       "name": "collections",
-      "title": "Manage Collections",
-      "description": "View list of current collections.",
+      "title": "Collections",
+      "description": "View list of document collections.",
       "mode": "view"
-    },
-    {
-      "name": "search",
-      "title": "Search Collection",
-      "description": "Search the current collection.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "collection",
-          "placeholder": "collection",
-          "type": "text",
-          "required": true
-        }
-      ]
     }
   ],
   "dependencies": {
@@ -47,7 +33,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 && cp .build/arm64-apple-macosx/release/SearchIndex assets && cp .build/arm64-apple-macosx/release/IndexDocument assets && cp Sources/VectorStore/Resources/vocab.txt assets",
+    "build-swift": "swift build --configuration=release --arch arm64 && cp .build/arm64-apple-macosx/release/SearchDocument assets && cp .build/arm64-apple-macosx/release/DrawImage assets",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
