@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Clipboard, openExtensionPreferences } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, openExtensionPreferences, Icon } from "@raycast/api";
 import { useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -66,8 +66,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Calculate and Copy" onSubmit={handleSubmit} />
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action.SubmitForm title="Calculate and Copy" onSubmit={handleSubmit} icon={Icon.CopyClipboard} />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Cog} />
         </ActionPanel>
       }
     >
