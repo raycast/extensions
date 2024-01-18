@@ -25,7 +25,9 @@ function parseSSHConfig(configFilePath: string): ISSHConnection[] {
       }
       currentConnection = { id: connections.length.toString(), address: "", name: trimmedLine.substring(5), user: "" };
     } else if (currentConnection !== null) {
-      const [key, value] = trimmedLine.split(/\s+/, 2);
+      const whitespaceIndex = /\s+/.exec(trimmedLine).index;
+      const key = trimmedLine.substring(0, whitespaceIndex);
+      const value = trimmedLine.substring(whitespaceIndex).trim();
 
       switch (key) {
         case "HostName":
