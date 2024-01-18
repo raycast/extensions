@@ -1,5 +1,12 @@
 # Apple Reminders Changelog
 
+## [Bug fixes] - {PR_MERGE_DATE}
+
+- Fix a bug where it wasn't possible to remove the priority from a list item
+- Fix a bug where it wasn't possible to remove the due date from a list item
+- Fix a bug where it wasn't possible to change the due date from the menu bar
+- Migrate codebase to use new Swift macros
+
 ## [Allow to open Reminders app from the menu bar] - 2024-01-25
 
 - Add menu item that allows to open the Reminders app from the menu bar.
