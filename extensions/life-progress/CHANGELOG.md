@@ -1,5 +1,9 @@
 # Life Progress Changelog
 
+## [Optimize UI display] - {PR_MERGE_DATE}
+
+- Display date progress information in the Life Progress command subtitle
+
 ## [Update Raycast API] - 2022-12-01
 
 - Update Raycast API version to 1.44.0
