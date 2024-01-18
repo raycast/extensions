@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
+
 import { DestructiveAction, PinAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
@@ -73,8 +74,8 @@ export default function Model() {
 
   return (
     <List
-      isShowingDetail={filteredModels.length === 0 ? false : true}
-      isLoading={models.isLoading}
+      isShowingDetail={filteredModels.length !== 0 && !models.fetchLoading}
+      isLoading={models.isLoading || models.fetchLoading}
       filtering={false}
       throttle={false}
       selectedItemId={selectedModelId || undefined}
@@ -87,7 +88,9 @@ export default function Model() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {models.data.length === 0 ? (
+      {models.fetchLoading ? (
+        <List.EmptyView />
+      ) : models.data.length === 0 ? (
         <List.EmptyView title="No custom models" description="Create new model with ⌘ + T shortcut" icon={Icon.Stars} />
       ) : (
         <>

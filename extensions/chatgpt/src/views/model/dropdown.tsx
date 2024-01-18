@@ -1,4 +1,5 @@
 import { List } from "@raycast/api";
+
 import { ChangeModelProp } from "../../type";
 
 export const ModelDropdown = (props: ChangeModelProp) => {

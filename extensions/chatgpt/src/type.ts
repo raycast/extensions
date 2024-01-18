@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 
 export type Set<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -67,6 +68,7 @@ export type QuestionHook = BaseHook<string> & { update: PromiseFunctionWithOneAr
 export type ModelHook = Hook<Model> & {
   update: PromiseFunctionWithOneArg<Model>;
   option: Model["option"][];
+  fetchLoading: boolean;
 };
 
 export interface ChatHook {

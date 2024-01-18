@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
+
 import { Model, ModelHook } from "../../type";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
@@ -10,9 +11,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
   const { handleSubmit, itemProps } = useForm<Model>({
     onSubmit: async (model) => {
       let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
-      if (typeof updatedModel.temperature === "string") {
-        updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
-      }
+      updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
       if (props.model) {
         const toast = await showToast({
           title: "Update your model...",

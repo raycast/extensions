@@ -1,6 +1,8 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { Model, ModelHook } from "../type";
+
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useProxy } from "./useProxy";
 
@@ -18,6 +20,7 @@ export const DEFAULT_MODEL: Model = {
 export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [fetchLoading, setFetchLoading] = useState<boolean>(true);
   const gpt = useChatGPT();
   const { useAzure } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
@@ -51,6 +54,9 @@ export function useModel(): ModelHook {
                   style: Toast.Style.Failure,
                 }
           );
+        })
+        .finally(() => {
+          setFetchLoading(false);
         });
     }
   }, [gpt]);
@@ -126,7 +132,7 @@ export function useModel(): ModelHook {
   }, [setData]);
 
   return useMemo(
-    () => ({ data, isLoading, option, add, update, remove, clear }),
-    [data, isLoading, option, add, update, remove, clear]
+    () => ({ data, isLoading, option, add, update, remove, clear, fetchLoading }),
+    [data, isLoading, option, add, update, remove, clear, fetchLoading]
   );
 }

@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useState } from "react";
+
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
 

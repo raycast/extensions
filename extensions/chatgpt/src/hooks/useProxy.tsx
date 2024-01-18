@@ -1,7 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
 import { Agent } from "http";
-import { SocksProxyAgent } from "socks-proxy-agent";
+
+import { getPreferenceValues } from "@raycast/api";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { SocksProxyAgent } from "socks-proxy-agent";
 
 type AgentConstructor = new (uri: string) => Agent;
 

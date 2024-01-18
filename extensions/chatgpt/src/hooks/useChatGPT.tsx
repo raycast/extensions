@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
 import { useState } from "react";
+
 import { ConfigurationPreferences } from "../type";
 import { getConfigUrl } from "../utils";
 

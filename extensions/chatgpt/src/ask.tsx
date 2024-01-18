@@ -1,6 +1,7 @@
 import { ActionPanel, getPreferenceValues, List, useNavigation } from "@raycast/api";
 import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+
 import { PrimaryAction } from "./actions";
 import { FormInputActionSection } from "./actions/form-input";
 import { PreferencesActionSection } from "./actions/preferences";

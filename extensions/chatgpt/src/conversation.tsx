@@ -1,5 +1,6 @@
 import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
+
 import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
 import { InnerAsk } from "./ask";
