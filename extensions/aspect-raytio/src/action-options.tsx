@@ -9,6 +9,7 @@ export default function ActionOptions(props: {
   basedDimension: BasedDimensions;
   orientation: Orientations;
   handleOrientationChange: () => void;
+  handleDeleteAll?: () => void;
 }) {
   const {
     id,
@@ -18,6 +19,7 @@ export default function ActionOptions(props: {
     basedDimension,
     orientation,
     handleOrientationChange,
+    handleDeleteAll,
   } = props;
 
   return (
@@ -52,6 +54,18 @@ export default function ActionOptions(props: {
           title={`Switch to ${orientation === Orientations.LANDSCAPE ? Orientations.PORTRAIT : Orientations.LANDSCAPE}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={() => handleOrientationChange()}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Danger Zone">
+        <Action
+          icon={{ source: Icon.Important, tintColor: Color.Red }}
+          title="Delete All Custom Raytios"
+          onAction={async () => {
+            if (handleDeleteAll) {
+              handleDeleteAll();
+            }
+            await LocalStorage.clear();
+          }}
         />
       </ActionPanel.Section>
     </ActionPanel>
