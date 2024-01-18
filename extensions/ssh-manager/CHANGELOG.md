@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [Fix RemoteCommand parsing] - 2024-01-18
+
+- Fixed a bug where a remote command of a connection was not correctly parsed if the remote command contains multiple spaces.
+
 ## [Modify hosts from  ~/.ssh/config] - 2023-09-20
 
 - This change adds the ability to view/modify ssh hosts from ~/.ssh/config file in addition to localStorage
