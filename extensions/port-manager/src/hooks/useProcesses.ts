@@ -1,28 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import Process from "../models/Process";
-import { useNamedPorts } from "./useNamedPorts";
 
-export default function useProcesses(): [Process[], () => Promise<void>] {
-  const [processes, setProcesses] = useState<Process[]>([]);
-  const { getNamedPort } = useNamedPorts();
+export default function useProcesses() {
+  const { data, revalidate, isLoading, mutate, error } = useCachedPromise(Process.getCurrent);
 
-  const reloadProcesses = useCallback(async () => {
-    const processes = await Process.getCurrent();
-
-    processes.forEach((p) => {
-      p.portInfo?.forEach((port) => {
-        port.name = getNamedPort(port.port)?.name;
-      });
-    });
-
-    setProcesses(processes);
-  }, [setProcesses]);
-
-  useEffect(() => {
-    (async () => {
-      reloadProcesses();
-    })();
-  }, []);
-
-  return [processes, reloadProcesses];
+  return {
+    processes: data,
+    revalidateProcesses: revalidate,
+    isLoadingProcesses: isLoading,
+    mutateProcesses: mutate,
+    processesError: error,
+  };
 }

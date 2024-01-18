@@ -1,7 +1,9 @@
+import { Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo } from "react";
 
 type NamedPortInfo = { name: string };
+type NamedPortRecord = Record<number, NamedPortInfo>;
 
 class NamedPortAlreadyExistsError extends Error {
   constructor(port: number) {
@@ -9,8 +11,22 @@ class NamedPortAlreadyExistsError extends Error {
   }
 }
 
+const NAMED_PORTS_CACHE_KEY = "named-ports";
+
+const cache = new Cache();
+
+function getNamedPorts(): NamedPortRecord {
+  const cached = cache.get(NAMED_PORTS_CACHE_KEY);
+
+  if (cached === undefined) {
+    return {};
+  }
+
+  return JSON.parse(cached);
+}
+
 function useNamedPorts() {
-  const [namedPorts, setNamedPorts] = useCachedState<Record<number, NamedPortInfo>>("named-ports", {});
+  const [namedPorts, setNamedPorts] = useCachedState<Record<number, NamedPortInfo>>(NAMED_PORTS_CACHE_KEY, {});
 
   const updateNamedPort = (port: number, info: NamedPortInfo) => {
     setNamedPorts((prev) => {
@@ -67,4 +83,4 @@ function useNamedPorts() {
   };
 }
 
-export { NamedPortAlreadyExistsError, useNamedPorts, type NamedPortInfo };
+export { NamedPortAlreadyExistsError, getNamedPorts, useNamedPorts, type NamedPortInfo };

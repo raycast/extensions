@@ -5,8 +5,8 @@ import { KillSignal, killProcess } from "../utilities/killProcess";
 const preferences = getPreferenceValues<Preferences>();
 export default function KillAllActions(props: {
   process: ProcessInfo;
-  onKilled?: () => Promise<void>;
-  onError?: (error: unknown) => Promise<void>;
+  onKilled?: () => Promise<void> | void;
+  onError?: (error: unknown) => Promise<void> | void;
 }) {
   if (preferences.killSignal === KillSignal.KILL || preferences.killSignal === KillSignal.TERM) {
     return (

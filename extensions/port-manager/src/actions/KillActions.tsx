@@ -6,8 +6,8 @@ const preferences = getPreferenceValues<Preferences>();
 
 export default function KillActions(props: {
   process: ProcessInfo;
-  onKilled?: () => Promise<void>;
-  onError?: (err: unknown) => Promise<void>;
+  onKilled?: () => Promise<void> | void;
+  onError?: (err: unknown) => Promise<void> | void;
 }) {
   if (preferences.killSignal === KillSignal.TERM || preferences.killSignal === KillSignal.KILL) {
     return (

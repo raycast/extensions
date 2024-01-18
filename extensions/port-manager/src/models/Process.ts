@@ -1,8 +1,12 @@
+import { Cache } from "@raycast/api";
 import { exec as cExec } from "child_process";
 import { promisify } from "util";
+import { getNamedPorts } from "../hooks/useNamedPorts";
 import isDigit from "../utilities/isDigit";
 import { LsofPrefix } from "./constants";
 import { PortInfo, ProcessInfo } from "./interfaces";
+
+const cache = new Cache();
 
 const exec = promisify(cExec);
 
@@ -38,6 +42,7 @@ export default class Process implements ProcessInfo {
   }
 
   public static async getCurrent() {
+    const namedPorts = getNamedPorts();
     const cmd = `/usr/sbin/lsof +c0 -iTCP -w -sTCP:LISTEN -P -FpcRuLPn`;
 
     const { stdout, stderr } = await exec(cmd);
@@ -76,11 +81,13 @@ export default class Process implements ProcessInfo {
             values.portInfo
               ? values.portInfo.push({
                   host: value.split(":")[0],
+                  name: namedPorts[Number(value.split(":")[1])]?.name,
                   port: Number(value.split(":")[1]),
                 })
               : (values.portInfo = [
                   {
                     host: value.split(":")[0],
+                    name: namedPorts[Number(value.split(":")[1])]?.name,
                     port: Number(value.split(":")[1]),
                   },
                 ]);

@@ -4,7 +4,7 @@ import { CopyCommandsActionsMenu } from "./actions/CopyCommandsActionMenu";
 import CopyInfoActionsMenu from "./actions/CopyInfoActionsMenu";
 import KillActions from "./actions/KillActions";
 import KillAllActions from "./actions/KillAllActions";
-import KillParentActions, { isProcessWithKillableParent } from "./actions/KillParentActions";
+import KillParentActions from "./actions/KillParentActions";
 import { ShowInFinderActionMenu } from "./actions/ShowInFinderActionMenu";
 import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
@@ -12,7 +12,7 @@ import useProcesses from "./hooks/useProcesses";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
 
 export default function Command() {
-  const [processes, reloadProcesses] = useProcesses();
+  const { processes, revalidateProcesses, isLoadingProcesses } = useProcesses();
   const { getNamedPort } = useNamedPorts();
 
   const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", false);
@@ -20,11 +20,11 @@ export default function Command() {
   return (
     <List
       isShowingDetail={isShowingDetail}
-      isLoading={processes.length === 0}
+      isLoading={isLoadingProcesses}
       navigationTitle="Kill Port"
       searchBarPlaceholder="Search Open Ports"
     >
-      {processes.map((p) => (
+      {processes?.map((p) => (
         <List.Item
           key={p.pid}
           title={p.name ?? "Untitled Process"}
@@ -72,39 +72,37 @@ export default function Command() {
             <ActionPanel>
               <KillActions
                 process={p}
-                onKilled={async () => {
-                  await showToast(Toasts.KillProcess.Success(p));
-                  await reloadProcesses();
+                onKilled={() => {
+                  showToast(Toasts.KillProcess.Success(p));
+                  revalidateProcesses();
                 }}
-                onError={async (err) => {
-                  await showToast(Toasts.KillProcess.Error(err));
-                  await reloadProcesses();
+                onError={(err) => {
+                  showToast(Toasts.KillProcess.Error(err));
+                  revalidateProcesses();
                 }}
               />
               <KillAllActions
                 process={p}
-                onKilled={async () => {
-                  await showToast(Toasts.KillProcess.Success(p));
-                  await reloadProcesses();
+                onKilled={() => {
+                  showToast(Toasts.KillProcess.Success(p));
+                  revalidateProcesses();
                 }}
-                onError={async (err) => {
-                  await showToast(Toasts.KillProcess.Error(err));
-                  await reloadProcesses();
+                onError={(err) => {
+                  showToast(Toasts.KillProcess.Error(err));
+                  revalidateProcesses();
                 }}
               />
-              {isProcessWithKillableParent(p) && (
-                <KillParentActions
-                  process={p}
-                  onKilled={async () => {
-                    await showToast(Toasts.KillProcess.Success(p));
-                    await reloadProcesses();
-                  }}
-                  onError={async (err) => {
-                    await showToast(Toasts.KillProcess.Error(err));
-                    await reloadProcesses();
-                  }}
-                />
-              )}
+              <KillParentActions
+                process={p}
+                onKilled={() => {
+                  showToast(Toasts.KillProcess.Success(p));
+                  revalidateProcesses();
+                }}
+                onError={async (err) => {
+                  showToast(Toasts.KillProcess.Error(err));
+                  revalidateProcesses();
+                }}
+              />
               <Action
                 title="Show Details"
                 icon={Icon.QuestionMark}
@@ -114,7 +112,7 @@ export default function Command() {
               <ShowInFinderActionMenu process={p} />
               <CopyInfoActionsMenu process={p} />
               <CopyCommandsActionsMenu process={p} />
-              <Action title="Reload" onAction={reloadProcesses} icon={Icon.ArrowClockwise} />
+              <Action title="Reload" onAction={revalidateProcesses} icon={Icon.ArrowClockwise} />
             </ActionPanel>
           }
           accessories={isShowingDetail ? undefined : getProcessAccessories(p)}
