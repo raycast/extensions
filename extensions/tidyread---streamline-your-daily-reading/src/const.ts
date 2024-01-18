@@ -4,7 +4,7 @@ export const CATEGORIES = [
   "AI",
   "Education",
   "Culture",
-  "Current Events",
+  "News",
   "Business",
   "Economics",
   "Startup",
