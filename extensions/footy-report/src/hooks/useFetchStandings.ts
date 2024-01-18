@@ -37,7 +37,6 @@ const useFetchStandings = (seasonId: string) => {
     revalidate,
   };
 
-
   if (data?.status === 401) {
     return { ...hookResponse, error: "Invalid API Token" };
   }
