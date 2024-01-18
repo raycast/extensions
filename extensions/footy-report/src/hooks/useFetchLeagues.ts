@@ -1,3 +1,4 @@
+import { HookResponse, League } from "@src/types";
 import useSportMonksClient from "./useSportMonksClient";
 
 type SportMonksSeason = {
@@ -20,6 +21,17 @@ const useFetchLeagues = (name: string) => {
     path: `/leagues/search/${name}?include=seasons`,
     execute: name.length > 0,
   });
+  const hookResponse: HookResponse<League, typeof revalidate> = {
+    data: [],
+    isLoading,
+    error: null,
+    revalidate,
+  };
+
+  if (data?.status === 401) {
+    return { ...hookResponse, error: "Invalid API Token" };
+  }
+
   const response: SportMonksLeagueRespsonse[] = data?.data;
   const finalData =
     response
@@ -30,7 +42,8 @@ const useFetchLeagues = (name: string) => {
         image_path: league.image_path,
         season: seasons.find((season) => season.is_current),
       })) ?? [];
-  return { data: finalData, isLoading, revalidate };
+
+  return { ...hookResponse, data: finalData };
 };
 
 export default useFetchLeagues;
