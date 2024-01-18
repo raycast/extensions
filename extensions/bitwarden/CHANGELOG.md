@@ -1,12 +1,9 @@
 # Bitwarden Changelog
 
-## [Fix] - 2024-01-06
-
-- Fixes issue with Loading Fallback
-
-## [New Command] - 2024-01-06
+## [New Command and Fix] - 2024-01-06
 
 - Adds Create Folder command
+- Fixes issue with Loading Fallback
 
 ## [Error handling] - 2023-11-30
 
