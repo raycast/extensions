@@ -3,12 +3,12 @@ import { Digest, Source } from "../types";
 import dayjs from "dayjs";
 
 export const getSources = async (): Promise<Source[]> => {
-  const itemsJson = await LocalStorage.getItem<string>("readItems");
+  const itemsJson = await LocalStorage.getItem<string>("sources");
   return itemsJson ? JSON.parse(itemsJson) : [];
 };
 
 export const saveSources = async (items: Source[]) => {
-  await LocalStorage.setItem("readItems", JSON.stringify(items));
+  await LocalStorage.setItem("sources", JSON.stringify(items));
 };
 
 export const getDigests = async (): Promise<Digest[]> => {

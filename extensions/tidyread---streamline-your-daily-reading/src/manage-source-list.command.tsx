@@ -24,20 +24,20 @@ import { validateSources } from "./utils/validate";
 import SharableLinkAction from "./components/SharableLinkAction";
 
 export default function SourceList() {
-  const [sources, setSources] = useState<Source[]>([]);
+  const [sources, setSources] = useState<Source[]>();
   const { pop } = useNavigation();
 
   useEffect(() => {
-    loadReadItems();
+    loadSources();
   }, []);
 
-  const loadReadItems = async () => {
+  const loadSources = async () => {
     const items = await getSources();
     setSources(items);
   };
 
   const handleDelete = async (itemToDelete: Source) => {
-    const updatedItems = sources.filter((item) => item.id !== itemToDelete.id);
+    const updatedItems = sources!.filter((item) => item.id !== itemToDelete.id);
     setSources(updatedItems);
     await saveSources(updatedItems);
     showToast(Toast.Style.Success, "Source deleted");
@@ -60,10 +60,10 @@ export default function SourceList() {
                     showToast(Toast.Style.Animated, "Validating sources json");
                     await validateSources(newSources);
                     const now = Date.now();
-                    await saveSources([...sources, ...newSources.map((s, index) => ({ ...s, id: `${now + index}` }))]);
+                    await saveSources([...sources!, ...newSources.map((s, index) => ({ ...s, id: `${now + index}` }))]);
                     showToast(Toast.Style.Success, "Sources imported");
                     pop();
-                    loadReadItems();
+                    loadSources();
                   } catch (error: any) {
                     showToast(Toast.Style.Failure, "Invalid sources json", error.message);
                   }
@@ -80,8 +80,8 @@ export default function SourceList() {
   );
 
   return (
-    <List>
-      {sources.length === 0 ? (
+    <List isLoading={!sources}>
+      {sources?.length === 0 ? (
         <List.EmptyView
           actions={
             <CustomActionPanel>
@@ -92,9 +92,9 @@ export default function SourceList() {
                 target={
                   <SourceForm
                     navigationTitle="Add Source"
-                    onSuccess={() => {
+                    onSuccess={async () => {
                       pop();
-                      loadReadItems();
+                      loadSources();
                     }}
                   ></SourceForm>
                 }
@@ -106,7 +106,7 @@ export default function SourceList() {
           description="Add your first source, or press cmd + Enter import sources from json."
         />
       ) : (
-        sources.map((item, index) => {
+        (sources || []).map((item, index) => {
           const accessories = filterByShownStatus([
             {
               icon: "./rssicon.svg",
@@ -138,9 +138,9 @@ export default function SourceList() {
                       <SourceForm
                         id={item.id}
                         navigationTitle="Edit Source"
-                        onSuccess={() => {
+                        onSuccess={async () => {
                           pop();
-                          loadReadItems();
+                          loadSources();
                         }}
                       ></SourceForm>
                     }
@@ -152,9 +152,9 @@ export default function SourceList() {
                     target={
                       <SourceForm
                         navigationTitle="Add Source"
-                        onSuccess={() => {
+                        onSuccess={async () => {
                           pop();
-                          loadReadItems();
+                          loadSources();
                         }}
                       ></SourceForm>
                     }
@@ -184,7 +184,7 @@ export default function SourceList() {
                     articleTitle="My Reading Sources"
                     articleContent={() => {
                       return `You can batch import the sources into your [Tidyread](https://tidyread.info) in 'Manage Source List' Command.\n\n\`\`\`json\n${JSON.stringify(
-                        sources.map((s) => omit(s, ["id"])),
+                        sources!.map((s) => omit(s, ["id"])),
                         null,
                         4,
                       )}\n\`\`\``;

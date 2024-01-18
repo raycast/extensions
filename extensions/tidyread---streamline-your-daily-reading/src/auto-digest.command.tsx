@@ -2,7 +2,7 @@ import { updateCommandMetadata } from "@raycast/api";
 import { sendNotification } from "./utils/notify";
 import { normalizePreference } from "./utils/preference";
 import * as chrono from "chrono-node";
-import { bizGenDigest, categorizeReadItems, isValidNotificationTime } from "./utils/biz";
+import { bizGenDigest, categorizeSources, isValidNotificationTime } from "./utils/biz";
 import { isAfter, subMinutes } from "date-fns";
 import { NO_API_KEY, NO_FEEDS, matchError } from "./utils/error";
 import { retry } from "./utils/util";
@@ -69,7 +69,7 @@ async function handleSuccess() {
 
 export default async function Command() {
   const sources = await getSources();
-  const { todayItems } = categorizeReadItems(sources);
+  const { todayItems } = categorizeSources(sources);
 
   // 若没有当日read，则无需通知
   if (todayItems.length === 0) return;

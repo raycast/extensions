@@ -14,7 +14,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { bizGenDigest, categorizeReadItems } from "./utils/biz";
+import { bizGenDigest, categorizeSources } from "./utils/biz";
 import { NO_API_KEY, NO_FEEDS, matchError } from "./utils/error";
 import { getSources, getTodaysDigest } from "./store";
 import { capitalize } from "lodash";
@@ -25,20 +25,20 @@ import SharableLinkAction from "./components/SharableLinkAction";
 import CustomActionPanel from "./components/CustomActionPanel";
 
 export default function DailyReadCommand() {
-  const [todayItems, setTodayItems] = useState<Source[]>([]);
-  const [otherItems, setOtherItems] = useState<Source[]>([]);
-  const itemsLength = todayItems.length + otherItems.length;
+  const [todayItems, setTodayItems] = useState<Source[]>();
+  const [otherItems, setOtherItems] = useState<Source[]>();
+  const itemsLength = (todayItems?.length ?? 0) + (otherItems?.length ?? 0);
   const { data: todaysDigest = false, revalidate } = usePromise(getTodaysDigest);
 
   const { push } = useNavigation();
 
   useEffect(() => {
-    loadReadItems();
+    loadSources();
   }, []);
 
-  const loadReadItems = async () => {
+  const loadSources = async () => {
     const items = await getSources();
-    const { todayItems, otherItems } = categorizeReadItems(items);
+    const { todayItems, otherItems } = categorizeSources(items);
     setTodayItems(todayItems);
     setOtherItems(otherItems);
   };
@@ -110,7 +110,7 @@ export default function DailyReadCommand() {
   );
 
   return (
-    <List>
+    <List isLoading={!todayItems && !otherItems}>
       {itemsLength === 0 ? (
         <List.EmptyView
           actions={
@@ -155,7 +155,7 @@ export default function DailyReadCommand() {
             )}
           </List.Section>
           <List.Section title="Today">
-            {todayItems.map((item, index) => (
+            {(todayItems || []).map((item, index) => (
               <List.Item
                 key={index}
                 title={item.title}
@@ -188,7 +188,7 @@ export default function DailyReadCommand() {
                     <Action
                       icon={Icon.ArrowNe}
                       title="Open All Today's Sources"
-                      onAction={() => openMultipleUrls(todayItems)}
+                      onAction={() => openMultipleUrls(todayItems!)}
                     />
                     {manageSourceListActionNode}
                     {generateDigestActionNode}
@@ -205,7 +205,7 @@ export default function DailyReadCommand() {
             ))}
           </List.Section>
           <List.Section title="Others">
-            {otherItems.map((item, index) => (
+            {(otherItems || []).map((item, index) => (
               <List.Item
                 key={index}
                 title={item.title}
@@ -238,7 +238,7 @@ export default function DailyReadCommand() {
                     <Action
                       icon={Icon.ArrowNe}
                       title="Open All Other's Sources"
-                      onAction={() => openMultipleUrls(otherItems)}
+                      onAction={() => openMultipleUrls(otherItems!)}
                     />
                     {manageSourceListActionNode}
                     {item.rssLink && (

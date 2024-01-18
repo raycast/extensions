@@ -23,7 +23,7 @@ import SharableLinkAction from "./components/SharableLinkAction";
 import CustomActionPanel from "./components/CustomActionPanel";
 
 export default function DigestList() {
-  const [digests, setDigests] = useState<Digest[]>([]);
+  const [digests, setDigests] = useState<Digest[]>();
 
   useEffect(() => {
     loadDigests();
@@ -35,7 +35,7 @@ export default function DigestList() {
   };
 
   const handleDelete = async (itemToDelete: Digest) => {
-    const updatedItems = digests.filter((item) => item.id !== itemToDelete.id);
+    const updatedItems = digests!.filter((item) => item.id !== itemToDelete.id);
     setDigests(updatedItems);
     await saveDigests(updatedItems);
     showToast(Toast.Style.Success, "Digest deleted");
@@ -54,8 +54,8 @@ export default function DigestList() {
   // );
 
   return (
-    <List>
-      {digests.length === 0 ? (
+    <List isLoading={!digests}>
+      {digests?.length === 0 ? (
         <List.EmptyView
           actions={
             <CustomActionPanel>
@@ -73,7 +73,7 @@ export default function DigestList() {
           description="Go to 'Daily Read' View to generate digest."
         />
       ) : (
-        digests.map((digest, index) => {
+        (digests || []).map((digest, index) => {
           return (
             <DigestListItem
               key={index}

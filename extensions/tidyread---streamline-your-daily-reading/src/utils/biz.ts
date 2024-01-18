@@ -11,7 +11,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import { RequestOptions } from "http";
 import { request } from "./request";
 
-export const categorizeReadItems = (items: Source[]): { todayItems: Source[]; otherItems: Source[] } => {
+export const categorizeSources = (items: Source[]): { todayItems: Source[]; otherItems: Source[] } => {
   const today = new Date();
 
   const todayItems = items.filter(
@@ -54,7 +54,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
   });
 
   const sources = await getSources();
-  const { todayItems } = categorizeReadItems(sources);
+  const { todayItems } = categorizeSources(sources);
 
   const feeds = todayItems
     .filter((item) => !!item.rssLink)

@@ -1,4 +1,4 @@
-import { Action, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Source } from "../types";
 import { useForm, usePromise } from "@raycast/utils";
@@ -9,7 +9,7 @@ import { normalizePreference } from "../utils/preference";
 import { fetchMetadata, isValidRSSLink } from "../utils/request";
 import CustomActionPanel from "./CustomActionPanel";
 
-export default function ReadForm(props: { id?: string; navigationTitle?: string; onSuccess?: () => void }) {
+export default function ReadForm(props: { id?: string; navigationTitle?: string; onSuccess?: () => Promise<void> }) {
   const { id, ...otherProps } = props;
   const { isLoading, data: sources } = usePromise(getSources);
 
@@ -25,7 +25,7 @@ export default function ReadForm(props: { id?: string; navigationTitle?: string;
   return null;
 }
 
-function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string; onSuccess?: () => void }) {
+function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string; onSuccess?: () => Promise<void> }) {
   const { defaultValues, navigationTitle, onSuccess } = props;
   const { pop } = useNavigation();
   const id = defaultValues?.id;
@@ -72,7 +72,7 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
 
         saveSources(sources);
         showToast(Toast.Style.Success, `Source ${id ? "updated" : "added"}`);
-        onSuccess?.();
+        await onSuccess?.();
         pop();
       } catch (error: any) {
         showToast(Toast.Style.Failure, error.message);
@@ -127,7 +127,7 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
     <Form
       actions={
         <CustomActionPanel>
-          <Action.SubmitForm title="Save Source" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.SaveDocument} title="Save Source" onSubmit={handleSubmit} />
         </CustomActionPanel>
       }
       navigationTitle={navigationTitle}
