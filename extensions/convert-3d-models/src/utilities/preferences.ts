@@ -19,7 +19,9 @@ export interface ConvertPreferences {
   show3MF: boolean;
   showAMF: boolean;
   showBRP: boolean;
+  showDAE: boolean;
   showIGS: boolean;
+  showIV: boolean;
   showOBJ: boolean;
   showOFF: boolean;
   showPLY: boolean;

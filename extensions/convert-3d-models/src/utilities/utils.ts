@@ -21,7 +21,7 @@ import { Clipboard, getFrontmostApplication, getPreferenceValues, LocalStorage, 
  */
 const getSelectedFinderModels = async (): Promise<string> => {
   return runAppleScript(
-    `set modelTypes to {"step", "stp", "stl", "obj", "off", "iges", "igs", "x3d", "x3dz", "amf", "3mf", "brep", "brp", "smf", "ply"}
+    `set modelTypes to {"step", "stp", "stl", "obj", "iges", "igs", "x3d", "x3dz", "3mf", "brep", "brp", "smf", "ply", "iv"}
 
     tell application "Finder"
       set theSelection to selection
@@ -57,7 +57,7 @@ const getSelectedFinderModels = async (): Promise<string> => {
  */
 const getSelectedPathFinderModels = async (): Promise<string> => {
   return runAppleScript(
-    `set modelTypes to {"step", "stp", "stl", "obj", "off", "iges", "igs", "x3d", "x3dz", "amf", "3mf", "brep", "brp", "smf", "ply"}
+    `set modelTypes to {"step", "stp", "stl", "obj", "iges", "igs", "x3d", "x3dz", "3mf", "brep", "brp", "smf", "ply", "iv"}
 
     tell application "Path Finder"
       set theSelection to selection

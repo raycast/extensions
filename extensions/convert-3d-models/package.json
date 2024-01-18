@@ -82,7 +82,7 @@
         {
           "label": "BREP/BRP",
           "name": "showBRP",
-          "description": "Whether to show BREP/BRP as a conversion option. Export only.",
+          "description": "Whether to show BREP/BRP as a conversion option.",
           "type": "checkbox",
           "default": true,
           "required": false
@@ -91,6 +91,14 @@
           "label": "IGS",
           "name": "showIGS",
           "description": "Whether to show IGS as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "label": "IV",
+          "name": "showIV",
+          "description": "Whether to show IV (Inventor) as a conversion option.",
           "type": "checkbox",
           "default": true,
           "required": false
@@ -145,6 +153,14 @@
           "required": false
         },
         {
+          "label": "DAE",
+          "name": "showDAE",
+          "description": "Whether to show Collada/DAE as a conversion option.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
           "label": "PLY (Not recommended)",
           "name": "showPLY",
           "description": "Whether to show PLY as a conversion option. Results may be subpar and low accuracy.",
@@ -174,6 +190,18 @@
       "name": "quickConvertSTL",
       "title": "Quick Convert to STL",
       "description": "Quickly convert selected models to STL",
+      "mode": "no-view"
+    },
+    {
+      "name": "quickConvertOBJ",
+      "title": "Quick Convert to OBJ",
+      "description": "Quickly convert selected models to OBJ",
+      "mode": "no-view"
+    },
+    {
+      "name": "quickConvertSTP",
+      "title": "Quick Convert to STP",
+      "description": "Quickly convert selected models to STP",
       "mode": "no-view"
     }
   ],

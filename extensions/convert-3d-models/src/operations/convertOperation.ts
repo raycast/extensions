@@ -49,7 +49,12 @@ export default async function convert(sourcePaths: string[], desiredType: string
     }
 
     execSync(`chmod +x ${environment.assetsPath}/freecad_convert.py`);
-    execSync(`python3 ${environment.assetsPath}/freecad_convert.py "${freeCADpath}" "${item}" "${newPath}"`);
+
+    // FreeCAD ships with its own python executable which needs to be used. Otherwise, some more advanced modules will have weird behavior.
+    // https://wiki.freecad.org/Embedding_FreeCAD#Using_FreeCAD_without_GUI
+    execSync(
+      `"${freeCADpath}"Contents/Resources/bin/python ${environment.assetsPath}/freecad_convert.py "${freeCADpath}" "${item}" "${newPath}"`,
+    );
 
     resultPaths.push(newPath);
   }

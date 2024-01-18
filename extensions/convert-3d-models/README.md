@@ -1,14 +1,15 @@
 # Convert 3D Models
 
-Convert between various NURBS/Parametric and mesh 3D model formats, such as STEP, STL, OBJ, and others.
+Effortlessly convert between various NURBS/Parametric and mesh 3D model formats, including STEP, STL, OBJ, and more.
 
 ## Features
 
-* Convert between various 3D model formats, including IGS and X3D
-  * All conversions powered by [FreeCAD](https://www.freecad.org/index.php)'s powerful OpenCascade engine
-* Convert from NURBS -> Mesh and Mesh -> NURBS
+* **Multiple Format Support**: Seamlessly convert across a range of 3D model formats such as STEP, STL, OBJ, IGS, and X3D.
+* **Powered by FreeCAD**: Leverage the robust [OpenCASCADE](https://wiki.freecad.org/OpenCASCADE) engine of [FreeCAD](https://www.freecad.org/index.php) for all conversions.
+* **NURBS and Mesh Conversion**: Easily transform NURBS models to Mesh formats and vice versa.
+* **Quick conversions to popular formats**: Quickly convert your models to popular formats with direct conversion commands.
 
-![Image](metadata/2.png)
+![Conversion Options](metadata/2.png)
 
 ## Commands
 
@@ -16,35 +17,46 @@ Convert between various NURBS/Parametric and mesh 3D model formats, such as STEP
   * Convert selected 3D model files from one format to another
 * Quick Convert to STL
   * Quickly convert the selected 3D models to STL
+* Quick Convert to OBJ
+  * Quickly convert the selected 3D models to OBJ
+* Quick Convert to STP
+  * Quickly convert the selected 3D models to STP
 
 ## Installation
 
 This extension relies on having [FreeCAD](https://www.freecad.org/) installed on the machine. You will be prompted to specify the path that FreeCAD is installed.
 
+![Splash Screen](metadata/1.png)
+
 It's recommended to open FreeCAD at least once after installation so that MacOS can verify the installation.
 
-![Image](metadata/1.png)
+### Downloading FreeCAD
 
-### Installation through Web
+Download the latest version of FreeCAD from the [official downloads page](https://www.freecad.org/downloads.php). Once the file is downloaded:
 
-You can download and follow the FreeCAD installation packages from [FreeCAD's Downloads page](https://www.freecad.org/downloads.php). 
+1. Mount the disk image file.
+2. Drag the FreeCAD application to your preferred folder, such as the Applications folder.
 
-This is the recommended way of installing FreeCAD for ease of installation. The FreeCAD installer is provided as a app package (.app) enclosed in a disk image file.
+To launch FreeCAD, double-click the app. If you encounter a message stating "FreeCAD can't be opened because it is from an unidentified developer," follow these steps:
 
-You can download the latest installer from [FreeCAD's Downloads page](https://www.freecad.org/downloads.php) page. After downloading the file, just mount the disk image, then drag it to the Application folder or a folder of your choice.
+1. Navigate to the Applications folder.
+2. Right-click the FreeCAD app and select "Open."
+3. Click "Open" in the dialog to confirm.
 
-That's it. Just click on the app to launch FreeCAD. If you have this message "FreeCAD can't be open as it is from unidentified developer." Open the folder (Application) and right click on the app then click open and accept to open the application.
+**Note:** This extension functions independently of the FreeCAD GUI and utilizes FreeCAD's command-line and Python interfaces. You do **not** need to have FreeCAD opened to use this extension.
 
-You do **not** need FreeCAD open to use this extension, as it relies on FreeCAD's command line interface and its Python interface.
+### Homebrew Installation
 
-### Installation through `brew`
+Alternatively, you can install FreeCAD using [Homebrew](https://brew.sh/), a package manager that helps you manage software installations and updates on macOS. After installing Homebrew, install FreeCAD by running the following command in your terminal:
 
-You can also use a package manager such as HomeBrew to keep your software updated. Instructions to install HomeBrew can be seen [here](https://brew.sh/). When HomeBrew installed you can simply install FreeCAD through your bash terminal with:
+```shell
+brew install freecad
+```
 
-```brew install freecad```
+---
 
 ## Thanks
 
 Special thanks to Stephen Kaplan <skaplanofficial@gmail.com> for creating [SIPS](https://github.com/raycast/extensions/tree/b415b8a9013e8569f788e5b7fc01a171a4f038d9/extensions/sips) on which this extension was heavily based.
 
-Further credit to [faeiretree on Github](https://github.com/faerietree/freecad_convert) for his work on `freecad_convert` which formed the basis of the FreeCAD conversion.
+Further credit to [faeiretree on Github](https://github.com/faerietree/freecad_convert) for his work on `freecad_convert`, which laid the groundwork for this FreeCAD conversion functionality.

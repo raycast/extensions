@@ -27,7 +27,7 @@ import { checkFreeCADInstallation } from "./utilities/checkinstall";
 /**
  * All supported model formats for conversion.
  */
-const FORMATS = ["3MF", "AMF", "BRP", "IGS", "OBJ", "OFF", "PLY", "SMF", "STL", "STEP", "X3D", "X3DZ"];
+const FORMATS = ["3MF", "AMF", "BRP", "DAE", "IGS", "IV", "OBJ", "OFF", "PLY", "SMF", "STL", "STEP", "X3D", "X3DZ"];
 
 /**
  * Executes the Command function.

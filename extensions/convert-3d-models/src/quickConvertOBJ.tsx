@@ -14,7 +14,7 @@ import convert from "./operations/convertOperation";
 import { cleanup, getSelectedModels, showErrorToast } from "./utilities/utils";
 import { checkFreeCADInstallation } from "./utilities/checkinstall";
 
-const quickConvertFormat = "STL"; // Change to the target format you want to convert to
+const quickConvertFormat = "OBJ"; // Change to the target format you want to convert to
 /**
  * Executes the Command function.
  * This function checks the FreeCAD installation, gets the preference values,
