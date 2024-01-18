@@ -2,7 +2,7 @@ import { Form, Action, showHUD, ActionPanel, showToast, Toast } from "@raycast/a
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { useState } from "react";
-import { SessionProvider } from "./context/session";
+import { SessionProvider } from "~/context/session";
 
 const CreateFolderCommand = () => (
   <RootErrorBoundary>
