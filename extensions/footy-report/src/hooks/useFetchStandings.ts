@@ -1,4 +1,5 @@
-import useSportMonksClient from "./useSportMonksClient";
+import { HookResponse, Standing } from "@src/types";
+import useSportMonksClient from "@src/hooks/useSportMonksClient";
 
 type Participant = {
   name: string;
@@ -29,9 +30,21 @@ const useFetchStandings = (seasonId: string) => {
     path: `/standings/seasons/${seasonId}?include=form.fixture;participant`,
   });
 
+  const hookResponse: HookResponse<Standing, typeof revalidate> = {
+    data: [],
+    isLoading,
+    error: null,
+    revalidate,
+  };
+
+
+  if (data?.status === 401) {
+    return { ...hookResponse, error: "Invalid API Token" };
+  }
+
   const response: SportMonksStandingResponse[] = data?.data;
 
-  const finalData =
+  const finalData: Standing[] =
     response?.map(({ participant, ...rest }) => {
       return {
         name: participant.name,
@@ -58,7 +71,7 @@ const useFetchStandings = (seasonId: string) => {
       };
     }) ?? [];
 
-  return { data: finalData, isLoading, revalidate };
+  return { ...hookResponse, data: finalData };
 };
 
 export default useFetchStandings;

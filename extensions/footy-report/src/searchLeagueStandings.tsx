@@ -9,7 +9,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useFetchLeagues } from "./hooks";
+import { useErrorToast, useFetchLeagues } from "@src/hooks";
 import { useState } from "react";
 import { League } from "@src/types";
 import Standings from "@src/components/Standings";
@@ -23,7 +23,9 @@ export default () => {
     return LocalStorage.getItem<string>("favorite-leagues");
   });
   const [searchText, setSearchText] = useState<string>("");
-  const { data, isLoading } = useFetchLeagues(searchText);
+  const { data, isLoading, error } = useFetchLeagues(searchText);
+
+  useErrorToast(error);
 
   const favoriteLeagues: League[] = favoritesCached
     ? JSON.parse(favoritesCached)

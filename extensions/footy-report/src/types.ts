@@ -78,6 +78,21 @@ export type Fixture = {
   }[];
 };
 
+export type Standing = {
+  name: string
+  img_path: string
+  position: number
+  points: number
+  played: number
+  wins: number
+  losses: number
+  draws: number
+  recentForm: {
+    name: string
+    result: "W" | "L" | "D"
+  }[]
+}
+
 export type HookResponse<T, K> = {
   data: T[];
   error: string | null;

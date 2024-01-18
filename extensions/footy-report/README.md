@@ -8,6 +8,10 @@
 Raycast extension to find your essential football match day info and stats
 </h3>
 
+<p align="center">
+  <a title="Install footy-report Raycast Extension" href="https://www.raycast.com/thuoe/footy-report"><img src="https://www.raycast.com/thuoe/footy-report/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+</p>
+
 ![Header](metadata/footy-report-1.png)
 
 ## ⚠️ Prerequisites
