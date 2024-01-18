@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "batteries-included",
+  "title": "Batteries Included",
+  "description": "A simple raycast application to showcase the battery levels of your connected devices",
+  "icon": "command-icon.png",
+  "author": "vorillaz",
+  "categories": [
+    "Productivity",
+    "System",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show battery levels in the Menu Bar",
+      "description": "Battery capacity for your workstation and any external devices",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "remainingYellow",
+      "title": "Optimal remaining time (h)",
+      "description": "Battery percentage will turn yellow if there's less than this many hours remaining",
+      "placeholder": "0.0",
+      "default": "3.0",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "remainingOrange",
+      "title": "Low remaining time (h)",
+      "description": "Battery percentage will turn orange if there's less than this many hours remaining",
+      "placeholder": "0.0",
+      "default": "2.0",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "remainingRed",
+      "title": "Critical remaining time (h)",
+      "description": "Battery percentage will turn red if there's less than this many hours remaining",
+      "placeholder": "0.0",
+      "default": "1.0",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "highPowerUsage",
+      "title": "High power usage (W)",
+      "description": "Battery percentage will turn yellow if more than this many watts are being drawn",
+      "placeholder": "20",
+      "default": "",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.4.8",
+    "run-applescript": "^6.1.0",
+    "plist": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/plist": "^3.0.5",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
