@@ -3,8 +3,8 @@
 ------------------------
 
 Author: Stephen Kaplan _(HelloImSteven)_ <br />
-Last Updated: 2023-12-28 <br />
-Pins Version: 1.6.0
+Last Updated: 2024-01-12 <br />
+Pins Version: 1.7.0
 
 ------------------------
 
@@ -28,7 +28,6 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | ----- | ----- |
 | `{{AI:...}}` or <br /> `{{AI:...}}` or <br /> `{{askAI:...}}` | The response to a Raycast AI query. Requires Raycast Pro. You can specify the model and creativity using `{{AI model="..." creativity=[decimal]}}`. The default model is `gpt-3.5-turbo` and the default creativity is `1.0`. The model must be either `gpt-3.5-turbo` or `text-davinci-003`. Creativity must be between `0.0` and `1.0`. |
 | `{{alert:...}}` | Displays an alert with the specified text. Specify an optional message and timeout using `{{alert timeout=[number] title="...":...}}`. The default timeout is 10 seconds. |
-| `{{dialog:...}}` | Displays a dialog with the specified text. Specify an optional title and timeout using `{{dialog timeout=[number] title="...":Message}}`. The default timeout is 30 seconds. You can accept input by providing `input=true` before the timeout, e.g. `{{dialog input=true timeout=5:Enter a number}}`. |
 | `{{as:...}}` or <br /> `{{AS:..}}` | The return value of an AppleScript script. |
 | `{{chooseApplication}}` | A quoted POSIX path of an application selected by the user in a file dialog. Use `{{chooseApplication multiple=true}}` to allow the user to select multiple applications. |
 | `{{chooseFile}}` | A quoted POSIX path of a file selected by the user in a file dialog. Use `{{chooseFile multiple=true}}` to allow the user to select multiple files. |
@@ -44,6 +43,7 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{date}}` or <br /> `{{currentDate}}` | The current date. Use `{{date format="..."}}` to specify a custom date format. Defaults to `MMMM d, yyyy`. |
 | `{{day}}` or <br /> `{{dayName}}` or <br /> `{{currentDay}}` or <br /> `{{currentDayName}}` | The current weekday, e.g. "Monday". Defaults to en-US locale. Use format `{{day locale="xx-XX"}}` to specify a different locale. |
 | `{{delete [name]}}` | Deletes the persistent variable with the specified name. |
+| `{{dialog:...}}` | Displays a dialog with the specified text. Specify an optional title and timeout using `{{dialog timeout=[number] title="...":Message}}`. The default timeout is 30 seconds. You can accept input by providing `input=true` before the timeout, e.g. `{{dialog input=true timeout=5:Enter a number}}`. |
 | `{{file:...}}` | The text content of a path at the specified path. The path can be absolute or relative to the user's home directory using `~/`. |
 | `{{get [name]}}` | Gets the value of the persistent variable with the specified name. |
 | `{{groupNames}}` | The comma-separated list of names of all groups. Specify an amount of groups to randomly select using `{{groupNames amount=[number]}}`. |

@@ -1,6 +1,6 @@
 import { LocalStorage, environment } from "@raycast/api";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME } from "./constants";
+import { ADVANCED_SETTINGS_FILENAME } from "./common/constants";
 import { defaultAdvancedSettings } from "../data/default-advanced-settings";
 import * as fs from "fs";
 

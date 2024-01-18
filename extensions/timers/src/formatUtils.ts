@@ -13,7 +13,7 @@ const formatDateTime = (d: Date) => {
     parsedDate.getDate().toString().padStart(2, "0"),
   ];
   const timevalues = [parsedDate.getHours(), parsedDate.getMinutes(), parsedDate.getSeconds()].map((x) =>
-    x.toString().padStart(2, "0")
+    x.toString().padStart(2, "0"),
   );
   const date = datevalues.join("-");
   const time = timevalues.join(":");
@@ -25,7 +25,7 @@ const secondsBetweenDates = (args: { d1?: Date | string; d2?: Date | string }) =
   args.d2 = args.d2 == "----" ? undefined : args.d2;
   return (
     Math.round(
-      (args.d1 ? new Date(args.d1) : new Date()).getTime() - (args.d2 ? new Date(args.d2) : new Date()).getTime()
+      (args.d1 ? new Date(args.d1) : new Date()).getTime() - (args.d2 ? new Date(args.d2) : new Date()).getTime(),
     ) / 1000
   );
 };

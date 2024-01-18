@@ -169,6 +169,15 @@ export interface RaycastArgumentsOllamaCommandCustom {
   launchContext?: string;
 }
 
+export interface RaycastArgumentsOllamaCommandTranslate {
+  fallbackText?: string;
+  arguments: {
+    language: string;
+  };
+  launchType: string;
+  launchContext?: string;
+}
+
 export interface RaycastImage {
   path: string;
   html: string;

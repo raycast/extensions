@@ -4,7 +4,7 @@ import { ExtensionPreferences } from "../../../lib/preferences/types";
 import path from "path";
 import * as fs from "fs";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut } from "../../../lib/action-utils";
+import { getActionShortcut } from "../../../lib/actions";
 
 /**
  * Action to export a chat to a JSON file.

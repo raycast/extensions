@@ -32,7 +32,8 @@
     "danulqua",
     "rgrunberg",
     "tleo19",
-    "loris"
+    "loris",
+    "bdsqqq"
   ],
   "commands": [
     {
@@ -65,11 +66,41 @@
       "preferences": [
         {
           "name": "url",
-          "title": "URL",
-          "description": "The URL to open in the new tab",
+          "title": "Default URL",
+          "description": "The URL to open in the new tab if no argument is provided",
           "type": "textfield",
           "required": false,
           "default": "https://google.com"
+        },
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used when opening mini arc with a non-url argument",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            }
+          ]
         }
       ],
       "arguments": [
