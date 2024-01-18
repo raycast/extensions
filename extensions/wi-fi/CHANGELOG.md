@@ -1,5 +1,9 @@
 # Wi-Fi Changelog
 
+## [Optimize UI display] - {PR_MERGE_DATE}
+
+- When the Toggle Wi-Fi command is run, the menu bar icons are immediately updated
+
 ## [Added Menubar Command] - 2023-10-09
 
 - Wi-Fi Signal: Show Wi-Fi signal strength in the menubar
