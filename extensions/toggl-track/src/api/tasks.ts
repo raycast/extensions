@@ -1,6 +1,6 @@
 import { get } from "./togglClient";
 
-export function getWorkspaceTasks(workspaceId: number) {
+export function getTasks(workspaceId: number) {
   return get<Task[]>(`/workspaces/${workspaceId}/tasks`);
 }
 

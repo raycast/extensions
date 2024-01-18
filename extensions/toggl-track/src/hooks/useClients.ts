@@ -1,9 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getWorkspaceClients, Workspace } from "../api";
+import { getClients, Workspace } from "../api";
 import { allWorkspacesFetch } from "../helpers/allWorkspacesFetch";
 
 export function useClients(workspaces: Workspace[]) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(getClients, [workspaces], {
+  const { data, error, isLoading, revalidate } = useCachedPromise(getAllClients, [workspaces], {
     initialData: [],
   });
   return {
@@ -14,6 +14,6 @@ export function useClients(workspaces: Workspace[]) {
   };
 }
 
-function getClients(workspaces: Workspace[]) {
-  return allWorkspacesFetch(getWorkspaceClients, workspaces);
+function getAllClients(workspaces: Workspace[]) {
+  return allWorkspacesFetch(getClients, workspaces);
 }
