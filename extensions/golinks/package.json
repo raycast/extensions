@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "golinks",
+  "title": "GoLinks",
+  "description": "Manage your GoLinks",
+  "icon": "command-icon.png",
+  "author": "micnncim",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "Search GoLinks",
+      "subtitle": "GoLinks",
+      "description": "Search your GoLinks",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create GoLink",
+      "subtitle": "GoLinks",
+      "description": "Create a new GoLink",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.4",
+    "axios": "^0.24.0",
+    "ky": "^0.28.7",
+    "ky-universal": "^0.9.1",
+    "node-fetch": "^3.0.0",
+    "swr": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.4.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "format": "prettier -w src/**",
+    "lint": "eslint src/**"
+  },
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Token",
+      "description": "Your GoLinks API token",
+      "placeholder": "Enter your access token"
+    }
+  ]
+}
