@@ -1,6 +1,6 @@
 <p align="center">
   <img src="assets/icon.png" height="128" width="128">
-  <h1 align="center">DouTu Extension for Raycast</h1>
+  <h1 align="center">Multi Display Extension for Raycast</h1>
 </p>
 
 🌟 A utility about multi-display input source switching and window switching
