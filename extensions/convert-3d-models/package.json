@@ -13,12 +13,12 @@
   "license": "MIT",
   "preferences": [
     {
-      "title": "FreeCAD Path",
+      "title": "FreeCAD Application",
       "name": "freeCADPath",
-      "description": "Path where FreeCAD is installed (with the trailing slash). Typically /Applications/FreeCAD.app/.",
-      "type": "textfield",
-      "value": "/Applications/FreeCAD.app/",
-      "default": "/Applications/FreeCAD.app/",
+      "description": "Select the FreeCAD application.",
+      "type": "appPicker",
+      "value": "/Applications/FreeCAD.app",
+      "default": "/Applications/FreeCAD.app",
       "required": true
     },
     {
