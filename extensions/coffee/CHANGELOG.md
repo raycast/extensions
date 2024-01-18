@@ -1,5 +1,14 @@
 # Coffee Changelog
 
+## [Fix] - 2023-11-26
+
+- Squashed a few bugs
+
+## [Status command] - 2023-11-12
+
+- Create separate status command
+-  Optimized code
+
 ## [Fix] - 2023-01-19
 
 Fixed a bug that caused the extension to crash if the menubar command was not enabled.

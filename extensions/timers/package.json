@@ -16,6 +16,14 @@
     "Productivity",
     "System"
   ],
+  "keywords": [
+    "timer",
+    "stopwatch",
+    "alert",
+    "pom",
+    "alarm",
+    "clock"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -77,6 +85,7 @@
       "title": "Start Custom Timer",
       "description": "Set a countdown for a custom amount of time.",
       "mode": "view",
+      "keywords": ["new"],
       "arguments": [
         {
           "name": "hours",
@@ -133,7 +142,8 @@
     },
     {
       "name": "dismissTimerAlert",
-      "title": "Dismiss Timer Alert",
+      "title": "Dismiss Ringing Timer",
+      "keywords": ["Dismiss Timer Alert", "Alert"],
       "description": "Stop a ringing alert from a finished timer.",
       "mode": "no-view"
     },
@@ -149,6 +159,12 @@
       "title": "Preview Alert Sounds",
       "description": "Play samples of different alert sound effects.",
       "mode": "view"
+    },
+    {
+      "name": "stopRunningTimer",
+      "title": "Stop Running Timer",
+      "description": "Stop the running timer closest to completion.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -267,18 +283,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8"
+    "@raycast/api": "^1.61.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.48",
-    "eslint": "^7.32.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "~20.8.10",
+    "@types/react": "^18.2.35",
+    "eslint": "^8.53.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "lint-fix": "ray lint --fix"
   }
 }

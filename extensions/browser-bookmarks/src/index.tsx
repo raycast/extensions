@@ -19,6 +19,7 @@ import useArcBookmarks from "./hooks/useArcBookmarks";
 import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
+import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
@@ -26,6 +27,7 @@ import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
+import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
@@ -99,25 +101,30 @@ export default function Command() {
   const hasArc = browsers.includes(BROWSERS_BUNDLE_ID.arc) ?? false;
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
+  const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
+  const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
+  const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
 
   const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
+  const braveNightly = useBraveNightlyBookmarks(hasBraveNightly);
   const chrome = useChromeBookmarks(hasChrome);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
-  const firefox = useFirefoxBookmarks(hasFirefox);
+  const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
   const safari = useSafariBookmarks(hasSafari);
+  const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
@@ -128,6 +135,7 @@ export default function Command() {
       ...arc.bookmarks,
       ...brave.bookmarks,
       ...braveBeta.bookmarks,
+      ...braveNightly.bookmarks,
       ...chrome.bookmarks,
       ...chromeDev.bookmarks,
       ...edge.bookmarks,
@@ -135,9 +143,9 @@ export default function Command() {
       ...edgeDev.bookmarks,
       ...firefox.bookmarks,
       ...safari.bookmarks,
+      ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
     ]
-      .filter((item) => item.title)
       .map((item) => {
         let domain;
         try {
@@ -166,7 +174,7 @@ export default function Command() {
         }
 
         // If both frecencies are undefined, sort by title
-        return a.title.localeCompare(b.title);
+        return a.title?.localeCompare(b.title);
       });
 
     setBookmarks(bookmarks);
@@ -174,6 +182,7 @@ export default function Command() {
     arc.bookmarks,
     brave.bookmarks,
     braveBeta.bookmarks,
+    braveNightly.bookmarks,
     chrome.bookmarks,
     chromeDev.bookmarks,
     edge.bookmarks,
@@ -181,6 +190,7 @@ export default function Command() {
     edgeDev.bookmarks,
     firefox.bookmarks,
     safari.bookmarks,
+    sidekick.bookmarks,
     vivaldi.bookmarks,
     frecencies,
     setBookmarks,
@@ -191,6 +201,7 @@ export default function Command() {
       ...arc.folders,
       ...brave.folders,
       ...braveBeta.folders,
+      ...braveNightly.folders,
       ...chrome.folders,
       ...chromeDev.folders,
       ...edge.folders,
@@ -198,6 +209,7 @@ export default function Command() {
       ...edgeDev.folders,
       ...firefox.folders,
       ...safari.folders,
+      ...sidekick.folders,
       ...vivaldi.folders,
     ];
 
@@ -206,6 +218,7 @@ export default function Command() {
     arc.folders,
     brave.folders,
     braveBeta.folders,
+    braveNightly.folders,
     chrome.folders,
     chromeDev.folders,
     edge.folders,
@@ -213,6 +226,7 @@ export default function Command() {
     edgeDev.folders,
     firefox.folders,
     safari.folders,
+    sidekick.folders,
     vivaldi.folders,
     setFolders,
   ]);
@@ -242,6 +256,7 @@ export default function Command() {
       ],
       threshold: 0.4,
       includeScore: true,
+      ignoreLocation: true,
     });
   }, [folderBookmarks]);
 
@@ -297,6 +312,9 @@ export default function Command() {
     if (hasBraveBeta) {
       braveBeta.mutate();
     }
+    if (hasBraveNightly) {
+      braveNightly.mutate();
+    }
     if (hasChrome) {
       chrome.mutate();
     }
@@ -312,11 +330,14 @@ export default function Command() {
     if (hasEdgeDev) {
       edge.mutate();
     }
-    if (hasFirefox) {
+    if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
     }
     if (hasSafari) {
       safari.mutate();
+    }
+    if (hasSidekick) {
+      sidekick.mutate();
     }
     if (hasVivaldi) {
       vivaldi.mutate();
@@ -365,6 +386,7 @@ export default function Command() {
         arc.isLoading ||
         brave.isLoading ||
         braveBeta.isLoading ||
+        braveNightly.isLoading ||
         chrome.isLoading ||
         chromeDev.isLoading ||
         edge.isLoading ||
@@ -372,6 +394,7 @@ export default function Command() {
         edgeDev.isLoading ||
         firefox.isLoading ||
         safari.isLoading ||
+        sidekick.isLoading ||
         vivaldi.isLoading
       }
       searchBarPlaceholder="Search by title, domain name, or folder name"
@@ -453,6 +476,15 @@ export default function Command() {
                     setCurrentProfile={braveBeta.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.braveNightly}
+                    name="Brave Nightly"
+                    icon="brave.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                    profiles={braveNightly.profiles}
+                    currentProfile={braveNightly.currentProfile}
+                    setCurrentProfile={braveNightly.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.chrome}
                     name="Chrome"
                     icon="chrome.png"
@@ -502,6 +534,15 @@ export default function Command() {
                     name="Firefox"
                     icon="firefox.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                    profiles={firefox.profiles}
+                    currentProfile={firefox.currentProfile}
+                    setCurrentProfile={firefox.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.firefoxDev}
+                    name="Firefox Dev"
+                    icon="firefoxDev.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}

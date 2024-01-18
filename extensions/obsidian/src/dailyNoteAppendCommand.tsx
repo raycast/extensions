@@ -25,8 +25,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
   const [content, setContent] = useState("");
   useEffect(() => {
     async function getContent() {
-      const withTemplate = appendTemplate ? appendTemplate + text : text;
-      const content = await applyTemplates(withTemplate);
+      const content = await applyTemplates(text, appendTemplate);
       setContent(content);
     }
     getContent();

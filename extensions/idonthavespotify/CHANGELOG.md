@@ -1,5 +1,9 @@
 # I Don't Have Spotify Changelog
 
+## [Fix] - 2023-11-06
+
+- Corrected the hostname from which the data was fetched from
+
 ## [API Schema updates] - 2023-10-19
 
 - Upgrade to API v1.3

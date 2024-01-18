@@ -23,6 +23,7 @@ const checkForOverlyLoudAlert = (launchedFromMenuBar = false) => {
 };
 
 async function startTimer(timeInSeconds: number, timerName = "Untitled", selectedSound = "default") {
+  popToRoot();
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
   const masterName = fileName.replace(/:/g, "__");
   writeFileSync(masterName, timerName);
@@ -33,7 +34,7 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
   }`;
   const cmdParts = [`sleep ${timeInSeconds}`];
   cmdParts.push(
-    `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`
+    `if [ -f "${masterName}" ]; then osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"'`,
   );
   const afplayString = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
   if (prefs.selectedSound === "speak_timer_name") {
@@ -57,13 +58,13 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
       return;
     }
   });
-  popToRoot();
   await showHUD(`Timer "${timerName}" started for ${formatTime(timeInSeconds)}! 🎉`);
 }
 
 function stopTimer(timerFile: string) {
-  const deleteTimerCmd = `if [ -f "${timerFile}" ]; then rm "${timerFile}"; else echo "Timer deleted"; fi`;
-  const dismissFile = timerFile.replace(".timer", ".dismiss");
+  const timerFilePath = environment.supportPath + "/" + timerFile;
+  const deleteTimerCmd = `if [ -f "${timerFilePath}" ]; then rm "${timerFilePath}"; else echo "Timer deleted"; fi`;
+  const dismissFile = timerFilePath.replace(".timer", ".dismiss");
   const deleteDismissCmd = `if [ -f "${dismissFile}" ]; then rm "${dismissFile}"; else echo "Timer deleted"; fi`;
   execSync(deleteTimerCmd);
   execSync(deleteDismissCmd);

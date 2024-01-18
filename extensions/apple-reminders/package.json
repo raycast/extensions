@@ -1,10 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-reminders",
-  "title": "Apple Reminders Beta",
+  "title": "Apple Reminders",
   "description": "Manage Apple Reminders.",
   "icon": "icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "tm.wrnr",
+    "ir4n"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": [
@@ -16,7 +20,7 @@
     {
       "name": "my-reminders",
       "title": "My Reminders",
-      "subtitle": "Apple Reminders Beta",
+      "subtitle": "Apple Reminders",
       "description": "View and complete your reminders.",
       "mode": "view",
       "preferences": [
@@ -33,25 +37,57 @@
     {
       "name": "create-reminder",
       "title": "Create Reminder",
-      "subtitle": "Apple Reminders Beta",
+      "subtitle": "Apple Reminders",
       "description": "Create and prioritize new reminders.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "selectDefaultList",
+          "type": "checkbox",
+          "label": "Initially select the default list",
+          "description": "When enabled, the Reminders's default list will be initially selected instead of the last used list.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "menu-bar",
       "title": "Menu Bar Reminders",
       "icon": "icon.png",
-      "subtitle": "Apple Reminders Beta",
+      "subtitle": "Apple Reminders",
       "description": "Manage your reminders in the menu bar.",
       "mode": "menu-bar",
       "preferences": [
         {
-          "name": "displayMenuBarCount",
+          "name": "titleType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Nothing",
+              "value": "nothing"
+            },
+            {
+              "title": "Count",
+              "value": "count"
+            },
+            {
+              "title": "First Reminder",
+              "value": "firstReminder"
+            }
+          ],
+          "default": "count",
+          "required": false,
+          "title": "Title",
+          "description": "Choose what you want to see next to the menu bar icon."
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
           "type": "checkbox",
           "title": "Count",
-          "label": "Display menu bar count",
-          "description": "When enabled, the number of reminders in the menu bar will be displayed",
-          "default": true,
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
           "required": false
         },
         {
@@ -74,7 +110,7 @@
           "default": "today",
           "required": false,
           "title": "View",
-          "description": "Indicates which view you want to see in your menu bar."
+          "description": "Choose which view you want to see in your menu bar."
         }
       ],
       "interval": "10m"
@@ -82,7 +118,7 @@
     {
       "name": "quick-add-reminder",
       "title": "Quick Add Reminder",
-      "subtitle": "Apple Reminders Beta",
+      "subtitle": "Apple Reminders",
       "description": "Quickly add a reminder in Reminders.",
       "mode": "no-view",
       "preferences": [
@@ -113,20 +149,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1",
     "date-fns": "^2.30.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.200",
-    "@types/node": "^20.8.7",
-    "@types/react": "^18.2.29",
-    "eslint": "^8.51.0",
-    "eslint-plugin-import": "^2.28.1",
+    "@types/lodash": "^4.14.201",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "eslint": "^8.53.0",
+    "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.0",
     "react": "^18.2.0",
     "typescript": "^5.2.2"
   },

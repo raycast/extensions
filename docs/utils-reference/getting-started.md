@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.10.1
+
+- Fix an issue where the values passed to the `reset` function of the `useForm` hook wouldn't be respected.
+
 ### v1.10.0
 
 - Add a new [`showFailureToast`](./functions/showFailureToast.md) function.

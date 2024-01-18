@@ -1,5 +1,30 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fixes] - 2023-12-29
+
+- Fixed an issue where the selected item would not be the first one after the search text changed
+
+## [Support for Sidekick] - 2023-12-18
+
+- Add support for `Sidekick` browser
+
+## [Support for Brave Nightly] - 2023-12-09
+
+- Add support for `Brave Nightly` browser.
+
+## [Support for Firefox Dev edition] - 2023-11-24
+
+- Add support for `Firefox Dev` browser, which uses the same profiles as `Firefox`.
+
+## [Bug fixes] - 2023-11-21
+
+- Improved search results
+- Fixed `toLocaleCompare` issue
+
+## [Bug Fixes] - 2023-11-03
+
+- Fixed an issue where Chrome bookmarks with no title were not displayed.
+
 ## [Bug Fixes] - 2023-10-25
 
 - Fixed an issue where Arc bookmarks could break the extension.

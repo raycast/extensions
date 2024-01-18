@@ -45,8 +45,10 @@ function parseSSHConfig(configFilePath: string): ISSHConnection[] {
         case "HostNameKey":
           // Ignore this key
           break;
+        case "RemoteCommand":
+          currentConnection.command = value;
+          break;
         default:
-          currentConnection.name = key;
           break;
       }
     }
@@ -73,6 +75,10 @@ function saveSSHConfig(configFilePath: string, connections: ISSHConnection[]): v
 
     if (connection.sshKey) {
       configData += `  IdentityFile ${connection.sshKey}\n`;
+    }
+
+    if (connection.command) {
+      configData += `  RemoteCommand ${connection.command}\n`;
     }
 
     configData += "\n";

@@ -286,7 +286,7 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
                 title={"Delete Issue Branch"}
                 style={Action.Style.Destructive}
                 icon={{ source: "branch.svg", tintColor: Color.Red }}
-                onAction={() => deleteLinkedBranch((linkedBranch as any)?.id || "", linkedBranch.ref?.name ?? "")}
+                onAction={() => deleteLinkedBranch(linkedBranch?.id || "", linkedBranch.ref?.name ?? "")}
               />
             ) : null}
           </>

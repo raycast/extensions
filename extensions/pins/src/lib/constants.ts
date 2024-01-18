@@ -45,6 +45,11 @@ export enum StorageKey {
   RECENT_APPS = "recentApplications",
 
   /**
+   * The current group to add new pins to by default.
+   */
+  TARGET_GROUP = "targetGroup",
+
+  /**
    * Whether or not the user has installed the example pins.
    */
   EXAMPLE_PINS_INSTALLED = "examplePinsInstalled",
@@ -87,6 +92,8 @@ export const KEYBOARD_SHORTCUT: { [key: string]: Keyboard.Shortcut } = {
   PIN_SELECTED_FILES: { modifiers: ["cmd", "shift"], key: "f" },
   PIN_CURRENT_DOCUMENT: { modifiers: ["cmd", "shift"], key: "e" },
   PIN_SELECTED_NOTES: { modifiers: ["cmd", "shift"], key: "n" },
+  PIN_CURRENT_TRACK: { modifiers: ["cmd", "opt"], key: "t" },
+  PIN_CURRENT_PLAYLIST: { modifiers: ["cmd", "opt"], key: "p" },
 
   CREATE_NEW_PIN: { modifiers: ["cmd"], key: "n" },
   COPY_PINS_JSON: { modifiers: ["cmd"], key: "j" },

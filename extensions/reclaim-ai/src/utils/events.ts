@@ -1,4 +1,5 @@
 import { ApiResponseEvents } from "../hooks/useEvent.types";
+import { decodeBase32 } from "./base32";
 
 export const eventColors = {
   NONE: "#AAA",
@@ -23,3 +24,56 @@ export const truncateEventSize = (eventTitle: string) => {
   }
   return eventTitle;
 };
+/**
+ * Function that returns the original events id if the event is a synced event otherwise returns null.
+ * @param {ApiResponseEvents[number]} event - The event object.
+ * @returns {string|null} The sync ID if found, null otherwise.
+ */
+export const getOriginalEventIDFromSyncEvent = (event: ApiResponseEvents[number]) => {
+  try {
+    const [type, ...rest] = decodeBase32(event.recurringEventId ?? event.eventId)
+      .replace("\x00", "")
+      .split(":");
+
+    if (type === "reclaim-personal-sync") {
+      const [id] = rest;
+      return id;
+    }
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * Filter out events that are synced, managed by Reclaim and part of multiple calendars
+ * @param events
+ * @returns
+ */
+export function filterMultipleOutDuplicateEvents(events: undefined): undefined;
+export function filterMultipleOutDuplicateEvents<Events extends ApiResponseEvents>(events: Events): Events;
+export function filterMultipleOutDuplicateEvents<Events extends ApiResponseEvents>(
+  events: Events | undefined
+): Events | undefined;
+export function filterMultipleOutDuplicateEvents<Events extends ApiResponseEvents>(
+  events: Events | undefined
+): Events | undefined {
+  if (!events) return events;
+
+  const ids = new Set(events.map((event) => event.recurringEventId ?? event.eventId));
+
+  return events.filter((event) => {
+    try {
+      const [type, ...rest] = decodeBase32(event.recurringEventId ?? event.eventId)
+        .replace("\x00", "")
+        .split(":");
+
+      if (type === "reclaim-personal-sync") {
+        const [id] = rest;
+        return id ? !ids.has(id) : true;
+      }
+      return true;
+    } catch (error) {
+      return true;
+    }
+  }) as Events;
+}

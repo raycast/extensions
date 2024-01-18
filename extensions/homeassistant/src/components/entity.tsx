@@ -3,12 +3,13 @@ import React from "react";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { EntityAttributesList } from "./attributes";
+import { HAOpenUrlInAction } from "./actions";
 
 export function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
-  const historyUrl = ha.urlJoin(`history?entity_id=${props.state.entity_id}`);
+  const historyUrl = ha.navigateUrl(`history?entity_id=${props.state.entity_id}`);
   return (
-    <Action.OpenInBrowser
-      title="Open History in Browser"
+    <HAOpenUrlInAction
+      action="Open History In"
       icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
       url={historyUrl}
       shortcut={{ modifiers: ["cmd"], key: "h" }}
@@ -17,10 +18,10 @@ export function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
 }
 
 export function OpenEntityLogbookAction(props: { state: State }): JSX.Element {
-  const historyUrl = ha.urlJoin(`logbook?entity_id=${props.state.entity_id}`);
+  const historyUrl = ha.navigateUrl(`logbook?entity_id=${props.state.entity_id}`);
   return (
-    <Action.OpenInBrowser
-      title="Open Logbook in Browser"
+    <HAOpenUrlInAction
+      action="Open Logbook In"
       icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
       url={historyUrl}
       shortcut={{ modifiers: ["cmd", "opt"], key: "l" }}

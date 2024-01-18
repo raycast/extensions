@@ -5,6 +5,9 @@
     "description": "Use Tesseract or Google Cloud Vision OCR to extract text from screenshot",
     "icon": "command-icon.png",
     "author": "Rafo94",
+    "contributors": [
+        "quiknull"
+    ],
     "categories": [
         "Productivity"
     ],
@@ -27,6 +30,15 @@
             "description": "Absolute path to your tesseract binary - check documentation if default path is not correct - required only if using tesseract",
             "placeholder": "Tesseract binary path",
             "default": "/opt/homebrew/bin/tesseract"
+        },
+        {
+            "name": "tesseract_lang",
+            "type": "textfield",
+            "required": false,
+            "title": "Tesseract language",
+            "description": "Language which will be used for OCR - required only if using tesseract. Check tesseract --list-langs for available languages.",
+            "placeholder": "Tesseract language",
+            "default": "eng"
         },
         {
             "name": "newLine",

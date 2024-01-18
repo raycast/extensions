@@ -39,8 +39,18 @@ const useStandings = () => {
 
     const easternStandings = getConferenceStandings(easternConference);
     const westernStandings = getConferenceStandings(westernConference);
+    const leagueStandings = getConferenceStandings({
+      name: "League",
+      abbreviation: "L",
+      standings: {
+        name: "League Standings",
+        entries: [...easternConference.standings.entries, ...westernConference.standings.entries],
+      },
+    }).sort((a: Team, b: Team) => {
+      return a?.wins !== b?.wins ? (b?.wins || 0) - (a?.wins || 0) : (a?.losses || 0) - (b?.losses || 0);
+    });
 
-    return { easternStandings, westernStandings };
+    return { easternStandings, westernStandings, leagueStandings };
   }, []);
 
   return useCachedPromise(fetchTeamStandings);

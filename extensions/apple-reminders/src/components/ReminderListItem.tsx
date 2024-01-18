@@ -2,7 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
-import { getPriorityIcon, isOverdue } from "../helpers";
+import { getLocationDescription, getPriorityIcon, isFullDay, isOverdue } from "../helpers";
 import { Reminder, List as TList } from "../hooks/useData";
 import { ViewProps } from "../hooks/useViewReminders";
 
@@ -51,10 +51,24 @@ export default function ReminderListItem({
     accessories.push({
       icon: { source: Icon.Calendar, tintColor: !reminder.isCompleted && overdue ? Color.Red : undefined },
       date: { value: dueDate, color: !reminder.isCompleted && overdue ? Color.Red : undefined },
-      tooltip: `Due date: ${format(dueDate, "EEEE dd MMMM yyyy 'at' HH:mm")}`,
+      tooltip: `Due date: ${
+        isFullDay(reminder.dueDate)
+          ? format(dueDate, "EEEE dd MMMM yyyy")
+          : format(dueDate, "EEEE dd MMMM yyyy 'at' HH:mm")
+      }`,
     });
 
     keywords.push(format(dueDate, "dd"), format(dueDate, "MMMM"));
+  }
+
+  if (reminder.location) {
+    accessories.push({
+      icon: Icon.Pin,
+      text: reminder.location.address,
+      tooltip: getLocationDescription(reminder.location),
+    });
+
+    keywords.push(reminder.location.address);
   }
 
   if (reminder.priority) {

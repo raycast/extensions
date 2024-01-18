@@ -1,7 +1,8 @@
-import { ResultView } from "./api/main";
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const systemPrompt =
+  const c = "professional";
+  const p =
     "Act as a writer. Make the following text more professional while keeping the core idea.\n\nOutput only with the modified text.\n";
-  return ResultView("professional", systemPrompt);
+  return <AnswerView command={c} prompt={p} />;
 }

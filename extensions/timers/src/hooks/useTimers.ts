@@ -1,4 +1,3 @@
-import { environment } from "@raycast/api";
 import { useState } from "react";
 import {
   checkForOverlyLoudAlert,
@@ -11,6 +10,7 @@ import {
   stopTimer,
 } from "../timerUtils";
 import { CustomTimer, Timer } from "../types";
+import { Alert, Icon, confirmAlert } from "@raycast/api";
 
 export default function useTimers() {
   const [timers, setTimers] = useState<Timer[] | undefined>(undefined);
@@ -34,7 +34,7 @@ export default function useTimers() {
 
   const handleStopTimer = (timer: Timer) => {
     setTimers(timers?.filter((t: Timer) => t.originalFile !== timer.originalFile));
-    stopTimer(`${environment.supportPath}/${timer.originalFile}`);
+    stopTimer(timer.originalFile);
     refreshTimers();
   };
 
@@ -55,9 +55,18 @@ export default function useTimers() {
     refreshTimers();
   };
 
-  const handleDeleteCT = (ctID: string) => {
-    deleteCustomTimer(ctID);
-    refreshTimers();
+  const handleDeleteCT = async (ctID: string) => {
+    const options: Alert.Options = {
+      title: "Delete this preset?",
+      icon: Icon.Trash,
+      message: "You won't be able to recover it.",
+      dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    };
+    if (await confirmAlert(options)) {
+      deleteCustomTimer(ctID);
+      refreshTimers();
+    }
   };
 
   return {

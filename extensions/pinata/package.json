@@ -2,10 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pinata",
   "title": "Pinata",
-  "description": "An extension to interact with the Pianta API and Submarine API",
+  "description": "An extension to interact with the Pianta API",
   "icon": "pinnie.png",
-  "author": "stevedsimkins",
-  "owner":"pinata",
+  "author": "stevedylandev",
+  "owner": "pinata",
   "access": "public",
   "categories": [
     "Web",
@@ -19,13 +19,6 @@
       "type": "password",
       "required": true,
       "title": "Pinata API JWT"
-    },
-    {
-      "name": "SUBMARINE_KEY",
-      "description": "Your Submarining API key which can be created at https://app.pinata.cloud/developers/v2-api-keys",
-      "type": "password",
-      "required": true,
-      "title": "Submarine API Key"
     },
     {
       "name": "GATEWAY",
@@ -57,21 +50,16 @@
       "subtitle": "Pinata",
       "description": "Retrieve the latest 100 files from your Pinata account",
       "mode": "view"
-    },
-    {
-      "name": "listSubmarineFiles",
-      "title": "List Submarined Files",
-      "subtitle": "Pinata",
-      "description": "Retrieve the latest 100 Submarined files from your Pinata account",
-      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.45.2",
     "@raycast/utils": "^1.4.16",
+    "@types/node-fetch": "^2.6.9",
     "axios": "^1.2.1",
     "base-path-converter": "^1.0.2",
     "form-data": "^4.0.0",
+    "formidable": "^3.5.1",
     "fs": "^0.0.1-security",
     "got": "^12.5.3",
     "react": "^18.2.0",

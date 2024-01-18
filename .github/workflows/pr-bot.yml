@@ -11,14 +11,11 @@ jobs:
     name: "PR Bot"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Get changed files
-        id: changed-files
-        uses: Ana06/get-changed-files@v2.2.0
+      - name: Get changed extensions
+        id: get_changed_extensions
+        uses: raycast/github-actions/get-changed-extensions@v1.15.0
         with:
-          format: "json"
+          github_event_name: ${{ github.event_name }}
 
       - uses: oven-sh/setup-bun@v1
         with:
@@ -34,7 +31,7 @@ jobs:
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           SCRIPT: "scripts/bots/pr-bot.ts"
-          CHANGED_FILES: ${{ steps.changed-files.outputs.all }}
+          CHANGED_EXTENSIONS: ${{ steps.get_changed_extensions.outputs.paths }}
 
       - name: Notify Failure to Slack
         if: failure()
