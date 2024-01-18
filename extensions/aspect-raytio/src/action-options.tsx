@@ -9,6 +9,7 @@ export default function ActionOptions(props: {
   basedDimension: BasedDimensions;
   orientation: Orientations;
   handleOrientationChange: () => void;
+  handleDeleteItem?: (id: string) => void;
   handleDeleteAll?: () => void;
 }) {
   const {
@@ -19,6 +20,7 @@ export default function ActionOptions(props: {
     basedDimension,
     orientation,
     handleOrientationChange,
+    handleDeleteItem,
     handleDeleteAll,
   } = props;
 
@@ -57,6 +59,18 @@ export default function ActionOptions(props: {
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Danger Zone">
+        {id && (
+          <Action
+            icon={{ source: Icon.Trash, tintColor: Color.Red }}
+            title={`Delete ${orientation === Orientations.LANDSCAPE ? `${ratio.width}:${ratio.height}` : `${ratio.height}:${ratio.width}`}`}
+            onAction={async () => {
+              if (handleDeleteItem) {
+                handleDeleteItem(id);
+              }
+              await LocalStorage.removeItem(id);
+            }}
+          />
+        )}
         <Action
           icon={{ source: Icon.Important, tintColor: Color.Red }}
           title="Delete All Custom Raytios"
