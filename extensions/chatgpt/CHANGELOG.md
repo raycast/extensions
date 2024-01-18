@@ -4,6 +4,7 @@
 
 - Fix: Conversation data not right when the Ask component unmount
 - Fix: Socket proxy not working
+- Fix: fix fetch model data lag caused incorrect option
 
 ## [Chore] - 2024-01-11
 
