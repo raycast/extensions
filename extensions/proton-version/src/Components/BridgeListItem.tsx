@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { PRODUCT_ICON, PRODUCT_TITLE } from "../constatnsBridge";
+import { PRODUCT_ICON, PRODUCT_TITLE } from "../constantsBridge";
 import { BridgeSupportedOS, BridgeVersion } from "../interface";
 import Actions from "./BridgeActionItems";
 
