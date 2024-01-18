@@ -1,5 +1,9 @@
 # Changelog
 
+## [Feat] - 2024-01-18
+
+-- Feature: Add support for custom model name
+
 ## [Chore] - 2024-01-11
 
 - Migrate openai v3 to v4
