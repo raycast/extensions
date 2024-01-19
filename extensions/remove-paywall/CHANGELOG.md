@@ -1,5 +1,9 @@
 # Remove Paywall Changelog
 
+## [Reintroduce URL argument] - 2024-01-19
+
+- Added back the URL argument to the "Remove Paywall" command
+
 ## [Service option in standard command] - 2023-12-14
 
 - Removed the "Remove Paywall Using" command
