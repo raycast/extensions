@@ -1,6 +1,6 @@
 # Wi-Fi Changelog
 
-## [Optimize UI display] - {PR_MERGE_DATE}
+## [Optimize UI display] - 2024-01-19
 
 - When the Toggle Wi-Fi command is run, the menu bar icons are immediately updated
 
