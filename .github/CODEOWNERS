@@ -123,7 +123,7 @@
 /extensions/cache-control-builder                    @rkusa
 /extensions/cacher                                   @jookyboi
 /extensions/cal-com-share-meeting-links              @eluce2 @peduarte @pernielsentikaer @AlexIsMaking
-/extensions/calendar                                 @fuksman
+/extensions/calendar                                 @fuksman @pernielsentikaer
 /extensions/calendly                                 @eluce2
 /extensions/can-i-use                                @thomaslombart @kidonng
 /extensions/canvascast                               @YodaLightsabr @yug2005
@@ -765,7 +765,7 @@
 /extensions/numpad                                   @paulovictor237
 /extensions/obs-clippings                            @trevware
 /extensions/obs-control                              @Yukaii
-/extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @KevinBatdorf @pernielsentikaer @ofalvai @KevinBatdorf
+/extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic
 /extensions/obsidian-bookmarks                       @Dru89
 /extensions/obsidian-smart-capture                   @trillhause
 /extensions/odesli                                   @anned20
@@ -865,7 +865,7 @@
 /extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp @susonthapa @mikikiv
 /extensions/popicons                                 @lucaschultz
 /extensions/porkbun                                  @xmok
-/extensions/port-manager                             @lucaschultz
+/extensions/port-manager                             @lucaschultz @Sheraff
 /extensions/portuguese-primeira-liga                 @danielsequeira
 /extensions/posthog                                  @daibhin
 /extensions/postman                                  @tarikyildizci

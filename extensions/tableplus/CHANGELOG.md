@@ -1,5 +1,9 @@
 # TablePlus Changelog
 
+## [Update] - 2024-01-18
+
+- Added the possibility to select either environment or path to show in the Menu Bar
+
 ## [Update] - 2023-08-30
 
 - Refacored the extension
