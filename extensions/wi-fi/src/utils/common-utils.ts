@@ -17,13 +17,13 @@ export const connectWifi = async (ssid: string, password: string, setRefresh: Di
       setRefresh(Date.now());
       const curWifi = await wifi.getCurrentConnections();
       if (curWifi[0].ssid === ssid) {
-        await showHUD(`Connected to ${ssid} successfully`);
+        await showHUD(`🛜 Connected to ${ssid} successfully`);
         await toast.hide();
         await popToRoot();
       } else {
         await showToast(Style.Failure, "Failure to connect");
       }
-    }
+    },
   );
 };
 
@@ -32,7 +32,7 @@ export const getCurWifiStatus = async () => {
     const execEnv = await getCachedEnv();
     const out = execSync(
       `networksetup -listnetworkserviceorder | sed -n '/Wi-Fi/s|.*Device: \\(.*\\)).*|\\1|p'`,
-      execEnv
+      execEnv,
     );
     const device = String(out).trim();
     const out2 = execSync(`networksetup -getairportnetwork ${device}`, execEnv);
@@ -52,21 +52,21 @@ export const toggleWifi = async () => {
     const execEnv = await getCachedEnv();
     const out = execSync(
       `networksetup -listnetworkserviceorder | sed -n '/Wi-Fi/s|.*Device: \\(.*\\)).*|\\1|p'`,
-      execEnv
+      execEnv,
     );
     const device = String(out).trim();
     const out2 = execSync(`networksetup -getairportnetwork ${device}`, execEnv);
     const network = String(out2).trim();
     if (network.includes("off")) {
-      await showHUD("Wi-Fi turned on");
+      await showHUD("🛜 Wi-Fi turned on");
       execSync(`networksetup -setairportpower ${device} on`, execEnv);
     } else {
-      await showHUD("Wi-Fi turned off");
+      await showHUD("🚫 Wi-Fi turned off");
       execSync(`networksetup -setairportpower ${device} off`, execEnv);
     }
   } catch (e) {
     console.error(e);
-    await showHUD(String(e));
+    await showHUD("❌ " + String(e));
   }
 };
 
