@@ -256,9 +256,9 @@
     },
     {
       "name": "writeFreelyEndpoint",
-      "description": "For generating shareable digest link. If you deploy your own writefreely instance, or use a community instance, you can fill in the endpoint of the writefreely instance here, including the https prefix, e.g.: https://writefreely.yourdomain.com",
+      "description": "For generating shareable digest link. If you deploy your own writefreely instance, or use a community instance, you can fill in the endpoint of the writefreely instance here, including the https prefix, e.g.: https://writefreely.yourdomain.com. Default is https://paper.wf.",
       "type": "textfield",
-      "title": "WriteFreely endpoint",
+      "title": "WriteFreely Endpoint",
       "default": "https://paper.wf",
       "required": false
     },
@@ -266,14 +266,14 @@
       "name": "writeFreelyAccount",
       "type": "textfield",
       "description": "Any WriteFreely instance account name",
-      "title": "WriteFreely account",
+      "title": "WriteFreely Account",
       "required": false
     },
     {
       "name": "writeFreelyPassword",
       "type": "password",
       "description": "Any WriteFreely instance account password",
-      "title": "WriteFreely password",
+      "title": "WriteFreely Password",
       "required": false
     },
     {
