@@ -60,10 +60,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     const getHeaders = function () {
       const config = getConfiguration();
       if (!config.useAzure) {
-        return { apiKey: "", params: {} };
+        return { apiKey: {}, params: {} };
       }
       return {
-        apiKey: config.apiKey,
+        apiKey: { "api-key": config.apiKey },
         params: { "api-version": "2023-06-01-preview" },
       };
     };
@@ -78,9 +78,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         },
         {
           httpAgent: proxy,
+          // https://github.com/openai/openai-node/blob/master/examples/azure.ts
           // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
           query: { ...getHeaders().params },
-          headers: { apiKey: getHeaders().apiKey },
+          headers: { ...getHeaders().apiKey },
         }
       )
       .then(async (res) => {
