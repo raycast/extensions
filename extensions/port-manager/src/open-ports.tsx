@@ -21,7 +21,6 @@ export default function Command() {
     <List
       isShowingDetail={isShowingDetail}
       isLoading={isLoadingProcesses}
-      navigationTitle="Kill Port"
       searchBarPlaceholder="Search Open Ports"
     >
       {processes?.map((p) => (
