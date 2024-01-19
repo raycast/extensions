@@ -4,15 +4,14 @@
   "title": "Lucide Icons Search",
   "description": "View the Lucide icon set.",
   "icon": "command-icon.png",
-  "author": "basil",
+  "author": "Sn0wye",
   "categories": [
     "Design Tools",
     "Developer Tools"
   ],
   "license": "MIT",
   "contributors": [
-    "lin",
-    "Sn0wye"
+    "lin"
   ],
   "commands": [
     {
