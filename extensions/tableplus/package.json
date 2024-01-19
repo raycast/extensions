@@ -74,8 +74,8 @@
     {
       "name": "subtitleMenubar",
       "description": "Subtitle Menu Bar",
-      "label": "Subtitle Menu Bar Data",
-      "title": "Subtitle Menu Bar Data",
+      "label": "Subtitle Menu Bar",
+      "title": "Subtitle Menu Bar",
       "type": "dropdown",
       "required": false,
       "default": "path",
@@ -96,9 +96,9 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Show monochrome icon in Menubar",
+      "title": "Show Monochrome Icon in Menu Bar",
       "placeholder": "Show monochrome icon in Menubar",
-      "label": "Show monochrome icon in Menubar"
+      "label": "Show Monochrome Icon in Menu Bar"
     },
     {
       "name": "defaultAction",
