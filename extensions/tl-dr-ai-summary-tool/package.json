@@ -17,8 +17,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "微信文章摘要",
-      "description": "使用 AI 对微信公众文章进行总结",
+      "title": "WeChat Article Summarizer",
+      "description": "Use AI to summarize WeChat public articles.",
       "mode": "view"
     }
   ],

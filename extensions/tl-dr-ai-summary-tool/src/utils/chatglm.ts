@@ -12,12 +12,14 @@ const ignoreSSL = axios.create({
     rejectUnauthorized: environment.isDevelopment ? false : true,
   }),
 });
-const proxy = environment.isDevelopment
-  ? {
-      host: "127.0.0.1",
-      port: 9090,
-    }
-  : undefined;
+// const proxy = environment.isDevelopment
+//   ? {
+//       host: "127.0.0.1",
+//       port: 9090,
+//     }
+//   : undefined;
+
+const proxy = undefined;
 
 export async function chatCompletion(
   messages: Array<{ role: string; content: string }>,
@@ -46,7 +48,7 @@ export async function chatCompletion(
           chunk.split("\n").forEach((line: string) => {
             if (line.startsWith("data:")) {
               let data = line.replace(/^data:/, "");
-              if (data == "") {
+              if (data.trim() == "") {
                 data = "\n";
               }
               output += data;

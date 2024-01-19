@@ -45,11 +45,16 @@ If you don't have a key yet, please go to [https://open.bigmodel.cn/usercenter/a
   const getActionPanel = () => (
     <ActionPanel>
       <Action
-        title={"生成摘要"}
+        title={"Get Summary"}
         icon={Icon.ArrowRight}
-        onAction={async () => {
-          await chat.ask(input.text);
-        }}
+        onAction={
+          input.text
+            ? () => {
+                chat.ask(input.text);
+                setInput({ text: "" });
+              }
+            : undefined
+        }
       />
       <Action title="Configure Extension" onAction={openExtensionPreferences} />
     </ActionPanel>
@@ -69,11 +74,10 @@ If you don't have a key yet, please go to [https://open.bigmodel.cn/usercenter/a
         });
       }}
       throttle={false}
-      navigationTitle={"TL;DR 太长不想读"}
       actions={getActionPanel()}
       selectedItemId={`${sortedMessages.length > 0 ? sortedMessages[0].id : undefined}`}
       onSelectionChange={() => {}}
-      searchBarPlaceholder={chatbox.messages.length > 0 ? "请对文章提问" : "请粘贴文章链接"}
+      searchBarPlaceholder={chatbox.messages.length > 0 ? "Ask a question about the article" : "Please paste the article link"}
     >
       {chatbox.messages.length == 0 ? (
         <List.EmptyView />
@@ -81,12 +85,11 @@ If you don't have a key yet, please go to [https://open.bigmodel.cn/usercenter/a
         <List.Section title="Result" subtitle={`${chatbox.messages.length}`}>
           {sortedMessages.map((msg: Message, i) => {
             return (
-              // <List.Item title="摘要" detail={<List.Item.Detail markdown={`# Hello World \n ${33}`}></List.Item.Detail>}/>
               <List.Item
                 id={`${msg.id}`}
                 key={`${i}`}
                 actions={isLoading ? undefined : getActionPanel()}
-                title={`${msg.question.slice(0, 20)}`}
+                title={`${msg.question}`}
                 detail={<List.Item.Detail markdown={`${msg.answer}`}></List.Item.Detail>}
               />
             );
