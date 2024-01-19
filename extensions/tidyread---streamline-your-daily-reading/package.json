@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tidyread---streamline-your-daily-reading",
   "title": "TidyRead - Streamline Your Daily Reading",
-  "description": "Schedule your daily feeds and use AI summaries for concise, efficient reading.",
+  "description": "Designed to manage and schedule your daily reading which offers a modern reading experience through AI-Powered digest.",
   "icon": "logo.png",
   "author": "jaredliu233",
   "categories": [
