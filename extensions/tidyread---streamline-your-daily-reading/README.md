@@ -1,5 +1,6 @@
 # TidyRead - Streamline Your Daily Reading
 
+## Introduction
 Designed to manage and schedule your daily reading which offers a modern reading experience through AI-Powered digest.
 
 Key Features:
@@ -11,3 +12,6 @@ Key Features:
 For more information, visit [Tidyread](https://tidyread.info).
 
 > If you have any questions or would like to discuss further, feel free to [DM me on x](https://x.com/jaredliu_bravo).
+
+## Other Links
+* [Buy me a coffee](https://www.buymeacoffee.com/jaredliu)
