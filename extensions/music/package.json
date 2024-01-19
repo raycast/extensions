@@ -138,7 +138,6 @@
       "title": "Add to Library",
       "subtitle": "Apple Music",
       "description": "Add currently playing track to your library.",
-      "disabledByDefault": true,
       "mode": "no-view"
     },
     {
