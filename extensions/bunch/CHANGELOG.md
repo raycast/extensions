@@ -1,6 +1,6 @@
 # Bunch Changelog
 
-## [Regular Updates] - {PR_MERGE_DATE}
+## [Regular Updates] - 2024-01-19
 
 - Update Raycast API version to 1.65.1
 - Update shortcut to open Command Preferences
