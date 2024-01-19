@@ -2,7 +2,6 @@ import { Action, ActionPanel, Application, Form, Toast, getApplications, showToa
 import { LocalStorage } from "@raycast/api";
 
 import { useEffect, useState } from "react";
-import { applicationIconFromPath } from "./utils/pathUtils";
 
 const ALLOWED_APPS_BUNDLEID = [
   "net.kovidgoyal.kitty",
@@ -58,12 +57,7 @@ export const SelectTerminalApp = ({ setIsTerminalSetup }: { setIsTerminalSetup?:
       <Form.Description text="When switch to session, it will open the session in the selected terminal app." />
       <Form.Dropdown id="terminalAppBundleId" isLoading={loading}>
         {apps?.map((app, index) => (
-          <Form.Dropdown.Item
-            key={index}
-            value={app.bundleId || ""}
-            title={app.name}
-            icon={applicationIconFromPath(app.path)}
-          />
+          <Form.Dropdown.Item key={index} value={app.bundleId || ""} title={app.name} icon={{ fileIcon: app.path }} />
         ))}
       </Form.Dropdown>
     </Form>
