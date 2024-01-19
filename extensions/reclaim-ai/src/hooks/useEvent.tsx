@@ -93,23 +93,26 @@ const useEvent = () => {
 
   const handleStartHabit = async (id: string, title: string) => {
     try {
+      await showHUD("Started Habit: " + parseEmojiField(title).textWithoutEmoji);
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/start/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
-      await showHUD(title + " Habit started! 👋");
       return habit;
     } catch (error) {
       console.error("Error while starting habit", error);
+      await showHUD("Whoops, something went wrong! Contact support.");
     }
   };
 
   const handleStopHabit = async (id: string, title: string) => {
     try {
+      await showHUD("Completed Habit: " + parseEmojiField(title).textWithoutEmoji);
       const [habit, error] = await axiosPromiseData(fetcher(`/planner/stop/habit/${id}`, { method: "POST" }));
       if (!habit || error) throw error;
-      await showHUD(title + " Habit completed! 👋");
+
       return habit;
     } catch (error) {
       console.error("Error while stopping habit", error);
+      await showHUD("Whoops, something went wrong! Contact support.");
     }
   };
 
