@@ -38,7 +38,7 @@ export default function main() {
           .map((day) => {
             const dayString = day.getMonth() === date.getMonth() ? day.getDate().toString() : " ";
             const todayMarker = day.toDateString() === today ? "**• " : " ";
-            return `${todayMarker}${dayString}${todayMarker !== " " ? " •**" : ""} |`;
+            return `${todayMarker}${dayString}${todayMarker !== " " ? "**" : ""} |`;
           })
           .join("");
 
