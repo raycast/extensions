@@ -1,8 +1,6 @@
 import { LocalStorage, OAuth, popToRoot, showToast, Toast } from "@raycast/api";
-import { createPlanetScaleClient } from "../api";
 
 const clientId = "pscale_app_f0abb01c616a75cbaf2655be98e08e0a";
-const applicationId = "or9t9ym9hocx";
 
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -23,10 +21,9 @@ export async function authorize() {
   }
 
   const authRequest = await oauthClient.authorizationRequest({
-    endpoint: "https://app.planetscale.com/oauth/authorize",
+    endpoint: "https://planetscale.oauth.raycast.com/authorize",
     clientId,
-    scope:
-      "read_user read_organizations read_organization read_databases read_members read_branches write_branches delete_branches write_deploy_requests read_deploy_requests deploy_deploy_requests approve_deploy_requests write_comments read_comments",
+    scope: "",
   });
 
   const { authorizationCode } = await oauthClient.authorize(authRequest);
@@ -39,6 +36,30 @@ export async function authorize() {
   };
 }
 
+export async function fetchTokens(
+  authRequest: OAuth.AuthorizationRequest,
+  authCode: string,
+): Promise<OAuth.TokenResponse> {
+  const response = await fetch("https://planetscale.oauth.raycast.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: clientId,
+      code: authCode,
+      code_verifier: authRequest.codeVerifier,
+      grant_type: "authorization_code",
+      redirect_uri: authRequest.redirectURI,
+    }),
+  });
+
+  const tokens = await response.json();
+
+  // Store service token accesses to know which organizations and resources the user has access to
+  // await storeServiceTokenAccesses(tokens.service_token_accesses);
+
+  return tokens as OAuth.TokenResponse;
+}
+
 export async function logout() {
   await oauthClient.removeTokens();
   await LocalStorage.removeItem("service-token-accesses");
@@ -48,42 +69,6 @@ export async function logout() {
     style: Toast.Style.Failure,
   });
   await popToRoot();
-}
-
-export async function fetchTokens(
-  authRequest: OAuth.AuthorizationRequest,
-  authCode: string,
-): Promise<OAuth.TokenResponse> {
-  const serviceTokenId = "";
-  const serviceToken = "";
-  const clientSecret = "";
-
-  const pscale = createPlanetScaleClient(`${serviceTokenId}:${serviceToken}`);
-
-  const tokens = await oauthClient.getTokens();
-
-  const response = (await pscale.createOrRenewAnOauthToken(
-    {
-      client_id: clientId,
-      client_secret: clientSecret,
-      grant_type: "authorization_code",
-      code: authCode,
-      redirect_uri: authRequest.redirectURI,
-      refresh_token: tokens?.refreshToken,
-    },
-    {
-      organization: "raycast",
-      id: applicationId,
-    },
-  )) as unknown as CreateOrRenewAnOauthTokenResponse;
-
-  await storeServiceTokenAccesses(response.data.service_token_accesses);
-
-  return {
-    id_token: response.data.id,
-    access_token: response.data.token!,
-    refresh_token: response.data.plain_text_refresh_token,
-  };
 }
 
 interface CreateOrRenewAnOauthTokenResponse {
