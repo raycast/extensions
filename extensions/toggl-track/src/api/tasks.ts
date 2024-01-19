@@ -1,7 +1,9 @@
 import { get } from "./togglClient";
+import { Page } from "./types";
 
-export function getTasks(workspaceId: number) {
-  return get<Task[]>(`/workspaces/${workspaceId}/tasks`);
+export async function getTasks(workspaceId: number) {
+  const tasks = await get<Page<Task[]>>(`/workspaces/${workspaceId}/tasks`);
+  return tasks.data;
 }
 
 // https://developers.track.toggl.com/docs/api/tasks/index.html#response
