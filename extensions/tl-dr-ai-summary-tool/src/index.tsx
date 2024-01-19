@@ -77,7 +77,9 @@ If you don't have a key yet, please go to [https://open.bigmodel.cn/usercenter/a
       actions={getActionPanel()}
       selectedItemId={`${sortedMessages.length > 0 ? sortedMessages[0].id : undefined}`}
       onSelectionChange={() => {}}
-      searchBarPlaceholder={chatbox.messages.length > 0 ? "Ask a question about the article" : "Please paste the article link"}
+      searchBarPlaceholder={
+        chatbox.messages.length > 0 ? "Ask a question about the article" : "Please paste the article link"
+      }
     >
       {chatbox.messages.length == 0 ? (
         <List.EmptyView />

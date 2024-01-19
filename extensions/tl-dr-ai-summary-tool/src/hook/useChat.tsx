@@ -13,7 +13,13 @@ export function useChat(saved: ChatBox): ChatHook {
   async function ask(question: string) {
     clearSearchBar();
     setLoading(true);
-    const msg: Message = { id: messages.length + 1, question, answer: "Loading ...", timestamp: Date.now(), prompt: [] };
+    const msg: Message = {
+      id: messages.length + 1,
+      question,
+      answer: "Loading ...",
+      timestamp: Date.now(),
+      prompt: [],
+    };
     const history = [...messages, msg];
     setMessages(history);
     let content = { title: question, content: question };
@@ -22,7 +28,11 @@ export function useChat(saved: ChatBox): ChatHook {
       content = await fetchContent(question);
       msg.prompt = [
         // { role: "user", content: "请阅读文字内容，并找到摘要。输出格式为：\n标题: {title}\n\n 摘要: {content}\n" },
-        { role: "user", content: "Please read the text content and find the summary. The output format is:\nTitle:{title}\n\n Summary:{content}\n" },
+        {
+          role: "user",
+          content:
+            "Please read the text content and find the summary. The output format is:\nTitle:{title}\n\n Summary:{content}\n",
+        },
         { role: "assistant", content: "OK, I will summarize your text in English" },
         { role: "user", content: content.content },
       ];
@@ -39,10 +49,9 @@ export function useChat(saved: ChatBox): ChatHook {
     }
 
     if (FEATURE_STREAM) {
-        const streamListener = (data: string, isFinish: boolean) => {
+      const streamListener = (data: string, isFinish: boolean) => {
         if (data.indexOf("标题") == 0 || data.indexOf("Title:")) {
-          msg.question = data.split("\n")[0].replace("标题:", "")
-            .replace("标题：", "").replace("Title:", "");
+          msg.question = data.split("\n")[0].replace("标题:", "").replace("标题：", "").replace("Title:", "");
         }
         msg.answer = data;
         setMessages([...history]);
@@ -55,9 +64,8 @@ export function useChat(saved: ChatBox): ChatHook {
       await chatCompletion(msg.prompt, { useStream: true, streamListener: streamListener });
     } else {
       const detail = await chatCompletion(msg.prompt);
-      if (detail.trim().indexOf("标题") == 0 || detail.indexOf("Title:") == 0){
-        msg.question = detail.trim().split("\n")[0].replace("标题:", "")
-          .replace("标题：", "").replace("Title:", "");
+      if (detail.trim().indexOf("标题") == 0 || detail.indexOf("Title:") == 0) {
+        msg.question = detail.trim().split("\n")[0].replace("标题:", "").replace("标题：", "").replace("Title:", "");
       }
       msg.prompt.push({ role: "assistant", content: detail });
       msg.answer = detail;
