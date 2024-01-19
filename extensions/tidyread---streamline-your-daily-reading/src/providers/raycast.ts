@@ -36,6 +36,8 @@ class RaycastProvider extends Provider {
         200000,
       );
 
+      console.log("raycast ai resp", resp);
+
       return resp;
     } catch (error) {
       console.error("Error summarizing content with Raycast AI:", error);

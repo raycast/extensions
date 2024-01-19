@@ -11,17 +11,18 @@
     "Applications"
   ],
   "keywords": [
-    "reading",
     "news",
     "read",
     "digest",
+    "summary",
     "rss",
     "RSS",
     "AI",
     "feed",
     "moonshot",
     "openai",
-    "schedule"
+    "schedule",
+    "morning coffee"
   ],
   "license": "MIT",
   "scripts": {
@@ -114,6 +115,10 @@
           "title": "OpenAI"
         },
         {
+          "value": "raycast",
+          "title": "Raycast AI"
+        },
+        {
           "value": "moonshot",
           "title": "Moonshot AI"
         }
@@ -185,6 +190,18 @@
         {
           "value": "gpt-4-32k-0613",
           "title": "gpt-4-32k-0613"
+        },
+        {
+          "value": "gpt-3.5-turbo-instruct",
+          "title": "raycast gpt-3.5-turbo-instruct"
+        },
+        {
+          "value": "gpt-3.5-turbo",
+          "title": "raycast gpt-3.5-turbo"
+        },
+        {
+          "value": "gpt-4",
+          "title": "raycast gpt-4"
         },
         {
           "value": "moonshot-v1-8k",
