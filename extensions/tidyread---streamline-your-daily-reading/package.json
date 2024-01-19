@@ -36,34 +36,35 @@
     {
       "name": "manage-source-list.command",
       "title": "Manage Source List",
-      "subtitle": "manage your read sources",
+      "subtitle": "TidyRead",
       "description": "Manage your read sources, including adding, editing, deleting, and scheduling.",
       "mode": "view"
     },
     {
       "name": "daily-read.command",
       "title": "Daily Read",
-      "subtitle": "show your daily reading list and digest",
+      "subtitle": "TidyRead",
       "description": "Show your daily reading list and digest.",
       "mode": "view"
     },
     {
       "name": "add-source.command",
       "title": "Add Source",
-      "subtitle": "create and schedule your read source",
+      "subtitle": "TidyRead",
       "description": "Create and schedule your read source.",
       "mode": "view"
     },
     {
       "name": "digest-list.command",
       "title": "Digest List",
-      "subtitle": "manage your digest list",
+      "subtitle": "TidyRead",
       "description": "Manage your digest list.",
       "mode": "view"
     },
     {
       "name": "auto-digest.command",
       "title": "Auto Digest",
+      "subtitle": "TidyRead",
       "description": "Enable the auto digest feature to receive daily digest notifications at the `notificationTime` specified in the extension preferences panel.",
       "mode": "no-view",
       "interval": "5m"
