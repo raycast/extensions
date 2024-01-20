@@ -1,30 +1,56 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mullvad",
-  "title": "Mullvad VPN Checker",
-  "description": "Fastest way to check if you are connected to Mullvad VPN",
+  "title": "Mullvad VPN",
+  "description": "Fastest way to connect, disconnect, and check if you are connected to Mullvad VPN.",
   "icon": "mullvad-icon.png",
   "author": "0x46616c6b",
+  "contributors": [
+    "sebastiankranz"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "mullvad",
-      "title": "Check Mullvad Connection",
+      "title": "Check Connection",
+      "subtitle": "Mullvad",
       "description": "Check whether you are connected to Mullvad VPN",
       "mode": "view"
+    },
+    {
+      "name": "selectLocation",
+      "title": "Select Mullvad Location",
+      "subtitle": "Mullvad",
+      "description": "Sets the destination Mullvad server.",
+      "mode": "view"
+    },
+    {
+      "name": "connect",
+      "title": "Connect",
+      "subtitle": "Mullvad",
+      "description": "Activates the VPN connection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "Mullvad",
+      "description": "Deactivates the VPN connection.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.51.3",
-    "@raycast/utils": "1.6.1"
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "20.2.1",
-    "@types/react": "18.2.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "8.40.0",
     "prettier": "2.5.1",
-    "typescript": "5.0.4"
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
