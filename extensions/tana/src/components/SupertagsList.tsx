@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { CreateSupertagAction } from "./SupertagCreateForm";
 import { EditSupertagAction } from "./SupertagEditForm";
-import { deleteTargetNode, useTanaLocal } from "../state";
+import { deleteSupertag, useTanaLocal } from "../state";
 
 export function SupertagsList() {
   const { supertags } = useTanaLocal();
@@ -28,9 +28,9 @@ export function SupertagsList() {
               <Action
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                title="Delete target node"
+                title="Delete supertag"
                 onAction={() => {
-                  deleteTargetNode(node.id);
+                  deleteSupertag(node.id);
                 }}
               />
             </ActionPanel>
