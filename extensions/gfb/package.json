@@ -20,16 +20,89 @@
   ],
   "preferences": [
     {
-      "name": "leagueTeamPairs",
-      "required": false,
       "type": "textfield",
-      "title": "League and Team ID Pairs",
-      "description": "Enter league and team ID pairs separated by a comma. Format: leagueID1:teamID1, leagueID2:teamID2. E.g., '9134:189397, 9907:401657'. You can find the IDs in the URL paths at the FotMob site: https://www.fotmob.com/."
+      "title": "League 1 ID",
+      "description": "League 1 ID",
+      "placeholder": "FotMob League ID",
+      "name": "league1",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "title": "Team 1 ID",
+      "description": "Team 1 ID",
+      "placeholder": "FotMob Team ID",
+      "name": "team1",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "title": "League 2 ID",
+      "description": "League 2 ID",
+      "placeholder": "FotMob League ID",
+      "name": "league2",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "Team 2 ID",
+      "description": "Team 2 ID",
+      "placeholder": "FotMob Team ID",
+      "name": "team2",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "League 3 ID",
+      "description": "League 3 ID",
+      "placeholder": "FotMob League ID",
+      "name": "league3",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "Team 3 ID",
+      "description": "Team 2 ID",
+      "placeholder": "FotMob Team ID",
+      "name": "team3",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "League 4 ID",
+      "description": "League 4 ID",
+      "placeholder": "FotMob League ID",
+      "name": "league4",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "Team 4 ID",
+      "description": "Team 4 ID",
+      "placeholder": "FotMob Team ID",
+      "name": "team4",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "League 5 ID",
+      "description": "League 5 ID",
+      "placeholder": "FotMob League ID",
+      "name": "league5",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "Team 5 ID",
+      "description": "Team 5 ID",
+      "placeholder": "FotMob Team ID",
+      "name": "team5",
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.64.5",
-    "fotmob": "^2.0.0"
+    "fotmob": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
