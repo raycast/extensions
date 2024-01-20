@@ -1,5 +1,5 @@
-import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import axios, { Axios, AxiosInstance } from "axios";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import axios from "axios";
 
 export const getApiClient = () => {
   const preferences = getPreferenceValues<Preferences>();

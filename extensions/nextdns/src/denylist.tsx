@@ -104,7 +104,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Add domain to allowlist"
+                title="Add Domain to Allowlist"
                 icon={Icon.PlusCircle}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 onAction={() => {
@@ -129,19 +129,19 @@ export default function Command() {
                 <ActionPanel.Section>
                   {active && (
                     <Action
-                      title="Deactivate domain"
+                      title="Deactivate Domain"
                       icon={Icon.XMarkCircle}
                       onAction={() => handleSwitch(id, false)}
                     />
                   )}
                   {!active && (
-                    <Action title="Activate domain" icon={Icon.CheckCircle} onAction={() => handleSwitch(id, true)} />
+                    <Action title="Activate Domain" icon={Icon.CheckCircle} onAction={() => handleSwitch(id, true)} />
                   )}
-                  <Action title="Remove domain" icon={Icon.Trash} onAction={() => handleRemove(id)} />
+                  <Action title="Remove Domain" icon={Icon.Trash} onAction={() => handleRemove(id)} />
                 </ActionPanel.Section>
 
                 <Action
-                  title="Add domain to denylist"
+                  title="Add Domain to Denylist"
                   icon={Icon.PlusCircle}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={() => {
