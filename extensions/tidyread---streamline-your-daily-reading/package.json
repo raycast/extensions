@@ -109,7 +109,7 @@
       "required": false,
       "title": "AI Provider",
       "default": "openai",
-      "description": "Choice Summarize API Provider",
+      "description": "Choose API provider for summarizing",
       "data": [
         {
           "value": "openai",
