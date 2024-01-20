@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigation, getPreferenceValues, Icon, List, ActionPanel, Action, Color, Form } from "@raycast/api";
+import fetch from "node-fetch";
 
-const fetch = require('node-fetch');
+interface TaskResponse {
+  [key: string]: Task;
+}
 
 type Task = {
   task_id: number | string;
@@ -12,6 +15,12 @@ type Task = {
   display_name?: string;
   color?: string;
   timer_info?: TimerInfo;
+  breadcrumb: Crumb[];
+};
+
+type Crumb = {
+  task_id: number | string;
+  name: string;
 };
 
 type TimerInfo = {
@@ -24,16 +33,31 @@ type TimerInfo = {
   name: string;
   note: string;
   browser_plugin_button_hash?: string;
-}
+};
+
+type TimerStart = {
+  new_timer_id: number | string;
+  entry_id: number | string;
+  name: string;
+  note: string | null;
+  stopped_timer?: string | number;
+  elapsed?: string | number;
+};
+
+type TimerStop = {
+  elapsed: number | string;
+  entry_id: number | string;
+  entry_time: number | string;
+};
 
 type TimerEntryNoteFormProps = {
   activeTask: Task;
   setActiveTask: (task: Task | null) => void;
-}
+};
 
 type FormData = {
   note: string;
-}
+};
 
 interface Preferences {
   timecamp_api_token: string;
@@ -45,46 +69,58 @@ const token = preferences.timecamp_api_token;
 function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormProps) {
   const { pop } = useNavigation();
   const updateNote = async (entryId: number | string, noteString: string, close: boolean) => {
-    const url = 'https://app.timecamp.com/third_party/api/entries';
+    const url = "https://app.timecamp.com/third_party/api/entries";
     const options = {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: `{"id":${entryId},"note":"${noteString}"}`
+      body: `{"id":${entryId},"note":"${noteString}"}`,
     };
 
     try {
+      type Data = {
+        note: string;
+        entry_id: number | string;
+        user_id: number | string;
+        date: string;
+        task_id: number | string;
+        start_time_hour: string;
+        end_time_hour: string;
+      };
       const response = await fetch(url, options);
-      const data = await response.json();
-      console.log('Changed Note: ',data)
+      const data = (await response.json()) as Data;
       if (data && data.note == noteString && close) {
-        const tempTask = activeTask
-        tempTask.timer_info = data;
-        setActiveTask(tempTask)
-        pop()
+        const tempTask = activeTask;
+        if (tempTask.timer_info) {
+          tempTask.timer_info.note = data.note;
+        }
+        setActiveTask(tempTask);
+        pop();
       }
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   return (
     <Form
       navigationTitle="Edit Entry"
       actions={
         <ActionPanel>
-          <Action.SubmitForm 
-            title="Save Edits" 
-            onSubmit={(values: FormData) => updateNote(activeTask.timer_info ? activeTask.timer_info.entry_id : "",values.note,true)} 
+          <Action.SubmitForm
+            title="Save Edits"
+            onSubmit={(values: FormData) =>
+              updateNote(activeTask.timer_info ? activeTask.timer_info.entry_id : "", values.note, true)
+            }
           />
         </ActionPanel>
       }
     >
-      <Form.TextField 
-        id="note" 
+      <Form.TextField
+        id="note"
         title="Note"
         placeholder="Enter task note"
         autoFocus={true}
@@ -97,9 +133,9 @@ function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormPro
 type ActiveTaskItemProps = {
   activeTask: Task;
   setActiveTask: (task: Task | null) => void;
-}
+};
 const ActiveTaskItem = ({ activeTask, setActiveTask }: ActiveTaskItemProps) => {
-  const [timer, setTimer] = useState<string>('00:00:00');
+  const [timer, setTimer] = useState<string>("00:00:00");
 
   useEffect(() => {
     const startTimeDate = new Date(activeTask.timer_info ? activeTask.timer_info.start_time : "");
@@ -113,10 +149,10 @@ const ActiveTaskItem = ({ activeTask, setActiveTask }: ActiveTaskItemProps) => {
       const hours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
 
       const formattedTime = [
-        hours.toString().padStart(2, '0'),
-        minutes.toString().padStart(2, '0'),
-        seconds.toString().padStart(2, '0'),
-      ].join(':');
+        hours.toString().padStart(2, "0"),
+        minutes.toString().padStart(2, "0"),
+        seconds.toString().padStart(2, "0"),
+      ].join(":");
 
       setTimer(formattedTime);
     }, 1000);
@@ -124,23 +160,23 @@ const ActiveTaskItem = ({ activeTask, setActiveTask }: ActiveTaskItemProps) => {
     return () => clearInterval(interval);
   }, [activeTask]);
 
-  async function stopTask (task: Task) {
-    const url = 'https://app.timecamp.com/third_party/api/timer';
+  async function stopTask(task: Task) {
+    const url = "https://app.timecamp.com/third_party/api/timer";
     const options = {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: `{"action":"stop","task_id":"${task.task_id}"}`
+      body: `{"action":"stop","task_id":"${task.task_id}"}`,
     };
 
     try {
       const response = await fetch(url, options);
-      const data = await response.json();
+      const data = (await response.json()) as TimerStop;
       if (data.entry_id) {
-        setActiveTask(null)
+        setActiveTask(null);
       }
     } catch (error) {
       console.error(error);
@@ -148,67 +184,59 @@ const ActiveTaskItem = ({ activeTask, setActiveTask }: ActiveTaskItemProps) => {
   }
 
   return (
-    <List.Item 
+    <List.Item
       key={activeTask.task_id}
       id={activeTask.task_id.toString()}
-      icon={{ source: Icon.Stop, tintColor: activeTask.color }} 
+      icon={{ source: Icon.Stop, tintColor: activeTask.color }}
       title={activeTask.display_name ? activeTask.display_name : activeTask.name}
-      subtitle={activeTask.timer_info ? activeTask.timer_info.note : ''}
+      subtitle={activeTask.timer_info ? activeTask.timer_info.note : ""}
       accessories={[
         {
-          icon: {source: Icon.CommandSymbol, tintColor: Color.Red },
-          tag: {value: " + S", color: Color.Red}
+          icon: { source: Icon.CommandSymbol, tintColor: Color.Red },
+          tag: { value: " + S", color: Color.Red },
         },
         {
-          icon: {source: Icon.Clock, tintColor: Color.Green},
-          text: {value: timer, color: Color.Green}
+          icon: { source: Icon.Clock, tintColor: Color.Green },
+          text: { value: timer, color: Color.Green },
         },
-      ]} 
+      ]}
       actions={
         <ActionPanel title="Active Task">
           <Action.Push
-            title="Edit Entry Note" 
-            target={
-              <TimerEntryNoteForm
-                activeTask={activeTask} 
-                setActiveTask={setActiveTask}
-              />
-            }
+            title="Edit Entry Note"
+            target={<TimerEntryNoteForm activeTask={activeTask} setActiveTask={setActiveTask} />}
           />
-          <Action 
-            title="End Task" 
-            onAction={() => stopTask(activeTask)} 
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-          />
+          <Action title="End Task" onAction={() => stopTask(activeTask)} shortcut={{ modifiers: ["cmd"], key: "s" }} />
         </ActionPanel>
-      }/>
+      }
+    />
   );
 };
 
 export default function Command() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-  const [selectedItemId, setSelectedItemId] = useState<string>('');
+  const [selectedItemId, setSelectedItemId] = useState<string>("");
 
   useEffect(() => {
-    if(tasks.length == 0) {
+    if (tasks.length == 0) {
       const fetchData = async () => {
-        const url = "https://app.timecamp.com/third_party/api/tasks?status=active"
+        const url = "https://app.timecamp.com/third_party/api/tasks?status=active";
         const options = {
-          method: 'GET',
-          headers: {Accept: 'application/json', Authorization: `Bearer ${token}`}
+          method: "GET",
+          headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
         };
 
         try {
           const response = await fetch(url, options);
-          const data = await response.json();
+          const data = (await response.json()) as TaskResponse;
           const filteredData: Task[] = [];
 
           // find the last level of every task and build the heirchy in the task.display_name
-          const processChildTasks = (parentTaskId: number, displayName: string) => {
-            for(const key in data) {
+          const processChildTasks = (parentTaskId: string | number, displayName: string) => {
+            for (const key in data) {
               const task = data[key];
-              if (task.name.includes("ARCHIVED")) continue
+              if (task.name.includes("ARCHIVED")) continue;
 
               if (task.parent_id == parentTaskId) {
                 const newDisplayName = displayName ? `${displayName} / ${task.name}` : task.name;
@@ -220,11 +248,11 @@ export default function Command() {
                 }
               }
             }
-          }
+          };
 
           for (const key in data) {
             const task = data[key];
-            if (task.name.includes("ARCHIVED")) continue
+            if (task.name.includes("ARCHIVED")) continue;
 
             if (task.level == 1) {
               if (task.hasChildren) {
@@ -239,80 +267,76 @@ export default function Command() {
         } catch (error) {
           console.error(error);
         }
-      }
+      };
 
-      fetchData()
-      getActiveTask()
+      fetchData();
+      getActiveTask();
     }
-  },[activeTask])
+  }, [activeTask]);
 
-  async function startTask (task: Task) {
-    const url = 'https://app.timecamp.com/third_party/api/timer';
+  async function startTask(task: Task) {
+    const url = "https://app.timecamp.com/third_party/api/timer";
     const options = {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: `{"action":"start","task_id":"${task.task_id}"}`
+      body: `{"action":"start","task_id":"${task.task_id}"}`,
     };
 
     try {
       const response = await fetch(url, options);
-      const data = await response.json();
+      const data = (await response.json()) as TimerStart;
       if (data.new_timer_id) {
-        getActiveTask()
+        getActiveTask();
       }
     } catch (error) {
       console.error(error);
     }
   }
 
-  async function getTasks (taskId: number | string) {
-    const url = `https://app.timecamp.com/third_party/api/tasks?status=active${taskId ? '&task_id=' + taskId : ''}`
+  async function getTasks(taskId: number | string) {
+    const url = `https://app.timecamp.com/third_party/api/tasks?status=active${taskId ? "&task_id=" + taskId : ""}`;
     const options = {
-      method: 'GET',
-      headers: {Accept: 'application/json', Authorization: `Bearer ${token}`}
+      method: "GET",
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
     };
 
     try {
       const response = await fetch(url, options);
       const data = await response.json();
-      return data
+      return data;
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 
-  async function getActiveTask () {
-    const url = 'https://app.timecamp.com/third_party/api/timer';
+  async function getActiveTask() {
+    const url = "https://app.timecamp.com/third_party/api/timer";
     const options = {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: '{"action":"status"}'
+      body: '{"action":"status"}',
     };
 
     try {
       const response = await fetch(url, options);
-      const data = await response.json();
+      const data = (await response.json()) as TimerInfo;
 
       if (data && data.isTimerRunning) {
-        const taskFetch = await getTasks(data.task_id);
-        type Crumb = {
-          task_id: number | string;
-          name: string;
-        }
+        const taskFetch = (await getTasks(data.task_id)) as Task;
         taskFetch.breadcrumb.forEach((crumb: Crumb) => {
-          taskFetch.display_name = taskFetch.display_name ? `${taskFetch.display_name} / ${crumb.name}` : crumb.name 
-        })
+          taskFetch.display_name = taskFetch.display_name ? `${taskFetch.display_name} / ${crumb.name}` : crumb.name;
+        });
         taskFetch.timer_info = data;
-        setActiveTask(taskFetch)
-        setSelectedItemId(taskFetch.task_id.toString())
+        setActiveTask(taskFetch);
+        setSelectedItemId(taskFetch.task_id.toString());
       }
     } catch (error) {
       console.error(error);
@@ -320,29 +344,21 @@ export default function Command() {
   }
 
   return (
-    <List 
-      filtering={{keepSectionOrder: true}} 
-      selectedItemId={selectedItemId}
-      searchBarPlaceholder="Search Task"
-    >
+    <List filtering={{ keepSectionOrder: true }} selectedItemId={selectedItemId} searchBarPlaceholder="Search Task">
       {activeTask ? (
-        <List.Section 
-          title="Active Timer">
-          <ActiveTaskItem
-            activeTask={activeTask}
-            setActiveTask={setActiveTask}
-          />
+        <List.Section title="Active Timer">
+          <ActiveTaskItem activeTask={activeTask} setActiveTask={setActiveTask} />
         </List.Section>
       ) : null}
       <List.Section title="Tasks">
         {tasks.map((task: Task) => {
-          if (activeTask && activeTask.task_id == task.task_id) return null
+          if (activeTask && activeTask.task_id == task.task_id) return null;
 
           return (
-            <List.Item 
+            <List.Item
               key={task.task_id}
               id={task.task_id.toString()}
-              icon={{ source: Icon.Dot, tintColor: task.color }} 
+              icon={{ source: Icon.Dot, tintColor: task.color }}
               title={task.display_name ? task.display_name : task.name}
               actions={
                 <ActionPanel title="Inactive Task">
@@ -350,10 +366,9 @@ export default function Command() {
                 </ActionPanel>
               }
             />
-          )
+          );
         })}
       </List.Section>
     </List>
   );
 }
-
