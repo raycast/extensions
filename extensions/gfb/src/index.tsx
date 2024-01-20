@@ -123,8 +123,7 @@ function formatDateTime(utcDateTime: Date) {
 
 async function cachedFetchLeagueMatches(): Promise<MatchData> {
   const cache = new Cache({ namespace: "MatchListCache", capacity: 10 * 1024 * 1024 }); // 10 MB capacity
-  const cacheExpiryTime = 30 * 1000; // 30 seconds in milliseconds
-  //const cacheExpiryTime = 60 * 60 * 1000; // 1 hour in milliseconds
+  const cacheExpiryTime = 60 * 60 * 1000; // 1 hour in milliseconds
   const cachedData = cache.get("matches");
   const cachedTimestamp = cache.get("matchesTimestamp");
 
