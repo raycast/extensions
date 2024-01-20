@@ -46,7 +46,12 @@ export default function Command() {
           <List.Item
             key={page.pathname}
             title={page.pathname}
-            accessories={[{ text: `${page.pageviews.toLocaleString()} (${relativePageviews}%)` }, { icon: Icon.TwoPeople }]}
+            accessories={[
+              {
+                text: `${page.pageviews.toLocaleString()} (${relativePageviews}%)`,
+              },
+              { icon: Icon.TwoPeople },
+            ]}
           />
         );
       })}

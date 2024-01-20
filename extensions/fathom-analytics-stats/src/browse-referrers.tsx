@@ -20,8 +20,10 @@ export default function Command() {
   const [dateFrom, setDateFrom] = useState<string>("");
 
   const { data, isLoading } = useFetch<Data>(
-    `https://api.usefathom.com/v1/aggregations?entity_id=${preferences.siteId
-    }&entity=pageview&aggregates=pageviews&field_grouping=referrer_hostname&sort_by=pageviews:desc${dateFrom ? `&date_from=${dateFrom}` : ""
+    `https://api.usefathom.com/v1/aggregations?entity_id=${
+      preferences.siteId
+    }&entity=pageview&aggregates=pageviews&field_grouping=referrer_hostname&sort_by=pageviews:desc${
+      dateFrom ? `&date_from=${dateFrom}` : ""
     }`,
     {
       method: "GET",
@@ -50,11 +52,15 @@ export default function Command() {
                 ? referrer.referrer_hostname.toString().replace("https://", "").replace("www.", "")
                 : "Direct"
             }
-            accessories={[{ text: `${referrer.pageviews.toLocaleString()} (${relativePageviews}%)` }, { icon: Icon.TwoPeople }]}
+            accessories={[
+              {
+                text: `${referrer.pageviews.toLocaleString()} (${relativePageviews}%)`,
+              },
+              { icon: Icon.TwoPeople },
+            ]}
           />
         );
       })}
     </List>
   );
 }
-

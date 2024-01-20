@@ -17,18 +17,21 @@ const PeriodDropdown: React.FC<PeriodDropdownProps> = ({ setDateFrom: setParentD
     }
   };
 
-  const timePeriods: TimePeriod[] = useMemo(() => [
-    { id: "1", title: "Today", value: getCurrentDate() },
-    { id: "2", title: "Yesterday", value: getPreviousDate(1) },
-    { id: "3", title: "Last 7 Days", value: getPreviousDate(7) },
-    { id: "4", title: "Last 30 Days", value: getPreviousDate(30) },
-    { id: "5", title: "Last 365 Days", value: getPreviousDate(365) },
-    { id: "6", title: "This Month", value: getCurrentMonthStartDate() },
-    { id: "7", title: "Last Month", value: getPreviousMonthStartDate() },
-    { id: "8", title: "This Year", value: getCurrentYearStartDate() },
-    { id: "9", title: "Last Year", value: getPreviousYearStartDate() },
-    { id: "10", title: "All Time", value: "" },
-  ], []);
+  const timePeriods: TimePeriod[] = useMemo(
+    () => [
+      { id: "1", title: "Today", value: getCurrentDate() },
+      { id: "2", title: "Yesterday", value: getPreviousDate(1) },
+      { id: "3", title: "Last 7 Days", value: getPreviousDate(7) },
+      { id: "4", title: "Last 30 Days", value: getPreviousDate(30) },
+      { id: "5", title: "Last 365 Days", value: getPreviousDate(365) },
+      { id: "6", title: "This Month", value: getCurrentMonthStartDate() },
+      { id: "7", title: "Last Month", value: getPreviousMonthStartDate() },
+      { id: "8", title: "This Year", value: getCurrentYearStartDate() },
+      { id: "9", title: "Last Year", value: getPreviousYearStartDate() },
+      { id: "10", title: "All Time", value: "" },
+    ],
+    [],
+  );
 
   function getCurrentDate() {
     const currentDate = new Date();

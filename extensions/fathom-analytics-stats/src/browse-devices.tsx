@@ -20,8 +20,10 @@ export default function Command() {
   const [dateFrom, setDateFrom] = useState<string>("");
 
   const { data, isLoading } = useFetch<Data>(
-    `https://api.usefathom.com/v1/aggregations?entity_id=${preferences.siteId
-    }&entity=pageview&aggregates=pageviews&field_grouping=device_type&sort_by=pageviews:desc${dateFrom ? `&date_from=${dateFrom}` : ""
+    `https://api.usefathom.com/v1/aggregations?entity_id=${
+      preferences.siteId
+    }&entity=pageview&aggregates=pageviews&field_grouping=device_type&sort_by=pageviews:desc${
+      dateFrom ? `&date_from=${dateFrom}` : ""
     }`,
     {
       method: "GET",
@@ -46,7 +48,12 @@ export default function Command() {
           <List.Item
             key={device.device_type}
             title={device.device_type}
-            accessories={[{ text: `${device.pageviews.toLocaleString()} (${relativePageviews}%)` }, { icon: Icon.TwoPeople }]}
+            accessories={[
+              {
+                text: `${device.pageviews.toLocaleString()} (${relativePageviews}%)`,
+              },
+              { icon: Icon.TwoPeople },
+            ]}
           />
         );
       })}

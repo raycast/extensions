@@ -46,7 +46,12 @@ export default function Command() {
           <List.Item
             key={browser.browser}
             title={browser.browser}
-            accessories={[{ text: `${browser.pageviews.toLocaleString()} (${relativePageviews}%)` }, { icon: Icon.TwoPeople }]}
+            accessories={[
+              {
+                text: `${browser.pageviews.toLocaleString()} (${relativePageviews}%)`,
+              },
+              { icon: Icon.TwoPeople },
+            ]}
           />
         );
       })}

@@ -56,7 +56,12 @@ export default function Command() {
           <List.Item
             key={country.country_code}
             title={`${countryCodeToFlagEmoji(country.country_code)} ${countryMapping[country.country_code] || country.country_code}`}
-            accessories={[{ text: `${country.pageviews.toLocaleString()} (${relativePageviews}%)` }, { icon: Icon.TwoPeople }]}
+            accessories={[
+              {
+                text: `${country.pageviews.toLocaleString()} (${relativePageviews}%)`,
+              },
+              { icon: Icon.TwoPeople },
+            ]}
           />
         );
       })}
