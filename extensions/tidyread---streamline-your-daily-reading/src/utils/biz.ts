@@ -92,7 +92,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
       if (!tidyreadCloudAvailable || !enableItemLinkProxy) return link;
       return `https://tidyread.info/read?source_link=${encodeURIComponent(link)}&rss_link=${encodeURIComponent(
         item?.feed?.url ?? "",
-      )}`;
+      )}&status=${item?.status}`;
     },
   });
 
