@@ -39,7 +39,6 @@ export default function Command() {
         message: `Domain ${id} has been ${active ? "activated" : "deactivated"}`,
       });
 
-      // optimistic update
       setDenylist({ ...denylist, [id]: active });
     } else {
       showToast({
@@ -63,7 +62,7 @@ export default function Command() {
       });
 
       if (denylist) {
-        const { [id]: _, ...rest } = denylist;
+        const { [id]: _, ...rest } = denylist; // eslint-disable-line @typescript-eslint/no-unused-vars
         setDenylist(rest);
       }
     } else {

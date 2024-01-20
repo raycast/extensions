@@ -62,7 +62,7 @@ export default function Command() {
       });
 
       if (allowlist) {
-        const { [id]: _, ...rest } = allowlist;
+        const { [id]: _, ...rest } = allowlist; // eslint-disable-line @typescript-eslint/no-unused-vars
         setAllowlist(rest);
       }
     } else {
