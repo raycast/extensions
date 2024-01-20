@@ -21,6 +21,9 @@ export function useOrganizations() {
       return response.data.data.filter((organization) => allowedOrganizations.includes(organization.id));
     },
     ["organizations"],
+    {
+      initialData: [],
+    },
   );
   return { organizations, organizationsLoading };
 }

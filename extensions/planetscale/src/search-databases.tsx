@@ -10,7 +10,7 @@ function ListSection({ organization }: { organization: string }) {
   const { databases } = useDatabases({ organization });
   return (
     <List.Section title={organization}>
-      {databases?.map((database) => (
+      {databases.map((database) => (
         <List.Item
           key={database.id}
           title={database.name}
@@ -59,7 +59,7 @@ function ListSection({ organization }: { organization: string }) {
                 />
                 <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Region Public IP">
                   {database.region.public_ip_addresses.map((ip) => (
-                    <Action.CopyToClipboard title={ip} content={ip} concealed />
+                    <Action.CopyToClipboard key={ip} title={ip} content={ip} concealed />
                   ))}
                 </ActionPanel.Submenu>
               </ActionPanel.Section>

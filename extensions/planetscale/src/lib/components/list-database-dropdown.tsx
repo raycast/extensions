@@ -7,7 +7,7 @@ function ListDatabaseDropdownSection({ organization }: { organization: string })
   const { databases } = useDatabases({ organization });
   return (
     <List.Dropdown.Section title={organization}>
-      {databases?.map((database) => (
+      {databases.map((database) => (
         <List.Dropdown.Item
           key={database.id}
           icon={getDatabaseIcon(database)}
@@ -36,7 +36,7 @@ export function ListDatabaseDropdown({
         onChange({ organization, database });
       }}
     >
-      {organizations?.map((organization) => (
+      {organizations.map((organization) => (
         <ListDatabaseDropdownSection key={organization.id} organization={organization.name} />
       ))}
     </List.Dropdown>

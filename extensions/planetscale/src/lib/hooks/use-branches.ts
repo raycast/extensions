@@ -13,9 +13,6 @@ export function useBranches(args: { organization?: string; database?: string }) 
     mutate,
   } = useCachedPromise(
     async (key, { organization, database }) => {
-      if (!organization || !database) {
-        return [];
-      }
       const response = await pscale.listBranches({
         page: 1,
         per_page: 25,
@@ -27,6 +24,7 @@ export function useBranches(args: { organization?: string; database?: string }) 
     ["branches", args],
     {
       initialData: [],
+      execute: !!args.organization && !!args.database,
     },
   );
 
@@ -57,6 +55,21 @@ export function useBranches(args: { organization?: string; database?: string }) 
           { name: values.name, parent_branch: values.parent },
           { database: values.database, organization: values.organization },
         ),
+        {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          optimisticUpdate: (branches) => [
+            ...branches,
+            {
+              id: Math.random().toString(),
+              name: values.name,
+              parent_branch: values.parent,
+              html_url: branches[0].html_url.replace(branches[0].name, values.name),
+              updated_at: new Date().toISOString(),
+              created_at: new Date().toISOString(),
+            },
+          ],
+        },
       );
 
       toast.title = "Branch created";

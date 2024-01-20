@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
 import { PlanetScaleColor } from "./lib/colors";
 import { View } from "./lib/oauth/view";
@@ -34,7 +34,7 @@ function SearchDeployRequests() {
         />
       }
     >
-      {deployRequests?.map((deployRequest) => (
+      {deployRequests.map((deployRequest) => (
         <List.Item
           key={deployRequest.id}
           title={`#${deployRequest.number}`}

@@ -1,5 +1,4 @@
 import { Form } from "@raycast/api";
-import { PlanetScaleColor } from "../colors";
 import { forwardRef } from "react";
 import { useOrganizations } from "../hooks/use-organizations";
 import { useDatabases } from "../hooks/use-databases";

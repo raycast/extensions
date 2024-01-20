@@ -23,6 +23,7 @@ export function useDeployOperations(args: { organization?: string; database?: st
     ["deploy-request-operations", args],
     {
       initialData: [],
+      execute: !!args.organization && !!args.database && !!args.number,
     },
   );
 

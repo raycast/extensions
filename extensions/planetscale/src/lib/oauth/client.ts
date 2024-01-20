@@ -71,14 +71,14 @@ export async function logout() {
   await popToRoot();
 }
 
-interface CreateOrRenewAnOauthTokenResponse {
-  data: {
-    id: string;
-    token: string;
-    plain_text_refresh_token: string;
-    service_token_accesses: ServiceTokenAccessesItem[];
-  };
-}
+// interface CreateOrRenewAnOauthTokenResponse {
+//   data: {
+//     id: string;
+//     token: string;
+//     plain_text_refresh_token: string;
+//     service_token_accesses: ServiceTokenAccessesItem[];
+//   };
+// }
 
 interface ServiceTokenAccessesItem {
   id: string;

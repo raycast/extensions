@@ -6,9 +6,6 @@ export function useDatabases(args: { organization?: string }) {
 
   const { data: databases, isLoading: databasesLoading } = useCachedPromise(
     async (key, { organization }) => {
-      if (!organization) {
-        return [];
-      }
       const response = await pscale.listDatabases({
         page: 1,
         per_page: 25,
@@ -19,6 +16,7 @@ export function useDatabases(args: { organization?: string }) {
     ["databases", args],
     {
       initialData: [],
+      execute: !!args.organization,
     },
   );
   return { databases, databasesLoading };

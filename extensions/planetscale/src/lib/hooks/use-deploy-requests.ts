@@ -29,6 +29,7 @@ export function useDeployRequests(args: { organization?: string; database?: stri
     ["deploy-requests", args],
     {
       initialData: [],
+      execute: !!args.organization && !!args.database,
     },
   );
 

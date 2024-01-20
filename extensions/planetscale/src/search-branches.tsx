@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List } from "@raycast/api";
 import { format } from "date-fns";
 import { CreateDeployRequest } from "./create-deploy-request";
 import { CreateBranch } from "./create-branch";
@@ -27,7 +27,7 @@ function SearchBranches() {
         />
       }
     >
-      {branches?.map((branch) => (
+      {branches.map((branch) => (
         <List.Item
           key={branch.id}
           title={branch.name}
@@ -126,7 +126,7 @@ function SearchBranches() {
                 {branch.region ? (
                   <ActionPanel.Submenu icon={Icon.CopyClipboard} title="Copy Region Public IP">
                     {branch.region.public_ip_addresses.map((ip) => (
-                      <Action.CopyToClipboard title={ip} content={ip} concealed />
+                      <Action.CopyToClipboard key={ip} title={ip} content={ip} concealed />
                     ))}
                   </ActionPanel.Submenu>
                 ) : null}
