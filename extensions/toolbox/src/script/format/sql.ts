@@ -14,7 +14,7 @@ export const formatSql: Script = {
     try {
       return format(input, {
         keywordCase: "upper",
-        tabWidth: 2
+        tabWidth: 2,
       });
     } catch (error) {
       throw Error("Invalid SQL");
