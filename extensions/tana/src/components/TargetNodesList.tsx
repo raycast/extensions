@@ -28,7 +28,6 @@ export function TargetNodesList() {
           actions={
             <ActionPanel>
               <EditTargetNodeAction node={node} />
-              <AddTargetNodeAction />
               <Action
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
@@ -37,6 +36,7 @@ export function TargetNodesList() {
                   deleteTargetNode(node.id);
                 }}
               />
+              <AddTargetNodeAction />
             </ActionPanel>
           }
         />

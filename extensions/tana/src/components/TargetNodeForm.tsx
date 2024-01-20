@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Form, Icon, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { TanaLocalNode, addTargetNode } from "../state";
+import { TanaLocalNode, addTargetNode, updateTargetNode } from "../state";
 
 type Values = {
   id: string;
@@ -12,13 +12,17 @@ export function TargetNodeForm({ node, onAdd }: { node?: TanaLocalNode; onAdd?: 
   const { handleSubmit, itemProps } = useForm<Values>({
     async onSubmit({ id, name }) {
       id = getNodeId(id);
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Adding node" });
+      const toast = new Toast({ style: Toast.Style.Animated, title: node ? "Updating node" : "Adding node" });
       await toast.show();
       try {
-        addTargetNode({ id, name });
+        if (node) {
+          updateTargetNode(id, name);
+        } else {
+          addTargetNode({ id, name });
+        }
         onAdd?.({ id, name });
         toast.style = Toast.Style.Success;
-        toast.message = "Node added";
+        toast.message = node ? "Node updated" : "Node added";
         pop();
       } catch (error) {
         let message: string | undefined = undefined;
@@ -40,12 +44,19 @@ export function TargetNodeForm({ node, onAdd }: { node?: TanaLocalNode; onAdd?: 
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add target node" onSubmit={handleSubmit} />
+          <Action.SubmitForm title={`${node ? "Update" : "Add"} target node`} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField title="Name" placeholder="Enter name" {...itemProps.name} />
-      <Form.TextField title="Node ID" placeholder="Enter node ID" {...itemProps.id} />
+      <Form.TextField
+        title={`Node ID${node ? " (read-only)" : ""}`}
+        placeholder={"Enter node ID"}
+        {...itemProps.id}
+        // if we are updating a node, make the ID read-only by forcing the value.
+        // Raycast doesn't support disabled fields
+        value={node?.id ?? itemProps.id.value}
+      />
     </Form>
   );
 }
