@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { SupertagNode, updateSupertag } from "../state";
-import { colorOptions } from "../utils";
+import { tanaColorOptions } from "../utils";
 
 type Values = {
   name: string;
@@ -48,7 +48,7 @@ export function SupertagEditForm({ node }: SuperTagEditFormProps) {
     >
       <Form.TextField title="Name" placeholder="Enter name" {...itemProps.name} />
       <Form.Dropdown title="Color" placeholder="Select color" {...itemProps.color}>
-        {colorOptions.map((color) => (
+        {tanaColorOptions.map((color) => (
           <Form.Dropdown.Item
             key={color.name}
             value={color.value}

@@ -1,14 +1,17 @@
-import { Color } from "@raycast/api";
-
-export const colorOptions = [
-  { name: "Default", value: Color.PrimaryText },
-  { name: "Blue", value: Color.Blue },
-  { name: "Green", value: Color.Green },
-  { name: "Magenta", value: Color.Magenta },
-  { name: "Orange", value: Color.Orange },
-  { name: "Purple", value: Color.Purple },
-  { name: "Red", value: Color.Red },
-  { name: "Yellow", value: Color.Yellow },
+export const tanaColorOptions = [
+  { name: "Default", value: "#7d798f" },
+  { name: "Fuchsia", value: "#d1086d" },
+  { name: "Red", value: "#a60717" },
+  { name: "Orange", value: "#ff9100" },
+  { name: "Dark Yellow", value: "#d48c0d" },
+  { name: "Yellow", value: "#d6ba04" },
+  { name: "Olive", value: "#9db325" },
+  { name: "Green", value: "#1dbf8c" },
+  { name: "Dark Blue", value: "#0558ab" },
+  { name: "Blue", value: "#0066ff" },
+  { name: "Indigo", value: "#4303a8" },
+  { name: "Purple", value: "#8b299e" },
+  { name: "Pink", value: "#f750d3" },
 ];
 
 export function getNodeIdFromURL(value: string) {

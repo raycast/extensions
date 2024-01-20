@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Form, Icon, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { SupertagNode, addSuperTag } from "../state";
-import { colorOptions, getNodeIdFromURL } from "../utils";
+import { tanaColorOptions, getNodeIdFromURL } from "../utils";
 
 type Values = {
   id: string;
@@ -53,7 +53,7 @@ export function SupertagCreateForm({ onCreate }: SuperTagCreateFormProps) {
       <Form.TextField title="Name" placeholder="Enter name" {...itemProps.name} />
       <Form.TextField title="Node ID" placeholder="Enter node ID" {...itemProps.id} />
       <Form.Dropdown title="Color" placeholder="Select color" {...itemProps.color}>
-        {colorOptions.map((color) => (
+        {tanaColorOptions.map((color) => (
           <Form.Dropdown.Item
             key={color.name}
             value={color.value}
