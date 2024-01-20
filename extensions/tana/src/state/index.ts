@@ -6,9 +6,13 @@ export type TanaLocalNode = {
   name: string;
 };
 
+export type SupertagNode = TanaLocalNode & {
+  color?: string;
+};
+
 type TanaLocalState = {
   targetNodes: TanaLocalNode[];
-  supertags: TanaLocalNode[];
+  supertags: SupertagNode[];
 };
 
 export const tanaLocal = proxy<TanaLocalState>({
@@ -36,6 +40,26 @@ export function updateTargetNode(nodeId: string, name: string) {
   const node = tanaLocal.targetNodes.find((n) => n.id === nodeId);
   if (node) {
     node.name = name;
+  }
+}
+
+export function addSuperTag(node: SupertagNode) {
+  const existingNode = tanaLocal.supertags.find((n) => n.id === node.id);
+  if (existingNode) {
+    throw new Error(`Supertag already exists with name: ${existingNode.name}`);
+  }
+  tanaLocal.supertags.push(node);
+}
+
+export function deleteSupertag(nodeId: string) {
+  tanaLocal.supertags = tanaLocal.supertags.filter((n) => n.id !== nodeId);
+}
+
+export function updateSupertag(nodeId: string, values: Omit<SupertagNode, "id">) {
+  const node = tanaLocal.supertags.find((n) => n.id === nodeId);
+  if (node) {
+    node.name = values.name;
+    node.color = values.color;
   }
 }
 

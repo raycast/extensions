@@ -1,8 +1,14 @@
 # Tana Changelog
 
-## [Custom target nodes] - 2024-01-20
+## [Custom supertags and target nodes] - 2024-01-20
 
-This adds a new `Manage Target Nodes` command. This provides the ability to submit notes to any desired node in your workspace.
+Support has been added for custom supertags and custom target nodes.
+
+You can now define supertags via the **Manage Supertags** command, which will submit the note with
+the configured supertags. In addition, target nodes may be defined via the **Manage Target Nodes**
+command which allow you to submit notes to any node in your workspace. Previously, only `Inbox`
+was supported.
+
 See the README for instructions.
 
 ## [Fix Compatibility Issues] - 2023-12-08

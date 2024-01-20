@@ -1,29 +1,30 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { CreateTargetNodeAction } from "./TargetNodeCreateForm";
-import { EditTargetNodeAction } from "./TargetNodeEditForm";
+import { CreateSupertagAction } from "./SupertagCreateForm";
+import { EditSupertagAction } from "./SupertagEditForm";
 import { deleteTargetNode, useTanaLocal } from "../state";
 
-export function TargetNodesList() {
-  const { targetNodes } = useTanaLocal();
+export function SupertagsList() {
+  const { supertags } = useTanaLocal();
   return (
     <List
-      searchBarPlaceholder="Search target nodes..."
+      searchBarPlaceholder="Search supertags..."
       actions={
         <ActionPanel>
-          <CreateTargetNodeAction />
+          <CreateSupertagAction />
         </ActionPanel>
       }
     >
-      {targetNodes.map((node) => (
+      {supertags.map((node) => (
         <List.Item
           key={node.id}
           id={node.id}
           title={node.name}
-          icon={Icon.Dot}
+          icon={{ source: Icon.Tag, tintColor: node.color }}
           accessories={[{ tag: node.id }]}
           actions={
             <ActionPanel>
-              <EditTargetNodeAction node={node} />
+              <EditSupertagAction node={node} />
+              <CreateSupertagAction />
               <Action
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
@@ -32,7 +33,6 @@ export function TargetNodesList() {
                   deleteTargetNode(node.id);
                 }}
               />
-              <CreateTargetNodeAction />
             </ActionPanel>
           }
         />

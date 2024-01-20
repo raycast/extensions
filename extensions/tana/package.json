@@ -34,6 +34,13 @@
       "subtitle": "Tana",
       "description": "Manage the nodes for Tana quick add",
       "mode": "view"
+    },
+    {
+      "name": "manageSupertagsCommand",
+      "title": "Manage Supertags",
+      "subtitle": "Tana",
+      "description": "Manage supertags for Tana quick add",
+      "mode": "view"
     }
   ],
   "preferences": [
