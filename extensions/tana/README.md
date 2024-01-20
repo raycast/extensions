@@ -8,8 +8,6 @@ Write a note in Raycast and and send it to Tana!
 
 The note may be customized by adding one or more supertags, or by setting a different target node (`Inbox` is the default).
 
-_Note: currently only plaintext notes are supported._
-
 ### Manage Supertags
 
 Supertags may be added to Raycast by their node ID in order to attach them to notes. This command
@@ -21,8 +19,6 @@ the full URL may be pasted into the `Node ID` field for convenience.
 
 ![](./media/copy-link-to-supertag.png)
 
-_Note: This command only manages Supertags within Raycast. Mutations to supertags do not modified in Tana_
-
 ### Manage Target Nodes
 
 This command can be used if you want to send your note to a node other than **Inbox**. Here you can add,
@@ -33,6 +29,13 @@ the desired target node, and selecting `Copy link`. The `nodeId` is contained in
 the full URL may be pasted into the `Node ID` field for convenience.
 
 ![](./media/copy-link-to-node.png)
+
+## Limitations
+
+- Only single-node, plaintext notes are supported.
+- Modifying fields within supertags is not yet supported.
+- Supertags and target nodes are only added, modified, and deleted within Raycast. This extension does not
+  modify these within your Tana workspace.
 
 ## Setup
 
