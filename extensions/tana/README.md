@@ -5,21 +5,36 @@
 ### Quick Add
 
 Write a note in Raycast and and send it to Tana!
-The note that you write will be added to your **Inbox**.
 
-To configure this in Raycast, you'll need to provide an API token which can be generated in Tana. 
+By default, the note that you write will be added to your **Inbox**,
+but this may be customized using the `Manage Target Nodes` command.
 
-*Note: currently only plaintext notes are supported.*
+To configure this in Raycast, you'll need to provide a workspace API token which can be generated in Tana.
+
+_Note: currently only plaintext notes are supported._
+
+### Manage Target Nodes
+
+This command can be used if you want to send your note to a node other than **Inbox**. Here you can add,
+update and delete target nodes.
+
+To add a target node, you'll need the node's `nodeId`. This can be found in Tana by pressing `Cmd-K` on
+the desired target node, and selecting `Copy link`. The `nodeId` is contained in the copied URL, however,
+the full URL may be pasted into the extension for convenience.
+
+![](./media/copy-link-to-node.png)
+
+## Setup
 
 ### Generate API token in Tana
-Please follow instructions in [Tana Documentation](https://help.tana.inc/tana-input-api.html) to generate a token.
+
+Please follow instructions in [Tana Documentation](https://tana.inc/docs/input-api#how-to-get-a-tana-api-token) to generate a token.
 Once generated, paste the token into the corresponding configuration in Raycast.
 
 If you have used this plugin before(in 2022), you also need to do the same thing since Tana have updated their API.
 ![](./media/change-extension-configuration.png)
 
-
-### Contribution
+## Contribution
 
 ```bash
 npm install
@@ -34,4 +49,3 @@ npx raycast/api@latest pull-contributions
 [Tana input api sample](https://github.com/tanainc/tana-input-api-samples)
 
 [Tana import tool](https://github.com/tanainc/tana-import-tools)
-

@@ -1,7 +1,7 @@
-import { AddToNodeForm } from "./components/AddToNodeForm";
+import { TargetNodesList } from "./components/TargetNodesList";
 import { useLoadInitialState } from "./state";
 
 export default function Command() {
   useLoadInitialState();
-  return <AddToNodeForm />;
+  return <TargetNodesList />;
 }
