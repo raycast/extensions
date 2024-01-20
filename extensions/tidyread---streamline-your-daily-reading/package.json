@@ -245,7 +245,7 @@
       "description": "For each RSS item, it will be summarized by the provider, and you can customize the summarize prompt",
       "type": "textfield",
       "title": "Summarize Prompt",
-      "default": "## Target\n\nsummarize the contents\n\n## Requirements\n\n* Output a minimum of 50 characters, maximum of 200 characters\n\n* Remove from the summary any references to author publicity and promotion.\n\n* Output the summarized content in a straightforward manner, without restating the requirements.\n\n## Respond Language\n\nRespond in the language of the user input content, not the language of the prompt itself.",
+      "default": "## Target\n\nsummarize the contents\n\n## Requirements\n\n- Output a minimum of 50 characters, maximum of 200 characters\n\n- Remove from the summary any references to author publicity and promotion.\n\n- Output the summarized content in a straightforward manner, without restating the requirements.\n\n## Respond Language\n\nRespond in the language of the user input content, not the language of the prompt itself.",
       "required": false
     },
     {

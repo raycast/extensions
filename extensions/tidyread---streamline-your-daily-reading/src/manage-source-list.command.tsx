@@ -103,7 +103,7 @@ export default function SourceList() {
             </CustomActionPanel>
           }
           title="No Source Found"
-          description="Add your first source, or press cmd + Enter import sources from json."
+          description="Add your first source, or press cmd + Enter to import sources from json."
         />
       ) : (
         (sources || []).map((item, index) => {
