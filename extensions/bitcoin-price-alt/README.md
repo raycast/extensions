@@ -1,6 +1,6 @@
 # Bitcoin Price
 
-Display Bitcoin price on the system menu bar.
+Display compact Bitcoin price and 24hr price change on the system menubar
 
 ![screenshot](./media/screenshot-1.png)
 

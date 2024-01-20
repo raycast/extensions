@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitcoin-price",
   "title": "Bitcoin Price",
-  "description": "Display bitcoin price on the system menu bar",
+  "description": "Display compact Bitcoin price and 24hr price change on the system menubar",
   "categories": [
     "Finance"
   ],
