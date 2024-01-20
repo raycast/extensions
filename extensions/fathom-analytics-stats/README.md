@@ -26,8 +26,9 @@ Note that `Menu Bar` is refreshed every minute.
 4. Open the extension with Raycast.
 
 ## Setup
-1. Obtain an API token and site ID from [Fathom Analytics](usefathom.com).
-2. Add the API token and site ID to the extension preferences in Raycast.
+1. Sign in to your Fathom account.
+2. Obtain an API token [here](https://app.usefathom.com/api) and site ID from Fathom your site settings.
+3. Add the API token and site ID to the extension preferences in Raycast.
 
 ## Usage
 1. Open Raycast.
