@@ -240,24 +240,6 @@
       ]
     },
     {
-      "name": "mode",
-      "type": "dropdown",
-      "required": true,
-      "title": "Pomodoro Mode",
-      "description": "Controls the timer behavior once an interval is completed",
-      "default": "manual",
-      "data": [
-        {
-          "title": "Manual",
-          "value": "manual"
-        },
-        {
-          "title": "Automatic",
-          "value": "automatic"
-        }
-      ]
-    },
-    {
       "name": "longBreakStartThreshold",
       "type": "dropdown",
       "required": false,
