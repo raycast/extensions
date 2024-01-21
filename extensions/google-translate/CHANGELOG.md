@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Feature] - 2024-01-20
+
+ - Added new "Quick Translate" command
+
 ## [Enhancement] - 2023-11-15
 
  - Added Copy Pronunciation keyboard shortcut
