@@ -4,20 +4,21 @@ A Raycast extension to browse your website analytics coming from Fathom.
 ![Fathom Analytics Stats extension - Commands](https://github.com/yannglt/raycast-extensions/assets/16894359/b26ebcdd-44e0-401e-96d4-5ea4b486e209)
 
 
-| Commands           | Description                                            |
-| :---               | :---                                                   |
-| `Menu Bar`         | Display your current pageviews and referrers           |
-| `Browse Pageviews` | Display your most viewed pages                         |
-| `Browse Referrers` | Display your referrers                                 |
-| `Browse Browsers`  | Display your visitor browsers                          |
-| `Browse Countries` | Display your visitor countries                         |
-| `Browse Devices`   | Display your visitor devices (desktop, tablet, mobile) |
+| Commands                    | Description                                                         |
+| :---                        | :---                                                                |
+| `Current Visitors`          | Display your current pageviews and referrers in your menu bar       |
+| `Current Visitors Menu Bar` | Display your current pageviews and referrers the command's subtitle |
+| `Browse Pageviews`          | Display your most viewed pages                                      |
+| `Browse Referrers`          | Display your referrers                                              |
+| `Browse Browsers`           | Display your visitor browsers                                       |
+| `Browse Countries`          | Display your visitor countries                                      |
+| `Browse Devices`            | Display your visitor devices (desktop, tablet, mobile)              |
 
 Each aggregation of page views is sorted in descending order, with a relative percentage to the total.
 
 Each command comes with a time range option, which can be set to: `Today`, `Yesterday`, `Last 7 Days`, `Last 30 Days`, `This Month`, `Last Month`, `This Year`, `Last Year`, `All Time`.
 
-Note that `Menu Bar` is refreshed every minute.
+Note that `Current Visitors` and `Current Visitors Menu Bar` are refreshed every minute.
 
 ## Installation
 1. Clone the repository.

@@ -44,11 +44,19 @@
       "mode": "view"
     },
     {
-      "name": "menu-bar",
-      "title": "Menu Bar",
+      "name": "current-visitors-menu-bar",
+      "title": "Current Visitors Menu Bar",
       "subtitle": "Fathom Analytics Stats",
       "description": "Display the number of current visitors on your website in the menu bar.",
       "mode": "menu-bar",
+      "interval": "60s"
+    },
+    {
+      "name": "current-visitors",
+      "title": "Current Visitors",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Display the number of current visitors on your website.",
+      "mode": "no-view",
       "interval": "60s"
     }
   ],
@@ -72,7 +80,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
