@@ -8,7 +8,7 @@ export function MyTweetListV2(): ReactElement {
   const { data, error, isLoading, fetcher } = useRefresher<Tweet[] | undefined>(
     async (updateInline): Promise<Tweet[] | undefined> => {
       return updateInline ? await clientV2.refreshTweets(data) : await clientV2.getMyTweets();
-    }
+    },
   );
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

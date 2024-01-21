@@ -70,7 +70,7 @@ export interface Fetcher {
 
 export function useRefresher<T>(
   fn: (updateInline: boolean) => Promise<T>,
-  deps?: React.DependencyList | undefined
+  deps?: React.DependencyList | undefined,
 ): {
   data: T | undefined;
   error?: string;

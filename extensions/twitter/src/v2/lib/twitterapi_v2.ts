@@ -208,7 +208,7 @@ export class ClientV2 {
     const nts = await Promise.all(
       tweetsRaw.data.map(async (t) => {
         return await this.tweetV2ToTweet(t, includes);
-      })
+      }),
     );
     return nts;
   }
@@ -321,7 +321,7 @@ export interface Fetcher {
 
 export function useRefresher<T>(
   fn: (updateInline: boolean) => Promise<T>,
-  deps?: React.DependencyList | undefined
+  deps?: React.DependencyList | undefined,
 ): {
   data: T | undefined;
   error?: string;

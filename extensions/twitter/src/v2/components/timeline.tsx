@@ -7,7 +7,7 @@ export function HomeTimelineListV2() {
   const { data, error, isLoading, fetcher } = useRefresher<Tweet[] | undefined>(
     async (updateInline): Promise<Tweet[] | undefined> => {
       return updateInline ? await clientV2.refreshTweets(data) : await clientV2.homeTimeline();
-    }
+    },
   );
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

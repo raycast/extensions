@@ -31,9 +31,7 @@ export function UserList() {
       onSearchTextChange={setQuery}
       throttle={true}
     >
-      {data?.map((u) => (
-        <UserListItem key={u.screen_name} user={u} />
-      ))}
+      {data?.map((u) => <UserListItem key={u.screen_name} user={u} />)}
     </List>
   );
 }

@@ -41,7 +41,7 @@ export async function authorize(): Promise<void> {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", getClientId());

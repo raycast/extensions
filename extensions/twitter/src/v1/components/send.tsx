@@ -177,11 +177,7 @@ export function TweetSendThreadForm(): ReactElement {
         <ActionPanel>
           <ActionPanel.Section>
             {validTweets(tweets) && (
-              <Action.SubmitForm
-                title={submitText}
-                icon="twitter.png"
-                onSubmit={(values: TweetFormValues) => submitTweets(tweets)}
-              />
+              <Action.SubmitForm title={submitText} icon="twitter.png" onSubmit={() => submitTweets(tweets)} />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Thread">
@@ -193,7 +189,7 @@ export function TweetSendThreadForm(): ReactElement {
             />
             {tweets.length > 1 && (
               <Action
-                title="Remove last Tweet"
+                title="Remove Last Tweet"
                 onAction={removeTweet}
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 shortcut={{ modifiers: ["cmd"], key: "-" }}
