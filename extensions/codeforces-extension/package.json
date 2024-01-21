@@ -36,7 +36,7 @@
       "name": "upcoming-contest",
       "title": "Upcoming Contest",
       "subtitle": "Codeforces",
-      "description": "Lists upcoming contests in menu bar",
+      "description": "Lists upcoming contests in Menu Bar",
       "mode": "menu-bar",
       "interval": "1d"
     }
