@@ -12,7 +12,7 @@ import {
   preferences,
   resetInterval,
 } from "../lib/intervals";
-import { FocusText, ShortBreakText, LongBreakText } from '../lib/constants'
+import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
 import { GiphyResponse } from "../lib/types";
 
 const createAction = (action: () => void) => () => {
@@ -135,7 +135,7 @@ const EndOfInterval = () => {
     markdownImage = `![${"You did it!"}](${preferences.completionImage})`;
   }
 
-  const executor = getNextIntervalExecutor()
+  const executor = getNextIntervalExecutor();
 
   return (
     <Detail
@@ -146,7 +146,7 @@ const EndOfInterval = () => {
           <Action
             title={executor.title}
             onAction={createAction(executor.onStart)}
-            shortcut={{ modifiers: ['cmd'], key: 'n' }}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
           <Action
             title={FocusText}
