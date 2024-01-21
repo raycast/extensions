@@ -84,7 +84,7 @@ export const useAPI = () => {
 
 export const APIProvider = ({ children }: APIProviderProps) => {
   const apis = useMemo(() => {
-    const client = createAdvancedClient(withProfile(clientSetting), withUserAgent('RayCast'))
+    const client = createAdvancedClient(withProfile(clientSetting), withUserAgent('Raycast'))
 
     enableConsoleLogger('debug')
 
