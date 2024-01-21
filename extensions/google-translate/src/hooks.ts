@@ -1,7 +1,9 @@
-import React from "react";
 import { getPreferenceValues, getSelectedText } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import React from "react";
+import { LanguageCode } from "./languages";
 import { LanguageCodeSet, TranslatePreferences } from "./types";
+import { AUTO_DETECT } from "./simple-translate";
 
 export const usePreferences = () => {
   return React.useMemo(() => getPreferenceValues<TranslatePreferences>(), []);
@@ -61,4 +63,20 @@ export const useDebouncedValue = <T>(value: T, delay: number) => {
   }, [value, delay]);
 
   return debouncedValue;
+};
+
+export const useSourceLanguage = () => {
+  const [sourceLanguage, setSourceLanguage] = useCachedState<LanguageCode>("sourceLanguage", AUTO_DETECT);
+
+  return [sourceLanguage, setSourceLanguage] as const;
+};
+
+export const useTargetLanguages = () => {
+  const preferences = usePreferences();
+  const [targetLanguages, setTargetLanguages] = useCachedState<LanguageCode[]>(
+    "targetLanguages",
+    [preferences.lang1, preferences.lang2].filter((lang) => lang !== AUTO_DETECT),
+  );
+
+  return [targetLanguages, setTargetLanguages] as const;
 };
