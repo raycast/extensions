@@ -84,8 +84,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.10.1",
     "node-fetch": "^3.0.0",
-    "twitter-api-v2": "^1.12.2"
+    "twitter-api-v2": "^1.16.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
