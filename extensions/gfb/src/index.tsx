@@ -7,7 +7,6 @@ async function fetchLeagueMatches(): Promise<MatchData> {
   const fotmob = new Fotmob();
   const prefs = getPreferenceValues<Preferences>();
 
-  // Convert string preferences to numbers and construct the interestedLeagues object
   const interestedLeagues = {
     [Number(prefs.league1)]: Number(prefs.team1),
     [Number(prefs.league2)]: Number(prefs.team2),
@@ -16,18 +15,17 @@ async function fetchLeagueMatches(): Promise<MatchData> {
     [Number(prefs.league5)]: Number(prefs.team5),
   };
 
-  // Filter out empty or invalid entries
   Object.keys(interestedLeagues).forEach((key) => {
     const leagueId = Number(key);
     const teamId = interestedLeagues[leagueId];
 
-    if (!teamId || isNaN(leagueId) || isNaN(teamId)) {
+    if (!leagueId || !teamId || isNaN(leagueId) || isNaN(teamId)) {
       delete interestedLeagues[leagueId];
     }
   });
 
   if (Object.keys(interestedLeagues).length === 0) {
-    return []; // Return an empty array if no leagues are specified
+    return [];
   }
 
   const allMatches: MatchData = [];
@@ -83,60 +81,59 @@ async function fetchLeagueMatches(): Promise<MatchData> {
 }
 
 function getMatchStatus(match: MatchStatus) {
-  if (match.status.cancelled) {
+  const { cancelled, finished, started } = match.status;
+  if (cancelled) {
     return "cancelled";
-  } else if (match.status.finished) {
-    return "finished";
-  } else if (match.status.started) {
-    return "in-progress";
-  } else {
-    return "upcoming";
   }
+  if (finished) {
+    return "finished";
+  }
+  if (started) {
+    return "in-progress";
+  }
+  return "upcoming";
 }
 
 function formatDateTime(utcDateTime: Date) {
-  const options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", hour12: true };
+  const dateOptions: Intl.DateTimeFormatOptions = { year: "2-digit", month: "2-digit", day: "2-digit" };
+  const timeOptions: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", hour12: true };
 
-  // Format date
-  const formattedDate = utcDateTime.toLocaleDateString("en-US", {
-    year: "2-digit",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  const formattedDate = utcDateTime.toLocaleDateString("en-US", dateOptions);
 
-  // Convert to Eastern Time (New York)
-  const easternTimeFormatter = new Intl.DateTimeFormat("en-US", {
-    ...options,
-    timeZone: "America/New_York",
-  });
+  const easternTimeFormatter = new Intl.DateTimeFormat("en-US", { ...timeOptions, timeZone: "America/New_York" });
   const easternTime = easternTimeFormatter.format(utcDateTime);
 
-  // Format UTC Time
-  const utcTimeFormatter = new Intl.DateTimeFormat("en-US", {
-    ...options,
-    timeZone: "UTC",
-  });
+  const utcTimeFormatter = new Intl.DateTimeFormat("en-US", { ...timeOptions, timeZone: "UTC" });
   const formattedUtcTime = utcTimeFormatter.format(utcDateTime);
 
   return `${formattedDate} at ${easternTime} (${formattedUtcTime} UTC)`;
 }
 
-async function cachedFetchLeagueMatches(): Promise<MatchData> {
-  const cache = new Cache({ namespace: "MatchListCache", capacity: 10 * 1024 * 1024 }); // 10 MB capacity
-  const cacheExpiryTime = 60 * 60 * 1000; // 1 hour in milliseconds
+function isToday(date: Date) {
+  const today = new Date();
+  const isSameYear = date.getFullYear() === today.getFullYear();
+  const isSameMonth = date.getMonth() === today.getMonth();
+  const isSameDay = date.getDate() === today.getDate();
+  return isSameYear && isSameMonth && isSameDay;
+}
+
+async function getCachedLeagueMatches(): Promise<MatchData> {
+  const cache = new Cache({ namespace: "MatchListCache", capacity: 10 * 1024 * 1024 });
+  const preferences = getPreferenceValues<Preferences>();
+  const cacheExpiryTimeInMinutes = Number(preferences.cacheExpiryTime) || 60;
+  const cacheExpiryTime = cacheExpiryTimeInMinutes * 60 * 1000;
+
   const cachedData = cache.get("matches");
   const cachedTimestamp = cache.get("matchesTimestamp");
 
   const currentTime = Date.now();
 
-  // Check if cached data exists and is still valid
   if (cachedData && cachedTimestamp && currentTime - parseInt(cachedTimestamp, 10) < cacheExpiryTime) {
     return JSON.parse(cachedData);
   } else {
-    // Fetch new data as cache is empty or expired
     const matches = await fetchLeagueMatches();
     cache.set("matches", JSON.stringify(matches));
-    cache.set("matchesTimestamp", currentTime.toString()); // Store the current time as a timestamp
+    cache.set("matchesTimestamp", currentTime.toString());
     return matches;
   }
 }
@@ -149,7 +146,7 @@ export default function MatchListCommand() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const matches = await cachedFetchLeagueMatches();
+        const matches = await getCachedLeagueMatches();
         const grouped = matches.reduce((acc: Record<string, MatchItem[]>, match: MatchItem) => {
           (acc[match.leagueName] = acc[match.leagueName] || []).push(match);
           return acc;
@@ -207,6 +204,8 @@ export default function MatchListCommand() {
                 icon = "⚽️";
               } else if (status === "cancelled") {
                 icon = "❌";
+              } else if (status === "upcoming" && isToday(new Date(match.match.status.utcTime))) {
+                icon = "🕒";
               }
 
               return (

@@ -56,6 +56,7 @@ export type MatchStatus = {
 export type LeaguePair = Record<string, string>;
 
 export interface Preferences {
+  cacheExpiryTime: string;
   team1: string;
   league1: string;
   team2: string;

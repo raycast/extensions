@@ -21,6 +21,15 @@
   "preferences": [
     {
       "type": "textfield",
+      "title": "Cache Expiry Time (in minutes)",
+      "description": "Cache Expiry Time",
+      "name": "cacheExpiryTime",
+      "placeholder": "Enter cache expiry time in minutes",
+      "default": "60",
+      "required": false
+    },
+    {
+      "type": "textfield",
       "title": "League 1 ID",
       "description": "League 1 ID",
       "placeholder": "FotMob League ID",
