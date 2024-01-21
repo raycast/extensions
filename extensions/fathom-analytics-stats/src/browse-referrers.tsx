@@ -54,7 +54,7 @@ export default function Command() {
             }
             accessories={[
               {
-                text: `${referrer.pageviews.toLocaleString()} (${relativePageviews}%)`,
+                text: `${referrer.pageviews.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${relativePageviews}%)`,
               },
               { icon: Icon.TwoPeople },
             ]}

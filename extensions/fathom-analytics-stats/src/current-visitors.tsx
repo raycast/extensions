@@ -36,6 +36,6 @@ async function fetchCurrentVisitorsCount() {
 export default async function Command() {
   const count = await fetchCurrentVisitorsCount();
   if (count) {
-    await updateCommandMetadata({ subtitle: `${count} visitors` });
+    await updateCommandMetadata({ subtitle: `${count.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} visitors` });
   }
 }

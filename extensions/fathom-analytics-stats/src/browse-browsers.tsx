@@ -48,7 +48,7 @@ export default function Command() {
             title={browser.browser}
             accessories={[
               {
-                text: `${browser.pageviews.toLocaleString()} (${relativePageviews}%)`,
+                text: `${browser.pageviews.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${relativePageviews}%)`,
               },
               { icon: Icon.TwoPeople },
             ]}

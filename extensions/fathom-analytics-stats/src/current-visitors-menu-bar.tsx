@@ -45,14 +45,22 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={Icon.TwoPeople} title={data.total.toLocaleString()} isLoading={isLoading}>
-      <MenuBarExtra.Section title={"Visitors (" + data.total.toLocaleString() + ")"}>
+      <MenuBarExtra.Section
+        title={"Visitors (" + data.total.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ")"}
+      >
         {data.content.map((page, index) => (
-          <MenuBarExtra.Item key={index} title={page.total.toLocaleString() + " " + page.pathname} />
+          <MenuBarExtra.Item
+            key={index}
+            title={page.total.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " " + page.pathname}
+          />
         ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title={`Referrers (${totalReferrers.toLocaleString()})`}>
         {data.referrers.map((page, index) => (
-          <MenuBarExtra.Item key={index} title={page.total.toLocaleString() + " " + page.referrer_hostname} />
+          <MenuBarExtra.Item
+            key={index}
+            title={page.total.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " " + page.referrer_hostname}
+          />
         ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>

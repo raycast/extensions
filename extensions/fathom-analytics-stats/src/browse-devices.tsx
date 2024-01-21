@@ -50,7 +50,7 @@ export default function Command() {
             title={device.device_type}
             accessories={[
               {
-                text: `${device.pageviews.toLocaleString()} (${relativePageviews}%)`,
+                text: `${device.pageviews.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${relativePageviews}%)`,
               },
               { icon: Icon.TwoPeople },
             ]}

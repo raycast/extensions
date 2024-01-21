@@ -58,7 +58,7 @@ export default function Command() {
             title={`${countryCodeToFlagEmoji(country.country_code)} ${countryMapping[country.country_code] || country.country_code}`}
             accessories={[
               {
-                text: `${country.pageviews.toLocaleString()} (${relativePageviews}%)`,
+                text: `${country.pageviews.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${relativePageviews}%)`,
               },
               { icon: Icon.TwoPeople },
             ]}

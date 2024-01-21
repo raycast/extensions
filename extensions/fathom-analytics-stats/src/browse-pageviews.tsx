@@ -48,7 +48,7 @@ export default function Command() {
             title={page.pathname}
             accessories={[
               {
-                text: `${page.pageviews.toLocaleString()} (${relativePageviews}%)`,
+                text: `${page.pageviews.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${relativePageviews}%)`,
               },
               { icon: Icon.TwoPeople },
             ]}
