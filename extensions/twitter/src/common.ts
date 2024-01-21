@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { getClientId } from "./v2/lib/oauth";
 
 export function shouldShowListWithDetails(): boolean {
   const pref = getPreferenceValues();
@@ -22,4 +23,12 @@ export function useV2(): boolean {
   }
   console.log("use v2");
   return true;*/
+}
+
+export function hasRestrictedAccess() {
+  const ci = getClientId();
+  if (!ci || ci === "" || ci === "-") {
+    return true;
+  }
+  return false;
 }

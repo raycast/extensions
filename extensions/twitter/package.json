@@ -44,41 +44,9 @@
       "name": "clientid",
       "type": "password",
       "title": "OAuth Client ID",
-      "required": true,
+      "required": false,
       "default": "",
       "description": "X OAuth Client ID From Your X Application"
-    },
-    {
-      "name": "appkey",
-      "type": "password",
-      "title": "API-key",
-      "required": false,
-      "default": "",
-      "description": "Twitter API API-key"
-    },
-    {
-      "name": "appsecret",
-      "type": "password",
-      "title": "App secret",
-      "required": false,
-      "default": "",
-      "description": "Twitter API App secret"
-    },
-    {
-      "name": "accesstoken",
-      "type": "password",
-      "title": "Access token",
-      "required": false,
-      "default": "",
-      "description": "Twitter API access token"
-    },
-    {
-      "name": "accesssecret",
-      "type": "password",
-      "title": "Access secret",
-      "required": false,
-      "default": "",
-      "description": "Twitter API access secret"
     },
     {
       "name": "listwithdetail",
