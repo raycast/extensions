@@ -10,7 +10,7 @@ export function shouldShowListWithDetails(): boolean {
 }
 
 export function useV2(): boolean {
-  return true;
+  return true; // v1 does not work anymore with X
   /*const pref = getPreferenceValues();
   const appKey = (pref.appkey as string) || "";
   const appSecret = (pref.appsecret as string) || "";

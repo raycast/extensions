@@ -43,9 +43,21 @@ Raycast extension to search or send tweets on [twitter.com](https://twitter.com)
   </p>
 </div>
 
+## State of this Extension
+
+> ⚠️ Read this before installing this Extension ⚠️
+
+Many features of the API are not available since the rebranding of Twitter to X. For most features, you need a paid account. Check out the X Developers guide for information about the pricing.
+
+I, the original author of this extension (Michael Aigner), do not have such a subscription, and therefore, I cannot really maintain it. If you have an OAuth key, this extension should still work in theory.
+
+I still call the extension `Twitter` because I'm not 100% sure it still works with x.com.
+
+Maybe somebody with an working OAuth key want to fix the extension.
+
 ## Features
 
-- Login via OAuth (default)
+- Login via OAuth (Bring your own X OAuth key)
 - Login with access tokens (optional)
 - Search Recent Tweets from your timeline
 - Search your own Tweets
@@ -99,16 +111,6 @@ You also need to activate `OAuth 1.0a` for at least `v1` API, otherwise you will
   - Set `https://raycast.com/redirect` as `Callback URI` 
   - Set `https://raycast.com` as Website URL
   - Press on `Save`
-
-## v1 vs v2 API
-Twitter has 2 APIs - `v1` and `v2`. Your Twitter app needs to have enabled `v1` access when you use access tokens, otherwise you will get a `403` error.
-The `v2` API of Twitter is still in progress and not all features are available.
-
-### Actual impl. differences between v1 and v2 mode in this extension
-
--  `v2` use 2 actions for `Like` and `Unlike` (v1 use one action which change it's state based on if the tweet is liked or not), because there is no way in v2 if the current user liked a given tweet or not
-- Retweet works as in `v1`, but un-retweet action needs to be done on the retweet itself. In `v1` it was done on the original one.
-- Search User command open twitter.com in the browser instead of show the result because there is no API for that in `v2`
 
 ## Showcases
 
