@@ -69,7 +69,6 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
   };
 
   async function browseProjects() {
-    setState((previous) => ({ ...previous, isLoading: true }));
     try {
       const cache = await loadCache<Project>("youtrack-projects");
 
@@ -89,7 +88,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
     } catch (err) {
       showToast({
         style: Toast.Style.Failure,
-        title: `Failed to fetch projects: ${(err as Error).message}. Check your connection.`,
+        title: "Failed to fetch projects. Check your connection.",
         primaryAction: openExtensionPreferencesAction,
         secondaryAction: openCommandPreferencesAction,
       });
@@ -100,7 +99,6 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
 
   async function prepareFavoriteProjects(favorites: string[]) {
     try {
-      setState((previous) => ({ ...previous, isLoading: true }));
       const cache = await loadCache<Project>("youtrack-favorite-projects");
       const { cached, toFetch } = prepareFavorites(cache, favorites);
 
@@ -138,15 +136,32 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         primaryAction: openCommandPreferencesAction,
         secondaryAction: openExtensionPreferencesAction,
       });
-      setState({ ...state, isLoading: false });
+      setState((previous) => ({ ...previous, isLoading: false }));
+      popToRoot();
+    }
+  }
+
+  async function prepareTags() {
+    setState((previous) => ({ ...previous, isLoading: true }));
+
+    try {
+      const tags = await fetchTags(yt);
+      setState((previous) => ({ ...previous, tags }));
+    } catch (err) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch tags. Check your connection.",
+        primaryAction: openExtensionPreferencesAction,
+        secondaryAction: openCommandPreferencesAction,
+      });
+      setState((previous) => ({ ...previous, isLoading: false }));
       popToRoot();
     }
   }
 
   useEffect(() => {
     async function init() {
-      const tags = await fetchTags(yt);
-      setState((previous) => ({ ...previous, tags }));
+      await prepareTags();
 
       if (state.mode === "all") {
         await browseProjects();
@@ -252,8 +267,8 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         </Form.Dropdown>
       )}
       <Form.TextField title="Summary" placeholder="Enter issue summary" {...itemProps.summary} />
-      <Form.TextArea title="Description" placeholder="Provide issue description(optional)" {...itemProps.description} />
-      <Form.TagPicker title="Tags" placeholder="Tags(optional)" {...itemProps.tags}>
+      <Form.TextArea title="Description" {...itemProps.description} />
+      <Form.TagPicker title="Tags" {...itemProps.tags}>
         {tags?.map(({ id, name }) => <Form.TagPicker.Item key={id} value={name} title={name} icon={Icon.Tag} />)}
       </Form.TagPicker>
     </Form>
