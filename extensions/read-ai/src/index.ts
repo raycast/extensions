@@ -154,7 +154,7 @@ class TextToSpeechProcessor {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Cannot speak selected text",
+        title: "Please select text first",
         message: String(error),
       });
     }
