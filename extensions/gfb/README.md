@@ -16,34 +16,11 @@ Before you start using this extension, ensure you have Raycast installed on your
 
 ## Configuration
 
-### Cache File
+To configure the leagues and teams you are interested in go to the extension's preferences and specify fairs of league IDs and Teams IDs.
 
-The extension uses a cache file to store match data. Follow these steps to create this file:
+To find the league and team IDs, you check the URLs from the FotMob website or use the FotMob API wrapper to fetch the data. For example, the [league ID for the English Premier League is 47](https://www.fotmob.com/leagues/47/overview/premier-league), and [the team ID for Manchester United is 10260](https://www.fotmob.com/teams/10260/overview/manchester-united).
 
-1. Navigate to the extension's configuration directory. On MacOS this:
-
-```
-/Users/username/.config/raycast/extensions/gfb/matchesCache.json
-```
-
-2. Create an empty file named `matchesCache.json`.
-
-### Setting Up Interested Leagues and Teams
-
-To configure the leagues and teams you are interested in:
-
-1. Open the `fetchLeagueMatches` function in the extension's code.
-2. Modify the `interestedLeagues` object. Use the format `"LeagueID": "TeamID"`. For example:
-
-   ```javascript
-   const interestedLeagues = {
-     9134: "189397", // League: Team
-     9907: "401657",
-     9227: "258657",
-   };
-   ```
-
-The extension currently supports selecting logic for only one team per league, i.e. "the team I support in that league". If you want to select multiple teams, you can modify the `fetchLeagueMatches` function to support this.
+The extension currently supports selecting logic for only one team per league, i.e. "the team I support in that league" but you can specify the same league multiple times.
 
 ## Usage
 
@@ -65,4 +42,4 @@ MIT
 
 ## Copyright
 
-© 2024- James Turnbull
+© 2024 - James Turnbull
