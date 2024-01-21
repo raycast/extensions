@@ -58,6 +58,20 @@
       "description": "Display the number of current visitors on your website.",
       "mode": "no-view",
       "interval": "60s"
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Open the dashboard of your website in Fathom Analytics.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-site-settings",
+      "title": "Open Site Settings",
+      "subtitle": "Fathom Analytics Stats",
+      "description": "Open the settings of your website in Fathom Analytics.",
+      "mode": "no-view"
     }
   ],
   "preferences": [

@@ -13,6 +13,8 @@ A Raycast extension to browse your website analytics coming from Fathom.
 | `Browse Browsers`           | Display your visitor browsers                                       |
 | `Browse Countries`          | Display your visitor countries                                      |
 | `Browse Devices`            | Display your visitor devices (desktop, tablet, mobile)              |
+| `Open Dashboard`            | Open your Fathom dashboard                                          |
+| `Open Site Settings`        | Open your Fathom site settings                                      |
 
 Each aggregation of page views is sorted in descending order, with a relative percentage to the total.
 
