@@ -1,11 +1,14 @@
 import { Cache, getPreferenceValues, List, ActionPanel, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import Fotmob from "fotmob";
-import { MatchData, MatchItem, Match, MatchStatus, Preferences } from "./types";
+import { MatchData, MatchItem, Preferences } from "./types";
 
 async function fetchLeagueMatches(): Promise<MatchData> {
   const fotmob = new Fotmob();
   const prefs = getPreferenceValues<Preferences>();
+  const startDateOffset = Number(prefs.startDateOffset) || 7;
+  const endDateOffset = Number(prefs.endDateOffset) || 30;
+  const allMatches: MatchData = [];
 
   const interestedLeagues = {
     [Number(prefs.league1)]: Number(prefs.team1),
@@ -28,12 +31,11 @@ async function fetchLeagueMatches(): Promise<MatchData> {
     return [];
   }
 
-  const allMatches: MatchData = [];
   const currentDate = new Date();
   const startDate = new Date();
-  startDate.setDate(currentDate.getDate() - 7);
+  startDate.setDate(currentDate.getDate() - startDateOffset);
   const endDate = new Date();
-  endDate.setDate(currentDate.getDate() + 30);
+  endDate.setDate(currentDate.getDate() + endDateOffset);
 
   for (const [leagueId, teamId] of Object.entries(interestedLeagues)) {
     try {
@@ -66,7 +68,20 @@ async function fetchLeagueMatches(): Promise<MatchData> {
               date: matchDate,
               leagueId: leagueId,
               leagueName: leagueData.details?.name ?? "",
-              match: match as Match,
+              away: {
+                name: match.away?.name ?? "",
+                score: match.away?.score,
+              },
+              home: {
+                name: match.home?.name ?? "",
+                score: match.home?.score,
+              },
+              status: {
+                utcTime: match.status?.utcTime ?? new Date(),
+                started: match.status?.started ?? false,
+                cancelled: match.status?.cancelled ?? false,
+                finished: match.status?.finished ?? false,
+              },
               matchLink: `https://www.fotmob.com${match.pageUrl}`,
               winner: winningTeam,
             });
@@ -80,17 +95,12 @@ async function fetchLeagueMatches(): Promise<MatchData> {
   return allMatches;
 }
 
-function getMatchStatus(match: MatchStatus) {
-  const { cancelled, finished, started } = match.status;
-  if (cancelled) {
-    return "cancelled";
-  }
-  if (finished) {
-    return "finished";
-  }
-  if (started) {
-    return "in-progress";
-  }
+function getMatchStatus(status: MatchItem["status"]) {
+  const { cancelled, finished, started } = status;
+
+  if (cancelled) return "cancelled";
+  if (finished) return "finished";
+  if (started) return "in-progress";
   return "upcoming";
 }
 
@@ -111,10 +121,10 @@ function formatDateTime(utcDateTime: Date) {
 
 function isToday(date: Date) {
   const today = new Date();
-  const isSameYear = date.getFullYear() === today.getFullYear();
-  const isSameMonth = date.getMonth() === today.getMonth();
-  const isSameDay = date.getDate() === today.getDate();
-  return isSameYear && isSameMonth && isSameDay;
+  const sameYear = date.getFullYear() === today.getFullYear();
+  const sameMonth = date.getMonth() === today.getMonth();
+  const sameDay = date.getDate() === today.getDate();
+  return sameYear && sameMonth && sameDay;
 }
 
 async function getCachedLeagueMatches(): Promise<MatchData> {
@@ -186,25 +196,22 @@ export default function MatchListCommand() {
         Object.entries(groupedMatches).map(([leagueName, matches], leagueIndex) => (
           <List.Section key={leagueIndex} title={leagueName}>
             {matches.map((match, matchIndex) => {
-              const status = getMatchStatus(match.match);
-              const dateTimeText = formatDateTime(new Date(match.match.status.utcTime));
+              const status = getMatchStatus(match.status);
+              const dateTimeText = formatDateTime(new Date(match.status.utcTime));
               let icon = "🔜";
-              let title = `${match.match.home.name} vs ${match.match.away.name}`;
+              let title = `${match.home.name} vs ${match.away.name}`;
 
               if (status === "finished") {
                 icon = "✅";
-                title += ` - ${match.match.home.score} - ${match.match.away.score}`;
+                title += ` - ${match.home.score} - ${match.away.score}`;
                 if (match.winner) {
-                  title +=
-                    match.winner === match.match.home.name
-                      ? ` 🏆 ${match.match.home.name}`
-                      : ` 🏆 ${match.match.away.name}`;
+                  title += match.winner === match.home.name ? ` 🏆 ${match.home.name}` : ` 🏆 ${match.away.name}`;
                 }
               } else if (status === "in-progress") {
                 icon = "⚽️";
               } else if (status === "cancelled") {
                 icon = "❌";
-              } else if (status === "upcoming" && isToday(new Date(match.match.status.utcTime))) {
+              } else if (status === "upcoming" && isToday(new Date(match.status.utcTime))) {
                 icon = "🕒";
               }
 

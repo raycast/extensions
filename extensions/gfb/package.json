@@ -30,6 +30,24 @@
     },
     {
       "type": "textfield",
+      "title": "Start Date Offset (in days)",
+      "description": "Number of days in the past to start searching for matches",
+      "name": "startDateOffset",
+      "placeholder": "Enter number of days in the past",
+      "default": "7",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "title": "End Date Offset (in days)",
+      "description": "Number of days in the future to end searching for matches",
+      "name": "endDateOffset",
+      "placeholder": "Enter number of days in the future",
+      "default": "30",
+      "required": false
+    },
+    {
+      "type": "textfield",
       "title": "League 1 ID",
       "description": "League 1 ID",
       "placeholder": "FotMob League ID",
