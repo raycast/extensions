@@ -25,7 +25,7 @@ async function fetchCurrentVisitorsCount() {
       throw new Error("Unable to fetch current visitors count");
     }
 
-    const data: Data = await response.json();
+    const data = (await response.json()) as Data;
     const { total } = data;
     return total.toLocaleString();
   } catch (error) {
