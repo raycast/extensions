@@ -8,7 +8,7 @@
     Twitter
   </h1>
 
-Raycast extension to search or send tweets on [twitter.com](https://twitter.com)
+Raycast extension Send Tweets on [twitter.com](https://twitter.com)
 
   <p>
     <a href="https://www.raycast.com/tonka3000/twitter">
@@ -45,34 +45,25 @@ Raycast extension to search or send tweets on [twitter.com](https://twitter.com)
 
 ## State of this Extension
 
-> ⚠️ Read this before installing this Extension ⚠️
+Many features of the X API are not available since the rebranding of Twitter to X. For most features, you need a paid account. Check out the X Developers guide for information about the pricing.
 
-Many features of the API are not available since the rebranding of Twitter to X. For most features, you need a paid account. Check out the X Developers guide for information about the pricing.
+I, the original author of this extension (Michael Aigner), do not have such a subscription, and therefore, I cannot really maintain features which require the paid API anymore. Some features maybe will not be restored because they don't exist in the X API yet.
+If you have an OAuth key, the command which requires it should still work in theory.
+Maybe somebody with an working OAuth key can fix bugs in the existing command which require a paid subscription.
 
-I, the original author of this extension (Michael Aigner), do not have such a subscription, and therefore, I cannot really maintain it. If you have an OAuth key, this extension should still work in theory.
+The affected commands are
 
-I still call the extension `Twitter` because I'm not 100% sure it still works with x.com.
+- My Recent Tweets
+- Recent Tweets
 
-Maybe somebody with an working OAuth key want to fix the extension.
+## Web Version
 
-## Features
+The following commands redirect to the web-site (including the entered content) when no OAuth key is set.
+This will keep at least some productivity 😁.
 
-- Login via OAuth (Bring your own X OAuth key)
-- Login with access tokens (optional)
-- Search Recent Tweets from your timeline
-- Search your own Tweets
-- Send Tweets (Thread)
-- Reply to Tweets
-- Retweet Tweets
-- Display Tweet content directly in Raycast
-- Search Twitter users
-- Tweet Metadata view like impressions (only with OAuth mode)
+- Send Tweet
+- Search User
 
-## Login
-
-The login works with `Login with Twitter`. `Login with Twitter` is activate as long as no access tokens are set in the extension preferences.
-When access tokens are set, the keys will be used for authentication and authorization instead of `Login with Twitter`. Also the API keys approach use `v1` of the Twitter API.
-`Login with Twitter` use v2.
 
 ### How to get the access token for the Twitter API (optional)
 

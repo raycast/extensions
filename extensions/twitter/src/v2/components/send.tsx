@@ -4,6 +4,7 @@ import { Tweet } from "../lib/twitter";
 import { clientV2 } from "../lib/twitterapi_v2";
 import { getErrorMessage } from "../../utils";
 import { hasRestrictedAccess } from "../../common";
+import { XIcon } from "../../icon";
 
 interface TweetFormValues {
   text: string;
@@ -187,7 +188,7 @@ export function TweetSendThreadFormV2({ defaultValue }: { defaultValue?: string 
         <ActionPanel>
           <ActionPanel.Section>
             {validTweets(tweets) && (
-              <Action.SubmitForm title={submitText} icon="twitter.png" onSubmit={() => submitTweets(tweets)} />
+              <Action.SubmitForm title={submitText} icon={XIcon()} onSubmit={() => submitTweets(tweets)} />
             )}
           </ActionPanel.Section>
           {!hasRestrictedAccess() && (

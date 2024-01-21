@@ -1,5 +1,6 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
+import { XIcon } from "../../icon";
 
 // Register a new OAuth app via https://developer.twitter.com/en/portal/dashboard
 // Select OAuth 2.0
@@ -19,9 +20,9 @@ export function getClientId(): string {
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Twitter",
-  providerIcon: "twitter.png",
+  providerIcon: XIcon(),
   providerId: "twitter",
-  description: "Connect your Twitter account",
+  description: "Connect your X account",
 });
 
 // Authorization
