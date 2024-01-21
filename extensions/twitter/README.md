@@ -45,10 +45,11 @@ Raycast extension Send Tweets on [twitter.com](https://twitter.com)
 
 ## State of this Extension
 
-Many features of the X API are not available since the rebranding of Twitter to X. For most features, you need a paid account. Check out the X Developers guide for information about the pricing.
+Many features of the X API are not available since the rebranding of Twitter to X. This affect some commands of this extension.
+For most features, you need a paid account. Check out the X Developers guide for information about the pricing.
 
 I, the original author of this extension (Michael Aigner), do not have such a subscription, and therefore, I cannot really maintain features which require the paid API anymore. Some features maybe will not be restored because they don't exist in the X API yet.
-If you have an OAuth key, the command which requires it should still work in theory.
+If you have an OAuth key, the commands which requires it should still work in theory.
 Maybe somebody with an working OAuth key can fix bugs in the existing command which require a paid subscription.
 
 The affected commands are
@@ -65,7 +66,7 @@ This will keep at least some productivity 😁.
 - Search User
 
 
-### How to get the access token for the Twitter API (optional)
+### How to get the access token for the X API (optional)
 
 This step is optional and is not required for normal usage.
 
