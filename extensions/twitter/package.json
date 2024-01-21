@@ -41,6 +41,14 @@
   ],
   "preferences": [
     {
+      "name": "clientid",
+      "type": "password",
+      "title": "OAuth Client ID",
+      "required": true,
+      "default": "",
+      "description": "X OAuth Client ID From Your X Application"
+    },
+    {
       "name": "appkey",
       "type": "password",
       "title": "API-key",

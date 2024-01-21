@@ -10,7 +10,8 @@ export function shouldShowListWithDetails(): boolean {
 }
 
 export function useV2(): boolean {
-  const pref = getPreferenceValues();
+  return true;
+  /*const pref = getPreferenceValues();
   const appKey = (pref.appkey as string) || "";
   const appSecret = (pref.appsecret as string) || "";
   const accessToken = (pref.accesstoken as string) || "";
@@ -20,5 +21,5 @@ export function useV2(): boolean {
     return false;
   }
   console.log("use v2");
-  return true;
+  return true;*/
 }
