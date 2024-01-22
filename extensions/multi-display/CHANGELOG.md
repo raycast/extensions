@@ -1,3 +1,3 @@
-# raycast-extensions-multi-display Changelog
+# Multi Display Changelog
 
-## [Initial Version] - 2024-01-17
+## [Initial Version] - {PR_MERGE_DATE}
