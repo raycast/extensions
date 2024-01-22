@@ -1,14 +1,30 @@
 # Read AI for Raycast
 
-This extension for Raycast allows users to utilize OpenAI's Text-to-Speech (TTS) API to audibly read selected text. It's a convenient tool for those who prefer to listen rather than read or for visually impaired users who need text read out loud.
+Feeling too lazy to read? No worries, we've got you covered! This Raycast extension is your go-to solution for those moments when reading feels like a chore. Leveraging OpenAI's Text-to-Speech (TTS) API, it transforms selected text into speech in a style of your choice. Perfect for those who prefer to listen, as well as for visually impaired users who benefit from auditory content. Sit back, relax, and let the extension do the reading for you, in the way you like it.
 
 ## Features
 
-- **Text-to-Speech**: Convert any selected text into speech with a simple command.
-- **Language Translation**: Optionally translate text to a specified language before speaking.
-- **Voice Selection**: Choose from multiple voices to personalize the listening experience.
-- **Subtitles**: Display subtitles for the spoken text if needed.
-- **Customizable Settings**: Adjust the temperature for AI responses, select the preferred GPT model, and choose the script style for the TTS output.
+1. **Advanced Text-to-Speech**: Go beyond traditional text-to-speech with a range of reading styles. Choose to have your text read in a:
+   - Summary Style: Provides a concise summary of the text.
+   - Detailed Style: Offers a detailed explanation of the text.
+   - Audio Book Style: Delivers a rich and immersive storytelling experience.
+   - Educational Style: Explains the text in an educational and informative manner.
+   - Explain Code Style: Ideal for developers, this style focuses on clearly explaining code snippets.
+   - Code Review Style: Get your code reviewed out loud with constructive feedback and commentary.
+   - News Style: For an informative and formal tone, similar to a newscaster.
+   - Podcast Style: Enjoy a conversational and engaging tone, akin to listening to a podcast.
+   - Tweet Style: Perfect for reading out social media posts or short messages.
+   - SparkNotes Style: Provides a quick and easy understanding of complex literature.
+   - And more!
+2. **Adapt to Content Type**: The extension intelligently adapts its reading style based on the type of content, enhancing comprehension and engagement.
+3. **Personalization and Accessibility**:
+   - Custom Voice Selection: Choose from a variety of voices to find the one that best suits your listening preference, whether it's for casual listening or professional use.
+   - Language Translation: Broaden your horizons by translating and listening to content in different languages.
+   - Subtitles Option: For those who prefer visual aid, enable subtitles to read along with the spoken text, improving accessibility and understanding.
+   - Customizable AI Settings: Tailor the text-to-speech output to your liking by adjusting AI response temperature, selecting the preferred GPT model, and more.
+4. **Enhanced User Experience**:
+   - Ideal for Various User Groups: Whether you're a student, a professional, a developer, or someone who enjoys listening to content rather than reading it, this extension is designed to cater to a wide array of needs.
+   - Accessibility for Visually Impaired: This extension is particularly useful for visually impaired users, offering them a means to access written content in an audible format.
 
 ## Installation
 
