@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Fixed] - {PR_MERGE_DATE}
+## [Fixed] - 2024-01-22
 
 - Resolve the issue of the 'Auto Fill with AI' executing too frequently.
 
