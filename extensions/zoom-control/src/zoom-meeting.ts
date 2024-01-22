@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { open, confirmAlert, showToast, Toast } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export enum ZoomMenuResult {
@@ -7,6 +7,31 @@ export enum ZoomMenuResult {
   NoMenu1 = "zoom-no-menu1",
   NoMenu2 = "zoom-no-menu2",
   Menu2Disabled = "zoom-menu-disabled",
+}
+
+export async function runAS(script: string, args: string[] = []): Promise<string> {
+  try {
+    const res = await runAppleScript<string>(script, args);
+    return res;
+  } catch (_e) {
+    console.log("runAppleScript error", _e);
+    const e = _e as Error;
+    if (e.message.includes("(-25211)")) {
+      const openAccessibility = await confirmAlert({
+        title: "Accessibility Permissions Required",
+        message:
+          "Raycast requires accessibility permissions to control Zoom meetings." +
+          "Would you like to open the Accessibility preferences?",
+        primaryAction: { title: "Open" },
+        dismissAction: { title: "Cancel" },
+      });
+      if (openAccessibility) {
+        open("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility");
+      }
+      return "";
+    }
+    throw e;
+  }
 }
 
 export async function zoomMenu(menu1: string, menu2: string): Promise<ZoomMenuResult> {
@@ -46,7 +71,7 @@ on run argv
 end run
 `;
 
-  const res = await runAppleScript<string>(script, [menu1, menu2]);
+  const res = await runAS(script, [menu1, menu2]);
   if (res == "zoom-not-running") {
     showFailureToast("Zoom not running");
     return ZoomMenuResult.HandledError;
@@ -106,7 +131,7 @@ on run argv
 end run
 `;
 
-  const res = await runAppleScript<string>(script, [menuItem]);
+  const res = await runAS(script, [menuItem]);
   if (res == "zoom-not-running") {
     showNoZoomMeeting();
     return ZoomMenuResult.HandledError;

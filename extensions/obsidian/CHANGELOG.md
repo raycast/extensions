@@ -1,5 +1,8 @@
 # Obsidian Changelog
 
+## [Copy Note Title action] - 2024-01-17
+- Add `Copy Note Title` action
+
 ## [Bugfixes and cache behavior tweak] - 2023-11-19
 - Will now skip the cache if the value is an empty array
 - Fixes a bug where no default application crashes the extension

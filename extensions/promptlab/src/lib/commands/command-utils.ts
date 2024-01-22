@@ -4,8 +4,9 @@ import { Command, CommandOptions, StoreCommand } from "./types";
 import { LocalStorage, AI } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { PLApplicator } from "placeholders-toolkit";
-import { PromptLabPlaceholders, loadCustomPlaceholders } from "../placeholders";
+import { loadCustomPlaceholders } from "../placeholders/utils";
 import { loadAdvancedSettingsSync } from "../storage-utils";
+import { PromptLabPlaceholders } from "../placeholders";
 
 /**
  * Runs the action script of a PromptLab command, providing the AI response as the `response` variable.
@@ -44,10 +45,7 @@ export const runActionScript = async (
       set input to "${input.replaceAll('"', '\\"')}"
       set response to "${response.replaceAll('"', '\\"')}"
       ${script}`,
-          {
-            customPlaceholders,
-            defaultPlaceholders: PromptLabPlaceholders,
-          },
+          { customPlaceholders, defaultPlaceholders: PromptLabPlaceholders },
         ),
       );
     } else if (type == "zsh") {
@@ -58,11 +56,8 @@ export const runActionScript = async (
         ${script.replaceAll("\n", " && ")}`;
 
         return new Promise((resolve, reject) => {
-          loadCustomPlaceholders(settings).then((customPlaceholders) => {
-            PLApplicator.bulkApply(shellScript, {
-              customPlaceholders,
-              defaultPlaceholders: PromptLabPlaceholders,
-            }).then((subbedScript) => {
+          PLApplicator.bulkApply(shellScript, { customPlaceholders, defaultPlaceholders: PromptLabPlaceholders }).then(
+            (subbedScript) => {
               exec(subbedScript, (error, stdout) => {
                 if (error) {
                   reject(error);
@@ -70,8 +65,8 @@ export const runActionScript = async (
                 }
                 resolve(stdout);
               });
-            });
-          });
+            },
+          );
         });
       };
       await runScript(script);
@@ -112,8 +107,6 @@ export const runReplacements = async (
   options?: CommandOptions,
 ): Promise<string> => {
   let subbedPrompt = prompt;
-  const settings = loadAdvancedSettingsSync();
-  const customPlaceholders = await loadCustomPlaceholders(settings);
 
   // Replace config placeholders
   if (options != undefined && options.setupConfig != undefined) {
@@ -126,10 +119,12 @@ export const runReplacements = async (
     }
   }
 
+  const settings = loadAdvancedSettingsSync();
+  const customPlaceholders = await loadCustomPlaceholders(settings);
   subbedPrompt = await PLApplicator.bulkApply(subbedPrompt, {
+    context,
     customPlaceholders,
     defaultPlaceholders: PromptLabPlaceholders,
-    context,
   });
 
   // Replace command placeholders
@@ -151,34 +146,4 @@ export const runReplacements = async (
   }
 
   return subbedPrompt;
-};
-
-/**
- * Updates a command with new data.
- * @param oldCommandData The old data object for the command.
- * @param newCommandData The new data object for the command.
- * @param setCommands The function to update the list of commands.
- */
-export const updateCommand = async (
-  oldCommandData: Command | undefined,
-  newCommandData: Command,
-  setCommands?: React.Dispatch<React.SetStateAction<Command[]>>,
-) => {
-  const commandData = await LocalStorage.allItems();
-  const commandDataFiltered = Object.values(commandData).filter((cmd, index) => {
-    return (
-      !Object.keys(commandData)[index].startsWith("--") &&
-      !Object.keys(commandData)[index].startsWith("id-") &&
-      (oldCommandData == undefined || JSON.parse(cmd).name != oldCommandData.name)
-    );
-  });
-
-  if (setCommands != undefined) {
-    setCommands([...commandDataFiltered.map((data) => JSON.parse(data)), newCommandData]);
-  }
-
-  if (oldCommandData != undefined && oldCommandData.name != newCommandData.name) {
-    await LocalStorage.removeItem(oldCommandData.name);
-  }
-  await LocalStorage.setItem(newCommandData.name, JSON.stringify(newCommandData));
 };

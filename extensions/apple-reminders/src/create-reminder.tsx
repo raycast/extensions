@@ -10,6 +10,7 @@ import {
   useNavigation,
   getPreferenceValues,
   LaunchProps,
+  PopToRootType,
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
@@ -183,7 +184,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Reminder" />
           <Action.SubmitForm
             onSubmit={async (values) => {
-              await closeMainWindow();
+              await closeMainWindow({ popToRootType: PopToRootType.Immediate });
               await handleSubmit(values as CreateReminderValues);
             }}
             title="Create Reminder and Close Window"

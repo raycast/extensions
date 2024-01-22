@@ -19,7 +19,9 @@ export default function Command() {
       isLoading={isLoading}
       icon={Icon.Clipboard}
       title={
-        userConfig.preview && data ? truncateText(data[0], Number(userConfig.truncate)).replace(/[\n\r]/g, "\\n") : ""
+        userConfig.preview && data && data.length > 0
+          ? truncateText(data[0], Number(userConfig.truncate)).replace(/[\n\r]/g, "\\n")
+          : ""
       }
     >
       <MenuBarExtra.Section title="Clipboard History">
@@ -27,7 +29,7 @@ export default function Command() {
           data.map((text, i) => (
             <MenuBarExtra.Item
               key={text + i}
-              title={truncateText(text, Number(userConfig.truncate))}
+              title={truncateText(text, Number(userConfig.truncate)).replace(/[\n\r]/g, "\\n")}
               onAction={() => Clipboard.paste(text)}
               icon={Icon.Clipboard}
             />

@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Fixes pop to root issue after creating reminders] - 2024-01-16
+
+- Fix an issue where `Create Reminder and Close Window` would stay on the `Create Reminder` screen after opening up Raycast again. Now, it should immediately pops to root after closing the window.
+
 ## [Add location-based reminders] - 2024-01-12
 
 - Add support for location-based reminders. You can now see which reminders have locations and easily create new ones with locations.
