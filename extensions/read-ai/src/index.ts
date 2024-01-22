@@ -1,4 +1,4 @@
-import { getSelectedText, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { getSelectedText, showToast, Toast, getPreferenceValues, closeMainWindow } from "@raycast/api";
 import { OpenAI } from "openai";
 import fs from "fs/promises";
 import path from "path";
@@ -54,6 +54,7 @@ class TextToSpeechProcessor {
    * @param {LanguageCode} [outputLanguage] - The language code for translation output.
    */
   public async processSelectedText() {
+    closeMainWindow();
     const currentIdentifier = Date.now().toString();
     await setCurrentCommandIdentifier(currentIdentifier);
 
