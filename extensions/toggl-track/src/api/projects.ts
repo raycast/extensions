@@ -1,8 +1,8 @@
 import { get } from "./togglClient";
 import { hideArchivedProjects } from "../helpers/preferences";
 
-export async function getProjects(workspaceId: number): Promise<Project[] | null> {
-  const projects = (await get<Project[] | null>(`/workspaces/${workspaceId}/projects?per_page=500`)) || [];
+export async function getMyProjects(): Promise<Project[]> {
+  const projects = (await get<Project[]>("/me/projects")) || [];
   return hideArchivedProjects ? projects.filter((p) => p.active) : projects;
 }
 

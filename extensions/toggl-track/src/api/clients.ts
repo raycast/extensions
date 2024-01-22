@@ -1,7 +1,7 @@
 import { get } from "./togglClient";
 
-export function getClients(workspaceId: number) {
-  return get<Client[] | null>(`/workspaces/${workspaceId}/clients`);
+export function getMyClients() {
+  return get<Client[]>("/me/clients");
 }
 
 // https://developers.track.toggl.com/docs/api/clients#response

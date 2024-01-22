@@ -1,6 +1,6 @@
 import { get, post, patch } from "./togglClient";
 
-export async function getTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
+export async function getMyTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
   const timeEntries = await get<TimeEntry[]>(
     `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`,
   );

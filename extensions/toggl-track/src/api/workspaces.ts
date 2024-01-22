@@ -1,7 +1,7 @@
 import { get } from "./togglClient";
 
-export function getWorkspaces() {
-  return get<Workspace[]>("/workspaces");
+export function getMyWorkspaces() {
+  return get<Workspace[]>("/me/workspaces");
 }
 
 // https://developers.track.toggl.com/docs/api/workspaces#response-4

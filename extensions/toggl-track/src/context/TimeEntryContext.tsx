@@ -65,10 +65,10 @@ export function TimeEntryContextProvider({ children }: { children: JSX.Element }
   const { timeEntries, timeEntriesError, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
   const { runningTimeEntry, runningTimeEntryError, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } =
     useRunningTimeEntry();
-  const { projects, projectsError, isLoadingProjects, revalidateProjects } = useProjects(workspaces);
-  const { clients, clientsError, isLoadingClients, revalidateClients } = useClients(workspaces);
-  const { tags, tagsError, isLoadingTags, revalidateTags } = useTags(workspaces);
-  const { tasks, tasksError, isLoadingTasks, revalidateTasks } = useTasks(workspaces);
+  const { projects, projectsError, isLoadingProjects, revalidateProjects } = useProjects();
+  const { clients, clientsError, isLoadingClients, revalidateClients } = useClients();
+  const { tags, tagsError, isLoadingTags, revalidateTags } = useTags();
+  const { tasks, tasksError, isLoadingTasks, revalidateTasks } = useTasks();
 
   const [projectGroups, setProjectGroups] = useCachedState<ProjectGroup[]>("projectGroups", []);
 
