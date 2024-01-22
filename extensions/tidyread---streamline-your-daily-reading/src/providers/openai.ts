@@ -78,6 +78,32 @@ class OpenaiProvider extends Provider {
       throw error;
     }
   }
+
+  async translate(content: string, lang = "English"): Promise<string> {
+    if (!this.available) return content;
+    const { apiModel, translatePrompt } = this.options;
+
+    const prompt = typeof translatePrompt === "function" ? translatePrompt(lang) : translatePrompt || "";
+
+    console.log("prompt is:", prompt);
+    console.log("content to be sum:", content);
+
+    try {
+      const stream = await this.client!.beta.chat.completions.stream({
+        model: apiModel ?? "gpt-3.5-turbo-16k",
+        messages: [
+          { role: "system", content: prompt! },
+          { role: "user", content: content },
+        ],
+        stream: true,
+      });
+      const chatCompletion = await stream.finalChatCompletion();
+      return chatCompletion.choices?.[0]?.message?.content ?? "";
+    } catch (error) {
+      console.error("Error translate content:", error);
+      throw error;
+    }
+  }
 }
 
 export { OpenaiProvider };

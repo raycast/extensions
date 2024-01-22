@@ -30,9 +30,47 @@ export function createAgent(): RequestOptions["agent"] | undefined {
   return httpProxy ? new HttpsProxyAgent(httpProxy) : undefined;
 }
 
+function getTranslateTitlesPrompt(lang: string) {
+  return `
+  ## Target
+  Translate each title in the array.
+
+  ## Example
+  Input:
+  ['Title 1', 'Title 2', 'Title 3', ...]
+
+  Output:
+  1.Title 1
+  2.Title 2
+  3.Title 3
+  ...
+
+  ## Requirements
+  1. Directly output the translated titles, without any other content.
+  2. Each output title must be translated into language: ${lang}
+  3. Maintain the original order.
+  4. Each title should start on a new line, separated by a blank line, rather than any other separators.
+  5. Each title is prefixed with a serial number.
+  `;
+}
+
+function parseOutput(output: string): string[] {
+  // 将输出按行分割成数组
+  const lines = output
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line !== "");
+
+  // 目标行
+  const targetLines = lines.filter((line) => line.match(/^\d+\s*?\./)).map((line) => line.replace(/^\d+\s*?\./, ""));
+
+  return targetLines;
+}
+
 export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Digest> {
   const preferences = normalizePreference();
   const {
+    preferredLanguage,
     apiHost,
     apiKey,
     apiModel,
@@ -50,7 +88,8 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     apiKey,
     apiModel,
     httpProxy,
-    summarizePrompt,
+    summarizePrompt: summarizePrompt.replaceAll("{{lang}}", preferredLanguage || "language of the content"),
+    translatePrompt: getTranslateTitlesPrompt(preferredLanguage || "language of the content"),
   });
 
   const sources = await getSources();
@@ -88,6 +127,13 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     httpProxy,
     maxApiConcurrency,
     requestTimeout,
+    translateTitles: !preferredLanguage
+      ? undefined
+      : async (titles) => {
+          const translatedTitles = await provider.translate(JSON.stringify(titles), preferredLanguage);
+          console.log("raw translated titles:", translatedTitles);
+          return parseOutput(translatedTitles);
+        },
     itemLinkFormat: (link, item) => {
       if (!tidyreadCloudAvailable || !enableItemLinkProxy) return link;
       return `https://tidyread.info/read?source_link=${encodeURIComponent(link)}&rss_link=${encodeURIComponent(
@@ -106,6 +152,23 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
   console.log("digest content:", finalDigest.content);
 
   return finalDigest;
+}
+
+export async function translateContent(content: string, targetLang: string = "English"): Promise<string> {
+  const preferences = normalizePreference();
+  const { apiHost, apiKey, apiModel, httpProxy } = preferences;
+  const Provider = PROVIDERS_MAP[preferences.provider];
+
+  const provider = new Provider({
+    apiHost,
+    apiKey,
+    apiModel,
+    httpProxy,
+  });
+
+  const translatedContent = await provider.translate(content, targetLang);
+
+  return translatedContent;
 }
 
 // e.g.: 9am, 10pm, 10:00, 10:05am, 23:12

@@ -197,6 +197,7 @@ export async function genDigest(options: {
   rssFeeds: RSSFeed[];
   httpProxy?: string;
   provider: Provider;
+  translateTitles?: (titles: string[]) => Promise<string[]>;
   maxApiConcurrency?: number;
   requestTimeout?: number;
   itemLinkFormat?: (link: string, item: RSSItem) => string;
@@ -219,7 +220,20 @@ export async function genDigest(options: {
 
   console.log(`${formatedItems.length} rss items found after filter`, formatedItems);
 
-  // 第三步：并发地对items进行概述
+  // 第三步：翻译titles
+  if (options.translateTitles) {
+    try {
+      const translatedTitles = await options.translateTitles(formatedItems.map((item) => item.title || ""));
+
+      formatedItems.forEach((item, index) => {
+        item.title = translatedTitles[index] ?? item.title;
+      });
+    } catch (err: any) {
+      console.error("translate titles failed", err);
+    }
+  }
+
+  // 第四步：并发地对items进行概述
   const summarizedItems = await Promise.all(
     formatedItems.map((item) => limit(() => summarizeItem(item, options.provider, options.requestTimeout))),
   );
@@ -231,7 +245,7 @@ export async function genDigest(options: {
 
   console.timeEnd(`gen digest ${now}`);
 
-  // 第四步：生成并返回摘要
+  // 第五步：生成并返回摘要
   return {
     content: generateDigestTemplate(options.provider, formatedItems),
     items: formatedItems.map((item) => ({

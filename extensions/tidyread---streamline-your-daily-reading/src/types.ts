@@ -32,6 +32,7 @@ export interface Preferences {
   apiKey?: string;
   apiModel?: string;
   apiHost?: string;
+  preferredLanguage?: string;
   httpProxy?: string;
   summarizePrompt?: string;
   maxItemsPerFeed?: number;
@@ -51,6 +52,7 @@ export interface ProviderOptions {
   apiModel?: string;
   httpProxy?: string;
   summarizePrompt?: string;
+  translatePrompt?: string | ((lang: string) => string);
 }
 
 export abstract class Provider {
@@ -63,4 +65,5 @@ export abstract class Provider {
 
   // 定义一个抽象方法
   abstract summarize(content: string): Promise<string>;
+  abstract translate(content: string, targetLang: string): Promise<string>;
 }

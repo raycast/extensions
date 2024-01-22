@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tidyread---streamline-your-daily-reading",
   "title": "TidyRead - Streamline Your Daily Reading",
-  "description": "Designed to manage and schedule your daily reading which offers a modern reading experience through AI-Powered digest.",
+  "description": "Designed to manage and schedule your daily reading which offers a modern reading experience through AI-Powered digest. \nVisit https://tidyread.info for more information.",
   "icon": "logo.png",
   "author": "jaredliu233",
   "categories": [
@@ -219,6 +219,13 @@
       ]
     },
     {
+      "name": "preferredLanguage",
+      "description": "If you configure the AI, it will automatically translate the article titles in the digest into your preferred language. You can also use the {{lang}} variable in the Summarize Prompt field.",
+      "type": "textfield",
+      "title": "Preferred Language",
+      "required": false
+    },
+    {
       "name": "notificationTime",
       "description": "Notification time for daily digest, e.g.: 9am, 10:30pm.",
       "type": "textfield",
@@ -245,7 +252,7 @@
       "description": "For each RSS item, it will be summarized by the provider, and you can customize the summarize prompt",
       "type": "textfield",
       "title": "Summarize Prompt",
-      "default": "## Target\n\nsummarize the contents\n\n## Requirements\n\n- Output a minimum of 50 characters, maximum of 200 characters\n\n- Remove from the summary any references to author publicity and promotion.\n\n- Output the summarized content in a straightforward manner, without restating the requirements.\n\n## Respond Language\n\nRespond in the language of the user input content, not the language of the prompt itself.",
+      "default": "Summarize the content within 50 to 200 characters, excluding any references to author publicity and promotion. The summary should be straightforward and in {{lang}}.",
       "required": false
     },
     {

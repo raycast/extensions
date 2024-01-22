@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types";
 import { isNumber, isEmpty } from "lodash";
 
-const DEFAULT_PROMPT = `## Target\n\nsummarize the contents\n\n## Requirements\n\n- Output a minimum of 50 characters, maximum of 200 characters\n\n- Remove from the summary any references to author publicity and promotion.\n\n- Output the summarized content in a straightforward manner, without restating the requirements.\n\n## Respond Language\n\nRespond in the language of the user input content, not the language of the prompt itself.`;
+const DEFAULT_PROMPT = `Summarize the content within 50 to 200 characters, excluding any references to author publicity and promotion. The summary should be straightforward and in {{lang}}.`;
 
 function isNum(value?: string) {
   if (isEmpty((value || "").trim())) return false;
@@ -18,6 +18,7 @@ export function normalizePreference(): Required<Preferences> {
     apiKey: values.apiKey || "",
     apiModel: values.apiModel || "gpt-3.5-turbo-16k",
     apiHost: values.apiHost || "",
+    preferredLanguage: values.preferredLanguage || "",
     httpProxy: values.httpProxy || "",
     summarizePrompt: (values.summarizePrompt || "").trim() || DEFAULT_PROMPT,
     maxItemsPerFeed: isNum(values.maxItemsPerFeed) ? +values.maxItemsPerFeed : 10,
