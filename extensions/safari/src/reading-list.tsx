@@ -32,7 +32,7 @@ const Command = () => {
         const filteredBookmarks = search(
           bookmarks,
           ["title", "url", "description"],
-          searchText
+          searchText,
         ) as ReadingListBookmark[];
 
         return <ReadingListSection key={key} title={key} filteredBookmarks={filteredBookmarks} />;

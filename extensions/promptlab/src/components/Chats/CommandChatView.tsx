@@ -1,16 +1,20 @@
 import { Color, Form, Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useModel from "../../hooks/useModel";
-import { Chat, CommandOptions, ExtensionPreferences } from "../../utils/types";
-import { runActionScript, runReplacements } from "../../utils/command-utils";
+import { Chat } from "../../lib/chats/types";
+import { ExtensionPreferences } from "../../lib/preferences/types";
+import { CommandOptions } from "../../lib/commands/types";
+import { runActionScript, runReplacements } from "../../lib/commands/command-utils";
+import { deleteChat } from "../../lib/chats";
 import { useChats } from "../../hooks/useChats";
-import runModel from "../../utils/runModel";
+import runModel from "../../lib/models/runModel";
 import { useFiles as useFileContents } from "../../hooks/useFiles";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
 import { ChatActionPanel } from "./actions/ChatActionPanel";
 import { useCachedState } from "@raycast/utils";
-import { PLChecker } from "placeholders-toolkit";
-import { PromptLabPlaceholders, loadCustomPlaceholders } from "../../lib/placeholders";
+import { loadCustomPlaceholders } from "../../lib/placeholders/utils";
+import { PromptLabPlaceholders } from "../../lib/placeholders";
+import { PLApplicator } from "placeholders-toolkit";
 
 interface CommandPreferences {
   useSelectedFiles: boolean;
@@ -358,7 +362,7 @@ export default function CommandChatView(props: {
     chats.revalidate().then(() => {
       setPreviousResponse("");
       if (chat && !chats.checkExists(chat)) {
-        chats.deleteChat(chat.name);
+        deleteChat(chat);
         setCurrentChat(undefined);
         showToast({ title: "Chat Doesn't Exist", style: Toast.Style.Failure });
         chats.revalidate();
@@ -460,24 +464,23 @@ export default function CommandChatView(props: {
         id="queryField"
         value={query}
         info={promptInfo}
-        onChange={(value) => {
+        onChange={async (value) => {
           setQuery(value);
-          loadCustomPlaceholders(advancedSettings).then((customPlaceholders) => {
-            PLChecker.checkForPlaceholders(value, {
-              customPlaceholders,
-              defaultPlaceholders: PromptLabPlaceholders,
-            }).then((includedPlaceholders) => {
-              let newPromptInfo =
-                defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
-              includedPlaceholders.forEach((placeholder) => {
-                newPromptInfo =
-                  newPromptInfo +
-                  `\n\n${placeholder.hintRepresentation || ""}: ${placeholder.description}\nExample: ${
-                    placeholder.example
-                  }`;
-              });
-              setPromptInfo(newPromptInfo);
+          const customPlaceholders = await loadCustomPlaceholders(advancedSettings);
+          PLApplicator.checkForPlaceholders(value, {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          }).then((includedPlaceholders) => {
+            let newPromptInfo =
+              defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
+            includedPlaceholders.forEach((placeholder) => {
+              newPromptInfo =
+                newPromptInfo +
+                `\n\n${placeholder.hintRepresentation || ""}: ${placeholder.description}\nExample: ${
+                  placeholder.example
+                }`;
             });
+            setPromptInfo(newPromptInfo);
           });
         }}
         autoFocus={true}

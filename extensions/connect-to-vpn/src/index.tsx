@@ -77,8 +77,11 @@ export default function Command() {
   };
 
   const showPPPoEStatus = (networkServiceName: string): Promise<NetworkServiceStatus> => {
+    // Escape double quotes in Network Service Name
+    networkServiceName = networkServiceName.replace(/"/g, '\\"');
+
     return new Promise((resolve, reject) => {
-      exec(`/usr/sbin/networksetup -showpppoestatus '${networkServiceName}'`, (err, stdout) => {
+      exec(`/usr/sbin/networksetup -showpppoestatus "${networkServiceName}"`, (err, stdout) => {
         if (err != null) {
           reject(err);
         } else {
@@ -129,7 +132,10 @@ export default function Command() {
   };
 
   const connectToPPPoEService = (service: NetworkService) => {
-    exec(`/usr/sbin/networksetup -connectpppoeservice '${service.name}'`, (err) => {
+    // Escape double quotes in Network Service Name
+    const networkServiceName = service.name.replace(/"/g, '\\"');
+
+    exec(`/usr/sbin/networksetup -connectpppoeservice "${networkServiceName}"`, (err) => {
       if (err != null) {
         setError(err);
         return;
@@ -146,7 +152,10 @@ export default function Command() {
   };
 
   const disconnectFromPPPoEService = (service: NetworkService) => {
-    exec(`/usr/sbin/networksetup -disconnectpppoeservice '${service.name}'`, (err) => {
+    // Escape double quotes in Network Service Name
+    const networkServiceName = service.name.replace(/"/g, '\\"');
+
+    exec(`/usr/sbin/networksetup -disconnectpppoeservice "${networkServiceName}"`, (err) => {
       if (err != null) {
         setError(err);
         return;

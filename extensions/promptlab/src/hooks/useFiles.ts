@@ -1,4 +1,7 @@
-import { CommandOptions, ERRORTYPE, ExtensionPreferences, Model } from "../utils/types";
+import { ERRORTYPE } from "../lib/common/types";
+import { Model } from "../lib/models/types";
+import { ExtensionPreferences } from "../lib/preferences/types";
+import { CommandOptions } from "../lib/commands/types";
 import { useEffect, useState } from "react";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import path from "path";
@@ -10,13 +13,13 @@ import {
   videoFileExtensions,
   spreadsheetFileExtensions,
 } from "../data/file-extensions";
-import { ScriptRunner, execScript } from "../utils/scripts";
-import { getAudioDetails, getImageDetails, unzipToTemp } from "../utils/file-utils";
-import { filterString } from "../utils/context-utils";
+import { ScriptRunner, execScript } from "../lib/scripts";
+import { getAudioDetails, getImageDetails, unzipToTemp } from "../lib/files/file-utils";
+import { filterString } from "../lib/context-utils";
 import mammoth from "mammoth";
 import xlsx from "xlsx";
 import pptxTextParser from "pptx-text-parser";
-import { loadAdvancedSettingsSync } from "../utils/storage-utils";
+import { loadAdvancedSettingsSync } from "../lib/storage-utils";
 import { useAdvancedSettings } from "./useAdvancedSettings";
 import { useModels } from "./useModels";
 import { defaultAdvancedSettings } from "../data/default-advanced-settings";

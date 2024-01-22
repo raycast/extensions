@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
@@ -189,13 +189,6 @@
       "mode": "no-view"
     },
     {
-      "name": "search-swift-package-index.command",
-      "title": "Search Swift Package Index",
-      "subtitle": "Xcode",
-      "description": "Search Swift Package Index.",
-      "mode": "view"
-    },
-    {
       "name": "add-swift-package.command",
       "title": "Add Swift Package",
       "subtitle": "Xcode",
@@ -279,8 +272,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "plist": "^3.0.6",

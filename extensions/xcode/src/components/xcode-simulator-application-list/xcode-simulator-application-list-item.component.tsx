@@ -12,7 +12,7 @@ import { XcodeSimulatorSendPushNotificationForm } from "../xcode-simulator-list/
 /**
  * Xcode Simulator Application List Item
  */
-export function XcodeSimulatorApplicationListItem(props: { application: XcodeSimulatorApplication }): JSX.Element {
+export function XcodeSimulatorApplicationListItem(props: { application: XcodeSimulatorApplication }) {
   return (
     <List.Item
       icon={{
