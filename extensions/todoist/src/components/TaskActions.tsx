@@ -257,7 +257,12 @@ export default function TaskActions({
           type={Action.PickDate.Type.DateTime}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onChange={(date) =>
-            updateTask({ id: task.id, due: date ? { date: getAPIDate(date) } : { string: "no due date" } })
+            updateTask({
+              id: task.id,
+              due: date
+                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
+                : { string: "no due date" },
+            })
           }
         />
 
