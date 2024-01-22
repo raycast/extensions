@@ -1,107 +1,110 @@
-import { Cache, getPreferenceValues, List, ActionPanel, Action } from "@raycast/api";
-import { useState, useEffect } from "react";
-import Fotmob from "fotmob";
-import { MatchData, MatchItem, Preferences } from "./types";
+import { getPreferenceValues, List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import fetch from "node-fetch";
+import { LeagueData, MatchData, MatchItem, Preferences } from "./types";
 
 async function fetchLeagueMatches(): Promise<MatchData> {
-  const fotmob = new Fotmob();
   const prefs = getPreferenceValues<Preferences>();
   const startDateOffset = Number(prefs.startDateOffset) || 7;
   const endDateOffset = Number(prefs.endDateOffset) || 30;
+  const currentDate = new Date();
+  const startDate = new Date(currentDate.setDate(currentDate.getDate() - startDateOffset));
+  const endDate = new Date(currentDate.setDate(currentDate.getDate() + endDateOffset));
+
+  const interestedLeagues = getInterestedLeagues(prefs);
   const allMatches: MatchData = [];
 
-  const interestedLeagues = {
-    [Number(prefs.league1)]: Number(prefs.team1),
-    [Number(prefs.league2)]: Number(prefs.team2),
-    [Number(prefs.league3)]: Number(prefs.team3),
-    [Number(prefs.league4)]: Number(prefs.team4),
-    [Number(prefs.league5)]: Number(prefs.team5),
-  };
-
-  Object.keys(interestedLeagues).forEach((key) => {
-    const leagueId = Number(key);
-    const teamId = interestedLeagues[leagueId];
-
-    if (!leagueId || !teamId || isNaN(leagueId) || isNaN(teamId)) {
-      delete interestedLeagues[leagueId];
-    }
-  });
-
-  if (Object.keys(interestedLeagues).length === 0) {
-    return [];
-  }
-
-  const currentDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(currentDate.getDate() - startDateOffset);
-  const endDate = new Date();
-  endDate.setDate(currentDate.getDate() + endDateOffset);
-
   for (const [leagueId, teamId] of Object.entries(interestedLeagues)) {
-    try {
-      console.log(`Fetching league data for ${leagueId}`);
-      const leagueData = await fotmob.getLeague(Number(leagueId), "overview", "league", "America/New_York");
-
-      if (leagueData && leagueData.overview && leagueData.overview.leagueOverviewMatches) {
-        for (const match of leagueData.overview.leagueOverviewMatches) {
-          if (!match.id) {
-            continue;
-          }
-
-          const matchDate = match.status?.utcTime ? new Date(match.status.utcTime) : new Date();
-          if (
-            matchDate >= startDate &&
-            matchDate <= endDate &&
-            (Number(match.home?.id) === teamId || Number(match.away?.id) === teamId)
-          ) {
-            const isMatchCompleted = match.status?.finished ?? false;
-            let winningTeam = "";
-            if (isMatchCompleted) {
-              if ((match.home?.score ?? 0) > (match.away?.score ?? 0)) {
-                winningTeam = match.home?.name ?? "";
-              } else if ((match.home?.score ?? 0) < (match.away?.score ?? 0)) {
-                winningTeam = match.away?.name ?? "";
-              }
-            }
-
-            allMatches.push({
-              date: matchDate,
-              leagueId: leagueId,
-              leagueName: leagueData.details?.name ?? "",
-              away: {
-                name: match.away?.name ?? "",
-                score: match.away?.score,
-              },
-              home: {
-                name: match.home?.name ?? "",
-                score: match.home?.score,
-              },
-              status: {
-                utcTime: match.status?.utcTime ?? new Date(),
-                started: match.status?.started ?? false,
-                cancelled: match.status?.cancelled ?? false,
-                finished: match.status?.finished ?? false,
-              },
-              matchLink: `https://www.fotmob.com${match.pageUrl}`,
-              winner: winningTeam,
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error(`Error fetching league data for ${leagueId}:`, error);
-    }
+    console.log(`Fetching matches for league ${leagueId} and team ${teamId}`);
+    const matches = await getLeagueMatches(Number(leagueId), teamId, startDate, endDate);
+    allMatches.push(...matches);
   }
+
   return allMatches;
 }
 
-function getMatchStatus(status: MatchItem["status"]) {
-  const { cancelled, finished, started } = status;
+function getInterestedLeagues(prefs: Preferences): Record<number, number> {
+  const interestedLeagues: Record<number, number> = {};
 
-  if (cancelled) return "cancelled";
-  if (finished) return "finished";
-  if (started) return "in-progress";
-  return "upcoming";
+  for (let i = 1; i <= 5; i++) {
+    const leagueId = Number(prefs[`league${i}` as keyof Preferences]);
+    const teamId = Number(prefs[`team${i}` as keyof Preferences]);
+    if (leagueId && teamId && !isNaN(leagueId) && !isNaN(teamId)) {
+      interestedLeagues[leagueId] = teamId;
+    }
+  }
+
+  return interestedLeagues;
+}
+
+async function getLeagueMatches(leagueId: number, teamId: number, startDate: Date, endDate: Date): Promise<MatchData> {
+  const url = `https://www.fotmob.com/api/leagues?id=${leagueId}&tab=overview&type=league&timeZone="America/New_York"`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Error fetching league data: ${response.statusText}`);
+    }
+    const leagueData = (await response.json()) as LeagueData;
+
+    if (leagueData?.overview?.leagueOverviewMatches) {
+      return leagueData.overview.leagueOverviewMatches
+        .filter((match: MatchItem) => isValidMatch(match as MatchItem, teamId, startDate, endDate))
+        .map((match: MatchItem) => processMatchData(match as MatchItem, leagueId, leagueData.details?.name ?? ""));
+    }
+  } catch (error) {
+    console.error(`Error fetching league data for ${leagueId}:`, error);
+  }
+  return [];
+}
+
+function isValidMatch(match: MatchItem, teamId: number, startDate: Date, endDate: Date) {
+  const matchDate = new Date(match.status?.utcTime || Date.now());
+  return (
+    matchDate >= startDate &&
+    matchDate <= endDate &&
+    (Number(match.home?.id) === teamId || Number(match.away?.id) === teamId)
+  );
+}
+
+function processMatchData(match: MatchItem, leagueId: number, leagueName: string) {
+  const isMatchCompleted = match.status?.finished ?? false;
+  const winningTeam = isMatchCompleted ? determineWinningTeam(match) : "";
+
+  const date = new Date(match.status?.utcTime ?? new Date());
+  const away = {
+    id: match.away?.id ?? "",
+    name: match.away?.name ?? "",
+    score: match.away?.score,
+  };
+  const home = {
+    id: match.home?.id ?? "",
+    name: match.home?.name ?? "",
+    score: match.home?.score,
+  };
+  const status = {
+    utcTime: match.status?.utcTime ?? new Date(),
+    started: match.status?.started ?? false,
+    cancelled: match.status?.cancelled ?? false,
+    finished: isMatchCompleted,
+  };
+  const pageUrl = match.pageUrl;
+  const matchLink = `https://www.fotmob.com${pageUrl}`;
+
+  return { date, leagueId, leagueName, away, home, status, pageUrl, matchLink, winner: winningTeam };
+}
+
+function determineWinningTeam(match: MatchItem) {
+  const homeScore = match.home?.score ?? 0;
+  const awayScore = match.away?.score ?? 0;
+
+  if (homeScore > awayScore) {
+    return match.home?.name ?? "";
+  } else if (homeScore < awayScore) {
+    return match.away?.name ?? "";
+  }
+
+  return "";
 }
 
 function formatDateTime(utcDateTime: Date) {
@@ -109,77 +112,38 @@ function formatDateTime(utcDateTime: Date) {
   const timeOptions: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", hour12: true };
 
   const formattedDate = utcDateTime.toLocaleDateString("en-US", dateOptions);
-
-  const easternTimeFormatter = new Intl.DateTimeFormat("en-US", { ...timeOptions, timeZone: "America/New_York" });
-  const easternTime = easternTimeFormatter.format(utcDateTime);
-
-  const utcTimeFormatter = new Intl.DateTimeFormat("en-US", { ...timeOptions, timeZone: "UTC" });
-  const formattedUtcTime = utcTimeFormatter.format(utcDateTime);
+  const easternTime = new Intl.DateTimeFormat("en-US", { ...timeOptions, timeZone: "America/New_York" }).format(
+    utcDateTime,
+  );
+  const formattedUtcTime = new Intl.DateTimeFormat("en-US", { ...timeOptions, timeZone: "UTC" }).format(utcDateTime);
 
   return `${formattedDate} at ${easternTime} (${formattedUtcTime} UTC)`;
 }
 
 function isToday(date: Date) {
   const today = new Date();
-  const sameYear = date.getFullYear() === today.getFullYear();
-  const sameMonth = date.getMonth() === today.getMonth();
-  const sameDay = date.getDate() === today.getDate();
-  return sameYear && sameMonth && sameDay;
-}
-
-async function getCachedLeagueMatches(): Promise<MatchData> {
-  const cache = new Cache({ namespace: "MatchListCache", capacity: 10 * 1024 * 1024 });
-  const preferences = getPreferenceValues<Preferences>();
-  const cacheExpiryTimeInMinutes = Number(preferences.cacheExpiryTime) || 60;
-  const cacheExpiryTime = cacheExpiryTimeInMinutes * 60 * 1000;
-
-  const cachedData = cache.get("matches");
-  const cachedTimestamp = cache.get("matchesTimestamp");
-
-  const currentTime = Date.now();
-
-  if (cachedData && cachedTimestamp && currentTime - parseInt(cachedTimestamp, 10) < cacheExpiryTime) {
-    return JSON.parse(cachedData);
-  } else {
-    const matches = await fetchLeagueMatches();
-    cache.set("matches", JSON.stringify(matches));
-    cache.set("matchesTimestamp", currentTime.toString());
-    return matches;
-  }
+  return date.toDateString() === today.toDateString();
 }
 
 export default function MatchListCommand() {
-  const [groupedMatches, setMatches] = useState<Record<string, MatchItem[]> | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    data: matches,
+    isLoading,
+    error,
+  } = useCachedPromise(fetchLeagueMatches, [], {
+    initialData: [],
+    keepPreviousData: true,
+  });
 
-  useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      try {
-        const matches = await getCachedLeagueMatches();
-        const grouped = matches.reduce((acc: Record<string, MatchItem[]>, match: MatchItem) => {
-          (acc[match.leagueName] = acc[match.leagueName] || []).push(match);
-          return acc;
-        }, {});
-        setMatches(grouped);
-      } catch (error) {
-        console.error("Error fetching matches:", error);
-        setMatches({});
-      }
-      setIsLoading(false);
-    }
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <List isLoading={true}>
-        <List.EmptyView title="Loading matches..." description="Please wait while we fetch the latest matches." />
-      </List>
-    );
+  if (error) {
+    showToast(Toast.Style.Failure, "Failed to fetch matches", error.message);
   }
 
-  if (Object.keys(groupedMatches || {}).length === 0) {
+  if (isLoading && matches.length === 0) {
+    return <List isLoading={true} />;
+  }
+
+  if (matches.length === 0) {
     return (
       <List>
         <List.EmptyView
@@ -190,47 +154,86 @@ export default function MatchListCommand() {
     );
   }
 
+  const groupedMatches = groupMatchesByLeague(matches);
+
   return (
     <List>
-      {groupedMatches &&
-        Object.entries(groupedMatches).map(([leagueName, matches], leagueIndex) => (
-          <List.Section key={leagueIndex} title={leagueName}>
-            {matches.map((match, matchIndex) => {
-              const status = getMatchStatus(match.status);
-              const dateTimeText = formatDateTime(new Date(match.status.utcTime));
-              let icon = "🔜";
-              let title = `${match.home.name} vs ${match.away.name}`;
-
-              if (status === "finished") {
-                icon = "✅";
-                title += ` - ${match.home.score} - ${match.away.score}`;
-                if (match.winner) {
-                  title += match.winner === match.home.name ? ` 🏆 ${match.home.name}` : ` 🏆 ${match.away.name}`;
-                }
-              } else if (status === "in-progress") {
-                icon = "⚽️";
-              } else if (status === "cancelled") {
-                icon = "❌";
-              } else if (status === "upcoming" && isToday(new Date(match.status.utcTime))) {
-                icon = "🕒";
-              }
-
-              return (
-                <List.Item
-                  key={matchIndex}
-                  icon={icon}
-                  title={title}
-                  accessories={[{ text: dateTimeText }]}
-                  actions={
-                    <ActionPanel>
-                      <Action.OpenInBrowser url={match.matchLink} title="Open Match Details" />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </List.Section>
-        ))}
+      {Object.entries(groupedMatches).map(([leagueName, matches], leagueIndex) => (
+        <List.Section key={leagueIndex} title={leagueName}>
+          {matches.map((match, matchIndex) => (
+            <MatchItem key={matchIndex} match={match} />
+          ))}
+        </List.Section>
+      ))}
     </List>
+  );
+}
+
+function groupMatchesByLeague(matches: MatchItem[]): Record<string, MatchItem[]> {
+  return matches.reduce((acc: Record<string, MatchItem[]>, match: MatchItem) => {
+    (acc[match.leagueName] = acc[match.leagueName] || []).push(match);
+    return acc;
+  }, {});
+}
+
+function getMatchStatus(status: MatchItem["status"]) {
+  const { cancelled, finished, started, utcTime } = status;
+
+  if (cancelled) return "cancelled";
+  if (finished) return "finished";
+  if (started) return "in-progress";
+  if (!started && !cancelled && !finished && isToday(new Date(utcTime))) return "today";
+  return "upcoming";
+}
+
+function MatchItem({ match }: { match: MatchItem }) {
+  const status = getMatchStatus(match.status);
+  const dateTimeText = formatDateTime(new Date(match.status.utcTime));
+  const icon = getMatchIcon(status);
+  const title = getMatchTitle(match, status);
+  const actions = getMatchActions(match);
+  return <List.Item icon={icon} title={title} accessories={[{ text: dateTimeText }]} actions={actions} />;
+}
+
+function getMatchIcon(status: string): string {
+  switch (status) {
+    case "finished":
+      return "✅";
+    case "in-progress":
+      return "⚽️";
+    case "cancelled":
+      return "❌";
+    case "today":
+      return "🕒";
+    default:
+      return "🔜";
+  }
+}
+
+function getMatchTitle(match: MatchItem, status: string): string {
+  if (status === "finished") {
+    return getFinishedMatchTitle(match);
+  }
+  return `${match.home.name} vs ${match.away.name}`;
+}
+
+function getFinishedMatchTitle(match: MatchItem): string {
+  let title = `${match.home.name} vs ${match.away.name}`;
+  if (match.winner) {
+    if (match.winner === match.home.name) {
+      title = `${match.home.name} 🏆 vs ${match.away.name}`;
+    } else {
+      title = `${match.home.name} vs ${match.away.name} 🏆`;
+    }
+    title += ` (${match.home.score} - ${match.away.score})`;
+  }
+  return title;
+}
+
+function getMatchActions(match: MatchItem): JSX.Element {
+  return (
+    <ActionPanel>
+      <Action.OpenInBrowser url={match.matchLink} title="Open Match Details" />
+    </ActionPanel>
   );
 }

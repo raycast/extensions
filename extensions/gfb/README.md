@@ -18,7 +18,7 @@ Before you start using this extension, ensure you have Raycast installed on your
 
 To configure the leagues and teams you are interested in go to the extension's preferences and specify fairs of league IDs and Teams IDs.
 
-To find the league and team IDs, you check the URLs from the FotMob website or use the FotMob API wrapper to fetch the data. For example, the [league ID for the English Premier League is 47](https://www.fotmob.com/leagues/47/overview/premier-league), and [the team ID for Manchester United is 10260](https://www.fotmob.com/teams/10260/overview/manchester-united).
+To find the league and team IDs, you check the URLs from the FotMob website. For example, the [league ID for the English Premier League is 47](https://www.fotmob.com/leagues/47/overview/premier-league), and [the team ID for Manchester United is 10260](https://www.fotmob.com/teams/10260/overview/manchester-united).
 
 The extension currently supports selecting logic for only one team per league, i.e. "the team I support in that league" but you can specify the same league multiple times.
 
@@ -33,7 +33,6 @@ For any issues or feature requests, please submit an issue on the project's GitH
 ## Acknowledgements
 
 - [FotMob](https://www.fotmob.com/) for providing the API used by this extension.
-- [FotMob API wrapper](https://github.com/bgrnwd/fotmob) for providing the API wrapper used by this extension.
 - [Raycast](https://raycast.com/) for creating the platform this extension runs on.
 
 ## License
