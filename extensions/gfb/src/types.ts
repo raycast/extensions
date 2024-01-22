@@ -41,10 +41,7 @@ export type LeagueData = {
   };
 };
 
-export type LeaguePair = Record<string, string>;
-
 export type Preferences = {
-  cacheExpiryTime: string;
   startDateOffset: string;
   endDateOffset: string;
   team1: string;
