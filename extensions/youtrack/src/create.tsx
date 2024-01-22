@@ -145,7 +145,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
     setState((previous) => ({ ...previous, isLoading: true }));
 
     try {
-      const tags = await fetchTags(yt);
+      const tags = await fetchTags(Number(prefs.maxTags), yt);
       setState((previous) => ({ ...previous, tags }));
     } catch (err) {
       showToast({
@@ -255,14 +255,14 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
           info={projectDraftError}
           {...itemProps.projectId}
         >
-          {projects.map(({ id, name }) => (
-            <Form.Dropdown.Item key={id} value={id} title={name} icon={Icon.Layers} />
+          {projects.map(({ id, name, shortName }) => (
+            <Form.Dropdown.Item key={id} value={id} title={name} icon={Icon.Layers} keywords={[shortName]} />
           ))}
         </Form.Dropdown>
       ) : (
         <Form.Dropdown title="Project" autoFocus info={projectDraftError} {...itemProps.favorite}>
-          {favoriteProjects.map(({ id, name }) => (
-            <Form.Dropdown.Item key={id} value={id} title={name} icon={Icon.Star} />
+          {favoriteProjects.map(({ id, name, shortName }) => (
+            <Form.Dropdown.Item key={id} value={id} title={name} icon={Icon.Star} keywords={[shortName]} />
           ))}
         </Form.Dropdown>
       )}

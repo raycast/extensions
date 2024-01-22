@@ -65,8 +65,8 @@ export async function fetchProjects(limit: number, yt: Youtrack): Promise<Projec
   return projects.map(prepareProject);
 }
 
-export async function fetchTags(yt: Youtrack): Promise<IssueTag[]> {
-  const tags = await yt.tags.all();
+export async function fetchTags(limit: number, yt: Youtrack): Promise<IssueTag[]> {
+  const tags = await yt.tags.all({ $top: limit });
   return tags.filter((tag) => tag.name !== "Star");
 }
 
