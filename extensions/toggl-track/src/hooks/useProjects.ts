@@ -1,8 +1,8 @@
-import { useCachedPromise } from "@raycast/utils";
+import { useSafeCachedPromise } from "./useSafeCachedPromise";
 import { getMyProjects } from "../api";
 
 export function useProjects() {
-  const { data, error, isLoading, revalidate } = useCachedPromise(getMyProjects, [], { initialData: [] });
+  const { data, error, isLoading, revalidate } = useSafeCachedPromise(getMyProjects, [], { initialData: [] });
 
   return {
     projects: data,

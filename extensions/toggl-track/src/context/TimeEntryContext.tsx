@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { useCachedState } from "@raycast/utils";
 import { Me, Workspace, TimeEntry, Project, Client, Tag, Task } from "../api";
 import {
@@ -13,7 +13,6 @@ import {
   useTasks,
 } from "../hooks";
 import { createProjectGroups, ProjectGroup } from "../helpers/createProjectGroups";
-import { useExtensionContext } from "./ExtensionContext";
 
 interface TimeEntryContextProps {
   isLoading: boolean;
@@ -60,15 +59,14 @@ const TimeEntryContext = createContext<TimeEntryContextProps>({
 export const useTimeEntryContext = () => useContext(TimeEntryContext);
 
 export function TimeEntryContextProvider({ children }: { children: JSX.Element }) {
-  const { me, meError, isLoadingMe, revalidateMe } = useMe();
-  const { workspaces, workspacesError, isLoadingWorkspaces, revalidateWorkspaces } = useWorkspaces();
-  const { timeEntries, timeEntriesError, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
-  const { runningTimeEntry, runningTimeEntryError, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } =
-    useRunningTimeEntry();
-  const { projects, projectsError, isLoadingProjects, revalidateProjects } = useProjects();
-  const { clients, clientsError, isLoadingClients, revalidateClients } = useClients();
-  const { tags, tagsError, isLoadingTags, revalidateTags } = useTags();
-  const { tasks, tasksError, isLoadingTasks, revalidateTasks } = useTasks();
+  const { me, isLoadingMe, revalidateMe } = useMe();
+  const { workspaces, isLoadingWorkspaces, revalidateWorkspaces } = useWorkspaces();
+  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
+  const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
+  const { projects, isLoadingProjects, revalidateProjects } = useProjects();
+  const { clients, isLoadingClients, revalidateClients } = useClients();
+  const { tags, isLoadingTags, revalidateTags } = useTags();
+  const { tasks, isLoadingTasks, revalidateTasks } = useTasks();
 
   const [projectGroups, setProjectGroups] = useCachedState<ProjectGroup[]>("projectGroups", []);
 
@@ -92,21 +90,6 @@ export function TimeEntryContextProvider({ children }: { children: JSX.Element }
     isLoadingTasks,
   ];
   const isLoading = useMemo(() => isLoadingArray.every((b) => b), isLoadingArray);
-
-  const { setTokenValidity } = useExtensionContext();
-  const errorArray = [
-    meError,
-    workspacesError,
-    timeEntriesError,
-    runningTimeEntryError,
-    projectsError,
-    clientsError,
-    tagsError,
-    tasksError,
-  ];
-  useEffect(() => {
-    if (errorArray.find((err) => err?.message.includes("403"))) setTokenValidity(false);
-  }, errorArray);
 
   return (
     <TimeEntryContext.Provider
