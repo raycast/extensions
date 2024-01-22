@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Fixed] - {PR_MERGE_DATE}
+
+- Resolve the issue of the 'Auto Fill with AI' executing too frequently.
+
 ## [Added] - 2024-01-09
 
 - Add `dueDate` and `startDate` to task detail view.
