@@ -12,13 +12,13 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "httpdHostname",
+      "name": "httpdAddress",
       "description": "On which address is radicle-httpd listening.",
       "type": "textfield",
       "required": false,
-      "title": "Radicle HTTPD Host",
-      "placeholder": "127.0.0.1:8080",
-      "default": "127.0.0.1:8080"
+      "title": "Radicle HTTPD Address",
+      "placeholder": "http://127.0.0.1:8080",
+      "default": "http://127.0.0.1:8080"
     },
     {
       "name": "webUrl",

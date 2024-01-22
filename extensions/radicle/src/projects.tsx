@@ -5,14 +5,14 @@ import { useFetch } from "@raycast/utils";
 import { ProjectListItem } from "./components/project-list-item";
 
 export default function Command() {
-  const p = getPreferenceValues<Preferences>();
-  const { isLoading, error, data } = useFetch<Project[]>(`http://${p.httpdHostname}/api/v1/projects`);
+  const p = getPreferenceValues();
+  const { isLoading, error, data } = useFetch<Project[]>(`${p.httpdAddress}/api/v1/projects`);
 
   if (error) {
     showToast({
       style: Toast.Style.Failure,
       title: "Not able to update project listing",
-      message: `Radicle HTTPD not found, trying to fetch from http://${p.httpdHostname}`,
+      message: `Radicle HTTPD not found, trying to fetch from ${p.httpdAddress}`,
     });
   }
 

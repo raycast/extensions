@@ -10,15 +10,16 @@ export interface Props {
 
 export function Project(props: { project: Project }) {
   const { id, name, head } = props.project;
-  const preferences = getPreferenceValues<Preferences>();
-  const readme = useFetch<Blob>(`http://${preferences.httpdHostname}/api/v1/projects/${id}/readme/${head}`);
-  const remotes = useFetch<Remote[]>(`http://${preferences.httpdHostname}/api/v1/projects/${id}/remotes`);
+  const preferences = getPreferenceValues();
+  const httpdURL = new URL(preferences.httpdAddress);
+  const readme = useFetch<Blob>(`${preferences.httpdAddress}/api/v1/projects/${id}/readme/${head}`);
+  const remotes = useFetch<Remote[]>(`${preferences.httpdAddress}/api/v1/projects/${id}/remotes`);
 
   if (readme.error || remotes.error) {
     showToast({
       style: Toast.Style.Failure,
       title: "Not able to update info",
-      message: `Radicle HTTPD not found, trying to fetch from http://${preferences.httpdHostname}`,
+      message: `Radicle HTTPD not found, trying to fetch from ${preferences.httpdAddress}`,
     });
   }
 
@@ -29,7 +30,7 @@ export function Project(props: { project: Project }) {
       markdown={readme.data?.content || ""}
       actions={
         <ActionPanel title={name}>
-          <Action.OpenInBrowser url={`${preferences.webUrl}/nodes/${preferences.httpdHostname}/${id}`} />
+          <Action.OpenInBrowser url={`${preferences.webUrl}/nodes/${httpdURL.hostname}/${id}`} />
           <Action.CopyToClipboard title="Copy Repository Id to Clipboard" content={id} />
           <Action
             icon={Icon.Repeat}
