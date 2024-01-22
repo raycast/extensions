@@ -23,6 +23,12 @@
       "title": "Start/Stop Time Entry",
       "description": "Start a new time entry or end the running time entry.",
       "mode": "view"
+    },
+    {
+      "name": "manageWorkspaces",
+      "title": "Manage Workspaces",
+      "description": "A list of all the workspace you have access to.",
+      "mode": "view"
     }
   ],
   "preferences": [
