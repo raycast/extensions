@@ -6,4 +6,4 @@
 - Improve file picker validation logic.
 - Edit package description.
 
-## [Initial Version] - 2023-12-04
+## [1.0.0] - 2023-12-04
