@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  LocalStorage,
-  showToast,
-  Alert,
-  Icon,
-  Color,
-  confirmAlert,
-} from "@raycast/api";
+import { ActionPanel, Action, List, LocalStorage, showToast, Alert, Icon, Color, confirmAlert } from "@raycast/api";
 import { useState } from "react";
 import Search from "./views/search";
 import { usePromise } from "@raycast/utils";
