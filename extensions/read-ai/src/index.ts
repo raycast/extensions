@@ -2,26 +2,17 @@ import { getSelectedText, showToast, Toast, getPreferenceValues } from "@raycast
 import { OpenAI } from "openai";
 import fs from "fs/promises";
 import path from "path";
-import { exec } from "child_process";
 import os from "os";
-import util from "util";
-import { SCRIPT_STYLES_PROMPTS } from "./const/index";
-
-const execAsync = util.promisify(exec);
-
-type Voice = "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
-type ScriptStyle = keyof typeof SCRIPT_STYLES_PROMPTS; // 추가된 타입
-type LanguageCode = string; // 추가된 타입
-
-interface Preferences {
-  apiKey: string;
-  defaultVoice: Voice;
-  temperature: string;
-  gptModel: string;
-  subtitlesToggle: boolean;
-  outputLanguage: LanguageCode;
-  scriptStyle: ScriptStyle; // 추가된 타입
-}
+import { LanguageCode, ScriptStyle, Voice, Preferences } from "./types";
+import { MIN_TEXT_QUE_SENTENCE_LENGTH, SCRIPT_STYLES_PROMPTS } from "./const";
+import {
+  cleanupTmpDir,
+  execAsync,
+  getCurrentCommandIdentifier,
+  setCurrentCommandIdentifier,
+  splitSentences,
+  splitTextWithoutCuttingWords,
+} from "./utills";
 
 class TextToSpeechProcessor {
   private textToSpeechQueue: string[] = [];
@@ -33,7 +24,6 @@ class TextToSpeechProcessor {
   private temperature: number;
   private gptModel: string;
   private subtitlesToggle: boolean;
-  private static identifierFilePath = path.join(os.tmpdir(), "raycast-tts-identifier.txt");
   private outputLanguage: LanguageCode;
   private scriptStyle: ScriptStyle; // 추가된 타입
 
@@ -55,19 +45,6 @@ class TextToSpeechProcessor {
     this.scriptStyle = scriptStyle;
   }
 
-  private async setCurrentCommandIdentifier(identifier: string) {
-    await fs.writeFile(TextToSpeechProcessor.identifierFilePath, identifier, "utf8");
-  }
-
-  private async getCurrentCommandIdentifier() {
-    try {
-      return await fs.readFile(TextToSpeechProcessor.identifierFilePath, "utf8");
-    } catch (error) {
-      console.error("Error reading the current command identifier:", error);
-      return null;
-    }
-  }
-
   /**
    * Initializes the TextToSpeechProcessor with the provided configuration.
    * @param {string} apiKey - The API key for OpenAI.
@@ -79,7 +56,7 @@ class TextToSpeechProcessor {
    */
   public async processSelectedText() {
     const currentIdentifier = Date.now().toString();
-    await this.setCurrentCommandIdentifier(currentIdentifier);
+    await setCurrentCommandIdentifier(currentIdentifier);
 
     // kill all afplay processes if any are running
     await this.stopAllProcesses();
@@ -91,7 +68,7 @@ class TextToSpeechProcessor {
 
       if (this.outputLanguage) {
         console.log(this.outputLanguage, "Start writing script...");
-        // 사용자에게 번역이 진행 중임을 알리는 토스트 메시지를 표시합니다.
+
         await showToast({
           style: Toast.Style.Animated,
           title: `Writing a ${this.scriptStyle} script... 🔍`,
@@ -115,7 +92,6 @@ class TextToSpeechProcessor {
         });
         selectedText = translation.choices[0].message.content as string;
 
-        // 번역이 완료되었음을 알리는 토스트 메시지를 표시합니다.
         await showToast({
           style: Toast.Style.Success,
           title: "🎉 Script Writing Complete",
@@ -123,22 +99,10 @@ class TextToSpeechProcessor {
         });
       }
 
-      /**
-       * Splits the selected text into sentences using a regular expression that
-       * looks for period, exclamation mark, or question mark followed by a space
-       * or a newline character, but not preceded or followed by a digit (to avoid
-       * splitting at decimal points or dates).
-       * Each sentence is then trimmed of whitespace, and only non-empty sentences
-       * are kept.
-       */
-      const sentences = selectedText
-        .split(/(?<!\d)[.!?](?!\d)\s|\n/)
-        .map((s: string) => s.trim()) // Explicitly annotate the parameter type
-        .filter((s: string) => s.length > 0);
+      const sentences = splitSentences(selectedText);
 
-      const MIN_SENTENCE_LENGTH = 10; // set the minimum sentence length to 10 characters
       this.textToSpeechQueue = sentences.reduce((acc: string[], sentence: string) => {
-        if (acc.length === 0 || acc[acc.length - 1].length >= MIN_SENTENCE_LENGTH) {
+        if (acc.length === 0 || acc[acc.length - 1].length >= MIN_TEXT_QUE_SENTENCE_LENGTH) {
           acc.push(sentence);
         } else {
           acc[acc.length - 1] += " " + sentence;
@@ -169,7 +133,7 @@ class TextToSpeechProcessor {
     this.isConverting = true;
 
     for (const textPart of this.textToSpeechQueue) {
-      const activeIdentifier = await this.getCurrentCommandIdentifier();
+      const activeIdentifier = await getCurrentCommandIdentifier();
       if (activeIdentifier !== currentIdentifier) {
         console.log("🚫 💬 A new command task has started. Stopping current text-to-speech task");
         return; // Exit the loop if a new command has started
@@ -186,7 +150,7 @@ class TextToSpeechProcessor {
           });
           const buffer = Buffer.from(await mp3.arrayBuffer());
           await fs.writeFile(speechFile, buffer);
-          this.playAudioQueue.push({ filePath: speechFile, text: textPart }); // 변경된 부분
+          this.playAudioQueue.push({ filePath: speechFile, text: textPart });
           console.log("🚀 ~ Converted text to speech:", textPart);
         } catch (error) {
           console.error("Error converting text to speech:", error);
@@ -211,7 +175,7 @@ class TextToSpeechProcessor {
    */
   private async playAudio(currentIdentifier: string) {
     while (this.playAudioQueue.length > 0) {
-      const activeIdentifier = await this.getCurrentCommandIdentifier();
+      const activeIdentifier = await getCurrentCommandIdentifier();
       if (activeIdentifier !== currentIdentifier) {
         console.log("🚫 🔇 A new task command has started. Stopping audio tasks");
         showToast({
@@ -228,7 +192,7 @@ class TextToSpeechProcessor {
         if (this.subtitlesToggle) {
           showToast({
             style: Toast.Style.Animated,
-            title: text,
+            title: splitTextWithoutCuttingWords(text, 50),
             message: text,
           });
         }
@@ -237,7 +201,7 @@ class TextToSpeechProcessor {
       } catch (error) {
         console.error("Error playing audio:", "file is deleted or moved");
       } finally {
-        // 파일 삭제를 시도합니다.
+        // Attempting to delete the file.
         fs.unlink(filePath).catch((err) => {
           if (err.code !== "ENOENT") {
             console.error(`Error deleting file: ${filePath}`, err);
@@ -250,34 +214,8 @@ class TextToSpeechProcessor {
   }
 
   /**
-   * Method to clean up temporary files in the tmp directory.
+   * Method to stop all afplay processes.
    */
-  private async cleanupTmpDir() {
-    const tmpdirPath = os.tmpdir();
-
-    try {
-      const files = await fs.readdir(tmpdirPath);
-      const audioFiles = files.filter((file) => file.startsWith("speech_") && file.endsWith(".mp3"));
-      console.log("🚀 ~ cleanupTmpDir audioFiles:", audioFiles);
-      for (const file of audioFiles) {
-        const filePath = path.resolve(tmpdirPath, file);
-        try {
-          await fs.unlink(filePath);
-        } catch (err) {
-          console.error(`Error deleting file: ${filePath}`, err);
-          throw new Error(`Failed to delete file: ${filePath}`);
-        }
-      }
-    } catch (error) {
-      console.error("Error cleaning up temporary directory:", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Cleanup Failed",
-        message: "Failed to clean up temporary directory.",
-      });
-    }
-  }
-
   public async stopAllProcesses() {
     try {
       // Check for existing afplay processes
@@ -297,7 +235,7 @@ class TextToSpeechProcessor {
       }
     }
     // Attempting to clean up the temporary mp3 files
-    await this.cleanupTmpDir();
+    await cleanupTmpDir();
   }
 
   /**
