@@ -1,4 +1,4 @@
-import type { Project, Preferences } from "./types";
+import type { Project } from "./types";
 
 import { List, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";

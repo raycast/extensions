@@ -1,4 +1,4 @@
-import type { Blob, Preferences, Project, Remote } from "./types";
+import type { Blob, Project, Remote } from "./types";
 
 import { Action, ActionPanel, showToast, Detail, getPreferenceValues, Toast, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";

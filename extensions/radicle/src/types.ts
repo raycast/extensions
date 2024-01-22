@@ -1,8 +1,3 @@
-export interface Preferences {
-  httpdHostname: string;
-  webUrl: string;
-}
-
 export interface Project {
   name: string;
   description: string;
