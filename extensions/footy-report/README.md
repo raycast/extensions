@@ -34,7 +34,9 @@ Trigger a simple API endpoint test using a SportsMonk API token to identify a su
 
 ### Search League Standings
 
-🛠️ Under development
+![League Standings](metadata/footy-report-5.png)
+
+View league standing by displaying position, points, wins, draws and losses
 
 ### Search League Stats
 

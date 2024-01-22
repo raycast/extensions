@@ -550,7 +550,7 @@
 /extensions/jenkins                                  @k8scat @vkhitrin
 /extensions/jetbrains                                @gdsmith @adrienbaron @dima-m711
 /extensions/jetpack-commands                         @sejas
-/extensions/jira                                     @thomaslombart @FezVrasta @igor9silva @jesperorb @teziovsky @gavinroderick @gavinroderick @michael-par @literallyjustroy
+/extensions/jira                                     @thomaslombart @FezVrasta @igor9silva @jesperorb @teziovsky @gavinroderick @gavinroderick @michael-par @literallyjustroy @mheidinger
 /extensions/jira-search                              @svenwiegand
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand @koseduhemak @rnprest @LunaticMuch @nick318
 /extensions/jira-time-tracking                       @niallpaterson
@@ -641,7 +641,7 @@
 /extensions/looksee                                  @olavgjerde @pernielsentikaer
 /extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek @enkia
 /extensions/lorem-picsum                             @MichaelFarquhar
-/extensions/lucide-icons                             @gBasil @aeither
+/extensions/lucide-icons                             @aeither
 /extensions/lunatask                                 @posthardcode
 /extensions/lyrics                                   @ajzbc
 /extensions/m3o                                      @andreaselia
@@ -709,7 +709,7 @@
 /extensions/morning-coffee                           @olimynameis
 /extensions/mound-for-pile                           @cr34t1ve
 /extensions/mousehunt-helper                         @chesterhow
-/extensions/mozilla-firefox                          @crisboarna
+/extensions/mozilla-firefox                          @crisboarna @grandkrav
 /extensions/mui-documentation                        @kgrhartlage
 /extensions/mullvad                                  @0x46616c6b
 /extensions/multilinks                               @abhisheksatre
@@ -765,7 +765,7 @@
 /extensions/numpad                                   @paulovictor237
 /extensions/obs-clippings                            @trevware
 /extensions/obs-control                              @Yukaii
-/extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic
+/extensions/obsidian                                 @KevinBatdorf @marcjulianschwarz @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais
 /extensions/obsidian-bookmarks                       @Dru89
 /extensions/obsidian-smart-capture                   @trillhause
 /extensions/odesli                                   @anned20
@@ -828,6 +828,7 @@
 /extensions/password-generator                       @joshuaiz
 /extensions/paste-as-plain-text                      @koinzhang @pantajoe
 /extensions/pastebin                                 @vimtor
+/extensions/pdfsearch                                @kevin-pek
 /extensions/pera-explorer                            @akgunberk
 /extensions/perchance-generator                      @Visual-Studio-Coder
 /extensions/performance-hud                          @say4n
@@ -906,7 +907,7 @@
 /extensions/quicktime                                @pradeepb28
 /extensions/quicktype                                @Aayush9029
 /extensions/quip                                     @justin0u0
-/extensions/quit-applications                        @mackopes @jrnxf @3llomi
+/extensions/quit-applications                        @mackopes @jrnxf @3llomi @sxn
 /extensions/r-pkg-search                             @gadenbuie
 /extensions/radix                                    @peduarte @emlez
 /extensions/railway                                  @coffee-cup @nagauta
@@ -1168,8 +1169,8 @@
 /extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart @j3lte
 /extensions/tmux-sessioner                           @louishuyng @sxn
 /extensions/todo-list                                @maggie-j-liu @joshkorol @madza91 @bkeys818 @pernielsentikaer @telmen
-/extensions/todoist                                  @thomaslombart @AnishDe12020 @kud @casassg
-/extensions/toggl-track                              @franzwilhelm @bkeys818 @rogatty @michaelfaisst
+/extensions/todoist                                  @thomaslombart @AnishDe12020 @kud @casassg @Princeyadav05
+/extensions/toggl-track                              @franzwilhelm @bkeys818 @michaelfaisst
 /extensions/toggle-desktop-visibility                @Haojen
 /extensions/toggle-menu-bar                          @iamyeizi
 /extensions/toggle-scroll-bars-visibility            @danulqua
