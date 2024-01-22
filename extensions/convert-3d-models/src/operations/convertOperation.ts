@@ -26,7 +26,7 @@ import { ModelResultHandling } from "../utilities/enums";
  */
 export default async function convert(sourcePaths: string[], desiredType: string) {
   const preferences = getPreferenceValues<ExtensionPreferences>();
-  const freeCADpath = preferences.freeCADPath.path;
+  const freeCADpath = preferences.freeCADPath?.path; // the "?" is a null check because TS thinks that this type could be undefined...
 
   const resultPaths = [];
   for (const item of sourcePaths) {
