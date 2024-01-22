@@ -6,13 +6,19 @@ import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } fro
 import { createTimeEntry, TimeEntry } from "./api";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { TimeEntryContextProvider, useTimeEntryContext } from "./context/TimeEntryContext";
+import { useTimeEntries, useRunningTimeEntry, useProjects } from "./hooks";
 
 dayjs.extend(duration);
 
 function ListView() {
-  const { isLoading, timeEntries, runningTimeEntry, projects, revalidateRunningTimeEntry, revalidateTimeEntries } =
-    useTimeEntryContext();
+  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
+  const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
+  const { projects, isLoadingProjects } = useProjects();
+
+  const isLoading = useMemo(
+    () => isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingProjects,
+    [isLoadingTimeEntries, isLoadingRunningTimeEntry, isLoadingProjects],
+  );
 
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
@@ -83,9 +89,7 @@ function ListView() {
                 icon={{ source: Icon.Clock }}
                 target={
                   <ExtensionContextProvider>
-                    <TimeEntryContextProvider>
-                      <CreateTimeEntryForm />
-                    </TimeEntryContextProvider>
+                    <CreateTimeEntryForm {...{ isLoading, projects, revalidateRunningTimeEntry }} />
                   </ExtensionContextProvider>
                 }
               />
@@ -126,9 +130,7 @@ function ListView() {
 export default function Command() {
   return (
     <ExtensionContextProvider>
-      <TimeEntryContextProvider>
-        <ListView />
-      </TimeEntryContextProvider>
+      <ListView />
     </ExtensionContextProvider>
   );
 }
