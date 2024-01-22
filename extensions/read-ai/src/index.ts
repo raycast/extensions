@@ -192,7 +192,7 @@ class TextToSpeechProcessor {
         if (this.subtitlesToggle) {
           showToast({
             style: Toast.Style.Animated,
-            title: splitTextWithoutCuttingWords(text, 50),
+            title: splitTextWithoutCuttingWords(text, 100),
             message: text,
           });
         }

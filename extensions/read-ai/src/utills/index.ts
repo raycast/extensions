@@ -8,18 +8,6 @@ import { showToast, Toast } from "@raycast/api";
 export const execAsync = util.promisify(exec);
 export const identifierFilePath = path.join(os.tmpdir(), "raycast-tts-identifier.txt");
 
-/**
- * Method to split text without cutting words.
- * @param {string} text - The text to be split.
- * @param {number} maxLength - The maximum length of each split.
- * @returns {string} - The split text.
- */
-export function splitTextWithoutCuttingWords(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  const indexOfSpace = text.lastIndexOf(" ", maxLength);
-  return indexOfSpace === -1 ? text : text.substring(0, indexOfSpace) + "\n" + text.substring(indexOfSpace + 1);
-}
-
 export async function cleanupTmpDir() {
   const tmpdirPath = os.tmpdir();
 
@@ -81,4 +69,32 @@ export function splitSentences(text: string): string[] {
     .split(/(?<!\d)[.!?](?!\d)\s|\n/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+}
+
+/**
+ * Method to split text without cutting words.
+ * @param {string} text - The text to be split.
+ * @param {number} maxLength - The maximum length of each split.
+ * @returns {string} - The split text.
+ */
+export function splitTextWithoutCuttingWords(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+
+  let result = "";
+  let start = 0;
+
+  while (start < text.length) {
+    const end = Math.min(start + maxLength, text.length);
+    const lastSpace = text.lastIndexOf(" ", end);
+
+    if (end < text.length && lastSpace > start) {
+      result += text.substring(start, lastSpace) + "\n";
+      start = lastSpace + 1;
+    } else {
+      result += text.substring(start, end);
+      start = end;
+    }
+  }
+
+  return result;
 }
