@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "filemaker-recents",
+  "title": "FileMaker Recents",
+  "description": "View and Launch your recent and favorite files in FileMaker Pro",
+  "icon": "command-icon.png",
+  "author": "eluce2",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "recents",
+      "title": "Show Recents",
+      "subtitle": "FileMaker Pro",
+      "description": "View recent files from FileMaker Pro",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Show Favorites",
+      "subtitle": "FileMaker Pro",
+      "description": "View favorited files from FileMaker Pro",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1",
+    "bplist-parser": "^0.3.2",
+    "plist": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/plist": "^3.0.5",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
