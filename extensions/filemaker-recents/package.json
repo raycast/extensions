@@ -3,7 +3,7 @@
   "name": "filemaker-recents",
   "title": "FileMaker Recents",
   "description": "View and Launch your recent and favorite files in FileMaker Pro",
-  "icon": "command-icon.png",
+  "icon": "FM12App512.png",
   "author": "eluce2",
   "categories": [
     "Developer Tools",

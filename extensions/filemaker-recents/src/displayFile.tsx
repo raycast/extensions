@@ -1,20 +1,23 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { ParsedFilePath } from "./helpers";
-import { existsSync } from "fs";
 
 export function DisplayFile({ file }: { file: ParsedFilePath & { id: string } }) {
-  const exists = file.local ? existsSync(file.path) : true;
   return (
     <List.Item
       key={file.id}
-      icon="list-icon.png"
+      icon="FM12Doc.png"
       title={file.fileName}
       subtitle={file.locationName}
-      accessories={[!exists ? { icon: Icon.Warning } : {}]}
+      keywords={
+        [file.fileName, file.local ? file.path : file.host, !file.local && file.locationName].filter(
+          Boolean,
+        ) as string[]
+      }
+      accessories={[file.local && !file.exists ? { icon: Icon.Warning } : {}]}
       actions={
         <ActionPanel>
           {file.local ? (
-            exists ? (
+            file.exists ? (
               <>
                 <Action.Open target={file.path} title="Launch File" />
                 <Action.ShowInFinder path={file.path} />

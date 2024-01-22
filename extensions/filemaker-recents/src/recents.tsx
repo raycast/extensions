@@ -6,7 +6,9 @@ export default function Command() {
   const { data, isLoading } = useFileMakerPrefs();
   return (
     <List isLoading={isLoading}>
-      {data?.recentFiles.map((item, i) => <DisplayFile file={{ ...item, id: `${item.raw}-${i}` }} />)}
+      {data?.recentFiles
+        .filter((o) => (o.local ? o.exists : true))
+        .map((item, i) => <DisplayFile file={{ ...item, id: `${item.raw}-${i}` }} />)}
     </List>
   );
 }
