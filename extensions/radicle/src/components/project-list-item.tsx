@@ -22,7 +22,7 @@ export function ProjectListItem({ project: p }: { project: Project }) {
 
 function Actions({ project: p }: { project: Project }) {
   return (
-    <ActionPanel title="More information">
+    <ActionPanel title="More Information">
       <Action.Push title="Show Details" target={<ProjectComponent project={p} />} />
       <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
     </ActionPanel>
