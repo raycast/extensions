@@ -1,7 +1,8 @@
+import { useFetch } from "@raycast/utils";
 import { SPLATOON_2_API, SPLATOON_2_ASSETS } from "../constants";
-import type { Mode, Schedule } from "../types/schedules";
+import type { Mode } from "../types/schedules";
 import type * as Splatoon2Api from "../types/splatoon-2-api-schedules";
-import { createSplatoonApiHook } from "../utils/create-splatoon-api-hook";
+import { getUserAgent } from "../utils/get-user-agent";
 
 function getModeIcon(mode: Splatoon2Api.Mode["key"]) {
   switch (mode) {
@@ -87,37 +88,41 @@ function getStageImage(stage: Splatoon2Api.Stage) {
   return SPLATOON_2_ASSETS + stage.image;
 }
 
-export const useSplatoon2Schedules = createSplatoonApiHook<Splatoon2Api.Response, Schedule[]>(
-  SPLATOON_2_API + "/schedules.json",
-  (response) => {
-    const modes: Splatoon2Api.Mode["key"][] = ["regular", "gachi", "league"];
+export function useSplatoon2Schedules() {
+  return useFetch(`${SPLATOON_2_API}/schedules.json`, {
+    headers: { "User-Agent": getUserAgent() },
+    keepPreviousData: true,
+    parseResponse: async (response) => {
+      const data = (await response.json()) as Splatoon2Api.Response;
+      const modes: Splatoon2Api.Mode["key"][] = ["regular", "gachi", "league"];
 
-    return modes.map((modeType) => {
-      const games = response[modeType];
+      return modes.map((modeType) => {
+        const games = data[modeType];
 
-      const mode: Mode = {
-        name: games[0].game_mode.name,
-        icon: getModeIcon(games[0].game_mode.key),
-        wiki: getModeWiki(modeType),
-      };
+        const mode: Mode = {
+          name: games[0].game_mode.name,
+          icon: getModeIcon(games[0].game_mode.key),
+          wiki: getModeWiki(modeType),
+        };
 
-      return {
-        mode,
-        games: games.map((game) => ({
-          from: new Date(game.start_time * 1000),
-          to: new Date(game.end_time * 1000),
-          stages: [
-            { name: game.stage_a.name, image: getStageImage(game.stage_a) },
-            { name: game.stage_b.name, image: getStageImage(game.stage_b) },
-          ],
-          rule: {
-            name: game.rule.name,
-            icon: getRuleIcon(game.rule.key),
-            wiki: getRuleWiki(game.rule.key),
-          },
+        return {
           mode,
-        })),
-      };
-    });
-  },
-);
+          games: games.map((game) => ({
+            from: new Date(game.start_time * 1000),
+            to: new Date(game.end_time * 1000),
+            stages: [
+              { name: game.stage_a.name, image: getStageImage(game.stage_a) },
+              { name: game.stage_b.name, image: getStageImage(game.stage_b) },
+            ],
+            rule: {
+              name: game.rule.name,
+              icon: getRuleIcon(game.rule.key),
+              wiki: getRuleWiki(game.rule.key),
+            },
+            mode,
+          })),
+        };
+      });
+    },
+  });
+}

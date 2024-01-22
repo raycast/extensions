@@ -1,7 +1,8 @@
+import { useFetch } from "@raycast/utils";
 import { SPLATOON_3_API } from "../constants";
 import type { Mode, Schedule } from "../types/schedules";
 import type * as Splatoon3Api from "../types/splatoon-3-api-schedules";
-import { createSplatoonApiHook } from "../utils/create-splatoon-api-hook";
+import { getUserAgent } from "../utils/get-user-agent";
 
 function getGames(data: Splatoon3Api.Data, mode: Splatoon3Api.Mode) {
   switch (mode) {
@@ -158,47 +159,52 @@ function getRuleWiki(mode: Splatoon3Api.Rule["rule"]) {
   }
 }
 
-export const useSplatoon3Schedules = createSplatoonApiHook<Splatoon3Api.Response, Schedule[]>(
-  SPLATOON_3_API + "/schedules.json",
-  (response) => {
-    const modes: Splatoon3Api.Mode[] = ["regular", "ranked-open", "ranked-series", "x"];
-    const schedules: (Schedule | undefined)[] = modes.map((modeType) => {
-      const games = getGames(response.data, modeType);
+export function useSplatoon3Schedules() {
+  return useFetch(`${SPLATOON_3_API}/schedules.json`, {
+    headers: { "User-Agent": getUserAgent() },
+    keepPreviousData: true,
+    parseResponse: async (response) => {
+      const data = ((await response.json()) as Splatoon3Api.Response).data;
 
-      if (!games) {
-        return;
-      }
+      const modes: Splatoon3Api.Mode[] = ["regular", "ranked-open", "ranked-series", "x"];
+      const schedules: (Schedule | undefined)[] = modes.map((modeType) => {
+        const games = getGames(data, modeType);
 
-      const mode: Mode = {
-        name: getModeName(modeType),
-        icon: getModeIcon(modeType),
-        wiki: getModeWiki(modeType),
-      };
+        if (!games) {
+          return;
+        }
 
-      return {
-        mode,
-        detail: getModeDetail(modeType),
-        games: games.map((game) => {
-          const setting = getGameSetting(game, modeType);
+        const mode: Mode = {
+          name: getModeName(modeType),
+          icon: getModeIcon(modeType),
+          wiki: getModeWiki(modeType),
+        };
 
-          return {
-            from: new Date(game.startTime),
-            to: new Date(game.endTime),
-            stages: setting.vsStages.map((stage) => ({
-              name: stage.name,
-              image: stage.image.url,
-            })),
-            rule: {
-              name: setting.vsRule.name,
-              icon: getRuleIcon(setting.vsRule.rule),
-              wiki: getRuleWiki(setting.vsRule.rule),
-            },
-            mode,
-          };
-        }),
-      };
-    });
+        return {
+          mode,
+          detail: getModeDetail(modeType),
+          games: games.map((game) => {
+            const setting = getGameSetting(game, modeType);
 
-    return schedules.filter(Boolean) as Schedule[];
-  },
-);
+            return {
+              from: new Date(game.startTime),
+              to: new Date(game.endTime),
+              stages: setting.vsStages.map((stage) => ({
+                name: stage.name,
+                image: stage.image.url,
+              })),
+              rule: {
+                name: setting.vsRule.name,
+                icon: getRuleIcon(setting.vsRule.rule),
+                wiki: getRuleWiki(setting.vsRule.rule),
+              },
+              mode,
+            };
+          }),
+        };
+      });
+
+      return schedules.filter(Boolean) as Schedule[];
+    },
+  });
+}
