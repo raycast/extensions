@@ -1,8 +1,8 @@
 # Todoist Changelog
 
-## [Duration Support for Schedule Tasks] - 2024-01-05
+## [Duration Support for Schedule Tasks] - 2024-01-22
 
-You can specify minutes and hours when scheduling tasks
+You can specify minutes and hours when scheduling tasks from the list
 
 ## [Show filters and filter tasks] - 2023-12-18
 
