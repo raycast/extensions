@@ -50,7 +50,7 @@ export function useChat(saved: ChatBox): ChatHook {
 
     if (FEATURE_STREAM) {
       const streamListener = (data: string, isFinish: boolean) => {
-        if (data.indexOf("标题") == 0 || data.indexOf("Title:")) {
+        if (data.trim().indexOf("标题") == 0 || data.trim().indexOf("Title:") == 0) {
           msg.question = data.split("\n")[0].replace("标题:", "").replace("标题：", "").replace("Title:", "");
         }
         msg.answer = data;
@@ -64,7 +64,7 @@ export function useChat(saved: ChatBox): ChatHook {
       await chatCompletion(msg.prompt, { useStream: true, streamListener: streamListener });
     } else {
       const detail = await chatCompletion(msg.prompt);
-      if (detail.trim().indexOf("标题") == 0 || detail.indexOf("Title:") == 0) {
+      if (detail.trim().indexOf("标题") == 0 || detail.trim().indexOf("Title:") == 0) {
         msg.question = detail.trim().split("\n")[0].replace("标题:", "").replace("标题：", "").replace("Title:", "");
       }
       msg.prompt.push({ role: "assistant", content: detail });
