@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix Search Media HotKey bug] - 2024-01-17
+## [Fix Search Media HotKey bug] - 2024-01-26
 - Checks for defined `searchArgument` in MediaGrid value before filtering
 
 ## [Copy Note Title action] - 2024-01-17
