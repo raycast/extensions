@@ -19,7 +19,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "manageTimeEntry",
+      "name": "index",
       "title": "Start/Stop Time Entry",
       "description": "Start a new time entry or end the running time entry.",
       "mode": "view"
