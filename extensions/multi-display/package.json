@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multi-display",
-  "title": "Multi display",
+  "title": "Multi Display",
   "description": "A utility about multi-display input source switching and window switching",
   "icon": "icon.png",
   "author": "gaoyang",
