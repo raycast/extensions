@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Change Menu Bar Icon Color in Dark Mode] - 2024-01-05
+## [Change Menu Bar Icon Color in Dark Mode] - 2024-01-22
 
 Changed Menu bar icon color in dark mode to e5e5e5.
 
