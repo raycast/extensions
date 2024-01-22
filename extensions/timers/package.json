@@ -16,6 +16,14 @@
     "Productivity",
     "System"
   ],
+  "keywords": [
+    "timer",
+    "stopwatch",
+    "alert",
+    "pom",
+    "alarm",
+    "clock"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -287,6 +295,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "lint-fix": "ray lint --fix"
   }
 }

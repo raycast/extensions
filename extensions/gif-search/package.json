@@ -5,6 +5,10 @@
   "description": "Search the Internet for animated GIFs",
   "icon": "command-icon.png",
   "author": "josephschmitt",
+  "contributors": [
+    "tm.wrnr",
+    "j3lte"
+  ],
   "license": "MIT",
   "categories": [
     "Media",

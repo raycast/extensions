@@ -1,26 +1,5 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-
-export type Preferences = {
-  focusIntervalDuration: string;
-  shortBreakIntervalDuration: string;
-  longBreakIntervalDuration: string;
-  completionImage: string;
-  sound: string;
-  enableTimeOnMenuBar: boolean
-};
-
-export type IntervalType = "focus" | "short-break" | "long-break";
-
-type Part = {
-  startedAt: number;
-  pausedAt?: number;
-};
-
-export type Interval = {
-  parts: Part[];
-  length: number;
-  type: IntervalType;
-};
+import { Interval, IntervalType } from "./types";
 
 const cache = new Cache();
 

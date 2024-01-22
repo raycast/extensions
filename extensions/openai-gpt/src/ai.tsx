@@ -17,6 +17,7 @@ import * as infoMessages from "./info-messages";
 
 interface Preferences {
   openAiApiKey: string;
+  openAiBasePath: string | undefined;
 }
 
 interface gptFormValues {
@@ -42,6 +43,7 @@ interface modelTokenLimit {
 
 const configuration = new Configuration({
   apiKey: getPreferenceValues<Preferences>().openAiApiKey,
+  basePath: getPreferenceValues<Preferences>().openAiBasePath || undefined,
 });
 const openai = new OpenAIApi(configuration);
 

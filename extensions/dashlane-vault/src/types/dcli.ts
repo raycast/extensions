@@ -5,7 +5,7 @@ export type VaultCredentialDto = {
   email?: string;
   login?: string;
   password: string;
-  url: string;
+  url?: string;
   secondaryLogin?: string;
   category?: string;
   note?: string;
@@ -72,7 +72,7 @@ export interface VaultNoteDto {
   id: string;
   lastBackupTime?: string;
   secured?: "true" | "false";
-  title: string;
+  title?: string;
   type: string;
   updateDate?: string;
   userModificationDatetime?: string;
