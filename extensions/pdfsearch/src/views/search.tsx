@@ -37,7 +37,7 @@ export default function SearchCollection(props: { collectionName: string }) {
       if (!collection) return [];
       const documents: Document[] = [];
       setIsQuerying(true);
-      // execute swift binary that will load saved database
+      // execute swift binary that will search files in collection
       const command = path.join(environment.assetsPath, "SearchDocument");
       await chmod(command, "755");
       const process = execa(command, [query, ...collection.files]);
@@ -145,7 +145,7 @@ function Detail({ document }: { document: Document }) {
 
   useEffect(() => {
     const createImage = async () => {
-      // execute swift binary that will load saved database
+      // execute swift binary that will draw image of pdf page and highlght search result
       const command = path.join(environment.assetsPath, "DrawImage");
       await chmod(command, "755");
       const process = execa(command, [
@@ -162,7 +162,7 @@ function Detail({ document }: { document: Document }) {
           setImagePath(stdout);
         }
       } catch {
-        //
+        // catch process cancellation exception that is triggered when query changes
       }
     };
 
