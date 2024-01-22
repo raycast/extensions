@@ -11,8 +11,12 @@ const authHeader = { Authorization: `Basic ${base64encode(`${togglApiToken}:api_
 export const get = <T>(endpoint: string) => togglFetch<T>("GET", endpoint);
 export const post = <T = void>(endpoint: string, body: unknown) => togglFetch<T>("POST", endpoint, body);
 export const patch = <T = void>(endpoint: string, body: unknown) => togglFetch<T>("PATCH", endpoint, body);
+export const put = <T = void>(endpoint: string, body: unknown) => togglFetch<T>("PUT", endpoint, body);
+export const remove = (endpoint: string) => togglFetch("DELETE", endpoint);
 
-async function togglFetch<T>(method: string, endpoint: string, body?: unknown): Promise<T> {
+async function togglFetch<T>(method: string, endpoint: string, body?: unknown): Promise<T>;
+async function togglFetch(method: "DELETE", endpoint: string): Promise<void>;
+async function togglFetch<T>(method: string, endpoint: string, body?: unknown): Promise<T | void> {
   const headers: Record<string, string> = authHeader;
   if (body !== undefined) headers["Content-Type"] = "application/json";
   const res = await fetch(baseUrl + endpoint, {
@@ -26,5 +30,10 @@ async function togglFetch<T>(method: string, endpoint: string, body?: unknown): 
     if (text) msg += ", " + text;
     throw new Error(msg);
   }
-  return (await res.json()) as T;
+  try {
+    const json = (await res.json()) as T | null;
+    if (json !== null) return json;
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) throw error;
+  }
 }
