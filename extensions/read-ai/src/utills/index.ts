@@ -59,23 +59,34 @@ export async function getCurrentCommandIdentifier() {
 /**
  * Splits the input text into sentences.
  * @description
- * The function first splits the text by period, exclamation mark, or question mark followed by a space
- * or a newline character, but not preceded or followed by a digit (to avoid splitting at decimal points or dates).
- * Each sentence is then trimmed of whitespace, and only non-empty sentences are kept.
+ * This function processes the input text to extract individual sentences. It first identifies sentence boundaries by
+ * looking for periods, exclamation marks, or question marks that are followed by a space or a newline character,
+ * ensuring that these punctuation marks are not immediately preceded or followed by a digit to prevent incorrect
+ * splitting at decimal points or within dates.
  *
- * For sentences that are longer than 100 characters, the function further splits the sentence by commas.
- * This is done to ensure that the resulting sentences are not too long.
+ * After identifying the sentence boundaries, the function trims each sentence to remove any leading or trailing
+ * whitespace. Sentences that are empty after trimming are discarded.
+ *
+ * Additionally, if a sentence exceeds 100 characters in length, it is further split into smaller segments at comma
+ * positions, provided that the commas are not immediately preceded or followed by a digit. This step helps to
+ * maintain a manageable sentence length for subsequent processing.
  *
  * @param {string} text - The input text to be split into sentences.
- * @returns {string[]} - An array of sentences obtained from the input text.
+ * @returns {string[]} - An array of sentences derived from the input text, with each sentence trimmed and
+ * potentially split at comma positions to ensure shorter lengths.
  */
 export function splitSentences(text: string): string[] {
-  return text
-    .split(/(?<=\D{10,})\.(?=\d)|(?<!\d)[.!?](?!\d)\s|\n/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
-    .flatMap((sentence) => {
-      // Split by comma for sentences that are longer than 100 characters.
-      return sentence.length > 100 ? sentence.split(/(?<!\d),(?!\d)\s*/) : [sentence];
-    });
+  const sentenceEndRegex = /(?<=\D{10,})\.(?=\d)|(?<!\d)[.!?](?!\d)\s|\n/;
+  const commaSplitRegex = /(?<!\d),(?!\d)\s*/;
+
+  const sentences = text.split(sentenceEndRegex).map((s) => s.trim());
+
+  // Explicitly define the type of the accumulator as string[]
+  return sentences.reduce<string[]>((acc, sentence) => {
+    if (sentence) {
+      const parts = sentence.length > 100 ? sentence.split(commaSplitRegex) : [sentence];
+      acc.push(...parts);
+    }
+    return acc;
+  }, []);
 }
