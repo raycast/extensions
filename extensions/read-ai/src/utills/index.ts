@@ -57,44 +57,25 @@ export async function getCurrentCommandIdentifier() {
 }
 
 /**
- * @description Splits the selected text into sentences using a regular expression that
- * looks for period, exclamation mark, or question mark followed by a space
- * or a newline character, but not preceded or followed by a digit (to avoid
- * splitting at decimal points or dates).
- * Each sentence is then trimmed of whitespace, and only non-empty sentences
- * are kept.
+ * Splits the input text into sentences.
+ * @description
+ * The function first splits the text by period, exclamation mark, or question mark followed by a space
+ * or a newline character, but not preceded or followed by a digit (to avoid splitting at decimal points or dates).
+ * Each sentence is then trimmed of whitespace, and only non-empty sentences are kept.
+ *
+ * For sentences that are longer than 100 characters, the function further splits the sentence by commas.
+ * This is done to ensure that the resulting sentences are not too long.
+ *
+ * @param {string} text - The input text to be split into sentences.
+ * @returns {string[]} - An array of sentences obtained from the input text.
  */
 export function splitSentences(text: string): string[] {
   return text
-    .split(/(?<!\d)[.!?](?!\d)\s|\n/)
+    .split(/(?<=\D{10,})\.(?=\d)|(?<!\d)[.!?](?!\d)\s|\n/)
     .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-}
-
-/**
- * Method to split text without cutting words.
- * @param {string} text - The text to be split.
- * @param {number} maxLength - The maximum length of each split.
- * @returns {string} - The split text.
- */
-export function splitTextWithoutCuttingWords(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-
-  let result = "";
-  let start = 0;
-
-  while (start < text.length) {
-    const end = Math.min(start + maxLength, text.length);
-    const lastSpace = text.lastIndexOf(" ", end);
-
-    if (end < text.length && lastSpace > start) {
-      result += text.substring(start, lastSpace) + "\n";
-      start = lastSpace + 1;
-    } else {
-      result += text.substring(start, end);
-      start = end;
-    }
-  }
-
-  return result;
+    .filter((s) => s.length > 0)
+    .flatMap((sentence) => {
+      // Split by comma for sentences that are longer than 100 characters.
+      return sentence.length > 100 ? sentence.split(/(?<!\d),(?!\d)\s*/) : [sentence];
+    });
 }

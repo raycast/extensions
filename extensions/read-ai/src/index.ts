@@ -11,7 +11,6 @@ import {
   getCurrentCommandIdentifier,
   setCurrentCommandIdentifier,
   splitSentences,
-  splitTextWithoutCuttingWords,
 } from "./utills";
 
 class TextToSpeechProcessor {
@@ -192,7 +191,7 @@ class TextToSpeechProcessor {
         if (this.subtitlesToggle) {
           showToast({
             style: Toast.Style.Animated,
-            title: splitTextWithoutCuttingWords(text, 100),
+            title: text,
             message: text,
           });
         }
