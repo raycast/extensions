@@ -19,14 +19,14 @@ export function DisplayFile({ file }: { file: ParsedFilePath & { id: string } })
           {file.local ? (
             file.exists ? (
               <>
-                <Action.Open target={file.path} title="Launch File" />
+                <Action.Open target={file.path} title="Launch File" icon={Icon.ArrowNe} />
                 <Action.ShowInFinder path={file.path} />
               </>
             ) : (
               <></>
             )
           ) : (
-            <Action.OpenInBrowser url={`fmp://${file.host}/${file.fileName}`} title="Launch File" />
+            <Action.OpenInBrowser url={`fmp://${file.host}/${file.fileName}`} title="Launch File" icon={Icon.ArrowNe} />
           )}
         </ActionPanel>
       }

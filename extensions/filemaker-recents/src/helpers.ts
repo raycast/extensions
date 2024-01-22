@@ -21,7 +21,7 @@ function parseFilePath(raw: string): ParsedFilePath {
   const locationName = local ? "Local" : split[2];
 
   // filename is the last part of the path
-  const fileName = split[split.length - 1];
+  const fileName = split[split.length - 1].replace(".fmp12", "");
 
   return {
     ...(local ? { local, path: host, exists: existsSync(host) } : { local, host }),
