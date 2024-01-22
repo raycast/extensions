@@ -550,7 +550,7 @@
 /extensions/jenkins                                  @k8scat @vkhitrin
 /extensions/jetbrains                                @gdsmith @adrienbaron @dima-m711
 /extensions/jetpack-commands                         @sejas
-/extensions/jira                                     @thomaslombart @FezVrasta @igor9silva @jesperorb @teziovsky @gavinroderick @gavinroderick @michael-par @literallyjustroy
+/extensions/jira                                     @thomaslombart @FezVrasta @igor9silva @jesperorb @teziovsky @gavinroderick @gavinroderick @michael-par @literallyjustroy @mheidinger
 /extensions/jira-search                              @svenwiegand
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand @koseduhemak @rnprest @LunaticMuch @nick318
 /extensions/jira-time-tracking                       @niallpaterson
@@ -709,7 +709,7 @@
 /extensions/morning-coffee                           @olimynameis
 /extensions/mound-for-pile                           @cr34t1ve
 /extensions/mousehunt-helper                         @chesterhow
-/extensions/mozilla-firefox                          @crisboarna
+/extensions/mozilla-firefox                          @crisboarna @grandkrav
 /extensions/mui-documentation                        @kgrhartlage
 /extensions/mullvad                                  @0x46616c6b
 /extensions/multilinks                               @abhisheksatre
@@ -1154,6 +1154,7 @@
 /extensions/things                                   @loris @andreaselia @thomaslombart
 /extensions/thrasher-magazine                        @whitespacecode
 /extensions/ticktick                                 @viduycheung @viduycheung @Alireza29675 @Yakitrak
+/extensions/tidyread---streamline-your-daily-reading @DophinL
 /extensions/tim                                      @tmwrnr
 /extensions/time-logger                              @aramikuto
 /extensions/time-traveling-world-clock               @himarky
@@ -1169,13 +1170,13 @@
 /extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart @j3lte
 /extensions/tmux-sessioner                           @louishuyng @sxn
 /extensions/todo-list                                @maggie-j-liu @joshkorol @madza91 @bkeys818 @pernielsentikaer @telmen
-/extensions/todoist                                  @thomaslombart @AnishDe12020 @kud @casassg
-/extensions/toggl-track                              @franzwilhelm @bkeys818 @rogatty @michaelfaisst
+/extensions/todoist                                  @thomaslombart @AnishDe12020 @kud @casassg @Princeyadav05
+/extensions/toggl-track                              @franzwilhelm @bkeys818 @michaelfaisst
 /extensions/toggle-desktop-visibility                @Haojen
 /extensions/toggle-menu-bar                          @iamyeizi
 /extensions/toggle-scroll-bars-visibility            @danulqua
 /extensions/tomito-controls                          @elyyyse
-/extensions/toolbox                                  @kkange @Saafo @pernielsentikaer @Yakitrak
+/extensions/toolbox                                  @kkange @Saafo @pernielsentikaer @Yakitrak @podlesny-j
 /extensions/toothpick                                @VladCuciureanu @briankosw @VladCuciureanu @sxn
 /extensions/tower                                    @tdwesten @sebduggan
 /extensions/trackflight                              @cojmeister
@@ -1310,7 +1311,7 @@
 /extensions/youversion-suggest                       @caleb531
 /extensions/yubikey-code                             @yoyoyeti
 /extensions/zalgo-text                               @petermiles
-/extensions/zed-recent-projects                      @ewgenius
+/extensions/zed-recent-projects                      @ewgenius @tleo19
 /extensions/zeitraum                                 @KennethWussmann
 /extensions/zen-mode                                 @pradeepb28
 /extensions/zendesk                                  @cpenned
