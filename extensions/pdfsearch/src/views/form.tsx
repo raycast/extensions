@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Collection } from "../type";
 import { Action, ActionPanel, Form, LocalStorage, showToast, useNavigation } from "@raycast/api";
 import { lstatSync, readdirSync } from "fs";
@@ -19,62 +19,75 @@ export function CreateCollectionForm(props: {
   const [fileError, setFileError] = useState<string | undefined>();
   const navigation = useNavigation();
 
-  const revalidateName = () => {
-    if (nameError && nameError.length > 0) {
+  const revalidateName = async () => {
+    if (name.length === 0) {
+      setNameError("Name shouldn't be empty!");
+    } else if (!props.collection && (await LocalStorage.getItem(name))) {
+      // if we are not editing an existing collection and it exists, it means
+      // collection name is not unique
+      setNameError("Name should be unique!");
+    } else if (nameError) {
+      // if both checks pass and there was previosly an existing error, we reset the error
       setNameError(undefined);
     }
   };
 
-  // checks that at least 1 file has been added that is of supported file type
   function revalidateFiles() {
-    if (
-      fileError &&
-      fileError.length > 0 &&
-      !files.some((f) => supportedFiletypes.some((filetype) => f.endsWith(filetype)))
-    ) {
+    if (files.length === 0) {
+      setFileError("Add at least 1 file!");
+    } else if (!files.every(file => lstatSync(file).isDirectory() || supportedFiletypes.includes(path.extname(file)))) {
+      // check if there are any individually added files that are not supported
+      setFileError("Unsupported file type detected!");
+    } else if (fileError) {
       setFileError(undefined);
     }
   }
 
   // returns all POSIX filepaths in directory with supportedFiletype
   const loadDir = (dirpath: string) => {
+    let validFiles: string[] = [];
     const files = readdirSync(dirpath);
-    files.flatMap((file) => {
+
+    files.forEach((file) => {
       const fullPath = path.join(dirpath, file);
       if (lstatSync(fullPath).isDirectory()) {
-        return loadDir(path.join(dirpath, file));
+        validFiles = validFiles.concat(loadDir(fullPath));
       } else if (supportedFiletypes.includes(path.extname(file))) {
-        files.push(fullPath);
+        validFiles.push(fullPath);
       }
     });
-    return files;
+
+    return validFiles;
   };
 
+  useEffect(() => {
+    revalidateName()
+  }, [name])
+
+  useEffect(() => {
+    revalidateFiles()
+  }, [files])
+
   const handleSubmit = async (values: Collection) => {
-    if (values.files.length == 0) {
-      setFileError("Select at least 1 file!");
-    } else if (values.name.length == 0) {
-      setNameError("Name shouldn't be empty!");
-    } else if ((await LocalStorage.getItem(values.name)) && !props.collection) {
-      setNameError("Collection name already exists!");
-    } else {
+    if (!fileError && !nameError) {
       try {
         // load array of unique supported files from files and directories
-        let files = values.files;
-        files = files.flatMap((file) => {
+        let validFiles: string[] = [];
+        values.files.forEach(file => {
           if (lstatSync(file).isDirectory()) {
-            return loadDir(file);
+            validFiles = validFiles.concat(loadDir(file));
           } else if (supportedFiletypes.includes(path.extname(file))) {
-            return file;
+            validFiles.push(file);
           }
-          return [];
         });
-        files = [...new Set(files)]; // get unique filepaths from array
-        if (!files) {
+        validFiles = [...new Set(validFiles)];
+
+        if (validFiles.length === 0) {
           setFileError("No supported filetypes found!");
           return;
         }
-        values.files = files;
+
+        values.files = validFiles;
 
         // if editing a collection and name changes, we delete the old collection
         if (props.collection && props.collection.name !== values.name) {
@@ -107,16 +120,6 @@ export function CreateCollectionForm(props: {
         error={nameError}
         onChange={(e) => {
           setName(e);
-          revalidateName();
-        }}
-        onBlur={async (event) => {
-          if (event.target.value?.length == 0) {
-            setNameError("Name shouldn't be empty!");
-          } else if (!props.collection && event.target.value && (await LocalStorage.getItem(event.target.value))) {
-            setNameError("Name should be unique!");
-          } else {
-            revalidateName();
-          }
         }}
         value={name}
       />
@@ -130,16 +133,6 @@ export function CreateCollectionForm(props: {
         error={fileError}
         onChange={(e) => {
           setFiles(e);
-          revalidateFiles();
-        }}
-        onBlur={async (event) => {
-          if (event.target.value?.length == 0) {
-            setFileError("Add at least 1 file!");
-          } else if (!files.some((f) => supportedFiletypes.some((filetype) => f.endsWith(filetype)))) {
-            setFileError("Unsupported file type detected!");
-          } else {
-            revalidateFiles();
-          }
         }}
         value={files}
       />
