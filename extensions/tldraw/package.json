@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tldraw",
-  "title": "TLDraw",
-  "description": "Creates and persists TLDraw projects",
+  "title": "tldraw",
+  "description": "Creates and persists tldraw projects",
   "icon": "tldraw-icon.png",
   "author": "zephraph",
   "categories": [
@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "create-project",
-      "title": "Create A New Project",
-      "subtitle": "TLDraw",
-      "description": "Creates a new TLDraw project",
+      "title": "Create New Project",
+      "subtitle": "tldraw",
+      "description": "Creates a new tldraw project",
       "mode": "no-view",
       "arguments": [
         {
@@ -33,9 +33,9 @@
     },
     {
       "name": "add-existing-project",
-      "title": "Add An Existing Project",
-      "subtitle": "TLDraw",
-      "description": "Adds an existing TLDraw project to your list of saved projects",
+      "title": "Add Existing Project",
+      "subtitle": "tldraw",
+      "description": "Adds an existing tldraw project to your list of saved projects",
       "mode": "no-view",
       "arguments": [
         {
@@ -61,8 +61,8 @@
     {
       "name": "list-projects",
       "title": "List Projects",
-      "subtitle": "TLDraw",
-      "description": "List all saved TLDraw projects",
+      "subtitle": "tldraw",
+      "description": "List all saved tldraw projects",
       "mode": "view"
     }
   ],
