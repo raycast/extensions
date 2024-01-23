@@ -13,15 +13,15 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
-      "subtitle": "Searchs Splix for a note",
+      "title": "Search Note",
+      "subtitle": "Splix",
       "description": "Search for a note in Splix",
       "mode": "view"
     },
     {
       "name": "add-note",
       "title": "Add Note",
-      "subtitle": "Adds a note to Splix",
+      "subtitle": "Splix",
       "description": "Adds a note to Splix",
       "mode": "view"
     }
