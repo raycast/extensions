@@ -48,20 +48,18 @@ export default function ConnectCommand() {
   }
 
   return (
-    <>
-      <List isLoading={isLoading}>
-        {sessions.map((session, index) => (
-          <List.Item
-            key={index}
-            title={session}
-            actions={
-              <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
-    </>
+    <List isLoading={isLoading}>
+      {sessions.map((session, index) => (
+        <List.Item
+          key={index}
+          title={session}
+          actions={
+            <ActionPanel>
+              <Action title="Connect to Session" onAction={() => connect(session)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }
