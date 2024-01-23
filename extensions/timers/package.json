@@ -31,55 +31,64 @@
       "name": "start2MinuteTimer",
       "title": "Start 2 Minute Timer",
       "description": "Set a countdown for 2 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start5MinuteTimer",
       "title": "Start 5 Minute Timer",
       "description": "Set a countdown for 5 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start10MinuteTimer",
       "title": "Start 10 Minute Timer",
       "description": "Set a countdown for 10 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start15MinuteTimer",
       "title": "Start 15 Minute Timer",
       "description": "Set a countdown for 15 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start25MinuteTimer",
       "title": "Start 25 Minute Timer",
       "description": "Set a countdown for 25 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start30MinuteTimer",
       "title": "Start 30 Minute Timer",
       "description": "Set a countdown for 30 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start45MinuteTimer",
       "title": "Start 45 Minute Timer",
       "description": "Set a countdown for 45 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start60MinuteTimer",
       "title": "Start 60 Minute Timer",
       "description": "Set a countdown for 60 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start90MinuteTimer",
       "title": "Start 90 Minute Timer",
       "description": "Set a countdown for 90 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "startCustomTimer",
