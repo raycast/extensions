@@ -33,11 +33,11 @@ import {
   setReminderPriority,
   setReminderDueDate,
 } from "./api";
-import { getPriorityIcon, truncateMiddle } from "./helpers";
+import { getPriorityIcon, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 
 export default function Command() {
-  const { displayMenuBarCount, view } = getPreferenceValues<Preferences.MenuBar>();
+  const { titleType, hideMenuBarCountWhenEmpty, view } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
@@ -160,12 +160,43 @@ export default function Command() {
     await mutate();
   }
 
+  let title = "";
+  if (titleType === "count") {
+    title = hideMenuBarCountWhenEmpty && remindersCount === 0 ? "" : String(remindersCount);
+  }
+
+  const displayReminderTitle = titleType === "firstReminder" && remindersCount > 0;
+  if (displayReminderTitle) {
+    const firstReminder = sections[0].items[0];
+    title = truncate(addPriorityToTitle(firstReminder.title, firstReminder.priority), 30);
+  }
+
   return (
-    <MenuBarExtra
-      isLoading={isLoading}
-      icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
-      {...(displayMenuBarCount ? { title: String(remindersCount) } : {})}
-    >
+    <MenuBarExtra isLoading={isLoading} icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }} title={title}>
+      {displayReminderTitle ? (
+        <MenuBarExtra.Item
+          title="Complete"
+          icon={Icon.CheckCircle}
+          onAction={async () => {
+            const reminder = sections[0].items[0];
+            try {
+              await toggleCompletionStatus(reminder.id);
+              await mutate();
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Marked reminder as complete",
+                message: reminder.title,
+              });
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Unable to mark reminder as complete",
+                message: reminder.title,
+              });
+            }
+          }}
+        />
+      ) : null}
       {sections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
           {section.items.map((reminder) => {
@@ -173,7 +204,7 @@ export default function Command() {
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
-                title={truncateMiddle(addPriorityToTitle(reminder.title, reminder.priority))}
+                title={truncate(addPriorityToTitle(reminder.title, reminder.priority))}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"

@@ -1,5 +1,13 @@
 # Todoist Changelog
 
+## [Change Menu Bar Icon Color in Dark Mode] - 2024-01-22
+
+Changed Menu bar icon color in dark mode to e5e5e5.
+
+## [Show filters and filter tasks] - 2023-12-18
+
+You can now view your Todoist filters and see all tasks associated with a selected filter.
+
 ## [Focused task] - 2023-10-30
 
 You can now directly open the focused task via a Raycast command.

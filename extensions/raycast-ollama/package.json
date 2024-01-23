@@ -49,12 +49,12 @@
       "label": "Check for enable input fallback"
     },
     {
-      "name": "ollamaShowMetadata",
-      "description": "Show inference statistics",
-      "type": "checkbox",
+      "name": "ollamaChatHistoryMessagesNumber",
+      "description": "Number of last messages to use as memory",
+      "type": "textfield",
       "required": false,
-      "title": "Show Inference Statistics",
-      "label": "Check for showing inference statistics"
+      "title": "Chat Memory Messages",
+      "default": "20"
     }
   ],
   "commands": [
@@ -108,6 +108,20 @@
       "mode": "view"
     },
     {
+      "name": "ollama-image-describe",
+      "title": "Describe Content of Image",
+      "subtitle": "Ollama",
+      "description": "Describe content of the image on the clipboard or selected from finder",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-image-to-text",
+      "title": "Get Text From Image",
+      "subtitle": "Ollama",
+      "description": "Get text from image on the clipboard or selected from finder",
+      "mode": "view"
+    },
+    {
       "name": "ollama-improve-writing",
       "title": "Improve Writing",
       "subtitle": "Ollama",
@@ -140,7 +154,15 @@
       "title": "Translate",
       "subtitle": "Ollama",
       "description": "Translate selected text",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+         "name": "language",
+         "placeholder": "To Language",
+         "type": "text",
+         "required": true
+        }
+      ]
     },
     {
       "name": "ollama-tweet",
@@ -171,10 +193,32 @@
       "mode": "view",
       "arguments": [
         {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "image",
+          "placeholder": "Use Image",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Yes",
+              "value": "yes"
+            },
+            {
+              "title": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
           "name": "model",
           "placeholder": "Model",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }

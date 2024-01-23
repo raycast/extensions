@@ -8,7 +8,7 @@ import { XcodeProjectTypeName } from "../../shared/xcode-project-type-name";
 export function XcodeProjectListSearchBarAccessory(props: {
   projectTypeFilter?: (xcodeProjectType: XcodeProjectType) => boolean;
   onChange: (projectTypeFilter: XcodeProjectType | undefined) => void;
-}): JSX.Element {
+}) {
   return (
     <List.Dropdown
       onChange={(projectType) =>

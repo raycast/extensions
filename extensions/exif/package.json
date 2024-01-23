@@ -37,8 +37,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
-    "exifreader": "^4.17.0",
+    "@raycast/api": "^1.64.4",
+    "exifreader": "^4.20.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

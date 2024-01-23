@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import React, { useState } from "react";
 
-import { PageListItem, View } from "./components";
+import { PageListItem } from "./components";
 import { useRecentPages, useSearchPages, useUsers } from "./hooks";
 
 function Search() {
@@ -47,9 +47,5 @@ function Search() {
 }
 
 export default function Command() {
-  return (
-    <View>
-      <Search />
-    </View>
-  );
+  return <Search />;
 }

@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [Fix RemoteCommand parsing] - 2024-01-18
+
+- Fixed a bug where a remote command of a connection was not correctly parsed if the remote command contains multiple spaces.
+
 ## [Fix] - 2023-11-22
 
 - Fixed a bug where a connection with a remote command did not work properly while saving.

@@ -14,7 +14,8 @@
   "contributors": [
     "AnishDe12020",
     "kud",
-    "gerardcs"
+    "gerardcs",
+    "prince_yadav"
   ],
   "commands": [
     {
@@ -202,6 +203,12 @@
       "title": "Show Labels",
       "subtitle": "Todoist",
       "description": "Show your Todoist labels.",
+      "mode": "view"
+    },
+    {
+      "name": "show-filters",
+      "title": "Show Filters",
+      "description": "Show your Todoist filters.",
       "mode": "view"
     },
     {

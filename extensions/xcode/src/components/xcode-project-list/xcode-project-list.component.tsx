@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { XcodeProjectListItem } from "./xcode-project-list-item.component";
 import { useCachedPromise } from "@raycast/utils";
 import { XcodeProjectService } from "../../services/xcode-project.service";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { XcodeProjectType } from "../../models/xcode-project/xcode-project-type.model";
 import { XcodeProjectListSearchBarAccessory } from "./xcode-project-list-search-bar-accessory.component";
 import { XcodeProjectFavoriteService } from "../../services/xcode-project-favorite.service";
@@ -16,7 +16,7 @@ export function XcodeProjectList(props: {
   searchBarPlaceholder?: string;
   projectTypeFilter?: (xcodeProjectType: XcodeProjectType) => boolean;
   actions?: (xcodeProject: XcodeProject) => [JSX.Element];
-}): JSX.Element {
+}) {
   // Use cached promise of XcodeProjectService XcodeProjects
   const xcodeProjectsState = useCachedPromise(XcodeProjectService.xcodeProjects);
   // Use cached promise of XcodeProjectFavoriteService Favorites
@@ -88,7 +88,7 @@ function XcodeProjectListItemContainer(props: {
   isFavorite: boolean;
   actions?: (xcodeProject: XcodeProject) => [JSX.Element];
   revalidate: () => void;
-}): JSX.Element {
+}) {
   return (
     <XcodeProjectListItem
       project={props.xcodeProject}
