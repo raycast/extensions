@@ -1,6 +1,4 @@
 export const CATEGORIES = [
-  "Technology",
-  "Programming",
   "AI",
   "Education",
   "Culture",
@@ -12,7 +10,10 @@ export const CATEGORIES = [
   "Science",
   "Health",
   "Politics",
+  "Product",
+  "Programming",
   "Arts",
+  "Technology",
   "Travel",
   "Other",
 ];

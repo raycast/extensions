@@ -8,6 +8,12 @@ export async function request(url: URL | string, options?: RequestInit, timeout?
     fetch(url, {
       ...options,
       agent: createAgent(),
+    }).catch((err: any) => {
+      if (err.message.includes("connect ECONNREFUSED")) {
+        throw new Error("Please check if your proxy is connected properly");
+      }
+
+      throw err;
     }),
     timeout ?? 20000,
   );
@@ -54,10 +60,11 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
   return { title, favicon, coverImageUrl: coverImageUrl ?? "" };
 }
 
+// 可能在获取url的时候报错
 export async function isValidRSSLink(url: string): Promise<boolean> {
   if (!isURL(url)) return false;
 
-  const response = await request(url);
+  const response = await request(url, undefined, 10000);
   const contentType = response.headers.get("content-type");
   const text = await response.text();
 

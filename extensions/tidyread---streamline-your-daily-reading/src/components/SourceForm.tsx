@@ -2,10 +2,9 @@ import { Action, Form, Icon, Toast, showToast, useNavigation } from "@raycast/ap
 import { useEffect, useState } from "react";
 import { Source } from "../types";
 import { useForm, usePromise } from "@raycast/utils";
-import { isURL, withTimeout } from "../utils/util";
+import { isURL } from "../utils/util";
 import { CATEGORIES } from "../const";
 import { getSources, saveSources } from "../store";
-import { normalizePreference } from "../utils/preference";
 import { fetchMetadata, isValidRSSLink } from "../utils/request";
 import CustomActionPanel from "./CustomActionPanel";
 
@@ -48,15 +47,19 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
     },
     async onSubmit(values) {
       const newReadItem = { ...values, id: id ?? `${Date.now()}` };
-      const { requestTimeout } = normalizePreference();
 
       try {
         // 且跟进入时发生了变化，才需要验证
         if (values.rssLink && values.rssLink !== defaultValues?.rssLink) {
           showToast(Toast.Style.Animated, "Validating RSS Link");
-          const isValid = await withTimeout(isValidRSSLink(values.rssLink), requestTimeout);
-          if (!isValid) {
-            showToast(Toast.Style.Failure, "Invalid RSS Link");
+          try {
+            const isValid = await isValidRSSLink(values.rssLink);
+            if (!isValid) {
+              showToast(Toast.Style.Failure, "Invalid RSS Link");
+              return;
+            }
+          } catch (err: any) {
+            showToast(Toast.Style.Failure, "Failed To Fetch RSS Link", err.message);
             return;
           }
         }
@@ -114,8 +117,8 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
           showToast(Toast.Style.Success, "Fetching success");
           setValue("title", metadata.title);
           setFavicon(metadata.favicon);
-        } catch (error) {
-          showToast(Toast.Style.Failure, "Failed to fetch metadata");
+        } catch (error: any) {
+          showToast(Toast.Style.Failure, "Failed to fetch metadata", error.message);
         }
       }
     }
@@ -125,6 +128,7 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
 
   return (
     <Form
+      searchBarAccessory={<Form.LinkAccessory target="https://tidyread.info/docs/where-to-find-rss" text="Find RSS" />}
       actions={
         <CustomActionPanel>
           <Action.SubmitForm icon={Icon.SaveDocument} title="Save Source" onSubmit={handleSubmit} />
@@ -154,7 +158,7 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
         {...itemProps.rssLink}
         title="RSS Link"
         placeholder="Enter RSS link (optional)"
-        info="Not required, used for daily digest"
+        info="Used for generate digest, you can learn how to find rss through the documentation in the upper right corner"
       />
       {!!values.rssLink && (
         <Form.TextField

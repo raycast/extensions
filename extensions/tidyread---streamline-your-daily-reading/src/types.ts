@@ -55,6 +55,13 @@ export interface ProviderOptions {
   translatePrompt?: string | ((lang: string) => string);
 }
 
+export interface RecommendedSourcesFromInterest {
+  title: string;
+  sources: Source[];
+}
+
+export type RecommendedData = RecommendedSourcesFromInterest[];
+
 export abstract class Provider {
   available: boolean = true;
 

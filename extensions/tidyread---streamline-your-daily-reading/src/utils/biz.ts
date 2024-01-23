@@ -1,12 +1,13 @@
 import { isAfter, subHours } from "date-fns";
+import queryString from "query-string";
 import { RSSItem, genDigest } from "../digest";
 import { PROVIDERS_MAP } from "../providers";
 import { Digest, Source } from "../types";
 import { normalizePreference } from "./preference";
-import { isToday } from "./util";
+import { isToday, withTimeout } from "./util";
 import { NO_FEEDS } from "./error";
 import dayjs from "dayjs";
-import { addOrUpdateDigest, getSources } from "../store";
+import { addOrUpdateDigest, getComeFrom, getInterest, getSources } from "../store";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { RequestOptions } from "http";
 import { request } from "./request";
@@ -119,6 +120,9 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     .then(() => true)
     .catch(() => false);
 
+  const interest = await getInterest();
+  const comeFrom = await getComeFrom();
+
   // 主要逻辑
   const digest = await genDigest({
     title: digestTitle,
@@ -130,15 +134,23 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     translateTitles: !preferredLanguage
       ? undefined
       : async (titles) => {
-          const translatedTitles = await provider.translate(JSON.stringify(titles), preferredLanguage);
+          const translatedTitles = await withTimeout(
+            provider.translate(JSON.stringify(titles), preferredLanguage),
+            requestTimeout,
+          );
           console.log("raw translated titles:", translatedTitles);
           return parseOutput(translatedTitles);
         },
     itemLinkFormat: (link, item) => {
       if (!tidyreadCloudAvailable || !enableItemLinkProxy) return link;
-      return `https://tidyread.info/read?source_link=${encodeURIComponent(link)}&rss_link=${encodeURIComponent(
-        item?.feed?.url ?? "",
-      )}&status=${item?.status}`;
+      const qstr = queryString.stringify({
+        source_link: link,
+        rss_link: item?.feed?.url,
+        status: item?.status,
+        interest,
+        come_from: comeFrom,
+      });
+      return `https://tidyread.info/read?${qstr}`;
     },
   });
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import ordinal from "ordinal";
-import { isURL } from "./util";
+import { isURL, reflect } from "./util";
 import { isValidRSSLink } from "./request";
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -53,13 +53,16 @@ const sourceValidationSchema = z
   );
 
 export async function validateSources(sources: Record<string, any>[]) {
-  for (const [index, source] of sources.entries()) {
-    try {
-      await sourceValidationSchema.parseAsync(source);
-    } catch (error: any) {
-      throw new Error(
-        `${ordinal(index + 1)} Source Error: ${error?.issues?.[0]?.message || error?.message || "Invalid Source"}`,
-      );
-    }
+  let promises: Promise<any>[] = [];
+  try {
+    promises = sources.map(async (source, index) => await reflect(sourceValidationSchema.parseAsync(source), index));
+    await Promise.all(promises);
+  } catch (error: any) {
+    const { payload, reason } = error as { payload: number; reason: any };
+    // const { title } = sources[payload];
+    // console.log("issue", reason?.issues?.[0]);
+    throw new Error(
+      `${ordinal(payload + 1)} Source Error: ${reason?.issues?.[0]?.message || reason?.message || "Invalid Source"}`,
+    );
   }
 }
