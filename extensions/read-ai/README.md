@@ -75,7 +75,9 @@ Read AI for Raycast is released under the MIT License.
 
 For support, feedback, or questions, please reach out through the Issues section on the GitHub repository page.
 
-### Buy me a coffee
+> If you have any questions or would like to discuss further, feel free to [DM me on x](https://x.com/lucas_ghae).
+
+## Buy me a coffee
 
 <a href="https://www.buymeacoffee.com/lucas.ghae" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
