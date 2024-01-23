@@ -1,8 +1,12 @@
 # Changelog
 
-## [Feat] - 2024-01-18
+## [Feat] - {PR_MERGE_DATE}
 
 - Feature: Add support for custom model name
+
+## [Fix] - 2024-1-19
+
+- Fix: Azure API 401 error
 
 ## [Chore] - 2024-01-11
 

@@ -5,6 +5,7 @@ import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@rayc
 import { CountdownDate, LifeProgress } from "../types/types";
 import { getLifeProgress } from "../utils/life-progress-utils";
 import { LocalStorageKey } from "../utils/constants";
+import { updateCommandSubtitle } from "../utils/common-utils";
 
 export const getWordOfTheDay = () => {
   const [wordOfTheDay, setWordOfTheDay] = useState<WordOfTheDay>({
@@ -50,10 +51,12 @@ export const getLifeProgressInfo = (refresh: number) => {
     const localStorage = await LocalStorage.getItem<string>(LocalStorageKey.COUNTDOWN_DATE_KEY);
     const localCountdownDates: CountdownDate[] = typeof localStorage !== "undefined" ? JSON.parse(localStorage) : [];
     const { lifeProgresses, cakeIndex } = getLifeProgress(localCountdownDates);
+
     setLifeProgresses(lifeProgresses);
     setCountdownDates(localCountdownDates);
     setCakeIndex(cakeIndex);
     setLoading(false);
+    await updateCommandSubtitle(lifeProgresses);
   }, [refresh]);
 
   useEffect(() => {
@@ -69,7 +72,7 @@ export const alertDialog = async (
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction?: () => void
+  cancelAction?: () => void,
 ) => {
   const options: Alert.Options = {
     icon: icon,

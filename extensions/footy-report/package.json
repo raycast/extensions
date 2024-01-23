@@ -43,6 +43,12 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "searchLeagueStandings",
+      "title": "Search League Standings",
+      "description": "View league standing by displaying position, points, wins, draws and losses",
+      "mode": "view"
     }
   ],
   "dependencies": {
