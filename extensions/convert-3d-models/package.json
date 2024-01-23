@@ -65,8 +65,7 @@
   "commands": [
     {
       "name": "convert",
-      "title": "Convert Models...",
-      "subtitle": "Convert 3D models files",
+      "title": "Convert 3D Model Files",
       "description": "Convert the selected model to the specified format.",
       "mode": "view",
       "preferences": [
