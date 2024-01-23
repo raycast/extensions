@@ -1,5 +1,11 @@
 # Logitech Litra Changelog
 
+## [Improve the UI for displaying your Litra devices] - 2024-01-23
+
+- The extension UI now shows the state of each Litra device - whether it's on or off, and the current brightness and temperature 💡
+- We've fixed the "loading" state, so you avoid a flash of the "No devices found" screen when devices are connected.
+- The "No devices found" screen now mentions all of the types of Litra devices that are supported.
+
 ## [Switch to using the new and more reliable `litra` CLI under the hood] - 2024-01-15
 
 - __BREAKING CHANGE__: The extension now uses a [new `litra` CLI](https://github.com/timrogers/litra-rs), built in Rust, under the hood. No more painful problems with Node and npm! 🙏
