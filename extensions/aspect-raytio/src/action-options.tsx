@@ -32,7 +32,7 @@ export default function ActionOptions(props: {
             icon={{ source: Icon.Ruler }}
             title={`Copy Width: ${width}`}
             content={width}
-            shortcut={{ modifiers: [], key: "w" }}
+            shortcut={{ modifiers: ["cmd"], key: "w" }}
           />
         )}
         {basedDimension === BasedDimensions.BASED_WIDTH && (
@@ -40,14 +40,14 @@ export default function ActionOptions(props: {
             icon={{ source: Icon.Ruler }}
             title={`Copy Height: ${height}`}
             content={height}
-            shortcut={{ modifiers: [], key: "h" }}
+            shortcut={{ modifiers: ["cmd"], key: "h" }}
           />
         )}
         <Action.CopyToClipboard
           icon={{ source: Icon.Maximize }}
           title={`Copy Full: ${width} × ${height}`}
           content={`${width} × ${height}`}
-          shortcut={{ modifiers: [], key: "f" }}
+          shortcut={{ modifiers: ["cmd"], key: "f" }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Orientation">
